@@ -186,6 +186,11 @@ export class OtelTelemetryReceiver {
       query: {
         bool: {
           filter: [{ range: { '@timestamp': { gte: `now-${config.query_window}` } } }],
+          must_not: [
+            { wildcard: { 'data_stream.dataset': '*.1m.otel' } },
+            { wildcard: { 'data_stream.dataset': '*.10m.otel' } },
+            { wildcard: { 'data_stream.dataset': '*.60m.otel' } },
+          ],
         },
       },
       aggs: {

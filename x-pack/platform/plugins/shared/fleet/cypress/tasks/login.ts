@@ -8,7 +8,7 @@
 import Url from 'url';
 import type { UrlObject } from 'url';
 
-import * as yaml from 'js-yaml';
+import * as yaml from 'yaml';
 
 import type { ROLES } from './privileges';
 import { hostDetailsUrl, LOGOUT_URL } from './navigation';
@@ -245,7 +245,7 @@ const loginViaConfig = () => {
 
   // read the login details from `kibana.dev.yaml`
   cy.readFile(KIBANA_DEV_YML_PATH).then((kibanaDevYml) => {
-    const config = yaml.load(kibanaDevYml);
+    const config = yaml.parse(kibanaDevYml);
 
     // programmatically authenticate without interacting with the Kibana login page
     request({
@@ -279,7 +279,7 @@ export const getEnvAuth = (): User => {
   } else {
     let user: User = { username: '', password: '' };
     cy.readFile(KIBANA_DEV_YML_PATH).then((devYml) => {
-      const config = yaml.load(devYml);
+      const config = yaml.parse(devYml);
       user = { username: config.elasticsearch.username, password: config.elasticsearch.password };
     });
 

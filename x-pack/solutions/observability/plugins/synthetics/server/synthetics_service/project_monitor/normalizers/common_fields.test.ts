@@ -9,6 +9,7 @@ import { ScheduleUnit } from '../../../../common/runtime_types';
 import type { NormalizedProjectProps } from './common_fields';
 import {
   flattenAndFormatObject,
+  getMaxAttempts,
   getMonitorSchedule,
   getNormalizeCommonFields,
   getUrlsField,
@@ -45,6 +46,34 @@ describe('getUrlsField', () => {
     expect(getUrlsField(['https://elastic.co?foo=bar,baz'])).toEqual([
       'https://elastic.co?foo=bar,baz',
     ]);
+  });
+});
+
+describe('getMaxAttempts', () => {
+  it('returns the default (2) when nothing is provided', () => {
+    expect(getMaxAttempts()).toBe(2);
+  });
+
+  it('returns the default (2) when retest_on_failure is true', () => {
+    expect(getMaxAttempts(true)).toBe(2);
+  });
+
+  it('returns 1 when retest_on_failure is false', () => {
+    expect(getMaxAttempts(false)).toBe(1);
+  });
+
+  // Regression for #243891: on update the merged payload still carries the
+  // previous max_attempts, which must not override an explicit disable request.
+  it('returns 1 when retest_on_failure is false even if a stale max_attempts is present', () => {
+    expect(getMaxAttempts(false, 2)).toBe(1);
+  });
+
+  it('returns the default (2) when retest_on_failure is true even if max_attempts is present', () => {
+    expect(getMaxAttempts(true, 1)).toBe(2);
+  });
+
+  it('falls back to max_attempts when retest_on_failure is not provided', () => {
+    expect(getMaxAttempts(undefined, 3)).toBe(3);
   });
 });
 

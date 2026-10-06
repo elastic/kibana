@@ -136,24 +136,21 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           },
-          {
-            nested: {
-              path: 'users',
-              query: {
-                bool: {
-                  should: [
-                    // Match on users.id if profile_uid exists
-                    ...(authenticatedUser.profile_uid
-                      ? [{ term: { 'users.id': authenticatedUser.profile_uid } }]
-                      : []),
-                    // Always try to match on users.name
-                    { term: { 'users.name': authenticatedUser.username } },
-                  ],
-                  minimum_should_match: 1,
+          ...(authenticatedUser.profile_uid
+            ? [
+                {
+                  nested: {
+                    path: 'users',
+                    query: {
+                      bool: {
+                        should: [{ term: { 'users.id': authenticatedUser.profile_uid } }],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
                 },
-              },
-            },
-          },
+              ]
+            : []),
         ],
       },
     },

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*", "public/**/*.json", "../../../../../typings/**/*"],
+  "include": ["public/**/*", "public/**/*.json", "test/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -45,6 +45,7 @@
     "@kbn/cps",
     "@kbn/css-utils",
     "@kbn/kql",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

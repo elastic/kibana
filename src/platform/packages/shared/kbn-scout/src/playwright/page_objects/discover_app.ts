@@ -12,6 +12,20 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
+import { resolveSelector } from '../utils/locator_helper';
+
+export type DiscoverQueryMode = 'esql' | 'classic';
+
+export interface DiscoverGotoOptions {
+  queryMode: DiscoverQueryMode;
+}
+
+export interface DataViewOptions {
+  /** Data view title; `*` is appended automatically by the editor. */
+  name: string;
+  /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
+  adHoc?: boolean;
+}
 
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
@@ -76,6 +90,58 @@ export class DiscoverApp {
     return this.page.testSubj
       .locator('discover-dataView-switch-link')
       .or(this.page.testSubj.locator('dataView-switch-link'));
+  }
+
+  /**
+   * Returns the trimmed display name of the currently selected data view.
+   */
+  async getSelectedDataViewName(): Promise<string> {
+    return (await this.getSelectedDataView().innerText()).trim();
+  }
+
+  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
+    // Minimal inline interaction with the data view editor flyout. The full
+    // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
+    // `kbn-scout` is a base package and must not depend on a plugin, so the few
+    // steps Discover needs are driven directly here.
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    const form = this.page.testSubj.locator('indexPatternEditorForm');
+    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+    const timestampField = this.page.testSubj.locator('timestampField');
+
+    await flyout.waitFor({ state: 'visible' });
+
+    // FTR passes the base name and relies on the editor auto-appending `*` as the
+    // user types. Scout sets the title verbatim (`fill`), so append the wildcard
+    // here to preserve that contract (`name`, `* will be added automatically`).
+    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
+    // wait for async title validation to settle before continuing.
+    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
+
+    // wait for timestamp options; default @timestamp applies.
+    await timestampField
+      .and(this.page.locator('[data-is-loading="0"]'))
+      .waitFor({ state: 'visible', timeout: 30_000 });
+
+    if (adHoc) {
+      await this.page.testSubj.click('exploreIndexPatternButton');
+    } else {
+      await this.page.testSubj.click('saveIndexPatternButton');
+    }
+    await flyout.waitFor({ state: 'hidden' });
+
+    await this.waitUntilTabIsLoaded();
+  }
+
+  /**
+   * Creates a new data view from the Discover search bar data-view switcher
+   * (classic mode only). The editor appends `*` to the title automatically.
+   */
+  async createDataViewFromSearchBar(options: DataViewOptions) {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    await dataViewSwitch.click();
+    await this.page.testSubj.click('dataview-create-new');
+    await this.fillAndSubmitDataViewEditor(options);
   }
 
   private async clickAppMenuItem(
@@ -209,6 +275,12 @@ export class DiscoverApp {
     const canvas = this.page.locator('[data-test-subj="unifiedHistogramChart"] canvas');
     // Click at the center of the canvas
     await canvas.click();
+  }
+
+  // Waits for a Discover tab to finish loading.
+  async waitUntilTabIsLoaded() {
+    await this.waitForDiscoverPage();
+    await this.waitUntilSearchingHasFinished();
   }
 
   async waitUntilSearchingHasFinished() {
@@ -374,8 +446,10 @@ export class DiscoverApp {
   }
 
   async dragFieldToGrid(fieldName: string[]) {
+    const gridLocator = this.page.testSubj.locator('euiDataGridBody');
     for (const field of fieldName) {
-      await this.page.testSubj.dragTo(`field-${field}`, 'euiDataGridBody');
+      // Fields can appear in both "Popular fields" and the full field list.
+      await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);
     }
   }
 
@@ -388,8 +462,8 @@ export class DiscoverApp {
   }
 
   async exportAsCsv(): Promise<Download> {
-    // 1. Navigate to the export menu
-    await this.page.testSubj.click('exportTopNavButton');
+    // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
+    await this.clickAppMenuItem('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
 
     // 2. Trigger the report generation
@@ -418,7 +492,7 @@ export class DiscoverApp {
   }
 
   async selectTextBaseLang() {
-    if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
+    if (await this.page.testSubj.isVisible('select-text-based-language-btn')) {
       await this.page.testSubj.click('select-text-based-language-btn');
       await this.waitUntilSearchingHasFinished();
       await this.codeEditor.waitCodeEditorReady('ESQLEditor');

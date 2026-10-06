@@ -110,6 +110,22 @@ describe('getJestConfigs', () => {
     expect(result.duplicateTestFiles).toHaveLength(0);
   });
 
+  it('excludes __fixtures__ from auto-discovery', async () => {
+    let capturedCmd = '';
+    mockExecResponder = (cmd: string) => {
+      capturedCmd = cmd;
+      if (cmd.includes('*.test.ts') && cmd.includes('jest.config')) {
+        return { stdout: 'pkg/a/foo.test.ts\npkg/a/jest.config.js' };
+      }
+      return { stdout: '' };
+    };
+
+    const { getJestConfigs } = await import('./get_jest_configs');
+    await getJestConfigs();
+
+    expect(capturedCmd).toContain(':(glob,exclude)**/__fixtures__/**');
+  });
+
   it('should handle provided config paths', async () => {
     const configPaths = ['pkg/a/jest.config.js'];
 

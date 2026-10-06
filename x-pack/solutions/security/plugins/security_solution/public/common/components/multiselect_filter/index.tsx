@@ -85,6 +85,7 @@ const MultiselectFilterComponent = <T extends unknown>({
 
   return (
     <EuiPopover
+      aria-label={title}
       data-test-subj={dataTestSubj}
       button={
         <EuiFilterButton

@@ -291,6 +291,72 @@ export default ({ getService }: FtrProviderContext): void => {
               });
             });
           });
+
+          describe('rule type change conflicts', () => {
+            it('reports a SOLVABLE conflict on `type` for a non-customized type-changed rule', async () => {
+              await setUpRuleUpgrade({
+                assets: [
+                  {
+                    installed: {
+                      rule_id: 'query-rule',
+                      type: 'query',
+                      version: 1,
+                    },
+                    patch: {},
+                    upgrade: {
+                      rule_id: 'query-rule',
+                      type: 'saved_query',
+                      version: 2,
+                    },
+                  },
+                ],
+                removeInstalledAssets: !withHistoricalVersions,
+                deps,
+              });
+
+              const fieldsDiff = await fetchFirstPrebuiltRuleUpgradeReviewDiff(supertest);
+
+              expect(fieldsDiff.fields.type).toMatchObject({
+                conflict: 'SOLVABLE',
+                has_update: true,
+              });
+              expect(fieldsDiff).toMatchObject({
+                num_fields_with_non_solvable_conflicts: 0,
+              });
+            });
+
+            it('reports a NON_SOLVABLE conflict on `type` for a customized type-changed rule', async () => {
+              await setUpRuleUpgrade({
+                assets: [
+                  {
+                    installed: {
+                      rule_id: 'query-rule',
+                      type: 'query',
+                      version: 1,
+                    },
+                    patch: {
+                      rule_id: 'query-rule',
+                      name: 'Customized name',
+                    },
+                    upgrade: {
+                      rule_id: 'query-rule',
+                      type: 'saved_query',
+                      version: 2,
+                    },
+                  },
+                ],
+                removeInstalledAssets: !withHistoricalVersions,
+                deps,
+              });
+
+              const fieldsDiff = await fetchFirstPrebuiltRuleUpgradeReviewDiff(supertest);
+
+              expect(fieldsDiff.fields.type).toMatchObject({
+                conflict: 'NON_SOLVABLE',
+              });
+              expect(fieldsDiff.num_fields_with_non_solvable_conflicts).toBeGreaterThanOrEqual(1);
+            });
+          });
         }
       );
     }
@@ -311,6 +377,33 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
         await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
           { rule_id: 'rule-b', version: 2 },
+        ]);
+
+        const response = await reviewPrebuiltRulesToUpgrade(supertest);
+
+        const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
+        expect(ruleIds).toContain('rule-a');
+        expect(ruleIds).not.toContain('rule-b');
+      });
+
+      it('excludes a rule_id from upgrade review when the latest asset is deprecated but an older non-deprecated SO still exists', async () => {
+        // Install rule-a and rule-b at version 1.
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-a', version: 1 }),
+          createRuleAssetSavedObject({ rule_id: 'rule-b', version: 1 }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-a', version: 2 }),
+          createRuleAssetSavedObject({
+            rule_id: 'rule-b',
+            version: 2,
+            name: 'Deprecated - Rule B',
+          }),
+        ]);
+        await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+          { rule_id: 'rule-b', version: 3, name: 'Deprecated - Rule B' },
         ]);
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest);

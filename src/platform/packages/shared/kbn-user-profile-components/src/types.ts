@@ -16,11 +16,11 @@ export interface UserProfileAvatarData {
   /**
    * Optional initials (two letters) of the user to use as avatar if avatar picture isn't specified.
    */
-  initials?: string;
+  initials?: string | null;
   /**
    * Background color of the avatar when initials are used.
    */
-  color?: string;
+  color?: string | null;
   /**
    * Base64 data URL for the user avatar image.
    */

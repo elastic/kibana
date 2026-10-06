@@ -8,6 +8,7 @@ import deepEqual from 'fast-deep-equal';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
+  IndicesIndexSettingsAnalysis,
   MappingDynamicTemplate,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -30,10 +31,14 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  PackageInfo,
   RegistryElasticsearch,
 } from '../../../../types';
 import { appContextService } from '../../..';
-import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import {
+  getRegistryDataStreamAssetBaseName,
+  dataStreamUsesOtelInput,
+} from '../../../../../common/services';
 import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
@@ -48,6 +53,7 @@ import { retryTransientEsErrors } from '../retry';
 import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import { retryDataStreamUpdateOnClusterEventTimeout } from './retry_data_stream_update';
 import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
 
 interface Properties {
@@ -858,6 +864,43 @@ export function generateTemplateIndexPattern(
   }
 }
 
+/**
+ * Same as `generateTemplateIndexPattern`, but pins the namespace segment to an exact match
+ * (no trailing wildcard) instead of `-*`. Used by the identity-free agentless OTel incoming-data
+ * check, which has no `agent.id` to narrow the match once the identity filter is dropped, so the
+ * pattern itself must not resolve to any namespace other than the caller's own.
+ */
+export function generateNamespaceTemplateIndexPattern(
+  dataStream: RegistryDataStream,
+  namespace: string,
+  isOtelInputType?: boolean
+): string {
+  // undefined or explicitly set to false
+  // See also https://github.com/elastic/package-spec/pull/102
+  if (!dataStream.dataset_is_prefix) {
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '-' + namespace;
+  } else {
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '.*-' + namespace;
+  }
+}
+
+/**
+ * Returns true if the given data stream should use the `.otel` dataset suffix: it effectively
+ * uses the OTel collector input (`dataStreamUsesOtelInput`) and the `enableOtelIntegrations`
+ * experimental feature is enabled. All pattern-producing call sites (template installation, the
+ * live incoming-data handler, and stored `es_index_patterns`) must use this same decision so they
+ * cannot diverge.
+ */
+export function isOtelDataStream(
+  dataStream: RegistryDataStream,
+  packageInfo: Pick<PackageInfo, 'policy_templates'>
+): boolean {
+  return (
+    !!appContextService.getExperimentalFeatures()?.enableOtelIntegrations &&
+    dataStreamUsesOtelInput(packageInfo, dataStream)
+  );
+}
+
 // Template priorities are discussed in https://github.com/elastic/kibana/issues/88307
 // See also https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html
 //
@@ -880,9 +923,12 @@ export function getTemplatePriority(dataStream: RegistryDataStream): number {
 /**
  * Returns a map of the data stream path fields to elasticsearch index pattern.
  * @param dataStreams an array of RegistryDataStream objects
+ * @param packageInfo package context used to detect OTel input data streams, which carry a
+ * `.otel` dataset suffix. Callers that omit it get unsuffixed patterns.
  */
 export function generateESIndexPatterns(
-  dataStreams: RegistryDataStream[] | undefined
+  dataStreams: RegistryDataStream[] | undefined,
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>
 ): Record<string, string> {
   if (!dataStreams) {
     return {};
@@ -890,7 +936,10 @@ export function generateESIndexPatterns(
 
   const patterns: Record<string, string> = {};
   for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
+    patterns[dataStream.path] = generateTemplateIndexPattern(
+      dataStream,
+      packageInfo ? isOtelDataStream(dataStream, packageInfo) : undefined
+    );
   }
   return patterns;
 }
@@ -1029,40 +1078,144 @@ const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   "[enabled] parameter can't be updated for the object mapping",
 ];
 
-function errorNeedRollover(err: any) {
+/**
+ * `mapper_parsing_exception` is ES's generic "this mapping is invalid" error, so only the
+ * reasons below are treated as rollover-worthy.  Both are caused by analysis settings
+ * (analyzers, normalizers) being immutable after index creation: the referenced analyzer is
+ * defined in the composed index template but not in the current write index's settings, so only
+ * a new backing index can pick it up.  This typically happens when a `@custom` component
+ * template gains a custom analyzer after the write index was created.
+ *
+ * Each pattern captures the kind and the name of the offending analysis component so that the
+ * composed index template can be checked for it before a rollover is scheduled.
+ */
+const MAPPER_PARSING_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
+  // (search_)analyzer [standard_lower] has not been configured in mappings
+  /(analyzer|normalizer) \[([^\]]+)\] has not been configured in mappings/,
+  // normalizer [uppercase_normalizer] not found for field [name]
+  /(analyzer|normalizer) \[([^\]]+)\] not found for field/,
+];
+
+/**
+ * Collects every `reason` string from an ES error body, walking the `caused_by` chain and
+ * `root_cause` entries, as ES often nests the actionable message below the top level.
+ */
+const collectErrorReasons = (err: any): string[] => {
+  const reasons: string[] = [];
+  const visit = (error: any) => {
+    if (!error || typeof error !== 'object') {
+      return;
+    }
+    if (typeof error.reason === 'string') {
+      reasons.push(error.reason);
+    }
+    visit(error.caused_by);
+    if (Array.isArray(error.root_cause)) {
+      error.root_cause.forEach(visit);
+    }
+  };
+  visit(err?.body?.error);
+  return reasons;
+};
+
+const errorReasonRequiresRollover = (err: any, reasonsRequiringRollover: string[]): boolean => {
+  const reasons = collectErrorReasons(err);
+  return reasonsRequiringRollover.some((reasonRequiringRollover) =>
+    reasons.some((reason) => reason.includes(reasonRequiringRollover))
+  );
+};
+
+/**
+ * Extracts the analyzer or normalizer that an ES mapping error complains about, or undefined
+ * when the error is not about a missing analysis component.
+ */
+const getReferencedAnalysisComponent = (
+  err: any
+): { kind: 'analyzer' | 'normalizer'; name: string } | undefined => {
+  for (const reason of collectErrorReasons(err)) {
+    for (const pattern of MAPPER_PARSING_EXCEPTION_REASONS_REQUIRING_ROLLOVER) {
+      const match = reason.match(pattern);
+      if (match) {
+        // `search_analyzer [x]` also matches the `analyzer` alternative, which is correct as its
+        // value is resolved from `analysis.analyzer` too.
+        return { kind: match[1] as 'analyzer' | 'normalizer', name: match[2] };
+      }
+    }
+  }
+};
+
+/**
+ * Returns true when the ES error indicates that the mapping change is incompatible with the
+ * current write index and a data-stream rollover is the right recovery action.
+ *
+ * `total_fields` limit breaches are deliberately excluded: they surface as
+ * `illegal_argument_exception` but a rollover cannot fix them — the new write index is built
+ * from the same index template and inherits the same field-count limit, so the oversized
+ * mapping would fail again immediately.  Callers should surface those errors clearly instead.
+ *
+ * `mapper_exception` and `mapper_parsing_exception` are matched against an allowlist of reasons
+ * rather than by type alone: both types also cover genuinely invalid mappings, and a rollover
+ * here swallows the error and reports the install as successful, so matching them
+ * unconditionally would hide real packaging bugs.
+ *
+ * `simulatedAnalysis` is the `index.analysis` section of the composed index template, and is
+ * undefined when the template could not be simulated at all.  A `mapper_parsing_exception` is
+ * only rollover-worthy when the analyzer it names is actually present there, as that is what
+ * the new backing index will be built from.
+ */
+function errorNeedRollover(err: any, simulatedAnalysis?: IndicesIndexSettingsAnalysis): boolean {
   if (
     isResponseError(err) &&
     err.statusCode === 400 &&
     err.body?.error?.type === 'illegal_argument_exception'
   ) {
+    // total_fields limit errors cannot be resolved by a rollover — skip them.
+    if (isTotalFieldsLimitError(err)) {
+      return false;
+    }
     return true;
   }
   if (
     err.body?.error?.type === 'mapper_exception' &&
-    err.body?.error?.reason &&
-    MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER.some((reason) =>
-      err.body?.error?.reason?.includes(reason)
-    )
+    errorReasonRequiresRollover(err, MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER)
   ) {
     return true;
   }
+  if (err.body?.error?.type === 'mapper_parsing_exception') {
+    const referenced = getReferencedAnalysisComponent(err);
+    // If the analyzer is missing from the composed template too — or the template could not be
+    // simulated — the next backing index would be built from the same broken definition, so the
+    // error has to surface instead of being masked by a rollover.
+    return Boolean(referenced && simulatedAnalysis?.[referenced.kind]?.[referenced.name]);
+  }
+  return false;
 }
 
-const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
-  try {
-    // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.transport.request({
-      method: 'POST',
-      path: `/${dataStreamName}/_rollover`,
-      querystring: {
-        lazy: true,
-      },
-    });
-  } catch (error) {
-    throw new PackageESError(
-      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
-    );
-  }
+/**
+ * Returns true when the error is an ES `total_fields` limit breach
+ * (`index.mapping.total_fields.limit` exceeded).
+ */
+export function isTotalFieldsLimitError(err: any): boolean {
+  const reason: string = err.body?.error?.reason ?? '';
+  return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
+}
+
+const rolloverDataStream = (
+  dataStreamName: string,
+  esClient: ElasticsearchClient,
+  logger: Logger
+) => {
+  return retryDataStreamUpdateOnClusterEventTimeout(
+    () =>
+      esClient.transport.request({
+        method: 'POST',
+        path: `/${dataStreamName}/_rollover`,
+        querystring: {
+          lazy: true,
+        },
+      }),
+    { logger, dataStreamName }
+  );
 };
 
 const updateAllDataStreams = async (
@@ -1121,6 +1274,9 @@ const updateExistingDataStream = async ({
   let lifecycle: any;
   let subobjectsFieldChanged: boolean = false;
   let simulateResult: any = {};
+  // Stays undefined if the template cannot be simulated, which `errorNeedRollover` relies on to
+  // tell a failed simulation apart from a failed mappings update.
+  let simulatedAnalysis: IndicesIndexSettingsAnalysis | undefined;
   try {
     simulateResult = await retryTransientEsErrors(async () =>
       esClient.indices.simulateTemplate({
@@ -1129,6 +1285,7 @@ const updateExistingDataStream = async ({
     );
 
     settings = simulateResult.template.settings;
+    simulatedAnalysis = settings?.index?.analysis;
 
     try {
       mappings = fillConstantKeywordValues(
@@ -1166,7 +1323,7 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    if (errorNeedRollover(err) || subobjectsFieldChanged) {
+    if (errorNeedRollover(err, simulatedAnalysis) || subobjectsFieldChanged) {
       logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
       logger.trace(`Attempted mappings: ${mappings}`);
       if (options?.skipDataStreamRollover === true) {
@@ -1176,9 +1333,23 @@ const updateExistingDataStream = async ({
         return;
       } else {
         logger.info(`Triggering a rollover for ${dataStreamName}`);
-        await rolloverDataStream(dataStreamName, esClient);
+        await rolloverDataStream(dataStreamName, esClient, logger);
         return;
       }
+    }
+    // total_fields limit errors cannot be resolved by a rollover (the new write index inherits
+    // the same limit from the index template).  Log clearly and skip the rollover so we don't
+    // add churn to an already-overloaded cluster.
+    if (isTotalFieldsLimitError(err)) {
+      logger.warn(
+        `Mappings update for ${dataStreamName} failed because the index mapping total_fields limit has been exceeded. ` +
+          `Skipping rollover as it would not resolve the issue. ` +
+          `The total_fields limit must be raised on the index template to allow this mapping update: ${err}`
+      );
+      if (options?.ignoreMappingUpdateErrors !== true) {
+        throw err;
+      }
+      return;
     }
     logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
     logger.trace(`Attempted mappings: ${mappings}`);
@@ -1233,7 +1404,7 @@ const updateExistingDataStream = async ({
           ? `Dynamic dimension mappings changed for ${dataStreamName}, triggering a rollover`
           : `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
-      await rolloverDataStream(dataStreamName, esClient);
+      await rolloverDataStream(dataStreamName, esClient, logger);
     }
   }
 

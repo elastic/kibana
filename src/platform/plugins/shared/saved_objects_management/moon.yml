@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/content-management-plugin'
   - '@kbn/scout'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod

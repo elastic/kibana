@@ -12,15 +12,16 @@ import type { ScoutLogger } from '../../common';
 import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
-import { DashboardLinks } from './dashboard_links';
+import { DataViewsManagementPage } from './data_views_management_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
+import { HomePage } from './home_page';
 import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
+import { QueryBar } from './query_bar';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
-import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
 import { LoginPage } from './login_page';
 import { OverlaysPage } from './overlays';
@@ -36,15 +37,16 @@ export interface PageObjectsFixtures {
 
 export interface PageObjects {
   datePicker: DatePicker;
+  dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
   dashboard: DashboardApp;
-  dashboardLinks: DashboardLinks;
   filterBar: FilterBar;
+  home: HomePage;
   maps: MapsPage;
+  queryBar: QueryBar;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
-  inspector: Inspector;
   lens: LensApp;
   login: LoginPage;
   overlays: OverlaysPage;
@@ -60,15 +62,16 @@ export interface PageObjects {
 export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
+    dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
-    dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
+    queryBar: createLazyPageObject(QueryBar, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
-    inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     overlays: createLazyPageObject(OverlaysPage, fixtures.page),

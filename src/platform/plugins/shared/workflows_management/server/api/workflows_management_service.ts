@@ -59,7 +59,10 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type {
+  ServerTriggerDefinition,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import { getChildWorkflowExecutions } from './lib/get_child_workflow_executions';
@@ -92,6 +95,7 @@ import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage, workflowIndexName } from '../storage/workflow_storage';
+import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
@@ -334,11 +338,13 @@ export class WorkflowsService {
   private async scheduleWorkflowTriggers(
     workflowId: string,
     definition: WorkflowYaml | undefined,
+    enabled: boolean,
+    valid: boolean,
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
     const { taskScheduler } = this;
-    if (!taskScheduler || !definition?.triggers) {
+    if (!taskScheduler || !definition?.triggers || !enabled || !valid) {
       return;
     }
 
@@ -416,7 +422,14 @@ export class WorkflowsService {
       document: workflowData,
     });
 
-    await this.scheduleWorkflowTriggers(id, definition, spaceId, request);
+    await this.scheduleWorkflowTriggers(
+      id,
+      definition,
+      workflowData.enabled,
+      workflowData.valid,
+      spaceId,
+      request
+    );
 
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
@@ -559,7 +572,14 @@ export class WorkflowsService {
 
     await Promise.allSettled(
       workflowsToSchedule.map((vw) =>
-        this.scheduleWorkflowTriggers(vw.id, vw.definition, spaceId, request)
+        this.scheduleWorkflowTriggers(
+          vw.id,
+          vw.definition,
+          vw.workflowData.enabled,
+          vw.workflowData.valid,
+          spaceId,
+          request
+        )
       )
     );
 
@@ -683,15 +703,31 @@ export class WorkflowsService {
 
   /**
    * Updates or removes scheduled tasks after a workflow document is saved.
-   * Call only when shouldUpdateScheduler is true and taskScheduler is set.
+   * Also refreshes task credentials for enabled scheduled workflows when metadata-only edits keep
+   * the schedule unchanged.
    */
   private async updateSchedulerAfterWorkflowSave(
     id: string,
     spaceId: string,
     request: KibanaRequest,
-    finalData: WorkflowProperties
+    finalData: WorkflowProperties,
+    shouldUpdateScheduler: boolean
   ): Promise<void> {
-    if (!this.taskScheduler) return;
+    const shouldRefreshScheduledTaskCredentials =
+      Boolean(finalData.definition) &&
+      finalData.valid &&
+      finalData.enabled &&
+      hasScheduledTriggers(finalData.definition?.triggers ?? []);
+    if (!shouldUpdateScheduler && !shouldRefreshScheduledTaskCredentials) {
+      return;
+    }
+
+    if (!this.taskScheduler) {
+      this.logger.warn(
+        `Skipping scheduler sync for workflow ${id} in space ${spaceId}: task scheduler is unavailable`
+      );
+      return;
+    }
 
     const workflowIsSchedulable = finalData.definition && finalData.valid && finalData.enabled;
     if (!workflowIsSchedulable) {
@@ -767,9 +803,13 @@ export class WorkflowsService {
         refresh: true,
       });
 
-      if (shouldUpdateScheduler && this.taskScheduler) {
-        await this.updateSchedulerAfterWorkflowSave(id, spaceId, request, finalData);
-      }
+      await this.updateSchedulerAfterWorkflowSave(
+        id,
+        spaceId,
+        request,
+        finalData,
+        shouldUpdateScheduler
+      );
 
       return {
         id,
@@ -1064,18 +1104,7 @@ export class WorkflowsService {
   }
 
   private async unscheduleDeletedWorkflowTasks(successfulIds: string[]): Promise<void> {
-    if (this.taskScheduler && successfulIds.length > 0) {
-      const results = await Promise.allSettled(
-        successfulIds.map((workflowId) => this.taskScheduler?.unscheduleWorkflowTasks(workflowId))
-      );
-      results.forEach((result, i) => {
-        if (result.status === 'rejected') {
-          this.logger.warn(
-            `Failed to unschedule tasks for deleted workflow ${successfulIds[i]}: ${result.reason}`
-          );
-        }
-      });
-    }
+    await unscheduleWorkflowTasks(successfulIds, this.taskScheduler);
   }
 
   /**
@@ -2181,6 +2210,11 @@ export class WorkflowsService {
       return { config: { taskType: connector.config?.taskType } };
     }
     return undefined;
+  }
+
+  public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
+    await this.ensureInitialized();
+    return this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
   }
 
   public async validateWorkflow(

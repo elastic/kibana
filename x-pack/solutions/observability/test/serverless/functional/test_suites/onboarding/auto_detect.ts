@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const synthtrace = getService('svlLogsSynthtraceClient');
 
   // Failing: See https://github.com/elastic/kibana/issues/251086
@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         copiedCommand.match(commandRegex)!;
 
       // Simulate bash script installing detected integrations
-      await supertest
+      await supertestWithoutAuth
         .post(`/internal/observability_onboarding/flow/${onboardingId}/integrations/install`)
         .set('Authorization', `ApiKey ${installKey}`)
         .set('Content-Type', 'text/tab-separated-values')
@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Simulate bash script installing Elastic Agent
       const agentId = generateLongId();
-      await supertest
+      await supertestWithoutAuth
         .post(`/internal/observability_onboarding/flow/${onboardingId}/step/ea-status`)
         .set('Authorization', `ApiKey ${installKey}`)
         .set('x-elastic-internal-origin', 'Kibana')

@@ -1,7 +1,7 @@
 {
   "type": "shared-browser",
   "id": "@kbn/event-stacktrace",
-  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-exploration-team"],
+  "owner": ["@elastic/obs-signals-traces-team", "@elastic/obs-exploration-team"],
   "group": "platform",
   "visibility": "shared"
 }

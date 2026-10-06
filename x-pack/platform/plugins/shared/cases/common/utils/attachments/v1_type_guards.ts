@@ -11,6 +11,7 @@ import type {
   PersistableStateAttachmentPayload,
   UnifiedAttachmentPayload,
   UserCommentAttachmentPayload,
+  AlertAttachmentPayload,
 } from '../../types/domain';
 import { LEGACY_ATTACHMENT_TYPES } from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
@@ -48,3 +49,7 @@ export const isLegacyCommentAttachment = (
 export const isLegacyEventAttachment = (
   attachment: AttachmentRequestV2
 ): attachment is EventAttachmentPayload => attachment.type === AttachmentType.event;
+
+export const isLegacyAlertAttachment = (
+  attachment: AttachmentRequestV2
+): attachment is AlertAttachmentPayload => attachment.type === AttachmentType.alert;

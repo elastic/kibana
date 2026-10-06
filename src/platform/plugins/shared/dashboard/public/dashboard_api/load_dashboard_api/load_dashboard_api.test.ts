@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
+import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { loadDashboardApi } from './load_dashboard_api';
 
 jest.mock('../performance/query_performance_tracking', () => {
@@ -15,9 +17,6 @@ jest.mock('../performance/query_performance_tracking', () => {
     startQueryPerformanceTracking: jest.fn(),
   };
 });
-
-import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
-import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -30,7 +29,7 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
 
 jest.mock('../../dashboard_client', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const defaultState = require('../default_dashboard_state');
+  const defaultState = require('../../../common/default_dashboard_state');
   return {
     dashboardClient: {
       get: jest.fn().mockResolvedValue({

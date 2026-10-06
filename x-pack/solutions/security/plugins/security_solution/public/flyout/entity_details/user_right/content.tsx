@@ -14,6 +14,7 @@ import { EntityHighlightsAccordion } from '../../../entity_analytics/components/
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
@@ -34,6 +35,7 @@ interface UserPanelContentProps {
   identityFields: IdentityFields;
   observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
+  entityRiskScores: EntityRiskScoresState<EntityType.user>;
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
@@ -41,8 +43,10 @@ interface UserPanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
   entityRecord?: Entity;
-  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
-  skipRiskAndCriticality?: boolean;
+  /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
+  noEntityInStore?: boolean;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.user>;
@@ -52,6 +56,7 @@ export const UserPanelContent = ({
   identityFields,
   observedUser,
   riskScoreState,
+  entityRiskScores,
   recalculatingScore,
   contextID,
   scopeId,
@@ -59,7 +64,8 @@ export const UserPanelContent = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
-  skipRiskAndCriticality = false,
+  noEntityInStore = false,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
 }: UserPanelContentProps) => {
@@ -72,18 +78,19 @@ export const UserPanelContent = ({
 
   return (
     <>
-      {!skipRiskAndCriticality && (
+      {!noEntityInStore && (
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity.id : userName}
           entityType={EntityType.user}
         />
       )}
-      {!skipRiskAndCriticality &&
+      {!noEntityInStore &&
         riskScoreState.hasEngineBeenInstalled &&
         riskScoreState.data?.length !== 0 && (
           <>
             <FlyoutRiskSummary
               riskScoreData={riskScoreState}
+              entityRiskScores={entityRiskScores}
               recalculatingScore={recalculatingScore}
               queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
               openDetailsPanel={openDetailsPanel}
@@ -117,7 +124,7 @@ export const UserPanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      {!skipRiskAndCriticality && !entityRecord && (
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: userName, type: EntityType.user }}
           onChange={onAssetCriticalityChange}

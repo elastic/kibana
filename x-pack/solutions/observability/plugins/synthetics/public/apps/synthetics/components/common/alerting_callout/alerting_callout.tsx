@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -23,7 +23,7 @@ import {
 } from '../../../state/alert_rules/selectors';
 import { selectMonitorListState } from '../../../state';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useCanManageRules } from '../../../../../hooks/use_capabilities';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 
 export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boolean }) => {
@@ -36,7 +36,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const hasDefaultConnector = !settings || !isEmpty(settings?.defaultConnectors);
   const defaultRuleEnabled = settings?.defaultTLSRuleEnabled || settings?.defaultStatusRuleEnabled;
 
-  const { canSave } = useSyntheticsSettingsContext();
+  const canManageRules = useCanManageRules();
 
   const {
     data: { monitors },
@@ -59,7 +59,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const showCallout = !hasDefaultConnector && hasAlertingConfigured && defaultRuleEnabled;
   const hasDefaultRules =
     !rulesLoaded || Boolean(defaultRules?.statusRule && defaultRules?.tlsRule);
-  const missingRules = !hasDefaultRules && !canSave;
+  const missingRules = !hasDefaultRules && !canManageRules;
 
   useEffect(() => {
     dispatch(getDynamicSettingsAction.get());
@@ -86,7 +86,7 @@ const MissingRulesCallout = ({
   missingConfig?: boolean;
   missingRules?: boolean;
 }) => {
-  const [isHidden, setIsHidden] = useSessionStorage('MissingRulesCalloutHidden', false);
+  const [isHidden, setIsHidden] = useLocalStorage('MissingRulesCalloutHidden', false);
 
   if ((!missingConfig && !missingRules) || isHidden) {
     return null;

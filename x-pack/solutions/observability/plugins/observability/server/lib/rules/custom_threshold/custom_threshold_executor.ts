@@ -52,6 +52,7 @@ import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import type { EvaluatedRuleParams } from './lib/evaluate_rule';
 import { evaluateRule } from './lib/evaluate_rule';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
+import { shouldTrackMissingGroups } from './lib/should_track_missing_groups';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
@@ -112,9 +113,10 @@ export const createCustomThresholdExecutor = ({
       alertOnGroupDisappear: boolean | undefined;
     };
 
-    // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear =
-      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
+    const alertOnGroupDisappear = shouldTrackMissingGroups(
+      params.noDataBehavior,
+      _alertOnGroupDisappear
+    );
     const compositeSize = config.customThresholdRule.groupByPageSize;
     const queryIsSame = isEqual(
       state.searchConfiguration?.query.query,
@@ -301,6 +303,7 @@ export const createCustomThresholdExecutor = ({
           typeof params.searchConfiguration?.index === 'string'
             ? params.searchConfiguration?.index
             : params.searchConfiguration?.index?.title;
+        const singleCriterion = alertResults.length === 1 ? alertResults[0][group] : undefined;
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
@@ -322,10 +325,12 @@ export const createCustomThresholdExecutor = ({
               dataViewId: dataViewIdTitle ?? dataViewId,
               groups,
               logsLocator,
-              metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+              metrics: singleCriterion?.metrics ?? [],
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
               spaceId,
+              timeSize: singleCriterion?.timeSize,
+              timeUnit: singleCriterion?.timeUnit,
             }),
             ...additionalContext,
           },
@@ -357,6 +362,8 @@ export const createCustomThresholdExecutor = ({
           metrics: params.criteria[0]?.metrics,
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
+          timeSize: params.criteria[0]?.timeSize,
+          timeUnit: params.criteria[0]?.timeUnit,
         }),
         reason: alertHits?.[ALERT_REASON],
         ...additionalContext,

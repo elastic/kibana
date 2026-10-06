@@ -108,6 +108,7 @@ export interface PackagePolicyReplaceDefineStepExtension {
   package: string;
   view: 'package-policy-replace-define-step';
   Component: LazyExoticComponent<PackagePolicyReplaceDefineStepExtensionComponent>;
+  useWidePageLayout?: boolean;
 }
 
 /** Extension point registration contract for Integration Policy Edit views */
@@ -182,19 +183,6 @@ export interface PackagePolicyCreateExtension {
 }
 
 /**
- * UI Component Extension is used on the pages displaying the ability to Create a multi step
- * Integration Policy
- */
-export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<{}>;
-
-/** Extension point registration contract for Integration Policy Create views in multi-step onboarding */
-export interface PackagePolicyCreateMultiStepExtension {
-  package: string;
-  view: 'package-policy-create-multi-step';
-  Component: LazyExoticComponent<PackagePolicyCreateMultiStepExtensionComponent>;
-}
-
-/**
  * UI Component Extension is used to display a Custom tab (and view) under a given Integration
  */
 export type PackageCustomExtensionComponent = ComponentType<PackageCustomExtensionComponentProps>;
@@ -242,6 +230,5 @@ export type UIExtensionPoint =
   | PackageAssetsExtension
   | PackageGenericErrorsListExtension
   | AgentEnrollmentFlyoutFinalStepExtension
-  | PackagePolicyCreateMultiStepExtension
   | EndpointAgentTamperProtectionExtension
   | PliAuthBlockExtension;

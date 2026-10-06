@@ -188,6 +188,42 @@ describe('MetricInsightsFlyout', () => {
     });
   });
 
+  describe('push padding cleanup', () => {
+    let appScrollContainer: HTMLDivElement;
+
+    beforeEach(() => {
+      appScrollContainer = document.createElement('div');
+      appScrollContainer.id = 'app-main-scroll';
+      document.body.appendChild(appScrollContainer);
+    });
+
+    afterEach(() => {
+      appScrollContainer.remove();
+    });
+
+    it('clears stale inline push padding from the app scroll container on unmount', () => {
+      // Simulate the stale padding EUI restores when a previous push flyout (e.g. the
+      // Inspector) shared the same container.
+      appScrollContainer.style.paddingInlineEnd = '544px';
+
+      const { unmount } = render(<MetricInsightsFlyout {...defaultProps} />);
+      unmount();
+
+      expect(appScrollContainer.style.paddingInlineEnd).toBe('');
+    });
+
+    it('leaves unrelated inline padding on the app scroll container untouched', () => {
+      // This flyout uses the default `side="right"`, so it must not clear a left-side
+      // (padding-inline-start) offset owned by something else.
+      appScrollContainer.style.paddingInlineStart = '16px';
+
+      const { unmount } = render(<MetricInsightsFlyout {...defaultProps} />);
+      unmount();
+
+      expect(appScrollContainer.style.paddingInlineStart).toBe('16px');
+    });
+  });
+
   describe('accessibility', () => {
     it('renders the title as h2 with id for aria-labelledby', () => {
       render(<MetricInsightsFlyout {...defaultProps} />);

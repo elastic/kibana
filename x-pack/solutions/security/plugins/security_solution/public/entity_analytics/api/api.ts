@@ -90,6 +90,7 @@ import {
   RISK_ENGINE_SETTINGS_URL,
   RISK_ENGINE_STATUS_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
+  RISK_SCORE_ENTITY_CALCULATION_V2_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
 import {
@@ -375,6 +376,14 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const calculateEntityRiskScore = (params: RiskScoresEntityCalculationRequest) => {
       return http.fetch<RiskScoresEntityCalculationResponse>(RISK_SCORE_ENTITY_CALCULATION_URL, {
+        version: '1',
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+    };
+
+    const calculateEntityRiskScoreV2 = (params: RiskScoresEntityCalculationRequest) => {
+      return http.fetch<RiskScoresEntityCalculationResponse>(RISK_SCORE_ENTITY_CALCULATION_V2_URL, {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),
@@ -952,6 +961,7 @@ export const useEntityAnalyticsRoutes = () => {
       uploadWatchlistCsv,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
+      calculateEntityRiskScoreV2,
       cleanUpRiskEngine,
       fetchEntitiesList,
       fetchEntitiesListV2,

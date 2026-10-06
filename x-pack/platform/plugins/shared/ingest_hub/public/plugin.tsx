@@ -82,7 +82,7 @@ export class IngestHubPlugin
           coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
             map((enabled): AppUpdater => {
               return () => ({
-                visibleIn: enabled ? ['sideNav', 'globalSearch'] : [],
+                visibleIn: enabled ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
               });
             })
           )

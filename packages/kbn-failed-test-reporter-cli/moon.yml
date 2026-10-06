@@ -18,6 +18,7 @@ project:
   sourceRoot: packages/kbn-failed-test-reporter-cli
 dependsOn:
   - '@kbn/ci-stats-reporter'
+  - '@kbn/code-owners'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
   - '@kbn/tooling-log'

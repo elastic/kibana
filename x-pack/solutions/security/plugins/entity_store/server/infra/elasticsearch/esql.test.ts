@@ -6,7 +6,53 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { esqlResponseToBulkObjects } from './esql';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { esqlResponseToBulkObjects, executeEsqlQuery } from './esql';
+
+function createMockEsClient(response: ESQLSearchResponse) {
+  return {
+    esql: {
+      query: jest.fn().mockResolvedValue(response),
+    },
+  } as unknown as jest.Mocked<ElasticsearchClient>;
+}
+
+describe('executeEsqlQuery', () => {
+  const response: ESQLSearchResponse = {
+    columns: [{ name: 'entity.id', type: 'keyword' }],
+    values: [['host:h1']],
+  };
+
+  it('runs the query directly and returns the response when telemetry is omitted', async () => {
+    const esClient = createMockEsClient(response);
+
+    const result = await executeEsqlQuery({ esClient, query: 'FROM logs-*' });
+
+    expect(result).toEqual(response);
+    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+    expect(esClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM logs-*' }),
+      expect.any(Object)
+    );
+  });
+
+  it('still runs the query and returns the response when telemetry is provided', async () => {
+    const esClient = createMockEsClient(response);
+
+    const result = await executeEsqlQuery({
+      esClient,
+      query: 'FROM logs-*',
+      telemetry: {
+        name: 'probe_query',
+        namespace: 'default',
+        type: 'host',
+      },
+    });
+
+    expect(result).toEqual(response);
+    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe('esqlResponseToBulkObjects', () => {
   it('converts columnar ESQL response to bulk objects with type and doc', () => {

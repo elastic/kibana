@@ -70,12 +70,7 @@ export function FieldName({
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
-            <EuiToolTip
-              position="top"
-              content={tooltip}
-              delay="long"
-              anchorClassName="eui-textBreakAll"
-            >
+            <EuiToolTip position="top" content={tooltip} anchorClassName="eui-textBreakAll">
               <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
@@ -83,7 +78,6 @@ export function FieldName({
           {isMultiField && !disableMultiFieldBadge && (
             <EuiToolTip
               position="top"
-              delay="long"
               content={i18n.translate(
                 'unifiedDocViewer.fieldChooser.discoverField.multiFieldTooltipContent',
                 {

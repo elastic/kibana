@@ -32,6 +32,16 @@ export const OPTIONS = i18n.translate(
   { defaultMessage: 'Options' }
 );
 
+export const COLLAPSE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.collapse',
+  { defaultMessage: 'Collapse' }
+);
+
+export const EXPAND = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.expand',
+  { defaultMessage: 'Expand' }
+);
+
 export const AUTO_GENERATE_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.autoGenerate',
   { defaultMessage: 'Auto-generate every 24 hours' }

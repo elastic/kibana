@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
@@ -86,24 +86,26 @@ describe('registerRoutes', () => {
       method: keyof Pick<CasesRouter, 'get' | 'post'>;
       path: string;
       context?: CasesRequestHandlerContext;
-      headers?: Record<string, unknown>;
+      headers?: Record<string, string>;
     }) => {
+      const registeredRoute = router[method] as jest.Mock;
       const [, registeredRouteHandler] =
-        // @ts-ignore
-        router[method].mock.calls.find((call) => {
+        registeredRoute.mock.calls.find((call) => {
           return call[0].path === path;
         }) ?? [];
 
       if (!registeredRouteHandler) return;
 
-      const result = await registeredRouteHandler(
-        context,
-        // @ts-ignore we don't need to pass a real request object here
-        { headers },
-        { customError, badRequest }
-      );
+      const fakeRequest = httpServerMock.createKibanaRequest({
+        headers,
+        path,
+        method,
+      });
 
-      return result;
+      return registeredRouteHandler(context, fakeRequest, {
+        customError,
+        badRequest,
+      });
     };
 
     return {
@@ -129,7 +131,7 @@ describe('registerRoutes', () => {
     });
   };
 
-  const initAndSimulateDeprecationEndpoint = async (headers?: Record<string, unknown>) => {
+  const initAndSimulateDeprecationEndpoint = async (headers?: Record<string, string>) => {
     const { simulateRequest } = initApi([
       ...routes,
       createCasesRoute({
@@ -224,7 +226,7 @@ describe('registerRoutes', () => {
       await simulateRequest({
         method: 'get',
         path: '/foo/{case_id}',
-        headers: { 'kbn-version': '8.2.0', referer: 'https://example.com' },
+        headers: { 'kbn-version': '8.2.0', [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana' },
       });
       expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledWith({
         counterName: 'GET /foo/{case_id}',
@@ -283,7 +285,7 @@ describe('registerRoutes', () => {
     it('does NOT log the deprecation message if it is a kibana request', async () => {
       await initAndSimulateDeprecationEndpoint({
         'kbn-version': '8.2.0',
-        referer: 'https://example.com',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
       });
 
       expect(logger.warn).not.toHaveBeenCalled();
@@ -292,9 +294,7 @@ describe('registerRoutes', () => {
     it('adds the warning header', async () => {
       response.ok.mockReturnValue({ status: 200, options: {} });
       const res = await initAndSimulateDeprecationEndpoint();
-      // @ts-expect-error upgrade typescript v5.4.5
       const warningHeader = res.options.headers.warning;
-      // @ts-expect-error upgrade typescript v5.4.5
       const warningValue = extractWarningValueFromWarningHeader(warningHeader);
       expect(warningValue).toBe('Deprecated endpoint');
     });

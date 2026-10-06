@@ -11,9 +11,7 @@ import type { ReactElement } from 'react';
 import React, { useState } from 'react';
 import { EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
 
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import {
@@ -22,19 +20,16 @@ import {
 } from '@kbn/content-management-access-control-public';
 
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
-import type { DashboardLocatorParams } from '../../../../common';
 import { shareService, coreServices, spacesService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
-import { buildDashboardShareOptions } from './share_options_utils';
+import type { useShareOptions } from './use_share_options';
 
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
-  isDirty: boolean;
-  savedObjectId?: string;
-  dashboardTitle?: string;
+  shareOptions: ReturnType<typeof useShareOptions>;
   canSave: boolean;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
@@ -53,9 +48,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 };
 
 export function ShowShareModal({
-  isDirty,
-  savedObjectId,
-  dashboardTitle,
+  shareOptions,
   canSave,
   accessControl,
   createdBy,
@@ -67,7 +60,7 @@ export function ShowShareModal({
   if (!shareService) return;
 
   const handleChangeAccessMode = async (accessMode: SavedObjectAccessControl['accessMode']) => {
-    if (!savedObjectId) return;
+    if (!shareOptions.objectId) return;
 
     try {
       await changeAccessMode(accessMode);
@@ -140,21 +133,13 @@ export function ShowShareModal({
     );
   };
 
-  const { locatorParams, shareableUrl, allowShortUrl, title, hasPanelChanges } =
-    buildDashboardShareOptions({
-      objectId: savedObjectId,
-      dashboardTitle,
-    });
-
   const { showWriteControls } = getDashboardCapabilities();
-  const showAccessContainer = savedObjectId && !isManaged && showWriteControls;
+  const showAccessContainer = shareOptions.objectId && !isManaged && showWriteControls;
+
+  const hasPanelChanges = Boolean(shareOptions.sharingData.locatorParams.params.panels);
 
   shareService.toggleShareContextMenu({
-    isDirty,
-    allowShortUrl,
-    shareableUrl,
-    objectId: savedObjectId,
-    objectType: 'dashboard',
+    ...shareOptions,
     onSave: canSave ? saveDashboard : undefined,
     objectTypeMeta: {
       title: i18n.translate('dashboard.share.shareModal.title', {
@@ -164,7 +149,7 @@ export function ShowShareModal({
         link: {
           draftModeCallOut: {
             message: hasPanelChanges
-              ? allowShortUrl
+              ? shareOptions.allowShortUrl
                 ? shareModalStrings.getDraftSharePanelChangesWarning()
                 : shareModalStrings.getSnapshotShareWarning()
               : shareModalStrings.getDraftShareWarning('link'),
@@ -199,11 +184,7 @@ export function ShowShareModal({
       },
     },
     sharingData: {
-      title,
-      locatorParams: {
-        id: DASHBOARD_APP_LOCATOR,
-        params: locatorParams,
-      },
+      ...shareOptions.sharingData,
       accessModeContainer: showAccessContainer ? (
         <AccessModeContainer
           accessControl={accessControl}
@@ -215,12 +196,6 @@ export function ShowShareModal({
           contentTypeId={DASHBOARD_SAVED_OBJECT_TYPE}
         />
       ) : undefined,
-    },
-    shareableUrlLocatorParams: {
-      locator: shareService.url.locators.get(
-        DASHBOARD_APP_LOCATOR
-      ) as LocatorPublic<DashboardLocatorParams>,
-      params: { ...locatorParams, timeRange: locatorParams.time_range },
     },
   });
 }

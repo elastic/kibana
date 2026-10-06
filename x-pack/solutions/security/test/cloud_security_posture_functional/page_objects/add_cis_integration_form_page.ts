@@ -282,9 +282,16 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickPolicyToBeEdited = async (name: string) => {
-    const table = await testSubjects.find(TEST_IDS.INTEGRATION_POLICY_TABLE);
-    const integrationToBeEdited = await table.findByXpath(`//text()="${name}"`);
-    await integrationToBeEdited.click();
+    const policyLink = await retry.tryForTime(20_000, async () => {
+      const nameLinks = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
+      for (const nameLink of nameLinks) {
+        if ((await nameLink.getVisibleText()).trim() === name) {
+          return nameLink;
+        }
+      }
+      throw new Error(`Integration policy "${name}" was not found in the policies table`);
+    });
+    await policyLink.click();
   };
 
   const clickFirstElementOnIntegrationTable = async () => {
@@ -477,7 +484,10 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getValueInEditPage = async (field: string) => {
-    /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor(`field ${field} to render on edit page`, async () =>
+      testSubjects.exists(field)
+    );
     const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
     return fieldValue;
   };
@@ -498,7 +508,11 @@ export function AddCisIntegrationFormPageProvider({
   const inputUniqueIntegrationName = async () => {
     const flyout = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE);
     const nameField = await flyout.findAllByCssSelector('input[id="name"]');
-    await nameField[0].type(uuidv4());
+    const name = uuidv4();
+    // Clear the auto-generated default name so the saved policy name equals `name` exactly and `clickPolicyToBeEdited(name)` can match its row.
+    await nameField[0].clearValueWithKeyboard();
+    await nameField[0].type(name);
+    return name;
   };
 
   const inputIntegrationName = async (text: string) => {
@@ -527,6 +541,10 @@ export function AddCisIntegrationFormPageProvider({
   const getFieldValueInEditPage = async (field: string) => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
     await navigateToEditIntegrationPage();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor(`field ${field} to render on edit page`, async () =>
+      testSubjects.exists(field)
+    );
     const fieldValue = await getFieldAttributeValue(field, 'value');
     return fieldValue;
   };

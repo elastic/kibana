@@ -143,4 +143,33 @@ export class IndexManagement extends AbstractPageObject {
       await this.clickNextButton();
     },
   };
+
+  /**
+   * Reads the Stack Management sidebar section composition. Uses the stable `data-test-subj`
+   * attributes set by `managementSidebarNav` (`item.id` is forwarded as `data-test-subj` on
+   * every EuiSideNav item). Returns the visible sections and the link IDs nested within each.
+   *
+   * Call this after navigating to `/app/management` and waiting for the sidebar to appear.
+   */
+  async readSidebarSections(): Promise<Array<{ sectionId: string; sectionLinks: string[] }>> {
+    // Evaluate in-page to avoid the `nth()` Playwright anti-pattern; reads the full section
+    // + link structure in one call to the DOM.
+    return this.page.locator('.kbnSolutionNav').evaluate((nav) => {
+      const roots = Array.from(nav.querySelectorAll<HTMLElement>('.euiSideNavItem--root'));
+      return roots.flatMap((root) => {
+        // Section header button carries data-test-subj = section ID
+        const sectionId = root
+          .querySelector<HTMLElement>(':scope > .euiSideNavItemButton')
+          ?.getAttribute('data-test-subj');
+        if (!sectionId) return [];
+        // Child link anchors carry data-test-subj = app ID
+        const sectionLinks = Array.from(
+          root.querySelectorAll<HTMLElement>('.euiSideNavItem > a.euiSideNavItemButton')
+        )
+          .map((a) => a.getAttribute('data-test-subj'))
+          .filter((id): id is string => id !== null);
+        return [{ sectionId, sectionLinks }];
+      });
+    });
+  }
 }

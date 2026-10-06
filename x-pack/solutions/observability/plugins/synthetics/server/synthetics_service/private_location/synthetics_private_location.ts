@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -400,7 +400,7 @@ export class SyntheticsPrivateLocation {
       ),
     ]);
 
-    const policiesToUpdate: NewPackagePolicyWithId[] = [];
+    const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
 
@@ -432,7 +432,7 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasNewFormatPolicyId) {
-              policiesToUpdate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              policiesToUpdate.push({ ...newPolicy, id: newId } as UpdatePackagePolicyWithId);
               policiesToDelete.push(...legacyPolicyIds);
             } else if (hasAnyLegacyPolicyId) {
               policiesToDelete.push(...legacyPolicyIds);

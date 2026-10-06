@@ -20,7 +20,7 @@ import {
   createNotificationPolicySavedObjectService,
 } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
-import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
 import { NotificationPolicyClient } from './notification_policy_client';
 
 describe('NotificationPolicyClient', () => {
@@ -62,7 +62,7 @@ describe('NotificationPolicyClient', () => {
       'default'
     );
 
-    userProfileService.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
+    userProfileService.getCurrentProfileId.mockResolvedValue('elastic_profile_uid');
 
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'policy-id-default',

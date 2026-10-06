@@ -18,9 +18,6 @@ if (window.__kbnHardenPrototypes__) {
   require('@kbn/security-hardening/prototype');
 }
 
-export const Jquery = require('jquery');
-window.$ = window.jQuery = Jquery;
-
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');
 export const KbnI18n = require('@kbn/i18n');
@@ -127,3 +124,4 @@ export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
 export const KbnCoreDi = require('@kbn/core-di-browser');
 export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');
 export const KbnCoreChromeBrowserContext = require('@kbn/core-chrome-browser-context');
+export const KbnCoreUserProfileBrowserContext = require('@kbn/core-user-profile-browser-context');

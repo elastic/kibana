@@ -22,6 +22,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiToolTip,
   formatDate,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -330,18 +331,25 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={
-              <EuiButtonIcon
-                size="s"
-                aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
                   defaultMessage: 'Actions',
                 })}
-                color="text"
-                display="base"
-                iconType="boxesVertical"
-                onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                data-test-subj="mlExplorerAnomalyPanelMenu"
-                disabled={chartsCount < 1}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  size="s"
+                  aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
+                    defaultMessage: 'Actions',
+                  })}
+                  color="text"
+                  display="base"
+                  iconType="boxesVertical"
+                  onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                  data-test-subj="mlExplorerAnomalyPanelMenu"
+                  disabled={chartsCount < 1}
+                />
+              </EuiToolTip>
             }
             isOpen={isMenuOpen}
             closePopover={setIsMenuOpen.bind(null, false)}

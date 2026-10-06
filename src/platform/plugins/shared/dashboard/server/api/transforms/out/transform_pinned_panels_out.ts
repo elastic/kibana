@@ -7,45 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import type {
-  LegacyIgnoreParentSettings,
-  LegacyStoredPinnedControlState,
-} from '@kbn/controls-schemas';
 import { flow } from 'lodash';
+
+import type { Reference } from '@kbn/content-management-utils';
+import {
+  type LegacyIgnoreParentSettings,
+  type LegacyStoredPinnedControlState,
+} from '@kbn/controls-schemas';
 import { transformType } from '@kbn/embeddable-plugin/server';
+import { pinnedControlSchema } from '@kbn/controls-schemas/src/controls_group_schema';
+
+import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import type { DashboardState, Warnings } from '../../types';
-
-import type {
-  DashboardPinnedPanelsState as DashboardControlsState,
-  DashboardPinnedPanelsState,
-} from '../../../../common';
 import { embeddableService } from '../../../kibana_services';
+import type { Warnings } from '../../types';
 
-type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
-type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+export type StoredPinnedPanels =
+  Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
 export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
-  containerReferences: Reference[]
-): { panels: DashboardState['pinned_panels']; warnings: Warnings } {
+  containerReferences: Reference[] = []
+): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
+  let warnings: Warnings = [];
+  let transformedPanels: DashboardPinnedPanelsState = [];
   if (pinnedPanels) {
     /**
      * >=9.4, pinned panels are stored in the SO under the key `pinned_panels` without any JSON bucketing
      */
-    return injectPinnedPanelReferences(
+    ({ warnings, panels: transformedPanels } = transformPanels(
       flow(transformPinnedPanelsObjectToArray, transformPinnedPanelProperties)(pinnedPanels.panels),
       containerReferences
-    );
+    ));
   } else if (controlGroupInput) {
     /**
      * <9.4, pinned panels were stored in the SO under `controlGroupInput` with the JSON bucket `panelsJSON`
      * This was before pinned panels were transformed to be generic - they **only** stored controls
      */
-    const { warnings, panels: controls } = controlGroupInput.panelsJSON
-      ? injectPinnedPanelReferences(
+    ({ warnings, panels: transformedPanels } = controlGroupInput.panelsJSON
+      ? transformPanels(
           flow(
             JSON.parse,
             transformPinnedPanelsObjectToArray,
@@ -53,7 +54,7 @@ export function transformPinnedPanelsOut(
           )(controlGroupInput.panelsJSON),
           containerReferences
         )
-      : { warnings: [], panels: [] };
+      : { warnings: [], panels: [] });
     /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
     const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined =
       controlGroupInput.ignoreParentSettingsJSON
@@ -67,7 +68,7 @@ export function transformPinnedPanelsOut(
         controlGroupInput.chainingSystem === 'NONE' ||
         legacyControlGroupOptions.ignoreFilters ||
         legacyControlGroupOptions.ignoreQuery;
-      controls.map(({ config, ...rest }) => ({
+      transformedPanels.map(({ config, ...rest }) => ({
         ...rest,
         config: {
           use_global_filters: !ignoreFilters,
@@ -76,9 +77,9 @@ export function transformPinnedPanelsOut(
         },
       }));
     }
-    return { warnings, panels: controls };
   }
-  return { warnings: [], panels: [] };
+
+  return { warnings, panels: transformedPanels };
 }
 
 /**
@@ -101,7 +102,7 @@ export function transformPinnedPanelProperties(
       | Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
     ) & { id: string }
   >
-): PinnedPanelsState {
+): DashboardPinnedPanelsState {
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ id, type, grow, width, ...rest }) => {
@@ -111,40 +112,51 @@ export function transformPinnedPanelProperties(
         ...(grow !== undefined && { grow }),
         ...(width !== undefined && { width }),
         config: 'explicitInput' in rest ? rest.explicitInput : rest.config,
-      } as PinnedPanelsState[number];
+      } as DashboardPinnedPanel;
     });
 }
 
 /**
  * Inject references via the embeddable transforms
  */
-function injectPinnedPanelReferences(
-  controls: PinnedPanelsState,
+function transformPanels(
+  panels: DashboardPinnedPanelsState,
   containerReferences: Reference[]
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
-  const transformedControls: DashboardControlsState = [];
+  const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
 
-  controls.forEach((control) => {
-    const transforms = embeddableService.getTransforms(control.type);
-    const { config, ...rest } = control;
-    if (transforms?.transformOut) {
-      try {
-        transformedControls.push({
-          ...rest,
-          config: transforms.transformOut(config, [], containerReferences, control.id),
-        } as DashboardControlsState[number]);
-      } catch (e) {
-        warnings.push({
-          type: 'dropped_panel',
-          panel_type: control.type,
-          panel_config: control.config,
-          message: `Unable to transform pinned panel config. Error: ${e.message}`,
-        });
+  panels.forEach((panel) => {
+    const { transformOut, schema } = embeddableService.getTransforms(panel.type) ?? {};
+    // eslint-disable-next-line prefer-const
+    let { config, type, ...rest } = panel;
+    try {
+      if (transformOut) {
+        config = transformOut(
+          config,
+          [],
+          containerReferences,
+          panel.id
+        ) as DashboardPinnedPanel['config'];
       }
-    } else {
-      transformedControls.push({ ...rest, config } as DashboardControlsState[number]);
+      if (schema) {
+        config = schema.validate(config, undefined, undefined, {
+          stripUnknownKeys: true,
+        }) as DashboardPinnedPanel['config'];
+      }
+      transformedPanels.push({
+        ...pinnedControlSchema.validate(rest),
+        config,
+        type,
+      } as DashboardPinnedPanel);
+    } catch (e) {
+      warnings.push({
+        type: 'dropped_panel',
+        panel_type: panel.type,
+        panel_config: panel.config,
+        message: `Unable to transform pinned panel config. Error: ${e.message}`,
+      });
     }
   });
-  return { warnings, panels: transformedControls };
+  return { warnings, panels: transformedPanels };
 }

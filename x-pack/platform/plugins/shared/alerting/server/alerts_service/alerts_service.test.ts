@@ -110,6 +110,7 @@ const IlmPutBody = {
   policy: {
     _meta: {
       managed: true,
+      content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
     },
     phases: {
       hot: {
@@ -171,7 +172,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
               },
             }),
         'index.mapping.ignore_malformed': true,
-        'index.mapping.total_fields.limit': 2500,
+        'index.mapping.total_fields.limit': 2800,
         'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
       mappings: {
@@ -196,6 +197,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
       kibana: { version: '8.8.0' },
       managed: true,
       namespace,
+      content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
     },
   };
 };
@@ -477,7 +479,7 @@ describe('Alerts Service', () => {
               ...existingIndexTemplate.index_template.template,
               settings: {
                 ...existingIndexTemplate.index_template.template?.settings,
-                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.limit': 2800,
                 'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
@@ -873,7 +875,7 @@ describe('Alerts Service', () => {
                     }),
                 'index.mapping.ignore_malformed': true,
                 'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.limit': 2800,
               },
               mappings: {
                 _meta: {
@@ -888,6 +890,7 @@ describe('Alerts Service', () => {
               kibana: { version: '8.8.0' },
               managed: true,
               namespace: 'default',
+              content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
             },
           };
 

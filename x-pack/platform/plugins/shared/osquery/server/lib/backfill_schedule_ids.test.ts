@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { backfillScheduleIds } from './backfill_schedule_ids';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -142,6 +143,67 @@ describe('backfillScheduleIds', () => {
 
     expect(updatedQueries[1].schedule_id).toBe('keep-me');
     expect(updatedQueries[1].start_date).toBe('2024-01-01T00:00:00.000Z');
+  });
+
+  test('stamps pack_name alongside pack_id on the agent policy pack block', async () => {
+    const scopedClient = createMockScopedClient();
+    const { core } = createMockCoreStart(
+      {
+        saved_objects: [
+          {
+            id: 'pack-1',
+            namespaces: ['default'],
+            references: [{ type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
+            attributes: {
+              name: 'test-pack',
+              enabled: true,
+              queries: [{ id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1' }],
+            },
+          },
+        ],
+        total: 1,
+      },
+      scopedClient
+    );
+
+    const packagePolicyService = {
+      list: jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'policy-1',
+            inputs: [
+              {
+                config: {
+                  osquery: {
+                    value: {
+                      packs: {
+                        'default--test-pack': { pack_id: 'stale-id', queries: {} },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    };
+
+    const logger = createMockLogger();
+
+    await backfillScheduleIds({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext(packagePolicyService),
+      logger: logger as unknown as Parameters<typeof backfillScheduleIds>[0]['logger'],
+    });
+
+    expect(packagePolicyService.update).toHaveBeenCalledTimes(1);
+    const updatedDraft = packagePolicyService.update.mock.calls[0][3];
+    const packBlock = updatedDraft.inputs[0].config.osquery.value.packs['default--test-pack'];
+
+    expect(packBlock.pack_id).toBe('pack-1');
+    expect(packBlock.pack_name).toBe('test-pack');
   });
 
   test('continues on version conflict (409)', async () => {

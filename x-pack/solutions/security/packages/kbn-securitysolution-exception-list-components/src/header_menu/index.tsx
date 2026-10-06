@@ -15,6 +15,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -101,15 +102,17 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
               {text}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonIcon
-              isDisabled={disableActions}
-              onClick={onAffectedRulesClick}
-              iconType={iconType ? iconType : 'boxesVertical'}
-              data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
-              aria-label={ariaLabel}
-            >
-              {text}
-            </EuiButtonIcon>
+            <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                isDisabled={disableActions}
+                onClick={onAffectedRulesClick}
+                iconType={iconType ? iconType : 'boxesVertical'}
+                data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
+                aria-label={ariaLabel}
+              >
+                {text}
+              </EuiButtonIcon>
+            </EuiToolTip>
           )
         }
         onClick={(e) => e.stopPropagation()}

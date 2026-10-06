@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/code_coverage/ingest_coverage').runCoverageIngestionCli();
+require('@kbn/dev/code_coverage/ingest_coverage').runCoverageIngestionCli();

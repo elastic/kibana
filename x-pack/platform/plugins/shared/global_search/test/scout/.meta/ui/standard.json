@@ -1,17 +1,19 @@
 {
-  "sha1": "332591b9388a3598288edf72e3a0d6b81a6bf41f",
+  "sha1": "b6c5f0bdf92d9e7ef7f29f9079dc06be7363442c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "d421c5332514126-a4adeccca38aa8c",
       "title": "GlobalSearchBar shows the popover on focus",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 31,
+        "line": 34,
         "column": 7
       }
     },
@@ -20,12 +22,11 @@
       "title": "GlobalSearchBar redirects to the correct page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 39,
+        "line": 42,
         "column": 7
       }
     },
@@ -34,12 +35,11 @@
       "title": "GlobalSearchBar shows a suggestion when searching for a term matching a type",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 47,
+        "line": 50,
         "column": 7
       }
     },
@@ -48,12 +48,11 @@
       "title": "GlobalSearchBar shows a suggestion when searching for a term matching a tag name",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 66,
+        "line": 78,
         "column": 7
       }
     },
@@ -62,22 +61,7 @@
       "title": "GlobalSearchBar allows to filter by type",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 86,
-        "column": 7
-      }
-    },
-    {
-      "id": "d421c5332514126-f9706f331195def",
-      "title": "GlobalSearchBar allows to filter by multiple types",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
@@ -86,16 +70,28 @@
       }
     },
     {
+      "id": "d421c5332514126-f9706f331195def",
+      "title": "GlobalSearchBar allows to filter by multiple types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
+        "line": 117,
+        "column": 7
+      }
+    },
+    {
       "id": "d421c5332514126-6ac245c5cb099ea",
       "title": "GlobalSearchBar allows to filter by tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 114,
+        "line": 140,
         "column": 7
       }
     },
@@ -104,12 +100,11 @@
       "title": "GlobalSearchBar allows to filter by multiple tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 124,
+        "line": 150,
         "column": 7
       }
     },
@@ -118,12 +113,11 @@
       "title": "GlobalSearchBar allows to filter by type and tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 135,
+        "line": 161,
         "column": 7
       }
     },
@@ -132,12 +126,11 @@
       "title": "GlobalSearchBar allows to filter by multiple types and tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 145,
+        "line": 171,
         "column": 7
       }
     },
@@ -146,12 +139,11 @@
       "title": "GlobalSearchBar allows to filter by term and type",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 158,
+        "line": 188,
         "column": 7
       }
     },
@@ -160,12 +152,11 @@
       "title": "GlobalSearchBar allows to filter by term and tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 164,
+        "line": 194,
         "column": 7
       }
     },
@@ -174,12 +165,11 @@
       "title": "GlobalSearchBar allows to filter by tags containing special characters",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 170,
+        "line": 200,
         "column": 7
       }
     },
@@ -188,12 +178,11 @@
       "title": "GlobalSearchBar returns no results when searching for an unknown tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 178,
+        "line": 208,
         "column": 7
       }
     },
@@ -202,12 +191,11 @@
       "title": "GlobalSearchBar returns no results when searching for an unknown type",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 184,
+        "line": 214,
         "column": 7
       }
     },
@@ -222,7 +210,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 31,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -236,7 +224,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 38,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -250,7 +238,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 45,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -264,7 +252,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 52,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -278,7 +266,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 59,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -291,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 71,
+        "column": 12
       }
     },
     {
@@ -305,8 +293,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -319,8 +307,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
-        "line": 86,
-        "column": 7
+        "line": 88,
+        "column": 12
       }
     }
   ]

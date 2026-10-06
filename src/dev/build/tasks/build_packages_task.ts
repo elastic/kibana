@@ -76,6 +76,9 @@ function excludeDirsByRel(rel: string) {
  */
 function excludeDirsByName(name: string) {
   return (
+    name === '.agents' ||
+    name === '.claude' ||
+    name === '.opencode' ||
     name === '__fixtures__' ||
     name === '__jest__' ||
     name === '__mocks__' ||
@@ -140,7 +143,7 @@ export const BuildPackages: Task = {
         try {
           // copy the built npm_module target dir into the build, package.json is updated to copy
           // the sources we actually end up using into the node_modules directory when we run
-          // yarn install
+          // pnpm install
           await scanCopy({
             source: pkgSrcPath,
             destination: pkgDistPath,
@@ -353,5 +356,5 @@ export async function buildWebpackBundles({
     ? ['ignore', 'pipe', 'pipe']
     : ['inherit', 'inherit', 'inherit'];
 
-  await execa('yarn', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
+  await execa('pnpm', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
 }

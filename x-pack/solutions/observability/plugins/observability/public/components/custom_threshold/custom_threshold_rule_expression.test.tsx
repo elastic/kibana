@@ -8,6 +8,7 @@
 import React from 'react';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
+import { FilterStateStore } from '@kbn/es-query';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -270,6 +271,35 @@ describe('Expression', () => {
     ).toBe(
       'The selected data view does not have a timestamp field, please select another data view.'
     );
+  });
+
+  it('should re-add $state to saved filters before passing them to the SearchBar', async () => {
+    const kibanaMock = kibanaStartMock.startContract();
+    const searchBarMock = kibanaMock.services.unifiedSearch.ui.SearchBar as jest.Mock;
+    searchBarMock.mockClear();
+    useKibanaMock.mockReturnValue(kibanaMock);
+
+    const savedFilter = {
+      meta: { index: 'mockedIndex', key: 'host.name', type: 'phrase' },
+      query: { match_phrase: { 'host.name': 'host-1' } },
+    };
+
+    await setup(undefined, {
+      searchConfiguration: {
+        index: 'mockedIndex',
+        query: { query: '', language: 'kuery' },
+        filter: [savedFilter],
+      },
+    });
+
+    expect(searchBarMock).toHaveBeenCalled();
+    const { filters } = searchBarMock.mock.calls[searchBarMock.mock.calls.length - 1][0];
+    expect(filters).toEqual([
+      {
+        ...savedFilter,
+        $state: { store: FilterStateStore.APP_STATE },
+      },
+    ]);
   });
 
   it('should use output of getSerializedFields() as searchConfiguration', async () => {

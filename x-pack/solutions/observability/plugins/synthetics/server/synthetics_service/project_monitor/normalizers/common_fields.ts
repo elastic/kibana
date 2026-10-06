@@ -141,13 +141,17 @@ const ONLY_ONE_ATTEMPT = 1;
 
 export const getMaxAttempts = (retestOnFailure?: boolean, maxAttempts?: number) => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
-  if (!retestOnFailure && maxAttempts) {
-    return maxAttempts;
-  }
-  if (retestOnFailure) {
+  // An explicit `retest_on_failure` always wins. On update the merged payload
+  // still carries the previous `max_attempts`, so checking `maxAttempts` first
+  // would ignore a request that sets `retest_on_failure: false` (see #243891).
+  if (retestOnFailure === true) {
     return defaultFields[ConfigKey.MAX_ATTEMPTS];
-  } else if (retestOnFailure === false) {
+  }
+  if (retestOnFailure === false) {
     return ONLY_ONE_ATTEMPT;
+  }
+  if (maxAttempts) {
+    return maxAttempts;
   }
   return defaultFields[ConfigKey.MAX_ATTEMPTS];
 };

@@ -48,6 +48,7 @@
     "@kbn/custom-integrations-plugin",
 
     // packages
+    "@kbn/deeplinks-management",
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
     "@kbn/i18n",
@@ -134,6 +135,7 @@
     "@kbn/css-utils",
     "@kbn/rison",
     "@kbn/rule-data-utils",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
+    "@kbn/yaml-loader"
   ]
 }

@@ -242,7 +242,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
       options
     );
-    await PageObjects.header.waitUntilLoadingHasFinished();
+    await testSubjects.existOrFail(RULES_ROWS_ENABLE_SWITCH_BUTTON);
   };
 
   return {

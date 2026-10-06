@@ -373,12 +373,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const CASE_ID = 'e49ad6e0-cf9d-11eb-a603-13e7747d215c';
 
       before(async () => {
-        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
+        await kibanaServer.importExport.load(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
         );
       });
 

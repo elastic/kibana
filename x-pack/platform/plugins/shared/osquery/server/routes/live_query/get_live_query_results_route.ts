@@ -37,6 +37,7 @@ import {
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
@@ -154,7 +155,7 @@ export const getLiveQueryResultsRoute = (
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -175,7 +176,8 @@ export const getLiveQueryResultsRoute = (
                   search,
                   query.action_id,
                   query.agents?.length ?? 0,
-                  namespacesOrUndefined
+                  namespacesOrUndefined,
+                  spaceId
                 )
               )
             )
@@ -188,6 +190,7 @@ export const getLiveQueryResultsRoute = (
                 kuery: request.query.kuery,
                 esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
+                spaceId,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100
@@ -200,7 +203,7 @@ export const getLiveQueryResultsRoute = (
                 ],
                 integrationNamespaces: namespacesOrUndefined,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 

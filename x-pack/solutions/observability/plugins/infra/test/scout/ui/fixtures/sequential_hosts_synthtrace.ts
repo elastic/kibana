@@ -64,6 +64,88 @@ const unwrapSynthtraceClient = <TClientName extends SynthtraceClientName, TClien
   return value as TClient;
 };
 
+/**
+ * Name of the shadow composable index template installed before ingesting fixed-date
+ * host metrics. The template uses priority 500 (> Fleet's 200) and omits
+ * `index.mode: time_series`, ensuring `metrics-system.*` data streams are created as
+ * standard (non-TSDS) streams that accept historical timestamps.
+ */
+const NON_TSDS_SHADOW_TEMPLATE_NAME = 'synthtrace-hosts-flyout-metrics-system-non-tsds';
+
+/**
+ * Upserts a priority-500 shadow index template for `metrics-system.*` that deliberately
+ * omits `index.mode: time_series`. This overrides any Fleet-installed TSDS template
+ * (priority 200) so the data streams accept fixed historical dates used in these tests.
+ */
+export const ensureNonTsdsSystemTemplate = async (
+  esClient: EsClient,
+  log: ScoutLogger
+): Promise<void> => {
+  try {
+    await esClient.indices.putIndexTemplate({
+      name: NON_TSDS_SHADOW_TEMPLATE_NAME,
+      index_patterns: ['metrics-system.*'],
+      data_stream: {},
+      priority: 500,
+      template: {
+        mappings: {
+          dynamic: true,
+          // Map all strings as keyword so `terms` aggregations on fields like
+          // `host.name` work correctly — `dynamic: true` alone would auto-map
+          // them as `text`, breaking the infra hosts API aggregation.
+          dynamic_templates: [
+            {
+              strings_as_keyword: {
+                match_mapping_type: 'string',
+                mapping: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          properties: {
+            '@timestamp': { type: 'date' },
+          },
+        },
+      },
+    });
+    log.info(
+      `Installed shadow index template "${NON_TSDS_SHADOW_TEMPLATE_NAME}" (priority 500, no TSDS) for metrics-system.*`
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log.warning(
+      `Failed to install shadow index template "${NON_TSDS_SHADOW_TEMPLATE_NAME}": ${message}`
+    );
+    throw error;
+  }
+};
+
+/**
+ * Removes the shadow index template installed by `ensureNonTsdsSystemTemplate`.
+ * Ignores 404 (already removed).
+ */
+export const cleanNonTsdsSystemTemplate = async (
+  esClient: EsClient,
+  log: ScoutLogger
+): Promise<void> => {
+  try {
+    await esClient.indices.deleteIndexTemplate({ name: NON_TSDS_SHADOW_TEMPLATE_NAME });
+    log.info(`Removed shadow index template "${NON_TSDS_SHADOW_TEMPLATE_NAME}"`);
+  } catch (error: unknown) {
+    const statusCode = (error as { statusCode?: number })?.statusCode;
+    if (statusCode === 404) {
+      log.debug(
+        `Shadow index template "${NON_TSDS_SHADOW_TEMPLATE_NAME}" not found — already removed`
+      );
+      return;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    log.warning(
+      `Failed to remove shadow index template "${NON_TSDS_SHADOW_TEMPLATE_NAME}": ${message}`
+    );
+    throw error;
+  }
+};
+
 const indexInfra = async (
   deps: SequentialSynthtraceWorkerDeps,
   events: SynthtraceGenerator<InfraDocument>

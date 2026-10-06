@@ -9,6 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { MONITOR_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 import { PLUGIN } from '../../../../../../common/constants/plugin';
@@ -21,6 +22,12 @@ export const useTestRunDetailsBreadcrumbs = (
 
   const { monitor } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
+
+  const monitorHrefParams = new URLSearchParams();
+  if (selectedLocation?.id) monitorHrefParams.set('locationId', selectedLocation.id);
+  if (spaceId) monitorHrefParams.set('spaceId', spaceId);
+  const monitorHrefSearch = monitorHrefParams.toString();
 
   useBreadcrumbs([
     {
@@ -34,7 +41,7 @@ export const useTestRunDetailsBreadcrumbs = (
             href: `${appPath}${MONITOR_ROUTE.replace(
               ':monitorId',
               monitor?.[ConfigKey.CONFIG_ID] ?? ''
-            )}?locationId=${selectedLocation?.id ?? ''}`,
+            )}${monitorHrefSearch ? `?${monitorHrefSearch}` : ''}`,
           },
         ]
       : []),

@@ -262,13 +262,13 @@ export const mappings = (specService: SpecDefinitionsService) => {
 
           // objects
           properties: {
-            __scope_link: 'put_mapping.type.properties',
+            __scope_link: 'put_mapping.properties',
           },
 
           // multi_field
           fields: {
             '*': {
-              __scope_link: 'put_mapping.type.properties.field',
+              __scope_link: 'put_mapping.properties.field',
             },
           },
           copy_to: { __one_of: ['{field}', ['{field}']] },

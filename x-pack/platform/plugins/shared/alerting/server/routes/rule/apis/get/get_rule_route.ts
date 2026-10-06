@@ -19,7 +19,10 @@ import type {
   GetRuleRequestParamsV1,
   GetRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/get';
-import { getRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/get';
+import {
+  getRuleRequestParamsSchemaV1,
+  getInternalRuleRequestParamsSchemaV1,
+} from '../../../../../common/routes/rule/apis/get';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 interface BuildGetRulesRouteParams {
@@ -27,6 +30,7 @@ interface BuildGetRulesRouteParams {
   path: string;
   router: IRouter<AlertingRequestHandlerContext>;
   excludeFromPublicApi?: boolean;
+  paramsSchema?: typeof getRuleRequestParamsSchemaV1;
   options?: RouteConfigOptions<RouteMethod>;
 }
 const buildGetRuleRoute = ({
@@ -34,6 +38,7 @@ const buildGetRuleRoute = ({
   path,
   router,
   excludeFromPublicApi = false,
+  paramsSchema = getRuleRequestParamsSchemaV1,
   options,
 }: BuildGetRulesRouteParams) => {
   router.get(
@@ -43,7 +48,7 @@ const buildGetRuleRoute = ({
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       validate: {
         request: {
-          params: getRuleRequestParamsSchemaV1,
+          params: paramsSchema,
         },
         response: {
           200: {
@@ -110,5 +115,6 @@ export const getInternalRuleRoute = (
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    paramsSchema: getInternalRuleRequestParamsSchemaV1,
     options: { access: 'internal' },
   });

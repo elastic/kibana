@@ -62,6 +62,7 @@ steps:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -75,7 +76,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 125
     timeout_in_minutes: 75
     parallelism: 22
     key: defend-workflows-stateful
@@ -93,7 +94,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 125
     timeout_in_minutes: 75
     parallelism: 14
     key: defend-workflows-serverless

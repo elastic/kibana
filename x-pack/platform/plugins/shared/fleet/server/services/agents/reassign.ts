@@ -12,6 +12,7 @@ import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import {
   AgentReassignmentError,
+  FleetError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
 } from '../../errors';
@@ -19,6 +20,7 @@ import {
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import {
   getAgentsById,
@@ -35,11 +37,17 @@ import { ReassignActionRunner, reassignBatch } from './reassign_action_runner';
 
 async function verifyNewAgentPolicy(
   soClient: SavedObjectsClientContract,
-  newAgentPolicyId: string
+  newAgentPolicyId: string,
+  options?: { spaceId?: string }
 ) {
   let newAgentPolicy;
   try {
-    newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+    newAgentPolicy = await agentPolicyService.get(
+      soClient,
+      newAgentPolicyId,
+      false,
+      options?.spaceId === '*' ? { spaceId: options.spaceId } : {}
+    );
   } catch (err) {
     if (err instanceof SavedObjectNotFound) {
       throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
@@ -76,6 +84,7 @@ export async function reassignAgent(
 
   await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
+    policy_base_id: removeVersionSuffixFromPolicyId(newAgentPolicyId),
     policy_revision: null,
     ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
   });
@@ -99,18 +108,54 @@ export async function reassignAgents(
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
     force?: boolean;
     batchSize?: number;
+    dryRun?: boolean;
+    /** Space ID for the target policy lookup. Pass '*' when using an unscoped SO client. */
+    spaceId?: string;
+    /**
+     * Must be set to `true` when spaceId is '*'. Only task code that holds an unscoped
+     * internal SO client may enable cross-space reassignment. Route handlers must never set
+     * this flag (user-supplied input is blocked by the API schema before reaching this layer).
+     * @internal
+     */
+    _internalCrossSpace?: true;
   },
   newAgentPolicyId: string
-): Promise<{ actionId: string }> {
-  await verifyNewAgentPolicy(soClient, newAgentPolicyId);
+): Promise<{ actionId: string } | { count: number }> {
+  // Guard cross-space reassignment behind two checks:
+  // 1. Explicit internal flag: callers that intend cross-space must opt in; route handlers
+  //    never set this, so user-facing paths are blocked regardless of soClient type.
+  // 2. getCurrentNamespace() check: catches the most obvious misuse (custom-space scoped
+  //    client). Note: a default-space user client also returns undefined here, but that
+  //    case is already blocked by check 1 since route handlers never pass spaceId '*'.
+  if (options.spaceId === '*') {
+    if (!options._internalCrossSpace) {
+      throw new FleetError(
+        `spaceId '*' requires _internalCrossSpace: true and an unscoped internal SO client`
+      );
+    }
+    if (soClient.getCurrentNamespace() !== undefined) {
+      throw new FleetError(
+        `spaceId '*' requires an unscoped SO client; got client scoped to '${soClient.getCurrentNamespace()}'`
+      );
+    }
+  }
+  await verifyNewAgentPolicy(soClient, newAgentPolicyId, { spaceId: options.spaceId });
 
   const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
   if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
-    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+    const agentIdOptions = { skipNamespaceFilter: options.spaceId === '*' };
+    if (options.dryRun) {
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds, agentIdOptions);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
+    }
+    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds, agentIdOptions);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
         outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
@@ -122,7 +167,12 @@ export async function reassignAgents(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
+    // When spaceId is '*' the caller is space-agnostic; pass undefined so agentsKueryNamespaceFilter
+    // omits the filter and the query covers all spaces. Otherwise use the explicit spaceId if given,
+    // falling back to the current namespace derived from soClient.
+    const effectiveSpaceId =
+      options.spaceId === '*' ? undefined : options.spaceId ?? currentSpaceId;
+    const namespaceFilter = await agentsKueryNamespaceFilter(effectiveSpaceId);
     const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
@@ -131,6 +181,9 @@ export async function reassignAgents(
       page: 1,
       perPage: batchSize,
     });
+    if (options.dryRun) {
+      return { count: res.total };
+    }
     // running action in async mode for >10k agents (or actions > batchSize for testing purposes)
     if (res.total <= batchSize) {
       givenAgents = res.agents;
@@ -140,7 +193,7 @@ export async function reassignAgents(
         soClient,
         {
           ...options,
-          spaceId: currentSpaceId,
+          spaceId: options.spaceId ?? currentSpaceId,
           batchSize,
           total: res.total,
           newAgentPolicyId,
@@ -152,7 +205,7 @@ export async function reassignAgents(
 
   return await reassignBatch(
     esClient,
-    { newAgentPolicyId, spaceId: currentSpaceId },
+    { newAgentPolicyId, spaceId: options.spaceId ?? currentSpaceId },
     givenAgents,
     outgoingErrors
   );

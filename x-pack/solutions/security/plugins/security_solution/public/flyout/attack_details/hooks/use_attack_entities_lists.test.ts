@@ -54,8 +54,8 @@ describe('useAttackEntitiesLists', () => {
         skip: true,
       })
     );
-    expect(result.current.userEntityIdentifiers).toEqual([]);
-    expect(result.current.hostEntityIdentifiers).toEqual([]);
+    expect(result.current.userEntityEntries).toEqual([]);
+    expect(result.current.hostEntityEntries).toEqual([]);
     expect(result.current.loading).toBe(false);
   });
 
@@ -103,7 +103,7 @@ describe('useAttackEntitiesLists', () => {
     );
   });
 
-  it('parses userEntityIdentifiers and hostEntityIdentifiers from EUID aggregation buckets with sample _source', () => {
+  it('parses userEntityEntries and hostEntityEntries (with sample _source) from EUID aggregation buckets', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
@@ -181,21 +181,39 @@ describe('useAttackEntitiesLists', () => {
 
     const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.userEntityIdentifiers).toEqual([
+    expect(result.current.userEntityEntries).toEqual([
       {
-        'user.name': 'user1',
-        'host.id': 'host-for-user1',
-        'entity.namespace': 'local',
+        identityFields: {
+          'user.name': 'user1',
+          'host.id': 'host-for-user1',
+          'entity.namespace': 'local',
+        },
+        sampleSource: {
+          user: { name: 'user1' },
+          host: { id: 'host-for-user1' },
+        },
       },
       {
-        'user.name': 'user2',
-        'host.id': 'host-for-user2',
-        'entity.namespace': 'local',
+        identityFields: {
+          'user.name': 'user2',
+          'host.id': 'host-for-user2',
+          'entity.namespace': 'local',
+        },
+        sampleSource: {
+          user: { name: 'user2' },
+          host: { id: 'host-for-user2' },
+        },
       },
     ]);
-    expect(result.current.hostEntityIdentifiers).toEqual([
-      { 'host.name': 'host1' },
-      { 'host.name': 'host2' },
+    expect(result.current.hostEntityEntries).toEqual([
+      {
+        identityFields: { 'host.name': 'host1' },
+        sampleSource: { host: { name: 'host1' } },
+      },
+      {
+        identityFields: { 'host.name': 'host2' },
+        sampleSource: { host: { name: 'host2' } },
+      },
     ]);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(false);
@@ -220,8 +238,8 @@ describe('useAttackEntitiesLists', () => {
 
     const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.userEntityIdentifiers).toEqual([]);
-    expect(result.current.hostEntityIdentifiers).toEqual([]);
+    expect(result.current.userEntityEntries).toEqual([]);
+    expect(result.current.hostEntityEntries).toEqual([]);
   });
 
   it('skips buckets with missing or invalid sample _source', () => {
@@ -278,9 +296,20 @@ describe('useAttackEntitiesLists', () => {
 
     const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.userEntityIdentifiers).toEqual([
-      { 'user.name': 'user1', 'host.id': 'h1', 'entity.namespace': 'local' },
+    expect(result.current.userEntityEntries).toEqual([
+      {
+        identityFields: { 'user.name': 'user1', 'host.id': 'h1', 'entity.namespace': 'local' },
+        sampleSource: {
+          user: { name: 'user1' },
+          host: { id: 'h1' },
+        },
+      },
     ]);
-    expect(result.current.hostEntityIdentifiers).toEqual([{ 'host.name': 'host1' }]);
+    expect(result.current.hostEntityEntries).toEqual([
+      {
+        identityFields: { 'host.name': 'host1' },
+        sampleSource: { host: { name: 'host1' } },
+      },
+    ]);
   });
 });

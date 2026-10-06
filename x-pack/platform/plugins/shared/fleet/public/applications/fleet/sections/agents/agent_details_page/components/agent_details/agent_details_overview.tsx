@@ -134,7 +134,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               </EuiFlexGroup>
             </FlexItemWithMinWidth>
             <FlexItemWithMinWidth grow={5}>
-              <EuiFlexGroup justifyContent="flexEnd" direction="column" alignItems="flexEnd">
+              <EuiFlexGroup justifyContent="flexStart" direction="column" alignItems="flexEnd">
                 <EuiFlexItem grow={false}>
                   <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
                 </EuiFlexItem>

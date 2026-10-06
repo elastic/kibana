@@ -35,7 +35,6 @@ import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail
 import type { ITableColumn } from '../../shared/managed_table';
 import { ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/links/apm/service_link';
-import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
 const StyledTransactionLink = styled(TransactionDetailLink)`
@@ -68,7 +67,7 @@ export function getTraceListColumns({
       name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
-      width: '40%',
+      maxWidth: '40%',
       sortable: true,
       render: (_: string, { serviceName, transactionName, transactionType }: TraceGroup) => (
         <EuiToolTip content={transactionName} anchorClassName="eui-textTruncate">
@@ -95,18 +94,14 @@ export function getTraceListColumns({
       name: i18n.translate('xpack.apm.tracesTable.originatingServiceColumnLabel', {
         defaultMessage: 'Originating service',
       }),
+      minWidth: '14em',
+      maxWidth: '25em',
       sortable: true,
       render: (_: string, { serviceName, agentName, transactionType }) => (
-        <TruncateWithTooltip
-          data-test-subj="apmTraceListAppLink"
-          text={serviceName || NOT_AVAILABLE_LABEL}
-          content={
-            <ServiceLink
-              agentName={agentName}
-              query={{ ...query, transactionType, serviceGroup: '' }}
-              serviceName={serviceName}
-            />
-          }
+        <ServiceLink
+          agentName={agentName}
+          query={{ ...query, transactionType, serviceGroup: '' }}
+          serviceName={serviceName || NOT_AVAILABLE_LABEL}
         />
       ),
     },
@@ -211,6 +206,7 @@ export function TraceList({ response }: Props) {
       initialSortDirection="desc"
       noItemsMessage={noItemsMessage}
       initialPageSize={25}
+      tableLayout="auto"
     />
   );
 }

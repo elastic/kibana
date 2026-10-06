@@ -10,7 +10,6 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
   describe('discover/group5', function () {
@@ -18,12 +17,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.setWindowSize(1300, 800);
     });
 
-    after(async function unloadMakelogs() {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-    });
-
+    // `_no_data` is intentionally first: it expects a clean ES/Kibana state.
+    // Running it after other tests leaves residual managed/default data views
+    // (e.g. "All logs") that prevent Discover from rendering the no-data page.
     loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_filter_editor'));
     loadTestFile(require.resolve('./_field_data_with_fields_api'));

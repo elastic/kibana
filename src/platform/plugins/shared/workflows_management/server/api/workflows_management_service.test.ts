@@ -1143,6 +1143,64 @@ steps:
       );
     });
 
+    it('does not schedule triggers when workflow is disabled', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const workflowCommand = {
+        yaml: `
+name: disabled scheduled workflow
+enabled: false
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+      };
+
+      mockEsClient.index.mockResolvedValue({ _id: 'new-workflow-id' } as any);
+
+      await service.createWorkflow(workflowCommand, 'default', mockRequest);
+
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+    });
+
+    it('does not schedule triggers when workflow is invalid', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const workflowCommand = {
+        yaml: 'name: invalid workflow\nenabled: true\ntriggers:\n  - type: invalid-trigger-type',
+      };
+
+      mockEsClient.index.mockResolvedValue({ _id: 'new-workflow-id' } as any);
+
+      await service.createWorkflow(workflowCommand, 'default', mockRequest);
+
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+    });
+
     it('should create workflow with custom ID when provided', async () => {
       const mockRequest = {
         auth: {
@@ -1793,6 +1851,41 @@ steps:
       await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
 
       expect(mockTaskScheduler.scheduleWorkflowTask).toHaveBeenCalled();
+    });
+
+    it('does not schedule triggers when workflow is disabled', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ create: { _id: 'workflow-1', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: disabled scheduled workflow
+enabled: false
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
     });
 
     it('should log warning when trigger scheduling fails without affecting result', async () => {
@@ -2597,6 +2690,109 @@ steps:
           refresh: true,
           require_alias: true,
         })
+      );
+    });
+
+    it('refreshes scheduled task credentials when editing an enabled scheduled workflow', async () => {
+      const request = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+      const taskScheduler = {
+        updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+      };
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      };
+      const existingDoc = {
+        _id: 'test-workflow-id',
+        _source: {
+          ...mockWorkflowDocument._source,
+          enabled: true,
+          valid: true,
+          triggerTypes: ['scheduled'],
+          definition: scheduledDefinition,
+          yaml: [
+            'name: Test Workflow',
+            'enabled: true',
+            'triggers:',
+            '  - type: scheduled',
+            '    with:',
+            '      every: 30s',
+            'steps: []',
+          ].join('\n'),
+        },
+      };
+      const updatedDoc = {
+        ...existingDoc,
+        _source: {
+          ...existingDoc._source,
+          tags: ['new'],
+          lastUpdatedBy: 'test-user',
+        },
+      };
+
+      service.setTaskScheduler(taskScheduler as any);
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [existingDoc] } } as any)
+        .mockResolvedValueOnce({ hits: { hits: [updatedDoc] } } as any);
+
+      await service.updateWorkflow('test-workflow-id', { tags: ['new'] }, 'default', request);
+
+      expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          definition: scheduledDefinition,
+        }),
+        'default',
+        request
+      );
+      expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+    });
+
+    it('warns when an enabled scheduled workflow needs scheduler sync but the scheduler is unavailable', async () => {
+      const request = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      };
+      const existingDoc = {
+        _id: 'test-workflow-id',
+        _source: {
+          ...mockWorkflowDocument._source,
+          enabled: true,
+          valid: true,
+          triggerTypes: ['scheduled'],
+          definition: scheduledDefinition,
+          yaml: [
+            'name: Test Workflow',
+            'enabled: true',
+            'triggers:',
+            '  - type: scheduled',
+            '    with:',
+            '      every: 30s',
+            'steps: []',
+          ].join('\n'),
+        },
+      };
+
+      mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [existingDoc] } } as any);
+
+      await service.updateWorkflow('test-workflow-id', { tags: ['new'] }, 'default', request);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Skipping scheduler sync for workflow test-workflow-id in space default: task scheduler is unavailable'
       );
     });
 
@@ -4579,6 +4775,7 @@ steps:
 
     it("should unschedule tasks per page with only that page's disabled IDs", async () => {
       const mockTaskScheduler = {
+        bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
         unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
         scheduleWorkflowTask: jest.fn(),
       };
@@ -4613,17 +4810,21 @@ steps:
 
       await service.disableAllWorkflows();
 
-      expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledTimes(1002);
+      expect(mockTaskScheduler.bulkUnscheduleWorkflowTasks).toHaveBeenCalledTimes(2);
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
 
-      const page1Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(0, 1000);
-      const page2Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(1000);
-
-      expect(page1Calls.map((c: any) => c[0])).toEqual(page1Hits.map((h) => h._id));
-      expect(page2Calls.map((c: any) => c[0])).toEqual(['wf-1000', 'wf-1001']);
+      expect(mockTaskScheduler.bulkUnscheduleWorkflowTasks.mock.calls[0][0]).toEqual(
+        page1Hits.map((h) => h._id)
+      );
+      expect(mockTaskScheduler.bulkUnscheduleWorkflowTasks.mock.calls[1][0]).toEqual([
+        'wf-1000',
+        'wf-1001',
+      ]);
     });
 
     it('should not call unschedule when no workflows were disabled', async () => {
       const mockTaskScheduler = {
+        bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
         unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
         scheduleWorkflowTask: jest.fn(),
       };
@@ -4635,6 +4836,7 @@ steps:
 
       await service.disableAllWorkflows();
 
+      expect(mockTaskScheduler.bulkUnscheduleWorkflowTasks).not.toHaveBeenCalled();
       expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     });
   });

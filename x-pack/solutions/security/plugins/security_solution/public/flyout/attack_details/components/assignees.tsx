@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -68,6 +69,7 @@ export const Assignees = memo(() => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const assigneesTitleId = useGeneratedHtmlId();
 
   const attacksWithAssignees = useMemo(
     () => [{ attackId, relatedAlertIds: alertIds, assignees }],
@@ -128,13 +130,14 @@ export const Assignees = memo(() => {
       )}
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-labelledby={assigneesTitleId}
           button={button}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"
           data-test-subj="attack-details-flyout-header-assignees-popover"
         >
-          <EuiPopoverTitle paddingSize="m">
+          <EuiPopoverTitle id={assigneesTitleId} paddingSize="m">
             {i18n.translate(
               'xpack.securitySolution.attackDetailsFlyout.header.assignees.popoverTitle',
               {

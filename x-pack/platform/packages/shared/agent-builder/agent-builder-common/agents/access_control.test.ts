@@ -38,10 +38,16 @@ describe('isAgentOwner', () => {
     expect(isAgentOwner({ owner, currentUser })).toBe(true);
   });
 
-  test('returns true when usernames match (id not used)', () => {
+  test('falls back to username for legacy owners that never stored an id', () => {
     const ownerByUsername: UserIdAndName = { username: 'alice' };
     const userByUsername: UserIdAndName = { username: 'alice' };
     expect(isAgentOwner({ owner: ownerByUsername, currentUser: userByUsername })).toBe(true);
+    expect(
+      isAgentOwner({
+        owner: { username: 'alice' },
+        currentUser: { id: 'realm:["file","file1","alice"]', username: 'alice' },
+      })
+    ).toBe(true);
   });
 
   test('returns false when ids differ and usernames differ', () => {
@@ -53,12 +59,18 @@ describe('isAgentOwner', () => {
     expect(isAgentOwner({ owner, currentUser: sameIdUser })).toBe(true);
   });
 
-  test('returns false when both ids are defined but differ (no username fallback)', () => {
+  test('does not fall back to username when the agent document stored an id', () => {
     const ownerWithId: UserIdAndName = { id: 'owner-id', username: 'alice' };
     const userSameUsernameDifferentId: UserIdAndName = { id: 'other-id', username: 'alice' };
     expect(isAgentOwner({ owner: ownerWithId, currentUser: userSameUsernameDifferentId })).toBe(
       false
     );
+    expect(
+      isAgentOwner({
+        owner: { id: 'owner-id', username: 'alice' },
+        currentUser: { username: 'alice' },
+      })
+    ).toBe(false);
   });
 
   test('returns false when owner has username only and current user has different username', () => {

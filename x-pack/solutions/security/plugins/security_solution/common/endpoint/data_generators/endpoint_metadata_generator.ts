@@ -162,6 +162,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('runscript');
     }
 
+    // v9.4.x + v9.6.0 introduced physical memory dump capability
+    if (gte(agentVersion, '9.4.7')) {
+      capabilities.push('memdump_raw');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {

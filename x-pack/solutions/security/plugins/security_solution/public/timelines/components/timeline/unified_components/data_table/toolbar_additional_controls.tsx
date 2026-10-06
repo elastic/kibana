@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  type EuiToolTipRef,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 
 import { isActiveTimeline } from '../../../../../helpers';
@@ -40,7 +46,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
 
-  const toolTipRef = useRef<EuiToolTip>(null);
+  const toolTipRef = useRef<EuiToolTipRef>(null);
 
   const hideToolTip = () => toolTipRef.current?.hideToolTip();
 
@@ -98,7 +104,6 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
             }
             iconType={fullScreen ? 'fullScreenExit' : 'fullScreen'}
             onClick={toggleFullScreen}
-            onMouseOut={hideToolTip}
           />
         </EuiToolTip>
       </span>

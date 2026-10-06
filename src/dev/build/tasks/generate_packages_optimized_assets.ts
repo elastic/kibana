@@ -25,7 +25,6 @@ import del from 'del';
 import type { Task } from '../lib';
 import { write } from '../lib';
 
-const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
 
 const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSync(path).size, 0);
@@ -87,10 +86,6 @@ async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: 
 
 type Category = ReturnType<typeof getCategory>;
 const getCategory = (relative: string) => {
-  if (EUI_THEME_RE.test(relative)) {
-    return 'euiTheme';
-  }
-
   if (relative.endsWith('.css')) {
     return 'css';
   }
@@ -136,14 +131,6 @@ function categorizeAssets(assetDirs: string[]) {
   };
 
   for (const { path, category } of assets) {
-    if (category === 'euiTheme') {
-      // only track borealis.light theme
-      if (path.includes('borealis.light')) {
-        add('css', path);
-      }
-      continue;
-    }
-
     add(category, path);
   }
 

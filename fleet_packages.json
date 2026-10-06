@@ -30,11 +30,11 @@
   },
   {
     "name": "elastic_agent",
-    "version": "2.9.2"
+    "version": "2.9.6"
   },
   {
     "name": "endpoint",
-    "version": "9.4.0"
+    "version": "9.4.1"
   },
   {
     "name": "fleet_server",
@@ -52,15 +52,15 @@
   },
   {
     "name": "synthetics",
-    "version": "1.6.1"
+    "version": "1.7.0"
   },
   {
     "name": "security_detection_engine",
-    "version": "9.4.4"
+    "version": "9.4.15"
   },
   {
     "name": "security_ai_prompts",
-    "version": "1.0.13",
+    "version": "1.0.14",
     "allowSyncToPrerelease": true
   }
 ]

@@ -9,13 +9,14 @@
 
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiHorizontalRule,
   EuiPopover,
   EuiPopoverTitle,
-  EuiContextMenuItem,
-  toSentenceCase,
-  EuiHorizontalRule,
-  EuiButtonIcon,
   EuiSelectable,
+  EuiToolTip,
+  toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -25,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 export const strings = {
   getSwitchLanguageButtonText: () =>
     i18n.translate('kql.switchLanguage.buttonText', {
-      defaultMessage: 'Switch language button.',
+      defaultMessage: 'Switch language',
     }),
   getFilterLanguageLabel: () =>
     i18n.translate('kql.switchLanguage.filterLanguageLabel', {
@@ -62,15 +63,17 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
-    <EuiButtonIcon
-      size="s"
-      iconType="filter"
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      className="kqlQueryBar__languageSwitcherButton"
-      data-test-subj={'switchQueryLanguageButton'}
-      aria-label={strings.getSwitchLanguageButtonText()}
-      disabled={isDisabled}
-    />
+    <EuiToolTip content={strings.getSwitchLanguageButtonText()} disableScreenReaderOutput>
+      <EuiButtonIcon
+        size="s"
+        iconType="filter"
+        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        className="kqlQueryBar__languageSwitcherButton"
+        data-test-subj={'switchQueryLanguageButton'}
+        aria-label={strings.getSwitchLanguageButtonText()}
+        disabled={isDisabled}
+      />
+    </EuiToolTip>
   );
 
   const isKqlSelected = language === 'kuery';

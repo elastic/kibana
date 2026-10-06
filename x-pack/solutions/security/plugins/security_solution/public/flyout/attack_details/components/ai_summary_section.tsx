@@ -38,6 +38,7 @@ export const AISummarySection = memo(() => {
     summaryMarkdownWithReplacements,
     detailsMarkdown,
     detailsMarkdownWithReplacements,
+    originalAlertIds,
   } = useOverviewTabData();
 
   const hasAnonymizedContent = useMemo(
@@ -98,6 +99,7 @@ export const AISummarySection = memo(() => {
             scopeId={TableId.alertsOnAttacksPage}
             disableActions={showAnonymized}
             markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+            alertIds={originalAlertIds}
           />
         </div>
 
@@ -119,6 +121,7 @@ export const AISummarySection = memo(() => {
             disableActions={showAnonymized}
             scopeId={TableId.alertsOnAttacksPage}
             markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+            alertIds={originalAlertIds}
           />
         </div>
       </EuiPanel>

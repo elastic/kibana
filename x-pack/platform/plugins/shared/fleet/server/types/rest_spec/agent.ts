@@ -23,12 +23,18 @@ const ActionIdSchema = schema.object({
 });
 
 const ActionIdOrMessageSchema = schema.oneOf([
-  schema.object({
-    actionId: schema.string(),
-  }),
-  schema.object({
-    message: schema.string(),
-  }),
+  schema.object(
+    {
+      actionId: schema.string(),
+    },
+    { meta: { id: 'action_id_response' } }
+  ),
+  schema.object(
+    {
+      message: schema.string(),
+    },
+    { meta: { id: 'action_message_response' } }
+  ),
 ]);
 
 export const GetAgentsRequestSchema = {
@@ -292,6 +298,7 @@ export const AgentResponseSchema = schema.object({
   default_api_key: schema.maybe(schema.string()),
   default_api_key_id: schema.maybe(schema.string()),
   policy_id: schema.maybe(schema.string()),
+  policy_base_id: schema.maybe(schema.string()),
   policy_revision: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
   last_checkin: schema.maybe(schema.string()),
   last_checkin_status: schema.maybe(
@@ -508,6 +515,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
         },
       })
     ),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -550,6 +558,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
     ),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -586,6 +595,7 @@ export const PostBulkRequestDiagnosticsActionRequestSchema = {
         maxSize: 1,
       })
     ),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -641,6 +651,7 @@ export const PostBulkAgentReassignRequestSchema = {
     agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -684,10 +695,13 @@ export const BulkMigrateAgentsRequestSchema = {
     enrollment_token: schema.string(),
     settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
     batchSize: schema.maybe(schema.number()),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
-export const BulkMigrateAgentsResponseSchema = ActionIdSchema;
+const DryRunCountSchema = schema.object({ count: schema.number() });
+
+export const BulkMigrateAgentsResponseSchema = schema.oneOf([ActionIdSchema, DryRunCountSchema]);
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
@@ -696,10 +710,11 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
-export const PostBulkActionResponseSchema = ActionIdSchema;
+export const PostBulkActionResponseSchema = schema.oneOf([ActionIdSchema, DryRunCountSchema]);
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
@@ -953,10 +968,14 @@ export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
         password: schema.maybe(schema.string()),
       })
     ),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
-export const BulkChangeAgentsPrivilegeLevelResponseSchema = ActionIdSchema;
+export const BulkChangeAgentsPrivilegeLevelResponseSchema = schema.oneOf([
+  ActionIdSchema,
+  DryRunCountSchema,
+]);
 
 export const PostAgentRollbackRequestSchema = {
   params: schema.object({
@@ -973,18 +992,28 @@ export const PostBulkAgentRollbackRequestSchema = {
     agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
-export const PostBulkAgentRollbackResponseSchema = schema.object({
-  actionIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-});
+export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
+  schema.object({
+    actionIds: schema.arrayOf(schema.string({ maxLength: 36 }), { maxSize: 10000 }),
+  }),
+  DryRunCountSchema,
+]);
 
 export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 512 }), {
+        minSize: 1,
+        maxSize: 10000,
+      }),
       schema.string({
+        // 10 000 chars matches the FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH constant that will be
+        // introduced by #288283; inlined here to satisfy CodeQL without pulling in that PR.
+        maxLength: 10000,
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
           if (validationObj?.error) {

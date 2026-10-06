@@ -7,7 +7,7 @@
 
 export const resultComboBoxCss = {
   '&.euiComboBox': {
-    position: 'relative',
+    position: 'relative' as const,
     left: '-1px',
 
     '.euiComboBox__inputWrap': {

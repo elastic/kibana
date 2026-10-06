@@ -13,6 +13,7 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsTermsBucketBase,
   QueryDslQueryContainer,
+  SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
@@ -24,6 +25,11 @@ import { appContextService } from '../app_context';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
+import {
+  buildPolicyBaseIdWithFallbackEsFilter,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
+
 import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
 
 import { getAgentById, removeSOAttributes } from './crud';
@@ -34,7 +40,7 @@ interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase 
 }
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
-const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
+export const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
@@ -86,19 +92,10 @@ export async function getAgentStatusForAgentPolicy(
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
-  // If agentPolicyIds is provided, we filter by those, otherwise we filter by depreciated agentPolicyId
   if (agentPolicyIds) {
-    clauses.push({
-      terms: {
-        policy_id: agentPolicyIds,
-      },
-    });
+    clauses.push(buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds));
   } else if (agentPolicyId) {
-    clauses.push({
-      term: {
-        policy_id: agentPolicyId,
-      },
-    });
+    clauses.push(buildPolicyBaseIdWithFallbackEsFilter(agentPolicyId));
   }
 
   const query =
@@ -213,7 +210,7 @@ export async function getIncomingDataByAgentsId({
 
     const searchResult = await retryTransientEsErrors(
       () =>
-        esClient.search({
+        esClient.search<unknown, Record<'agent_ids', { buckets: Array<{ key: string }> }>>({
           index: dataStreamPattern,
           allow_partial_search_results: true,
           _source: returnDataPreview,
@@ -259,9 +256,9 @@ export async function getIncomingDataByAgentsId({
 
     const dataPreview = searchResult.hits?.hits || [];
 
-    const agentIdsWithData: string[] =
-      // @ts-expect-error aggregation type is not specified
-      searchResult.aggregations.agent_ids.buckets.map((bucket: any) => bucket.key as string) ?? [];
+    const agentIdsWithData: string[] = searchResult.aggregations.agent_ids.buckets.map(
+      (bucket) => bucket.key
+    );
 
     const items = agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }
@@ -270,6 +267,81 @@ export async function getIncomingDataByAgentsId({
     return { items, dataPreview };
   } catch (error) {
     logger.debug(`Error getting incoming data for agents: ${error}`);
+    throw new FleetError(
+      `Unable to retrieve incoming data for agents due to error: ${error.message}`
+    );
+  }
+}
+
+/**
+ * Identity-free incoming-data check for a single agentless agent whose data streams carry no
+ * queryable agent identity (native OTel documents). The caller must scope `dataStreamPattern` to
+ * the agent's own namespace; see `getAgentDataHandler` for the gate that guarantees this.
+ */
+export async function getIncomingDataByDataStreams({
+  esClient,
+  agentId,
+  dataStreamPattern,
+  returnDataPreview = false,
+}: {
+  esClient: ElasticsearchClient;
+  agentId: string;
+  dataStreamPattern: string;
+  returnDataPreview?: boolean;
+}) {
+  const logger = appContextService.getLogger();
+
+  try {
+    const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+      index: [
+        {
+          names: dataStreamPattern.split(','),
+          privileges: ['read'],
+        },
+      ],
+    });
+
+    if (!hasAllPrivileges) {
+      throw new FleetUnauthorizedError('Missing permissions to read data streams indices');
+    }
+
+    const searchResult = await retryTransientEsErrors(
+      () =>
+        esClient.search({
+          index: dataStreamPattern,
+          // The pattern names concrete data streams that may not exist yet; without this,
+          // Elasticsearch throws index_not_found_exception instead of returning zero hits.
+          ignore_unavailable: true,
+          allow_partial_search_results: true,
+          _source: returnDataPreview,
+          timeout: '5s',
+          size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
+          terminate_after: returnDataPreview ? undefined : 1,
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    'event.ingested': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      { logger }
+    );
+
+    const dataPreview = searchResult.hits?.hits || [];
+    const total = searchResult.hits.total as SearchTotalHits | undefined;
+    const hasData = (total?.value ?? 0) > 0;
+
+    return { items: [{ [agentId]: { data: hasData } }], dataPreview };
+  } catch (error) {
+    logger.debug(`Error getting incoming data for data streams: ${error}`);
     throw new FleetError(
       `Unable to retrieve incoming data for agents due to error: ${error.message}`
     );

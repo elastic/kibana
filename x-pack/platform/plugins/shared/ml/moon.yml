@@ -115,6 +115,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/task-manager-plugin'
   - '@kbn/test-jest-helpers'
+  - '@kbn/scout'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/unified-field-list'
@@ -148,6 +149,8 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/lens-common'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -161,9 +164,11 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - __mocks__/**/*
+    - test/scout/**/*
     - common/**/*.json
     - public/**/*.json
     - server/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

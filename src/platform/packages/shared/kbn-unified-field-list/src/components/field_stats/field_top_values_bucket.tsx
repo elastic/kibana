@@ -116,7 +116,6 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                     count,
                   },
                 })}
-                delay="long"
               >
                 <EuiText
                   tabIndex={0}
@@ -137,7 +136,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               `}
             >
               {(formattedFieldValue?.length ?? 0) > 0 ? (
-                <EuiToolTip content={formattedFieldValue} delay="long">
+                <EuiToolTip content={formattedFieldValue}>
                   <EuiTextBlockTruncate lines={3}>
                     <EuiText size="xs" color={'subdued'} {...textProps}>
                       {formattedFieldValue}

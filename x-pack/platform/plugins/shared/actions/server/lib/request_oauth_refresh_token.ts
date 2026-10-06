@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { OAuthTokenResponse } from './request_oauth_token';
+import type { OAuthTokenResponse, TokenResponseOptions } from './request_oauth_token';
 import { requestOAuthToken } from './request_oauth_token';
 import type { AsApiContract } from '../../common';
 
@@ -36,7 +36,8 @@ export async function requestOAuthRefreshToken(
   logger: Logger,
   params: RefreshTokenOAuthRequestParams,
   configurationUtilities: ActionsConfigurationUtilities,
-  useBasicAuth: boolean = true // Default to true (OAuth 2.0 recommended practice)
+  useBasicAuth: boolean = true,
+  tokenResponseOptions?: TokenResponseOptions
 ): Promise<OAuthTokenResponse> {
   return await requestOAuthToken<RefreshTokenOAuthRequestParams>(
     tokenUrl,
@@ -44,6 +45,7 @@ export async function requestOAuthRefreshToken(
     configurationUtilities,
     logger,
     rewriteBodyRequest(params),
-    useBasicAuth
+    useBasicAuth,
+    tokenResponseOptions
   );
 }

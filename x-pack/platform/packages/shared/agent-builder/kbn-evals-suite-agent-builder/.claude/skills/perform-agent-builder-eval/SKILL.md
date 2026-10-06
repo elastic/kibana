@@ -112,7 +112,7 @@ Tell the user the snapshot has been restored.
 Launch Kibana in the background using `run_in_background`:
 
 ```bash
-yarn start --no-base-path
+pnpm start --no-base-path
 ```
 
 Tell the user Kibana is starting up.
@@ -224,7 +224,7 @@ Run the following commands to find and kill the relevant processes:
 # Kill Elasticsearch
 pkill -f 'elasticsearch' || true
 
-# Kill Kibana (node process started by yarn start)
+# Kill Kibana (node process started by pnpm start)
 pkill -f 'scripts/kibana --dev' || true
 
 # Kill EDOT collector

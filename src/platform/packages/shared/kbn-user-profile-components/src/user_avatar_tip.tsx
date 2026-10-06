@@ -23,7 +23,7 @@ export const UserAvatarTip: FunctionComponent<UserAvatarProps> = ({ user, avatar
   }
 
   return (
-    <UserToolTip user={user} avatar={avatar} position="top" delay="regular">
+    <UserToolTip user={user} avatar={avatar} position="top">
       <UserAvatar user={user} avatar={avatar} {...rest} />
     </UserToolTip>
   );

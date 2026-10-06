@@ -10,7 +10,7 @@ import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../shared/mocks';
+import { mockRiskScoreState, mockEntityRiskScores } from '../../shared/mocks';
 import { HostPanelContent } from './content';
 import { mockObservedHostData, mockEntityRecord } from '../mocks';
 
@@ -37,6 +37,7 @@ export const Default = {
     <HostPanelContent
       observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -44,6 +45,7 @@ export const Default = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 
@@ -55,6 +57,7 @@ export const WithGraphVisualization = {
     <HostPanelContent
       observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -64,6 +67,7 @@ export const WithGraphVisualization = {
       isPreviewMode={false}
       entityRecord={mockEntityRecord}
       entityStoreEntityId={mockEntityRecord.entity.id}
+      entityStoreV2Enabled={true}
     />
   ),
 
@@ -86,6 +90,7 @@ export const NoObservedData = {
         },
       }}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -93,6 +98,7 @@ export const NoObservedData = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 
@@ -115,6 +121,7 @@ export const Loading = {
         },
       }}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -122,6 +129,7 @@ export const Loading = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 

@@ -10,7 +10,7 @@ import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../shared/mocks';
+import { mockEntityRiskScores, mockRiskScoreState } from '../../shared/mocks';
 import { mockObservedUser, mockEntityRecord } from './mocks';
 import { UserPanelContent } from './content';
 
@@ -37,6 +37,7 @@ export const Default = {
     <UserPanelContent
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -44,6 +45,7 @@ export const Default = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 
@@ -55,24 +57,7 @@ export const IntegrationDisabled = {
     <UserPanelContent
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
-      contextID={'test-user-details'}
-      scopeId={'test-scopeId'}
-      openDetailsPanel={() => {}}
-      identityFields={{ 'user.name': 'test-user-name' }}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
-      isPreviewMode={false}
-    />
-  ),
-
-  name: 'integration disabled',
-};
-
-export const WithGraphVisualization = {
-  render: () => (
-    <UserPanelContent
-      observedUser={mockObservedUser}
-      riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -82,6 +67,7 @@ export const WithGraphVisualization = {
       isPreviewMode={false}
       entityRecord={mockEntityRecord}
       entityStoreEntityId={mockEntityRecord.entity.id}
+      entityStoreV2Enabled={true}
     />
   ),
 
@@ -93,6 +79,7 @@ export const NoManagedData = {
     <UserPanelContent
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -100,6 +87,7 @@ export const NoManagedData = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 
@@ -134,6 +122,7 @@ export const NoObservedData = {
         },
       }}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -141,6 +130,7 @@ export const NoObservedData = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 
@@ -175,6 +165,7 @@ export const Loading = {
         },
       }}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
@@ -182,6 +173,7 @@ export const Loading = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 

@@ -37,7 +37,7 @@ export const snapshot: Command = {
       --port            The port to bind to on 127.0.0.1 [default: 9200]
       --kill            Kill running ES Docker containers before starting
       --ssl             Sets up SSL on Elasticsearch
-      --use-cached      Skips cache verification and use cached ES snapshot.
+      --use-cached      Prefer locally cached ES snapshots instead of downloading promoted snapshots.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]
@@ -81,7 +81,7 @@ export const snapshot: Command = {
 
     if (options.docker) {
       throw createCliError(
-        `The --docker flag has been removed from 'es snapshot'. Use 'yarn es docker --snapshot' instead.`
+        `The --docker flag has been removed from 'es snapshot'. Use 'pnpm es docker --snapshot' instead.`
       );
     } else if (options['download-only']) {
       await cluster.downloadSnapshot({

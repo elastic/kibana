@@ -63,10 +63,18 @@ export const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => 
     },
   ];
 
-  shouldClauses.push({ term: { created_by_name: user.username } });
   if (user.id !== undefined) {
     shouldClauses.push({ term: { created_by_id: user.id } });
   }
+
+  // Legacy ownership: username match only when created_by_id was never stored, so owners of those
+  // docs keep list access without reopening cross-realm collisions for id-backed documents.
+  shouldClauses.push({
+    bool: {
+      must_not: { exists: { field: 'created_by_id' } },
+      filter: { term: { created_by_name: user.username } },
+    },
+  });
 
   return {
     bool: {

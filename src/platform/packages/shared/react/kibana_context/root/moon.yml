@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/core-base-browser-internal'
   - '@kbn/react-kibana-context-env'
   - '@kbn/core-chrome-browser'
+  - '@kbn/core-security-browser'
+  - '@kbn/core-user-profile-browser-context'
 tags:
   - shared-common
   - package

@@ -28,6 +28,10 @@ import {
   type EnhancedCaseData,
 } from './helpers';
 
+// Each alert ID fans out into a separate getCasesByAlertID request, so the
+// array must stay bounded to avoid resource exhaustion.
+const MAX_ALERT_IDS = 100;
+
 const casesSchema = z.object({
   // Get case by ID operation
   caseId: z
@@ -39,9 +43,10 @@ const casesSchema = z.object({
   // Find cases by alert IDs
   alertIds: z
     .array(z.string())
+    .max(MAX_ALERT_IDS)
     .optional()
     .describe(
-      'Array of alert IDs to find cases containing these alerts. If provided, cases containing any of these alert IDs will be returned. Alert IDs must be provided via this parameter.'
+      `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). If provided, cases containing any of these alert IDs will be returned. Alert IDs must be provided via this parameter.`
     ),
   // Owner filter
   owner: z

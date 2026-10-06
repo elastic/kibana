@@ -19,6 +19,7 @@ export default createTestConfig({
       'endpointExceptionsMovedUnderManagement',
       'entityAnalyticsWatchlistEnabled',
     ])}`,
+    '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
   ],
   testFiles: [require.resolve('..')],
   junit: {

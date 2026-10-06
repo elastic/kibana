@@ -55,7 +55,17 @@ describe('getKqlSuggestionsIfApplicable', () => {
   });
 
   it('should return suggestions if applicable', async () => {
-    const mockSuggestions = [{ text: 'value1', kind: 'Value', detail: 'A value' }];
+    const mockSuggestions = [
+      {
+        text: 'value1',
+        kind: 'Value',
+        detail: 'A value',
+        rangeToReplace: {
+          end: 12,
+          start: 7,
+        },
+      },
+    ];
     const mockGetKqlSuggestions = jest.fn().mockResolvedValue(mockSuggestions);
     const ctx = createContext('KQL("""query', mockGetKqlSuggestions);
 

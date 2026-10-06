@@ -22,11 +22,27 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { cache } from './utils/cache';
 import { resolveCustomSnapshotUrl } from './custom_snapshots';
 import { createCliError, isCliError } from './errors';
+import { shouldPreferCachedSnapshot } from './utils/find_local_cached_snapshot';
 
 const asyncPipeline = promisify(pipeline);
-const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
-const PERMANENT_SNAPSHOTS_BASE_URL =
-  'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
+const GCS_BASE_URL = 'https://storage.googleapis.com';
+const DAILY_SNAPSHOTS_BASE_URL = `${GCS_BASE_URL}/kibana-ci-es-snapshots-daily`;
+const PERMANENT_SNAPSHOTS_BASE_URL = `${GCS_BASE_URL}/kibana-ci-es-snapshots-permanent`;
+const ALLOWED_SNAPSHOT_URL_PREFIXES = [
+  `${DAILY_SNAPSHOTS_BASE_URL}/`,
+  `${PERMANENT_SNAPSHOTS_BASE_URL}/`,
+];
+
+/**
+ * Whether a snapshot manifest or archive URL points into the Kibana CI snapshot buckets.
+ */
+export function isAllowedSnapshotUrl(url: string): boolean {
+  if (!URL.canParse(url)) {
+    return false;
+  }
+  const { href } = new URL(url);
+  return ALLOWED_SNAPSHOT_URL_PREFIXES.some((prefix) => href.startsWith(prefix));
+}
 
 type ChecksumType = 'sha512';
 export type ArtifactLicense = 'basic' | 'trial';
@@ -123,7 +139,16 @@ async function fetchSnapshotManifest(url: string, log: ToolingLog) {
   log.info('Downloading snapshot manifest from %s', chalk.bold(url));
 
   const abc = new AbortController();
-  const resp = await retry(log, async () => await fetch(url, { signal: abc.signal }));
+  const resp = await retry(log, async () => {
+    const response = await fetch(url, { signal: abc.signal, redirect: 'error' });
+    // node-fetch resolves (does not reject) on 5xx, so a transient server error
+    // (e.g. a GCS 500 on the snapshot bucket) would otherwise escape retry and
+    // fail immediately. Throw here so retry() catches it and backs off.
+    if (response.status >= 500) {
+      throw new Error(`Unable to read snapshot manifest: ${response.statusText}`);
+    }
+    return response;
+  });
   const json = await resp.text();
 
   return { abc, resp, json };
@@ -142,6 +167,14 @@ async function getArtifactSpecForSnapshot(
     shouldUseUnverifiedSnapshot() ? '' : '-verified'
   }.json`;
   const secondaryManifestUrl = `${PERMANENT_SNAPSHOTS_BASE_URL}/${desiredVersion}/manifest.json`;
+
+  if (customManifestUrl && !isAllowedSnapshotUrl(customManifestUrl)) {
+    throw createCliError(
+      `ES_SNAPSHOT_MANIFEST must start with ${ALLOWED_SNAPSHOT_URL_PREFIXES.join(
+        ' or '
+      )}, got ${customManifestUrl}. Use KBN_ES_SNAPSHOT_URL to run a custom Elasticsearch build.`
+    );
+  }
 
   let { abc, resp, json } = await fetchSnapshotManifest(
     customManifestUrl || primaryManifestUrl,
@@ -175,6 +208,10 @@ async function getArtifactSpecForSnapshot(
     throw createCliError(
       `Snapshots are available, but couldn't find an artifact in the manifest for [${desiredLicense}, ${platform}, ${arch}]`
     );
+  }
+
+  if (!isAllowedSnapshotUrl(archive.url)) {
+    throw createCliError(`Snapshot manifest points to an unexpected archive url: ${archive.url}`);
   }
 
   if (archive.version !== desiredVersion) {
@@ -232,16 +269,13 @@ export class Artifact {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
 
-      if (useCached || process.env.KBN_ES_SNAPSHOT_USE_CACHED === 'true') {
-        if (cacheMeta.exists) {
-          this.log.info(
-            'use-cached passed, forcing to use existing snapshot',
-            chalk.bold(cacheMeta.ts)
-          );
+      if (shouldPreferCachedSnapshot(useCached)) {
+        if (fs.existsSync(dest)) {
+          this.log.info('using locally cached snapshot %s', chalk.bold(dest));
           return;
-        } else {
-          this.log.info('use-cached passed but no cached snapshot found. Continuing to download');
         }
+
+        this.log.info('prefer-cached enabled but no cached snapshot found at %s', chalk.bold(dest));
       }
 
       const artifactResp = await this.fetchArtifact(tmpPath, cacheMeta.etag, cacheMeta.ts);

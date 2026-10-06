@@ -111,7 +111,7 @@ export class FeatureTable extends Component<Props, State> {
         >
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={category.euiIconType} />
+              <EuiIcon size="m" type={category.euiIconType} aria-hidden={true} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={1}>
@@ -279,7 +279,11 @@ export class FeatureTable extends Component<Props, State> {
         </EuiText>
       );
 
-      return renderFeatureMarkup(buttonContent, extraAction, <EuiIcon type="empty" />);
+      return renderFeatureMarkup(
+        buttonContent,
+        extraAction,
+        <EuiIcon type="empty" aria-hidden={true} />
+      );
     }
 
     if (primaryFeaturePrivileges.length === 0) {

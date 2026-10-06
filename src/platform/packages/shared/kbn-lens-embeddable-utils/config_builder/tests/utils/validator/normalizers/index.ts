@@ -11,10 +11,23 @@ import type { LensApiConfigChartType } from '../../../../schema';
 import type { AttributesNormalizer } from './normalize';
 import { normalizeHeatmap } from './heatmap';
 import { normalizeDatatable } from './datatable';
+import { normalizeMetric } from './metric';
+import { normalizePartition } from './partition';
+import { normalizeTagcloud } from './tagcloud';
+import { normalizeRegionMap } from './region_map';
+import { normalizeLegacyMetric } from './legacy_metric';
 
 const chartNormalizers = {
+  metric: normalizeMetric,
   heatmap: normalizeHeatmap,
   data_table: normalizeDatatable,
+  pie: normalizePartition,
+  treemap: normalizePartition,
+  mosaic: normalizePartition,
+  waffle: normalizePartition,
+  tag_cloud: normalizeTagcloud,
+  region_map: normalizeRegionMap,
+  legacy_metric: normalizeLegacyMetric,
 } satisfies Record<string, AttributesNormalizer<any>>;
 
 export function getChartNormalizer(

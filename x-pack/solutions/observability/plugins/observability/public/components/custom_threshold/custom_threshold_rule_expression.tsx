@@ -27,7 +27,7 @@ import type { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { type SavedQuery } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { type Filter } from '@kbn/es-query';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -81,6 +81,18 @@ export const defaultExpression: MetricExpression = {
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
+
+/**
+ * Saved filters are persisted without `$state` (only `meta` and `query` are stored). The unified
+ * search filter editor's `onSubmit` returns early when `$state.store` is missing, so editing a
+ * saved filter would be a no-op. Re-add `$state` before handing filters back to the `SearchBar`.
+ */
+const ensureFiltersHaveState = (filters: Filter[]): Filter[] =>
+  filters.map((filter) =>
+    filter.$state?.store != null
+      ? filter
+      : { ...filter, $state: { store: FilterStateStore.APP_STATE } }
+  );
 
 const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar): number => {
   switch (timeWindowUnit) {
@@ -424,6 +436,11 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
     [setRuleParams, ruleParams.searchConfiguration]
   );
 
+  const searchBarFilters = useMemo(
+    () => ensureFiltersHaveState(ruleParams.searchConfiguration?.filter ?? EMPTY_FILTERS),
+    [ruleParams.searchConfiguration?.filter]
+  );
+
   const onQuerySubmit = useCallback(
     ({ query: newQuery }: { query?: Query }) => {
       setParamsWarning(undefined);
@@ -661,7 +678,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
         onSaved={onSavedQueryUpdated}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query}
-        filters={ruleParams.searchConfiguration?.filter ?? EMPTY_FILTERS}
+        filters={searchBarFilters}
         savedQuery={savedQuery}
         onFiltersUpdated={onFilterUpdated}
         hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}

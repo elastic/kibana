@@ -45,7 +45,7 @@ describe('ValueWithSpaceWarning', () => {
     );
     expect(container.container).toMatchSnapshot();
   });
-  it('should show the tooltip when the icon is clicked', async () => {
+  it('should show the tooltip when the icon is hovered', async () => {
     const container = render(
       <ThemeProvider theme={() => ({ eui: { euiSizeXS: '4px' } })}>
         <ValueWithSpaceWarning value="Test" />

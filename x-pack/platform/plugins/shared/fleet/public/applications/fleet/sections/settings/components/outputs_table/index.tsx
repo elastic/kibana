@@ -7,7 +7,14 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -154,35 +161,50 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
-                  <EuiButtonIcon
-                    color="text"
-                    iconType="trash"
-                    onClick={() => deleteOutput(output)}
-                    title={i18n.translate('xpack.fleet.settings.outputSection.deleteButtonTitle', {
-                      defaultMessage: 'Delete',
-                    })}
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.fleet.settings.outputSection.deleteButtonTitle',
                       {
                         defaultMessage: 'Delete',
                       }
                     )}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      iconType="trash"
+                      onClick={() => deleteOutput(output)}
+                      aria-label={i18n.translate(
+                        'xpack.fleet.settings.outputSection.deleteButtonTitle',
+                        {
+                          defaultMessage: 'Delete',
+                        }
+                      )}
+                      data-test-subj="deleteOutputBtn"
+                    />
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  iconType="pencil"
-                  href={getHref('settings_edit_outputs', { outputId: output.id })}
-                  title={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
                     defaultMessage: 'Edit',
                   })}
-                  aria-label={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
-                    defaultMessage: 'Edit',
-                  })}
-                  data-test-subj="editOutputBtn"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="pencil"
+                    href={getHref('settings_edit_outputs', { outputId: output.id })}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.settings.outputSection.editButtonTitle',
+                      {
+                        defaultMessage: 'Edit',
+                      }
+                    )}
+                    data-test-subj="editOutputBtn"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

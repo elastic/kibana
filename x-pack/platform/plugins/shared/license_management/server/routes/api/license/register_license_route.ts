@@ -25,7 +25,7 @@ export function registerLicenseRoute({
         },
       },
       validate: {
-        query: schema.object({ acknowledge: schema.string() }),
+        query: schema.object({ acknowledge: schema.string({ maxLength: 64 }) }),
         body: schema.object({
           license: schema.object({}, { unknowns: 'allow' }),
         }),

@@ -62,6 +62,7 @@ const getSyncedIntegrationsCCRDoc = async (
   logger: Logger
 ): Promise<SyncIntegrationsData | undefined> => {
   const index = await getFollowerIndex(esClient, abortController);
+  if (!index) return undefined;
 
   const response = await esClient.search(
     {

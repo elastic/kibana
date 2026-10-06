@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { castField } from './cast';
+
 export function esqlIsNotNullOrEmpty(field: string) {
-  return `${field} IS NOT NULL AND ${field} != ""`;
+  const ref = castField(field);
+  return `${ref} IS NOT NULL AND ${ref} != ""`;
 }
 
 export function esqlIsNullOrEmpty(field: string) {
-  return `(${field} IS NULL OR ${field} == "")`;
+  const ref = castField(field);
+  return `(${ref} IS NULL OR ${ref} == "")`;
 }
 
 /** Escape a string for use inside double-quoted ESQL string literals (backslash and double-quote). */

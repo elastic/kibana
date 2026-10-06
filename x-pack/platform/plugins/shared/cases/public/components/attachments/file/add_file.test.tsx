@@ -59,6 +59,17 @@ const mockFileUpload = jest
         >
           {'test'}
         </button>
+        <button
+          data-test-subj="testOnMimeError"
+          type="button"
+          onClick={() => {
+            const mimeError = new Error('File type "application/x-foo" is not supported.');
+            (mimeError as { code?: string }).code = 'mimeTypeNotSupported';
+            onError(mimeError);
+          }}
+        >
+          {'test'}
+        </button>
         <button data-test-subj="testMetadata" type="button" onClick={() => validateMetadata(meta)}>
           {'test'}
         </button>
@@ -77,11 +88,13 @@ jest.mock('@kbn/shared-ux-file-upload', () => {
 describe('AddFile', () => {
   const successMock = jest.fn();
   const errorMock = jest.fn();
+  const dangerMock = jest.fn();
 
   useToastsMock.mockImplementation(() => {
     return {
       addSuccess: successMock,
       addError: errorMock,
+      addDanger: dangerMock,
     };
   });
 
@@ -118,6 +131,16 @@ describe('AddFile', () => {
     await userEvent.click(await screen.findByTestId('cases-files-add'));
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
+  });
+
+  it('renders the upload hint with max size and supported formats', async () => {
+    renderWithTestingProviders(<AddFile caseId={'foobar'} />);
+
+    await userEvent.click(await screen.findByTestId('cases-files-add'));
+
+    const hint = await screen.findByTestId('cases-files-upload-hint');
+    expect(hint).toHaveTextContent(/Maximum file size:/);
+    expect(hint).toHaveTextContent(/Supported formats:/);
   });
 
   it('createAttachments called with right parameters', async () => {
@@ -177,6 +200,23 @@ describe('AddFile', () => {
         title: 'Failed to upload file',
       }
     );
+  });
+
+  it('shows a categorized notice for unsupported file types instead of the raw mime message', async () => {
+    renderWithTestingProviders(<AddFile caseId={'foobar'} />);
+
+    await userEvent.click(await screen.findByTestId('cases-files-add'));
+
+    expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('testOnMimeError'));
+
+    // rich (bolded) content is rendered via a mount point, so assert on the
+    // title and that a danger toast was raised rather than the error toast
+    expect(dangerMock).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Unsupported file type', text: expect.anything() })
+    );
+    expect(errorMock).not.toHaveBeenCalled();
   });
 
   it('correct metadata is passed to FileUpload component', async () => {

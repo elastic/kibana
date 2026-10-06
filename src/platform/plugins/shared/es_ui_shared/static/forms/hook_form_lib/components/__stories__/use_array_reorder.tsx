@@ -10,16 +10,17 @@
 import React from 'react';
 import type { DropResult } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiDragDropContext,
-  EuiDroppable,
-  EuiDraggable,
-  EuiTitle,
   EuiIcon,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { TextField } from '../../../components';
@@ -119,11 +120,13 @@ export function Reorder() {
                                 </EuiFlexItem>
                                 {items.length > 1 && (
                                   <EuiFlexItem grow={false}>
-                                    <EuiButtonIcon
-                                      iconType="minusCircle"
-                                      onClick={() => removeItem(id)}
-                                      aria-label="Remove item"
-                                    />
+                                    <EuiToolTip content="Remove item" disableScreenReaderOutput>
+                                      <EuiButtonIcon
+                                        iconType="minusCircle"
+                                        onClick={() => removeItem(id)}
+                                        aria-label="Remove item"
+                                      />
+                                    </EuiToolTip>
                                   </EuiFlexItem>
                                 )}
                               </EuiFlexGroup>

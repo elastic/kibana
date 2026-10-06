@@ -59,6 +59,9 @@ export function CreateSloBtn() {
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.slo.createSloBtn.popoverAriaLabel', {
+          defaultMessage: 'Create SLO options',
+        })}
         button={
           <EuiButton
             color="primary"

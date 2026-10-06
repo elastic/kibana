@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { apm } from '@elastic/apm-rum';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -145,7 +146,14 @@ export function DashboardRenderer({
           setShowControlGroup(results.useControlsIntegration);
       })
       .catch((err) => {
-        if (!canceled) setError(err);
+        if (!canceled) {
+          apm.captureError(err, {
+            labels: {
+              error_type: 'LoadDashboardFailure',
+            },
+          });
+          setError(err);
+        }
       });
 
     return () => {

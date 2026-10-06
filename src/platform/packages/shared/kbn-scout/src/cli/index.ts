@@ -13,6 +13,7 @@ import { startServerCmd } from './start_server';
 import { runTestsCmd } from './run_tests';
 import { runPlaywrightTestCheckCmd } from './run_playwright_test_check';
 import { discoverPlaywrightConfigsCmd } from './config_discovery';
+import { resolveTestingScopeCmd } from './resolve_testing_scope';
 import { createTestTracks } from './create_test_tracks';
 import { generateCmd } from './generate';
 
@@ -26,9 +27,11 @@ export async function run() {
       runTestsCmd,
       runPlaywrightTestCheckCmd,
       discoverPlaywrightConfigsCmd,
+      resolveTestingScopeCmd,
       reportingCLI.initializeReportDatastream,
       reportingCLI.uploadEvents,
       reportingCLI.updateTestConfigStats,
+      reportingCLI.discoverFlakyTests,
       createTestTracks,
       updateTestConfigManifests,
       generateCmd,

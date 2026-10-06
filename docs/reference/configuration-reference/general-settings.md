@@ -279,7 +279,7 @@ $$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2
 :   The number of times migrations retry temporary failures, such as a network timeout, 503 status code, or `snapshot_in_progress_exception`. When upgrade migrations frequently fail after exhausting all retry attempts with a message such as `Unable to complete the [...] step after 15 attempts, terminating.`, increase the setting value. **Default: `15`**
 
 `migrations.useCumulativeLogger` {applies_to}`stack: ga 9.2`
-:   Skip logging migration progress unless there are any errors. Set to `false` when troubleshooting migration issues and not automatically shown. **Default: `true`**
+:   When enabled, migration progress is only logged if the migration fails, reducing log volume during successful startups. When disabled (the default), migration steps are logged continuously, which keeps failing or stuck migrations visible. Set to `true` to reduce startup log volume. **Default: `false`**
 
 `newsfeed.enabled`
 :   Controls whether to enable the newsfeed system for the {{kib}} UI notification center. Set to `false` to disable the newsfeed system. **Default: `true`**

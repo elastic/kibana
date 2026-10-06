@@ -76,6 +76,7 @@ import {
   TimestampOverrideFallbackDisabled,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SERVER_APP_ID } from '../../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 
 // 8.10.x is mapped as an array of strings
 export type LegacyInvestigationFields = z.infer<typeof LegacyInvestigationFields>;
@@ -146,7 +147,7 @@ export const BaseRuleParams = z.object({
   timelineId: TimelineTemplateId.optional(),
   timelineTitle: TimelineTemplateTitle.optional(),
   meta: RuleMetadata.optional(),
-  maxSignals: MaxSignals,
+  maxSignals: MaxSignals.default(DEFAULT_MAX_SIGNALS),
   riskScore: RiskScore,
   riskScoreMapping: RiskScoreMapping,
   ruleNameOverride: RuleNameOverride.optional(),

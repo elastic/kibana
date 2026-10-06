@@ -6,7 +6,6 @@
  */
 
 import { encode } from '@kbn/rison';
-import { recurse } from 'cypress-recurse';
 import 'cypress-network-idle';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
@@ -61,7 +60,7 @@ import {
   TIMELINE_CONTEXT_MENU_BTN,
   TOOLTIP,
 } from '../screens/alerts';
-import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
+import { REFRESH_BUTTON } from '../screens/security_header';
 import {
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
@@ -411,17 +410,11 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  recurse(
-    () => {
-      // To clear focus
-      cy.get('body').type('{esc}');
-      cy.get(propertySelector).eq(rowIndex).should('be.visible');
-      cy.get(propertySelector).eq(rowIndex).realHover();
-      return cy.get(actionSelector).first();
-    },
-    ($el) => $el.is(':visible')
-  );
-
+  // To clear focus
+  cy.get('body').type('{esc}');
+  cy.get(propertySelector).eq(rowIndex).should('be.visible');
+  cy.get(propertySelector).eq(rowIndex).realHover();
+  cy.get(actionSelector).first().should('be.visible');
   cy.get(actionSelector).first().click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
@@ -438,13 +431,9 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 };
 
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
-  recurse(
-    () => {
-      clickExpandActions(propertySelector, rowIndex);
-      return cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first();
-    },
-    ($el) => $el.is(':visible')
-  );
+  // The expand button toggles the actions popover, so click it once; the assertion below waits
+  // for the opening transition.
+  clickExpandActions(propertySelector, rowIndex);
 
   hideMessageTooltip();
 
@@ -456,7 +445,6 @@ export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 

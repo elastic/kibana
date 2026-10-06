@@ -17,6 +17,19 @@ export const getTechnicalPreviewWarning = (featureName: string) => {
  */
 export const AGENT_SOCKET_TIMEOUT_MS = 15 * 60 * 1000;
 
+/**
+ * Returns the headers needed for SSE streaming responses.
+ */
+export const getSSEResponseHeaders = (): Record<string, string> => ({
+  'Content-Type': 'text/event-stream',
+  'Content-Encoding': 'identity',
+  'Cache-Control': 'no-cache',
+  Connection: 'keep-alive',
+  'Transfer-Encoding': 'chunked',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Accel-Buffering': 'no',
+});
+
 export const toConnectorItem = (
   connector: Connector,
   options?: {

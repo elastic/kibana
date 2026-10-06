@@ -102,7 +102,7 @@ export class FeatureTable extends Component<Props, {}> {
         >
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={category.euiIconType} />
+              <EuiIcon size="m" type={category.euiIconType} aria-hidden={true} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={1}>

@@ -87,6 +87,11 @@ describe('OtelTelemetryReceiver', () => {
       expect(call.query.bool.filter).toEqual([
         { range: { '@timestamp': { gte: `now-${defaultConfig.query_window}` } } },
       ]);
+      expect(call.query.bool.must_not).toEqual([
+        { wildcard: { 'data_stream.dataset': '*.1m.otel' } },
+        { wildcard: { 'data_stream.dataset': '*.10m.otel' } },
+        { wildcard: { 'data_stream.dataset': '*.60m.otel' } },
+      ]);
 
       const composite = call.aggs.combos.composite;
       expect(composite.size).toBe(defaultConfig.composite_page_size);

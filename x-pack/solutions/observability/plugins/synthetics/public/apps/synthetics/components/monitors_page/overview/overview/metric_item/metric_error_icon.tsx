@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -79,13 +79,15 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
         }
       }}
     >
-      <EuiButtonIcon
-        data-test-subj="syntheticsMetricItemIconButton"
-        iconType="warning"
-        color="danger"
-        size="m"
-        aria-label={ERROR_DETAILS}
-      />
+      <EuiToolTip content={ERROR_DETAILS} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj="syntheticsMetricItemIconButton"
+          iconType="warning"
+          color="danger"
+          size="m"
+          aria-label={ERROR_DETAILS}
+        />
+      </EuiToolTip>
     </div>
   );
 };

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
@@ -30,11 +31,25 @@ export const buildSecurityApi = ({
   audit: AuditServiceSetup;
   config: { uiam?: { enabled: boolean } };
 }): CoreSecurityDelegateContract => {
+  const getCurrentUser: CoreSecurityDelegateContract['authc']['getCurrentUser'] = (request) => {
+    return getAuthc().getCurrentUser(request);
+  };
+
+  const getPrincipal: CoreSecurityDelegateContract['authc']['getPrincipal'] = (request) => {
+    // Fake requests never pass through the authenticator, so their principal is not known without
+    // I/O.
+    if (request.isFakeRequest) {
+      return null;
+    }
+
+    const user = getCurrentUser(request);
+    return user ? getAuthenticatedPrincipal(user) : null;
+  };
+
   return {
     authc: {
-      getCurrentUser: (request) => {
-        return getAuthc().getCurrentUser(request);
-      },
+      getCurrentUser,
+      getPrincipal,
       getRedactedSessionId: async (request) => {
         const sid = await getSession().getSID(request);
         return sid ? getPrintableSessionId(sid) : undefined;
@@ -82,6 +97,7 @@ export const buildUserProfileApi = ({
 }): CoreUserProfileDelegateContract => {
   return {
     getCurrent: (params) => getUserProfile().getCurrent(params),
+    getCurrentProfileId: (params) => getUserProfile().getCurrentProfileId(params),
     suggest: (params) => getUserProfile().suggest(params),
     bulkGet: (params) => getUserProfile().bulkGet(params),
     update: (uids, data) => getUserProfile().update(uids, data),

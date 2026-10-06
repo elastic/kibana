@@ -91,7 +91,7 @@ export const useToolbarActions = ({
       {
         iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
         label: fullscreenButtonLabel,
-        title: fullscreenButtonLabel,
+        toolTipContent: fullscreenButtonLabel,
         onClick: onToggleFullscreen,
         'data-test-subj': 'metricsExperienceToolbarFullScreen',
         css: css`

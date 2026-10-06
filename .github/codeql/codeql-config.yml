@@ -119,6 +119,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-storybook
   - src/platform/packages/shared/kbn-test
   - src/platform/packages/shared/kbn-tooling-log
+  - src/platform/plugins/private/interactive_setup/test/**
   - src/platform/test
   - typings
   - x-pack/examples

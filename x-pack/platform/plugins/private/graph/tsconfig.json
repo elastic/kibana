@@ -10,6 +10,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*",
   ],
   "kbn_references": [
@@ -54,6 +55,7 @@
     "@kbn/licensing-types",
     "@kbn/kql",
     "@kbn/unified-search-plugin",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

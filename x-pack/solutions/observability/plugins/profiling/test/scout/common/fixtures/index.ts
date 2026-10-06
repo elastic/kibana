@@ -21,6 +21,13 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
   profilingHelper: [
     async ({ apiServices, log }, use) => {
       const installPolicies = async (): Promise<void> => {
+        // Guard against the `ingest_manager_settings` SO being deleted by an unrelated
+        // suite's `cleanStandardList()` between global setup and this spec. Without this,
+        // Fleet's space-awareness check flips and the agent policy gets written under the
+        // legacy SO type, causing setupResources() to 404 on `policy-elastic-agent-on-cloud`.
+        // See https://github.com/elastic/kibana/issues/248929.
+        await apiServices.fleet.internal.setup();
+
         log.info('Checking if APM agent policy exists, creating if needed...');
         const getPolicyResponse = await apiServices.fleet.agent_policies.get({
           page: 1,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
@@ -58,6 +59,7 @@ export function initializeUnsavedChangesManager({
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
+    unsavedChanges$: Observable<Partial<DashboardState>>;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
@@ -116,6 +118,7 @@ export function initializeUnsavedChangesManager({
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
+      unsavedChanges$: dashboardStateChanges$,
     },
   };
 }

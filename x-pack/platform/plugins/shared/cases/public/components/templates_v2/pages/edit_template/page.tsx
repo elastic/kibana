@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { dump as yamlDump } from 'js-yaml';
+import { stringify as yamlDump } from 'yaml';
 import { useTemplateViewParams, useCasesTemplatesNavigation } from '../../../../common/navigation';
 import type { YamlEditorFormValues } from '../../components/template_form';
 import { useGetTemplate } from '../../hooks/use_get_template';
@@ -32,7 +32,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   // Server version as initial value - useDebouncedYamlEdit will use WIP from storage if exists
   const serverDefinition = useMemo(() => {
     if (template) {
-      return yamlDump(template.definition, { lineWidth: -1 }).trimEnd();
+      return yamlDump(template.definition, { lineWidth: 0 }).trimEnd();
     }
     return '';
   }, [template]);
@@ -48,7 +48,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
       return;
     }
 
-    const definition = yamlDump(template.definition, { lineWidth: -1 }).trimEnd();
+    const definition = yamlDump(template.definition, { lineWidth: 0 }).trimEnd();
     form.reset({
       definition,
     });

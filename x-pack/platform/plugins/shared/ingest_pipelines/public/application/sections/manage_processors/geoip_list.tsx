@@ -10,13 +10,14 @@ import React, { useState } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
-  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -107,19 +108,29 @@ export const GeoipList: React.FunctionComponent = () => {
           }
 
           return (
-            <EuiButtonIcon
-              name="Delete"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.ingestPipelines.manageProcessors.geoip.list.actionIconLabel',
                 {
                   defaultMessage: 'Delete this database',
                 }
               )}
-              iconType="trash"
-              color="danger"
-              onClick={() => onDatabaseDelete(item)}
-              data-test-subj="deleteGeoipDatabaseButton"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                name="Delete"
+                aria-label={i18n.translate(
+                  'xpack.ingestPipelines.manageProcessors.geoip.list.actionIconLabel',
+                  {
+                    defaultMessage: 'Delete this database',
+                  }
+                )}
+                iconType="trash"
+                color="danger"
+                onClick={() => onDatabaseDelete(item)}
+                data-test-subj="deleteGeoipDatabaseButton"
+              />
+            </EuiToolTip>
           );
         },
       },

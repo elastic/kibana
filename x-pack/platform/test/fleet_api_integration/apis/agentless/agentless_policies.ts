@@ -329,6 +329,29 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiCalls[0].url).to.be(`/agentless-api/api/v1/ess/deployments/${policyId}`);
         expect(apiCalls[0].method).to.be('DELETE');
       });
+
+      it('should allow to delete an orphaned agentless policy when agent policy is missing', async () => {
+        // Orphan the policy by directly deleting the agent policy SO
+        await es.delete({
+          index: '.kibana_ingest',
+          id: `fleet-agent-policies:${policyId}`,
+          refresh: 'wait_for',
+        });
+
+        // Verify agent policy is gone
+        await expectToRejectWithNotFound(() => apiClient.getAgentPolicy(policyId));
+
+        // Delete via agentless API should succeed despite missing agent policy
+        await apiClient.deleteAgentlessPolicy(policyId);
+
+        // Verify package policy is cleaned up
+        await expectToRejectWithNotFound(() => apiClient.getPackagePolicy(policyId));
+
+        // Verify agentless API DELETE was called to clean up the deployment
+        expect(apiCalls.length).to.be(1);
+        expect(apiCalls[0].url).to.be(`/agentless-api/api/v1/ess/deployments/${policyId}`);
+        expect(apiCalls[0].method).to.be('DELETE');
+      });
     });
 
     describe('Update Agentless Policy', () => {

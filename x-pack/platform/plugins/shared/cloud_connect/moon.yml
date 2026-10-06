@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
   - '@kbn/home-plugin'
+  - '@kbn/core-security-server'
+  - '@kbn/core-http-server'
 tags:
   - plugin
   - prod

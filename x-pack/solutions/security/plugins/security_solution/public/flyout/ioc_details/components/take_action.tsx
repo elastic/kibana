@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { BlockListFlyout } from '../../../threat_intelligence/modules/block_list/containers/flyout';
 import { useIOCDetailsContext } from '../context';
 import { canAddToBlockList } from '../../../threat_intelligence/modules/block_list/utils/can_add_to_block_list';
@@ -89,6 +90,10 @@ export const TakeAction = memo(() => {
     <>
       <EuiPopover
         id={smallContextMenuPopoverId}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.threatIntelligence.indicators.flyout.take-action.popoverAriaLabel',
+          { defaultMessage: 'Take action' }
+        )}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}

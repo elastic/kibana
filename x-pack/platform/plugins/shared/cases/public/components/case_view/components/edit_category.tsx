@@ -7,15 +7,16 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiTitle,
-  EuiText,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -122,12 +123,14 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
         {isLoadingAll && <EuiLoadingSpinner data-test-subj="category-loading" />}
         {!isLoadingAll && permissions.update && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="category-edit-button"
-              aria-label={i18n.EDIT_CATEGORIES_ARIA}
-              iconType={'pencil'}
-              onClick={onEdit}
-            />
+            <EuiToolTip content={i18n.EDIT_CATEGORIES_ARIA} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="category-edit-button"
+                aria-label={i18n.EDIT_CATEGORIES_ARIA}
+                iconType={'pencil'}
+                onClick={onEdit}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

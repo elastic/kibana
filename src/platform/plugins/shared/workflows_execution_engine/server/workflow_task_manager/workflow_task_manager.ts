@@ -75,6 +75,34 @@ export class WorkflowTaskManager {
     };
   }
 
+  /**
+   * Returns true if Task Manager has at least one task for this execution scope that could still
+   * run (idle, claiming, or running)
+   */
+  async hasActiveTaskForExecution(workflowExecutionId: string): Promise<boolean> {
+    const { docs } = await this.taskManager.fetch({
+      // Existence check only: avoid default page size and full deserialise for N tasks.
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'task.status': [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running],
+              },
+            },
+            {
+              term: {
+                'task.scope': `workflow:execution:${workflowExecutionId}`,
+              },
+            },
+          ],
+        },
+      },
+    });
+    return docs.length > 0;
+  }
+
   async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {
     const { docs: idleTasks } = await this.taskManager.fetch({
       query: {

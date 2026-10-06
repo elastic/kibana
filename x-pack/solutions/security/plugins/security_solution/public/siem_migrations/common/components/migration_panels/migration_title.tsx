@@ -153,18 +153,21 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
           <EuiFlexItem grow={false} onClick={stopPropagation}>
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  iconType="boxesVertical"
-                  onClick={togglePopover}
-                  aria-label={i18n.OPEN_MIGRATION_OPTIONS_BUTTON}
-                  data-test-subj="openMigrationOptionsButton"
-                  isLoading={isUpdating || isDeleting}
-                />
+                <EuiToolTip content={i18n.OPEN_MIGRATION_OPTIONS_BUTTON} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesVertical"
+                    onClick={togglePopover}
+                    aria-label={i18n.OPEN_MIGRATION_OPTIONS_BUTTON}
+                    data-test-subj="openMigrationOptionsButton"
+                    isLoading={isUpdating || isDeleting}
+                  />
+                </EuiToolTip>
               }
               isOpen={isPopoverOpen}
               closePopover={closePopover}
               panelPaddingSize="none"
               anchorPosition="downCenter"
+              aria-label={i18n.OPEN_MIGRATION_OPTIONS_BUTTON}
             >
               <EuiContextMenuPanel size="s">
                 <EuiContextMenuItem

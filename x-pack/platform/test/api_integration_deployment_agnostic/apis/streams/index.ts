@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./flush_config'));
     loadTestFile(require.resolve('./attachments/attachments'));
     loadTestFile(require.resolve('./schema'));
+    loadTestFile(require.resolve('./schema_limits'));
     loadTestFile(require.resolve('./description_only_inheritance'));
     loadTestFile(require.resolve('./processing_date_suggestions'));
     loadTestFile(require.resolve('./processing_simulate'));
@@ -39,5 +40,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./snapshot_restore'));
     loadTestFile(require.resolve('./query_streams'));
     loadTestFile(require.resolve('./deferred_data_stream'));
+    loadTestFile(require.resolve('./otel_metrics_processing'));
   });
 }

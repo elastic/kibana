@@ -13,14 +13,20 @@ import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
+import {
+  MAX_INDEX_PATTERN_LENGTH,
+  MAX_KQL_FILTER_LENGTH,
+  MAX_SHORT_STRING_LENGTH,
+} from '../../utils/schema_limits';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
 
 const logRateAnalysisSchema = z.object({
-  index: z.string().describe(indexDescription),
+  index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription),
   timeFieldName: z
     .string()
+    .max(MAX_SHORT_STRING_LENGTH)
     .default('@timestamp')
     .describe('Timestamp field used to build the baseline/deviation windows.'),
   baseline: z
@@ -33,6 +39,7 @@ const logRateAnalysisSchema = z.object({
     .describe('Time range representing the time period with unusual behavior.'),
   kqlFilter: z
     .string()
+    .max(MAX_KQL_FILTER_LENGTH)
     .optional()
     .describe(
       'Optional KQL filter to narrow which documents are analyzed. Examples: "service.name: checkout", "log.level: error".'

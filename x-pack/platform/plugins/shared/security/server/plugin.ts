@@ -185,6 +185,7 @@ export class SecurityPlugin
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
   private elasticsearchUrl?: string;
+  private kibanaServerURL?: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -250,6 +251,11 @@ export class SecurityPlugin
       this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
     }
 
+    const { protocol, hostname, port } = core.http.getServerInfo();
+    const serverBaseUrl = `${protocol}://${hostname}:${port}`;
+
+    this.kibanaServerURL = core.http.basePath.publicBaseUrl ?? serverBaseUrl;
+
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
@@ -271,6 +277,7 @@ export class SecurityPlugin
       config: config.audit,
       logging: core.logging,
       http: core.http,
+      status: core.status,
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,
@@ -413,7 +420,11 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({ clusterClient, session });
+    this.userProfileStart = this.userProfileService.start({
+      clusterClient,
+      session,
+      getCurrentUser: core.security.authc.getCurrentUser,
+    });
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
     const customLogoutURL =
@@ -422,9 +433,6 @@ export class SecurityPlugin
         : undefined;
 
     const config = this.getConfig();
-
-    const { protocol, hostname, port } = core.http.getServerInfo();
-    const serverConfig = { protocol, hostname, port, ...config.public };
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
@@ -437,7 +445,7 @@ export class SecurityPlugin
       session,
       uiam: config.uiam?.enabled
         ? new UiamService(this.logger.get('uiam'), config.uiam, {
-            kibanaServerURL: `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`,
+            kibanaServerURL: this.kibanaServerURL!,
             elasticsearchUrl: this.elasticsearchUrl,
           })
         : undefined,
@@ -481,6 +489,7 @@ export class SecurityPlugin
       },
       userProfiles: {
         getCurrent: this.userProfileStart.getCurrent,
+        getCurrentProfileId: this.userProfileStart.getCurrentProfileId,
         bulkGet: this.userProfileStart.bulkGet,
         suggest: this.userProfileStart.suggest,
       },

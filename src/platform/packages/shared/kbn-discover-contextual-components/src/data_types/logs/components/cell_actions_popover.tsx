@@ -11,15 +11,16 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import {
   EuiBadge,
-  type EuiBadgeProps,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
   EuiText,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiCopy,
+  EuiToolTip,
+  type EuiBadgeProps,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -127,14 +128,16 @@ export function CellActionsPopover({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={closeCellActionPopoverText}
-            data-test-subj="dataTableExpandCellActionPopoverClose"
-            iconSize="s"
-            iconType="cross"
-            size="xs"
-            onClick={closePopover}
-          />
+          <EuiToolTip content={closeCellActionPopoverText} disableScreenReaderOutput>
+            <EuiButtonIcon
+              aria-label={closeCellActionPopoverText}
+              data-test-subj="dataTableExpandCellActionPopoverClose"
+              iconSize="s"
+              iconType="cross"
+              size="xs"
+              onClick={closePopover}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       {onFilter ? (

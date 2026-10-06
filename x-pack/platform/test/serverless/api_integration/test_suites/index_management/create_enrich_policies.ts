@@ -66,13 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      try {
-        await es.indices.delete({ index: INDEX_A_NAME });
-        await es.indices.delete({ index: INDEX_B_NAME });
-      } catch (err) {
-        log.debug('[Cleanup error] Error deleting test index');
-        throw err;
-      }
+      await es.indices.delete({ index: INDEX_A_NAME }, { ignore: [404] });
+      await es.indices.delete({ index: INDEX_B_NAME }, { ignore: [404] });
     });
 
     it('Allows to create an enrich policy', async () => {

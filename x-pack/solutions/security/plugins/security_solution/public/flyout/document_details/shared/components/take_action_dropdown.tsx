@@ -420,6 +420,7 @@ export const TakeActionDropdown = memo(
     return items.length && dataAsNestedObject ? (
       <EuiPopover
         id="AlertTakeActionPanel"
+        aria-label={TAKE_ACTION}
         button={takeActionButton}
         isOpen={isPopoverOpen}
         closePopover={closePopoverHandler}

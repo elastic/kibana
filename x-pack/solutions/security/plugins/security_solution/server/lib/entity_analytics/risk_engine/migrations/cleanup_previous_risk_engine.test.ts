@@ -78,6 +78,7 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(mockStopTransform).toHaveBeenCalledTimes(2);
@@ -126,6 +127,7 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(mockStopTransform).not.toHaveBeenCalled();
@@ -154,6 +156,7 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(logger.warn).toHaveBeenCalledWith(
@@ -177,6 +180,7 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -184,6 +188,33 @@ describe('cleanupLegacyRiskEngine', () => {
     );
     expect(mockDeleteTransform).toHaveBeenCalledTimes(1);
     expect(mockRemoveRiskScoringTask).toHaveBeenCalledTimes(1);
+  });
+
+  it('queries only the specified space when spaceId is defined', async () => {
+    soClient.find.mockResolvedValue({
+      ...mockSavedObjectsResponseDefaults,
+      saved_objects: [buildSavedObject('my-space')],
+    });
+
+    await cleanupLegacyRiskEngine({
+      logger,
+      getStartServices: getStartServicesMock,
+      auditLogger: undefined,
+      kibanaVersion: '9.0.0',
+      hasEncryptionKey: true,
+      spaceId: 'my-space',
+    });
+
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ namespaces: ['my-space'] })
+    );
+    expect(mockStopTransform).toHaveBeenCalledTimes(1);
+    expect(mockStopTransform).toHaveBeenCalledWith(
+      expect.objectContaining({ transformId: getLatestTransformId('my-space') })
+    );
+    expect(mockRemoveRiskScoringTask).toHaveBeenCalledWith(
+      expect.objectContaining({ namespace: 'my-space' })
+    );
   });
 
   it('processes the next namespace when one namespace hits a failure during task removal', async () => {
@@ -200,6 +231,7 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('remove failed'));

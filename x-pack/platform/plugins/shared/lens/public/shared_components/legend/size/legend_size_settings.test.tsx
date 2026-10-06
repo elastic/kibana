@@ -10,7 +10,7 @@ import type { LegendSizeSettingsProps } from './legend_size_settings';
 import { LegendSizeSettings } from './legend_size_settings';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 
 describe('legend size settings', () => {
   const renderLegendSizeSettings = (props?: Partial<LegendSizeSettingsProps>) => {
@@ -22,7 +22,8 @@ describe('legend size settings', () => {
     };
     return render(<LegendSizeSettings {...defaultProps} {...props} />);
   };
-  const openSelect = async () => await userEvent.click(screen.getByRole('button'));
+  const user = userEvent.setup({ pointerEventsCheck: PointerEventsCheckLevel.Never });
+  const openSelect = async () => await user.click(screen.getByRole('button'));
   const chooseOption = async (option: string) => {
     await openSelect();
     fireEvent.click(screen.getByRole('option', { name: option }));

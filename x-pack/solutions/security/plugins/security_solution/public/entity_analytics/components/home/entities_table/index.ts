@@ -20,6 +20,7 @@ export const DataViewContext = createContext<DataViewContextValue>({} as DataVie
 export { EntitiesTableSection } from './entities_table_section';
 export {
   useEntityURLState,
+  DEFAULT_ENTITIES_TABLE_SORT,
   type EntityURLStateResult,
   type EntitiesBaseURLQuery,
   type URLQuery,

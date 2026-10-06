@@ -110,7 +110,9 @@ export async function validateOutputForPolicy(
 export async function validateAgentPolicyOutputForIntegration(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy,
-  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>,
+  packagePolicy: Pick<PackagePolicy, 'supports_agentless'> & {
+    inputs?: Array<{ type: string; enabled: boolean }>;
+  },
   packageName: string,
   isNewPackagePolicy: boolean = true
 ) {

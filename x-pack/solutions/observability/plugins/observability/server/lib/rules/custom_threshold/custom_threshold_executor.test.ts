@@ -1730,6 +1730,8 @@ describe('The custom threshold alert type', () => {
               language: 'kuery',
             },
           },
+          timeSize: 1,
+          timeUnit: 'm',
         });
       });
 
@@ -1791,6 +1793,8 @@ describe('The custom threshold alert type', () => {
               language: 'kuery',
             },
           },
+          timeSize: 1,
+          timeUnit: 'm',
         });
       });
       test('includes reason message in the recovered alert context pulled from the last active alert ', async () => {
@@ -2899,6 +2903,65 @@ describe('The custom threshold alert type', () => {
 
           // Reset mock
           services.alertsClient.isTrackedAlert.mockReturnValue(false);
+        });
+      });
+
+      describe('legacy alertOnGroupDisappear: false with noDataBehavior', () => {
+        const runWith = async (params: Record<string, unknown>) => {
+          setEvaluationResults([{}]);
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              ...params,
+            },
+          });
+        };
+
+        const trackedMissingGroups = () =>
+          jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6];
+
+        test('remainActive still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'remainActive',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('alertOnNoData still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'alertOnNoData',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('recover does not track missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'recover',
+            alertOnGroupDisappear: true,
+          });
+          expect(trackedMissingGroups()).toBe(false);
+        });
+
+        test('legacy alertOnGroupDisappear: false without noDataBehavior does not track', async () => {
+          await runWith({
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(false);
         });
       });
 

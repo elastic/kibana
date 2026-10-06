@@ -9,14 +9,15 @@ import React from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import type { DragDropContextProps, EuiButtonEmptyProps } from '@elastic/eui';
 import {
-  EuiFormRow,
-  EuiPanel,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiDraggable,
   EuiFlexGroup,
-  EuiIcon,
-  EuiButtonIcon,
   EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiPanel,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -179,7 +180,7 @@ const DraggablePatternInput = ({
                   { defaultMessage: 'Drag Handle' }
                 )}
               >
-                <EuiIcon type="dragVertical" />
+                <EuiIcon type="dragVertical" aria-hidden={true} />
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem style={{ minWidth: 0 }}>
@@ -191,16 +192,24 @@ const DraggablePatternInput = ({
               />
             </EuiFlexItem>
             {onRemove && (
-              <EuiButtonIcon
-                data-test-subj="streamsAppDraggablePatternInputButton"
-                iconType="minusCircle"
-                color="danger"
-                onClick={onRemove}
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.removePattern',
                   { defaultMessage: 'Remove grok pattern' }
                 )}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="streamsAppDraggablePatternInputButton"
+                  iconType="minusCircle"
+                  color="danger"
+                  onClick={onRemove}
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.removePattern',
+                    { defaultMessage: 'Remove grok pattern' }
+                  )}
+                />
+              </EuiToolTip>
             )}
           </EuiFlexGroup>
         </EuiFormRow>

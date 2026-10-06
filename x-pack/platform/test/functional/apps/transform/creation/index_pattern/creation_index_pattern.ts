@@ -13,13 +13,11 @@ import { isLatestTransformTestData, isPivotTransformTestData } from '../../helpe
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
-  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
   const pageObjects = getPageObjects(['discover']);
 
   describe('creation_index_pattern', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await transform.testResources.setKibanaTimeZoneToUTC();
 

@@ -12,6 +12,6 @@ import type { StoredLinksState } from '../../server';
 
 export type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../server';
 
-// links never supported enhancements, but some legacy states serialized an empty enhancements object
 export type StoredLinksEmbeddableState = SerializedTitles &
-  StoredLinksState & { enhancements?: unknown };
+  // enhancements and disabled actions were accidentally serialized in previous versions
+  StoredLinksState & { enhancements?: unknown; disabledActions?: unknown };

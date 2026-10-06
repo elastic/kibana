@@ -46,7 +46,12 @@ export const JourneyStepScreenshotContainer = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const imgPath = checkGroup
-    ? getScreenshotUrl({ basePath, checkGroup, stepNumber: initialStepNumber })
+    ? getScreenshotUrl({
+        basePath,
+        checkGroup,
+        stepNumber: initialStepNumber,
+        timestamp,
+      })
     : '';
 
   const intersection = useIntersection(intersectionRef, {

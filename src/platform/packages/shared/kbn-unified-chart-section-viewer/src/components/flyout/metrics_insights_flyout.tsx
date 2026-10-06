@@ -53,6 +53,20 @@ export const MetricInsightsFlyout = ({
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
   }, []);
 
+  // TODO: Remove once EUI ships the push-flyout padding fix (https://github.com/elastic/kibana/issues/276159).
+  // When this push flyout mounts while another push flyout (e.g. the Inspector) is still
+  // cleaning up, EUI captures and later restores a stale push offset onto Kibana's app scroll
+  // container on unmount, which shrinks the layout permanently. Clearing that inline padding
+  // when this flyout unmounts neutralizes the stale value.
+  useEffect(() => {
+    return () => {
+      // Hardcoded to avoid a package dependency; mirrors APP_MAIN_SCROLL_CONTAINER_ID from
+      // `@kbn/ui-chrome-layout-constants` and the default EuiFlyout container configured in
+      // the Kibana EUI provider.
+      document.getElementById('app-main-scroll')?.style.removeProperty('padding-inline-end');
+    };
+  }, []);
+
   const metricFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'metricFlyoutTitle',
   });

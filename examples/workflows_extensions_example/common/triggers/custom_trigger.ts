@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
@@ -34,8 +35,69 @@ export const customTriggerEventSchema = z.object({
 
 export type CustomTriggerEvent = z.infer<typeof customTriggerEventSchema>;
 
-/** Shared trigger definition (id + eventSchema) for use by public and server. */
+/** Shared trigger definition for use by public and server. */
 export const commonCustomTriggerDefinition: CommonTriggerDefinition = {
   id: CUSTOM_TRIGGER_ID,
   eventSchema: customTriggerEventSchema,
+  title: i18n.translate('workflowsExtensionsExample.customTrigger.title', {
+    defaultMessage: 'Custom trigger',
+  }),
+  description: i18n.translate('workflowsExtensionsExample.customTrigger.description', {
+    defaultMessage:
+      'Emitted when a custom event occurs. Used by the workflows extensions example plugin.',
+  }),
+  documentation: {
+    details: i18n.translate('workflowsExtensionsExample.customTrigger.documentation.details', {
+      defaultMessage:
+        'Emitted when a custom event occurs. Events can include an optional category (e.g. alerts, notifications, audit, demo). In the `on` block, add a condition (KQL) to filter when this workflow runs using event properties: `event.category`, `event.message`, `event.source`.',
+    }),
+    examples: [
+      i18n.translate(
+        'workflowsExtensionsExample.customTrigger.documentation.exampleMatchCategory',
+        {
+          defaultMessage: `## Match by category (conditional subscription)
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.category: "alerts"'
+\`\`\``,
+          values: { triggerId: CUSTOM_TRIGGER_ID },
+        }
+      ),
+      i18n.translate('workflowsExtensionsExample.customTrigger.documentation.exampleMatchMessage', {
+        defaultMessage: `## Match any message
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.message: *'
+\`\`\``,
+        values: { triggerId: CUSTOM_TRIGGER_ID },
+      }),
+      i18n.translate('workflowsExtensionsExample.customTrigger.documentation.exampleMatchSource', {
+        defaultMessage: `## Match events from a specific source
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.source: "api"'
+\`\`\``,
+        values: { triggerId: CUSTOM_TRIGGER_ID },
+      }),
+      i18n.translate('workflowsExtensionsExample.customTrigger.documentation.exampleMatchError', {
+        defaultMessage: `## Match message containing "error"
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.message: *error*'
+\`\`\``,
+        values: { triggerId: CUSTOM_TRIGGER_ID },
+      }),
+    ],
+  },
+  snippets: {
+    condition: 'event.category: "alerts"',
+  },
 };

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -123,32 +123,39 @@ export function Assignment({
       )}
 
       <EuiFlexItem grow={0}>
-        <EuiButtonIcon
-          iconType="trash"
-          size="xs"
-          disabled={disableDelete}
-          onClick={() => dispatch(removeAssignment(index))}
-          aria-label={i18n.translate(
-            'coloring.colorMapping.assignments.deleteAssignmentButtonLabel',
-            {
-              defaultMessage: 'Delete this assignment',
+        <EuiToolTip
+          content={i18n.translate('coloring.colorMapping.assignments.deleteAssignmentButtonLabel', {
+            defaultMessage: 'Delete this assignment',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            size="xs"
+            disabled={disableDelete}
+            onClick={() => dispatch(removeAssignment(index))}
+            aria-label={i18n.translate(
+              'coloring.colorMapping.assignments.deleteAssignmentButtonLabel',
+              {
+                defaultMessage: 'Delete this assignment',
+              }
+            )}
+            color="danger"
+            css={
+              !disableDelete
+                ? css`
+                    color: ${euiThemeVars.euiTextColor};
+                    transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+                    transition-property: color;
+                    &:hover,
+                    &:focus {
+                      color: ${euiThemeVars.euiColorDangerText};
+                    }
+                  `
+                : undefined
             }
-          )}
-          color="danger"
-          css={
-            !disableDelete
-              ? css`
-                  color: ${euiThemeVars.euiTextColor};
-                  transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
-                  transition-property: color;
-                  &:hover,
-                  &:focus {
-                    color: ${euiThemeVars.euiColorDangerText};
-                  }
-                `
-              : undefined
-          }
-        />
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
