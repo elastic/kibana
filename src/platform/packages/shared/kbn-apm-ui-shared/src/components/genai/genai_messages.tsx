@@ -8,12 +8,13 @@
  */
 
 import {
+  EuiAvatar,
   EuiButtonIcon,
+  EuiComment,
+  EuiCommentList,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -28,66 +29,78 @@ import { getMessageBlocks, getToolNamesById } from './get_message_blocks';
 import { GenAiMessageContent } from './genai_message_content';
 import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
-interface RoleDisplay {
-  label: string;
-  iconType: string;
-}
-
-const ROLE_DISPLAY: Record<string, RoleDisplay> = {
-  system: {
-    label: i18n.translate('apmUiShared.genAi.messages.role.system', { defaultMessage: 'System' }),
-    iconType: 'gear',
-  },
-  user: {
-    label: i18n.translate('apmUiShared.genAi.messages.role.user', { defaultMessage: 'User' }),
-    iconType: 'user',
-  },
-  assistant: {
-    label: i18n.translate('apmUiShared.genAi.messages.role.assistant', {
-      defaultMessage: 'Assistant',
-    }),
-    iconType: 'sparkles',
-  },
-  tool: {
-    label: i18n.translate('apmUiShared.genAi.messages.role.tool', { defaultMessage: 'Tool' }),
-    iconType: 'wrench',
-  },
-  function: {
-    label: i18n.translate('apmUiShared.genAi.messages.role.function', {
-      defaultMessage: 'Function',
-    }),
-    iconType: 'wrench',
-  },
+const ROLE_LABELS: Record<string, string> = {
+  system: i18n.translate('apmUiShared.genAi.messages.role.system', { defaultMessage: 'System' }),
+  user: i18n.translate('apmUiShared.genAi.messages.role.user', { defaultMessage: 'User' }),
+  assistant: i18n.translate('apmUiShared.genAi.messages.role.assistant', {
+    defaultMessage: 'Assistant',
+  }),
+  tool: i18n.translate('apmUiShared.genAi.messages.role.tool', { defaultMessage: 'Tool' }),
+  function: i18n.translate('apmUiShared.genAi.messages.role.function', {
+    defaultMessage: 'Function',
+  }),
 };
 
-const getRoleDisplay = (role: string): RoleDisplay =>
-  ROLE_DISPLAY[role.toLowerCase()] ?? { label: role, iconType: 'dot' };
+const getRoleLabel = (role: string): string => ROLE_LABELS[role.toLowerCase()] ?? role;
 
-interface ToolMessageInfo {
-  names: string[];
-  callIds: string[];
+/**
+ * Fixed-size role avatar using EUI semantic background tokens so the circle
+ * is always the same size regardless of the role label length — keeping all
+ * message bodies aligned in a consistent column.
+ */
+function RoleAvatar({ role }: { role: string }) {
+  const { euiTheme } = useEuiTheme();
+
+  // Semantic "light" background tokens — soft pastels that work in both
+  // light and dark mode and match EUI's own status-color system.
+  const colorByRole: Record<string, string> = {
+    system: euiTheme.colors.backgroundLightWarning,
+    user: euiTheme.colors.backgroundLightPrimary,
+    assistant: euiTheme.colors.backgroundLightSuccess,
+    tool: euiTheme.colors.backgroundLightAccent,
+    function: euiTheme.colors.backgroundLightAccent,
+  };
+  const color = colorByRole[role.toLowerCase()] ?? euiTheme.colors.backgroundBaseSubdued;
+
+  return <EuiAvatar name={role} color={color} size="m" data-test-subj={`genAiRoleBadge-${role}`} />;
+}
+
+interface ToolOutput {
+  id?: string;
+  name?: string;
+  response?: unknown;
 }
 
 /**
- * Tool names and call IDs of the results a tool message carries, so the
- * header pairs each result with the tool call card that requested it.
+ * Tool outputs a tool message carries, each labelled with the name of the
+ * tool that produced it (resolved through the matching tool call ID).
  */
-const getToolMessageInfo = (
+const getToolOutputs = (
   message: GenAiMessage,
   toolNamesById: Map<string, string>
-): ToolMessageInfo => {
-  if (message.role !== 'tool') return { names: [], callIds: [] };
+): ToolOutput[] => {
+  if (message.role !== 'tool') return [];
   const legacyName = typeof message.name === 'string' ? message.name : undefined;
-  const responses = getMessageBlocks(message).filter(
-    (block) => block.type === 'tool_call_response'
+  return getMessageBlocks(message).flatMap((block) =>
+    block.type === 'tool_call_response'
+      ? [
+          {
+            id: block.id,
+            name: (block.id && toolNamesById.get(block.id)) || legacyName,
+            response: block.response,
+          },
+        ]
+      : []
   );
-  const names = responses.flatMap(({ id }) => {
-    const name = (id && toolNamesById.get(id)) || legacyName;
-    return name ? [name] : [];
-  });
-  const callIds = responses.flatMap(({ id }) => (id ? [id] : []));
-  return { names: [...new Set(names)], callIds: [...new Set(callIds)] };
 };
+
+const unique = (values: Array<string | undefined>): string[] => [
+  ...new Set(values.filter((value): value is string => Boolean(value))),
+];
+
+/** Decoded tool output as JSON, matching what the tool call card copies for a call. */
+const getToolOutputCopyText = (outputs: ToolOutput[]): string =>
+  JSON.stringify(outputs.length === 1 ? outputs[0] : outputs, null, 2);
 
 interface Props {
   inputMessages: GenAiMessage[];
@@ -97,22 +110,26 @@ interface Props {
   ebt?: EbtClickAttrsElementOnly;
 }
 
-const listCss = css`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-`;
+// Base style applied to every comment: smooth background transition, plus
+// overflow handling so messages always fit their container's width.
+const messageCss = css`
+  /* The event column is a flex child: with the default min-width: auto it
+     cannot shrink below the intrinsic width of its widest content (a long
+     unbroken code line, URL, etc.), pushing the copy button and part of the
+     message outside the container — which offers no horizontal scrolling.
+     Let it shrink so long content wraps vertically instead. */
+  .euiTimelineItemEvent {
+    min-width: 0;
+  }
 
-// Long unbroken content (code lines, URLs) must wrap rather than overflow the
-// flyout, which offers no horizontal scrolling.
-const bodyCss = css`
-  min-width: 0;
-  overflow-wrap: anywhere;
+  .euiCommentEvent__body {
+    transition: background-color 150ms ease;
+    overflow-wrap: anywhere;
+  }
 
-  pre,
-  code {
+  /* Wrap long code lines instead of overflowing horizontally. */
+  .euiCommentEvent__body pre,
+  .euiCommentEvent__body code {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
@@ -129,6 +146,17 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
     return content === systemInstructions || getTextPartsContent(parts) === systemInstructions;
   });
 
+  // Highlighted style applied when the copy button for that message is hovered.
+  const highlightedCss = css`
+    .euiCommentEvent__body {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    }
+  `;
+  const codeFontCss = css`
+    font-family: ${euiTheme.font.familyCode};
+    overflow-wrap: anywhere;
+  `;
+
   const allMessages: GenAiMessage[] = [
     ...(systemInstructions && !hasSystemInstructions
       ? [{ role: 'system', content: systemInstructions }]
@@ -141,78 +169,88 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
   if (allMessages.length === 0) return null;
 
   return (
-    <ol
-      css={[listCss, { gap: euiTheme.size.s }]}
+    <EuiCommentList
       aria-label={i18n.translate('apmUiShared.genAi.messages.conversationAriaLabel', {
         defaultMessage: 'GenAI conversation',
       })}
     >
       {allMessages.map((msg, i) => {
-        const { label, iconType } = getRoleDisplay(msg.role);
-        const toolMessageInfo = getToolMessageInfo(msg, toolNamesById);
-        const isHighlighted = hoveredIndex === i;
+        const toolOutputs = getToolOutputs(msg, toolNamesById);
+        const toolNames = unique(toolOutputs.map(({ name }) => name));
+        const callIds = unique(toolOutputs.map(({ id }) => id));
+        const onMouseEnter = () => setHoveredIndex(i);
+        const onMouseLeave = () => setHoveredIndex(null);
 
         return (
-          <li key={`${msg.role}-${i}`}>
-            <EuiPanel
-              hasBorder
-              hasShadow={false}
-              paddingSize="none"
-              data-test-subj={`genAiMessage-${i}`}
-              data-highlighted={isHighlighted}
-              css={css`
-                transition: background-color 150ms ease;
-                ${isHighlighted
-                  ? `background-color: ${euiTheme.colors.backgroundBaseSubdued};`
-                  : ''}
-              `}
-            >
-              <EuiFlexGroup
-                gutterSize="s"
-                alignItems="center"
-                responsive={false}
-                css={css`
-                  padding: ${euiTheme.size.xs} ${euiTheme.size.xs} 0 ${euiTheme.size.s};
-                `}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} size="s" color="subdued" aria-hidden={true} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" data-test-subj={`genAiRoleBadge-${msg.role}`}>
-                    <strong>{label}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-                {toolMessageInfo.names.length > 0 && (
-                  <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+          <EuiComment
+            key={`${msg.role}-${i}`}
+            username={
+              <span data-test-subj={`genAiRoleLabel-${msg.role}`}>{getRoleLabel(msg.role)}</span>
+            }
+            event={
+              toolNames.length > 0 || callIds.length > 0 ? (
+                <EuiFlexGroup
+                  component="span"
+                  gutterSize="s"
+                  alignItems="baseline"
+                  responsive={false}
+                  wrap
+                >
+                  {toolNames.length > 0 && (
                     <EuiText
                       size="xs"
-                      color="subdued"
+                      component="span"
+                      css={codeFontCss}
                       data-test-subj={`genAiToolMessageName-${i}`}
-                      css={css`
-                        font-family: ${euiTheme.font.familyCode};
-                        overflow-wrap: anywhere;
-                      `}
                     >
-                      {toolMessageInfo.names.join(', ')}
+                      {toolNames.join(', ')}
                     </EuiText>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem />
-                {toolMessageInfo.callIds.length > 0 && (
-                  <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                  )}
+                  {callIds.length > 0 && (
                     <EuiText
                       size="xs"
+                      component="span"
                       color="subdued"
+                      css={codeFontCss}
                       data-test-subj={`genAiToolMessageCallId-${i}`}
-                      css={css`
-                        font-family: ${euiTheme.font.familyCode};
-                        overflow-wrap: anywhere;
-                        text-align: right;
-                      `}
                     >
-                      {toolMessageInfo.callIds.join(', ')}
+                      {callIds.join(', ')}
                     </EuiText>
+                  )}
+                </EuiFlexGroup>
+              ) : undefined
+            }
+            timelineAvatar={<RoleAvatar role={msg.role} />}
+            timelineAvatarAriaLabel={msg.role}
+            data-test-subj={`genAiMessage-${i}`}
+            data-highlighted={hoveredIndex === i}
+            css={[messageCss, hoveredIndex === i && highlightedCss]}
+            actions={
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                {toolOutputs.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCopy textToCopy={getToolOutputCopyText(toolOutputs)}>
+                      {(copy) => (
+                        <EuiToolTip
+                          content={i18n.translate('apmUiShared.genAi.messages.copyToolOutput', {
+                            defaultMessage: 'Copy tool output',
+                          })}
+                        >
+                          <EuiButtonIcon
+                            iconType="wrench"
+                            color="text"
+                            data-test-subj={`genAiToolOutputCopy-${i}`}
+                            aria-label={i18n.translate(
+                              'apmUiShared.genAi.messages.copyToolOutput',
+                              { defaultMessage: 'Copy tool output' }
+                            )}
+                            onClick={copy}
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                          />
+                        </EuiToolTip>
+                      )}
+                    </EuiCopy>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
@@ -226,7 +264,6 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
                         <EuiButtonIcon
                           iconType="copy"
                           color="text"
-                          size="xs"
                           data-test-subj={`genAiMessageCopy-${i}`}
                           {...(ebt
                             ? getEbtProps({
@@ -243,30 +280,20 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
                             }
                           )}
                           onClick={copy}
-                          onMouseEnter={() => setHoveredIndex(i)}
-                          onMouseLeave={() => setHoveredIndex(null)}
+                          onMouseEnter={onMouseEnter}
+                          onMouseLeave={onMouseLeave}
                         />
                       </EuiToolTip>
                     )}
                   </EuiCopy>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <div
-                css={[
-                  bodyCss,
-                  css`
-                    padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.s};
-                  `,
-                ]}
-              >
-                <EuiText size="s">
-                  <GenAiMessageContent message={msg} toolNamesById={toolNamesById} />
-                </EuiText>
-              </div>
-            </EuiPanel>
-          </li>
+            }
+          >
+            <GenAiMessageContent message={msg} toolNamesById={toolNamesById} />
+          </EuiComment>
         );
       })}
-    </ol>
+    </EuiCommentList>
   );
 }

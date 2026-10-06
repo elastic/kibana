@@ -155,7 +155,12 @@ interface BlockProps {
 function GenAiMessageBlockContent({ block, role, toolNamesById }: BlockProps) {
   switch (block.type) {
     case 'text':
-      return <GenAiFieldValue value={block.content} />;
+      // Only prose goes in EuiText: its typography margins would pad code blocks.
+      return (
+        <EuiText size="s">
+          <GenAiFieldValue value={block.content} />
+        </EuiText>
+      );
     case 'tool_call':
       return (
         <GenAiToolCard
@@ -187,7 +192,11 @@ function GenAiMessageBlockContent({ block, role, toolNamesById }: BlockProps) {
       );
     }
     default:
-      return <GenAiFieldValue value={block.value} />;
+      return (
+        <EuiText size="s">
+          <GenAiFieldValue value={block.value} />
+        </EuiText>
+      );
   }
 }
 
