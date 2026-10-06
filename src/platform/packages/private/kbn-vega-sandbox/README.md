@@ -11,20 +11,21 @@ This package is **not** the iframe HTML document, and it is **not** the Kibana p
 
 1. **A Node library** the Kibana parent imports: protocol types, `isVegaSandboxOutboundMessage`,
    constants, inspector serializers.
-2. **A browser JS file** the iframe loads: `vega_sandbox.bootstrap.js`, built by webpack from
-   `src/bootstrap.ts`, with Vega bundled in. It does not use Kibana optimizer globals or
+2. **A browser JS file** the iframe loads: `vega_sandbox.bootstrap.js`, built by the Kibana
+   Rspack build from `src/bootstrap.ts`, with Vega bundled in. It does not use Kibana optimizer globals or
    shared-deps externals.
 
 That split is why `index.ts` and `server.ts` exist next to `bootstrap.ts`.
 
-## Why a separate webpack bundle
+## Why a separate bundle
 
 Kibana plugin chunks assume they run in the Kibana page (shared deps, `__webpack_require__`
 from the optimizer, same origin as `sid`). An opaque iframe has a unique origin. It cannot
 see those globals, and Kibana's global CSP `script-src 'self'` does not match the iframe
 origin either.
 
-So the in-frame code is built like `@kbn/monaco` workers: `webpack.config.js` uses
+So the in-frame code is built like `@kbn/monaco` workers: its own compiler in the Kibana
+Rspack build (`packages/kbn-rspack-optimizer/src/config/create_vega_sandbox_config.ts`),
 `target: 'web'`, no externals, output `target_vega_sandbox/vega_sandbox.bootstrap.js`.
 A **dedicated HTML route** (owned by the host, not this package) must send
 `script-src 'nonce-…' 'strict-dynamic'` so that file can actually run.
@@ -33,7 +34,7 @@ A **dedicated HTML route** (owned by the host, not this package) must send
 
 ```
 src/bootstrap.ts
-        │  webpack (package "build" script)
+        │  Kibana Rspack build (`pnpm start`, `pnpm kbn build-shared`, distributable build)
         ▼
 target_vega_sandbox/vega_sandbox.bootstrap.js
         │  server.ts exports bundleDir (that folder, or the dist copy)
@@ -56,9 +57,10 @@ at `/bundles/kbn-vega-sandbox/`?"
 export const bundleDir = Fs.existsSync(localBundleDir) ? localBundleDir : builtBundleDir;
 ```
 
-- Dev: webpack wrote `src/platform/packages/private/kbn-vega-sandbox/target_vega_sandbox/`.
-- Dist: `build_packages_task.ts` copied that folder into the build output; `bundleDir` falls
-  back to `target/build/.../target_vega_sandbox`.
+- Dev: Rspack writes `target/build/src/platform/packages/private/kbn-vega-sandbox/target_vega_sandbox/`,
+  the fallback path.
+- Dist: Rspack writes `target_vega_sandbox/` into the package's build copy, which is installed into
+  `node_modules`, so the local path wins.
 
 Core does `import * as KbnVegaSandbox from '@kbn/vega-sandbox/server'` and passes
 `KbnVegaSandbox.bundleDir` to `registerRouteForBundle`, same pattern as monaco. Parents never

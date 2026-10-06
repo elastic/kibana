@@ -14,6 +14,7 @@ import { createMonacoWorkersConfig, MONACO_WORKERS_COMPILER } from './create_mon
 import { createMultiCompileConfig, KIBANA_COMPILER } from './create_multi_compile_config';
 import { createSharedNpmConfig, SHARED_NPM_COMPILER } from './create_shared_npm_config';
 import { createSharedSrcConfig, SHARED_SRC_COMPILER } from './create_shared_src_config';
+import { createVegaSandboxConfig, VEGA_SANDBOX_COMPILER } from './create_vega_sandbox_config';
 import { resolveSharedAssetPaths } from './shared_asset_paths';
 
 describe('shared Rspack configs', () => {
@@ -29,11 +30,13 @@ describe('shared Rspack configs', () => {
     const npm = createSharedNpmConfig({ repoRoot, outputRoot });
     const src = createSharedSrcConfig({ repoRoot, outputRoot });
     const monaco = createMonacoWorkersConfig({ repoRoot, outputRoot });
+    const vega = createVegaSandboxConfig({ repoRoot, outputRoot });
 
     expect({
       npm: { name: npm.name, output: npm.output?.path },
       src: { name: src.name, dependencies: src.dependencies, output: src.output?.path },
       monaco: { name: monaco.name, output: monaco.output?.path },
+      vega: { name: vega.name, output: vega.output?.path, filename: vega.output?.filename },
     }).toEqual({
       npm: { name: SHARED_NPM_COMPILER, output: paths.npmOutput },
       src: {
@@ -42,6 +45,11 @@ describe('shared Rspack configs', () => {
         output: paths.srcOutput,
       },
       monaco: { name: MONACO_WORKERS_COMPILER, output: paths.monacoOutput },
+      vega: {
+        name: VEGA_SANDBOX_COMPILER,
+        output: paths.vegaSandboxOutput,
+        filename: 'vega_sandbox.bootstrap.js',
+      },
     });
   });
 
@@ -63,9 +71,15 @@ describe('shared Rspack configs', () => {
     expect(paths.monacoOutput).toBe(
       Path.resolve(repoRoot, 'target/build/src/platform/packages/shared/kbn-monaco/target_workers')
     );
+    expect(paths.vegaSandboxOutput).toBe(
+      Path.resolve(
+        repoRoot,
+        'target/build/src/platform/packages/private/kbn-vega-sandbox/target_vega_sandbox'
+      )
+    );
   });
 
-  it('creates an ordered four-compiler graph', async () => {
+  it('creates an ordered five-compiler graph', async () => {
     const { configs, bundleCount } = await createMultiCompileConfig({ repoRoot, outputRoot });
     expect(bundleCount).toBeGreaterThan(0);
 
@@ -78,6 +92,7 @@ describe('shared Rspack configs', () => {
       { name: SHARED_NPM_COMPILER, dependencies: undefined },
       { name: MONACO_WORKERS_COMPILER, dependencies: undefined },
       { name: SHARED_SRC_COMPILER, dependencies: [SHARED_NPM_COMPILER] },
+      { name: VEGA_SANDBOX_COMPILER, dependencies: undefined },
       {
         name: KIBANA_COMPILER,
         dependencies: [SHARED_SRC_COMPILER, MONACO_WORKERS_COMPILER],

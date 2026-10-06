@@ -12,6 +12,7 @@ import Path from 'path';
 const NPM_PACKAGE_PATH = 'src/platform/packages/private/kbn-ui-shared-deps-npm';
 const SRC_PACKAGE_PATH = 'src/platform/packages/private/kbn-ui-shared-deps-src';
 const MONACO_PACKAGE_PATH = 'src/platform/packages/shared/kbn-monaco';
+const VEGA_SANDBOX_PACKAGE_PATH = 'src/platform/packages/private/kbn-vega-sandbox';
 
 export interface SharedAssetPaths {
   npmPackageRoot: string;
@@ -21,6 +22,8 @@ export interface SharedAssetPaths {
   srcOutput: string;
   monacoPackageRoot: string;
   monacoOutput: string;
+  vegaSandboxPackageRoot: string;
+  vegaSandboxOutput: string;
 }
 
 export function resolveSharedAssetPaths(
@@ -44,5 +47,7 @@ export function resolveSharedAssetPaths(
     srcOutput: Path.resolve(packageRoot, SRC_PACKAGE_PATH, 'shared_built_assets'),
     monacoPackageRoot,
     monacoOutput: Path.resolve(packageRoot, MONACO_PACKAGE_PATH, 'target_workers'),
+    vegaSandboxPackageRoot: Path.resolve(repoRoot, VEGA_SANDBOX_PACKAGE_PATH),
+    vegaSandboxOutput: Path.resolve(packageRoot, VEGA_SANDBOX_PACKAGE_PATH, 'target_vega_sandbox'),
   };
 }

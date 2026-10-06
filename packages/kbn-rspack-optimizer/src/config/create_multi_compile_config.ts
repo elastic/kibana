@@ -15,6 +15,7 @@ import {
 import { createMonacoWorkersConfig, MONACO_WORKERS_COMPILER } from './create_monaco_workers_config';
 import { createSharedNpmConfig } from './create_shared_npm_config';
 import { createSharedSrcConfig, SHARED_SRC_COMPILER } from './create_shared_src_config';
+import { createVegaSandboxConfig } from './create_vega_sandbox_config';
 import { resolveSharedAssetPaths } from './shared_asset_paths';
 
 export const KIBANA_COMPILER = 'kibana';
@@ -54,5 +55,6 @@ export function createSharedCompileConfigs({
     createSharedNpmConfig({ repoRoot, outputRoot, dist }),
     createMonacoWorkersConfig({ repoRoot, outputRoot, dist }),
     createSharedSrcConfig({ repoRoot, outputRoot, dist }),
+    createVegaSandboxConfig({ repoRoot, outputRoot, dist }),
   ];
 }
