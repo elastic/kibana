@@ -65,6 +65,7 @@ import {
 } from '../../../common/services/agentless_policy_helper';
 import { agentlessAgentService } from '../agents/agentless_agent';
 import { createAndIntegrateCloudConnector } from '../cloud_connectors';
+import { deleteSecretsIfNotReferenced } from '../secrets';
 
 import { prefixKueryFieldsWithSavedObjectType } from './kuery_utils';
 
@@ -600,6 +601,12 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         throwOnAgentlessError: true,
       });
 
+      await this.deleteReplacedSecrets({
+        previous: existingPackagePolicy,
+        updated: updatedPackagePolicy,
+        agentPolicyId,
+      });
+
       return packagePolicyToAgentlessPolicy(updatedPackagePolicy);
     } catch (err) {
       // Log the triggering failure at error level before attempting rollback. The error is also
@@ -625,6 +632,49 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       });
 
       throw err;
+    }
+  }
+
+  /**
+   * Deletes the secrets an update replaced. The package-policy update runs with
+   * `bumpRevision: false`, so while it runs the compiled policy still references the old secrets
+   * and Fleet keeps them (it never deletes a secret a compiled policy references). Once the agent
+   * policy update has written the new revision they are unreferenced, so they are removed here.
+   * Secrets another package policy still uses are kept by `deleteSecretsIfNotReferenced`.
+   * Best-effort: a failed cleanup leaves a secret behind but must not fail the update.
+   */
+  private async deleteReplacedSecrets({
+    previous,
+    updated,
+    agentPolicyId,
+  }: {
+    previous: PackagePolicy;
+    updated: PackagePolicy;
+    agentPolicyId: string;
+  }) {
+    // Cloud connector secrets are shared across package policies and not tracked in their
+    // `secret_references`, so they are never removed from here.
+    if (previous.cloud_connector_id) return;
+
+    const stillUsed = new Set((updated.secret_references ?? []).map(({ id }) => id));
+    const replaced = (previous.secret_references ?? [])
+      .map(({ id }) => id)
+      .filter((id) => !stillUsed.has(id));
+    if (replaced.length === 0) return;
+
+    try {
+      await deleteSecretsIfNotReferenced({
+        esClient: this.esClient,
+        soClient: this.soClient,
+        ids: replaced,
+        agentPolicyIds: [agentPolicyId],
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Could not delete replaced secrets [${replaced.join(', ')}] of agentless policy: ${
+          error.message
+        }`
+      );
     }
   }
 

@@ -14,6 +14,7 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { createAppContextStartContractMock, createPackagePolicyServiceMock } from '../../mocks';
+import { deleteSecretsIfNotReferenced } from '../secrets';
 import { getInstallation, getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
 import { agentPolicyService } from '../agent_policy';
@@ -24,6 +25,10 @@ import { AgentlessPoliciesServiceImpl } from './agentless_policies';
 jest.mock('../epm/packages/get');
 
 jest.mock('../agent_policy');
+jest.mock('../secrets', () => ({
+  ...jest.requireActual('../secrets'),
+  deleteSecretsIfNotReferenced: jest.fn(),
+}));
 
 const buildAgentlessPackagePolicy = (overrides: Record<string, any> = {}): any => ({
   id: 'agentless-policy-id',
@@ -340,6 +345,98 @@ describe('AgentlessPoliciesService', () => {
             ],
           } as any)
       );
+    });
+
+    describe('replaced secrets', () => {
+      const withSecretReferences = (ids: string[]) =>
+        packagePolicyService.update.mockImplementation(async (_, __, id, policy: any) => ({
+          ...buildAgentlessPackagePolicy(),
+          id,
+          name: policy.name,
+          package: policy.package,
+          vars: policy.vars,
+          secret_references: ids.map((secretId) => ({ id: secretId })),
+        }));
+
+      it('deletes the secrets the update replaced once the new revision is deployed', async () => {
+        packagePolicyService.get.mockResolvedValue(
+          buildAgentlessPackagePolicy({
+            secret_references: [{ id: 'old-access-key' }, { id: 'old-secret-key' }],
+          })
+        );
+        withSecretReferences(['new-access-key', 'new-secret-key']);
+
+        await createService().updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest());
+
+        expect(deleteSecretsIfNotReferenced).toHaveBeenCalledTimes(1);
+        expect(deleteSecretsIfNotReferenced).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['old-access-key', 'old-secret-key'],
+            agentPolicyIds: ['agentless-policy-id'],
+          })
+        );
+        // Only after the agent policy bump and deploy: before that the compiled policy still
+        // references the old secrets and they would be kept.
+        const deleteOrder = jest.mocked(deleteSecretsIfNotReferenced).mock.invocationCallOrder[0];
+        expect(jest.mocked(agentPolicyService.update).mock.invocationCallOrder[0]).toBeLessThan(
+          deleteOrder
+        );
+        expect(
+          jest.mocked(agentPolicyService.deployPolicy).mock.invocationCallOrder[0]
+        ).toBeLessThan(deleteOrder);
+      });
+
+      it('keeps the secrets the updated policy still references', async () => {
+        packagePolicyService.get.mockResolvedValue(
+          buildAgentlessPackagePolicy({
+            secret_references: [{ id: 'kept' }, { id: 'replaced' }],
+          })
+        );
+        withSecretReferences(['kept', 'added']);
+
+        await createService().updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest());
+
+        expect(deleteSecretsIfNotReferenced).toHaveBeenCalledWith(
+          expect.objectContaining({ ids: ['replaced'] })
+        );
+      });
+
+      it('deletes nothing when no secret was replaced', async () => {
+        packagePolicyService.get.mockResolvedValue(
+          buildAgentlessPackagePolicy({ secret_references: [{ id: 'same' }] })
+        );
+        withSecretReferences(['same']);
+
+        await createService().updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest());
+
+        expect(deleteSecretsIfNotReferenced).not.toHaveBeenCalled();
+      });
+
+      it('never deletes the shared secrets of a policy that uses a cloud connector', async () => {
+        packagePolicyService.get.mockResolvedValue(
+          buildAgentlessPackagePolicy({
+            cloud_connector_id: 'connector-1',
+            secret_references: [{ id: 'connector-secret' }],
+          })
+        );
+        withSecretReferences([]);
+
+        await createService().updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest());
+
+        expect(deleteSecretsIfNotReferenced).not.toHaveBeenCalled();
+      });
+
+      it('does not fail the update when removing the replaced secrets fails', async () => {
+        packagePolicyService.get.mockResolvedValue(
+          buildAgentlessPackagePolicy({ secret_references: [{ id: 'old' }] })
+        );
+        withSecretReferences(['new']);
+        jest.mocked(deleteSecretsIfNotReferenced).mockRejectedValue(new Error('es down'));
+
+        await expect(
+          createService().updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest())
+        ).resolves.toBeDefined();
+      });
     });
 
     it('should update the package + agent policy, re-deploy, and return the mapped policy', async () => {
