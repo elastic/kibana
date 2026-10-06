@@ -8,9 +8,8 @@
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import {
-  combineSourceTypePatterns,
-  patternsFromApmIndices,
-  uniqueSourceTypePatternTokens,
+  loadSourceTypePatterns,
+  type ApmIndexPatternFields,
   type SourceTypePatterns,
 } from '@kbn/nightshift-shared';
 
@@ -18,8 +17,6 @@ export interface SourceTypePatternPlugins {
   logsDataAccess?: LogsDataAccessPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
-
-const EMPTY_APM_PATTERNS: SourceTypePatterns = { logs: [], traces: [], metrics: [] };
 
 /**
  * Schema defaults from `indicesSchema` in apm_sources_access. Copied because a 403 means this
@@ -40,31 +37,17 @@ const isForbiddenResponse = (error: unknown): boolean => {
   return response?.status === 403;
 };
 
-const readLogPatterns = async (
-  logsDataAccess: LogsDataAccessPluginStart | undefined
-): Promise<string[]> => {
-  if (!logsDataAccess) {
-    return [];
-  }
-  return uniqueSourceTypePatternTokens([
-    await logsDataAccess.services.logSourcesService.getFlattenedLogSources(),
-  ]);
-};
-
-const readApmPatterns = async (
-  apmSourcesAccess: ApmSourceAccessPluginStart | undefined
-): Promise<SourceTypePatterns> => {
-  if (!apmSourcesAccess) {
-    return EMPTY_APM_PATTERNS;
-  }
+const readApmIndices = async (
+  apmSourcesAccess: ApmSourceAccessPluginStart
+): Promise<ApmIndexPatternFields> => {
   try {
-    return patternsFromApmIndices(await apmSourcesAccess.getApmIndices());
+    return await apmSourcesAccess.getApmIndices();
   } catch (error) {
     // The indices route requires the `apm` privilege, which Nightshift does not grant.
     // Schema defaults keep the logs check alive. kibana.yml overrides are not in the browser;
     // the server applies those on save.
     if (isForbiddenResponse(error)) {
-      return patternsFromApmIndices(DEFAULT_APM_INDEX_PATTERNS);
+      return DEFAULT_APM_INDEX_PATTERNS;
     }
     throw error;
   }
@@ -82,11 +65,12 @@ export const getSourceTypePatterns = async ({
   apmSourcesAccess,
 }: SourceTypePatternPlugins): Promise<SourceTypePatterns | null> => {
   try {
-    const [logSourceTokens, apmPatterns] = await Promise.all([
-      readLogPatterns(logsDataAccess),
-      readApmPatterns(apmSourcesAccess),
-    ]);
-    return combineSourceTypePatterns(logSourceTokens, apmPatterns);
+    return await loadSourceTypePatterns({
+      readLogSources: logsDataAccess
+        ? () => logsDataAccess.services.logSourcesService.getFlattenedLogSources()
+        : undefined,
+      readApmIndices: apmSourcesAccess ? () => readApmIndices(apmSourcesAccess) : undefined,
+    });
   } catch {
     return null;
   }

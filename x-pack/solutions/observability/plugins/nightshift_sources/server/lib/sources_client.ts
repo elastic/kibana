@@ -145,13 +145,12 @@ export class SourcesClient {
     const esqlChanged = !hasSameEsql(parsed.esql, previous.esql);
     // A metadata-only save keeps the stored type. Reclassifying would reject a rename when
     // log sources or APM indices cannot be read, or would overwrite a good type with a guess.
-    const type = esqlChanged
-      ? validateSourceQuery({
-          esql: parsed.esql,
-          patterns: await this.deps.getSourceTypePatterns(),
-        })
-      : previous.type;
+    let type = previous.type;
     if (esqlChanged) {
+      type = validateSourceQuery({
+        esql: parsed.esql,
+        patterns: await this.deps.getSourceTypePatterns(),
+      });
       await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
     }
 

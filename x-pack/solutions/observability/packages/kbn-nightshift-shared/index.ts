@@ -114,17 +114,11 @@ export {
 } from './src/sources/schema';
 
 export {
-  combineSourceTypePatterns,
-  DEFAULT_LOGS_BASE_PATTERNS,
-  DEFAULT_METRICS_BASE_PATTERNS,
   DEFAULT_SOURCE_TYPE_PATTERNS,
-  DEFAULT_TRACES_BASE_PATTERNS,
+  loadSourceTypePatterns,
   matchSourceTypes,
-  patternsFromApmIndices,
   SOURCE_TYPES,
   sourceTypeSchema,
-  toSourceTypePatternTokens,
-  uniqueSourceTypePatternTokens,
   type ApmIndexPatternFields,
   type SourceType,
   type SourceTypePatterns,

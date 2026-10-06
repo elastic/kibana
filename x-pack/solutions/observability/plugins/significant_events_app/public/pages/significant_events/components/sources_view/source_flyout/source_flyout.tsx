@@ -38,7 +38,6 @@ import { hasSameEsql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useSourceTypePatterns } from '../../../../../hooks/use_source_type_patterns';
 import { useSourcesApi } from '../../../../../hooks/use_sources_api';
 import { getFormattedError } from '../../../../../util/errors';
 import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
@@ -69,9 +68,13 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     core: {
       notifications: { toasts },
     },
+    dependencies: {
+      start: {
+        nightshiftSources: { getSourceTypePatterns },
+      },
+    },
   } = useKibana();
   const { createSource, updateSource } = useSourcesApi();
-  const { getSourceTypePatterns, refreshSourceTypePatterns } = useSourceTypePatterns();
   const titleId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   // `runId` changes on every run, so running an unchanged query still refetches it.
@@ -115,10 +118,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
   };
 
   const runPreview = async (esql: string) => {
-    const result = await validateSourceEsql({
-      esql,
-      getSourceTypePatterns: refreshSourceTypePatterns,
-    });
+    const result = await validateSourceEsql({ esql, getSourceTypePatterns });
     if (result !== true) {
       setError('esql', { message: result });
       return;
@@ -127,7 +127,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     setPreview(({ runId }) => ({ esql, runId: runId + 1 }));
   };
 
-  const submit = handleSubmit(async (values) => {
+  const save = handleSubmit(async (values) => {
     // Same comparison the server uses to decide the query changed and the knowledge is reset.
     if (source && !hasSameEsql(values.esql, source.esql)) {
       setPendingQueryChange(values);
@@ -135,11 +135,6 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     }
     await persist(values);
   });
-
-  const save = async () => {
-    await refreshSourceTypePatterns();
-    await submit();
-  };
 
   return (
     <>

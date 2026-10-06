@@ -104,14 +104,16 @@ const indexPatternMatches = (pattern: string, name: string): boolean => {
   return new RegExp(`^${expression}$`, 'i').test(stripDataSelector(name));
 };
 
+const TYPE_SEGMENT_REGEXP: Record<KnownSourceType, RegExp> = {
+  logs: /(?:^|[^a-z0-9])logs(?=$|[^a-z0-9])/i,
+  traces: /(?:^|[^a-z0-9])traces(?=$|[^a-z0-9])/i,
+  metrics: /(?:^|[^a-z0-9])metrics(?=$|[^a-z0-9])/i,
+};
+
 /** `logs` / `metrics` / `traces` as whole segments. `logstash` and `transaction_log` are not. */
 const typeSegments = (name: string): KnownSourceType[] => {
-  const found = new Set<string>();
-  const expression = /(?:^|[^a-z0-9])(logs|metrics|traces)(?=$|[^a-z0-9])/gi;
-  for (const match of stripDataSelector(name).matchAll(expression)) {
-    found.add(match[1].toLowerCase());
-  }
-  return KNOWN_SOURCE_TYPES.filter((type) => found.has(type));
+  const stripped = stripDataSelector(name);
+  return KNOWN_SOURCE_TYPES.filter((type) => TYPE_SEGMENT_REGEXP[type].test(stripped));
 };
 
 const matchesKnownType = (
@@ -138,6 +140,10 @@ export const matchSourceTypes = ({
   patterns?: SourceTypePatterns;
 }): KnownSourceType[] => {
   const matched = KNOWN_SOURCE_TYPES.filter((type) => matchesKnownType(name, type, patterns));
+  // A segment only breaks ties, so skip the scan when there is nothing to break.
+  if (matched.length < 2) {
+    return matched;
+  }
   const segments = typeSegments(name);
   if (segments.length === 1 && matched.includes(segments[0])) {
     return [segments[0]];
@@ -171,17 +177,31 @@ export const patternsFromApmIndices = ({
   error,
   metric,
 }: ApmIndexPatternFields): SourceTypePatterns => ({
-  logs: uniqueSourceTypePatternTokens([error]),
+  logs: toSourceTypePatternTokens(error),
   traces: uniqueSourceTypePatternTokens([transaction, span]),
-  metrics: uniqueSourceTypePatternTokens([metric]),
+  metrics: toSourceTypePatternTokens(metric),
 });
 
-/** Log-source tokens plus the APM split. The same token on two kinds is left on both. */
-export const combineSourceTypePatterns = (
-  logSourceTokens: readonly string[],
-  apmPatterns: SourceTypePatterns
-): SourceTypePatterns => ({
-  logs: [...new Set([...logSourceTokens, ...apmPatterns.logs])],
-  traces: [...apmPatterns.traces],
-  metrics: [...(apmPatterns.metrics ?? [])],
-});
+const NO_APM_PATTERNS: SourceTypePatterns = { logs: [], traces: [], metrics: [] };
+
+/**
+ * Reads configured log sources and APM indices in parallel and merges them into patterns. A
+ * reader that is not given contributes nothing. The same token on two kinds stays on both.
+ * Failure handling (a forbidden APM read, for example) belongs in the reader.
+ */
+export const loadSourceTypePatterns = async ({
+  readLogSources,
+  readApmIndices,
+}: {
+  /** Comma-separated log source index patterns. */
+  readLogSources?: () => Promise<string>;
+  readApmIndices?: () => Promise<ApmIndexPatternFields>;
+}): Promise<SourceTypePatterns> => {
+  const [logSources, apmIndices] = await Promise.all([readLogSources?.(), readApmIndices?.()]);
+  const apm = apmIndices ? patternsFromApmIndices(apmIndices) : NO_APM_PATTERNS;
+  return {
+    logs: [...new Set([...toSourceTypePatternTokens(logSources ?? ''), ...apm.logs])],
+    traces: apm.traces,
+    metrics: apm.metrics,
+  };
+};

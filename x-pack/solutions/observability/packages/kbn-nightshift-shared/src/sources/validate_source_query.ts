@@ -130,24 +130,6 @@ const emptyNamesByType = (): Record<SourceType, string[]> => ({
   unknown: [],
 });
 
-const resolveIndexType = ({
-  matched,
-  isTimeSeries,
-}: {
-  // `matchSourceTypes` never returns `unknown`. No match is `undefined`.
-  matched?: Exclude<SourceType, 'unknown'>;
-  isTimeSeries: boolean;
-}): SourceType => {
-  if (matched) {
-    return matched;
-  }
-  // An unmatched name on TS is metrics. On FROM it stays unknown.
-  if (isTimeSeries) {
-    return 'metrics';
-  }
-  return 'unknown';
-};
-
 const describeType = (
   type: SourceType,
   names: readonly string[],
@@ -231,7 +213,8 @@ export const getSourceType = ({
   const isTimeSeries = firstCommand.name === 'ts';
   const namesByType = emptyNamesByType();
   for (const { name, matched } of classified) {
-    namesByType[resolveIndexType({ matched: matched[0], isTimeSeries })].push(name);
+    // `matchSourceTypes` never returns `unknown`. An unmatched name on TS is metrics, on FROM unknown.
+    namesByType[matched[0] ?? (isTimeSeries ? 'metrics' : 'unknown')].push(name);
   }
 
   // A TS command is metrics even when every named index classified as something else.

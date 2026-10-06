@@ -10,9 +10,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import {
-  combineSourceTypePatterns,
-  patternsFromApmIndices,
-  uniqueSourceTypePatternTokens,
+  loadSourceTypePatterns,
   type ApmIndexPatternFields,
   type SourceTypePatterns,
 } from '@kbn/nightshift-shared';
@@ -29,35 +27,19 @@ export interface SourceTypePatternDependencies {
   logger: Logger;
 }
 
-const EMPTY_APM_PATTERNS: SourceTypePatterns = { logs: [], traces: [], metrics: [] };
-
 const isForbiddenSavedObjectError = (error: unknown): boolean =>
   error instanceof Error && SavedObjectsErrorHelpers.isForbiddenError(error);
 
-const readLogPatterns = async ({
-  logsDataAccess,
-  soClient,
-}: SourceTypePatternDependencies): Promise<string[]> => {
-  if (!logsDataAccess) {
-    return [];
-  }
-  const logSources = await logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
-    soClient
-  );
-  return uniqueSourceTypePatternTokens([await logSources.getFlattenedLogSources()]);
-};
-
-const readApmPatterns = async ({
+const readApmIndices = async ({
   apmSourcesAccess,
   apmIndicesFromConfig,
   soClient,
   logger,
-}: SourceTypePatternDependencies): Promise<SourceTypePatterns> => {
-  if (!apmSourcesAccess) {
-    return EMPTY_APM_PATTERNS;
-  }
+}: SourceTypePatternDependencies & {
+  apmSourcesAccess: ApmSourcesAccessPluginStart;
+}): Promise<ApmIndexPatternFields> => {
   try {
-    return patternsFromApmIndices(await apmSourcesAccess.getApmIndices(soClient));
+    return await apmSourcesAccess.getApmIndices(soClient);
   } catch (error) {
     // Nightshift does not grant `apm-indices`. The plugin config still names traces, logs
     // and metrics; an empty list would store `FROM apm-*` as unknown and reject the default
@@ -66,20 +48,28 @@ const readApmPatterns = async ({
       logger.warn(
         'Could not read APM index overrides for source type detection, using the configured defaults'
       );
-      return patternsFromApmIndices(apmIndicesFromConfig);
+      return apmIndicesFromConfig;
     }
     throw error;
   }
 };
 
-const loadSourceTypePatterns = async (
+const readSourceTypePatterns = (
   dependencies: SourceTypePatternDependencies
 ): Promise<SourceTypePatterns> => {
-  const [logSourceTokens, apmPatterns] = await Promise.all([
-    readLogPatterns(dependencies),
-    readApmPatterns(dependencies),
-  ]);
-  return combineSourceTypePatterns(logSourceTokens, apmPatterns);
+  const { logsDataAccess, apmSourcesAccess, soClient } = dependencies;
+  return loadSourceTypePatterns({
+    readLogSources: logsDataAccess
+      ? async () => {
+          const logSources =
+            await logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(soClient);
+          return logSources.getFlattenedLogSources();
+        }
+      : undefined,
+    readApmIndices: apmSourcesAccess
+      ? () => readApmIndices({ ...dependencies, apmSourcesAccess })
+      : undefined,
+  });
 };
 
 /**
@@ -92,7 +82,7 @@ export const createGetSourceTypePatterns = (
 ): (() => Promise<SourceTypePatterns>) => {
   let patternsPromise: Promise<SourceTypePatterns> | undefined;
   return () => {
-    patternsPromise ??= loadSourceTypePatterns(dependencies);
+    patternsPromise ??= readSourceTypePatterns(dependencies);
     return patternsPromise;
   };
 };
