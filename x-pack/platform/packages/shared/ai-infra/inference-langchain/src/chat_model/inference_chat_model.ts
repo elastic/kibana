@@ -416,7 +416,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         }
         const text = JSON.stringify(toolCall.args);
         throw new OutputParserException(
-          `Failed to parse. Text: "${text}". Error: ${JSON.stringify(parsed.error.issues)}`,
+          `Failed to parse. Text: "${text}". Error: ${
+            parsed.error.issues ? JSON.stringify(parsed.error.issues) : String(parsed.error)
+          }`,
           text
         );
       }

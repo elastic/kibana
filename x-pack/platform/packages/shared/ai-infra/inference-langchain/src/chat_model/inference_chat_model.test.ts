@@ -1223,6 +1223,28 @@ describe('InferenceChatModel', () => {
       expect(output).toEqual({ note: 'this ' });
     });
 
+    it('includes a thrown transform error in the parse failure', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        z.object({
+          note: z.string().transform(() => {
+            throw new Error('transform failed');
+          }),
+        }),
+        { name: 'extract' }
+      );
+
+      mockExtract({ note: 'hello' });
+
+      await expect(
+        structuredOutputModel.invoke([new HumanMessage({ content: 'extract a note' })])
+      ).rejects.toThrow('transform failed');
+    });
+
     it('rejects tool call args that do not match the schema', async () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
