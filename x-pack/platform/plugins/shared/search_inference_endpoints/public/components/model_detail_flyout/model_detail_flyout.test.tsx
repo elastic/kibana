@@ -446,7 +446,7 @@ describe('ModelDetailFlyout', () => {
         );
       });
       expect(screen.getByTestId('modelDetailFlyoutDataRetentionTooltip')).toHaveTextContent(
-        'Model provider retains data used with this model for a period of time. Model inputs are not used to train inference. Refer to the Provider for more information.'
+        'Model provider retains data used with this model for a period of time. Inputs are not used to train the models. Refer to the provider for more information.'
       );
     });
 
