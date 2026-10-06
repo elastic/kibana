@@ -28,35 +28,3 @@ z.object({
 Refer to [Bounded string schemas](../../../../../docs/extend/key-concepts/security/bounded-string-schemas.md)
 for the full list of helpers and their default bounds, length semantics,
 reporting-mode telemetry and adoption guidance.
-
-## Lazy schemas
-
-Module-scope `z.object(...)` (and similar builders) materialize the schema graph
-at import and keep it on the idle heap. Wrapping connector-spec schemas in
-`lazySchema` cut about 52 MB of idle heap in
-[PR #294667](https://github.com/elastic/kibana/pull/294667).
-
-```typescript
-import { z, lazySchema } from '@kbn/zod';
-
-// before - constructed at import:
-// export const UserSchema = z.object({ id: z.string() });
-
-// after - constructed on first use
-export const UserSchema = lazySchema(() => z.object({ id: z.string() }));
-type User = z.infer<typeof UserSchema>;
-```
-
-`z.infer<typeof UserSchema>` still works on the lazy wrapper.
-
-Caveats:
-
-- `instanceof z.ZodObject` / `instanceof z.ZodType` is `false` on the proxy.
-  Use `isZod` or structural `_zod` / `.def` checks.
-- Chaining `.extend()`, `.optional()`, or `.array()` at module scope retains the
-  materialized schema. Prefer deriving inside the `lazySchema` factory.
-- Call `setLazySchemaDisabled(true)` to disable the proxy and build eagerly
-  (debugging).
-- ESLint rule `@kbn/eslint/require_lazy_zod_schema` warns on eager module-scope
-  Zod schemas. Its auto-fix wraps known schema calls when `lazySchema` is
-  already imported.
