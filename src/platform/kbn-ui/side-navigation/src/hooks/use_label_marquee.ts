@@ -87,6 +87,13 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
       --label-fade-end: 0px;
     }
   `;
+  // An animation instead of a transition so a re-measured overflow, e.g. when the label
+  // turns semibold on highlight, retargets the running slide instead of restarting its delay.
+  const slide = keyframes`
+    to {
+      transform: translateX(calc(var(--label-overflow-width) * -1px));
+    }
+  `;
 
   return {
     label: css`
@@ -133,8 +140,7 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
         a:hover & > span,
         button:focus-visible & > span,
         a:focus-visible & > span {
-          transform: translateX(calc(var(--label-overflow-width) * -1px));
-          transition: transform ${duration} linear ${delay};
+          animation: ${slide} ${duration} linear ${delay} both;
         }
       }
     `,
