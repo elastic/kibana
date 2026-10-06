@@ -454,6 +454,36 @@ describe('EvaluatorDefinitionClient', () => {
         expect(version).toBe('2.0.0');
       });
 
+      it.each(['minimize', 'neutral'] as const)(
+        'takes a major when a score turns %s, since the same movement now reads differently',
+        async (direction) => {
+          expect(
+            await bumpFor({
+              judge: {
+                ...JUDGE,
+                output: { scores: [{ name: 'tone', type: 'number', direction }] },
+              },
+            })
+          ).toBe('2.0.0');
+        }
+      );
+
+      it('takes a major when a score of the opposite direction is added', async () => {
+        expect(
+          await bumpFor({
+            judge: {
+              ...JUDGE,
+              output: {
+                scores: [
+                  { name: 'tone', type: 'number' },
+                  { name: 'hallucination', type: 'number', direction: 'minimize' },
+                ],
+              },
+            },
+          })
+        ).toBe('2.0.0');
+      });
+
       it('takes a major when the required evidence changes', async () => {
         expect(await bumpFor({ judge: { ...JUDGE, evidence: ['input', 'response'] } })).toBe(
           '2.0.0'
@@ -585,6 +615,28 @@ describe('EvaluatorDefinitionClient', () => {
       // The form omits a blank description, so it would otherwise read as a change.
       const unchanged = await client.update('tone', {
         judge: { ...JUDGE, output: { scores: [{ name: 'tone', type: 'number' }] } },
+      });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('reads a score saved without a direction as maximize, so re-saving it is a no-op', async () => {
+      const { client, docs } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: { ...JUDGE, output: { scores: [{ name: 'tone', type: 'number' }] } },
+      });
+      const sizeAfterCreate = docs.size;
+
+      // The form always sends a direction, so a version written before scores declared one
+      // would otherwise mint a version the first time anyone opened and saved it unchanged.
+      const unchanged = await client.update('tone', {
+        judge: {
+          ...JUDGE,
+          output: { scores: [{ name: 'tone', type: 'number', direction: 'maximize' }] },
+        },
       });
 
       expect(unchanged.version).toBe('1.0.0');

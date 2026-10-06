@@ -16,4 +16,5 @@ export { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
 export { createDetectionCoverageSkill } from './detection_coverage';
 export { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 export { createEndpointResponseActionsSkill } from './endpoint_response_actions';
+export { manageResolutionSkill } from './entity_resolution';
 export { registerSkills } from './register_skills';
