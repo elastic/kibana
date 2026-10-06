@@ -13,4 +13,5 @@ const operations = loadContractOperations(openApiDocument);
 `loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document and returns operations in the shape the Prism validator expects. Loading:
 
 - keeps schema refs pointing into one shared bundle instead of dereferencing them, which keeps large specs such as Microsoft Graph fast to load;
-- repairs schema defects common in vendor specs: `nullable` without `type`, duplicate `enum` values, regex escapes that are invalid under the `u` flag, and `null` in parameter types.
+- repairs schema defects common in vendor specs: `nullable` without `type`, duplicate `enum` values, regex escapes that are invalid under the `u` flag, and `null` in parameter types;
+- compiles every schema and throws a `SchemaCompileError` listing each operation and location that still fails. Prism would otherwise treat such a schema as matching any value and silently skip validation.

@@ -100,3 +100,7 @@ export const getOperationSchemas = ({ request, responses }: IHttpOperation): Loc
   }
   return located;
 };
+
+/** Formats an operation as `METHOD /path` for error messages. */
+export const describeOperation = ({ method, path }: IHttpOperation): string =>
+  `${method.toUpperCase()} ${path}`;

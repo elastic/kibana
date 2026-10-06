@@ -7,12 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { assertSchemasCompile } from './assert_schemas_compile';
 import { loadOperations } from './load_operations';
 import { normalizeOperations } from './normalize_operations';
 import type { ContractOperation, OpenApiDocument } from './types';
 
-/** Loads a spec into operations ready for validation, repairing known vendor schema defects. */
-export const loadContractOperations = (document: OpenApiDocument): ContractOperation[] =>
-  normalizeOperations(loadOperations(document));
+/**
+ * Loads a spec into operations ready for validation, repairing known vendor schema defects
+ * and failing if any schema still cannot be compiled.
+ */
+export const loadContractOperations = (document: OpenApiDocument): ContractOperation[] => {
+  const operations = normalizeOperations(loadOperations(document));
+  assertSchemasCompile(operations);
+  return operations;
+};
 
+export { SchemaCompileError } from './assert_schemas_compile';
+export type { SchemaCompileFailure } from './assert_schemas_compile';
 export type { ContractOperation, OpenApiDocument, SchemaBundle } from './types';

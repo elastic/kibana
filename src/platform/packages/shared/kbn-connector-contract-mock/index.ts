@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { loadContractOperations } from './src/openapi';
-export type { ContractOperation, OpenApiDocument, SchemaBundle } from './src/openapi';
+export { loadContractOperations, SchemaCompileError } from './src/openapi';
+export type {
+  ContractOperation,
+  OpenApiDocument,
+  SchemaBundle,
+  SchemaCompileFailure,
+} from './src/openapi';
