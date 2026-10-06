@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { VISUALIZATION_COLORS } from '@elastic/eui/lib/services/color/visualization_colors';
 
 import type {
   AuthenticatedUser,
