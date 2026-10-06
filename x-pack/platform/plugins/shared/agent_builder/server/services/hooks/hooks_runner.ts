@@ -21,23 +21,23 @@ import {
 } from '@kbn/agent-builder-common/base/errors';
 import { orderBy } from 'lodash';
 
-/** Default maximum execution time for a hook when timeout is not configured (5 minutes). */
-const DEFAULT_HOOK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
+const DEFAULT_HOOK_TIMEOUT_MS = 2 * 60 * 1000;
 
-/**
- * Default maximum execution time for an `afterChatEvent` hook. Events queue behind an event whose
- * hooks are running, so these hooks must be fast.
- */
-const AFTER_CHAT_EVENT_HOOK_TIMEOUT_MS = 10 * 1000;
+interface HookLifecycleConfig {
+  /** `after` hooks run last to first, so they nest like LangChain (last before = first after). */
+  phase: 'before' | 'after';
+  /** Maximum execution time of a blocking hook that doesn't set `timeout`. */
+  defaultTimeoutMs: number;
+}
 
-/** After hooks run in reverse order so they nest like LangChain (last before = first after). */
-const AFTER_EVENTS: HookLifecycle[] = [
-  HookLifecycle.afterToolCall,
-  HookLifecycle.afterExecution,
-  HookLifecycle.afterChatEvent,
-];
-
-const isAfterEvent = (event: HookLifecycle): boolean => AFTER_EVENTS.includes(event);
+const LIFECYCLE_CONFIG: Record<HookLifecycle, HookLifecycleConfig> = {
+  [HookLifecycle.beforeAgent]: { phase: 'before', defaultTimeoutMs: DEFAULT_HOOK_TIMEOUT_MS },
+  [HookLifecycle.beforeToolCall]: { phase: 'before', defaultTimeoutMs: DEFAULT_HOOK_TIMEOUT_MS },
+  [HookLifecycle.afterToolCall]: { phase: 'after', defaultTimeoutMs: DEFAULT_HOOK_TIMEOUT_MS },
+  [HookLifecycle.afterExecution]: { phase: 'after', defaultTimeoutMs: DEFAULT_HOOK_TIMEOUT_MS },
+  // Events queue behind an event whose hooks are running, so these hooks must be fast.
+  [HookLifecycle.afterChatEvent]: { phase: 'after', defaultTimeoutMs: 10 * 1000 },
+};
 
 const normalizeHookError = <E extends HookLifecycle>(
   hookLifecycle: E,
@@ -71,7 +71,7 @@ function getRelevantHooks<E extends HookLifecycle>(
   const hooks = getHooksForLifecycle(lifecycle) as Array<HookRegistration<E>>;
   const filtered = hooks.filter((h) => h.mode === mode);
   const sorted = orderBy(filtered, [(h) => h.priority ?? 0], ['desc']);
-  return isAfterEvent(lifecycle) ? sorted.reverse() : sorted;
+  return LIFECYCLE_CONFIG[lifecycle].phase === 'after' ? sorted.reverse() : sorted;
 }
 
 /**
@@ -102,14 +102,9 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
       }
 
       try {
-        const defaultTimeoutMs =
-          lifecycle === HookLifecycle.afterChatEvent
-            ? AFTER_CHAT_EVENT_HOOK_TIMEOUT_MS
-            : DEFAULT_HOOK_TIMEOUT_MS;
         const timeoutMs =
-          hook.mode === HookExecutionMode.blocking && 'timeout' in hook
-            ? hook.timeout ?? defaultTimeoutMs
-            : defaultTimeoutMs;
+          ('timeout' in hook ? hook.timeout : undefined) ??
+          LIFECYCLE_CONFIG[lifecycle].defaultTimeoutMs;
         const timed = await withTimeout({
           promise: (async () => hook.handler(currentContext))(),
           timeoutMs,
