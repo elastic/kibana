@@ -28,7 +28,7 @@ import { renderEndzoneTooltip, useActiveCursor } from '@kbn/charts-plugin/public
 import { EuiIcon } from '@elastic/eui';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getCharts } from '../../../../services';
-import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
+import { GRID_LINE_CONFIG, STACKED_OPTIONS, getIconType } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
@@ -228,7 +228,7 @@ export const TimeSeries = ({
             id={id}
             domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
-            marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} aria-hidden={true} />}
+            marker={<EuiIcon type={getIconType(icon) || 'asterisk'} aria-hidden={true} />}
             hideLinesTooltips={true}
             style={style}
           />
