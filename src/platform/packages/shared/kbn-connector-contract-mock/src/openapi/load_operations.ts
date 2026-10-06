@@ -7,59 +7,175 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { convertToJsonSchema } from '@stoplight/http-spec/oas';
-import { transformOas2Operations } from '@stoplight/http-spec/oas2';
-import { transformOas3Operations } from '@stoplight/http-spec/oas3';
+import { convertSwagger2 } from './convert_swagger2';
+import { appendPointer, resolveObject } from './json_pointer';
 import { isRecord } from './schema_walk';
-import type { ContractOperation, OpenApiDocument, SchemaBundle } from './types';
+import type {
+  ContractOperation,
+  ContractSpec,
+  MediaTypeContent,
+  OpenApiDocument,
+  OperationParameter,
+  OperationServer,
+  ParameterLocation,
+  SpecSchema,
+} from './types';
 
-const COMPONENT_SCHEMA_REF = /^#\/(?:components\/schemas|definitions)\/(.+)$/;
+const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
 
-const rewriteRefs = (node: unknown, seen: WeakSet<object>): void => {
-  if (typeof node !== 'object' || node === null || seen.has(node)) {
-    return;
-  }
-  seen.add(node);
-  const children = Array.isArray(node) ? node : Object.values(node);
-  if (isRecord(node) && typeof node.$ref === 'string') {
-    const match = COMPONENT_SCHEMA_REF.exec(node.$ref);
-    if (match) {
-      node.$ref = `#/__bundled__/${match[1]}`;
-    }
-  }
-  for (const child of children) {
-    rewriteRefs(child, seen);
-  }
+const DEFAULT_STYLES: Readonly<Record<ParameterLocation, string>> = {
+  path: 'simple',
+  query: 'form',
+  header: 'simple',
+  cookie: 'form',
 };
 
-const getComponentSchemas = (document: OpenApiDocument): Record<string, unknown> => {
-  const { components, definitions } = document;
-  if (isRecord(components) && isRecord(components.schemas)) {
-    return components.schemas;
+const isParameterLocation = (value: unknown): value is ParameterLocation =>
+  typeof value === 'string' && value in DEFAULT_STYLES;
+
+// Skips `x-` specification extensions, which may appear among paths and responses.
+const entriesOf = (value: unknown): Array<[string, unknown]> =>
+  isRecord(value) ? Object.entries(value).filter(([key]) => !key.startsWith('x-')) : [];
+
+const toSchema = (owner: Record<string, unknown>, pointer: string): SpecSchema | undefined =>
+  isRecord(owner.schema)
+    ? { pointer: appendPointer(pointer, 'schema'), schema: owner.schema }
+    : undefined;
+
+const toContents = (owner: Record<string, unknown>, pointer: string): MediaTypeContent[] =>
+  entriesOf(owner.content).map(([mediaType, content]) => ({
+    mediaType,
+    schema: isRecord(content)
+      ? toSchema(content, appendPointer(pointer, 'content', mediaType))
+      : undefined,
+  }));
+
+const toServers = (servers: unknown): OperationServer[] | undefined => {
+  if (!Array.isArray(servers) || servers.length === 0) {
+    return undefined;
   }
-  return isRecord(definitions) ? definitions : {};
+  return servers.filter(isRecord).map(({ url, variables }) => ({
+    url: String(url),
+    variables: Object.fromEntries(
+      entriesOf(variables).map(([name, variable]) => {
+        const { default: fallback, enum: values } = isRecord(variable) ? variable : {};
+        return [
+          name,
+          {
+            default: String(fallback),
+            enum: Array.isArray(values) ? values.map(String) : undefined,
+          },
+        ];
+      })
+    ),
+  }));
+};
+
+const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
+  const version = typeof openapi === 'string' ? openapi : '';
+  if (version.startsWith('3.0.')) {
+    return 'openapi-3.0';
+  }
+  if (/^3\.[1-9]\d*\./.test(version)) {
+    return 'draft-2020-12';
+  }
+  throw new Error(
+    `Unsupported spec version ${version || 'unknown'}; expected Swagger 2.0 or OpenAPI 3.x`
+  );
 };
 
 /**
- * Transforms a spec into Prism operations. Unlike Prism's own loader, schemas are not
- * dereferenced: refs point into one shared bundle, which keeps large or recursive specs
- * (Microsoft Graph, Figma) fast to load.
+ * Indexes the operations of an OpenAPI 3.x document, converting Swagger 2.0 documents first.
+ * Parameter, request body, response and header refs are resolved, while schemas stay in place
+ * in a copy of the document, so their refs keep resolving against it and large specs such as
+ * Microsoft Graph load quickly.
  */
-export const loadOperations = (document: OpenApiDocument): ContractOperation[] => {
-  const operations =
-    'swagger' in document ? transformOas2Operations(document) : transformOas3Operations(document);
+export const loadOperations = (source: OpenApiDocument): ContractOperation[] => {
+  const openApi = source.swagger === '2.0' ? convertSwagger2(source) : structuredClone(source);
+  const spec: ContractSpec = { document: openApi, dialect: getDialect(openApi) };
+  const { document } = spec;
+  const resolve = (node: unknown, pointer: string) => resolveObject(document, node, pointer);
+  const rootServers = toServers(document.servers) ?? [];
 
-  const bundle: SchemaBundle = Object.fromEntries(
-    Object.entries(getComponentSchemas(document)).map(([name, schema]) => [
-      name,
-      convertToJsonSchema(document, schema),
-    ])
-  );
+  const toParameters = (parameters: unknown, pointer: string): OperationParameter[] =>
+    (Array.isArray(parameters) ? parameters : []).flatMap((node, index) => {
+      const { value, pointer: resolved } = resolve(node, appendPointer(pointer, index));
+      if (!isParameterLocation(value.in)) {
+        return [];
+      }
+      const style = typeof value.style === 'string' ? value.style : DEFAULT_STYLES[value.in];
+      const explode = typeof value.explode === 'boolean' ? value.explode : style === 'form';
+      const required = value.in === 'path' || value.required === true;
+      return [
+        {
+          name: String(value.name),
+          in: value.in,
+          required,
+          style,
+          explode,
+          schema: toSchema(value, resolved),
+        },
+      ];
+    });
 
-  const seen = new WeakSet<object>();
-  rewriteRefs(bundle, seen);
-  return operations.map((operation) => {
-    rewriteRefs(operation, seen);
-    return Object.assign(operation, { __bundled__: bundle });
+  return entriesOf(document.paths).flatMap(([path, node]) => {
+    const { value: item, pointer: itemPointer } = resolve(node, appendPointer('/paths', path));
+    const itemParameters = toParameters(item.parameters, appendPointer(itemPointer, 'parameters'));
+
+    return HTTP_METHODS.flatMap((method): ContractOperation[] => {
+      const operation = item[method];
+      if (!isRecord(operation)) {
+        return [];
+      }
+      const pointer = appendPointer(itemPointer, method);
+      const ownParameters = toParameters(
+        operation.parameters,
+        appendPointer(pointer, 'parameters')
+      );
+      // Operation parameters override path item parameters with the same name and location.
+      const inherited = itemParameters.filter(
+        ({ name, in: location }) =>
+          !ownParameters.some((own) => own.name === name && own.in === location)
+      );
+      const body = isRecord(operation.requestBody)
+        ? resolve(operation.requestBody, appendPointer(pointer, 'requestBody'))
+        : undefined;
+
+      return [
+        {
+          id:
+            typeof operation.operationId === 'string'
+              ? operation.operationId
+              : `${method.toUpperCase()} ${path}`,
+          method,
+          path,
+          servers: toServers(operation.servers) ?? toServers(item.servers) ?? rootServers,
+          parameters: [...inherited, ...ownParameters],
+          requestBody: body && {
+            required: body.value.required === true,
+            contents: toContents(body.value, body.pointer),
+          },
+          responses: entriesOf(operation.responses).map(([code, response]) => {
+            const { value, pointer: resolved } = resolve(
+              response,
+              appendPointer(pointer, 'responses', code)
+            );
+            return {
+              code,
+              contents: toContents(value, resolved),
+              headers: entriesOf(value.headers).map(([name, header]) => {
+                const target = resolve(header, appendPointer(resolved, 'headers', name));
+                return {
+                  name,
+                  required: target.value.required === true,
+                  schema: toSchema(target.value, target.pointer),
+                };
+              }),
+            };
+          }),
+          spec,
+        },
+      ];
+    });
   });
 };

@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractOperation } from '../openapi/types';
+import type { OperationMatch, OperationMismatch } from '../openapi/match_operation';
+import type { ContractOperation, Violation } from '../openapi/types';
+
+export type { Violation };
 
 /** A request as a connector sent it. Header names are lowercase. */
 export interface ContractRequest {
@@ -24,16 +27,7 @@ export interface ContractResponse {
   readonly body?: unknown;
 }
 
-/** A way a request or response breaks the contract, e.g. `query.limit` failing `maximum`. */
-export interface Violation {
-  readonly path: readonly string[];
-  readonly code: string;
-  readonly message: string;
-}
-
-export type RouteResult =
-  | { readonly operation: ContractOperation }
-  | { readonly status: number; readonly message: string };
+export type RouteResult = OperationMatch | OperationMismatch;
 
 /** Produces the mock's answer to a valid request. */
 export type Responder = (
@@ -44,7 +38,7 @@ export type Responder = (
 /** The steps the mock runs for every request, implemented once per spec format. */
 export interface ContractAdapter {
   route(request: ContractRequest): RouteResult;
-  validateRequest(operation: ContractOperation, request: ContractRequest): Violation[];
+  validateRequest(match: OperationMatch, request: ContractRequest): Violation[];
   respond: Responder;
   validateResponse(operation: ContractOperation, response: ContractResponse): Violation[];
 }

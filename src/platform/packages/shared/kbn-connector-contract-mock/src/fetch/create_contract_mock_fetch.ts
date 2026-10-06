@@ -11,7 +11,6 @@ import type { ContractRequest, ContractResponse, Responder, Violation } from '..
 import type { OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
-import { describeOperation } from '../openapi/schema_walk';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -106,8 +105,8 @@ export const createContractMockFetch = ({ specs, respond }: ContractMockOptions)
     }
 
     const { operation } = routed;
-    const name = operation.iid ?? describeOperation(operation);
-    const requestViolations = contract.validateRequest(operation, request);
+    const name = operation.id;
+    const requestViolations = contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
       calls.push({
         request: description,
