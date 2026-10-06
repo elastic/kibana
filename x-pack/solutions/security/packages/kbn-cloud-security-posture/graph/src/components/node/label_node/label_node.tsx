@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { Handle, NodeToolbar, Position, useViewport } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -61,7 +61,6 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
-  const { zoom } = useViewport();
 
   const text = label ? label : id;
 
@@ -107,41 +106,38 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             Opacity controls visual show/hide; WebDriver ignores opacity for
             interactability checks so FTR can always click the buttons. */}
         {interactive && toolbarItems.length > 0 && (
-          <NodeToolbar isVisible={true} position={Position.Top} align="center" offset={4}>
-            <div
-              onMouseEnter={showToolbar}
-              onMouseLeave={hideToolbar}
-              style={{ transform: `scale(${zoom})`, transformOrigin: 'center bottom' }}
-              css={css`
-                display: flex;
-                align-items: center;
-                gap: 2px;
-                background: ${euiTheme.colors.backgroundBasePlain};
-                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
-                border-radius: ${euiTheme.border.radius.medium};
-                padding: 2px;
-                box-shadow: ${shadow};
-                opacity: ${isHovered ? 1 : 0};
-                pointer-events: ${isHovered ? 'auto' : 'none'};
-                transition: opacity 150ms ease;
-              `}
-            >
-              {toolbarItems.map((item, idx) => (
-                <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    data-test-subj={item.testSubject}
-                    iconType={item.iconType}
-                    iconSize="m"
-                    color="text"
-                    size="s"
-                    aria-label={item.label}
-                    disabled={item.disabled}
-                    onClick={item.onClick}
-                  />
-                </EuiToolTip>
-              ))}
-            </div>
-          </NodeToolbar>
+          <div
+            onMouseEnter={showToolbar}
+            onMouseLeave={hideToolbar}
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: 2px;
+              position: absolute;
+              bottom: calc(100% + 4px);
+              left: 50%;
+              transform: translateX(-50%);
+              z-index: ${euiTheme.levels.content};
+              opacity: ${isHovered ? 1 : 0};
+              pointer-events: ${isHovered ? 'auto' : 'none'};
+              transition: opacity 150ms ease;
+            `}
+          >
+            {toolbarItems.map((item, idx) => (
+              <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj={item.testSubject}
+                  iconType={item.iconType}
+                  iconSize="m"
+                  color="text"
+                  size="s"
+                  aria-label={item.label}
+                  disabled={item.disabled}
+                  onClick={item.onClick}
+                />
+              </EuiToolTip>
+            ))}
+          </div>
         )}
         <LabelShape
           data-test-subj={TEST_SUBJ_SHAPE}
