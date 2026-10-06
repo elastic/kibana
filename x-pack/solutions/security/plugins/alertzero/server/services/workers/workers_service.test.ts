@@ -755,7 +755,12 @@ describe('WorkersService', () => {
     it('reports an enabled managed Worker as enabled', async () => {
       const harness = createPersistentHarness();
       const service = harness.createService();
-      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      await service.update(
+        TRIAGE,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
 
       await expect(service.isWorkerEnabled(TRIAGE, SPACE)).resolves.toBe(true);
     });

@@ -467,6 +467,8 @@ describe('AlertZeroPlugin Alert Triage Worker start contract', () => {
   }: { alertZeroEnabledInSpace?: boolean; hasAllRequested?: boolean } = {}) => {
     const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
     const coreStart = coreMock.createStart();
+    // The plugin only builds its Workers service when service accounts are enabled.
+    jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
     coreStart.uiSettings.asScopedToClient.mockReturnValue({
       get: jest.fn().mockResolvedValue(alertZeroEnabledInSpace),
     } as never);
