@@ -120,6 +120,25 @@ describe('truncateUpstreamBody', () => {
   });
 });
 
+describe('upstream credential redaction', () => {
+  it.each([
+    ['ES-API-Key: esCredential123', 'esCredential123'],
+    ['api-key: apiCredential123', 'apiCredential123'],
+    ['apikey: compactCredential123', 'compactCredential123'],
+    ['token: tokenCredential123', 'tokenCredential123'],
+    ['password: passwordCredential123', 'passwordCredential123'],
+    ['Authorization: Basic basicCredential123', 'basicCredential123'],
+    ['authorization: Digest digestCredential123 user=x', 'digestCredential123'],
+  ])('redacts %s without losing the diagnostic', (credential, secret) => {
+    const result = truncateUpstreamBody(
+      `upstream rejected request: ${credential}; check permissions`
+    );
+    expect(result).not.toContain(secret);
+    expect(result).toContain('upstream rejected request:');
+    expect(result).toContain('check permissions');
+  });
+});
+
 describe('buildInferenceErrorMessage', () => {
   it('handles AxiosError-shaped errors', () => {
     const message = buildInferenceErrorMessage({

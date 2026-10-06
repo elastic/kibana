@@ -81,22 +81,28 @@ describe('InferenceConnector upstream error propagation', () => {
     });
   });
 
-  it('keeps the status when the upstream body stream fails mid-read', async () => {
-    const body = new Readable({
-      read() {
-        this.push('partial body');
-        this.destroy(new Error('connection reset'));
-      },
-    });
-    (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
-      body,
-      statusCode: 502,
-    });
-    const error = await connector.performApiUnifiedCompletionStream(params).catch((e) => e);
-    expect(error.message).toContain('status code 502');
-    expect(error.message).toContain('connection reset');
-    expect(getErrorSource(error)).toBe(TaskErrorSource.FRAMEWORK);
-  });
+  it.each([
+    [401, TaskErrorSource.USER],
+    [500, TaskErrorSource.FRAMEWORK],
+  ])(
+    'classifies status %i when the upstream body stream fails mid-read',
+    async (statusCode, source) => {
+      const body = new Readable({
+        read() {
+          this.push('partial body');
+          this.destroy(new Error('connection reset'));
+        },
+      });
+      (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
+        body,
+        statusCode,
+      });
+      const error = await connector.performApiUnifiedCompletionStream(params).catch((e) => e);
+      expect(error.message).toContain(`status code ${statusCode}`);
+      expect(error.message).toContain('connection reset');
+      expect(getErrorSource(error)).toBe(source);
+    }
+  );
 
   it('omits a dangling separator for an empty upstream body', async () => {
     (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
@@ -121,6 +127,24 @@ describe('InferenceConnector upstream error propagation', () => {
     for (const secret of ['abc123', 'sk-live-abcdef123456', 'secret123', 'token123']) {
       expect(error.message).not.toContain(secret);
     }
+  });
+
+  it('bounds and redacts an in-band SSE error', async () => {
+    const secret = 'sseCredential123';
+    const message = `upstream rejected token: ${secret}; context length exceeded ${'x'.repeat(
+      2000
+    )}`;
+    (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
+      body: Readable.from([`data: ${JSON.stringify({ error: { message } })}\n\n`]),
+      statusCode: 200,
+    });
+
+    const error = await connector.performApiUnifiedCompletion(params).catch((e) => e);
+
+    expect(error.message).toContain('context length exceeded');
+    expect(error.message).not.toContain(secret);
+    expect(error.message).toHaveLength(1000);
+    expect(error.message).toContain('... [truncated]');
   });
 
   describe('performApiUnifiedCompletionAsyncIterator', () => {
@@ -174,9 +198,38 @@ describe('InferenceConnector upstream error propagation', () => {
       expect(error.message).toContain('upstream connect error or disconnect/reset before headers');
     });
 
-    it('still bubbles up user errors as-is', async () => {
+    it('keeps the enriched message when the caught error has a read-only message', async () => {
+      const readOnly = Object.freeze(
+        Object.assign(new Error('connection refused'), {
+          response: { status: 502, data: 'upstream unavailable' },
+        })
+      );
+      (mockEsClient.transport.request as unknown as jest.Mock).mockRejectedValue(readOnly);
+
+      const error = await connector
+        .performApiUnifiedCompletionAsyncIterator(params, connectorUsageCollector)
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toContain('connection refused');
+      expect(error.message).toContain('upstream unavailable');
+      expect(error).not.toBe(readOnly);
+    });
+
+    it.each([
+      [
+        '{"error":{"message":"Received a rate limit status code from the inference service: status [429] and current quota]"}}',
+        'Received a rate limit status code from the inference service: status [429] and current quota]',
+        false,
+      ],
+      [
+        `{"error":{"message":"status [429] quota ${'x'.repeat(2000)}"}}`,
+        'status [429] quota',
+        true,
+      ],
+    ])('still bubbles up user errors as-is for %s', async (upstreamBody, diagnostic, truncated) => {
       (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
-        body: Readable.from([`{"error":{"message":"status [429] quota ${'x'.repeat(2000)}"}}`]),
+        body: Readable.from([upstreamBody]),
         statusCode: 400,
       });
 
@@ -185,6 +238,8 @@ describe('InferenceConnector upstream error propagation', () => {
         .catch((e) => e);
 
       expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toContain(diagnostic);
+      expect(error.message.includes('... [truncated]')).toBe(truncated);
       expect(error.message.length).toBeLessThanOrEqual(1000);
     });
   });

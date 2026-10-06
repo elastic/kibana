@@ -166,8 +166,9 @@ const redactUpstreamSecrets = (text: string): string =>
   text
     .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
     .replace(/sk-[A-Za-z0-9_-]{8,}/g, '[redacted]')
+    .replace(/(authorization)\s*[:=]\s*(?:basic|digest)\s+[^\s"',}]+/gi, '$1: [redacted]')
     .replace(
-      /((?:api_key|x-api-key|authorization)["']?\s*[:=]\s*["']?)[^\s"',}]+/gi,
+      /((?:api[-_]?key|es-api-key|x-api-key|authorization|token|password|secret)["']?\s*[:=]\s*["']?)[^\s"',}]+/gi,
       '$1[redacted]'
     );
 

@@ -146,7 +146,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       }),
       tap((line) => {
         if ('error' in line) {
-          throw new Error(line.error.message || line.error.reason || 'Unknown error');
+          throw new Error(
+            truncateUpstreamBody(line.error.message || line.error.reason || 'Unknown error')
+          );
         }
         if (
           'choices' in line &&
@@ -238,7 +240,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
               }; upstream body stream failed: ${buildInferenceErrorMessage(cause)}`
             )
           ),
-          TaskErrorSource.FRAMEWORK
+          response.statusCode < 500 ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
         );
       }
       detectandThrowUserError(error);
@@ -289,7 +291,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       }
       const errorMessage = this.getResponseErrorMessage(e);
       if (e instanceof Error) {
-        e.message = errorMessage;
+        try {
+          e.message = errorMessage;
+        } catch (assignmentError) {
+          // frozen / getter-only `message`: keep the enriched text rather than masking the failure
+          throw new Error(errorMessage);
+        }
         throw e;
       }
       throw new Error(errorMessage);
