@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { interval, type Subscription } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -26,6 +27,8 @@ import {
 import type { DeferredInitExampleConfig } from './config';
 
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+const HEARTBEAT_INTERVAL_MS = 60_000;
 
 interface DeferredInitExampleDoc {
   message: string;
@@ -91,6 +94,8 @@ export class DeferredInitExampleServerPlugin
   private readonly instanceUuid: string;
   // Produced by `lazyInitialize`, consumed by `start`. Core guarantees that order on this instance.
   private instanceState?: DeferredInitExampleInstanceState;
+  // Created by `start()`. Stays undefined if this instance was never triggered.
+  private heartbeatSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -254,6 +259,10 @@ export class DeferredInitExampleServerPlugin
       throw new Error('[deferredInitExample] start() ran before lazyInitialize() completed');
     }
 
+    this.heartbeatSubscription = interval(HEARTBEAT_INTERVAL_MS).subscribe(() => {
+      this.logger.debug('[deferredInitExample] heartbeat');
+    });
+
     const client = core.elasticsearch.client.asInternalUser;
     return {
       getDoc: () => this.getDocFrom(client),
@@ -269,5 +278,14 @@ export class DeferredInitExampleServerPlugin
     return result._source!;
   }
 
-  public stop(): void {}
+  /**
+   * Core calls this even if `start()` never ran on this instance, so every start-time resource
+   * must be guarded.
+   */
+  public stop(): void {
+    if (this.heartbeatSubscription) {
+      this.logger.info('[deferredInitExample] stop: unsubscribing heartbeat created by start()');
+      this.heartbeatSubscription.unsubscribe();
+    }
+  }
 }

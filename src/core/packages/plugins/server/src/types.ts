@@ -318,8 +318,10 @@ export interface Plugin<
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
   /**
-   * Not invoked for a lazy plugin whose deferred `start()` never ran on this instance: there is
-   * nothing start-time to tear down, and `setup()`-time registrations need no cleanup.
+   * Always invoked once `setup()` has run, including for a lazy plugin whose deferred `start()`
+   * never ran on this instance, so `setup()`-time resources can be torn down. A lazy plugin's
+   * `stop()` must therefore not assume start-time state exists: guard each start-time resource
+   * (for example `this.subscription?.unsubscribe()`).
    */
   stop?(): MaybePromise<void>;
 
