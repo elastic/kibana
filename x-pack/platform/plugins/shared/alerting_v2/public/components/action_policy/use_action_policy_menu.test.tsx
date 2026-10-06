@@ -53,7 +53,11 @@ const getItems = (result: { current: ReturnType<typeof useActionPolicyMenu> }) =
 
 const findItem = (items: FlyoutFooterMenuItem[], testSubj: string) =>
   items.find((item) => 'data-test-subj' in item && item['data-test-subj'] === testSubj) as
-    | (FlyoutFooterMenuItem & { onClick?: () => void; disabled?: boolean; toolTipContent?: unknown })
+    | (FlyoutFooterMenuItem & {
+        onClick?: () => void;
+        disabled?: boolean;
+        toolTipContent?: unknown;
+      })
     | undefined;
 
 describe('useActionPolicyMenu', () => {

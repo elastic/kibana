@@ -584,7 +584,6 @@ export const AlertEpisodeDetailsFlyout = ({
           </FlyoutTemplate.Body>
         </FlyoutTemplate>
       )}
-
     </>
   );
 };
