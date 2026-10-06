@@ -35,8 +35,6 @@ const MAX_COUNTER_UPDATE_ATTEMPTS = 3;
 const MEMORY_TAG = 'memory';
 const SPACE_ID_FIELD = 'attributes.space_id';
 const ARCHIVE_REASON_FIELD = 'attributes.archive_reason';
-/** Legacy field. Read only, so a pre-`archive_reason` document still reads archived. */
-const STATUS_FIELD = 'attributes.status';
 const UPDATED_AT_FIELD = 'attributes.updated_at';
 const SLUG_FIELD = 'attributes.slug';
 
@@ -44,17 +42,10 @@ const SLUG_FIELD = 'attributes.slug';
  * The one definition of "archived" for every query in this file. It matches
  * `toPage`'s read-side derivation, so a document the read path calls archived can
  * never appear in the active listing, the archived count, or a recall result.
- *
- * `archive_reason` is the field that is written; `status: 'archived'` only exists
- * on documents written before it was introduced, and `exists` is true even for an
- * empty reason, so a malformed one still reads as archived.
+ * `exists` is true even for an empty reason, so a malformed one still reads as
+ * archived.
  */
-const ARCHIVED_CLAUSE: object = {
-  bool: {
-    should: [{ exists: { field: ARCHIVE_REASON_FIELD } }, { term: { [STATUS_FIELD]: 'archived' } }],
-    minimum_should_match: 1,
-  },
-};
+const ARCHIVED_CLAUSE: object = { exists: { field: ARCHIVE_REASON_FIELD } };
 
 export type { CounterUpdate };
 
@@ -269,11 +260,8 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
   }
 
   const slug = source.attributes?.slug ?? slugFromMemoryId(id);
-  // `archive_reason` is the single source of truth. The `status` branch only
-  // exists so documents written before the field was introduced still report as
-  // archived; it is never written.
   const archiveReason = source.attributes?.archive_reason;
-  const archived = archiveReason !== undefined || source.attributes?.status === 'archived';
+  const archived = archiveReason !== undefined;
 
   return {
     id,
@@ -348,7 +336,6 @@ export const createMemoryPageStore = ({
       attributes: {
         slug: page.slug,
         space_id: spaceId,
-        // `status` is deliberately not written; `archive_reason` is the state.
         ...(page.agent_id !== undefined ? { agent_id: page.agent_id } : {}),
         ...(page.conversation_id !== undefined ? { conversation_id: page.conversation_id } : {}),
         categories: page.categories,
@@ -494,8 +481,7 @@ export const createMemoryPageStore = ({
 
   /**
    * `active` is "not archived", where archived is `ARCHIVED_CLAUSE` — the same
-   * definition the read path applies, so a legacy `status: 'archived'` document
-   * with no reason is not offered as active.
+   * definition the read path applies.
    *
    * The tag clauses come last and are shared by every filter, so the total in the
    * stats counts exactly the rows the listing returns.

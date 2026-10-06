@@ -174,27 +174,16 @@ describe('createMemoryPageStore', () => {
 
     await store.list({ filter: 'active' });
     const activeClause = JSON.stringify(search.mock.calls[0][0]);
-    // Both archived markers, in one clause: `archive_reason` is what is written,
-    // and legacy `status: 'archived'` is only read so pre-existing documents
-    // cannot show up as active or be recalled.
     expect(activeClause).toContain('attributes.archive_reason');
-    expect(activeClause).toContain('"attributes.status":"archived"');
-    // Anything else on the removed `status` field must stay out of the query.
-    expect(activeClause).not.toContain('"attributes.status":"established"');
-    expect(activeClause).not.toContain('"attributes.status":"tentative"');
   });
 
-  it('treats a legacy status-only archived document as archived in every query', async () => {
-    // A document written before `archive_reason` existed. The read path already
-    // derived `archived: true` from it, so the queries have to agree — otherwise
-    // it is listed as active and handed to the agent.
-    const legacy = {
+  it('excludes an archived document in every query and counts it once', async () => {
+    const archived = {
       ...source,
-      attributes: { ...source.attributes, status: 'archived' as const },
+      attributes: { ...source.attributes, archive_reason: 'manual' as const },
     };
-    delete (legacy.attributes as { archive_reason?: string }).archive_reason;
     const search = jest.fn(() =>
-      Promise.resolve({ hits: { hits: [{ _id: 'space-a:memory_kafka-lag', _source: legacy }] } })
+      Promise.resolve({ hits: { hits: [{ _id: 'space-a:memory_kafka-lag', _source: archived }] } })
     );
     const store = createMemoryPageStore({
       esClient: {
@@ -202,7 +191,7 @@ describe('createMemoryPageStore', () => {
         get: jest.fn().mockResolvedValue({
           found: true,
           _id: 'space-a:memory_kafka-lag',
-          _source: legacy,
+          _source: archived,
         }),
       } as never,
       logger,
@@ -212,8 +201,6 @@ describe('createMemoryPageStore', () => {
 
     expect((await store.get('memory_kafka-lag'))?.archived).toBe(true);
 
-    // The legacy marker has to be in every query that excludes archived pages:
-    // the active listing, the archived listing, the archived count, and recall.
     await store.list({ filter: 'active' });
     await store.listPaginated({ filter: 'archived' });
     await store.retrieve();
@@ -222,13 +209,9 @@ describe('createMemoryPageStore', () => {
     const serialized = calls.map(([request]) => JSON.stringify(request));
     // 0: active listing. 1: archived listing, with the archived count hung off it.
     // 2: recall.
-    expect(serialized[0]).toContain('"attributes.status":"archived"');
-    expect(serialized[1]).toContain('"attributes.status":"archived"');
-    expect(serialized[2]).toContain('"attributes.status":"archived"');
-    // The archived count is a filter aggregation over the whole index, so it has
-    // to use the same clause or the header reports a legacy archived page as
-    // active — and it cannot hang off the listing query, which matches no
-    // archived document at all under `active`.
+    expect(serialized[0]).toContain('attributes.archive_reason');
+    expect(serialized[1]).toContain('attributes.archive_reason');
+    expect(serialized[2]).toContain('attributes.archive_reason');
     const statsQuery = calls[1][0] as unknown as {
       aggs: { archived: { global: unknown; aggs: { inScope: { filter: unknown } } } };
     };
@@ -238,15 +221,7 @@ describe('createMemoryPageStore', () => {
         filter: [
           { term: { tags: 'memory' } },
           { term: { 'attributes.space_id': 'space-a' } },
-          {
-            bool: {
-              should: [
-                { exists: { field: 'attributes.archive_reason' } },
-                { term: { 'attributes.status': 'archived' } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
+          { exists: { field: 'attributes.archive_reason' } },
         ],
       },
     });
@@ -294,8 +269,7 @@ describe('createMemoryPageStore', () => {
       expect(archivedFilter).toHaveLength(3);
       expect(archivedFilter[0]).toEqual({ term: { tags: 'memory' } });
       expect(archivedFilter[1]).toEqual({ term: { 'attributes.space_id': 'space-a' } });
-      expect(JSON.stringify(archivedFilter[2])).toContain('"minimum_should_match":1');
-      expect(JSON.stringify(archivedFilter[2])).not.toContain('must_not');
+      expect(archivedFilter[2]).toEqual({ exists: { field: 'attributes.archive_reason' } });
     }
   });
 
@@ -1116,17 +1090,7 @@ describe('createMemoryPageStore', () => {
         sort: [{ '@timestamp': { order: 'desc' } }],
         query: expect.objectContaining({
           bool: expect.objectContaining({
-            must_not: [
-              {
-                bool: {
-                  should: [
-                    { exists: { field: 'attributes.archive_reason' } },
-                    { term: { 'attributes.status': 'archived' } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+            must_not: [{ exists: { field: 'attributes.archive_reason' } }],
           }),
         }),
       }),

@@ -42,13 +42,6 @@ export interface StoredMemoryPage {
   context?: string;
   tags?: string[];
   attributes: {
-    /**
-     * Legacy corroboration gate, removed. Only read so documents written before
-     * the change still report as archived; never written.
-     *
-     * @deprecated derive archived state from `archive_reason` instead.
-     */
-    status?: 'established' | 'tentative' | 'archived';
     impressions?: number;
     conversions?: number;
     last_impression_time?: string;
@@ -79,7 +72,7 @@ export interface MemoryPage {
   content: string;
   context?: string;
   tags: string[];
-  /** True when `archive_reason` is set, or when a legacy document says `status: 'archived'`. */
+  /** True when `archive_reason` is set. */
   archived: boolean;
   source?: string;
   merged_from?: string[];
