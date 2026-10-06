@@ -160,27 +160,46 @@ export const buildActionInput = ({
 
 /**
  * Upper bound on per-proposal bullets embedded in the run conclusion. The conclusion lands in a
- * journal note whose `message` is capped at 8,000 characters (`journal_note.yaml`); a bullet is
- * roughly 250 characters at worst, so this leaves room for the rest of the conclusion. Uncapped,
+ * journal note whose `message` is capped at 8,000 characters (`journal_note.yaml`); uncapped,
  * 50 hosts x 2 actions overflowed it and failed the note's input validation.
  */
 export const MAX_SUMMARY_PROPOSAL_BULLETS = 20;
 
 /**
+ * Character budget for the bullets, as well as the count cap above: titles (256) and host names
+ * (schema allows far more than a DNS name) are variable-length, so a count alone does not bound
+ * the note. Sits well under the 8,000 limit to leave room for the rest of the conclusion.
+ */
+export const MAX_SUMMARY_BULLETS_CHARS = 5000;
+
+const MAX_SUMMARY_HOST_NAME_CHARS = 253;
+
+const truncate = (value: string, max: number): string =>
+  value.length > max ? `${value.slice(0, max - 1)}…` : value;
+
+/**
  * Bounded bullet list for the run conclusion. `proposals` stays whole (it drives the gate
- * fan-out); only this prose view is capped, and the remainder is reported as a count.
+ * fan-out); only this prose view is capped, and everything left out is reported as a count.
  */
 export const buildProposalSummaryBullets = (
   proposals: PackageReportMintPayload[]
 ): { bullets: string[]; omittedCount: number } => {
-  const bullets = proposals.slice(0, MAX_SUMMARY_PROPOSAL_BULLETS).map((p) => {
-    const host = p.hostName ? ` on \`${p.hostName}\`` : '';
+  const bullets: string[] = [];
+  let usedChars = 0;
+  for (const p of proposals.slice(0, MAX_SUMMARY_PROPOSAL_BULLETS)) {
+    const host = p.hostName ? ` on \`${truncate(p.hostName, MAX_SUMMARY_HOST_NAME_CHARS)}\`` : '';
     const action = p.actionWorkflowId
       ? `: runs \`${p.actionWorkflowId}\` on approval`
       : ': recommendation only';
-    return `- **${p.title || p.category}**${host}${action}`;
-  });
-  return { bullets, omittedCount: Math.max(0, proposals.length - bullets.length) };
+    const bullet = `- **${p.title || p.category}**${host}${action}`;
+    // +1 for the newline between bullets.
+    if (usedChars + bullet.length + 1 > MAX_SUMMARY_BULLETS_CHARS) {
+      break;
+    }
+    bullets.push(bullet);
+    usedChars += bullet.length + 1;
+  }
+  return { bullets, omittedCount: proposals.length - bullets.length };
 };
 
 const buildClosureSummary = (state: CurrentRunState): string => {

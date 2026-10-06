@@ -11,6 +11,7 @@ import {
   canFillRespondAction,
   decidePackageReport,
   buildProposalSummaryBullets,
+  MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
 } from './decide_package_report';
 import type { CurrentRunState } from './types';
@@ -486,6 +487,27 @@ describe('buildProposalSummaryBullets', () => {
     expect(bullets[0]).toBe(
       '- **Isolate host a-fairly-long-host-name-number-0.corp.example.com** on `a-fairly-long-host-name-number-0.corp.example.com`: runs `system-security-action-isolate-host` on approval'
     );
+  });
+
+  it('stays under the character cap with very long host names and counts what it drops', () => {
+    const hosts = Array.from({ length: 50 }, (_, i) => ({
+      name: `${i}-${'h'.repeat(2000)}`,
+      enrolled: true,
+      agentId: `agent-${i}`,
+    }));
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState({ hosts }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    const { bullets, omittedCount } = buildProposalSummaryBullets(proposals);
+
+    expect(bullets.length).toBeGreaterThan(0);
+    expect(bullets.length).toBeLessThan(MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(bullets.join('\n').length).toBeLessThanOrEqual(MAX_SUMMARY_BULLETS_CHARS);
+    expect(bullets.join('\n').length).toBeLessThan(JOURNAL_NOTE_MESSAGE_MAX);
+    expect(bullets.length + omittedCount).toBe(proposals.length);
   });
 
   it('lists everything and omits nothing at or under the cap', () => {
