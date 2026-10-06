@@ -43,6 +43,29 @@ describe('alertActionSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('keeps the alert id and status of an alert-level action', () => {
+    const result = alertActionSchema.safeParse({
+      ...baseAction,
+      actor: { type: 'internal' },
+      alert_id: 'alert-1',
+      alert_status: 'active',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({ alert_id: 'alert-1', alert_status: 'active' });
+  });
+
+  it('accepts a null alert id for a series-level action', () => {
+    const result = alertActionSchema.safeParse({
+      ...baseAction,
+      action_type: 'snooze',
+      actor: { type: 'user' },
+      alert_id: null,
+    });
+
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('getAlertActionsResourceDefinition', () => {
@@ -58,10 +81,21 @@ describe('getAlertActionsResourceDefinition', () => {
     });
   });
 
-  it('resets data streams created with the keyword actor mapping', () => {
+  it('maps alert_id and alert_status as keywords without the episode_* fields', () => {
+    const { mappings } = getAlertActionsResourceDefinition();
+
+    expect(mappings.properties).toMatchObject({
+      alert_id: { type: 'keyword' },
+      alert_status: { type: 'keyword' },
+    });
+    expect(mappings.properties).not.toHaveProperty('episode_id');
+    expect(mappings.properties).not.toHaveProperty('episode_status');
+  });
+
+  it('resets data streams created with the episode_* fields or the keyword actor mapping', () => {
     const { version, forceReset } = getAlertActionsResourceDefinition();
 
-    expect(version).toBe(7);
-    expect(forceReset).toEqual({ version: 6 });
+    expect(version).toBe(8);
+    expect(forceReset).toEqual({ version: 7 });
   });
 });

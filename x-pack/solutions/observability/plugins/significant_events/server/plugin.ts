@@ -24,7 +24,6 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
-  firstValueFrom,
   from,
   of,
   skip,
@@ -33,10 +32,7 @@ import {
 } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import {
-  NIGHTSHIFT_ENABLED_FLAG,
-  SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -233,10 +229,6 @@ export class SignificantEventsPlugin
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
-        useRuleEventsRead$: coreStart.featureFlags.getBooleanValue$(
-          SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-          false
-        ),
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
@@ -247,18 +239,10 @@ export class SignificantEventsPlugin
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
 
-      let alertEventsClientPromise: Promise<AlertEventsClientApi | undefined> | undefined;
-      const getAlertEventsClient = (): Promise<AlertEventsClientApi | undefined> => {
-        alertEventsClientPromise ??= pluginsStart.alertingVTwo
-          .getAlertEventsClientWithRequest(request)
-          .catch((err) => {
-            this.logger.warn(
-              `Failed to acquire AlertEventsClient; .rule-events dual-write skipped: ${
-                err instanceof Error ? err.message : err
-              }`
-            );
-            return undefined;
-          });
+      let alertEventsClientPromise: Promise<AlertEventsClientApi> | undefined;
+      const getAlertEventsClient = (): Promise<AlertEventsClientApi> => {
+        alertEventsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertEventsClientWithRequest(request);
         return alertEventsClientPromise;
       };
 
@@ -324,7 +308,6 @@ export class SignificantEventsPlugin
       registerAgentBuilderSmlTypes({
         agentBuilderSml: plugins.agentBuilderSml,
         getScopedClients: this.getScopedClients,
-        getDataStreams: async () => (await core.getStartServices())[0].dataStreams,
         isAvailable: async () => {
           const [, pluginsStart] = await core.getStartServices();
           return this.server
@@ -333,12 +316,6 @@ export class SignificantEventsPlugin
                 licensing: pluginsStart.licensing,
               })
             : false;
-        },
-        getUseRuleEventsRead: async () => {
-          const [coreStart] = await core.getStartServices();
-          return firstValueFrom(
-            coreStart.featureFlags.getBooleanValue$(SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ, false)
-          );
         },
       });
     }

@@ -123,6 +123,7 @@ describe('exportLiveQueryResultsRoute', () => {
       request,
       response,
       expect.objectContaining({
+        actionId: 'action-abc',
         baseFilter: 'action_id: "action-abc"',
         metadata: expect.objectContaining({ action_id: 'action-abc' }),
         fileNamePrefix: 'osquery-results-action-abc',

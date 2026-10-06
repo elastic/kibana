@@ -12,7 +12,7 @@ import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common'
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { ChartType } from '@kbn/visualization-utils';
-import { DataViewSource } from '@kbn/data-source';
+import { DataViewSource, type DataSource } from '@kbn/data-source';
 import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
@@ -62,6 +62,7 @@ export const getLensVisMock = async ({
   timeRange,
   breakdownField,
   dataView,
+  dataSource,
   allSuggestions,
   isTransformationalESQL,
   table,
@@ -72,6 +73,8 @@ export const getLensVisMock = async ({
   filters: QueryParams['filters'];
   query: QueryParams['query'];
   dataView: DataView;
+  /** Defaults to a `DataViewSource` of `dataView`. */
+  dataSource?: DataSource;
   columns: DatatableColumn[];
   isPlainRecord: boolean;
   timeInterval: string;
@@ -124,7 +127,7 @@ export const getLensVisMock = async ({
 
   lensService.update({
     queryParams: {
-      dataSource: new DataViewSource(dataView),
+      dataSource: dataSource ?? new DataViewSource(dataView),
       query,
       filters,
       timeRange: timeRange ?? TIME_RANGE,
