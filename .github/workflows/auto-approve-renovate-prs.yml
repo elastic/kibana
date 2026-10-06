@@ -19,6 +19,7 @@ jobs:
       github.event.sender.login == 'elastic-renovate-prod[bot]' &&
       contains(github.event.pull_request.labels.*.name, 'renovate-auto-approve')
     permissions:
+      contents: read
       pull-requests: write
     steps:
       - name: Approve if the PR only contains Renovate commits to allowed files
@@ -35,16 +36,31 @@ jobs:
               pull_number: context.payload.pull_request.number,
             };
 
-            // Author metadata is spoofable; GitHub-signed (web-flow) commits authored by the Renovate app are not.
+            // Commit author metadata is spoofable, so each commit must be either GitHub-signed (web-flow) by the
+            // Renovate app, or a Renovate helper fix commit that kibanamachine itself pushed to this branch.
             const commits = await github.paginate(github.rest.pulls.listCommits, pull);
+            const kibanamachinePushes = await github.paginate(github.rest.repos.listActivities, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/heads/${context.payload.pull_request.head.ref}`,
+              actor: 'kibanamachine',
+              activity_type: 'push',
+            });
+            const isRenovateCommit = ({ author, committer, commit }) =>
+              author?.login === 'elastic-renovate-prod[bot]' &&
+              committer?.login === 'web-flow' &&
+              commit.verification.verified;
+            const isRenovateHelperCommit = ({ sha, author, committer, commit, parents }) =>
+              author?.login === 'kibanamachine' &&
+              committer?.login === 'kibanamachine' &&
+              parents.length === 1 &&
+              commit.message.startsWith('Changes from Renovate helper') &&
+              kibanamachinePushes.some(({ after }) => after === sha);
             const foreignCommits = commits.filter(
-              ({ author, committer, commit }) =>
-                author?.login !== 'elastic-renovate-prod[bot]' ||
-                committer?.login !== 'web-flow' ||
-                !commit.verification.verified
+              (commit) => !isRenovateCommit(commit) && !isRenovateHelperCommit(commit)
             );
             if (foreignCommits.length > 0) {
-              core.notice(`Not approving: commits not signed by Renovate: ${foreignCommits.map(({ sha }) => sha).join(', ')}`);
+              core.notice(`Not approving: commits not from Renovate or the Renovate helper: ${foreignCommits.map(({ sha }) => sha).join(', ')}`);
               return;
             }
 

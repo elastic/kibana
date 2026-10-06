@@ -185,7 +185,7 @@ Here is an example configuration for a dependency in the `renovate.json` file:
 
 ### Automerge
 
-Renovate PRs from rules with `"automerge": true` and the `renovate-auto-approve` label are merged without manual intervention. Renovate enables GitHub auto-merge on the PR, the [`auto-approve-renovate-prs.yml`](https://github.com/elastic/kibana/blob/main/.github/workflows/auto-approve-renovate-prs.yml) workflow approves it, and the merge queue merges it once required checks pass. The workflow only approves PRs whose commits are all signed by Renovate and which only change `package.json` and `pnpm-lock.yaml`. If anyone other than Renovate or `kibanamachine` pushes to the PR, the approval is dismissed.
+Renovate PRs from rules with `"automerge": true` and the `renovate-auto-approve` label are merged without manual intervention. Renovate enables GitHub auto-merge on the PR, the [`auto-approve-renovate-prs.yml`](https://github.com/elastic/kibana/blob/main/.github/workflows/auto-approve-renovate-prs.yml) workflow approves it, and the merge queue merges it once required checks pass. The workflow only approves PRs whose commits all come from Renovate or the Renovate helper, and which only change `package.json` and `pnpm-lock.yaml`. If anyone other than Renovate or `kibanamachine` pushes to the PR, the approval is dismissed.
 
 Automerge is currently enabled on `main` for patch updates of dependencies owned solely by `@elastic/kibana-operations`. To opt a dependency in, add it to the `matchDepNames` list of the automerge rule at the end of `packageRules`. Keep `minimumReleaseAge` set on the owning rule.
 
