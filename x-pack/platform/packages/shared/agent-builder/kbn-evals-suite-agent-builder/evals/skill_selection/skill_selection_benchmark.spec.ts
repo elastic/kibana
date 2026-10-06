@@ -8,12 +8,15 @@
 import { evaluate as evalsBase } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { AgentBuilderEvaluationChatClient } from '../../src/chat_client';
-import { skillSelectionEvaluator } from '../../src/skill_selection_evaluators';
+import {
+  preSelectionEvaluator,
+  skillSelectionEvaluator,
+} from '../../src/skill_selection_evaluators';
 import type { BenchmarkExample } from './benchmark_dataset';
 import {
   ALERT_ANALYSIS_EXAMPLES,
   AUTOMATIC_TROUBLESHOOTING_EXAMPLES,
-  DASHBOARD_MANAGEMENT_EXAMPLES,
+  DASHBOARDS_EXAMPLES,
   DETECTION_RULE_EDIT_EXAMPLES,
   ENTITY_ANALYTICS_EXAMPLES,
   FIND_RULES_EXAMPLES,
@@ -42,7 +45,11 @@ import {
 const base = evalsBase.extend<{}, { chatClient: AgentBuilderEvaluationChatClient }>({
   chatClient: [
     async ({ fetch, log, connector }, use) => {
-      await use(new AgentBuilderEvaluationChatClient(fetch, log, connector.id));
+      // Space on the *target* Kibana that agent requests are sent to. Distinct from
+      // `--space-ids` / EVAL_SPACE_IDS, which only scopes where datasets and scores are stored
+      // (possibly on a separate evaluations Kibana). Unset = default space.
+      const targetSpaceId = process.env.EVAL_TARGET_SPACE_ID;
+      await use(new AgentBuilderEvaluationChatClient(fetch, log, connector.id, targetSpaceId));
     },
     { scope: 'worker' },
   ],
@@ -86,7 +93,7 @@ const evaluate = base.extend<{}, { evaluateBenchmark: EvaluateBenchmark }>({
               } satisfies SkillRoutingTaskOutput;
             },
           },
-          [skillSelectionEvaluator]
+          [skillSelectionEvaluator, preSelectionEvaluator]
         );
       });
     },
@@ -115,10 +122,10 @@ evaluate.describe(
       await evaluateBenchmark({ skillId: 'skill-authoring', examples: SKILL_AUTHORING_EXAMPLES });
     });
 
-    evaluate('dashboard-management routing', async ({ evaluateBenchmark }) => {
+    evaluate('dashboards routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
-        skillId: 'dashboard-management',
-        examples: DASHBOARD_MANAGEMENT_EXAMPLES,
+        skillId: 'dashboards',
+        examples: DASHBOARDS_EXAMPLES,
       });
     });
   }

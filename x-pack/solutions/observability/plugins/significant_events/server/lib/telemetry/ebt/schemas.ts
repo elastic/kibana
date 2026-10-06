@@ -76,9 +76,14 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
       _meta: {
         description:
           'Reasoning turns that contained external content and pending task tools and were correctly continued',
+        optional: true,
       },
     },
     tool_usage: {
+      _meta: {
+        description: 'Tool usage statistics for the inference steps',
+        optional: true,
+      },
       properties: {
         get_stream_features: {
           properties: {
@@ -362,7 +367,15 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   event_uuid: {
     type: 'keyword',
     _meta: {
-      description: 'The identifier of the updated significant event',
+      description:
+        'Deprecated — superseded by `event_id`. The identifier of the updated significant event',
+      optional: true,
+    },
+  },
+  event_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The stable event id of the updated significant event',
     },
   },
   status: {
@@ -565,7 +578,17 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
     event_uuid: {
       type: 'keyword',
       _meta: {
-        description: 'The identifier of the significant event the investigation was attached to',
+        description:
+          'Deprecated — superseded by `event_id`. The identifier of the significant event the investigation was attached to',
+        optional: true,
+      },
+    },
+    event_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The stable event id of the significant event the investigation was attached to',
+        optional: true,
       },
     },
     workflow_execution_id: {

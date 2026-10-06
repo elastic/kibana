@@ -15,27 +15,32 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { DEFAULT_AI_INDEX_TYPE, MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
+import { AiIndexDescriptionField } from '../components/ai_index_description_field';
+import { MemorySettingsPanel } from '../components/memory_settings_panel';
 import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
-import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
+import {
+  ContextEngineSubPageHeader,
+  contextEngineBackDestinationLabel,
+} from '../layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { validateAiIndexId } from '../utils/ai_index_dest';
-
-const cancelLabel = i18n.translate('xpack.contextEngine.createAiIndex.cancel', {
-  defaultMessage: 'Cancel',
-});
+import { validateTextInput } from '../utils/validate_text_input';
 
 const createPageDescription = i18n.translate('xpack.contextEngine.createAiIndex.description', {
   defaultMessage: "Name your AI index. You'll add sources and automations next.",
@@ -48,23 +53,34 @@ const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title'
 export const CreateAiIndexPage = () => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
+  const isMemoryFeatureEnabled = useMemoryEnabled();
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
+  const [memoryEnabled, setMemoryEnabled] = useState(true);
   const [trace, setTrace] = useState<EditableAiIndexTrace | undefined>();
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
   const { dest, error: nameError } = validateAiIndexId(DEFAULT_AI_INDEX_TYPE, id);
   const destValue = dest?.value;
+  const descriptionValidation = validateTextInput({
+    value: description,
+    maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
+  });
 
   const createAndContinue = async () => {
     const created = await createAiIndex({
       id,
       description,
+      memoryEnabled: isMemoryFeatureEnabled ? memoryEnabled : undefined,
       sources: [],
       trace,
     });
     if (created) {
-      navigateToContextEngine(getAiIndexDetailPath(created.id));
+      navigateToContextEngine(
+        getAiIndexDetailPath(created.id),
+        undefined,
+        AI_INDEX_CREATED_LOCATION_STATE
+      );
     }
   };
 
@@ -74,7 +90,7 @@ export const CreateAiIndexPage = () => {
       breadcrumbPageName={createPageTitle}
     >
       <ContextEngineSubPageHeader
-        backLabel={cancelLabel}
+        backDestinationLabel={contextEngineBackDestinationLabel}
         backHref={backHref}
         onBackClick={(event) => {
           event.preventDefault();
@@ -128,6 +144,18 @@ export const CreateAiIndexPage = () => {
           </EuiFormRow>
         </EuiPanel>
 
+        {isMemoryFeatureEnabled && (
+          <>
+            <EuiSpacer size="l" />
+
+            <MemorySettingsPanel
+              checked={memoryEnabled}
+              onChange={({ target: { checked } }) => setMemoryEnabled(checked)}
+              toggleTestSubject="contextCreateAiIndexMemoryToggle"
+            />
+          </>
+        )}
+
         <EuiSpacer size="l" />
 
         <EuiPanel hasBorder paddingSize="l">
@@ -139,30 +167,13 @@ export const CreateAiIndexPage = () => {
             </h2>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiFormRow
-            fullWidth
-            helpText={i18n.translate('xpack.contextEngine.createAiIndex.description.helpText', {
-              defaultMessage: 'Optional — describe what this AI index is for.',
-            })}
-          >
-            <EuiTextArea
-              fullWidth
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              maxLength={MAX_AI_INDEX_DESCRIPTION_LENGTH}
-              data-test-subj="contextAiIndexDescriptionInput"
-              placeholder={i18n.translate(
-                'xpack.contextEngine.createAiIndex.description.placeholder',
-                { defaultMessage: 'Describe what this AI index is for.' }
-              )}
-              aria-label={i18n.translate(
-                'xpack.contextEngine.createAiIndex.description.ariaLabel',
-                {
-                  defaultMessage: 'AI index description',
-                }
-              )}
-            />
-          </EuiFormRow>
+          <AiIndexDescriptionField
+            value={description}
+            onChange={setDescription}
+            error={descriptionValidation.error}
+            warning={descriptionValidation.warning}
+            data-test-subj="contextAiIndexDescriptionInput"
+          />
         </EuiPanel>
 
         <EuiSpacer size="l" />
@@ -186,7 +197,11 @@ export const CreateAiIndexPage = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <TraceSelector value={trace} onChange={setTrace} />
+          <TraceSelector
+            value={trace}
+            onChange={setTrace}
+            ebtElement={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePageTraceSelector}
+          />
         </EuiPanel>
 
         <EuiSpacer size="l" />
@@ -205,7 +220,11 @@ export const CreateAiIndexPage = () => {
               data-test-subj="contextCreateAiIndexButton"
               onClick={createAndContinue}
               isLoading={isCreating}
-              isDisabled={dest === undefined}
+              isDisabled={dest === undefined || !descriptionValidation.valid}
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage,
+                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexCreate.CREATE,
+              })}
             >
               {i18n.translate('xpack.contextEngine.createAiIndex.continueButton', {
                 defaultMessage: 'Create AI index',

@@ -31,6 +31,7 @@ import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
+import type { EsqlSource } from '@kbn/data-source';
 
 const mockDiscoverGridEmbeddableProps = jest.fn();
 
@@ -88,6 +89,7 @@ const createApi = (
     query$: new BehaviorSubject(savedSearch.searchSource.getField('query')),
     filters$: new BehaviorSubject<Filter[]>(panelFilters),
     fetchContext$: new BehaviorSubject<FetchContext | undefined>(undefined),
+    abortSignal$: new BehaviorSubject<AbortSignal | undefined>(undefined),
     title$: new BehaviorSubject<string | undefined>('Test'),
     description$: new BehaviorSubject<string | undefined>(undefined),
     defaultTitle$: new BehaviorSubject<string | undefined>('Test'),
@@ -95,6 +97,9 @@ const createApi = (
   } as unknown as SearchEmbeddableApi & {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
+    abortSignal$: BehaviorSubject<AbortSignal | undefined>;
+    query$: BehaviorSubject<AggregateQuery | Query | undefined>;
+    savedSearch$: BehaviorSubject<SavedSearch>;
   };
 };
 
@@ -115,6 +120,7 @@ describe('SearchEmbeddableGridComponent', () => {
     savedObjectId,
     panelFilters,
     services: servicesOverride = services,
+    esqlSource$,
   }: {
     isEsql: boolean;
     expandedDoc?: DataTableRecord;
@@ -123,6 +129,7 @@ describe('SearchEmbeddableGridComponent', () => {
     savedObjectId?: string;
     panelFilters?: Filter[];
     services?: ReturnType<typeof createDiscoverServicesMock>;
+    esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
   }) => {
     const savedSearch = createSavedSearch(isEsql);
     const api = createApi(savedSearch, { savedObjectId, panelFilters });
@@ -142,6 +149,7 @@ describe('SearchEmbeddableGridComponent', () => {
         <SearchEmbeddableGridComponent
           api={api}
           dataView={dataViewMock}
+          esqlSource$={esqlSource$}
           stateManager={stateManager}
           enableDocumentViewer={true}
           inlineEditing={{
@@ -157,7 +165,7 @@ describe('SearchEmbeddableGridComponent', () => {
       </DiscoverTestProvider>
     );
 
-    return { stateManager };
+    return { api, stateManager };
   };
 
   const getLastFlyoutMenuTrailingActions = (): EuiFlyoutMenuAction[] | undefined =>
@@ -185,6 +193,29 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = getLastGridProps();
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
+    });
+  });
+
+  describe('dataSource', () => {
+    it('passes the EsqlSource through to DiscoverGrid', async () => {
+      const esqlSource = {
+        kind: 'esql',
+        id: 'esql-test',
+        getColumns: () => [],
+        getColumn: () => undefined,
+      } as unknown as EsqlSource;
+
+      renderComponent({
+        isEsql: true,
+        esqlSource$: new BehaviorSubject<EsqlSource | undefined>(esqlSource),
+      });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      expect(lastCallProps?.dataSource).toBe(esqlSource);
     });
   });
 
@@ -228,7 +259,9 @@ describe('SearchEmbeddableGridComponent', () => {
     };
 
     it('passes a completed ES|QL table and dashboard filterQuery', async () => {
-      renderComponent({ isEsql: true, fetchContext, columnsMeta });
+      const abortController = new AbortController();
+      const { api } = await renderComponent({ isEsql: true, fetchContext, columnsMeta });
+      api.abortSignal$.next(abortController.signal);
 
       await waitFor(() => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
@@ -246,6 +279,7 @@ describe('SearchEmbeddableGridComponent', () => {
       expect(lastCallProps?.searchContext?.searchSessionId).toBe('session-embeddable');
       expect(lastCallProps?.searchContext?.projectRouting).toBe('_alias:_origin');
       expect(lastCallProps?.searchContext?.isApproximate).toBe(true);
+      expect(lastCallProps?.searchContext?.abortSignal).toBe(abortController.signal);
     });
 
     it('still supplies searchContext when fetchContext has no time range', async () => {
@@ -327,7 +361,10 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
       });
 
-      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.();
+      // pass a mock event to the onClick handler to simulate a click without an actual event
+      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.(
+        {} as React.MouseEvent<HTMLButtonElement, MouseEvent>
+      );
 
       await waitFor(() => {
         expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
@@ -359,7 +396,10 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
       });
 
-      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.();
+      // pass a mock event to the onClick handler to simulate a click without an actual event
+      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.(
+        {} as React.MouseEvent<HTMLButtonElement, MouseEvent>
+      );
 
       await waitFor(() => {
         expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();

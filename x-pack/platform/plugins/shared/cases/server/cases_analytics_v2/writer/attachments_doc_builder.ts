@@ -97,7 +97,7 @@ interface AttachmentUserDoc {
  * analytics index byte-for-byte equivalent regardless of which source
  * type an attachment was written as.
  *
- * For unmigrated externalReference / persistableState subtypes that
+ * For unmapped externalReference / persistableState subtypes that
  * have no entry in `EXTERNAL_REFERENCE_TYPE_MAP`, the transformer
  * falls back to `passThroughTransformer` which casts the legacy
  * attributes through unchanged. The doc-builder still works against

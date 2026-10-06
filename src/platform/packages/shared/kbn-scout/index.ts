@@ -18,6 +18,7 @@ export {
   apiTest,
   globalSetupHook,
   globalTeardownHook,
+  getPlaywrightTagsFor,
   tags,
 } from './src/playwright';
 
@@ -50,6 +51,7 @@ export * from './src/playwright/ui_components';
 export {
   AppMenu,
   ContentListWrapper,
+  Controls,
   DataGrid,
   DiscoverApp,
   FilterBar,
@@ -115,3 +117,4 @@ export {
   OTEL_RECEIVER_PORT,
   OTEL_TEST_PROJECT_ID,
 } from './src/servers/configs/config_sets/security_audit_otel/shared';
+export { KIBANA_TLS_ORIGIN } from './src/servers/configs/config_sets/shared/tls_origin';

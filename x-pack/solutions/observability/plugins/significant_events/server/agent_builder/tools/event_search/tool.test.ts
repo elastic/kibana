@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { searchEventsToolHandler } from './handler';
@@ -30,7 +30,7 @@ describe('event_search tool', () => {
   it('uses expected tool id', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -41,7 +41,7 @@ describe('event_search tool', () => {
   it('validates bounded filters and normalizes query', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -63,7 +63,7 @@ describe('event_search tool', () => {
       tool.schema.parse({ event_ids: ['event-1'], rule_uuids: [] }).rule_uuids
     ).toBeUndefined();
     expect(tool.schema.parse({ query: '  latency  ' }).query).toBe('latency');
-    expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('open');
+    expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('active');
     expect(tool.schema.safeParse({ view: 'full', event_ids: ['event-1'] }).success).toBe(true);
     expect(tool.schema.safeParse({ view: 'full', event_ids: ['event-1', 'event-2'] }).success).toBe(
       false
@@ -74,7 +74,7 @@ describe('event_search tool', () => {
     expect(tool.schema.safeParse({}).success).toBe(true);
     expect(tool.schema.parse({})).toEqual(
       expect.objectContaining({
-        status: 'open',
+        status: 'active',
         view: 'compact',
         page: 1,
         per_page: 20,
@@ -94,7 +94,7 @@ describe('event_search tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
     });
@@ -102,7 +102,7 @@ describe('event_search tool', () => {
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -113,7 +113,7 @@ describe('event_search tool', () => {
         query: '   ',
         stream_names: ['logs.checkout'],
         rule_uuids: ['rule-uuid-1'],
-        status: 'open',
+        status: 'active',
       },
       createMockToolContext()
     );
@@ -126,7 +126,7 @@ describe('event_search tool', () => {
       result_count: 1,
       has_query: false,
       has_stream_filter: true,
-      status_filter: 'open',
+      status_filter: 'active',
       view: 'compact',
       page: 1,
     });
@@ -150,21 +150,21 @@ describe('event_search tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
     });
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
 
     const result = await invokeHandler(
       tool as never,
-      { query: 'latency', status: 'closed' },
+      { query: 'latency', status: 'inactive' },
       createMockToolContext()
     );
 

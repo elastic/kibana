@@ -9,6 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
+import { DataViewSource, EsqlSource } from '@kbn/data-source';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -36,6 +37,15 @@ describe('useStateProps', () => {
     totalHitsResult: undefined,
   };
 
+  const esqlDataSource = (query: string, columns?: DatatableColumn[]) => {
+    EsqlSource.clearCache();
+    return EsqlSource.create({
+      query,
+      timeFieldName: '@timestamp',
+      resultColumns: columns,
+    });
+  };
+
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
     const stateService = createStateService({
       ...options,
@@ -55,7 +65,7 @@ describe('useStateProps', () => {
   it('should return the correct props', () => {
     const stateService = getStateService({ initialState });
     const fetchParams = getFetchParamsMock({
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
@@ -128,10 +138,10 @@ describe('useStateProps', () => {
     `);
   });
 
-  it('should return the correct props when an ES|QL query is used', () => {
+  it('should return the correct props when an ES|QL query is used', async () => {
     const stateService = getStateService({ initialState });
     const fetchParams = getFetchParamsMock({
-      dataView: dataViewWithTimefieldMock,
+      dataSource: await esqlDataSource('FROM index'),
       query: { esql: 'FROM index' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
@@ -211,14 +221,14 @@ describe('useStateProps', () => {
     );
   });
 
-  it('should return the correct props when an ES|QL query is used with transformational commands', () => {
+  it('should return the correct props when an ES|QL query is used with transformational commands', async () => {
     const stateService = getStateService({
       initialState: {
         ...initialState,
       },
     });
     const fetchParams = getFetchParamsMock({
-      dataView: dataViewWithTimefieldMock,
+      dataSource: await esqlDataSource('FROM index | keep field1'),
       query: { esql: 'FROM index | keep field1' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
@@ -242,7 +252,7 @@ describe('useStateProps', () => {
     );
   });
 
-  it('should return the correct props when an ES|QL query is used with breakdown field', () => {
+  it('should return the correct props when an ES|QL query is used with breakdown field', async () => {
     const breakdownField = 'extension';
     const esqlColumns = [
       {
@@ -262,7 +272,7 @@ describe('useStateProps', () => {
       },
     });
     const fetchParams = getFetchParamsMock({
-      dataView: dataViewWithTimefieldMock,
+      dataSource: await esqlDataSource('FROM index', esqlColumns),
       query: { esql: 'FROM index' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
@@ -291,7 +301,7 @@ describe('useStateProps', () => {
     );
   });
 
-  it('should call the setBreakdown cb when an ES|QL query is used', () => {
+  it('should call the setBreakdown cb when an ES|QL query is used', async () => {
     const breakdownField = 'extension';
     const esqlColumns = [
       {
@@ -311,7 +321,7 @@ describe('useStateProps', () => {
       },
     });
     const fetchParams = getFetchParamsMock({
-      dataView: dataViewWithTimefieldMock,
+      dataSource: await esqlDataSource('FROM index', esqlColumns),
       query: { esql: 'FROM index' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
@@ -335,11 +345,9 @@ describe('useStateProps', () => {
 
   it('should return the correct props when a rollup data view is used', () => {
     const stateService = getStateService({ initialState });
+    const rollupDataView = { ...dataViewWithTimefieldMock, type: DataViewType.ROLLUP } as DataView;
     const fetchParams = getFetchParamsMock({
-      dataView: {
-        ...dataViewWithTimefieldMock,
-        type: DataViewType.ROLLUP,
-      } as DataView,
+      dataSource: new DataViewSource(rollupDataView),
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
@@ -412,7 +420,7 @@ describe('useStateProps', () => {
   it('should return the correct props when a non time based data view is used', () => {
     const stateService = getStateService({ initialState });
     const fetchParams = getFetchParamsMock({
-      dataView: dataViewMock,
+      dataSource: new DataViewSource(dataViewMock),
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
@@ -485,7 +493,7 @@ describe('useStateProps', () => {
   it('should execute callbacks correctly', async () => {
     const stateService = getStateService({ initialState });
     const fetchParams = getFetchParamsMock({
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',

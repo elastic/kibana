@@ -8,7 +8,7 @@
 import type { ComponentType, FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -72,8 +72,12 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
 
   const updateDataSource = useCallback(
     (param: 'index' | 'savedSearchId', value: string) => {
-      const { index: _i, savedSearchId: _s, ...rest } = parse(location.search, { sort: false });
-      history.replace({ search: '?' + stringify({ ...rest, [param]: value }) });
+      const {
+        index: _i,
+        savedSearchId: _s,
+        ...rest
+      } = queryString.parse(location.search, { sort: false });
+      history.replace({ search: '?' + queryString.stringify({ ...rest, [param]: value }) });
     },
     [history, location.search]
   );

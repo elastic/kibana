@@ -12,7 +12,7 @@ import {
   INTERNAL_HEADERS,
   PUBLIC_HEADERS,
   LIST_ESCALATIONS_PATH,
-  ESCALATION_BY_ID_PATH,
+  ESCALATION_LINK_PATH,
   CREATE_ESCALATION_PATH,
   AB_CONVERSATIONS_PATH,
   expectCreated,
@@ -60,7 +60,7 @@ async function resolveProfileUid(
 }
 
 apiTest.describe(
-  'Escalation access control — private escalations and collaborators',
+  'Escalation access control — private escalations and assignees',
   { tag: [...tags.stateful.classic] },
   () => {
     let adminCookieHeader: Record<string, string>;
@@ -97,13 +97,13 @@ apiTest.describe(
       });
       investigationId = expectCreated(invResult, 'investigation');
 
-      // Create a private escalation owned by admin with the editor as collaborator.
+      // Create a private escalation owned by admin with the editor as assignee.
       const escResult = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
         body: {
           linked_investigation_id: investigationId,
           visibility: 'private',
-          collaborators: [editorProfileUid],
+          assignees: [editorProfileUid],
         },
         responseType: 'json',
       });
@@ -122,7 +122,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'a collaborator (editor) can see the private escalation in their list',
+      'an assignee (editor) can see the private escalation in their list',
       async ({ apiClient }) => {
         const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
@@ -150,19 +150,17 @@ apiTest.describe(
     );
 
     apiTest(
-      'PATCH from a collaborator returns 404 — current limitation: only owner can mutate (tracked in follow-up)',
+      'POST _link from a collaborator returns 403 — collaborator lacks manage_escalations',
       async ({ apiClient }) => {
-        // The agent_builder conversation client enforces owner-only access for patchMetadata and
-        // update, so a collaborator with manage_escalations gets 404 (not 403) on PATCH.
-        // This test documents the current behaviour; a follow-up issue will address it once
-        // agent_builder exposes a non-owner write access mode.
-        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(privateEscalationId), {
+        // The editor role does not include escalations_all (includeIn: 'none'), so the privilege
+        // gate fires before the ownership check and returns 403.
+        const response = await apiClient.post(ESCALATION_LINK_PATH(privateEscalationId), {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
-          body: { title: 'Collaborator rename attempt' },
+          body: { linked_investigations: [investigationId] },
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(404);
+        expect(response).toHaveStatusCode(403);
       }
     );
   }
