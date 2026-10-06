@@ -8,7 +8,7 @@
  */
 
 import { loadOperations } from './load_operations';
-import { getSchemaValidator } from './schema_compiler';
+import { getSchemaValidator } from './schema_validator';
 
 const validatorFor = (openapi: string) => {
   const [{ spec, responses }] = loadOperations({
@@ -28,8 +28,8 @@ const validatorFor = (openapi: string) => {
     },
     components: {
       schemas: {
-        Pair: { type: 'array', prefixItems: [{ $ref: '#/components/schemas/Id' }] },
-        Id: { type: 'integer', format: 'int32' },
+        Pair: { type: 'array', items: { $ref: '#/components/schemas/Id%20Value', maximum: 9 } },
+        'Id Value': { type: 'integer', format: 'int32', example: { id: 'not-a-schema' } },
       },
     },
   });
@@ -41,16 +41,20 @@ const validatorFor = (openapi: string) => {
 };
 
 describe('getSchemaValidator', () => {
-  it('compiles schemas in place, resolving refs against the document', () => {
+  it('validates schemas in place, resolving refs against the document', () => {
     const validate = validatorFor('3.1.0');
 
-    expect(validate([1])).toBe(true);
-    expect(validate(['a'])).toBe(false);
-    expect(validatorFor('3.1.0')).not.toBe(validate);
+    expect(validate([1])).toEqual([]);
+    expect(validate(['a'])).toContainEqual(
+      expect.objectContaining({ keyword: 'type', instanceLocation: '#/0' })
+    );
   });
 
   it('validates OpenAPI 3.1 as draft 2020-12 and OpenAPI 3.0 as draft-07', () => {
-    // `prefixItems` only exists in draft 2020-12; draft-07 ignores it.
-    expect(validatorFor('3.0.3')(['a'])).toBe(true);
+    // Draft-07, like OpenAPI 3.0, ignores keywords next to `$ref`; draft 2020-12 applies them.
+    expect(validatorFor('3.0.3')([10])).toEqual([]);
+    expect(validatorFor('3.1.0')([10])).toContainEqual(
+      expect.objectContaining({ keyword: 'maximum', instanceLocation: '#/0' })
+    );
   });
 });
