@@ -59,7 +59,7 @@ const toAgentView = (investigation: Investigation) => {
   };
 };
 
-/** `investigations.get`: the agent's (and skills') read path for an investigation. */
+/** `agentic_investigations.get`: the agent's (and skills') read path for an investigation. */
 export const createGetInvestigationTool = ({
   getQueryService,
   privileges,
