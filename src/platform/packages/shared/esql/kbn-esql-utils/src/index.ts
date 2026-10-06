@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
+export {
+  getESQLAdHocDataview,
+  getESQLAdHocDataviewId,
+  getIndexForESQLQuery,
+} from './utils/get_esql_adhoc_dataview';
 export { getESQLTimeField } from './utils/get_time_field';
 export {
   getESQLSourceInfo,
@@ -55,6 +59,7 @@ export {
   getIndexPatternsFromESQLQuery,
   splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
 export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
