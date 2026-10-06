@@ -24,7 +24,6 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
-  firstValueFrom,
   from,
   of,
   skip,
@@ -60,7 +59,6 @@ import {
 } from './lib/workflows/setup/managed_workflows_installer';
 import { registerFeatureFlags } from './feature_flags';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
-import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_rules';
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
@@ -263,18 +261,6 @@ export class SignificantEventsPlugin
         return alertEventsClientPromise;
       };
 
-      const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
-        if (ruleIds.length === 0) {
-          return;
-        }
-        const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-          request,
-          DEFAULT_SPACE_ID,
-          rulesClientOptions
-        );
-        await deleteLegacyRules(rulesClient, ruleIds);
-      };
-
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
@@ -307,7 +293,6 @@ export class SignificantEventsPlugin
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         getAlertEventsClient,
-        deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -338,7 +323,6 @@ export class SignificantEventsPlugin
       registerAgentBuilderSmlTypes({
         agentBuilderSml: plugins.agentBuilderSml,
         getScopedClients: this.getScopedClients,
-        getDataStreams: async () => (await core.getStartServices())[0].dataStreams,
         isAvailable: async () => {
           const [, pluginsStart] = await core.getStartServices();
           return this.server
@@ -347,12 +331,6 @@ export class SignificantEventsPlugin
                 licensing: pluginsStart.licensing,
               })
             : false;
-        },
-        getUseRuleEventsRead: async () => {
-          const [coreStart] = await core.getStartServices();
-          return firstValueFrom(
-            coreStart.featureFlags.getBooleanValue$(SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ, false)
-          );
         },
       });
     }

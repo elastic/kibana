@@ -13,10 +13,10 @@ import type {
   SecurityWorkerFixtures,
 } from '@kbn/scout-security';
 import {
-  enrollEndpointHost,
   FLEET_AND_HOST_TIMEOUT_MS,
+  withEnrolledEndpoint,
   type EnrolledEndpoint,
-} from '../../fixtures/enroll_endpoint';
+} from '../../fixtures/enrolled_endpoint';
 import type { EdrRealFleetPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
@@ -41,16 +41,7 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
 
   enrolledEndpoint: [
     async ({ kbnClient, esClient, log }, use) => {
-      await enrollEndpointHost(
-        {
-          kbnClient,
-          esClient,
-          log,
-          policyNamePrefix: 'automated-response-actions',
-          hostnamePrefix: 'test-host-ara',
-        },
-        use
-      );
+      await withEnrolledEndpoint({ kbnClient, esClient, log }, use);
     },
     { scope: 'worker', timeout: FLEET_AND_HOST_TIMEOUT_MS },
   ],

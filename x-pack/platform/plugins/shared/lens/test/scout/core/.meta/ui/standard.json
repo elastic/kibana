@@ -1,5 +1,5 @@
 {
-  "sha1": "760a9639ecc6438009558192d5cfa7368642be19",
+  "sha1": "50ecc047cafbcd64c839c0c76b8babd9e2612947",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 42,
+        "line": 41,
         "column": 21
       }
     },
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 94,
-        "column": 21
+        "line": 89,
+        "column": 13
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 119,
-        "column": 23
+        "line": 112,
+        "column": 13
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 169,
-        "column": 9
+        "line": 160,
+        "column": 5
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 178,
-        "column": 24
+        "line": 168,
+        "column": 16
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 189,
-        "column": 12
+        "line": 180,
+        "column": 18
       }
     },
     {
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 195,
-        "column": 11
+        "line": 186,
+        "column": 23
       }
     },
     {

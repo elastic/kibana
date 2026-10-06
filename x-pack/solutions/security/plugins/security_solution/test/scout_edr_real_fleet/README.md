@@ -7,11 +7,12 @@ The default `test/scout/` config set has no Fleet Server and no VirtualBox/Multi
 ## What it runs
 
 - Config set: `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/edr_real_fleet/`
-- Playwright: `ui/playwright.config.ts` and `api/playwright.config.ts` (`workers: 1`)
+- Playwright UI: `ui/playwright.config.ts` (`workers: 1`) — browser assertions
+- Playwright API: `api/playwright.config.ts` (`workers: 1`) — HTTP only, still enrolls a live host
 - Host: Vagrant + VirtualBox on CI (`CI=true`), Multipass locally
 - Fleet Server: Docker via `startFleetServerIfNecessary()` after Kibana is up
 
-This config is listed in `.buildkite/scout_ci_config.yml` `excluded_configs` so default Scout discovery never picks it up.
+Both configs are listed in `.buildkite/scout_ci_config.yml` `excluded_configs` so default Scout discovery never picks them up. CI runs them one after the other, so each boots Elasticsearch, Kibana, and its own Endpoint VM.
 
 ## Local
 
@@ -27,7 +28,7 @@ node scripts/scout run-tests --location local --arch stateful --domain classic \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts
 ```
 
-The live-agent API specs use the same server config set:
+The API project uses the same server config set and a different Playwright config:
 
 ```bash
 node scripts/scout run-tests --location local --arch stateful --domain classic \
@@ -49,7 +50,7 @@ node scripts/playwright test \
   --project local
 ```
 
-Use `api/playwright.config.ts` in that command to run only the API specs.
+Swap that config path for `api/playwright.config.ts` to run the HTTP-only specs against the same stack.
 
 ## CI
 

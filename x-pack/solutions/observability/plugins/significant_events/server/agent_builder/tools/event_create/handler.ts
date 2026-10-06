@@ -16,7 +16,7 @@ import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
  * Chat-initiated event input — a minimal subset of EventsWriteInput.
  *
  * Always-write snapshot: a generated `event_id` is supplied so find-or-create does not
- * collapse chat creates onto an existing same-stream event. `status` defaults to 'open'.
+ * collapse chat creates onto an existing same-stream event. `status` defaults to 'active'.
  */
 export type EventCreateInput = Pick<
   EventsWriteInput,
@@ -35,13 +35,13 @@ export async function createEventToolHandler({
   eventInput: EventCreateInput;
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
-}): Promise<{ event_uuid: string; acknowledged: true }> {
+}): Promise<{ event_id: string; acknowledged: true }> {
   const result = await eventsWriteHandler({
     eventClient,
     input: {
       ...eventInput,
       event_id: uuidv4(),
-      status: eventInput.status ?? 'open',
+      status: eventInput.status ?? 'active',
     },
     alertEventsClient,
     logger,
@@ -51,5 +51,5 @@ export async function createEventToolHandler({
       `Event write skipped (${result.reason}): event_id=${result.event_id}`
     );
   }
-  return { event_uuid: result.event_uuid, acknowledged: true };
+  return { event_id: result.event_id, acknowledged: true };
 }

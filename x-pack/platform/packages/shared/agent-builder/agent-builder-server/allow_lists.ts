@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineMemoryTools,
   contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
@@ -123,6 +124,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   contextEngineAutomationTools.saveAutomation,
   contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
+  ...Object.values(contextEngineMemoryTools),
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',
@@ -363,13 +365,12 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'cases',
 
   // Platform – Alerting v2
+  'platform.alerting.alert',
   'platform.alerting.rule',
   'platform.alerting.action_policy',
-  'platform.alerting.episode',
 
   // Security Solution
   'security.alert',
-  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',

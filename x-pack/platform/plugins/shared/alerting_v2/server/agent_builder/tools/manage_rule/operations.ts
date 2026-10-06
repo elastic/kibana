@@ -173,7 +173,7 @@ export const setRecoveryOperationSchema = z
     operation: z.literal('set_recovery'),
     recovery: recoverySchema,
   })
-  .describe('Use `set_recovery` to control how alert episodes recover. Requires `kind: alert`.');
+  .describe('Use `set_recovery` to control how alerts recover. Requires `kind: alert`.');
 
 export const setNoDataOperationSchema = z
   .object({
@@ -189,7 +189,7 @@ export const setGroupingOperationSchema = groupingSchema
     operation: z.literal('set_grouping'),
   })
   .describe(
-    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own episode instead of one combined alert.'
+    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own alert instead of one combined alert.'
   );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema
