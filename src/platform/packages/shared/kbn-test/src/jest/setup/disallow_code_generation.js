@@ -65,11 +65,28 @@ const ALLOWED_CALLERS = [
   // hmr_client.test uses new Function() to load a browser bundle with injected globals;
   // the bundle itself does not use code generation in production.
   /kbn-rspack-optimizer.*hmr_client\.test/,
-  // @kbn/connector-contract-mock validates requests and responses with Ajv and matches
-  // path templates with uri-template-lite (via Prism), both of which compile with
-  // new Function(). The package is dev-only test tooling and never runs in Kibana.
+];
+
+// Matched against the full stack instead of the default 10 frames. Only for callers that can
+// be many frames below the code generation and that Jest's own frames, at the bottom of every
+// stack, cannot match.
+const ALLOWED_CALLERS_ANYWHERE_IN_STACK = [
+  // @kbn/connector-contract-mock validates requests and responses with Ajv, which compiles
+  // schemas with new Function(). Ajv compiles nested and referenced schemas recursively, so
+  // for large vendor specs the package's frames are far from the top of the stack. The
+  // package is dev-only test tooling and never runs in Kibana.
   /kbn-connector-contract-mock\//,
 ];
+
+const getFullStack = () => {
+  const { stackTraceLimit } = Error;
+  Error.stackTraceLimit = Infinity;
+  try {
+    return new Error().stack || '';
+  } finally {
+    Error.stackTraceLimit = stackTraceLimit;
+  }
+};
 
 // @kbn/handlebars probes for CSP unsafe-eval support by calling
 // new Function('kbnUnsafeEvalTest', 'return true;'). In Jest the jest-runtime
@@ -85,7 +102,11 @@ function isCspProbe(args) {
 
 function isCallerAllowed() {
   const stack = new Error().stack || '';
-  return ALLOWED_CALLERS.some((pattern) => pattern.test(stack));
+  if (ALLOWED_CALLERS.some((pattern) => pattern.test(stack))) {
+    return true;
+  }
+  const fullStack = getFullStack();
+  return ALLOWED_CALLERS_ANYWHERE_IN_STACK.some((pattern) => pattern.test(fullStack));
 }
 
 // eslint-disable-next-line no-eval -- intentionally replacing eval to block code generation
