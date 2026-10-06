@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/core/server';
 import type { ResolvePanelContent } from './operations/panels';
 import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from './operations/types';
 import type { OperationFailure } from './utils';
-import { indexPanelsById } from './dashboard_state';
 import type { PanelAuthoringNote } from './resolve_panel';
 import { discardInvalidChanges, type ValidateDashboard } from './validate_dashboard';
 import {
@@ -93,13 +92,14 @@ export const executeDashboardOperations = async ({
   const validationResult = discardInvalidChanges({
     originalDashboardData,
     dashboardData: nextDashboardData,
-    issues: validateDashboard(nextDashboardData),
+    validateDashboard,
   });
-  const validPanelsById = indexPanelsById(validationResult.dashboardData.panels);
 
   return {
     dashboardData: validationResult.dashboardData,
     failures: [...failures, ...validationResult.failures],
-    panelAuthoringNotes: panelAuthoringNotes.filter(({ panelId }) => validPanelsById.has(panelId)),
+    panelAuthoringNotes: panelAuthoringNotes.filter(
+      ({ panelId }) => !validationResult.discardedPanelIds.has(panelId)
+    ),
   };
 };
