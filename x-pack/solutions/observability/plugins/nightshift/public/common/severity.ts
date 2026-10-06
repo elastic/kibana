@@ -9,7 +9,9 @@ import type { IconType } from '@elastic/eui';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 
 /** Shared by the severity tiles, the section headings, and each list row. */
-export const SEVERITY_DOT_COLOR: Record<Severity, 'danger' | 'risk' | 'warning' | 'neutral'> = {
+export type SeverityDotColor = 'danger' | 'risk' | 'warning' | 'neutral';
+
+export const SEVERITY_DOT_COLOR: Record<Severity, SeverityDotColor> = {
   critical: 'danger',
   high: 'risk',
   medium: 'warning',
