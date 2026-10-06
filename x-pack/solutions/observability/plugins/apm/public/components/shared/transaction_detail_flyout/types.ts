@@ -43,4 +43,9 @@ export interface TransactionDetailFlyoutProps {
   preferDocumentBasedCharts?: boolean;
   schema?: ServiceSchemaType;
   indices?: APMIndices | null;
+  /**
+   * Active alerts for this transaction, typically from the parent transactions table.
+   * When absent or 0, the header hides the alerts badge.
+   */
+  alertsCount?: number;
 }
