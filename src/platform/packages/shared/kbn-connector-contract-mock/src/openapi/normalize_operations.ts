@@ -25,8 +25,8 @@ const isUnicodeRegExp = (pattern: string): boolean => {
 };
 
 /**
- * Ajv compiles patterns with the `u` flag, which rejects identity escapes such as `\_`
- * that vendor specs commonly use. Drops the backslash from those escapes.
+ * Schema validators compile patterns with the `u` flag, which rejects identity escapes such as
+ * `\_` that vendor specs commonly use. Drops the backslash from those escapes.
  */
 export const toUnicodePattern = (pattern: string): string => {
   if (isUnicodeRegExp(pattern)) {
@@ -53,6 +53,32 @@ export const toUnicodePattern = (pattern: string): string => {
   return result;
 };
 
+// JSON Schema has no `nullable`; OpenAPI 3.0's `nullable: true` means the schema also accepts null.
+const toNullUnion = (schema: SchemaNode): void => {
+  if (!('nullable' in schema)) {
+    return;
+  }
+  const { nullable, ...rest } = schema;
+  delete schema.nullable;
+  if (nullable !== true || Object.keys(rest).length === 0) {
+    return;
+  }
+  if (schema.type === undefined) {
+    for (const key of Object.keys(rest)) {
+      delete schema[key];
+    }
+    schema.anyOf = [rest, { type: 'null' }];
+    return;
+  }
+  const types = Array.isArray(schema.type) ? schema.type : [schema.type];
+  if (!types.includes('null')) {
+    schema.type = [...types, 'null'];
+  }
+  if (Array.isArray(schema.enum) && !schema.enum.includes(null)) {
+    schema.enum = [...schema.enum, null];
+  }
+};
+
 const normalizeSchema = (schema: SchemaNode): void => {
   if (typeof schema.pattern === 'string') {
     schema.pattern = toUnicodePattern(schema.pattern);
@@ -60,22 +86,11 @@ const normalizeSchema = (schema: SchemaNode): void => {
   if (Array.isArray(schema.enum)) {
     schema.enum = uniqWith(schema.enum, isEqual);
   }
-  // Ajv rejects `nullable` without `type`; express it as a union with null instead.
-  if ('nullable' in schema && schema.type === undefined) {
-    const { nullable, ...rest } = schema;
-    for (const key of Object.keys(schema)) {
-      delete schema[key];
-    }
-    if (nullable === true && Object.keys(rest).length > 0) {
-      schema.anyOf = [rest, { type: 'null' }];
-    } else {
-      Object.assign(schema, rest);
-    }
-  }
+  toNullUnion(schema);
 };
 
-// OpenAPI 3.0 inherits draft-04's boolean `exclusiveMinimum`/`exclusiveMaximum`, which Ajv
-// only accepts in their later numeric form.
+// OpenAPI 3.0 inherits draft-04's boolean `exclusiveMinimum`/`exclusiveMaximum`; draft-07 and
+// later only define the numeric form.
 const toNumericExclusiveBounds = (schema: SchemaNode): void => {
   for (const [exclusive, bound] of [
     ['exclusiveMinimum', 'minimum'],
@@ -94,7 +109,8 @@ const toNumericExclusiveBounds = (schema: SchemaNode): void => {
 };
 
 /**
- * Repairs schema defects found in vendor specs that Ajv would otherwise reject, in place in
+ * Repairs schema defects found in vendor specs, and rewrites OpenAPI 3.0 extensions as plain
+ * JSON Schema, in place in
  * each spec document and following refs, so every schema an operation uses is covered.
  */
 export const normalizeOperations = (operations: ContractOperation[]): ContractOperation[] => {
