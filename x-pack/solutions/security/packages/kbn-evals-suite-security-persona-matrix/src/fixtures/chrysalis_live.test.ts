@@ -14,7 +14,10 @@ import { ALERT_INDEX } from './chrysalis_seed';
 
 // This suite exercises the parity profile end to end, so force it before the
 // seed module is loaded — regardless of the caller's SEED_PROFILE — and load
-// chrysalis_seed inside isolateModules so it reads the forced value.
+// chrysalis_seed inside isolateModules so it reads the forced value. Restore
+// the original value afterwards so 'parity' cannot leak into sibling suites
+// sharing this worker.
+const outerSeedProfile = process.env.SEED_PROFILE;
 process.env.SEED_PROFILE = 'parity';
 let chrysalisSeed: typeof import('./chrysalis_seed');
 jest.isolateModules(() => {
@@ -22,6 +25,13 @@ jest.isolateModules(() => {
   chrysalisSeed = require('./chrysalis_seed');
 });
 const { seedChrysalisAlerts, cleanupChrysalisAlerts } = chrysalisSeed!;
+afterAll(() => {
+  if (outerSeedProfile === undefined) {
+    delete process.env.SEED_PROFILE;
+  } else {
+    process.env.SEED_PROFILE = outerSeedProfile;
+  }
+});
 
 // Runs only against a dedicated, explicitly-provisioned Elasticsearch
 // (set PERSONA_MATRIX_LIVE_ES to its URL; skipped otherwise). Credentials come

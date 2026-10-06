@@ -106,12 +106,13 @@ function restamp(doc: Record<string, unknown>, offsetMs: number): Record<string,
 export async function seedChrysalisAlerts({
   esClient,
   log,
-  count = 3,
+  count = DEFAULT_SEED_COUNT,
 }: {
   esClient: EsClient;
   log: ToolingLog;
   count?: number;
 }): Promise<void> {
+  assertValidCount(count);
   try {
     if (seedProfile === 'parity') {
       const { docs, anchor } = loadParityDocs();
@@ -181,15 +182,31 @@ export async function bulkCreateOrThrow(
 const SEED_DOC_ID_PREFIX = 'persona-matrix-seed';
 const seedIdPrefix = (index: string) => `${SEED_DOC_ID_PREFIX}-${index}`;
 
+/** Number of alerts `seedChrysalisAlerts` writes when `count` is omitted. */
+export const DEFAULT_SEED_COUNT = 3;
+const MAX_SEED_COUNT = 50;
+
+function assertValidCount(count: number): void {
+  if (!Number.isInteger(count) || count < 1 || count > MAX_SEED_COUNT) {
+    throw new Error(
+      `Invalid alert count ${count}. Must be an integer between 1 and ${MAX_SEED_COUNT}.`
+    );
+  }
+}
+
 export async function cleanupChrysalisAlerts({
   esClient,
   log,
-  count: alertCount = 3,
+  // Default to the max seedable count so a default cleanup removes everything
+  // any seed call could have written, even when it was given a higher count.
+  // delete_by_query on ids that were never written simply matches nothing.
+  count: alertCount = MAX_SEED_COUNT,
 }: {
   esClient: EsClient;
   log: ToolingLog;
   count?: number;
 }): Promise<void> {
+  assertValidCount(alertCount);
   try {
     // Delete exactly the docs this harness seeded, by their deterministic ids.
     // Never match_all here: the alerts index may hold foreign alerts on a shared cluster.

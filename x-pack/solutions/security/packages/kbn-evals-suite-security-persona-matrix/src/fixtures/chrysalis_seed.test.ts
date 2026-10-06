@@ -184,15 +184,58 @@ describe('chrysalis_seed', () => {
       expect(deletes).toHaveLength(1);
       const query = (deletes[0][0] as { query: unknown }).query;
       expect(query).not.toEqual({ match_all: {} });
-      expect(query).toEqual({
-        ids: {
-          values: [
-            'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-0',
-            'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-1',
-            'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-2',
-          ],
-        },
-      });
+      const ids = (query as { ids: { values: string[] } }).ids.values;
+      // Default cleanup sweeps every id a seed call could have written; the
+      // three seeded ids must all be covered.
+      expect(ids).toEqual(
+        expect.arrayContaining([
+          'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-0',
+          'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-1',
+          'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-2',
+        ])
+      );
+    });
+
+    it('cleans up every alert when seeding more than the default count and cleaning up with defaults', async () => {
+      const { seedChrysalisAlerts, cleanupChrysalisAlerts } = loadProfile('minimal');
+      const client = createClient();
+
+      await seedChrysalisAlerts({ esClient: asEs(client), log, count: 5 });
+      await cleanupChrysalisAlerts({ esClient: asEs(client), log });
+
+      const deletes = client.deleteByQuery.mock.calls.filter(
+        ([arg]) =>
+          (arg as { index: string }).index === '.internal.alerts-security.alerts-default-000001'
+      );
+      expect(deletes).toHaveLength(1);
+      const query = (deletes[0][0] as { query: { ids?: { values: string[] } } }).query;
+      const values = query.ids?.values ?? [];
+      // Default cleanup covers every id a seed call could have written, so all
+      // five seeded ids (<0..4>) must be swept — none left behind.
+      expect(values).toContain(
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-4'
+      );
+      expect(values).toContain(
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-0'
+      );
+    });
+  });
+
+  describe('alert count guard', () => {
+    it('rejects non-integer, zero, negative, and out-of-range counts on seed and cleanup', async () => {
+      const { seedChrysalisAlerts, cleanupChrysalisAlerts } = loadProfile('minimal');
+      const client = createClient();
+
+      for (const bad of [0, -1, 2.5, 51]) {
+        await expect(
+          seedChrysalisAlerts({ esClient: asEs(client), log, count: bad })
+        ).rejects.toThrow(/Invalid alert count/);
+        await expect(
+          cleanupChrysalisAlerts({ esClient: asEs(client), log, count: bad })
+        ).rejects.toThrow(/Invalid alert count/);
+      }
+      expect(client.bulk).not.toHaveBeenCalled();
+      expect(client.deleteByQuery).not.toHaveBeenCalled();
     });
   });
 });
