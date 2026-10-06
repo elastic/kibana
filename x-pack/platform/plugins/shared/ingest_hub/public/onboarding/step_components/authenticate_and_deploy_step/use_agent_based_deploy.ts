@@ -26,6 +26,7 @@ import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
 import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
+import { fetchPackagePolicySecretRefs } from './secret_refs';
 import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
@@ -185,11 +186,30 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       const { dataFormat } = servicesStep;
 
       try {
+        // New package policies reuse the keys the user kept from an already deployed one. Read
+        // before cleanup runs: it may delete the policy providing the refs.
+        const typedCreds = agentCredentialsRef.current;
+        const usesKeys =
+          agentCredentialMethod === 'static_keys' || agentCredentialMethod === 'temporary_keys';
+        const isTyped =
+          !!typedCreds?.access_key_id &&
+          !!typedCreds.secret_access_key &&
+          (typedCreds.method !== 'temporary_keys' || !!typedCreds.session_token);
+        const keptSecretRefs =
+          usesKeys && !isTyped
+            ? await fetchPackagePolicySecretRefs(
+                Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0]
+              )
+            : undefined;
+
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
           globalRegion,
           storedServiceVars,
-          authenticateAndDeployStep,
+          authenticateAndDeployStep: {
+            ...authenticateAndDeployStep,
+            existingSecretRefs: keptSecretRefs,
+          },
           pkgVersion: '', // overridden per-package inside deploy functions
           agentCredentials: agentCredentialsRef.current,
         };

@@ -63,6 +63,11 @@ export async function extractAndWriteSecrets(opts: {
   const secretsToCreate = secretPaths.filter(
     (secretPath) => !!secretPath.value.value && !secretPath.value.value.isSecretRef
   );
+  // Vars that already carry a secret ref (e.g. reusing the credentials of a sibling policy) are
+  // left in place; they must still be tracked so deleting the sibling does not delete the secret.
+  const providedSecretRefs = secretPaths.filter(
+    (secretPath) => !!secretPath.value.value?.isSecretRef
+  );
 
   const hasCloudConnectorSecretReferences =
     packagePolicy.supports_cloud_connector &&
@@ -93,6 +98,11 @@ export async function extractAndWriteSecrets(opts: {
         }
         return [...acc, { id: secret.id }];
       }, []),
+      ...providedSecretRefs.flatMap((secretPath) =>
+        secretPath.value.value.ids
+          ? secretPath.value.value.ids.map((id: string) => ({ id }))
+          : [{ id: secretPath.value.value.id }]
+      ),
     ],
   };
 }

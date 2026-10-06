@@ -1185,6 +1185,15 @@ describe('useDeploy', () => {
       expect(result.current.isAlreadyDeployed).toBe(false);
     });
 
+    it('is true for a resumed session: every instance has a policy id but no status', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: { ec2: 'policy-1' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(true);
+    });
+
     it('is false when status is instantiating (deploy in flight)', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],

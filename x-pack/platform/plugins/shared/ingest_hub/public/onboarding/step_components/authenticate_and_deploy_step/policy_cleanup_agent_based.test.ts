@@ -184,6 +184,44 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
   });
 
+  it('keeps stored secret keys when the form kept them (empty values) and replaces the others', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    mockGetOnePackagePolicy.mockResolvedValue({
+      data: {
+        item: {
+          name: 'existing-policy-name',
+          namespace: 'existing-ns',
+          package: { version: '2.5.0' },
+          vars: {
+            access_key_id: { value: { isSecretRef: true, id: 'ref-akid' } },
+            secret_access_key: { value: { isSecretRef: true, id: 'ref-secret' } },
+          },
+        },
+      },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: 'NEW' },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: 'NEW',
+    });
+  });
+
   it('includes enabled input for the surviving service', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },

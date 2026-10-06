@@ -9,6 +9,7 @@ import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
+import type { CredentialVarName, ExistingSecretRefs, SecretRefValue } from './secret_refs';
 import {
   resolveFieldMeta,
   shouldDefaultCollectS3Logs,
@@ -251,30 +252,39 @@ export interface AgentCredentialVars {
   role_arn?: string;
 }
 
+/**
+ * Builds the package-level vars of a policy body. For a credential var the typed value wins; when
+ * the user kept the stored secret instead (empty value), the policy's existing ref is sent back.
+ * Fleet's agentless PUT is a full replace, so a credential var that is simply left out would have
+ * its stored secret deleted.
+ */
 export function buildPackageVars(
   globalRegion: string,
   staticKeys: AuthenticateAndDeployStepState['staticKeys'],
   pkgVarNames: Set<string>,
-  agentCredentials?: AgentCredentialVars
-): Record<string, string> | undefined {
-  const vars: Record<string, string> = {};
+  agentCredentials?: AgentCredentialVars,
+  existingSecretRefs?: ExistingSecretRefs
+): Record<string, string | SecretRefValue> | undefined {
+  const vars: Record<string, string | SecretRefValue> = {};
   if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
   // 'region' (distinct from 'default_region') is a package-level var on aws_cloudwatch_input_otel
   // today; ECS packages use 'default_region'. The pkgVarNames guard ensures it only fires when
   // the deployed package actually declares it.
   if (globalRegion && pkgVarNames.has('region')) vars.region = globalRegion;
 
+  const setCredentialVar = (name: CredentialVarName, typedValue: string | undefined) => {
+    if (!pkgVarNames.has(name)) return;
+    const value = typedValue || existingSecretRefs?.get(name);
+    if (value) vars[name] = value;
+  };
+
   if (agentCredentials) {
     const { method } = agentCredentials;
     if (method === 'static_keys' || method === 'temporary_keys') {
-      if (agentCredentials.access_key_id && agentCredentials.secret_access_key) {
-        if (pkgVarNames.has('access_key_id')) vars.access_key_id = agentCredentials.access_key_id;
-        if (pkgVarNames.has('secret_access_key'))
-          vars.secret_access_key = agentCredentials.secret_access_key;
-      }
-      if (method === 'temporary_keys' && agentCredentials.session_token) {
-        if (pkgVarNames.has('session_token')) vars.session_token = agentCredentials.session_token;
-      }
+      setCredentialVar('access_key_id', agentCredentials.access_key_id);
+      setCredentialVar('secret_access_key', agentCredentials.secret_access_key);
+      if (method === 'temporary_keys')
+        setCredentialVar('session_token', agentCredentials.session_token);
     } else if (method === 'shared_credentials') {
       if (agentCredentials.shared_credential_file && pkgVarNames.has('shared_credential_file'))
         vars.shared_credential_file = agentCredentials.shared_credential_file;
@@ -284,10 +294,12 @@ export function buildPackageVars(
       if (agentCredentials.role_arn && pkgVarNames.has('role_arn'))
         vars.role_arn = agentCredentials.role_arn;
     }
-  } else if (staticKeys?.access_key_id && staticKeys?.secret_access_key) {
+  } else {
     // Agentless path: staticKeys is used when no agentCredentials are provided.
-    if (pkgVarNames.has('access_key_id')) vars.access_key_id = staticKeys.access_key_id;
-    if (pkgVarNames.has('secret_access_key')) vars.secret_access_key = staticKeys.secret_access_key;
+    setCredentialVar('access_key_id', staticKeys?.access_key_id);
+    setCredentialVar('secret_access_key', staticKeys?.secret_access_key);
+    // Only ever a kept ref: the in-memory static keys have no session token.
+    setCredentialVar('session_token', undefined);
   }
   return Object.keys(vars).length > 0 ? vars : undefined;
 }

@@ -27,6 +27,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { AgentCredentialVars } from '../package_inputs';
+import { fetchPackagePolicySecretRefs, useExistingSecretRefs } from '../secret_refs';
 
 import { useOnboardingFlow } from '../../../onboarding_flow_context';
 import { DeploymentModeAccordion } from '../section_accordion';
@@ -37,6 +38,9 @@ import type { AgentCredentialMethod } from './credential_method_selector';
 import { SharedCredentialsForm } from './shared_credentials_form';
 import { AssumeRoleForm } from './assume_role_form';
 import { AgentPolicyPanel } from './agent_policy_panel';
+
+const STATIC_KEY_FIELDS = ['access_key_id', 'secret_access_key'] as const;
+const TEMPORARY_KEY_FIELDS = ['access_key_id', 'secret_access_key', 'session_token'] as const;
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -73,7 +77,8 @@ export function AgentBasedSection({
   // True when the wizard was opened via ?deploymentId=<id> (resume / edit mode).
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
 
-  const { agentBasedDeployment, setAgentBasedDeployment } = useOnboardingFlow();
+  const { agentBasedDeployment, setAgentBasedDeployment, detectAndReviewStep } =
+    useOnboardingFlow();
   const {
     agentHostsMode,
     agentPolicyId,
@@ -88,6 +93,23 @@ export function AgentBasedSection({
 
   // ── Credential method ──────────────────────────────────────────────────────
   const credentialMethod = persistedCredentialMethod;
+
+  // Keys are never persisted, but the deployed package policies still hold them as secrets: the
+  // forms offer to keep them instead of asking again (resume, or Back then forward).
+  const { existingSecretRefs, isLoading: isStoredSecretsLoading } = useExistingSecretRefs(
+    Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0],
+    fetchPackagePolicySecretRefs
+  );
+  const isKeysMethod = credentialMethod === 'static_keys' || credentialMethod === 'temporary_keys';
+  const storedStaticFields = useMemo(
+    () => STATIC_KEY_FIELDS.filter((field) => isKeysMethod && existingSecretRefs.has(field)),
+    [isKeysMethod, existingSecretRefs]
+  );
+  const storedTemporaryFields = useMemo(
+    () => TEMPORARY_KEY_FIELDS.filter((field) => isKeysMethod && existingSecretRefs.has(field)),
+    [isKeysMethod, existingSecretRefs]
+  );
+  const hasStoredSecrets = storedStaticFields.length > 0;
   const [isCredentialReady, setIsCredentialReady] = useState(() => {
     if (!requiresCredentials) return true;
     // For methods backed by persisted text fields, initialize ready from stored values.
@@ -401,7 +423,7 @@ export function AgentBasedSection({
                 <EuiSpacer size="m" />
 
                 {/* Resume callout — credentials are never persisted; user must re-enter them. */}
-                {isEditMode && !isCredentialReady && (
+                {isEditMode && !isCredentialReady && !hasStoredSecrets && (
                   <>
                     <KbnWarningCallout
                       announceOnMount
@@ -429,8 +451,10 @@ export function AgentBasedSection({
 
                 {/* Credential fields */}
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  {credentialMethod === 'static_keys' && (
+                  {isKeysMethod && isStoredSecretsLoading && <EuiLoadingSpinner />}
+                  {credentialMethod === 'static_keys' && !isStoredSecretsLoading && (
                     <LazyAwsStaticKeysForm
+                      storedSecretFields={storedStaticFields}
                       onReadyChange={setIsCredentialReady}
                       onFieldsChange={(creds) => {
                         setStaticKeyCreds(creds ?? undefined);
@@ -441,8 +465,9 @@ export function AgentBasedSection({
                       data-test-subj="agentBasedSection-directAccessKeysForm"
                     />
                   )}
-                  {credentialMethod === 'temporary_keys' && (
+                  {credentialMethod === 'temporary_keys' && !isStoredSecretsLoading && (
                     <LazyAwsTemporaryKeysForm
+                      storedSecretFields={storedTemporaryFields}
                       onReadyChange={setIsCredentialReady}
                       onFieldsChange={(creds) => {
                         setTemporaryKeyCreds(creds ?? undefined);

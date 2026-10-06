@@ -9,6 +9,8 @@ import React, { useEffect, useState } from 'react';
 import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { StoredSecretField, useStoredSecretFields } from './stored_secret_field';
+
 export const AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ = 'awsTemporaryKeysForm';
 
 export interface AwsTemporaryKeyCredentials {
@@ -20,6 +22,8 @@ export interface AwsTemporaryKeyCredentials {
 export interface AwsTemporaryKeysFormProps {
   hasInvalidRequiredVars?: boolean;
   initialValues?: Partial<AwsTemporaryKeyCredentials>;
+  /** See `AwsStaticKeysFormProps.storedSecretFields`. */
+  storedSecretFields?: ReadonlyArray<keyof AwsTemporaryKeyCredentials>;
   onReadyChange?: (isReady: boolean) => void;
   onFieldsChange?: (fields: AwsTemporaryKeyCredentials | undefined) => void;
 }
@@ -27,6 +31,7 @@ export interface AwsTemporaryKeysFormProps {
 export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
   hasInvalidRequiredVars = false,
   initialValues,
+  storedSecretFields,
   onReadyChange,
   onFieldsChange,
 }) => {
@@ -36,19 +41,25 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
     session_token: initialValues?.session_token ?? '',
   });
 
+  const { isStored, replace } = useStoredSecretFields(storedSecretFields);
+  const hasAccessKeyId = !!fields.access_key_id || isStored('access_key_id');
+  const hasSecretAccessKey = !!fields.secret_access_key || isStored('secret_access_key');
+  const hasSessionToken = !!fields.session_token || isStored('session_token');
+
   useEffect(() => {
-    onReadyChange?.(!!fields.access_key_id && !!fields.secret_access_key && !!fields.session_token);
-  }, [fields.access_key_id, fields.secret_access_key, fields.session_token, onReadyChange]);
+    onReadyChange?.(hasAccessKeyId && hasSecretAccessKey && hasSessionToken);
+  }, [hasAccessKeyId, hasSecretAccessKey, hasSessionToken, onReadyChange]);
 
   const handleChange = (key: keyof AwsTemporaryKeyCredentials, value: string) => {
     const next = { ...fields, [key]: value };
     setFields(next);
-    onFieldsChange?.(next.access_key_id ? next : undefined);
+    const hasKeyId = !!next.access_key_id || isStored('access_key_id');
+    onFieldsChange?.(hasKeyId ? next : undefined);
   };
 
-  const accessKeyIdInvalid = hasInvalidRequiredVars && !fields.access_key_id;
-  const secretAccessKeyInvalid = hasInvalidRequiredVars && !fields.secret_access_key;
-  const sessionTokenInvalid = hasInvalidRequiredVars && !fields.session_token;
+  const accessKeyIdInvalid = hasInvalidRequiredVars && !hasAccessKeyId;
+  const secretAccessKeyInvalid = hasInvalidRequiredVars && !hasSecretAccessKey;
+  const sessionTokenInvalid = hasInvalidRequiredVars && !hasSessionToken;
 
   return (
     <div data-test-subj={AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}>
@@ -66,13 +77,20 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
         }
         fullWidth
       >
-        <EuiFieldText
-          fullWidth
-          value={fields.access_key_id}
-          isInvalid={accessKeyIdInvalid}
-          onChange={(e) => handleChange('access_key_id', e.target.value)}
-          data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-accessKeyId`}
-        />
+        {isStored('access_key_id') ? (
+          <StoredSecretField
+            onReplace={() => replace('access_key_id')}
+            data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-accessKeyId`}
+          />
+        ) : (
+          <EuiFieldText
+            fullWidth
+            value={fields.access_key_id}
+            isInvalid={accessKeyIdInvalid}
+            onChange={(e) => handleChange('access_key_id', e.target.value)}
+            data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-accessKeyId`}
+          />
+        )}
       </EuiFormRow>
 
       <EuiSpacer size="m" />
@@ -91,13 +109,20 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
         }
         fullWidth
       >
-        <EuiFieldPassword
-          fullWidth
-          value={fields.secret_access_key}
-          isInvalid={secretAccessKeyInvalid}
-          onChange={(e) => handleChange('secret_access_key', e.target.value)}
-          data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-secretAccessKey`}
-        />
+        {isStored('secret_access_key') ? (
+          <StoredSecretField
+            onReplace={() => replace('secret_access_key')}
+            data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-secretAccessKey`}
+          />
+        ) : (
+          <EuiFieldPassword
+            fullWidth
+            value={fields.secret_access_key}
+            isInvalid={secretAccessKeyInvalid}
+            onChange={(e) => handleChange('secret_access_key', e.target.value)}
+            data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-secretAccessKey`}
+          />
+        )}
       </EuiFormRow>
 
       <EuiSpacer size="m" />
@@ -119,13 +144,20 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
         }
         fullWidth
       >
-        <EuiFieldPassword
-          fullWidth
-          value={fields.session_token}
-          isInvalid={sessionTokenInvalid}
-          onChange={(e) => handleChange('session_token', e.target.value)}
-          data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-sessionToken`}
-        />
+        {isStored('session_token') ? (
+          <StoredSecretField
+            onReplace={() => replace('session_token')}
+            data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-sessionToken`}
+          />
+        ) : (
+          <EuiFieldPassword
+            fullWidth
+            value={fields.session_token}
+            isInvalid={sessionTokenInvalid}
+            onChange={(e) => handleChange('session_token', e.target.value)}
+            data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-sessionToken`}
+          />
+        )}
       </EuiFormRow>
     </div>
   );

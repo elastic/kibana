@@ -17,6 +17,7 @@ import type { ServiceSettingsPersistedState } from '../service_settings_step/use
 import { buildInstanceStatuses, collectDeployResults, deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
+import { fetchAgentlessSecretRefs } from './secret_refs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
 import {
   cleanupManagedIntegrationsPolicies,
@@ -243,6 +244,17 @@ export function useMiDeploy({
   return useCallback(
     async (instanceIds?: string[]) => {
       const isInitialDeploy = instanceIds === undefined;
+
+      // New policies reuse the credentials the user kept from an already deployed one. Read before
+      // cleanup runs: the policy providing the refs may be deleted by it. Not needed when the
+      // credentials were typed in full or come from an identity.
+      const { connectorId: deployConnectorId, staticKeys: typedKeys } = authenticateAndDeployStep;
+      const sourcePolicyId = Object.values(policyIdsByInstance ?? {})[0];
+      const hasTypedKeys = Boolean(typedKeys?.access_key_id && typedKeys?.secret_access_key);
+      const keptSecretRefs =
+        deployConnectorId || hasTypedKeys
+          ? undefined
+          : await fetchAgentlessSecretRefs(sourcePolicyId);
 
       let groupsToDeploy: DeployGroup[];
       let cleanupOps: PolicyCleanupOps = { toDelete: [], toUpdate: [] };
@@ -602,7 +614,10 @@ export function useMiDeploy({
             namespace,
             globalRegion,
             storedServiceVars,
-            authenticateAndDeployStep,
+            authenticateAndDeployStep: {
+              ...authenticateAndDeployStep,
+              existingSecretRefs: keptSecretRefs,
+            },
           })
         )
       );

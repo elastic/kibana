@@ -1318,6 +1318,32 @@ describe('Package policy secrets', () => {
       });
     });
 
+    describe('when a var already carries a secret reference', () => {
+      it('keeps the reference, tracks it and does not create a new secret for it', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-secret-1': { value: { isSecretRef: true, id: 'existing-secret-id' } },
+            'pkg-secret-2': { value: 'pkg-secret-2-val' },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+        expect(result.packagePolicy.vars?.['pkg-secret-1'].value).toEqual({
+          isSecretRef: true,
+          id: 'existing-secret-id',
+        });
+        expect(result.secretReferences).toHaveLength(2);
+        expect(result.secretReferences).toContainEqual({ id: 'existing-secret-id' });
+      });
+    });
+
     describe('when both required and optional secret values are provided', () => {
       it('returns secret reference for both required and optional secret', async () => {
         const mockPackagePolicy = {

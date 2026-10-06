@@ -61,6 +61,10 @@ interface ManagedIntegrationsSectionProps {
   hasFailed: boolean;
   /** When true, Deploy only runs cleanup (Fleet API calls) — AWS credentials are not required. */
   isCleanupOnly?: boolean;
+  /** Credential fields already stored as secrets on the deployed policies; kept unless replaced. */
+  storedSecretFields?: Array<'access_key_id' | 'secret_access_key'>;
+  /** True until the stored-secret lookup has settled, so the form does not flash empty inputs. */
+  isStoredSecretsLoading?: boolean;
   /**
    * When true, settings have drifted from the last deploy. With an existing identity-federation
    * connector the Deploy button is enabled immediately — credentials were already validated by the
@@ -76,6 +80,9 @@ interface ManagedIntegrationsSectionProps {
   onReplaceFormDirtyChange?: (dirty: boolean) => void;
 }
 
+const NO_STORED_SECRET_FIELDS: NonNullable<ManagedIntegrationsSectionProps['storedSecretFields']> =
+  [];
+
 export function ManagedIntegrationsSection({
   serviceCount,
   showIdentityFederation,
@@ -85,6 +92,8 @@ export function ManagedIntegrationsSection({
   isDone,
   hasFailed,
   isCleanupOnly = false,
+  storedSecretFields = NO_STORED_SECRET_FIELDS,
+  isStoredSecretsLoading = false,
   isDirty = false,
   onReplaceFormDirtyChange,
 }: ManagedIntegrationsSectionProps) {
@@ -166,6 +175,18 @@ export function ManagedIntegrationsSection({
       setStaticKeys(fields);
     },
     [setStaticKeys]
+  );
+
+  // With stored secrets the form is the same in edit mode and outside it; only replacing a stored
+  // value (typing into its field) is a change to deploy, keeping them all is not.
+  const handleStoredKeysFormChange = useCallback(
+    (fields: AwsStaticKeyCredentials | undefined) => {
+      setStaticKeys(fields);
+      if (isStaticKeysEditMode && storedSecretFields.length > 0) {
+        onReplaceFormDirtyChange?.(Boolean(fields?.access_key_id || fields?.secret_access_key));
+      }
+    },
+    [setStaticKeys, isStaticKeysEditMode, storedSecretFields.length, onReplaceFormDirtyChange]
   );
 
   // Whether the replace form has ever reported ready in this component lifetime.
@@ -356,7 +377,9 @@ export function ManagedIntegrationsSection({
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
                 />
-              ) : isStaticKeysEditMode ? (
+              ) : isStoredSecretsLoading ? (
+                <EuiLoadingSpinner />
+              ) : isStaticKeysEditMode && storedSecretFields.length === 0 ? (
                 <StaticKeysReplaceView
                   onReadyChange={handleStaticKeyReplaceReadyChange}
                   onFieldsChange={handleStaticKeysChange}
@@ -364,8 +387,9 @@ export function ManagedIntegrationsSection({
               ) : (
                 <LazyAwsStaticKeysForm
                   initialValues={authenticateAndDeployStep.staticKeys}
+                  storedSecretFields={storedSecretFields}
                   onReadyChange={setIsDeployReady}
-                  onFieldsChange={handleStaticKeysChange}
+                  onFieldsChange={handleStoredKeysFormChange}
                 />
               )}
             </Suspense>

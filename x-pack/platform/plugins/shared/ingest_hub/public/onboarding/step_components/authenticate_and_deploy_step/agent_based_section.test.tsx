@@ -28,6 +28,11 @@ jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
 
+jest.mock('./secret_refs', () => ({
+  ...jest.requireActual('./secret_refs'),
+  fetchPackagePolicySecretRefs: jest.fn(),
+}));
+
 jest.mock('./agent_based_deploy/agent_policy_name', () => ({
   buildAgentPolicyName: jest.fn().mockResolvedValue('AWS Agent Policy 1'),
 }));
@@ -50,10 +55,12 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useLocation } from 'react-router-dom';
+import { fetchPackagePolicySecretRefs } from './secret_refs';
 import { SharedCredentialsForm } from './agent_based_section/shared_credentials_form';
 import { AssumeRoleForm } from './agent_based_section/assume_role_form';
 
 const mockUseLocation = useLocation as jest.Mock;
+const mockFetchSecretRefs = fetchPackagePolicySecretRefs as jest.Mock;
 
 const MockSharedCredentialsForm = SharedCredentialsForm as unknown as jest.Mock;
 const MockAssumeRoleForm = AssumeRoleForm as unknown as jest.Mock;
@@ -81,6 +88,8 @@ interface OnboardingFlowOptions {
   roleArn?: string;
   /** Persisted credential profile name — seeds isCredentialReady:true for shared_credentials */
   credentialProfileName?: string;
+  /** Policy ids of the already deployed package policies (what stored secrets are read from). */
+  policyIdsByInstance?: Record<string, string>;
   /** Whether the URL contains ?deploymentId= (resume/edit mode) */
   isEditMode?: boolean;
 }
@@ -95,6 +104,7 @@ function setupMocks({
   setAgentBasedDeployment = jest.fn(),
   roleArn = undefined,
   credentialProfileName = undefined,
+  policyIdsByInstance = {},
   isEditMode = false,
 }: OnboardingFlowOptions = {}) {
   mockUseLocation.mockReturnValue({ search: isEditMode ? '?deploymentId=dep-test' : '' });
@@ -182,6 +192,7 @@ function setupMocks({
       credentialProfileName,
     },
     setAgentBasedDeployment,
+    detectAndReviewStep: { policyIdsByInstance },
   });
 }
 
@@ -693,6 +704,67 @@ describe('AgentBasedSection', () => {
         expect(
           screen.queryByTestId('agentBasedSection-resumeCredentialsCallout')
         ).not.toBeInTheDocument();
+      });
+    });
+
+    describe('stored secrets', () => {
+      const REFS = new Map([
+        ['access_key_id', { isSecretRef: true, id: 'r1' }],
+        ['secret_access_key', { isSecretRef: true, id: 'r2' }],
+      ]);
+
+      it('passes the stored fields to the static keys form and drops the re-enter callout', async () => {
+        mockFetchSecretRefs.mockResolvedValue(REFS);
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'static_keys',
+          policyIdsByInstance: { inst: 'pp-1' },
+          isEditMode: true,
+        });
+        renderSection();
+        await waitFor(() => expect(screen.getByTestId('static-keys-form')).toBeInTheDocument());
+        expect(mockFetchSecretRefs).toHaveBeenCalledWith('pp-1');
+        expect(MockStaticKeysForm.mock.calls.at(-1)?.[0].storedSecretFields).toEqual([
+          'access_key_id',
+          'secret_access_key',
+        ]);
+        expect(
+          screen.queryByTestId('agentBasedSection-resumeCredentialsCallout')
+        ).not.toBeInTheDocument();
+      });
+
+      it('only offers session_token as stored for temporary keys', async () => {
+        mockFetchSecretRefs.mockResolvedValue(
+          new Map([...REFS, ['session_token', { isSecretRef: true, id: 'r3' }]])
+        );
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'temporary_keys',
+          policyIdsByInstance: { inst: 'pp-1' },
+          isEditMode: true,
+        });
+        renderSection();
+        await waitFor(() => expect(screen.getByTestId('temporary-keys-form')).toBeInTheDocument());
+        expect(MockTemporaryKeysForm.mock.calls.at(-1)?.[0].storedSecretFields).toEqual([
+          'access_key_id',
+          'secret_access_key',
+          'session_token',
+        ]);
+      });
+
+      it('does not look up secrets for methods without secret keys', async () => {
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'assume_role',
+          policyIdsByInstance: { inst: 'pp-1' },
+          isEditMode: true,
+        });
+        renderSection();
+        await waitFor(() => expect(screen.getByTestId('assume-role-form')).toBeInTheDocument());
+        expect(screen.queryByTestId('static-keys-form')).not.toBeInTheDocument();
       });
     });
 

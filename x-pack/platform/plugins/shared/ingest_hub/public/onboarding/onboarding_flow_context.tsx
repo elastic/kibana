@@ -18,6 +18,7 @@ import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
+import type { ExistingSecretRefs } from './step_components/authenticate_and_deploy_step/secret_refs';
 
 /** Method used when nothing is persisted. Read and compared against in exactly one place each. */
 const DEFAULT_DEPLOYMENT_METHOD: DeploymentMethod = 'managed_integration';
@@ -44,6 +45,12 @@ export interface AuthenticateAndDeployStepState {
   staticKeys?: AwsStaticKeyCredentials;
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   pendingIacTemplate?: PendingIacTemplate;
+  /**
+   * Secret refs already stored on deployed policies, for credentials the user chose to keep.
+   * Never held in the provider: Deploy reads them fresh from Fleet just before it builds a policy
+   * body, so a ref replaced by an earlier deploy is never reused.
+   */
+  existingSecretRefs?: ExistingSecretRefs;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
