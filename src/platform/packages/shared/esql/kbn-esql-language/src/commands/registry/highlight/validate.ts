@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Walker,
-  isColumn,
-  isFunctionExpression,
-  isList,
-  isMap,
-  isStringLiteral,
-} from '@elastic/esql';
+import { isColumn, isFunctionExpression, isList, isMap, isStringLiteral } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAst,
   ESQLAstHighlightCommand,
   ESQLAstItem,
-  ESQLFunction,
   ESQLMap,
 } from '@elastic/esql/types';
 import type { ESQLMessage } from '../../definitions/types';
@@ -31,7 +23,7 @@ import { validateCommandArguments } from '../../definitions/utils/validation';
 import { validateMap } from '../../definitions/utils/validation/map';
 import { getMapEntryByStringKeyFromAst } from '../../definitions/utils/maps';
 import type { ICommandContext, ICommandCallbacks } from '../types';
-import { HIGHLIGHT_PREFIX_KEYWORD, getPrefixKeyword } from './utils';
+import { HIGHLIGHT_PREFIX_KEYWORD, getPrefixKeyword, getQueryFieldNames } from './utils';
 
 // `pre_tags`/`post_tags` accept `keyword | keyword[]`; using type=[keyword] still validates
 // list values because getExpressionType delegates a list's type to its first element.
@@ -88,31 +80,7 @@ const findInvalidQueryNode = (expression: ESQLAstItem): ESQLAstItem | undefined 
   return FULL_TEXT_SEARCH_DEFINITIONS.includes(functionName) ? undefined : expression;
 };
 
-/** Functions whose first argument is the field the query targets. */
-const FIELD_TARGETING_QUERY_FUNCTIONS = ['match', 'match_phrase', ':'];
-
 const WILDCARD = '*';
-
-/** Names of the fields a field-targeting query (MATCH, MATCH_PHRASE, `:`) searches. */
-const getQueryFieldNames = (queryExpression: ESQLAstItem): string[] => {
-  const queryFields: string[] = [];
-
-  Walker.walk(queryExpression as ESQLFunction, {
-    visitFunction: (fn) => {
-      if (!FIELD_TARGETING_QUERY_FUNCTIONS.includes(fn.name.toLowerCase())) {
-        return;
-      }
-
-      const [target] = fn.args;
-
-      if (!Array.isArray(target) && isColumn(target)) {
-        queryFields.push(target.name);
-      }
-    },
-  });
-
-  return queryFields;
-};
 
 const ENCODER_VALUES = ['default', 'html'];
 const SINGLE_TAG_OPTIONS = ['pre_tags', 'post_tags'];

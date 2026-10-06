@@ -126,7 +126,10 @@ export function fetchEsql({
             let inlineHighlights: ESQLColumnsWithHighlights | undefined;
             if (isOfAggregateQueryType(query)) {
               try {
-                inlineHighlights = getColumnsWithHighlights(query.esql);
+                inlineHighlights = getColumnsWithHighlights(
+                  query.esql,
+                  finalColumns.map(({ name }) => name)
+                );
               } catch (_e) {
                 inlineHighlights = undefined;
               }

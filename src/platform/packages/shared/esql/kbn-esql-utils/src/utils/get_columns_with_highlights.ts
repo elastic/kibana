@@ -83,7 +83,10 @@ export type ESQLColumnsWithHighlights = Record<string, ESQLHighlightTags>;
  *   },
  * }
  */
-export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighlights {
+export function getColumnsWithHighlights(
+  query: string,
+  availableColumnNames: string[] = []
+): ESQLColumnsWithHighlights {
   const columnsWithHighlights: ESQLColumnsWithHighlights = {};
   const { root } = Parser.parse(query);
 
@@ -135,14 +138,36 @@ export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighligh
 
     const prefix = command.prefix?.valueUnquoted ?? HIGHLIGHT_COMMAND_DEFAULT_PREFIX;
 
-    for (const field of command.highlightFields ?? []) {
-      const columnName = `${prefix}${field.name}`;
-      const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [columnName]);
+    const { highlightFields } = command;
+
+    for (const field of highlightFields ?? []) {
+      // A parameter cannot be resolved to a column name here, and a pattern other than `*` is
+      // rejected by the language.
+      if (!isColumn(field) || field.name.includes('*')) {
+        continue;
+      }
+
+      const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [`${prefix}${field.name}`]);
 
       columnsWithHighlights[resolvedColumnName] = {
         preTag,
         postTag,
       };
+    }
+
+    // `ON *`, or an omitted ON, highlights fields that only the response tells apart. Their
+    // columns are the ones that start with the prefix; an empty prefix overwrites the source
+    // columns, which cannot be told apart from the rest.
+    const highlightsDerivedFields =
+      highlightFields === undefined ||
+      highlightFields.some((field) => isColumn(field) && field.name === '*');
+
+    if (highlightsDerivedFields && prefix !== '') {
+      for (const columnName of availableColumnNames) {
+        if (columnName.startsWith(prefix)) {
+          columnsWithHighlights[columnName] = { preTag, postTag };
+        }
+      }
     }
   }
 

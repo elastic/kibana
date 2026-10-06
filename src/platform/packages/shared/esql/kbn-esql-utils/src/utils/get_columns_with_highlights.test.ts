@@ -120,6 +120,34 @@ describe('getColumnsWithHighlights', () => {
     });
   });
 
+  it('uses the response columns that start with the prefix for ON *', () => {
+    const query = 'FROM books | HIGHLIGHT "Tolkien" ON *';
+    expect(
+      Object.keys(
+        getColumnsWithHighlights(query, ['title', 'highlight_title', 'highlight_description'])
+      )
+    ).toEqual(['highlight_title', 'highlight_description']);
+  });
+
+  it('uses the response columns that start with the prefix when ON is omitted', () => {
+    const query = 'FROM books | WHERE MATCH(title, "Tolkien") | HIGHLIGHT prefix = "hl_"';
+    expect(
+      Object.keys(getColumnsWithHighlights(query, ['title', 'hl_title', 'highlight_title']))
+    ).toEqual(['hl_title']);
+  });
+
+  it('cannot tell the derived columns apart when the prefix is empty', () => {
+    const query = 'FROM books | HIGHLIGHT prefix = "" "Tolkien" ON *';
+    expect(getColumnsWithHighlights(query, ['title', 'description'])).toEqual({});
+  });
+
+  it('ignores parameter and invalid pattern ON fields', () => {
+    const query = 'FROM books | HIGHLIGHT "Tolkien" ON title, desc*, ?field';
+    expect(Object.keys(getColumnsWithHighlights(query, ['highlight_desc']))).toEqual([
+      'highlight_title',
+    ]);
+  });
+
   it('returns one HIGHLIGHT column per ON field', () => {
     const query = 'FROM books | HIGHLIGHT "Tolkien" ON title, description';
     expect(getColumnsWithHighlights(query)).toEqual({

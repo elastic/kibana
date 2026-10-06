@@ -8,12 +8,22 @@
  */
 import type {
   ESQLAstHighlightCommand,
+  ESQLAstItem,
   ESQLColumn,
   ESQLCommandOption,
   ESQLFunction,
   ESQLIdentifier,
 } from '@elastic/esql/types';
-import { isColumn, isFunctionExpression, isIdentifier, isMap, isOptionNode } from '@elastic/esql';
+import {
+  Walker,
+  isColumn,
+  isFunctionExpression,
+  isIdentifier,
+  isMap,
+  isOptionNode,
+} from '@elastic/esql';
+import type { ESQLColumnData } from '../types';
+import { METADATA_FIELDS } from '../options/metadata';
 
 /**
  * The keyword accepted by the optional `prefix = "..."` modifier. Elasticsearch rejects
@@ -167,12 +177,88 @@ export const canSuggestPrefix = (
 export const getHighlightPrefix = (command: ESQLAstHighlightCommand): string =>
   command.prefix?.valueUnquoted ?? HIGHLIGHT_DEFAULT_PREFIX;
 
+/** Functions whose first argument is the field the query targets. */
+const FIELD_TARGETING_QUERY_FUNCTIONS = ['match', 'match_phrase', ':'];
+
+/** Column types HIGHLIGHT can highlight; `semantic_text` is treated as `text`. */
+const HIGHLIGHTABLE_COLUMN_TYPES = ['text', 'keyword', 'semantic_text'];
+
+const WILDCARD = '*';
+
+/** Names of the fields a field-targeting query (MATCH, MATCH_PHRASE, `:`) searches. */
+export const getQueryFieldNames = (queryExpression: ESQLAstItem): string[] => {
+  const queryFields: string[] = [];
+
+  Walker.walk(queryExpression as ESQLFunction, {
+    visitFunction: (fn) => {
+      if (!FIELD_TARGETING_QUERY_FUNCTIONS.includes(fn.name.toLowerCase())) {
+        return;
+      }
+
+      const [target] = fn.args;
+
+      if (!Array.isArray(target) && isColumn(target)) {
+        queryFields.push(target.name);
+      }
+    },
+  });
+
+  return queryFields;
+};
+
+/** Every text and keyword column, which is what `ON *` covers; metadata columns are excluded. */
+const getHighlightableColumnNames = (columns: ESQLColumnData[]): string[] =>
+  columns
+    .filter(
+      ({ name, type }) =>
+        HIGHLIGHTABLE_COLUMN_TYPES.includes(type) && !METADATA_FIELDS.includes(name)
+    )
+    .map(({ name }) => name);
+
 /**
- * Names of the columns HIGHLIGHT generates: one per ON field, prefixed. An empty prefix makes
- * the highlighted value overwrite the source column.
+ * The fields HIGHLIGHT highlights. Without ON they come from the query: the field a
+ * field-targeting query searches, or every text and keyword column. With no query either, they
+ * come from an earlier WHERE, which is not looked up here, so any text or keyword column is
+ * assumed: a column that is not generated is never reported unknown, at the cost of suggesting
+ * a few extra.
  */
-export const getHighlightColumnNames = (command: ESQLAstHighlightCommand): string[] => {
+const getHighlightFieldNames = (
+  command: ESQLAstHighlightCommand,
+  columns: ESQLColumnData[]
+): string[] => {
+  const { highlightFields, queryExpression } = command;
+
+  if (highlightFields === undefined) {
+    const queryFields = queryExpression === undefined ? [] : getQueryFieldNames(queryExpression);
+
+    return queryFields.length > 0 ? queryFields : getHighlightableColumnNames(columns);
+  }
+
+  return highlightFields.flatMap((field) => {
+    // A parameter cannot be resolved to a column name without its value.
+    if (!isColumn(field) && !isIdentifier(field)) {
+      return [];
+    }
+
+    if (field.name === WILDCARD) {
+      return getHighlightableColumnNames(columns);
+    }
+
+    // Any other pattern is rejected by validation, so it has no column to generate.
+    return field.name.includes(WILDCARD) ? [] : [field.name];
+  });
+};
+
+/**
+ * Names of the columns HIGHLIGHT generates: one per highlighted field, prefixed. An empty prefix
+ * makes the highlighted value overwrite the source column. The `columns` are needed to resolve
+ * `ON *`, and an omitted ON that is derived from the query.
+ */
+export const getHighlightColumnNames = (
+  command: ESQLAstHighlightCommand,
+  columns: ESQLColumnData[] = []
+): string[] => {
   const prefix = getHighlightPrefix(command);
 
-  return (command.highlightFields ?? []).map(({ name }) => `${prefix}${name}`);
+  return getHighlightFieldNames(command, columns).map((name) => `${prefix}${name}`);
 };

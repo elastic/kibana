@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstHighlightCommand } from '@elastic/esql/types';
+import { Parser } from '@elastic/esql';
+import type { ESQLAstHighlightCommand, ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
 
@@ -61,5 +62,69 @@ describe('HIGHLIGHT > columnsAfter', () => {
     const result = columnsAfter(makeCommand([]), previous);
 
     expect(result.map((c) => c.name)).toEqual(['count']);
+  });
+
+  describe('derived fields', () => {
+    const previousColumns: ESQLColumnData[] = [
+      { name: 'title', type: 'text', userDefined: false },
+      { name: 'author', type: 'keyword', userDefined: false },
+      { name: 'body', type: 'semantic_text', userDefined: false },
+      { name: 'year', type: 'integer', userDefined: false },
+      { name: '_id', type: 'keyword', userDefined: false },
+    ];
+
+    const getGeneratedColumns = (query: string): string[] => {
+      const { root } = Parser.parse(query);
+      const command = root.commands.find(({ name }) => name === 'highlight') as ESQLCommand;
+
+      return columnsAfter(command, previousColumns)
+        .map(({ name }) => name)
+        .filter((name) => name.startsWith('highlight_'));
+    };
+
+    it('expands ON * to the text, keyword and semantic_text columns, without metadata', () => {
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT "fox" ON *')).toEqual([
+        'highlight_title',
+        'highlight_author',
+        'highlight_body',
+      ]);
+    });
+
+    it('highlights the field a field-targeting query searches when ON is omitted', () => {
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT MATCH(title, "fox")')).toEqual([
+        'highlight_title',
+      ]);
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT author : "fox"')).toEqual([
+        'highlight_author',
+      ]);
+    });
+
+    it('highlights every text and keyword column for a query that targets no field', () => {
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT "fox"')).toEqual([
+        'highlight_title',
+        'highlight_author',
+        'highlight_body',
+      ]);
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT QSTR("fox")')).toHaveLength(3);
+    });
+
+    it('assumes every text and keyword column when both the query and ON are omitted', () => {
+      expect(getGeneratedColumns('FROM a | WHERE MATCH(title, "fox") | HIGHLIGHT')).toEqual([
+        'highlight_title',
+        'highlight_author',
+        'highlight_body',
+      ]);
+    });
+
+    it('uses the prefix for the derived columns', () => {
+      expect(
+        getGeneratedColumns('FROM a | HIGHLIGHT prefix = "highlight_x_" "fox" ON title')
+      ).toEqual(['highlight_x_title']);
+    });
+
+    it('does not generate columns for a parameter or an invalid pattern', () => {
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT "fox" ON ?field')).toEqual([]);
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT "fox" ON title*')).toEqual([]);
+    });
   });
 });
