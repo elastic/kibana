@@ -92,9 +92,14 @@ const parityTests = {
   security_imports_restriction: () => require('../security_imports_restriction.test.js'),
 };
 
+// Rules that alias an existing ESLint `create` rule instead of being reimplemented with `createOnce`.
+// Oxlint runs them through its ESLint-compatible API, which re-runs `create` for every file.
+const CREATE_API_RULES = new Set(['security_imports_restriction']);
+
 for (const [ruleName, rule] of Object.entries(oxlintPlugin.rules)) {
-  if (typeof rule.createOnce !== 'function') {
-    throw new Error(`Oxlint plugin rule '${ruleName}' must use createOnce.`);
+  const api = CREATE_API_RULES.has(ruleName) ? 'create' : 'createOnce';
+  if (typeof rule[api] !== 'function') {
+    throw new Error(`Oxlint plugin rule '${ruleName}' must use ${api}.`);
   }
 
   const runParityTest = parityTests[ruleName];
