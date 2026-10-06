@@ -55,17 +55,26 @@ export const createMemoryToolsAvailability = (
  * save_automation is the tool that persists agent-authored workflow YAML — the only action
  * that the feedback loop setting gates. Checking it server-side here means the tool is
  * unavailable regardless of what the LLM instructions or the client-provided attachment say.
+ *
+ * contextEngine:feedbackLoopEnabled is a global setting, so it must be read through the
+ * global settings client (same pattern as createMemoryToolsAvailability).
  */
-export const saveAutomationToolAvailability: ToolAvailabilityConfig = {
-  cacheMode: 'space',
-  handler: async ({ uiSettings }) => {
+export const createSaveAutomationToolAvailability = (
+  getCoreStart: () => Promise<CoreStart>
+): ToolAvailabilityConfig => ({
+  cacheMode: 'none',
+  handler: async ({ request, uiSettings }) => {
     const contextEngineEnabled = await uiSettings
       .get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)
       .catch(() => false);
     if (!contextEngineEnabled) {
       return { status: 'unavailable', reason: 'Context Engine is disabled in this space.' };
     }
-    const feedbackLoopEnabled = await uiSettings
+
+    const coreStart = await getCoreStart();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+    const feedbackLoopEnabled = await globalUiSettings
       .get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)
       .catch(() => false);
     if (!feedbackLoopEnabled) {
@@ -77,4 +86,4 @@ export const saveAutomationToolAvailability: ToolAvailabilityConfig = {
     }
     return { status: 'available' };
   },
-};
+});

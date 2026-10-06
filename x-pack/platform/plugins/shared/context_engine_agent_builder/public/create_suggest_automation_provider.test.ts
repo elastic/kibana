@@ -87,7 +87,7 @@ const createProvider = ({
       executeWorkflow: hasWorkflowsExecutePrivilege,
     },
   };
-  coreStart.uiSettings.get.mockImplementation((key: string) => {
+  coreStart.settings.globalClient.get.mockImplementation((key: string) => {
     if (key === CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID) {
       return feedbackLoopEnabled;
     }
@@ -97,7 +97,7 @@ const createProvider = ({
   const provider = createSuggestAutomationProvider({
     agentBuilder,
     application,
-    uiSettings: coreStart.uiSettings,
+    settings: coreStart.settings,
   });
 
   return { provider, openChat, chatEvents$, getChatEvents$ };

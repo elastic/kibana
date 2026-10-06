@@ -7,7 +7,7 @@
 
 import { isToolResultEvent, ToolResultType, type ToolResult } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ApplicationStart, SettingsStart } from '@kbn/core/public';
 import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/public/types';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
@@ -57,11 +57,11 @@ export const buildSuggestAutomationSessionTag = (spaceId: string, aiIndexId: str
 export const createSuggestAutomationProvider = ({
   agentBuilder,
   application,
-  uiSettings,
+  settings,
 }: {
   agentBuilder: AgentBuilderPluginStart | undefined;
   application: ApplicationStart;
-  uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
 }): SuggestAutomationProvider => ({
   canSuggest: ({ aiIndex, isManaged }) =>
     aiIndex !== undefined &&
@@ -80,7 +80,7 @@ export const createSuggestAutomationProvider = ({
     // Snapshot at chat-open time; reactive updates would require threading an observable
     // through the attachment, which is out of scope. The server-side gate on save_automation
     // is the authoritative enforcement — this value is advisory for the LLM instructions only.
-    const feedbackLoopEnabled = uiSettings.get<boolean>(
+    const feedbackLoopEnabled = settings.globalClient.get<boolean>(
       CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
       false
     );

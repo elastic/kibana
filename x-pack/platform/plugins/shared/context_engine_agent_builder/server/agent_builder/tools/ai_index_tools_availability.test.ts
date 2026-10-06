@@ -16,7 +16,7 @@ import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/context-en
 import {
   aiIndexToolsAvailability,
   createMemoryToolsAvailability,
-  saveAutomationToolAvailability,
+  createSaveAutomationToolAvailability,
 } from './ai_index_tools_availability';
 
 describe('aiIndexToolsAvailability', () => {
@@ -103,67 +103,66 @@ describe('aiIndexToolsAvailability', () => {
   });
 });
 
-describe('saveAutomationToolAvailability', () => {
-  const createContext = (settings: Record<string, boolean | Error>): AvailabilityContext => ({
+describe('createSaveAutomationToolAvailability', () => {
+  const createAvailability = (feedbackLoopEnabled: boolean | Error) => {
+    const coreStart = {
+      savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) },
+      uiSettings: {
+        globalAsScopedToClient: jest.fn().mockReturnValue({
+          get: jest.fn(async (key: string) => {
+            if (key === CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID) {
+              if (feedbackLoopEnabled instanceof Error) throw feedbackLoopEnabled;
+              return feedbackLoopEnabled;
+            }
+            return undefined;
+          }),
+        }),
+      },
+    } as unknown as CoreStart;
+    return createSaveAutomationToolAvailability(async () => coreStart);
+  };
+
+  const createContext = (contextEngineEnabled: boolean): AvailabilityContext => ({
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     uiSettings: {
-      get: jest.fn(async (key: string) => {
-        const value = settings[key];
-        if (value instanceof Error) {
-          throw value;
-        }
-        return value;
-      }),
+      get: jest.fn(async (key: string) =>
+        key === CONTEXT_ENGINE_ENABLED_SETTING_ID ? contextEngineEnabled : undefined
+      ),
     } as unknown as AvailabilityContext['uiSettings'],
   });
 
-  it('caches per space', () => {
-    expect(saveAutomationToolAvailability.cacheMode).toBe('space');
+  it('does not cache, because the global feedback-loop flag is not space-scoped', () => {
+    expect(createAvailability(true).cacheMode).toBe('none');
   });
 
   it('is available when both Context Engine and feedback loop are enabled', async () => {
-    const result = await saveAutomationToolAvailability.handler(
-      createContext({
-        [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true,
-        [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: true,
-      })
-    );
+    const availability = createAvailability(true);
 
-    expect(result).toEqual({ status: 'available' });
+    await expect(availability.handler(createContext(true))).resolves.toEqual({
+      status: 'available',
+    });
   });
 
   it('is unavailable when Context Engine is off', async () => {
-    const result = await saveAutomationToolAvailability.handler(
-      createContext({
-        [CONTEXT_ENGINE_ENABLED_SETTING_ID]: false,
-        [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: true,
-      })
-    );
+    const availability = createAvailability(true);
+    const result = await availability.handler(createContext(false));
 
     expect(result.status).toBe('unavailable');
     expect(result.reason).toContain('Context Engine');
   });
 
   it('is unavailable when feedbackLoopEnabled is off', async () => {
-    const result = await saveAutomationToolAvailability.handler(
-      createContext({
-        [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true,
-        [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: false,
-      })
-    );
+    const availability = createAvailability(false);
+    const result = await availability.handler(createContext(true));
 
     expect(result.status).toBe('unavailable');
     expect(result.reason).toContain('feedbackLoopEnabled');
   });
 
   it('treats an unreadable feedbackLoop setting as disabled', async () => {
-    const result = await saveAutomationToolAvailability.handler(
-      createContext({
-        [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true,
-        [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: new Error('unregistered'),
-      })
-    );
+    const availability = createAvailability(new Error('unregistered'));
+    const result = await availability.handler(createContext(true));
 
     expect(result.status).toBe('unavailable');
   });
