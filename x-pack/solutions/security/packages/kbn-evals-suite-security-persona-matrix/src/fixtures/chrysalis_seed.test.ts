@@ -36,15 +36,47 @@ describe('chrysalis_seed', () => {
   });
 
   describe('seedProfile resolution', () => {
-    it('falls back to minimal for the removed enriched profile', () => {
-      const mod = loadProfile('minimal');
-      expect(mod.seedProfile).toBe('minimal');
+    it('defaults to minimal when SEED_PROFILE is unset or empty', () => {
+      delete process.env.SEED_PROFILE;
+      let unset: typeof import('./chrysalis_seed');
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        unset = require('./chrysalis_seed');
+      });
+      expect(unset!.seedProfile).toBe('minimal');
 
-      jest.resetModules();
+      process.env.SEED_PROFILE = '';
+      let empty: typeof import('./chrysalis_seed');
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        empty = require('./chrysalis_seed');
+      });
+      expect(empty!.seedProfile).toBe('minimal');
+    });
+
+    it('resolves explicit minimal and parity', () => {
+      expect(loadProfile('minimal').seedProfile).toBe('minimal');
+      expect(loadProfile('parity').seedProfile).toBe('parity');
+    });
+
+    it('throws for the removed enriched profile instead of silently falling back', () => {
       process.env.SEED_PROFILE = 'enriched';
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const fallback = require('./chrysalis_seed') as typeof import('./chrysalis_seed');
-      expect(fallback.seedProfile).toBe('minimal');
+      expect(() => {
+        jest.isolateModules(() => {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          require('./chrysalis_seed');
+        });
+      }).toThrow(/enriched.*minimal.*parity|Unknown SEED_PROFILE 'enriched'/s);
+    });
+
+    it('throws for any other unknown profile (case-sensitive)', () => {
+      process.env.SEED_PROFILE = 'Parity';
+      expect(() => {
+        jest.isolateModules(() => {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          require('./chrysalis_seed');
+        });
+      }).toThrow(/Unknown SEED_PROFILE 'Parity'/);
     });
   });
 
@@ -123,6 +155,44 @@ describe('chrysalis_seed', () => {
       // Offset is a real shift to ~now (positive, large).
       const now = Date.now();
       expect(Date.parse(seeded!['@timestamp'] as string)).toBeGreaterThan(now - 10 * 60 * 1000);
+    });
+  });
+
+  describe('cleanupChrysalisAlerts is id-scoped', () => {
+    it('deletes only the seeded alert ids, never match_all', async () => {
+      const { seedChrysalisAlerts, cleanupChrysalisAlerts } = loadProfile('minimal');
+      const client = createClient();
+
+      await seedChrysalisAlerts({ esClient: asEs(client), log });
+      // Minimal seeding assigns deterministic ids via the seed prefix.
+      const bulkOps = client.bulk.mock.calls[0][0] as { operations: unknown[] };
+      const createIds = bulkOps.operations
+        .filter((op) => typeof op === 'object' && op !== null && 'create' in (op as object))
+        .map((op) => (op as { create: { _id: string } }).create._id);
+      expect(createIds).toEqual([
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-0',
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-1',
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-2',
+      ]);
+
+      await cleanupChrysalisAlerts({ esClient: asEs(client), log });
+
+      const deletes = client.deleteByQuery.mock.calls.filter(
+        ([arg]) =>
+          (arg as { index: string }).index === '.internal.alerts-security.alerts-default-000001'
+      );
+      expect(deletes).toHaveLength(1);
+      const query = (deletes[0][0] as { query: unknown }).query;
+      expect(query).not.toEqual({ match_all: {} });
+      expect(query).toEqual({
+        ids: {
+          values: [
+            'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-0',
+            'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-1',
+            'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-2',
+          ],
+        },
+      });
     });
   });
 });

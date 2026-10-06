@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { PARITY_DOCS, type ParityDoc } from './chrysalis_parity_docs';
 
-const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
+export const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
 
 /**
  * Seed profile:
@@ -21,8 +21,16 @@ const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
  *    Opt in with SEED_PROFILE=parity under a separate experiment label.
  */
 export type SeedProfile = 'minimal' | 'parity';
-export const seedProfile: SeedProfile =
-  process.env.SEED_PROFILE === 'parity' ? 'parity' : 'minimal';
+function resolveSeedProfile(): SeedProfile {
+  const raw = process.env.SEED_PROFILE;
+  if (raw === undefined || raw === '') return 'minimal';
+  if (raw === 'minimal' || raw === 'parity') return raw;
+  throw new Error(
+    `Unknown SEED_PROFILE '${raw}'. Valid profiles: 'minimal', 'parity'. ` +
+      `The 'enriched' profile was removed because its scores were comparable with no seed at all.`
+  );
+}
+export const seedProfile: SeedProfile = resolveSeedProfile();
 
 interface AlertDoc {
   '@timestamp': string;
@@ -128,7 +136,7 @@ export async function seedChrysalisAlerts({
       'kibana.alert.risk_score': Math.max(30, 73 - i * 10),
     }));
 
-    await bulkCreateOrThrow(esClient, ALERT_INDEX, docs);
+    await bulkCreateOrThrow(esClient, ALERT_INDEX, docs, seedIdPrefix(ALERT_INDEX));
     log.info(
       `Seeded ${docs.length} Chrysalis alerts into ${ALERT_INDEX} (profile: ${seedProfile})`
     );
@@ -176,14 +184,22 @@ const seedIdPrefix = (index: string) => `${SEED_DOC_ID_PREFIX}-${index}`;
 export async function cleanupChrysalisAlerts({
   esClient,
   log,
+  count: alertCount = 3,
 }: {
   esClient: EsClient;
   log: ToolingLog;
+  count?: number;
 }): Promise<void> {
   try {
+    // Delete exactly the docs this harness seeded, by their deterministic ids.
+    // Never match_all here: the alerts index may hold foreign alerts on a shared cluster.
     await esClient.deleteByQuery({
       index: ALERT_INDEX,
-      query: { match_all: {} },
+      query: {
+        ids: {
+          values: Array.from({ length: alertCount }, (_, i) => `${seedIdPrefix(ALERT_INDEX)}-${i}`),
+        },
+      },
       refresh: true,
       conflicts: 'proceed',
       ignore_unavailable: true,

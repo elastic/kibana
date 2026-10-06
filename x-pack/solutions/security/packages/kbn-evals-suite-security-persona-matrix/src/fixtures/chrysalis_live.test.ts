@@ -9,11 +9,23 @@
 import { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { PARITY_DOCS } from './chrysalis_parity_docs';
-import { seedChrysalisAlerts, cleanupChrysalisAlerts } from './chrysalis_seed';
 import { seedPersonaMatrixTools, cleanupPersonaMatrixTools } from './persona_matrix_tools_seed';
+import { ALERT_INDEX } from './chrysalis_seed';
+
+// This suite exercises the parity profile end to end, so force it before the
+// seed module is loaded — regardless of the caller's SEED_PROFILE — and load
+// chrysalis_seed inside isolateModules so it reads the forced value.
+process.env.SEED_PROFILE = 'parity';
+let chrysalisSeed: typeof import('./chrysalis_seed');
+jest.isolateModules(() => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  chrysalisSeed = require('./chrysalis_seed');
+});
+const { seedChrysalisAlerts, cleanupChrysalisAlerts } = chrysalisSeed!;
 
 // Runs only against a dedicated, explicitly-provisioned Elasticsearch
-// (set PERSONA_MATRIX_LIVE_ES to its URL; skipped otherwise).
+// (set PERSONA_MATRIX_LIVE_ES to its URL; skipped otherwise). Credentials come
+// from PERSONA_MATRIX_LIVE_ES_USERNAME / _PASSWORD.
 const run = process.env.PERSONA_MATRIX_LIVE_ES ? it : it.skip;
 
 run(
@@ -21,11 +33,15 @@ run(
   async () => {
     const esClient = new EsClient({
       node: process.env.PERSONA_MATRIX_LIVE_ES,
-      auth: { username: 'elastic', password: 'changeme' },
+      auth: {
+        username: process.env.PERSONA_MATRIX_LIVE_ES_USERNAME ?? 'elastic',
+        password: process.env.PERSONA_MATRIX_LIVE_ES_PASSWORD ?? '',
+      },
     });
     const log = { info: console.log, warning: console.warn } as unknown as ToolingLog;
     const foreignIndex = 'logs-endpoint.events.process-default';
     const foreignId = `foreign-${Date.now()}`;
+    const foreignAlertId = `foreign-alert-${Date.now()}`;
     const count = async (index: string, simulation: string) =>
       (
         await esClient.count({
@@ -70,6 +86,19 @@ run(
             .hits.hits.length
         }`
       );
+      // A foreign alert in the same index cleanup targets: it must survive the
+      // id-scoped delete_by_query.
+      await esClient.index({
+        index: ALERT_INDEX,
+        id: foreignAlertId,
+        op_type: 'create',
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': new Date().toISOString(),
+          'kibana.alert.rule.name': 'foreign alert — not part of the persona-matrix seed',
+          event: { kind: 'alert' },
+        },
+      });
       await seedChrysalisAlerts({ esClient, log });
       await seedPersonaMatrixTools({ kbnClient, log, parity: true });
       for (const id of ['vt.hash.lookup', 'check.on.call.schedule']) {
@@ -93,6 +122,14 @@ run(
         (await esClient.search({ index: foreignIndex, query: { ids: { values: [foreignId] } } }))
           .hits.hits
       ).toHaveLength(1);
+      expect(
+        (
+          await esClient.search({
+            index: ALERT_INDEX,
+            query: { ids: { values: [foreignAlertId] } },
+          })
+        ).hits.hits
+      ).toHaveLength(1);
       await seedChrysalisAlerts({ esClient, log });
       const reseed = await Promise.all(
         groups.map(async (index) => [index, await count(index, 'chrysalis-sim')])
@@ -103,12 +140,15 @@ run(
           0
         )}`
       );
-      expect(reseed.reduce((sum, [, total]) => sum + Number(total), 0)).toBe(97);
+      expect(reseed.reduce((sum, [, total]) => sum + Number(total), 0)).toBe(PARITY_DOCS.length);
     } finally {
       await cleanupChrysalisAlerts({ esClient, log });
       await cleanupPersonaMatrixTools({ kbnClient, log });
       await esClient
         .delete({ index: foreignIndex, id: foreignId, refresh: 'wait_for' })
+        .catch(() => {});
+      await esClient
+        .delete({ index: ALERT_INDEX, id: foreignAlertId, refresh: 'wait_for' })
         .catch(() => {});
       await esClient.close();
     }
