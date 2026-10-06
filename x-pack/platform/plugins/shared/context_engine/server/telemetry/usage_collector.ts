@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -16,6 +17,7 @@ import { formatErrorMessage } from '../utils/format_es_error';
 
 /** Upper bound on AI index entries read per collection. */
 const MAX_COLLECTED_AI_INDICES = 10_000;
+const COUNT_KIS_CONCURRENCY = 5;
 
 const KI_LIFECYCLE_BUCKETS = ['active', 'expired', 'deleted'] as const;
 type KiLifecycleBucket = (typeof KI_LIFECYCLE_BUCKETS)[number];
@@ -83,7 +85,7 @@ const countKisByLifecycle = async (
   for (const row of response.values) {
     const lifecycle = row[lifecycleIndex];
     if (isKiLifecycleBucket(lifecycle)) {
-      counts[lifecycle] = Number(row[countIndex] ?? 0);
+      counts[lifecycle] = Number(row[countIndex]);
     }
   }
   return counts;
@@ -95,7 +97,7 @@ const addCounts = (target: KiLifecycleCounts, source: KiLifecycleCounts): void =
   }
 };
 
-export const fetchContextEngineUsage = async ({
+const fetchContextEngineUsage = async ({
   esClient,
   getManagedDest,
   logger,
@@ -127,16 +129,32 @@ export const fetchContextEngineUsage = async ({
     usage.ai_indices[owner] += 1;
     const id = source.id ?? hit._id;
     const dest = owner === 'managed' && id !== undefined ? getManagedDest(id) : source.dest;
-    if (dest !== undefined && !isIndexPattern(dest.value) && !destOwners.has(dest.value)) {
+    // A dest shared by managed and user entries counts as managed.
+    if (
+      dest !== undefined &&
+      !isIndexPattern(dest.value) &&
+      (owner === 'managed' || !destOwners.has(dest.value))
+    ) {
       destOwners.set(dest.value, { dest, owner });
     }
   }
 
-  for (const { dest, owner } of destOwners.values()) {
-    try {
-      addCounts(usage.kis[owner], await countKisByLifecycle(esClient, dest));
-    } catch (error) {
-      logger.debug(`Could not count KIs in [${dest.value}]: ${formatErrorMessage(error)}`);
+  const limit = pLimit(COUNT_KIS_CONCURRENCY);
+  const results = await Promise.all(
+    [...destOwners.values()].map(({ dest, owner }) =>
+      limit(async () => {
+        try {
+          return { owner, counts: await countKisByLifecycle(esClient, dest) };
+        } catch (error) {
+          logger.debug(`Could not count KIs in [${dest.value}]: ${formatErrorMessage(error)}`);
+          return undefined;
+        }
+      })
+    )
+  );
+  for (const result of results) {
+    if (result !== undefined) {
+      addCounts(usage.kis[result.owner], result.counts);
     }
   }
   return usage;

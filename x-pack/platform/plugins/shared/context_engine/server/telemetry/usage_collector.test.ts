@@ -143,6 +143,30 @@ describe('context_engine usage collector', () => {
     expect(esClient.esql.query).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['user first', ['user', 'managed']],
+    ['managed first', ['managed', 'user']],
+  ])('attributes a shared dest to managed (%s)', async (_, order) => {
+    const shared: AiIndexDest = { type: 'index', value: 'ai-index-idx-nightshift-cortex' };
+    managedDests.set('nightshift-cortex', shared);
+    const entries: Record<string, Record<string, unknown>> = {
+      user: { id: 'squatter', dest: shared },
+      managed: { id: 'nightshift-cortex', managed: true, dest: shared },
+    };
+    setHits(order.map((owner) => entries[owner]));
+    esqlResponses.set(shared.value, { counts: { active: 4 } });
+
+    const usage = await fetch();
+
+    expect(usage).toEqual({
+      ai_indices: { user: 1, managed: 1 },
+      kis: {
+        user: { active: 0, expired: 0, deleted: 0 },
+        managed: { active: 4, expired: 0, deleted: 0 },
+      },
+    });
+  });
+
   it('counts unreadable dests as zero', async () => {
     setHits([
       { id: 'broken', dest: { type: 'index', value: 'ai-index-idx-broken' } },
