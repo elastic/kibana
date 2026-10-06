@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export { registerAttackDiscoveryAttachment } from './attack_discovery_attachment';
-export { registerAttacksFlyoutGroupedAttachment } from './register_attacks_flyout_grouped_attachment';
+export { FlyoutRow } from './flyout_row';
+export { useSpaceId } from './use_space_id';
+export {
+  ALERT_SUBTITLE,
+  ATTACK_SUBTITLE,
+  RULE_FALLBACK_TITLE,
+  RULE_SUBTITLE,
+  alertsTitle,
+} from './translations';

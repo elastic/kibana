@@ -12,7 +12,7 @@ import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { AttachmentSummaryFlyoutOpener } from './open_flyout_on_mount';
+import { GroupedAttachmentFlyoutOpener } from './flyout_opener';
 
 jest.mock('../../../flyout_v2/use_flyout_api');
 jest.mock('../../../flyout_v2/shared/url_state/use_flyout_v2_restore');
@@ -40,20 +40,20 @@ const resolveSecurityCanvasContext = jest.fn().mockResolvedValue({ store: {}, ki
 
 const renderOpener = (d: FlyoutDescriptor = descriptor) =>
   render(
-    <AttachmentSummaryFlyoutOpener
+    <GroupedAttachmentFlyoutOpener
       descriptor={d}
       resolveSecurityCanvasContext={resolveSecurityCanvasContext}
     />
   );
 
-describe('AttachmentSummaryFlyoutOpener', () => {
+describe('GroupedAttachmentFlyoutOpener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataViewStatus = 'ready';
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
-  it('opens the flyout for the given descriptor, attributed to the summary', async () => {
+  it('opens the flyout for the given descriptor, attributed to the attachment summary', async () => {
     renderOpener();
 
     await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalledTimes(1));

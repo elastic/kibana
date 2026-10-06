@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
@@ -35,6 +36,7 @@ export class AgenticInvestigationsPublicPlugin
     >
 {
   private readonly escalationsEnabled: boolean;
+  private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -46,7 +48,7 @@ export class AgenticInvestigationsPublicPlugin
   ): AgenticInvestigationsPublicPluginSetup {
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
-    return {};
+    return { registerFlyoutGroupedAttachment: this.groupedAttachments.register };
   }
 
   start(
@@ -62,6 +64,7 @@ export class AgenticInvestigationsPublicPlugin
         // Escalations are AlertZero-only for now: without them there is no escalation template,
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
+        groupedAttachments: this.groupedAttachments,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],

@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { registerAttackDiscoveryAttachment } from './attack_discovery_attachment';
-export { registerAttacksFlyoutGroupedAttachment } from './register_attacks_flyout_grouped_attachment';
+import { i18n } from '@kbn/i18n';
+
+export const openInNewTabAriaLabel = (title: string) =>
+  i18n.translate('xpack.alertzero.groupedAttachments.openInNewTabAriaLabel', {
+    defaultMessage: '{title}, opens in a new tab',
+    values: { title },
+  });
