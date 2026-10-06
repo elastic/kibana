@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
-import { ImpactForbiddenError } from '../../impact/services/errors';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 import { createSubjectsClient } from './subjects_client';
 import type { SubjectsService } from './subjects_service';
 
@@ -21,7 +21,7 @@ const setup = ({ allowed = true }: { allowed?: boolean } = {}) => {
     listByConversationIds: jest.fn().mockResolvedValue([]),
     claimSubjects: jest.fn().mockResolvedValue({ claimed: true }),
   };
-  const deny = jest.fn().mockRejectedValue(new ImpactForbiddenError('Missing privilege'));
+  const deny = jest.fn().mockRejectedValue(new InvestigationsForbiddenError('Missing privilege'));
   const privileges = {
     assertCanManage: allowed ? jest.fn().mockResolvedValue(undefined) : deny,
     assertCanRead: allowed ? jest.fn().mockResolvedValue(undefined) : deny,
@@ -85,13 +85,15 @@ describe('createSubjectsClient', () => {
   it('checks the privilege before touching the index', async () => {
     const { client, service } = setup({ allowed: false });
 
-    await expect(client.upsertSubjects('conv-1', [])).rejects.toBeInstanceOf(ImpactForbiddenError);
+    await expect(client.upsertSubjects('conv-1', [])).rejects.toBeInstanceOf(
+      InvestigationsForbiddenError
+    );
     await expect(client.listByConversationIds(['conv-1'])).rejects.toBeInstanceOf(
-      ImpactForbiddenError
+      InvestigationsForbiddenError
     );
     await expect(
       client.claimSubjects({ conversationId: 'c', subjects: [], isHolderOpen: jest.fn() })
-    ).rejects.toBeInstanceOf(ImpactForbiddenError);
+    ).rejects.toBeInstanceOf(InvestigationsForbiddenError);
 
     expect(service.upsertSubjects).not.toHaveBeenCalled();
     expect(service.listByConversationIds).not.toHaveBeenCalled();
