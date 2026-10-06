@@ -253,6 +253,43 @@ const isLazySchemaCall = (init, state) => {
 };
 
 /**
+ * @param {Expression} node
+ * @returns {boolean}
+ */
+const canAutoFixSchemaCall = (node) => {
+  if (node.type !== esTypes.CallExpression || node.callee.type !== esTypes.MemberExpression) {
+    return false;
+  }
+  const { callee } = node;
+  return (
+    !callee.computed &&
+    callee.property.type === esTypes.Identifier &&
+    AUTO_FIX_SCHEMA_METHODS.has(callee.property.name)
+  );
+};
+
+/**
+ * True when a schema method is called on a lazySchema result at module scope.
+ * @param {Expression} init
+ * @param {FileState} state
+ * @returns {boolean}
+ */
+const isLazySchemaDerivationChain = (init, state) => {
+  let current = unwrapExpression(init);
+  if (!current || !canAutoFixSchemaCall(current)) {
+    return false;
+  }
+
+  while (current && canAutoFixSchemaCall(current)) {
+    current = unwrapExpression(current.callee.object);
+    if (current && isLazySchemaCall(current, state)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
  * Root identifier is in schemaBindings and the chain has at least one call.
  * @param {Expression} init
  * @param {FileState} state
@@ -281,6 +318,7 @@ const recordSchemaBinding = (node, state) => {
   }
   if (
     isLazySchemaCall(node.init, state) ||
+    isLazySchemaDerivationChain(node.init, state) ||
     isZodNamespaceChain(node.init, state) ||
     isEagerDerivedSchemaChain(node.init, state)
   ) {
@@ -353,22 +391,6 @@ const isModuleScopeProperty = (ancestors, state) => {
 
 /**
  * @param {Expression} node
- * @returns {boolean}
- */
-const canAutoFixSchemaCall = (node) => {
-  if (node.type !== esTypes.CallExpression || node.callee.type !== esTypes.MemberExpression) {
-    return false;
-  }
-  const { callee } = node;
-  return (
-    !callee.computed &&
-    callee.property.type === esTypes.Identifier &&
-    AUTO_FIX_SCHEMA_METHODS.has(callee.property.name)
-  );
-};
-
-/**
- * @param {Expression} node
  * @param {FileState} state
  * @returns {{ node: ImportDeclaration; namespace: boolean; name: string } | null}
  */
@@ -405,6 +427,22 @@ const hasBinding = (node, name, sourceCode) => {
   return false;
 };
 
+/**
+ * @param {Expression} node
+ * @returns {boolean}
+ */
+const containsAwaitExpression = (node) => {
+  let hasAwait = false;
+  tsEstree.simpleTraverse(node, {
+    visitors: {
+      [esTypes.AwaitExpression]: () => {
+        hasAwait = true;
+      },
+    },
+  });
+  return hasAwait;
+};
+
 /** @type {Rule} */
 module.exports = {
   meta: {
@@ -429,6 +467,7 @@ module.exports = {
     let sourceCode;
 
     const reportEagerSchema = (node, messageId) => {
+      const canFix = canAutoFixSchemaCall(node) && !containsAwaitExpression(node);
       let lazySchemaName =
         state.lazySchemaNames.size === 1 ? state.lazySchemaNames.values().next().value : undefined;
       let importToUpdate;
@@ -442,13 +481,13 @@ module.exports = {
         }
       }
       const addImport = importToUpdate && !state.importFixScheduled;
-      if (addImport && canAutoFixSchemaCall(node)) {
+      if (addImport && canFix) {
         state.importFixScheduled = true;
       }
       context.report({
         node,
         messageId,
-        ...(lazySchemaName && canAutoFixSchemaCall(node)
+        ...(lazySchemaName && canFix
           ? {
               fix: (fixer) => {
                 const fixes = [
@@ -499,7 +538,10 @@ module.exports = {
 
         if (isEagerZodNamespaceChain(declarator.init, state)) {
           reportEagerSchema(declarator.init, 'eagerZodSchema');
-        } else if (isEagerDerivedSchemaChain(declarator.init, state)) {
+        } else if (
+          isEagerDerivedSchemaChain(declarator.init, state) ||
+          isLazySchemaDerivationChain(declarator.init, state)
+        ) {
           reportEagerSchema(declarator.init, 'eagerDerivedZodSchema');
         }
 
@@ -514,7 +556,10 @@ module.exports = {
         const value = /** @type {Expression} */ (property.value);
         if (isEagerZodNamespaceChain(value, state)) {
           reportEagerSchema(value, 'eagerZodSchema');
-        } else if (isEagerDerivedSchemaChain(value, state)) {
+        } else if (
+          isEagerDerivedSchemaChain(value, state) ||
+          isLazySchemaDerivationChain(value, state)
+        ) {
           reportEagerSchema(value, 'eagerDerivedZodSchema');
         }
       },

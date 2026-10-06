@@ -41,6 +41,12 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     },
     {
       code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = lazySchema(() => z.object({})).parse({});
+      `,
+    },
+    {
+      code: dedent`
         import { z } from '@kbn/zod';
         function make() {
           const X = z.object({});
@@ -174,6 +180,27 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     },
     {
       code: dedent`
+        import { z } from '@kbn/zod';
+        export const X = z.literal(await getValue());
+      `,
+      parserOptions: { ecmaVersion: 2022 },
+      errors: [EAGER],
+      output: null,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        const A = z.literal(await getValue()), B = z.string();
+      `,
+      parserOptions: { ecmaVersion: 2022 },
+      errors: [EAGER, EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const A = z.literal(await getValue()), B = lazySchema(() => z.string());
+      `,
+    },
+    {
+      code: dedent`
         import { z, lazySchema } from '@kbn/zod';
         export const X = z.object({});
       `,
@@ -263,6 +290,41 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
       output: dedent`
         import * as z from '@kbn/zod';
         export const X = z.lazySchema(() => z.object({}));
+      `,
+    },
+    {
+      code: dedent`
+        import * as schemas from '@kbn/zod';
+        export const X = schemas.lazySchema(() => schemas.object({})).optional();
+      `,
+      errors: [DERIVED],
+      output: dedent`
+        import * as schemas from '@kbn/zod';
+        export const X = schemas.lazySchema(() => schemas.lazySchema(() => schemas.object({})).optional());
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({})).optional().array();
+        export const Derived = Base.optional();
+      `,
+      errors: [DERIVED, DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => lazySchema(() => z.object({})).optional().array());
+        export const Derived = lazySchema(() => Base.optional());
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Schemas = { input: lazySchema(() => z.object({})).optional() };
+      `,
+      errors: [DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Schemas = { input: lazySchema(() => lazySchema(() => z.object({})).optional()) };
       `,
     },
     {
