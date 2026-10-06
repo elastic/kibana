@@ -23,7 +23,7 @@ const LazyEsqlEditor = React.lazy(async () => {
 
 export const mountManagementSection = (
   coreStart: CoreStart,
-  { share }: StartDependencies,
+  { data, share }: StartDependencies,
   { element, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   const { docTitle } = coreStart.chrome;
@@ -49,6 +49,11 @@ export const mountManagementSection = (
         discoverLocator={discoverLocator}
         documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
         EsqlEditor={LazyEsqlEditor}
+        previewDependencies={{
+          dataViews: data.dataViews,
+          http: coreStart.http,
+          search: data.search.search,
+        }}
         toasts={coreStart.notifications.toasts}
       />
     )

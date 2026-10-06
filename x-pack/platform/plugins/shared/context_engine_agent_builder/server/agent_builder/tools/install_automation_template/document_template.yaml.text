@@ -10,7 +10,7 @@ version: "1"
 #      string takes the whole index.
 #   2. Add any further fields the summary should draw on to the `KEEP` in `discover_documents`,
 #      remembering that `KEEP` fixes the column order the `foreach` reads by position.
-#   3. Tell the prompt what these documents are. "Support article" and "incident record" produce
+#   3. Tell the prompt what these documents are. "Product manual" and "incident record" produce
 #      different summaries from the same text, and the model cannot tell which it is holding.
 #
 # One KI per document is the right granularity only for a bounded corpus of documents that each
@@ -25,6 +25,9 @@ enabled: true
 consts:
   # The Context Engine AI index the indicators are written into.
   ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance, used as a KI ID prefix so that
+  # multiple installations reading from the same index produce distinct, non-colliding KIs.
+  automation_name: __AUTOMATION_NAME__
   # The index the documents are read from.
   source_index: __SOURCE_INDEX__
   # The field used as the document's title.
@@ -34,7 +37,8 @@ consts:
   # The agreed corpus filter, as a complete ES|QL line. Set to "" to take the whole index.
   corpus_filter: __CORPUS_FILTER__
   # The KI budget: one model call and one KI per document, 100 at most during onboarding. A
-  # one-KI-per-claim variant multiplies it by the claims per document.
+  # one-KI-per-claim variant sets it to the budget divided by the claims
+  # per document.
   max_documents: __MAX_DOCUMENTS__
   # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
   # context window and silently drop the rest of the batch.
@@ -46,6 +50,14 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        pilot_size:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Summarizes only this many documents, to measure a run before the full one.
+      additionalProperties: false
 
 steps:
   # Fetched once, outside the loop, and handed to every summary. Without it the model only ever
@@ -57,15 +69,19 @@ steps:
       method: GET
       path: /{{ consts.source_index }}/_mapping
 
+  # Sorted by _id so a pilot's documents are the first of the full run's, and the full run
+  # replaces the pilot's KIs instead of adding to them. Sorted and limited before the body is
+  # read, so only the kept documents' bodies are loaded.
   - name: discover_documents
     type: elasticsearch.esql.query
     with:
       query: |
         FROM {{ consts.source_index }} METADATA _id
         {{ consts.corpus_filter }}
+        | SORT _id ASC
+        | LIMIT {{ inputs.pilot_size | default: consts.max_documents | at_most: consts.max_documents }}
         | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
         | KEEP _id, `{{ consts.title_field }}`, body
-        | LIMIT {{ consts.max_documents }}
 
   # Documents are chunked into batches of at most 100 before entering `parallel`: the engine
   # throws above that fan-out limit. Each batch runs concurrently; batches run sequentially.
@@ -242,15 +258,14 @@ steps:
                   esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' | default: nil }}"
                   topics: "${{ steps.summarize_document.output.content.topics }}"
 
-          # `ki_id` pairs the index with the source document id, so a re-run replaces that
-          # document's KI rather than appending a second copy, and two indices holding the same
-          # document id do not collide. On a data-stream destination a re-run appends a new revision
-          # instead.
+          # `ki_id` scopes the document to this automation instance so that two installations
+          # reading from the same index produce distinct, non-colliding KIs. A re-run with the
+          # same automation_name replaces the KI in-place rather than appending a second copy.
           - name: create_ki
             type: context-engine.createKi
             with:
               ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "{{ consts.source_index }}-{{ steps.document_context.output.doc_id }}"
+              ki_id: "{{ consts.automation_name }}/{{ steps.document_context.output.doc_id }}"
               ki: "${{ steps.assemble_ki.output.ki }}"
               verifiers:
                 - esql-valid-syntax
