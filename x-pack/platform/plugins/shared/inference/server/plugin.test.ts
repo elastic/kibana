@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { resolveOnFailureMode, resolveReplacementsEncryptionKey } from './plugin';
+import moment from 'moment';
+import { coreMock } from '@kbn/core/server/mocks';
+import type { InferenceSetupDependencies } from './types';
+import { InferencePlugin, resolveOnFailureMode, resolveReplacementsEncryptionKey } from './plugin';
 
 describe('resolveReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', async () => {
@@ -74,5 +77,47 @@ describe('resolveOnFailureMode', () => {
         legacySettingsPromise: Promise.reject(new Error('saved objects unavailable')),
       })
     ).resolves.toBe('block');
+  });
+});
+
+describe('InferencePlugin.setup', () => {
+  const setupPlugin = (
+    workersEnabled: boolean,
+    plugins: Partial<InferenceSetupDependencies> = {}
+  ) => {
+    const plugin = new InferencePlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        workers: {
+          anonymization: {
+            enabled: workersEnabled,
+            minThreads: 0,
+            maxThreads: 3,
+            maxQueue: 20,
+            idleTimeout: moment.duration(30, 'seconds'),
+            taskTimeout: moment.duration(15, 'seconds'),
+          },
+        },
+      })
+    );
+    return plugin.setup(coreMock.createSetup(), {
+      actions: {},
+      ...plugins,
+    } as unknown as InferenceSetupDependencies);
+  };
+
+  for (const workersEnabled of [true, false]) {
+    it(`tells the anonymization settings plugin whether anonymization workers are enabled (${workersEnabled})`, () => {
+      const configurePatternTester = jest.fn();
+
+      setupPlugin(workersEnabled, { aiAnonymizationSettings: { configurePatternTester } });
+
+      expect(configurePatternTester).toHaveBeenCalledTimes(1);
+      expect(configurePatternTester).toHaveBeenCalledWith({ enabled: workersEnabled });
+    });
+  }
+
+  it('does not require the anonymization settings plugin', () => {
+    expect(() => setupPlugin(true)).not.toThrow();
   });
 });

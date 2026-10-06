@@ -14,3 +14,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export { config } from './config';
 export type { AiAnonymizationSettingsConfig } from './config';
+export type {
+  AiAnonymizationSettingsPluginSetup,
+  AiAnonymizationSettingsPluginStart,
+} from './types';
