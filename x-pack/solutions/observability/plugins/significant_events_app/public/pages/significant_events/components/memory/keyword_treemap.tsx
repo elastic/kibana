@@ -178,14 +178,15 @@ export function MemoryKeywordTreemap({
       const cell = tooltipCell(values, cellsByKeyword);
       if (cell === undefined) return null;
       return (
-        // A panel of its own: the chart's tooltip surface is transparent over a
-        // treemap, so in the dark theme this text would otherwise sit on whatever
-        // cell it happened to be drawn over.
+        // A panel and an explicit colour of its own: the chart tooltip inherits
+        // charts' light-on-dark colour, which is unreadable on this panel in the
+        // light theme and over the cells in either theme.
         <EuiPanel
           hasBorder
           hasShadow
           paddingSize="s"
           borderRadius="m"
+          css={{ color: euiTheme.colors.text }}
           data-test-subj="nightshiftMemoryTreemapTooltip"
         >
           <EuiText size="s">
@@ -207,7 +208,7 @@ export function MemoryKeywordTreemap({
         </EuiPanel>
       );
     },
-    [cellsByKeyword]
+    [cellsByKeyword, euiTheme.colors.text]
   );
 
   // A store with no memories at all has nothing to rank, and an empty chart frame
