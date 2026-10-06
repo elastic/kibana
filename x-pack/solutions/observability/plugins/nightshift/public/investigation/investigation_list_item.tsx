@@ -178,7 +178,7 @@ function EntityChips({
   severityColorKey,
 }: {
   entities?: Array<{ name: string; type?: string }>;
-  severityColorKey: 'danger' | 'warning' | 'primary' | 'success';
+  severityColorKey: 'danger' | 'risk' | 'warning' | 'neutral' | 'primary';
 }): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
 

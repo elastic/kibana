@@ -132,12 +132,7 @@ export const InvestigationSeverityTiles = ({
   onSeverityClick,
 }: InvestigationSeverityTilesProps): React.ReactElement => {
   const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-  const styles = useMemo(
-    () => getSeverityTileStyles(euiThemeContext),
-    // Theme context object identity is unstable; key off the fields styles actually use.
-    [euiTheme]
-  );
+  const styles = useMemo(() => getSeverityTileStyles(euiThemeContext), [euiThemeContext]);
 
   return (
     <EuiFlexGroup gutterSize="m" responsive={false}>
