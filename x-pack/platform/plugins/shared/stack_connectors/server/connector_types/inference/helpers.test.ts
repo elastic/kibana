@@ -160,6 +160,10 @@ describe('upstream credential redaction', () => {
     ['connect ECONNREFUSED http://admin:ZZSECRET9@10.0.0.5:8000/v1/chat/completions', 'ZZSECRET9'],
     ['https://user:P%40ssZZSECRET9@gateway.local/v1', 'P%40ssZZSECRET9'],
     ['{"url":"https://u:ZZSECRET9@h/x"}', 'ZZSECRET9'],
+    ['{"token":"ZZSECRET9', 'ZZSECRET9'],
+    ["{'token':'ZZSECRET9", 'ZZSECRET9'],
+    ['{"api_key":"ZZSECRET9', 'ZZSECRET9'],
+    ['{"password":"ZZSECRET9', 'ZZSECRET9'],
   ])('redacts %s', (input, secret) => {
     expect(truncateUpstreamBody(input)).not.toContain(secret);
   });

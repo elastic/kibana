@@ -172,11 +172,11 @@ const redactUpstreamSecrets = (text: string): string =>
       '$1[redacted]'
     )
     .replace(
-      /(^|[{},&?;"'])\s*(token["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s"',}]+)/gim,
+      /(^|[{},&?;"'])\s*(token["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|"[^"\n]*|'[^'\n]*|[^\s"',}]+)/gim,
       '$1$2[redacted]'
     )
     .replace(
-      /\b((?:api[-_ ]?key|password|passwd|(?:[\w-]+_)?secret(?:_key)?|private_key|aws_secret_access_key|credential|(?:access|refresh|id|auth|session|hf|api|bearer|user)_token|accessToken|clientSecret|refreshToken|idToken)["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s"',}]+)/gi,
+      /\b((?:api[-_ ]?key|password|passwd|(?:[\w-]+_)?secret(?:_key)?|private_key|aws_secret_access_key|credential|(?:access|refresh|id|auth|session|hf|api|bearer|user)_token|accessToken|clientSecret|refreshToken|idToken)["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|"[^"\n]*|'[^'\n]*|[^\s"',}]+)/gi,
       '$1[redacted]'
     )
     .replace(
