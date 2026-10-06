@@ -1020,6 +1020,7 @@ export class TaskRunner<
     // run reclassifies from originalState rather than re-emitting.
     if (
       isOk(runRuleResult) &&
+      !this.cancelled &&
       this.ruleResult.getLastRunResults().errors.length === 0 &&
       this.context.alertingEventBus
     ) {
