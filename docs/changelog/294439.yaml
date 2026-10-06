@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/294439
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Search and data
+title: Fix incorrect minimum agent version after bulk package policy upgrade

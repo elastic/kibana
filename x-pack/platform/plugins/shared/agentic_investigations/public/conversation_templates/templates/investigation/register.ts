@@ -16,6 +16,7 @@ import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
+import { copyLink } from '../../shared/copy_link';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -28,6 +29,7 @@ export const investigationTemplate: TemplateDefinition = {
   templateId: INVESTIGATION_TEMPLATE_ID,
   register: ({
     templateId,
+    core,
     startDeps,
     services,
     escalationsEnabled,
@@ -124,6 +126,8 @@ export const investigationTemplate: TemplateDefinition = {
       // The toggle itself disables when the user may not change the status.
       renderStatus,
       renderCloseInvestigationModal,
+      // The flyout's Copy link button confirms success itself; only a failure needs a toast.
+      onCopyLink: (url) => copyLink(core.notifications.toasts, url),
       // Without escalations the footer has no "Open escalation" button.
       renderEscalationModal: escalationsEnabled
         ? (props) =>
