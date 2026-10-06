@@ -21,7 +21,10 @@ import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AiButton } from '@kbn/ui-ai-components';
-import { useEffectiveProjectRouting } from '../hooks/use_effective_project_routing';
+import {
+  getEffectiveProjectRouting,
+  usePickerProjectRouting,
+} from '../hooks/use_effective_project_routing';
 import { SubmitButton } from './submit_button';
 import { VisorMode } from './visor_mode';
 import { useNlGeneration } from './use_nl_generation';
@@ -97,9 +100,7 @@ export function QuickSearchVisor({
   } = useNlGeneration({ query, onNlResult, onUpdateAndSubmitQuery, telemetryService });
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
 
-  const sourcesKey = useMemo(() => getIndexPatternFromESQLQuery(query), [query]);
-  const sourceQuery = useMemo(() => getSourceCommandQueryFromESQLQuery(query), [query]);
-  const projectRouting = useEffectiveProjectRouting(query);
+  const pickerProjectRouting = usePickerProjectRouting();
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
     setSearchValue(kqlQuery);
@@ -108,6 +109,7 @@ export function QuickSearchVisor({
   const onKqlSubmit = useCallback(
     (kqlQuery: string) => {
       if (isDisabled || disableSubmitAction) return;
+      const sourcesKey = getIndexPatternFromESQLQuery(query);
       if (sourcesKey && kqlQuery.trim()) {
         const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
         const newQuery = `${sourceCommand} ${sourcesKey} | WHERE KQL("""${kqlQuery.trim()}""")`;
@@ -116,7 +118,7 @@ export function QuickSearchVisor({
         onKqlSubmitted?.();
       }
     },
-    [isDisabled, disableSubmitAction, sourcesKey, query, onUpdateAndSubmitQuery, onKqlSubmitted]
+    [isDisabled, disableSubmitAction, query, onUpdateAndSubmitQuery, onKqlSubmitted]
   );
 
   const onNlSubmit = useCallback(() => {
@@ -148,21 +150,29 @@ export function QuickSearchVisor({
   }, [isInline, isVisible]);
 
   useEffect(() => {
-    if (!isVisible || !sourceQuery) {
+    if (!isVisible) {
       setKqlDataView(undefined);
       return;
     }
-    // The fields only serve KQL suggestions: look them up once the KQL input is focused, never
-    // while the ES|QL query is typed. They are kept after blur, for the same source.
+    // The fields only serve KQL suggestions, shown while the KQL input is focused: derive the
+    // source and look it up only then, never while the ES|QL query is typed. They are kept after
+    // blur and reused for the same source.
     if (!isKqlFocused) {
       return;
     }
+    const sourceQuery = getSourceCommandQueryFromESQLQuery(query);
+    if (!sourceQuery) {
+      setKqlDataView(undefined);
+      return;
+    }
+    // Fields loaded for another source are stale.
+    setKqlDataView((current) => (current?.sourceQuery === sourceQuery ? current : undefined));
     let cancelled = false;
     // Only the fields are needed, as before: skip the time field request.
     EsqlSource.create({
       query: sourceQuery,
       http: core.http,
-      projectRouting,
+      projectRouting: getEffectiveProjectRouting(query, pickerProjectRouting),
       resolveTimeField: false,
     })
       .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
@@ -173,10 +183,7 @@ export function QuickSearchVisor({
     return () => {
       cancelled = true;
     };
-  }, [isVisible, isKqlFocused, sourceQuery, projectRouting, data.dataViews, core.http]);
-
-  // Fields loaded for another source are stale.
-  const adHocDataView = kqlDataView?.sourceQuery === sourceQuery ? kqlDataView.dataView : undefined;
+  }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
   const isKqlMode = visorMode === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
@@ -254,7 +261,7 @@ export function QuickSearchVisor({
                     <KQLComponent
                       iconType=""
                       disableLanguageSwitcher={true}
-                      indexPatterns={adHocDataView ? [adHocDataView] : []}
+                      indexPatterns={kqlDataView ? [kqlDataView.dataView] : []}
                       bubbleSubmitEvent={false}
                       query={{ query: searchValue, language: 'kuery' }}
                       disableAutoFocus={true}

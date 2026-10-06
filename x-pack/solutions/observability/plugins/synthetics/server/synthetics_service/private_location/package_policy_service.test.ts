@@ -161,6 +161,48 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
     expect(clientPassedToFleet(fleetBulkCreate)).toEqual({ __space: DEFAULT_SPACE_ID });
   });
 
+  it('keeps every id-less Test Now policy when the monitor is in a non-default space', async () => {
+    const { server, getByIds, fleetBulkCreate } = makeServer();
+    getByIds.mockResolvedValue([
+      { id: 'policy-a', space_ids: ['naims', DEFAULT_SPACE_ID] },
+      { id: 'policy-b', space_ids: ['naims', DEFAULT_SPACE_ID] },
+      { id: 'policy-c', space_ids: [DEFAULT_SPACE_ID] },
+    ]);
+    const testNowPolicies = ['policy-a', 'policy-b', 'policy-c'].map((policyId) =>
+      policy({ id: undefined, name: 'BROWSER_SYNTHETICS_TEST_NOW_RUN', policy_ids: [policyId] })
+    );
+
+    await new PackagePolicyService(server).bulkCreate({
+      newPolicies: testNowPolicies,
+      spaceId: 'naims',
+    });
+
+    const policiesByClient = fleetBulkCreate.mock.calls.map(([client, , policies]) => ({
+      client,
+      policyIds: policies.map((p: NewPackagePolicyWithId) => p.policy_ids),
+    }));
+    expect(policiesByClient).toEqual([
+      { client: { __space: DEFAULT_SPACE_ID }, policyIds: [['policy-c']] },
+      { client: { __space: 'naims' }, policyIds: [['policy-a'], ['policy-b']] },
+    ]);
+  });
+
+  it('routes a package policy attached to several agent policies in one space only once', async () => {
+    const { server, getByIds, fleetBulkCreate } = makeServer();
+    getByIds.mockResolvedValue([
+      { id: 'policy-a', space_ids: ['naims'] },
+      { id: 'policy-b', space_ids: ['naims'] },
+    ]);
+
+    await new PackagePolicyService(server).bulkCreate({
+      newPolicies: [policy({ policy_ids: ['policy-a', 'policy-b'] })],
+      spaceId: 'naims',
+    });
+
+    expect(fleetBulkCreate).toHaveBeenCalledTimes(1);
+    expect(fleetBulkCreate.mock.calls[0][2]).toHaveLength(1);
+  });
+
   it('short-circuits to the DEFAULT-space client without fetching agent policies when the monitor is in the default space', async () => {
     const { server, getByIds, fleetBulkCreate } = makeServer();
 

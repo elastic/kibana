@@ -108,23 +108,21 @@ export const createEventInvestigationAttachTool = ({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, getEventSearchClient, getAlertEventsClient, licensing } =
+        const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
           await getScopedClients({
             request,
           });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
 
-        const eventClient = await getEventClient();
-
         const data = await attachEventInvestigationToolHandler({
-          eventClient,
           eventSearchClient: await getEventSearchClient(),
           eventId: toolParams.event_id,
           workflowExecutionId: toolParams.workflow_execution_id,
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
           alertEventsClient: await getAlertEventsClient(),
+          emitTrigger,
           logger,
         });
 

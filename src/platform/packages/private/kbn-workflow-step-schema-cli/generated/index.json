@@ -606,6 +606,9 @@
     "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
+    "nightshift.decisionTreeHydrate",
+    "nightshift.decisionTreePrepare",
+    "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
@@ -727,6 +730,7 @@
     "security.deleteNote",
     "security.disableRule",
     "security.enableRule",
+    "security.getAlertEntities",
     "security.getNotes",
     "security.patchRule",
     "security.renderAlertNarrative",
@@ -997,11 +1001,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "53ab212e742fc0cb0917ff8f60ff86207e3dd086e58942eba4a18bff5fe2238c"
+      "sha256": "6b244a3d2f0b1ac564e39224754fc03d779eb3f95ab59566c12f5a7689cd5bb7"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "b4b33deb5a55c772dd54a8cccef87cc7eaa136dd42306cb924d38af1bfb962f4"
+      "sha256": "c60a773d90ecbbd2c01ff49d9c2ce4f9c1570bcae9656c79fdb9d0a76be8ad4d"
     }
   }
 }
