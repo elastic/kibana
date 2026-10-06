@@ -1175,7 +1175,8 @@ describe('TabsStorageManager', () => {
     const loadWithUrlAppState = (
       urlAppState: DiscoverAppState,
       storedProfileState?: TabState['profileState'],
-      timeRestore = true
+      timeRestore = true,
+      persistedTabId = mockTab1.id
     ) => {
       const { tabsStorageManager, urlStateStorage, services } = create();
 
@@ -1206,7 +1207,7 @@ describe('TabsStorageManager', () => {
           tabs: [
             {
               ...fromSavedSearchToSavedObjectTab({
-                tab: { id: mockTab1.id, label: mockTab1.label },
+                tab: { id: persistedTabId, label: mockTab1.label },
                 savedSearch: savedSearchMock,
                 services,
               }),
@@ -1219,6 +1220,12 @@ describe('TabsStorageManager', () => {
 
       return urlStateStorage;
     };
+
+    it('should clear the URL time when the stored tab was removed and the first saved tab restores time', () => {
+      const urlStateStorage = loadWithUrlAppState(mockTab1.appState, undefined, true, 'other-tab');
+
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
+    });
 
     it('should keep the URL time when the saved tab does not restore time', () => {
       const urlStateStorage = loadWithUrlAppState(mockTab1.appState, undefined, false);

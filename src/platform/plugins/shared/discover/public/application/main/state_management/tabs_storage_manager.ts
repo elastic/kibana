@@ -519,9 +519,10 @@ export const createTabsStorageManager = ({
     ) {
       // Only a saved time range can replace the URL time. Global filters are shared with other
       // apps, so they stay in _g.
-      const persistedSelectedTab = persistedDiscoverSession?.tabs.find(
-        (tab) => tab.id === selectedTabId
-      );
+      // Falls back to the first saved tab, which is selected when the stored one was removed.
+      const persistedSelectedTab =
+        persistedDiscoverSession?.tabs.find((tab) => tab.id === selectedTabId) ??
+        persistedDiscoverSession?.tabs[0];
       if (persistedSelectedTab?.timeRestore) {
         const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
         void urlStateStorage.set(GLOBAL_STATE_URL_KEY, omit(urlGlobalState, 'time'), {
