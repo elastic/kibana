@@ -22,6 +22,7 @@ import {
   isSubagentRosterUpdatedStep,
   isTodosStep,
   isToolCallStep,
+  internalTools,
 } from '@kbn/agent-builder-common';
 import { isImageResult } from '@kbn/agent-builder-common/tools/tool_result';
 import {
@@ -269,6 +270,15 @@ const renderImageMessages = async (
   return messages;
 };
 
+/**
+ * The params a tool call is replayed with. Earlier rounds' `write_spec` calls drop the spec: it is
+ * persisted on the round's response and would repeat the reply in every later prompt.
+ */
+const toolCallParams = (call: ToolCallStep, context: RenderContext): ToolCallStep['params'] =>
+  context.type === 'history' && call.tool_id === internalTools.writeSpec
+    ? { spec: '[omitted from history]' }
+    : call.params;
+
 const renderToolCallGroup = async (
   calls: ToolCallStep[],
   { context, reasoningSteps }: { context: RenderContext; reasoningSteps: ReasoningStep[] }
@@ -289,10 +299,11 @@ const renderToolCallGroup = async (
       );
       const name =
         current?.run.renderState[call.tool_call_id]?.toolName ?? sanitizeToolId(call.tool_id);
+      const params = toolCallParams(call, context);
       return {
         id: call.tool_call_id,
         name,
-        args: stepReasoning ? { _reasoning: stepReasoning, ...call.params } : call.params,
+        args: stepReasoning ? { _reasoning: stepReasoning, ...params } : params,
         type: 'tool_call' as const,
       };
     }),

@@ -10,6 +10,7 @@ import {
   agentBuilderDefaultAgentId,
   ToolOrigin,
   type AgentConfiguration,
+  type ConversationRoundOrigin,
   type ConversationTemplate,
   type MetadataFieldValue,
 } from '@kbn/agent-builder-common';
@@ -28,6 +29,7 @@ import { createAskUserQuestionTool } from './ask_user_question';
 import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
+import { createWriteSpecTool } from './write_spec';
 import {
   createDiscoverApisTool,
   createDescribeApiTool,
@@ -70,6 +72,8 @@ export interface RegisterInternalToolsParams {
    * gates `run_subagent` / `send_message` / `sleep`.
    */
   agentConfiguration: AgentConfiguration;
+  /** External origin of the execution, such as Slack. Gates `write_spec`. */
+  origin?: ConversationRoundOrigin;
 }
 
 /**
@@ -91,6 +95,7 @@ export const registerInternalTools = async ({
   subagentTracker,
   conversationExists,
   agentConfiguration,
+  origin,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -210,6 +215,11 @@ export const registerInternalTools = async ({
     tools.push(
       createSearchRelevantSkillsTool({ modelProvider, filteredSkills, logger, abortSignal })
     );
+  }
+
+  // write_spec — only for executions from an external origin, whose surfaces render the spec.
+  if (origin) {
+    tools.push(createWriteSpecTool());
   }
 
   await toolManager.addTools({

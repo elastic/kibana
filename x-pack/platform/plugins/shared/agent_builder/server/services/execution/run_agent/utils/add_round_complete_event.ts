@@ -47,6 +47,7 @@ import { persistableSteps } from '../step_state';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type { PendingTurn } from './conversation_turn';
 import { getModelUsage } from './round_summary';
+import { getLastAcceptedSpec } from './get_last_accepted_spec';
 import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 
@@ -206,6 +207,16 @@ export const addRoundCompleteEvent = ({
           // exec_k's terminated carries the same resume state as the folded round.
           if (resumeExecution) {
             resumeExecution.follow_up_round.state = round.state;
+          }
+
+          // Read from the merged steps, so a spec accepted before a HITL pause is kept on resume.
+          const spec = getLastAcceptedSpec(round.steps);
+          if (spec) {
+            round.response = { ...round.response, spec };
+            if (resumeExecution) {
+              const { follow_up_round: followUpRound } = resumeExecution;
+              followUpRound.response = { ...followUpRound.response, spec };
+            }
           }
 
           if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {

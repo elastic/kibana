@@ -126,6 +126,7 @@ export const internalTools = {
   describeApi: 'describe_api',
   describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
+  writeSpec: 'write_spec',
 };
 
 export const isAttachmentTool = (toolName: string) =>

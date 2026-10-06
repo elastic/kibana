@@ -403,6 +403,9 @@ importers:
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
+      '@elastic/isomer-sdk':
+        specifier: 0.1.0
+        version: 0.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
       '@elastic/kibana-d3-color':
         specifier: 2.0.1
         version: 2.0.1
@@ -565,6 +568,9 @@ importers:
       '@kbn/agent-builder-sml-test-types-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/agent_builder_sml/plugins/sml_test_types
+      '@kbn/agent-builder-surfaces':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-surfaces
       '@kbn/agent-builder-tools-base':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
@@ -8933,6 +8939,8 @@ importers:
 
   x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader: {}
 
+  x-pack/platform/packages/shared/agent-builder/agent-builder-surfaces: {}
+
   x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base: {}
 
   x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen: {}
@@ -11024,6 +11032,17 @@ packages:
 
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
+
+  '@elastic/isomer-sdk@0.1.0':
+    resolution: {integrity: sha512-/y4AkG39Wb/b5ZxEvnwCMw79jgT6OcpH+kmLmaFoKOv/ZvHs0dBY3pZ7SllBYHy+8a73SpIMb2yPcgBBUFYqCg==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      react: '>=18 <20'
+      react-dom: '>=18 <20'
+      zod: 4.4.3
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   '@elastic/kibana-d3-color@2.0.1':
     resolution: {integrity: sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==}
@@ -27930,6 +27949,20 @@ snapshots:
       vfile: 4.2.1
 
   '@elastic/filesaver@1.1.2': {}
+
+  '@elastic/isomer-sdk@0.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
+    dependencies:
+      acorn: 8.18.0
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
+      mdast-util-gfm: 3.1.0(supports-color@10.2.2)
+      mdast-util-to-markdown: 2.1.2
+      micromark-extension-gfm: 3.0.0
+      react: 18.2.0
+      zod: 4.4.3
+    optionalDependencies:
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - supports-color
 
   '@elastic/kibana-d3-color@2.0.1': {}
 

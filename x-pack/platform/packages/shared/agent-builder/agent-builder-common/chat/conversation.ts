@@ -6,6 +6,7 @@
  */
 
 import type { JsonObject } from '@kbn/utility-types';
+import type { Composition } from '@elastic/isomer-sdk';
 import type { UserIdAndName } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
@@ -102,6 +103,10 @@ export interface AssistantResponse {
    */
   message: string;
   structured_output?: object;
+  /**
+   * Isomer spec of the reply, written by the `write_spec` tool. Never rendered in the Kibana UI.
+   */
+  spec?: Composition;
 }
 
 export enum ConversationRoundStepType {

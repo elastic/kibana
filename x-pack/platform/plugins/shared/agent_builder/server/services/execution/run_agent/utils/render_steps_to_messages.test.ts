@@ -140,6 +140,16 @@ describe('renderHistorySteps', () => {
     expect(toolB.tool_call_id).toBe('b');
   });
 
+  it('omits the spec from earlier write_spec calls', async () => {
+    const writeSpec = call('a', {
+      tool_id: internalTools.writeSpec,
+      params: { spec: { type: 'view', body: [{ type: 'markdown', text: 'Hi' }] } },
+    });
+    const [ai] = (await renderHistorySteps({ steps: [writeSpec] })) as [AIMessage];
+
+    expect(ai.tool_calls?.[0].args).toEqual({ spec: '[omitted from history]' });
+  });
+
   it('passes results through the transformer', async () => {
     const resultTransformer: ToolCallResultTransformer = async () => [other('summarized')];
     const messages = await renderHistorySteps({ steps: [call('a')], resultTransformer });
@@ -279,6 +289,14 @@ describe('renderCurrentRun', () => {
       type: 'tool_call',
     });
     expect(tool.content).toBe(wrapToolResultContent('browser said hi'));
+  });
+
+  it('keeps the spec of write_spec calls in the current run', async () => {
+    const spec = { type: 'view', body: [{ type: 'markdown', text: 'Hi' }] };
+    const writeSpec = call('a', { tool_id: internalTools.writeSpec, params: { spec } });
+    const [ai] = (await current([writeSpec], rendered('a'))) as [AIMessage];
+
+    expect(ai.tool_calls?.[0].args).toEqual({ spec });
   });
 
   it('falls back to the sanitized tool id and serialized results without render state', async () => {

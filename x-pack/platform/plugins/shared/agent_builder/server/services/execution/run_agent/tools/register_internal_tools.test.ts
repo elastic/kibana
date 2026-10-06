@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ConversationOriginType } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_subagents';
 import { registerInternalTools, type RegisterInternalToolsParams } from './register_internal_tools';
@@ -71,7 +71,11 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
-const register = async (context: AgentHandlerContext, subagentIds: string[] = ['other-agent']) => {
+const register = async (
+  context: AgentHandlerContext,
+  subagentIds: string[] = ['other-agent'],
+  overrides: Partial<RegisterInternalToolsParams> = {}
+) => {
   const params = {
     context,
     agentId: 'agent-1',
@@ -82,6 +86,7 @@ const register = async (context: AgentHandlerContext, subagentIds: string[] = ['
     subagentTracker: {},
     conversationExists: jest.fn(),
     agentConfiguration: { subagent_ids: subagentIds },
+    ...overrides,
   } as unknown as RegisterInternalToolsParams;
   await registerInternalTools(params);
 };
@@ -130,5 +135,28 @@ describe('registerInternalTools - subagents', () => {
     await register(context);
 
     expect(addedToolIds(toolManager)).not.toEqual(expect.arrayContaining(['run_subagent']));
+  });
+});
+
+describe('registerInternalTools - write_spec', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resolveAllowedSubagentsMock.mockResolvedValue([]);
+  });
+
+  it('registers write_spec for executions with an external origin', async () => {
+    const { context, toolManager } = createContext();
+
+    await register(context, [], { origin: { type: ConversationOriginType.Slack } });
+
+    expect(addedToolIds(toolManager)).toContain('write_spec');
+  });
+
+  it('does not register write_spec for executions without an origin', async () => {
+    const { context, toolManager } = createContext();
+
+    await register(context, []);
+
+    expect(addedToolIds(toolManager)).not.toContain('write_spec');
   });
 });

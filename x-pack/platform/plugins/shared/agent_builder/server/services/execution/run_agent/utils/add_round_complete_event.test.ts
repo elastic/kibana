@@ -18,6 +18,7 @@ import {
   createRelevantSkillsStep,
   isRoundCompleteEvent,
   isRelevantSkillsStep,
+  internalTools,
   type ChatAgentEvent,
   type ChatEvent,
   type Conversation,
@@ -552,6 +553,160 @@ describe('addRoundCompleteEvent', () => {
       }),
     ]);
     expect(reloaded[0].steps).toEqual(rc.data.round.steps);
+  });
+
+  describe('response.spec', () => {
+    const spec = (text: string) => ({ type: 'view', body: [{ type: 'markdown', text }] });
+
+    const writeSpecCall = (
+      id: string,
+      text: string,
+      resultType: ToolResultType = ToolResultType.other
+    ): ToolCallStep => ({
+      type: ConversationRoundStepType.toolCall,
+      tool_call_id: id,
+      tool_id: internalTools.writeSpec,
+      params: { spec: spec(text) },
+      results: [
+        {
+          tool_result_id: `r-${id}`,
+          type: resultType,
+          data: resultType === ToolResultType.error ? { message: 'invalid' } : { accepted: true },
+        } as ToolCallStep['results'][number],
+      ],
+      progression: [],
+    });
+
+    const completeWithSteps = async (steps: ToolCallStep[]) => {
+      const run = freshRun();
+      run.apply(steps.map((step) => stepUpdates.appendToolCall(step)));
+
+      const events = await firstValueFrom(
+        completedRun(run).pipe(
+          addRoundCompleteEvent({
+            ...createDeps(),
+            tracker: run.tracker,
+            userInput: { message: 'go' },
+            startTime: new Date('2026-01-01T00:00:00.000Z'),
+          }),
+          toArray()
+        )
+      );
+
+      return events.find(isRoundCompleteEvent)?.data.round;
+    };
+
+    it('sets the spec of the last accepted write_spec call, ignoring failed calls', async () => {
+      const round = await completeWithSteps([
+        writeSpecCall('a', 'first'),
+        writeSpecCall('b', 'second'),
+        writeSpecCall('c', 'invalid', ToolResultType.error),
+      ]);
+
+      expect(round?.response).toEqual({ message: 'Done', spec: spec('second') });
+    });
+
+    it('leaves the spec unset when write_spec was not called', async () => {
+      const round = await completeWithSteps([]);
+
+      expect(round?.response).not.toHaveProperty('spec');
+    });
+
+    it('keeps a spec accepted before a pause when the round resumes, and after reload', async () => {
+      const pausedCall: ToolCallStep = {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'call-1',
+        tool_id: 'my_tool',
+        params: {},
+        results: [],
+        progression: [],
+      };
+      const pendingRound = createRound({
+        status: ConversationRoundStatus.awaitingPrompt,
+        input: { message: 'go' },
+        steps: [writeSpecCall('spec-1', 'before the pause'), pausedCall],
+        pending_prompts: [confirmPrompt],
+        state: {
+          version: 2,
+          agent: {
+            current_cycle: 1,
+            error_count: 0,
+            nodes: [
+              {
+                step: 'execute_tool',
+                tool_call_id: 'call-1',
+                tool_id: 'my_tool',
+                tool_params: {},
+                tool_state: undefined,
+              },
+            ],
+          },
+        },
+      });
+      const { pendingTurn, run } = pendingTurnFor(pendingRound);
+
+      const resolved = { tool_result_id: 'res-1', type: ToolResultType.other, data: 'resolved' };
+      run.apply([
+        stepUpdates.resolveToolCall({
+          toolCallId: 'call-1',
+          toolId: 'my_tool',
+          results: [resolved],
+          progression: [],
+        }),
+      ]);
+
+      const events = await firstValueFrom(
+        completedRun(
+          run,
+          { currentCycle: 1 },
+          {
+            type: ChatEventType.toolResult,
+            data: { tool_call_id: 'call-1', tool_id: 'my_tool', results: [resolved] },
+          } as ChatAgentEvent,
+          messageComplete('resumed')
+        ).pipe(
+          addRoundCompleteEvent({
+            ...createDeps(),
+            pendingTurn,
+            tracker: run.tracker,
+            userInput: { message: '' },
+            startTime: new Date('2026-01-01T00:05:00.000Z'),
+          }),
+          toArray()
+        )
+      );
+
+      const rc = events.find(isRoundCompleteEvent);
+      if (!rc?.data.resume_execution) {
+        throw new Error('Expected resume execution');
+      }
+      const followUpRound = rc.data.resume_execution.follow_up_round;
+      expect(rc.data.round.response.spec).toEqual(spec('before the pause'));
+      expect(followUpRound.response.spec).toEqual(spec('before the pause'));
+
+      const conversation = createEmptyConversation();
+      const response = promptResponseEvent({
+        roundId: pendingRound.id,
+        executionIndex: 1,
+        promptRequestedEventId: `${pendingRound.id}::execution_terminated`,
+        responses: {},
+        input: followUpRound.input,
+        conversation,
+        createdAt: followUpRound.started_at,
+      });
+      const reloaded = eventsToRounds([
+        ...roundToEvents(pendingRound, conversation),
+        response,
+        ...resumeExecutionToEvents({
+          followUpRound,
+          roundId: pendingRound.id,
+          executionIndex: 1,
+          triggerEventId: response.id,
+          conversation,
+        }),
+      ]);
+      expect(reloaded[0].response.spec).toEqual(spec('before the pause'));
+    });
   });
 
   it('stamps the resolved author on the round when there is no origin', async () => {

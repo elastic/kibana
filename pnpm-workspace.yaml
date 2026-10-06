@@ -1236,6 +1236,7 @@ packages:
   - 'x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils'
   - 'x-pack/platform/packages/shared/agent-builder/agent-builder-server'
   - 'x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader'
+  - 'x-pack/platform/packages/shared/agent-builder/agent-builder-surfaces'
   - 'x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base'
   - 'x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen'
   - 'x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder'
