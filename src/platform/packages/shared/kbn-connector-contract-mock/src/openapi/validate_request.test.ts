@@ -79,12 +79,13 @@ describe('validateRequest', () => {
       {
         path: ['path', 'id'],
         code: 'type',
-        message: 'Request path parameter id must be integer',
+        message:
+          'Request path parameter id: Instance type "string" is invalid. Expected "integer".',
       },
       {
         path: ['query', 'limit'],
         code: 'maximum',
-        message: 'Request query parameter limit must be <= 100',
+        message: 'Request query parameter limit: 500 is greater than 100.',
       },
       {
         path: ['header', 'X-Key'],
@@ -108,11 +109,15 @@ describe('validateRequest', () => {
     ]);
     expect(validate({ body: { name: 1, extra: true } })).toEqual([
       {
+        path: ['body', 'name'],
+        code: 'type',
+        message: 'Request body at /name: Instance type "number" is invalid. Expected "string".',
+      },
+      {
         path: ['body'],
         code: 'additionalProperties',
-        message: 'Request body must NOT have additional properties: extra',
+        message: 'Request body: Property "extra" does not match additional properties schema.',
       },
-      { path: ['body', 'name'], code: 'type', message: 'Request body at /name must be string' },
     ]);
   });
 
@@ -121,7 +126,7 @@ describe('validateRequest', () => {
 
     expect(messages({ headers, body: 'name=a&count=2' })).toEqual([]);
     expect(messages({ headers, body: 'name=a&count=many' })).toEqual([
-      'Request body at /count must be integer',
+      'Request body at /count: Instance type "string" is invalid. Expected "integer".',
     ]);
   });
 });
