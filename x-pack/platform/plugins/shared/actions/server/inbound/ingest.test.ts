@@ -18,11 +18,7 @@ import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
 import { composeIngestToken } from './ingress_credential';
-import {
-  INBOUND_EVENTS_DISABLED_MESSAGE,
-  INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
-  INBOUND_EVENTS_RATE_LIMITED_MESSAGE,
-} from './constants';
+import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { ingestInboundEvent } from './ingest';
 import { InboundEventRateLimiter } from './inbound_event_rate_limiter';
