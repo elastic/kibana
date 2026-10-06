@@ -19,7 +19,7 @@ export type RehydrateProcessSelectors = (args: {
     event_id: string;
     source_index: string;
     /** Present when the SSE attributed this event to a technique; preferred over a plain sample ref during dedupe. */
-    matched?: { technique_id?: string };
+    matched?: { technique_id?: string; ioc?: true };
   }>;
 }) => Promise<ProcessSelector[]>;
 

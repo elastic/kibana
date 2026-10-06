@@ -515,6 +515,7 @@ describe('decidePackageReport', () => {
           processKey: 'pid:100',
           hostName: 'host-a',
           processName: 'a.exe',
+          iocMatched: false,
         }),
       })
     ).toBe(false);
@@ -529,6 +530,7 @@ describe('decidePackageReport', () => {
           processKey: 'entity:ent-9',
           hostName: 'host-a',
           processName: 'b.exe',
+          iocMatched: false,
         }),
       })
     ).toBe(true);
@@ -563,7 +565,13 @@ describe('decidePackageReport', () => {
       state: baseHitState({
         hasProcessBearingEvent: true,
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+          {
+            pid: 100,
+            processKey: 'pid:100',
+            hostName: 'host-a',
+            processName: 'a.exe',
+            iocMatched: false,
+          },
         ],
       }),
       catalog: { ok: true, actions: [isolateHost] },
@@ -941,7 +949,11 @@ describe('decidePackageReport', () => {
         state: baseHitState({
           hosts: [withMemdump],
           processSelectors: [
-            selector({ entityId: 'ent-700', processKey: 'entity:ent-700', processName: 'lsass.exe' }),
+            selector({
+              entityId: 'ent-700',
+              processKey: 'entity:ent-700',
+              processName: 'lsass.exe',
+            }),
           ],
         }),
         catalog: { ok: true, actions: defendCatalog },

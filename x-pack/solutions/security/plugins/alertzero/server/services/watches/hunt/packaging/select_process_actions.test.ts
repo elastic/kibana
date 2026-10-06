@@ -45,6 +45,7 @@ const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   titles: [],
   evidenceLines: [],
   techniques: [],
+  corroboratedTechniques: [],
   hosts: [host()],
   processSelectors: [],
   hasNonHostEntity: false,

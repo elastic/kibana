@@ -6,7 +6,8 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import { readCurrentRunState, type RehydrateProcessSelectors } from './read_current_run_state';
+import { readCurrentRunState } from './read_current_run_state';
+import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
 
 const reportId = 'rpt-package-1';
 const runId = 'run-abc';
