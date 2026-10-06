@@ -8,7 +8,10 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
+import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../register_routes';
+import { buildSseAttachmentId } from '../../services/watches/hunt/common/sse_mapper';
 import { registerHuntCoordinatorRoute } from './hunt_coordinator';
 import { resolveScopedModel } from './lib/scoped_model';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
@@ -23,11 +26,16 @@ const huntCoordinatorMock = huntCoordinator as jest.MockedFunction<typeof huntCo
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
 
+const UNIVERSE = ['logs-*', 'filebeat-*', '-*elastic-cloud-logs-*'];
+
 const coordinatorResult: HuntCoordinatorResult = {
   status: 'tier1_only',
   report_id: 'report-1',
   run_id: 'run-1',
-  technologies: ['aws_iam'],
+  index_patterns: UNIVERSE,
+  tier2_targets: [],
+  tier2_target_sources: [],
+  actionable_indices: [],
   tier1: {
     tier: 1,
     ...emptyHuntForThreatResult('no_environment_hits', [], [], { from: 'now-7d', to: 'now' }, ''),
@@ -37,9 +45,14 @@ const coordinatorResult: HuntCoordinatorResult = {
   has_confirmed_hit: false,
   completeness: 'complete',
   completed_successfully: true,
+  headline: 'no confirmed hits: Tier 1 found no matches; Tier 2 skipped',
+  narrative: 'Hunt Watch found no confirmed hits for threat report report-1.',
 };
 
-const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
+const makeDeps = ({
+  spaceId = 'default',
+  indexPatterns = UNIVERSE,
+}: { spaceId?: string; indexPatterns?: string[] } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
@@ -57,10 +70,12 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
 
   const asCurrentUser = { search: jest.fn() };
   const asInternalUser = { search: jest.fn() };
+  const uiSettingsGet = jest.fn().mockResolvedValue(indexPatterns);
   const context = {
+    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser, asInternalUser } },
-      uiSettings: { client: { get: jest.fn() } },
+      uiSettings: { client: { get: uiSettingsGet } },
     }),
   };
 
@@ -75,6 +90,7 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     asCurrentUser,
     asInternalUser,
     logger,
+    uiSettingsGet,
   };
 };
 
@@ -100,24 +116,15 @@ describe('registerHuntCoordinatorRoute', () => {
     expect(routeConfig.access).toBe('internal');
   });
 
-  it('rejects an unknown technology with 400 before running anything', async () => {
-    const { handler, context } = makeDeps();
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(context, requestFor({ technology: 'not_a_technology' }), response);
-
-    expect(huntCoordinatorMock).not.toHaveBeenCalled();
-    expect(response.badRequest).toHaveBeenCalledWith({
-      body: { message: expect.stringContaining('not_a_technology') },
-    });
-  });
-
-  it('treats an absent technology as "resolve from the environment"', async () => {
-    const { handler, context } = makeDeps();
+  it('passes indexPatterns from the universe helper and never a technology', async () => {
+    const patterns = ['logs-*', 'winlogbeat-*'];
+    const { handler, context, uiSettingsGet } = makeDeps({ indexPatterns: patterns });
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
-    expect(paramsOf().technology).toBeUndefined();
+    expect(uiSettingsGet).toHaveBeenCalledWith(SECURITY_SOLUTION_DEFAULT_INDEX_ID);
+    expect(paramsOf().indexPatterns).toEqual(patterns);
+    expect(paramsOf()).not.toHaveProperty('technology');
   });
 
   it('runs against the request space, not the default one', async () => {
@@ -139,7 +146,7 @@ describe('registerHuntCoordinatorRoute', () => {
     });
   });
 
-  it('skips model resolution entirely when Tier 2 is never going to run', async () => {
+  it('still resolves the model when Tier 2 is never going to run, so scope resolution can use it', async () => {
     const { handler, context } = makeDeps();
 
     await handler(
@@ -148,8 +155,39 @@ describe('registerHuntCoordinatorRoute', () => {
       httpServerMock.createResponseFactory()
     );
 
-    expect(resolveScopedModelMock).not.toHaveBeenCalled();
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(1);
+    expect(huntCoordinatorMock.mock.calls[0][1]).toBe(model);
+    expect(paramsOf().tier2_when).toBe('never');
+  });
+
+  it('passes no model on a never run without a connector, and the request still succeeds', async () => {
+    resolveScopedModelMock.mockResolvedValue({
+      ok: false,
+      reason: 'no_connector',
+      message: 'no connector configured',
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor({ tier2_when: 'never' }), response);
+
     expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
+    expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('passes no model when resolution throws, logging at debug rather than failing the request', async () => {
+    resolveScopedModelMock.mockRejectedValue(new Error('connector store unavailable'));
+    const { handler, context, logger } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('connector store unavailable')
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalled();
   });
 
   it('passes no model when resolution fails, leaving the coordinator to degrade', async () => {
@@ -186,6 +224,155 @@ describe('registerHuntCoordinatorRoute', () => {
 
     expect(paramsOf().run_id).toEqual(expect.stringMatching(/^[0-9a-f-]{36}$/));
   });
+
+  /**
+   * The gate that puts `sse` on the response is three conditions wide (confirmed hit,
+   * a named report, the request's space) and the mapper it calls is real here. A
+   * regression in any of them removes or mis-scopes every attachment the hunt writes.
+   */
+  describe('SSE entries on the response', () => {
+    const confirmedResult: HuntCoordinatorResult = {
+      ...coordinatorResult,
+      status: 'tier1_and_tier2',
+      message: 'behaviors proposed',
+      has_confirmed_hit: true,
+      tier2: {
+        tier: 2,
+        status: 'behaviors_proposed',
+        behaviors: [
+          {
+            technique_id: 'T1078.004',
+            evidence_quote: 'AssumeRole into OrgAdminBoundary',
+            llm_confidence: 0.9,
+            confidence: 0.9,
+            technique_name: 'Valid Accounts: Cloud Accounts',
+            reference: 'https://attack.mitre.org/techniques/T1078/004/',
+            tactic_ids: ['TA0001'],
+            validated_esql: 'FROM logs-aws.cloudtrail-default | WHERE true',
+            title: 'AssumeRole into high-risk policy boundary',
+            severity: 'high',
+            risk_score: 73,
+            execution: { executed: true, row_count: 2, hit: true },
+          },
+        ],
+        indexed_behaviors: [],
+        has_hit: true,
+        next_step: 'Review the proposed rule.',
+      },
+    };
+
+    const bodyOf = (response: ReturnType<typeof httpServerMock.createResponseFactory>) => {
+      const [options] = response.ok.mock.calls[0];
+      if (!options) throw new Error('expected an ok response carrying a body');
+      return options.body as HuntCoordinatorResponse;
+    };
+    const sseOf = (response: ReturnType<typeof httpServerMock.createResponseFactory>) =>
+      bodyOf(response).sse;
+
+    it('attaches one entry per corroborated technique on a confirmed hit', async () => {
+      huntCoordinatorMock.mockResolvedValue(confirmedResult);
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(sseOf(response)).toHaveLength(1);
+      expect(sseOf(response)?.[0].attachment_id).toBe(
+        buildSseAttachmentId({
+          spaceId: 'default',
+          reportId: 'report-1',
+          techniqueId: 'T1078.004',
+        })
+      );
+    });
+
+    it('scopes attachment ids to the request space', async () => {
+      huntCoordinatorMock.mockResolvedValue(confirmedResult);
+      const { handler, context } = makeDeps({ spaceId: 'hunt-space' });
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      // Re-hunts are idempotent on this id, so a default-space id in another space
+      // would overwrite that space's attachment.
+      expect(sseOf(response)?.[0].attachment_id).toBe(
+        buildSseAttachmentId({
+          spaceId: 'hunt-space',
+          reportId: 'report-1',
+          techniqueId: 'T1078.004',
+        })
+      );
+      expect(sseOf(response)?.[0].attachment_id).not.toBe(
+        buildSseAttachmentId({
+          spaceId: 'default',
+          reportId: 'report-1',
+          techniqueId: 'T1078.004',
+        })
+      );
+    });
+
+    it('sends no entries for a run that confirmed nothing', async () => {
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(sseOf(response)).toBeUndefined();
+      expect(bodyOf(response).impacted_entities).toBeUndefined();
+    });
+
+    it('sends the hosts and users the SSE entries name as impact entities on a confirmed hit', async () => {
+      huntCoordinatorMock.mockResolvedValue({
+        ...confirmedResult,
+        tier1: {
+          ...confirmedResult.tier1,
+          affected_assets: {
+            hosts: [{ name: 'WIN-01', hit_count: 3 }],
+            users: [{ name: 'james', hit_count: 2 }],
+            services: [{ name: 'arn:aws:iam::1:role/deploy', hit_count: 9 }],
+          },
+        },
+      });
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(bodyOf(response).impacted_entities).toEqual([
+        { id: 'host:WIN-01', name: 'WIN-01', type: 'host' },
+        { id: 'user:james', name: 'james', type: 'user' },
+      ]);
+    });
+
+    it('sends an empty impact list on a confirmed hit that names no host or user', async () => {
+      huntCoordinatorMock.mockResolvedValue(confirmedResult);
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(bodyOf(response).impacted_entities).toEqual([]);
+    });
+
+    it('sends no entries for a hit on an ad hoc hunt, which has no report to attach to', async () => {
+      huntCoordinatorMock.mockResolvedValue(confirmedResult);
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(
+        context,
+        httpServerMock.createKibanaRequest({ body: { text: 'ad hoc hunt' } }),
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(sseOf(response)).toBeUndefined();
+      expect(bodyOf(response).impacted_entities).toBeUndefined();
+    });
+  });
+
+  // The hunt-once evidence write is its own route (`write_hunt_evidence.ts`), called by hunt.yaml
+  // only after this step succeeds -- see that route's doc comment for why it isn't folded in here.
 
   it('logs and returns a generic 500 when the coordinator throws', async () => {
     huntCoordinatorMock.mockRejectedValue(new Error('tier1 search failed'));

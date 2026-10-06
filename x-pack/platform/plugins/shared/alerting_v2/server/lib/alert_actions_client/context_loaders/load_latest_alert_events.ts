@@ -192,7 +192,7 @@ export const loadLastEpisodeAlertEventOrThrow = async ({
   if (events.length === 0) {
     throw Boom.notFound(getAlertEpisodeNotFoundMessage(episodeId), {
       code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
-      details: { episode_id: episodeId },
+      details: { alert_id: episodeId },
     });
   }
 

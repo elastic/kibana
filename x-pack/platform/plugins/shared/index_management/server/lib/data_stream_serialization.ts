@@ -184,16 +184,24 @@ export function deserializeDataStream(
         index_uuid: indexUuid,
         prefer_ilm: preferILM = false,
         managed_by: managedBy,
+        ilm_policy: backingIndexIlmPolicyName,
+        index_mode: backingIndexMode,
       }: {
         index_name: string;
         index_uuid: string;
         prefer_ilm?: boolean;
         managed_by?: string;
+        ilm_policy?: string;
+        index_mode?: string;
       }) => ({
         name: indexName,
         uuid: indexUuid,
         preferILM,
         managedBy,
+        ...(backingIndexIlmPolicyName !== undefined
+          ? { ilmPolicyName: backingIndexIlmPolicyName }
+          : {}),
+        ...(backingIndexMode !== undefined ? { indexMode: backingIndexMode } : {}),
       })
     ),
     generation,

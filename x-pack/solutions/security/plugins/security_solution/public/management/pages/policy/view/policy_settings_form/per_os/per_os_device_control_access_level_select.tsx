@@ -11,7 +11,23 @@ import { i18n } from '@kbn/i18n';
 import type { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
-import { buildOsControlSelectOptions } from './os_control_select_options';
+import {
+  buildOsControlSelectOptions,
+  OS_CONTROL_SELECT_POPOVER_PROPS,
+} from './os_control_select_options';
+
+export const DEVICE_CONTROL_DISABLED = 'disabled';
+
+export type PerOsDeviceControlSelectValue =
+  | DeviceControlAccessLevel
+  | typeof DEVICE_CONTROL_DISABLED;
+
+const DISABLE_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.deviceControl.disable',
+  {
+    defaultMessage: 'Disable',
+  }
+);
 
 const ALLOW_ALL_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.allowReadWrite',
@@ -48,7 +64,12 @@ const ACCESS_LEVEL_SELECT_ARIA_LABEL = i18n.translate(
   }
 );
 
-const ACCESS_LEVEL_OPTIONS = buildOsControlSelectOptions([
+const ACCESS_LEVEL_OPTIONS = buildOsControlSelectOptions<PerOsDeviceControlSelectValue>([
+  {
+    value: DEVICE_CONTROL_DISABLED,
+    label: DISABLE_LABEL,
+    healthColor: 'danger',
+  },
   {
     value: DeviceControlAccessLevelEnum.audit,
     label: ALLOW_ALL_LABEL,
@@ -72,8 +93,8 @@ const ACCESS_LEVEL_OPTIONS = buildOsControlSelectOptions([
 ]);
 
 export interface PerOsDeviceControlAccessLevelSelectProps {
-  accessLevel: DeviceControlAccessLevel;
-  onAccessLevelChange: (accessLevel: DeviceControlAccessLevel) => void;
+  accessLevel: PerOsDeviceControlSelectValue;
+  onAccessLevelChange: (accessLevel: PerOsDeviceControlSelectValue) => void;
   disabled?: boolean;
   'data-test-subj'?: string;
 }
@@ -81,7 +102,7 @@ export interface PerOsDeviceControlAccessLevelSelectProps {
 export const PerOsDeviceControlAccessLevelSelect = memo<PerOsDeviceControlAccessLevelSelectProps>(
   ({ accessLevel, onAccessLevelChange, disabled, 'data-test-subj': dataTestSubj }) => {
     const handleChange = useCallback(
-      (selectedAccessLevel: DeviceControlAccessLevel) => {
+      (selectedAccessLevel: PerOsDeviceControlSelectValue) => {
         onAccessLevelChange(selectedAccessLevel);
       },
       [onAccessLevelChange]
@@ -92,12 +113,13 @@ export const PerOsDeviceControlAccessLevelSelect = memo<PerOsDeviceControlAccess
         data-test-subj={dataTestSubj ? `${dataTestSubj}-fixedWidth` : undefined}
         css={{ inlineSize: OS_CONTROL_WIDTH, maxInlineSize: '100%' }}
       >
-        <EuiSuperSelect<DeviceControlAccessLevel>
+        <EuiSuperSelect<PerOsDeviceControlSelectValue>
           options={ACCESS_LEVEL_OPTIONS}
           valueOfSelected={accessLevel}
           onChange={handleChange}
           disabled={disabled}
           fullWidth={true}
+          popoverProps={OS_CONTROL_SELECT_POPOVER_PROPS}
           data-test-subj={dataTestSubj}
           aria-label={ACCESS_LEVEL_SELECT_ARIA_LABEL}
         />

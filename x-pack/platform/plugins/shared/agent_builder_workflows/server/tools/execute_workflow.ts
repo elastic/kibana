@@ -139,24 +139,19 @@ If set to false, or if the workflow does not complete within the timeout, the to
       const workflowParams = inputs ?? {};
       const wait = waitForCompletion ?? true;
 
-      // Executing an existing persisted workflow by id runs under the caller's
-      // identity, so require the same Workflows privileges the direct run API
-      // enforces. Inline YAML runs the caller's own definition and is not gated.
-      if (!resolvedYaml) {
-        const canExecute = await hasWorkflowExecutePrivilege({
-          security: getSecurity(),
-          request,
-          spaceId,
-        });
-        if (!canExecute) {
-          return {
-            results: [
-              errorResult(
-                `Unauthorized to execute workflow '${resolvedWorkflowId}'. The 'workflowsManagement' execute privilege is required.`
-              ),
-            ],
-          };
-        }
+      const canExecute = await hasWorkflowExecutePrivilege({
+        security: getSecurity(),
+        request,
+        spaceId,
+      });
+      if (!canExecute) {
+        return {
+          results: [
+            errorResult(
+              "Unauthorized to execute workflow. The 'workflowsManagement' execute privilege is required."
+            ),
+          ],
+        };
       }
 
       const result = resolvedYaml
