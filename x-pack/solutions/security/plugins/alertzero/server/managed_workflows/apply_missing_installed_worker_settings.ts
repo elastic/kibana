@@ -15,6 +15,11 @@ import { installRegisteredWorker, workerRegistry } from './worker_registry';
  * fill them, so this has to run before `ready()` or the upgrade keeps the old shape. A document
  * that is still invalid after the fill is left alone. The install is bound to the listed document
  * version, so a settings save that landed after the list is not overwritten.
+ *
+ * A worker that already has a service account is left alone. This install has no request, and a
+ * requestless write of a bound workflow is rejected even when the account id stays the same.
+ * Applying a new default to those workers needs a workflows change that allows a same-account
+ * template update without a user request.
  */
 export const applyMissingInstalledWorkerSettings = async (
   client: PluginScopedManagedWorkflowsApi,
@@ -52,6 +57,13 @@ export const applyMissingInstalledWorkerSettings = async (
         `Skipping missing setting defaults for AlertZero worker "${state.workflowId}": ${
           error instanceof Error ? error.message : String(error)
         }`
+      );
+      continue;
+    }
+    const serviceAccountId = filled.serviceAccountId;
+    if (typeof serviceAccountId === 'string' && serviceAccountId.length > 0) {
+      logger.warn(
+        `Skipping missing setting defaults for AlertZero worker "${state.workflowId}" in space "${state.spaceId}": it has a service account, and boot cannot rewrite a bound workflow without an authenticated request`
       );
       continue;
     }

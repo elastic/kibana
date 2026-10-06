@@ -39,6 +39,7 @@ import {
   QUERY_PERFORMANCE_PHRASE_QUERY_COUNT,
   QUERY_PERFORMANCE_QUERY_RANGE_SECONDS,
   QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND,
+  QUERY_PERFORMANCE_APPROXIMATION,
   QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
@@ -114,6 +115,7 @@ interface QueryPerformanceEventData {
   [QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: string[];
   [QUERY_PERFORMANCE_FETCH_TYPE]: QueryPerformanceFetchType;
   [QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: string | undefined;
+  [QUERY_PERFORMANCE_APPROXIMATION]: boolean | undefined;
 }
 
 type QueryPerformanceFetchType = 'fetchTextBased' | 'fetchDocuments';
@@ -126,6 +128,7 @@ interface QueryPerformanceTrackerParams {
 
 interface QueryPerformanceReportEventParams {
   requestAdapter: RequestAdapter | undefined;
+  approximation?: boolean;
 }
 
 export class ScopedDiscoverEBTManager {
@@ -452,7 +455,7 @@ export class ScopedDiscoverEBTManager {
     let reported = false;
 
     return {
-      reportEvent: ({ requestAdapter }: QueryPerformanceReportEventParams) => {
+      reportEvent: ({ requestAdapter, approximation }: QueryPerformanceReportEventParams) => {
         if (reported || (!this.reportPerformanceEvent && !this.reportEvent)) {
           return;
         }
@@ -495,6 +498,7 @@ export class ScopedDiscoverEBTManager {
           [QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: mergedAnalysis.rawTypes,
           [QUERY_PERFORMANCE_FETCH_TYPE]: fetchType,
           [QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: querySourceCommand,
+          [QUERY_PERFORMANCE_APPROXIMATION]: approximation,
         };
 
         this.reportEvent?.(QUERY_PERFORMANCE_EVENT_TYPE, eventData);
