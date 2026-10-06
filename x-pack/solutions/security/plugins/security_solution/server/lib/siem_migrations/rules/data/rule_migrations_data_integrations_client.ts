@@ -57,9 +57,11 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
 
   /**
    * Builds the document to index for a package.
-   * Returns `null` when the package has no logs data stream, or when its fields metadata or archive
-   * could not be fetched: in that case the package is left out of this run and, as it is not indexed
-   * with its version, it is picked up again on the next populate.
+   * Returns `null` when the package has no logs data stream, or when its archive could not be read:
+   * in that case the package is left out of this run and, as it is not indexed with its version,
+   * it is picked up again on the next populate.
+   * When the fields metadata cannot be fetched (e.g. an uploaded package that is not in the registry),
+   * the package is still built, without `fields_metadata`.
    */
   private async processIntegration(pkg: PackageListItem): Promise<RuleMigrationIntegration | null> {
     const logsDataStreams = pkg.data_streams?.filter(({ type }) => type === 'logs');
@@ -76,14 +78,11 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
           });
       }
     } catch (error) {
-      this.logger.error(
-        `Failed to fetch fields metadata for package ${
-          pkg.name
-        }, it is skipped and will be retried on the next start: ${
+      this.logger.warn(
+        `Failed to fetch fields metadata for package ${pkg.name}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return null;
     }
 
     const packageKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
