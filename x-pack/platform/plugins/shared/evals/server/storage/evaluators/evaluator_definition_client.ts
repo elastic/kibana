@@ -16,7 +16,7 @@ import {
   MAX_EVALUATOR_NAME_LENGTH,
   buildSpaceFilter,
   getEvaluatorDefinitionId,
-  getScoreDirection,
+  getJudgeScoreDirection,
 } from '@kbn/evals-common';
 import type {
   EvaluatorDefinitionDocument,
@@ -49,7 +49,7 @@ const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
       // direction, which a version written before scores declared one reads as `maximize`.
       scores: judge.output.scores.map(({ description, ...score }) => ({
         ...score,
-        direction: getScoreDirection(score),
+        direction: getJudgeScoreDirection(score),
         ...(description?.trim() ? { description: description.trim() } : {}),
       })),
     },
@@ -70,7 +70,7 @@ const comparabilityContract = (judge: LlmJudgeConfig) => ({
     .map(({ name, type, labels, direction }) => ({
       name,
       type,
-      direction: getScoreDirection({ direction }),
+      direction: getJudgeScoreDirection({ direction }),
       labels: [...(labels ?? [])].map(({ value, score }) => `${value}=${score}`).sort(),
     }))
     .sort((a, b) => a.name.localeCompare(b.name)),

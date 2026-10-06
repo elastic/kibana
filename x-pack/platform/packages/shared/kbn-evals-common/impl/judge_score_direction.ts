@@ -11,8 +11,8 @@ import type { Direction } from './schemas/common_attributes.gen';
  * The direction of a judge score that declares none. Every score written before scores could
  * declare one was read as higher-is-better, and must keep reading that way.
  */
-export const DEFAULT_SCORE_DIRECTION: Direction = 'maximize';
+export const DEFAULT_JUDGE_SCORE_DIRECTION: Direction = 'maximize';
 
 /** Resolves a judge score's direction, applying the default when it declares none. */
-export const getScoreDirection = ({ direction }: { direction?: Direction }): Direction =>
-  direction ?? DEFAULT_SCORE_DIRECTION;
+export const getJudgeScoreDirection = ({ direction }: { direction?: Direction }): Direction =>
+  direction ?? DEFAULT_JUDGE_SCORE_DIRECTION;

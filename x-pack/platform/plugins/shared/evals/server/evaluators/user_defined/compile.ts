@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DEFAULT_SCORE_DIRECTION, getScoreDirection, type Direction } from '@kbn/evals-common';
+import {
+  DEFAULT_JUDGE_SCORE_DIRECTION,
+  getJudgeScoreDirection,
+  type Direction,
+} from '@kbn/evals-common';
 import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition, EvaluatorResult } from '../types';
 import { JUDGE_TOOL_NAME, buildJudgeInput, buildJudgePrompt } from './prompt';
@@ -18,9 +22,9 @@ import type { EvaluatorDefinitionDocument, JudgeScoreDefinition, LlmJudgeConfig 
  * single right answer, so it keeps the default it always reported.
  */
 const getEvaluatorDirection = (judge: LlmJudgeConfig): Direction => {
-  const directions = new Set(judge.output.scores.map(getScoreDirection));
+  const directions = new Set(judge.output.scores.map(getJudgeScoreDirection));
   const [direction] = directions;
-  return directions.size === 1 ? direction : DEFAULT_SCORE_DIRECTION;
+  return directions.size === 1 ? direction : DEFAULT_JUDGE_SCORE_DIRECTION;
 };
 
 interface JudgeScoreOutput {
@@ -81,7 +85,7 @@ export const mapJudgeOutput = (judge: LlmJudgeConfig, output: JudgeOutput): Eval
       ...(label !== undefined ? { label } : {}),
       explanation,
       metadata: { judge: scoreOutput },
-      direction: getScoreDirection(definition),
+      direction: getJudgeScoreDirection(definition),
     };
   }),
 });
