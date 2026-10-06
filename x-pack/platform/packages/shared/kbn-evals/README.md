@@ -659,11 +659,17 @@ Log in to the matching Vault first; the scripts print the login command if your 
 node scripts/vault/retrieve_secrets.js --vault ci-prod
 node scripts/vault/upload_secrets.js --vault ci-prod
 
-# Or print the vault command instead of running it:
+# Or print the vault command instead of running it. The command holds the whole config inline,
+# so running it puts the secret in your shell history; prefer upload_secrets.js.
 node scripts/vault/get_command.js --vault ci-prod
 ```
 
-Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions, so a bad upload can be undone with `vault kv rollback -version=<n> kv/ci-shared/kbn-evals/golden` against the ci-prod Vault.
+Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions. To undo a bad upload, write an earlier version back (version numbers increase by one per upload), against the ci-prod Vault:
+
+```bash
+vault kv get -version=<n> -field=config kv/ci-shared/kbn-evals/golden \
+  | vault kv put kv/ci-shared/kbn-evals/golden config=-
+```
 
 ### CI telemetry
 

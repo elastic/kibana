@@ -145,11 +145,12 @@ const runVaultKv = async (
     });
     return stdout;
   } catch (error) {
-    const { stderr } = error as { stderr?: string };
+    // `shortMessage` omits stdout/stderr, and the argv it quotes never holds the config.
+    const { stderr, shortMessage } = error as { stderr?: string; shortMessage?: string };
     throw new Error(
       [
         `vault kv ${args[0]} against the ${vault} vault (${address}) failed:`,
-        stderr?.trim() || (error as Error).name,
+        stderr?.trim() || shortMessage || (error as Error).name,
         `If your token is missing or expired, log in with: ${KBN_EVALS_VAULT_LOGIN_COMMANDS[vault]}`,
       ].join('\n')
     );
