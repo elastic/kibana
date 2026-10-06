@@ -58,6 +58,8 @@ steps:
     with:
       conversationId: "{{ steps.find_or_create.output.investigationConversationId }}"
       workflowExecutionId: "{{ inputs.runId }}"
+    on-failure:
+      continue: true
 
   # By reference (security.threat's own contract: report_id plus optional
   # captured-fallback fields; the live report document is resolved

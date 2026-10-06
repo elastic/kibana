@@ -104,6 +104,7 @@ describe('Hunt Watch worker chain', () => {
   it('records the hunt run on both new and reused investigations before attaching findings', () => {
     const append = stepIn(findOrCreateInvestigation.steps, 'append_workflow_execution');
     expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+    expect(append?.['on-failure']).toEqual({ continue: true });
     expect(append?.with).toEqual({
       conversationId: '{{ steps.find_or_create.output.investigationConversationId }}',
       workflowExecutionId: '{{ inputs.runId }}',

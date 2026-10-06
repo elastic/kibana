@@ -147,6 +147,8 @@ steps:
         with:
           conversationId: "{{ steps.resolve_request.output.investigation_id }}"
           workflowExecutionId: "{{ execution.id }}"
+        on-failure:
+          continue: true
 
       # Both of this indicator's attachments mean an earlier run finished the
       # analysis but could not retire the indicator. Finding them lets this run

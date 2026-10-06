@@ -73,6 +73,7 @@ describe('Endpoint analysis run', () => {
     expect(validRequest?.steps?.[0]).toEqual({
       name: 'append_workflow_execution',
       type: 'investigations.appendWorkflowExecutionId',
+      'on-failure': { continue: true },
       with: {
         conversationId: '{{ steps.resolve_request.output.investigation_id }}',
         workflowExecutionId: '{{ execution.id }}',

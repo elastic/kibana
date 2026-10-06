@@ -277,6 +277,8 @@ steps:
     with:
       conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
       workflowExecutionId: "{{ inputs.parent_run_id }}"
+    on-failure:
+      continue: true
 
   # Always-on journal. `trigger_mode: never` (elastic/kibana#290223) persists a
   # user_message without waking the Investigation agent. A user round or

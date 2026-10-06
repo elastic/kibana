@@ -868,6 +868,7 @@ describe('Attack Discovery worker chain', () => {
       it('appends the runner ID when reusing an investigation without changing its metadata at creation', () => {
         const append = stepIn(reviewSteps, 'append_workflow_execution');
         expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+        expect(append?.['on-failure']).toEqual({ continue: true });
         expect(append?.if).toBe('${{ inputs.parent_run_id != blank }}');
         expect(append?.with).toEqual({
           conversationId: '{{ steps.resolve_investigation_id.output.investigation_id }}',
