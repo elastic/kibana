@@ -170,6 +170,7 @@ describe('ingestInboundEvent', () => {
     maxEmitted?: number;
     maxBodyBytes?: number;
     connectorTypeId?: string;
+    connectorId?: string;
     spaceId?: string;
     query?: Record<string, unknown>;
     headers?: Record<string, string>;
@@ -182,7 +183,7 @@ describe('ingestInboundEvent', () => {
     const response = httpServerMock.createResponseFactory();
     const result = await ingestInboundEvent({
       connectorTypeId: overrides?.connectorTypeId ?? 'myConnector',
-      connectorId,
+      connectorId: overrides?.connectorId ?? connectorId,
       spaceId: overrides?.spaceId ?? spaceId,
       requestId: 'req-1',
       headers: overrides?.headers ?? {},
@@ -1075,6 +1076,9 @@ describe('ingestInboundEvent', () => {
       connector: { limit: connectorLimit, windowMs: 60_000 },
     });
 
+  const addressFailureKey = (address: string, id = connectorId) =>
+    `${address}\0${spaceId}\0.myConnector\0${id}`;
+
   const emptyEmitSpec = () =>
     createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events: [] })) as ReturnType<
       typeof getConnectorSpec
@@ -1082,7 +1086,7 @@ describe('ingestInboundEvent', () => {
 
   it('returns 429 before the saved-object read when the address budget is already spent', async () => {
     const limiter = windowLimiter({ remoteAddressLimit: 1 });
-    limiter.recordRemoteAddressFailure('203.0.113.9');
+    limiter.recordRemoteAddressFailure(addressFailureKey('203.0.113.9'));
     getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
 
     const { response: res, result } = await run({
@@ -1109,6 +1113,34 @@ describe('ingestInboundEvent', () => {
     expectOutcome('debug', 'rate_limited');
     expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('203.0.113.9');
     expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('ingest-token-value');
+  });
+
+  it('does not apply a spent address budget to another connector on the same socket', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1 });
+    limiter.recordRemoteAddressFailure(addressFailureKey('203.0.113.9'));
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const { result } = await run({
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.9',
+      connectorId: 'connector-2',
+    });
+
+    expect(result.status).not.toBe('rate_limited');
+    expect(getUnsecuredSavedObjectsClient).toHaveBeenCalled();
+  });
+
+  it('does not apply a spent address budget to another socket on the same connector', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1 });
+    limiter.recordRemoteAddressFailure(addressFailureKey('203.0.113.9'));
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const { result } = await run({
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.10',
+    });
+
+    expect(result.status).toBe('accepted');
   });
 
   it('counts each 404 against the address budget and then skips the saved-object read', async () => {
@@ -1247,7 +1279,7 @@ describe('ingestInboundEvent', () => {
 
   it('shares one unknown address key when the socket address is missing', async () => {
     const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
-    limiter.recordRemoteAddressFailure('unknown');
+    limiter.recordRemoteAddressFailure(addressFailureKey('unknown'));
     getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
 
     const { result } = await run({ rateLimiter: limiter, omitRemoteAddress: true });

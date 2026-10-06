@@ -67,7 +67,7 @@ export class InboundEventRateLimiter {
 
   constructor(private readonly config: InboundEventRateLimitConfig) {}
 
-  /** Returns denied when this address is already over its failed-auth budget. Does not increment. */
+  /** Returns denied when this socket and connector are already over the failed-auth budget. Does not increment. */
   peekRemoteAddress(key: string): InboundEventRateLimitDecision {
     return this.decide('remoteAddress', key, false);
   }

@@ -118,7 +118,10 @@ export async function ingestInboundEvent({
     return { status: 'forbidden', body: INBOUND_EVENTS_DISABLED_MESSAGE };
   }
 
-  const remoteAddressKey = remoteAddress || 'unknown';
+  // Socket plus connector. Behind a proxy the socket is shared, so each connector has its own bucket.
+  const remoteAddressKey = `${
+    remoteAddress || 'unknown'
+  }\0${spaceId}\0${connectorTypeId}\0${connectorId}`;
 
   const rateLimited = (
     budget: 'remoteAddress' | 'connector',
