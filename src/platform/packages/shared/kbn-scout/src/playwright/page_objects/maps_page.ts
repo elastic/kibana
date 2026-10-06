@@ -130,7 +130,7 @@ export class MapsPage {
   }
 
   /** Waits until map layers are loaded. */
-  async waitForLayersToLoad() {
+  async waitForLayersToLoad(loadingExpected = false) {
     await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
 
     // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
@@ -142,7 +142,7 @@ export class MapsPage {
       { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
     );
 
-    await this.waitForLoadCycleIfNeeded();
+    await this.waitForLoadCycleIfNeeded(loadingExpected);
 
     await expect
       .poll(() => this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true'), {
@@ -152,12 +152,16 @@ export class MapsPage {
   }
 
   /**
-   * If the map is not currently loading, waits up to 2000 ms for a load cycle to begin —
+   * If the map is not currently loading, waits for a load cycle to begin —
    * bridging the gap between a triggering action resolving and the new request's loading
    * state reaching the DOM. Falls through if no load starts in that window
    * (e.g. the action required no re-fetch).
+   *
+   * @param loadingExpected - When true, waits up to DEFAULT_MAP_LOADING_TIMEOUT for loading
+   *   to begin (use when a fetch is certain, e.g. after navigation). When false (default),
+   *   waits only 2000 ms before falling through.
    */
-  private async waitForLoadCycleIfNeeded() {
+  private async waitForLoadCycleIfNeeded(loadingExpected = false) {
     const alreadyLoading = (await this.mapContainer.getAttribute('data-map-loading')) === 'true';
     if (!alreadyLoading) {
       await this.page
@@ -167,7 +171,7 @@ export class MapsPage {
               .querySelector('[data-test-subj="mapContainer"]')
               ?.getAttribute('data-map-loading') === 'true',
           undefined,
-          { timeout: 2000 }
+          { timeout: loadingExpected ? DEFAULT_MAP_LOADING_TIMEOUT : 2000 }
         )
         .catch(() => {});
     }
@@ -254,7 +258,7 @@ export class MapsPage {
 
   async openMapWithId(id: string) {
     await this.page.gotoApp(`maps/map/${id}`);
-    await this.waitForLayersToLoad();
+    await this.waitForLayersToLoad(true);
   }
 
   /**
