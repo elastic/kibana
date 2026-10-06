@@ -206,7 +206,7 @@ export const createDatasetWizardStrings = {
   discardFieldChangesTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.discardFieldChangesTitle',
     {
-      defaultMessage: 'Discard unsaved field mapping?',
+      defaultMessage: 'Discard unsaved schema mapping changes?',
     }
   ),
   discardFieldChangesCancelButton: i18n.translate(
