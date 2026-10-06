@@ -421,7 +421,7 @@ describe('ModelDetailFlyout', () => {
       ]);
 
       expect(screen.getByTestId('modelDetailFlyoutDataRetentionBadge')).toHaveTextContent(
-        'Zero Data Retention'
+        'Zero data retention'
       );
       expect(screen.queryByTestId('modelDetailFlyoutDataRetentionTooltip')).not.toBeInTheDocument();
     });
@@ -434,7 +434,7 @@ describe('ModelDetailFlyout', () => {
       ]);
 
       const badge = screen.getByTestId('modelDetailFlyoutDataRetentionBadge');
-      expect(badge).toHaveTextContent('Retains data');
+      expect(badge).toHaveTextContent('Data retained by provider');
       expect(badge).not.toHaveTextContent('days');
       expect(screen.queryByTestId('modelDetailFlyoutDataRetentionTooltip')).not.toBeInTheDocument();
 
@@ -442,12 +442,9 @@ describe('ModelDetailFlyout', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('modelDetailFlyoutDataRetentionTooltip')).toHaveTextContent(
-          'Data Retention'
+          'The provider of this model retains the data used with it for a period of time. Your inputs are not used to train the models. Refer to the provider for more information on their policy.'
         );
       });
-      expect(screen.getByTestId('modelDetailFlyoutDataRetentionTooltip')).toHaveTextContent(
-        'Model provider retains data used with this model for a period of time. Inputs are not used to train the models. Refer to the provider for more information.'
-      );
     });
 
     it('renders Retains data when metadata has no properties list', () => {
@@ -458,7 +455,7 @@ describe('ModelDetailFlyout', () => {
       ]);
 
       expect(screen.getByTestId('modelDetailFlyoutDataRetentionBadge')).toHaveTextContent(
-        'Retains data'
+        'Data retained by provider'
       );
     });
 
@@ -466,7 +463,7 @@ describe('ModelDetailFlyout', () => {
       renderFlyout();
 
       expect(screen.getByTestId('modelDetailFlyoutDataRetentionBadge')).toHaveTextContent(
-        'Retains data'
+        'Data retained by provider'
       );
     });
   });

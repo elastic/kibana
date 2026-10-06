@@ -36,10 +36,6 @@ export const DataRetention = ({ metadata }: DataRetentionProps) => {
   return (
     <EuiToolTip
       data-test-subj="modelDetailFlyoutDataRetentionTooltip"
-      title={i18n.translate(
-        'xpack.searchInferenceEndpoints.modelDetailFlyout.retainsDataTooltipTitle',
-        { defaultMessage: 'Data retention' }
-      )}
       content={i18n.translate(
         'xpack.searchInferenceEndpoints.modelDetailFlyout.retainsDataTooltip',
         {
