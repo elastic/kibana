@@ -78,6 +78,7 @@ function resolveToolSchema(schema: unknown): ToolSchema {
       'type',
       'properties',
       'required',
+      '$defs',
     ]) as ToolSchema;
   }
   // Zod v3: use zod-to-json-schema
@@ -86,6 +87,7 @@ function resolveToolSchema(schema: unknown): ToolSchema {
       'type',
       'properties',
       'required',
+      'definitions',
     ]) as ToolSchema;
   }
   // Plain JSON Schema object
