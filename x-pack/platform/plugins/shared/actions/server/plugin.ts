@@ -84,7 +84,9 @@ import { defineRoutes } from './routes';
 import {
   createInboundEventsClient,
   dispatchConnectorEvents,
+  InboundEventAdmission,
   InboundEventRateLimiter,
+  registerInboundEventAdmission,
   type ConnectorEventEmitter,
 } from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
@@ -504,6 +506,19 @@ export class ActionsPlugin
     const inboundEventRateLimiter = inboundEventsEnabled
       ? new InboundEventRateLimiter(actionsConfigUtils.getInboundEventsRateLimit())
       : undefined;
+    if (inboundEventsEnabled) {
+      const admissionConfig = actionsConfigUtils.getInboundEventsAdmission();
+      if (admissionConfig.enabled) {
+        registerInboundEventAdmission({
+          http: core.http,
+          logger: this.logger,
+          admission: new InboundEventAdmission(admissionConfig),
+          config: admissionConfig,
+          maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
+          getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
+        });
+      }
+    }
     const inboundEvents =
       inboundEventsEnabled && inboundEventRateLimiter
         ? {

@@ -634,6 +634,12 @@ describe('config validation', () => {
 
     expect(() =>
       configSchema.validate({
+        inboundEvents: { rateLimit: { maxKeys: 10001 } },
+      })
+    ).toThrow(/lower than \[10000\]/);
+
+    expect(() =>
+      configSchema.validate({
         inboundEvents: { admission: { maxInFlight: 0 } },
       })
     ).toThrow(/greater than \[1\]/);

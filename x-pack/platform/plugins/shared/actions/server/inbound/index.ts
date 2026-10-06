@@ -19,6 +19,8 @@ export {
 export type { InboundEventsClient, InboundEventsClientArgs } from './factory';
 export { createInboundEventsClient } from './factory';
 export { InboundEventRateLimiter } from './inbound_event_rate_limiter';
+export { InboundEventAdmission } from './inbound_event_admission';
+export { registerInboundEventAdmission } from './register_inbound_event_admission';
 export type {
   ConnectorEventEmitParams,
   ConnectorEventEmitter,

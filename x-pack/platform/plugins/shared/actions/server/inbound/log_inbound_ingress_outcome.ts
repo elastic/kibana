@@ -40,7 +40,8 @@ export interface InboundIngressLogFields {
   /** Optional detail (eventId, error message, etc.) — truncated when logged. */
   detail?: string;
   /** Set for `rate_limited` only. */
-  budget?: 'remoteAddress' | 'connector';
+  budget?: 'remoteAddress' | 'connector' | 'inflight';
+  scope?: 'process' | 'connector';
   retryAfterSeconds?: number;
 }
 
@@ -62,7 +63,7 @@ const OUTCOME_LOG_LEVEL: Record<Exclude<InboundIngressOutcome, 'rate_limited'>, 
 
 const ingressLogLevel = (fields: InboundIngressLogFields): IngressLogLevel => {
   if (fields.outcome === 'rate_limited') {
-    return fields.budget === 'connector' ? 'info' : 'debug';
+    return fields.budget === 'connector' || fields.budget === 'inflight' ? 'info' : 'debug';
   }
   return OUTCOME_LOG_LEVEL[fields.outcome];
 };
@@ -86,6 +87,7 @@ export const logInboundIngressOutcome = (logger: Logger, fields: InboundIngressL
     requestId,
     detail,
     budget,
+    scope,
     retryAfterSeconds,
   } = fields;
   const level = ingressLogLevel(fields);
@@ -104,6 +106,7 @@ export const logInboundIngressOutcome = (logger: Logger, fields: InboundIngressL
         ...(requestId !== undefined ? { requestId } : {}),
         ...(truncatedDetail !== undefined ? { detail: truncatedDetail } : {}),
         ...(budget !== undefined ? { budget } : {}),
+        ...(scope !== undefined ? { scope } : {}),
         ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
       },
     }
