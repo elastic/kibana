@@ -417,9 +417,9 @@ module.exports = {
     schema: [],
     messages: {
       eagerZodSchema:
-        'Wrap module-scope Zod schemas in `lazySchema(() => ...)` so they are not materialized at import. See https://github.com/elastic/kibana/pull/294667.',
+        'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use.',
       eagerDerivedZodSchema:
-        'Calling `.extend()` / `.optional()` / `.array()` / `.pick()` on a Zod schema at module scope retains the materialized schema. Wrap the derivation in `lazySchema(() => ...)` too. See https://github.com/elastic/kibana/pull/294667.',
+        'Wrap this module-level Zod schema derivation in `lazySchema(() => ...)` to defer it until first use.',
     },
   },
 
