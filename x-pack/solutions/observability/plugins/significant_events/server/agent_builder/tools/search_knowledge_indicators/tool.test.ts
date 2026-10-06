@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { SignificantEventsServer } from '../../../types';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import {
@@ -17,20 +15,20 @@ import {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
 } from './tool';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  invokeHandler,
+  type NightshiftFeaturePrivilege,
+} from '../../utils/test_helpers';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
-jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
-  assertCanReadSignificantEvents: jest.fn(),
-}));
-
 describe('ki_search tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as unknown as SignificantEventsServer;
+  const server = createSignificantEventsServer({ featurePrivilege: 'read' });
   const request = {} as unknown as KibanaRequest;
   const uiSettings = {} as unknown as IUiSettingsClient;
 
@@ -113,16 +111,30 @@ describe('ki_search tool', () => {
     expect(res.status).toBe('unavailable');
   });
 
-  it('does not search KIs without the Nightshift read privilege', async () => {
+  const searchAs = async (featurePrivilege: NightshiftFeaturePrivilege) => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(Boom.forbidden());
     const getKnowledgeIndicatorClient = jest.fn();
     const getScopedClients = jest.fn(async () => {
       return { licensing: {}, getKnowledgeIndicatorClient } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
-    const tool = createSearchKnowledgeIndicatorsTool({ getScopedClients, server, logger });
+    const tool = createSearchKnowledgeIndicatorsTool({
+      getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege }),
+      logger,
+    });
 
     const result = await invokeHandler(tool as never, {}, createMockToolContext());
+    return { result, getKnowledgeIndicatorClient };
+  };
+
+  it('lets a Nightshift reader search KIs', async () => {
+    const { getKnowledgeIndicatorClient } = await searchAs('read');
+
+    expect(getKnowledgeIndicatorClient).toHaveBeenCalled();
+  });
+
+  it('does not search KIs without the Nightshift read privilege', async () => {
+    const { result, getKnowledgeIndicatorClient } = await searchAs('none');
 
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });

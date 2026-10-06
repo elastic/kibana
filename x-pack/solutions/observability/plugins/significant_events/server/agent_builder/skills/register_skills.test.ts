@@ -20,7 +20,7 @@ import {
   FEATURE_IDENTIFICATION_SKILL_ID,
   FINALIZE_FEATURES_TOOL_ID,
 } from './feature_identification';
-import { NIGHTSHIFT_ALL_PRIVILEGES, createNightshiftSecurityServer } from '../utils/test_helpers';
+import { createSignificantEventsServer } from '../utils/test_helpers';
 
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
 const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
@@ -50,7 +50,7 @@ const createOptions = (
     agentBuilder,
     telemetry,
     getScopedClients: jest.fn(),
-    server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_ALL_PRIVILEGES }),
+    server: createSignificantEventsServer({ featurePrivilege: 'all' }),
     maintenanceService,
     logger: loggerMock.create(),
     isAvailable: jest.fn().mockResolvedValue(true),

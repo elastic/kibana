@@ -9,9 +9,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
-  NIGHTSHIFT_READ_PRIVILEGES,
   createMockToolContext,
-  createNightshiftSecurityServer,
+  createSignificantEventsServer,
   invokeHandler,
 } from '../../../utils/test_helpers';
 import { createGetFeaturesTool } from './tool';
@@ -61,7 +60,7 @@ describe('ki_features_get tool', () => {
   const createTool = () =>
     createGetFeaturesTool({
       getScopedClients,
-      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
     });
 
@@ -135,7 +134,7 @@ describe('ki_features_get tool', () => {
   it('does not load features without the Nightshift read privilege', async () => {
     const tool = createGetFeaturesTool({
       getScopedClients,
-      server: createNightshiftSecurityServer({ privileges: [] }),
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
       logger,
     });
 

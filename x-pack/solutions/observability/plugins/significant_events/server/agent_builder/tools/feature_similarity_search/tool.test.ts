@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  invokeHandler,
+} from '../../utils/test_helpers';
 import {
   createFeatureSimilaritySearchTool,
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
@@ -21,20 +22,19 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
-jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
-  assertCanReadSignificantEvents: jest.fn(),
-}));
-
 describe('ki_feature_similarity_search tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as SignificantEventsServer;
+  const server = createSignificantEventsServer({ featurePrivilege: 'read' });
 
   beforeEach(() => {
     jest.clearAllMocks();
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
   });
 
-  const createTool = (findFeatures = jest.fn().mockResolvedValue({ hits: [] })) => {
+  const createTool = (
+    findFeatures = jest.fn().mockResolvedValue({ hits: [] }),
+    toolServer = server
+  ) => {
     const getScopedClients = jest.fn(async () => {
       return {
         licensing: {},
@@ -45,7 +45,7 @@ describe('ki_feature_similarity_search tool', () => {
 
     const tool = createFeatureSimilaritySearchTool({
       getScopedClients,
-      server,
+      server: toolServer,
       logger,
     });
     if (!('schema' in tool)) {
@@ -194,8 +194,11 @@ describe('ki_feature_similarity_search tool', () => {
   });
 
   it('does not search KIs without the Nightshift read privilege', async () => {
-    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(Boom.forbidden());
-    const { tool, findFeatures } = createTool();
+    const findFeatures = jest.fn();
+    const { tool } = createTool(
+      findFeatures,
+      createSignificantEventsServer({ featurePrivilege: 'none' })
+    );
 
     await invokeHandler(
       tool as never,

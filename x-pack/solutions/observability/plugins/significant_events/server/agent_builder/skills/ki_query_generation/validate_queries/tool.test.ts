@@ -14,9 +14,8 @@ import {
 } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
-  NIGHTSHIFT_READ_PRIVILEGES,
   createMockToolContext,
-  createNightshiftSecurityServer,
+  createSignificantEventsServer,
   invokeHandler,
 } from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
@@ -117,7 +116,7 @@ describe('ki_queries_validate tool', () => {
   const createTool = () =>
     createValidateQueriesTool({
       getScopedClients,
-      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
     });
 
@@ -274,7 +273,7 @@ describe('ki_queries_validate tool', () => {
   it('does not validate queries without the Nightshift read privilege', async () => {
     const tool = createValidateQueriesTool({
       getScopedClients,
-      server: createNightshiftSecurityServer({ privileges: [] }),
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
       logger,
     });
 

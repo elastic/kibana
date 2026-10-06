@@ -7,10 +7,9 @@
 
 import { createKiIdentificationStartTool } from './tool';
 import {
-  NIGHTSHIFT_ALL_PRIVILEGES,
-  NIGHTSHIFT_READ_PRIVILEGES,
   createMockToolContext,
-  createNightshiftSecurityServer,
+  createSignificantEventsServer,
+  type NightshiftFeaturePrivilege,
 } from '../../utils/test_helpers';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
@@ -21,8 +20,8 @@ describe('createKiIdentificationStartTool', () => {
   };
 
   const setup = ({
-    privileges = NIGHTSHIFT_ALL_PRIVILEGES,
-  }: { privileges?: typeof NIGHTSHIFT_ALL_PRIVILEGES } = {}) => {
+    featurePrivilege = 'all',
+  }: { featurePrivilege?: NightshiftFeaturePrivilege } = {}) => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
         id: 'system-streams-ki-onboarding',
@@ -42,7 +41,7 @@ describe('createKiIdentificationStartTool', () => {
     };
 
     const tool = createKiIdentificationStartTool({
-      server: createNightshiftSecurityServer({ privileges }),
+      server: createSignificantEventsServer({ featurePrivilege }),
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
@@ -102,7 +101,7 @@ describe('createKiIdentificationStartTool', () => {
   });
 
   it('does not let a Nightshift reader start onboarding', async () => {
-    const { tool, context, managementApi } = setup({ privileges: NIGHTSHIFT_READ_PRIVILEGES });
+    const { tool, context, managementApi } = setup({ featurePrivilege: 'read' });
 
     const result = await tool.handler(
       { stream_name: 'logs.nginx', steps: [KIsOnboardingStep.FeaturesIdentification] },

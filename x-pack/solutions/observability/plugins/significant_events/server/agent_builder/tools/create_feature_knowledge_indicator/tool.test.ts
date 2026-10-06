@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  invokeHandler,
+} from '../../utils/test_helpers';
 import {
   createFeatureKnowledgeIndicatorTool,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
 } from './tool';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
-jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
-  assertCanManageSignificantEvents: jest.fn(),
-}));
-
 describe('ki_feature_create tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as unknown as SignificantEventsServer;
+  const server = createSignificantEventsServer({ featurePrivilege: 'all' });
   const request = {} as unknown as KibanaRequest;
   const uiSettings = {} as unknown as IUiSettingsClient;
   const telemetry = {
@@ -45,6 +42,27 @@ describe('ki_feature_create tool', () => {
     properties: {},
     confidence: 80,
   };
+
+  // Scoped clients that let a write through, so only the privilege check can stop it.
+  const createScopedClients = (kiClient: object) =>
+    jest.fn(async () => {
+      return {
+        streamsClient: {
+          getStream: jest.fn().mockResolvedValue({
+            name: 'logs.test',
+            ingest: {
+              classic: { field_overrides: {} },
+              processing: [],
+              lifecycle: { inherit: {} },
+              failure_store: { inherit: {} },
+            },
+          }),
+        },
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+        licensing: {},
+        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -141,24 +159,7 @@ describe('ki_feature_create tool', () => {
       bulk: jest.fn().mockResolvedValue(undefined),
     };
 
-    const getScopedClients = jest.fn(async () => {
-      return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
-          }),
-        },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
-        licensing: {},
-        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
-      } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const getScopedClients = createScopedClients(featureClient);
 
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -188,24 +189,7 @@ describe('ki_feature_create tool', () => {
       bulk: jest.fn().mockRejectedValue(new Error('write failed')),
     };
 
-    const getScopedClients = jest.fn(async () => {
-      return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
-          }),
-        },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
-        licensing: {},
-        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
-      } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const getScopedClients = createScopedClients(featureClient);
 
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -229,29 +213,20 @@ describe('ki_feature_create tool', () => {
     );
   });
 
-  it('does not write the KI without the Nightshift manage privilege', async () => {
+  it('does not let a Nightshift reader create a feature KI', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanManageSignificantEvents as jest.Mock).mockRejectedValueOnce(Boom.forbidden());
 
-    const getKnowledgeIndicatorClient = jest.fn();
-    const getScopedClients = jest.fn(async () => {
-      return {
-        streamsClient: { getStream: jest.fn() },
-        getKnowledgeIndicatorClient,
-        licensing: {},
-      } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
-
+    const featureClient = { bulk: jest.fn() };
     const tool = createFeatureKnowledgeIndicatorTool({
-      getScopedClients,
-      server,
+      getScopedClients: createScopedClients(featureClient),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
       telemetry,
     });
 
     await invokeHandler(tool as never, featureParams, createMockToolContext());
 
-    expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
+    expect(featureClient.bulk).not.toHaveBeenCalled();
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
       expect.objectContaining({ ki_kind: 'feature', success: false })
     );

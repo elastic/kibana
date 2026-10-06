@@ -10,16 +10,15 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from './tool';
 import {
-  NIGHTSHIFT_ALL_PRIVILEGES,
-  NIGHTSHIFT_READ_PRIVILEGES,
   createMockToolContext,
-  createNightshiftSecurityServer,
+  createSignificantEventsServer,
+  type NightshiftFeaturePrivilege,
 } from '../../utils/test_helpers';
 
 describe('createKiIdentificationCancelTool', () => {
   const setup = ({
-    privileges = NIGHTSHIFT_ALL_PRIVILEGES,
-  }: { privileges?: typeof NIGHTSHIFT_ALL_PRIVILEGES } = {}) => {
+    featurePrivilege = 'all',
+  }: { featurePrivilege?: NightshiftFeaturePrivilege } = {}) => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
         results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
@@ -32,7 +31,7 @@ describe('createKiIdentificationCancelTool', () => {
     });
 
     const tool = createKiIdentificationCancelTool({
-      server: createNightshiftSecurityServer({ privileges }),
+      server: createSignificantEventsServer({ featurePrivilege }),
       streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
@@ -75,7 +74,7 @@ describe('createKiIdentificationCancelTool', () => {
   });
 
   it('does not let a Nightshift reader cancel onboarding', async () => {
-    const { tool, context, managementApi } = setup({ privileges: NIGHTSHIFT_READ_PRIVILEGES });
+    const { tool, context, managementApi } = setup({ featurePrivilege: 'read' });
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
 

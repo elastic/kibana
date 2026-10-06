@@ -99,38 +99,37 @@ export const createMockToolContext = (): ToolHandlerContext => {
   return toolHandlerContext;
 };
 
-type NightshiftApiPrivilege =
-  (typeof NIGHTSHIFT_API_PRIVILEGES)[keyof typeof NIGHTSHIFT_API_PRIVILEGES];
+/** Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes without read. */
+export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all';
 
-/** API privileges of the Nightshift `read` feature privilege. */
-export const NIGHTSHIFT_READ_PRIVILEGES: readonly NightshiftApiPrivilege[] = [
-  NIGHTSHIFT_API_PRIVILEGES.read,
-];
-
-/** API privileges of the Nightshift `all` feature privilege. */
-export const NIGHTSHIFT_ALL_PRIVILEGES: readonly NightshiftApiPrivilege[] = [
-  NIGHTSHIFT_API_PRIVILEGES.read,
-  NIGHTSHIFT_API_PRIVILEGES.manage,
-];
+const API_PRIVILEGES_BY_FEATURE_PRIVILEGE: Record<NightshiftFeaturePrivilege, readonly string[]> = {
+  none: [],
+  read: [NIGHTSHIFT_API_PRIVILEGES.read],
+  all: [NIGHTSHIFT_API_PRIVILEGES.read, NIGHTSHIFT_API_PRIVILEGES.manage],
+};
 
 /**
- * A server whose Kibana privilege check behaves like a user holding exactly `privileges`:
- * a check passes only when every requested API privilege is among them.
+ * A server whose Kibana privilege check behaves like a user with `featurePrivilege` on Nightshift:
+ * a check passes only when every requested API privilege is granted by it. Only `security` is
+ * real, so mock any other server dependency (e.g. `assertSignificantEventsAccess`).
  */
-export const createNightshiftSecurityServer = ({
-  privileges,
+export const createSignificantEventsServer = ({
+  featurePrivilege,
 }: {
-  privileges: readonly NightshiftApiPrivilege[];
-}): Pick<SignificantEventsServer, 'security'> => {
+  featurePrivilege: NightshiftFeaturePrivilege;
+}): SignificantEventsServer => {
   const security = securityMock.createStart();
   const toApiAction = (privilege: string) => `api:${privilege}`;
   jest.spyOn(security.authz.actions.api, 'get').mockImplementation(toApiAction);
 
-  const grantedActions = new Set(privileges.map(toApiAction));
+  const grantedActions = new Set(
+    API_PRIVILEGES_BY_FEATURE_PRIVILEGE[featurePrivilege].map(toApiAction)
+  );
   security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
     jest.fn(async ({ kibana = [] }: { kibana?: string | string[] }) => ({
       hasAllRequested: [kibana].flat().every((action) => grantedActions.has(action)),
     }))
   );
-  return { security };
+  const server: Pick<SignificantEventsServer, 'security'> = { security };
+  return server as SignificantEventsServer;
 };

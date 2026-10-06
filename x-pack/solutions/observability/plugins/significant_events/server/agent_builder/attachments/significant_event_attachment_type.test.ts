@@ -14,7 +14,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
-import { NIGHTSHIFT_READ_PRIVILEGES, createNightshiftSecurityServer } from '../utils/test_helpers';
+import { createSignificantEventsServer } from '../utils/test_helpers';
 import {
   createSignificantEventAttachmentType,
   formatSignificantEventAsText,
@@ -73,7 +73,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([]),
-      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(Promise.resolve(type.validate(event))).resolves.toEqual({
@@ -90,7 +90,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event, updatedEvent]),
-      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(
@@ -109,7 +109,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
-      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(
@@ -125,7 +125,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
-      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(
@@ -141,7 +141,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
-      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(
@@ -156,7 +156,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([]),
-      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     expect(formatSignificantEventAsText(event)).toContain('Payment outage');
@@ -171,7 +171,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients,
-      server: createNightshiftSecurityServer({ privileges: [] }),
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
     });
     const context = agentBuilderMocks.attachments.createResolveContextMock();
 
