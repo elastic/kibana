@@ -342,6 +342,20 @@ sets overflow context:
   window. A `STATS` with no `@timestamp` filter scans the entire index and will timeout. Use
   literal timestamps, not `now-1h`. Schema
   probes (`| LIMIT 0`, or a single-row `| LIMIT 1`) are exempt.
+- **Filter on structured fields before matching text.** Free-text matching on message fields
+  (`LIKE`, `RLIKE`, especially with a leading `*` or `%`) is the slowest kind of query on large
+  log indices. First narrow with structured fields — service, host, pod or container, log level,
+  error or event code — then match text inside that subset.
+- **Never group by free text.** `STATS … BY message` (or any other free-text field) over more than
+  a few minutes is very expensive. Group by structured fields, or count a few specific message
+  patterns you already know about.
+- **Start narrow and widen deliberately.** Begin with the incident window and the most relevant
+  data source; widen the window or the index pattern only when the narrow query returns nothing
+  useful. Check volume with `COUNT(*)` before pulling rows.
+- **When a query times out, change it — do not repeat it.** Add a structured filter, shorten the
+  window or drop the text match; rerunning the same query costs the full timeout again. Run a
+  query you expect to be expensive on its own, not batched with other calls, so it does not delay
+  results you could already act on.
 - Kickoff `Related streams` are logical stream names. Prefer the canonical query view by probing
   `FROM $.<stream-name> | LIMIT 0`; if it is unavailable, probe the ingest-stream target with
   `FROM <stream-name>, <stream-name>.* | LIMIT 0`. Use the target that resolves, and preserve the
