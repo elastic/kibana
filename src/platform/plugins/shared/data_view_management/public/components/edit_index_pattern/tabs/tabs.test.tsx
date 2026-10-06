@@ -20,9 +20,6 @@ import { mockManagementPlugin } from '../../../mocks';
 import { DataViewMgmtService } from '../../../management_app/data_view_management_service';
 import { Tabs } from './tabs';
 
-// Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_filter.ts
-// and src/platform/test/functional/apps/management/group2/_scripted_fields_filter.ts
-
 const indexedFieldsDataView = createStubDataView({
   spec: {
     id: 'test-data-view',

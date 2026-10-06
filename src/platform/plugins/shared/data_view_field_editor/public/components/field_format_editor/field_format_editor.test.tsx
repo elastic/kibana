@@ -10,8 +10,8 @@
 import React, { useState } from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, within } from '@testing-library/react';
-import type { CoreStart } from '@kbn/core/public';
-import type { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Serializable } from '@kbn/utility-types';
 import type {
   FieldFormatsGetConfigFn,
@@ -28,7 +28,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { FormatEditorService } from '../../service';
 import { FormatSelectEditor } from './field_format_editor';
 
-const createFieldFormats = () => {
+const createFieldFormats = (): FieldFormatsStart => {
   const registry = new FieldFormatsRegistry();
   const config: Record<string, Serializable> = {
     'dateFormat:tz': 'UTC',
@@ -45,7 +45,7 @@ const createFieldFormats = () => {
   };
   const getConfig: FieldFormatsGetConfigFn = (key) => config[key];
   registry.init(getConfig, {}, [...baseFormatters, DateFormat, DateNanosFormat]);
-  return registry as unknown as FieldFormatsStart;
+  return registry;
 };
 
 const createFieldFormatEditors = () => {
@@ -62,7 +62,7 @@ const FormatSelectEditorHarness = ({ esTypes }: { esTypes: ES_FIELD_TYPES[] }) =
       esTypes={esTypes}
       fieldFormatEditors={createFieldFormatEditors()}
       fieldFormats={createFieldFormats()}
-      uiSettings={{} as CoreStart['uiSettings']}
+      uiSettings={coreMock.createStart().uiSettings}
       onChange={setValue}
       onError={jest.fn()}
       value={value}
@@ -79,9 +79,8 @@ const getFormatIds = () =>
     .map((option) => option.getAttribute('value'));
 
 describe('FormatSelectEditor', () => {
-  // https://github.com/elastic/kibana/issues/93349
   it('can switch between the duration and bytes editors more than once', async () => {
-    renderSelectEditor(['long' as ES_FIELD_TYPES]);
+    renderSelectEditor([ES_FIELD_TYPES.LONG]);
 
     await userEvent.selectOptions(screen.getByTestId('editorSelectedFormatId'), 'duration');
     expect(await screen.findByTestId('durationEditorInputFormat')).toBeVisible();
@@ -95,7 +94,7 @@ describe('FormatSelectEditor', () => {
   });
 
   it('offers the formats that apply to a keyword field', () => {
-    renderSelectEditor(['keyword' as ES_FIELD_TYPES]);
+    renderSelectEditor([ES_FIELD_TYPES.KEYWORD]);
 
     expect(getFormatIds()).toEqual([
       '',
@@ -109,7 +108,7 @@ describe('FormatSelectEditor', () => {
   });
 
   it('offers the date and date_nanos formats for a date_nanos field', () => {
-    renderSelectEditor(['date_nanos' as ES_FIELD_TYPES]);
+    renderSelectEditor([ES_FIELD_TYPES.DATE_NANOS]);
 
     expect(getFormatIds()).toEqual(expect.arrayContaining(['', 'date', 'date_nanos']));
   });
