@@ -107,11 +107,16 @@ export type UiamServiceAccountCreator =
     };
 
 /**
- * A service account as UIAM reports it from get and list, which add `creator` to what create
- * returns.
+ * A service account as UIAM reports it from get and list, which add `creator` and `revoked` to
+ * what create returns.
  */
 export interface UiamServiceAccountDetails extends UiamServiceAccount {
   creator: UiamServiceAccountCreator;
+  /**
+   * Whether the account was revoked. A revoked account stays around for a short while, and `get`
+   * still reports it until then. `list` leaves revoked accounts out.
+   */
+  revoked: boolean;
 }
 
 /**
