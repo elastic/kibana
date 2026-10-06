@@ -524,6 +524,25 @@ export class TaskRunner<
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
 
+    // ActionScheduler calls alert.unscheduleActions() once it has scheduled a per-alert action,
+    // which clears getScheduledActionOptions(). Snapshot the action group of each new alert
+    // (id -> group) now so the alertStatusChanged payload can still report it afterwards.
+    // Only done when the batch could be built; the per-space setting is still read later.
+    const newAlertActionGroups = new Map<string, string>();
+    if (
+      !this.cancelled &&
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      this.shouldLogAndScheduleActionsForAlerts()
+    ) {
+      for (const [id, alert] of Object.entries(alertsClient.getProcessedAlerts('new'))) {
+        const actionGroup = alert.getScheduledActionOptions()?.actionGroup;
+        if (actionGroup != null) {
+          newAlertActionGroups.set(id, actionGroup);
+        }
+      }
+    }
+
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
         if (isRuleSnoozed(rule)) {
@@ -614,13 +633,13 @@ export class TaskRunner<
         alertStatusChangedBatch = {
           request: fakeRequest,
           events: [
-            ...newEntries.map(([, alert]) => ({
+            ...newEntries.map(([id, alert]) => ({
               rule: rulePayload,
               alert: {
                 id: alert.getId(),
                 uuid: alert.getUuid(),
                 status: 'active' as const,
-                actionGroup: alert.getScheduledActionOptions()?.actionGroup ?? null,
+                actionGroup: newAlertActionGroups.get(id) ?? null,
                 start: alert.getStart(),
               },
             })),
