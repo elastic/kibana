@@ -14,7 +14,6 @@ import type {
   ContractSpec,
   MediaTypeContent,
   OpenApiDocument,
-  OperationHeader,
   OperationParameter,
   OperationServer,
   ParameterLocation,
@@ -23,10 +22,15 @@ import type {
 
 const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
 
-const PARAMETER_LOCATIONS: readonly string[] = ['path', 'query', 'header', 'cookie'];
+const DEFAULT_STYLES: Readonly<Record<ParameterLocation, string>> = {
+  path: 'simple',
+  query: 'form',
+  header: 'simple',
+  cookie: 'form',
+};
 
 const isParameterLocation = (value: unknown): value is ParameterLocation =>
-  typeof value === 'string' && PARAMETER_LOCATIONS.includes(value);
+  typeof value === 'string' && value in DEFAULT_STYLES;
 
 // Skips `x-` specification extensions, which may appear among paths and responses.
 const entriesOf = (value: unknown): Array<[string, unknown]> =>
@@ -38,92 +42,33 @@ const toSchema = (owner: Record<string, unknown>, pointer: string): SpecSchema |
     : undefined;
 
 const toContents = (owner: Record<string, unknown>, pointer: string): MediaTypeContent[] =>
-  entriesOf(owner.content).flatMap(([mediaType, content]) =>
-    isRecord(content)
-      ? [
+  entriesOf(owner.content).map(([mediaType, content]) => ({
+    mediaType,
+    schema: isRecord(content)
+      ? toSchema(content, appendPointer(pointer, 'content', mediaType))
+      : undefined,
+  }));
+
+const toServers = (servers: unknown): OperationServer[] | undefined => {
+  if (!Array.isArray(servers) || servers.length === 0) {
+    return undefined;
+  }
+  return servers.filter(isRecord).map(({ url, variables }) => ({
+    url: String(url),
+    variables: Object.fromEntries(
+      entriesOf(variables).map(([name, variable]) => {
+        const { default: fallback, enum: values } = isRecord(variable) ? variable : {};
+        return [
+          name,
           {
-            mediaType,
-            schema: toSchema(content, appendPointer(appendPointer(pointer, 'content'), mediaType)),
+            default: String(fallback),
+            enum: Array.isArray(values) ? values.map(String) : undefined,
           },
-        ]
-      : []
-  );
-
-const toServers = (servers: unknown): OperationServer[] | undefined =>
-  Array.isArray(servers) && servers.length > 0
-    ? servers.filter(isRecord).map(({ url, variables }) => ({
-        url: String(url),
-        variables: Object.fromEntries(
-          entriesOf(variables).flatMap(([name, variable]) =>
-            isRecord(variable)
-              ? [
-                  [
-                    name,
-                    {
-                      default: String(variable.default),
-                      enum: Array.isArray(variable.enum) ? variable.enum.map(String) : undefined,
-                    },
-                  ],
-                ]
-              : []
-          )
-        ),
-      }))
-    : undefined;
-
-const toParameters = (document: OpenApiDocument, parameters: unknown, pointer: string) =>
-  (Array.isArray(parameters) ? parameters : []).flatMap((node, index): OperationParameter[] => {
-    const { value, pointer: resolved } = resolveObject(
-      document,
-      node,
-      appendPointer(pointer, index)
-    );
-    if (!isParameterLocation(value.in)) {
-      return [];
-    }
-    const style =
-      typeof value.style === 'string'
-        ? value.style
-        : value.in === 'query' || value.in === 'cookie'
-        ? 'form'
-        : 'simple';
-    return [
-      {
-        name: String(value.name),
-        in: value.in,
-        required: value.in === 'path' || value.required === true,
-        style,
-        explode: typeof value.explode === 'boolean' ? value.explode : style === 'form',
-        schema: toSchema(value, resolved),
-      },
-    ];
-  });
-
-const toHeaders = (
-  document: OpenApiDocument,
-  headers: unknown,
-  pointer: string
-): OperationHeader[] =>
-  entriesOf(headers).map(([name, node]) => {
-    const { value, pointer: resolved } = resolveObject(
-      document,
-      node,
-      appendPointer(pointer, name)
-    );
-    return { name, required: value.required === true, schema: toSchema(value, resolved) };
-  });
-
-// Operation parameters override path item parameters with the same name and location.
-const mergeParameters = (
-  inherited: OperationParameter[],
-  own: OperationParameter[]
-): OperationParameter[] => [
-  ...inherited.filter(
-    (parameter) =>
-      !own.some(({ name, in: location }) => name === parameter.name && location === parameter.in)
-  ),
-  ...own,
-];
+        ];
+      })
+    ),
+  }));
+};
 
 const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
   const version = typeof openapi === 'string' ? openapi : '';
@@ -144,26 +89,53 @@ const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
 export const loadOperations = (source: OpenApiDocument): ContractOperation[] => {
   const spec: ContractSpec = { document: structuredClone(source), dialect: getDialect(source) };
   const { document } = spec;
+  const resolve = (node: unknown, pointer: string) => resolveObject(document, node, pointer);
   const rootServers = toServers(document.servers) ?? [];
 
+  const toParameters = (parameters: unknown, pointer: string): OperationParameter[] =>
+    (Array.isArray(parameters) ? parameters : []).flatMap((node, index) => {
+      const { value, pointer: resolved } = resolve(node, appendPointer(pointer, index));
+      if (!isParameterLocation(value.in)) {
+        return [];
+      }
+      const style = typeof value.style === 'string' ? value.style : DEFAULT_STYLES[value.in];
+      const explode = typeof value.explode === 'boolean' ? value.explode : style === 'form';
+      const required = value.in === 'path' || value.required === true;
+      return [
+        {
+          name: String(value.name),
+          in: value.in,
+          required,
+          style,
+          explode,
+          schema: toSchema(value, resolved),
+        },
+      ];
+    });
+
   return entriesOf(document.paths).flatMap(([path, node]) => {
-    const itemPointer = appendPointer('/paths', path);
-    const { value: item, pointer: itemResolved } = resolveObject(document, node, itemPointer);
-    const itemParameters = toParameters(
-      document,
-      item.parameters,
-      appendPointer(itemResolved, 'parameters')
-    );
+    const { value: item, pointer: itemPointer } = resolve(node, appendPointer('/paths', path));
+    const itemParameters = toParameters(item.parameters, appendPointer(itemPointer, 'parameters'));
 
     return HTTP_METHODS.flatMap((method): ContractOperation[] => {
       const operation = item[method];
       if (!isRecord(operation)) {
         return [];
       }
-      const pointer = appendPointer(itemResolved, method);
+      const pointer = appendPointer(itemPointer, method);
+      const ownParameters = toParameters(
+        operation.parameters,
+        appendPointer(pointer, 'parameters')
+      );
+      // Operation parameters override path item parameters with the same name and location.
+      const inherited = itemParameters.filter(
+        ({ name, in: location }) =>
+          !ownParameters.some((own) => own.name === name && own.in === location)
+      );
       const body = isRecord(operation.requestBody)
-        ? resolveObject(document, operation.requestBody, appendPointer(pointer, 'requestBody'))
+        ? resolve(operation.requestBody, appendPointer(pointer, 'requestBody'))
         : undefined;
+
       return [
         {
           id:
@@ -173,28 +145,27 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
           method,
           path,
           servers: toServers(operation.servers) ?? toServers(item.servers) ?? rootServers,
-          parameters: mergeParameters(
-            itemParameters,
-            toParameters(document, operation.parameters, appendPointer(pointer, 'parameters'))
-          ),
+          parameters: [...inherited, ...ownParameters],
           requestBody: body && {
             required: body.value.required === true,
             contents: toContents(body.value, body.pointer),
           },
           responses: entriesOf(operation.responses).map(([code, response]) => {
-            const resolved = resolveObject(
-              document,
+            const { value, pointer: resolved } = resolve(
               response,
-              appendPointer(appendPointer(pointer, 'responses'), code)
+              appendPointer(pointer, 'responses', code)
             );
             return {
               code,
-              contents: toContents(resolved.value, resolved.pointer),
-              headers: toHeaders(
-                document,
-                resolved.value.headers,
-                appendPointer(resolved.pointer, 'headers')
-              ),
+              contents: toContents(value, resolved),
+              headers: entriesOf(value.headers).map(([name, header]) => {
+                const target = resolve(header, appendPointer(resolved, 'headers', name));
+                return {
+                  name,
+                  required: target.value.required === true,
+                  schema: toSchema(target.value, target.pointer),
+                };
+              }),
             };
           }),
           spec,

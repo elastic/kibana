@@ -12,9 +12,12 @@ import type { OpenApiDocument } from './types';
 
 const MAX_REF_HOPS = 32;
 
-/** Appends a property name to a JSON pointer, escaping `~` and `/`. */
-export const appendPointer = (pointer: string, token: string | number): string =>
-  `${pointer}/${String(token).replace(/~/g, '~0').replace(/\//g, '~1')}`;
+/** Appends property names to a JSON pointer, escaping `~` and `/`. */
+export const appendPointer = (pointer: string, ...tokens: Array<string | number>): string =>
+  tokens.reduce<string>(
+    (result, token) => `${result}/${String(token).replace(/~/g, '~0').replace(/\//g, '~1')}`,
+    pointer
+  );
 
 /** Returns the value a JSON pointer such as `/components/schemas/Item` points at. */
 export const getAtPointer = (document: OpenApiDocument, pointer: string): unknown =>
