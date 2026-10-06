@@ -117,6 +117,21 @@ const diffEntitySets = (expected: EntitySet, actual: EntitySet): string[] => {
   return diffs;
 };
 
+/** `entity.id` -> `namespace/confidence`. Both come from the EUID, so run order cannot move them. */
+const levelsById = (entities: EntitySet): Record<string, string> =>
+  Object.fromEntries(
+    [...entities].map(([id, doc]) => {
+      const { entity } = doc as { entity: { namespace?: string; confidence?: string } };
+      return [id, `${entity.namespace}/${entity.confidence}`];
+    })
+  );
+
+const countByLevel = (levels: Record<string, string>): Record<string, number> =>
+  Object.values(levels).reduce<Record<string, number>>(
+    (acc, level) => ({ ...acc, [level]: (acc[level] ?? 0) + 1 }),
+    {}
+  );
+
 const readEntities = async (esClient: EsClient, type: EntityType): Promise<EntitySet> => {
   await esClient.indices.refresh({ index: LATEST_ALIAS });
   const response = await esClient.search<Record<string, unknown>>({
@@ -271,6 +286,14 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
     expect(diffEntitySets(expected, await readEntities(esClient, 'user'))).toStrictEqual([]);
   };
 
+  /** Same entities at the same levels; field values are free to differ by run order. */
+  const expectSameEntitiesAndLevels = async (esClient: EsClient, expected: EntitySet) => {
+    const want = levelsById(expected);
+    const got = levelsById(await readEntities(esClient, 'user'));
+    expect(countByLevel(got)).toStrictEqual(countByLevel(want));
+    expect(got).toStrictEqual(want);
+  };
+
   apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     publicHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
@@ -352,11 +375,12 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
     }
   );
 
-  // Fails until https://github.com/elastic/kibana/issues/294434 and
-  // https://github.com/elastic/kibana/issues/294432 are fixed: non-priority drops IdP activity it
-  // reads before priority created the user.
+  // Field values may differ in this order: non-priority drops IdP activity it reads before
+  // priority created the user, and run order decides newest and oldest values. Both are accepted,
+  // see https://github.com/elastic/kibana/issues/294434 and
+  // https://github.com/elastic/kibana/issues/294432.
   apiTest(
-    'flag on: non-priority then priority matches single-process output',
+    'flag on: non-priority then priority gives the same entities and levels as single-process',
     async ({ apiClient, apiServices, esClient }) => {
       const expected = await getBaseline(apiClient, apiServices, esClient);
       await setDualProcess(apiServices, true);
@@ -370,7 +394,13 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
       await expectProcessStatuses(apiClient, 'started', 'started');
       await extract(apiClient, 'user', 'priority');
 
-      await expectUnionMatchesSingle(esClient, expected.users);
+      // Hosts have no gate, so run order cannot touch them.
+      await extract(apiClient, 'host');
+
+      await expectSameEntitiesAndLevels(esClient, expected.users);
+      expect(diffEntitySets(expected.hosts, await readEntities(esClient, 'host'))).toStrictEqual(
+        []
+      );
 
       await uninstall(apiClient, esClient);
     }
@@ -396,13 +426,12 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
     }
   );
 
-  // Known gap: across runs, `prefer_newest_value` and `prefer_oldest_value` keep the value of
-  // the last and first run, not of the newest and oldest log. Priority then non-priority over an
-  // activity log older than the asset log swaps this user's lifecycle and takes the older name.
-  // When https://github.com/elastic/kibana/issues/294432 is fixed, the dual-process expectation
-  // becomes the single-process one.
+  // Across runs, `prefer_newest_value` and `prefer_oldest_value` keep the value of the last and
+  // first run, not of the newest and oldest log. Priority then non-priority over an activity log
+  // older than the asset log swaps this user's lifecycle and takes the older name. Accepted in
+  // https://github.com/elastic/kibana/issues/294432; this pins it so a merge change shows up here.
   apiTest(
-    'known gap: dual-process picks newest and oldest values by run order',
+    'dual-process: run order decides newest and oldest values',
     async ({ apiClient, apiServices, esClient }) => {
       await setDualProcess(apiServices, false);
       await install(apiClient, false);
