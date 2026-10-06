@@ -11,6 +11,8 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_SO_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  LENS_SO_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
@@ -133,6 +135,43 @@ export default ({ getService }: FtrProviderContext): void => {
           owner: 'securitySolutionFixture',
           attachmentId: 'timeline-1',
           metadata: { title: 'My timeline' },
+        } as unknown as AttachmentRequestV2,
+        expectedHttpCode: 400,
+      })) as unknown as { statusCode: number; message: string };
+
+      expect(response.statusCode).to.be(400);
+      expect(response.message).to.contain('has no legacy representation');
+    });
+
+    it('400s when creating a unified-only dashboard attachment', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const response = (await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: {
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          owner: 'securitySolutionFixture',
+          attachmentId: 'dashboard-1',
+          metadata: { title: 'My dashboard', soType: DASHBOARD_SO_TYPE },
+        } as unknown as AttachmentRequestV2,
+        expectedHttpCode: 400,
+      })) as unknown as { statusCode: number; message: string };
+
+      expect(response.statusCode).to.be(400);
+      expect(response.message).to.contain('has no legacy representation');
+    });
+
+    // By-value Lens maps to a legacy persistableState row; by-reference Lens does not.
+    it('400s when creating a Lens-by-reference attachment', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const response = (await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: {
+          type: LENS_ATTACHMENT_TYPE,
+          owner: 'securitySolutionFixture',
+          attachmentId: 'lens-1',
+          metadata: { title: 'My lens', soType: LENS_SO_TYPE },
         } as unknown as AttachmentRequestV2,
         expectedHttpCode: 400,
       })) as unknown as { statusCode: number; message: string };

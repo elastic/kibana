@@ -6,6 +6,7 @@
  */
 
 export {
+  BINDING_CLOCK_SKEW_TOLERANCE_MS,
   getCredentialId,
   registerServiceAccountCredentialSavedObjectType,
   SERVICE_ACCOUNT_CREDENTIAL_TYPE,
