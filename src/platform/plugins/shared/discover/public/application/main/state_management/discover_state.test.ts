@@ -37,6 +37,7 @@ import {
   savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -73,13 +74,13 @@ import {
   type ProfileStateDefinition,
 } from '../../../../common/context_awareness';
 import type { DiscoverSessionApiClassicTab } from '@kbn/as-code-discover-schema';
-import type { DiscoverSessionApiResponse } from '../../../../server';
+import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../../../server';
 import {
   discoverSessionInternalDataSchema,
   type DiscoverSessionInternalResponse,
 } from '../../../../server/api/internal_schema';
 import { fromDiscoverSessionApiResponse } from '../../../session/session_conversions';
-import { createSessionService } from '../../../session/session_service';
+import { createDiscoverSessionService } from '../../../session/session_service';
 import type {
   DiscoverSessionClient,
   DiscoverSessionClientRequestData,
@@ -362,6 +363,38 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.sort).toEqual([['bytes', 'desc']]);
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
+  });
+
+  describe('Session load warnings', () => {
+    const warning: DiscoverSessionWarning = {
+      type: 'dropped_panel',
+      tab_id: 'tab-1',
+      panel_id: 'control-1',
+      message: 'Unable to transform control panel [control-1].',
+    };
+
+    test.each([
+      { warnings: [], toastCount: 0 },
+      { warnings: [warning], toastCount: 1 },
+    ])(
+      'shows $toastCount warning toasts when loading $warnings',
+      async ({ warnings, toastCount }) => {
+        const { internalState, services } = getDiscoverInternalStateMock();
+        const session = createDiscoverSessionMock({ id: 'test-session' });
+        jest
+          .spyOn(services.discoverSessionService, 'get')
+          .mockResolvedValueOnce({ session, warnings });
+
+        await internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
+        await internalState
+          .dispatch(internalStateActions.initializeTabs({ discoverSessionId: session.id }))
+          .unwrap();
+
+        expect(services.discoverSessionService.get).toHaveBeenCalledWith(session.id);
+        expect(internalState.getState().persistedDiscoverSession).toEqual(session);
+        expect(services.core.notifications.toasts.addWarning).toHaveBeenCalledTimes(toastCount);
+      }
+    );
   });
 
   describe('Loading a session with an inline data view', () => {
@@ -702,15 +735,14 @@ describe('Discover state', () => {
         ),
         get: jest.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
       };
-      const sessionService = createSessionService({
+      const discoverSessionService = createDiscoverSessionService({
         apiClient,
         legacyClient: services.savedSearch,
         useHttpApi: true,
       });
-      // Exercise HTTP through the existing save boundary without connecting production callers.
       jest
-        .spyOn(services.savedSearch, 'saveDiscoverSession')
-        .mockImplementation((session, options = {}) => sessionService.save(session, options));
+        .spyOn(services.discoverSessionService, 'save')
+        .mockImplementation(discoverSessionService.save);
 
       await firstLoad.saveDiscoverSession({ newCopyOnSave: copyOnSave });
 
@@ -753,7 +785,7 @@ describe('Discover state', () => {
       const reloadedServices = createDiscoverServicesMock();
       reloadedServices.history = createMemoryHistory({ initialEntries: [url] });
       const reloaded = createState(reloadedServices);
-      const loadedSession = await sessionService.get(savedId);
+      const loadedSession = await discoverSessionService.get(savedId);
       await reloaded.initializeTabs({ persistedDiscoverSession: loadedSession.session });
       const reloadedTabId = reloaded.getCurrentTab().id;
       await reloaded.initializeSingleTab({ tabId: reloadedTabId });
@@ -1676,21 +1708,24 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchWithTimeField.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchWithTimeField,
-        id: savedSearchWithTimeField.id ?? '',
-        title: savedSearchWithTimeField.title ?? '',
-        description: savedSearchWithTimeField.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: savedSearchWithTimeField.id ?? '',
-              label: savedSearchWithTimeField.title ?? '',
-            },
-            savedSearch: savedSearchWithTimeField,
-            services: testServices,
-          }),
-        ],
+      jest.spyOn(testServices.discoverSessionService, 'get').mockResolvedValueOnce({
+        session: {
+          ...savedSearchWithTimeField,
+          id: savedSearchWithTimeField.id ?? '',
+          title: savedSearchWithTimeField.title ?? '',
+          description: savedSearchWithTimeField.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchWithTimeField.id ?? '',
+                label: savedSearchWithTimeField.title ?? '',
+              },
+              savedSearch: savedSearchWithTimeField,
+              services: testServices,
+            }),
+          ],
+        },
+        warnings: [],
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithTimeField.id })
@@ -1721,21 +1756,24 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchMock.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchMock,
-        id: savedSearchMock.id ?? '',
-        title: savedSearchMock.title ?? '',
-        description: savedSearchMock.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: savedSearchMock.id ?? '',
-              label: savedSearchMock.title ?? '',
-            },
-            savedSearch: savedSearchMock,
-            services: testServices,
-          }),
-        ],
+      jest.spyOn(testServices.discoverSessionService, 'get').mockResolvedValueOnce({
+        session: {
+          ...savedSearchMock,
+          id: savedSearchMock.id ?? '',
+          title: savedSearchMock.title ?? '',
+          description: savedSearchMock.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchMock.id ?? '',
+                label: savedSearchMock.title ?? '',
+              },
+              savedSearch: savedSearchMock,
+              services: testServices,
+            }),
+          ],
+        },
+        warnings: [],
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchMock.id })
@@ -1898,7 +1936,6 @@ describe('Discover state', () => {
     });
 
     test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
-      const persistedDataViewId = savedSearchMockWithESQL.searchSource.getField('index')!.id;
       const url = "/#?_a=(dataSource:(dataViewId:'the-data-view-id',type:dataView))&_g=()";
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMockWithESQL,
@@ -1918,7 +1955,9 @@ describe('Discover state', () => {
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(persistedDataViewId).toBe(currentDataView$.getValue()?.id);
+      expect(currentDataView$.getValue()).toEqual(
+        expect.objectContaining({ type: ESQL_TYPE, title: 'index-pattern-esql' })
+      );
     });
 
     test('onChangeDataView', async () => {

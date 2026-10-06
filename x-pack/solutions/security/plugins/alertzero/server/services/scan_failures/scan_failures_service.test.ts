@@ -22,6 +22,7 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
   ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
@@ -168,6 +169,25 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
           watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        },
+      ],
+      unknown: false,
+    });
+  });
+
+  it('folds the closure review onto the Alert Triage Worker that started it', async () => {
+    const { failedPage, lookup } = childStartedByWorker(
+      ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+      ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID
+    );
+    const search = jest.fn(async () => failedPage);
+    const { service } = createService(search, lookup);
+
+    await expect(service.list(request, 'default')).resolves.toEqual({
+      workers: [
+        {
+          workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+          watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
         },
       ],
       unknown: false,

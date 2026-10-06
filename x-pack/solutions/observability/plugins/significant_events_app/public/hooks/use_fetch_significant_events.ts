@@ -23,6 +23,8 @@ interface UseFetchSignificantEventsParams {
   severity?: Severity[];
   stream?: string[];
   search?: string;
+  /** Knowledge Indicator feature ids matched against `causal_features` and `blast_radius`. */
+  topologyFeatureIds?: string[];
   eventId?: string;
 }
 
@@ -33,6 +35,7 @@ export const useFetchSignificantEvents = ({
   severity,
   stream,
   search,
+  topologyFeatureIds,
   eventId,
 }: UseFetchSignificantEventsParams) => {
   const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
@@ -42,7 +45,7 @@ export const useFetchSignificantEvents = ({
 
   useEffect(() => {
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, [from, to, status, severity, stream, search, eventId]);
+  }, [from, to, status, severity, stream, search, topologyFeatureIds, eventId]);
 
   const query = useQuery<PaginatedResponse<SignificantEventResponse>, Error>({
     // Deep-link lookups must not depend on time or filters. DateRangeRedirect writing
@@ -59,6 +62,7 @@ export const useFetchSignificantEvents = ({
           severity,
           stream,
           search,
+          topologyFeatureIds,
         ],
     queryFn: async ({
       signal,
@@ -75,6 +79,7 @@ export const useFetchSignificantEvents = ({
               ...(severity?.length ? { severity } : {}),
               ...(stream?.length ? { stream } : {}),
               ...(search ? { search } : {}),
+              ...(topologyFeatureIds?.length ? { topology_feature_id: topologyFeatureIds } : {}),
             }),
       };
 

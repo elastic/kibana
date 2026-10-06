@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { firstValueFrom } from 'rxjs';
 import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import {
@@ -204,9 +205,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   }
 
   private async shouldUseCoreSelfClient(): Promise<boolean> {
-    return this.stepExecutionRuntime.contextManager
-      .getCoreStart()
-      .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
+    return firstValueFrom(
+      this.stepExecutionRuntime.contextManager
+        .getCoreStart()
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+    );
   }
 
   private async executeViaSelfClient(

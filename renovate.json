@@ -5,6 +5,10 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "gitIgnoredAuthors": [
+    "174716857+elastic-renovate-prod[bot]@users.noreply.github.com",
+    "42973632+kibanamachine@users.noreply.github.com"
+  ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**", ".github/workflows/*.lock.yml"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.5", "9.4", "8.19"],
@@ -127,7 +131,6 @@
         "openai",
         "@types/json-schema",
         "table",
-        "@huggingface/hub",
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
@@ -141,7 +144,7 @@
     },
     {
       "groupName": "@elastic/nightshift-context-and-research-team dependencies",
-      "matchDepNames": ["simple-statistics"],
+      "matchDepNames": ["@elastic/statistics"],
       "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:nightshift-context-and-research"],
@@ -609,8 +612,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "mime related",
-      "matchDepNames": ["mime", "mime-types", "@types/mime", "@types/mime-types"],
+      "groupName": "mime-types",
+      "matchDepNames": ["mime-types", "@types/mime-types"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Core"],
@@ -733,8 +736,8 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "launchdarkly-js-client-sdk",
         "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],

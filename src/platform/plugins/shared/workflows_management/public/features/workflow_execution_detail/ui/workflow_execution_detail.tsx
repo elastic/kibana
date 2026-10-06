@@ -325,6 +325,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               shouldAutoResume={shouldAutoResume}
               submitState={resumeSubmitState}
               waitingStepExecutionId={waitingStepExecutionId}
+              resumeExecutionId={resolvedExecutionId}
               hasResumeError={hasResumeError}
               onRetryResume={retryResume}
               childWorkflowExecution={selectedStepChildExecution}

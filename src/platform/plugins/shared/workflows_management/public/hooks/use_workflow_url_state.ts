@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { LayoutDirection } from '@kbn/workflows';
@@ -83,10 +83,10 @@ const withRunEntryState = (state: unknown, runEntry: RunEntryState | undefined):
 };
 
 /**
- * Normalise a `query-string` value (which may be `string | string[] | null`)
+ * Normalise a `query-string` value (which may be `string | (string | null)[] | null`)
  * to `string | undefined`, taking the first element of any array.
  */
-function firstString(value: string | string[] | null | undefined): string | undefined {
+function firstString(value: string | Array<string | null> | null | undefined): string | undefined {
   if (Array.isArray(value)) return value[0] ?? undefined;
   return value ?? undefined;
 }
@@ -106,7 +106,7 @@ export function useWorkflowUrlState() {
     replayExecutionId: string | undefined;
     replayIsTestRun: boolean;
   } => {
-    const params = parse(location.search);
+    const params = queryString.parse(location.search);
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       view:
@@ -130,7 +130,7 @@ export function useWorkflowUrlState() {
 
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>, { replace = true }: WorkflowUrlUpdateOptions = {}) => {
-      const currentParams = parse(history.location.search);
+      const currentParams = queryString.parse(history.location.search);
 
       // Update the params with new values
       const newParams = {
@@ -149,7 +149,7 @@ export function useWorkflowUrlState() {
       // Update the URL without causing a full page reload. Values must be encoded: iteration and
       // case-branch ids embed author-controlled step names and case matches, and a raw `&`, `#`
       // or `+` would split or truncate the param when the URL is parsed back.
-      const newSearch = stringify(cleanParams);
+      const newSearch = queryString.stringify(cleanParams);
       const nextSearch = newSearch ? `?${newSearch}` : '';
       if (nextSearch === history.location.search) {
         return;

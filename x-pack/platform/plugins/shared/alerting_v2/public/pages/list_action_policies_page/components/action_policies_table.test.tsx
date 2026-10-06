@@ -175,7 +175,6 @@ jest.mock('../../../components/action_policy/details_flyout/action_policy_detail
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
-  version: 'WzEsMV0=',
   name: 'Policy One',
   description: 'Policy description',
   enabled: true,
