@@ -10,7 +10,7 @@ import { stableStringify } from '@kbn/std';
 import { Version } from './versions_picker/constants';
 import {
   ThreeWayDiffOutcome,
-  type RequiredFieldInput,
+  type RequiredField,
   type ThreeWayDiff,
   ThreeWayDiffConflict,
 } from '../../../../../../../common/api/detection_engine';
@@ -96,32 +96,28 @@ export const stringifyWithExpandedEmpties = (value: unknown): string => {
 };
 
 /**
- * Normalizes required fields for display: drops `ecs` (derived from `name` and `type` on the backend),
- * deduplicates and sorts by `name` and `type` so order and `ecs` differences don't show up as changes.
+ * Normalizes required fields for display: deduplicates and sorts by `name` and `type`
+ * so order and duplicates don't show up as changes.
  */
-export const normalizeRequiredFieldsForDisplay = (
-  requiredFields: RequiredFieldInput[]
-): RequiredFieldInput[] =>
+export const normalizeRequiredFieldsForDisplay = <T extends Pick<RequiredField, 'name' | 'type'>>(
+  requiredFields: T[]
+): T[] =>
   sortBy(
-    uniqBy(
-      requiredFields.map(({ name, type }) => ({ name, type })),
-      ({ name, type }) => `${name}\u0000${type}`
-    ),
+    uniqBy(requiredFields, ({ name, type }) => `${name}\u0000${type}`),
     ['name', 'type']
   );
 
 /**
  * Stringifies required fields one field per line, which keeps diffs of long lists compact.
  */
-export const stringifyRequiredFields = (
-  requiredFields: RequiredFieldInput[] | undefined
-): string => {
+export const stringifyRequiredFields = (requiredFields: RequiredField[] | undefined): string => {
   if (requiredFields === undefined) {
     return '';
   }
 
   const lines = normalizeRequiredFieldsForDisplay(requiredFields).map(
-    ({ name, type }) => `  { "name": ${JSON.stringify(name)}, "type": ${JSON.stringify(type)} }`
+    ({ name, type, ecs }) =>
+      `  { "name": ${JSON.stringify(name)}, "type": ${JSON.stringify(type)}, "ecs": ${ecs} }`
   );
 
   // Keeps empty arrays multi-line so the line-based diff renders additions as clean insertions

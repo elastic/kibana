@@ -11,7 +11,6 @@ import { stringifyRequiredFields } from '../utils';
 
 /**
  * Returns `required_fields` changes rendered one field per line, sorted and deduplicated by name and type.
- * `ecs` is omitted since it's derived from name and type, so that order and `ecs` differences don't show up.
  */
 export const getSubfieldChangesForRequiredFields = (
   oldFieldValue?: DiffableAllFields['required_fields'],

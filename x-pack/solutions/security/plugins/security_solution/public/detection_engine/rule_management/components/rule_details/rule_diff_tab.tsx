@@ -19,7 +19,6 @@ import type { Filter } from '@kbn/es-query';
 import { normalizeMachineLearningJobIds } from '../../../../../common/detection_engine/utils';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
-import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 import { DiffView } from './json_diff/diff_view';
 import {
   normalizeRequiredFieldsForDisplay,
@@ -204,13 +203,8 @@ export const RuleDiffTab = ({
   );
 };
 
-/*
-  "ecs" is derived from the field's name and type on the backend, so it's not shown.
-  Order and duplicates don't matter either.
-*/
-const normalizeRequiredFields = (
-  ruleProperties: Partial<RuleResponse>
-): Omit<Partial<RuleResponse>, 'required_fields'> & { required_fields?: RequiredFieldInput[] } => {
+/* Order and duplicates of required fields don't matter. */
+const normalizeRequiredFields = (ruleProperties: Partial<RuleResponse>): Partial<RuleResponse> => {
   if (!ruleProperties.required_fields) {
     return ruleProperties;
   }

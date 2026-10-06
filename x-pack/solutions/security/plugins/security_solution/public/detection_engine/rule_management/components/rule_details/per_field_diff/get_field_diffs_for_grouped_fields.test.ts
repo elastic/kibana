@@ -398,23 +398,23 @@ describe('getFieldDiffsForRuleSchedule', () => {
 });
 
 describe('getFieldDiffsForRequiredFields', () => {
-  it('returns no diff when versions differ only in order, duplicates and "ecs"', () => {
+  it('returns no diff when versions differ only in order and duplicates', () => {
     const result = getFieldDiffsForRequiredFields({
       current_version: [
         { name: 'host.name', type: 'keyword', ecs: true },
         { name: 'custom.field', type: 'keyword', ecs: false },
       ],
       target_version: [
-        { name: 'custom.field', type: 'keyword', ecs: true },
-        { name: 'host.name', type: 'keyword', ecs: false },
-        { name: 'host.name', type: 'keyword', ecs: false },
+        { name: 'custom.field', type: 'keyword', ecs: false },
+        { name: 'host.name', type: 'keyword', ecs: true },
+        { name: 'host.name', type: 'keyword', ecs: true },
       ],
     } as ThreeWayDiff<RequiredFieldArray>);
 
     expect(result).toEqual([]);
   });
 
-  it('returns a diff without "ecs" with one sorted field per line', () => {
+  it('returns a diff with "ecs" and one sorted field per line', () => {
     const result = getFieldDiffsForRequiredFields({
       current_version: [{ name: 'host.name', type: 'keyword', ecs: true }],
       target_version: [
@@ -426,11 +426,15 @@ describe('getFieldDiffsForRequiredFields', () => {
     expect(result).toEqual([
       {
         fieldName: 'required_fields',
-        currentVersion: ['[', '  { "name": "host.name", "type": "keyword" }', ']'].join('\n'),
+        currentVersion: [
+          '[',
+          '  { "name": "host.name", "type": "keyword", "ecs": true }',
+          ']',
+        ].join('\n'),
         targetVersion: [
           '[',
-          '  { "name": "host.name", "type": "keyword" },',
-          '  { "name": "user.name", "type": "keyword" }',
+          '  { "name": "host.name", "type": "keyword", "ecs": true },',
+          '  { "name": "user.name", "type": "keyword", "ecs": true }',
           ']',
         ].join('\n'),
       },

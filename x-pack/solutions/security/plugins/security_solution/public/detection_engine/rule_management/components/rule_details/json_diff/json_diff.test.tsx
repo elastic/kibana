@@ -241,7 +241,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
   });
 
   describe('"required_fields"', () => {
-    it('omits "ecs" and ignores order and duplicates', () => {
+    it('ignores order and duplicates and keeps "ecs"', () => {
       const oldRule: RuleResponse = {
         ...savedRuleMock,
         required_fields: [
@@ -252,16 +252,16 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       const newRule: RuleResponse = {
         ...savedRuleMock,
         required_fields: [
-          { name: 'custom.field', type: 'keyword', ecs: true },
-          { name: 'host.name', type: 'keyword', ecs: false },
-          { name: 'host.name', type: 'keyword', ecs: false },
+          { name: 'custom.field', type: 'keyword', ecs: false },
+          { name: 'host.name', type: 'keyword', ecs: true },
+          { name: 'host.name', type: 'keyword', ecs: true },
         ],
       };
 
       const [oldSource, newSource] = getRuleDiffSources(oldRule, newRule);
 
       expect(oldSource).toEqual(newSource);
-      expect(newSource).not.toContain('"ecs"');
+      expect(newSource).toContain('"ecs"');
     });
   });
 

@@ -8,7 +8,7 @@
 import { getSubfieldChangesForRequiredFields } from './required_fields';
 
 describe('getSubfieldChangesForRequiredFields', () => {
-  it('returns no changes when values differ only in order, duplicates and "ecs"', () => {
+  it('returns no changes when values differ only in order and duplicates', () => {
     expect(
       getSubfieldChangesForRequiredFields(
         [
@@ -16,15 +16,15 @@ describe('getSubfieldChangesForRequiredFields', () => {
           { name: 'custom.field', type: 'keyword', ecs: false },
         ],
         [
-          { name: 'custom.field', type: 'keyword', ecs: true },
-          { name: 'host.name', type: 'keyword', ecs: false },
-          { name: 'host.name', type: 'keyword', ecs: false },
+          { name: 'custom.field', type: 'keyword', ecs: false },
+          { name: 'host.name', type: 'keyword', ecs: true },
+          { name: 'host.name', type: 'keyword', ecs: true },
         ]
       )
     ).toEqual([]);
   });
 
-  it('renders one sorted field per line without "ecs"', () => {
+  it('renders one sorted field per line with "ecs"', () => {
     expect(
       getSubfieldChangesForRequiredFields(
         [
@@ -38,11 +38,15 @@ describe('getSubfieldChangesForRequiredFields', () => {
         subfieldName: 'required_fields',
         oldSubfieldValue: [
           '[',
-          '  { "name": "host.name", "type": "keyword" },',
-          '  { "name": "user.name", "type": "keyword" }',
+          '  { "name": "host.name", "type": "keyword", "ecs": true },',
+          '  { "name": "user.name", "type": "keyword", "ecs": true }',
           ']',
         ].join('\n'),
-        newSubfieldValue: ['[', '  { "name": "host.name", "type": "keyword" }', ']'].join('\n'),
+        newSubfieldValue: [
+          '[',
+          '  { "name": "host.name", "type": "keyword", "ecs": true }',
+          ']',
+        ].join('\n'),
       },
     ]);
   });
