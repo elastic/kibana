@@ -32,5 +32,12 @@ const BADGES: AppHeaderBadge[] = [
 ];
 
 export const AssetInventoryTitle = () => (
-  <SecurityAppHeader title={PAGE_TITLE} badges={BADGES} spacing="largeBleed" docLink={DOCS_URL} />
+  <SecurityAppHeader
+    title={PAGE_TITLE}
+    badges={BADGES}
+    spacing="largeBleed"
+    docLink={DOCS_URL}
+    // we still want to show the menu for the feedback and doc links when there are no other items in the menu (i.e. when integrations are not installed)
+    menu={{ items: [] }}
+  />
 );
