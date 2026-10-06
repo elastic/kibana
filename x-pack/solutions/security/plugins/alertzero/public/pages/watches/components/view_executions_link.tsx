@@ -22,8 +22,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
-import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
-import { useShowManagedWorkflowsSetting } from '@kbn/workflows-ui';
+import { useShowManagedWorkflowsSetting, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import * as settingsI18n from '../settings_translations';
 
 interface ViewExecutionsLinkProps {
@@ -47,6 +46,7 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
     services: { application },
   } = useKibana<CoreStart>();
   const showManagedWorkflows = useShowManagedWorkflowsSetting();
+  const workflowsCapabilities = useWorkflowsCapabilities();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
 
@@ -61,21 +61,19 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
     'data-test-subj': testSubj,
   } as const;
 
-  if (
-    showManagedWorkflows &&
-    application.capabilities.workflowsManagement?.[
-      WorkflowsManagementUiActions.readManagedExecution
-    ] !== true
-  ) {
-    return (
-      <EuiToolTip content={settingsI18n.MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP}>
-        <span aria-disabled={true} tabIndex={0}>
-          <EuiButtonEmpty {...linkProps} isDisabled>
-            {settingsI18n.VIEW_EXECUTIONS}
-          </EuiButtonEmpty>
-        </span>
-      </EuiToolTip>
-    );
+  // EuiToolTip needs a focusable anchor; a disabled button cannot receive focus.
+  const renderDisabled = (reason: string) => (
+    <EuiToolTip content={reason}>
+      <span aria-disabled={true} tabIndex={0}>
+        <EuiButtonEmpty {...linkProps} isDisabled>
+          {settingsI18n.VIEW_EXECUTIONS}
+        </EuiButtonEmpty>
+      </span>
+    </EuiToolTip>
+  );
+
+  if (showManagedWorkflows && !workflowsCapabilities.canReadManagedWorkflowExecution) {
+    return renderDisabled(settingsI18n.MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP);
   }
 
   if (showManagedWorkflows) {
@@ -92,16 +90,7 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
   }
 
   if (application.capabilities.advancedSettings?.save !== true) {
-    return (
-      <EuiToolTip content={settingsI18n.MANAGED_WORKFLOWS_REQUIRED_TOOLTIP}>
-        {/* EuiToolTip needs a focusable anchor; a disabled button cannot receive focus. */}
-        <span aria-disabled={true} tabIndex={0}>
-          <EuiButtonEmpty {...linkProps} isDisabled>
-            {settingsI18n.VIEW_EXECUTIONS}
-          </EuiButtonEmpty>
-        </span>
-      </EuiToolTip>
-    );
+    return renderDisabled(settingsI18n.MANAGED_WORKFLOWS_REQUIRED_TOOLTIP);
   }
 
   const advancedSettingsHref = application.getUrlForApp('management', {
