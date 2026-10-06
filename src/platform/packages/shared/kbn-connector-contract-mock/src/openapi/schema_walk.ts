@@ -15,6 +15,14 @@ export type SchemaNode = Record<string, unknown>;
 export const isRecord = (value: unknown): value is SchemaNode =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+const BUNDLE_REF = /^#\/__bundled__\/(.+)$/;
+
+/** Returns the bundle component name a `$ref` points at, or undefined for other refs. */
+export const getBundleRefName = (ref: unknown): string | undefined => {
+  const match = typeof ref === 'string' ? BUNDLE_REF.exec(ref) : null;
+  return match ? decodeURIComponent(match[1]).replace(/~1/g, '/').replace(/~0/g, '~') : undefined;
+};
+
 const SUBSCHEMA_KEYWORDS = [
   'additionalItems',
   'additionalProperties',

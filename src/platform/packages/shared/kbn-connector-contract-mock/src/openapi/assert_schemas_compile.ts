@@ -10,7 +10,7 @@
 import Ajv from 'ajv';
 import Ajv2019 from 'ajv/dist/2019';
 import Ajv2020 from 'ajv/dist/2020';
-import { describeOperation, getOperationSchemas, isRecord } from './schema_walk';
+import { describeOperation, getBundleRefName, getOperationSchemas, isRecord } from './schema_walk';
 import type { ContractOperation, SchemaBundle } from './types';
 
 export interface SchemaCompileFailure {
@@ -50,12 +50,9 @@ const AJV_OPTIONS = {
 
 const DRAFT_2019_09 = /^https?:\/\/json-schema.org\/draft\/2019-09\/schema#?$/;
 const DRAFT_2020_12 = /^https?:\/\/json-schema.org\/draft\/2020-12\/schema#?$/;
-const BUNDLE_REF = /^#\/__bundled__\/(.+)$/;
 const REGISTRY_BASE = 'https://contract-mock.invalid/bundle/';
 
-const toRegistryId = (pointerToken: string): string =>
-  REGISTRY_BASE +
-  encodeURIComponent(decodeURIComponent(pointerToken).replace(/~1/g, '/').replace(/~0/g, '~'));
+const toRegistryId = (name: string): string => REGISTRY_BASE + encodeURIComponent(name);
 
 // Copies a schema with bundle refs pointing at registered schemas, so Ajv compiles each
 // component once instead of once per operation schema that reaches it.
@@ -76,8 +73,8 @@ const withRegistryRefs = (node: unknown, copies: Map<object, unknown>): unknown 
   const copy: Record<string, unknown> = {};
   copies.set(node, copy);
   for (const [key, value] of Object.entries(node)) {
-    const match = key === '$ref' && typeof value === 'string' ? BUNDLE_REF.exec(value) : null;
-    copy[key] = match ? toRegistryId(match[1]) : withRegistryRefs(value, copies);
+    const name = key === '$ref' ? getBundleRefName(value) : undefined;
+    copy[key] = name === undefined ? withRegistryRefs(value, copies) : toRegistryId(name);
   }
   return copy;
 };
@@ -94,7 +91,7 @@ const createValidator = (
       // Prism nests components under the operation schema, where neither `$schema` applies
       // nor meta-schema validation runs, so mirror both here.
       const { $schema, ...rest } = copy;
-      ajv.addSchema(rest, REGISTRY_BASE + encodeURIComponent(name), undefined, false);
+      ajv.addSchema(rest, toRegistryId(name), undefined, false);
     }
   }
   return ajv;
