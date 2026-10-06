@@ -170,22 +170,27 @@ export const persistUserMessage = async ({
     const hasResolvedParentUser =
       Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
     try {
-      await conversationClient.create({
-        id: conversation.id,
-        title: DEFAULT_CONVERSATION_TITLE,
-        agent_id: conversation.agent_id,
-        access_control: conversation.access_control,
-        origin: conversation.origin,
-        read_only: conversation.read_only,
-        rounds: [],
-        events,
-        // Nothing is stored yet, so the produced list needs no reconciliation.
-        ...(attachments ? { attachments: attachments.produced } : {}),
-        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-        ...(conversation.parent_conversation
-          ? { parent_conversation: conversation.parent_conversation }
-          : {}),
-      });
+      await conversationClient.create(
+        {
+          id: conversation.id,
+          title: DEFAULT_CONVERSATION_TITLE,
+          agent_id: conversation.agent_id,
+          access_control: conversation.access_control,
+          origin: conversation.origin,
+          read_only: conversation.read_only,
+          rounds: [],
+          events,
+          // Nothing is stored yet, so the produced list needs no reconciliation.
+          ...(attachments ? { attachments: attachments.produced } : {}),
+          ...(isPersistentSubagentCreate && hasResolvedParentUser
+            ? { user: conversation.user }
+            : {}),
+          ...(conversation.parent_conversation
+            ? { parent_conversation: conversation.parent_conversation }
+            : {}),
+        },
+        { source: 'execution' }
+      );
       return event.id;
     } catch (error) {
       if (!isConversationAlreadyExistsError(error)) {
@@ -196,7 +201,7 @@ export const persistUserMessage = async ({
 
   await conversationClient.appendEvents(
     { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
-    { access: 'converse' }
+    { access: 'converse', source: 'execution' }
   );
 
   return event.id;
@@ -250,7 +255,7 @@ export const appendRoundTerminated$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, events, round };
@@ -376,7 +381,7 @@ export const appendResumeExecution$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, executionEvents, round, resumeIndex };
@@ -570,7 +575,7 @@ export const persistExecutionInterruption = async (
           ...workspaceUpdate,
           ...stateUpdate,
         },
-        { access: 'converse' }
+        { access: 'converse', source: 'execution' }
       );
       return writtenTerminals(persisted, executionEvents);
     }
@@ -615,7 +620,7 @@ export const persistExecutionInterruption = async (
         ...workspaceUpdate,
         ...stateUpdate,
       },
-      { access: 'converse' }
+      { access: 'converse', source: 'execution' }
     );
     return writtenTerminals(persisted, executionEvents);
   } catch (writeError) {
