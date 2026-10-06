@@ -12,17 +12,5 @@ export interface DocumentSelection {
   _index: string;
 }
 
-/**
- * A document trigger selection sent as compact `(id, index)` pairs. The server expands each pair
- * into the same `{ _id, _index, 'dotted.field': [value] }` shape a caller would otherwise embed
- * itself, so a request stays small regardless of how many documents are selected.
- */
-export interface DocumentTriggerInput {
-  event: {
-    triggerType: 'document';
-    documentIds: DocumentSelection[];
-  };
-}
-
 /** An expanded document as it appears in `event.documents` once preprocessing has run. */
 export type ExpandedDocument = DocumentSelection & Record<string, unknown>;
