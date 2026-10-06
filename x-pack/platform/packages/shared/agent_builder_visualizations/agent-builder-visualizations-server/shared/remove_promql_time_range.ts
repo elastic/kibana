@@ -20,6 +20,11 @@ const isTimeRangeParamEntry = ({ key, value }: ESQLMapEntry): boolean => {
   );
 };
 
+// cheap check to avoid parsing queries that can't contain both options
+const mayHaveTimeRangeParams = (query: string): boolean =>
+  /\bpromql\b/i.test(query) &&
+  Object.values(TIME_RANGE_PARAMS).every((param) => query.includes(`?${param}`));
+
 /**
  * Remove `start=?_tstart end=?_tend` from a `PROMQL` source command, since the
  * visualization framework applies the time range to `PROMQL` queries by itself.
@@ -29,6 +34,10 @@ const isTimeRangeParamEntry = ({ key, value }: ESQLMapEntry): boolean => {
  * (e.g. absolute dates), are returned unchanged.
  */
 export const removePromqlTimeRangeParams = (query: string): string => {
+  if (!mayHaveTimeRangeParams(query)) {
+    return query;
+  }
+
   const { root, errors } = Parser.parse(query);
   const [sourceCommand] = root.commands;
   if (errors.length > 0 || sourceCommand?.name !== 'promql') {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Parser } from '@elastic/esql';
 import { removePromqlTimeRangeParams } from './remove_promql_time_range';
 
 describe('removePromqlTimeRangeParams', () => {
@@ -48,6 +49,15 @@ describe('removePromqlTimeRangeParams', () => {
   it('leaves other source commands unchanged', () => {
     const query = 'TS metrics-tsds | WHERE TRANGE(?_tstart, ?_tend) | STATS SUM(RATE(requests))';
     expect(removePromqlTimeRangeParams(query)).toBe(query);
+  });
+
+  it('does not parse queries that cannot contain both options', () => {
+    const parseSpy = jest.spyOn(Parser, 'parse');
+    removePromqlTimeRangeParams('FROM logs-* | STATS COUNT(*) BY BUCKET(@timestamp, 1h)');
+    removePromqlTimeRangeParams('TS metrics-tsds | WHERE TRANGE(?_tstart, ?_tend)');
+    removePromqlTimeRangeParams('PROMQL index=metrics-tsds start=?_tstart v=(sum(rate(requests)))');
+    expect(parseSpy).not.toHaveBeenCalled();
+    parseSpy.mockRestore();
   });
 
   it('leaves queries that fail to parse unchanged', () => {
