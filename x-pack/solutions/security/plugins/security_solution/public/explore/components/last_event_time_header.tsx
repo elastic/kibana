@@ -31,6 +31,8 @@ export const LastEventTimeHeader = React.memo<LastEventTimeHeaderProps>(
         description={lastEventTimeText}
         spacing="largeBleed"
         docLink={docLink}
+        // Empty items still count as a menu, so the legacy data view picker is not remounted.
+        menu={{ items: [] }}
       />
     );
   }

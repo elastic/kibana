@@ -20,7 +20,11 @@ import { TabNavigation } from '../../../common/components/navigation/tab_navigat
 import { SearchWithDataView } from '../../components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { LastEventTimeHeader } from '../../components/last_event_time_header';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import { Display } from '../../hosts/pages/display';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
@@ -81,6 +85,7 @@ const UsersComponent = () => {
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
+  const hasFullScreenContent = useHasFullScreenContent();
   const { uiSettings, docLinks } = useKibana().services;
 
   const { tabName } = useParams<{ tabName: string }>();
@@ -169,24 +174,28 @@ const UsersComponent = () => {
           <EuiWindowEvent event="resize" handler={noop} />
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <LastEventTimeHeader
-              title={i18n.PAGE_TITLE}
-              docLink={docLinks.links.securitySolution.entityAnalytics.explore.usersPage}
-              indexKey={LastEventIndexKey.users}
-              indexNames={selectedPatterns}
-            />
+            {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+            {!hasFullScreenContent && (
+              <LastEventTimeHeader
+                title={i18n.PAGE_TITLE}
+                docLink={docLinks.links.securitySolution.entityAnalytics.explore.usersPage}
+                indexKey={LastEventIndexKey.users}
+                indexNames={selectedPatterns}
+              />
+            )}
+            <Display show={!hasFullScreenContent}>
+              <SearchWithDataView dataView={dataView} />
 
-            <SearchWithDataView dataView={dataView} />
+              <EuiSpacer size="l" />
 
-            <EuiSpacer size="l" />
+              <UsersKpiComponent from={from} to={to} />
 
-            <UsersKpiComponent from={from} to={to} />
+              <EuiSpacer />
 
-            <EuiSpacer />
+              <TabNavigation navTabs={navTabs} />
 
-            <TabNavigation navTabs={navTabs} />
-
-            <EuiSpacer />
+              <EuiSpacer />
+            </Display>
 
             <UsersTabs
               deleteQuery={deleteQuery}

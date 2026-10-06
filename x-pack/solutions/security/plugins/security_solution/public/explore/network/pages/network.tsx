@@ -20,7 +20,10 @@ import { TabNavigation } from '../../../common/components/navigation/tab_navigat
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SearchWithDataView } from '../../components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
@@ -69,6 +72,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const { to, from, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useGlobalFullScreen();
+    const hasFullScreenContent = useHasFullScreenContent();
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
 
@@ -145,14 +149,16 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             <EuiWindowEvent event="resize" handler={noop} />
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-              <Display show={!globalFullScreen}>
+              {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+              {!hasFullScreenContent && (
                 <LastEventTimeHeader
                   title={i18n.PAGE_TITLE}
                   docLink={docLinks.links.securitySolution.entityAnalytics.explore.networkPage}
                   indexKey={LastEventIndexKey.network}
                   indexNames={selectedPatterns}
                 />
-
+              )}
+              <Display show={!hasFullScreenContent}>
                 <SearchWithDataView dataView={dataView} />
 
                 <EuiSpacer size="l" />
@@ -181,7 +187,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
               {capabilitiesFetched && !isInitializing ? (
                 <>
-                  <Display show={!globalFullScreen}>
+                  <Display show={!hasFullScreenContent}>
                     <EuiSpacer />
                     <TabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
                     <EuiSpacer />
