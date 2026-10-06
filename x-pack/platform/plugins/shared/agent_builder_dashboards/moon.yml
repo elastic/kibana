@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
-  - '@kbn/config-schema'
   - '@kbn/i18n'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'

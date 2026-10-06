@@ -55,7 +55,6 @@ describe('createPanelResolver', () => {
 
   it('routes a request without renderer to the vis resolver', async () => {
     const result = await resolve({
-      operationType: 'add_panels',
       identifier: 'show total requests',
       nlQuery: 'show total requests',
     });
@@ -71,7 +70,6 @@ describe('createPanelResolver', () => {
   it('routes a custom_content request to the template resolver', async () => {
     const result = await resolve({
       renderer: 'custom_content',
-      operationType: 'edit_panels',
       identifier: 'cc-1',
       nlQuery: 'change the title',
       existingPanel: { id: 'cc-1', type: CUSTOM_CONTENT_EMBEDDABLE_TYPE, config: {}, grid },

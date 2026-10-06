@@ -6,11 +6,8 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import type { AgentBuilderDashboardsConfig } from './config';
 
-export { config } from './config';
-
-export const plugin = async (context: PluginInitializerContext<AgentBuilderDashboardsConfig>) => {
+export const plugin = async (context: PluginInitializerContext) => {
   const { AgentBuilderDashboardsPlugin } = await import('./plugin');
   return new AgentBuilderDashboardsPlugin(context);
 };

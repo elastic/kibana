@@ -6,4 +6,3 @@
  */
 
 export { dashboardGeneration } from './generation_guidance';
-export { dashboardUpsertGeneration } from './upsert_generation_guidance';

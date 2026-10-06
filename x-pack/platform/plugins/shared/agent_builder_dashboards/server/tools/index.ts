@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { generateDashboardTool, generateDashboardUpsertTool } from './generate';
+export { generateDashboardTool } from './generate';
 export type { GenerateDashboardToolDeps } from './generate';

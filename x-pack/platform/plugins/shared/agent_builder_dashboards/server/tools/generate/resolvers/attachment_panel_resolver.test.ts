@@ -39,7 +39,7 @@ describe('createAttachmentPanelResolver', () => {
       ),
     });
 
-    expect(resolve('att-1', 'add_panels')).toEqual({
+    expect(resolve('att-1')).toEqual({
       type: 'success',
       panelContent: { type: LENS_EMBEDDABLE_TYPE, config: { type: 'lnsXY' } },
     });
@@ -57,7 +57,7 @@ describe('createAttachmentPanelResolver', () => {
       ),
     });
 
-    expect(resolve('att-1', 'add_panels')).toMatchObject({
+    expect(resolve('att-1')).toMatchObject({
       panelContent: { type: LENS_EMBEDDABLE_TYPE },
     });
   });
@@ -74,7 +74,7 @@ describe('createAttachmentPanelResolver', () => {
       ),
     });
 
-    expect(resolve('att-1', 'add_panels')).toEqual({
+    expect(resolve('att-1')).toEqual({
       type: 'success',
       panelContent: {
         type: VEGA_VIS_TYPE,
@@ -95,7 +95,7 @@ describe('createAttachmentPanelResolver', () => {
       ),
     });
 
-    expect(resolve('att-1', 'add_panels')).toEqual({
+    expect(resolve('att-1')).toEqual({
       type: 'success',
       panelContent: {
         type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
@@ -118,7 +118,7 @@ describe('createAttachmentPanelResolver', () => {
       ),
     });
 
-    expect(resolve('att-1', 'add_panels')).toEqual({
+    expect(resolve('att-1')).toEqual({
       type: 'success',
       panelContent: {
         type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
@@ -132,16 +132,16 @@ describe('createAttachmentPanelResolver', () => {
   it('attributes the failure to the operation that asked for the panel', () => {
     const resolve = createAttachmentPanelResolver({ attachments: makeAttachments(undefined) });
 
-    expect(resolve('missing', 'add_section')).toMatchObject({
+    expect(resolve('missing')).toMatchObject({
       type: 'failure',
-      failure: { type: 'add_section' },
+      failure: { type: 'upsert_dashboard' },
     });
   });
 
   it('fails when the attachment does not exist', () => {
     const resolve = createAttachmentPanelResolver({ attachments: makeAttachments(undefined) });
 
-    expect(resolve('missing', 'add_panels')).toMatchObject({
+    expect(resolve('missing')).toMatchObject({
       type: 'failure',
       failure: { identifier: 'missing', error: expect.stringContaining('not found') },
     });
@@ -157,7 +157,7 @@ describe('createAttachmentPanelResolver', () => {
       }),
     });
 
-    expect(resolve('att-1', 'add_panels')).toMatchObject({
+    expect(resolve('att-1')).toMatchObject({
       type: 'failure',
       failure: { error: expect.stringContaining('only visualization attachments') },
     });
@@ -173,7 +173,7 @@ describe('createAttachmentPanelResolver', () => {
       }),
     });
 
-    expect(resolve('att-1', 'add_panels')).toMatchObject({
+    expect(resolve('att-1')).toMatchObject({
       type: 'failure',
       failure: { error: expect.stringContaining('no readable visualization data') },
     });

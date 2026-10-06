@@ -7,27 +7,12 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { DASHBOARDS_SKILL_ID } from '../../common';
-import {
-  generateDashboardTool,
-  generateDashboardUpsertTool,
-  type GenerateDashboardToolDeps,
-} from '../tools';
-import { dashboardGeneration, dashboardUpsertGeneration } from './generation_guidance';
-import { kibanaRendering, kibanaUpsertRendering } from './rendering_guidance';
+import { generateDashboardTool, type GenerateDashboardToolDeps } from '../tools';
+import { dashboardGeneration } from './generation_guidance';
+import { kibanaRendering } from './rendering_guidance';
 
-export interface DashboardsSkillOptions {
-  /** Uses the upsert shape of the generate dashboard tool and its guidance. */
-  upsertDashboardEnabled?: boolean;
-}
-
-export const createDashboardsSkill = (
-  deps: GenerateDashboardToolDeps,
-  { upsertDashboardEnabled = false }: DashboardsSkillOptions = {}
-) => {
-  const generation = upsertDashboardEnabled ? dashboardUpsertGeneration : dashboardGeneration;
-  const rendering = upsertDashboardEnabled ? kibanaUpsertRendering : kibanaRendering;
-
-  return defineSkillType({
+export const createDashboardsSkill = (deps: GenerateDashboardToolDeps) =>
+  defineSkillType({
     id: DASHBOARDS_SKILL_ID,
     name: DASHBOARDS_SKILL_ID,
     basePath: 'skills/platform/dashboard',
@@ -45,16 +30,13 @@ Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
 
-${generation.guidance}
+${dashboardGeneration.guidance}
 
-${rendering.guidance}
+${kibanaRendering.guidance}
 `,
     referencedContent: [
-      ...(generation.referencedContent ?? []),
-      ...(rendering.referencedContent ?? []),
+      ...(dashboardGeneration.referencedContent ?? []),
+      ...(kibanaRendering.referencedContent ?? []),
     ],
-    getInlineTools: () => [
-      upsertDashboardEnabled ? generateDashboardUpsertTool(deps) : generateDashboardTool(deps),
-    ],
+    getInlineTools: () => [generateDashboardTool(deps)],
   });
-};

@@ -7,4 +7,3 @@
 
 export { generateDashboardTool } from './generate_dashboard_tool';
 export type { GenerateDashboardToolDeps } from './generate_dashboard_tool';
-export { generateDashboardUpsertTool } from './upsert_dashboard_tool';

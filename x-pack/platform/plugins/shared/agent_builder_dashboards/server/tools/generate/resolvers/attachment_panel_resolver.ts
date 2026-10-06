@@ -17,7 +17,6 @@ import {
 import { toEsqlQueryState } from '@kbn/custom-content-common';
 import {
   createPanelFailureResult,
-  type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
   getRendererEmbeddableType,
@@ -59,8 +58,8 @@ export const createAttachmentPanelResolver = ({
 }: {
   attachments: AttachmentStateManager;
 }) => {
-  return (attachmentId: string, operationType: InlinePanelOperationType): PanelContentAttempt => {
-    const fail = (error: string) => createPanelFailureResult(operationType, attachmentId, error);
+  return (attachmentId: string): PanelContentAttempt => {
+    const fail = (error: string) => createPanelFailureResult(attachmentId, error);
 
     const record = attachments.getAttachmentRecord(attachmentId);
     if (!record) {

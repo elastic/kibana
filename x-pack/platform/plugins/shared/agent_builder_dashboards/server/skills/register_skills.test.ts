@@ -30,9 +30,10 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
-  it('inlines the dashboard design guidance directly in the skill body', () => {
+  it('inlines the dashboard composition guidance and leaves the grid to the layout step', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
-    expect(skill.content).toContain('Grid Packing Rules');
+    expect(skill.content).toContain('Panel positions and sizes are arranged automatically');
+    expect(skill.content).not.toContain('Grid Packing Rules');
     expect(skill.content).toContain('show avg/min/max in the legend');
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
@@ -40,7 +41,7 @@ describe('registerSkills', () => {
   it('delegates enhance presentation defaults to the chart author', () => {
     expect(skill.content).toContain('Improving an Existing Dashboard (Enhance)');
     expect(skill.content).toContain('applyChartRules: true');
-    expect(skill.content).toContain('for every existing ES|QL Lens panel');
+    expect(skill.content).toContain('Edit every existing ES|QL Lens panel');
     expect(skill.content).toContain('preserveESQL: true');
     expect(skill.content).toContain(
       'a query change and presentation enhancement can share one edit'
@@ -64,7 +65,7 @@ describe('registerSkills', () => {
   });
 
   it('separates appearance-only and content enhance modes', () => {
-    expect(skill.content).toContain('**Appearance mode.** Keep every chart panel ID');
+    expect(skill.content).toContain('**Appearance mode.** Keep every chart panel id');
     expect(skill.content).toContain('Markdown panels may be rewritten or removed.');
     expect(skill.content).toContain(
       'Do not add, remove, or recreate other panels, add controls, or change queries'
@@ -73,9 +74,9 @@ describe('registerSkills', () => {
       "Skip this step when the user's message already asks for appearance only"
     );
     expect(skill.content).toContain('**Content mode.** Do everything appearance mode does');
-    expect(skill.content).toContain('`remove_panels`');
+    expect(skill.content).toContain('Remove panels that meet the removal criteria with `remove`');
     expect(skill.content).toContain(
-      'replace non-ES|QL panels with new ES|QL Lens panels without asking again'
+      'replace non-ES|QL panels with new ES|QL Lens content under the same id without asking again'
     );
     expect(skill.content).toContain('Keep the existing time range');
     expect(skill.content).toContain('In content mode, confirm the resulting panel set');
