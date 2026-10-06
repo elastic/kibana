@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useState } from 'react';
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { useKibana } from './use_kibana';
 
 export interface PatternTestAnonymization {
@@ -28,7 +28,7 @@ export interface PatternTestResult {
 }
 
 /**
- * Calls the ephemeral, non-persisting `/internal/inference/anonymization/_test` endpoint used
+ * Calls the ephemeral, non-persisting `/internal/ai_anonymization_settings/pattern_tester` endpoint used
  * by the Pattern tester tab and the Add/Edit pattern flyout's inline preview.
  */
 export function usePatternTester() {
@@ -46,7 +46,7 @@ export function usePatternTester() {
       setError(undefined);
       try {
         const response = await http.post<PatternTestResult>(
-          '/internal/inference/anonymization/_test',
+          '/internal/ai_anonymization_settings/pattern_tester',
           { body: JSON.stringify({ input, rules }) }
         );
         setResult(response);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { aiAnonymizationSettings, DEFAULT_BUILTIN_REGEX_RULES } from '@kbn/inference-common';
+import { aiAnonymizationSettings, DEFAULT_BUILTIN_REGEX_RULES } from '@kbn/ai-anonymization-common';
 import { useAnonymizationSettings } from './use_anonymization_settings';
 import { useKibana } from './use_kibana';
 

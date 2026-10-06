@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnonymizationFailureMode } from '@kbn/inference-common';
+import type { AnonymizationFailureMode } from '@kbn/ai-anonymization-common';
 
 interface SettingsTabProps {
   maskingEnabled: boolean;

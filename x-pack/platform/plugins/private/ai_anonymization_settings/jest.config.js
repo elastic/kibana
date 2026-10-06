@@ -13,6 +13,6 @@ module.exports = {
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/ai_anonymization_settings',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/private/ai_anonymization_settings/{common,public}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/private/ai_anonymization_settings/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

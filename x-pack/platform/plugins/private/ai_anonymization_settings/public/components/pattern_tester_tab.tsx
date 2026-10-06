@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { PatternTesterPanel } from './pattern_tester_panel';
 
 interface PatternTesterTabProps {

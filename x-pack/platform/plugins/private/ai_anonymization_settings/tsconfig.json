@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "test/scout/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/management-plugin",
@@ -11,7 +11,9 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
-    "@kbn/inference-common",
+    "@kbn/ai-anonymization-common",
+    "@kbn/ai-anonymization-server",
+    "@kbn/config-schema",
     "@kbn/react-kibana-context-render",
     "@kbn/app-header",
     "@kbn/code-editor",
