@@ -137,15 +137,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     todoStateManager,
     renderers,
     conversationClient,
+    storeConversation,
   } = context;
 
   // The context is built from the normalized event timeline (legacy conversations serialized
   // through roundsToEvents) so preflight and message building read one source.
   const timeline = conversation ? eventsForContext(conversation) : [];
 
-  ensureValidInput({ input: nextInput, timeline });
+  // A run that stores nothing cannot close a paused round, so it runs a fresh round on top of it.
+  ensureValidInput({ input: nextInput, timeline, allowResume: storeConversation });
 
-  const pendingTurn = conversation ? getPendingTurn(conversation) : undefined;
+  const pendingTurn = conversation && storeConversation ? getPendingTurn(conversation) : undefined;
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingTurn?.compatRound.started_at ?? startTime.toISOString();
@@ -157,13 +159,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const roundId = providedRoundId ?? uuidv4();
 
-  // Create background execution service from conversation state
+  // Sub-agents of the stored conversation are not this run's: it can't deliver to or address them.
   const backgroundExecutionService = new BackgroundExecutionService({
     subAgentExecutor: context.subAgentExecutor,
-    initialState: conversation?.state?.background_executions,
+    initialState: storeConversation ? conversation?.state?.background_executions : undefined,
   });
 
-  const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
+  const subagentTracker = new SubagentTracker(
+    storeConversation ? conversation?.state?.subagents : undefined
+  );
 
   const model = await modelProvider.getDefaultModel();
   const resolvedConfiguration = await resolveConfiguration(agentConfiguration, {
@@ -293,7 +297,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const conversationId = conversation?.id;
   const updateConversationMetadata =
-    conversationId && conversation?.template_id
+    storeConversation && conversationId && conversation?.template_id
       ? (updates: Record<string, MetadataFieldValue>) =>
           conversationClient.patchMetadata(conversationId, updates, { source: 'execution' })
       : undefined;
