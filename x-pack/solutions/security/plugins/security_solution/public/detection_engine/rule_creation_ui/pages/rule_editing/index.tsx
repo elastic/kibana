@@ -221,7 +221,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
-  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
+  const { indexPattern, isIndexPatternLoading, isIndexPatternSettled } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
@@ -715,7 +715,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                             onClick={onSubmit}
                             iconType="save"
                             isLoading={isLoading}
-                            isDisabled={loading}
+                            isDisabled={loading || !isIndexPatternSettled}
                           >
                             {i18n.SAVE_CHANGES}
                           </EuiButton>
