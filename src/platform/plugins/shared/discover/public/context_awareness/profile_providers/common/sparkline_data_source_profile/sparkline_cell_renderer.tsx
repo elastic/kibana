@@ -33,13 +33,18 @@ export const SparklineCellRenderer: FC<
   DataGridCellValueElementProps & {
     services: ProfileProviderServices;
     density: DataGridDensity | undefined;
+    isDetails: boolean;
   }
-> = ({ services, row, columnId, density, setCellProps }) => {
+> = ({ services, row, columnId, density, setCellProps, isDetails }) => {
   const { euiTheme } = useEuiTheme();
   const cellPadding = getDataGridDensityPadding(euiTheme, density ?? DataGridDensity.COMPACT);
   const fallbackHeight = useMemo(
     () => mathWithUnits(euiTheme.size.l, (l) => l * 2),
     [euiTheme.size.l]
+  );
+  const detailsHeight = useMemo(
+    () => mathWithUnits([euiTheme.size.xxxxl, euiTheme.size.s], (xxxxl, s) => xxxxl - s),
+    [euiTheme.size.xxxxl, euiTheme.size.s]
   );
 
   useEffect(() => {
@@ -55,7 +60,13 @@ export const SparklineCellRenderer: FC<
   return (
     <>
       <div css={{ minHeight: fallbackHeight }} />
-      <div css={{ position: 'absolute', inset: cellPadding }}>
+      <div
+        css={{
+          position: 'absolute',
+          inset: cellPadding,
+          ...(isDetails && { height: detailsHeight, bottom: 'auto' }),
+        }}
+      >
         <SparklineRenderer charts={services.charts} values={row.flattened[columnId]} />
       </div>
     </>
