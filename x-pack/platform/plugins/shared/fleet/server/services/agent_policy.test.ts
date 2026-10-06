@@ -57,6 +57,7 @@ import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_speci
 import { agentlessAgentService } from './agents/agentless_agent';
 import { unenrollForAgentPolicyId } from './agents';
 import { getPackageInfo } from './epm/packages';
+import { getPackageInfoCache, setPackageInfoCache } from './epm/packages/cache';
 import { ensureInstalledPackage } from './epm/packages/install';
 
 jest.mock('./spaces/helpers');
@@ -1225,13 +1226,23 @@ describe('Agent policy', () => {
       const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
+      // The suite mocks getPackageInfo, so reuse has to go through the real request cache.
+      // collectAgentVersionConditions still calls it once per policy.
+      let lookups = 0;
       jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
-        return {
+        const cached = getPackageInfoCache(pkgName, pkgVersion);
+        if (cached) {
+          return cached;
+        }
+        lookups += 1;
+        const packageInfo = {
           name: pkgName,
           version: pkgVersion,
           title: 'Apache',
           conditions: { agent: { version: '>=8.12.0' } },
         } as any;
+        setPackageInfoCache(pkgName, pkgVersion, packageInfo);
+        return packageInfo;
       });
 
       mockPackagePolicySOs(soClient, [
@@ -1248,6 +1259,8 @@ describe('Agent policy', () => {
       try {
         await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
 
+        expect(lookups).toBe(1);
+        expect(getPackageInfo).toHaveBeenCalledTimes(2);
         expect(getPackageInfo).toHaveBeenCalledWith(
           expect.objectContaining({
             pkgName: 'apache',
