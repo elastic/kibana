@@ -31,11 +31,37 @@ export const ATTRIBUTE_GEN_AI_TOOL_NAME = 'attributes.gen_ai.tool.name';
 export const ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS = 'attributes.gen_ai.tool.call.arguments';
 export const ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT = 'attributes.gen_ai.tool.call.result';
 
+/** Standard role values for GenAI messages (OTel semantic conventions). */
+export const GEN_AI_MESSAGE_ROLES = {
+  USER: 'user',
+  ASSISTANT: 'assistant',
+  SYSTEM: 'system',
+  TOOL: 'tool',
+} as const;
+
 // OpenRouter OTel fields — non-standard field names used by the OpenRouter
 // OTel collector (https://openrouter.ai/docs/guides/features/broadcast/otel-collector.md).
 // These differ from the EDOT/OTel semconv `attributes.gen_ai.*` shape.
 export const ATTRIBUTE_GEN_AI_PROMPT = 'attributes.gen_ai.prompt';
 export const ATTRIBUTE_GEN_AI_COMPLETION = 'attributes.gen_ai.completion';
+
+/**
+ * All fields that carry input messages, in priority order (first match wins).
+ * OTel standard takes precedence; non-standard provider fields follow as fallbacks.
+ */
+export const GEN_AI_INPUT_MESSAGE_FIELDS = [
+  ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
+  ATTRIBUTE_GEN_AI_PROMPT,
+] as const;
+
+/**
+ * All fields that carry output messages, in priority order (first match wins).
+ * OTel standard takes precedence; non-standard provider fields follow as fallbacks.
+ */
+export const GEN_AI_OUTPUT_MESSAGE_FIELDS = [
+  ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  ATTRIBUTE_GEN_AI_COMPLETION,
+] as const;
 
 /**
  * GenAI fields whose values regularly exceed the `ignore_above: 1024` limit of
@@ -46,12 +72,10 @@ export const ATTRIBUTE_GEN_AI_COMPLETION = 'attributes.gen_ai.completion';
  * (APM plugin `mergeLongFieldsFromSource`).
  */
 export const GEN_AI_LONG_MESSAGE_FIELDS = [
-  ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  ...GEN_AI_INPUT_MESSAGE_FIELDS,
+  ...GEN_AI_OUTPUT_MESSAGE_FIELDS,
   ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
   ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS,
   ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS,
   ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT,
-  ATTRIBUTE_GEN_AI_PROMPT,
-  ATTRIBUTE_GEN_AI_COMPLETION,
 ] as const;

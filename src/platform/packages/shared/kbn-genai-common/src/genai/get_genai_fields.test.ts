@@ -428,6 +428,16 @@ describe('OpenRouter field fallbacks on getGenAiFields', () => {
       });
       expect(fields.inputMessages).toHaveLength(0);
     });
+
+    it('filters out invalid message elements from gen_ai.prompt messages array', () => {
+      const fields = getGenAiFields({
+        'attributes.gen_ai.prompt': JSON.stringify({
+          messages: [null, { content: 'no role' }, { role: 'user', content: 'valid' }],
+        }),
+      });
+      expect(fields.inputMessages).toHaveLength(1);
+      expect(fields.inputMessages[0].content).toBe('valid');
+    });
   });
 
   describe('output messages fallback to gen_ai.completion', () => {

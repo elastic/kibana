@@ -32,6 +32,7 @@ import {
   ATTRIBUTE_GEN_AI_TOOL_NAME,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
+  GEN_AI_MESSAGE_ROLES,
 } from './constants';
 import type { GenAiFields, GenAiMessage } from './types';
 
@@ -195,34 +196,81 @@ function parseSystemInstructions(raw: unknown): string | undefined {
   return stringifyFallback(raw);
 }
 
-// Tries OTel standard first, then falls back to OpenRouter's gen_ai.prompt field.
-// OpenRouter shape: {"messages":[{"role":"...","content":"..."},...]}
-function getInputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
-  const otel = allValues<string>(metadata, ATTRIBUTE_GEN_AI_INPUT_MESSAGES);
-  if (otel && otel.length > 0) return parseGenAiMessages(otel);
+type MessageParser = (raw: unknown) => GenAiMessage[] | undefined;
 
-  const raw = first<unknown>(metadata, ATTRIBUTE_GEN_AI_PROMPT);
-  const parsed = parseJsonValue(raw);
-  if (parsed != null && typeof parsed === 'object' && 'messages' in parsed) {
-    const { messages } = parsed;
-    if (Array.isArray(messages)) return messages as GenAiMessage[];
+// Each entry tries a field in priority order; the first non-empty result wins.
+const INPUT_FIELD_PARSERS: Array<{ field: string; parse: MessageParser }> = [
+  {
+    field: ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
+    parse: (raw) => {
+      const vals = (Array.isArray(raw) ? raw : [raw]).filter(
+        (v): v is string => typeof v === 'string'
+      );
+      return vals.length > 0 ? parseGenAiMessages(vals) : undefined;
+    },
+  },
+  {
+    field: ATTRIBUTE_GEN_AI_PROMPT,
+    parse: (raw) => {
+      const value = Array.isArray(raw) ? raw.find((v) => v != null) : raw;
+      const parsed = parseJsonValue(value);
+      if (parsed != null && typeof parsed === 'object' && 'messages' in parsed) {
+        const { messages } = parsed;
+        if (Array.isArray(messages)) {
+          const valid = messages.filter(
+            (m): m is GenAiMessage =>
+              m != null && typeof m === 'object' && typeof m.role === 'string'
+          );
+          return valid.length > 0 ? valid : undefined;
+        }
+      }
+    },
+  },
+];
+
+const OUTPUT_FIELD_PARSERS: Array<{ field: string; parse: MessageParser }> = [
+  {
+    field: ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+    parse: (raw) => {
+      const vals = (Array.isArray(raw) ? raw : [raw]).filter(
+        (v): v is string => typeof v === 'string'
+      );
+      return vals.length > 0 ? parseGenAiMessages(vals) : undefined;
+    },
+  },
+  {
+    field: ATTRIBUTE_GEN_AI_COMPLETION,
+    parse: (raw) => {
+      const value = Array.isArray(raw) ? raw.find((v) => v != null) : raw;
+      const parsed = parseJsonValue(value);
+      if (parsed != null && typeof parsed === 'object' && 'completion' in parsed) {
+        const { completion } = parsed;
+        if (typeof completion === 'string')
+          return [{ role: GEN_AI_MESSAGE_ROLES.ASSISTANT, content: completion }];
+      }
+    },
+  },
+];
+
+function runParsers(
+  metadata: Record<string, unknown>,
+  parsers: Array<{ field: string; parse: MessageParser }>
+): GenAiMessage[] {
+  for (const { field, parse } of parsers) {
+    const raw = rawValue(metadata, field);
+    if (raw == null) continue;
+    const messages = parse(raw);
+    if (messages && messages.length > 0) return messages;
   }
   return [];
 }
 
-// Tries OTel standard first, then falls back to OpenRouter's gen_ai.completion field.
-// OpenRouter shape: {"completion":"...","reasoning":"...","rawRequest":{...}}
-function getOutputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
-  const otel = allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES);
-  if (otel && otel.length > 0) return parseGenAiMessages(otel);
+function getInputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
+  return runParsers(metadata, INPUT_FIELD_PARSERS);
+}
 
-  const raw = first<unknown>(metadata, ATTRIBUTE_GEN_AI_COMPLETION);
-  const parsed = parseJsonValue(raw);
-  if (parsed != null && typeof parsed === 'object' && 'completion' in parsed) {
-    const { completion } = parsed;
-    if (typeof completion === 'string') return [{ role: 'assistant', content: completion }];
-  }
-  return [];
+function getOutputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
+  return runParsers(metadata, OUTPUT_FIELD_PARSERS);
 }
 
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
