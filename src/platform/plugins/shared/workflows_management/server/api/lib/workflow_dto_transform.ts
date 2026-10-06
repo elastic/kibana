@@ -31,6 +31,7 @@ export const transformStorageDocumentToWorkflowDto = (
     ...(accessControl ? { access_control: accessControl } : {}),
     name: source.name,
     description: source.description,
+    tags: source.tags,
     enabled: source.enabled,
     tags: source.tags,
     managed: source.managed,

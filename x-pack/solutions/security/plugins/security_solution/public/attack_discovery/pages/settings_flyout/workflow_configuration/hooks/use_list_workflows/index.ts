@@ -18,7 +18,6 @@ interface WorkflowSearchResult {
   managed?: boolean;
   name: string;
   tags?: string[];
-  definition?: { tags?: string[] } | null;
 }
 
 interface WorkflowSearchResponse {
@@ -50,10 +49,12 @@ export const useListWorkflows = () => {
 
   return {
     ...result,
+    // `tags` comes from the top-level DTO field: `definition` is null for
+    // schema-invalid workflows, so reading it from there loses their tags.
     data: result.data?.results.map((r) => ({
       ...r,
       managed: r.managed,
-      tags: r.definition?.tags,
+      tags: r.tags,
     })),
   };
 };
