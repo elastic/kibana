@@ -85,10 +85,11 @@ receipt uses the existing pending-admission recovery described above.
 These standalone scripts run under Node's native TypeScript stripping in
 `actions/github-script@v9`; Kibana bootstrap is not needed on the dispatcher runner.
 
-From a bootstrapped checkout using the pinned Node version:
+From a bootstrapped checkout using the pinned Node version (tests use `_test.ts`
+so Kibana's Jest checks don't claim them):
 
 ```sh
-node --test .github/scripts/flaky_fix_queue/*.test.ts
+node --test .github/scripts/flaky_fix_queue/*_test.ts
 node node_modules/typescript/bin/tsc -p .github/scripts/flaky_fix_queue/tsconfig.json
 gh aw compile flaky-test-fixer failed-test-investigator --validate --no-check-update
 ```
