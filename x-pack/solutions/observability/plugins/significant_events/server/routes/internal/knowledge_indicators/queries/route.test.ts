@@ -69,6 +69,19 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
   getState: jest.fn().mockResolvedValue(state),
 });
 
+// Mirrors `IndicatorReader.getQueryLinks`: an empty source list yields no links, so a handler
+// that forgets to name its sources finds nothing here, exactly as it does against the real client.
+const makeGetQueryLinks = (links: QueryLink[]) =>
+  jest.fn(async (sourceIds: string[]) =>
+    links.filter((link) => sourceIds.includes(link.source_id))
+  );
+
+const makeSourcesList = (...ids: string[]) =>
+  jest.fn().mockResolvedValue({
+    sources: ids.map((id) => ({ id, enabled: true })),
+    total: ids.length,
+  });
+
 const makeQueryLink = (id: string, severityScore: number, sourceId = 'logs.test'): QueryLink => ({
   query: {
     id,
@@ -252,6 +265,35 @@ describe('pause guard on rule-touching query routes', () => {
   });
 });
 
+describe('demoteBackedQueriesRoute', () => {
+  const demoteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_demote'];
+
+  it('finds queries across the catalog sources and demotes them per source', async () => {
+    const demoteQueries = jest.fn().mockResolvedValue({ demoted: 1 });
+    const getQueryLinks = makeGetQueryLinks([
+      makeQueryLink('q1', 40, 'logs.a'),
+      makeQueryLink('q2', 40, 'logs.b'),
+    ]);
+    const handlerParams = {
+      params: { body: { queryIds: ['q1', 'q2'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { list: makeSourcesList('logs.a', 'logs.b') },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getQueryLinks, demoteQueries }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+      logger: { warn: jest.fn() },
+    } as unknown as Parameters<typeof demoteRoute.handler>[0];
+
+    await expect(demoteRoute.handler(handlerParams)).resolves.toEqual({ demoted: 2 });
+    expect(getQueryLinks).toHaveBeenCalledWith(['logs.a', 'logs.b'], expect.anything());
+    expect(demoteQueries).toHaveBeenCalledWith('logs.a', ['q1']);
+    expect(demoteQueries).toHaveBeenCalledWith('logs.b', ['q2']);
+  });
+});
+
 describe('bulkDeleteQueriesRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -268,16 +310,15 @@ describe('bulkDeleteQueriesRoute', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
+          list: makeSourcesList('logs.test'),
           get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }),
         },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-          getQueryLinks: jest
-            .fn()
-            .mockResolvedValue([
-              makeQueryLink('q1', 40),
-              { ...makeQueryLink('q2', 40), rule_backed: false },
-            ]),
+          getQueryLinks: makeGetQueryLinks([
+            makeQueryLink('q1', 40),
+            { ...makeQueryLink('q2', 40), rule_backed: false },
+          ]),
           deleteQueries,
         }),
         getEventClient: () => eventClient,
@@ -320,16 +361,15 @@ describe('bulkDeleteQueriesRoute', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
+          list: makeSourcesList('logs.success', 'logs.failed'),
           get: jest.fn().mockImplementation((id: string) => Promise.resolve({ source: { id } })),
         },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-          getQueryLinks: jest
-            .fn()
-            .mockResolvedValue([
-              makeQueryLink('q1', 40, 'logs.success'),
-              makeQueryLink('q2', 40, 'logs.failed'),
-            ]),
+          getQueryLinks: makeGetQueryLinks([
+            makeQueryLink('q1', 40, 'logs.success'),
+            makeQueryLink('q2', 40, 'logs.failed'),
+          ]),
           deleteQueries,
         }),
         getEventClient: () => eventClient,
@@ -713,12 +753,15 @@ describe('upsertQueryRoute', () => {
 
   it('upserts against the provided source_id', async () => {
     const upsertQuery = jest.fn().mockResolvedValue(undefined);
-    const getQueryLinks = jest.fn().mockResolvedValue([]);
+    const getQueryLinks = makeGetQueryLinks([]);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
+        sourcesClient: {
+          list: makeSourcesList('logs.test', 'logs.other'),
+          get: jest.fn().mockResolvedValue({ source }),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery, getQueryLinks }),
       }),
@@ -744,11 +787,14 @@ describe('upsertQueryRoute', () => {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
+        sourcesClient: {
+          list: makeSourcesList('logs.test', 'logs.other'),
+          get: jest.fn().mockResolvedValue({ source }),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           upsertQuery,
-          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+          getQueryLinks: makeGetQueryLinks([makeQueryLink('q1', 40)]),
         }),
       }),
       server: makeServer(),
@@ -766,11 +812,11 @@ describe('upsertQueryRoute', () => {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.other' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { get: sourcesGet },
+        sourcesClient: { list: makeSourcesList('logs.test', 'logs.other'), get: sourcesGet },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           upsertQuery,
-          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+          getQueryLinks: makeGetQueryLinks([makeQueryLink('q1', 40)]),
         }),
       }),
       server: makeServer(),
@@ -790,11 +836,14 @@ describe('upsertQueryRoute', () => {
       params: { path: { queryId: 'q1' }, body: upsertBody },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
+        sourcesClient: {
+          list: makeSourcesList('logs.test', 'logs.other'),
+          get: jest.fn().mockResolvedValue({ source }),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           upsertQuery,
-          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+          getQueryLinks: makeGetQueryLinks([makeQueryLink('q1', 40)]),
         }),
       }),
       server: makeServer(),
@@ -811,11 +860,11 @@ describe('upsertQueryRoute', () => {
       params: { path: { queryId: 'missing' }, body: upsertBody },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { get: jest.fn() },
+        sourcesClient: { list: makeSourcesList('logs.test'), get: jest.fn() },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           upsertQuery,
-          getQueryLinks: jest.fn().mockResolvedValue([]),
+          getQueryLinks: makeGetQueryLinks([]),
         }),
       }),
       server: makeServer(),
@@ -834,11 +883,14 @@ describe('upsertQueryRoute', () => {
       params: { path: { queryId: 'q1' }, body: upsertBody },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { get: jest.fn().mockResolvedValue({ source: disabledSource }) },
+        sourcesClient: {
+          list: makeSourcesList('logs.test'),
+          get: jest.fn().mockResolvedValue({ source: disabledSource }),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           upsertQuery,
-          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+          getQueryLinks: makeGetQueryLinks([makeQueryLink('q1', 40)]),
         }),
       }),
       server: makeServer(),
@@ -860,11 +912,14 @@ describe('upsertQueryRoute', () => {
       },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
+        sourcesClient: {
+          list: makeSourcesList('logs.test', 'logs.other'),
+          get: jest.fn().mockResolvedValue({ source }),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest
           .fn()
-          .mockResolvedValue({ upsertQuery, getQueryLinks: jest.fn().mockResolvedValue([]) }),
+          .mockResolvedValue({ upsertQuery, getQueryLinks: makeGetQueryLinks([]) }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),

@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type {
   QueriesGetResponse,
   QueriesOccurrencesGetResponse,
+  QueryLink,
   SignificantEventsQueriesGenerationResult,
   StreamQuery,
 } from '@kbn/significant-events-schema';
@@ -21,6 +22,7 @@ import {
   upsertStreamQueryRequestSchema,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { deriveQueryType } from '@kbn/streams-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
@@ -176,7 +178,8 @@ const demoteBackedQueriesRoute = createServerRoute({
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     // Only rule-backed queries can be demoted; unbacked queries have no rule to remove.
-    const toDemote = await kiClient.getQueryLinks([], {
+    const catalogSourceIds = await requestedOrAllSourceIds(undefined, sourcesClient);
+    const toDemote = await kiClient.getQueryLinks(catalogSourceIds, {
       ruleUnbacked: 'exclude',
       queryIds: params.body.queryIds,
       includeExpired: true,
@@ -193,7 +196,7 @@ const demoteBackedQueriesRoute = createServerRoute({
       return acc;
     }, {});
 
-    const catalogIds = new Set(await requestedOrAllSourceIds(undefined, sourcesClient));
+    const catalogIds = new Set(catalogSourceIds);
 
     let demoted = 0;
 
@@ -248,10 +251,14 @@ const bulkDeleteQueriesRoute = createServerRoute({
     // Bulk delete must cover both backed and unbacked queries; the default 'exclude'
     // filter would skip unbacked (draft) ones. includeExpired: explicit-id action, so
     // an expired query must stay reachable.
-    const queryLinks = await kiClient.getQueryLinks([], {
-      queryIds: params.body.queryIds,
-      ruleUnbacked: 'include',
-      includeExpired: true,
+    const queryLinks = await getQueryLinksAcrossSources({
+      kiClient,
+      sourcesClient,
+      filters: {
+        queryIds: params.body.queryIds,
+        ruleUnbacked: 'include',
+        includeExpired: true,
+      },
     });
 
     // Count requested IDs that getQueryLinks did not find — these are idempotent
@@ -794,7 +801,7 @@ const upsertQueryRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const existingLink = await findExistingQueryLink(kiClient, queryId);
+    const existingLink = await findExistingQueryLink({ kiClient, sourcesClient, queryId });
     const sourceId = requestedSourceId ?? existingLink?.source_id;
     if (!sourceId) {
       throw new QueryNotFoundError(`Query [${queryId}] not found`);
@@ -825,16 +832,38 @@ const upsertQueryRoute = createServerRoute({
   },
 });
 
-async function findExistingQueryLink(
-  kiClient: KnowledgeIndicatorClient,
-  queryId: string
-): Promise<Awaited<ReturnType<KnowledgeIndicatorClient['getQueryLinks']>>[number] | undefined> {
-  // Empty source list means "no source filter"; include expired and unbacked so an existing
-  // query is found whatever its state.
-  const [existing] = await kiClient.getQueryLinks([], {
-    queryIds: [queryId],
-    ruleUnbacked: 'include',
-    includeExpired: true,
+/**
+ * `getQueryLinks` returns nothing for an empty source list, so a lookup by query id alone has
+ * to name every source of the space. Disabled sources stay in the list: their queries remain
+ * reachable for edit, demote and delete.
+ */
+async function getQueryLinksAcrossSources({
+  kiClient,
+  sourcesClient,
+  filters,
+}: {
+  kiClient: KnowledgeIndicatorClient;
+  sourcesClient: SourcesClient;
+  filters: Parameters<KnowledgeIndicatorClient['getQueryLinks']>[1];
+}): Promise<QueryLink[]> {
+  const sourceIds = await requestedOrAllSourceIds(undefined, sourcesClient);
+  return kiClient.getQueryLinks(sourceIds, filters);
+}
+
+async function findExistingQueryLink({
+  kiClient,
+  sourcesClient,
+  queryId,
+}: {
+  kiClient: KnowledgeIndicatorClient;
+  sourcesClient: SourcesClient;
+  queryId: string;
+}): Promise<QueryLink | undefined> {
+  // Include expired and unbacked so an existing query is found whatever its state.
+  const [existing] = await getQueryLinksAcrossSources({
+    kiClient,
+    sourcesClient,
+    filters: { queryIds: [queryId], ruleUnbacked: 'include', includeExpired: true },
   });
   return existing;
 }
