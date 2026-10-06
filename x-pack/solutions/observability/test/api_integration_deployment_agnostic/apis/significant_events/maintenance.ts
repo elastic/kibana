@@ -145,7 +145,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await upsertFeature(apiClient, RESET_STREAM_NAME, {
           id: 'reset-feature',
-          stream_name: RESET_STREAM_NAME,
           type: 'entity',
           subtype: 'service',
           title: 'Reset feature',
