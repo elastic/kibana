@@ -17,7 +17,6 @@ export const serviceAccountsServiceMock = {
         name: 'mock-service-account-name',
         roles: ['viewer'],
       }),
-      delete: jest.fn().mockResolvedValue(undefined),
       list: jest.fn().mockResolvedValue({ serviceAccounts: [] }),
       get: jest.fn().mockResolvedValue({
         id: 'mock-service-account-id',
@@ -35,6 +34,11 @@ export const serviceAccountsServiceMock = {
       reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
       releaseFakeRequest: jest.fn(),
       getFakeRequestPrincipal: jest.fn().mockReturnValue(null),
+      delete: jest.fn().mockResolvedValue({ warnings: [] }),
+    },
+    management: {
+      listWorkloads: jest.fn().mockResolvedValue([]),
+      delete: jest.fn().mockResolvedValue({ deleted: true, warnings: [] }),
     },
     workloads: {
       bindWorkload: jest.fn().mockResolvedValue({

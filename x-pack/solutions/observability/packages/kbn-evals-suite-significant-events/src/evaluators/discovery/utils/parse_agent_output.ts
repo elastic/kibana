@@ -19,7 +19,6 @@ interface EventsWriteToolResult {
 type EventsWriteItemResult =
   | {
       index: number;
-      event_uuid: string;
       event_id: string;
       written: true;
     }
@@ -27,7 +26,12 @@ type EventsWriteItemResult =
       index: number;
       event_id: string;
       written: false;
-      reason: 'existing_active_event' | 'bulk_error' | 'duplicate_in_batch' | 'unchanged_outcome';
+      reason:
+        | 'existing_active_event'
+        | 'bulk_error'
+        | 'duplicate_in_batch'
+        | 'unchanged_outcome'
+        | 'unknown_event_id';
       existing_event_id?: string;
     };
 
@@ -151,7 +155,6 @@ export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): Sig
           ? ({
               ...items[index],
               event_id: result.event_id,
-              event_uuid: result.event_uuid,
             } as SignificantEvent)
           : undefined
       )

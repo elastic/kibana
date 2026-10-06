@@ -13,8 +13,18 @@ import type { ChangePasswordProps } from './change_password';
 import { getComponents } from './components';
 import type { CreateServiceAccountProps } from './create_service_account';
 import type { PersonalInfoProps } from './personal_info';
+import type { ServiceAccountPickerProps } from './service_account_picker';
 
-export type { ChangePasswordProps, CreateServiceAccountProps, PersonalInfoProps };
+export type {
+  ChangePasswordProps,
+  CreateServiceAccountProps,
+  PersonalInfoProps,
+  ServiceAccountPickerProps,
+};
+export type {
+  ServiceAccountPickerDirectory,
+  ServiceAccountPickerStatus,
+} from './service_account_picker';
 
 interface GetUiApiOptions {
   core: CoreStart;
@@ -26,6 +36,7 @@ type LazyComponentFn<T> = (props: T) => ReactElement;
 
 export interface UiApi {
   components: {
+    getServiceAccountPicker: LazyComponentFn<ServiceAccountPickerProps>;
     getCreateServiceAccount: LazyComponentFn<CreateServiceAccountProps>;
     getPersonalInfo: LazyComponentFn<PersonalInfoProps>;
     getChangePassword: LazyComponentFn<ChangePasswordProps>;
