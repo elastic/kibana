@@ -28,6 +28,12 @@ export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}`
 export const buildWatchUrl = (watchId: string) =>
   `${ALERTZERO_WATCHES_URL}/${encodeURIComponent(watchId)}`;
 
+/** Security's service-account directory. The id is opaque and may contain `/`. */
+export const SECURITY_SERVICE_ACCOUNT_URL = '/internal/security/service_account' as const;
+
+export const buildServiceAccountUrl = (serviceAccountId: string) =>
+  `${SECURITY_SERVICE_ACCOUNT_URL}/${encodeURIComponent(serviceAccountId)}`;
+
 /** Global worker catalog — shared across watches. */
 export const ALERTZERO_WORKERS_URL = `${ALERTZERO_INTERNAL_URL}/workers` as const;
 
@@ -69,6 +75,9 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
 /** Mints or verifies the Hunt Watch Investigation for a report, called by its own child workflow. */
 export const FIND_OR_CREATE_INVESTIGATION_URL =
   `${HUNT_INTERNAL_ROUTE_BASE}/find_or_create_investigation` as const;
+
+/** Stamps the hunt-once gate on a report after a completed `run_hunt_coordinator` call. */
+export const WRITE_HUNT_EVIDENCE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/write_hunt_evidence` as const;
 
 /** Failed managed scans in the trailing 24 hours, folded onto Workers. */
 export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;

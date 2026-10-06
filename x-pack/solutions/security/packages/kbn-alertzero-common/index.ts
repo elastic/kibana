@@ -42,8 +42,10 @@ export {
   CANDIDATES_URL,
   HUNT_COORDINATOR_URL,
   FIND_OR_CREATE_INVESTIGATION_URL,
+  WRITE_HUNT_EVIDENCE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
+  SECURITY_SERVICE_ACCOUNT_URL,
   SYSTEM_SECURITY_WATCH_CATALOG,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
@@ -71,6 +73,7 @@ export {
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
+  buildServiceAccountUrl,
   buildWatchUrl,
   buildWorkerUrl,
 } from './constants';
@@ -152,6 +155,8 @@ export {
   HuntCoordinatorStatus,
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
+  WriteHuntEvidenceRequestBody,
+  WriteHuntEvidenceResponse,
 } from './impl/schemas';
 
 export {
