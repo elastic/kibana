@@ -173,6 +173,7 @@ describe('MemorySidebar', () => {
           onFilterChange={jest.fn()}
           selection={{ kind: 'home' }}
           onSelect={jest.fn()}
+          onSearchChange={jest.fn()}
           {...listProps({ isLoading: true })}
         />
       </I18nProvider>
@@ -186,6 +187,7 @@ describe('MemorySidebar', () => {
           onFilterChange={jest.fn()}
           selection={{ kind: 'home' }}
           onSelect={jest.fn()}
+          onSearchChange={jest.fn()}
           {...listProps()}
         />
       </I18nProvider>
