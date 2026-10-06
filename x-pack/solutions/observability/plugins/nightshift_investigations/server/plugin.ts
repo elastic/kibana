@@ -48,7 +48,7 @@ import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_t
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
-import { registerCortexTelemetryEvents } from './telemetry';
+import { registerCortexTelemetryEvents, registerDecisionTreeTelemetryEvents } from './telemetry';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { createMemoryService, type MemoryService } from './memory/internal_client';
@@ -158,6 +158,7 @@ export class NightshiftInvestigationsPlugin
       Boolean(plugins.sandbox?.isAvailable);
     if (this.decisionTreesEnabled) {
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
+      registerDecisionTreeTelemetryEvents(core.analytics);
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
@@ -288,6 +289,7 @@ export class NightshiftInvestigationsPlugin
             connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
+            analytics: core.analytics,
             logger: decisionTreeLogger,
           })) {
             plugins.agentBuilder.tools.register(tool);
@@ -373,6 +375,7 @@ export class NightshiftInvestigationsPlugin
           plugins.workflowsExtensions.registerStepDefinition(
             decisionTreeHydrateStepDefinition({
               getSandboxStart: () => this.sandboxStart,
+              analytics: core.analytics,
               logger: decisionTreeLogger,
             })
           );
