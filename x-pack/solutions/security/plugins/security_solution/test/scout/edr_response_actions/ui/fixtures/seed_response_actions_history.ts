@@ -12,6 +12,7 @@ import type {
   ScoutTestConfig,
   SecurityApiServicesFixture,
 } from '@kbn/scout-security';
+import { withMetadataTransformLock } from '../../common/with_metadata_transform_lock';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { scopeKbnClientToSpace } from './scope_kbn_client_to_space';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -71,27 +72,29 @@ const indexResponseActionHost = ({
   hostNamePrefix?: string;
   responseState?: 'success';
 }): Promise<IndexedHostsAndAlertsResponse> => {
-  return indexHostsAndAlerts(
-    esClient,
-    kbnClient,
-    `${hostNamePrefix}-${randomUUID()}`,
-    1,
-    1,
-    METADATA_DATASTREAM,
-    POLICY_RESPONSE_INDEX,
-    ENDPOINT_EVENTS_INDEX,
-    ENDPOINT_ALERTS_INDEX,
-    ENDPOINT_DEVICE_INDEX,
-    1,
-    true,
-    {},
-    EndpointDocGenerator,
-    true,
-    numResponseActions,
-    alertIds,
-    isServerless,
-    undefined,
-    responseState
+  return withMetadataTransformLock(() =>
+    indexHostsAndAlerts(
+      esClient,
+      kbnClient,
+      `${hostNamePrefix}-${randomUUID()}`,
+      1,
+      1,
+      METADATA_DATASTREAM,
+      POLICY_RESPONSE_INDEX,
+      ENDPOINT_EVENTS_INDEX,
+      ENDPOINT_ALERTS_INDEX,
+      ENDPOINT_DEVICE_INDEX,
+      0,
+      true,
+      {},
+      EndpointDocGenerator,
+      true,
+      numResponseActions,
+      alertIds,
+      isServerless,
+      undefined,
+      responseState
+    )
   );
 };
 
