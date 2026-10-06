@@ -16,9 +16,9 @@ The mock is a standard `fetch`. Connector clients built on axios use it through 
 
 For every request, the mock:
 
-1. routes it to an operation, answering **404** with the method and URL when none matches;
-2. validates it against the operation, answering **422** with `{ operation, violations }` when it breaks the spec. Besides Prism's checks on parameters, headers and body, this flags undeclared query parameters and repeated keys for `explode: false` parameters;
-3. builds a response, then validates it against the spec.
+1. routes it to an operation by server URL and path template, answering **404** with the method and URL when none matches and **405** naming the allowed methods when only the method is wrong;
+2. validates it against the operation, answering **422** with `{ operation, violations }` when it breaks the spec. Parameters are deserialized by `style` and `explode` and checked against their schemas, as is the body for its declared content type. Undeclared query parameters and repeated keys for `explode: false` parameters are flagged too;
+3. builds a response, then validates its status code, headers and body against the spec.
 
 By default, the response is sampled from the spec. The mock picks the lowest declared 2xx response (then `2XX`, then `default`) and the content type that best matches the request's `Accept` header, preferring JSON. It answers **406** when no content type matches. Values come from the schema's first `examples` entry, `example`, `default`, `const` or `enum` value, and otherwise from a placeholder that matches the schema's type, format and bounds. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Pass `respond: (operation, request) => response` to answer differently.
 
@@ -26,8 +26,6 @@ Each request is recorded in `calls` with its operation, status, and request and 
 
 ## Spec loading
 
-`loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document and returns operations in the shape the Prism validator expects. Loading:
+`loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document (converted to OpenAPI 3.0 first) and returns its operations: method, path, servers, parameters (with `style` and `explode` defaults applied), request body and responses. Parameter, request body, response and header refs are resolved. Schemas are not dereferenced: each one stays in place in a copy of the document, together with its JSON pointer, so its refs keep resolving against the document. This keeps large specs such as Microsoft Graph fast to load. The schema dialect follows the OpenAPI version: OpenAPI 3.0 schemas for 3.0, JSON Schema 2020-12 for 3.1 and later.
 
-- keeps schema refs pointing into one shared bundle instead of dereferencing them, which keeps large specs such as Microsoft Graph fast to load;
-- repairs schema defects common in vendor specs: `nullable` without `type`, duplicate `enum` values, regex escapes that are invalid under the `u` flag, and `null` in parameter types;
-- compiles every schema and throws a `SchemaCompileError` listing each operation and location that still fails. Prism would otherwise treat such a schema as matching any value and silently skip validation.
+Loading also repairs schema defects common in vendor specs, in place and following refs: `nullable` without `type`, duplicate `enum` values, regex escapes that are invalid under the `u` flag, and OpenAPI 3.0's boolean `exclusiveMinimum`/`exclusiveMaximum`. It then compiles every schema with Ajv, in place by pointer and in the spec's dialect, and throws a `SchemaCompileError` listing each operation and location that still fails, so a broken spec fails at load instead of on the first request that uses it.

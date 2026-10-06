@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpOperationResponse, IMediaTypeContent } from '@stoplight/types';
 import type { Responder } from '../contract/types';
+import type { MediaTypeContent, OperationResponse } from '../openapi/types';
 import { sampleSchema } from './sample_schema';
 
-const statusOf = ({ code }: IHttpOperationResponse): number =>
+const statusOf = ({ code }: OperationResponse): number =>
   /^\d{3}$/.test(code) ? Number(code) : /^2xx$/i.test(code) ? 299 : 1000;
 
 /** The lowest declared 2xx response, falling back to `2XX` and then `default`. */
 export const selectSuccessResponse = (
-  responses: readonly IHttpOperationResponse[]
-): IHttpOperationResponse | undefined =>
+  responses: readonly OperationResponse[]
+): OperationResponse | undefined =>
   [...responses]
     .filter((response) => statusOf(response) < 300 && statusOf(response) >= 200)
     .sort((a, b) => statusOf(a) - statusOf(b))[0] ??
@@ -51,9 +51,9 @@ const matchesRange = (range: string, mediaType: string): boolean => {
  * several match. Returns undefined when the response has contents but none is acceptable.
  */
 export const negotiateContent = (
-  contents: readonly IMediaTypeContent[],
+  contents: readonly MediaTypeContent[],
   accept: string | undefined
-): IMediaTypeContent | undefined => {
+): MediaTypeContent | undefined => {
   const ranges = accept ? parseAccept(accept) : [{ range: '*/*', q: 1 }];
   for (const { range } of ranges) {
     const matching = contents.filter(({ mediaType }) => matchesRange(range, mediaType));
@@ -66,19 +66,22 @@ export const negotiateContent = (
 };
 
 /** Answers with a deterministic sample of the operation's success response. */
-export const sampleResponse: Responder = ({ responses, __bundled__ }, { headers: { accept } }) => {
+export const sampleResponse: Responder = (
+  { responses, spec: { document } },
+  { headers: { accept } }
+) => {
   const response = selectSuccessResponse(responses);
   if (!response) {
     return { statusCode: 204 };
   }
   const statusCode = /^\d{3}$/.test(response.code) ? Number(response.code) : 200;
   const headers: Record<string, string> = {};
-  for (const { name, required, schema } of response.headers ?? []) {
+  for (const { name, required, schema } of response.headers) {
     if (required) {
-      headers[name.toLowerCase()] = String(sampleSchema(schema, __bundled__));
+      headers[name.toLowerCase()] = String(sampleSchema(schema?.schema, document));
     }
   }
-  const contents = response.contents ?? [];
+  const { contents } = response;
   if (contents.length === 0) {
     return { statusCode, headers };
   }
@@ -94,5 +97,5 @@ export const sampleResponse: Responder = ({ responses, __bundled__ }, { headers:
     };
   }
   headers['content-type'] = content.mediaType;
-  return { statusCode, headers, body: sampleSchema(content.schema, __bundled__) };
+  return { statusCode, headers, body: sampleSchema(content.schema?.schema, document) };
 };

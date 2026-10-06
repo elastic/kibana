@@ -9,7 +9,7 @@
 
 import { sampleSchema } from './sample_schema';
 
-const sample = (schema: unknown, bundle = {}) => sampleSchema(schema, bundle);
+const sample = (schema: unknown, schemas = {}) => sampleSchema(schema, { components: { schemas } });
 
 describe('sampleSchema', () => {
   it.each([
@@ -35,17 +35,17 @@ describe('sampleSchema', () => {
     expect(sample(schema)).toEqual(expected);
   });
 
-  it('builds objects and arrays, resolving bundle refs', () => {
-    const bundle = { Tag: { type: 'object', properties: { name: { type: 'string' } } } };
+  it('builds objects and arrays, resolving refs against the document', () => {
+    const schemas = { Tag: { type: 'object', properties: { name: { type: 'string' } } } };
     const schema = {
       type: 'object',
       properties: {
-        tags: { type: 'array', items: { $ref: '#/__bundled__/Tag' } },
+        tags: { type: 'array', items: { $ref: '#/components/schemas/Tag' } },
         pair: { type: 'array', minItems: 2, items: { type: 'integer' } },
       },
     };
 
-    expect(sample(schema, bundle)).toEqual({ tags: [{ name: 'string' }], pair: [0, 0] });
+    expect(sample(schema, schemas)).toEqual({ tags: [{ name: 'string' }], pair: [0, 0] });
   });
 
   it('takes the first non-null variant and merges allOf parts', () => {
@@ -61,32 +61,32 @@ describe('sampleSchema', () => {
   });
 
   it('combines the constraints of a property declared by several allOf parts', () => {
-    const bundle = {
+    const schemas = {
       Trait: { type: 'object', properties: { type: { type: 'string' }, id: { type: 'string' } } },
     };
     const schema = {
       allOf: [
         { type: 'object', properties: { type: { type: 'string', enum: ['DOCUMENT'] } } },
-        { $ref: '#/__bundled__/Trait' },
+        { $ref: '#/components/schemas/Trait' },
       ],
     };
 
-    expect(sample(schema, bundle)).toEqual({ type: 'DOCUMENT', id: 'string' });
+    expect(sample(schema, schemas)).toEqual({ type: 'DOCUMENT', id: 'string' });
   });
 
   it('keeps samples of recursive schemas finite', () => {
-    const bundle = {
+    const schemas = {
       Node: {
         type: 'object',
         required: ['id'],
         properties: {
           id: { type: 'string' },
-          children: { type: 'array', items: { $ref: '#/__bundled__/Node' } },
+          children: { type: 'array', items: { $ref: '#/components/schemas/Node' } },
         },
       },
     };
 
-    expect(sample({ $ref: '#/__bundled__/Node' }, bundle)).toEqual({
+    expect(sample({ $ref: '#/components/schemas/Node' }, schemas)).toEqual({
       id: 'string',
       children: [{ id: 'string', children: [{ id: 'string' }] }],
     });

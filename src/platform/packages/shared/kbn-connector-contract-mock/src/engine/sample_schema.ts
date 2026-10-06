@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getAtPointer, refToPointer } from '../openapi/json_pointer';
 import type { SchemaNode } from '../openapi/schema_walk';
-import { getBundleRefName, isRecord } from '../openapi/schema_walk';
-import type { SchemaBundle } from '../openapi/types';
+import { isRecord } from '../openapi/schema_walk';
+import type { OpenApiDocument } from '../openapi/types';
 
 // Beyond SHALLOW_DEPTH only required properties and `minItems` items are generated, which
 // keeps samples of large recursive schemas small; MAX_DEPTH stops cycles of required refs.
@@ -66,9 +67,11 @@ const firstType = ({ type, properties, items }: SchemaNode): unknown => {
 const allowsNull = ({ type, nullable }: SchemaNode): boolean =>
   nullable === true || type === 'null' || (Array.isArray(type) && type.includes('null'));
 
-const resolve = (schema: unknown, bundle: SchemaBundle): SchemaNode => {
-  const refName = isRecord(schema) ? getBundleRefName(schema.$ref) : undefined;
-  const resolved = refName === undefined ? schema : bundle[refName];
+const resolve = (schema: unknown, document: OpenApiDocument): SchemaNode => {
+  const resolved =
+    isRecord(schema) && typeof schema.$ref === 'string'
+      ? getAtPointer(document, refToPointer(schema.$ref))
+      : schema;
   return isRecord(resolved) ? resolved : {};
 };
 
@@ -85,10 +88,10 @@ const mergeProperties = (left: unknown, right: unknown): SchemaNode | undefined 
 
 // Merges allOf parts into one schema before sampling, so that a property declared by several
 // parts gets the constraints of all of them (e.g. an `enum` in one and a plain `type` in another).
-const mergeAllOf = (parts: readonly unknown[], bundle: SchemaBundle): SchemaNode =>
+const mergeAllOf = (parts: readonly unknown[], document: OpenApiDocument): SchemaNode =>
   parts.reduce<SchemaNode>((merged, part) => {
-    const { allOf, ...schema } = resolve(part, bundle);
-    const next = Array.isArray(allOf) ? { ...mergeAllOf(allOf, bundle), ...schema } : schema;
+    const { allOf, ...schema } = resolve(part, document);
+    const next = Array.isArray(allOf) ? { ...mergeAllOf(allOf, document), ...schema } : schema;
     const result: SchemaNode = { ...next, ...merged };
     const properties = mergeProperties(merged.properties, next.properties);
     if (properties) {
@@ -107,13 +110,12 @@ const mergeAllOf = (parts: readonly unknown[], bundle: SchemaBundle): SchemaNode
  * Builds a deterministic value for a schema: the first of `examples`, `default`, `const` and
  * `enum` that it declares, otherwise a placeholder for its type and format.
  */
-export const sampleSchema = (schema: unknown, bundle: SchemaBundle, depth = 0): unknown => {
+export const sampleSchema = (schema: unknown, document: OpenApiDocument, depth = 0): unknown => {
   if (!isRecord(schema) || depth > MAX_DEPTH) {
     return null;
   }
-  const refName = getBundleRefName(schema.$ref);
-  if (refName !== undefined) {
-    return sampleSchema(bundle[refName], bundle, depth + 1);
+  if (typeof schema.$ref === 'string') {
+    return sampleSchema(resolve(schema, document), document, depth + 1);
   }
   if (Array.isArray(schema.examples) && schema.examples.length > 0) {
     return schema.examples[0];
@@ -126,7 +128,7 @@ export const sampleSchema = (schema: unknown, bundle: SchemaBundle, depth = 0): 
   if (Array.isArray(schema.enum) && schema.enum.length > 0) {
     return schema.enum[0];
   }
-  const sampleNext = (child: unknown) => sampleSchema(child, bundle, depth + 1);
+  const sampleNext = (child: unknown) => sampleSchema(child, document, depth + 1);
 
   const variants = Array.isArray(schema.oneOf) ? schema.oneOf : schema.anyOf;
   if (Array.isArray(variants) && variants.length > 0) {
@@ -135,7 +137,7 @@ export const sampleSchema = (schema: unknown, bundle: SchemaBundle, depth = 0): 
   }
   if (Array.isArray(schema.allOf) && schema.allOf.length > 0) {
     const { allOf, ...rest } = schema;
-    return sampleSchema(mergeAllOf([rest, ...allOf], bundle), bundle, depth + 1);
+    return sampleSchema(mergeAllOf([rest, ...allOf], document), document, depth + 1);
   }
 
   switch (firstType(schema)) {

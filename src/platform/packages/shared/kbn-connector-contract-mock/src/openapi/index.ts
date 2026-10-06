@@ -24,4 +24,4 @@ export const loadContractOperations = (document: OpenApiDocument): ContractOpera
 
 export { SchemaCompileError } from './assert_schemas_compile';
 export type { SchemaCompileFailure } from './assert_schemas_compile';
-export type { ContractOperation, OpenApiDocument, SchemaBundle } from './types';
+export type { ContractOperation, ContractSpec, OpenApiDocument, SpecSchema } from './types';
