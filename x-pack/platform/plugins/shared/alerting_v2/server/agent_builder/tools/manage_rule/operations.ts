@@ -153,7 +153,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data` and `state_transition` settings."
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data`,  `state_transition`, and `routing_tags`."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
