@@ -328,6 +328,11 @@ export function DateRangePickerProvider({
       // re-parsed into a different format. Datemath bounds (containing "now")
       // go through the parser which may apply rounding.
       const preserveBounds = range && !range.start.includes('now') && !range.end.includes('now');
+      // eslint-disable-next-line no-console
+      console.log('Applied time range', {
+        start: rangeToApply.startDate?.toISOString(),
+        end: rangeToApply.endDate?.toISOString(),
+      });
       onChange({
         start: preserveBounds ? range.start : rangeToApply.start,
         end: preserveBounds ? range.end : rangeToApply.end,
