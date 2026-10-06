@@ -553,7 +553,9 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
 
           const episodeIds = new Set(breachEvents.map((event) => event.alert?.id));
           expect(episodeIds.size).toBe(1);
-          expect([...episodeIds][0]).toBeTruthy();
+          const [episodeId] = [...episodeIds];
+          expect(episodeId).toBeDefined();
+          expect(episodeId).not.toBe('');
 
           const eventsByHost = groupEventsByHost(breachEvents);
           expect(eventsByHost['host-grouping-fallback-a'].data).toMatchObject({
@@ -613,7 +615,9 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           // ...all sharing one non-empty episode id and group_hash.
           const episodeIds = new Set(breachEvents.map((event) => event.alert?.id));
           expect(episodeIds.size).toBe(1);
-          expect([...episodeIds][0]).toBeTruthy();
+          const [episodeId] = [...episodeIds];
+          expect(episodeId).toBeDefined();
+          expect(episodeId).not.toBe('');
           expect(new Set(breachEvents.map((event) => event.group_hash)).size).toBe(1);
 
           // No recovery churn: the series never flapped to recovered between runs.
