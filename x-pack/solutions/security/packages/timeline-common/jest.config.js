@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const UPDATING = i18n.translate('xpack.timelines.updating', {
-  defaultMessage: 'Updating...',
-});
-
-export const UPDATED = i18n.translate('xpack.timelines.updated', {
-  defaultMessage: 'Updated',
-});
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/timeline-common'],
+};

@@ -6,18 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type { GlobalFilter, StartPlugins } from '../types';
+import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
+import type { GlobalFilter } from '../types';
 
 export const useLastUpdated = (globalFilter: GlobalFilter) => {
-  const { timelines: timelinesUi } = useKibana<CoreStart & StartPlugins>().services;
-
   // Only reset updated at on refresh or after globalFilter gets updated
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updatedAt = useMemo(() => Date.now(), [globalFilter]);
 
-  return timelinesUi.getLastUpdated({
+  return getLastUpdated({
     updatedAt: updatedAt || Date.now(),
   });
 };

@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-export * from './last_updated';
+export type Maybe<T> = T | null;
+
+export interface CursorType {
+  value?: Maybe<string>;
+  tiebreaker?: Maybe<string>;
+}
+
+export enum Direction {
+  asc = 'asc',
+  desc = 'desc',
+}
