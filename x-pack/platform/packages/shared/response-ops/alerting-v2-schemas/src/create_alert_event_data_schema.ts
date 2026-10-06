@@ -111,7 +111,7 @@ export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
 
 export const createAlertEventResponseSchema = z.object({
   group_hash: z.string(),
-  episode_id: z.string(),
+  alert_id: z.string(),
 });
 
 /** Normalized ingest payload — `source` is always present past the HTTP edge. */

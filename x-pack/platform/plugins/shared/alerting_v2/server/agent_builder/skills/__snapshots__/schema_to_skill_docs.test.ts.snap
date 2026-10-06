@@ -227,8 +227,8 @@ Max 4096 characters. Only the following fields are available in the KQL expressi
 
 | Field | Type | Description |
 |---|---|---|
-| \`episode_id\` | string | The alert UUID |
-| \`episode_status\` | \`inactive\`, \`pending\`, \`active\`, \`recovering\` | Alert lifecycle status |
+| \`alert_id\` | string | The alert UUID |
+| \`alert_status\` | \`inactive\`, \`pending\`, \`active\`, \`recovering\` | Alert lifecycle status |
 | \`group_hash\` | string | Hash of the grouping fields |
 | \`last_event_timestamp\` | string | Timestamp of the most recent event |
 | \`severity\` | \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\` | Alert severity when present |
