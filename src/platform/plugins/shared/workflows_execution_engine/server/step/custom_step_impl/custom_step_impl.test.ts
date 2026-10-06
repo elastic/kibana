@@ -66,6 +66,7 @@ const createMocks = () => {
       logDebug: jest.fn(),
       logWarn: jest.fn(),
     },
+    executionContext: { withContext: jest.fn((_context: unknown, fn: () => unknown) => fn()) },
   };
 };
 
@@ -96,7 +97,8 @@ const buildImpl = (
     mocks.stepExecutionRuntime as any,
     mocks.connectorExecutor as any,
     mocks.workflowRuntime as any,
-    mocks.workflowLogger as any
+    mocks.workflowLogger as any,
+    mocks.executionContext as any
   );
 
 describe('CustomStepImpl', () => {
@@ -170,9 +172,14 @@ describe('CustomStepImpl', () => {
       const runResult = { input: { key: 'value' }, output: { ok: true }, error: undefined };
       mockOneShotRun.mockResolvedValue(runResult);
 
-      const impl = buildImpl({ handler: jest.fn() });
+      const mocks = createMocks();
+      const impl = buildImpl({ handler: jest.fn() }, mocks);
       const result = await (impl as any)._run({ key: 'value' });
 
+      expect(mocks.executionContext.withContext).toHaveBeenCalledWith(
+        { type: 'workflow step', name: 'my-custom-type' },
+        expect.any(Function)
+      );
       expect(mockOneShotRun).toHaveBeenCalledTimes(1);
       expect(mockOneShotRun).toHaveBeenCalledWith(
         { key: 'value' },

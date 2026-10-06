@@ -32,6 +32,7 @@ import {
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { registerTestOnlyCpuSpinStep } from './test_steps/register_cpu_spin_step';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
@@ -75,6 +76,7 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Setup');
 
     registerUISettings(core, plugins);
+    registerTestOnlyCpuSpinStep(core, plugins.workflowsExtensions);
 
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 

@@ -1,0 +1,195 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import Path from 'node:path';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type {
+  InternalThreadsStart,
+  ManagedWorker,
+  PostMessage,
+} from '@kbn/core-threads-server-internal';
+import type { Logger } from '@kbn/logging';
+import { ProfilingSession } from './profiling_session';
+import type { PprofProfile, PprofTime, ProfileWindow, SessionLimits } from './profiling_session';
+import {
+  BLOCK_THRESHOLD_MS,
+  HEARTBEAT_INTERVAL_MS,
+  SLOT_COUNT,
+  Slot,
+  WATCHDOG_WORKER_NAME,
+  monotonicUs,
+  type MainToWorkerMessage,
+  type WatchdogWorkerData,
+  type WorkerToMainMessage,
+} from './types';
+
+export const MAX_RESTARTS = 3;
+export const RESTART_BASE_DELAY_MS = 1_000;
+const WORKER_ENTRY = Path.resolve(__dirname, 'worker_entry.js');
+
+export interface LoadedPprof {
+  time: PprofTime;
+  /** Native binary that was loaded, for diagnostics. */
+  binary?: string;
+}
+
+/** Loads the native profiler lazily so that nothing native is loaded unless the watchdog runs. */
+export const loadPprof = async (): Promise<LoadedPprof> => {
+  const { time } = await import('@datadog/pprof');
+  const binary = Object.keys(require.cache).find(
+    (path) => path.endsWith('.node') && path.includes('pprof')
+  );
+  return { time, binary };
+};
+
+export interface EventLoopWatchdogParams {
+  threads: InternalThreadsStart;
+  logger: Logger;
+  sanitizeRoot: string;
+  diagnosticDir?: string;
+  loadProfiler?: () => Promise<LoadedPprof>;
+  limits?: SessionLimits;
+  workerEntry?: string;
+}
+
+/**
+ * Main-thread side: stamps the heartbeat the worker watches, and runs the profiling session that
+ * keeps the windows the worker flags as containing a block.
+ */
+export class EventLoopWatchdog {
+  private worker?: ManagedWorker;
+  private post?: PostMessage<MainToWorkerMessage>;
+  private heartbeatTimer?: NodeJS.Timeout;
+  private session?: ProfilingSession;
+  private stopping?: Promise<void>;
+  private generation = 0;
+
+  constructor(private readonly params: EventLoopWatchdogParams) {}
+
+  public start(): void {
+    if (this.worker) return;
+    if (this.stopping) throw new Error('Cannot start the watchdog while it is stopping');
+    const { threads, logger, sanitizeRoot, diagnosticDir, workerEntry } = this.params;
+    const shared = new BigInt64Array(
+      new SharedArrayBuffer(SLOT_COUNT * BigInt64Array.BYTES_PER_ELEMENT)
+    );
+    Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
+    this.heartbeatTimer = setInterval(() => {
+      Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
+      this.session?.tick(Number(Atomics.load(shared, Slot.blocks)));
+    }, HEARTBEAT_INTERVAL_MS);
+    this.heartbeatTimer.unref();
+
+    const workerData: WatchdogWorkerData = {
+      shared: shared.buffer as SharedArrayBuffer,
+      sanitizeRoot,
+      diagnosticDir,
+    };
+    this.worker = threads.createWorker<MainToWorkerMessage, WorkerToMainMessage>({
+      filename: workerEntry ?? WORKER_ENTRY,
+      options: {
+        workerData,
+        name: WATCHDOG_WORKER_NAME,
+        resourceLimits: { maxOldGenerationSizeMb: 64, maxYoungGenerationSizeMb: 16 },
+      },
+      logger,
+      unref: true,
+      restart: { maxAttempts: MAX_RESTARTS, delayMs: RESTART_BASE_DELAY_MS },
+      onStart: (post) => {
+        this.post = post;
+      },
+      onMessage: ({ level, message, meta }) => logger[level](message, meta),
+      onExit: () => {
+        this.post = undefined;
+      },
+      onExhausted: () => {
+        clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = undefined;
+        this.session?.end('watchdog worker unavailable');
+      },
+    });
+    this.worker.start();
+    logger.info(
+      `Event loop watchdog started (threshold ${BLOCK_THRESHOLD_MS}ms, heartbeat ${HEARTBEAT_INTERVAL_MS}ms)`
+    );
+    void this.startProfiling(shared, ++this.generation);
+  }
+
+  /** Runs `run` with profiler labels for `context` while a session is active. */
+  public runWithLabels<R>(context: KibanaExecutionContext, run: () => R): R {
+    return this.session ? this.session.runWithLabels(context, run) : run();
+  }
+
+  public stop(): Promise<void> {
+    if (this.stopping) return this.stopping;
+    const { worker } = this;
+    if (!worker) return Promise.resolve();
+    this.generation++;
+    this.session?.end('watchdog stopped');
+    this.session = undefined;
+    this.worker = undefined;
+    this.post = undefined;
+    clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = undefined;
+    this.stopping = worker
+      .stop()
+      .then(() => this.params.logger.info('Event loop watchdog stopped'))
+      .finally(() => {
+        this.stopping = undefined;
+      });
+    return this.stopping;
+  }
+
+  private async startProfiling(shared: BigInt64Array, generation: number): Promise<void> {
+    const { logger, limits, loadProfiler = loadPprof } = this.params;
+    try {
+      const { time, binary } = await loadProfiler();
+      if (generation !== this.generation) return;
+      const session = new ProfilingSession({
+        time,
+        limits,
+        logger,
+        now: monotonicUs,
+        markRotation: (phase, atUs) =>
+          Atomics.store(
+            shared,
+            phase === 'start' ? Slot.rotationStart : Slot.rotationEnd,
+            BigInt(atUs)
+          ),
+        onKeep: (profile, window, kept) => this.sendProfile(profile, window, kept),
+      });
+      session.start(Number(Atomics.load(shared, Slot.blocks)), binary ? `, ${binary}` : '');
+      this.session = session;
+    } catch (error) {
+      logger.warn(`Event loop profiling unavailable: ${error.message}`);
+    }
+  }
+
+  private sendProfile(profile: PprofProfile, window: ProfileWindow, kept: string): void {
+    profile
+      .encodeAsync()
+      .then((bytes) => {
+        if (!this.post) throw new Error('watchdog worker unavailable');
+        this.post(
+          {
+            type: 'profile',
+            bytes,
+            windowStartUs: window.startUs,
+            windowEndUs: window.endUs,
+            kept,
+          },
+          // encoded into a fresh, unshared buffer
+          [bytes.buffer as ArrayBuffer]
+        );
+      })
+      .catch((error) =>
+        this.params.logger.warn(`Dropped event loop block profile ${kept}: ${error.message}`)
+      );
+  }
+}

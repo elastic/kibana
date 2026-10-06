@@ -1,0 +1,92 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { concatMap, distinctUntilChanged, type Subscription } from 'rxjs';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { Logger } from '@kbn/logging';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
+import { EventLoopWatchdog } from './event_loop_watchdog';
+
+/** Feature flag enabling the event-loop watchdog (and its profiling session) at runtime. */
+export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
+
+export interface EventLoopWatchdogSetupDeps {
+  executionContext: Pick<InternalExecutionContextSetup, 'registerContextWrapper'>;
+}
+
+export interface EventLoopWatchdogStartDeps {
+  threads: InternalThreadsStart;
+  featureFlags: FeatureFlagsStart;
+}
+
+/** Node's `--diagnostic-dir`, where Serverless collects diagnostic files from. */
+export const resolveDiagnosticDir = (
+  execArgv: readonly string[] = process.execArgv,
+  nodeOptions: string = process.env.NODE_OPTIONS ?? ''
+): string | undefined =>
+  [...execArgv, ...nodeOptions.split(/\s+/)]
+    .map((arg) => /^--diagnostic-dir=(.+)$/.exec(arg)?.[1])
+    .find(Boolean);
+
+/**
+ * Core-owned event-loop watchdog PoC: while the feature flag is on, a worker detects blocks and
+ * the main thread keeps pprof profiles of the windows they happen in.
+ * @internal
+ */
+export class EventLoopWatchdogService {
+  private readonly logger: Logger;
+  private watchdog?: EventLoopWatchdog;
+  private subscription?: Subscription;
+
+  constructor(coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('metrics', 'event_loop_watchdog');
+  }
+
+  public setup({ executionContext }: EventLoopWatchdogSetupDeps): void {
+    executionContext.registerContextWrapper((context, run) =>
+      this.watchdog ? this.watchdog.runWithLabels(context.toJSON(), run) : run()
+    );
+  }
+
+  public start({ featureFlags, threads }: EventLoopWatchdogStartDeps): void {
+    const watchdog = new EventLoopWatchdog({
+      threads,
+      logger: this.logger,
+      sanitizeRoot: REPO_ROOT,
+      diagnosticDir: resolveDiagnosticDir(),
+    });
+    this.watchdog = watchdog;
+    this.subscription = featureFlags
+      .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, false)
+      .pipe(
+        distinctUntilChanged(),
+        concatMap(async (enabled) => {
+          try {
+            if (enabled) {
+              watchdog.start();
+            } else {
+              await watchdog.stop();
+            }
+          } catch (error) {
+            this.logger.warn(`Failed to toggle the event loop watchdog: ${error.message}`);
+          }
+        })
+      )
+      .subscribe();
+  }
+
+  public async stop(): Promise<void> {
+    this.subscription?.unsubscribe();
+    this.subscription = undefined;
+    await this.watchdog?.stop();
+  }
+}

@@ -18,6 +18,8 @@ import {
   mockUiSettingsService,
   mockRenderingService,
   mockMetricsService,
+  mockEventLoopWatchdogService,
+  mockThreadsStart,
   mockStatusService,
   mockLoggingService,
   mockI18nService,
@@ -251,6 +253,7 @@ test('runs services on "start"', async () => {
   expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
   expect(mockUiSettingsService.start).not.toHaveBeenCalled();
   expect(mockMetricsService.start).not.toHaveBeenCalled();
+  expect(mockEventLoopWatchdogService.start).not.toHaveBeenCalled();
   expect(mockStatusService.start).not.toHaveBeenCalled();
   expect(mockDeprecationService.start).not.toHaveBeenCalled();
   expect(mockDocLinksService.start).not.toHaveBeenCalled();
@@ -265,6 +268,9 @@ test('runs services on "start"', async () => {
   expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
+  expect(mockEventLoopWatchdogService.start).toHaveBeenCalledWith(
+    expect.objectContaining({ threads: mockThreadsStart })
+  );
   expect(mockStatusService.start).toHaveBeenCalledTimes(1);
   expect(mockDeprecationService.start).toHaveBeenCalledTimes(1);
   expect(mockDocLinksService.start).toHaveBeenCalledTimes(1);

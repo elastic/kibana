@@ -352,6 +352,9 @@ importers:
       '@dagrejs/dagre':
         specifier: 3.0.0
         version: 3.0.0
+      '@datadog/pprof':
+        specifier: 5.19.0
+        version: 5.19.0
       '@dnd-kit/core':
         specifier: 6.3.1
         version: 6.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1618,6 +1621,9 @@ importers:
       '@kbn/core-theme-browser-internal-types':
         specifier: workspace:*
         version: link:src/core/packages/theme/browser-internal-types
+      '@kbn/core-threads-server-internal':
+        specifier: workspace:*
+        version: link:src/core/packages/threads/server-internal
       '@kbn/core-ui-settings-browser':
         specifier: workspace:*
         version: link:src/core/packages/ui-settings/browser
@@ -4696,6 +4702,9 @@ importers:
       polished:
         specifier: 4.3.1
         version: 4.3.1
+      pprof-format:
+        specifier: 2.3.1
+        version: 2.3.1
       pretty-ms:
         specifier: 6.0.0
         version: 6.0.0
@@ -7494,6 +7503,8 @@ importers:
   src/core/packages/theme/browser-internal-types: {}
 
   src/core/packages/theme/browser-mocks: {}
+
+  src/core/packages/threads/server-internal: {}
 
   src/core/packages/ui-settings/browser: {}
 
@@ -10846,6 +10857,10 @@ packages:
 
   '@dagrejs/graphlib@4.0.1':
     resolution: {integrity: sha512-IvcV6FduIIAmLwnH+yun+QtV36SC7mERqa86aClNqmMN09WhmPPYU8ckHrZBozErf+UvHPWOTJYaGYiIcs0DgA==}
+
+  '@datadog/pprof@5.19.0':
+    resolution: {integrity: sha512-0ACUNjUdZ254ay7ZeAm8A3iO1t+jdPzAV8DuVHzqsuxV72KqygwT6ydq4/tm4LqIq51m1pQXEPT1L+j9myzn6g==}
+    engines: {node: '>=16'}
 
   '@date-fns/tz@1.5.0':
     resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
@@ -22848,6 +22863,9 @@ packages:
     resolution: {integrity: sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==}
     engines: {node: '>=20'}
 
+  pprof-format@2.3.1:
+    resolution: {integrity: sha512-y51Z83qG2vEQBACPu6lkGFREVkHwQaCaNDdSFEMLIqSo3bmpADsbP6J3F2SSk7tYB741oTQ9Kt5YAdQsmiCRkA==}
+
   prebuild-install@7.1.3:
     resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
     engines: {node: '>=10'}
@@ -27642,6 +27660,12 @@ snapshots:
       '@dagrejs/graphlib': 4.0.1
 
   '@dagrejs/graphlib@4.0.1': {}
+
+  '@datadog/pprof@5.19.0':
+    dependencies:
+      node-gyp-build: 4.8.4
+      pprof-format: 2.3.1
+      source-map: 0.8.0
 
   '@date-fns/tz@1.5.0': {}
 
@@ -40711,8 +40735,7 @@ snapshots:
     dependencies:
       detect-libc: 2.1.2
 
-  node-gyp-build@4.8.4:
-    optional: true
+  node-gyp-build@4.8.4: {}
 
   node-int64@0.4.0: {}
 
@@ -41756,6 +41779,8 @@ snapshots:
   potpack@2.1.0: {}
 
   powershell-utils@0.1.0: {}
+
+  pprof-format@2.3.1: {}
 
   prebuild-install@7.1.3:
     dependencies:

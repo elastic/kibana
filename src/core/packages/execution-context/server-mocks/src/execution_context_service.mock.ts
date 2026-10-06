@@ -33,7 +33,10 @@ const createExecutionContextMock = () => {
   return mock;
 };
 const createInternalSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalExecutionContextSetup> = createExecutionContextMock();
+  const setupContract: jest.Mocked<InternalExecutionContextSetup> = {
+    ...createExecutionContextMock(),
+    registerContextWrapper: jest.fn(),
+  };
   return setupContract;
 };
 
@@ -48,7 +51,7 @@ const createSetupContractMock = () => {
 
 export const executionContextServiceMock = {
   createInternalSetupContract: createInternalSetupContractMock,
-  createInternalStartContract: createInternalSetupContractMock,
+  createInternalStartContract: createExecutionContextMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createSetupContractMock,
 };
