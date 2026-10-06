@@ -1,0 +1,96 @@
+# Approves Renovate PRs that opted into automerge in renovate.json (`automerge: true` + the
+# `renovate-auto-approve` label). Renovate enables GitHub auto-merge right after opening such a PR;
+# that event triggers the approval, and GitHub queues the PR once required checks pass.
+name: Auto-approve Renovate PRs
+
+on:
+  pull_request_target:
+    types:
+      - auto_merge_enabled
+      - synchronize
+
+jobs:
+  approve:
+    name: Approve Renovate automerge PR
+    runs-on: ubuntu-latest
+    if: |
+      github.event.action == 'auto_merge_enabled' &&
+      github.event.pull_request.user.login == 'elastic-renovate-prod[bot]' &&
+      github.event.sender.login == 'elastic-renovate-prod[bot]' &&
+      contains(github.event.pull_request.labels.*.name, 'renovate-auto-approve')
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Approve if the PR only contains Renovate commits to allowed files
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const allowedFiles = [
+              'package.json',
+              'pnpm-lock.yaml',
+            ];
+            const pull = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            };
+
+            // Author metadata is spoofable; GitHub-signed (web-flow) commits authored by the Renovate app are not.
+            const commits = await github.paginate(github.rest.pulls.listCommits, pull);
+            const foreignCommits = commits.filter(
+              ({ author, committer, commit }) =>
+                author?.login !== 'elastic-renovate-prod[bot]' ||
+                committer?.login !== 'web-flow' ||
+                !commit.verification.verified
+            );
+            if (foreignCommits.length > 0) {
+              core.notice(`Not approving: commits not signed by Renovate: ${foreignCommits.map(({ sha }) => sha).join(', ')}`);
+              return;
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, pull);
+            const disallowedFiles = files
+              .map(({ filename }) => filename)
+              .filter((filename) => !allowedFiles.includes(filename));
+            if (disallowedFiles.length > 0) {
+              core.notice(`Not approving: changes outside the allowlist: ${disallowedFiles.join(', ')}`);
+              return;
+            }
+
+            await github.rest.pulls.createReview({
+              ...pull,
+              event: 'APPROVE',
+              body: 'Auto-approved Renovate automerge PR (see .github/workflows/auto-approve-renovate-prs.yml).',
+            });
+
+  dismiss:
+    name: Dismiss approval after a non-bot push
+    runs-on: ubuntu-latest
+    if: |
+      github.event.action == 'synchronize' &&
+      github.event.pull_request.user.login == 'elastic-renovate-prod[bot]' &&
+      github.event.sender.login != 'elastic-renovate-prod[bot]' &&
+      github.event.sender.login != 'kibanamachine'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Dismiss github-actions[bot] approvals
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const pull = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            };
+            const reviews = await github.paginate(github.rest.pulls.listReviews, pull);
+            const botApprovals = reviews.filter(
+              ({ user, state }) => user?.login === 'github-actions[bot]' && state === 'APPROVED'
+            );
+            for (const { id } of botApprovals) {
+              await github.rest.pulls.dismissReview({
+                ...pull,
+                review_id: id,
+                message: `Dismissing the automatic approval: ${context.payload.sender.login} pushed to this Renovate PR, so it needs a human review.`,
+              });
+            }
