@@ -164,8 +164,8 @@ export class GraphPage {
   async pickIndexPattern(indexPattern: string) {
     await this.datasourceButton.click();
     await this.page.getByTestId(`savedObjectTitle${indexPattern}`).click();
-    // "Add fields" stays `aria-disabled` until the fields finish loading.
-    await expect(this.addFieldButton).toBeEnabled();
+    // EuiBadge is not a native control, so toBeEnabled() ignores its aria-disabled state.
+    await expect(this.addFieldButton).toHaveAttribute('aria-disabled', 'false');
   }
 
   async pickIndexPatternByName(dataViewName: string) {
@@ -174,7 +174,8 @@ export class GraphPage {
       .getByRole('dialog', { name: 'Select a data source' })
       .getByRole('button', { name: dataViewName, exact: true })
       .click();
-    await expect(this.addFieldButton).toBeEnabled();
+    // EuiBadge is not a native control, so toBeEnabled() ignores its aria-disabled state.
+    await expect(this.addFieldButton).toHaveAttribute('aria-disabled', 'false');
   }
 
   async changeIndexPatternByName(dataViewName: string) {
@@ -184,7 +185,8 @@ export class GraphPage {
       .getByRole('dialog', { name: 'Select a data source' })
       .getByRole('button', { name: dataViewName, exact: true })
       .click();
-    await expect(this.addFieldButton).toBeEnabled();
+    // EuiBadge is not a native control, so toBeEnabled() ignores its aria-disabled state.
+    await expect(this.addFieldButton).toHaveAttribute('aria-disabled', 'false');
   }
 
   async addFields(fields: string[]) {
