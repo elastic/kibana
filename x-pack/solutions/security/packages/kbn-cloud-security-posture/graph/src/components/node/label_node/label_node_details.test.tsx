@@ -26,15 +26,14 @@ describe('LabelNodeDetails', () => {
     const ips = ['192.168.1.1', '10.0.0.1'];
     const { container } = render(<LabelNodeDetails ips={ips} />);
 
-    // Check that the IPs text is shown
+    // Check that the IPs label is shown
     const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
     expect(ipsElement).toBeInTheDocument();
-    expect(screen.getByText(ips[0])).toBeInTheDocument();
 
-    // If there are multiple IPs, there should be a "+1" indicator
-    if (ips.length > 1) {
-      expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toBeInTheDocument();
-    }
+    // Multiple IPs: first IP value is hidden, only the +N badge is shown
+    expect(screen.queryByText(ips[0])).not.toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toHaveTextContent(`+${ips.length}`);
 
     // Check that the country flags are not rendered
     expect(container.querySelectorAll(`[data-test-subj="${GRAPH_FLAGS_BADGE_ID}"]`).length).toBe(0);
@@ -61,10 +60,11 @@ describe('LabelNodeDetails', () => {
     const countryCodes = ['US', 'CA'];
     render(<LabelNodeDetails ips={ips} countryCodes={countryCodes} />);
 
-    // Check that the IPs text is shown
+    // Check that the IPs label is shown; multiple IPs show only the +N badge, not the first value
     const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
     expect(ipsElement).toBeInTheDocument();
-    expect(screen.getByText(ips[0])).toBeInTheDocument(); // Only first IP is shown by default
+    expect(screen.queryByText(ips[0])).not.toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toHaveTextContent(`+${ips.length}`);
 
     // Check that the country flags badge is shown
     const flagsElement = screen.getByTestId(GRAPH_FLAGS_BADGE_ID);

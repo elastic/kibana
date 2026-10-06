@@ -19,6 +19,7 @@ export * from './request_diagnostics';
 export * from './migrate';
 export * from './change_privilege_level';
 export * from './rollback';
+export * from './restart';
 export {
   getAgentUploads,
   getAgentUploadFile,

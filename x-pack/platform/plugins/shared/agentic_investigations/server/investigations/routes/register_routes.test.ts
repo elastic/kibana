@@ -8,7 +8,10 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
-import { INVESTIGATION_ASSIGN_URL } from '../../../common/investigations/constants';
+import {
+  INVESTIGATION_ASSIGN_URL,
+  INVESTIGATIONS_PRIVILEGES_URL,
+} from '../../../common/investigations/constants';
 import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../constants';
 import { WrongTemplateError } from '../../assignments/assignments_service';
 import type { AssignmentsService } from '../../assignments/assignments_service';
@@ -143,6 +146,58 @@ describe('investigation routes', () => {
           params: { id: 'investigation-1' },
           body: { assignees: [] },
         }),
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
+    });
+  });
+
+  describe('privileges probe', () => {
+    const PRIVILEGES = {
+      investigations: { read: true, manage: false },
+      escalations: { read: true, manage: true },
+    };
+
+    const registerProbe = (getPrivileges: jest.Mock) => {
+      const router = httpServiceMock.createRouter();
+      registerInvestigationRoutes({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        getAssignmentsService: jest.fn(),
+        privileges: { getPrivileges },
+      } as unknown as InvestigationRouteDependencies);
+      return router.versioned.getRoute('get', INVESTIGATIONS_PRIVILEGES_URL);
+    };
+
+    it('is an internal route without authz, since it only reports the caller', () => {
+      const { config } = registerProbe(jest.fn());
+
+      expect(config.access).toBe('internal');
+      expect(config.security?.authz).toEqual(expect.objectContaining({ enabled: false }));
+    });
+
+    it('returns the caller privileges', async () => {
+      const getPrivileges = jest.fn().mockResolvedValue(PRIVILEGES);
+      const route = registerProbe(getPrivileges);
+      const request = httpServerMock.createKibanaRequest();
+      const response = httpServerMock.createResponseFactory();
+
+      await route.versions['1'].handler({} as never, request, response);
+
+      expect(getPrivileges).toHaveBeenCalledWith(request);
+      expect(response.ok).toHaveBeenCalledWith({ body: PRIVILEGES });
+    });
+
+    it('maps an unexpected failure to 500', async () => {
+      const route = registerProbe(jest.fn().mockRejectedValue(new Error('boom')));
+      const response = httpServerMock.createResponseFactory();
+
+      await route.versions['1'].handler(
+        {} as never,
+        httpServerMock.createKibanaRequest(),
         response
       );
 

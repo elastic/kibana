@@ -49,7 +49,7 @@ const ruleEventSource = (overrides: Record<string, unknown> = {}) => ({
   type: 'alert',
   source: 'elastic.significant_events',
   severity: 'medium',
-  episode: { status: 'active' },
+  alert: { status: 'active' },
   data: dataDoc,
   ...overrides,
 });
@@ -110,9 +110,8 @@ describe('RuleEventsClient', () => {
         {
           ...dataDoc,
           '@timestamp': '2026-01-02T00:00:00.000Z',
-          event_uuid: 'group-hash-1',
-          status: 'open',
-          severity: '40-medium',
+          status: 'active',
+          severity: 'medium',
         },
       ]);
     });
@@ -157,16 +156,31 @@ describe('RuleEventsClient', () => {
   });
 
   describe('findLatestByCurrentStatePaginated', () => {
-    it('filters status on episode.status (not top-level alert_status), translated from SIGNIFICANT_EVENTS_STATUS_MAP', async () => {
+    it('filters status on alert.status (not top-level alert_status), translated from SIGNIFICANT_EVENTS_STATUS_MAP', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
-      await client.findLatestByCurrentStatePaginated({ status: ['open'] });
+      await client.findLatestByCurrentStatePaginated({ status: ['active'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain('`episode.status` IN ("active")');
+      expect(q).toContain('`alert.status` IN ("active")');
       expect(q).not.toContain('alert_status');
+    });
+
+    it('decodes the persisted alert.status of each row rather than defaulting to open', async () => {
+      const row: MockRow = {
+        source: ruleEventSource({ alert: { status: 'inactive' } }),
+        dataJson: JSON.stringify(dataDoc),
+        createdAt: '2026-01-01T00:00:00.000Z',
+      };
+      const { client } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(1) : sourceResponse([row])
+      );
+
+      const { hits } = await client.findLatestByCurrentStatePaginated({});
+
+      expect(hits[0].status).toBe('inactive');
     });
 
     it('filters severity on top-level severity, translated from SIGNIFICANT_EVENTS_SEVERITY_MAP', async () => {
@@ -174,7 +188,7 @@ describe('RuleEventsClient', () => {
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
-      await client.findLatestByCurrentStatePaginated({ severity: ['80-critical'] });
+      await client.findLatestByCurrentStatePaginated({ severity: ['critical'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
       expect(q).toContain('severity IN ("critical")');
@@ -244,7 +258,7 @@ describe('RuleEventsClient', () => {
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-01-02T00:00:00.000Z',
         search: 'checkout',
-        status: ['closed'],
+        status: ['inactive'],
       });
 
       const { commands, params } = getPageRequest(query);
@@ -260,8 +274,8 @@ describe('RuleEventsClient', () => {
         'WHERE TO_LOWER(FIELD_EXTRACT(data, "title")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "summary")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "symptom_hypothesis")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "event_id")) == TO_LOWER("checkout")',
         // Created before the range ends, and still active or updated after it starts.
         'WHERE created_at <= TO_DATETIME(?overlapToIso)',
-        'WHERE (`episode.status` IN ("active")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
-        'WHERE `episode.status` IN ("inactive")',
+        'WHERE (`alert.status` IN ("active")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
+        'WHERE `alert.status` IN ("inactive")',
         'EVAL data_json = JSON_EXTRACT(_source, "$.data")',
         'SORT @timestamp DESC, _id ASC',
         'LIMIT 25',
@@ -291,9 +305,8 @@ describe('RuleEventsClient', () => {
           {
             ...dataDoc,
             '@timestamp': '2026-01-02T00:00:00.000Z',
-            event_uuid: 'group-hash-1',
-            status: 'open',
-            severity: '40-medium',
+            status: 'active',
+            severity: 'medium',
             created_at: createdAt,
           },
         ],
@@ -318,13 +331,13 @@ describe('RuleEventsClient', () => {
   });
 
   describe('findLatestActive', () => {
-    it('filters episode.status to the active mapping, not the top-level status', async () => {
+    it('filters alert.status to the active mapping, not the top-level status', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
       await client.findLatestActive({});
 
       const q = lastQuery(query);
-      expect(q).toContain('`episode.status` IN ("active")');
+      expect(q).toContain('`alert.status` IN ("active")');
       expect(q).not.toContain('status IN ("open")');
     });
 
@@ -358,9 +371,8 @@ describe('RuleEventsClient', () => {
         {
           ...dataDoc,
           '@timestamp': '2026-01-02T00:00:00.000Z',
-          event_uuid: 'group-hash-1',
-          status: 'open',
-          severity: '40-medium',
+          status: 'active',
+          severity: 'medium',
         },
       ]);
     });

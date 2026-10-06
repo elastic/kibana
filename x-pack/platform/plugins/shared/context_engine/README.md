@@ -100,9 +100,9 @@ query. It returns `{ response: string }`: a free-form text context block meant
 to be handed to an agent as-is, not parsed.
 
 ```
-AI index: sales-knowledge
+AI-index registry ID: sales-knowledge
 Curated sales knowledge.
-Query with ES|QL against: ai-index-idx-sales-knowledge
+Backing Elasticsearch target (use only in ES|QL queries): ai-index-idx-sales-knowledge
 
 Fields
 @timestamp: date, searchable, aggregatable
@@ -139,8 +139,8 @@ Count by type
 ...
 ```
 
-- The `Query with ES|QL against` line is `dest.value`, the string to put after
-  `FROM`.
+- The `Backing Elasticsearch target` line is `dest.value`, the string to put
+  after `FROM`.
 - `Fields` lists every mapped field, mapping-defined runtime fields included
   (`path: type`, then `searchable` and/or `aggregatable` when true), one per
   line, sorted by path and capped at 500;
@@ -469,8 +469,9 @@ only in the skill because the briefing is the one part of a run that cannot be
 replaced by configuring a different agent.
 
 The `platform.context_engine.ai_index` attachment is not used: it carries the
-`save_automation` tool and instructions to ask the user questions, which belong
-to the interactive setup conversation.
+install and save tools and the authority to write to the index, which belong to
+the interactive setup conversation. How that conversation asks the user is in
+the Context Engine agent's instructions.
 
 The `ai.agent` step runs under the workflow owner's identity — the user who
 turned analysis on. The conversation it creates is private to that user, Agent
