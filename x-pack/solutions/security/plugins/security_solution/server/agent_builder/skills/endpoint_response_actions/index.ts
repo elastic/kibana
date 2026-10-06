@@ -50,8 +50,9 @@ improvise one with another tool.
 
 ## Guardrails
 
-- Never use \`platform.core.search\` or raw Elasticsearch queries for endpoint
-  or response action state — use the tools above.
+- For status and response action lookups, use the tools above instead of
+  \`platform.core.search\` or raw Elasticsearch queries. This does not restrict
+  diagnostic queries made by other loaded skills.
 - Never claim an endpoint was isolated, released, or scanned. This skill only
   reads state.
 - Branch on the typed signals the tools return: a missing host or action is
@@ -70,7 +71,7 @@ export const createEndpointResponseActionsSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Read endpoint response action context from chat conversations: list enrolled endpoints, check a host status (healthy, unhealthy, updating, offline, inactive, unenrolled; unknown when not yet reported) and isolation state, and look up a previously dispatched response action by ID. Resolves hostnames to endpoint identities via the Elastic Defend Response Actions service. Read-only — it does not isolate, release, or scan endpoints.',
+      'List enrolled Elastic Defend endpoints, check a host status (healthy, unhealthy, updating, offline, inactive, unenrolled; unknown when not yet reported) and isolation state, and look up a previously dispatched response action by ID. Read-only — it does not isolate, release, or scan endpoints. NOT for diagnosing why an endpoint is unhealthy, offline, or missing, or why an isolation or other response action failed (use elastic-defend-configuration-troubleshooting).',
     content: SYSTEM_INSTRUCTIONS,
     referencedContent: [
       {

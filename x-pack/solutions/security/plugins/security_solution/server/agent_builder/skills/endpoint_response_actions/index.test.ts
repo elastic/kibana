@@ -30,7 +30,11 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.id).toBe('endpoint-response-actions');
       expect(skill.name).toBe('endpoint-response-actions');
       expect(skill.basePath).toBe('skills/security/endpoint');
-      expect(skill.description).toContain('endpoint response action');
+      expect(skill.description).toContain('List enrolled Elastic Defend endpoints');
+      expect(skill.description).toContain('NOT for diagnosing');
+      expect(skill.description).toContain('(use elastic-defend-configuration-troubleshooting)');
+      expect(skill.description).not.toContain('Resolves hostnames to endpoint identities');
+      expect(skill.description).toContain('Read-only');
       expect(skill.content).toContain('Endpoint Response Actions Skill');
     });
 
@@ -41,6 +45,9 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.content).toContain('When to Use This Skill');
       expect(skill.content).toContain('Process');
       expect(skill.content).toContain('Guardrails');
+      expect(skill.content).toContain('does not restrict');
+      expect(skill.content).toContain('other loaded skills');
+      expect(skill.content).not.toContain('Never use `platform.core.search`');
     });
 
     it('exposes detailed reference material via referencedContent', () => {
