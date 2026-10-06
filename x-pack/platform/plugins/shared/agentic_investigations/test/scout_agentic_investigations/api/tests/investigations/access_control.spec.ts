@@ -7,7 +7,6 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { InvestigationsPrivilegesResponse } from '../../../../../common';
 import {
   apiTest,
   IMPACT_PATH,
@@ -21,6 +20,11 @@ import {
   deleteConversations,
   seedInvestigation,
 } from '../../fixtures';
+
+// The `_privileges` response shape; spelled out because the Scout project cannot import plugin code.
+interface InvestigationsPrivilegesResponse {
+  investigations: { read: boolean; manage: boolean };
+}
 
 const RUN = `scout-access-${Date.now()}`;
 
