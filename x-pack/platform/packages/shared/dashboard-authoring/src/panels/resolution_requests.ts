@@ -21,6 +21,18 @@ export const getUneditablePanelError = ({ id, type }: AttachmentPanel): string =
     : `Panel "${id}" with type "${type}" is not supported for inline editing.`;
 };
 
+/**
+ * Error for a request without a `renderer` on a panel that Lens and Vega edits cannot target.
+ * Without a renderer the request edits the panel, so it is rejected instead of replacing it.
+ */
+export const getRendererlessEditError = (existingPanel: AttachmentPanel): string => {
+  const replaceHint = 'To replace the panel with generated content, set `renderer` explicitly.';
+  if (findPanelRenderer(existingPanel.type) === 'custom_content') {
+    return `Panel "${existingPanel.id}" is a custom content panel. Edit it with source: "request", renderer: "custom_content". ${replaceHint}`;
+  }
+  return `${getUneditablePanelError(existingPanel)} ${replaceHint}`;
+};
+
 /** Maps a new-panel request input onto the resolution request for its renderer. */
 export const toCreationResolutionRequest = (
   panelInput: PanelRequestInput,

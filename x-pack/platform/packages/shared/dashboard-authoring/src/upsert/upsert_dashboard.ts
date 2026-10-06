@@ -37,6 +37,7 @@ import {
   type UpsertPanelContent,
 } from '../panels';
 import {
+  getRendererlessEditError,
   toCreationResolutionRequest,
   toEditResolutionRequest,
 } from '../panels/resolution_requests';
@@ -78,6 +79,32 @@ const findDuplicates = (ids: string[]): Set<string> =>
 
 const getSectionIds = ({ panels }: DashboardAttachmentData): Set<string> =>
   new Set(panels.filter(isSection).map(({ id }) => id));
+
+/**
+ * Leaves out ids listed both as an update (`panels` or `sections`) and in `remove`, recording one
+ * failure for each, so neither the update nor the removal is applied.
+ */
+const withoutConflictingIds = (
+  { sections = [], panels = [], remove = [] }: DashboardUpsert,
+  recordFailure: RecordFailure
+): { sections: UpsertSectionItem[]; panels: UpsertPanelItem[]; removedIds: Set<string> } => {
+  const requestedRemovals = new Set(remove);
+  const conflictingIds = new Set(
+    [...sections, ...panels].map(({ id }) => id).filter((id) => requestedRemovals.has(id))
+  );
+  for (const id of conflictingIds) {
+    recordFailure(
+      id,
+      `"${id}" is both updated and removed in this call, so neither change was applied. Do only one.`
+    );
+  }
+  const isKept = ({ id }: { id: string }) => !conflictingIds.has(id);
+  return {
+    sections: sections.filter(isKept),
+    panels: panels.filter(isKept),
+    removedIds: new Set([...requestedRemovals].filter((id) => !conflictingIds.has(id))),
+  };
+};
 
 const applyMetadata = (
   dashboardData: DashboardAttachmentData,
@@ -172,6 +199,10 @@ const planPanelContent = ({
   const isEdit =
     existingPanel !== undefined && getEditableEmbeddableTypes(content).includes(existingPanel.type);
 
+  if (existingPanel && !isEdit && content.source === 'request' && !content.renderer) {
+    return { error: getRendererlessEditError(existingPanel) };
+  }
+
   if (existingPanel && isEdit) {
     const parsed = editPanelInputSchema.safeParse({ ...content, panelId: id });
     if (!parsed.success) {
@@ -195,7 +226,12 @@ const planPanelContent = ({
 
   const parsed = newPanelInputSchema.safeParse({ ...content, grid: PARSE_GRID });
   if (!parsed.success) {
-    return { error: `Invalid content for panel "${id}": ${formatIssues(parsed.error)}` };
+    const replacement = existingPanel
+      ? ` The content does not match the existing "${existingPanel.type}" panel, so it replaces the panel and must be complete.`
+      : '';
+    return {
+      error: `Invalid content for panel "${id}":${replacement} ${formatIssues(parsed.error)}`,
+    };
   }
   const newInput = parsed.data;
   if (newInput.source === 'config') {
@@ -224,12 +260,14 @@ const planPanelContent = ({
 const planPanels = ({
   dashboardData,
   panels,
+  removedIds,
   recordFailure,
   resolvePanelContent,
   resolveAttachmentPanel,
 }: {
   dashboardData: DashboardAttachmentData;
   panels: UpsertPanelItem[];
+  removedIds: ReadonlySet<string>;
   recordFailure: RecordFailure;
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
@@ -246,6 +284,13 @@ const planPanels = ({
     }
     if (sectionIds.has(id)) {
       recordFailure(id, `"${id}" is a section id. Use a different id for the panel.`);
+      return [];
+    }
+    if (typeof section === 'string' && removedIds.has(section)) {
+      recordFailure(
+        id,
+        `Section "${section}" is removed in this call. Place panel "${id}" in a section that stays, or keep the section.`
+      );
       return [];
     }
     if (typeof section === 'string' && !sectionIds.has(section)) {
@@ -354,12 +399,10 @@ const applyPanel = ({
 const applyRemovals = ({
   dashboardData,
   remove,
-  upsertedIds,
   recordFailure,
 }: {
   dashboardData: DashboardAttachmentData;
-  remove: string[];
-  upsertedIds: ReadonlySet<string>;
+  remove: ReadonlySet<string>;
   recordFailure: RecordFailure;
 }): DashboardAttachmentData => {
   const panelIds = new Set(indexPanelsById(dashboardData.panels).keys());
@@ -372,10 +415,8 @@ const applyRemovals = ({
   const sectionIdsToRemove = new Set<string>();
   const controlIdsToRemove = new Set<string>();
 
-  for (const id of new Set(remove)) {
-    if (upsertedIds.has(id)) {
-      recordFailure(id, `"${id}" is both updated and removed in this call. Do only one.`);
-    } else if (panelIds.has(id)) {
+  for (const id of remove) {
+    if (panelIds.has(id)) {
       panelIdsToRemove.add(id);
     } else if (sectionIds.has(id)) {
       sectionIdsToRemove.add(id);
@@ -436,12 +477,15 @@ export const executeDashboardUpsert = async ({
     failures.push({ type: DASHBOARD_OPERATION_FAILURE_TYPES.upsertDashboard, identifier, error });
   };
 
+  const { sections, panels, removedIds } = withoutConflictingIds(upsert, recordFailure);
+
   let nextDashboardData = applyMetadata(originalDashboardData, upsert.set);
-  nextDashboardData = upsertSections(nextDashboardData, upsert.sections ?? [], recordFailure);
+  nextDashboardData = upsertSections(nextDashboardData, sections, recordFailure);
 
   const plans = planPanels({
     dashboardData: nextDashboardData,
-    panels: upsert.panels ?? [],
+    panels,
+    removedIds,
     recordFailure,
     resolvePanelContent,
     resolveAttachmentPanel,
@@ -480,14 +524,10 @@ export const executeDashboardUpsert = async ({
     });
   }
 
-  if (upsert.remove && upsert.remove.length > 0) {
+  if (removedIds.size > 0) {
     nextDashboardData = applyRemovals({
       dashboardData: nextDashboardData,
-      remove: upsert.remove,
-      upsertedIds: new Set([
-        ...(upsert.panels ?? []).map(({ id }) => id),
-        ...(upsert.sections ?? []).map(({ id }) => id),
-      ]),
+      remove: removedIds,
       recordFailure,
     });
   }

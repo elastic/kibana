@@ -929,6 +929,35 @@ describe('executeDashboardUpsert', () => {
         'top-1',
       ]);
     });
+
+    it('rejects panels placed into a section that is removed in the same call', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [
+            createLensPanel('top-1', 0),
+            createSection('section-a', 'Section A', 10, [createLensPanel('section-a-1', 0)]),
+          ],
+        },
+        upsert: {
+          panels: [{ id: 'top-1', section: 'section-a' }],
+          remove: ['section-a'],
+        },
+        logger,
+      });
+
+      expect(getSections(result.dashboardData.panels)).toHaveLength(0);
+      expect(getIds(result.dashboardData.panels)).toEqual(['top-1']);
+      expect(result.failures).toEqual([
+        {
+          type: UPSERT_FAILURE,
+          identifier: 'top-1',
+          error:
+            'Section "section-a" is removed in this call. Place panel "top-1" in a section that stays, or keep the section.',
+        },
+      ]);
+    });
   });
 
   describe('removals', () => {
@@ -979,7 +1008,7 @@ describe('executeDashboardUpsert', () => {
       ]);
     });
 
-    it('records a failure and keeps the panel when it is both updated and removed', async () => {
+    it('records a failure and applies neither change when an id is both updated and removed', async () => {
       const resolvePanelContent = createResolverMock(async () =>
         createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
       );
@@ -1000,14 +1029,14 @@ describe('executeDashboardUpsert', () => {
         resolvePanelContent,
       });
 
-      expect(findPanel(result.dashboardData, 'panel-1')).toEqual(
-        expect.objectContaining({ config: { type: 'bar' } })
-      );
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.dashboardData.panels).toEqual([createLensPanel('panel-1', 5)]);
       expect(result.failures).toEqual([
         {
           type: UPSERT_FAILURE,
           identifier: 'panel-1',
-          error: '"panel-1" is both updated and removed in this call. Do only one.',
+          error:
+            '"panel-1" is both updated and removed in this call, so neither change was applied. Do only one.',
         },
       ]);
     });
@@ -1490,7 +1519,8 @@ describe('executeDashboardUpsert', () => {
         {
           type: UPSERT_FAILURE,
           identifier: 'panel-1',
-          error: expect.stringContaining('Invalid content for panel "panel-1": chartType'),
+          error:
+            'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline editing. To replace the panel with generated content, set `renderer` explicitly.',
         },
       ]);
     });
@@ -1542,7 +1572,8 @@ describe('executeDashboardUpsert', () => {
           {
             type: UPSERT_FAILURE,
             identifier: 'cc-1',
-            error: expect.stringContaining('Invalid content for panel "cc-1": chartType'),
+            error:
+              'Panel "cc-1" is a custom content panel. Edit it with source: "request", renderer: "custom_content". To replace the panel with generated content, set `renderer` explicitly.',
           },
         ]);
       });
@@ -1654,7 +1685,8 @@ describe('executeDashboardUpsert', () => {
           {
             type: UPSERT_FAILURE,
             identifier: 'md-1',
-            error: expect.stringContaining('Invalid content for panel "md-1": chartType'),
+            error:
+              'Panel "md-1" is a markdown panel. Edit it with source: "config", type: "markdown". To replace the panel with generated content, set `renderer` explicitly.',
           },
         ]);
       });
