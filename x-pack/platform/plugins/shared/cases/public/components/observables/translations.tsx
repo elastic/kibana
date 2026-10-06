@@ -199,3 +199,23 @@ export const SELECTED_OBSERVABLES = (count: number) =>
 export const BULK_ACTIONS = i18n.translate('xpack.cases.caseView.observables.bulkActions', {
   defaultMessage: 'Bulk actions',
 });
+
+export const BULK_DELETE_OBSERVABLES = i18n.translate(
+  'xpack.cases.caseView.observables.bulkDelete',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const BULK_DELETE_TITLE = (count: number) =>
+  i18n.translate('xpack.cases.caseView.observables.bulkDeleteTitle', {
+    values: { count },
+    defaultMessage: 'Delete {count, plural, one {# observable} other {# observables}}?',
+  });
+
+export const BULK_DELETE_MESSAGE = (count: number) =>
+  i18n.translate('xpack.cases.caseView.observables.bulkDeleteMessage', {
+    values: { count },
+    defaultMessage:
+      'Are you sure you want to delete {count, plural, one {this observable} other {these observables}}?',
+  });
