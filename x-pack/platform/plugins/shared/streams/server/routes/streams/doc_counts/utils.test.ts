@@ -7,9 +7,12 @@
 
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import {
+  DATA_STREAM_INDEX_NAMES_FILTER_PATH,
   getAllBackingIndicesByStream,
   getDataStreamsMeteringStats,
+  getDataStreamsWithIndexNames,
   getLastBackingIndexByStream,
 } from './utils';
 
@@ -163,7 +166,7 @@ describe('getDataStreamsMeteringStats', () => {
       method: 'GET',
       path: '/_metering/stats/.ds-logs-a-000001,.ds-logs-b-000001',
     });
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       '.ds-logs-a-000001': { sizeBytes: 10, totalDocs: 1 },
       '.ds-logs-b-000001': { sizeBytes: 20, totalDocs: 2 },
     });
@@ -226,9 +229,16 @@ describe('getDataStreamsMeteringStats', () => {
     expect(result['.ds-logs-stream-000399']).toEqual({ sizeBytes: 10, totalDocs: 1 });
   });
 
+  it('returns an empty record when no chunk has an indices field', async () => {
+    const { esClient } = makeMeteringClient(() => ({}));
+
+    await expect(
+      getDataStreamsMeteringStats({ esClient, dataStreams: makeBackingIndexNames(400) })
+    ).resolves.toStrictEqual({});
+  });
+
   it('aggregates 10,000 entries in linear time', async () => {
-    // Regression guard for elastic/sdh-kibana#6555: a quadratic accumulator needed seconds for
-    // this input and blocked the Kibana event loop for the whole time.
+    // A quadratic accumulator needs seconds for this input and blocks the Kibana event loop.
     const { esClient } = makeMeteringClient((names) => ({
       indices: names.map((name) => indexEntry(name, 1)),
     }));
@@ -243,4 +253,73 @@ describe('getDataStreamsMeteringStats', () => {
     expect(Object.keys(result)).toHaveLength(10000);
     expect(elapsedMs).toBeLessThan(1000);
   }, 30000);
+});
+
+describe('getDataStreamsWithIndexNames', () => {
+  const makeClient = (getDataStream: jest.Mock) =>
+    ({ indices: { getDataStream } } as unknown as ElasticsearchClient);
+
+  const notFoundError = () =>
+    new errors.ResponseError({
+      statusCode: 404,
+      body: { error: { type: 'index_not_found_exception' } },
+      headers: {},
+      meta: {} as never,
+      warnings: [],
+    });
+
+  it('requests only the name and index names of every data stream', async () => {
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [{ name: 'logs-a' }] });
+
+    const result = await getDataStreamsWithIndexNames({ esClient: makeClient(getDataStream) });
+
+    expect(getDataStream).toHaveBeenCalledWith({
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+    expect(DATA_STREAM_INDEX_NAMES_FILTER_PATH).toEqual([
+      'data_streams.name',
+      'data_streams.indices.index_name',
+      'data_streams.failure_store.indices.index_name',
+    ]);
+    expect(result).toEqual([{ name: 'logs-a' }]);
+  });
+
+  it('scopes the request to one stream when a name is given', async () => {
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [{ name: 'logs-a' }] });
+
+    await getDataStreamsWithIndexNames({
+      esClient: makeClient(getDataStream),
+      streamName: 'logs-a',
+    });
+
+    expect(getDataStream).toHaveBeenCalledWith({
+      name: 'logs-a',
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+  });
+
+  it('returns an empty list when the filtered response has no data_streams key', async () => {
+    // Elasticsearch drops the key entirely when filter_path matches nothing.
+    const getDataStream = jest.fn().mockResolvedValue({});
+
+    await expect(
+      getDataStreamsWithIndexNames({ esClient: makeClient(getDataStream) })
+    ).resolves.toEqual([]);
+  });
+
+  it('returns an empty list when the named stream does not exist', async () => {
+    const getDataStream = jest.fn().mockRejectedValue(notFoundError());
+
+    await expect(
+      getDataStreamsWithIndexNames({ esClient: makeClient(getDataStream), streamName: 'missing' })
+    ).resolves.toEqual([]);
+  });
+
+  it('rethrows any other error', async () => {
+    const getDataStream = jest.fn().mockRejectedValue(new Error('boom'));
+
+    await expect(
+      getDataStreamsWithIndexNames({ esClient: makeClient(getDataStream), streamName: 'logs-a' })
+    ).rejects.toThrow('boom');
+  });
 });

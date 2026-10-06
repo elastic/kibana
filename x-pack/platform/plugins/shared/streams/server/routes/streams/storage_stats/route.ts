@@ -8,7 +8,11 @@
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { getDataStreamsMeteringStats, processAsyncInChunks } from '../doc_counts/utils';
+import {
+  getDataStreamsMeteringStats,
+  getDataStreamsWithIndexNames,
+  processAsyncInChunks,
+} from '../doc_counts/utils';
 
 export interface StreamStorageStat {
   stream: string;
@@ -30,7 +34,7 @@ const bulkStorageStatsRoute = createServerRoute({
     const esClient = scopedClusterClient.asCurrentUser;
 
     // Streams without backing datastreams (query, draft) have no storage size associated with them.
-    const { data_streams: dataStreams } = await esClient.indices.getDataStream();
+    const dataStreams = await getDataStreamsWithIndexNames({ esClient });
 
     if (!dataStreams.length) {
       return [];

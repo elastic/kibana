@@ -6,6 +6,7 @@
  */
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import { DATA_STREAM_INDEX_NAMES_FILTER_PATH } from '../doc_counts/utils';
 import { storageStatsRoutes } from './route';
 
 const route = storageStatsRoutes['GET /internal/streams/storage_stats'];
@@ -17,21 +18,28 @@ interface DataStreamInput {
   indices: string[];
 }
 
+let getDataStream: jest.Mock;
+
 const callHandler = ({
   dataStreams,
   indicesStats,
+  getDataStreamResponse,
 }: {
   dataStreams: DataStreamInput[];
   indicesStats: Record<string, IndicesStatsIndicesStats>;
+  getDataStreamResponse?: object;
 }) => {
+  getDataStream = jest.fn().mockResolvedValue(
+    getDataStreamResponse ?? {
+      data_streams: dataStreams.map((ds) => ({
+        name: ds.name,
+        indices: ds.indices.map((index_name) => ({ index_name })),
+      })),
+    }
+  );
   const esClient = {
     indices: {
-      getDataStream: jest.fn().mockResolvedValue({
-        data_streams: dataStreams.map((ds) => ({
-          name: ds.name,
-          indices: ds.indices.map((index_name) => ({ index_name })),
-        })),
-      }),
+      getDataStream,
       stats: jest.fn().mockResolvedValue({ indices: indicesStats }),
     },
   };
@@ -134,6 +142,26 @@ describe('storage_stats route (stateful)', () => {
 
   it('returns an empty array when there are no data streams', async () => {
     const result = await callHandler({ dataStreams: [], indicesStats: {} });
+    expect(result).toEqual([]);
+  });
+
+  it('fetches data streams with only the fields it reads', async () => {
+    await callHandler({
+      dataStreams: [{ name: 'stream-a', indices: ['.ds-stream-a-000001'] }],
+      indicesStats: { '.ds-stream-a-000001': hotStats(1) },
+    });
+
+    expect(getDataStream).toHaveBeenCalledWith({
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+  });
+
+  it('returns an empty array when the filtered response has no data_streams key', async () => {
+    const result = await callHandler({
+      dataStreams: [],
+      indicesStats: {},
+      getDataStreamResponse: {},
+    });
     expect(result).toEqual([]);
   });
 
