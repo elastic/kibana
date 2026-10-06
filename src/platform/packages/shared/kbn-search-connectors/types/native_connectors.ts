@@ -5103,6 +5103,42 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: true,
       },
+      acl_sync_concurrency: {
+        default_value: 10,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: NUMERIC,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.aclSyncConcurrencyLabel',
+          {
+            defaultMessage: 'Maximum concurrent access control requests',
+          }
+        ),
+        options: [],
+        order: 18,
+        required: false,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.aclSyncConcurrencyTooltip',
+          {
+            defaultMessage:
+              'Number of users processed in parallel during an access control sync. Lower this value if Microsoft Graph throttles the connector.',
+          }
+        ),
+        type: INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [
+          {
+            type: 'greater_than',
+            constraint: 0,
+          },
+        ],
+        value: 10,
+      },
     },
     features: {
       [SYNC_RULES]: {

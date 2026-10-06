@@ -507,6 +507,65 @@ describe('Both modes', () => {
 
       /**
        * GIVEN not all primary menu items fit the menu height
+       * WHEN I hover over the "More" primary menu
+       * AND I click on an item that has a submenu
+       * AND I hover out (the shorter nested panel can shrink out from under the cursor)
+       * THEN the popover should persist
+       */
+      it('should have persistent popover on hover out after opening a nested panel', async () => {
+        render(<TestComponent items={securityMock.navItems} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.hover(moreButton);
+        flushPopoverTimers();
+
+        const morePopover = await screen.findByTestId(morePopoverId);
+
+        await user.click(within(morePopover).getByTestId(secondaryItemId(mlItemId)));
+
+        const nestedPanelTitle = within(morePopover).getByRole('heading');
+        await user.hover(nestedPanelTitle);
+        await user.unhover(nestedPanelTitle);
+        flushPopoverTimers();
+
+        // The closed popover stays in the DOM while it transitions out
+        expect(moreButton).toHaveAttribute('aria-expanded', 'true');
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
+       * WHEN I hover over the "More" primary menu
+       * AND I click on an item without a submenu
+       * THEN the popover should close
+       * AND when I hover over the "More" primary menu again
+       * THEN the popover should show again
+       */
+      it('should show the popover on hover again after clicking an item in it', async () => {
+        render(<TestComponent items={securityMock.navItems} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.hover(moreButton);
+        flushPopoverTimers();
+
+        const morePopover = await screen.findByTestId(morePopoverId);
+
+        await user.click(within(morePopover).getByTestId(secondaryItemId('coverage')));
+
+        await waitFor(() => {
+          expect(morePopover).not.toBeInTheDocument();
+        });
+
+        await user.unhover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
+
+        expect(await screen.findByTestId(morePopoverId)).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
        * WHEN I click on the “More” primary menu
        * AND when I hover over another popover trigger
        * THEN the popover attached to that trigger should not show

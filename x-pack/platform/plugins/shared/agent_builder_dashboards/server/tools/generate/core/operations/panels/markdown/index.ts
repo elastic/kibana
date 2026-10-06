@@ -8,16 +8,15 @@
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
-import { definePanelType } from '../panel_type';
+import type { ConfigPanelTypeDefinition } from '../config_panel_type';
 
 /**
  * Markdown panel logic.
  *
- * Markdown is authored with `source: 'config'` (`type: 'markdown'`) whose
- * `config` is passed through to the embeddable unchanged, like a Lens
- * `config`-source panel. This module owns the markdown embeddable identity, the
- * by-value config contract, and the `config`-source input schema, and is where
- * future markdown-specific behavior would live.
+ * Markdown is authored by value: `source: 'config'` (`type: 'markdown'`) whose
+ * `config` is passed through to the embeddable unchanged. This module owns the
+ * markdown embeddable identity, the by-value config contract, and the
+ * `config`-source input schemas.
  */
 
 /**
@@ -63,18 +62,8 @@ export const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
     ),
   });
 
-/**
- * Registry entry for the `markdown` panel type. Markdown is editable by config
- * (content is replaced in place), so it provides `validateConfigEdit` to reject
- * edits that target a non-markdown panel.
- */
-export const markdownPanelDefinition = definePanelType({
+/** Registry entry for the `markdown` by-value panel type. */
+export const markdownPanelDefinition: ConfigPanelTypeDefinition = {
   embeddableType: MARKDOWN_EMBEDDABLE_TYPE,
-  validateConfigEdit: (existingPanel) =>
-    existingPanel.type === MARKDOWN_EMBEDDABLE_TYPE
-      ? { ok: true }
-      : {
-          ok: false,
-          error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as markdown. Use source: "request" for ES|QL-backed Lens panels.`,
-        },
-});
+  label: 'markdown',
+};
