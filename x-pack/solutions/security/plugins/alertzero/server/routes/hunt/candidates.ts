@@ -25,7 +25,7 @@ export { CANDIDATES_URL };
  * `no_action`, `succeeded`) are terminal, so a report carrying only those is
  * free to be hunted again.
  */
-const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
+export const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
