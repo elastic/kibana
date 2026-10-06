@@ -15,4 +15,4 @@ import type { ContractOperation, OpenApiDocument } from './types';
 export const loadContractOperations = (document: OpenApiDocument): ContractOperation[] =>
   normalizeOperations(loadOperations(document));
 
-export type { ContractOperation, OpenApiDocument, SchemaBundle } from './types';
+export type { ContractOperation, ContractSpec, OpenApiDocument, SpecSchema } from './types';

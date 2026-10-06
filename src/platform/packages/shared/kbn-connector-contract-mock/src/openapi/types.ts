@@ -7,21 +7,85 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpOperation } from '@stoplight/types';
-import type { JSONSchema7 } from 'json-schema';
-
-/** A parsed OpenAPI 3.x or Swagger 2.0 document. */
 export type OpenApiDocument = Record<string, unknown>;
 
-/** Component schemas shared by every operation of a spec, keyed by component name. */
-export type SchemaBundle = Record<string, JSONSchema7>;
+export type JsonSchema = Record<string, unknown>;
 
-/** An operation whose schema refs point into the shared bundle, in the shape Prism expects. */
-export type ContractOperation = IHttpOperation & { __bundled__: SchemaBundle };
+/** OpenAPI 3.0 schemas are an extended subset of draft-04; 3.1 and later use draft 2020-12. */
+export type SchemaDialect = 'openapi-3.0' | 'draft-2020-12';
+
+/** A loaded spec. Operations share it, and their schemas stay in place in its document. */
+export interface ContractSpec {
+  readonly document: OpenApiDocument;
+  readonly dialect: SchemaDialect;
+}
+
+/** A schema with its JSON pointer into the spec document, so refs resolve where they are. */
+export interface SpecSchema {
+  readonly pointer: string;
+  readonly schema: JsonSchema;
+}
 
 /** A schema of an operation, with a human-readable location such as `query.limit`. */
 export interface LocatedSchema {
   readonly kind: 'parameter' | 'request' | 'response';
   readonly location: string;
-  readonly schema: JSONSchema7;
+  readonly schema: SpecSchema;
+}
+
+export type ParameterLocation = 'path' | 'query' | 'header' | 'cookie';
+
+export interface OperationParameter {
+  readonly name: string;
+  readonly in: ParameterLocation;
+  readonly required: boolean;
+  readonly style: string;
+  readonly explode: boolean;
+  readonly schema?: SpecSchema;
+}
+
+export interface MediaTypeContent {
+  readonly mediaType: string;
+  readonly schema?: SpecSchema;
+}
+
+export interface OperationHeader {
+  readonly name: string;
+  readonly required: boolean;
+  readonly schema?: SpecSchema;
+}
+
+export interface OperationRequestBody {
+  readonly required: boolean;
+  readonly contents: readonly MediaTypeContent[];
+}
+
+export interface OperationResponse {
+  /** A status code, a range such as `2XX`, or `default`. */
+  readonly code: string;
+  readonly contents: readonly MediaTypeContent[];
+  readonly headers: readonly OperationHeader[];
+}
+
+export interface ServerVariable {
+  readonly default: string;
+  readonly enum?: readonly string[];
+}
+
+export interface OperationServer {
+  readonly url: string;
+  readonly variables: Readonly<Record<string, ServerVariable>>;
+}
+
+export interface ContractOperation {
+  /** The `operationId`, or `METHOD /path` when the spec declares none. */
+  readonly id: string;
+  /** Lowercase HTTP method. */
+  readonly method: string;
+  readonly path: string;
+  readonly servers: readonly OperationServer[];
+  readonly parameters: readonly OperationParameter[];
+  readonly requestBody?: OperationRequestBody;
+  readonly responses: readonly OperationResponse[];
+  readonly spec: ContractSpec;
 }

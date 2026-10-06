@@ -8,4 +8,4 @@
  */
 
 export { loadContractOperations } from './src/openapi';
-export type { ContractOperation, OpenApiDocument, SchemaBundle } from './src/openapi';
+export type { ContractOperation, ContractSpec, OpenApiDocument, SpecSchema } from './src/openapi';
