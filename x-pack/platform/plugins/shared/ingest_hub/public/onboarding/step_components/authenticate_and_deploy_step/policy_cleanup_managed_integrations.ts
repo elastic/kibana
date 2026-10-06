@@ -63,7 +63,7 @@ export async function cleanupManagedIntegrationsPolicies(
   return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
 }
 
-async function updateManagedIntegrationsPolicy(
+export async function updateManagedIntegrationsPolicy(
   policyId: string,
   survivingInstanceIds: string[],
   opts: BuildPolicyBodyOpts
@@ -108,15 +108,22 @@ async function updateManagedIntegrationsPolicy(
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName, existingVersion);
   const pkgInfo = pkgInfoResponse.data?.item;
   const pkgVersion = pkgInfo?.version;
-  if (!pkgVersion || !pkgInfo) return;
+  // Treat a missing package as a failure so callers do not count the update as successful and
+  // clear isDirty for a policy that was never actually updated.
+  if (!pkgVersion || !pkgInfo) {
+    throw new Error(
+      `Cannot update managed-integration policy ${policyId}: package info unavailable for ${packageName}@${
+        existingVersion ?? 'latest'
+      }.`
+    );
+  }
 
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? {
-        enabledDataStreams: service.dataStreams,
-        varsByDataStream: {},
-      };
+    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    };
   }
 
   const services = members.map(({ service }) => service);
@@ -145,9 +152,19 @@ async function updateManagedIntegrationsPolicy(
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
   const policyNamespace = existingNamespace ?? namespace;
 
-  // Preserve the connector already on the policy (a Fleet operator may have reassigned it
-  // since the wizard ran); never substitute the stale wizard connectorId.
-  const existingCloudConnector = existingGetResult.item.cloud_connector;
+  // Use the override connector when the caller explicitly provides one (e.g. a dirty redeploy
+  // that changed identity federation settings). Otherwise preserve the connector already on the
+  // policy — a Fleet operator may have reassigned it since the wizard ran.
+  const rawConnector =
+    'overrideCloudConnector' in opts
+      ? opts.overrideCloudConnector
+      : existingGetResult.item.cloud_connector;
+  // Normalise: the GET response may return a legacy string ID for cloud_connector; the PUT
+  // endpoint expects the object form { enabled: boolean, cloud_connector_id?: string }.
+  const cloudConnector =
+    rawConnector == null || typeof rawConnector !== 'string'
+      ? rawConnector
+      : ({ enabled: true, cloud_connector_id: rawConnector } as const);
 
   await sendUpdateAgentlessPolicy(policyId, {
     name: policyName,
@@ -155,6 +172,8 @@ async function updateManagedIntegrationsPolicy(
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    ...(existingCloudConnector ? { cloud_connector: existingCloudConnector } : {}),
+    // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
+    // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
+    ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
   });
 }

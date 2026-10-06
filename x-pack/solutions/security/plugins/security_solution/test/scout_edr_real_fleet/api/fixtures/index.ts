@@ -5,33 +5,20 @@
  * 2.0.
  */
 
-import { apiTest as base, tags } from '@kbn/scout-security';
+import { apiTest as baseApiTest, tags } from '@kbn/scout-security';
 import {
-  enrollEndpointHost,
   FLEET_AND_HOST_TIMEOUT_MS,
+  withEnrolledEndpoint,
   type EnrolledEndpoint,
-} from '../../fixtures/enroll_endpoint';
+} from '../../fixtures/enrolled_endpoint';
 
 export { tags };
 export type { EnrolledEndpoint };
 
-interface EdrRealFleetApiWorkerFixtures {
-  enrolledEndpoint: EnrolledEndpoint;
-}
-
-export const apiTest = base.extend<{}, EdrRealFleetApiWorkerFixtures>({
+export const apiTest = baseApiTest.extend<{}, { enrolledEndpoint: EnrolledEndpoint }>({
   enrolledEndpoint: [
     async ({ kbnClient, esClient, log }, use) => {
-      await enrollEndpointHost(
-        {
-          kbnClient,
-          esClient,
-          log,
-          policyNamePrefix: 'host-isolation',
-          hostnamePrefix: 'test-host-iso',
-        },
-        use
-      );
+      await withEnrolledEndpoint({ kbnClient, esClient, log }, use);
     },
     { scope: 'worker', timeout: FLEET_AND_HOST_TIMEOUT_MS },
   ],
