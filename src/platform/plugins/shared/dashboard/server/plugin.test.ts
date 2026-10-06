@@ -59,6 +59,8 @@ describe('DashboardPlugin', () => {
       expect(response).toEqual({
         scanDashboards: expect.any(Function),
         client: expect.any(Object),
+        getDashboardStateSchema: expect.any(Function),
+        getDashboardAppStateSchema: expect.any(Function),
       });
     });
   });
