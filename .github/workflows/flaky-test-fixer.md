@@ -1,14 +1,21 @@
 ---
 name: Flaky Test Fixer
-description: Open a draft fix PR for a `failed-test` issue that has been labeled `ai:fix-flaky`.
+description: Open a draft fix PR for an admitted `ai:fix-flaky` request or a manual dispatch.
+run-name: "Flaky Test Fixer #${{ inputs.issue_number }} (${{ inputs.request_id && format('request {0}', inputs.request_id) || 'manual' }})"
 on:
-  issues:
-    types: [labeled]
   workflow_dispatch:
     inputs:
       issue_number:
         description: Issue number in this repository to fix
         required: true
+        type: string
+      request_id:
+        description: Label event ID supplied by the queue dispatcher; omit for a manual override
+        required: false
+        type: string
+      requested_by:
+        description: Original requester supplied by the queue dispatcher
+        required: false
         type: string
   status-comment: true
 
@@ -20,28 +27,16 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
+if: "${{ github.repository == 'elastic/kibana' && github.event.inputs.issue_number != '' }}"
 
 concurrency:
-  # Keep one fixer lane per issue for the real trigger. Every other label event (e.g. the
-  # sibling `failure:*` labels the investigator applies in the same batch as `ai:fix-flaky`)
-  # gets its own group suffix, so it can skip without canceling a pending or in-flight fix run.
-  group: >-
-    flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
-      (
-        github.event.action == 'labeled' &&
-        github.event.label.name != 'ai:fix-flaky' &&
-        github.event.label.name
-      ) ||
-      'fix'
-    }}
+  group: flaky-test-fixer-${{ github.event.inputs.issue_number }}
   cancel-in-progress: false
-  job-discriminator: ${{ github.event.issue.number || github.event.inputs.issue_number }}
+  job-discriminator: ${{ github.event.inputs.issue_number }}
 
 env:
-  ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
-  # Whoever triggered this run: the user who applied `ai:fix-flaky`, or the manual dispatcher.
-  REQUESTED_BY: ${{ github.actor }}
+  ISSUE_NUMBER: &issue_number ${{ github.event.inputs.issue_number }}
+  REQUESTED_BY: ${{ github.event.inputs.requested_by || github.actor }}
   # Lets the agent omit `-o elastic` on every `bk` invocation when re-investigating.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -136,7 +131,7 @@ safe-outputs:
     run-failure: 'The flaky test fixer failed before it could report an outcome. Review [{workflow_name}]({run_url}), then remove and reapply `ai:fix-flaky` to retry.'
   mentions:
     allowed:
-      - ${{ github.actor }}
+      - ${{ env.REQUESTED_BY }}
   add-comment:
     max: 1
     target: *issue_number
@@ -153,7 +148,7 @@ safe-outputs:
     labels: [flaky-test-fixer]
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
-    reviewers: ${{ github.actor }}
+    reviewers: ${{ env.REQUESTED_BY }}
     base-branch: main
     # `main` only: any other base makes the handler run an unbounded `git fetch` that
     # can't finish on a repo Kibana's size. Version-branch fixes are handed over in the
@@ -231,6 +226,13 @@ Open a single draft PR with the smallest possible fix for this flaky-test issue.
 - the failing test is under `x-pack/solutions/security/test/security_solution_cypress/cypress/` and the doctor's action is one this fixer does not ship (migrate, a new Scout spec, or a new API/unit test) — see [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship).
 
 Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
+
+## Admission queue
+
+The Flaky Fix Dispatcher admits labelled issues every 15 minutes, allowing up to three open
+fix PRs or admitted fixes per owning team and one active fixer per team. Waiting issues keep
+`ai:fix-flaky`. A direct workflow dispatch without `request_id` is a manual capacity override.
+See [queue operations](../scripts/flaky_fix_queue/README.md) for retries and recovery.
 
 ## Requester mention
 

@@ -1,0 +1,41 @@
+name: Flaky Fix Queue Tests
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/flaky_fix_queue/**'
+      - '.github/workflows/flaky_fix_dispatcher.yml'
+      - '.github/workflows/flaky_fix_queue_tests.yml'
+      - '.github/workflows/flaky-test-fixer.md'
+      - '.github/workflows/flaky-test-fixer.lock.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github/scripts/flaky_fix_queue
+            .github/workflows/flaky_fix_dispatcher.yml
+            .github/workflows/flaky-test-fixer.lock.yml
+            .nvmrc
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+      - name: Install standalone test dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/flaky-fix-queue" --no-save --no-package-lock \
+            @octokit/rest@22.0.1 typescript@6.0.3 @types/node@24.10.13
+          ln -s "$RUNNER_TEMP/flaky-fix-queue/node_modules" node_modules
+      - name: Test queue and GitHub adapter
+        run: node --test .github/scripts/flaky_fix_queue/*.test.ts
+      - name: Check queue types
+        run: node node_modules/typescript/bin/tsc -p .github/scripts/flaky_fix_queue/tsconfig.json

@@ -133,12 +133,11 @@ safe-outputs:
       - failure:ai-fixable
       - failure:fix-did-not-hold
       - failure:insufficient-data
-      # fix-request label that triggers the Flaky Test Fixer workflow
+      # fix-request label consumed by the Flaky Fix Dispatcher
       - ai:fix-flaky
     max: 5
     target: *issue_number
-    # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
-    # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
+    # Preserve the existing bot identity for investigation labels.
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
     # Use the REST endpoint: with issue intents on, GitHub only applies HIGH-confidence
     # labels and parks the rest as pending suggestions, so a `medium` verdict added no
@@ -279,7 +278,7 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 Request an automatic fix immediately for a fixable **`application`** failure. For every other classification, only request a fix after the failure has **recurred** — a test that failed at least twice on tracked branches, not a first-time one-off — so we don't spend a fix run on a fluke. Read `test.failCount` from the issue body's `kibanaCiData` metadata (the `<!-- kibanaCiData = ... -->` comment): `test.failCount >= 2` means it recurred. If that metadata is missing, treat the failure as recurring only when the timeline shows it — a "New failure" comment from `kibanamachine`, or a prior reopen.
 
 - **`application`, and you added `failure:ai-fixable`:** add `ai:fix-flaky` immediately, regardless of `failCount`.
-- **Any other classification that recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
+- **Any other classification that recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** add `ai:fix-flaky` to request a fix — the Flaky Fix Dispatcher admits labelled requests when the owning team has capacity, then the fixer opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
 - **Any other classification with a first-time failure (`failCount` is 1, no recurrence):** do **not** add `ai:fix-flaky` yet, even if a fix is available — a single failure is likely a one-off and not worth a fix run. Still add `failure:ai-fixable` if a fix exists (so the signal is recorded) and leave the issue open. When the test fails again the reporter reopens the issue or posts a new-failure comment; either re-triggers this investigation at `failCount` 2, which requests the fix then.
 
 **Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate. Also skip `ai:fix-flaky` (and `failure:ai-fixable`) for Security Cypress when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none`.
@@ -365,7 +364,7 @@ Use `> [!TIP]` only when the callout suggests the reader add a label; use `> [!N
 
 ```markdown
 > [!NOTE]
-> Marked "AI-fixable": fix PR incoming within ~20-30 min.
+> Marked "AI-fixable": fix request queued; it will start when the owning team has capacity.
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the note instead of the automatic-request sentence.
