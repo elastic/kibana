@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Shape of the real package: one `Eui<Component>Selectors` object per Component
-// Object, `*_SELECTOR` entries are CSS classes, `*_TEST_SUBJ` entries are not.
+// Shape of the real package: a `selectors` object keyed by component, `*_SELECTOR`
+// entries are CSS classes, `*_TEST_SUBJ` entries are not.
 jest.mock('@elastic/eui-test-helpers', () => ({
   EuiComboBoxObject: class {},
-  EuiComboBoxSelectors: {
-    ROOT_SELECTOR: '.euiComboBox',
-    PILL_SELECTOR: '.euiComboBoxPill',
-    SEARCH_INPUT_TEST_SUBJ: 'comboBoxSearchInput',
-    optionFor: (testSubj) => `[data-test-subj~="${testSubj}-optionsList"] [role="option"]`,
-  },
-  EuiDataGridSelectors: {
-    ROW_SELECTOR: '.euiDataGridRow',
-    FULL_SCREEN_BUTTON_TEST_SUBJ: 'dataGridFullScreenButton',
+  selectors: {
+    comboBox: {
+      ROOT_SELECTOR: '.euiComboBox',
+      PILL_SELECTOR: '.euiComboBoxPill',
+      SEARCH_INPUT_TEST_SUBJ: 'comboBoxSearchInput',
+      optionFor: (testSubj) => `[data-test-subj~="${testSubj}-optionsList"] [role="option"]`,
+    },
+    dataGrid: {
+      ROW_SELECTOR: '.euiDataGridRow',
+      FULL_SCREEN_BUTTON_TEST_SUBJ: 'dataGridFullScreenButton',
+    },
   },
 }));
 

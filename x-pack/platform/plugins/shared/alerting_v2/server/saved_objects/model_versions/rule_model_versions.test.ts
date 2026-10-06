@@ -96,6 +96,105 @@ describe('ruleModelVersions', () => {
     });
   });
 
+  describe('v7 to v8 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    // Built by running the real v7 migration so the fixture tracks the v7 shape.
+    const createV7RuleDocument = (metadata: Record<string, unknown>): SavedObject =>
+      migrator.migrate({
+        document: createV5RuleDocument({
+          metadata,
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: { profile_uid: 'editor_profile_uid' },
+        }),
+        fromVersion: 6,
+        toVersion: 7,
+      });
+
+    const migrate = (document: SavedObject) =>
+      migrator.migrate({ document, fromVersion: 7, toVersion: 8 }).attributes as Record<
+        string,
+        unknown
+      >;
+
+    it('copies the configuration version counter to the attributes root', () => {
+      expect(migrate(createV7RuleDocument({ name: 'test-rule', version: 4 })).version).toBe(4);
+    });
+
+    it('backfills the baseline counter for a rule written before versioning', () => {
+      expect(migrate(createV7RuleDocument({ name: 'test-rule' })).version).toBe(1);
+    });
+
+    it('leaves the legacy metadata.version in place for rollback', () => {
+      const document = createV7RuleDocument({ name: 'test-rule', version: 4 });
+
+      expect(migrate(document)).toEqual({
+        ...(document.attributes as Record<string, unknown>),
+        version: 4,
+      });
+    });
+
+    it('accepts a migrated rule in the v8 forward compatibility schema', () => {
+      const forwardCompatibility = ruleModelVersions['8']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = migrate(createV7RuleDocument({ name: 'test-rule', version: 4 }));
+
+      expect((forwardCompatibility.validate(attributes) as Record<string, unknown>).version).toBe(
+        4
+      );
+    });
+  });
+
+  describe('v8 to v9 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    const createV8RuleDocument = (): SavedObject =>
+      migrator.migrate({
+        document: createV5RuleDocument({
+          metadata: { name: 'test-rule', tags: ['prod'] },
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: { profile_uid: 'editor_profile_uid' },
+        }),
+        fromVersion: 5,
+        toVersion: 8,
+      });
+
+    it('leaves existing rules unchanged, since routing_tags is optional', () => {
+      const document = createV8RuleDocument();
+      const migrated = migrator.migrate({ document, fromVersion: 8, toVersion: 9 });
+
+      expect(migrated.attributes).toEqual(document.attributes);
+    });
+
+    it('accepts routing tags in the v9 forward compatibility schema', () => {
+      const forwardCompatibility = ruleModelVersions['9']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...(createV8RuleDocument().attributes as Record<string, unknown>),
+        metadata: { name: 'test-rule', tags: ['prod'], routing_tags: ['sre'] },
+      };
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata.routing_tags
+      ).toEqual(['sre']);
+    });
+
+    it('drops routing tags when a v8 node reads a v9 rule', () => {
+      const forwardCompatibility = ruleModelVersions['8']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...(createV8RuleDocument().attributes as Record<string, unknown>),
+        metadata: { name: 'test-rule', tags: ['prod'], routing_tags: ['sre'] },
+      };
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata
+      ).toEqual({ name: 'test-rule', tags: ['prod'] });
+    });
+  });
+
   // The actor is a nested object, so these pin that `unknowns: 'ignore'` on the
   // attributes schema reaches it. It does: config-schema maps the option to Joi's
   // `stripUnknown`, which cascades to children that do not override it. Without

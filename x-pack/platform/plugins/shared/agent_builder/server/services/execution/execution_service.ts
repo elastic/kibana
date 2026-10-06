@@ -13,6 +13,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { validateReasoningEffort, type InferenceConnector } from '@kbn/inference-common';
 import type {
   ChatEvent,
   ConverseInput,
@@ -56,7 +57,7 @@ import {
   collectAndWriteEvents,
   type AgentExecutionDeps,
 } from './execution_runner';
-import { serializeExecutionError } from './utils';
+import { resolveExecutionConnectorId, serializeExecutionError } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
@@ -118,8 +119,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
-
     const executionClient = this.createExecutionClient();
+
+    if (
+      params.reasoningLevel !== undefined &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+    ) {
+      const connector = await this.resolveExecutionConnector({
+        agentId,
+        connectorId: params.connectorId,
+        request,
+      });
+      if (connector) {
+        validateReasoningEffort(connector, params.reasoningLevel);
+      }
+    }
 
     const conversationClient = await this.getConversationClient({
       request,
@@ -675,6 +689,60 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       request,
       user: { ...requestClient.getUser(), ...parentOwner },
     });
+  }
+
+  private async isIdempotentReplay({
+    executionClient,
+    executionId,
+    metadata,
+  }: {
+    executionClient: AgentExecutionClient;
+    executionId: string;
+    metadata?: Record<string, string>;
+  }): Promise<boolean> {
+    if (!metadata?.execution_idempotency_key) {
+      return false;
+    }
+    return (await executionClient.peek(executionId)) !== undefined;
+  }
+
+  private async resolveExecutionConnector({
+    agentId,
+    connectorId,
+    request,
+  }: {
+    agentId: string;
+    connectorId?: string;
+    request: KibanaRequest;
+  }): Promise<InferenceConnector | undefined> {
+    const { inference, searchInferenceEndpoints, agentService } = this.deps;
+    const getInferenceFeatureId = async (): Promise<string | undefined> => {
+      if (connectorId !== undefined) {
+        return undefined;
+      }
+      const agentRegistry = await agentService.getRegistry({ request });
+      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+    };
+    return (
+      getInferenceFeatureId()
+        .then((inferenceFeatureId) =>
+          resolveExecutionConnectorId({
+            connectorId,
+            inferenceFeatureId,
+            request,
+            searchInferenceEndpoints,
+          })
+        )
+        .then(
+          ({ connectorId: resolvedConnectorId, connector }) =>
+            connector ??
+            (resolvedConnectorId
+              ? inference.getConnectorById(resolvedConnectorId, request)
+              : undefined)
+        )
+        // Leaves resolution failures to the runner, which records them against the execution
+        .catch(() => undefined)
+    );
   }
 
   private async resolveConversationRequest({

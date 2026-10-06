@@ -141,7 +141,8 @@ export const EscalationsPageHeader: React.FC<EscalationsPageHeaderProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>
-      <EuiSpacer size="l" />
+      {/* Same small inset as `AlertZeroPageHeader`; the page column supplies the large gap. */}
+      <EuiSpacer size="s" />
     </>
   );
 };

@@ -18,6 +18,40 @@ import { i18n } from '@kbn/i18n';
 /* Header                                                                     */
 /* -------------------------------------------------------------------------- */
 
+export const SERVICE_ACCOUNT_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountLabel',
+  {
+    defaultMessage: 'Run as',
+  }
+);
+
+export const SERVICE_ACCOUNT_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountHelp',
+  {
+    defaultMessage:
+      'The worker runs as this account. Select one before turning the worker on. A worker that is already on keeps running until you save an account for it.',
+  }
+);
+
+export const SERVICE_ACCOUNT_PLACEHOLDER = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountPlaceholder',
+  { defaultMessage: 'Select a service account' }
+);
+
+export const SERVICE_ACCOUNT_REQUIRED_TO_SAVE = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountRequiredToSave',
+  {
+    defaultMessage:
+      'Select a service account to save while this worker stays on. You can turn it off without one.',
+  }
+);
+
+export const serviceAccountSelectAriaLabel = (workerName: string) =>
+  i18n.translate('xpack.alertzero.watches.settings.serviceAccountAriaLabel', {
+    defaultMessage: 'Run as for {workerName}',
+    values: { workerName },
+  });
+
 export const ENABLED_SWITCH_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.enabledSwitch',
   {
@@ -35,6 +69,12 @@ export const viewExecutionsAriaLabel = (workerName: string) =>
     values: { workerName },
   });
 
+export const workerWarningAriaLabel = (workerName: string): string =>
+  i18n.translate('xpack.alertzero.watches.settings.workerWarningAriaLabel', {
+    defaultMessage: 'Warnings for {workerName}',
+    values: { workerName },
+  });
+
 export const READ_ONLY_CALLOUT_MESSAGE = i18n.translate(
   'xpack.alertzero.watches.settings.readOnlyCalloutMessage',
   {
@@ -48,6 +88,43 @@ export const READ_ONLY_TOOLTIP = i18n.translate(
   {
     defaultMessage: 'Read-only access',
   }
+);
+
+/** Shown instead of navigating when managed workflows are hidden in this space. */
+export const MANAGED_WORKFLOWS_DISABLED_POPOVER_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledPopoverTitle',
+  { defaultMessage: 'Managed workflows are turned off' }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_BODY = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledBody',
+  {
+    defaultMessage:
+      'Execution history lives in Managed workflows, which is turned off for this space.',
+  }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_DISMISS = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledDismiss',
+  { defaultMessage: 'Not now' }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_OPEN_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledOpenSettings',
+  { defaultMessage: 'Open Advanced Settings' }
+);
+
+/** Read-only spaces get no popover, so the requirement is stated on the link itself. */
+export const MANAGED_WORKFLOWS_REQUIRED_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsRequiredTooltip',
+  {
+    defaultMessage: 'Requires Managed workflows. Ask an admin to enable it in Advanced Settings.',
+  }
+);
+
+export const MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowExecutionsPermissionTooltip',
+  { defaultMessage: 'Requires permission to view managed workflow executions.' }
 );
 
 export const SAVE_WATCH_SETTINGS = i18n.translate(
@@ -174,5 +251,36 @@ export const WORKERS_EMPTY_TITLE = i18n.translate(
   'xpack.alertzero.watches.settings.workers.empty.title',
   {
     defaultMessage: 'No Workers in this Watch',
+  }
+);
+
+/* -------------------------------------------------------------------------- */
+/* Workers section (Watch detail)                                             */
+/* -------------------------------------------------------------------------- */
+
+export const WORKERS_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.sectionTitle',
+  { defaultMessage: 'Workers' }
+);
+
+export const WORKERS_SECTION_SUBTITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.sectionSubtitle',
+  { defaultMessage: 'Workers tagged as this Watch' }
+);
+
+/* -------------------------------------------------------------------------- */
+/* Alert Triage Worker extras                                                 */
+/* -------------------------------------------------------------------------- */
+
+export const MINIMUM_CONFIDENCE_SCORE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreLabel',
+  { defaultMessage: 'Minimum confidence score' }
+);
+
+export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
+  {
+    defaultMessage:
+      'False positive alerts must meet or exceed this confidence score to be surfaced for review or auto-closed. Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
   }
 );

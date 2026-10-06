@@ -31,25 +31,11 @@ export interface NoSamplingOption {
 
 export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
-export interface FieldData {
-  fieldName: string;
-  existsInDocs: boolean;
-  stats?: {
-    sampleCount?: number;
-    count?: number;
-    cardinality?: number;
-  };
-}
-
 export interface Field {
   fieldName: string;
   type: string;
   cardinality: number;
   safeFieldName: string;
-}
-
-export function isValidField(arg: unknown): arg is Field {
-  return isPopulatedObject(arg, ['fieldName', 'type']) && typeof arg.fieldName === 'string';
 }
 
 export interface Distribution {
@@ -135,66 +121,6 @@ export interface FieldExamples {
   examples: unknown[];
 }
 
-export interface AggHistogram {
-  histogram: estypes.AggregationsHistogramAggregation;
-}
-
-export interface AggTerms {
-  terms: {
-    field: string;
-    size: number;
-  };
-}
-
-export interface NumericDataItem {
-  key: number;
-  key_as_string?: string;
-  doc_count: number;
-}
-
-export interface NumericChartData {
-  data: NumericDataItem[];
-  id: string;
-  interval: number;
-  stats: [number, number];
-  type: 'numeric';
-}
-
-export interface OrdinalDataItem {
-  key: string;
-  key_as_string?: string;
-  doc_count: number;
-}
-
-export interface OrdinalChartData {
-  type: 'ordinal' | 'boolean';
-  cardinality: number;
-  data: OrdinalDataItem[];
-  id: string;
-}
-
-export interface UnsupportedChartData {
-  id: string;
-  type: 'unsupported';
-}
-
-export interface AggCardinality {
-  cardinality: estypes.AggregationsCardinalityAggregation;
-}
-
-export type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
-
-export type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
-
-export type BatchStats =
-  | NonSampledNumericFieldStats
-  | NumericFieldStats
-  | StringFieldStats
-  | BooleanFieldStats
-  | DateFieldStats
-  | DocumentCountStats
-  | FieldExamples;
-
 export type FieldStats =
   | NonSampledNumericFieldStats
   | NumericFieldStats
@@ -203,10 +129,6 @@ export type FieldStats =
   | DateFieldStats
   | FieldExamples
   | FieldStatsError;
-
-export function isValidFieldStats(arg: unknown): arg is FieldStats {
-  return isPopulatedObject(arg, ['fieldName', 'type', 'count']);
-}
 
 export interface FieldStatsCommonRequestParams {
   index: string;
@@ -262,16 +184,6 @@ export interface DataStatsFetchProgress {
   total: number;
 }
 
-export interface FieldData {
-  fieldName: string;
-  existsInDocs: boolean;
-  stats?: {
-    sampleCount?: number;
-    count?: number;
-    cardinality?: number;
-  };
-}
-
 export interface Field {
   fieldName: string;
   type: string;
@@ -284,19 +196,9 @@ export interface Aggs {
   [key: string]: estypes.AggregationsAggregationContainer;
 }
 
-export const EMBEDDABLE_SAMPLER_OPTION = {
-  RANDOM: 'random_sampling',
-  NORMAL: 'normal_sampling',
-};
-export type FieldStatsEmbeddableSamplerOption =
-  (typeof EMBEDDABLE_SAMPLER_OPTION)[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
-
 export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
   return arg.mode === 'random_sampling';
 }
 export function isNormalSamplingOption(arg: SamplingOption): arg is NormalSamplingOption {
   return arg.mode === 'normal_sampling';
-}
-export function isNoSamplingOption(arg: SamplingOption): arg is NoSamplingOption {
-  return arg.mode === 'no_sampling' || (arg.mode === 'random_sampling' && arg.probability === 1);
 }

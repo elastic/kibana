@@ -190,7 +190,7 @@ describe('manageRuleTool', () => {
       expect(results[0].data.message).toContain('rule name is required');
     });
 
-    it('stores the recovery object from set_query', async () => {
+    it('stores the recovery object from set_recovery', async () => {
       const ctx = createContext();
       getEsqlQueryMock(ctx).mockResolvedValueOnce({
         columns: [{ name: 'host.name', type: 'keyword' }],
@@ -198,7 +198,7 @@ describe('manageRuleTool', () => {
       });
       mockResolvableTimeField(ctx);
 
-      await tool.handler(
+      const result = await tool.handler(
         {
           operations: [
             { operation: 'set_metadata', name: 'Recovery Rule' },
@@ -206,6 +206,9 @@ describe('manageRuleTool', () => {
             {
               operation: 'set_query',
               query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+            },
+            {
+              operation: 'set_recovery',
               recovery: { strategy: 'query', query: 'FROM metrics-* | WHERE cpu < 0.5' },
             },
           ],
@@ -220,9 +223,28 @@ describe('manageRuleTool', () => {
         strategy: 'query',
         query: 'FROM metrics-* | WHERE cpu < 0.5',
       });
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: {
+            ruleAttachment?: {
+              recovery?: { strategy: string; query?: string };
+              query?: { base: string; breach?: { segment: string } };
+            };
+          };
+        }>;
+      };
+      expect(results[0].data?.ruleAttachment?.recovery).toEqual({
+        strategy: 'query',
+        query: 'FROM metrics-* | WHERE cpu < 0.5',
+      });
+      expect(results[0].data?.ruleAttachment?.query).toEqual({
+        base: 'FROM metrics-* | WHERE cpu > 0.9',
+      });
     });
 
-    it('stores the no_data object from set_query', async () => {
+    it('stores the no_data object from set_no_data', async () => {
       const ctx = createContext();
       getEsqlQueryMock(ctx).mockResolvedValueOnce({
         columns: [{ name: 'host.name', type: 'keyword' }],
@@ -230,7 +252,7 @@ describe('manageRuleTool', () => {
       });
       mockResolvableTimeField(ctx);
 
-      await tool.handler(
+      const result = await tool.handler(
         {
           operations: [
             { operation: 'set_metadata', name: 'No-Data Rule' },
@@ -238,6 +260,9 @@ describe('manageRuleTool', () => {
             {
               operation: 'set_query',
               query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+            },
+            {
+              operation: 'set_no_data',
               no_data: {
                 strategy: 'keep_last',
                 query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name',
@@ -252,6 +277,21 @@ describe('manageRuleTool', () => {
         data: { no_data?: { strategy: string; query?: string } };
       };
       expect(addCall.data.no_data).toEqual({
+        strategy: 'keep_last',
+        query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name',
+      });
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: {
+            ruleAttachment?: {
+              no_data?: { strategy: string; query?: string };
+            };
+          };
+        }>;
+      };
+      expect(results[0].data?.ruleAttachment?.no_data).toEqual({
         strategy: 'keep_last',
         query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name',
       });

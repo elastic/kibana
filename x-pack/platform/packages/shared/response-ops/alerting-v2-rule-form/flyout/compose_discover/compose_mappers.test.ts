@@ -26,7 +26,8 @@ const baseRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1, tags: ['tag1'] },
+  version: 1,
+  metadata: { name: 'Test Rule', tags: ['tag1'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
   query: {
@@ -105,6 +106,20 @@ describe('composeFormToCreateRequest', () => {
     };
     const result = composeFormToCreateRequest(values);
     expect(result.metadata.tags).toBeUndefined();
+  });
+
+  it('maps routing tags when present and omits them when empty', () => {
+    const withRoutingTags = composeFormToCreateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+    });
+    expect(withRoutingTags.metadata.routing_tags).toEqual(['sre']);
+
+    const withoutRoutingTags = composeFormToCreateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: [] },
+    });
+    expect(withoutRoutingTags.metadata).not.toHaveProperty('routing_tags');
   });
 
   it('maps grouping when present', () => {
@@ -325,6 +340,19 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.metadata?.tags).toEqual(['prod', 'infra']);
   });
 
+  it('sends routing tags when present', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+    });
+    expect(result.metadata?.routing_tags).toEqual(['sre']);
+  });
+
+  it('nullifies routing tags when empty (clear all routing tags on a partial update)', () => {
+    const result = composeFormToUpdateRequest(baseFormValues);
+    expect(result.metadata?.routing_tags).toBeNull();
+  });
+
   it('preserves grouping when present', () => {
     const values: FormValues = {
       ...baseFormValues,
@@ -378,6 +406,14 @@ describe('mapRuleToComposeFormValues', () => {
     });
     expect(result.stateTransitionAlertDelayMode).toBe('immediate');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
+  });
+
+  it('loads routing tags from the rule', () => {
+    const rule = {
+      ...baseRuleResponse,
+      metadata: { ...baseRuleResponse.metadata, routing_tags: ['sre'] },
+    } as RuleResponse;
+    expect(mapRuleToComposeFormValues(rule).metadata.routingTags).toEqual(['sre']);
   });
 
   it('maps schedule with lookback', () => {
@@ -469,8 +505,10 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransition).toEqual({
       pendingCount: 3,
       pendingTimeframe: '10m',
+      pendingOperator: null,
       recoveringCount: null,
       recoveringTimeframe: null,
+      recoveringOperator: null,
     });
     expect(result.stateTransitionAlertDelayMode).toBe('duration');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
