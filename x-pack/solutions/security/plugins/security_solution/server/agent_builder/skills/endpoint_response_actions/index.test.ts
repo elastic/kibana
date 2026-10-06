@@ -33,8 +33,9 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.description).toContain('List enrolled Elastic Defend endpoints');
       expect(skill.description).toContain('NOT for diagnosing');
       expect(skill.description).toContain('(use elastic-defend-configuration-troubleshooting)');
-      expect(skill.description).not.toContain('Resolves hostnames to endpoint identities');
-      expect(skill.description).toContain('Read-only');
+      expect(skill.description).toContain('by hostname or agent ID');
+      expect(skill.description).toContain('isolation state');
+      expect(skill.description).toContain('response action by ID');
       expect(skill.content).toContain('Endpoint Response Actions Skill');
     });
 
@@ -43,6 +44,10 @@ describe('createEndpointResponseActionsSkill', () => {
 
       expect(skill.content).toContain('Endpoint Response Actions Skill');
       expect(skill.content).toContain('When to Use This Skill');
+      expect(skill.content).toContain('host by hostname or agent ID');
+      expect(skill.content).toContain(
+        'response action failed — that routes to the elastic-defend-configuration-troubleshooting'
+      );
       expect(skill.content).toContain('Process');
       expect(skill.content).toContain('Guardrails');
       expect(skill.content).toContain('does not restrict');
@@ -53,14 +58,12 @@ describe('createEndpointResponseActionsSkill', () => {
     it('exposes detailed reference material via referencedContent', () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
 
-      expect(skill.referencedContent).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: 'reference',
-            content: expect.stringContaining('Error Handling Reference'),
-          }),
-        ])
-      );
+      const reference =
+        skill.referencedContent?.find((entry) => entry.name === 'reference')?.content ?? '';
+      expect(reference).toContain('Error Handling Reference');
+      expect(reference).toContain('Other skills');
+      expect(reference).not.toContain('for endpoint or response action state');
+      expect(reference).toContain('get_endpoint_status');
     });
 
     it('declares itself read-only and names the write actions it cannot perform', () => {

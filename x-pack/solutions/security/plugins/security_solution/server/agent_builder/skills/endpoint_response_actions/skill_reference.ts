@@ -44,7 +44,7 @@ When a counter shows dropped items, say that only a sample is shown and give the
 - When the analyst asks which hosts are available, call \`list_endpoints\` first.
 - To confirm a host's identity and current isolation state, call \`get_endpoint_status\`.
 - For follow-up on a prior action ("what happened to scan X?"), use \`get_response_action_status\` with the action ID.
-- Do **not** use \`platform.core.search\` or raw Elasticsearch queries for endpoint or response action state.
+- For this skill's status and response action lookups, use \`list_endpoints\`, \`get_endpoint_status\`, and \`get_response_action_status\` instead of \`platform.core.search\` or raw Elasticsearch queries. Other skills' diagnostic queries are unaffected.
 
 ## Scope
 

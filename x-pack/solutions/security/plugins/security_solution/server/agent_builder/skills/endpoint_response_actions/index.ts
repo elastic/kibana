@@ -27,9 +27,12 @@ const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
 ## When to Use This Skill
 
 Use when the analyst wants to list enrolled endpoints, check the status of a
-host (status, healthy, unhealthy, updating, offline, inactive, unenrolled;
-unknown when not yet reported — isolated or not), or look up a previously
-dispatched response action by its action ID.
+host by hostname or agent ID (status, healthy, unhealthy, updating, offline,
+inactive, unenrolled; unknown when not yet reported — isolated or not), or look
+up a previously dispatched response action by its action ID. Not for diagnosing
+why a host is unhealthy, offline, or missing, or why an isolation or other
+response action failed — that routes to the elastic-defend-configuration-troubleshooting
+skill.
 
 This skill is **read-only**. It cannot isolate, release, scan, or otherwise
 change the state of an endpoint. If the analyst asks for a state-changing
@@ -71,7 +74,7 @@ export const createEndpointResponseActionsSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'List enrolled Elastic Defend endpoints, check a host status (healthy, unhealthy, updating, offline, inactive, unenrolled; unknown when not yet reported) and isolation state, and look up a previously dispatched response action by ID. Read-only — it does not isolate, release, or scan endpoints. NOT for diagnosing why an endpoint is unhealthy, offline, or missing, or why an isolation or other response action failed (use elastic-defend-configuration-troubleshooting).',
+      'List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID (healthy, unhealthy, updating, offline, inactive, unenrolled; unknown when not yet reported) and isolation state, and look up a previously dispatched response action by ID. Read-only — it does not isolate, release, or scan endpoints. NOT for diagnosing why an endpoint is unhealthy, offline, or missing, or why an isolation or other response action failed (use elastic-defend-configuration-troubleshooting).',
     content: SYSTEM_INSTRUCTIONS,
     referencedContent: [
       {
