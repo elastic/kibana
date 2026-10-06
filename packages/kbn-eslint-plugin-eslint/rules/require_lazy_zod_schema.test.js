@@ -103,12 +103,6 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     },
     {
       code: dedent`
-        import { z } from '@kbn/zod';
-        export const Ext = UnknownSchema.extend({ a: z.string() });
-      `,
-    },
-    {
-      code: dedent`
         import { z, lazySchema } from '@kbn/zod';
         const Base = lazySchema(() => z.object({}));
         export const Ext = lazySchema(() => Base.extend({ a: z.string() }));
@@ -119,6 +113,15 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         import { z, lazySchema } from '@kbn/zod';
         const Base = lazySchema(() => z.object({}));
         export const Alias = Base;
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Connector = {
+          actions: { checkIp: { input: lazySchema(() => z.object({ ip: z.string() })) } },
+          make: () => ({ input: z.object({}) }),
+        };
       `,
     },
   ],
@@ -189,6 +192,13 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     },
     {
       code: dedent`
+        import { z } from '@kbn/zod';
+        export const Ext = UnknownSchema.extend({ a: z.string() });
+      `,
+      errors: [EAGER],
+    },
+    {
+      code: dedent`
         import { z, lazySchema } from '@kbn/zod';
         export const Base = lazySchema(() => z.object({}));
         export const Ext = Base.extend({ a: z.string() });
@@ -219,6 +229,30 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const Picked = Ext.pick({ a: true });
       `,
       errors: [EAGER, DERIVED, DERIVED],
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const Connector = {
+          actions: { checkIp: { input: z.object({ ip: z.string() }) } },
+        };
+      `,
+      errors: [EAGER],
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        const Connector = register({ input: z.object({ ip: z.string() }) });
+      `,
+      errors: [EAGER],
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({}));
+        export const Connector = { input: Base.extend({ ip: z.string() }) };
+      `,
+      errors: [DERIVED],
     },
   ],
 });

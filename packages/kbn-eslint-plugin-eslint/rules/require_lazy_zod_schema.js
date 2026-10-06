@@ -13,6 +13,7 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Identifier} Identifier */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.ImportDeclaration} ImportDeclaration */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.VariableDeclarator} VariableDeclarator */
+/** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Property} Property */
 
 const tsEstree = require('@typescript-eslint/typescript-estree');
 const esTypes = tsEstree.AST_NODE_TYPES;
@@ -273,6 +274,39 @@ const isModuleScopeDeclarator = (node, ancestors) => {
   return false;
 };
 
+/**
+ * @param {Node[]} ancestors
+ * @param {FileState} state
+ * @returns {boolean}
+ */
+const isModuleScopeProperty = (ancestors, state) => {
+  const declaratorIndex = ancestors.findIndex(
+    (ancestor) => ancestor.type === esTypes.VariableDeclarator
+  );
+  if (declaratorIndex < 0) {
+    return false;
+  }
+
+  const declarator = /** @type {VariableDeclarator} */ (ancestors[declaratorIndex]);
+  if (!isModuleScopeDeclarator(declarator, ancestors.slice(0, declaratorIndex))) {
+    return false;
+  }
+
+  return !ancestors.slice(declaratorIndex + 1).some((ancestor) => {
+    if (
+      ancestor.type === esTypes.ArrowFunctionExpression ||
+      ancestor.type === esTypes.FunctionExpression
+    ) {
+      return true;
+    }
+    if (ancestor.type !== esTypes.CallExpression) {
+      return false;
+    }
+    const call = /** @type {Expression} */ (ancestor);
+    return isZodNamespaceChain(call, state) || isEagerDerivedSchemaChain(call, state);
+  });
+};
+
 /** @type {Rule} */
 module.exports = {
   meta: {
@@ -329,6 +363,19 @@ module.exports = {
         }
 
         recordSchemaBinding(declarator, state);
+      },
+      Property(node) {
+        const property = /** @type {Property} */ (node);
+        if (!isModuleScopeProperty(sourceCode.getAncestors(node), state)) {
+          return;
+        }
+
+        const value = /** @type {Expression} */ (property.value);
+        if (isEagerZodNamespaceChain(value, state)) {
+          context.report({ node: property.value, messageId: 'eagerZodSchema' });
+        } else if (isEagerDerivedSchemaChain(value, state)) {
+          context.report({ node: property.value, messageId: 'eagerDerivedZodSchema' });
+        }
       },
     };
   },
