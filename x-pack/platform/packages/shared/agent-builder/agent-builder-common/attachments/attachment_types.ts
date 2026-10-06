@@ -168,12 +168,6 @@ export const MAX_PDF_BYTES = 10 * 1024 * 1024;
 
 export const MAX_PDF_PAGES = 20;
 
-/** Input sent by the client: a reference to the PDF in the Files API. */
-export const pdfAttachmentInputSchema = z.object({
-  file_id: z.string().max(1024),
-  name: z.string().max(1024),
-});
-
 export const pdfAttachmentDataSchema = z.object({
   file_id: z.string().max(1024),
   name: z.string().max(1024),

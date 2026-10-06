@@ -174,8 +174,9 @@ export const processPdfFile = async ({
     const name = file.name || 'document.pdf';
     const { file: fileEntry } = await filesClient.create({ name, mimeType: file.type });
     await filesClient.upload({ id: fileEntry.id, body: file, contentType: file.type });
+    // POC: send the file id as origin only. The server reads the PDF and runs OCR.
     upsertAttachments([
-      { type: AttachmentType.pdf, data: { file_id: fileEntry.id, name } } as ConversationAttachment,
+      { type: AttachmentType.pdf, origin: fileEntry.id } as ConversationAttachment,
     ]);
   } catch (err: unknown) {
     // POC: no toast for upload errors

@@ -13,7 +13,9 @@ import { pdfToImages } from './pdf_to_images';
 // POC: hardcoded endpoint, no config / availability check
 const JINA_OCR_INFERENCE_ID = '.jina-ocr-v1-chat_completion';
 const OCR_CONCURRENCY = 4;
-const OCR_TIMEOUT_MS = 120_000;
+// POC: per page, large to avoid timeouts on slow OCR. Used by ES and by the ES client.
+const OCR_TIMEOUT_MINUTES = 10;
+const OCR_TIMEOUT_MS = OCR_TIMEOUT_MINUTES * 60 * 1000;
 
 const readStreamText = async (stream: Readable): Promise<string> => {
   let raw = '';
@@ -39,7 +41,7 @@ const ocrPage = async (esClient: ElasticsearchClient, pngBase64: string): Promis
   const stream = await esClient.inference.chatCompletionUnified(
     {
       inference_id: JINA_OCR_INFERENCE_ID,
-      timeout: '2m',
+      timeout: `${OCR_TIMEOUT_MINUTES}m`,
       chat_completion_request: {
         messages: [
           {

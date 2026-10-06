@@ -37,7 +37,6 @@ export {
   MAX_IMAGES_PER_ROUND,
   MAX_PDF_BYTES,
   MAX_PDF_PAGES,
-  pdfAttachmentInputSchema,
   pdfAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,

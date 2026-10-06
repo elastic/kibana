@@ -75,13 +75,6 @@ const handleImageFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts
   const { onPasteFile, onChange } = opts;
   if (!onPasteFile || !event.clipboardData) return false;
 
-  // POC: remove
-  // eslint-disable-next-line no-console
-  console.log(
-    '[pdf-poc] paste items',
-    Array.from(event.clipboardData.items).map((i) => `${i.kind}:${i.type}`)
-  );
-
   const imageItem = Array.from(event.clipboardData.items).find(
     (item) =>
       item.kind === 'file' &&

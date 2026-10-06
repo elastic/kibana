@@ -97,30 +97,26 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
 
+    const chatAttachmentFileHttp = {
+      create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+      download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+      getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+      list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+      delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+    };
+
     setupDeps.files.registerFileKind({
       id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
       allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
       maxSizeBytes: MAX_IMAGE_BYTES,
-      http: {
-        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-      },
+      http: chatAttachmentFileHttp,
     });
 
     setupDeps.files.registerFileKind({
       id: CHAT_ATTACHMENT_PDFS_FILE_KIND,
       allowedMimeTypes: [SUPPORTED_PDF_MIME_TYPE],
       maxSizeBytes: MAX_PDF_BYTES,
-      http: {
-        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-      },
+      http: chatAttachmentFileHttp,
     });
 
     // Create usage counter for telemetry (if usageCollection is available)
