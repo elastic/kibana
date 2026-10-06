@@ -47,6 +47,9 @@ export interface AlertingBoomData {
   details?: Record<string, unknown>;
 }
 
+/** Name of the `Server-Timing` metric covering a route's handler (kill-switch check and `execute()`). */
+const ROUTE_TIMING_NAME = 'alerting-v2-route';
+
 @injectable()
 export abstract class BaseAlertingRoute implements RouteHandler {
   protected static readonly defaultOptions: RouteConfigOptions<RouteMethod> = {
@@ -185,11 +188,15 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   constructor(protected readonly ctx: AlertingRouteContext) {}
 
   async handle(): Promise<IKibanaResponse> {
+    const timer = this.ctx.request.serverTiming.start(ROUTE_TIMING_NAME, this.routeName);
+
     try {
       await this.assertAlertingEnabled();
       return await this.execute();
     } catch (e) {
       return this.onError(e);
+    } finally {
+      timer.end();
     }
   }
 
