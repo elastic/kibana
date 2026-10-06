@@ -77,7 +77,7 @@ export function registerPatternTesterRoute({
           statusCode: 503,
           body: {
             message:
-              'The pattern tester is disabled (xpack.aiAnonymizationSettings.patternTester.enabled)',
+              'The pattern tester is disabled: it needs anonymization worker threads (see xpack.aiAnonymizationSettings.patternTester.enabled and xpack.inference.workers.anonymization.enabled)',
           },
         });
       }
