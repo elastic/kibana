@@ -70,6 +70,7 @@
     ".slack2",
     ".slack_api",
     ".snowflake",
+    ".solarwinds_platform",
     ".sublime_security",
     ".swimlane",
     ".tavily_mcp",
@@ -832,6 +833,12 @@
     "snowflake.listTables",
     "snowflake.listViews",
     "snowflake.runQuery",
+    "solarwinds_platform.acknowledgeAlert",
+    "solarwinds_platform.getAlert",
+    "solarwinds_platform.getNode",
+    "solarwinds_platform.listActiveAlerts",
+    "solarwinds_platform.query",
+    "solarwinds_platform.searchNodes",
     "sublime_security.getAsaVerdict",
     "sublime_security.getAttackScore",
     "sublime_security.getMessage",
@@ -943,6 +950,7 @@
     "ai.attachmentDeleted",
     "ai.attachmentUpdated",
     "ai.conversation.metadataUpdated",
+    "ai.conversation.updated",
     "alert",
     "alerting.actions.alertAcked",
     "alerting.actions.alertActivated",
@@ -989,11 +997,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "59212037792fb6747a7d7052ea6159c5003ccebf12abee3e4fc2786c92f130f2"
+      "sha256": "53ab212e742fc0cb0917ff8f60ff86207e3dd086e58942eba4a18bff5fe2238c"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "ff2ab28c2f78c0b04cb97f53104d2618c4e2163f477accde130a3b15d6ddda0a"
+      "sha256": "b4b33deb5a55c772dd54a8cccef87cc7eaa136dd42306cb924d38af1bfb962f4"
     }
   }
 }
