@@ -26,7 +26,12 @@ import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
 import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
-import { fetchPackagePolicySecretRefs, filterSecretRefsForMethod } from './secret_refs';
+import {
+  fetchPackagePolicySecretRefs,
+  filterSecretRefsForMethod,
+  withoutCoveredCredentials,
+} from './secret_refs';
+import type { ExistingSecretRefs } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import {
   buildLiveStalePolicyIds,
@@ -222,8 +227,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           Boolean(
             typedCreds?.access_key_id || typedCreds?.secret_access_key || typedCreds?.session_token
           );
-        const withoutTypedSecrets = (creds: AgentCredentialVars | undefined) =>
-          creds && { ...creds, access_key_id: '', secret_access_key: '', session_token: '' };
+        const withoutCoveredSecrets = (
+          creds: AgentCredentialVars | undefined,
+          refs: ExistingSecretRefs
+        ) => creds && withoutCoveredCredentials(creds, refs);
 
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
@@ -318,7 +325,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                     ? targetPolicyIds
                     : [],
                   agentCredentials: shared
-                    ? withoutTypedSecrets(agentCredentialsRef.current)
+                    ? withoutCoveredSecrets(agentCredentialsRef.current, shared)
                     : agentCredentialsRef.current,
                 }),
               getPolicyId: ([policyId]) => policyId,
@@ -329,7 +336,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 ...authenticateAndDeployStep,
                 existingSecretRefs: sharedRefs,
               };
-              baseOpts.agentCredentials = withoutTypedSecrets(agentCredentialsRef.current);
+              baseOpts.agentCredentials = withoutCoveredSecrets(
+                agentCredentialsRef.current,
+                sharedRefs
+              );
             }
             redeployResults.forEach((result) => {
               if (result.status === 'rejected') {

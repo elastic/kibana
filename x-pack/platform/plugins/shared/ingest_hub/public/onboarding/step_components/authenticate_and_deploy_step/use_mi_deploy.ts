@@ -17,7 +17,7 @@ import type { ServiceSettingsPersistedState } from '../service_settings_step/use
 import { buildInstanceStatuses, collectDeployResults, deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
-import { fetchAgentlessSecretRefs } from './secret_refs';
+import { fetchAgentlessSecretRefs, withoutCoveredCredentials } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import type { ExistingSecretRefs } from './secret_refs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
@@ -281,12 +281,19 @@ export function useMiDeploy({
       const hasTypedSecrets =
         !deployConnectorId && Boolean(typedKeys?.access_key_id || typedKeys?.secret_access_key);
       // The auth state a policy is built with: when its credentials come from a secret an earlier
-      // policy already stored, the typed values are left out so Fleet does not store them again.
+      // policy already stored, the typed values those refs cover are left out so Fleet does not store
+      // them again.
       const withSharedRefs = (
         sharedRefs: ExistingSecretRefs | undefined
       ): AuthenticateAndDeployStepState =>
         sharedRefs
-          ? { ...authenticateAndDeployStep, staticKeys: undefined, existingSecretRefs: sharedRefs }
+          ? {
+              ...authenticateAndDeployStep,
+              staticKeys:
+                authenticateAndDeployStep.staticKeys &&
+                withoutCoveredCredentials(authenticateAndDeployStep.staticKeys, sharedRefs),
+              existingSecretRefs: sharedRefs,
+            }
           : authenticateAndDeployStep;
       let dirtySharedRefs: ExistingSecretRefs | undefined;
 

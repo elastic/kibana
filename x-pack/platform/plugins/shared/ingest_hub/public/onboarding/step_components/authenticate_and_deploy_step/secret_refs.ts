@@ -81,6 +81,22 @@ export function filterSecretRefsForMethod(
   return new Map([...refs].filter(([name]) => name !== 'session_token'));
 }
 
+/**
+ * Blanks the typed credentials the refs already cover, so Fleet does not store them again, and
+ * keeps the typed value of every credential without a ref (a package may declare only some of its
+ * credential vars as secrets).
+ */
+export function withoutCoveredCredentials<T extends Partial<Record<CredentialVarName, string>>>(
+  credentials: T,
+  refs: ExistingSecretRefs
+): T {
+  const result = { ...credentials };
+  for (const name of CREDENTIAL_VAR_NAMES) {
+    if (name in result && refs.has(name)) result[name] = '' as T[CredentialVarName];
+  }
+  return result;
+}
+
 /** Fresh secret refs of one deployed managed-integration (agentless) policy; none when unreadable. */
 export async function fetchAgentlessSecretRefs(policyId: string | undefined) {
   if (!policyId) return NO_REFS;

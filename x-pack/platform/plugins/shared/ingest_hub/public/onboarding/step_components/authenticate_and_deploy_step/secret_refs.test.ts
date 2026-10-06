@@ -17,6 +17,7 @@ import {
   detectSecretRefs,
   fetchAgentlessSecretRefs,
   filterSecretRefsForMethod,
+  withoutCoveredCredentials,
   fetchPackagePolicySecretRefs,
   useExistingSecretRefs,
 } from './secret_refs';
@@ -194,5 +195,33 @@ describe('filterSecretRefsForMethod', () => {
 
   it('keeps every ref for temporary keys', () => {
     expect(filterSecretRefsForMethod(refs, 'temporary_keys')).toBe(refs);
+  });
+});
+
+describe('withoutCoveredCredentials', () => {
+  const refs: ExistingSecretRefs = new Map([
+    ['secret_access_key', { isSecretRef: true as const, id: 'r1' }],
+  ]);
+
+  it('blanks the credentials a ref covers and keeps the others', () => {
+    expect(
+      withoutCoveredCredentials({ access_key_id: 'AKID', secret_access_key: 'SECRET' }, refs)
+    ).toStrictEqual({ access_key_id: 'AKID', secret_access_key: '' });
+  });
+
+  it('leaves everything alone when no ref applies and does not mutate its input', () => {
+    const input = { access_key_id: 'AKID', secret_access_key: 'SECRET' };
+    expect(withoutCoveredCredentials(input, new Map())).toStrictEqual(input);
+    withoutCoveredCredentials(input, refs);
+    expect(input.secret_access_key).toBe('SECRET');
+  });
+
+  it('ignores fields the credentials object does not have', () => {
+    const tokenRefs: ExistingSecretRefs = new Map([
+      ['session_token', { isSecretRef: true as const, id: 'r2' }],
+    ]);
+    expect(withoutCoveredCredentials({ access_key_id: 'AKID' }, tokenRefs)).toStrictEqual({
+      access_key_id: 'AKID',
+    });
   });
 });

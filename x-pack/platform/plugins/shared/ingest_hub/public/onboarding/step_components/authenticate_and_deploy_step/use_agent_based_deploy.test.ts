@@ -1178,6 +1178,11 @@ describe('useAgentBasedDeploy — kept secret refs', () => {
       isDuplicateGroup: false,
     };
     mockBuildAgentBasedTargets.mockReturnValue([groupA, groupC]);
+    const FULL_REFS = new Map([
+      ['access_key_id', { isSecretRef: true as const, id: 'ref-akid' }],
+      ['secret_access_key', { isSecretRef: true as const, id: 'ref-1' }],
+    ]);
+    mockFetchSecretRefs.mockResolvedValue(FULL_REFS);
     mockUpdateAgentBasedPolicy.mockResolvedValue(undefined);
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
@@ -1223,7 +1228,7 @@ describe('useAgentBasedDeploy — kept secret refs', () => {
     expect(updates[1].opts.agentCredentials).toEqual(
       expect.objectContaining({ method: 'static_keys', access_key_id: '', secret_access_key: '' })
     );
-    expect(updates[1].opts.authenticateAndDeployStep.existingSecretRefs).toEqual(KEPT_REFS);
+    expect(updates[1].opts.authenticateAndDeployStep.existingSecretRefs).toEqual(FULL_REFS);
   });
 
   it('exposes the surviving policy for the credential forms', () => {

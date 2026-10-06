@@ -18,6 +18,7 @@ jest.mock('./policy_cleanup_managed_integrations', () => ({
 }));
 
 jest.mock('./secret_refs', () => ({
+  ...jest.requireActual('./secret_refs'),
   fetchAgentlessSecretRefs: jest.fn(),
 }));
 
@@ -37,6 +38,11 @@ const mockUpdate = updateManagedIntegrationsPolicy as jest.Mock;
 const mockFetchRefs = fetchAgentlessSecretRefs as jest.Mock;
 
 const KEPT_REFS = new Map([['secret_access_key', { isSecretRef: true as const, id: 'ref-1' }]]);
+// A package whose credential vars are all secrets: the refs cover every typed value.
+const FULL_REFS = new Map([
+  ['access_key_id', { isSecretRef: true as const, id: 'ref-akid' }],
+  ['secret_access_key', { isSecretRef: true as const, id: 'ref-1' }],
+]);
 
 function makeGroup(instanceId: string): DeployGroup {
   return {
@@ -222,6 +228,7 @@ describe('useMiDeploy — kept secret refs', () => {
     const TYPED = { staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' } };
 
     it('stores typed keys once for new policies: the first gets them, the rest get its refs', async () => {
+      mockFetchRefs.mockResolvedValue(FULL_REFS);
       mockDeployGroup
         .mockResolvedValueOnce({ policyId: 'new-1' })
         .mockResolvedValueOnce({ policyId: 'new-2' });
@@ -239,13 +246,17 @@ describe('useMiDeploy — kept secret refs', () => {
       const [first, second] = mockDeployGroup.mock.calls.map(([, opts]) => opts);
       expect(first.authenticateAndDeployStep.staticKeys).toStrictEqual(TYPED.staticKeys);
       expect(first.authenticateAndDeployStep.existingSecretRefs).toBeUndefined();
-      expect(second.authenticateAndDeployStep.staticKeys).toBeUndefined();
-      expect(second.authenticateAndDeployStep.existingSecretRefs).toBe(KEPT_REFS);
+      // The refs cover both typed values, so none of them is sent again.
+      expect(second.authenticateAndDeployStep.staticKeys).toStrictEqual({
+        access_key_id: '',
+        secret_access_key: '',
+      });
+      expect(second.authenticateAndDeployStep.existingSecretRefs).toBe(FULL_REFS);
     });
 
     it('a dirty update stores typed keys once; the other policies and new ones use that secret', async () => {
       mockFetchRefs.mockImplementation(async (id?: string) =>
-        id === 'policy-A' ? KEPT_REFS : new Map()
+        id === 'policy-A' ? FULL_REFS : new Map()
       );
       mockUpdate.mockResolvedValue(undefined);
       await runDeploy(
@@ -266,12 +277,35 @@ describe('useMiDeploy — kept secret refs', () => {
       expect(updates.map((u) => u.policyId)).toEqual(['policy-A', 'policy-C']);
       // First policy: typed keys. Second: the refs Fleet stored for the first, no typed keys.
       expect(updates[0].auth.staticKeys).toStrictEqual(TYPED.staticKeys);
-      expect(updates[1].auth.staticKeys).toBeUndefined();
-      expect(updates[1].auth.existingSecretRefs).toBe(KEPT_REFS);
+      expect(updates[1].auth.staticKeys).toStrictEqual({
+        access_key_id: '',
+        secret_access_key: '',
+      });
+      expect(updates[1].auth.existingSecretRefs).toBe(FULL_REFS);
       // The service added in the same run is created on the same secret too.
       const created = mockDeployGroup.mock.calls[0][1].authenticateAndDeployStep;
-      expect(created.staticKeys).toBeUndefined();
-      expect(created.existingSecretRefs).toBe(KEPT_REFS);
+      expect(created.staticKeys).toStrictEqual({ access_key_id: '', secret_access_key: '' });
+      expect(created.existingSecretRefs).toBe(FULL_REFS);
+    });
+
+    it('keeps typed values for credentials the shared refs do not cover', async () => {
+      // Only the secret access key is stored as a secret (KEPT_REFS), the access key id is not.
+      mockDeployGroup
+        .mockResolvedValueOnce({ policyId: 'new-1' })
+        .mockResolvedValueOnce({ policyId: 'new-2' });
+      await runDeploy(
+        makeParams({
+          deployGroups: [makeGroup('s3'), makeGroup('sqs')],
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          pendingCleanupPolicyIds: {},
+          authenticateAndDeployStep: TYPED,
+        })
+      );
+
+      const second = mockDeployGroup.mock.calls[1][1].authenticateAndDeployStep;
+      expect(second.staticKeys).toStrictEqual({ access_key_id: 'AKID', secret_access_key: '' });
+      expect(second.existingSecretRefs).toBe(KEPT_REFS);
     });
 
     it('does not share anything for a single policy or without typed keys', async () => {
