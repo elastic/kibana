@@ -101,6 +101,8 @@ import {
   type RenderDocumentViewMeta,
   type ValueToStringConverter,
   type DocMap,
+  type CustomCellRenderer,
+  type DataGridCellValueElementProps,
   type DataGridPaginationMode,
 } from '@kbn/unified-data-table';
 import { uniq } from 'lodash';
@@ -139,6 +141,7 @@ export interface TanStackDataGridProps {
   rows: DataTableRecord[];
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
+  externalCustomRenderers?: UnifiedDataTableProps['externalCustomRenderers'];
   dataView: DataView;
   query?: AggregateQuery;
   showTimeCol: boolean;
@@ -1512,11 +1515,60 @@ const SummaryCellContent = React.memo(
   }
 );
 
+const CustomDataCell = React.memo(
+  ({
+    Renderer,
+    row,
+    rowIndex,
+    columnId,
+    colIndex,
+    dataView,
+    fieldFormats,
+    columnsMeta,
+    isCompressed,
+  }: {
+    Renderer: CustomCellRenderer[string];
+    row: DataTableRecord;
+    rowIndex: number;
+    columnId: string;
+    colIndex: number;
+    dataView: DataView;
+    fieldFormats: DataGridCellValueElementProps['fieldFormats'];
+    columnsMeta: DataTableColumnsMeta | undefined;
+    isCompressed: boolean;
+  }) => {
+    const [cellProps, setCellProps] = useState<
+      Parameters<DataGridCellValueElementProps['setCellProps']>[0]
+    >({});
+
+    return (
+      <span {...cellProps}>
+        <Renderer
+          row={row}
+          rowIndex={rowIndex}
+          columnId={columnId}
+          colIndex={colIndex}
+          dataView={dataView}
+          fieldFormats={fieldFormats}
+          columnsMeta={columnsMeta}
+          isCompressed={isCompressed}
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          closePopover={() => {}}
+          setCellProps={setCellProps}
+        />
+      </span>
+    );
+  }
+);
+
 export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
   ({
     rows,
     columns,
     columnsMeta,
+    externalCustomRenderers,
     dataView,
     query,
     showTimeCol,
@@ -2252,6 +2304,18 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               onFilter={onFilter}
               isPlainRecord={isPlainRecord}
             />
+          ) : externalCustomRenderers?.[SOURCE_COLUMN_ID] ? (
+            <CustomDataCell
+              Renderer={externalCustomRenderers[SOURCE_COLUMN_ID]}
+              row={row.original}
+              rowIndex={row.index}
+              columnId={SOURCE_COLUMN_ID}
+              colIndex={effectiveColumns.indexOf(SOURCE_COLUMN_ID)}
+              dataView={dataView}
+              fieldFormats={fieldFormats}
+              columnsMeta={columnsMeta}
+              isCompressed={dataGridDensity === DataGridDensity.COMPACT}
+            />
           ) : (
             <SummaryCellContent
               row={row.original}
@@ -2300,7 +2364,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
         defs.push(summaryColumn);
       } else {
-        for (const colId of effectiveColumns) {
+        for (const [colIndex, colId] of effectiveColumns.entries()) {
           if (colId === SOURCE_COLUMN_ID) {
             defs.push(summaryColumn);
             continue;
@@ -2327,6 +2391,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               columnSchema,
               dataViewField,
             });
+          const CustomRenderer = externalCustomRenderers?.[colId];
 
           defs.push({
             id: colId,
@@ -2339,6 +2404,21 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             enableSorting: columnIsSortable,
             meta: { isTimestamp: isTimeField, fieldName: colId, formatValue },
             cell: function DataCell({ getValue, row }) {
+              if (CustomRenderer) {
+                return (
+                  <CustomDataCell
+                    Renderer={CustomRenderer}
+                    row={row.original}
+                    rowIndex={row.index}
+                    columnId={colId}
+                    colIndex={colIndex}
+                    dataView={dataView}
+                    fieldFormats={fieldFormats}
+                    columnsMeta={columnsMeta}
+                    isCompressed={dataGridDensity === DataGridDensity.COMPACT}
+                  />
+                );
+              }
               return formatFieldValueReact({
                 value: getValue(),
                 hit: row.original.raw,
@@ -2354,6 +2434,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       return defs;
     }, [
       columnsMeta,
+      externalCustomRenderers,
+      dataGridDensity,
       dataView,
       effectiveColumns,
       fieldFormats,
@@ -2372,7 +2454,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       headerRowHeightLines,
       actionsColumnWidth,
       onToggleExpandDoc,
-      dataGridDensity,
     ]);
 
     const dataColumns = useMemo<TanStackDataColumnDescriptor[]>(() => {

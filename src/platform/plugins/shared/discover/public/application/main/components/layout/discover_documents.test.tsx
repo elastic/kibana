@@ -55,6 +55,12 @@ const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
     tabId: toolkit.getCurrentTab().id,
     skipWaitForDataFetching: true,
   });
+  toolkit.internalState.dispatch(
+    internalStateActions.updateAppState({
+      tabId: toolkit.getCurrentTab().id,
+      appState: { gridImplementation: 'unified' },
+    })
+  );
 
   return { toolkit };
 };

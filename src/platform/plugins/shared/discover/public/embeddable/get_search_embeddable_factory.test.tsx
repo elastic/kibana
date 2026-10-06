@@ -226,7 +226,7 @@ describe('saved search embeddable', () => {
 
       await waitFor(() => {
         expect(discoverComponent.queryByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
-        expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable').textContent).toEqual(
+        expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable')).toHaveTextContent(
           'No results found'
         );
       });
@@ -870,7 +870,10 @@ describe('saved search embeddable', () => {
       const { search, resolveSearch } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { columns: ['rootProfile', 'message', 'extension'] },
+        partialState: {
+          columns: ['rootProfile', 'message', 'extension'],
+          gridImplementation: 'unified',
+        },
       });
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,

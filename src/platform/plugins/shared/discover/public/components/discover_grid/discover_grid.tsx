@@ -209,6 +209,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           rows={props.rows ?? []}
           columns={props.columns}
           columnsMeta={props.columnsMeta}
+          externalCustomRenderers={props.externalCustomRenderers}
           dataView={props.dataView}
           query={isOfAggregateQueryType(query) ? query : undefined}
           showTimeCol={props.showTimeCol}
