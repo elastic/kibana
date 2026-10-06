@@ -449,12 +449,17 @@ const popoverListsItem = {
   iconType: 'dashboardApp',
   href: '/dashboards',
   popoverSections: [
-    { id: 'starred', label: 'Starred', items: dashboardTitles('starred', 3) },
-    { id: 'recentlyViewed', label: 'Recently viewed', items: dashboardTitles('recent', 20) },
+    { id: 'starred', label: 'Starred', isPaginated: true, items: dashboardTitles('starred', 3) },
+    {
+      id: 'recentlyViewed',
+      label: 'Recently viewed',
+      isPaginated: true,
+      items: dashboardTitles('recent', 20),
+    },
   ],
 };
 
-// Feature-registered hover lists page behind "Show more": 5, then 10 more per click
+// Dynamic lists with `isPaginated` page behind "Show more": 5, then 10 more per click
 export const WithShowMoreInPopover: StoryObj<PropsAndArgs> = {
   name: 'Navigation with Show More in Popover',
   args: {

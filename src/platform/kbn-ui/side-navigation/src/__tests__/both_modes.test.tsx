@@ -385,7 +385,9 @@ describe('Both modes', () => {
         render(
           <TestComponent
             items={withDashboardsSections({
-              popoverSections: [{ id: 'recent', label: 'Recent', items: listItems(22) }],
+              popoverSections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(22) },
+              ],
             })}
           />
         );
@@ -410,7 +412,9 @@ describe('Both modes', () => {
         render(
           <TestComponent
             items={withDashboardsSections({
-              popoverSections: [{ id: 'recent', label: 'Recent', items: listItems(5) }],
+              popoverSections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(5) },
+              ],
             })}
           />
         );
@@ -421,11 +425,11 @@ describe('Both modes', () => {
       });
 
       /**
-       * GIVEN a long static tree section shown in the hover popover
+       * GIVEN a long section without `isPaginated` shown in the hover popover
        * WHEN the popover opens
        * THEN the section is not paged
        */
-      it('should not page static tree sections', async () => {
+      it('should not page sections without `isPaginated`', async () => {
         render(
           <TestComponent
             items={withDashboardsSections({
@@ -448,7 +452,9 @@ describe('Both modes', () => {
         render(
           <TestComponent
             items={withDashboardsSections({
-              popoverSections: [{ id: 'recent', label: 'Recent', items: listItems(8) }],
+              popoverSections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(8) },
+              ],
             })}
           />
         );

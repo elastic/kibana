@@ -19,7 +19,6 @@ import { useShowMore } from '../../hooks/use_show_more';
 export interface SecondaryMenuSectionProps {
   children: ReactNode;
   id?: string;
-  /** Page long lists behind "Show more". For feature-registered lists, not static tree sections. */
   isPaginated?: boolean;
   label?: string;
 }
