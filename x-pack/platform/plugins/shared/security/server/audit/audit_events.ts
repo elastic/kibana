@@ -402,12 +402,14 @@ export function spaceAuditEvent({
 
 export enum ServiceAccountAuditAction {
   CREATE = 'service_account_create',
+  DELETE = 'service_account_delete',
   WORKLOAD_BIND = 'service_account_workload_bind',
   WORKLOAD_UNBIND = 'service_account_workload_unbind',
 }
 
 const serviceAccountAuditVerbs: Record<ServiceAccountAuditAction, VerbsTuple> = {
   service_account_create: ['create', 'creating', 'created'],
+  service_account_delete: ['delete', 'deleting', 'deleted'],
   service_account_workload_bind: ['bind', 'binding', 'bound'],
   service_account_workload_unbind: ['unbind', 'unbinding', 'unbound'],
 };
@@ -417,6 +419,7 @@ const serviceAccountAuditCategories: Record<
   ArrayElement<EcsEvent['category']>
 > = {
   service_account_create: 'iam',
+  service_account_delete: 'iam',
   service_account_workload_bind: 'iam',
   service_account_workload_unbind: 'iam',
 };
@@ -426,6 +429,7 @@ const serviceAccountAuditTypes: Record<
   ArrayElement<EcsEvent['type']>
 > = {
   service_account_create: 'creation',
+  service_account_delete: 'deletion',
   service_account_workload_bind: 'change',
   service_account_workload_unbind: 'change',
 };
@@ -440,6 +444,11 @@ export interface ServiceAccountAuditEventParams {
   serviceAccount?: { id?: string; name?: string };
   /** The workload a binding event addresses. */
   workload?: NonNullable<AuditEvent['kibana']>['workload'];
+  /**
+   * Whether a delete skips the check for bound workloads, which it leaves behind. Recorded in the
+   * message only.
+   */
+  force?: boolean;
   outcome?: EcsEvent['outcome'];
   error?: Error;
 }
@@ -448,6 +457,7 @@ export function serviceAccountAuditEvent({
   action,
   serviceAccount,
   workload,
+  force,
   outcome,
   error,
 }: ServiceAccountAuditEventParams): AuditEvent {
@@ -469,7 +479,7 @@ export function serviceAccountAuditEvent({
         workload.plugin_id
       }/${workload.type}/${workload.id}]`
     : '';
-  const doc = `${accountDoc}${workloadDoc}`;
+  const doc = `${accountDoc}${workloadDoc}${force ? ' [force=true]' : ''}`;
 
   const [present, progressive, past] = serviceAccountAuditVerbs[action];
   // An error with an `unknown` outcome is a failure whose cleanup could not be confirmed, so the

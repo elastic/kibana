@@ -167,6 +167,7 @@ export class ServiceAccountsService {
         backend,
         store,
         checkPrivilegesWithRequest,
+        audit,
       }),
       workloads: new ServiceAccountWorkloadBindings({
         logger: bindingsLogger,

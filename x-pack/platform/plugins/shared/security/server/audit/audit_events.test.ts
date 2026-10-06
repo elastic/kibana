@@ -987,4 +987,99 @@ describe('#serviceAccountAuditEvent', () => {
       }
     `);
   });
+
+  test('creates an `unknown` delete event', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.DELETE,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        outcome: 'unknown',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_delete",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "deletion",
+          ],
+        },
+        "message": "User is deleting service account [id=kibana/nightshift-relay]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('records a forced delete in the message', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.DELETE,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        force: true,
+        outcome: 'unknown',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_delete",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "deletion",
+          ],
+        },
+        "message": "User is deleting service account [id=kibana/nightshift-relay] [force=true]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('creates a `failure` delete event', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.DELETE,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        force: true,
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "service_account_delete",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "deletion",
+          ],
+        },
+        "message": "Failed attempt to delete service account [id=kibana/nightshift-relay] [force=true]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
 });

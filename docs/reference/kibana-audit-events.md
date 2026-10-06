@@ -359,8 +359,15 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 | `service_account_workload_unbind` {applies_to}`stack: preview 9.6+` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. `user.target` is omitted when the workload has no binding or the stored binding failed integrity verification. |
 | | `failure` | Failed attempt to unbind service account from workload [plugin/type/id]: the user is not authorized. |
 
+#### Type: deletion
+
+| **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
+| `service_account_delete` {applies_to}`stack: preview 9.6+` | `unknown` | User is deleting service account [id=x]. A forced delete, which skips the check for bound workloads and leaves their bindings behind, appends `[force=true]` to the message. |
+| | `failure` | Failed attempt to delete service account [id=x]: the user is not authorized. |
+
 ::::{note}
-Across the `service_account_*` events, `failure` means the user was not authorized. Other errors, such as a missing license or encryption key or an invalid request, leave no event. Binding events follow the convention for writes: `unknown` is logged once the user is authorized and before the binding is written, so it records the attempt, not the result. It is also written when an unbind matches no binding, and a write that later fails leaves no further event; refer to the {{kib}} server logs for write errors. `service_account_create` is logged after the operation instead, because the backend assigns the id.
+Across the `service_account_*` events, `failure` means the user was not authorized. Other errors, such as a missing license or encryption key or an invalid request, leave no event. Binding and delete events follow the convention for writes: `unknown` is logged once the user is authorized and before the write, so it records the attempt, not the result. It is also written when an unbind matches no binding or a delete names no account, and a write that later fails or is refused leaves no further event; refer to the {{kib}} server logs for write errors. A delete refused because workloads are still bound to the account leaves no event. `service_account_create` is logged after the operation instead, because the backend assigns the id.
 ::::
 
 ### Category: web
