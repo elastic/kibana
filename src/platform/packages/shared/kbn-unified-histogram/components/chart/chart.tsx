@@ -75,6 +75,7 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  withLensActions?: boolean;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
@@ -100,6 +101,7 @@ export function UnifiedHistogramChart({
   onTotalHitsChange,
   onChartLoad,
   onApiAvailable: consumerOnApiAvailable,
+  withLensActions = true,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -146,12 +148,11 @@ export function UnifiedHistogramChart({
   }, [visContext?.attributes]);
 
   const {
-    dataView,
+    dataSource,
     query,
     timeRange,
     relativeTimeRange,
     abortController,
-    columns,
     controlsState,
     isESQLQuery: isPlainRecord,
     breakdown,
@@ -205,7 +206,7 @@ export function UnifiedHistogramChart({
       if (response) {
         const newBucketInterval = buildBucketInterval({
           data: services.data,
-          dataView,
+          dataSource,
           timeInterval: chart?.timeInterval,
           timeRange,
           response,
@@ -244,7 +245,7 @@ export function UnifiedHistogramChart({
 
   const onEditVisualization = useEditVisualization({
     services,
-    dataView,
+    dataSource,
     relativeTimeRange,
     lensAttributes: visContext?.attributes,
     isPlainRecord,
@@ -260,10 +261,9 @@ export function UnifiedHistogramChart({
       <div>
         {chartVisible && breakdown && (
           <BreakdownFieldSelector
-            dataView={dataView}
+            dataSource={dataSource}
             breakdown={breakdown}
             onBreakdownFieldChange={onBreakdownFieldChange}
-            esqlColumns={isPlainRecord ? columns : undefined}
           />
         )}
       </div>,
@@ -274,9 +274,8 @@ export function UnifiedHistogramChart({
       onTimeIntervalChange,
       chart,
       breakdown,
-      dataView,
+      dataSource,
       onBreakdownFieldChange,
-      columns,
     ]
   );
 
@@ -304,7 +303,7 @@ export function UnifiedHistogramChart({
 
   const actions: IconButtonGroupProps['buttons'] = [];
 
-  if (canEditVisualizationOnTheFly) {
+  if (withLensActions && canEditVisualizationOnTheFly) {
     const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
       defaultMessage: 'Edit visualization',
     });
@@ -316,7 +315,7 @@ export function UnifiedHistogramChart({
       'data-test-subj': 'unifiedHistogramEditFlyoutVisualization',
       onClick: () => setIsFlyoutVisible(true),
     });
-  } else if (onEditVisualization) {
+  } else if (withLensActions && onEditVisualization) {
     const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
       defaultMessage: 'Edit visualization',
     });
@@ -329,7 +328,7 @@ export function UnifiedHistogramChart({
     });
   }
 
-  if (canSaveVisualization) {
+  if (withLensActions && canSaveVisualization) {
     const saveLabel = i18n.translate('unifiedHistogram.saveVisualizationButton', {
       defaultMessage: 'Save visualization to dashboard',
     });
@@ -387,7 +386,7 @@ export function UnifiedHistogramChart({
               {lensPropsContext && (
                 <HistogramMemoized
                   services={services}
-                  dataView={dataView}
+                  dataSource={dataSource}
                   chart={chart}
                   bucketInterval={bucketInterval}
                   visContext={visContext}

@@ -50,6 +50,7 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   getStartServices: InfraPluginStartServicesAccessor;
   handleEsError: typeof handleEsError;
   isCpsPlatformGateEnabled: () => Promise<boolean>;
+  isPodSchemaSelectorEnabled: () => Promise<boolean>;
   logger: Logger;
   plugins: Plugins;
   serverless: ServerlessInfo;

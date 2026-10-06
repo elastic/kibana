@@ -104,7 +104,8 @@ interface ManifestEntry {
       set -euo pipefail
 
       echo '--- Upload files to GCS'
-      .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
+      # Archive upload can outlive the 60-minute shared token; impersonation refreshes it.
+      .buildkite/scripts/common/activate_service_account.sh --auto-refresh ${BASE_BUCKET_DAILY}
       cd "${destination}"
       gcloud storage cp --recursive *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json

@@ -9,6 +9,7 @@ export {
   EscalationQueue,
   EscalationCard,
   AssignToUsers,
+  AssigneeAvatarStack,
   EscalationMetaInfo,
   LinkedInvestigationsBadge,
   type EscalationQueueItem,
@@ -16,6 +17,7 @@ export {
 } from './src/components/escalation_queue';
 
 export { ActionButton } from './src/components/actions/action_button';
+export { getCopyLinkFlyoutAction } from './src/components/actions/copy_link_action';
 export {
   BaseActions,
   type BaseActionsProps,
@@ -110,6 +112,8 @@ export {
   impactPills,
   investigationEntityIds,
   matchesEntityFilter,
+  useEntityFilter,
+  type ImpactFilterable,
   type ImpactPill,
 } from './src/components/filters/impact';
 

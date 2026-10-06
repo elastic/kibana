@@ -29,6 +29,7 @@ import type {
   IContextContainer,
   IContextProvider,
   IRouter,
+  HttpSelfUnauthorizedErrorHandler,
 } from '@kbn/core-http-server';
 import type {
   InternalContextSetup,
@@ -86,6 +87,7 @@ export class HttpService
   private currentConfig?: HttpConfig;
   private selfClient?: InternalHttpSelfService;
   private selfClientUiamAttestationGetter?: SelfClientUiamAttestationGetter;
+  private selfClientUnauthorizedErrorHandler?: HttpSelfUnauthorizedErrorHandler;
 
   private readonly log: Logger;
   private readonly env: Env;
@@ -218,6 +220,12 @@ export class HttpService
         Router.on('onPostValidate', cb);
       },
       getRegisteredDeprecatedApis: () => serverContract.getDeprecatedRoutes(),
+      setSelfClientUnauthorizedErrorHandler: (handler) => {
+        if (this.selfClientUnauthorizedErrorHandler) {
+          throw new Error('The self client unauthorized error handler was already set');
+        }
+        this.selfClientUnauthorizedErrorHandler = handler;
+      },
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
@@ -262,7 +270,9 @@ export class HttpService
         kibanaVersion: this.env.packageInfo.version,
         log: this.log.get('self-client'),
         target: internalSetup.config.selfHttp.target,
+        // Resolved at call time: both are registered after the start contract is built.
         getUiamAttestationGetter: () => this.selfClientUiamAttestationGetter,
+        getUnauthorizedErrorHandler: () => this.selfClientUnauthorizedErrorHandler,
       })),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);

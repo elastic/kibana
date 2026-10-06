@@ -19,13 +19,12 @@ import type { SignificantEvent } from './data_stream';
 
 const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'event-1',
   event_id: 'agent-event-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.8,
   ...overrides,
 });
@@ -46,27 +45,15 @@ const makeLogger = (): jest.Mocked<Logger> =>
     debug: jest.fn(),
   } as unknown as jest.Mocked<Logger>);
 
-/**
- * @param hits - results returned for the first esql query (findByEventUuid)
- * @param lineageHits - when provided, returned for the second query (findByEventId);
- *   when omitted both queries return the same `hits` (backward-compat behaviour).
- */
-const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEvent[]) => {
+/** @param hits - results returned for the single findByEventId esql query. */
+const createEventClient = (hits: SignificantEvent[]) => {
   const okResponse = { errors: false, items: [] } as unknown as BulkResponse;
   const dataStreamClient = { create: jest.fn().mockResolvedValue(okResponse) };
 
-  const makeResult = (h: SignificantEvent[]) => ({
+  const queryMock = jest.fn().mockResolvedValue({
     columns: [{ name: '_source' }],
-    values: h.map((event) => [{ ...event }]),
+    values: hits.map((event) => [{ ...event }]),
   });
-
-  const queryMock = jest.fn().mockResolvedValue(makeResult(hits));
-  if (lineageHits !== undefined) {
-    // Sequence the two internal esql calls: findByEventUuid first, findByEventId second.
-    queryMock
-      .mockResolvedValueOnce(makeResult(hits))
-      .mockResolvedValueOnce(makeResult(lineageHits));
-  }
 
   const esClient = { esql: { query: queryMock } };
   const client = new EventClient({
@@ -79,31 +66,27 @@ const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEv
 
 describe('updateSignificantEventStatus', () => {
   it('creates a new event version when status changes', async () => {
-    const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+    const existing = createSignificantEvent({ status: 'active' });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
-      status: 'closed',
+      eventId: existing.event_id,
+      status: 'inactive',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
     });
 
     expect(result).toEqual({
-      event_uuid: result.event_uuid,
       updated: 1,
       ignored: 0,
-      status: 'closed',
+      status: 'inactive',
     });
-    expect(result.event_uuid).not.toBe('event-1');
 
     const [[callArg]] = dataStreamClient.create.mock.calls;
     const written: SignificantEvent = callArg.documents[0];
 
-    expect(written.status).toBe('closed');
-    expect(written.previous_event_uuid).toBe('event-1');
-    expect(written.event_uuid).not.toBe('event-1');
+    expect(written.status).toBe('inactive');
     expect(written).not.toHaveProperty('created_at');
     // Written with `refresh: 'wait_for'` so an immediate re-read (e.g. the UI's post-mutation
     // refetch) sees this version rather than resurfacing the previous one.
@@ -112,7 +95,6 @@ describe('updateSignificantEventStatus', () => {
 
   it('updates the status of a legacy event with longer narratives', async () => {
     const existing = createSignificantEvent({
-      event_uuid: 'event-1',
       symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
       summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
       assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
@@ -122,24 +104,24 @@ describe('updateSignificantEventStatus', () => {
     await expect(
       updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
-        status: 'closed',
+        eventId: existing.event_id,
+        status: 'inactive',
         alertEventsClient: makeAlertEventsClient(),
         logger: makeLogger(),
       })
-    ).resolves.toMatchObject({ updated: 1, status: 'closed' });
+    ).resolves.toMatchObject({ updated: 1, status: 'inactive' });
 
     expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
   });
 
   it('records an assessment note with an automated status change', async () => {
-    const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+    const existing = createSignificantEvent({ status: 'active' });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
-      status: 'closed',
+      eventId: existing.event_id,
+      status: 'inactive',
       assessmentNote: 'Automatically closed by cleanup.',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
@@ -151,16 +133,15 @@ describe('updateSignificantEventStatus', () => {
 
   it('preserves an existing assessment note when the caller omits one', async () => {
     const existing = createSignificantEvent({
-      event_uuid: 'event-1',
-      status: 'open',
+      status: 'active',
       assessment_note: 'Operator dismissed as noise.',
     });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
-      status: 'closed',
+      eventId: existing.event_id,
+      status: 'inactive',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
     });
@@ -169,62 +150,78 @@ describe('updateSignificantEventStatus', () => {
     expect(callArg.documents[0].assessment_note).toBe('Operator dismissed as noise.');
   });
 
+  it('does not overwrite the existing note with a whitespace-only note', async () => {
+    const existing = createSignificantEvent({
+      status: 'active',
+      assessment_note: 'Original rationale.',
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    await updateSignificantEventStatus({
+      eventClient: client,
+      eventId: existing.event_id,
+      status: 'inactive',
+      assessmentNote: '   ',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
+    });
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    expect(callArg.documents[0].assessment_note).toBe('Original rationale.');
+  });
+
   it('ignores when the event is not found', async () => {
     const { client, dataStreamClient } = createEventClient([]);
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'missing-event',
-      status: 'closed',
+      eventId: 'missing-event',
+      status: 'inactive',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
     });
 
     expect(result).toEqual({
-      event_uuid: 'missing-event',
       updated: 0,
       ignored: 1,
-      status: 'closed',
+      status: 'inactive',
     });
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
   it('ignores when the status is unchanged', async () => {
-    const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'closed' });
+    const existing = createSignificantEvent({ status: 'inactive' });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
-      status: 'closed',
+      eventId: existing.event_id,
+      status: 'inactive',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
     });
 
-    expect(result).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'closed' });
+    expect(result).toEqual({ updated: 0, ignored: 1, status: 'inactive' });
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-  it('resolves lineage: update targets the latest event_id version, not a stale caller reference', async () => {
+  it('targets the latest version in the lineage when multiple versions exist, not the first', async () => {
     const e0 = createSignificantEvent({
-      event_uuid: 'event-0',
       event_id: 'event-id-1',
-      status: 'open',
+      status: 'active',
     });
     const e1 = createSignificantEvent({
-      event_uuid: 'event-1',
       event_id: 'event-id-1',
-      previous_event_uuid: 'event-0',
       '@timestamp': '2026-01-01T00:01:00.000Z',
-      status: 'dismissed',
+      status: 'inactive',
     });
-    // findByEventUuid returns only E0 (the stale ref); findByEventId returns the full lineage
-    const { client, dataStreamClient } = createEventClient([e0], [e0, e1]);
+    // findByEventId returns the full lineage, ordered ascending by @timestamp.
+    const { client, dataStreamClient } = createEventClient([e0, e1]);
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-0',
-      status: 'closed',
+      eventId: 'event-id-1',
+      status: 'active',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
     });
@@ -234,22 +231,20 @@ describe('updateSignificantEventStatus', () => {
     const [[callArg]] = dataStreamClient.create.mock.calls;
     const written: SignificantEvent = callArg.documents[0];
 
-    // Must chain off E1 (the true latest), not E0 (the stale caller reference)
-    expect(written.previous_event_uuid).toBe('event-1');
-    expect(written.status).toBe('closed');
+    expect(written.status).toBe('active');
   });
 
   describe('dual-write to .rule-events (Writer 2)', () => {
     it('calls createAlertEvent once with the toRuleEvent output of the updated event', async () => {
-      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+      const existing = createSignificantEvent({ status: 'active' });
       const { client } = createEventClient([existing]);
       const alertEventsClient = makeAlertEventsClient();
       const logger = makeLogger();
 
       await updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
-        status: 'closed',
+        eventId: existing.event_id,
+        status: 'inactive',
         alertEventsClient,
         logger,
       });
@@ -259,19 +254,19 @@ describe('updateSignificantEventStatus', () => {
       // Verify the argument is the toRuleEvent output: must have fingerprint and alert_status
       expect(calledWith).toMatchObject({
         fingerprint: existing.event_id,
-        alert_status: 'inactive', // 'closed' maps to inactive
+        alert_status: 'inactive',
       });
     });
 
     it('does not call createAlertEvent when no write occurs (status unchanged)', async () => {
-      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'closed' });
+      const existing = createSignificantEvent({ status: 'inactive' });
       const { client } = createEventClient([existing]);
       const alertEventsClient = makeAlertEventsClient();
 
       await updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
-        status: 'closed',
+        eventId: existing.event_id,
+        status: 'inactive',
         alertEventsClient,
         logger: makeLogger(),
       });
@@ -285,8 +280,8 @@ describe('updateSignificantEventStatus', () => {
 
       await updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'missing-event',
-        status: 'closed',
+        eventId: 'missing-event',
+        status: 'inactive',
         alertEventsClient,
         logger: makeLogger(),
       });
@@ -295,7 +290,7 @@ describe('updateSignificantEventStatus', () => {
     });
 
     it('returns success and logs error when createAlertEvent rejects (error suppression)', async () => {
-      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+      const existing = createSignificantEvent({ status: 'active' });
       const { client } = createEventClient([existing]);
       const alertEventsClient = makeAlertEventsClient({
         createAlertEvent: jest.fn().mockRejectedValue(new Error('index unavailable')),
@@ -305,13 +300,13 @@ describe('updateSignificantEventStatus', () => {
       // Writer still returns success despite .rule-events failure
       const result = await updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
-        status: 'closed',
+        eventId: existing.event_id,
+        status: 'inactive',
         alertEventsClient,
         logger,
       });
 
-      expect(result).toMatchObject({ updated: 1, status: 'closed' });
+      expect(result).toMatchObject({ updated: 1, status: 'inactive' });
       // Give the fire-and-forget promise a chance to settle (flush full microtask queue)
       await new Promise(setImmediate);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));

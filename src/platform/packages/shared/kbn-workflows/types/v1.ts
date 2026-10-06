@@ -501,7 +501,7 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
 
 export type WorkflowAccessControlUpdateResponseDto = Pick<
   WorkflowDetailDto,
-  'owner_id' | 'access_control' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
+  'owner_id' | 'access_control' | 'permissions' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
 >;
 
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
@@ -600,6 +600,7 @@ export interface ConnectorInstance {
 
 export interface ConnectorInstanceConfig {
   taskType?: string;
+  selectedActions?: string[];
 }
 
 export interface ConnectorTypeInfo {

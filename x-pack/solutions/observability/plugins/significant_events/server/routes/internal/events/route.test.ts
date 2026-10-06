@@ -64,13 +64,13 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
 
 describe('POST /internal/significant_events/events/{id}/investigate', () => {
   it('rejects with 409 while paused before loading the event', async () => {
-    const findByEventUuid = jest.fn();
+    const findLatestByEventId = jest.fn();
     const handlerParams = {
       params: { path: { id: 'event-1' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({ findByEventUuid }),
+        getEventSearchClient: () => ({ findLatestByEventId }),
       }),
       server: { nightshiftInvestigations: {} },
       logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
@@ -80,7 +80,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
     await expect(investigateRoute.handler(handlerParams)).rejects.toMatchObject({
       output: { statusCode: 409 },
     });
-    expect(findByEventUuid).not.toHaveBeenCalled();
+    expect(findLatestByEventId).not.toHaveBeenCalled();
   });
 });
 
@@ -140,6 +140,7 @@ describe('GET /internal/significant_events/events', () => {
           status: 'open',
           severity: '40-medium',
           stream: 'logs.test',
+          topology_feature_id: 'checkout-service',
           search: 'noise',
           page: 2,
           perPage: 10,
@@ -160,6 +161,7 @@ describe('GET /internal/significant_events/events', () => {
       status: ['open'],
       severity: ['40-medium'],
       stream: ['logs.test'],
+      topologyFeatureIds: ['checkout-service'],
       search: 'noise',
       page: 2,
       perPage: 10,
@@ -230,12 +232,11 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
     };
 
     const response = await lifecycleRoute.handler({
-      params: { path: { id: latestVersion.event_uuid } },
+      params: { path: { id: latestVersion.event_id } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({
-          findByEventUuid: jest.fn().mockResolvedValue({ hits: [latestVersion] }),
+        getEventSearchClient: () => ({
           findByEventId: jest.fn().mockResolvedValue({ hits: [firstVersion, latestVersion] }),
         }),
         getDetectionClient: () => ({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
@@ -260,16 +261,15 @@ describe('GET /internal/significant_events/events/{id}', () => {
     confidence: 0.8,
   };
 
-  it('returns 404 when the event uuid is missing', async () => {
+  it('returns 404 when the event id is missing', async () => {
     await expect(
       eventsGetRoute.handler({
         params: { path: { id: 'missing' } },
         request: {},
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
-          getEventClient: () => ({
-            findByEventUuid: jest.fn().mockResolvedValue({ hits: [] }),
-            findByEventId: jest.fn(),
+          getEventSearchClient: () => ({
+            findLatestByEventId: jest.fn().mockResolvedValue(undefined),
           }),
         }),
         server: {},
@@ -281,25 +281,22 @@ describe('GET /internal/significant_events/events/{id}', () => {
     const older = { ...baseEvent };
     const latest = {
       ...baseEvent,
-      event_uuid: 'version-2',
-      previous_event_uuid: 'version-1',
       assessment_note: 'Known noise',
     };
 
     const response = await eventsGetRoute.handler({
-      params: { path: { id: older.event_uuid } },
+      params: { path: { id: older.event_id } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({
-          findByEventUuid: jest.fn().mockResolvedValue({ hits: [older] }),
-          findByEventId: jest.fn().mockResolvedValue({ hits: [older, latest] }),
+        getEventSearchClient: () => ({
+          findLatestByEventId: jest.fn().mockResolvedValue(latest),
         }),
       }),
       server: {},
     } as never);
 
-    expect(response.event_uuid).toBe('version-2');
+    expect(response.event_id).toBe(older.event_id);
     expect(response.assessment_note).toBe('Known noise');
   });
 
@@ -320,13 +317,12 @@ describe('GET /internal/significant_events/events/{id}', () => {
     const eventWithSignals = { ...baseEvent, signals };
 
     const response = await eventsGetRoute.handler({
-      params: { path: { id: baseEvent.event_uuid } },
+      params: { path: { id: baseEvent.event_id } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({
-          findByEventUuid: jest.fn().mockResolvedValue({ hits: [eventWithSignals] }),
-          findByEventId: jest.fn().mockResolvedValue({ hits: [eventWithSignals] }),
+        getEventSearchClient: () => ({
+          findLatestByEventId: jest.fn().mockResolvedValue(eventWithSignals),
         }),
       }),
       server: {},
@@ -339,32 +335,21 @@ describe('GET /internal/significant_events/events/{id}', () => {
 describe('POST /internal/significant_events/events/{id}/update — body schema', () => {
   const bodySchema = eventsUpdateRoute.params.shape.body;
 
-  it('rejects dismissed status with no assessment_note', () => {
-    const result = bodySchema.safeParse({ status: 'dismissed' });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['assessment_note']);
-    }
+  it('accepts inactive status without assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'inactive' });
+    expect(result.success).toBe(true);
   });
 
-  it('rejects dismissed status with a blank assessment_note', () => {
-    const result = bodySchema.safeParse({ status: 'dismissed', assessment_note: '   ' });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['assessment_note']);
-    }
-  });
-
-  it('accepts dismissed status with a non-empty assessment_note', () => {
+  it('accepts inactive status with a non-empty assessment_note', () => {
     const result = bodySchema.safeParse({
-      status: 'dismissed',
+      status: 'inactive',
       assessment_note: 'Known noise from nightly batch job',
     });
     expect(result.success).toBe(true);
   });
 
-  it('accepts closed status without assessment_note', () => {
-    const result = bodySchema.safeParse({ status: 'closed' });
+  it('accepts active status without assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'active' });
     expect(result.success).toBe(true);
   });
 });
