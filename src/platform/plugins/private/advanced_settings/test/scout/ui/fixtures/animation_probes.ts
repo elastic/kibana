@@ -9,6 +9,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 
+// essential animations and drag-and-drop elements are exempt from the disable-animations setting
 export const ANIMATION_EXEMPTIONS = [
   'essentialAnimation',
   'data-rbd-draggable-context-id',
