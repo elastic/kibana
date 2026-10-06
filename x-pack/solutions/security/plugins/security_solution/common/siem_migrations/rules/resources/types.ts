@@ -8,7 +8,6 @@
 import type {
   SiemMigrationResourceBase,
   SiemMigrationResourceData,
-  SiemMigrationVendor,
 } from '../../model/common.gen';
 
 import type { OriginalRule } from '../../model/rule_migration.gen';
@@ -27,7 +26,7 @@ const RESOURCE_IDENT_SUPPORTED_VENDORS = ['splunk', 'qradar', 'microsoft-sentine
 export type ResourceSupportedVendor = (typeof RESOURCE_IDENT_SUPPORTED_VENDORS)[number];
 
 export const isResourceSupportedVendor = (
-  vendor: SiemMigrationVendor
+  vendor: string
 ): vendor is ResourceSupportedVendor => {
   return RESOURCE_IDENT_SUPPORTED_VENDORS.includes(vendor as ResourceSupportedVendor);
 };

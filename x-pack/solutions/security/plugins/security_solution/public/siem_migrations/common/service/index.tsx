@@ -6,6 +6,7 @@
  */
 
 export { SiemMigrationsServiceBase } from './migrations_service_base';
+export type { MigrationsServiceTaskStats } from './migrations_service_base';
 
 export * from './capabilities';
 export * from './notifications';

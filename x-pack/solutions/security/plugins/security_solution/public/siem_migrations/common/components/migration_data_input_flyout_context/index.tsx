@@ -6,10 +6,10 @@
  */
 
 import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
-import type { MigrationStats } from '../../types';
+import type { MigrationsServiceTaskStats } from '../../service/migrations_service_base';
 
 interface MigrationDataInputContextValue {
-  openFlyout: (migrationStats?: MigrationStats) => void;
+  openFlyout: (migrationStats?: MigrationsServiceTaskStats) => void;
   closeFlyout: () => void;
   isFlyoutOpen: boolean;
 }
