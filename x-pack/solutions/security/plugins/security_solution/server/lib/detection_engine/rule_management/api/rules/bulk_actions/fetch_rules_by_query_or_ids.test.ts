@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { RulesNotFoundError, RulesNotVisibleError } from '@kbn/alerting-plugin/server';
-import { fetchRulesByQueryOrIds, RuleNotFoundError } from './fetch_rules_by_query_or_ids';
+import { fetchRulesByQueryOrIds, BulkActionRuleNotFoundError } from './fetch_rules_by_query_or_ids';
 
 describe('fetchRulesByQueryOrIds', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -20,7 +20,7 @@ describe('fetchRulesByQueryOrIds', () => {
   const fetchByIds = (ids: string[]) =>
     fetchRulesByQueryOrIds({ query: undefined, ids, rulesClient, maxRules: 100 });
 
-  it('returns a RuleNotFoundError for ids that bulkGetRules reports as 404', async () => {
+  it('returns a BulkActionRuleNotFoundError for ids that bulkGetRules reports as 404', async () => {
     rulesClient.bulkGetRules.mockResolvedValue({
       rules: [],
       errors: [{ id: 'missing-id', error: { message: 'Saved object not found', statusCode: 404 } }],
@@ -30,7 +30,7 @@ describe('fetchRulesByQueryOrIds', () => {
 
     expect(errors).toHaveLength(1);
     expect(errors[0].item).toBe('missing-id');
-    expect(errors[0].error).toBeInstanceOf(RuleNotFoundError);
+    expect(errors[0].error).toBeInstanceOf(BulkActionRuleNotFoundError);
     expect(errors[0].error).toMatchObject({ message: 'Rule not found' });
   });
 
@@ -42,26 +42,26 @@ describe('fetchRulesByQueryOrIds', () => {
 
     const { errors } = await fetchByIds(['broken-id']);
 
-    expect(errors[0].error).not.toBeInstanceOf(RuleNotFoundError);
+    expect(errors[0].error).not.toBeInstanceOf(BulkActionRuleNotFoundError);
     expect(errors[0].error).toEqual(new Error('Error resolving the rule'));
   });
 
-  it('returns a RuleNotFoundError for every id when bulkGetRules throws RulesNotFoundError', async () => {
+  it('returns a BulkActionRuleNotFoundError for every id when bulkGetRules throws RulesNotFoundError', async () => {
     rulesClient.bulkGetRules.mockRejectedValue(new RulesNotFoundError('get'));
 
     const { errors } = await fetchByIds(['id-1', 'id-2']);
 
     expect(errors.map(({ item }) => item)).toEqual(['id-1', 'id-2']);
-    errors.forEach(({ error }) => expect(error).toBeInstanceOf(RuleNotFoundError));
+    errors.forEach(({ error }) => expect(error).toBeInstanceOf(BulkActionRuleNotFoundError));
   });
 
-  it('returns a RuleNotFoundError for every id when bulkGetRules throws RulesNotVisibleError', async () => {
+  it('returns a BulkActionRuleNotFoundError for every id when bulkGetRules throws RulesNotVisibleError', async () => {
     rulesClient.bulkGetRules.mockRejectedValue(new RulesNotVisibleError('get'));
 
     const { errors } = await fetchByIds(['id-1', 'id-2']);
 
     expect(errors.map(({ item }) => item)).toEqual(['id-1', 'id-2']);
-    errors.forEach(({ error }) => expect(error).toBeInstanceOf(RuleNotFoundError));
+    errors.forEach(({ error }) => expect(error).toBeInstanceOf(BulkActionRuleNotFoundError));
   });
 
   it('returns a plain error for every id when bulkGetRules throws another error', async () => {
@@ -69,7 +69,7 @@ describe('fetchRulesByQueryOrIds', () => {
 
     const { errors } = await fetchByIds(['id-1']);
 
-    expect(errors[0].error).not.toBeInstanceOf(RuleNotFoundError);
+    expect(errors[0].error).not.toBeInstanceOf(BulkActionRuleNotFoundError);
     expect(errors[0].error).toEqual(new Error('Unauthorized'));
   });
 });

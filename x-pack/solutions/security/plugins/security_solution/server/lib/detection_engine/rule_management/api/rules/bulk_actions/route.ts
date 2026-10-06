@@ -51,7 +51,7 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../constants';
 import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
-import { fetchRulesByQueryOrIds, RuleNotFoundError } from './fetch_rules_by_query_or_ids';
+import { fetchRulesByQueryOrIds, BulkActionRuleNotFoundError } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
@@ -325,7 +325,7 @@ export const performBulkActionRoute = (
               // Rules not found at fetch time are skipped for delete (idempotent semantics)
               const [notFoundErrors, otherFetchErrors] = partition(
                 fetchErrors,
-                ({ error }) => error instanceof RuleNotFoundError
+                ({ error }) => error instanceof BulkActionRuleNotFoundError
               );
               errors.push(...otherFetchErrors);
               skipped = notFoundErrors.map(({ item }) => ({

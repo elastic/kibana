@@ -18,10 +18,10 @@ import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_ru
 /**
  * Returned for rule ids that could not be found while fetching rules for a bulk action.
  */
-export class RuleNotFoundError extends Error {
+export class BulkActionRuleNotFoundError extends Error {
   constructor() {
     super('Rule not found');
-    this.name = 'RuleNotFoundError';
+    this.name = 'BulkActionRuleNotFoundError';
   }
 }
 
@@ -54,7 +54,9 @@ export const fetchRulesByQueryOrIds = async ({
         errors: errors.map(({ id, error }) => ({
           item: id,
           error:
-            error.statusCode === 404 ? new RuleNotFoundError() : new Error(fallbackErrorMessage),
+            error.statusCode === 404
+              ? new BulkActionRuleNotFoundError()
+              : new Error(fallbackErrorMessage),
         })),
       };
     } catch (error) {
@@ -68,7 +70,7 @@ export const fetchRulesByQueryOrIds = async ({
           item: id,
           // We do this to remove any status code set by the bulkGetRules client
           error: isRuleNotFound
-            ? new RuleNotFoundError()
+            ? new BulkActionRuleNotFoundError()
             : new Error(error.message || fallbackErrorMessage),
         })),
       };
