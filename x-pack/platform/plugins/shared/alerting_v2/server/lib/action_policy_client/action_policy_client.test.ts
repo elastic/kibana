@@ -14,7 +14,10 @@ import {
 } from '../../saved_objects';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
-import type { ActionPolicySavedObjectService } from '../services/action_policy_saved_object_service/action_policy_saved_object_service';
+import type {
+  ActionPolicyRoutingTagSource,
+  ActionPolicySavedObjectService,
+} from '../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import {
   createMockEncryptedSavedObjects,
   createActionPolicySavedObjectService,
@@ -3114,6 +3117,88 @@ describe('ActionPolicyClient', () => {
       });
 
       expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getRoutingTags', () => {
+    const source = (
+      id: string,
+      name: string,
+      enabled: boolean,
+      tags?: string[]
+    ): ActionPolicyRoutingTagSource => ({ id, name, enabled, matcher: tags ? { tags } : null });
+
+    const mockSources = (policies: ActionPolicyRoutingTagSource[], isTruncated = false) =>
+      jest
+        .spyOn(actionPolicySavedObjectService, 'findRoutingTagSources')
+        .mockResolvedValue({ policies, isTruncated });
+
+    it('reads up to 10,000 policies', async () => {
+      const findRoutingTagSources = mockSources([]);
+
+      await client.getRoutingTags({ policiesPerTag: 5 });
+
+      expect(findRoutingTagSources).toHaveBeenCalledWith({ maxPolicies: 10_000 });
+    });
+
+    it('groups policies by routing tag', async () => {
+      mockSources([
+        source('1', 'SRE on call', true, ['rna', 'sre']),
+        source('2', 'Digest', true),
+        source('3', 'Disabled', false, ['rna']),
+      ]);
+
+      const result = await client.getRoutingTags({ policiesPerTag: 5 });
+
+      expect(result).toEqual({
+        items: [
+          {
+            tag: 'rna',
+            policy_count: 2,
+            policies: [
+              { id: '1', name: 'SRE on call' },
+              { id: '3', name: 'Disabled' },
+            ],
+          },
+          { tag: 'sre', policy_count: 1, policies: [{ id: '1', name: 'SRE on call' }] },
+        ],
+        total_tags: 2,
+        is_truncated: false,
+      });
+    });
+
+    it('applies search and policiesPerTag', async () => {
+      mockSources([
+        source('1', 'A', true, ['rna']),
+        source('2', 'B', true, ['rna']),
+        source('3', 'C', true, ['sre']),
+      ]);
+
+      const result = await client.getRoutingTags({ search: 'rn', policiesPerTag: 1 });
+
+      expect(result.items).toEqual([
+        { tag: 'rna', policy_count: 2, policies: [{ id: '1', name: 'A' }] },
+      ]);
+      expect(result.total_tags).toBe(1);
+    });
+
+    it('limits items to 20 tags and reports every matching tag in total_tags', async () => {
+      mockSources(
+        Array.from({ length: 25 }, (_, i) => source(`p${i}`, `Policy ${i}`, true, [`tag-${i}`]))
+      );
+
+      const result = await client.getRoutingTags({ policiesPerTag: 5 });
+
+      expect(result.items).toHaveLength(20);
+      expect(result.total_tags).toBe(25);
+    });
+
+    it('reports when the policy scan stopped at its ceiling', async () => {
+      mockSources([source('1', 'A', true, ['rna'])], true);
+
+      const result = await client.getRoutingTags({ policiesPerTag: 5 });
+
+      expect(result.is_truncated).toBe(true);
     });
   });
 

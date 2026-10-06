@@ -70,6 +70,7 @@ import {
   matchedActionPolicySchema,
   matchActionPoliciesResponseSchema,
 } from './match_action_policies_schema';
+import { actionPolicyRoutingTagsResponseSchema } from './action_policy_routing_tags_schema';
 import { matchRulesBodySchema } from './match_rules_schema';
 import {
   ruleExecutionViewSchema,
@@ -159,6 +160,7 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [matchActionPoliciesBodySchema, 'alerting_match_action_policies_request'],
   [matchedActionPolicySchema, 'alerting_matched_action_policy'],
   [matchActionPoliciesResponseSchema, 'alerting_match_action_policies_response'],
+  [actionPolicyRoutingTagsResponseSchema, 'alerting_action_policy_routing_tags_response'],
   // matched rules
   [matchRulesBodySchema, 'alerting_match_rules_request'],
   // execution history
