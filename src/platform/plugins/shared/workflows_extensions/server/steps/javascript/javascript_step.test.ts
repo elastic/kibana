@@ -53,7 +53,7 @@ const createMockContext = (
 describe('scriptsJavaScriptStepDefinition', () => {
   it('has a stable handler hash for approval', () => {
     expect(createSHA256Hash(scriptsJavaScriptStepDefinition.handler.toString())).toBe(
-      'ddf0b743e6ae5614c6006233912d8c8314f02f2d86a8150fb550edd931eb6524'
+      '24e3aa262092e11c57a8bb367c31ed8eefad536b2ac6666c62cdc93c827e5c2e'
     );
   });
 
