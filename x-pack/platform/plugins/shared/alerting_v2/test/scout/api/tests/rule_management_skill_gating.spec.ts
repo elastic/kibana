@@ -11,6 +11,11 @@ import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-c
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
+const DEPLOYMENTS_WITH_ALERTING_V2 = [
+  ...tags.stateful.all,
+  ...tags.serverless.observability.complete,
+];
+
 const SKILLS_API = '/api/agent_builder/skills';
 const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
 const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
@@ -50,7 +55,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
 
   apiTest(
     'does not list the alerting V2 skills when neither gate is enabled',
-    { tag: tags.deploymentAgnostic },
+    { tag: DEPLOYMENTS_WITH_ALERTING_V2 },
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
 
@@ -72,7 +77,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
 
   apiTest(
     'does not list the alerting V2 skills when only experimental features are enabled',
-    { tag: tags.deploymentAgnostic },
+    { tag: DEPLOYMENTS_WITH_ALERTING_V2 },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,

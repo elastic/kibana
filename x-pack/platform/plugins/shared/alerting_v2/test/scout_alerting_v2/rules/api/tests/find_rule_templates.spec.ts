@@ -20,6 +20,11 @@ import {
   testData,
 } from '../fixtures';
 
+const DEPLOYMENTS_WITH_ALERTING_V2 = [
+  ...tags.stateful.all,
+  ...tags.serverless.observability.complete,
+];
+
 const getTemplateNames = (items: Array<{ rule: { metadata: { name: string } } }>) =>
   items.map((template) => template.rule.metadata.name);
 
@@ -27,7 +32,7 @@ const getTemplateNames = (items: Array<{ rule: { metadata: { name: string } } }>
  * Rule templates are installed by Fleet packages, so the specs seed the saved
  * objects directly rather than going through a write API.
  */
-apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Find rule templates API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

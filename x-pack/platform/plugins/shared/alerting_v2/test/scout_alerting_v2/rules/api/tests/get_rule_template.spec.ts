@@ -18,7 +18,12 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Get rule template API', { tag: tags.deploymentAgnostic }, () => {
+const DEPLOYMENTS_WITH_ALERTING_V2 = [
+  ...tags.stateful.all,
+  ...tags.serverless.observability.complete,
+];
+
+apiTest.describe('Get rule template API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

@@ -21,7 +21,12 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Get rule template tags API', { tag: tags.deploymentAgnostic }, () => {
+const DEPLOYMENTS_WITH_ALERTING_V2 = [
+  ...tags.stateful.all,
+  ...tags.serverless.observability.complete,
+];
+
+apiTest.describe('Get rule template tags API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 }, () => {
   let adminHeaders: Record<string, string>;
   const createdTemplateIds = new Set<string>();
   const templateNamespace = `rule-template-tags-${randomUUID()}`;
