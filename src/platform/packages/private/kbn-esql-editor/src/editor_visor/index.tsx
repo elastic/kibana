@@ -79,7 +79,8 @@ export function QuickSearchVisor({
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
-  const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
+  const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
+  const [isKqlFocused, setIsKqlFocused] = useState(false);
   const wasVisibleRef = useRef(isVisible);
   const telemetryService = useMemo(
     () => new ESQLEditorTelemetryService(core.analytics),
@@ -148,20 +149,34 @@ export function QuickSearchVisor({
 
   useEffect(() => {
     if (!isVisible || !sourceQuery) {
-      setAdHocDataView(null);
+      setKqlDataView(undefined);
+      return;
+    }
+    // The fields only serve KQL suggestions: look them up once the KQL input is focused, never
+    // while the ES|QL query is typed. They are kept after blur, for the same source.
+    if (!isKqlFocused) {
       return;
     }
     let cancelled = false;
-    EsqlSource.create({ query: sourceQuery, http: core.http, projectRouting })
+    // Only the fields are needed, as before: skip the time field request.
+    EsqlSource.create({
+      query: sourceQuery,
+      http: core.http,
+      projectRouting,
+      resolveTimeField: false,
+    })
       .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
       .then(
-        (dataView) => !cancelled && setAdHocDataView(dataView),
-        () => !cancelled && setAdHocDataView(null)
+        (dataView) => !cancelled && setKqlDataView({ sourceQuery, dataView }),
+        () => !cancelled && setKqlDataView(undefined)
       );
     return () => {
       cancelled = true;
     };
-  }, [isVisible, sourceQuery, projectRouting, data.dataViews, core.http]);
+  }, [isVisible, isKqlFocused, sourceQuery, projectRouting, data.dataViews, core.http]);
+
+  // Fields loaded for another source are stale.
+  const adHocDataView = kqlDataView?.sourceQuery === sourceQuery ? kqlDataView.dataView : undefined;
 
   const isKqlMode = visorMode === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
@@ -248,6 +263,7 @@ export function QuickSearchVisor({
                       onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
                       appName="esqlEditorVisor"
                       dataTestSubj="esqlVisorKQLQueryInput"
+                      onChangeQueryInputFocus={setIsKqlFocused}
                       size="s"
                       isClearable={false}
                     />

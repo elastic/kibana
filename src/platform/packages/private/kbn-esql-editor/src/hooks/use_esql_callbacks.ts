@@ -333,6 +333,8 @@ export const useEsqlCallbacks = ({
         query: sourceQuery,
         http: core.http,
         projectRouting,
+        // Only the fields are needed for KQL suggestions: skip the time field request.
+        resolveTimeField: false,
       });
       const dataView = await registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http);
       const suggestions = await kql?.autocomplete.getQuerySuggestions({

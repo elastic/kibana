@@ -158,7 +158,7 @@ export const applyEsqlControlVariables: InternalStateThunkActionCreator<
       const { esqlSource } = await resolveEsqlSource({
         esql: query.esql,
         services,
-        esqlVariables: esqlVariables.length ? esqlVariables : undefined,
+        esqlVariables,
         timeRange: services.data.query.timefilter.timefilter.getTime(),
         previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
       });

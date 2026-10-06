@@ -20,6 +20,8 @@ export interface ESQLSourceInfoColumn {
 
 export interface ESQLSourceInfo {
   columns: ESQLSourceInfoColumn[];
+  /** Set when the query failed (e.g. invalid or partial query); the request is not cached. */
+  error?: { statusCode: number; message: string };
 }
 
 /** A shared request, aborted only once every caller waiting on it has aborted. */
@@ -46,9 +48,10 @@ export function buildEsqlSourceCacheKey(
   projectRouting: string | undefined,
   esqlVariables: ESQLControlVariable[] | undefined
 ): { cacheKey: string; cleanVariables: ESQLControlVariable[] | undefined } {
-  const cleanVariables = esqlVariables?.map(
-    ({ key, value, type }) => ({ key, value, type } as ESQLControlVariable)
-  );
+  // Use one representation for no variables in both source IDs and cache keys.
+  const cleanVariables = esqlVariables?.length
+    ? esqlVariables.map(({ key, value, type }) => ({ key, value, type } as ESQLControlVariable))
+    : undefined;
   return {
     cacheKey: JSON.stringify([query, projectRouting ?? null, cleanVariables ?? null]),
     cleanVariables,
@@ -86,16 +89,24 @@ export async function getESQLSourceInfo({
   let request = sourceInfoCache.get(cacheKey);
   if (!request) {
     const controller = new AbortController();
-    const promise = http.post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
-      body: JSON.stringify({
-        query,
-        projectRouting,
-        timeRange,
-        timeFieldName,
-        esqlVariables: cleanVariables,
-      }),
-      signal: controller.signal,
-    });
+    const promise = http
+      .post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
+        body: JSON.stringify({
+          query,
+          projectRouting,
+          timeRange,
+          timeFieldName,
+          esqlVariables: cleanVariables,
+        }),
+        signal: controller.signal,
+      })
+      .then((info) => {
+        // Query errors are answered with 200 to keep the console clean; still fail, uncached.
+        if (info.error) {
+          throw new Error(info.error.message);
+        }
+        return info;
+      });
     const newRequest: SourceInfoRequest = { promise, controller, waiters: 0, settled: false };
     promise.then(
       () => {

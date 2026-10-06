@@ -88,17 +88,39 @@ describe('getESQLSourceInfo', () => {
     expect(cacheKey).toBe(withoutMeta.cacheKey);
   });
 
-  it('reuses the in-flight request for the same cache key', async () => {
+  it.each([{ variables: undefined }, { variables: [] }])(
+    'normalizes absent or empty variables ($variables)',
+    ({ variables }) => {
+      expect(buildEsqlSourceCacheKey('FROM logs-*', undefined, variables)).toEqual({
+        cacheKey: JSON.stringify(['FROM logs-*', null, null]),
+        cleanVariables: undefined,
+      });
+    }
+  );
+
+  it('reuses the in-flight request for absent and empty variables', async () => {
     const http = createHttp();
     const query = 'FROM logs-source-info-cache-*';
 
     const [first, second] = await Promise.all([
       getESQLSourceInfo({ query, http }),
-      getESQLSourceInfo({ query, http }),
+      getESQLSourceInfo({ query, http, esqlVariables: [] }),
     ]);
 
     expect(first).toBe(second);
     expect(http.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a query error answered with 200 and does not cache it', async () => {
+    const http = createHttp(() => ({
+      columns: [],
+      error: { statusCode: 400, message: 'Unknown index [lo]' },
+    }));
+    const query = 'FROM lo';
+
+    await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('Unknown index [lo]');
+    await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('Unknown index [lo]');
+    expect(http.post).toHaveBeenCalledTimes(2);
   });
 
   it('evicts the cache entry when the request fails', async () => {
