@@ -27,6 +27,7 @@ const ebtElement = {
   aiIndexDetailPageAutomationsPanel: 'contextEngine.aiIndexDetailPage.automationsPanel',
   aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
   aiIndexDetailPageKiListPanel: 'contextEngine.aiIndexDetailPage.kiListPanel',
+  kiDetailPage: 'contextEngine.kiDetailPage',
   aiIndexEditFlyoutSourcePicker: 'contextEngine.aiIndexEditFlyout.sourcePicker',
   aiIndexDetailFlyout: 'contextEngine.aiIndexDetailFlyout',
   aiIndexDetailFlyoutSignalGroup: 'contextEngine.aiIndexDetailFlyout.signalGroup',
@@ -107,7 +108,15 @@ const ebtAction = {
     FILTER_TYPE: 'filter_type',
     LOAD_MORE: 'load_more_ki',
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',
-    TOGGLE_ROW: 'toggle_row',
+    OPEN_ROW: 'open_row',
+  },
+  kiDetail: {
+    EDIT: 'edit_ki',
+    SAVE: 'save_ki',
+    CANCEL: 'cancel_ki',
+    TAB_DETAILS: 'tab_details',
+    TAB_FIELDS: 'tab_fields',
+    TAB_RAW_JSON: 'tab_raw_json',
   },
 } as const;
 

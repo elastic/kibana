@@ -38,6 +38,10 @@ import {
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
+import {
+  DEFAULT_KI_LIST_LIFECYCLE_STATUSES_QUERY,
+  parseKiListLifecycleStatusesQuery,
+} from '../../../common/ki_list_lifecycle';
 import { MAX_KI_ID_LENGTH } from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,
@@ -298,6 +302,26 @@ export const createAiIndexBodySchema = schema.object({
 });
 export const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
+const kiListLifecycleStatusQuerySchema = () =>
+  schema.string({
+    defaultValue: DEFAULT_KI_LIST_LIFECYCLE_STATUSES_QUERY,
+    maxLength: 32,
+    validate: (value) => {
+      try {
+        const statuses = parseKiListLifecycleStatusesQuery(value);
+        if (statuses.length > 2) {
+          return 'must not include more than two lifecycle statuses';
+        }
+      } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+      }
+    },
+    meta: {
+      description:
+        'Comma-separated lifecycle statuses to include (`active`, `deleted`). Defaults to `active` (excludes tombstoned KIs). Use `active,deleted` to include forgotten memories.',
+    },
+  });
+
 export const listKisQuerySchema = schema.object({
   size: schema.number({
     min: 0,
@@ -311,6 +335,7 @@ export const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
+  lifecycle_status: kiListLifecycleStatusQuerySchema(),
 });
 
 export const getKiQuerySchema = schema.object({
@@ -319,6 +344,22 @@ export const getKiQuerySchema = schema.object({
     maxLength: MAX_INDEX_NAME_BYTES,
     meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
   }),
+  lifecycle_status: kiListLifecycleStatusQuerySchema(),
+});
+
+export const updateKiQuerySchema = getKiQuerySchema;
+
+export const updateKiBodySchema = schema.object({
+  ki: schema.object({}, { unknowns: 'allow' }),
+});
+
+export const updateKiResponseSchema = schema.object({
+  id: schema.string(),
+  result: schema.oneOf([schema.literal('updated'), schema.literal('noop')]),
+});
+
+export const forgetMemoryKiResponseSchema = schema.object({
+  id: schema.string(),
 });
 
 export const queryAiIndicesBodySchema = schema.object({

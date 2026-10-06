@@ -60,6 +60,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/index-management-shared-types",
     "@kbn/code-editor",
+    "@kbn/key-value-metadata-table",
     "@kbn/ui-callout",
     "@kbn/logging-mocks",
     "@kbn/agent-builder-common",

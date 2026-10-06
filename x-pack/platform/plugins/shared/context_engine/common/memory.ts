@@ -6,3 +6,8 @@
  */
 
 export const MEMORY_KI_TYPES = ['memory.session', 'memory.session_fact'] as const;
+
+export type MemoryKiType = (typeof MEMORY_KI_TYPES)[number];
+
+export const isMemoryKiType = (type: string): type is MemoryKiType =>
+  (MEMORY_KI_TYPES as readonly string[]).includes(type);

@@ -18,6 +18,7 @@ import React, { useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { isIndexPattern } from '../../../../common/ai_index_dest';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
+import { KI_LIST_ACTIVE_AND_DELETED_LIFECYCLE_STATUSES } from '../../../../common/ki_list_lifecycle';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useKiList } from '../../hooks/use_ki_list';
 import { useKibana } from '../../hooks/use_kibana';
@@ -53,6 +54,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
     aiIndexId,
     size,
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
+    lifecycleStatuses: KI_LIST_ACTIVE_AND_DELETED_LIFECYCLE_STATUSES,
   });
 
   const typeFilterOptions = useMemo(

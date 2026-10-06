@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { KiListPanel } from './ki_list_panel';
+export class KiWriteValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'KiWriteValidationError';
+  }
+}

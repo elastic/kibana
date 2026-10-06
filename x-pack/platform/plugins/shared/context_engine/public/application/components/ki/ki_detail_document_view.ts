@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { KiListPanel } from './ki_list_panel';
+import type { GetKiResponse } from '../../../../common/http_api/knowledge_indicators';
+
+export const buildKiDetailDocumentView = (ki: GetKiResponse): Record<string, unknown> => ({
+  id: ki.id,
+  ...ki.document,
+});

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KiLifecycleStatus, KiPartialFields } from '../step_types/ki';
 import type { KiTypeCount } from './ai_indices';
 
 export interface KiListItem {
@@ -12,6 +13,8 @@ export interface KiListItem {
   index: string;
   type?: string;
   title?: string;
+  updatedAt?: string;
+  lifecycleStatus?: KiLifecycleStatus;
 }
 
 /** Unfiltered store stats. */
@@ -36,4 +39,19 @@ export interface KiDocument {
 export interface GetKiResponse {
   id: string;
   document: KiDocument;
+}
+
+export interface UpdateKiResponse {
+  id: string;
+  result: 'updated' | 'noop';
+}
+
+export interface ForgetMemoryKiResponse {
+  id: string;
+}
+
+export type RestoreMemoryKiResponse = ForgetMemoryKiResponse;
+
+export interface UpdateKiRequestBody {
+  ki: KiPartialFields;
 }

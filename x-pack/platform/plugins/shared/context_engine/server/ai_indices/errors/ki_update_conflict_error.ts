@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { KiListPanel } from './ki_list_panel';
+export class KiUpdateConflictError extends Error {
+  constructor(aiIndexId: string, kiId: string) {
+    super(`KI '${kiId}' in AI index '${aiIndexId}' was modified concurrently`);
+    this.name = 'KiUpdateConflictError';
+  }
+}

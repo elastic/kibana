@@ -8,6 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { DEFAULT_KI_LIST_LIFECYCLE_STATUSES } from '../../common/ki_list_lifecycle';
+import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { GetKiResponse, KiDocument } from '../../common/http_api/knowledge_indicators';
 import { KiNotFoundError } from './errors';
 
@@ -71,13 +73,21 @@ export interface GetKiOptions {
   dest: AiIndexDest;
   index: string;
   kiId: string;
+  lifecycleStatuses?: KiLifecycleStatus[];
 }
 
 /** Fetches the current revision of a KI. */
 export const getKi = async (
   esClient: ElasticsearchClient,
-  { aiIndexId, dest, index, kiId }: GetKiOptions
+  {
+    aiIndexId,
+    dest,
+    index,
+    kiId,
+    lifecycleStatuses = DEFAULT_KI_LIST_LIFECYCLE_STATUSES,
+  }: GetKiOptions
 ): Promise<GetKiResponse> => {
+  const allowDeleted = lifecycleStatuses.includes('deleted');
   const response = await esClient.search<KiDocument>({
     index: dest.value,
     ...LENIENT_INDEX_OPTIONS,
@@ -94,7 +104,10 @@ export const getKi = async (
   });
 
   const { _id, _source: document } = pickCurrentRevision(response.hits.hits) ?? {};
-  if (_id === undefined || document === undefined || isDeleted(document)) {
+  if (_id === undefined || document === undefined) {
+    throw new KiNotFoundError(aiIndexId, kiId);
+  }
+  if (isDeleted(document) && !allowDeleted) {
     throw new KiNotFoundError(aiIndexId, kiId);
   }
 

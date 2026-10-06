@@ -10,6 +10,8 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { DEFAULT_KI_LIST_LIFECYCLE_STATUSES } from '../../common/ki_list_lifecycle';
+import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
 /** Columns the list reads. Each is guarded by a schema probe since AI indices vary in shape. */
@@ -18,6 +20,7 @@ const KI_LIST_FIELDS = [
   '@timestamp',
   'type',
   'title',
+  'updated_at',
   'governance.lifecycle.status',
 ] as const;
 type KiListField = (typeof KI_LIST_FIELDS)[number];
@@ -26,7 +29,29 @@ export interface GetKisOptions {
   dest: AiIndexDest;
   size: number;
   type?: string;
+  lifecycleStatuses?: KiLifecycleStatus[];
 }
+
+const ACTIVE_LIFECYCLE_FILTER =
+  'governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"';
+
+const lifecycleStatusFilterClause = (
+  lifecycleStatuses: KiLifecycleStatus[],
+  hasLifecycleField: boolean
+): string[] => {
+  if (!hasLifecycleField) {
+    return [];
+  }
+  const includeActive = lifecycleStatuses.includes('active');
+  const includeDeleted = lifecycleStatuses.includes('deleted');
+  if (includeActive && includeDeleted) {
+    return [];
+  }
+  if (includeDeleted) {
+    return ['WHERE governance.lifecycle.status == "deleted"'];
+  }
+  return [`WHERE ${ACTIVE_LIFECYCLE_FILTER}`];
+};
 
 const EMPTY: ListKisResponse = { kis: [], total: 0, summary: { total: 0, counts_by_type: [] } };
 
@@ -35,14 +60,39 @@ const toRecords = (response: ESQLSearchResponse): Array<Record<string, unknown>>
     Object.fromEntries(response.columns.map((column, i) => [column.name, row[i]]))
   );
 
+const readLifecycleStatus = (row: Record<string, unknown>): KiLifecycleStatus | undefined => {
+  if (!('governance.lifecycle.status' in row)) {
+    return undefined;
+  }
+  const status = row['governance.lifecycle.status'];
+  if (status === 'active' || status === 'deleted') {
+    return status;
+  }
+  return 'active';
+};
+
 const toKiListItem = (row: Record<string, unknown>): KiListItem => {
-  const { _index: index, id, type, title } = row;
+  const { _index: index, id, type, title, updated_at: updatedAt } = row;
+  const lifecycleStatus = readLifecycleStatus(row);
   return {
     id: String(id),
     index: String(index),
     ...(typeof type === 'string' ? { type } : {}),
     ...(typeof title === 'string' ? { title } : {}),
+    ...(typeof updatedAt === 'string' ? { updatedAt } : {}),
+    ...(lifecycleStatus !== undefined ? { lifecycleStatus } : {}),
   };
+};
+
+const keepListFields = (has: (field: KiListField) => boolean): string => {
+  const fields = ['_index', 'id', 'type', 'title'];
+  if (has('governance.lifecycle.status')) {
+    fields.push('governance.lifecycle.status');
+  }
+  if (has('updated_at')) {
+    fields.push('updated_at');
+  }
+  return `KEEP ${fields.join(', ')}`;
 };
 
 /** A dest value may be a comma-separated list of index expressions. */
@@ -76,14 +126,15 @@ const probeColumns = async (
 
 /**
  * One row per KI: the latest revision by `@timestamp` for each logical id,
- * excluding KIs whose lifecycle status is deleted. On an index dest the same
+ * optionally filtered by lifecycle status (default: active only). On an index dest the same
  * id may exist in several backing indices, so those are distinct KIs.
  * Documents without a timestamp sort first, and `_id` breaks timestamp ties.
  */
 const currentKisQuery = (
   dest: AiIndexDest,
   sources: string[],
-  has: (field: KiListField) => boolean
+  has: (field: KiListField) => boolean,
+  lifecycleStatuses: KiLifecycleStatus[]
 ): string => {
   const key = dest.type === 'data_stream' ? 'id' : '_index, id';
   return [
@@ -98,9 +149,7 @@ const currentKisQuery = (
           'WHERE _id == latest_doc',
         ]
       : []),
-    ...(has('governance.lifecycle.status')
-      ? ['WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"']
-      : []),
+    ...lifecycleStatusFilterClause(lifecycleStatuses, has('governance.lifecycle.status')),
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
   ].join('\n| ');
@@ -108,8 +157,9 @@ const currentKisQuery = (
 
 export const getKis = async (
   esClient: ElasticsearchClient,
-  { dest, size, type }: GetKisOptions
+  { dest, size, type, lifecycleStatuses = DEFAULT_KI_LIST_LIFECYCLE_STATUSES }: GetKisOptions
 ): Promise<ListKisResponse> => {
+  const statuses = [...new Set(lifecycleStatuses)];
   // Zero-row probes resolve the mapped columns under the caller's own read privilege; an
   // expression that resolves to nothing is left out so the rest of the dest still lists.
   const expressions = destExpressions(dest.value);
@@ -128,7 +178,8 @@ export const getKis = async (
   const base = currentKisQuery(
     dest,
     sources.map(({ expression }) => expression),
-    has
+    has,
+    statuses
   );
   const typeParams = type !== undefined ? { params: [{ type }] } : {};
 
@@ -136,7 +187,7 @@ export const getKis = async (
     base,
     ...(type !== undefined ? ['WHERE type == ?type'] : []),
     has('@timestamp') ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC',
-    'KEEP _index, id, type, title',
+    keepListFields(has),
     `LIMIT ${size}`,
   ].join('\n| ');
   // Exact counts, independent of how many type buckets exist.

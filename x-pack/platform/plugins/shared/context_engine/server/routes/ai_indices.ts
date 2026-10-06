@@ -19,6 +19,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
@@ -30,7 +31,9 @@ import {
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_FORGET_PATH,
   AI_INDEX_KI_LIST_PATH,
+  AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_PATH,
   AI_INDEX_QUERY_PATH,
 } from '../../common/constants';
@@ -43,7 +46,15 @@ import type {
   PutAiIndexResponse,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
-import type { GetKiResponse, ListKisResponse } from '../../common/http_api/knowledge_indicators';
+import type {
+  ForgetMemoryKiResponse,
+  GetKiResponse,
+  ListKisResponse,
+  RestoreMemoryKiResponse,
+  UpdateKiResponse,
+} from '../../common/http_api/knowledge_indicators';
+import { parseKiListLifecycleStatusesQuery } from '../../common/ki_list_lifecycle';
+import { kiPartialFieldsSchema } from '../../common/step_types/ki';
 import { apiPrivileges } from '../../common/features';
 import {
   InvalidAiIndexDestError,
@@ -60,7 +71,15 @@ import {
   InvalidEsqlSourceError,
   InvalidAiIndexTraceError,
   KiNotFoundError,
+  KiUpdateConflictError,
+  KiWriteValidationError,
 } from '../ai_indices/errors';
+import {
+  forgetMemoryKi,
+  kiWriterFromUi,
+  restoreMemoryKi,
+  updateKiDocument,
+} from '../ai_indices/ki_update';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
 import {
@@ -90,6 +109,8 @@ import {
   feedbackAnalysisSchema,
   getKiQuerySchema,
   kiIdParamsSchema,
+  updateKiBodySchema,
+  updateKiQuerySchema,
   listAiIndexResponseSchema,
   listKisQuerySchema,
   putAiIndexBodySchema,
@@ -157,8 +178,17 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   ) {
     return response.badRequest({ body: { message: error.message } });
   }
+  if (
+    error instanceof KiWriteValidationError ||
+    (error instanceof ExecutionError && error.type === 'ValidationError')
+  ) {
+    return response.badRequest({ body: { message: error.message } });
+  }
   if (error instanceof AiIndexNotFoundError || error instanceof KiNotFoundError) {
     return response.notFound({ body: { message: error.message } });
+  }
+  if (error instanceof KiUpdateConflictError) {
+    return response.conflict({ body: { message: error.message } });
   }
   if (error instanceof AiIndexNotReadableError) {
     return response.forbidden({ body: { message: error.message } });
@@ -686,7 +716,8 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
-        const { size, type } = request.query;
+        const { size, type, lifecycle_status: lifecycleStatusQuery } = request.query;
+        const lifecycleStatuses = parseKiListLifecycleStatusesQuery(lifecycleStatusQuery);
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -695,6 +726,7 @@ export const registerAiIndexRoutes = ({
             dest: aiIndex.dest,
             size,
             ...(type !== undefined ? { type } : {}),
+            lifecycleStatuses,
           });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
           return response.ok({ body });
@@ -729,7 +761,8 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
-        const { index } = request.query;
+        const { index, lifecycle_status: lifecycleStatusQuery } = request.query;
+        const lifecycleStatuses = parseKiListLifecycleStatusesQuery(lifecycleStatusQuery);
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -739,6 +772,154 @@ export const registerAiIndexRoutes = ({
             dest: aiIndex.dest,
             index,
             kiId,
+            lifecycleStatuses,
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  router.versioned
+    .patch({
+      path: AI_INDEX_KI_BY_ID_PATH,
+      security: WRITE_SECURITY,
+      access: 'internal',
+      summary: 'Update a Knowledge Indicator',
+      description:
+        'Applies a partial update to a Knowledge Indicator in the AI Index backing store.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: kiIdParamsSchema,
+            query: updateKiQuerySchema,
+            body: updateKiBodySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId, kiId } = request.params;
+        const { index: backingIndex } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const parsedKi = kiPartialFieldsSchema.safeParse(request.body.ki);
+        if (!parsedKi.success) {
+          return response.badRequest({ body: { message: parsedKi.error.message } });
+        }
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const body: UpdateKiResponse = await updateKiDocument({
+            esClient,
+            aiIndexId,
+            dest: aiIndex.dest,
+            kiId,
+            backingIndex,
+            ki: parsedKi.data,
+            writer: kiWriterFromUi(spaceId),
+            refresh: true,
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: AI_INDEX_KI_FORGET_PATH,
+      security: WRITE_SECURITY,
+      access: 'internal',
+      summary: 'Forget a memory Knowledge Indicator',
+      description:
+        'Marks a memory.session or memory.session_fact Knowledge Indicator as deleted so it is no longer recalled.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: kiIdParamsSchema,
+            query: updateKiQuerySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId, kiId } = request.params;
+        const { index: backingIndex } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const body: ForgetMemoryKiResponse = await forgetMemoryKi({
+            esClient,
+            aiIndexId,
+            dest: aiIndex.dest,
+            kiId,
+            backingIndex,
+            memoryEnabled: aiIndex.memory_enabled,
+            writer: kiWriterFromUi(spaceId),
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: AI_INDEX_KI_RESTORE_PATH,
+      security: WRITE_SECURITY,
+      access: 'internal',
+      summary: 'Restore a forgotten memory Knowledge Indicator',
+      description:
+        'Sets lifecycle status back to active for a tombstoned memory.session or memory.session_fact so agents can recall it again.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: kiIdParamsSchema,
+            query: updateKiQuerySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId, kiId } = request.params;
+        const { index: backingIndex } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const body: RestoreMemoryKiResponse = await restoreMemoryKi({
+            esClient,
+            aiIndexId,
+            dest: aiIndex.dest,
+            kiId,
+            backingIndex,
+            memoryEnabled: aiIndex.memory_enabled,
+            writer: kiWriterFromUi(spaceId),
           });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });

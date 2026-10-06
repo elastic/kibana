@@ -8,8 +8,9 @@
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
 import type { AiIndexDest } from '../../../../common/http_api/ai_indices';
+import type { KiLifecycleStatus } from '../../../../common/step_types/ki';
 
-const noneValueLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.noneValue', {
+export const noneValueLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.noneValue', {
   defaultMessage: 'None',
 });
 
@@ -31,7 +32,30 @@ export const getIndexManagementLocatorParams = (
 export const capitalizeLabel = (label: string): string =>
   label.length > 0 ? `${label.charAt(0).toUpperCase()}${label.slice(1)}` : label;
 
-export const getKiTypeLabel = (type: string): string => type.replace(/_/g, ' ');
+const getMemoryKiTypeLabel = (type: string): string | undefined => {
+  switch (type) {
+    case 'memory.session':
+      return i18n.translate('xpack.contextEngine.kiType.memorySession', {
+        defaultMessage: 'Session summary',
+      });
+    case 'memory.session_fact':
+      return i18n.translate('xpack.contextEngine.kiType.memorySessionFact', {
+        defaultMessage: 'Session fact',
+      });
+    default:
+      return undefined;
+  }
+};
+
+export const getKiTypeLabel = (type: string): string => {
+  const memoryLabel = getMemoryKiTypeLabel(type);
+  if (memoryLabel !== undefined) {
+    return memoryLabel;
+  }
+
+  const leafType = type.includes('.') ? type.slice(type.lastIndexOf('.') + 1) : type;
+  return leafType.replace(/_/g, ' ');
+};
 
 export const getKiListTypeFilterLabel = (type: string): string =>
   type === ALL_TYPE_FILTER.value
@@ -44,3 +68,14 @@ export const getKiDisplayTitle = (title?: string): string => title ?? noneValueL
 
 export const getKiDisplayTypeLabel = (type?: string): string =>
   capitalizeLabel(getKiTypeLabel(type ?? noneValueLabel));
+
+export const getKiLifecycleStatusLabel = (status: KiLifecycleStatus): string => {
+  if (status === 'deleted') {
+    return i18n.translate('xpack.contextEngine.kiList.lifecycleStatus.deleted', {
+      defaultMessage: 'Deleted',
+    });
+  }
+  return i18n.translate('xpack.contextEngine.kiList.lifecycleStatus.active', {
+    defaultMessage: 'Active',
+  });
+};

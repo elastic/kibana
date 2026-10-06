@@ -421,26 +421,32 @@ export const findKiRevision = async ({
   aiIndexId,
   dest,
   kiId,
+  backingIndex,
   abortSignal,
 }: {
   esClient: ElasticsearchClient;
   aiIndexId: string;
   dest: AiIndexDest;
   kiId: string;
+  backingIndex?: string;
   abortSignal: AbortSignal;
 }): Promise<KiRevision | undefined> => {
   const isDataStream = dest.type === 'data_stream';
+  const query =
+    backingIndex !== undefined && !isDataStream
+      ? { bool: { filter: [kiIdQuery(kiId), { term: { _index: backingIndex } }] } }
+      : kiIdQuery(kiId);
   // A dest with no physical backing index yet must resolve to empty hits, not an error.
   const response = await esClient.search<StoredKi>(
     {
       index: dest.value,
       ignore_unavailable: true,
       allow_no_indices: true,
-      query: kiIdQuery(kiId),
+      query,
       ...(isDataStream && {
         sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
       }),
-      size: isDataStream ? REVISION_TIE_WINDOW : 2,
+      size: isDataStream ? REVISION_TIE_WINDOW : backingIndex !== undefined ? 1 : 2,
       seq_no_primary_term: true,
       _source: isDataStream ? true : ['id', 'governance'],
     },

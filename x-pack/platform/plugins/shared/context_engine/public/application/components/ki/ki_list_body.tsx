@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  EuiSkeletonText,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { KiListItem } from '../../../../common/http_api/knowledge_indicators';
-import { KiRow } from './ki_row';
+import { KiListTable } from './ki_list_table';
 
 interface KiListBodyProps {
   aiIndexId: string;
@@ -59,21 +53,8 @@ export const KiListBody = ({ aiIndexId, kis, isLoading, error }: KiListBodyProps
   }
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="m"
-      responsive={false}
-      role="list"
-      data-test-subj="contextKiListRows"
-    >
-      {kis.map((ki, index) => (
-        <React.Fragment key={`${ki.index}:${ki.id}`}>
-          <div role="listitem">
-            <KiRow aiIndexId={aiIndexId} ki={ki} />
-          </div>
-          {index < kis.length - 1 && <EuiHorizontalRule margin="none" />}
-        </React.Fragment>
-      ))}
-    </EuiFlexGroup>
+    <div data-test-subj="contextKiListRows">
+      <KiListTable aiIndexId={aiIndexId} kis={kis} />
+    </div>
   );
 };
