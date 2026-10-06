@@ -13,7 +13,6 @@ import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { isEqual } from 'lodash';
 import type { DataSourceService, EsqlSource } from '@kbn/data-source';
 import { unregisterFromDataViewsCache } from '@kbn/data-source';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
@@ -38,14 +37,12 @@ export const buildEsqlFetchSubscribe = ({
   getCurrentTab,
   injectCurrentTab,
   dataSourceService,
-  dataViews,
 }: {
   internalState: InternalStateStore;
   dataSubjects: SavedSearchData;
   getCurrentTab: () => TabState;
   injectCurrentTab: TabActionInjector;
   dataSourceService: DataSourceService;
-  dataViews: DataViewsPublicPluginStart;
 }) => {
   // EsqlSource from the last completed fetch. Undefined = no successful fetch yet (initial fetch).
   // Carries .query and .getColumns() so we no longer need to track those separately.
@@ -61,7 +58,7 @@ export const buildEsqlFetchSubscribe = ({
 
     if (registeredEsqlSourceId) {
       dataSourceService.unregisterEsqlSource(registeredEsqlSourceId);
-      unregisterFromDataViewsCache(dataViews, registeredEsqlSourceId);
+      unregisterFromDataViewsCache(registeredEsqlSourceId);
       registeredEsqlSourceId = undefined;
     }
 

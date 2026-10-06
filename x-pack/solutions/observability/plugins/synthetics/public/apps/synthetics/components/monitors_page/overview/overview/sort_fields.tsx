@@ -9,7 +9,7 @@ import type { PayloadAction } from 'redux-toolkit-v1';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
+import type { MonitorListSortField } from '../../../../../../../common/runtime_types/schemas/sort_field';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { selectOverviewPageState, setOverviewPageStateAction } from '../../../../state/overview';
