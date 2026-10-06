@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
 
-  describe('runtime fields', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/295508
+  describe.skip('runtime fields', function () {
     // It's flaky on MKI and will be migrated to scout soon
     this.tags(['failsOnMKI']);
     before(async function () {
