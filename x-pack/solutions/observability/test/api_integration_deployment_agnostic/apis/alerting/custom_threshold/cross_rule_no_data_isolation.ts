@@ -24,7 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   describe('CROSS-RULE NO-DATA ISOLATION', function () {
-    // Fails on MKI: the staging-host-2 no-data alert does not show up within 120s
+    // Fails on MKI, see https://github.com/elastic/kibana/issues/295624
     this.tags(['failsOnMKI']);
 
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
