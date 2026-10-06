@@ -36,7 +36,7 @@ summary="$(jq -r '
 [[ -z "$summary" ]] && summary="no findings"
 
 channel="${SLACK_NOTIFICATIONS_CHANNEL:-}"
-if [[ "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" != "true" || -z "$channel" ]]; then
+if [[ ( "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" != "true" && "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" != "true" ) || -z "$channel" ]]; then
   echo "Slack notifications disabled or no channel set, not posting."
   echo "Summary: $summary"
   exit 0
