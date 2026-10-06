@@ -18,6 +18,7 @@ import { buildInstanceStatuses, collectDeployResults, deployGroup } from './depl
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 import { fetchAgentlessSecretRefs } from './secret_refs';
+import { runWithSharedSecrets } from './shared_secrets';
 import type { ExistingSecretRefs } from './secret_refs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
 import {
@@ -277,6 +278,18 @@ export function useMiDeploy({
       let remainingPending: Record<string, string> | undefined;
       let dirtyUpdateApplied = false;
 
+      const hasTypedSecrets =
+        !deployConnectorId && Boolean(typedKeys?.access_key_id || typedKeys?.secret_access_key);
+      // The auth state a policy is built with: when its credentials come from a secret an earlier
+      // policy already stored, the typed values are left out so Fleet does not store them again.
+      const withSharedRefs = (
+        sharedRefs: ExistingSecretRefs | undefined
+      ): AuthenticateAndDeployStepState =>
+        sharedRefs
+          ? { ...authenticateAndDeployStep, staticKeys: undefined, existingSecretRefs: sharedRefs }
+          : authenticateAndDeployStep;
+      let dirtySharedRefs: ExistingSecretRefs | undefined;
+
       // Updates all already-deployed MI policies with the current session config.
       // Returns whether any policy update failed and the full set of IDs to mark failed.
       // additionalFailedIds: undeployed targets that should also surface as failed on error
@@ -305,14 +318,18 @@ export function useMiDeploy({
             ? { hadFailures: true, allFailedIds: Object.keys(policyIdsByInstance) }
             : { hadFailures: false, allFailedIds: [] };
         }
-        const results = await Promise.allSettled(
-          [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
+        // Typed credentials become new Fleet secrets: store them once on the first policy and have
+        // the others use that secret, so a replacement never leaves one secret per policy.
+        const { results, sharedRefs: storedRefs } = await runWithSharedSecrets({
+          items: [...byPolicy.entries()],
+          hasTypedSecrets,
+          run: ([policyId, instanceIdsForPolicy], sharedRefs) =>
             updateManagedIntegrationsPolicy(policyId, instanceIdsForPolicy, {
               instances: serviceSettings?.instances ?? [],
               storedServiceVars: serviceSettings?.serviceVars ?? {},
               globalRegion: serviceSettings?.globalRegion ?? '',
               namespace,
-              authenticateAndDeployStep,
+              authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
               // Override the connector when auth changed or when deploying with static keys.
               // Static keys never use a cloud connector; any connector attached externally after
@@ -323,9 +340,12 @@ export function useMiDeploy({
               ...(isAuthDirty || authenticateAndDeployStep.authMethod === 'static_keys'
                 ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
                 : {}),
-            })
-          )
-        );
+            }),
+          getPolicyId: ([policyId]) => policyId,
+          fetchRefs: fetchAgentlessSecretRefs,
+        });
+        // New policies of this run use the secret just created, not another one.
+        dirtySharedRefs = storedRefs;
         results.forEach((result) => {
           if (result.status === 'rejected') {
             // eslint-disable-next-line no-console
@@ -627,20 +647,24 @@ export function useMiDeploy({
         }
       }
 
-      // Promise.allSettled preserves insertion order, so results[i] matches groupsToDeploy[i].
-      const results = await Promise.allSettled(
-        groupsToDeploy.map((group) =>
+      // Results are in groupsToDeploy order. Typed credentials are stored once (first policy) and
+      // shared by the other new policies, or by all of them when a dirty update just stored them.
+      const { results } = await runWithSharedSecrets({
+        items: groupsToDeploy,
+        hasTypedSecrets,
+        initialRefs: dirtySharedRefs,
+        run: (group, sharedRefs) =>
           deployGroup(group, {
             namespace,
             globalRegion,
             storedServiceVars,
-            authenticateAndDeployStep: {
-              ...authenticateAndDeployStep,
-              existingSecretRefs: keptSecretRefs,
-            },
-          })
-        )
-      );
+            authenticateAndDeployStep: sharedRefs
+              ? withSharedRefs(sharedRefs)
+              : { ...authenticateAndDeployStep, existingSecretRefs: keptSecretRefs },
+          }),
+        getPolicyId: (_group, outcome) => outcome.policyId,
+        fetchRefs: fetchAgentlessSecretRefs,
+      });
 
       const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
       const {

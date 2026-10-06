@@ -27,6 +27,7 @@ import { toSOAuthMethod } from './agent_based_section/credential_method_selector
 import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
 import { fetchPackagePolicySecretRefs, filterSecretRefsForMethod } from './secret_refs';
+import { runWithSharedSecrets } from './shared_secrets';
 import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
@@ -215,6 +216,15 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               )
             : undefined;
 
+        // Typed keys that Fleet will store as new secrets (not kept or replaced-in-full ones).
+        const hasTypedKeys =
+          !!keysMethod &&
+          Boolean(
+            typedCreds?.access_key_id || typedCreds?.secret_access_key || typedCreds?.session_token
+          );
+        const withoutTypedSecrets = (creds: AgentCredentialVars | undefined) =>
+          creds && { ...creds, access_key_id: '', secret_access_key: '', session_token: '' };
+
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
           globalRegion,
@@ -287,24 +297,40 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             byPolicy.get(policyId)!.push(instanceId);
           }
           if (byPolicy.size > 0) {
-            const redeployResults = await Promise.allSettled(
-              [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
+            // Typed keys become new Fleet secrets: store them once on the first package policy
+            // and have the others (and this run's new ones) use that secret.
+            const { results: redeployResults, sharedRefs } = await runWithSharedSecrets({
+              items: [...byPolicy.entries()],
+              hasTypedSecrets: hasTypedKeys,
+              run: ([policyId, instanceIdsForPolicy], shared) =>
                 updateAgentBasedPolicy(policyId, instanceIdsForPolicy, {
                   instances: serviceSettings?.instances ?? [],
                   storedServiceVars,
                   globalRegion,
                   namespace: DEFAULT_NAMESPACE,
-                  authenticateAndDeployStep,
+                  authenticateAndDeployStep: shared
+                    ? { ...authenticateAndDeployStep, existingSecretRefs: shared }
+                    : authenticateAndDeployStep,
                   servicesMap: servicesMap ?? new Map(),
                   // Only override policy_ids when the selection drifted; otherwise a var-only redeploy
                   // would detach agent policies attached outside the wizard.
                   selectedAgentPolicyIds: detectAndReviewStep.isPolicySelectionDirty
                     ? targetPolicyIds
                     : [],
-                  agentCredentials: agentCredentialsRef.current,
-                })
-              )
-            );
+                  agentCredentials: shared
+                    ? withoutTypedSecrets(agentCredentialsRef.current)
+                    : agentCredentialsRef.current,
+                }),
+              getPolicyId: ([policyId]) => policyId,
+              fetchRefs: fetchPackagePolicySecretRefs,
+            });
+            if (sharedRefs) {
+              baseOpts.authenticateAndDeployStep = {
+                ...authenticateAndDeployStep,
+                existingSecretRefs: sharedRefs,
+              };
+              baseOpts.agentCredentials = withoutTypedSecrets(agentCredentialsRef.current);
+            }
             redeployResults.forEach((result) => {
               if (result.status === 'rejected') {
                 // eslint-disable-next-line no-console

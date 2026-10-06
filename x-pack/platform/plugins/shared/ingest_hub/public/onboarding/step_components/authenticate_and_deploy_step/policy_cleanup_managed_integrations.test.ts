@@ -264,6 +264,37 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     });
   });
 
+  it("prefers refs handed in (a secret an earlier policy just stored) over the policy's own", async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: { version: '2.5.0', vars: [{ name: 'secret_access_key' }], policy_templates: [] },
+      },
+    });
+    mockGetAgentlessPolicy.mockResolvedValue({
+      item: {
+        name: 'existing-agentless-name',
+        package: { version: '2.5.0' },
+        vars: { secret_access_key: { isSecretRef: true, id: 'own-old-secret' } },
+      },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        existingSecretRefs: new Map([
+          ['secret_access_key', { isSecretRef: true as const, id: 'shared-new-secret' }],
+        ]),
+      } as never,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    expect(mockUpdateAgentless.mock.calls[0][1].vars).toEqual({
+      default_region: undefined,
+      secret_access_key: { isSecretRef: true, id: 'shared-new-secret' },
+    });
+  });
+
   it('does not send stored refs for a policy that uses a cloud connector', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: {

@@ -23,13 +23,17 @@ jest.mock('./secret_refs', () => ({
 
 import { deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
-import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
+import {
+  cleanupManagedIntegrationsPolicies,
+  updateManagedIntegrationsPolicy,
+} from './policy_cleanup_managed_integrations';
 import { fetchAgentlessSecretRefs } from './secret_refs';
 import { useMiDeploy } from './use_mi_deploy';
 import type { UseMiDeployParams } from './use_mi_deploy';
 
 const mockDeployGroup = deployGroup as jest.Mock;
 const mockCleanup = cleanupManagedIntegrationsPolicies as jest.Mock;
+const mockUpdate = updateManagedIntegrationsPolicy as jest.Mock;
 const mockFetchRefs = fetchAgentlessSecretRefs as jest.Mock;
 
 const KEPT_REFS = new Map([['secret_access_key', { isSecretRef: true as const, id: 'ref-1' }]]);
@@ -193,7 +197,7 @@ describe('useMiDeploy — kept secret refs', () => {
     expect(clearStagedStaticKeys).not.toHaveBeenCalled();
   });
 
-  it('skips the lookup when both keys were typed', async () => {
+  it('does not look up kept secrets when both keys were typed; it reads back the ones it just stored', async () => {
     await runDeploy(
       makeParams({
         authenticateAndDeployStep: {
@@ -202,10 +206,79 @@ describe('useMiDeploy — kept secret refs', () => {
       })
     );
 
-    expect(mockFetchRefs).not.toHaveBeenCalled();
+    // No lookup on the deployed policy; the only read is of the policy the deploy just created.
+    expect(mockFetchRefs).not.toHaveBeenCalledWith('policy-A');
+    expect(mockFetchRefs).toHaveBeenCalledWith('policy-B');
+    expect(mockDeployGroup.mock.calls[0][1].authenticateAndDeployStep.staticKeys).toStrictEqual({
+      access_key_id: 'AKID',
+      secret_access_key: 'SECRET',
+    });
     expect(mockDeployGroup.mock.calls[0][1].authenticateAndDeployStep.existingSecretRefs).toBe(
       undefined
     );
+  });
+
+  describe('typed keys shared across policies', () => {
+    const TYPED = { staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' } };
+
+    it('stores typed keys once for new policies: the first gets them, the rest get its refs', async () => {
+      mockDeployGroup
+        .mockResolvedValueOnce({ policyId: 'new-1' })
+        .mockResolvedValueOnce({ policyId: 'new-2' });
+      await runDeploy(
+        makeParams({
+          deployGroups: [makeGroup('s3'), makeGroup('sqs')],
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          pendingCleanupPolicyIds: {},
+          authenticateAndDeployStep: TYPED,
+        })
+      );
+
+      expect(mockFetchRefs).toHaveBeenCalledWith('new-1');
+      const [first, second] = mockDeployGroup.mock.calls.map(([, opts]) => opts);
+      expect(first.authenticateAndDeployStep.staticKeys).toStrictEqual(TYPED.staticKeys);
+      expect(first.authenticateAndDeployStep.existingSecretRefs).toBeUndefined();
+      expect(second.authenticateAndDeployStep.staticKeys).toBeUndefined();
+      expect(second.authenticateAndDeployStep.existingSecretRefs).toBe(KEPT_REFS);
+    });
+
+    it('a dirty update stores typed keys once; the other policies and new ones use that secret', async () => {
+      mockFetchRefs.mockImplementation(async (id?: string) =>
+        id === 'policy-A' ? KEPT_REFS : new Map()
+      );
+      mockUpdate.mockResolvedValue(undefined);
+      await runDeploy(
+        makeParams({
+          deployGroups: [makeGroup('elb'), makeGroup('alb'), makeGroup('s3')],
+          serviceStatuses: { elb: 'receiving', alb: 'receiving' },
+          policyIdsByInstance: { elb: 'policy-A', alb: 'policy-C' },
+          pendingCleanupPolicyIds: {},
+          isDirty: true,
+          authenticateAndDeployStep: TYPED,
+        })
+      );
+
+      const updates = mockUpdate.mock.calls.map(([policyId, , opts]) => ({
+        policyId,
+        auth: opts.authenticateAndDeployStep,
+      }));
+      expect(updates.map((u) => u.policyId)).toEqual(['policy-A', 'policy-C']);
+      // First policy: typed keys. Second: the refs Fleet stored for the first, no typed keys.
+      expect(updates[0].auth.staticKeys).toStrictEqual(TYPED.staticKeys);
+      expect(updates[1].auth.staticKeys).toBeUndefined();
+      expect(updates[1].auth.existingSecretRefs).toBe(KEPT_REFS);
+      // The service added in the same run is created on the same secret too.
+      const created = mockDeployGroup.mock.calls[0][1].authenticateAndDeployStep;
+      expect(created.staticKeys).toBeUndefined();
+      expect(created.existingSecretRefs).toBe(KEPT_REFS);
+    });
+
+    it('does not share anything for a single policy or without typed keys', async () => {
+      await runDeploy(makeParams());
+      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(mockDeployGroup).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('still looks the refs up when only one key was typed', async () => {

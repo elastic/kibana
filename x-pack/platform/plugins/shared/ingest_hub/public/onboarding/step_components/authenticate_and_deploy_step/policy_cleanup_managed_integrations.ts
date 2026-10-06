@@ -174,7 +174,9 @@ export async function updateManagedIntegrationsPolicy(
     staticKeys,
     pkgVarNames,
     undefined,
-    cloudConnector ? undefined : detectSecretRefs(existingGetResult.item)
+    cloudConnector
+      ? undefined
+      : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item)
   );
 
   await sendUpdateAgentlessPolicy(policyId, {

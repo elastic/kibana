@@ -222,6 +222,41 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     });
   });
 
+  it("prefers refs handed in (a secret an earlier policy just stored) over the policy's own", async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: { version: '2.5.0', vars: [{ name: 'secret_access_key' }], policy_templates: [] },
+      },
+    });
+    mockGetOnePackagePolicy.mockResolvedValue({
+      data: {
+        item: {
+          name: 'existing-policy-name',
+          namespace: 'existing-ns',
+          package: { version: '2.5.0' },
+          vars: { secret_access_key: { value: { isSecretRef: true, id: 'own-old-secret' } } },
+        },
+      },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        existingSecretRefs: new Map([
+          ['secret_access_key', { isSecretRef: true as const, id: 'shared-new-secret' }],
+        ]),
+      } as never,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: '' },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      secret_access_key: { isSecretRef: true, id: 'shared-new-secret' },
+    });
+  });
+
   it('includes enabled input for the surviving service', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },

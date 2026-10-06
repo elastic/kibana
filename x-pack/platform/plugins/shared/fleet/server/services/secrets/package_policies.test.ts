@@ -969,6 +969,29 @@ describe('Package policy secrets', () => {
         noChange: paths,
       });
     });
+    it('keeps the new ref and marks the old secret for deletion when a var points at a different secret', () => {
+      const oldPaths = [
+        { path: ['somepath'], value: { value: { isSecretRef: true, id: 'secret-old' } } },
+      ];
+      const newPaths = [
+        { path: ['somepath'], value: { value: { isSecretRef: true, id: 'secret-new' } } },
+      ];
+      expect(diffSecretPaths(oldPaths, newPaths)).toEqual({
+        toCreate: [],
+        toDelete: oldPaths,
+        noChange: newPaths,
+      });
+    });
+    it('marks the old secrets for deletion when the ids of a multi-secret var change', () => {
+      const oldPaths = [{ path: ['p'], value: { value: { isSecretRef: true, ids: ['a', 'b'] } } }];
+      const newPaths = [{ path: ['p'], value: { value: { isSecretRef: true, ids: ['a', 'c'] } } }];
+      expect(diffSecretPaths(oldPaths, newPaths).toDelete).toEqual(oldPaths);
+    });
+    it('does not mark anything for deletion when the same ids are listed in another order', () => {
+      const oldPaths = [{ path: ['p'], value: { value: { isSecretRef: true, ids: ['a', 'b'] } } }];
+      const newPaths = [{ path: ['p'], value: { value: { isSecretRef: true, ids: ['b', 'a'] } } }];
+      expect(diffSecretPaths(oldPaths, newPaths).toDelete).toEqual([]);
+    });
     it('should return empty array if multiple secrets not changed', () => {
       const paths = [
         {

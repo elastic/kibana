@@ -177,7 +177,7 @@ export async function updateAgentBasedPolicy(
     staticKeys,
     pkgVarNames,
     agentCredentials,
-    existingSecretRefs
+    authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs
   );
   // When new credentials are explicitly provided, use only the newly built vars — merging the
   // existing values would retain stale fields from the old credential method (e.g. access_key_id

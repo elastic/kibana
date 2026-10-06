@@ -348,6 +348,15 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   return res;
 }
 
+const secretIds = (ref: { id?: string; ids?: string[] } | undefined): string[] =>
+  ref?.ids ?? (ref?.id ? [ref.id] : []);
+
+function sameSecretIds(a: unknown, b: unknown): boolean {
+  const aIds = secretIds(a as { id?: string; ids?: string[] });
+  const bIds = secretIds(b as { id?: string; ids?: string[] });
+  return aIds.length === bIds.length && aIds.every((id) => bIds.includes(id));
+}
+
 export function diffSecretPaths(
   oldPaths: SecretPath[],
   newPaths: SecretPath[]
@@ -371,6 +380,12 @@ export function diffSecretPaths(
           toDelete.push(oldPath);
         } else {
           noChange.push(newPath);
+          // The var now points at a different secret (e.g. several policies were switched to one
+          // shared secret): the old one is no longer used by this policy and may be unreferenced.
+          // It is only a candidate; deletion still checks that no other policy references it.
+          if (!sameSecretIds(oldPath.value.value, newPath.value.value)) {
+            toDelete.push(oldPath);
+          }
         }
       } else {
         // value explicitly cleared (null/undefined) — old secret must be deleted
