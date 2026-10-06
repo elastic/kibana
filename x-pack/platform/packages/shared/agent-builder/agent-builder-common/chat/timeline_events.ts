@@ -436,7 +436,10 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
 
 /**
- * The run lock held on a conversation while an execution is active.
+ * Reserved representation of a run lock on a conversation while an execution is active; nothing
+ * reads or writes it yet. An execution that stores nothing to its conversation
+ * (`storeConversation: false`) must never take or check it, so ephemeral runs can overlap with each
+ * other and with a regular execution.
  */
 export interface ActiveExecution {
   execution_id: string;

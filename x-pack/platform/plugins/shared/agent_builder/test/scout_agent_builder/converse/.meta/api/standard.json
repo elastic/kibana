@@ -1,5 +1,5 @@
 {
-  "sha1": "b3afbc0ae73378a7664cbec9dc90f444bb11905e",
+  "sha1": "0dcb37fde6d492e4bb863b5d47f0593659901db5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -722,6 +722,20 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 595,
         "column": 16
+      }
+    },
+    {
+      "id": "bca2309a02a613a-e12e2371ba1dd9a",
+      "title": "Agent Builder — ephemeral ai.agent workflow step runs on top of the conversation without modifying it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_ephemeral_workflow_step_api.spec.ts",
+        "line": 59,
+        "column": 37
       }
     },
     {
