@@ -194,6 +194,11 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     /*
      * Adds and indexes `metadata.routing_tags`, which action policies match on.
      * Optional, so existing rules need no backfill.
+     *
+     * The rules client filters on the field in the same release that adds its
+     * mapping, so this is NOT rollback-compatible: a node rolled back to model
+     * version 8 does not know the field. Accepted while alerting v2 is
+     * experimental.
      */
     changes: [
       {
