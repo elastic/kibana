@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-import { TLSParamsType } from '../zod/alerts';
+import { z, lazySchema } from '@kbn/zod';
 
-export { TLSParamsType };
+export const SnapshotType = lazySchema(() =>
+  z.looseObject({
+    down: z.number(),
+    total: z.number(),
+    up: z.number(),
+  })
+);

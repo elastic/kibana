@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { MonitorManagementEnablementResultCodec } from '../monitor_management/state';
+import { z, lazySchema } from '@kbn/zod';
+
+export const remoteMonitorInfoSchema = lazySchema(() =>
+  z.looseObject({
+    remoteName: z.string(),
+    kibanaUrl: z.string().optional(),
+  })
+);
