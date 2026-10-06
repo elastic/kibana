@@ -13,6 +13,7 @@ import {
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
+import { filterUnchangedByVersion } from './utils/filter_unchanged_by_version';
 
 const INTEGRATION_WEIGHTS = [
   // These integrations should be boosted because in many cases they are used as fallback.
@@ -60,6 +61,8 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       return null;
     }
 
+    let isComplete = true;
+
     let fieldsMetadata: Record<string, Record<string, unknown>> | undefined;
     try {
       if (this.dependencies.packageService) {
@@ -69,6 +72,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
           });
       }
     } catch (error) {
+      isComplete = false;
       this.logger.warn(
         `Failed to fetch fields metadata for package ${pkg.name}: ${
           error instanceof Error ? error.message : String(error)
@@ -76,7 +80,11 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
     }
 
-    const packageKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
+    const fetchedKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
+    if (fetchedKnowledgeBase === undefined) {
+      isComplete = false;
+    }
+    const packageKnowledgeBase = fetchedKnowledgeBase ?? '';
 
     return {
       title: pkg.title,
@@ -95,10 +103,13 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         packageKnowledgeBase,
       ].join(' - '),
       fields_metadata: fieldsMetadata,
+      // only complete docs are versioned, incomplete ones are rebuilt on the next populate
+      ...(isComplete && { version: pkg.version }),
     };
   }
 
-  private async fetchPackageKnowledgeBase(pkg: PackageListItem): Promise<string> {
+  /** Returns `undefined` when the package archive could not be read, so the caller can tell it apart from a package without knowledge base files */
+  private async fetchPackageKnowledgeBase(pkg: PackageListItem): Promise<string | undefined> {
     let packageKnowledgeBase = '';
 
     try {
@@ -148,16 +159,29 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
           error instanceof Error ? error.message : String(error)
         }`
       );
+      return undefined;
     }
     return packageKnowledgeBase;
   }
 
-  /** Indexes an array of integrations to be used with ELSER semantic search queries */
+  /**
+   * Indexes integrations for ELSER semantic search, skipping packages whose version is already indexed.
+   * Note: changes to how the doc (`elser_embedding`, `knowledge_base`, `data_streams`, `fields_metadata`)
+   * is built only apply to a package once its version changes.
+   */
   public async populate(): Promise<void> {
     const index = await this.getIndexName();
     const packages = await this.getSecurityLogsPackages();
     if (packages) {
-      const ragIntegrations = await pMap(packages, (pkg) => this.processIntegration(pkg), {
+      const changedPackages = await filterUnchangedByVersion({
+        esClient: this.esClient,
+        index,
+        logger: this.logger,
+        items: packages,
+        getDetails: ({ name, version }) => ({ id: name, version }),
+      });
+
+      const ragIntegrations = await pMap(changedPackages, (pkg) => this.processIntegration(pkg), {
         concurrency: PACKAGE_METADATA_CONCURRENCY,
       });
 
@@ -166,7 +190,9 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
 
       if (validIntegrations.length === 0) {
-        this.logger.debug('No security integrations with logs data streams found to index');
+        this.logger.debug(
+          'No new or updated security integrations with logs data streams to index'
+        );
         return;
       }
 
