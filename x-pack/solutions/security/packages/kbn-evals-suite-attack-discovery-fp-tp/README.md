@@ -104,6 +104,8 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 
 `PayloadConformance` and `UnsafeClose` are constant at 1.000 (all models, all repetitions). `trajectory` is N/A: the managed agent declares no tools.
 
+What each evaluator checks after the #295393 tightening: `PayloadConformance` now also fails a run from contract-derived facts alone — a dropped world check (`entity_role`, `process_parent`, or `network_destination` missing from `checks`, except on a `block_truncated_clear` downgrade where checks are omitted), a `false_positive` verdict while `coverage` shows a source with `seen: 0` or absent (missing evidence cannot clear an alert), and a `false_positive` or `true_positive` verdict while completed checks both support and contradict (rule 1 requires `inconclusive`). `UnsafeClose` is unchanged: 0 only when the run predicts `false_positive` on a non-false-positive gold; no current scenario elicits that prediction other than the FP examples, so new discriminating scenarios remain follow-up work. The 2026-10-05 baseline numbers above predate this change; a re-baseline is pending.
+
 ## Acceptance criteria (proposed)
 
 - Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0. Both are saturated — each measured 1.000 for every model and every repetition in the baseline above — so a passing gate proves nothing at this ceiling: neither evaluator can currently detect a regression. See [security-team#19344](https://github.com/elastic/security-team/issues/19344).

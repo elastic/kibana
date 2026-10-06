@@ -74,6 +74,76 @@ export const unsafeClose: Evaluator = {
   },
 };
 
+/** The world checks the managed prompt requires in `raw.checks`. */
+const WORLD_CHECK_NAMES = ['entity_role', 'process_parent', 'network_destination'] as const;
+
+interface RawCheck {
+  name?: string;
+  status?: string;
+  result?: string;
+}
+
+interface RawCoverage {
+  seen?: number;
+  truncated?: boolean;
+}
+
+/**
+ * Contract-derived problems computable from `raw` without a model — each one is
+ * something a well-formed but wrong answer can still violate. Mirrors the managed
+ * workflow's `emit_result` shape: `coverage.*` carries only `seen`/`cap`/`truncated`
+ * (a failed or empty query is `seen: 0`), and a `block_truncated_clear` downgrade
+ * omits `checks` and `claims` entirely, so 2a only applies when checks are present.
+ */
+const contractProblems = (output: FpTpTaskOutput): string[] => {
+  const { payload, raw } = output;
+  if (!payload || !raw) {
+    return [];
+  }
+  const problems: string[] = [];
+  const coverage = (raw.coverage ?? {}) as Record<string, RawCoverage | undefined>;
+  const sourceSeen = (source: string): number | undefined => coverage[source]?.seen;
+
+  // A downgrade emits verdict `inconclusive` and omits checks, so checks are only
+  // required when they would be present: a completed verdict, or an inconclusive one
+  // that was not a truncation downgrade.
+  const downgraded =
+    payload.verdict === 'inconclusive' &&
+    (coverage.entities?.truncated === true || coverage.events?.truncated === true);
+
+  if (!downgraded) {
+    const checks = (raw.checks ?? []) as RawCheck[];
+    const present = new Set(checks.map(({ name }) => name));
+    for (const name of WORLD_CHECK_NAMES) {
+      if (!present.has(name)) {
+        problems.push(`checks is missing "${name}"`);
+      }
+    }
+  }
+
+  if (payload.verdict === 'false_positive') {
+    // "Missing evidence cannot clear an alert": a failed or empty query yields
+    // `seen: 0` (or no coverage entry at all) for that source.
+    if ((sourceSeen('entities') ?? 0) === 0 || (sourceSeen('events') ?? 0) === 0) {
+      problems.push('false_positive with missing evidence');
+    }
+  }
+
+  // Rule 1: world checks both support and contradict -> the verdict is inconclusive,
+  // whatever the run decided. Skipped checks carry no result and never count.
+  if (payload.verdict === 'false_positive' || payload.verdict === 'true_positive') {
+    const results = new Set(
+      ((raw.checks ?? []) as RawCheck[])
+        .filter(({ status }) => status === undefined || status === 'completed')
+        .map(({ result }) => result)
+    );
+    if (results.has('supports') && results.has('contradicts')) {
+      problems.push(`${payload.verdict} contradicts rule 1: checks both support and contradict`);
+    }
+  }
+  return problems;
+};
+
 const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): string[] => {
   const { payload, attackDiscoveryIdEcho } = output;
   if (!payload) {
@@ -99,6 +169,7 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
   if (attackDiscoveryIdEcho !== attackDiscoveryId) {
     problems.push(`attack_discovery_id "${attackDiscoveryIdEcho}" does not echo the input`);
   }
+  problems.push(...contractProblems(output));
   return problems;
 };
 
