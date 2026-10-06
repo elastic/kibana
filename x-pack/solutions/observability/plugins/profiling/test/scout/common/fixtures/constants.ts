@@ -17,6 +17,21 @@ export const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 export const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
 export const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 export const esArchiversPath = Path.join(__dirname, 'es_archiver', 'profiling', 'data.json');
+
+// OTel profiling data, adapted from the Elasticsearch profiling OTel integration tests. Its events
+// are all within `PROFILING_OTEL_TEST_DATES`, which no Universal Profiling data overlaps.
+export const otelEsArchiverPath = Path.join(
+  __dirname,
+  'es_archiver',
+  'profiling_otel',
+  'data.json'
+);
+export const PROFILING_OTEL_TEST_DATES = {
+  rangeFrom: '2023-10-30T00:00:00.000Z',
+  rangeTo: '2023-10-30T00:01:00.000Z',
+} as const;
+// The host every OTel profiling event in `otelEsArchiverPath` was sampled on.
+export const PROFILING_OTEL_TEST_HOST_ID = '8457605156473051743';
 export const esResourcesEndpoint = 'api/profiling/setup/es_resources';
 
 // Headers required by internal profiling API routes (xsrf + internal origin).
@@ -39,6 +54,7 @@ export const profilingApiEndpoints = {
   flamechart: 'internal/profiling/flamechart',
   setupInstructions: 'internal/profiling/setup/instructions',
   status: 'internal/profiling/status',
+  schemas: 'internal/profiling/schemas',
 } as const;
 
 // Full-resolution events data stream of the OTel profiling schema.
