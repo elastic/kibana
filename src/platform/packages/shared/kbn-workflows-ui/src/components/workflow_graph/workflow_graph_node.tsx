@@ -32,7 +32,7 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import { aiIconTileCss } from './ai_icon_tile';
 import { deslugifyStepName } from './deslugify_step_name';
-import { handleAlongStyle, IF_PORT_FALSE, IF_PORT_TRUE, STEP_PORT } from './port_geometry';
+import { handleAlongStyle, STEP_PORT } from './port_geometry';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
 import { INSERT_FLASH_MS } from './use_insert_layout_animation';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
@@ -1029,13 +1029,13 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             type="source"
             id="then"
             position={sourceHandlePos}
-            style={{ opacity: 0, ...handleAlongStyle(IF_PORT_TRUE, isHorizontal) }}
+            style={{ opacity: 0, ...handleAlongStyle(STEP_PORT, isHorizontal) }}
           />
           <Handle
             type="source"
             id="else"
             position={sourceHandlePos}
-            style={{ opacity: 0, ...handleAlongStyle(IF_PORT_FALSE, isHorizontal) }}
+            style={{ opacity: 0, ...handleAlongStyle(STEP_PORT, isHorizontal) }}
           />
           {hasFallback && (
             <Handle
