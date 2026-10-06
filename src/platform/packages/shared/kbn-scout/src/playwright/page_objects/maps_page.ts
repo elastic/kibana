@@ -133,15 +133,6 @@ export class MapsPage {
   async waitForLayersToLoad(loadingExpected = false) {
     await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
 
-    // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
-    // visible before that, so gate on this signal before checking loading state.
-    await this.page.waitForFunction(
-      () =>
-        Boolean(document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas')),
-      undefined,
-      { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
-    );
-
     await this.waitForLoadCycleIfNeeded(loadingExpected);
 
     await expect
