@@ -29,6 +29,7 @@ test.describe('Advanced settings - disable animations', { tag: tags.stateful.cla
   });
 
   test('disables animations while preserving completion events and exemptions', async ({
+    kbnClient,
     kbnUrl,
     page,
     pageObjects,
@@ -42,7 +43,7 @@ test.describe('Advanced settings - disable animations', { tag: tags.stateful.cla
     await expect(probe).toHaveCSS('transition-duration', '1s');
     await expect(probe).toHaveCSS('transition-delay', '1s');
 
-    await pageObjects.settings.toggleAdvancedSettingCheckbox(SETTING);
+    await kbnClient.uiSettings.update({ [SETTING]: true });
     // this setting requires a page reload to take effect
     await page.reload();
     await pageObjects.settings.waitForPageLoad();
@@ -62,7 +63,7 @@ test.describe('Advanced settings - disable animations', { tag: tags.stateful.cla
     await startAnimationProbe(page);
     await expect(probe).toHaveAttribute('data-animation-ended', 'true');
 
-    await pageObjects.settings.toggleAdvancedSettingCheckbox(SETTING);
+    await kbnClient.uiSettings.update({ [SETTING]: false });
     await page.reload();
     await pageObjects.settings.waitForPageLoad();
     await addAnimationProbes(page);
