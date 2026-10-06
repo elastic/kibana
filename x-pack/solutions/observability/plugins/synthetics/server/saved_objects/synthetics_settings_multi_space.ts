@@ -14,7 +14,9 @@ export const SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE = 'synthetics-settings-mult
 const syntheticsSettingsMultiSpaceSchemaV1 = schema.object(
   {
     useAllRemoteClusters: schema.maybe(schema.boolean()),
-    selectedRemoteClusters: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    selectedRemoteClusters: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })
+    ),
   },
   { unknowns: 'ignore' }
 );
