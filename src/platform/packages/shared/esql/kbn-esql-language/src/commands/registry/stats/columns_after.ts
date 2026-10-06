@@ -6,18 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import uniqBy from 'lodash/uniqBy';
 import { isAssignment, isColumn, isFunctionExpression, isOptionNode } from '@elastic/esql';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 import type { SupportedDataType } from '../../definitions/types';
 import { getExpressionType } from '../../definitions/utils';
 import type { ESQLColumnData, ESQLUserDefinedColumn, UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';
+import { getColumnsDefinedInByClause } from './utils';
+
+type ExpressionType = (thing: ESQLAstItem) => SupportedDataType | 'unknown';
 
 const getUserDefinedColumns = (
   command: ESQLCommand | ESQLCommandOption,
-  typeOf: (thing: ESQLAstItem) => SupportedDataType | 'unknown',
-  query: string
+  typeOf: ExpressionType,
+  query: string,
+  byTypeOf: ExpressionType = typeOf
 ): ESQLUserDefinedColumn[] => {
   const columns: ESQLUserDefinedColumn[] = [];
 
@@ -35,7 +38,7 @@ const getUserDefinedColumns = (
     }
 
     if (isOptionNode(expression) && expression.name === 'by') {
-      columns.push(...getUserDefinedColumns(expression, typeOf, query));
+      columns.push(...getUserDefinedColumns(expression, byTypeOf, query, byTypeOf));
       continue;
     }
 
@@ -106,11 +109,16 @@ export const columnsAfter = (
   additionalFields: IAdditionalFields,
   unmappedFieldsStrategy: UnmappedFieldsStrategy
 ) => {
-  const columnMap = new Map<string, ESQLColumnData>();
-  previousColumns.forEach((col) => columnMap.set(col.name, col)); // TODO make this more efficient
+  const inputColumns = new Map<string, ESQLColumnData>();
+  previousColumns.forEach((col) => inputColumns.set(col.name, col)); // TODO make this more efficient
+
+  const assignments = getColumnsDefinedInByClause(command, inputColumns, unmappedFieldsStrategy);
+  const aggregatingColumns = new Map([...inputColumns, ...assignments]);
 
   const typeOf = (thing: ESQLAstItem) =>
-    getExpressionType(thing, columnMap, unmappedFieldsStrategy);
+    getExpressionType(thing, aggregatingColumns, unmappedFieldsStrategy);
+  const byTypeOf = (thing: ESQLAstItem) =>
+    getExpressionType(thing, inputColumns, unmappedFieldsStrategy);
 
-  return uniqBy([...getUserDefinedColumns(command, typeOf, query)], 'name');
+  return getUserDefinedColumns(command, typeOf, query, byTypeOf);
 };

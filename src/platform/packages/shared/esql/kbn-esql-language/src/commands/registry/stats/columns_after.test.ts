@@ -182,4 +182,39 @@ describe('STATS', () => {
       { name: 'ss', type: 'keyword', userDefined: true, location: { min: 30, max: 33 } },
     ]);
   });
+
+  it('types an aggregating expression from the BY assignment', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'doubleField', type: 'double', userDefined: false },
+    ];
+
+    const queryString = `FROM a | STATS s1 = b1 + 1 BY b1 = doubleField`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      {
+        name: 's1',
+        type: 'double',
+        userDefined: true,
+        location: { min: 15, max: 16 },
+      },
+      {
+        name: 'b1',
+        type: 'double',
+        userDefined: true,
+        location: { min: 30, max: 31 },
+      },
+    ]);
+  });
 });

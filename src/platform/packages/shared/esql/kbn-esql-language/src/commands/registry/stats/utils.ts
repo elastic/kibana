@@ -9,6 +9,8 @@
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
+  ESQLCommand,
+  ESQLCommandOption,
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
@@ -26,11 +28,18 @@ import {
 } from '@elastic/esql';
 import { commaCompleteItem, newLineCompleteItem, pipeCompleteItem } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ISuggestionItem } from '../types';
+import type {
+  ESQLColumnData,
+  ESQLUserDefinedColumn,
+  ISuggestionItem,
+  UnmappedFieldsStrategy,
+} from '../types';
+import { getExpressionType } from '../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
 import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
+import { getColumnName } from '../../definitions/utils/columns';
 
 /**
  * Position of the caret in the sort command:
@@ -204,4 +213,51 @@ export const getCommaAndPipe = (
   }
 
   return [newLineCompleteItem, pipeSuggestion, commaSuggestion];
+};
+
+export type StatsCommand = ESQLCommand<'stats'> | ESQLCommand<'inline stats'>;
+
+export const isStatsCommand = (command: ESQLAstAllCommands): command is StatsCommand =>
+  command.type === 'command' && (command.name === 'stats' || command.name === 'inline stats');
+
+export const isByOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
+  !Array.isArray(arg) && isOptionNode(arg) && arg.name === 'by';
+
+/**
+ * Returns the columns defined in the BY clause.
+ * Given | STATS count = COUNT() BY addr = address
+ * returns { addr, { type: 'keyword' ... } }
+ */
+export const getColumnsDefinedInByClause = (
+  command: Pick<ESQLCommand, 'args'>,
+  inputColumns: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
+): Map<string, ESQLUserDefinedColumn> => {
+  const typeOf = (thing: ESQLAstItem) =>
+    getExpressionType(thing, inputColumns, unmappedFieldsStrategy);
+
+  const assignments = new Map<string, ESQLUserDefinedColumn>();
+
+  for (const arg of command.args) {
+    if (!isByOption(arg)) {
+      continue;
+    }
+
+    for (const grouping of arg.args) {
+      if (!isAssignment(grouping) || !isColumn(grouping.args[0])) {
+        continue;
+      }
+
+      const target = grouping.args[0];
+      const name = getColumnName(target);
+      assignments.set(name, {
+        name,
+        type: typeOf(grouping.args[1]),
+        location: target.location,
+        userDefined: true,
+      });
+    }
+  }
+
+  return assignments;
 };
