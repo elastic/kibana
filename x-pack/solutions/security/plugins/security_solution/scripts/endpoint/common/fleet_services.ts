@@ -927,7 +927,10 @@ export const enrollHostVmWithFleet = async ({
   log.info(`Enrolling Elastic Agent with Fleet`);
   log.verbose('Enrollment command:', agentEnrollCommand);
 
-  await hostVm.exec(agentEnrollCommand);
+  // `elastic-agent install` blocks until enrollment finishes and does not
+  // return output until then. Cap it so a hung install fails with the VM
+  // output and the next attempt can destroy the machine.
+  await hostVm.exec(agentEnrollCommand, { timeoutMs: 180_000 });
 
   return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
 };

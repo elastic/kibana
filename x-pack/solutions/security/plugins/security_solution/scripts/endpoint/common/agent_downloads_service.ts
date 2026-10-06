@@ -14,9 +14,67 @@ import { finished } from 'stream/promises';
 import { Readable } from 'stream';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
 import type { ReadStream } from 'fs';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { handleProcessInterruptions } from './nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { SettingsStorage } from './settings_storage';
+
+const DOWNLOAD_LOCK_WAIT_MS = 10 * 60 * 1000;
+
+const isProcessAlive = (pid: number): boolean => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === 'EPERM';
+  }
+};
+
+/**
+ * One shared tarball path is used by every worker. Hold an exclusive lock so a
+ * second download does not truncate or delete the file the first one is writing.
+ */
+const withDownloadLock = async <T>(
+  log: ToolingLog,
+  lockPath: string,
+  run: () => Promise<T>
+): Promise<T> => {
+  const started = Date.now();
+  let reportedWait = false;
+
+  while (true) {
+    try {
+      fs.writeFileSync(lockPath, String(process.pid), { flag: 'wx' });
+      break;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
+        throw error;
+      }
+
+      const owner = Number(fs.readFileSync(lockPath, 'utf8'));
+      if (!Number.isFinite(owner) || !isProcessAlive(owner)) {
+        fs.rmSync(lockPath, { force: true });
+      } else {
+        if (!reportedWait) {
+          reportedWait = true;
+          log.info(`Waiting for agent download lock held by pid ${owner}`);
+        }
+
+        if (Date.now() - started > DOWNLOAD_LOCK_WAIT_MS) {
+          throw new Error(`Timed out waiting for agent download lock [${lockPath}]`);
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+  }
+
+  try {
+    return await run();
+  } finally {
+    fs.rmSync(lockPath, { force: true });
+  }
+};
 
 /**
  * Fetches the expected SHA512 hash from the artifacts API sha_url endpoint.
@@ -125,6 +183,18 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     agentFileName?: string,
     shaUrl?: string
   ): Promise<DownloadedAgentInfo> {
+    await this.ensureExists();
+    const downloadInfo = this.getPathsForUrl(agentDownloadUrl, agentFileName);
+    return withDownloadLock(this.log, `${downloadInfo.fullFilePath}.lock`, () =>
+      this.downloadAndStoreUnlocked(agentDownloadUrl, agentFileName, shaUrl)
+    );
+  }
+
+  private async downloadAndStoreUnlocked(
+    agentDownloadUrl: string,
+    agentFileName?: string,
+    shaUrl?: string
+  ): Promise<DownloadedAgentInfo> {
     this.log.debug(`Starting download: ${agentDownloadUrl}`);
 
     await this.ensureExists();
@@ -200,7 +270,11 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
                 throw error;
               }
             },
-            () => fs.unlinkSync(newDownloadInfo.fullFilePath)
+            // `exit` listeners that throw are fatal. The file may already be gone
+            // when another worker cleaned up the same shared download path.
+            () => {
+              fs.rmSync(newDownloadInfo.fullFilePath, { force: true });
+            }
           );
 
           // Validate hash after download
@@ -221,10 +295,9 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
         },
         {
           retries: 2, // 2 retries = 3 total attempts (1 initial + 2 retries)
-          onFailedAttempt: (error) => {
+          onFailedAttempt: async (error) => {
             this.log.error(`Download attempt ${error.attemptNumber} failed: ${error.message}`);
-            // Cleanup failed download
-            return unlink(newDownloadInfo.fullFilePath);
+            await unlink(newDownloadInfo.fullFilePath).catch(() => undefined);
           },
         }
       );

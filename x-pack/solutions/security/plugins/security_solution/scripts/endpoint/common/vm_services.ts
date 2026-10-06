@@ -22,6 +22,35 @@ export const DEFAULT_VAGRANTFILE = path.join(__dirname, 'vagrant', 'Vagrantfile'
 
 const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
+const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promise<void> => {
+  const maxAttempts = 6;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await execa.command('vagrant destroy -f', {
+        env: { VAGRANT_CWD: vagrantCwd },
+        stdio: ['inherit', 'pipe', 'pipe'],
+        timeout: 120_000,
+      });
+      return;
+    } catch (error) {
+      const execError = error as execa.ExecaError;
+      log.warning(
+        `vagrant destroy failed (attempt ${attempt}/${maxAttempts}): ${
+          execError.stderr || execError.message
+        }`
+      );
+
+      if (attempt === maxAttempts) {
+        return;
+      }
+
+      // A Playwright retry can start while the previous `vagrant ssh` still holds the machine lock.
+      await new Promise((resolve) => setTimeout(resolve, 5_000));
+    }
+  }
+};
+
 export interface BaseVmCreateOptions {
   name: string;
   /** Number of CPUs */
@@ -85,10 +114,13 @@ export const createMultipassHostVmClient = (
 ): HostVm => {
   const exec = async (
     command: string,
-    options?: { silent?: boolean }
+    options?: { silent?: boolean; timeoutMs?: number }
   ): Promise<HostVmExecResponse> => {
     const execResponse = await execa
-      .command(`multipass exec ${name} -- ${command}`, { maxBuffer: MAX_BUFFER })
+      .command(`multipass exec ${name} -- ${command}`, {
+        maxBuffer: MAX_BUFFER,
+        ...(options?.timeoutMs ? { timeout: options.timeoutMs } : {}),
+      })
       .catch((e) => {
         if (!options?.silent) {
           log.error(dump(e));
@@ -396,12 +428,7 @@ const createVagrantVm = async ({
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      await execa
-        .command('vagrant destroy -f', {
-          env: { VAGRANT_CWD },
-          stdio: ['inherit', 'pipe', 'pipe'],
-        })
-        .catch(() => {});
+      await destroyVagrantMachine(VAGRANT_CWD, log);
 
       const vagrantUpResponse = (
         await execa.command('vagrant up', {
@@ -453,18 +480,36 @@ export const createVagrantHostVmClient = (
 
   const exec = async (
     command: string,
-    options?: { silent?: boolean }
+    options?: { silent?: boolean; timeoutMs?: number }
   ): Promise<HostVmExecResponse> => {
-    const execResponse = await execa
-      .command(`vagrant ssh -- ${command}`, execaOptions)
-      .catch((e) => {
-        if (!options?.silent) {
-          log.error(dump(e));
-        }
-        throw e;
-      });
+    const subprocess = execa.command(`vagrant ssh -- ${command}`, {
+      ...execaOptions,
+      ...(options?.timeoutMs ? { timeout: options.timeoutMs } : {}),
+    });
 
-    log.verbose(execResponse);
+    // `vagrant ssh` only returns when the remote command exits. Stream its
+    // output so a hung `elastic-agent install` is visible before the timeout.
+    if (!options?.silent) {
+      subprocess.stdout?.on('data', (chunk: Buffer) => {
+        const text = chunk.toString().trimEnd();
+        if (text) {
+          log.info(text);
+        }
+      });
+      subprocess.stderr?.on('data', (chunk: Buffer) => {
+        const text = chunk.toString().trimEnd();
+        if (text) {
+          log.warning(text);
+        }
+      });
+    }
+
+    const execResponse = await subprocess.catch((e) => {
+      if (!options?.silent) {
+        log.error(dump(e));
+      }
+      throw e;
+    });
 
     return {
       stdout: execResponse.stdout,
