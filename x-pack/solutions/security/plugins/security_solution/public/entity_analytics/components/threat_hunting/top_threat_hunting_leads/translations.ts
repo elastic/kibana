@@ -247,7 +247,6 @@ export const MISSING_INFERENCE_PRIVILEGE_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Not enough privileges to use the selected connector. Select a different connector to start generating leads',
-    values: { privilege: INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE },
   }
 );
 

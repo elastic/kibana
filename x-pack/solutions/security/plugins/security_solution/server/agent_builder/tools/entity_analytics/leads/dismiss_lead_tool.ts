@@ -67,7 +67,7 @@ export const dismissLeadTool = (
       });
 
       try {
-        const [, { security }] = await core.getStartServices();
+        const [coreCtx, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
         if (!privileges.has_write_permissions) {
           const errorMessage = 'You do not have permission to dismiss leads in this space.';
@@ -114,8 +114,10 @@ export const dismissLeadTool = (
           };
         }
 
+        const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
         const dataClient = createLeadDataClient({
           esClient: esClient.asCurrentUser,
+          internalEsClient,
           logger,
           spaceId,
         });
