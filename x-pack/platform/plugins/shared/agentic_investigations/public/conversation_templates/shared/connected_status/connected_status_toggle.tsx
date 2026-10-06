@@ -167,7 +167,7 @@ const EscalationCloseContainer: React.FC<EscalationCloseContainerProps> = ({
         const code = getCloseErrorCode(err);
         if (code === 'close_targets_changed') {
           setTargetsChanged(true);
-          void refetch();
+          refetch();
         } else if (code === 'escalation_close_incomplete') {
           const attrs = (
             err as unknown as { body?: { attributes?: { skipped_investigation_ids?: string[] } } }
@@ -176,16 +176,16 @@ const EscalationCloseContainer: React.FC<EscalationCloseContainerProps> = ({
             kind: 'escalation_incomplete',
             count: attrs?.skipped_investigation_ids?.length ?? 1,
           });
-          void refetch();
+          refetch();
         } else if (code === 'proposal_dismiss_failed') {
           const ids =
             (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } }).body
               ?.attributes?.failed_proposal_ids ?? [];
           setCloseError({ kind: 'dismiss_failed', count: ids.length });
-          void refetch();
+          refetch();
         } else if (code === 'linked_investigation_unavailable') {
           // The preview will now surface unavailable_investigation_ids.
-          void refetch();
+          refetch();
         }
       }
     },
