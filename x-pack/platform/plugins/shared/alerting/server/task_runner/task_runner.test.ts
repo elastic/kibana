@@ -4790,6 +4790,33 @@ describe('Task Runner', () => {
       expect(mockBus.publish).not.toHaveBeenCalled();
     });
 
+    test('does not publish when the run is cancelled while the rule saved object is being updated', async () => {
+      // The batch is built before processRunResults() awaits the post-run rule update, so a
+      // timeout that cancels the task during that await must still suppress publication.
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      elasticsearchService.client.asInternalUser.update.mockImplementationOnce(async () => {
+        await taskRunner.cancel();
+        return {
+          _id: 'alert:1',
+          _index: 'idx',
+          _version: 2,
+          _seq_no: 2,
+          _primary_term: 1,
+          result: 'updated',
+          _shards: { total: 1, successful: 1, failed: 0 },
+        };
+      });
+
+      await taskRunner.run();
+
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
     test('does not publish when run is cancelled, even when cancelAlertsOnRuleTimeout is disabled', async () => {
       // With cancelAlertsOnRuleTimeout:false, shouldLogAndScheduleActionsForAlerts() returns
       // true for a cancelled run. The !this.cancelled guard in the batch-collection condition
