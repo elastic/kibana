@@ -23,7 +23,7 @@ const createTool = ({
   handler?: jest.Mock;
 } = {}) =>
   createInvestigationTool({
-    id: 'investigations.test',
+    id: 'agentic_investigations.test',
     description: 'Test tool',
     schema,
     annotations: {
@@ -85,7 +85,7 @@ describe('createInvestigationTool', () => {
   it('is a builtin tool hidden from MCP', () => {
     const tool = createTool();
 
-    expect(tool).toMatchObject({ id: 'investigations.test', excludeFromMcp: true });
+    expect(tool).toMatchObject({ id: 'agentic_investigations.test', excludeFromMcp: true });
     expect(tool.availability?.cacheMode).toBe('none');
   });
 

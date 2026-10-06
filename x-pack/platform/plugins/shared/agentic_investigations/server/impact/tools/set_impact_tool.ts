@@ -118,7 +118,7 @@ const toImpactEntity = ({
   ...(evidence !== undefined && { evidence }),
 });
 
-/** `investigations.set_impact`: the agent's write path for the `investigation_impact` attachment. */
+/** `agentic_investigations.set_impact`: the agent's write path for the `investigation_impact` attachment. */
 export const createSetImpactTool = ({
   getImpactService,
   resolveUser,
