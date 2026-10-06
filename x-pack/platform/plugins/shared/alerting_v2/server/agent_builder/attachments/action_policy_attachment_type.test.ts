@@ -26,7 +26,7 @@ const basePolicyData: ActionPolicyAttachmentData = {
   destinations: [{ type: 'workflow', id: 'wf-1' }],
   matcher: { tags: ['ops-critical'] },
   group_by: null,
-  grouping_mode: 'per_episode',
+  grouping_mode: 'per_alert',
   throttle: null,
   snoozed_until: null,
   updated_at: '2026-04-10T00:00:00.000Z',

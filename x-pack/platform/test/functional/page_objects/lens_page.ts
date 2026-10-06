@@ -166,6 +166,37 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    /**
+     * Selects a combobox option and waits for the choice to be committed to the Lens state,
+     * re-selecting when the option click never landed.
+     *
+     * @param testTargetId - the selector of the combobox, which must also carry `committedAttribute`
+     * @param committedAttribute - the attribute holding the committed option label
+     * @param name - the option label to select
+     */
+    async selectCommittedOptionFromComboBox(
+      testTargetId: string,
+      committedAttribute: string,
+      name: string
+    ) {
+      // EUI drops the option click under load, and the filter text setElement leaves behind makes
+      // the input read back as `name` either way. Match case-insensitively, as comboBox itself does.
+      const expected = name.trim().toLowerCase();
+      await retry.tryWithRetries(
+        `select [${name}] from [${testTargetId}]`,
+        async () => {
+          await this.selectOptionFromComboBox(testTargetId, name);
+          await retry.waitForWithTimeout(`[${name}] selection to commit`, 10_000, async () => {
+            const combo = await testSubjects.find(testTargetId);
+            const committed = (await combo.getAttribute(committedAttribute)) ?? '';
+            return committed.trim().toLowerCase() === expected;
+          });
+        },
+        { retryCount: 3, timeout: 60_000 },
+        async () => comboBox.clearInputField(testTargetId)
+      );
+    },
+
     async configureQueryAnnotation(opts: {
       queryString: string;
       timeField: string;
@@ -298,15 +329,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       isPreviousIncompatible?: boolean;
     }) {
       if (opts.operation) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-subFunction-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-subFunction-selection-row > indexPattern-reference-function',
+          'data-selected-function',
           opts.operation
         );
       }
 
       if (opts.field) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-reference-field-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-reference-field-selection-row > indexPattern-dimension-field',
+          'data-selected-field',
           opts.field
         );
       }
@@ -955,9 +988,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       await find.clickByCssSelector('button[data-test-subj="style"]');
-      await retry.try(async () => {
-        await find.byCssSelector('#lnsDimensionContainerTitle');
-      });
+      await testSubjects.existOrFail('lnsStyleSettingsFlyout');
     },
 
     async openLegendSettingsFlyout() {
@@ -973,8 +1004,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (await this.hasLegendToolbarButton()) {
         const button = await find.byCssSelector('button[data-test-subj="legend"]');
         await button.click();
+        await testSubjects.existOrFail('lnsLegendSettingsFlyout');
       }
     },
+    /**
+     * Opens the layer settings flyout and waits for it to be present in the DOM.
+     */
+    async openLayerSettings() {
+      await testSubjects.click('lnsLayerSettings');
+      await testSubjects.existOrFail('lnsLayerSettingsFlyout');
+    },
+
     async closeFlyoutWithBackButton() {
       await retry.try(async () => {
         if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {

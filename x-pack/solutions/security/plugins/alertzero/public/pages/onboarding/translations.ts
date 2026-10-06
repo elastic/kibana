@@ -15,14 +15,38 @@ import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
 
-export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title', {
-  defaultMessage: 'Enable your workers',
+export const ONBOARDING_GREETING = i18n.translate('xpack.alertzero.onboarding.greeting', {
+  defaultMessage: 'Your data is coming in.',
 });
 
-export const ONBOARDING_SUBTITLE = i18n.translate('xpack.alertzero.onboarding.subtitle', {
-  defaultMessage:
-    'Choose the workers you need — each covers a job. New workers default to the lowest autonomy; previously configured workers keep their saved settings.',
+export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title', {
+  defaultMessage: "Let's turn on the Watches?",
 });
+
+export const ONBOARDING_INTRO_GREETING = i18n.translate(
+  'xpack.alertzero.onboarding.intro.greeting',
+  { defaultMessage: "Hello, I'm AlertZero." }
+);
+
+export const ONBOARDING_INTRO_HEADING = i18n.translate('xpack.alertzero.onboarding.intro.heading', {
+  defaultMessage: "Let's add your data?",
+});
+
+export const ONBOARDING_WATCHES_HEADING = i18n.translate(
+  'xpack.alertzero.onboarding.introHeading',
+  {
+    defaultMessage: 'Watches are how AlertZero works for you',
+  }
+);
+
+export const WATCH_SETTINGS = i18n.translate('xpack.alertzero.onboarding.watchSettings', {
+  defaultMessage: 'Watch settings',
+});
+
+export const ONBOARDING_KEEP_ALL_ENABLED_NOTE = i18n.translate(
+  'xpack.alertzero.onboarding.keepAllEnabledNote',
+  { defaultMessage: 'We recommend keeping all Watches enabled.' }
+);
 
 export const ONBOARDING_WORKERS_FOOTNOTE = i18n.translate(
   'xpack.alertzero.onboarding.workersFootnote',
@@ -39,50 +63,53 @@ export const ONBOARDING_NO_WORKERS_AVAILABLE = i18n.translate(
   }
 );
 
-export const BEFORE_YOU_ENABLE_TITLE = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.title',
-  { defaultMessage: 'Before you enable' }
-);
+export const ENABLE_AND_RUN = i18n.translate('xpack.alertzero.onboarding.enableAndRun', {
+  defaultMessage: 'Enable and run',
+});
 
-export const beforeYouEnableRunsAs = (email: string | undefined) =>
-  i18n.translate('xpack.alertzero.onboarding.beforeYouEnable.runsAs', {
-    defaultMessage:
-      'Workers run as you{emailSuffix}. Anything they do is attributed to this account.',
-    values: {
-      emailSuffix: email ? ` ( ${email} )` : '',
-    },
+export const READ_MORE = i18n.translate('xpack.alertzero.onboarding.readMore', {
+  defaultMessage: 'Read more about Watches in the documentation',
+});
+
+export const workersSelectedCount = (selected: number, total: number) =>
+  i18n.translate('xpack.alertzero.onboarding.workersSelectedCount', {
+    defaultMessage: '{selected} of {total} Workers selected',
+    values: { selected, total },
   });
 
-export const BEFORE_YOU_ENABLE_LLM = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.llm',
+export const BEFORE_YOU_ENABLE_RUNS_AS = i18n.translate(
+  'xpack.alertzero.onboarding.beforeYouEnable.runsAs',
   {
     defaultMessage:
-      'Workers use your configured LLM connector. Usage scales with the number of workers and data volume.',
+      'Workers run as the service account you select. Anything they do is attributed to that account.',
   }
 );
 
-export const BEFORE_YOU_ENABLE_PRIVILEGE = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.privilege',
+export const SERVICE_ACCOUNT_LABEL = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountLabel',
   {
-    defaultMessage: 'Requires the manage AlertZero privilege.',
+    defaultMessage: 'Run as',
   }
 );
 
-export const BEFORE_YOU_ENABLE_AUTONOMY = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.autonomy',
+export const BACK = i18n.translate('xpack.alertzero.onboarding.back', {
+  defaultMessage: 'Back',
+});
+
+export const ATTACK_DISCOVERY_WORKFLOWS_NOTE = i18n.translate(
+  'xpack.alertzero.onboarding.attackDiscoveryWorkflowsNote',
+  {
+    defaultMessage: 'Turning this on also enables the Attack Discovery workflows in Settings.',
+  }
+);
+
+export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
+  'xpack.alertzero.onboarding.modifyForbiddenCallout',
   {
     defaultMessage:
-      'Workers keep their existing autonomy settings. New workers default to the lowest level — investigates and proposes only; nothing runs without your approval. Adjust any time on Watches.',
+      'You need the manage_security cluster privilege to enable workers. Ask an administrator.',
   }
 );
-
-export const ENABLE_AND_CONTINUE = i18n.translate('xpack.alertzero.onboarding.enableAndContinue', {
-  defaultMessage: 'Enable and continue',
-});
-
-export const NOT_NOW = i18n.translate('xpack.alertzero.onboarding.notNow', {
-  defaultMessage: 'Not now — explore Security without AlertZero',
-});
 
 export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboarding.readOnlyBody', {
   defaultMessage:
@@ -94,29 +121,322 @@ export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboard
 const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.attackDiscovery',
-    { defaultMessage: 'Correlates alerts into candidate attacks and opens investigations' }
+    {
+      defaultMessage:
+        'Finds candidate attacks on its schedule, opens an Investigation for each, and sends true positives to forensics.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.alertTriage',
-    { defaultMessage: 'Investigates each alert; recommends close or escalate' }
+    {
+      defaultMessage:
+        'Classifies each batch of alerts a rule execution generates, and reduces the noise Attack Discovery has to analyze.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleTuning',
-    { defaultMessage: 'Learns from your close decisions; proposes rule tuning' }
+    {
+      defaultMessage:
+        'Diagnoses noisy or under-covering rules and produces a tuning proposal with a backtest.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.endpointAnalysis',
-    { defaultMessage: 'Drafts response actions for your approval' }
+    {
+      defaultMessage:
+        'Runs deeper forensics on the hosts from a promoted attack and proposes response actions.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.continuousThreatHunt',
-    { defaultMessage: 'Scheduled hunts against your data; surfaces leads' }
+    {
+      defaultMessage:
+        'Hunts previously ingested threat reports for matching and related activity, and opens an Investigation for anything it finds.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleCoverage',
-    { defaultMessage: 'Finds coverage gaps; drafts, installs or enables rules on approval' }
+    {
+      defaultMessage:
+        'Assesses detection gaps surfaced by Hunt Watch and proposes new or existing rules to close them.',
+    }
   ),
 };
 
 export const onboardingWorkerDescription = (workerId: string): string | undefined =>
   ONBOARDING_WORKER_DESCRIPTIONS[workerId];
+
+// Workers without a schedule interval are event-driven; schedule-driven ones use the cadence label.
+const ONBOARDING_WORKER_EVENT_TRIGGERS: Record<string, string> = {
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
+    'xpack.alertzero.onboarding.workerTrigger.alertTriage',
+    { defaultMessage: 'On new alerts' }
+  ),
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
+    'xpack.alertzero.onboarding.workerTrigger.endpointAnalysis',
+    { defaultMessage: 'On Attack Discovery promotion' }
+  ),
+};
+
+export const onboardingWorkerEventTrigger = (workerId: string): string | undefined =>
+  ONBOARDING_WORKER_EVENT_TRIGGERS[workerId];
+
+export const INTRO_TITLE = i18n.translate('xpack.alertzero.onboarding.intro.title', {
+  defaultMessage: 'AlertZero in 90 seconds',
+});
+
+export const INTRO_PROMO_LEAD = i18n.translate('xpack.alertzero.onboarding.intro.promoLead', {
+  defaultMessage: 'AlertZero is a coworker that is always there — always working for you.',
+});
+
+export const INTRO_PROMO_BODY = i18n.translate('xpack.alertzero.onboarding.intro.promoBody', {
+  defaultMessage:
+    'Once your data is in, its Watches triage alerts, hunt for threats, tune noisy rules, and investigate on their own — around the clock. You only see the actions that need a human.',
+});
+
+export const INTRO_READ_MORE = i18n.translate('xpack.alertzero.onboarding.intro.readMore', {
+  defaultMessage: 'Read more about AlertZero',
+});
+
+export const INTRO_PREVIEW_HEADING = i18n.translate(
+  'xpack.alertzero.onboarding.intro.previewHeading',
+  { defaultMessage: 'Once I have data, I will:' }
+);
+
+export const INTRO_SET_UP_DATA_TITLE = i18n.translate(
+  'xpack.alertzero.onboarding.intro.setUpDataTitle',
+  { defaultMessage: 'Get started with your data' }
+);
+
+export const INTRO_SET_UP_DATA_BODY = i18n.translate(
+  'xpack.alertzero.onboarding.intro.setUpDataBody',
+  {
+    defaultMessage:
+      'Getting started walks you through connecting your first sources — endpoint, identity, cloud, and network — and confirms the data is flowing. Any Elastic integration works; the more you connect, the more the Watches can see.',
+  }
+);
+
+export const INTRO_SET_UP_DATA_LINK = i18n.translate(
+  'xpack.alertzero.onboarding.intro.setUpDataLink',
+  { defaultMessage: 'Open Getting started' }
+);
+
+export const CONTINUE = i18n.translate('xpack.alertzero.onboarding.continue', {
+  defaultMessage: 'Continue',
+});
+
+export const PREVIEW_TABLIST_LABEL = i18n.translate(
+  'xpack.alertzero.onboarding.preview.tablistLabel',
+  { defaultMessage: 'Example queue sections' }
+);
+
+export const PREVIEW_REOPENED = i18n.translate('xpack.alertzero.onboarding.preview.reopened', {
+  defaultMessage: 'Reopened',
+});
+
+export const VIDEO_PLACEHOLDER_LABEL = i18n.translate(
+  'xpack.alertzero.onboarding.intro.videoPlaceholderLabel',
+  { defaultMessage: 'Play: AlertZero in 90 seconds (video placeholder)' }
+);
+
+export interface PreviewItem {
+  readonly age: string;
+  readonly reopened: boolean;
+  readonly title: string;
+  readonly description: string;
+}
+
+export interface PreviewSlide {
+  readonly id: string;
+  readonly label: string;
+  readonly subtitle: string;
+  readonly count: number;
+  readonly badgeColor: 'danger' | 'warning' | 'primary';
+  readonly items: readonly PreviewItem[];
+}
+
+export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
+  {
+    id: 'respond',
+    label: i18n.translate('xpack.alertzero.onboarding.preview.respond.label', {
+      defaultMessage: 'Respond',
+    }),
+    subtitle: i18n.translate('xpack.alertzero.onboarding.preview.respond.subtitle', {
+      defaultMessage: 'Let you decide on the things that really matter',
+    }),
+    count: 5,
+    badgeColor: 'danger',
+    items: [
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.respond.item1.age', {
+          defaultMessage: '10 min ago',
+        }),
+        reopened: false,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.respond.item1.title', {
+          defaultMessage: 'Impossible travel — exec account (cfo@corp)',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.respond.item1.description',
+          {
+            defaultMessage:
+              "MFA was satisfied from two countries in 40 minutes — a replayed session cookie. Elastic Defend on the CFO's laptop shows an unsigned launch agent reading the browser cookie store at 13:39.",
+          }
+        ),
+      },
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.respond.item2.age', {
+          defaultMessage: '18 min ago',
+        }),
+        reopened: false,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.respond.item2.title', {
+          defaultMessage: 'Kerberoasting against service accounts — fin-dc-01',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.respond.item2.description',
+          {
+            defaultMessage:
+              '19 SPN ticket requests for svc-helpdesk and svc-backup in four minutes from fin-ws-31, all downgraded to RC4 — offline cracking is the point.',
+          }
+        ),
+      },
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.respond.item3.age', {
+          defaultMessage: '26 min ago',
+        }),
+        reopened: false,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.respond.item3.title', {
+          defaultMessage: 'Suspicious OAuth consent — hr-admin',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.respond.item3.description',
+          {
+            defaultMessage:
+              'hr-admin granted finance-sync Mail.ReadWrite and offline_access on the payroll mailbox — no ticket, publisher verified this morning.',
+          }
+        ),
+      },
+    ],
+  },
+  {
+    id: 'investigate',
+    label: i18n.translate('xpack.alertzero.onboarding.preview.investigate.label', {
+      defaultMessage: 'Investigate',
+    }),
+    subtitle: i18n.translate('xpack.alertzero.onboarding.preview.investigate.subtitle', {
+      defaultMessage: 'Run investigations end to end and close what I can',
+    }),
+    count: 4,
+    badgeColor: 'warning',
+    items: [
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.investigate.item1.age', {
+          defaultMessage: '8 min ago',
+        }),
+        reopened: false,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.investigate.item1.title', {
+          defaultMessage: 'Named-pipe backdoor — eng-ws-19',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.investigate.item1.description',
+          {
+            defaultMessage:
+              'Forensics pass on eng-ws-19 found an unsigned service on \\\\.\\pipe\\msupdate. Isolate is staged so the implant cannot reach out while the service is pulled.',
+          }
+        ),
+      },
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.investigate.item2.age', {
+          defaultMessage: '12 min ago',
+        }),
+        reopened: true,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.investigate.item2.title', {
+          defaultMessage: 'Scheduled task persistence — helpdesk-ws-04',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.investigate.item2.description',
+          {
+            defaultMessage:
+              'Endpoint analysis posted a follow-up after close: inspect the GPO that pushed the scheduled task.',
+          }
+        ),
+      },
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.investigate.item3.age', {
+          defaultMessage: '22 min ago',
+        }),
+        reopened: false,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.investigate.item3.title', {
+          defaultMessage: 'KRBTGT password age — fin-dc-01',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.investigate.item3.description',
+          {
+            defaultMessage:
+              'KRBTGT last rotated 412 days ago — a forged ticket from tonight would still validate. Worth proving before it matters.',
+          }
+        ),
+      },
+    ],
+  },
+  {
+    id: 'configure',
+    label: i18n.translate('xpack.alertzero.onboarding.preview.configure.label', {
+      defaultMessage: 'Configure',
+    }),
+    subtitle: i18n.translate('xpack.alertzero.onboarding.preview.configure.subtitle', {
+      defaultMessage: 'Help you prevent the next incident',
+    }),
+    count: 6,
+    badgeColor: 'primary',
+    items: [
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.configure.item1.age', {
+          defaultMessage: '10 min ago',
+        }),
+        reopened: false,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.configure.item1.title', {
+          defaultMessage: 'Orphaned GitHub PAT — eng-ci',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.configure.item1.description',
+          {
+            defaultMessage:
+              'The previous disable failed because the service account is not an org owner. An org owner granted admin:org — disabling now prevents the app from minting another PAT.',
+          }
+        ),
+      },
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.configure.item2.age', {
+          defaultMessage: '26 min ago',
+        }),
+        reopened: false,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.configure.item2.title', {
+          defaultMessage: 'Suspicious OAuth consent — hr-admin',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.configure.item2.description',
+          {
+            defaultMessage:
+              'Require admin consent for Graph mail scopes so an hr-admin grant cannot recur.',
+          }
+        ),
+      },
+      {
+        age: i18n.translate('xpack.alertzero.onboarding.preview.configure.item3.age', {
+          defaultMessage: '26 min ago',
+        }),
+        reopened: false,
+        title: i18n.translate('xpack.alertzero.onboarding.preview.configure.item3.title', {
+          defaultMessage: 'Coverage gap — LSASS memory access from unbacked module',
+        }),
+        description: i18n.translate(
+          'xpack.alertzero.onboarding.preview.configure.item3.description',
+          {
+            defaultMessage:
+              'Hunt found LSASS access from an unbacked module on eng-ws-06 with no covering rule. Rule coverage drafted one — enabling it closes the gap.',
+          }
+        ),
+      },
+    ],
+  },
+];

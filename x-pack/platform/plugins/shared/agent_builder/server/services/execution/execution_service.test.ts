@@ -1288,7 +1288,8 @@ describe('AgentExecutionService', () => {
       });
 
       expect(conversationClient.create).toHaveBeenCalledWith(
-        expect.objectContaining({ read_only: true })
+        expect.objectContaining({ read_only: true }),
+        { source: 'execution' }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
