@@ -48,16 +48,30 @@ Read source files from the checkout, not from the diff, for line numbers. If no 
 From the diff, sort changed files into:
 
 - **Route definitions**: `.ts` files under `server/routes/` registering `router.versioned.*` or `router.*` endpoints
-- **Schema definitions**: `.ts` files with `schema.object` / `schema.maybe` / etc. used in route validation
+- **Schema definitions**: `.ts` files with `schema.object` / `schema.maybe` / etc. (`@kbn/config-schema`) or `z.object` / `.describe()` / `.meta({ openapi: {...} })` (Zod) used in route validation
+- **Spec-first YAML**: hand-written OpenAPI under `docs/openapi/`, `common/api/`, or `*.schema.yaml` (Security, Fleet, Endpoint). These are published as written: `x-state`, `description`, and `deprecated` are typed by hand, so the rules below apply to the YAML directly
 - **Generated YAML**: `oas_docs/output/` (local review only) — scan for diagnostic signals only
 - **Example files**: YAML under `routes/examples/`
 - **Other**: types, tests, mocks — note but do not audit
+
+Kibana field equivalents, so one rule reads across all three forms:
+
+| Rule says | `@kbn/config-schema` | Zod | Spec-first YAML |
+|---|---|---|---|
+| route `availability` | `options.availability` | `options.availability` | `x-state` on the operation |
+| property `meta.description` | `meta: { description }` | `.describe('...')` | `description:` |
+| property `meta.availability` | `meta: { availability }` | `.meta({ openapi: { availability } })` | `x-state` on the property |
 
 ### 2. Audit
 
 Apply every rule from the rules section below against the diff. If you have the generated YAML, use it as a cross-check signal: if it looks wrong (missing `x-state`, empty `x-state`, wrong label), trace it back to the TypeScript source to find the root cause.
 
 For every finding, read the actual file at the PR head to confirm the exact line number. Point at the line where the developer needs to make the change.
+
+Read before you assert. A diff hunk shows a window, not the file:
+- Before reporting that a summary, description, `availability`, `meta`, or example is missing, read the full route or schema definition. The field may sit outside the hunk or come from a shared schema the route spreads in.
+- Before flagging terminology, casing, a tag, or a missing doc link, read the sibling you are comparing against and quote it.
+- Before flagging a `since` value, read `version` in the root `package.json` at the PR head.
 
 ### 3. Cross-check sibling routes
 
@@ -117,6 +131,12 @@ Valid `stability` values and their rendered labels:
 
 `since` is a version string like `'9.2.0'`. It marks the version when the API first shipped. It appears in Elastic Stack docs and is omitted from serverless docs.
 
+For a new public route, `since` is the `version` in the root `package.json` at the PR head (on `main` that is the next minor, for example `9.6.0`). A lower value is correct only if the PR carries a matching backport label (`backport:version` plus `v9.5.0`, or `backport:prev-minor`). If you cannot see the labels, report the mismatch as a question rather than an error.
+
+Stability tracks the gate, not the intent. A route still behind a feature flag or UI setting cannot be `'stable'`. When a PR removes the flag or gate on a public route, the same PR must move `stability` to `'stable'`; when it adds a gate, `stability` must leave `'stable'`.
+
+Spec-first YAML carries the same information in `x-state`. Use the exact strings the generator emits so the two sources read the same in the published docs: `Technical Preview; added in 9.6.0`, `Generally available; added in 9.6.0`, or `Experimental; added in 9.6.0`. Flag a label with no version, a version with no label, or no `x-state` at all on a new operation.
+
 Correct pattern:
 
 ```typescript
@@ -137,6 +157,9 @@ What to flag:
 - ❌ `stability` missing from `availability`
 - ❌ `since` missing from `availability`
 - ❌ `stability` has an invalid value
+- ❌ `since` does not match `package.json` and no backport label explains it
+- ❌ Feature flag or gate removed or added on a public route without a matching `stability` change
+- ❌ Spec-first `x-state` missing, or carrying a label without a version or a version without a label
 
 ### 2. Route summary
 
@@ -171,10 +194,18 @@ Good: `'Create a new conversation with an agent. The conversation persists acros
 
 Bad: `'Creates a conversation.'` (restates the summary, adds nothing)
 
+Style, for route and property descriptions alike:
+- Operation descriptions start with a verb (`Get`, `Create`, `Update`, `Delete`). Field descriptions start with a noun phrase (`The identifier of...`, `A list of...`), not `This field...` or `Used to...`.
+- Active voice. Short sentences. No semicolons, no chained parentheticals, no stacked clauses.
+- Backticks around field names, enum values, paths, and literal values the user types.
+- Written for the API consumer. No internal names: executor tasks, registries, saved object types, `v1`/`v2` version labels, plugin or service names ("the alerting engine"), or settings a serverless user cannot change.
+- Error messages and error-response descriptions tell the user how to resolve the problem (`Specify either agent_id or conversation_id, not both.`), not what went wrong internally (`Invalid state: both ids present.`).
+
 What to flag:
 - ❌ `description` missing
 - ❌ Description is just a copy or restatement of the summary
 - ❌ Description omits constraints or prerequisites that a user would need
+- ❌ Description names internal components, or uses passive voice, semicolons, or chained parentheticals where a plain sentence would do
 
 ### 4. Narrative documentation link
 
@@ -232,10 +263,19 @@ A good property description explains what the value controls, its format, and an
 - ❌ `'The page size.'` — vague, no constraints, no default
 - ✅ `'The maximum number of results to return. Must be between 1 and 1000. Defaults to 20.'`
 
+Cover what the schema enforces and what the server does when the value is absent:
+- Constraints that exist in the schema (`minLength`, `maxLength`, `min`, `max`, patterns, allowed values) appear in the description.
+- Cross-field dependencies are stated on the field (`Required when type is webhook.`, `Ignored unless enabled is true.`).
+- Optional fields say what happens when they are omitted (`If omitted, all spaces are searched.`), not just that they are optional.
+
+Match the terminology of sibling properties and routes on the same resource. If siblings call it a "connector," do not introduce "integration." If siblings use `space ID`, do not write `space identifier`. This is about terms and casing only: never shorten a complete description to match a terser sibling, and never flag a description for being longer than its neighbors.
+
 What to flag:
 - ❌ New property has no `meta` at all
 - ❌ `meta` exists but has no `description`
 - ❌ Description is a single generic phrase that restates the property name (for example, `'The name.'` on a property called `name`)
+- ❌ A constraint enforced by the schema, a cross-field dependency, or the omission behavior is left out
+- ❌ A term or casing differs from the sibling you read (quote the sibling)
 
 ### 8. Enum value descriptions
 
@@ -275,7 +315,7 @@ What to flag:
 
 When a new property is added to an existing route's schema, and that property ships in a later version than the route itself, the property MUST have its own `meta.availability` with `stability` and `since`.
 
-How to detect: look for added `schema.maybe(...)` or `schema.object(...)` fields inside an existing route's validation block. If the route has `since: '9.2.0'` and the new property ships in `'9.6.0'`, the property needs its own availability.
+How to detect: look for added `schema.maybe(...)` or `schema.object(...)` fields (or new Zod fields, or new properties in spec-first YAML) inside an existing route's validation block. The property's shipping version is the `version` in the root `package.json` at the PR head. If the route's `since` (or spec-first `x-state` version) is lower than that, the property needs its own availability. If the route has no `availability` at all, flag the route under rule 1 only, since there is no baseline to compare.
 
 Correct pattern:
 
@@ -298,9 +338,12 @@ What to flag:
 
 Deprecated routes or properties should be marked. In Kibana, the route's `options` supports a `deprecated` flag, and property descriptions should explain the deprecation.
 
+For a route, `options.deprecated` is a `RouteDeprecationInfo` object: `documentationUrl` (required), `severity` (`'warning'` or `'critical'`), `reason` (`{ type: 'bump', newApiVersion }`, `{ type: 'remove' }`, `{ type: 'migrate', newApiPath, newApiMethod }`, or `{ type: 'deprecate' }`), and an optional `message`. A route that is already gone takes `options.discontinued: 'Use ... instead.'`. For a spec-first operation or property, set `deprecated: true` and open the description with `**Deprecated in 9.6.0.** Use ... instead.` so the version and replacement survive into the published page.
+
 What to flag:
 - ❌ A property or route is described as deprecated in comments or description text but has no `deprecated: true` marker
 - ❌ Deprecated property has no description explaining what to use instead
+- ❌ `options.deprecated` is missing `documentationUrl` or `reason`, or the deprecation is not reflected in the description as well
 
 ### 12. Response examples
 
