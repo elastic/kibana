@@ -44,7 +44,7 @@ export const DataRetention = ({ metadata }: DataRetentionProps) => {
         'xpack.searchInferenceEndpoints.modelDetailFlyout.retainsDataTooltip',
         {
           defaultMessage:
-            'Model provider retains data used with this model for a period of time. Inputs are not used to train the models. Refer to the provider for more information.',
+            'The provider of this model retains the data used with it for a period of time. Your inputs are not used to train the models. Refer to the provider for more information on their policy.',
         }
       )}
     >
