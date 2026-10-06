@@ -1204,6 +1204,37 @@ describe('useDeploy', () => {
       expect(result.current.storedSecretFields).toEqual(['access_key_id', 'secret_access_key']);
     });
 
+    it('reads the stored keys from a policy cleanup keeps, not one it deletes', async () => {
+      mockSendGetAgentlessPolicy.mockResolvedValue(STORED_KEYS_POLICY);
+      setupMocks({
+        authMethod: 'static_keys',
+        detectAndReviewStep: {
+          ...DEPLOYED_WITH_PENDING_CLEANUP,
+          policyIdsByInstance: { removed: 'policy-2', ec2: 'policy-1' },
+        },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await waitFor(() =>
+        expect(result.current.storedSecretFields).toEqual(['access_key_id', 'secret_access_key'])
+      );
+      expect(mockSendGetAgentlessPolicy).toHaveBeenCalledTimes(1);
+      expect(mockSendGetAgentlessPolicy).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('offers no stored keys when every deployed policy is being removed', () => {
+      setupMocks({
+        authMethod: 'static_keys',
+        detectAndReviewStep: {
+          ...DEPLOYED_WITH_PENDING_CLEANUP,
+          policyIdsByInstance: { removed: 'policy-2' },
+        },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(mockSendGetAgentlessPolicy).not.toHaveBeenCalled();
+      expect(result.current.storedSecretFields).toEqual([]);
+      expect(result.current.isStoredSecretsLoading).toBe(false);
+    });
+
     it('is false while the stored secrets are still loading', () => {
       mockSendGetAgentlessPolicy.mockReturnValue(new Promise(() => {}));
       setupMocks({ authMethod: 'static_keys', detectAndReviewStep: DEPLOYED_WITH_PENDING_CLEANUP });

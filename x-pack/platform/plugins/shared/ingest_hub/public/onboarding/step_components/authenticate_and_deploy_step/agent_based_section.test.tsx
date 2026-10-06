@@ -144,9 +144,29 @@ function setupMocks({
   );
 
   MockTemporaryKeysForm.mockImplementation(
-    ({ onReadyChange }: { onReadyChange?: (v: boolean) => void }) => (
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
       <div data-test-subj="temporary-keys-form">
         <button onClick={() => onReadyChange?.(true)}>mark-temp-credential-ready</button>
+        <button
+          onClick={() =>
+            onFieldsChange?.({ access_key_id: '', secret_access_key: '', session_token: 'NEW' })
+          }
+        >
+          replace-session-token
+        </button>
+        <button
+          onClick={() =>
+            onFieldsChange?.({ access_key_id: '', secret_access_key: '', session_token: '' })
+          }
+        >
+          clear-session-token
+        </button>
       </div>
     )
   );
@@ -799,6 +819,26 @@ describe('AgentBasedSection', () => {
         fireEvent.click(screen.getByText('replace-secret'));
         expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(true);
         fireEvent.click(screen.getByText('clear-secret'));
+        expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(false);
+      });
+
+      it('reports a replaced session token for temporary keys and clears it when emptied', async () => {
+        mockFetchSecretRefs.mockResolvedValue(
+          new Map([...REFS, ['session_token', { isSecretRef: true, id: 'r3' }]])
+        );
+        const onStoredCredentialsReplacedChange = jest.fn();
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'temporary_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1', onStoredCredentialsReplacedChange });
+        await waitFor(() => expect(screen.getByTestId('temporary-keys-form')).toBeInTheDocument());
+
+        fireEvent.click(screen.getByText('replace-session-token'));
+        expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(true);
+        fireEvent.click(screen.getByText('clear-session-token'));
         expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(false);
       });
 
