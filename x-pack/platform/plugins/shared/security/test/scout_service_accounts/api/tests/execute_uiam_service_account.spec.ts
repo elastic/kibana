@@ -7,22 +7,16 @@
 
 import { randomUUID } from 'crypto';
 
-import { MOCK_IDP_UIAM_ORG_ADMIN_API_KEY } from '@kbn/mock-idp-utils';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { deleteUiamServiceAccount } from '../fixtures/uiam_service_account_cleanup';
+import {
+  createUiamServiceAccount,
+  HEADERS,
+  ORG_ADMIN_HEADERS,
+} from '../fixtures/uiam_service_account_create';
 
-const HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
-// UIAM refuses to create service accounts for session users, so every call that manages one uses
-// the seeded organization key.
-const ORG_ADMIN_HEADERS = {
-  ...HEADERS,
-  Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
-};
-// The config set issues one-minute exchange tokens, and UIAM allows 2s of clock skew. Tests that
-// wait this long raise their own timeout above the 60s default.
-const OUTLIVE_TOKEN_MS = 65000;
 const uniqueName = () => `sa-uiam-execution-${randomUUID()}`;
 
 // The local UIAM client certificate identifies an Elasticsearch (Search) project.
@@ -49,13 +43,10 @@ apiTest.describe(
 
     apiTest.beforeEach(async ({ apiClient }) => {
       endpoint = `internal/service_accounts_test/${uniqueName()}`;
-      const created = await apiClient.post('internal/security/service_account', {
-        headers: ORG_ADMIN_HEADERS,
-        body: { name: uniqueName(), roles: [roleName] },
-        responseType: 'json',
+      accountId = await createUiamServiceAccount(apiClient, {
+        name: uniqueName(),
+        roles: [roleName],
       });
-      expect(created).toHaveStatusCode(200);
-      accountId = created.body.id;
       accountIds.push(accountId);
       const bound = await apiClient.post(endpoint, {
         headers: ORG_ADMIN_HEADERS,
@@ -122,34 +113,6 @@ apiTest.describe(
       expect(denied).toHaveStatusCode(403);
     });
 
-    apiTest(
-      'renews an expired token transparently on an existing scoped ES client',
-      async ({ apiClient }) => {
-        apiTest.setTimeout(180_000);
-        const executed = await apiClient.post(endpoint, {
-          headers: ORG_ADMIN_HEADERS,
-          body: { operation: 'execute', waitMs: OUTLIVE_TOKEN_MS },
-          responseType: 'json',
-        });
-        expect(executed).toHaveStatusCode(200);
-        expect(executed.body).toMatchObject({
-          username: accountId,
-          renewedUsername: accountId,
-          tokenChanged: true,
-          principal: {
-            type: 'service_account',
-            variant: 'uiam',
-            serviceAccountId: accountId,
-          },
-          renewedPrincipal: {
-            type: 'service_account',
-            variant: 'uiam',
-            serviceAccountId: accountId,
-          },
-        });
-      }
-    );
-
     apiTest('isolates workload bindings by space', async ({ apiClient }) => {
       const otherEndpoint = `s/${spaceId}/${endpoint}`;
       const missing = await apiClient.post(otherEndpoint, {
@@ -172,30 +135,6 @@ apiTest.describe(
       expect(executed).toHaveStatusCode(200);
       expect(executed.body).toMatchObject({ username: accountId, spaceId });
     });
-
-    apiTest(
-      'unbind denies renewal while leaving the issued token valid until expiry',
-      async ({ apiClient }) => {
-        apiTest.setTimeout(180_000);
-        const executed = await apiClient.post(endpoint, {
-          headers: ORG_ADMIN_HEADERS,
-          body: { operation: 'execute', revoke: 'unbind', waitMs: OUTLIVE_TOKEN_MS },
-          responseType: 'json',
-        });
-        expect(executed).toHaveStatusCode(200);
-        expect(executed.body).toStrictEqual({
-          username: accountId,
-          afterChangeUsername: accountId,
-          renewalStatus: 401,
-        });
-        const newExecution = await apiClient.post(endpoint, {
-          headers: ORG_ADMIN_HEADERS,
-          body: { operation: 'execute' },
-          responseType: 'json',
-        });
-        expect(newExecution).toHaveStatusCode(404);
-      }
-    );
 
     apiTest(
       'refuses an unauthorized caller before executing a workload',

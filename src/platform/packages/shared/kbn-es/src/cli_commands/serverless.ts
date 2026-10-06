@@ -82,7 +82,7 @@ export const serverless: Command = {
       --uiam-oauth        Start an additional UIAM OAuth container for OAuth flow support [default: false].
       --uiam-ephemeral-token-expiration
                           ISO-8601 lifetime of UIAM ephemeral tokens, such as service account exchange tokens.
-                          UIAM accepts PT1M to PT5M [default: PT5M].
+                          UIAM accepts PT1M to PT5M [UIAM default: PT5M].
       --eis               Enable EIS mode: sets the EIS inference URL, resolves and sets the CCM API key (implies --waitForReady)
 
       -E                  Additional key=value settings to pass to ES
