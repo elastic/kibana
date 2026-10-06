@@ -29,6 +29,8 @@ import {
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import {
   addsNewDetectionRules,
+  confirmedSignals,
+  extractDedupIdentity,
   extractRuleUuids,
   extractRuleUuidsFromEvents,
   makeIdentity,
@@ -62,7 +64,6 @@ export type EventsWriteInput = Pick<
 
 export interface EventsWriteResult {
   index: number;
-  event_uuid: string;
   event_id: string;
   status: SignificantEvent['status'];
   written: true;
@@ -95,7 +96,7 @@ export interface EventsWriteFailureResult {
   event_id: string;
   status: SignificantEvent['status'];
   written: false;
-  reason: 'bulk_error' | 'duplicate_in_batch';
+  reason: 'bulk_error' | 'duplicate_in_batch' | 'unknown_event_id';
   error: CompactBulkError;
 }
 
@@ -104,9 +105,9 @@ interface DedupCandidate {
   index: number;
   input: EventsWriteInput;
   eventId: string;
-  eventUuid: string;
   /** Retained separately so the dedup scan can narrow by rule identity. */
   ruleUuids: string[];
+  confirmedOnly: boolean;
 }
 
 interface SnapshotCandidate {
@@ -114,7 +115,6 @@ interface SnapshotCandidate {
   index: number;
   input: EventsWriteInput;
   eventId: string;
-  eventUuid: string;
 }
 
 type WriteCandidate = DedupCandidate | SnapshotCandidate;
@@ -170,7 +170,7 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
     const normalizedEventId = normalizeEventId(input.event_id);
     if (normalizedEventId === undefined) {
       // No event_id → find-or-create: scan active events for identity match before writing.
-      const ruleUuids = extractRuleUuids(input.signals);
+      const { ruleUuids, confirmedOnly } = extractDedupIdentity(input.signals);
       // Normalize event_id to undefined so fetchLatestByEventId does not attempt a lineage lookup.
       const normalizedInput = { ...input, event_id: undefined };
       return {
@@ -178,8 +178,8 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
         index,
         input: normalizedInput,
         eventId: uuidv4(),
-        eventUuid: uuidv4(),
         ruleUuids,
+        confirmedOnly,
       };
     }
     const normalizedInput = { ...input, event_id: normalizedEventId };
@@ -188,14 +188,13 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
       index,
       input: normalizedInput,
       eventId: normalizedEventId,
-      eventUuid: uuidv4(),
     };
   });
 
 /**
- * Flags candidates that share an in-batch dedup identity (stream+rules exact-set match) or
- * event_id (snapshot mode) as `duplicate_in_batch` errors, keeping the first occurrence. Returns
- * the remainder.
+ * Flags candidates that share an in-batch dedup identity (identity kind plus stream+rules
+ * exact-set match) or event_id (snapshot mode) as `duplicate_in_batch` errors, keeping the first
+ * occurrence. Returns the remainder.
  */
 const markDuplicateKeys = (
   candidates: WriteCandidate[],
@@ -206,10 +205,15 @@ const markDuplicateKeys = (
   for (const candidate of candidates) {
     const key =
       candidate.mode === 'dedup'
-        ? makeIdentity({
-            streamNames: candidate.input.stream_names,
-            ruleUuids: candidate.ruleUuids,
-          })
+        ? [
+            // Confirmed-only and all-verdict identities use different matching semantics.
+            // Keep their keys separate even when their stream and rule sets are identical.
+            candidate.confirmedOnly ? 'confirmed' : 'all',
+            makeIdentity({
+              streamNames: candidate.input.stream_names,
+              ruleUuids: candidate.ruleUuids,
+            }),
+          ].join('|')
         : candidate.eventId;
     const firstIndex = seenKeys.get(key);
 
@@ -264,15 +268,19 @@ const fetchActiveEventsForDedup = async (
 };
 
 /**
- * Returns true when the candidate's rule set is entirely contained in the active event's rule set
- * and at least one stream name is shared — meaning this detection is already tracked.
+ * Returns true when the candidate's dedup rule set is entirely contained in the corresponding
+ * active-event rule set and at least one stream name is shared — meaning this detection is already
+ * tracked.
  *
- * Subset matching (not exact-set) handles co-detection noise: a candidate carrying rules [A]
- * correctly finds an active event with rules [A, B] rather than creating a duplicate. A new rule C
- * not present in any active event still produces a new event.
+ * Candidates with confirmed rules compare only confirmed rules on both sides. Candidates without
+ * confirmed rules retain all-verdict subset matching. A new identity rule not present in any
+ * active event still produces a new event.
  *
  * Empty-rule candidates only match empty-rule events to avoid false-matching any event on stream
  * overlap alone.
+ *
+ * Full rule-set coverage is deliberate. A partial overlap can span multiple active events, and
+ * selecting one would silently discard the candidate rules owned by the others.
  */
 const isCoveredByActiveEvent = (
   candidate: DedupCandidate,
@@ -285,7 +293,9 @@ const isCoveredByActiveEvent = (
   const streamsOverlap = (ev.stream_names ?? []).some((s) => candidateStreamSet.has(s));
   if (!streamsOverlap) return false;
 
-  const eventRuleUuids = extractRuleUuids(ev.signals);
+  const eventRuleUuids = extractRuleUuids(
+    candidate.confirmedOnly ? confirmedSignals(ev.signals) : ev.signals
+  );
   if (candidate.ruleUuids.length === 0) return eventRuleUuids.length === 0;
 
   const eventRuleSet = new Set(eventRuleUuids);
@@ -293,8 +303,9 @@ const isCoveredByActiveEvent = (
 };
 
 /**
- * Marks dedup candidates whose rules are a subset of an active event's rules (with stream overlap)
- * as `existing_active_event` in `results`. Returns the candidates that still need to be written.
+ * Marks dedup candidates whose identity rules are a subset of an active event's corresponding
+ * identity rules (with stream overlap) as `existing_active_event` in `results`. Returns the
+ * candidates that still need to be written.
  */
 const resolveDedupSkips = (
   validCandidates: WriteCandidate[],
@@ -302,11 +313,17 @@ const resolveDedupSkips = (
   results: BulkResults
 ): WriteCandidate[] => {
   const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
+  const sortedActiveEvents = activeEvents.toSorted((a, b) => {
+    const timestampOrder = Date.parse(b['@timestamp']) - Date.parse(a['@timestamp']);
+    return timestampOrder !== 0
+      ? timestampOrder
+      : (b.event_id ?? '').localeCompare(a.event_id ?? '');
+  });
   const toWrite: WriteCandidate[] = [];
 
   for (const candidate of validCandidates) {
     if (candidate.mode === 'dedup') {
-      const duplicate = activeEvents.find((ev) =>
+      const duplicate = sortedActiveEvents.find((ev) =>
         isCoveredByActiveEvent(candidate, ev, activeStatuses)
       );
       if (duplicate) {
@@ -336,11 +353,9 @@ const fetchPriorDocsByEventId = async (
   candidates: WriteCandidate[]
 ): Promise<{
   latestByEventId: Map<string, SignificantEvent>;
-  latestLegacyByEventId: Map<string, SignificantEvent>;
   priorDocsByEventId: Map<string, SignificantEvent[]>;
 }> => {
   const latestByEventId = new Map<string, SignificantEvent>();
-  const latestLegacyByEventId = new Map<string, SignificantEvent>();
   const priorDocsByEventId = new Map<string, SignificantEvent[]>();
   await Promise.all(
     candidates
@@ -367,30 +382,27 @@ const fetchPriorDocsByEventId = async (
           : await eventClient.findByEventId(c.eventId);
         const legacyHits = legacyResult ? legacyResult.hits : hits;
         priorDocsByEventId.set(c.eventId, hits);
-        const latest = hits.at(-1);
+        // `.rule-events` is dual-written asynchronously and can lag the write store. Use the
+        // canonical predecessor for fields copied into the new version (especially
+        // investigations), while retaining the read-store history for episode-context merging.
+        const latest = legacyHits.at(-1);
         if (latest !== undefined) {
           latestByEventId.set(c.eventId, latest);
         }
-        const latestLegacy = legacyHits.at(-1);
-        if (latestLegacy !== undefined) {
-          latestLegacyByEventId.set(c.eventId, latestLegacy);
-        }
       })
   );
-  return { latestByEventId, latestLegacyByEventId, priorDocsByEventId };
+  return { latestByEventId, priorDocsByEventId };
 };
 
 const buildPendingWrite = (
   candidate: WriteCandidate,
   timestamp: string,
   latestByEventId: Map<string, SignificantEvent>,
-  latestLegacyByEventId: Map<string, SignificantEvent>,
   priorDocsByEventId: Map<string, SignificantEvent[]>
 ) => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
   const latestEvent = latestByEventId.get(candidate.eventId);
-  const latestLegacyEvent = latestLegacyByEventId.get(candidate.eventId);
   const isContinuation = candidate.input.event_id !== undefined;
 
   const signals = isContinuation
@@ -434,10 +446,8 @@ const buildPendingWrite = (
           }
         : {}),
       '@timestamp': timestamp,
-      event_uuid: candidate.eventUuid,
       event_id: candidate.eventId,
-      previous_event_uuid: latestLegacyEvent?.event_uuid,
-      investigations: latestLegacyEvent?.investigations,
+      investigations: latestEvent?.investigations,
       signals,
       stream_names: episodeContext.streamNames,
       causal_features: episodeContext.causalFeatures,
@@ -468,7 +478,6 @@ const applyBulkResults = (
     } else {
       const result: EventsWriteResult = {
         index: candidate.index,
-        event_uuid: candidate.eventUuid,
         event_id: candidate.eventId,
         status,
         written: true,
@@ -486,12 +495,14 @@ const applyBulkResults = (
  * returned results.
  *
  * Find-or-create items (no `event_id`):
- *  - Scan all currently-active events for one whose rules contain the candidate rules and whose
- *    streams overlap the candidate streams.
+ *  - Scan all currently-active events for one whose confirmed rules contain the candidate's
+ *    confirmed rules and whose streams overlap the candidate streams.
+ *  - If the candidate has no confirmed rules, compare all rules instead.
  *  - If found, skip the write and return the existing event_id (existing_active_event).
  *  - Otherwise write a new event with the caller-supplied status.
  *
  * Snapshot-mode items (`event_id` present):
+ *  - When `rejectUnknownEventIds` is enabled, reject IDs with no canonical lineage.
  *  - Skip the write (`unchanged_outcome`) when the latest stored version has the same severity and
  *    status, avoiding pure-churn duplicates.
  *  - Otherwise write a new version of the identified event, persisting the caller-supplied status.
@@ -504,6 +515,7 @@ export async function eventsWriteBulkHandler({
   eventSearchClient,
   inputs,
   source,
+  rejectUnknownEventIds,
   alertEventsClient,
   logger,
 }: {
@@ -518,6 +530,8 @@ export async function eventsWriteBulkHandler({
   eventSearchClient?: SignificantEventsReadClient;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
+  /** Discovery-only guard for explicit IDs that have no canonical event history. */
+  rejectUnknownEventIds?: boolean;
   /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
@@ -564,15 +578,42 @@ export async function eventsWriteBulkHandler({
   const activeEvents = client !== eventClient ? canonicalActiveEvents : searchClientActiveEvents;
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  const { latestByEventId, latestLegacyByEventId, priorDocsByEventId } =
-    await fetchPriorDocsByEventId(client, eventClient, toWrite);
-  const calibrated = toWrite.map((candidate) => ({
+  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId(
+    client,
+    eventClient,
+    toWrite
+  );
+  const knownCandidates = toWrite.filter((candidate) => {
+    if (
+      rejectUnknownEventIds &&
+      candidate.mode === 'snapshot' &&
+      !latestByEventId.has(candidate.eventId)
+    ) {
+      results[candidate.index] = {
+        index: candidate.index,
+        event_id: candidate.eventId,
+        status: candidate.input.status,
+        written: false,
+        reason: 'unknown_event_id',
+        error: {
+          type: 'validation_error',
+          reason: `event_id ${JSON.stringify(
+            candidate.eventId
+          )} does not exist. Do not retry this item in the current run or reuse this id. Leave it unprocessed so the next discovery cycle routes it again from fresh search results.`,
+          status: 404,
+        },
+      };
+      return false;
+    }
+    return true;
+  });
+  const calibrated = knownCandidates.map((candidate) => ({
     ...candidate,
     input: {
       ...candidate.input,
       severity: getCalibratedSeverity({
         source,
-        latestEvent: latestLegacyByEventId.get(candidate.eventId),
+        latestEvent: latestByEventId.get(candidate.eventId),
         proposedSeverity: candidate.input.severity,
         proposedStatus: candidate.input.status,
         proposedSignals: candidate.input.signals,
@@ -583,7 +624,7 @@ export async function eventsWriteBulkHandler({
     if (
       candidate.mode === 'snapshot' &&
       shouldSkipAsNoOp(
-        latestLegacyByEventId.get(candidate.eventId),
+        latestByEventId.get(candidate.eventId),
         candidate,
         priorDocsByEventId.get(candidate.eventId) ?? []
       )
@@ -606,13 +647,7 @@ export async function eventsWriteBulkHandler({
   }
 
   const pendingToWrite = remaining.map((candidate) =>
-    buildPendingWrite(
-      candidate,
-      timestamp,
-      latestByEventId,
-      latestLegacyByEventId,
-      priorDocsByEventId
-    )
+    buildPendingWrite(candidate, timestamp, latestByEventId, priorDocsByEventId)
   );
 
   let response;
@@ -645,9 +680,9 @@ export async function eventsWriteBulkHandler({
       // Use the canonical predecessor (legacy write store) rather than the read-store view:
       // .rule-events is dual-written fire-and-forget (no refresh guarantee), so it may lag and
       // yield undefined — emitting a spurious eventCreated for an existing event. The read-store
-      // client also decodes dismissed → closed, corrupting the status comparison used to decide
+      // client may decode statuses differently, corrupting the status comparison used to decide
       // whether to emit eventStatusChanged.
-      priorSignificantEvent: latestLegacyByEventId.get(candidate.eventId),
+      priorSignificantEvent: latestByEventId.get(candidate.eventId),
     });
     if (alertEventsClient && dualWriteLimit) {
       return [

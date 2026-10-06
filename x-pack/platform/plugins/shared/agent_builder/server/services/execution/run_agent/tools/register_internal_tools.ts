@@ -139,12 +139,12 @@ export const registerInternalTools = async ({
     tools.push(createDiscoverApisTool());
   }
 
-  // run_subagent + send_message + sleep — experimental; reserved for top-level
-  // runs (see `canSpawnSubagents` above for why sub-agents can't nest-spawn).
+  // run_subagent + send_message + sleep — reserved for top-level runs (see
+  // `canSpawnSubagents` above for why sub-agents can't nest-spawn).
   // All three share the same registration gate: the parent agent's resolved
   // `subagent_ids` allowlist must be non-empty. Per-call reachability for
   // `send_message` is enforced in the handler (§3.5 of the design).
-  if (experimentalFeatures.subagents && canSpawnSubagents) {
+  if (canSpawnSubagents) {
     const allowedSubagents = await resolveAllowedSubagents({
       configuredIds: agentConfiguration.subagent_ids ?? [],
       agentRegistry,

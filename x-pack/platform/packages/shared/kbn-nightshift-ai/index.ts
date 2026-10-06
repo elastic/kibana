@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+export {
+  resolveNightshiftModel,
+  type NightshiftModelRestriction,
+  type ResolveNightshiftModelOptions,
+} from './src/resolve_nightshift_model';
+export { resolveNightshiftModelForRequest } from './src/resolve_nightshift_model_for_request';
 export type { AnalysisTarget } from './src/shared/analysis_target';
 export { getDiverseSampleDocuments } from './src/shared/sampling/get_diverse_sample_documents';
 export { EMPTY_TOKENS, sumTokens } from './src/shared/tokens/sum_tokens';
