@@ -143,7 +143,7 @@ const opensInEsqlByDefault = ({ services }: DefaultQueryArgs): boolean => {
   );
 };
 
-// Precedence: defaultEsqlQuery space setting > default profile setting > data view derived query
+// Precedence: defaultEsqlQuery space setting > default profile setting
 const getConfiguredEsqlQuery = ({ services, defaultProfileEsqlQuery }: DefaultQueryArgs) =>
   services.uiSettings.get<string>(DEFAULT_ESQL_QUERY_SETTING)?.trim() ||
   defaultProfileEsqlQuery?.query;
