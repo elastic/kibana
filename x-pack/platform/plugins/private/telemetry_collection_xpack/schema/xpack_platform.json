@@ -9899,112 +9899,428 @@
         },
         "workflows": {
           "properties": {
-            "runs": {
+            "all": {
               "properties": {
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Total number of workflow runs recorded on cases"
+                "runs": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of workflow runs recorded on cases"
+                      }
+                    },
+                    "monthly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last month"
+                      }
+                    },
+                    "weekly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last week"
+                      }
+                    },
+                    "daily": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last day"
+                      }
+                    }
                   }
                 },
-                "monthly": {
+                "totalCasesWithRuns": {
                   "type": "long",
                   "_meta": {
-                    "description": "Number of workflow runs recorded on cases in the last month"
+                    "description": "Number of distinct cases that have had at least one workflow run"
                   }
                 },
-                "weekly": {
+                "totalUniqueUsers": {
                   "type": "long",
                   "_meta": {
-                    "description": "Number of workflow runs recorded on cases in the last week"
+                    "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
                   }
                 },
-                "daily": {
+                "byOriginType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from this origin type, without its `cases.` prefix"
+                      }
+                    },
+                    "case": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the case detail page"
+                      }
+                    },
+                    "observable": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table for a single observable"
+                      }
+                    },
+                    "observables": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table with a multi-observable selection"
+                      }
+                    },
+                    "attachment": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                      }
+                    },
+                    "attachments": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                      }
+                    },
+                    "unattributed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs carrying no single-case origin, such as cases-list bulk runs"
+                      }
+                    }
+                  }
+                },
+                "byAttachmentType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)"
+                      }
+                    }
+                  }
+                },
+                "configurationsWithWorkflowTags": {
                   "type": "long",
                   "_meta": {
-                    "description": "Number of workflow runs recorded on cases in the last day"
+                    "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
                   }
                 }
               }
             },
-            "totalCasesWithRuns": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of distinct cases that have had at least one workflow run"
-              }
-            },
-            "totalUniqueUsers": {
-              "type": "long",
-              "_meta": {
-                "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
-              }
-            },
-            "byOriginType": {
+            "sec": {
               "properties": {
-                "case": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Runs triggered from the case detail page"
+                "runs": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of workflow runs recorded on cases"
+                      }
+                    },
+                    "monthly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last month"
+                      }
+                    },
+                    "weekly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last week"
+                      }
+                    },
+                    "daily": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last day"
+                      }
+                    }
                   }
                 },
-                "observable": {
+                "totalCasesWithRuns": {
                   "type": "long",
                   "_meta": {
-                    "description": "Runs triggered from the observables table for a single observable"
+                    "description": "Number of distinct cases that have had at least one workflow run"
                   }
                 },
-                "observables": {
+                "totalUniqueUsers": {
                   "type": "long",
                   "_meta": {
-                    "description": "Runs triggered from the observables table with a multi-observable selection"
+                    "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
                   }
                 },
-                "attachment": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                "byOriginType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from this origin type, without its `cases.` prefix"
+                      }
+                    },
+                    "case": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the case detail page"
+                      }
+                    },
+                    "observable": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table for a single observable"
+                      }
+                    },
+                    "observables": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table with a multi-observable selection"
+                      }
+                    },
+                    "attachment": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                      }
+                    },
+                    "attachments": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                      }
+                    },
+                    "unattributed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs carrying no single-case origin, such as cases-list bulk runs"
+                      }
+                    }
                   }
                 },
-                "attachments": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                "byAttachmentType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)"
+                      }
+                    }
                   }
                 },
-                "unattributed": {
+                "configurationsWithWorkflowTags": {
                   "type": "long",
                   "_meta": {
-                    "description": "Runs carrying no single-case origin (cases-list bulk runs or an unrecognised origin). Derived as max(0, total minus the sum of all attributed origin buckets)."
+                    "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
                   }
                 }
               }
             },
-            "byAttachmentType": {
+            "obs": {
               "properties": {
-                "alert": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Attachment-origin runs triggered from alert attachments"
+                "runs": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of workflow runs recorded on cases"
+                      }
+                    },
+                    "monthly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last month"
+                      }
+                    },
+                    "weekly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last week"
+                      }
+                    },
+                    "daily": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last day"
+                      }
+                    }
                   }
                 },
-                "event": {
+                "totalCasesWithRuns": {
                   "type": "long",
                   "_meta": {
-                    "description": "Attachment-origin runs triggered from event attachments"
+                    "description": "Number of distinct cases that have had at least one workflow run"
                   }
                 },
-                "other": {
+                "totalUniqueUsers": {
                   "type": "long",
                   "_meta": {
-                    "description": "Attachment-origin runs triggered from any other attachment type. Derived as max(0, attachment + attachments origin runs minus alert and event runs)."
+                    "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
+                  }
+                },
+                "byOriginType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from this origin type, without its `cases.` prefix"
+                      }
+                    },
+                    "case": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the case detail page"
+                      }
+                    },
+                    "observable": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table for a single observable"
+                      }
+                    },
+                    "observables": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table with a multi-observable selection"
+                      }
+                    },
+                    "attachment": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                      }
+                    },
+                    "attachments": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                      }
+                    },
+                    "unattributed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs carrying no single-case origin, such as cases-list bulk runs"
+                      }
+                    }
+                  }
+                },
+                "byAttachmentType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)"
+                      }
+                    }
+                  }
+                },
+                "configurationsWithWorkflowTags": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
                   }
                 }
               }
             },
-            "configurationsWithWorkflowTags": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
+            "main": {
+              "properties": {
+                "runs": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of workflow runs recorded on cases"
+                      }
+                    },
+                    "monthly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last month"
+                      }
+                    },
+                    "weekly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last week"
+                      }
+                    },
+                    "daily": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last day"
+                      }
+                    }
+                  }
+                },
+                "totalCasesWithRuns": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of distinct cases that have had at least one workflow run"
+                  }
+                },
+                "totalUniqueUsers": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
+                  }
+                },
+                "byOriginType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from this origin type, without its `cases.` prefix"
+                      }
+                    },
+                    "case": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the case detail page"
+                      }
+                    },
+                    "observable": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table for a single observable"
+                      }
+                    },
+                    "observables": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table with a multi-observable selection"
+                      }
+                    },
+                    "attachment": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                      }
+                    },
+                    "attachments": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                      }
+                    },
+                    "unattributed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs carrying no single-case origin, such as cases-list bulk runs"
+                      }
+                    }
+                  }
+                },
+                "byAttachmentType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)"
+                      }
+                    }
+                  }
+                },
+                "configurationsWithWorkflowTags": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
+                  }
+                }
               }
             }
           }

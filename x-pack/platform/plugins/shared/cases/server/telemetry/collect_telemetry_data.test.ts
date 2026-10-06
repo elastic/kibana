@@ -92,7 +92,7 @@ const expectedFieldLibrary = {
   main: populatedFieldLibraryScope,
 };
 
-const expectedWorkflows = {
+const workflowsScope = {
   runs: { total: 4, monthly: 4, weekly: 3, daily: 1 },
   totalCasesWithRuns: 3,
   totalUniqueUsers: 2,
@@ -104,8 +104,15 @@ const expectedWorkflows = {
     attachments: 0,
     unattributed: 2,
   },
-  byAttachmentType: { alert: 0, event: 0, other: 0 },
+  byAttachmentType: { security_alert: 1 },
   configurationsWithWorkflowTags: 1,
+};
+
+const expectedWorkflows = {
+  all: workflowsScope,
+  sec: workflowsScope,
+  obs: workflowsScope,
+  main: workflowsScope,
 };
 
 describe('collectTelemetryData', () => {

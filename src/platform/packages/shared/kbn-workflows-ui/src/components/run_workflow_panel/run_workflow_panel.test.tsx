@@ -721,7 +721,7 @@ describe('RunWorkflowPanel', () => {
       });
     });
 
-    it('reports an unknown origin when no telemetry context is provided', () => {
+    it('reports an unknown origin and owner when no telemetry context is provided', () => {
       renderComponent();
 
       fireEvent.click(screen.getByTestId('select-workflow-option'));
@@ -734,6 +734,7 @@ describe('RunWorkflowPanel', () => {
         origin: 'unknown',
         workflow_execution_id: 'exec-123',
         succeeded: true,
+        owner: 'unknown',
       });
     });
   });
