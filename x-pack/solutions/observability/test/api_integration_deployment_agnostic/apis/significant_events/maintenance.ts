@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+
 import expect from '@kbn/expect';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
@@ -33,6 +35,8 @@ import {
 
 const RESET_STREAM_NAME = 'logs.otel.maintenance-reset-test';
 const RULE_EVENTS_DATA_STREAM = '.rule-events';
+/** Stable event_id for the seeded `.rule-events` doc — drives `group_hash` and the API filter. */
+const RULE_EVENT_SEED_EVENT_ID = 'maintenance-reset-event';
 const ORPHAN_RULE_STREAM_NAME = 'logs.otel.maintenance-reset-orphan-rule';
 const REGISTERED_DATA_STREAMS = [
   '.significant_events-detections',
@@ -144,6 +148,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: resetStream,
         ...emptyAssets,
       });
+      // Unique ES doc _id per run so re-runs after a failed cleanup never hit a 409.
+      const ruleEventSeedDocId = `maintenance-reset-event-${Date.now()}`;
       try {
         await upsertFeature(apiClient, RESET_STREAM_NAME, {
           id: 'reset-feature',
@@ -208,24 +214,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // Seed one event directly into `.rule-events` so Reset's deleteByQuery is exercised.
-        // Use a unique id per run so re-runs after a failed cleanup never hit a 409.
+        // Use the persisted shape so RuleEventsClient can actually decode and return the event.
         await esClient.create({
           index: RULE_EVENTS_DATA_STREAM,
-          id: `maintenance-reset-event-${Date.now()}`,
+          id: ruleEventSeedDocId,
           refresh: 'wait_for',
           document: {
             '@timestamp': timestamp,
             source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
             space_id: 'default',
-            fingerprint: 'maintenance-reset-event',
-            alert_status: 'active',
             type: 'alert',
+            status: 'breached',
+            group_hash: createHash('sha256')
+              .update(`default:${SIGNIFICANT_EVENTS_ALERT_SOURCE}:${RULE_EVENT_SEED_EVENT_ID}`)
+              .digest('hex'),
+            alert: { status: 'active' },
+            severity: 'medium',
+            data: {
+              event_id: RULE_EVENT_SEED_EVENT_ID,
+              title: 'Maintenance reset test event',
+              rule_name: 'Maintenance reset test event',
+              stream_names: [RESET_STREAM_NAME],
+              summary: 'Representative event removed by the maintenance reset test.',
+              confidence: 0.8,
+            },
           },
         });
 
-        // Confirm the event is visible before reset.
+        // Confirm the seeded event is readable before reset.
         const eventsBefore = await apiClient
-          .fetch('GET /internal/significant_events/events', { params: { query: {} } })
+          .fetch('GET /internal/significant_events/events', {
+            params: { query: { event_id: RULE_EVENT_SEED_EVENT_ID } },
+          })
           .expect(200);
         expect(eventsBefore.body.total).to.be.greaterThan(0);
 
@@ -310,11 +330,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         // Best-effort cleanup: remove the seeded rule-event in case Reset did not wipe it
         // (e.g. when this finally runs after an earlier assertion failure).
+        // `.rule-events` is `dynamic: false` so only indexed fields are queryable; delete by _id.
         await esClient
           .deleteByQuery({
             index: RULE_EVENTS_DATA_STREAM,
             refresh: true,
-            query: { term: { fingerprint: 'maintenance-reset-event' } },
+            query: { ids: { values: [ruleEventSeedDocId] } },
           })
           .catch(() => {});
         await deleteStream(apiClient, RESET_STREAM_NAME);

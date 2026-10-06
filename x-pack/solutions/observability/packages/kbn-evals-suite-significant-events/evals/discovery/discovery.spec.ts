@@ -657,7 +657,7 @@ evaluate.describe(
                                 type: 'alert',
                                 space_id: 'default',
                                 severity: seededEvent.severity,
-                                episode: {
+                                alert: {
                                   status: seededEvent.status,
                                 },
                                 data: {
