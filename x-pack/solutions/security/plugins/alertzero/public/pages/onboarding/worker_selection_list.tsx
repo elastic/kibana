@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiHorizontalRule, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -20,6 +21,7 @@ interface Props {
   isSaving: boolean;
   canModifyWorkers: boolean;
   onToggle: (workerId: string, checked: boolean) => void;
+  header?: ReactNode;
 }
 
 export const WorkerSelectionList: React.FC<Props> = ({
@@ -30,11 +32,18 @@ export const WorkerSelectionList: React.FC<Props> = ({
   isSaving,
   canModifyWorkers,
   onToggle,
+  header,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+      {header ? (
+        <>
+          {header}
+          <EuiHorizontalRule margin="none" />
+        </>
+      ) : null}
       {workers.length === 0 ? (
         <div
           css={css`

@@ -274,7 +274,9 @@ describe('OnboardingPage', () => {
     it('keeps Enable and run unavailable until a service account is selected', () => {
       renderPage({ canWrite: true });
 
-      expect(screen.getByText(/Workers run as the service account you select/)).toBeInTheDocument();
+      expect(
+        screen.getByText('Saved on every Worker, even the ones you leave off.')
+      ).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
 
       selectServiceAccount();

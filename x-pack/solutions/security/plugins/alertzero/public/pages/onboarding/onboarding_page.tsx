@@ -7,15 +7,7 @@
 
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -25,10 +17,10 @@ import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { ServiceAccountField } from '../watches/components/service_account_field';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import { OnboardingEnableFooter } from './onboarding_enable_footer';
 import { OnboardingIntro } from './onboarding_intro';
+import { OnboardingRunAsRow } from './onboarding_run_as_row';
 import { useEnableWorkers } from './use_enable_workers';
 import { useWorkerSelection } from './use_worker_selection';
 import { WorkerSelectionDescription } from './worker_selection_description';
@@ -143,32 +135,14 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           isSaving={isSaving}
           canModifyWorkers={canModifyWorkers}
           onToggle={toggleWorker}
+          header={
+            <OnboardingRunAsRow
+              serviceAccountId={serviceAccountId}
+              isDisabled={!canModifyWorkers || isSaving}
+              onChange={setServiceAccountId}
+            />
+          }
         />
-
-        <EuiSpacer size="l" />
-        <EuiPanel
-          hasBorder
-          hasShadow={false}
-          paddingSize="m"
-          data-test-subj="alertZeroOnboardingServiceAccount"
-        >
-          <EuiText size="s">
-            <strong>{i18n.SERVICE_ACCOUNT_LABEL}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <ServiceAccountField
-            workerId="onboarding"
-            workerName={i18n.SERVICE_ACCOUNT_LABEL}
-            ariaLabel={i18n.SERVICE_ACCOUNT_LABEL}
-            current={serviceAccountId}
-            isDisabled={!canModifyWorkers || isSaving}
-            onChange={(nextId) => setServiceAccountId(nextId ?? undefined)}
-          />
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
-            <p>{i18n.BEFORE_YOU_ENABLE_RUNS_AS}</p>
-          </EuiText>
-        </EuiPanel>
       </div>
 
       <OnboardingEnableFooter
