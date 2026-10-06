@@ -35,6 +35,7 @@ const renderCard = (
       isSelected={isSelected}
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
       renderAssignees={() => null}
@@ -84,6 +85,7 @@ describe('ConversationCard', () => {
         hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}
@@ -101,6 +103,7 @@ describe('ConversationCard', () => {
         hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}

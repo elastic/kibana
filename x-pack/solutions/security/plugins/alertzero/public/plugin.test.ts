@@ -341,7 +341,9 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
 
   it('derives the space id from the base path so registration never waits on a round trip', async () => {
     // A non-default space is carried by the base path as `/s/<id>`, and that id scopes the
-    // threat-report lookup, so assert it reaches the ES|QL the action button is built from.
+    // SSE's alerts lookup (every alert ref is pinned to the *current* space's alerts alias,
+    // never its persisted `index` — see `buildSignificantSecurityEventActionButtons`), so
+    // assert it reaches the ES|QL the action button is built from.
     const locator = { getRedirectUrl: jest.fn().mockReturnValue('/app/discover#/?x=1') };
     const share = {
       url: { locators: { get: jest.fn().mockReturnValue(locator) } },
@@ -350,16 +352,39 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
     const { attachments } = startPlugin({ basePath: '/s/soc', share });
     await flushRegistration();
 
-    const [, threatDefinition] =
-      attachments.addAttachmentType.mock.calls.find(([type]) => type === 'security.threat') ?? [];
-    threatDefinition?.getActionButtons?.({
-      attachment: { id: 'a-1', type: 'security.threat', data: { report_id: 'report-7' } },
+    const [, sseDefinition] =
+      attachments.addAttachmentType.mock.calls.find(
+        ([type]) => type === 'security.significant_security_event'
+      ) ?? [];
+    sseDefinition?.getActionButtons?.({
+      attachment: {
+        id: 'a-1',
+        type: 'security.significant_security_event',
+        data: {
+          title: 'Suspicious lateral movement',
+          severity: 'high',
+          confidence: 0.8,
+          status: 'open',
+          source_watch: 'watch-1',
+          capability: 'lateral-movement-detector',
+          run_id: 'run-1',
+          report_id: 'ti-report-1',
+          security_knowledge_indicators: [],
+          entities: [],
+          timeline: [],
+          hypothesis_tested: 'hyp',
+          evidence_for: [],
+          evidence_against: [],
+          evaluation_record_ref: 'eval-1',
+          alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-other' }],
+        },
+      },
     } as never);
 
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
-          esql: expect.stringContaining('space_id IN ("soc", "*")'),
+          esql: expect.stringContaining('.alerts-security.alerts-soc'),
         }),
       })
     );

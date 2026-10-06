@@ -25,6 +25,7 @@ import { registerImpactStepDefinitions } from './impact/step_types';
 import { registerInvestigationStepDefinitions } from './investigations/step_types';
 import { registerWorkflowExecutionStepDefinitions } from './workflow_execution/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
+import { createSetImpactTool } from './impact/tools/set_impact_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
@@ -75,17 +76,28 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
+    // Steps and tools register during setup but only run once Kibana has
+    // started, so the authorization service is resolved per call rather than
+    // captured here — `security.authz` does not exist yet.
+    const impactPrivileges = createImpactPrivilegesChecker({
+      getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+      logger: this.logger,
+    });
+
+    agentBuilder.tools.register(
+      createSetImpactTool({
+        getImpactService: () => this.requireImpactService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: impactPrivileges,
+        logger: this.logger,
+      })
+    );
+
     registerImpactStepDefinitions({
       workflowsExtensions,
       getImpactService: () => this.requireImpactService(),
       resolveUser: (request) => this.requireUserResolver()(request),
-      // Steps register during setup but only run once Kibana has started, so
-      // the authorization service is resolved per call rather than captured
-      // here — `security.authz` does not exist yet.
-      privileges: createImpactPrivilegesChecker({
-        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
-        logger: this.logger,
-      }),
+      privileges: impactPrivileges,
       getAttachmentClient: (request) => this.getAttachmentClient(request),
       getConversationClient: (request) => this.getConversationClient(request),
     });
@@ -166,9 +178,19 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
+    const getImpactClient = createImpactClient({
+      getImpactService: () => this.requireImpactService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: createImpactPrivilegesChecker({
+        getSecurity: async () => plugins.security,
+        logger: this.logger,
+      }),
+    });
+
     if (this.escalationsEnabled) {
       this.escalationsService = new EscalationsService({
         logger: this.logger,
+        getImpactClient,
         getConversationClient: (request) =>
           plugins.agentBuilder.conversations.getScopedClient({ request }),
         getAttachmentsClient: (request) =>
@@ -181,15 +203,6 @@ export class AgenticInvestigationsPlugin
     this.assignmentsService = new AssignmentsService({
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
-    });
-
-    const getImpactClient = createImpactClient({
-      getImpactService: () => this.requireImpactService(),
-      getSpaceId: (request) => this.getSpaceId(request),
-      privileges: createImpactPrivilegesChecker({
-        getSecurity: async () => plugins.security,
-        logger: this.logger,
-      }),
     });
 
     return {

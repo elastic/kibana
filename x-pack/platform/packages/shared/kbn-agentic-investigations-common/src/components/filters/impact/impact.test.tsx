@@ -30,11 +30,7 @@ const pillLabels = () =>
 describe('Impact', () => {
   it('renders nothing when no investigation carries an entity', () => {
     renderWithKibanaRenderContext(
-      <Impact
-        investigations={[investigation()]}
-        entityFilter={null}
-        onEntityFilterChange={jest.fn()}
-      />
+      <Impact items={[investigation()]} entityFilter={null} onEntityFilterChange={jest.fn()} />
     );
 
     expect(screen.queryByRole('heading', { name: 'Impact' })).not.toBeInTheDocument();
@@ -43,7 +39,7 @@ describe('Impact', () => {
   it('renders deduped pills with counts, busiest entity first', () => {
     renderWithKibanaRenderContext(
       <Impact
-        investigations={[
+        items={[
           investigation({ entityIds: ['zeta'] }),
           investigation({ id: 'inv-2', entityIds: ['alpha', 'zeta'] }),
         ]}
@@ -63,7 +59,7 @@ describe('Impact', () => {
 
     const { unmount } = renderWithKibanaRenderContext(
       <Impact
-        investigations={investigations}
+        items={investigations}
         entityFilter={null}
         onEntityFilterChange={onEntityFilterChange}
       />
@@ -74,7 +70,7 @@ describe('Impact', () => {
 
     renderWithKibanaRenderContext(
       <Impact
-        investigations={investigations}
+        items={investigations}
         entityFilter="host-1"
         onEntityFilterChange={onEntityFilterChange}
       />

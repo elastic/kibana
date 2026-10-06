@@ -15,6 +15,31 @@ export {
 export { userSchema } from './user';
 export type { User } from './user';
 
+export {
+  EVIDENCE_CHART_TYPES,
+  EVIDENCE_CHART_X_AXIS_TYPES,
+  EVIDENCE_CHART_Y_AXIS_UNITS,
+  MAX_EVIDENCE_CHART_ANNOTATIONS,
+  MAX_EVIDENCE_CHART_LABEL_LENGTH,
+  MAX_EVIDENCE_CHART_POINTS,
+  MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_SHORT_TEXT_LENGTH,
+  MAX_EVIDENCE_TEXT_LENGTH,
+  evidenceChartSchema,
+  investigationEvidenceSchema,
+} from './evidence';
+export type {
+  EvidenceChart,
+  EvidenceChartAnnotation,
+  EvidenceChartSeries,
+  InvestigationEvidence,
+} from './evidence';
+
+export type {
+  InvestigationAttachmentDocument,
+  StoredInvestigationAttachment,
+} from './investigation_attachments';
+
 // Each entity this plugin owns keeps its own barrel; the umbrella re-exports
 // them so consumers have a single entry point per the plugin's public surface.
 export {
@@ -26,11 +51,14 @@ export {
   MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
   MAX_IMPACT_ID_LENGTH,
+  MAX_IMPACT_TOOL_ENTITIES,
+  SET_IMPACT_TOOL_ID,
   attachImpactRequestSchema,
   getImpactQuerySchema,
   impactEntitiesSchema,
   impactEntitySchema,
   impactSchema,
+  storedImpactEntitiesSchema,
 } from './impact';
 
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
