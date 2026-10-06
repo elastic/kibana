@@ -8,7 +8,8 @@
     "allowImportingTsExtensions": true
   },
   "include": [
-    "**/*.mts"
+    "**/*.mts",
+    "axios_legacy_consumers.js"
   ],
   "kbn_references": [
     "@kbn/babel-preset"

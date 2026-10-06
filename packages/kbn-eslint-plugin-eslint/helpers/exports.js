@@ -97,7 +97,7 @@ const getImportPath = (dir, specifier) => {
  *
  * @param {Parser} parser
  * @param {string} from
- * @param {ts.ExportDeclaration} exportFrom
+ * @param {string | undefined} specifier module specifier of the `export *` declaration
  * @param {ExportSet | undefined} exportSet only passed when called recursively
  * @param {boolean | undefined} assumeAllTypes only passed when called recursively
  * @returns {ExportSet | undefined}
@@ -105,14 +105,10 @@ const getImportPath = (dir, specifier) => {
 const getExportNamesDeep = (
   parser,
   from,
-  exportFrom,
+  specifier,
   exportSet = new ExportSet(),
   assumeAllTypes = false
 ) => {
-  const specifier = ts.isStringLiteral(exportFrom.moduleSpecifier)
-    ? exportFrom.moduleSpecifier.text
-    : undefined;
-
   if (!specifier) {
     return undefined;
   }
@@ -172,7 +168,9 @@ const getExportNamesDeep = (
         const childTypes = getExportNamesDeep(
           parser,
           sourceFile.fileName,
-          statement,
+          ts.isStringLiteral(statement.moduleSpecifier)
+            ? statement.moduleSpecifier.text
+            : undefined,
           exportSet,
           types
         );

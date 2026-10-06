@@ -92,7 +92,7 @@ Disallows the usage of constructor arguments into class property initializers.
 
 ## no_export_all
 
-Disables the usage of `export *`.
+Disables the usage of `export *`. The autofix lists the names exported by the re-exported module, which the rule reads by parsing that module (and any modules it re-exports with `export *`) with TypeScript.
 
 ## no_this_in_property_initializers
 
@@ -127,3 +127,25 @@ module.exports = {
 ## no_unsafe_console
 
 Disables the usage of kbn-security-hardening/console/unsafeConsole.
+
+## scout_no_raw_eui_selectors
+
+Disallows hand-written EUI class selectors in Scout locators for components that have an `@elastic/eui-test-helpers` Component Object. The restricted classes are read from the installed `@elastic/eui-test-helpers` package.
+
+## security_imports_restriction
+
+Restricts imports of the given modules, or of given names from them, with the same reports as `no-restricted-imports` `paths` entries. It is a separate rule so that local `no-restricted-imports` overrides cannot drop these restrictions. Kibana configures it in `.oxlint/security_imports.mts`.
+
+```javascript
+'@kbn/eslint/security_imports_restriction': [
+  'error',
+  {
+    name: 'lodash',
+    importNames: ['set', 'setWith', 'template'],
+    message: 'Please use @kbn/safer-lodash-set instead',
+  },
+  { name: 'lodash/set', message: 'Please use @kbn/safer-lodash-set/set instead' },
+],
+```
+
+Each entry requires `name` and `message`. With `importNames`, only those names are restricted, and `import * as` and `export *` of the module are reported too. Type-only imports and exports are checked like value imports, and `import x = require('module')` is checked as a default import.
