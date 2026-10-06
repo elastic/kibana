@@ -11,24 +11,11 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
-import { partition } from 'lodash';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import type { FlyoutFooterMenuCustomItem, FlyoutFooterMenuItem } from '@kbn/flyout-template';
 import type { EpisodeAction } from '../../actions/types';
+import { buildEpisodeMenuPanels } from './build_episode_menu_panels';
 import * as i18n from './translations';
-
-/**
- * Episode workflow actions, grouped together right below "View details". Every other
- * action (edit tags, open in Discover) is grouped after them.
- */
-const WORKFLOW_ACTION_IDS: ReadonlySet<string> = new Set([
-  'ALERTING_V2_ACK_EPISODE',
-  'ALERTING_V2_UNACK_EPISODE',
-  'ALERTING_V2_SNOOZE_EPISODE',
-  'ALERTING_V2_UNSNOOZE_EPISODE',
-  'ALERTING_V2_RESOLVE_EPISODE',
-  'ALERTING_V2_UNRESOLVE_EPISODE',
-  'ALERTING_V2_EDIT_EPISODE_ASSIGNEE',
-]);
 
 export interface EpisodeFooterActionMenuProps {
   /** DOM node to anchor the popover to (the footer primary action button). */
@@ -48,6 +35,9 @@ export interface EpisodeFooterActionMenuProps {
   onSuccess?: () => void;
 }
 
+const isCustomItem = (item: FlyoutFooterMenuItem): item is FlyoutFooterMenuCustomItem =>
+  typeof item.renderItem === 'function';
+
 /** Primary flyout footer control listing every action available for an episode. */
 export const EpisodeFooterActionMenu = ({
   anchor,
@@ -58,76 +48,30 @@ export const EpisodeFooterActionMenu = ({
   viewDetailsHref,
   onSuccess,
 }: EpisodeFooterActionMenuProps) => {
-  const [workflowActions, otherActions] = partition(
+  const panels: EuiContextMenuPanelDescriptor[] = buildEpisodeMenuPanels({
     actions,
-    (action) => WORKFLOW_ACTION_IDS.has(action.id) || action.isWorkflowAction === true
-  );
-
-  const toMenuItem = (action: EpisodeAction): EuiContextMenuPanelItemDescriptor => {
-    const compatible = action.isCompatible({ episodes });
-    if (!compatible) {
+    episodes,
+    viewDetailsHref,
+    onSuccess,
+  }).map((panel) => ({
+    ...panel,
+    items: panel.items.map((item): EuiContextMenuPanelItemDescriptor => {
+      if (isCustomItem(item)) {
+        return { key: item.key, renderItem: () => item.renderItem({ closeMenu: onClose }) };
+      }
+      const { onClick } = item as { onClick?: (event: React.MouseEvent) => void };
+      if (!onClick) {
+        return item;
+      }
       return {
-        name: action.displayName,
-        icon: action.iconType,
-        disabled: true,
-        toolTipContent: action.disabledTooltip,
-        'data-test-subj': `alertingV2EpisodeTakeAction-${action.id}`,
-      };
-    }
-
-    // An action that renders its own entry owns the click too, so it can anchor a
-    // nested popover to it. A plain descriptor item closes the menu on click,
-    // which would unmount the anchor before the popover could show.
-    if (action.renderMenuItem) {
-      return {
-        key: action.id,
-        renderItem: () =>
-          action.renderMenuItem!({
-            episodes,
-            onSuccess,
-            closeMenu: onClose,
-            surface: 'details_flyout',
-          }),
-      };
-    }
-
-    return {
-      name: action.displayName,
-      icon: action.iconType,
-      'data-test-subj': `alertingV2EpisodeTakeAction-${action.id}`,
-      onClick: () => {
-        onClose();
-        action.execute({ episodes, onSuccess });
-      },
-    };
-  };
-
-  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = viewDetailsHref
-    ? [
-        {
-          name: i18n.FLYOUT_VIEW_DETAILS,
-          icon: 'eye',
-          href: viewDetailsHref,
-          'data-test-subj': 'alertingV2EpisodeTakeAction-viewDetails',
+        ...item,
+        onClick: (event: React.MouseEvent) => {
+          onClose();
+          onClick(event);
         },
-      ]
-    : [];
-
-  const nonEmptyGroups = [
-    viewDetailsGroup,
-    workflowActions.map(toMenuItem),
-    otherActions.map(toMenuItem),
-  ].filter((group) => group.length > 0);
-
-  const items = nonEmptyGroups.reduce<EuiContextMenuPanelItemDescriptor[]>(
-    (acc, group, index) =>
-      index === 0
-        ? [...acc, ...group]
-        : [...acc, { isSeparator: true as const, key: `separator-${index}` }, ...group],
-    []
-  );
-
-  const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items }];
+      };
+    }),
+  }));
 
   return (
     <EuiWrappingPopover
