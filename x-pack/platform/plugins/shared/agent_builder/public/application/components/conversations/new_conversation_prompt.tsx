@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, type UseEuiTheme } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationInput } from './conversation_input/conversation_input';
@@ -18,6 +18,7 @@ import { useConversationContext } from '../../context/conversation/conversation_
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceSolution } from '../../hooks/use_space_solution';
 import { useTypewriterLoop } from './use_typewriter_loop';
+import { useNowrapFitsContainer } from './use_nowrap_fits_container';
 import { getCapabilityMessagesForSolution } from './capability_messages';
 
 const greetingPrefix = i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt', {
@@ -33,11 +34,38 @@ const caretBlink = keyframes`
   }
 `;
 
+const greetingHeadingStyles = css`
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 0.35em;
+  row-gap: 0;
+  text-align: center;
+`;
+
+const greetingPrefixStyles = css`
+  max-width: 100%;
+`;
+
+const nowrapSizerStyles = css`
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+`;
+
+const nowrapSizerLineStyles = css`
+  display: block;
+  white-space: nowrap;
+`;
+
 const reservedWidthStyles = css`
   grid-area: 1 / 1;
   visibility: hidden;
   display: inline-grid;
-  justify-items: start;
+  justify-items: inherit;
+  width: 100%;
 `;
 
 const reservedMessageStyles = css`
@@ -50,12 +78,26 @@ const typedOverlayStyles = css`
   white-space: nowrap;
 `;
 
+const wrappingMessageStyles = css`
+  white-space: normal;
+  overflow-wrap: break-word;
+`;
+
 const typedTextStyles = ({ euiTheme }: UseEuiTheme) => css`
   color: ${euiTheme.colors.primary};
   display: inline-grid;
   justify-items: start;
   text-align: left;
   vertical-align: baseline;
+  min-width: 0;
+  max-width: 100%;
+`;
+
+const typedTextWrapStyles = css`
+  justify-items: center;
+  text-align: center;
+  flex: 1 1 100%;
+  width: 100%;
 `;
 
 const caretStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -84,23 +126,30 @@ const inputPaddingStyles = ({ euiTheme }: UseEuiTheme) => css`
   padding-bottom: ${euiTheme.size.base};
 `;
 
-const TypedCapability: React.FC<{ messages: readonly string[]; enabled?: boolean }> = ({
-  messages,
-  enabled = true,
-}) => {
+const TypedCapability: React.FC<{
+  messages: readonly string[];
+  enabled?: boolean;
+  wrapAndCenter?: boolean;
+}> = ({ messages, enabled = true, wrapAndCenter = false }) => {
   const typedText = useTypewriterLoop({ messages, enabled });
+  const wrappingStyles = wrapAndCenter ? wrappingMessageStyles : undefined;
 
   return (
-    <span css={typedTextStyles} aria-hidden="true" data-test-subj="agentBuilderWelcomeTypedText">
+    <span
+      css={[typedTextStyles, wrapAndCenter && typedTextWrapStyles]}
+      aria-hidden="true"
+      data-test-subj="agentBuilderWelcomeTypedText"
+      data-wrap-and-center={wrapAndCenter ? 'true' : undefined}
+    >
       <span css={reservedWidthStyles}>
         {messages.map((message) => (
-          <span key={message} css={reservedMessageStyles}>
+          <span key={message} css={[reservedMessageStyles, wrappingStyles]}>
             {message}
             <span css={caretStyles} />
           </span>
         ))}
       </span>
-      <span css={typedOverlayStyles}>
+      <span css={[typedOverlayStyles, wrappingStyles]}>
         {typedText}
         <span css={caretStyles} />
       </span>
@@ -116,11 +165,27 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const spaceSolution = useSpaceSolution(plugins.spaces);
   const capabilityMessages =
     spaceSolution !== undefined ? getCapabilityMessagesForSolution(spaceSolution) : [];
+  const [headingEl, setHeadingEl] = useState<HTMLHeadingElement | null>(null);
+  const [sizerEl, setSizerEl] = useState<HTMLSpanElement | null>(null);
+  const fitsOnOneLine = useNowrapFitsContainer(headingEl, sizerEl);
+  const wrapAndCenter = !fitsOnOneLine;
 
   const greeting = greetingMessage ?? (
     <>
-      {greetingPrefix}{' '}
-      {spaceSolution !== undefined && <TypedCapability messages={capabilityMessages} />}
+      {capabilityMessages.length > 0 && (
+        <span ref={setSizerEl} css={nowrapSizerStyles} aria-hidden="true">
+          {capabilityMessages.map((message) => (
+            <span key={message} css={nowrapSizerLineStyles}>
+              {greetingPrefix} {message}
+              <span css={caretStyles} />
+            </span>
+          ))}
+        </span>
+      )}
+      <span css={greetingPrefixStyles}>{greetingPrefix}</span>
+      {spaceSolution !== undefined && (
+        <TypedCapability messages={capabilityMessages} wrapAndCenter={wrapAndCenter} />
+      )}
     </>
   );
 
@@ -136,7 +201,9 @@ export const NewConversationPrompt: React.FC<{}> = () => {
     >
       <EuiFlexItem grow={isEmbeddedContext} css={centerFlexItemStyles}>
         <EuiTitle size="m">
-          <h2>{greeting}</h2>
+          <h2 ref={setHeadingEl} css={greetingHeadingStyles}>
+            {greeting}
+          </h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem
