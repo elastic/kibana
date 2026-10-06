@@ -46,7 +46,7 @@ export async function replaySignificantEventsSnapshot(
 ) {
   log.debug(`Replaying significant events data from snapshot: ${snapshotName}`);
 
-  await cleanSignificantEventsDataStreams(esClient, log);
+  await cleanSignificantEventsDataStreams(esClient, log, { includeRuleEvents: true });
   await deleteStaleSnapshotLoaderIndices(esClient, log);
   await ensureLogsIndexTemplate(esClient, log);
 
@@ -85,7 +85,7 @@ async function deleteStaleSnapshotLoaderIndices(esClient: Client, log: ToolingLo
 export interface CleanSignificantEventsDataStreamsOptions {
   /** When false, only clears Significant Events docs and leaves the replayed logs stream intact. */
   includeLogs?: boolean;
-  /** When true, also clears Significant Events series from `.rule-events` (read path behind `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`). */
+  /** When true, also clears Significant Events series from `.rule-events`. Defaults to false. */
   includeRuleEvents?: boolean;
 }
 
