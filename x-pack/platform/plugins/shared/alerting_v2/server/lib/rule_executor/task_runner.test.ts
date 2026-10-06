@@ -297,7 +297,7 @@ describe('RuleExecutorTaskRunner', () => {
       );
     });
 
-    it('reports a timeout status and cancelled_timeout for cancellation errors', async () => {
+    it('reports a timeout status and task_manager_cancelled for cancellation errors', async () => {
       pipeline.execute.mockRejectedValue(
         tagFailedStep(new RuleExecutionCancellationError(), 'execute_rule_query')
       );
@@ -307,7 +307,7 @@ describe('RuleExecutorTaskRunner', () => {
       expect(setCustomTaskRunEventFields).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'timeout',
-          reason: RULE_EXECUTION_REASONS.CANCELLED_TIMEOUT,
+          reason: RULE_EXECUTION_REASONS.TASK_MANAGER_CANCELLED,
         })
       );
     });

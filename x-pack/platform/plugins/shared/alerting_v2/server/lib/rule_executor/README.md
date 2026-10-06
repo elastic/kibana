@@ -338,7 +338,7 @@ The codes are deliberately not step names or halt reasons. `STEP_EXECUTION_REASO
 | `no_data_failed` | The data-presence query threw. |
 | `store_failed` | `store_alert_events` threw. |
 | `director_failed` | `director` threw. |
-| `cancelled_timeout` | The task timeout fired, whatever was in flight at the time. |
+| `task_manager_cancelled` | Task Manager aborted the run, whatever was in flight at the time. The abort signal does not say why, so this covers both an expired task timeout and a claim conflict. |
 | `unexpected_error` | A step that owns no code of its own threw. |
 
 For a run that threw, a cancellation outranks everything, then a code tagged at the failing operation via `tagFailureReason`, then the code owned by the step. An error reaching the task runner with no step tag reports no reason at all.

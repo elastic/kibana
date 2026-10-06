@@ -34,16 +34,16 @@ describe('resolveReasonForError', () => {
     expect(resolveReasonForError('boom')).toBeUndefined();
   });
 
-  it('maps a cancellation to cancelled_timeout', () => {
+  it('maps a cancellation to task_manager_cancelled', () => {
     expect(resolveReasonForError(new RuleExecutionCancellationError())).toBe(
-      RULE_EXECUTION_REASONS.CANCELLED_TIMEOUT
+      RULE_EXECUTION_REASONS.TASK_MANAGER_CANCELLED
     );
   });
 
-  it('prefers cancelled_timeout over the step that was in flight', () => {
+  it('prefers task_manager_cancelled over the step that was in flight', () => {
     const error = tagFailedStep(new RuleExecutionCancellationError(), 'execute_rule_query');
 
-    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_REASONS.CANCELLED_TIMEOUT);
+    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_REASONS.TASK_MANAGER_CANCELLED);
   });
 
   it('prefers a tagged reason over the code owned by the step', () => {

@@ -120,7 +120,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     } catch (error) {
       this.publishExecutionFailed(rawInput, pipelineState.logger, error);
       throw tagRunReport(error, {
-        ruleVersion: pipelineState.rule?.metadata.version,
+        ruleVersion: pipelineState.rule?.version,
         counters: collector.finalize().counters,
       });
     } finally {

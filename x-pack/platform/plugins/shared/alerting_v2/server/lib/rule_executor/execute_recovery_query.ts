@@ -84,7 +84,10 @@ export const executeRecoveryQuery = async ({
     tagFailureReason(error, RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED);
 
     if (isMaximumResponseSizeExceededError(error)) {
-      const sizeError = toQueryResponseSizeExceededError(error, 'recovery', maxResponseSize);
+      const sizeError = tagFailureReason(
+        toQueryResponseSizeExceededError(error, 'recovery', maxResponseSize),
+        RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED
+      );
       logger.warn({
         message: `Recovery query: ${sizeError.message}`,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,

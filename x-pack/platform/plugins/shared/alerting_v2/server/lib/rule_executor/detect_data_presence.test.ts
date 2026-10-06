@@ -204,6 +204,24 @@ describe('detectDataPresence', () => {
     expect((error as QueryResponseSizeExceededError).queryType).toBe('data_presence');
   });
 
+  it('tags content-length-exceeded errors as no_data_failed', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await detectDataPresence({
+      queryService,
+      rule: buildRule(),
+      input: createRuleExecutionInput(),
+      logger: loggerService,
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
+    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_REASONS.NO_DATA_FAILED);
+  });
+
   it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {
     const { queryService, scopedEsClient } = setup();
 

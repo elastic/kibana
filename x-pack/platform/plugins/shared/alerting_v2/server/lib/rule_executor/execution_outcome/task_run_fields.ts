@@ -71,7 +71,7 @@ const resolveOutcome = (params: TaskRunEventFieldsParams): RunOutcome => {
     return {
       status: resolveStatusForResult(result),
       reason: result.haltReason ? HALT_EXECUTION_REASONS[result.haltReason] : undefined,
-      ruleVersion: result.finalState.rule?.metadata.version,
+      ruleVersion: result.finalState.rule?.version,
       counters: result.metrics.counters,
     };
   }

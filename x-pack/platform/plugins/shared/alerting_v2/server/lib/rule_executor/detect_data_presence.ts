@@ -74,7 +74,10 @@ export const detectDataPresence = async ({
     tagFailureReason(error, RULE_EXECUTION_REASONS.NO_DATA_FAILED);
 
     if (isMaximumResponseSizeExceededError(error)) {
-      const sizeError = toQueryResponseSizeExceededError(error, 'data_presence', maxResponseSize);
+      const sizeError = tagFailureReason(
+        toQueryResponseSizeExceededError(error, 'data_presence', maxResponseSize),
+        RULE_EXECUTION_REASONS.NO_DATA_FAILED
+      );
       logger.warn({
         message: `Data-presence query: ${sizeError.message}`,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,

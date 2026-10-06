@@ -35,8 +35,9 @@ export const RULE_EXECUTION_REASONS = {
   STORE_FAILED: 'store_failed',
   /** Episode-transition computation threw. */
   DIRECTOR_FAILED: 'director_failed',
-  /** The task timeout fired, whatever was in flight at the time. */
-  CANCELLED_TIMEOUT: 'cancelled_timeout',
+  /**
+   * Task Manager aborted the run, whatever was in flight at the time. */
+  TASK_MANAGER_CANCELLED: 'task_manager_cancelled',
   /** A step that owns no code of its own threw. */
   UNEXPECTED_ERROR: 'unexpected_error',
 } as const;

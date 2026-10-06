@@ -59,7 +59,7 @@ describe('buildTaskRunEventFields', () => {
     it('reports the rule version once final state carries it', () => {
       const finalState = createRulePipelineState({
         // @ts-expect-error: only the version is read
-        rule: { metadata: { version: 7 } },
+        rule: { version: 7 },
       });
 
       expect(buildTaskRunEventFields({ input, result: createResult({ finalState }) })).toEqual(
@@ -190,7 +190,7 @@ describe('buildTaskRunEventFields', () => {
       expect(buildTaskRunEventFields({ input, error })).toEqual(
         expect.objectContaining({
           status: 'timeout',
-          reason: RULE_EXECUTION_REASONS.CANCELLED_TIMEOUT,
+          reason: RULE_EXECUTION_REASONS.TASK_MANAGER_CANCELLED,
         })
       );
     });

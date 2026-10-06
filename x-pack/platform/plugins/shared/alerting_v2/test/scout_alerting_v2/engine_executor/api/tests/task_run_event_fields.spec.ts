@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-/**
- * We are excluding the @kbn/eslint/scout_require_api_client_in_api_test
- * eslint rule for this file because we do not test APIs but what the rule
- * executor reports about its own runs. The observable surface is the
- * event-log document, not an HTTP response.
- */
-
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
-
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { ReportedRun, ReportedRunStatus } from '../../../common/services';
@@ -43,9 +35,15 @@ const reportedStatus =
  * `kibana.task.data`, which is how the execution-history read side learns the
  * fine-grained outcome of a run. ECS `event.outcome` on the same document
  * only carries `success`/`failure`.
+ *
+ * Each `apiTest` below opts out of
+ * `@kbn/eslint/scout_require_api_client_in_api_test` individually because we
+ * do not test APIs but what the rule executor reports about its own runs. The
+ * observable surface is the event-log document, not an HTTP response.
  */
 apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.classic }, () => {
-  const SOURCE_INDEX = 'test-alerting-v2-task-run-fields-source';
+  const SOURCE_INDEX = `test-alerting-v2-task-run-fields-source-${randomUUID()}`;
+  const createdRuleIds: string[] = [];
 
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.sourceIndex.create({
@@ -58,11 +56,14 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-    await apiServices.alertingV2.ruleEvents.cleanUp();
+    for (const ruleId of createdRuleIds) {
+      await apiServices.alertingV2.rules.delete(ruleId);
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
+    }
     await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
   });
 
+  // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
   apiTest(
     'reports success, rule identity, and the counters a breaching run produced',
     async ({ apiServices }) => {
@@ -77,13 +78,12 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
         buildCreateRuleData({
           metadata: { name: 'task-run-fields-success' },
           query: {
-            format: 'standalone',
-            breach: {
-              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reports-success" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reports-success" | STATS count = COUNT(*) BY host.name`,
+            breach: { segment: 'WHERE count >= 1' },
           },
         })
       );
+      createdRuleIds.push(rule.id);
 
       // Counters are per-run, and only the run that first sees a group opens
       // an episode for it, so select the earliest run that produced events
@@ -100,7 +100,7 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
 
       expect(run['rule.id']).toBe(rule.id);
       expect(run['rule.spaceId']).toBe('default');
-      expect(run['rule.version']).toBe(rule.metadata.version);
+      expect(run['rule.version']).toBe(rule.version);
 
       expect(run['metrics.rowsReturnedByQuery']).toBeGreaterThanOrEqual(1);
       expect(run['metrics.newEpisodesGenerated']).toBeGreaterThanOrEqual(1);
@@ -116,6 +116,7 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
     }
   );
 
+  // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
   apiTest(
     'reports every counter as zero on a run that matches nothing',
     async ({ apiServices }) => {
@@ -123,13 +124,12 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
         buildCreateRuleData({
           metadata: { name: 'task-run-fields-quiet' },
           query: {
-            format: 'standalone',
-            breach: {
-              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-never-indexed" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-never-indexed" | STATS count = COUNT(*) BY host.name`,
+            breach: { segment: 'WHERE count >= 1' },
           },
         })
       );
+      createdRuleIds.push(rule.id);
 
       const run = await apiServices.alertingV2.ruleExecutions.waitForReportedRun({
         ruleId: rule.id,
@@ -141,6 +141,7 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
     }
   );
 
+  // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
   apiTest(
     'reports failed with the code owned by the step that threw, and still reports counters',
     async ({ apiServices }) => {
@@ -151,14 +152,12 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
         buildCreateRuleData({
           metadata: { name: 'task-run-fields-failed' },
           query: {
-            format: 'standalone',
-            breach: {
-              query:
-                'FROM nonexistent-index-task-run-fields-zzz | STATS count = COUNT(*) | WHERE count >= 1',
-            },
+            base: 'FROM nonexistent-index-task-run-fields-zzz | STATS count = COUNT(*)',
+            breach: { segment: 'WHERE count >= 1' },
           },
         })
       );
+      createdRuleIds.push(rule.id);
 
       const run = await apiServices.alertingV2.ruleExecutions.waitForReportedRun({
         ruleId: rule.id,
@@ -178,6 +177,7 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
     }
   );
 
+  // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
   apiTest(
     'reports skipped with the halt reason when the rule is disabled',
     async ({ apiServices }) => {
@@ -185,13 +185,12 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
         buildCreateRuleData({
           metadata: { name: 'task-run-fields-skipped' },
           query: {
-            format: 'standalone',
-            breach: {
-              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skipped" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skipped" | STATS count = COUNT(*) BY host.name`,
+            breach: { segment: 'WHERE count >= 1' },
           },
         })
       );
+      createdRuleIds.push(rule.id);
 
       // Wait for one normal run so the task is known to be scheduled and
       // ticking before the rule is taken away from it.
@@ -213,7 +212,7 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
       expect(run['rule.id']).toBe(rule.id);
 
       // `validate_rule` halts after `fetch_rule`, so the version is known.
-      expect(run['rule.version']).toBe(rule.metadata.version);
+      expect(run['rule.version']).toBe(rule.version);
 
       // Nothing was evaluated, so every counter is zero.
       expect(run).toMatchObject(ZEROED_COUNTERS);

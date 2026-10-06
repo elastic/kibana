@@ -196,6 +196,30 @@ describe('executeRecoveryQuery', () => {
     expect((error as QueryResponseSizeExceededError).queryType).toBe('recovery');
   });
 
+  it('tags content-length-exceeded errors as recovery_query_failed', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await executeRecoveryQuery({
+      queryService,
+      logger: loggerService,
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
+      effectiveQuery: 'FROM logs-*',
+      input: createRuleExecutionInput(),
+      activeGroupHashes: toActive(['hash-1']),
+      breachedGroupHashes: new Set(),
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
+    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED);
+  });
+
   it('does not mark ResponseError(503) recovery query errors as TaskErrorSource.USER', async () => {
     const { queryService, scopedEsClient } = setup();
 
@@ -252,7 +276,10 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-* | WHERE invalid syntax',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),

@@ -23,8 +23,9 @@ interface ReasonTaggedError extends Error {
  * Reason published for a run that ended by throwing: the code owned by the
  * step that raised the error, unless something more specific applies.
  *
- * A timeout outranks whatever was in flight when the signal fired, so the
- * cancellation check comes first. A {@link tagFailureReason} tag then wins over
+ * A Task Manager cancellation (an expired timeout or a claim conflict) outranks
+ * whatever was in flight when the signal fired, so the cancellation check comes
+ * first. A {@link tagFailureReason} tag then wins over
  * the step, being the more precise of the two. Errors that reach the task
  * runner untagged report no reason.
  *
@@ -34,7 +35,7 @@ interface ReasonTaggedError extends Error {
  */
 export const resolveReasonForError = (error: unknown): RuleExecutionReason | undefined => {
   if (isRuleExecutionCancellationError(error)) {
-    return RULE_EXECUTION_REASONS.CANCELLED_TIMEOUT;
+    return RULE_EXECUTION_REASONS.TASK_MANAGER_CANCELLED;
   }
 
   if (error instanceof Error && (error as ReasonTaggedError)[failureReason] !== undefined) {

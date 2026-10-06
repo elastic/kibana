@@ -431,7 +431,7 @@ describe('RuleExecutionPipeline', () => {
 
       const thrown = await pipeline.execute(createRuleExecutionPipelineInput()).catch((e) => e);
 
-      expect(getRunReport(thrown)?.ruleVersion).toBe(rule.metadata.version);
+      expect(getRunReport(thrown)?.ruleVersion).toBe(rule.version);
     });
 
     it('omits the rule version when the run fails before its first full emission', async () => {
