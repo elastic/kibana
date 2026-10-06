@@ -30,7 +30,7 @@ export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
           data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
           disabled={disabled}
           fill
-          iconType="sparkles"
+          iconType="listCheck"
           isLoading={isGenerateLoading}
           onClick={() => {
             generateConfiguration({ connectorId });
