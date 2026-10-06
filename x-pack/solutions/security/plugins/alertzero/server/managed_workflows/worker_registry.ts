@@ -14,7 +14,11 @@ import {
   getManagedWorkflowDefinition,
   type ManagedWorkflowTemplateValues,
 } from '@kbn/workflows/managed';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type {
+  ManagedWorkflowsApi,
+  PluginScopedManagedWorkflowsApi,
+} from '@kbn/workflows/server/types';
+import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
 import { workerSettingsById, type WorkerSettingsRegistration } from './workers';
 
 export type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
@@ -32,6 +36,23 @@ interface RegisteredWorkerInstallOptions {
   values?: ManagedWorkflowTemplateValues;
   expectedDocumentVersion?: number | null;
 }
+
+/**
+ * User saves go through the request-scoped client so a `run_as` change can bind to the caller.
+ * The registry id is the template the values were built from, same as {@link installRegisteredWorker}.
+ */
+export const installRegisteredWorkerForRequest = async (
+  managedWorkflows: ManagedWorkflowsApi,
+  registration: WorkerRegistration,
+  options: RegisteredWorkerInstallOptions
+): Promise<void> => {
+  const install = managedWorkflows.install as (
+    pluginId: string,
+    id: RegisteredWorkerId,
+    installOptions: RegisteredWorkerInstallOptions
+  ) => Promise<void>;
+  await install(ALERTZERO_MANAGED_WORKFLOW_OWNER_ID, registration.id, options);
+};
 
 /** The runtime registry guarantees that template values came from the definition with this id. */
 export const installRegisteredWorker = async (

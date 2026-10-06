@@ -8,36 +8,38 @@
 import { firstValueFrom } from 'rxjs';
 import type { FeatureFlagsStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { resolveNightshiftModel } from '@kbn/nightshift-ai';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-export const isInvestigationAvailable = async ({
-  request,
-  featureFlags,
-  agentBuilder,
-  logger,
-  searchInferenceEndpoints,
-  spaceId,
-  spaces,
-  workflowsExtensions,
-  workflowsManagement,
-}: {
+export interface InvestigationInfrastructureAvailabilityDependencies {
   request: KibanaRequest;
   featureFlags: FeatureFlagsStart;
   agentBuilder?: AgentBuilderPluginStart;
+  inference?: InferenceServerStart;
   logger: Logger;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   spaceId?: string;
   spaces?: SpacesPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
-}): Promise<boolean> => {
+}
+
+export const isInvestigationInfrastructureAvailable = async ({
+  request,
+  featureFlags,
+  agentBuilder,
+  inference,
+  logger,
+  spaceId,
+  spaces,
+  workflowsExtensions,
+  workflowsManagement,
+}: InvestigationInfrastructureAvailabilityDependencies): Promise<boolean> => {
   const isFlagEnabled = await firstValueFrom(
     featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false)
   );
@@ -45,26 +47,53 @@ export const isInvestigationAvailable = async ({
     return false;
   }
 
-  if (!agentBuilder || !searchInferenceEndpoints || !workflowsExtensions || !workflowsManagement) {
+  if (!agentBuilder || !inference || !workflowsExtensions || !workflowsManagement) {
     return false;
   }
 
   try {
     const resolvedSpaceId =
       spaceId ?? spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-    const [workflow, { endpoints }] = await Promise.all([
-      workflowsManagement.management
-        .getClient(request)
-        .getWorkflow(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, resolvedSpaceId),
-      searchInferenceEndpoints.endpoints.getForFeature(
-        SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-        request
-      ),
-    ]);
+    const workflow = await workflowsManagement.management
+      .getClient(request)
+      .getWorkflow(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, resolvedSpaceId);
 
-    return Boolean(workflow?.definition && endpoints.length > 0);
+    return Boolean(workflow?.definition);
   } catch (error) {
-    logger.warn(`Failed to check investigation availability: ${String(error)}`);
+    logger.warn(`Failed to check investigation infrastructure availability: ${String(error)}`);
+    return false;
+  }
+};
+
+export const isInvestigationRunAvailable = async ({
+  connectorId,
+  ...dependencies
+}: InvestigationInfrastructureAvailabilityDependencies & {
+  connectorId?: string;
+}): Promise<boolean> => {
+  if (!(await isInvestigationInfrastructureAvailable(dependencies))) {
+    return false;
+  }
+
+  const { inference, request, logger } = dependencies;
+  if (!inference) {
+    return false;
+  }
+
+  try {
+    await resolveNightshiftModel({
+      step: 'investigation',
+      requestedId: connectorId,
+      validateConnector: async (id) => ({
+        connectorId: (await inference.getConnectorById(id, request)).connectorId,
+      }),
+      // Availability reports whether the model resolves. The restriction is checked on start so
+      // a blocked model remains visible and produces the setting-specific error.
+      getModelRestriction: async () => ({ defaultOnly: false }),
+    });
+    return true;
+  } catch (error) {
+    logger.warn(`Failed to check investigation model availability: ${String(error)}`);
     return false;
   }
 };

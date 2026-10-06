@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
+import type { BuildFlavor } from '@kbn/config';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
@@ -22,9 +24,12 @@ const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';
 
 interface TestOptions {
+  buildFlavor?: BuildFlavor;
   name?: string;
   licenseCheckResult?: LicenseCheck;
   apiResponse?: () => unknown;
+  queryResponses?: Array<() => estypes.SecurityQueryRoleResponse>;
+  queryRequests?: estypes.SecurityQueryRoleRequest[];
   asserts: { statusCode: number; result?: Record<string, any> };
   query?: Record<string, unknown>;
 }
@@ -145,10 +150,19 @@ const features: KibanaFeature[] = [
 describe('GET all roles', () => {
   const getRolesTest = (
     description: string,
-    { licenseCheckResult = { state: 'valid' }, apiResponse, asserts, query }: TestOptions
+    {
+      licenseCheckResult = { state: 'valid' },
+      apiResponse,
+      queryResponses,
+      queryRequests,
+      asserts,
+      query,
+      buildFlavor = 'traditional',
+    }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      mockRouteDefinitionParams.buildFlavor = buildFlavor;
       const versionedRouterMock = mockRouteDefinitionParams.router
         .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
@@ -170,6 +184,11 @@ describe('GET all roles', () => {
           (() => ({ body: apiResponse() })) as any
         );
       }
+
+      const { queryRole, getRole } = mockCoreContext.elasticsearch.client.asCurrentUser.security;
+      queryResponses?.forEach((queryResponse) => {
+        queryRole.mockResponseImplementationOnce(() => ({ body: queryResponse() }));
+      });
 
       defineGetAllRolesRoutes(mockRouteDefinitionParams);
       const handler = versionedRouterMock.getRoute('get', '/api/security/role').versions[
@@ -193,9 +212,135 @@ describe('GET all roles', () => {
           mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
         ).toHaveBeenCalled();
       }
+      if (queryResponses) {
+        expect(getRole).not.toHaveBeenCalled();
+        expect(queryRole.mock.calls.map(([params]) => params)).toEqual(
+          queryRequests ?? [{ size: 1000, sort: [{ name: { order: 'asc' } }] }]
+        );
+      } else {
+        expect(queryRole).not.toHaveBeenCalled();
+      }
       expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
+
+  describe('built-in role visibility', () => {
+    for (const buildFlavor of ['traditional', 'serverless'] as const) {
+      for (const includeReservedRoles of [undefined, false, true]) {
+        const customRole = {
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          metadata: {},
+        };
+        const builtinRole = { ...customRole, metadata: { _reserved: true } };
+        const returnedRole = {
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [],
+          _transform_error: [],
+          _unrecognized_applications: [],
+        };
+        getRolesTest(`${buildFlavor} with includeReservedRoles=${includeReservedRoles}`, {
+          buildFlavor,
+          query: includeReservedRoles === undefined ? {} : { includeReservedRoles },
+          ...(buildFlavor === 'serverless' && includeReservedRoles
+            ? {
+                queryResponses: [
+                  () => ({
+                    total: 2,
+                    count: 2,
+                    roles: [
+                      { name: 'custom', ...customRole },
+                      { name: 'viewer', ...builtinRole },
+                    ],
+                  }),
+                ],
+              }
+            : { apiResponse: () => ({ custom: customRole, viewer: builtinRole }) }),
+          asserts: {
+            statusCode: 200,
+            result: [
+              { ...returnedRole, name: 'custom', metadata: {} },
+              ...(buildFlavor === 'traditional' || includeReservedRoles
+                ? [{ ...returnedRole, name: 'viewer', metadata: { _reserved: true } }]
+                : []),
+            ],
+          },
+        });
+      }
+    }
+  });
+
+  describe('serverless role query pagination', () => {
+    const customRole = {
+      name: 'custom',
+      cluster: [],
+      indices: [],
+      applications: [],
+      run_as: [],
+      metadata: {},
+      _sort: ['custom'],
+    };
+    const builtinRole = { ...customRole, name: 'viewer', metadata: { _reserved: true } };
+    const firstPage = () => ({ total: 2, count: 1, roles: [customRole] });
+    const queryRequests = [
+      { size: 1000, sort: [{ name: { order: 'asc' as const } }] },
+      { size: 1000, sort: [{ name: { order: 'asc' as const } }], search_after: ['custom'] },
+    ];
+    const returnedRole = {
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [],
+      _transform_error: [],
+      _unrecognized_applications: [],
+    };
+
+    getRolesTest('accepts roles with omitted optional privilege fields', {
+      buildFlavor: 'serverless',
+      query: { includeReservedRoles: true },
+      queryResponses: [() => ({ total: 1, count: 1, roles: [{ name: 'custom' }] })],
+      asserts: { statusCode: 200, result: [{ ...returnedRole, name: 'custom' }] },
+    });
+
+    getRolesTest('includes roles from subsequent pages', {
+      buildFlavor: 'serverless',
+      query: { includeReservedRoles: true },
+      queryResponses: [firstPage, () => ({ total: 2, count: 1, roles: [builtinRole] })],
+      queryRequests,
+      asserts: {
+        statusCode: 200,
+        result: [
+          { ...returnedRole, name: 'custom', metadata: {} },
+          { ...returnedRole, name: 'viewer', metadata: { _reserved: true } },
+        ],
+      },
+    });
+
+    getRolesTest('stops if the next page is empty after roles are deleted', {
+      buildFlavor: 'serverless',
+      query: { includeReservedRoles: true },
+      queryResponses: [firstPage, () => ({ total: 2, count: 0, roles: [] })],
+      queryRequests,
+      asserts: {
+        statusCode: 200,
+        result: [{ ...returnedRole, name: 'custom', metadata: {} }],
+      },
+    });
+
+    const error = Boom.forbidden('Cannot query roles');
+    getRolesTest('propagates a subsequent page failure instead of returning partial roles', {
+      buildFlavor: 'serverless',
+      query: { includeReservedRoles: true },
+      queryResponses: [
+        firstPage,
+        () => {
+          throw error;
+        },
+      ],
+      queryRequests,
+      asserts: { statusCode: 403, result: error },
+    });
+  });
 
   describe('failure', () => {
     getRolesTest('returns result of license checker', {

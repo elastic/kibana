@@ -36,7 +36,9 @@ import {
   isLifecycleConfigAllowedForKind,
   isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
+  isRoutingTagsAllowedForKind,
   REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
@@ -151,7 +153,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data` and `state_transition` settings."
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data`,  `state_transition`, and `routing_tags`."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
@@ -165,11 +167,23 @@ export const setQueryOperationSchema = z
   .object({
     operation: z.literal('set_query'),
     query: querySchema,
-    recovery: recoverySchema.optional(),
-    no_data: noDataSchema.optional(),
+  })
+  .describe('Use `set_query` to define the ES|QL condition that should fire the rule.');
+
+export const setRecoveryOperationSchema = z
+  .object({
+    operation: z.literal('set_recovery'),
+    recovery: recoverySchema,
+  })
+  .describe('Use `set_recovery` to control how alerts recover. Requires `kind: alert`.');
+
+export const setNoDataOperationSchema = z
+  .object({
+    operation: z.literal('set_no_data'),
+    no_data: noDataSchema,
   })
   .describe(
-    'Use `set_query` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.'
+    'Use `set_no_data` to control what happens when data stops arriving. Requires `kind: alert`.'
   );
 
 export const setGroupingOperationSchema = groupingSchema
@@ -177,7 +191,7 @@ export const setGroupingOperationSchema = groupingSchema
     operation: z.literal('set_grouping'),
   })
   .describe(
-    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own episode instead of one combined alert.'
+    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own alert instead of one combined alert.'
   );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema
@@ -230,6 +244,8 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setKindOperationSchema,
   setScheduleOperationSchema,
   setQueryOperationSchema,
+  setRecoveryOperationSchema,
+  setNoDataOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
   setDashboardsOperationSchema,
@@ -345,17 +361,25 @@ export const executeRuleOperations = async (
             name: mergedName,
             ...(op.description !== undefined ? { description: op.description } : {}),
             ...(op.tags !== undefined ? { tags: op.tags } : {}),
+            ...(op.routing_tags !== undefined ? { routing_tags: op.routing_tags } : {}),
           },
         };
         break;
       }
 
       case 'set_kind':
-        // An alert draft always carries the alert-only fields and no operation
-        // can remove them, so converting to a signal has to clear them here.
+        /*
+         * No operation can remove the alert-only fields once set, so converting
+         * to a signal has to clear them here.
+         */
         next =
           op.kind === 'signal'
-            ? omit({ ...next, kind: op.kind }, ['recovery', 'no_data', 'state_transition'])
+            ? omit({ ...next, kind: op.kind }, [
+                'recovery',
+                'no_data',
+                'state_transition',
+                'metadata.routing_tags',
+              ])
             : { ...next, kind: op.kind };
         break;
 
@@ -405,9 +429,12 @@ export const executeRuleOperations = async (
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
-          ...(op.recovery !== undefined ? { recovery: op.recovery } : {}),
-          ...(op.no_data !== undefined ? { no_data: op.no_data } : {}),
         };
+        break;
+      }
+
+      case 'set_recovery': {
+        next = { ...next, recovery: op.recovery };
 
         // A recovering delay is inert under `manual` and the write API rejects
         // the pair, and no operation can remove a phase, so switching to manual
@@ -421,15 +448,12 @@ export const executeRuleOperations = async (
             ? { ...next, state_transition: stateTransition }
             : omit(next, 'state_transition');
         }
-
-        if (!isRecoveryConditionUsableWithBreach(next)) {
-          throw new RuleOperationValidationError(
-            'recovery.strategy "condition" requires query.breach. Without a breach segment ' +
-              'every row of the base query breaches, so the rule could never recover.'
-          );
-        }
         break;
       }
+
+      case 'set_no_data':
+        next = { ...next, no_data: op.no_data };
+        break;
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
@@ -553,6 +577,21 @@ export const executeRuleOperations = async (
 
   if (!isLifecycleConfigAllowedForKind(next)) {
     throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
+  }
+
+  if (!isRoutingTagsAllowedForKind(next)) {
+    throw new RuleOperationValidationError(ROUTING_TAGS_SIGNAL_RULE_MESSAGE);
+  }
+
+  // `set_query` replaces the query and `set_recovery` replaces the strategy, so
+  // either one can leave `condition` with nothing to contrast against. Judge
+  // the combination after both have been applied — a query-only edit never
+  // enters `set_recovery`.
+  if (!isRecoveryConditionUsableWithBreach(next)) {
+    throw new RuleOperationValidationError(
+      'recovery.strategy "condition" requires query.breach. Without a breach segment ' +
+        'every row of the base query breaches, so the rule could never recover.'
+    );
   }
 
   if (!isAbsenceDistinguishableFromBreach(next)) {

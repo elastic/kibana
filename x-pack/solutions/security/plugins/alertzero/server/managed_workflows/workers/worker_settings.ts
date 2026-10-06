@@ -7,7 +7,7 @@
 
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -30,7 +30,7 @@ type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID
   | typeof SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
-  | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
+  | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
 
 const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
   // Stays at 1: the narrowed `allowedAutonomyLevels` (assisted dropped) is already handled by
@@ -44,7 +44,7 @@ const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 1,
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: 1,
 };
 
 /**
@@ -60,6 +60,9 @@ const toTemplateValues = (
   ...(settings.scheduleInterval === undefined
     ? {}
     : { scheduleInterval: settings.scheduleInterval }),
+  ...(settings.serviceAccountId === undefined
+    ? {}
+    : { serviceAccountId: settings.serviceAccountId }),
   ...(settings.extras === undefined ? {} : { extras: settings.extras }),
 });
 
@@ -75,7 +78,14 @@ const parseWorkerValues = (
 ): WorkerSettings => {
   const raw = applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), stored);
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
+  const {
+    settingsVersion,
+    autonomyLevel,
+    scheduleInterval,
+    serviceAccountId,
+    extras,
+    ...unsupported
+  } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
@@ -94,6 +104,9 @@ const parseWorkerValues = (
     workerId,
     autonomy: projectStoredAutonomyLevel(getWorkerSettingsDeclaration(workerId), autonomyLevel),
     ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
+    ...(typeof serviceAccountId === 'string' && serviceAccountId.length > 0
+      ? { serviceAccountId }
+      : {}),
     ...(extras === undefined ? {} : { extras }),
   };
   const parsed = getCompleteWorkerSettingsSchema(workerId).safeParse(candidate);

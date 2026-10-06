@@ -44,7 +44,7 @@ const suggestValues = (
   );
 
 /*
- * Alert events backing the ES-aggregation branches (`group_hash`, `episode_id`
+ * Alert events backing the ES-aggregation branches (`group_hash`, `alert_id`
  * and the `data.*` prefix). Every value is prefixed with `scout` so the
  * prefix-filtered assertions stay exact even if the rule executor writes its
  * own events into `.rule-events` while a test runs.
@@ -56,12 +56,12 @@ const suggestValues = (
 const buildSeededAlertEvents = () => [
   buildAlertEvent({
     group_hash: 'scout.web-1',
-    episode: { id: 'scout-episode-web', status: 'active' },
+    alert: { id: 'scout-episode-web', status: 'active' },
     data: { host: 'scout-web-1', region: 'scout-us-east' },
   }),
   buildAlertEvent({
     group_hash: 'scoutxweb-2',
-    episode: { id: 'scout-episode-db', status: 'active' },
+    alert: { id: 'scout-episode-db', status: 'active' },
     data: { host: 'scout-db-1' },
   }),
 ];
@@ -94,13 +94,13 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   });
 
   apiTest(
-    'returns a 200 with an array of suggested values for a static field',
+    'alert_status: returns a 200 with an array of suggested values for a static field',
     async ({ apiClient }) => {
-      // `episode_status` is backed by static suggestions, so the result is
+      // The status is backed by static suggestions, so the result is
       // deterministic without seeding any alert events or rules.
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: writerHeaders }
       );
 
@@ -114,7 +114,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest('filters static suggestions by the query prefix', async ({ apiClient }) => {
     const response = await suggestValues(
       apiClient,
-      { field: 'episode_status', query: 'a' },
+      { field: 'alert_status', query: 'a' },
       { headers: writerHeaders }
     );
 
@@ -157,13 +157,13 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   );
 
   apiTest(
-    'episode_id: aggregates the episode ids stored on the alert events',
+    'alert_id: aggregates the alert ids stored on the alert events',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_id', query: 'scout-episode-w' },
+        { field: 'alert_id', query: 'scout-episode-w' },
         { headers: writerHeaders }
       );
 
@@ -204,7 +204,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     async ({ apiClient }) => {
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: 'test', unknownField: 'x' },
+        { field: 'alert_status', query: 'test', unknownField: 'x' },
         { headers: writerHeaders }
       );
 
@@ -219,9 +219,9 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         {
-          field: 'episode_status',
+          field: 'alert_status',
           query: 'test',
-          fieldMeta: { name: 'episode_status', type: 'string' },
+          fieldMeta: { name: 'alert_status', type: 'string' },
           filters: [],
         },
         { headers: writerHeaders }
@@ -235,7 +235,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest('validation: rejects a body without a query', async ({ apiClient }) => {
     const response = await suggestValues(
       apiClient,
-      { field: 'episode_status' },
+      { field: 'alert_status' },
       { headers: writerHeaders }
     );
 
@@ -268,7 +268,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest('validation: rejects a query longer than the schema limit', async ({ apiClient }) => {
     const response = await suggestValues(
       apiClient,
-      { field: 'episode_status', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
+      { field: 'alert_status', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
       { headers: writerHeaders }
     );
 
@@ -283,7 +283,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 
@@ -298,7 +298,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 
@@ -313,7 +313,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 
@@ -328,7 +328,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 
