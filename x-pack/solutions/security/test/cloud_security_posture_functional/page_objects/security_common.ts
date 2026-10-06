@@ -7,8 +7,13 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+const DEFAULT_USER_NAME = 'test_user';
+const DEFAULT_USER_PASSWORD = 'changeme';
+
 export function CspSecurityCommonProvider({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
+  const browser = getService('browser');
+  const deployment = getService('deployment');
   const pageObjects = getPageObjects(['security']);
 
   const roles = [
@@ -107,7 +112,18 @@ export function CspSecurityCommonProvider({ getPageObjects, getService }: FtrPro
     },
 
     async logout() {
+      // Invalidate the session server-side while the browser still holds its cookie: clearing
+      // browser state alone leaves it valid, and an in-flight request can re-issue the cookie.
+      await browser.get(`${deployment.getHostPort()}/logout`);
       await pageObjects.security.forceLogout();
+    },
+
+    // Logs back in as the default FTR user so a custom-role session cannot leak into later suites.
+    async restoreDefaultUser() {
+      await this.logout();
+      await pageObjects.security.login(DEFAULT_USER_NAME, DEFAULT_USER_PASSWORD, {
+        expectSpaceSelector: false,
+      });
     },
 
     async cleanRoles() {

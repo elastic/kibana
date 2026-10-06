@@ -21,7 +21,7 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate } from '@kbn/i18n-react';
-import { AGENT_BUILDER_UI_EBT, ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, isPublicConversation } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversation, useConversationPermissions } from '../../../hooks/use_conversation';
 import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
@@ -127,10 +127,9 @@ export const ConversationTitleMetadata = ({ ariaLabelledBy }: ConversationTitleM
   const templateDisplay = useConversationTemplateDisplay();
   const templateName = templateDisplay?.name;
   const templateIcon = templateDisplay?.icon;
-  const visibilityLabel =
-    conversation?.access_control?.access_mode === ConversationAccessControlMode.Public
-      ? labels.public
-      : labels.private;
+  const visibilityLabel = isPublicConversation(conversation?.access_control)
+    ? labels.public
+    : labels.private;
 
   const titleButtonStyles = css`
     max-width: 100%;

@@ -29,7 +29,7 @@ import { useAuthenticatedUser } from '../hooks/use_authenticated_user';
 
 export const HomePage = () => {
   const {
-    services: { cloud, application, docLinks },
+    services: { cloud, application, chrome, docLinks },
   } = useKibana();
   const { user } = useAuthenticatedUser();
   const { stats, isLoading } = useDeploymentStats();
@@ -39,7 +39,7 @@ export const HomePage = () => {
   const username = user?.full_name || user?.email;
   const vectorDatabaseDocsUrl = docLinks.links.enterpriseSearch.vectorDatabaseFullTextSearch;
 
-  const statCardDeps = { application, stats, isLoading };
+  const statCardDeps = { application, chrome, stats, isLoading };
   const dataCard = getDataCard(statCardDeps);
   const secondaryCards = getSecondaryCards(statCardDeps);
 

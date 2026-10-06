@@ -8,6 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux-v7';
 import type { LocationDescriptorObject } from 'history';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -41,11 +42,13 @@ describe('UploadLicense', () => {
   const renderComponent = (store: ReturnType<typeof licenseManagementStore>) => {
     return render(
       <I18nProvider>
-        <AppContextProvider value={appDependencies}>
-          <Provider store={store}>
-            <UploadLicense history={history} />
-          </Provider>
-        </AppContextProvider>
+        <MockAppHeaderProvider>
+          <AppContextProvider value={appDependencies}>
+            <Provider store={store}>
+              <UploadLicense history={history} />
+            </Provider>
+          </AppContextProvider>
+        </MockAppHeaderProvider>
       </I18nProvider>
     );
   };

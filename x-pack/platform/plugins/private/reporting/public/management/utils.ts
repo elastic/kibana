@@ -16,6 +16,7 @@ import type {
   RecurringSchedule,
 } from '@kbn/response-ops-recurring-schedule-form/types';
 import {
+  LAST_DAY_OF_MONTH,
   RRULE_TO_ISO_WEEKDAYS,
   RecurrenceEnd,
 } from '@kbn/response-ops-recurring-schedule-form/constants';
@@ -110,6 +111,9 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
     if (rRule.byweekday?.length) {
       recurringSchedule.bymonth = 'weekday';
       recurringSchedule.bymonthweekday = rRule.byweekday[0];
+    } else if (rRule.bymonthday?.includes(LAST_DAY_OF_MONTH)) {
+      recurringSchedule.bymonth = 'lastday';
+      recurringSchedule.bymonthday = LAST_DAY_OF_MONTH;
     } else if (rRule.bymonthday?.length) {
       recurringSchedule.bymonth = 'day';
       recurringSchedule.bymonthday = rRule.bymonthday[0];
@@ -137,6 +141,30 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
     emailSubject: notification?.email?.subject ?? '',
     emailMessage: notification?.email?.message ?? '',
   };
+};
+
+const BRACKETED_LITERAL = /(\[[^\]]*\])/;
+// Seconds (s, ss), fractional seconds (S to SSSSSSSSS) and timezone (z, zz, Z, ZZ) components
+const SUB_MINUTE_TOKENS = /[:.,]?\s*(?:s{1,2}|S{1,9}|z{1,2}|Z{1,2})/g;
+// Hour tokens (H, h, k) and localized formats including a time (LT, LTS, LLL, LLLL, lll, llll)
+const TIME_TOKENS = /[Hhk]|LT|LLL|lll/;
+
+const isBracketedLiteral = (segment: string): boolean => BRACKETED_LITERAL.test(segment);
+
+const stripSubMinuteTokens = (segment: string): string =>
+  segment.replace(/LTS/g, 'LT').replace(SUB_MINUTE_TOKENS, '');
+
+export const getParsedDateFormat = (format: string): string => {
+  const segments = format.split(BRACKETED_LITERAL);
+  const hasTime = segments.some(
+    (segment) => !isBracketedLiteral(segment) && TIME_TOKENS.test(segment)
+  );
+  const withoutSubMinuteTokens = segments
+    .map((segment) => (isBracketedLiteral(segment) ? segment : stripSubMinuteTokens(segment)))
+    .join('')
+    .trim();
+
+  return hasTime ? withoutSubMinuteTokens : `${withoutSubMinuteTokens} @ HH:mm`;
 };
 
 export const transformEmailNotification = ({

@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { TestProviders } from '../../../../../../common/mock';
+import { createReactQueryWrapper } from '../../../../../../common/mock/create_react_query_wrapper';
 import { useWatchlistsTableData } from './use_watchlists_table_data';
 
 const mockFetchWatchlists = jest.fn();
@@ -53,7 +53,7 @@ describe('useWatchlistsTableData', () => {
 
   it('includes manual assignments in the source label without requesting sources for empty lists', async () => {
     const { result } = renderHook(() => useWatchlistsTableData('default', 0, true), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     await waitFor(() => {
@@ -80,7 +80,7 @@ describe('useWatchlistsTableData', () => {
     mockListWatchlistEntitySources.mockRejectedValue(new Error('Request failed'));
 
     const { result } = renderHook(() => useWatchlistsTableData('default', 0, true), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     await waitFor(() => {

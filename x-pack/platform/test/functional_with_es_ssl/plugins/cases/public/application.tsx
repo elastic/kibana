@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { Router } from '@kbn/shared-ux-router';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { CasesPublicStart, CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
@@ -48,7 +48,9 @@ const permissions = {
   manageTemplates: true,
 };
 
-const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];
+const attachments: CaseAttachmentsWithoutOwner = [
+  { type: COMMENT_ATTACHMENT_TYPE, data: { content: 'test' } },
+];
 
 const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   const { cases } = props;

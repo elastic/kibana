@@ -37,7 +37,9 @@ interface WorkflowStep {
 interface WorkflowDefinition {
   triggers: Array<{
     type: string;
-    inputs?: Array<{ name: string; type: string }>;
+    inputs?:
+      | Array<{ name: string; type: string }>
+      | { properties?: Record<string, { type: string }> };
   }>;
   steps: WorkflowStep[];
 }
@@ -71,7 +73,13 @@ const findInput = (
   name: string
 ): { name: string; type: string } | undefined =>
   definition.triggers
-    .flatMap((trigger) => trigger.inputs ?? [])
+    .flatMap((trigger) => {
+      if (Array.isArray(trigger.inputs)) {
+        return trigger.inputs;
+      }
+      const input = trigger.inputs?.properties?.[name];
+      return input ? [{ name, type: input.type }] : [];
+    })
     .find((input) => input.name === name);
 
 const stepIndex = (definition: WorkflowDefinition, name: string): number =>
@@ -108,9 +116,9 @@ describe('Significant Events run quota workflow contracts', () => {
     }
   });
 
-  it('runs all three gates only for workers whose root origin is scheduled', () => {
+  it('runs detection and KI extraction gates only for workers whose root origin is scheduled', () => {
     expect(quotaSteps.map((step) => step.with?.body?.group).sort()).toEqual(
-      ['detection', 'investigation', 'ki_extraction'].sort()
+      ['detection', 'ki_extraction'].sort()
     );
 
     for (const step of quotaSteps) {
@@ -204,15 +212,12 @@ describe('Significant Events run quota workflow contracts', () => {
     );
   });
 
-  it('gates investigations after eligibility, event resolution, and deduplication but before launch', () => {
+  it('starts investigations after eligibility, event resolution, and deduplication', () => {
     const orderedSteps = [
       'gate_investigatable_severity',
-      'resolve_open_event',
-      'check_prior_investigation',
+      'resolve_active_event',
       'guard_resolved_event',
       'guard_missing_investigation',
-      'consume_investigation_quota',
-      'guard_investigation_quota',
       'trigger_investigation',
     ];
     const indexes = orderedSteps.map((name) => stepIndex(definitions.discovery, name));
@@ -221,55 +226,12 @@ describe('Significant Events run quota workflow contracts', () => {
     expect(indexes).toEqual([...indexes].sort((left, right) => left - right));
   });
 
-  it('derives investigation criticality from the resolved event severity', () => {
-    const gate = findStep(definitions.discovery, 'consume_investigation_quota');
-    const critical = gate.with?.body?.critical;
-
-    expect(critical).toBe(
-      '${{ steps.resolve_open_event.output.hits.hits[0]._source.severity == "80-critical" }}'
-    );
-    expect(
-      evaluateExpression(critical as string, {
-        steps: {
-          resolve_open_event: {
-            output: { hits: { hits: [{ _source: { severity: '80-critical' } }] } },
-          },
-        },
-      })
-    ).toBe(true);
-    expect(
-      evaluateExpression(critical as string, {
-        steps: {
-          resolve_open_event: {
-            output: { hits: { hits: [{ _source: { severity: '60-high' } }] } },
-          },
-        },
-      })
-    ).toBe(false);
-  });
-
-  it('prevents investigation launch only on explicit denial', () => {
-    const guard = findStep(definitions.discovery, 'guard_investigation_quota');
-
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: { output: { allowed: false } } },
-      })
-    ).toBe(false);
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: { output: { allowed: true } } },
-      })
-    ).toBe(true);
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: {} },
-      })
-    ).toBe(true);
-    expect(guard.steps?.[0]).toEqual(
+  it('delegates automatic investigation admission to the trigger step and fails open', () => {
+    expect(findStep(definitions.discovery, 'trigger_investigation')).toEqual(
       expect.objectContaining({
-        name: 'trigger_investigation',
-        type: 'workflow.executeAsync',
+        type: 'nightshift.triggerInvestigation',
+        with: expect.objectContaining({ trigger_type: 'automatic' }),
+        'on-failure': { continue: true },
       })
     );
   });

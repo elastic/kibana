@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart, ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { VECTOR_COUNT_ENABLED } from '../../common/constants';
 import type { DeploymentStats } from '../hooks/use_deployment_stats';
 import { formatBytes, formatNumber } from '../utils/format';
 import { STAT_TILE_LABELS } from '../constants';
@@ -14,16 +15,28 @@ import type { HomePageStatPanelProps } from './home_page_stat_panel';
 
 interface StatCardDeps {
   application: ApplicationStart;
+  chrome: ChromeStart;
   stats: DeploymentStats;
   isLoading: boolean;
 }
 
 type HomePageStats = Omit<HomePageStatPanelProps, 'newIndex'>;
 
+const INDEX_MANAGEMENT_NAV_LINK_ID = 'management:index_management';
+
 const showVectorCount = ({ application }: Pick<StatCardDeps, 'application'>): boolean =>
+  VECTOR_COUNT_ENABLED &&
   application.capabilities.vectordbIndexStats?.canMonitorAllIndices === true;
 
-export const getDataCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
+const showIndexManagement = ({ chrome }: Pick<StatCardDeps, 'chrome'>): boolean =>
+  chrome.navLinks.has(INDEX_MANAGEMENT_NAV_LINK_ID);
+
+export const getDataCard = ({
+  application,
+  chrome,
+  stats,
+  isLoading,
+}: StatCardDeps): HomePageStats => ({
   iconType: 'database',
   title: i18n.translate('xpack.serverlessVectordb.home.dataCard.title', {
     defaultMessage: 'Data',
@@ -60,20 +73,22 @@ export const getDataCard = ({ application, stats, isLoading }: StatCardDeps): Ho
       isLoading,
     },
   ],
-  actions: [
-    {
-      key: 'viewIndices',
-      label: i18n.translate('xpack.serverlessVectordb.home.dataCard.dataManagement', {
-        defaultMessage: 'Manage data',
-      }),
-      onClick: () =>
-        application.navigateToApp('management', {
-          path: '/data/index_management/indices',
-        }),
-      testSubj: 'homePageDataCardDataManagement',
-      telemetryId: 'serverlessVectordb-home-dataCard-dataManagement',
-    },
-  ],
+  actions: showIndexManagement({ chrome })
+    ? [
+        {
+          key: 'viewIndices',
+          label: i18n.translate('xpack.serverlessVectordb.home.dataCard.dataManagement', {
+            defaultMessage: 'Manage data',
+          }),
+          onClick: () =>
+            application.navigateToApp('management', {
+              path: '/data/index_management/indices',
+            }),
+          testSubj: 'homePageDataCardDataManagement',
+          telemetryId: 'serverlessVectordb-home-dataCard-dataManagement',
+        },
+      ]
+    : [],
 });
 
 const getDashboardsCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({

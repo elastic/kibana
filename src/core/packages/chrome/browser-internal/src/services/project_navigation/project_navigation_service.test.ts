@@ -533,6 +533,43 @@ describe('initNavigation()', () => {
     });
   });
 
+  test('should add the Search Power Cloud link to the navigation tree', async () => {
+    const { projectNavigation } = setup();
+    projectNavigation.setCloudUrls({
+      searchPowerUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+    });
+
+    projectNavigation.initNavigation<any>(
+      'vectordb',
+      of({
+        body: [
+          {
+            id: 'group1',
+            type: 'navGroup',
+            children: [{ cloudLink: 'searchPower' }],
+          },
+        ],
+      })
+    );
+
+    const treeDefinition = await lastValueFrom(
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
+    );
+    const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+
+    expect(node.children).toEqual([
+      expect.objectContaining({
+        href: 'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+        isExternalLink: true,
+        title: 'Configure Search Power',
+      }),
+    ]);
+  });
+
   test('should update the navigation tree when cloud URLs are updated after initialization', async () => {
     const { projectNavigation } = setup();
 
@@ -1016,6 +1053,33 @@ describe('getActiveSolutionNavId$()', () => {
 
     activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
     expect(activeId).toBe('oblt');
+  });
+});
+
+describe('registerNavigationLinks', () => {
+  it('registers hover lists and rejects a second registration on the same target', async () => {
+    const { projectNavigation } = setup();
+
+    projectNavigation.registerNavigationLinks({
+      id: 'dashboardLinks',
+      target: 'dashboards',
+      lists: [{ id: 'recentlyViewed', title: 'Recently viewed', items$: of([]) }],
+    });
+
+    const afterFirst = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
+    expect(afterFirst).toHaveLength(1);
+
+    expect(() =>
+      projectNavigation.registerNavigationLinks({
+        id: 'otherDashboardLinks',
+        target: 'dashboards',
+        lists: [{ id: 'favorites', title: 'Favorites', items$: of([]) }],
+      })
+    ).toThrow('A second hover registration on target "dashboards" is not allowed.');
+
+    const afterSecond = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
+    expect(afterSecond).toHaveLength(1);
+    expect(afterSecond[0].id).toBe('dashboardLinks');
   });
 });
 

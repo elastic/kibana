@@ -46,7 +46,11 @@ const knownFormatSchemas = {
   url: urlFormatSchema,
 } as const;
 
-const extensibleFormatSchema = z.object({ type: z.string(), params: z.any().optional() });
+const extensibleFormatSchema = z.object({ type: z.string(), params: z.any().optional() }).meta({
+  title: 'Extensible format',
+  description:
+    'Fallback for custom formatter IDs only. Known formatter IDs must match their dedicated schema and are validated at runtime.',
+});
 
 export const formatSchema = z
   .union([

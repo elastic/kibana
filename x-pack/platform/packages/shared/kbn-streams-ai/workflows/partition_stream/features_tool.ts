@@ -10,7 +10,7 @@ import {
   createGetStreamFeaturesTool,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
-} from '../../src/features/tool';
+} from '@kbn/nightshift-ai';
 
 export const PARTITION_FEATURE_TOOL_TYPES = ['entity'] as const;
 

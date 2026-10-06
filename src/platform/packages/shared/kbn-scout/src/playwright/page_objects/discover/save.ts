@@ -65,6 +65,18 @@ export abstract class SaveMixin extends NavigationMixin {
     await this.confirmSaveModal();
   }
 
+  /** Saves an embedded edit as a new library session and opens it in normal Discover mode. */
+  async saveEditorSessionAsNew(name: string) {
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+    const popover = this.page.testSubj.locator('discoverSaveButtonPopover');
+    await popover.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('interactiveSaveMenuItem');
+    await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
+    await this.page.testSubj.fill('savedObjectTitle', name);
+    await this.confirmSaveModal();
+    await this.waitUntilTabIsLoaded();
+  }
+
   async saveUnsavedChanges() {
     await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
@@ -198,32 +210,43 @@ export abstract class SaveMixin extends NavigationMixin {
   }
 
   async exportAsCsv(options?: TimeoutOptions): Promise<import('playwright-core').Download> {
+    const timeout = options?.timeout ?? 30_000;
+
+    // Arm the response interceptor before clicking so we never miss it.
+    // Use the caller's timeout — the page default (10s) is too short for 3 button clicks + HTTP.
+    const generateResponsePromise = this.page.waitForResponse(
+      (r) => r.url().includes('/internal/reporting/generate/') && r.request().method() === 'POST',
+      { timeout }
+    );
+
     // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
-    await this.clickAppMenuItem('exportTopNavButton');
-    await this.page.testSubj.click('exportMenuItem-CSV');
+    // Settle the interceptor on click errors so it never produces an unhandled rejection.
+    try {
+      await this.clickAppMenuItem('exportTopNavButton');
+      await this.page.testSubj.click('exportMenuItem-CSV');
+      await this.page.testSubj.click('generateReportButton');
+    } catch (clickErr) {
+      generateResponsePromise.catch(() => {});
+      throw clickErr;
+    }
 
-    // 2. Trigger the report generation
-    await this.page.testSubj.click('generateReportButton');
+    const generateResponse = await generateResponsePromise;
+    if (!generateResponse.ok()) {
+      throw new Error(
+        `CSV report generate request failed with status ${generateResponse.status()}`
+      );
+    }
 
-    // 3. Explicitly wait for the report to finish generating
     const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
     const reportFailure = this.page.locator('[data-test-errorText]');
-    await downloadBtn.or(reportFailure).waitFor({
-      state: 'visible',
-      timeout: options?.timeout ?? 30_000,
-    });
+    await downloadBtn.or(reportFailure).waitFor({ state: 'visible', timeout });
 
     if (await reportFailure.isVisible()) {
       const errorText = await reportFailure.getAttribute('data-test-errorText');
       throw new Error(`CSV report generation failed: ${errorText ?? 'Unknown error'}`);
     }
 
-    // 4. Coordinate the click and the event listener
-    const [download] = await Promise.all([
-      this.page.waitForEvent('download'), // Set listener
-      downloadBtn.click(), // Perform action
-    ]);
-
+    const [download] = await Promise.all([this.page.waitForEvent('download'), downloadBtn.click()]);
     return download;
   }
 }

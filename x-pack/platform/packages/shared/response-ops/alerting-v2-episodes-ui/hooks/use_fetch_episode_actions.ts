@@ -32,13 +32,15 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
     select: (rows) => {
       const map = new Map<string, EpisodeActionState>();
       for (const row of rows) {
-        map.set(row.episode_id, {
-          episodeId: row.episode_id,
+        map.set(row.alert_id, {
+          episodeId: row.alert_id,
           ruleId: row.rule_id ?? null,
           groupHash: row.group_hash ?? null,
           lastAckAction: row.last_ack_action ?? null,
           lastAssigneeUid: row.last_assignee_uid ?? null,
           lastAckActor: row.last_ack_actor ?? null,
+          lastDeactivateAction: row.last_deactivate_action ?? null,
+          lastDeactivateActor: row.last_deactivate_actor ?? null,
         });
       }
       return map;

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
-  enableWorkflowsFeatureFlag,
   getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
@@ -18,23 +17,24 @@ import {
 
 apiTest.describe('Workflow schedule API - delete', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let spaceId: string;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ samlAuth, scheduleSpace }) => {
+    spaceId = scheduleSpace.id;
 
     const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
+  apiTest.afterEach(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders, spaceId);
   });
 
-  apiTest('should delete a schedule', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should delete a schedule', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
+    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule(spaceId));
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const { body, statusCode } = await apis.deleteSchedule(createdId);
@@ -43,11 +43,11 @@ apiTest.describe('Workflow schedule API - delete', { tag: SCHEDULE_TAGS }, () =>
     expect((body as Record<string, unknown>).id).toBe(createdId);
 
     const getResult = await apis.getSchedule(createdId);
-    expect(getResult.statusCode).toBe(404);
+    expect(getResult).toHaveStatusCode(404);
   });
 
-  apiTest('should return 404 when deleting non-existent schedule', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return 404 when deleting non-existent schedule', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
     const response = await apis.deleteSchedule('non-existent-id-12345');
     const body = response.body as { message?: string };

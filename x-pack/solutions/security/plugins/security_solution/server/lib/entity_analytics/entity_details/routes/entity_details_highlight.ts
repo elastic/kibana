@@ -81,10 +81,13 @@ export const entityDetailsHighlightsRoute = ({
               spaceId,
             });
 
+            const mitreDataClient = securitySolution.getMitreDataClient();
+
             const { getV1Data, getV2Data, getLocalReplacements } =
               entityDetailsHighlightsServiceFactory({
                 entityStoreClient,
                 experimentalFeatures: config.experimentalFeatures,
+                mitreDataClient,
                 spaceId,
                 logger,
                 esClient,

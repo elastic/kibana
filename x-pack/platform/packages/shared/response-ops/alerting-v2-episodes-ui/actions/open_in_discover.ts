@@ -7,12 +7,14 @@
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { EpisodeAction } from './types';
+import { episodeSupportsActions } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 export const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
 
 export interface OpenInDiscoverActionDeps {
   application: ApplicationStart;
+  isRuleAvailable: (ruleId: string) => boolean;
   /**
    * Resolves the Discover URL for an episode. May be async (e.g. if rule ES|QL is fetched on demand).
    * Caller returns undefined when no valid URL can be produced (rule without ES|QL, user lacks Discover access, etc.).
@@ -27,8 +29,15 @@ export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): Epis
   id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
   order: 50,
   displayName: i18n.OPEN_IN_DISCOVER,
-  iconType: 'discoverApp',
-  isCompatible: ({ episodes }) => episodes.length === 1,
+  iconType: 'productDiscover',
+  isCompatible: ({ episodes }) => {
+    if (episodes.length !== 1 || !episodeSupportsActions(episodes[0])) {
+      return false;
+    }
+
+    const ruleId = episodes[0]['rule.id'];
+    return Boolean(ruleId) && deps.isRuleAvailable(ruleId);
+  },
   execute: async ({ episodes }) => {
     const [ep] = episodes;
     const href = await deps.getDiscoverHref({

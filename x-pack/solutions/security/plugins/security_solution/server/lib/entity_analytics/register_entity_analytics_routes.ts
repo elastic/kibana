@@ -6,6 +6,7 @@
  */
 
 import { registerAssetCriticalityRoutes } from './asset_criticality/routes';
+import { registerRiskEngineRoutes } from './risk_engine/routes';
 import { registerRiskScoreRoutes } from './risk_score/routes';
 import type { EntityAnalyticsRoutesDeps } from './types';
 import { registerPrivilegeMonitoringRoutes } from './privilege_monitoring/routes/register_privilege_monitoring_routes';
@@ -19,6 +20,7 @@ import { registerRiskScoreHistoryRoute } from './risk_score/routes/register_risk
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   registerAssetCriticalityRoutes(routeDeps);
+  registerRiskEngineRoutes(routeDeps);
   registerRiskScoreRoutes(routeDeps);
   registerMigrationsRoutes(routeDeps);
   registerPrivilegeMonitoringRoutes(routeDeps);
