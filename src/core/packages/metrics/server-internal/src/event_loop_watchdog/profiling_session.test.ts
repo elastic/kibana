@@ -107,11 +107,21 @@ describe('ProfilingSession', () => {
     expect(params.onKeep).toHaveBeenCalledTimes(MAX_KEPT_PROFILES);
   });
 
-  it('ends after the time limit', () => {
+  it('ends after the time limit, publishing the final stop as a rotation', () => {
     now += MAX_SESSION_MS * 1000;
     session.tick(0);
     expect(time.stop).toHaveBeenCalledWith(false);
+    expect(params.markRotation).toHaveBeenLastCalledWith('end', now);
+    expect(params.markRotation).toHaveBeenCalledTimes(4);
     expect(session.isActive).toBe(false);
+  });
+
+  it('keeps a last flagged window when the time limit is reached', () => {
+    advance(MAX_SESSION_MS / 1000 - 5);
+    now += 5 * S;
+    session.tick(1);
+    expect(params.onKeep).toHaveBeenCalledTimes(1);
+    expect(time.stop).toHaveBeenLastCalledWith(false);
   });
 
   it('ends when a rotation fails, still publishing its end', () => {

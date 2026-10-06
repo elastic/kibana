@@ -154,6 +154,7 @@ export class ProfilingSession {
     }
     const { maxSessionMs, windowMs, minFlaggedWindowMs } = this.limits;
     if (now - this.startedAt >= maxSessionMs * 1000) {
+      if (this.flagged) this.rotate(); // keep a last flagged window before ending
       return this.end(`time limit reached`);
     }
     const windowAge = now - this.windowStartedAt;
@@ -170,12 +171,16 @@ export class ProfilingSession {
   public end(reason: string): void {
     if (!this.active) return;
     this.active = false;
+    const { time, now, markRotation, logger } = this.params;
+    markRotation('start', now());
     try {
-      this.params.time.stop(false);
+      time.stop(false);
     } catch (error) {
-      this.params.logger.warn(`Failed to stop the event loop profiler: ${error.message}`);
+      logger.warn(`Failed to stop the event loop profiler: ${error.message}`);
+    } finally {
+      markRotation('end', now());
     }
-    this.params.logger.info(
+    logger.info(
       `Event loop profiling ended (${reason}); kept ${this.kept}/${this.limits.maxKeptProfiles} profiles`
     );
   }
