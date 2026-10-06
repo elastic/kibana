@@ -20,6 +20,7 @@ export const servers: ScoutServerConfig = {
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'automaticTroubleshootingSkill',
         'endpointForensicAnalysisSkill',
+        'endpointResponseActionsSkill',
         'elasticDefendPolicyManagementSkill',
       ])}`,
       '--xpack.fleet.packages.0.name=endpoint',

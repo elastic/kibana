@@ -323,7 +323,11 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
   });
 
   const agentStatus =
-    endpointStatus === 'failed' ? 'error' : endpointStatus === 'degraded' ? 'degraded' : 'online';
+    endpointStatus === 'failed' || endpointStatus === 'unhealthy'
+      ? 'error'
+      : endpointStatus === 'degraded'
+      ? 'degraded'
+      : 'online';
 
   await clients.internalEsClient.index({
     index: '.fleet-agents',
@@ -412,6 +416,27 @@ export const SCENARIOS = {
           message: 'Endpoint policy application failed: kernel extension could not be loaded',
         },
       },
+    ],
+  },
+
+  routingUnhealthyHost: {
+    agentId: 'eval-agent-ts-routing-unhealthy-001',
+    hostName: 'eval-routing-unhealthy',
+    os: { name: 'Windows', version: '10', type: 'windows', full: 'Windows 10' },
+    policyName: 'eval-policy-routing-unhealthy',
+    policyStatus: 'success',
+    endpointStatus: 'unhealthy',
+    extraDocuments: [
+      createPolicyResponseDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        hostName: 'eval-routing-unhealthy',
+        os: { name: 'Windows', version: '10', type: 'windows', full: 'Windows 10' },
+        policyId: 'eval-policy-routing-unhealthy',
+        policyName: 'eval-policy-routing-unhealthy',
+        endpointStatus: 'unhealthy',
+        message: 'agent_connectivity: missed check-ins; endpoint has not checked in with the agent',
+        scenario: 'routing_unhealthy_host',
+      }),
     ],
   },
 
