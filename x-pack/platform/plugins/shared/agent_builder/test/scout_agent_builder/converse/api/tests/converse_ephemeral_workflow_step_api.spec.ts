@@ -18,6 +18,14 @@ import { setupAgentDirectAnswer } from '../../../../scout_agent_builder_shared/l
 import { apiTest, API_AGENT_BUILDER, ELASTIC_API_VERSION } from '../fixtures';
 
 const VERSION_HEADERS = { 'elastic-api-version': ELASTIC_API_VERSION };
+
+interface WorkflowExecution {
+  status?: ExecutionStatus;
+  stepExecutions?: Array<{
+    stepId: string;
+    output?: { message?: string; conversation_id?: string };
+  }>;
+}
 const WORKFLOW_ID = `ephemeral-ai-agent-${Date.now()}`;
 
 const workflowYaml = ({
@@ -108,6 +116,7 @@ apiTest.describe(
       });
       expect(created, JSON.stringify(created.body)).toHaveStatusCode(200);
 
+      const requestsBeforeRun = llmProxy.interceptedRequests.length;
       await setupAgentDirectAnswer({
         proxy: llmProxy,
         continueConversation: true,
@@ -121,15 +130,18 @@ apiTest.describe(
       expect(run, JSON.stringify(run.body)).toHaveStatusCode(200);
       const { workflowExecutionId } = run.body as { workflowExecutionId: string };
 
-      let execution: { status?: ExecutionStatus } = {};
+      let execution: WorkflowExecution = {};
       await expect
         .poll(
           async () => {
             execution = (
-              await asAdmin.get(`api/workflows/executions/${workflowExecutionId}`, {
-                headers: VERSION_HEADERS,
-                responseType: 'json',
-              })
+              await asAdmin.get(
+                `api/workflows/executions/${workflowExecutionId}?includeOutput=true`,
+                {
+                  headers: VERSION_HEADERS,
+                  responseType: 'json',
+                }
+              )
             ).body;
             return (
               execution.status !== undefined && TerminalExecutionStatuses.includes(execution.status)
@@ -140,6 +152,20 @@ apiTest.describe(
         .toBe(true);
       expect(execution.status, JSON.stringify(execution)).toBe(ExecutionStatus.COMPLETED);
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      const [answerRequest] = llmProxy.interceptedRequests
+        .slice(requestsBeforeRun)
+        .filter((request) => request.matchingInterceptorName === 'final-assistant-response');
+      const prompt = JSON.stringify(answerRequest?.requestBody.messages);
+      expect(prompt).toContain('Hello');
+      expect(prompt).toContain('First answer');
+      expect(prompt).toContain('Summarize this conversation.');
+
+      const stepOutput = execution.stepExecutions?.find(
+        ({ stepId }) => stepId === 'summarize'
+      )?.output;
+      expect(stepOutput?.message).toBe('A summary');
+      expect(stepOutput?.conversation_id).toBeUndefined();
 
       const after = await readConversation();
       expect(after.updated_at).toBe(before.updated_at);

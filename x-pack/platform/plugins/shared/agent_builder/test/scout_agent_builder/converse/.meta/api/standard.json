@@ -1,5 +1,5 @@
 {
-  "sha1": "0dcb37fde6d492e4bb863b5d47f0593659901db5",
+  "sha1": "f87dc3bb32dcc41e397bab93c7846a317447cd71",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -734,7 +734,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_ephemeral_workflow_step_api.spec.ts",
-        "line": 59,
+        "line": 67,
         "column": 37
       }
     },
