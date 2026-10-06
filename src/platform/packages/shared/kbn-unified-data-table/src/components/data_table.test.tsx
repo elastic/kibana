@@ -21,6 +21,7 @@ import type { UnifiedDataTableProps } from './data_table';
 import React, { useCallback, useState } from 'react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
+import { EsqlSource } from '@kbn/data-source';
 import {
   buildDataViewMock,
   deepMockedFields,
@@ -1079,8 +1080,6 @@ describe('UnifiedDataTable', () => {
         },
       };
 
-      const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
-
       const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
@@ -1089,7 +1088,6 @@ describe('UnifiedDataTable', () => {
 
       await renderComponent({
         ...getProps(),
-        columnsMeta: columnsMetaOverride,
         expandedDoc,
         externalControlColumns: [testLeadingControlColumn],
         renderDocumentView: renderDocumentViewMock,
@@ -1103,7 +1101,70 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        columnsMetaOverride
+        undefined,
+        undefined
+      );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  it(
+    'should pass the deprecated columnsMeta through to renderDocumentView without an ES|QL source',
+    async () => {
+      const { rows } = getProps();
+      const expandedDoc = rows?.[0];
+      const columnsMeta = { testField: { type: 'number' as DatatableColumnType } };
+      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+        <div data-test-subj="test-document-view">{hit.id}</div>
+      ));
+
+      await renderComponent({
+        ...getProps(),
+        columnsMeta,
+        expandedDoc,
+        renderDocumentView: renderDocumentViewMock,
+        setExpandedDoc: jest.fn(),
+      });
+
+      expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
+        expandedDoc,
+        rows,
+        ['_source'],
+        columnsMeta,
+        undefined
+      );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  it(
+    'should give renderDocumentView the ES|QL data source and its columns meta',
+    async () => {
+      const dataSource = await EsqlSource.create({
+        query: 'FROM test_i | EVAL testField = 1',
+        resultColumns: [{ id: 'testField', name: 'testField', meta: { type: 'number' } }],
+      });
+      const { rows } = getProps();
+      const expandedDoc = rows?.[0];
+      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+        <div data-test-subj="test-document-view">{hit.id}</div>
+      ));
+
+      await renderComponent({
+        ...getProps(),
+        dataSource,
+        columnsMeta: { otherField: { type: 'string' } },
+        expandedDoc,
+        renderDocumentView: renderDocumentViewMock,
+        setExpandedDoc: jest.fn(),
+      });
+
+      expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
+        expandedDoc,
+        rows,
+        ['_source'],
+        { testField: { type: 'number', esType: undefined, isComputedColumn: false } },
+        dataSource
       );
     },
     EXTENDED_JEST_TIMEOUT

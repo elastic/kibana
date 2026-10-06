@@ -15,7 +15,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -41,11 +41,6 @@ jest.mock('../../../../components/discover_grid_flyout', () => ({
 
 const discoverGridMock = jest.mocked(DiscoverGrid);
 const singleEsHit = esHitsMock.slice(0, 1);
-const cascadedColumnsMeta: DataTableColumnsMeta = {
-  bytes: {
-    type: 'number',
-  },
-};
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
@@ -302,14 +297,8 @@ describe('Discover documents layout', () => {
         })
       );
 
-      toolkit.internalState.dispatch(
-        internalStateActions.setCascadedDocumentsState({
-          tabId,
-          cascadedDocumentsState: {
-            ...toolkit.getCurrentTab().cascadedDocumentsState,
-            columnsMeta: cascadedColumnsMeta,
-          },
-        })
+      toolkit.runtimeStateManager.tabs.byId[tabId].cascadedLeafDataSource$.next(
+        createMockEsqlSource([{ name: 'bytes', type: 'number', source: 'index' }])
       );
 
       await mountComponent({

@@ -11,9 +11,10 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, type EsqlColumnLookup } from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataTableColumnsMeta, EsHitRecord } from '@kbn/discover-utils/types';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -45,7 +46,7 @@ const renderCell = (
     selectedColumns,
     onFilter,
     hideFilteringOnComputedColumns,
-    columnsMeta,
+    esqlColumns,
     isPlainRecord,
   }: {
     shouldShowFieldHandler?: (fieldName: string) => boolean;
@@ -54,7 +55,7 @@ const renderCell = (
     selectedColumns?: string[];
     onFilter?: DocViewFilterFn;
     hideFilteringOnComputedColumns?: boolean;
-    columnsMeta?: DataTableColumnsMeta;
+    esqlColumns?: EsqlColumnLookup;
     isPlainRecord?: boolean;
   } = {}
 ) => {
@@ -62,7 +63,7 @@ const renderCell = (
     <SourceDocumentJsonMode
       row={buildDataTableRecord(hit, dataViewMock)}
       dataView={dataViewMock}
-      columnsMeta={columnsMeta}
+      esqlColumns={esqlColumns}
       shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
       jsonModeSettings={jsonModeSettings}
@@ -213,13 +214,15 @@ describe('SourceDocumentJsonMode', () => {
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), [200], '+');
     });
 
-    it('renders filter buttons for an ES|QL computed column resolved from column meta', async () => {
+    it('renders filter buttons for an ES|QL computed column resolved from the ES|QL columns', async () => {
       const onFilter: jest.MockedFunction<DocViewFilterFn> = jest.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         {
           onFilter,
-          columnsMeta: { computedField: { type: 'number', isComputedColumn: true } },
+          esqlColumns: createMockEsqlSource([
+            { name: 'computedField', type: 'number', source: 'esql-result' },
+          ]),
         }
       );
 
@@ -236,7 +239,9 @@ describe('SourceDocumentJsonMode', () => {
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         {
           onFilter: jest.fn(),
-          columnsMeta: { computedField: { type: 'number', isComputedColumn: true } },
+          esqlColumns: createMockEsqlSource([
+            { name: 'computedField', type: 'number', source: 'esql-result' },
+          ]),
           hideFilteringOnComputedColumns: true,
         }
       );

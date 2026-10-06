@@ -14,14 +14,17 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import type {
-  DataTableColumnsMeta,
   DataTableRecord,
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldStringValueWithHighlights, getIgnoredReason } from '@kbn/discover-utils';
+import {
+  formatFieldStringValueWithHighlights,
+  getIgnoredReason,
+  type EsqlColumnLookup,
+} from '@kbn/discover-utils';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_document_tree';
 import type { JsonModeSettings } from '../types';
@@ -39,7 +42,7 @@ const treeExpansionStore = new WeakMap<EsHitRecord, TreeExpansionState>();
 export interface SourceDocumentJsonModeProps {
   row: DataTableRecord;
   dataView: DataView;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  esqlColumns: EsqlColumnLookup | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   fieldFormats: FieldFormatsStart;
   jsonModeSettings?: JsonModeSettings;
@@ -50,7 +53,7 @@ export interface SourceDocumentJsonModeProps {
 export const SourceDocumentJsonMode = ({
   row,
   dataView,
-  columnsMeta,
+  esqlColumns,
   shouldShowFieldHandler,
   fieldFormats,
   jsonModeSettings,
@@ -70,10 +73,10 @@ export const SourceDocumentJsonMode = ({
     (node) => {
       const { path, value, isArrayItem } = node;
       const fieldName = fieldNameFromPath(path);
-      const field = getDataViewFieldOrCreateFromColumnMeta({
+      const field = getDataViewFieldOrCreateFromColumn({
         dataView,
         fieldName,
-        columnMeta: columnsMeta?.[fieldName],
+        column: esqlColumns?.getColumn(fieldName),
       });
       if (
         !shouldShowFieldFilterInOutActions({
@@ -111,7 +114,7 @@ export const SourceDocumentJsonMode = ({
         },
       ];
     },
-    [dataView, columnsMeta, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
+    [dataView, esqlColumns, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
   );
 
   const initialTreeState = useMemo(() => treeExpansionStore.get(row.raw), [row]);
@@ -125,7 +128,6 @@ export const SourceDocumentJsonMode = ({
   const { tree: documentTree, truncated } = flattenedToNestedDocument({
     row,
     dataView,
-    columnsMeta,
     shouldShowFieldHandler,
     hideNulls,
     selectedColumns,

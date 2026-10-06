@@ -52,9 +52,12 @@ import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { RowControlColumn } from '@kbn/discover-utils';
+import type { DataSource } from '@kbn/data-source';
 import {
   getShouldShowFieldHandler,
   canPrependTimeFieldColumn,
+  getEsqlColumnLookup,
+  toDataTableColumnsMeta,
   getVisibleColumns,
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
@@ -68,7 +71,7 @@ import {
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import type {
   UnifiedDataTableSettings,
@@ -150,7 +153,9 @@ export type RenderDocumentViewCallback = (
   hit: DataTableRecord,
   displayedRows: DataTableRecord[],
   displayedColumns: string[],
-  columnsMeta?: DataTableColumnsMeta
+  /** @deprecated Read the columns from `dataSource` instead. */
+  columnsMeta?: DataTableColumnsMeta,
+  dataSource?: DataSource
 ) => JSX.Element | undefined;
 
 export interface RenderDocumentViewMeta {
@@ -175,9 +180,12 @@ interface InternalUnifiedDataTableProps {
    */
   columns: string[];
   /**
-   * If not provided, types will be derived by default from the dataView field types.
-   * For displaying text-based search results, pass columns meta (which are available separately in the fetch request) down here.
-   * Check available utils in `utils/get_columns_meta.ts`
+   * The data source of the rows. For ES|QL results, column types are read from it;
+   * otherwise they are derived from the dataView field types.
+   */
+  dataSource?: DataSource;
+  /**
+   * @deprecated Pass `dataSource` instead. Only used when `dataSource` is not an ES|QL source.
    */
   columnsMeta?: DataTableColumnsMeta;
   /**
@@ -570,6 +578,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     {
       ariaLabelledBy,
       columns,
+      dataSource,
       columnsMeta,
       showColumnTokens,
       canDragAndDropColumns,
@@ -748,17 +757,26 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
     }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
+    const esqlColumns = useMemo(
+      () => getEsqlColumnLookup({ dataSource, columnsMeta }),
+      [dataSource, columnsMeta]
+    );
+    const legacyColumnsMeta = useMemo(
+      () => toDataTableColumnsMeta({ dataSource, columnsMeta }),
+      [dataSource, columnsMeta]
+    );
+
     const timeFieldName = dataView.timeFieldName;
     const shouldPrependTimeFieldColumn = useCallback(
       (activeColumns: string[]) =>
         canPrependTimeFieldColumn(
           activeColumns,
           timeFieldName,
-          columnsMeta,
+          esqlColumns,
           showTimeCol,
           isPlainRecord
         ),
-      [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
+      [timeFieldName, isPlainRecord, showTimeCol, esqlColumns]
     );
 
     const visibleColumns = useMemo(() => {
@@ -772,7 +790,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const { sortedRows, sorting } = useSorting({
       rows,
       visibleColumns,
-      columnsMeta,
+      esqlColumns,
       sort,
       dataView,
       isPlainRecord,
@@ -814,7 +832,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           dataView,
           columnId,
           fieldFormats,
-          columnsMeta,
+          esqlColumns,
           options,
           documentsDisplayMode,
           shouldShowFieldHandler,
@@ -825,7 +843,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         displayedRows,
         dataView,
         fieldFormats,
-        columnsMeta,
+        esqlColumns,
         documentsDisplayMode,
         shouldShowFieldHandler,
         columns,
@@ -991,7 +1009,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           externalCustomRenderers,
           isPlainRecord,
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
-          columnsMeta,
+          dataSource,
+          esqlColumns,
           documentsDisplayMode,
           jsonModeSettings,
           selectedColumns: columns,
@@ -1005,7 +1024,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         externalCustomRenderers,
         isPlainRecord,
         dataGridDensity,
-        columnsMeta,
+        dataSource,
+        esqlColumns,
         documentsDisplayMode,
         jsonModeSettings,
         columns,
@@ -1118,10 +1138,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
 
       return visibleColumns.map((columnName) => {
-        const field = getDataViewFieldOrCreateFromColumnMeta({
+        const field = getDataViewFieldOrCreateFromColumn({
           dataView,
           fieldName: columnName,
-          columnMeta: columnsMeta?.[columnName],
+          column: esqlColumns?.getColumn(columnName),
         });
         return (
           field?.toSpec() ?? {
@@ -1132,7 +1152,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           }
         );
       });
-    }, [cellActionsTriggerId, visibleColumns, dataView, columnsMeta]);
+    }, [cellActionsTriggerId, visibleColumns, dataView, esqlColumns]);
 
     const allCellActionsMetadata = useMemo(
       () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
@@ -1211,7 +1231,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           onFilter,
           editField,
           visibleCellActions,
-          columnsMeta,
+          esqlColumns,
           showColumnTokens,
           headerRowHeightLines,
           customGridColumnsConfiguration,
@@ -1224,7 +1244,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         }),
       [
         cellActionsHandling,
-        columnsMeta,
+        esqlColumns,
         columnsCellActions,
         customGridColumnsConfiguration,
         dataView,
@@ -1628,7 +1648,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 ariaDescribedBy={randomId}
                 ariaLabelledBy={ariaLabelledBy}
                 dataView={dataView}
-                columnsMeta={columnsMeta}
+                esqlColumns={esqlColumns}
                 isPlainRecord={isPlainRecord}
                 selectedFieldNames={visibleColumns}
                 selectedDocIds={docIdsInSelectionOrder}
@@ -1713,7 +1733,13 @@ const InternalUnifiedDataTable = React.forwardRef<
           {canSetExpandedDoc &&
             expandedDoc &&
             typeof renderDocumentView === 'function' &&
-            renderDocumentView(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+            renderDocumentView(
+              expandedDoc,
+              displayedRows,
+              displayedColumns,
+              legacyColumnsMeta,
+              dataSource
+            )}
         </span>
       </UnifiedDataTableContext.Provider>
     );

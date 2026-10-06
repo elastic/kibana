@@ -11,15 +11,15 @@ import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
   FormattedHit,
   EsHitRecord,
-  DataTableColumnsMeta,
 } from '../types';
 import { formatFieldValueReact } from './format_value';
+import type { EsqlColumnLookup } from './esql_column_lookup';
 
 // We use a special type here allowing formattedValue to be undefined because
 // we want to avoid formatting values which will not be shown to users since
@@ -46,7 +46,7 @@ const formattedHitCache = new WeakMap<
  * @param shouldShowFieldHandler
  * @param maxEntries
  * @param fieldFormats
- * @param columnsMeta
+ * @param esqlColumns ES|QL columns of the result, if any
  * @param options
  */
 export function formatHitReact(
@@ -55,7 +55,7 @@ export function formatHitReact(
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined,
+  esqlColumns: EsqlColumnLookup | undefined,
   options?: FormatHitReactOptions
 ): FormattedHit {
   const skipNullishValues = Boolean(options?.skipNullishValues);
@@ -83,10 +83,10 @@ export function formatHitReact(
     }
 
     // Retrieve the (display) name of the fields, if it's a mapped field on the data view
-    const field = getDataViewFieldOrCreateFromColumnMeta({
+    const field = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: key,
-      columnMeta: columnsMeta?.[key],
+      column: esqlColumns?.getColumn(key),
     });
     const displayKey = field?.displayName;
     const pairs = highlights[key] ? renderedPairs : otherPairs;
@@ -124,10 +124,10 @@ export function formatHitReact(
     const key = pair[2]!;
 
     // Format the raw value using the regular field formatters for that field
-    const field = getDataViewFieldOrCreateFromColumnMeta({
+    const field = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: key,
-      columnMeta: columnsMeta?.[key],
+      column: esqlColumns?.getColumn(key),
     });
     pair[1] = formatFieldValueReact({
       value: flattened[key],

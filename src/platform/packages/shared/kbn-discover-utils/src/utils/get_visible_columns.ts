@@ -8,12 +8,12 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta } from '../types';
+import type { EsqlColumnLookup } from './esql_column_lookup';
 
 export function canPrependTimeFieldColumn(
   columns: string[] | undefined,
   timeFieldName: string | undefined,
-  columnsMeta: DataTableColumnsMeta | undefined,
+  esqlColumns: EsqlColumnLookup | undefined,
   showTimeCol: boolean, // based on Advanced Settings `doc_table:hideTimeColumn`
   isESQLMode: boolean
 ) {
@@ -22,7 +22,7 @@ export function canPrependTimeFieldColumn(
   }
 
   if (isESQLMode) {
-    return !!columns && !!columnsMeta && timeFieldName in columnsMeta;
+    return !!columns && Boolean(esqlColumns?.getColumn(timeFieldName));
   }
 
   return true;

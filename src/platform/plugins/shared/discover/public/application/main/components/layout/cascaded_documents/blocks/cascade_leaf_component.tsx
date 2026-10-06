@@ -171,7 +171,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
-      cascadedColumnsMeta,
+      cascadedLeafDataSource,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
@@ -282,7 +282,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
-        columnsMeta={cascadedColumnsMeta}
+        dataSource={cascadedLeafDataSource}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
         expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}

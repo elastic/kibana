@@ -15,7 +15,7 @@ import {
   EuiIconTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsqlColumnLookup } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AttributesTable } from './attributes_table';
@@ -31,7 +31,7 @@ interface AttributesAccordionProps {
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  esqlColumns: EsqlColumnLookup | undefined;
   searchTerm: string;
   onAddColumn?: (col: string) => void;
   onRemoveColumn?: (col: string) => void;
@@ -47,7 +47,7 @@ export const AttributesAccordion = ({
   hit,
   dataView,
   columns,
-  columnsMeta,
+  esqlColumns,
   searchTerm,
   onAddColumn,
   onRemoveColumn,
@@ -92,7 +92,7 @@ export const AttributesAccordion = ({
             hit={hit}
             dataView={dataView}
             columns={columns}
-            columnsMeta={columnsMeta}
+            esqlColumns={esqlColumns}
             fields={fields}
             searchTerm={searchTerm}
             onAddColumn={onAddColumn}

@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import {
   dataViewMock as dataViewMockWithoutTimeField,
   dataViewMockWithTimeField,
@@ -46,15 +46,12 @@ describe('getVisibleColumns utils', function () {
   });
 
   describe('canPrependTimeFieldColumn', () => {
-    function buildColumnTypes(dataView: DataView) {
-      const columnsMeta: Record<
-        string,
-        { type: DatatableColumnType; esType?: string | undefined }
-      > = {};
-      for (const field of dataView.fields) {
-        columnsMeta[field.name] = { type: field.type as DatatableColumnType };
-      }
-      return columnsMeta;
+    function buildEsqlSource(dataView: DataView, { except }: { except?: string } = {}) {
+      return createMockEsqlSource(
+        dataView.fields
+          .filter(({ name }) => name !== except)
+          .map(({ name, type }) => ({ name, type, source: 'index' as const }))
+      );
     }
 
     describe('dataView with timeField', () => {
@@ -64,7 +61,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['extension', 'message'],
               dataViewMockWithTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithTimeField),
+              buildEsqlSource(dataViewMockWithTimeField),
               showTimeCol,
               false
             )
@@ -78,7 +75,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['extension', 'message'],
               dataViewMockWithTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithTimeField),
+              buildEsqlSource(dataViewMockWithTimeField),
               showTimeCol,
               true
             )
@@ -92,7 +89,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewMockWithTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithTimeField),
+              buildEsqlSource(dataViewMockWithTimeField),
               showTimeCol,
               false
             )
@@ -106,7 +103,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewMockWithTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithTimeField),
+              buildEsqlSource(dataViewMockWithTimeField),
               showTimeCol,
               true
             )
@@ -116,16 +113,15 @@ describe('getVisibleColumns utils', function () {
 
       it('should return false if _source column is passed but time field is not returned, text-based datasource', () => {
         // ... | DROP @timestamp test case
-        const columnsMeta = buildColumnTypes(dataViewMockWithTimeField);
-        if (dataViewMockWithTimeField.timeFieldName) {
-          delete columnsMeta[dataViewMockWithTimeField.timeFieldName];
-        }
+        const esqlSource = buildEsqlSource(dataViewMockWithTimeField, {
+          except: dataViewMockWithTimeField.timeFieldName,
+        });
         for (const showTimeCol of [true, false]) {
           expect(
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewMockWithTimeField.timeFieldName,
-              columnsMeta,
+              esqlSource,
               showTimeCol,
               true
             )
@@ -141,7 +137,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['extension', 'message'],
               dataViewMockWithoutTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithoutTimeField),
+              buildEsqlSource(dataViewMockWithoutTimeField),
               showTimeCol,
               false
             )
@@ -155,7 +151,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['extension', 'message'],
               dataViewMockWithoutTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithoutTimeField),
+              buildEsqlSource(dataViewMockWithoutTimeField),
               showTimeCol,
               true
             )
@@ -169,7 +165,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewMockWithoutTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithoutTimeField),
+              buildEsqlSource(dataViewMockWithoutTimeField),
               showTimeCol,
               false
             )
@@ -183,7 +179,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewMockWithoutTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithoutTimeField),
+              buildEsqlSource(dataViewMockWithoutTimeField),
               showTimeCol,
               true
             )

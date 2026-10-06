@@ -14,13 +14,14 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import type {
-  DataTableColumnsMeta,
-  DataTableRecord,
-  ShouldShowFieldInTableHandler,
-} from '@kbn/discover-utils/types';
-import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
+import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
+import type { DataSource } from '@kbn/data-source';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
+import {
+  formatFieldValueReact,
+  tryPrettyPrintJsonBlocks,
+  type EsqlColumnLookup,
+} from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer, JsonModeSettings, DocumentsDisplayMode } from '../types';
@@ -43,7 +44,8 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers,
   isPlainRecord,
   isCompressed = true,
-  columnsMeta,
+  dataSource,
+  esqlColumns,
   documentsDisplayMode,
   jsonModeSettings,
   selectedColumns,
@@ -57,7 +59,8 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
   isCompressed?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource?: DataSource;
+  esqlColumns: EsqlColumnLookup | undefined;
   documentsDisplayMode: DocumentsDisplayMode;
   jsonModeSettings?: JsonModeSettings;
   selectedColumns?: string[];
@@ -72,10 +75,10 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const field = getDataViewFieldOrCreateFromColumnMeta({
+    const field = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: columnId,
-      columnMeta: columnsMeta?.[columnId],
+      column: esqlColumns?.getColumn(columnId),
     });
     const ctx = useContext(UnifiedDataTableContext);
     const internalCellProps = useRef<EuiDataGridSetCellProps>({});
@@ -143,7 +146,7 @@ export const getRenderCellValueFn = ({
         <SourceDocumentJsonMode
           row={row}
           dataView={dataView}
-          columnsMeta={columnsMeta}
+          esqlColumns={esqlColumns}
           shouldShowFieldHandler={shouldShowFieldHandler}
           fieldFormats={fieldFormats}
           jsonModeSettings={jsonModeSettings}
@@ -168,7 +171,7 @@ export const getRenderCellValueFn = ({
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
-            columnsMeta={columnsMeta}
+            dataSource={dataSource}
           />
         </span>
       );
@@ -207,7 +210,7 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
-          columnsMeta={columnsMeta}
+          esqlColumns={esqlColumns}
         />
       );
     }

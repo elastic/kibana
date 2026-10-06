@@ -15,6 +15,7 @@ import {
 import { DataTableColumnHeader } from './data_table_column_header';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const stubDataViewWithNested = createStubDataView({
   spec: {
@@ -71,12 +72,9 @@ describe('DataTableColumnHeader', () => {
     renderWithKibanaRenderContext(
       <DataTableColumnHeader
         columnDisplayName="bytesDisplayName"
-        columnsMeta={{
-          bytes: {
-            type: 'string',
-            esType: 'keyword',
-          },
-        }}
+        esqlColumns={createMockEsqlSource([
+          { name: 'bytes', type: 'string', esType: 'keyword', source: 'index' },
+        ])}
         columnName="bytes"
         dataView={stubLogstashDataView}
         showColumnTokens

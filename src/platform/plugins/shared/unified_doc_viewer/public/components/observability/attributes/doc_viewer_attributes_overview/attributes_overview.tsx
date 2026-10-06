@@ -12,7 +12,11 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSpacer, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  SHOW_MULTIFIELDS,
+  getEsqlColumnLookup,
+  getShouldShowFieldHandler,
+} from '@kbn/discover-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   LOCAL_STORAGE_KEY_SEARCH_TERM,
@@ -36,6 +40,7 @@ export interface AttributeField {
 
 export function AttributesOverview({
   columns,
+  dataSource,
   columnsMeta,
   hit,
   dataView,
@@ -48,6 +53,10 @@ export function AttributesOverview({
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { storage, uiSettings } = getUnifiedDocViewerServices();
   const isEsqlMode = Array.isArray(textBasedHits);
+  const esqlColumns = useMemo(
+    () => getEsqlColumnLookup({ dataSource, columnsMeta }),
+    [dataSource, columnsMeta]
+  );
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const { searchTerm, onChangeSearchTerm } = useTableFiltersState({
     storage,
@@ -236,7 +245,7 @@ export function AttributesOverview({
                     hit={hit}
                     dataView={dataView}
                     columns={columns}
-                    columnsMeta={columnsMeta}
+                    esqlColumns={esqlColumns}
                     searchTerm={searchTerm}
                     onAddColumn={onAddColumn}
                     onRemoveColumn={onRemoveColumn}

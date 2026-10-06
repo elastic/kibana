@@ -18,10 +18,10 @@ import {
   type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsqlColumnLookup } from '@kbn/discover-utils';
 import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
 import type {
@@ -29,7 +29,7 @@ import type {
   DocumentsDisplayMode,
   UnifiedDataTableSettings,
 } from '../types';
-import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
+import type { ValueToStringConverter } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton, getSelectAllButton } from './data_table_document_selection';
@@ -124,7 +124,7 @@ function buildEuiGridColumn({
   columnCellActions,
   cellActionsHandling,
   visibleCellActions,
-  columnsMeta,
+  esqlColumns,
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
@@ -152,7 +152,7 @@ function buildEuiGridColumn({
   columnCellActions?: EuiDataGridColumnCellAction[];
   cellActionsHandling: 'replace' | 'append';
   visibleCellActions?: number;
-  columnsMeta?: DataTableColumnsMeta;
+  esqlColumns?: EsqlColumnLookup;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -164,10 +164,10 @@ function buildEuiGridColumn({
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
 }) {
-  const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+  const dataViewField = getDataViewFieldOrCreateFromColumn({
     dataView,
     fieldName: columnName,
-    columnMeta: columnsMeta?.[columnName],
+    column: esqlColumns?.getColumn(columnName),
   });
   const editFieldButton =
     editField &&
@@ -243,7 +243,7 @@ function buildEuiGridColumn({
           dataView={dataView}
           columnName={columnName}
           columnDisplayName={columnDisplayName}
-          columnsMeta={columnsMeta}
+          esqlColumns={esqlColumns}
           showColumnTokens={showColumnTokens}
           headerRowHeight={headerRowHeight}
         />
@@ -325,7 +325,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         headerRowHeight={headerRowHeight}
         columnName={columnName}
-        columnsMeta={columnsMeta}
+        esqlColumns={esqlColumns}
       />
     );
   }
@@ -374,7 +374,7 @@ export function getEuiGridColumns({
   onFilter,
   editField,
   visibleCellActions,
-  columnsMeta,
+  esqlColumns,
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
@@ -403,7 +403,7 @@ export function getEuiGridColumns({
   onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
-  columnsMeta?: DataTableColumnsMeta;
+  esqlColumns?: EsqlColumnLookup;
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -435,7 +435,7 @@ export function getEuiGridColumns({
       onFilter,
       editField,
       visibleCellActions,
-      columnsMeta,
+      esqlColumns,
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,

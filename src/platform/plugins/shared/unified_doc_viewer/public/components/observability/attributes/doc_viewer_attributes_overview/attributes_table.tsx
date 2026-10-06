@@ -11,6 +11,7 @@ import type { EuiDataGridProps } from '@elastic/eui';
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { EsqlColumnLookup } from '@kbn/discover-utils';
 import React, { useMemo } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { FieldRow } from '../../../doc_viewer_table/field_row';
@@ -24,8 +25,9 @@ import type { AttributeField } from './attributes_overview';
 interface AttributesTableProps
   extends Pick<
     DocViewRenderProps,
-    'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+    'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
+  esqlColumns: EsqlColumnLookup | undefined;
   fields: AttributeField[];
   searchTerm: string;
   isEsqlMode: boolean;
@@ -34,7 +36,7 @@ interface AttributesTableProps
 export const AttributesTable = ({
   hit,
   dataView,
-  columnsMeta,
+  esqlColumns,
   fields,
   searchTerm,
   columns,
@@ -71,10 +73,10 @@ export const AttributesTable = ({
             dataView,
             fieldFormats,
             isPinned: false,
-            columnsMeta,
+            esqlColumns,
           })
       ),
-    [fields, flattened, hit, dataView, fieldFormats, columnsMeta]
+    [fields, flattened, hit, dataView, fieldFormats, esqlColumns]
   );
 
   const fieldCellActions = useMemo(

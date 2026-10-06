@@ -8,20 +8,19 @@
  */
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsqlColumnLookup } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
-import type { DataTableColumnsMeta } from '../types';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
 
 export const useSorting = ({
   rows,
   visibleColumns,
-  columnsMeta,
+  esqlColumns,
   sort,
   dataView,
   isPlainRecord,
@@ -32,7 +31,7 @@ export const useSorting = ({
 }: {
   rows: DataTableRecord[] | undefined;
   visibleColumns: string[];
-  columnsMeta: DataTableColumnsMeta | undefined;
+  esqlColumns: EsqlColumnLookup | undefined;
   sort: SortOrder[];
   dataView: DataView;
   isPlainRecord: boolean;
@@ -54,10 +53,10 @@ export const useSorting = ({
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
-        const field = getDataViewFieldOrCreateFromColumnMeta({
+        const field = getDataViewFieldOrCreateFromColumn({
           dataView,
           fieldName: id,
-          columnMeta: columnsMeta?.[id],
+          column: esqlColumns?.getColumn(id),
         });
 
         if (!field) {
@@ -72,7 +71,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [columnsMeta, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
+  }, [esqlColumns, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {

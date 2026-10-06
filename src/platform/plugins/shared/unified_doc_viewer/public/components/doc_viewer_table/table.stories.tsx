@@ -26,7 +26,6 @@ export const Basic: Story = {
   args: {
     hit: APMSpanFixture,
     columns: [],
-    columnsMeta: {},
     filter: () => {},
     onAddColumn: () => {},
     onRemoveColumn: () => {},

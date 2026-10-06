@@ -9,12 +9,13 @@
 
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getFieldIconType } from './get_field_icon_type';
 
 export function getTextBasedColumnIconType(
   columnMeta:
     | {
-        type: DatatableColumnMeta['type'];
+        type: DatatableColumnMeta['type'] | KBN_FIELD_TYPES;
         esType?: DatatableColumnMeta['esType'];
       }
     | undefined
@@ -22,7 +23,11 @@ export function getTextBasedColumnIconType(
 ): string | null {
   return columnMeta && columnMeta.type
     ? getFieldIconType(
-        convertDatatableColumnToDataViewFieldSpec({ id: '', name: '', meta: columnMeta })
+        convertDatatableColumnToDataViewFieldSpec({
+          id: '',
+          name: '',
+          meta: { type: columnMeta.type as DatatableColumnMeta['type'], esType: columnMeta.esType },
+        })
       )
     : null;
 }

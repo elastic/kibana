@@ -17,7 +17,7 @@ import React, { useEffect } from 'react';
 import userEvent from '@testing-library/user-event';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
-  columnsMetaOverridingBytesType,
+  esqlSourceOverridingBytesType,
   createDataViewWithBytesField,
   createFormatFieldValueReactSpy,
   dataViewMock,
@@ -29,6 +29,7 @@ import * as sourcePopoverContentModule from '../components/source_popover_conten
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const mockSourceDocument = jest.spyOn(sourceDocumentModule, 'SourceDocument');
 const mockSourcePopoverContent = jest.spyOn(sourcePopoverContentModule, 'default');
@@ -134,18 +135,10 @@ const getCustomEsqlDataTableCellValue = () => {
   return getRenderCellValueFn({
     documentsDisplayMode: 'table',
     closePopover: jest.fn(),
-    columnsMeta: {
-      // custom ES|QL var
-      var0: {
-        type: 'number',
-        esType: 'long',
-      },
-      // custom ES|QL override
-      bytes: {
-        type: 'string',
-        esType: 'keyword',
-      },
-    },
+    esqlColumns: createMockEsqlSource([
+      { name: 'var0', type: 'number', esType: 'long', source: 'index' },
+      { name: 'bytes', type: 'string', esType: 'keyword', source: 'index' },
+    ]),
     dataView: dataViewMock,
     fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
     maxEntries: 100,
@@ -173,7 +166,7 @@ const getUnmappedFieldDataTableCellValue = () => {
   return getRenderCellValueFn({
     documentsDisplayMode: 'table',
     closePopover: jest.fn(),
-    columnsMeta: undefined,
+    esqlColumns: undefined,
     dataView: dataViewMock,
     fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
     maxEntries: 100,
@@ -192,7 +185,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -222,7 +215,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -250,7 +243,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: closePopoverMockFn,
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -283,7 +276,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -314,7 +307,7 @@ describe('Unified data table cell rendering', () => {
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
         columnId: '_source',
-        columnsMeta: undefined,
+        esqlColumns: undefined,
         dataView: dataViewMock,
         fieldFormats: mockServices.fieldFormats,
         isCompressed: true,
@@ -334,7 +327,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'json',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       externalCustomRenderers: {
         _source: CustomSourceRenderer,
@@ -383,7 +376,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewWithoutSource,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       isPlainRecord: true,
@@ -421,7 +414,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -449,7 +442,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       isPlainRecord: true,
@@ -479,7 +472,7 @@ describe('Unified data table cell rendering', () => {
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
         columnId: '_source',
-        columnsMeta: undefined,
+        esqlColumns: undefined,
         dataView: dataViewMock,
         fieldFormats: mockServices.fieldFormats,
         isCompressed: true,
@@ -500,7 +493,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -531,7 +524,7 @@ describe('Unified data table cell rendering', () => {
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
         columnId: '_source',
-        columnsMeta: undefined,
+        esqlColumns: undefined,
         dataView: dataViewMock,
         fieldFormats: mockServices.fieldFormats,
         isCompressed: true,
@@ -551,7 +544,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       // this is the number of rendered items
@@ -580,7 +573,7 @@ describe('Unified data table cell rendering', () => {
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
         columnId: '_source',
-        columnsMeta: undefined,
+        esqlColumns: undefined,
         dataView: dataViewMock,
         fieldFormats: mockServices.fieldFormats,
         isCompressed: true,
@@ -597,7 +590,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -626,7 +619,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -653,7 +646,7 @@ describe('Unified data table cell rendering', () => {
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
         columnId: 'object',
-        columnsMeta: undefined,
+        esqlColumns: undefined,
         dataView: dataViewMock,
         fieldFormats: mockServices.fieldFormats,
         isCompressed: true,
@@ -675,7 +668,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -702,7 +695,7 @@ describe('Unified data table cell rendering', () => {
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
         columnId: 'object',
-        columnsMeta: undefined,
+        esqlColumns: undefined,
         dataView: dataViewMock,
         fieldFormats: mockServices.fieldFormats,
         isCompressed: true,
@@ -721,7 +714,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: closePopoverMockFn,
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -749,7 +742,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: closePopoverMockFn,
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -783,7 +776,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -812,7 +805,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -841,7 +834,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -921,7 +914,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -960,7 +953,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -999,7 +992,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      esqlColumns: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -1044,7 +1037,7 @@ describe('Unified data table cell rendering', () => {
     expect(element).toHaveClass('unifiedDataTable__cellValue');
   });
 
-  it('renders custom ES|QL fields from columnsMeta correctly', () => {
+  it('renders custom ES|QL fields correctly', () => {
     const fieldsCreateSpy = jest.spyOn(dataViewMock.fields, 'create');
     fieldsCreateSpy.mockClear();
     const DataTableCellValue = getCustomEsqlDataTableCellValue();
@@ -1077,7 +1070,7 @@ describe('Unified data table cell rendering', () => {
     });
   });
 
-  it('renders ES|QL fields with columnsMeta overrides correctly', () => {
+  it('renders ES|QL fields with type overrides correctly', () => {
     const fieldsCreateSpy = jest.spyOn(dataViewMock.fields, 'create');
     fieldsCreateSpy.mockClear();
     const DataTableCellValue = getCustomEsqlDataTableCellValue();
@@ -1110,8 +1103,8 @@ describe('Unified data table cell rendering', () => {
     });
   });
 
-  describe('columnsMeta handling for _source column', () => {
-    it('should use data view field type when columnsMeta is undefined', () => {
+  describe('ES|QL columns for _source column', () => {
+    it('should use data view field type without ES|QL columns', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -1130,7 +1123,7 @@ describe('Unified data table cell rendering', () => {
       const DataTableCellValue = getRenderCellValueFn({
         documentsDisplayMode: 'table',
         closePopover: jest.fn(),
-        columnsMeta: undefined,
+        esqlColumns: undefined,
         dataView: testDataView,
         fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
         maxEntries: 100,
@@ -1160,7 +1153,7 @@ describe('Unified data table cell rendering', () => {
       formatFieldValueReactSpy.mockRestore();
     });
 
-    it('should use columnsMeta type instead of data view field type when provided', () => {
+    it('should use the ES|QL column type instead of the data view field type', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -1179,7 +1172,7 @@ describe('Unified data table cell rendering', () => {
       const DataTableCellValue = getRenderCellValueFn({
         documentsDisplayMode: 'table',
         closePopover: jest.fn(),
-        columnsMeta: columnsMetaOverridingBytesType,
+        esqlColumns: esqlSourceOverridingBytesType,
         dataView: testDataView,
         fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
         maxEntries: 100,
@@ -1247,7 +1240,7 @@ describe('Unified data table cell rendering', () => {
       getRenderCellValueFn({
         documentsDisplayMode: 'table',
         closePopover: jest.fn(),
-        columnsMeta: undefined,
+        esqlColumns: undefined,
         dataView: dataViewMock,
         externalCustomRenderers,
         fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,

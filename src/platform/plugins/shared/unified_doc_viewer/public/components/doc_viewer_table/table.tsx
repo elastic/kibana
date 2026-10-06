@@ -28,6 +28,7 @@ import {
   getShouldShowFieldHandler,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  getEsqlColumnLookup,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -106,6 +107,7 @@ const savePinnedFieldsToStorage = (newFields: string[], dataViewId: string, stor
 
 const InternalDocViewerTable = ({
   columns,
+  dataSource,
   columnsMeta,
   hit,
   dataView,
@@ -119,6 +121,10 @@ const InternalDocViewerTable = ({
   const styles = useMemoCss(componentStyles);
 
   const isEsqlMode = Array.isArray(textBasedHits);
+  const esqlColumns = useMemo(
+    () => getEsqlColumnLookup({ dataSource, columnsMeta }),
+    [dataSource, columnsMeta]
+  );
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -199,10 +205,10 @@ const InternalDocViewerTable = ({
         dataView,
         fieldFormats,
         isPinned,
-        columnsMeta,
+        esqlColumns,
       });
     },
-    [dataView, hit, columnsMeta, flattened, fieldFormats]
+    [dataView, hit, esqlColumns, flattened, fieldFormats]
   );
 
   const fieldsFromColumns = useMemo(
@@ -225,7 +231,7 @@ const InternalDocViewerTable = ({
         canPrependTimeFieldColumn(
           columns,
           dataView.timeFieldName,
-          columnsMeta,
+          esqlColumns,
           !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
           isEsqlMode
         )
@@ -245,7 +251,7 @@ const InternalDocViewerTable = ({
     mapping,
     dataView,
     columns,
-    columnsMeta,
+    esqlColumns,
     isEsqlMode,
     uiSettings,
   ]);

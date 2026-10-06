@@ -9,13 +9,10 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type {
-  DataTableRecord,
-  DataTableColumnsMeta,
-  ShouldShowFieldInTableHandler,
-} from '@kbn/discover-utils/types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
+import type { EsqlColumnLookup } from '@kbn/discover-utils';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
 import type { DocumentsDisplayMode } from '../types';
 import { SOURCE_COLUMN } from './columns';
@@ -34,7 +31,7 @@ export const convertValueToString = ({
   columnId,
   dataView,
   fieldFormats,
-  columnsMeta,
+  esqlColumns,
   options,
   documentsDisplayMode,
   shouldShowFieldHandler,
@@ -45,7 +42,7 @@ export const convertValueToString = ({
   columnId: string;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  esqlColumns: EsqlColumnLookup | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
     compatibleWithMarkdown?: boolean; // values as one-liner
@@ -66,7 +63,7 @@ export const convertValueToString = ({
     const multiline = !(options?.compatibleWithCSV || options?.compatibleWithMarkdown);
     return {
       formattedString: sourceDocumentToJsonString(
-        { row, dataView, columnsMeta, shouldShowFieldHandler, selectedColumns },
+        { row, dataView, shouldShowFieldHandler, selectedColumns },
         { multiline }
       ),
       withFormula: false,
@@ -74,10 +71,10 @@ export const convertValueToString = ({
   }
 
   const value = row.flattened?.[columnId];
-  const field = getDataViewFieldOrCreateFromColumnMeta({
+  const field = getDataViewFieldOrCreateFromColumn({
     fieldName: columnId,
     dataView,
-    columnMeta: columnsMeta?.[columnId],
+    column: esqlColumns?.getColumn(columnId),
   });
 
   return commonConvertValueToString({

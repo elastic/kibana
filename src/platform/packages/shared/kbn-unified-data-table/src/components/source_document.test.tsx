@@ -13,7 +13,7 @@ import React from 'react';
 import SourceDocument from './source_document';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
-  columnsMetaOverridingBytesType,
+  esqlSourceOverridingBytesType,
   createDataViewWithBytesField,
   createFormatFieldValueReactSpy,
   dataViewMock,
@@ -51,7 +51,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
+        esqlColumns={undefined}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
@@ -87,7 +87,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="foo"
-        columnsMeta={undefined}
+        esqlColumns={undefined}
         dataView={dataViewMock}
         fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
@@ -115,7 +115,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
+        esqlColumns={undefined}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
@@ -146,7 +146,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
+        esqlColumns={undefined}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
@@ -166,8 +166,8 @@ describe('Unified data table source document cell rendering', () => {
     expect(within(descriptionList).queryByText(/and \d+ more fields/)).not.toBeInTheDocument();
   });
 
-  describe('with columnsMeta', () => {
-    it('should use data view field type when columnsMeta is undefined', () => {
+  describe('with ES|QL columns', () => {
+    it('should use data view field type without ES|QL columns', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -184,7 +184,7 @@ describe('Unified data table source document cell rendering', () => {
       renderWithI18n(
         <SourceDocument
           columnId="_source"
-          columnsMeta={undefined}
+          esqlColumns={undefined}
           dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
           isPlainRecord={true}
@@ -204,7 +204,7 @@ describe('Unified data table source document cell rendering', () => {
       formatFieldValueReactSpy.mockRestore();
     });
 
-    it('should use columnsMeta type instead of data view field type when provided', () => {
+    it('should use the ES|QL column type instead of the data view field type', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -221,7 +221,7 @@ describe('Unified data table source document cell rendering', () => {
       renderWithI18n(
         <SourceDocument
           columnId="_source"
-          columnsMeta={columnsMetaOverridingBytesType}
+          esqlColumns={esqlSourceOverridingBytesType}
           dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
           isPlainRecord={true}

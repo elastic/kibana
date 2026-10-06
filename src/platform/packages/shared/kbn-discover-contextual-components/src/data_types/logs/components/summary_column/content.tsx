@@ -9,9 +9,10 @@
 
 import React, { useMemo, type ReactNode } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { ShouldShowFieldInTableHandler } from '@kbn/discover-utils';
+import type { EsqlColumnLookup, ShouldShowFieldInTableHandler } from '@kbn/discover-utils';
 import {
   formatFieldStringValueWithHighlights,
+  getEsqlColumnLookup,
   getMessageFieldWithFallbacks,
   getLogLevelCoalescedValue,
   getLogLevelColor,
@@ -177,9 +178,10 @@ export const Content = ({
   isSingleLine = false,
   row,
   shouldShowFieldHandler,
-  columnsMeta,
+  dataSource,
 }: ContentProps) => {
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
+  const esqlColumns = useMemo(() => getEsqlColumnLookup({ dataSource }), [dataSource]);
 
   const { euiTheme } = useEuiTheme();
   const isDarkTheme = useKibanaIsDarkMode();
@@ -215,21 +217,15 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
-      columnsMeta={columnsMeta}
+      esqlColumns={esqlColumns}
     />
   );
 };
 
 type FormattedSourceDocumentProps = Pick<
   ContentProps,
-  | 'columnId'
-  | 'dataView'
-  | 'fieldFormats'
-  | 'isCompressed'
-  | 'row'
-  | 'shouldShowFieldHandler'
-  | 'columnsMeta'
->;
+  'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
+> & { esqlColumns: EsqlColumnLookup | undefined };
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {
   const formattedRow = useMemo(() => formatJsonDocumentForContent(row), [row]);

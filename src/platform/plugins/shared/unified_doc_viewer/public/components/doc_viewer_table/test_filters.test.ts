@@ -42,7 +42,7 @@ const rowExtensionKeyword = new FieldRow({
   dataView,
   fieldFormats: {} as FieldFormatsStart,
   isPinned: false,
-  columnsMeta: undefined,
+  esqlColumns: undefined,
 });
 const rowBytes = new FieldRow({
   name: 'bytes',
@@ -51,7 +51,7 @@ const rowBytes = new FieldRow({
   dataView,
   fieldFormats: {} as FieldFormatsStart,
   isPinned: false,
-  columnsMeta: undefined,
+  esqlColumns: undefined,
 });
 const rowTimestamp = new FieldRow({
   name: '@timestamp',
@@ -60,7 +60,7 @@ const rowTimestamp = new FieldRow({
   dataView,
   fieldFormats: {} as FieldFormatsStart,
   isPinned: false,
-  columnsMeta: undefined,
+  esqlColumns: undefined,
 });
 // machine.os and geo.src both exist in stubLogstashDataView, so the data view's
 // formatter is used (avoids needing a real fieldFormats mock).
@@ -71,7 +71,7 @@ const rowMachineOs = new FieldRow({
   dataView,
   fieldFormats: {} as FieldFormatsStart,
   isPinned: false,
-  columnsMeta: undefined,
+  esqlColumns: undefined,
 });
 const rowGeoSrc = new FieldRow({
   name: 'geo.src',
@@ -80,7 +80,7 @@ const rowGeoSrc = new FieldRow({
   dataView,
   fieldFormats: {} as FieldFormatsStart,
   isPinned: false,
-  columnsMeta: undefined,
+  esqlColumns: undefined,
 });
 
 describe('useTableFilters', () => {
