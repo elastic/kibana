@@ -11,6 +11,7 @@ import {
   SIEM_READINESS_QUALITY_TOOL_ID,
   SIEM_READINESS_CONTINUITY_TOOL_ID,
   SIEM_READINESS_RETENTION_TOOL_ID,
+  SIEM_READINESS_PLATFORM_TOOL_ID,
 } from '../../tools/siem_readiness';
 
 export const siemReadinessSkill = defineSkillType({
@@ -38,6 +39,7 @@ Use this skill when the user asks about:
 - \`security.siem_readiness.get_quality\` — ECS field compatibility results per index
 - \`security.siem_readiness.get_continuity\` — ingest pipeline stats (docs processed, failure rate, serving indices)
 - \`security.siem_readiness.get_retention\` — retention policy per data stream / index, days, and compliance status
+- \`security.siem_readiness.get_platform_readiness\` — readiness rolled up by ECS-derived platform label (streams, rules, MITRE tactics, nested findings across all dimensions)
 
 ## Response Structure
 
@@ -200,6 +202,19 @@ Playbook guidance:
 1. Call the relevant tools
 2. In the Findings section, focus on the Endpoint category but still show other categories if they have findings
 
+### For platform-specific questions (e.g., "How is AWS account 123456789012 readiness?"):
+1. Call \`get_platform_readiness\` with the \`platform\` parameter set to the user's platform label (case-insensitive partial match is supported)
+2. For comparison questions like "Which platform is least ready?" or "Compare windows Endpoints vs AWS", call \`get_platform_readiness\` without a filter
+3. Structure the response around each platform in \`platforms[]\`:
+   - Platform name
+   - Streams: \`activeStreams\`
+   - Enabled rules: \`enabledRules\`
+   - MITRE tactics: \`mitreTactics\`
+   - Status: \`status\` plus \`topFinding\` when present
+   - Nested \`findings\` with full blast radius sub-bullets
+4. Platform labels come from ECS fields in the actual data (for example "AWS account 123456789012", "windows Endpoints", "okta") — not environment nicknames like "AWS Prod"
+5. If the user's label does not match any platform, list the known platforms from the tool response and ask them to pick one
+
 ### For silence and volume-drop questions:
 - "Which data streams have gone silent?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type === 'silence'\`, report resource name, \`silenceMs\` converted to human-readable duration, and blast radius.
 - "Are any streams showing an unusual volume drop vs last week?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type\` is \`volume_drop_warning\` or \`volume_drop_critical\`, report \`volumeDropPct\`, \`lastFullDayDocs\`, \`baseline7dAvg\`, and blast radius.
@@ -250,6 +265,16 @@ Playbook guidance:
 - Threshold: 365 days (FedRAMP). \`retentionDays: null\` means no explicit retention — data kept forever — which is compliant.
 - When reporting retention findings: group by category using the \`categories\` field. Example: "1 index in Cloud has retention below threshold: logs-cloud_security_posture.findings-default (180d)".
 
+### Platform (\`get_platform_readiness\`)
+- \`status\`: \`healthy | actionsRequired | noData\`
+- \`summary\`: pre-computed summary string
+- \`platforms\`: array of \`{ platform, primaryCategory, activeStreams, enabledRules, mitreTactics, status, topFinding, findings }\`
+- \`platform\` parameter (optional): filter to one platform label; omit to compare all discovered platforms
+- Example prompts:
+  - "How is AWS account 123456789012 readiness?"
+  - "Which platform is least ready?"
+  - "Compare windows Endpoints vs AWS"
+
 ## Best Practices
 - Always call \`actionableFindings\` arrays first to build the Suggested Actions section — they are pre-computed from the data.
 - When \`statsAvailable\` is false (serverless), note this in the Continuity findings rather than reporting zero failures.
@@ -262,5 +287,6 @@ Playbook guidance:
     SIEM_READINESS_QUALITY_TOOL_ID,
     SIEM_READINESS_CONTINUITY_TOOL_ID,
     SIEM_READINESS_RETENTION_TOOL_ID,
+    SIEM_READINESS_PLATFORM_TOOL_ID,
   ],
 });

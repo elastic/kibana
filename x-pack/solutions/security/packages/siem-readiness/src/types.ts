@@ -218,3 +218,20 @@ export interface RetentionPayload {
   items: RetentionInfo[];
   actionableFindings: ActionableFinding[];
 }
+
+export interface PlatformReadinessItem {
+  platform: string;
+  primaryCategory?: MainCategories;
+  activeStreams: number;
+  enabledRules: number;
+  mitreTactics: number;
+  status: VisibilityStatus;
+  topFinding?: string;
+  findings: ActionableFinding[];
+}
+
+export interface PlatformReadinessPayload {
+  status: VisibilityStatus;
+  summary: string;
+  platforms: PlatformReadinessItem[];
+}
