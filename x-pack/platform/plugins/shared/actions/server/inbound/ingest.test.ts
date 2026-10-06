@@ -18,7 +18,11 @@ import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
 import { composeIngestToken } from './ingress_credential';
-import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
+import {
+  INBOUND_EVENTS_DISABLED_MESSAGE,
+  INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+  INBOUND_EVENTS_RATE_LIMITED_MESSAGE,
+} from './constants';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { ingestInboundEvent } from './ingest';
 import { InboundEventRateLimiter } from './inbound_event_rate_limiter';
@@ -62,6 +66,7 @@ describe('ingestInboundEvent', () => {
   const elasticsearchClient = elasticsearchClientMock.createClusterClient();
   const getElasticsearchClient = jest.fn().mockResolvedValue(elasticsearchClient);
   const getKibanaRequestAccess = jest.fn().mockResolvedValue(true);
+  let rateLimiter: InboundEventRateLimiter;
 
   const connectorId = 'connector-1';
   const credentialId = 'cred-1';
@@ -151,6 +156,12 @@ describe('ingestInboundEvent', () => {
       }
       return mockConnectorGet() as never;
     });
+    rateLimiter = new InboundEventRateLimiter({
+      enabled: false,
+      maxKeys: 10_000,
+      remoteAddress: { limit: 10, windowMs: 60_000 },
+      connector: { limit: 300, windowMs: 60_000 },
+    });
   });
 
   const run = async (overrides?: {
@@ -164,6 +175,9 @@ describe('ingestInboundEvent', () => {
     headers?: Record<string, string>;
     emit?: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
     inMemoryConnectors?: InMemoryConnector[];
+    remoteAddress?: string;
+    omitRemoteAddress?: boolean;
+    rateLimiter?: InboundEventRateLimiter;
   }) => {
     const response = httpServerMock.createResponseFactory();
     const result = await ingestInboundEvent({
@@ -185,12 +199,10 @@ describe('ingestInboundEvent', () => {
       getElasticsearchClient,
       getKibanaRequestAccess,
       inMemoryConnectors: overrides?.inMemoryConnectors ?? [],
-      rateLimiter: new InboundEventRateLimiter({
-        enabled: false,
-        maxKeys: 10_000,
-        remoteAddress: { limit: 10, windowMs: 60_000 },
-        connector: { limit: 300, windowMs: 60_000 },
-      }),
+      remoteAddress: overrides?.omitRemoteAddress
+        ? undefined
+        : overrides?.remoteAddress ?? '203.0.113.4',
+      rateLimiter: overrides?.rateLimiter ?? rateLimiter,
     });
     mapIngestResultToResponse(result, response);
     return { response, result };
@@ -1045,6 +1057,236 @@ describe('ingestInboundEvent', () => {
       expect.anything()
     );
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('es-secret');
+  });
+
+  const windowLimiter = ({
+    enabled = true,
+    remoteAddressLimit = 10,
+    connectorLimit = 300,
+  }: {
+    enabled?: boolean;
+    remoteAddressLimit?: number;
+    connectorLimit?: number;
+  } = {}) =>
+    new InboundEventRateLimiter({
+      enabled,
+      maxKeys: 100,
+      remoteAddress: { limit: remoteAddressLimit, windowMs: 60_000 },
+      connector: { limit: connectorLimit, windowMs: 60_000 },
+    });
+
+  const emptyEmitSpec = () =>
+    createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events: [] })) as ReturnType<
+      typeof getConnectorSpec
+    >;
+
+  it('returns 429 before the saved-object read when the address budget is already spent', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1 });
+    limiter.recordRemoteAddressFailure('203.0.113.9');
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const { response: res, result } = await run({
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.9',
+    });
+
+    expect(result).toEqual({
+      status: 'rate_limited',
+      budget: 'remoteAddress',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+    expect(res.customError).toHaveBeenCalledWith({
+      statusCode: 429,
+      body: INBOUND_EVENTS_RATE_LIMITED_MESSAGE,
+      headers: {
+        'Retry-After': `${result.status === 'rate_limited' ? result.retryAfterSeconds : ''}`,
+        RateLimit: `"inbound-events";r=0;t=${
+          result.status === 'rate_limited' ? result.retryAfterSeconds : ''
+        }`,
+      },
+    });
+    expectOutcome('debug', 'rate_limited');
+    expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('203.0.113.9');
+    expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('ingest-token-value');
+  });
+
+  it('counts each 404 against the address budget and then skips the saved-object read', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 2, connectorLimit: 10 });
+    getConnectorSpecMock.mockReturnValue(undefined);
+
+    const first = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.10' });
+    const second = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.10' });
+    expect(first.result.status).toBe('not_found');
+    expect(second.result.status).toBe('not_found');
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+    const third = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.10' });
+    expect(third.result).toEqual({
+      status: 'rate_limited',
+      budget: 'remoteAddress',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+  });
+
+  it('does not spend the address budget on successful ingests', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const first = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.11' });
+    const second = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.11' });
+
+    expect(first.result.status).toBe('accepted');
+    expect(second.result.status).toBe('accepted');
+  });
+
+  it('denies the connector after auth without decrypting, emitting, or spending the address budget', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 1 });
+    limiter.consume('connector', `default\0.myConnector\0${connectorId}`);
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const denied = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.12' });
+    expect(denied.result).toEqual({
+      status: 'rate_limited',
+      budget: 'connector',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(getUnsecuredSavedObjectsClient).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('info', 'rate_limited');
+    expect(JSON.stringify(logger.info.mock.calls)).not.toContain('203.0.113.12');
+
+    getConnectorSpecMock.mockReturnValue(undefined);
+    const followUp = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.12' });
+    expect(followUp.result.status).toBe('not_found');
+  });
+
+  it('does not consume the connector budget when the token is rejected', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 10, connectorLimit: 1 });
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const rejected = await run({ rateLimiter: limiter, query: { token: 'wrong' } });
+    expect(rejected.result.status).toBe('not_found');
+
+    const accepted = await run({ rateLimiter: limiter });
+    expect(accepted.result.status).toBe('accepted');
+  });
+
+  it('consumes the connector budget on the ApiKey path and denies the next request before emit', async () => {
+    const limiter = windowLimiter({ connectorLimit: 1 });
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const input = {
+      rateLimiter: limiter,
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    };
+
+    const first = await run(input);
+    expect(first.result.status).toBe('accepted');
+    expect(handleEvents).toHaveBeenCalledTimes(1);
+
+    const second = await run(input);
+    expect(second.result).toEqual({
+      status: 'rate_limited',
+      budget: 'connector',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(handleEvents).toHaveBeenCalledTimes(1);
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+  });
+
+  it('counts an authenticated handshake against the connector budget', async () => {
+    const limiter = windowLimiter({ connectorLimit: 1 });
+    const handleEvents = jest.fn().mockResolvedValue({
+      type: 'http',
+      httpResponse: { status: 200, body: { challenge: 'abc' } },
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const first = await run({ rateLimiter: limiter });
+    expect(first.result.status).toBe('spoke_http');
+    expect(handleEvents).toHaveBeenCalledTimes(1);
+
+    const second = await run({ rateLimiter: limiter });
+    expect(second.result).toEqual({
+      status: 'rate_limited',
+      budget: 'connector',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(handleEvents).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a tight limit when rate limiting is disabled', async () => {
+    const limiter = windowLimiter({
+      enabled: false,
+      remoteAddressLimit: 1,
+      connectorLimit: 1,
+    });
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const first = await run({ rateLimiter: limiter });
+    const second = await run({ rateLimiter: limiter });
+    expect(first.result.status).toBe('accepted');
+    expect(second.result.status).toBe('accepted');
+  });
+
+  it('shares one unknown address key when the socket address is missing', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
+    limiter.recordRemoteAddressFailure('unknown');
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const { result } = await run({ rateLimiter: limiter, omitRemoteAddress: true });
+    expect(result).toEqual({
+      status: 'rate_limited',
+      budget: 'remoteAddress',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+  });
+
+  it('does not spend the address budget on a 500', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    const unavailable = new errors.ResponseError({
+      body: {},
+      statusCode: 503,
+      headers: {},
+      warnings: [],
+      meta: {} as DiagnosticResult['meta'],
+    } as TransportResult);
+    elasticsearchClient
+      .asScoped()
+      .asCurrentUser.security.authenticate.mockRejectedValueOnce(unavailable);
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const failed = await run({
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.13',
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(failed.result.status).toBe('error');
+
+    getConnectorSpecMock.mockReturnValue(undefined);
+    const followUp = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.13' });
+    expect(followUp.result.status).toBe('not_found');
   });
 });
 

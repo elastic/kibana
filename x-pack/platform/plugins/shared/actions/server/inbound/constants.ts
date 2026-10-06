@@ -26,6 +26,13 @@ export const INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+export const INBOUND_EVENTS_RATE_LIMITED_MESSAGE = i18n.translate(
+  'xpack.actions.inboundEvents.rateLimitedError',
+  {
+    defaultMessage: 'Too many requests. Try again later.',
+  }
+);
+
 /**
  * Default / schema default for `xpack.actions.inboundEvents.maxEmitted`.
  */

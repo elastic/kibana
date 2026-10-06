@@ -49,6 +49,7 @@ describe('buildInboundEventsClient', () => {
       headers: {},
       query: {},
       body: {},
+      remoteAddress: '203.0.113.5',
     });
 
     expect(ingestInboundEventMock).toHaveBeenCalledWith(expect.objectContaining({ rateLimiter }));
