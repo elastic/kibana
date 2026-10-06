@@ -722,6 +722,16 @@
                                     "type": "keyword",
                                     "ignore_above": 1024
                                 },
+                                "alert_count": {
+                                    "type": "long"
+                                },
+                                "alert_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
                                 "episode_count": {
                                     "type": "long"
                                 },

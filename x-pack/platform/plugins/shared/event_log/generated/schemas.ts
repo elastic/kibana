@@ -329,6 +329,8 @@ export const EventSchema = schema.maybe(
             dispatcher: schema.maybe(
               schema.object({
                 failure_reason: ecsString(),
+                alert_count: ecsStringOrNumber(),
+                alert_ids: ecsStringMulti(),
                 episode_count: ecsStringOrNumber(),
                 episode_ids: ecsStringMulti(),
                 rule_count: ecsStringOrNumber(),

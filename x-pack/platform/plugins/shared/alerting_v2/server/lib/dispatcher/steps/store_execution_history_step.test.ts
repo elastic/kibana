@@ -102,8 +102,8 @@ describe('StoreExecutionHistoryStep', () => {
       },
     ]);
     expect(event?.kibana?.alerting_v2?.dispatcher).toEqual({
-      episode_count: 3,
-      episode_ids: ['ep-1', 'ep-2', 'ep-3'],
+      alert_count: 3,
+      alert_ids: ['ep-1', 'ep-2', 'ep-3'],
       rule_count: 2,
       action_group_count: 2,
       action_group_ids: ['group-1', 'group-2'],
@@ -167,8 +167,8 @@ describe('StoreExecutionHistoryStep', () => {
     expect(event?.event?.action).toBe('throttled');
     expect(event?.event?.outcome).toBe('success');
     expect(event?.kibana?.alerting_v2?.dispatcher).toEqual({
-      episode_count: 1,
-      episode_ids: ['ep-1'],
+      alert_count: 1,
+      alert_ids: ['ep-1'],
       rule_count: 1,
       action_group_count: 1,
       action_group_ids: ['group-1'],
@@ -178,7 +178,7 @@ describe('StoreExecutionHistoryStep', () => {
     });
   });
 
-  it('emits one unmatched summary per rule with episode_ids for that rule', async () => {
+  it('emits one unmatched summary per rule with alert_ids for that rule', async () => {
     const ruleA = createRule({ id: 'rule-a' });
     const ruleB = createRule({ id: 'rule-b' });
     const unmatchedA1 = createAlert({ rule_id: 'rule-a', alert_id: 'ep-a1' });
@@ -213,15 +213,15 @@ describe('StoreExecutionHistoryStep', () => {
       },
     ]);
     expect(eventA?.kibana?.alerting_v2?.dispatcher).toEqual({
-      episode_count: 2,
-      episode_ids: ['ep-a1', 'ep-a2'],
+      alert_count: 2,
+      alert_ids: ['ep-a1', 'ep-a2'],
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
 
     const eventB = byRuleId.get('rule-b');
     expect(eventB?.kibana?.alerting_v2?.dispatcher).toEqual({
-      episode_count: 1,
-      episode_ids: ['ep-b1'],
+      alert_count: 1,
+      alert_ids: ['ep-b1'],
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
     expect(eventB?.kibana?.saved_objects?.[0]?.type_id).toBe('alert');
@@ -251,7 +251,7 @@ describe('StoreExecutionHistoryStep', () => {
     const outcomes = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.outcome);
     expect(outcomes).toEqual(['success', 'success', 'success']);
     const unmatchedEvent = eventLogger.logEvent.mock.calls[2][0];
-    expect(unmatchedEvent?.kibana?.alerting_v2?.dispatcher?.episode_ids).toEqual(['ep-unmatched']);
+    expect(unmatchedEvent?.kibana?.alerting_v2?.dispatcher?.alert_ids).toEqual(['ep-unmatched']);
   });
 
   it('stamps the same execution.uuid on every event emitted in a single run', async () => {
@@ -375,8 +375,8 @@ describe('StoreExecutionHistoryStep', () => {
       action_group_count: 1,
       action_group_ids: ['group-1'],
       workflow_ids: ['wf-a'],
-      episode_count: 2,
-      episode_ids: ['ep-1', 'ep-2'],
+      alert_count: 2,
+      alert_ids: ['ep-1', 'ep-2'],
       rule_count: 2,
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
@@ -653,7 +653,7 @@ describe('StoreExecutionHistoryStep', () => {
         action_group_ids: ['g1'],
         workflow_ids: ['wf-a'],
         workflow_execution_ids: ['exec-a'],
-        episode_ids: ['ep-1'],
+        alert_ids: ['ep-1'],
       });
       expect(failed?.kibana?.alerting_v2?.dispatcher?.workflow_ids).toEqual(['wf-b']);
     });
@@ -736,7 +736,7 @@ describe('StoreExecutionHistoryStep', () => {
         action_group_ids: ['g1'],
         workflow_ids: ['wf-a'],
         workflow_execution_ids: ['exec-a'],
-        episode_ids: ['ep-1'],
+        alert_ids: ['ep-1'],
       });
     });
 
@@ -784,8 +784,8 @@ describe('StoreExecutionHistoryStep', () => {
         action_group_count: 1,
         action_group_ids: ['g2'],
         workflow_ids: ['wf-b'],
-        episode_count: 1,
-        episode_ids: ['ep-2'],
+        alert_count: 1,
+        alert_ids: ['ep-2'],
         rule_count: 1,
       });
     });
@@ -859,7 +859,7 @@ describe('StoreExecutionHistoryStep', () => {
       const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
       expect(actions).toEqual(['unmatched', 'unmatched']);
       const alertSets = eventLogger.logEvent.mock.calls.map(
-        ([event]) => event?.kibana?.alerting_v2?.dispatcher?.episode_ids
+        ([event]) => event?.kibana?.alerting_v2?.dispatcher?.alert_ids
       );
       expect(alertSets).toContainEqual(['pd-1']);
       expect(alertSets).toContainEqual(['dd-1']);

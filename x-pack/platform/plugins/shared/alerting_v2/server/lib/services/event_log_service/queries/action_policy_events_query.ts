@@ -47,11 +47,12 @@ export interface BuildActionPolicyEventsQueryParams {
    */
   mandatoryRuleIds?: string[];
   /**
-   * Episode filter. Applied as an AND clause: the event must reference at
-   * least one of these episode ids in the top-level
-   * `kibana.alerting_v2.dispatcher.episode_ids` keyword array.
+   * Alert filter. Applied as an AND clause: the event must reference at
+   * least one of these alert ids in the top-level
+   * `kibana.alerting_v2.dispatcher.alert_ids` keyword array, or in the legacy
+   * `episode_ids` array of events written before the alert rename.
    */
-  episodeIds?: string[];
+  alertIds?: string[];
 }
 
 /**
@@ -126,8 +127,8 @@ const buildBaseActionPolicyEventsQuery = (
     filters.push(buildMandatoryRuleClause(params.mandatoryRuleIds));
   }
 
-  if (params.episodeIds && params.episodeIds.length > 0) {
-    filters.push({ terms: { 'kibana.alerting_v2.dispatcher.episode_ids': params.episodeIds } });
+  if (params.alertIds && params.alertIds.length > 0) {
+    filters.push(buildAlertIdClause(params.alertIds));
   }
 
   return {
@@ -189,6 +190,16 @@ const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContainer => 
     should: [
       buildNestedSavedObjectClause(RULE_SAVED_OBJECT_TYPE, ruleIds),
       { terms: { 'kibana.alerting_v2.dispatcher.rule_ids': ruleIds } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+const buildAlertIdClause = (alertIds: string[]): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { terms: { 'kibana.alerting_v2.dispatcher.alert_ids': alertIds } },
+      { terms: { 'kibana.alerting_v2.dispatcher.episode_ids': alertIds } },
     ],
     minimum_should_match: 1,
   },

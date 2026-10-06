@@ -52,8 +52,8 @@ interface PolicySummary {
 }
 
 interface PolicySummaryDispatcherFields {
-  episode_count: number;
-  episode_ids: string[];
+  alert_count: number;
+  alert_ids: string[];
   rule_count: number;
   rule_ids?: string[];
   action_group_count: number;
@@ -63,8 +63,8 @@ interface PolicySummaryDispatcherFields {
 }
 
 interface UnmatchedDispatcherFields {
-  episode_count: number;
-  episode_ids: string[];
+  alert_count: number;
+  alert_ids: string[];
 }
 
 interface DispatchFailureDispatcherFields {
@@ -72,8 +72,8 @@ interface DispatchFailureDispatcherFields {
   action_group_count: number;
   action_group_ids: ActionGroupId[];
   workflow_ids: string[];
-  episode_count: number;
-  episode_ids: string[];
+  alert_count: number;
+  alert_ids: string[];
   rule_count: number;
   rule_ids?: string[];
 }
@@ -181,8 +181,8 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
         spaceId: summary.spaceId,
         savedObjects: refs,
         dispatcherFields: {
-          episode_count: summary.alertIds.size,
-          episode_ids: Array.from(summary.alertIds),
+          alert_count: summary.alertIds.size,
+          alert_ids: Array.from(summary.alertIds),
           rule_count: summary.ruleIds.size,
           rule_ids: spillOver.length > 0 ? spillOver : undefined,
           action_group_count: summary.actionGroupIds.size,
@@ -213,8 +213,8 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
         spaceId: group.space_id,
         savedObjects,
         dispatcherFields: {
-          episode_count: group.alertIds.size,
-          episode_ids: Array.from(group.alertIds),
+          alert_count: group.alertIds.size,
+          alert_ids: Array.from(group.alertIds),
         },
       })
     );
@@ -260,8 +260,8 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
           action_group_count: 1,
           action_group_ids: [failure.actionGroupId],
           workflow_ids: [failure.workflowId],
-          episode_count: alertIds.length,
-          episode_ids: alertIds,
+          alert_count: alertIds.length,
+          alert_ids: alertIds,
           rule_count: ruleIds.length,
           rule_ids: spillOver.length > 0 ? spillOver : undefined,
         },

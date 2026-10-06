@@ -508,7 +508,7 @@ describe('DispatcherService', () => {
               dispatcher: expect.objectContaining({
                 failure_reason: 'license_not_supported',
                 workflow_ids: ['workflow-test-id'],
-                episode_ids: ['alert-2'],
+                alert_ids: ['alert-2'],
               }),
             },
           }),

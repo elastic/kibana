@@ -486,6 +486,15 @@ exports.EcsCustomPropertyMappings = {
                 type: 'keyword',
                 ignore_above: 1024,
               },
+              alert_count: {
+                type: 'long',
+              },
+              alert_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              // Legacy names of alert_count and alert_ids. Keep them mapped while event log
+              // documents written with them can still be read.
               episode_count: {
                 type: 'long',
               },
@@ -564,6 +573,7 @@ exports.EcsEventLogMultiValuedProperties = [
   'kibana.alert.rule.gap.filled_intervals',
   'kibana.alert.rule.gap.unfilled_intervals',
   'kibana.gap_auto_fill.execution.rule_ids',
+  'kibana.alerting_v2.dispatcher.alert_ids',
   'kibana.alerting_v2.dispatcher.episode_ids',
   'kibana.alerting_v2.dispatcher.rule_ids',
   'kibana.alerting_v2.dispatcher.action_group_ids',
