@@ -170,9 +170,13 @@ const redactUpstreamSecrets = (text: string): string =>
       /(authorization["']?\s*[:=]\s*["']?)(?:[A-Za-z][\w-]*\s+)?[^\s"',}]+/gi,
       '$1[redacted]'
     )
-    .replace(/(^|[{},&?;"'])\s*(token["']?\s*[:=]\s*["']?)[^\s"',}]+/gi, '$1$2[redacted]')
+    .replace(/(^|[{},&?;"'])\s*(token["']?\s*[:=]\s*["']?)[^\s"',}]+/gim, '$1$2[redacted]')
     .replace(
-      /\b((?:api[-_ ]?key|password|(?:[\w-]+_)?secret(?:_key)?|private_key|aws_secret_access_key|credential|(?:access|refresh|id|auth|session)_token)["']?\s*[:=]\s*["']?)[^\s"',}]+/gi,
+      /\b((?:api[-_ ]?key|password|passwd|(?:[\w-]+_)?secret(?:_key)?|private_key|aws_secret_access_key|credential|(?:access|refresh|id|auth|session|hf|api|bearer|user)_token|accessToken|clientSecret|refreshToken|idToken)["']?\s*[:=]\s*["']?)[^\s"',}]+/gi,
+      '$1[redacted]'
+    )
+    .replace(
+      /([A-Z][A-Z0-9_]{0,63}(?:_API_KEY|_TOKEN|_SECRET|_PASSWORD)\s*=\s*["']?)[^\s"',}]+/g,
       '$1[redacted]'
     );
 

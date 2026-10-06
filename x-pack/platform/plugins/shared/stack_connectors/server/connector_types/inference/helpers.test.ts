@@ -147,6 +147,16 @@ describe('upstream credential redaction', () => {
     ['refresh_token: abc123', 'abc123'],
     ['{"token":"abc123"}', 'abc123'],
     ['token=abc123', 'abc123'],
+    ['error: bad request\ntoken: ZZSECRET9', 'ZZSECRET9'],
+    ['Host: x\nToken: ZZSECRET9', 'ZZSECRET9'],
+    ['OPENAI_API_KEY=ZZSECRET9', 'ZZSECRET9'],
+    ['HF_TOKEN=ZZSECRET9', 'ZZSECRET9'],
+    ['hf_token: ZZSECRET9', 'ZZSECRET9'],
+    ['api_token: ZZSECRET9', 'ZZSECRET9'],
+    ['bearer_token: ZZSECRET9', 'ZZSECRET9'],
+    ['{"accessToken":"ZZSECRET9"}', 'ZZSECRET9'],
+    ['{"clientSecret":"ZZSECRET9"}', 'ZZSECRET9'],
+    ['passwd: ZZSECRET9', 'ZZSECRET9'],
   ])('redacts %s', (input, secret) => {
     expect(truncateUpstreamBody(input)).not.toContain(secret);
   });
@@ -159,6 +169,10 @@ describe('upstream credential redaction', () => {
     'special token: <|im_end|>',
     "This model's maximum context length is 32768 tokens. However, you requested 40000 tokens",
     'prompt_tokens: 120, completion_tokens: 80',
+    'secretary: Alice',
+    'credentials were not provided',
+    'Input validation error: inputs tokens + max_new_tokens must be <= 32768',
+    '{"object":"error","message":"The input (40000 tokens) is longer than the model\'s context length (32768 tokens).","type":"BadRequestError","param":null,"code":400}',
   ])('keeps %s', (input) => {
     expect(truncateUpstreamBody(input)).toBe(input);
   });
