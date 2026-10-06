@@ -180,7 +180,7 @@ export const buildTanStackColumnHeaderActions = ({
     columnId,
     dataViewField?.displayName,
     settings?.columns?.[columnId]?.display,
-    'summary'
+    'table'
   );
   const columnSchema = getSchemaByKbnType(dataViewField?.type);
   const columnIsSortable =

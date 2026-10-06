@@ -2402,7 +2402,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           dataViewField?.displayName,
           settings?.columns?.[columnId]?.display ??
             (typeof column.columnDef.header === 'string' ? column.columnDef.header : undefined),
-          'summary'
+          'table'
         );
 
         const nextWidth = getColumnAutoFitWidth({
@@ -3265,7 +3265,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         (typeof header.column.columnDef.header === 'string'
                           ? header.column.columnDef.header
                           : undefined),
-                      'summary'
+                      'table'
                     );
                     const columnIndex = effectiveColumns.indexOf(colId);
 

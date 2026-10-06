@@ -224,7 +224,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   }),
 
   pinnedCellShadow: css({
-    boxShadow: `1px 0 0 ${euiTheme.colors.borderStrong}, 2px 0 6px -1px ${euiTheme.colors.borderStrong}`,
+    boxShadow: `1px 0 0 ${euiTheme.colors.borderStrongNeutral}, 2px 0 6px -1px ${euiTheme.colors.borderStrongNeutral}`,
   }),
 
   cell: css({
