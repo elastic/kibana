@@ -339,6 +339,148 @@ evaluate.describe(
   }
 );
 
+/**
+ * The workflow message of `coverage_review.yaml` (step `coverage_check`), with a gap that
+ * only the installable catalog covers. Elastic ships several encoded-PowerShell rules for
+ * T1059.001, and no installed rule may match, so the only correct verdict is
+ * `prebuilt_available`. The evidence names no length threshold on purpose: the closest
+ * prebuilt rule fires at 4,000 characters, so "over 1,000 characters" makes it too narrow.
+ *
+ * Two failures this traps, both seen in workflow runs:
+ * - the model stops after empty installed-rule searches and never searches the catalog;
+ * - the model searches the catalog once by parent technique (hundreds of rules), judges
+ *   the first page, and returns `no_coverage`.
+ */
+const PREBUILT_ONLY_GAP_MESSAGE = `Use the [/detection-coverage](skill://detection-coverage) skill to decide
+whether this detection gap is already covered. The supplied context is
+sufficient; do not ask a follow-up question and do not draft a rule.
+
+ATT&CK technique: T1059.001
+Detection gap: Long Base64-encoded PowerShell commands are not detected.
+Evidence: Hunt found powershell.exe started with long Base64-encoded command lines on 3 hosts. The decoded scripts downloaded a second-stage payload. No detection alert fired.
+
+Report one verdict. Take every rule name and id from a tool result.`;
+
+/** Names of every rule that `security.find_prebuilt_rules` returned in these calls. */
+const prebuiltRuleNames = (calls: ToolCallStep[]): string[] =>
+  calls.flatMap((call) => {
+    const results: unknown = call.results;
+    const parsed = (typeof results === 'string' ? JSON.parse(results) : results ?? []) as unknown[];
+    return parsed.flatMap((result) => {
+      const rules = (result as { data?: { rules?: Array<{ name?: unknown }> } })?.data?.rules;
+      return (rules ?? []).map((rule) => rule.name).filter((name): name is string => !!name);
+    });
+  });
+
+/** An installed rule with one of these words could be a real match and change the verdict. */
+const PREBUILT_ONLY_GAP_CONFLICT = /powershell|base64|encoded/i;
+
+evaluate.describe(
+  'Security Skills - Detection Coverage prebuilt-only gap',
+  { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
+  () => {
+    let coverageAgentId: string | undefined;
+
+    evaluate.beforeAll(async ({ kbnClient, fetch, connector }) => {
+      await kbnClient.request({
+        path: FLEET_BULK_INSTALL_PATH,
+        method: 'POST',
+        query: { prerelease: true },
+        headers: { 'elastic-api-version': '2023-10-31' },
+        body: { packages: ['security_detection_engine'], force: false },
+      });
+
+      const connectorHash = createHash('sha256').update(connector.id).digest('hex').slice(0, 8);
+      const agentId = `eval_det_cov_pb_${connectorHash}_${Date.now().toString(36)}`;
+      await fetch(AGENTS_API_BASE_PATH, {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify({
+          id: agentId,
+          name: 'Eval: detection coverage (prebuilt-only gap)',
+          description: 'Evaluation agent pinned to the detection-coverage skill family.',
+          configuration: {
+            tools: [{ tool_ids: [...defaultAgentToolIds, CREATE_RULE_TOOL_ID] }],
+            skill_ids: COVERAGE_SKILL_IDS,
+          },
+        }),
+      });
+      coverageAgentId = agentId;
+    });
+
+    evaluate.afterAll(async ({ fetch, log }) => {
+      if (!coverageAgentId) return;
+      try {
+        await fetch(`${AGENTS_API_BASE_PATH}/${encodeURIComponent(coverageAgentId)}`, {
+          method: 'DELETE',
+          version: '2023-10-31',
+        });
+      } catch (error) {
+        log.warning(
+          `[detection-coverage eval] failed to delete eval agent ${coverageAgentId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    });
+
+    evaluate(
+      'a gap covered only by the installable catalog returns prebuilt_available on every run',
+      async ({ chatClient, kbnClient, repetitions, log }) => {
+        // Fixtures of other specs (e.g. find_rules) install PowerShell rules in the same
+        // space. With one of them present, `covered_enabled` can be correct, so stop here.
+        const { data: installed } = await kbnClient.request<{ data: Array<{ name: string }> }>({
+          path: '/api/detection_engine/rules/_find?per_page=10000',
+          method: 'GET',
+          headers: { 'elastic-api-version': '2023-10-31' },
+        });
+        const conflicting = (installed?.data ?? [])
+          .map((rule) => rule.name)
+          .filter((name) => PREBUILT_ONLY_GAP_CONFLICT.test(name));
+        expect(
+          conflicting,
+          'precondition: no installed rule may cover this gap; run this case alone'
+        ).toEqual([]);
+
+        const failures: string[] = [];
+        for (let run = 1; run <= repetitions; run++) {
+          const response = await chatClient.converse({
+            options: { agentId: coverageAgentId },
+            messages: [{ message: PREBUILT_ONLY_GAP_MESSAGE }],
+          });
+          const steps = (response.steps ?? []) as ToolCallStep[];
+          const answer = answerOf(response);
+          const verdicts = verdictsMentioned(answer);
+          const prebuiltCalls = toolCalls(steps, FIND_PREBUILT_RULES_TOOL_ID);
+          // A verdict for a rule the tool never returned is an invented rule, not a pass.
+          const grounded = prebuiltRuleNames(prebuiltCalls).some((name) =>
+            mentionsRule(answer, name)
+          );
+          const passed =
+            prebuiltCalls.length > 0 && verdicts.join() === 'prebuilt_available' && grounded;
+          const summary =
+            `verdicts=${verdicts.join('|') || 'none'} ` +
+            `find_prebuilt_rules calls=${prebuiltCalls.length} grounded=${grounded}`;
+
+          log.info(
+            `[detection-coverage eval] prebuilt-only run ${run}/${repetitions}: ${
+              passed ? 'PASS' : 'FAIL'
+            } ${summary}`
+          );
+          if (!passed) {
+            failures.push(`run ${run}: ${summary}`);
+          }
+        }
+
+        expect(
+          failures,
+          `${repetitions - failures.length} of ${repetitions} runs returned prebuilt_available`
+        ).toEqual([]);
+      }
+    );
+  }
+);
+
 evaluate.describe(
   'Security Skills - Detection Coverage routing',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },

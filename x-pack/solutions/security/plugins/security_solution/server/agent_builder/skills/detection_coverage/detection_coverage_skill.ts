@@ -89,9 +89,13 @@ Keep the technique id at the level the user gave you. A filter on a sub-techniqu
 
 Judge each returned rule with the Match Rubric. The filter matches only names, index patterns, and MITRE fields, but every result carries its \`description\` and \`query\`: read both before you judge. A rule whose distinctive behavior appears only in its query (\`process.args:*-enc*\` for encoded-command execution, \`network.protocol:smb\` for SMB lateral movement) is still an exact match once you read that query. An exact match that is enabled means \`covered_enabled\`. Stop. An exact match that is disabled means \`covered_disabled\`. Stop. A close but insufficient rule is not coverage: note it for the final explanation and continue.
 
+No exact match in step 1 means you must run step 2. Empty installed-rule searches say nothing about the prebuilt catalog, so never return a verdict after step 1 alone.
+
 ### Step 2: installable prebuilt rules
 
-Only when step 1 found no exact match. Call \`load_skill\` with \`recommend-prebuilt-rules\`. Follow its search instructions. Request the \`description\`, \`query\`, and \`threat\` fields, because you must judge the behavior and the technique, not the name. One search, two at most. Unlike Step 1, the \`keywords\` filter in \`security.find_prebuilt_rules\` searches both rule names and descriptions — use the most distinctive behavior words from the gap, not the full sentence.
+Only when step 1 found no exact match. Call \`load_skill\` with \`recommend-prebuilt-rules\` and follow its search instructions. Request the \`description\`, \`query\`, and \`threat\` fields, because you must judge the behavior and the technique, not the name.
+
+A search is a gap check, not a browse. Never judge a gap from the first page of a large result: when \`total\` is larger than the number of rules returned, search again with a narrower filter. Name only a rule that a \`security.find_prebuilt_rules\` result in this conversation returned.
 
 An exact match means \`prebuilt_available\`, with one guard first: if the single-word probe from step 1 never ran, run it now against installed rules. An installed exact match always beats installing a copy of it. Only when that probe also finds no exact match, return \`prebuilt_available\`. Stop. Otherwise return \`no_coverage\`.
 
@@ -151,7 +155,7 @@ When the user agrees, finish the job here. Call \`load_skill\` with \`detection-
 
 Every rule name and id you report must come from a tool result in this conversation. Never recall a rule from memory or invent a \`rule_id\`.
 
-If both searches return zero rules, say so plainly and return \`no_coverage\`. Zero results is a valid, useful answer.
+Never return \`no_coverage\` before at least one \`security.find_prebuilt_rules\` call. If step 1 and step 2 both find no exact match, say so plainly and return \`no_coverage\`. Zero results is a valid, useful answer.
 
 State which filters you used. A wrong filter looks the same as a real gap, and only the user can tell the two apart.
 
