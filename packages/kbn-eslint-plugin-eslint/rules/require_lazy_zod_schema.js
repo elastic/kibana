@@ -16,6 +16,7 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Property} Property */
 
 const tsEstree = require('@typescript-eslint/typescript-estree');
+const changedLines = require('./require_lazy_zod_schema_changed_lines');
 const esTypes = tsEstree.AST_NODE_TYPES;
 
 const ZOD_SOURCES = new Set(['@kbn/zod', '@kbn/zod/v4', 'zod', 'zod/v4', 'zod/v3']);
@@ -449,8 +450,7 @@ module.exports = {
     type: 'problem',
     fixable: 'code',
     docs: {
-      description:
-        'Require module-scope Zod schemas to be wrapped in lazySchema so they are not materialized at import.',
+      description: 'Require new or edited module-scope Zod schemas to be wrapped in lazySchema.',
     },
     schema: [],
     messages: {
@@ -465,8 +465,12 @@ module.exports = {
     /** @type {FileState} */
     let state;
     let sourceCode;
+    let fileChangedLines;
 
-    const reportEagerSchema = (node, messageId) => {
+    const reportEagerSchema = (node, declaration, messageId) => {
+      if (!changedLines.touchesChangedLine(fileChangedLines, declaration)) {
+        return;
+      }
       const canFix = canAutoFixSchemaCall(node) && !containsAwaitExpression(node);
       let lazySchemaName =
         state.lazySchemaNames.size === 1 ? state.lazySchemaNames.values().next().value : undefined;
@@ -517,6 +521,7 @@ module.exports = {
           schemaBindings: new Set(),
         };
         sourceCode = context.sourceCode;
+        fileChangedLines = changedLines.getChangedLines(context.filename);
       },
       ImportDeclaration(node) {
         recordImportBindings(/** @type {ImportDeclaration} */ (node), state);
@@ -537,12 +542,12 @@ module.exports = {
         }
 
         if (isEagerZodNamespaceChain(declarator.init, state)) {
-          reportEagerSchema(declarator.init, 'eagerZodSchema');
+          reportEagerSchema(declarator.init, declarator, 'eagerZodSchema');
         } else if (
           isEagerDerivedSchemaChain(declarator.init, state) ||
           isLazySchemaDerivationChain(declarator.init, state)
         ) {
-          reportEagerSchema(declarator.init, 'eagerDerivedZodSchema');
+          reportEagerSchema(declarator.init, declarator, 'eagerDerivedZodSchema');
         }
 
         recordSchemaBinding(declarator, state);
@@ -555,12 +560,12 @@ module.exports = {
 
         const value = /** @type {Expression} */ (property.value);
         if (isEagerZodNamespaceChain(value, state)) {
-          reportEagerSchema(value, 'eagerZodSchema');
+          reportEagerSchema(value, property, 'eagerZodSchema');
         } else if (
           isEagerDerivedSchemaChain(value, state) ||
           isLazySchemaDerivationChain(value, state)
         ) {
-          reportEagerSchema(value, 'eagerDerivedZodSchema');
+          reportEagerSchema(value, property, 'eagerDerivedZodSchema');
         }
       },
     };
