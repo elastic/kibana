@@ -56,6 +56,7 @@ const defaultActionsConfig: ActionsConfig = {
     maxBodyBytes: new ByteSizeValue(1024 * 1024),
     maxEmitted: 25,
   },
+  connectorSigningKeys: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -1048,6 +1049,21 @@ describe('isInboundEventsEnabled()', () => {
       },
     });
     expect(acu.isInboundEventsEnabled()).toBe(true);
+  });
+});
+
+describe('isConnectorSigningKeysEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isConnectorSigningKeysEnabled()).toBe(false);
+  });
+
+  test('returns true when connectorSigningKeys.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      connectorSigningKeys: { enabled: true },
+    });
+    expect(acu.isConnectorSigningKeysEnabled()).toBe(true);
   });
 });
 

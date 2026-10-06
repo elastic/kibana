@@ -58,6 +58,7 @@ const createActionsConfigMock = () => {
     isInboundEventsEnabled: jest.fn().mockReturnValue(false),
     getInboundEventsMaxBodyBytes: jest.fn().mockReturnValue(1024 * 1024),
     getInboundEventsMaxEmitted: jest.fn().mockReturnValue(25),
+    isConnectorSigningKeysEnabled: jest.fn().mockReturnValue(false),
     isEarsExperimentalEnabled: jest.fn().mockReturnValue(false),
   };
   return mocked;

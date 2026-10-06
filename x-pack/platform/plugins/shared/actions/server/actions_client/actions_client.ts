@@ -130,6 +130,7 @@ export interface ConstructorOptions {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   publicBaseUrl?: string;
+  connectorSigningKeysEnabled?: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
@@ -160,6 +161,7 @@ export interface ActionsClientContext {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   publicBaseUrl?: string;
+  connectorSigningKeysEnabled?: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
@@ -193,6 +195,7 @@ export class ActionsClient {
     spaces,
     isESOCanEncrypt,
     publicBaseUrl,
+    connectorSigningKeysEnabled,
     connectorLifecycleListeners,
     getCurrentUserProfileId,
     evictClientPool,
@@ -220,6 +223,7 @@ export class ActionsClient {
       spaces,
       isESOCanEncrypt,
       publicBaseUrl,
+      connectorSigningKeysEnabled,
       connectorLifecycleListeners,
       getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
       evictClientPool,
@@ -627,10 +631,12 @@ export class ActionsClient {
     });
 
     // Not limited to types that publish keys: an import can change the stored actionTypeId.
-    await deleteConnectorSigningKey({
-      unsecuredSavedObjectsClient: this.context.unsecuredSavedObjectsClient,
-      connectorId: id,
-    });
+    if (this.context.connectorSigningKeysEnabled) {
+      await deleteConnectorSigningKey({
+        unsecuredSavedObjectsClient: this.context.unsecuredSavedObjectsClient,
+        connectorId: id,
+      });
+    }
 
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 

@@ -10,10 +10,19 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { registerConnectorTypesFromSpecs } from '.';
 
 describe('registerConnectorTypesFromSpecs', () => {
-  const createActionsSetup = (inboundEventsEnabled: boolean) => {
+  const createActionsSetup = ({
+    inboundEventsEnabled = false,
+    connectorSigningKeysEnabled = false,
+  }: {
+    inboundEventsEnabled?: boolean;
+    connectorSigningKeysEnabled?: boolean;
+  }) => {
     const actions = actionsMock.createSetup();
     const configUtils = actions.getActionsConfigurationUtilities();
     (configUtils.isInboundEventsEnabled as jest.Mock).mockReturnValue(inboundEventsEnabled);
+    (configUtils.isConnectorSigningKeysEnabled as jest.Mock).mockReturnValue(
+      connectorSigningKeysEnabled
+    );
     actions.getActionsConfigurationUtilities.mockReturnValue(configUtils);
     return actions;
   };
@@ -22,7 +31,7 @@ describe('registerConnectorTypesFromSpecs', () => {
     registerType.mock.calls.map(([actionType]: [{ id: string }]) => actionType.id);
 
   it('skips inbound-only specs when inbound events are disabled', () => {
-    const actions = createActionsSetup(false);
+    const actions = createActionsSetup({ connectorSigningKeysEnabled: true });
 
     registerConnectorTypesFromSpecs({ actions });
 
@@ -32,12 +41,25 @@ describe('registerConnectorTypesFromSpecs', () => {
   });
 
   it('registers inbound-only specs when inbound events are enabled', () => {
-    const actions = createActionsSetup(true);
+    const actions = createActionsSetup({
+      inboundEventsEnabled: true,
+      connectorSigningKeysEnabled: true,
+    });
 
     registerConnectorTypesFromSpecs({ actions });
 
     const ids = registeredIds(actions.registerType as jest.Mock);
     expect(ids).toContain('.inboundWebhook');
     expect(ids).toHaveLength(Object.values(connectorsSpecs).length);
+  });
+
+  it('skips specs that publish keys when connector signing keys are disabled', () => {
+    const actions = createActionsSetup({ inboundEventsEnabled: true });
+
+    registerConnectorTypesFromSpecs({ actions });
+
+    const ids = registeredIds(actions.registerType as jest.Mock);
+    expect(ids).not.toContain('.ssf');
+    expect(ids).toHaveLength(Object.values(connectorsSpecs).length - 1);
   });
 });

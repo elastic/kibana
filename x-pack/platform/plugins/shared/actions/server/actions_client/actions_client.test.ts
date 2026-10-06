@@ -18,7 +18,6 @@ import {
 import type { ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ActionType } from '../types';
 import type { ILicenseState } from '../lib';
 import { ActionExecutor, TaskRunnerFactory, asHttpRequestExecutionSource } from '../lib';
@@ -42,6 +41,7 @@ import { actionsAuthorizationMock } from '../authorization/actions_authorization
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
@@ -561,6 +561,7 @@ describe('create()', () => {
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
         maxEmitted: 25,
       },
+      connectorSigningKeys: { enabled: false },
     });
 
     const localActionTypeRegistryParams = {
@@ -1936,12 +1937,40 @@ describe('delete()', () => {
       expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
     });
 
-    test('deletes any signing key record, also when the stored type does not publish keys', async () => {
+    test('does not delete a signing key record when connector signing keys are disabled', async () => {
+      await actionsClient.delete({ id: '1' });
+
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalledWith(
+        'connector_signing_key',
+        '1'
+      );
+    });
+
+    test('deletes any signing key record when connector signing keys are enabled, also when the stored type does not publish keys', async () => {
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        connectorSigningKeysEnabled: true,
+      });
       unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError('connector_signing_key', '1')
       );
 
-      await actionsClient.delete({ id: '1' });
+      await client.delete({ id: '1' });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('connector_signing_key', '1');
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', '1');
@@ -2085,16 +2114,11 @@ describe('delete()', () => {
 
   test('calls unsecuredSavedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
-    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
-    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toEqual([
-      'connector_signing_key',
-      '1',
-    ]);
-    expect(unsecuredSavedObjectsClient.delete.mock.calls[1]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         "1",
@@ -2104,12 +2128,11 @@ describe('delete()', () => {
 
   test('calls postDeleteHook', async () => {
     const expectedResult = Symbol();
-    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
 
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
-    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(postDeleteHook).toHaveBeenCalledTimes(1);
   });
 
@@ -2238,7 +2261,6 @@ describe('delete()', () => {
 
   test('deleting unregistered action types works as expected', async () => {
     const expectedResult = Symbol();
-    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     unsecuredSavedObjectsClient.get = jest.fn().mockResolvedValueOnce({
       id: '2',
@@ -2265,7 +2287,6 @@ describe('delete()', () => {
 
   test('invalidates the last-saver API key before deleting an inbound connector', async () => {
     const expectedResult = Symbol();
-    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     unsecuredSavedObjectsClient.get.mockReset();
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({

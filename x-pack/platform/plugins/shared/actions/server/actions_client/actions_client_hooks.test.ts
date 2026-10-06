@@ -219,7 +219,6 @@ describe('connector type hooks', () => {
 
     test('for delete', async () => {
       const expectedResult = Symbol();
-      unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
       unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ConnectorSavedObject);
 
@@ -382,7 +381,6 @@ describe('connector type hooks', () => {
       postDeleteHook.mockRejectedValueOnce(new Error('OMG delete post delete'));
 
       const expectedResult = Symbol();
-      unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
       unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ConnectorSavedObject);
 

@@ -305,6 +305,9 @@ export const configSchema = schema.object({
       max: INBOUND_EVENTS_MAX_EMITTED_LIMIT,
     }),
   }),
+  connectorSigningKeys: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

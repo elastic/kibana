@@ -64,7 +64,9 @@ export function defineRoutes(opts: RouteOptions) {
     inboundEvents,
   } = opts;
 
-  connectorPublicKeysRoutes(opts);
+  if (actionsConfigUtils.isConnectorSigningKeysEnabled()) {
+    connectorPublicKeysRoutes(opts);
+  }
   createConnectorRoute(router, licenseState, actionsConfigUtils);
   deleteConnectorRoute(router, licenseState);
   getConnectorRoute(router, licenseState, actionsConfigUtils);

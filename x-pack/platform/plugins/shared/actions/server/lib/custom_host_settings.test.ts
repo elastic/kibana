@@ -93,6 +93,7 @@ describe('custom_host_settings', () => {
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
         maxEmitted: 25,
       },
+      connectorSigningKeys: { enabled: false },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

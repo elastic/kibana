@@ -674,6 +674,7 @@ export class ActionsPlugin
     }) => {
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,
+        connectorSigningKeysEnabled: this.actionsConfig.connectorSigningKeys.enabled,
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
@@ -1093,6 +1094,7 @@ export class ActionsPlugin
       getAxiosInstanceWithAuthHelper,
       spaces,
       connectorLifecycleListeners,
+      actionsConfig,
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
     const evictClientPool = async (connectorId: string): Promise<void> => {
@@ -1124,6 +1126,7 @@ export class ActionsPlugin
 
           return new ActionsClient({
             publicBaseUrl: coreStart.http.basePath.publicBaseUrl,
+            connectorSigningKeysEnabled: actionsConfig.connectorSigningKeys.enabled,
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,

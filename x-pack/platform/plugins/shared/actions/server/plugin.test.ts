@@ -82,6 +82,7 @@ function getConfig(overrides = {}) {
       maxBodyBytes: new ByteSizeValue(1024 * 1024),
       maxEmitted: 25,
     },
+    connectorSigningKeys: { enabled: false },
     ...overrides,
   };
 }
@@ -145,6 +146,7 @@ describe('Actions Plugin', () => {
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
         },
+        connectorSigningKeys: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -590,6 +592,7 @@ describe('Actions Plugin', () => {
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
         },
+        connectorSigningKeys: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -972,6 +975,7 @@ describe('Actions Plugin', () => {
                 maxBodyBytes: new ByteSizeValue(1024 * 1024),
                 maxEmitted: 25,
               },
+              connectorSigningKeys: { enabled: false },
             })
           );
           const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
