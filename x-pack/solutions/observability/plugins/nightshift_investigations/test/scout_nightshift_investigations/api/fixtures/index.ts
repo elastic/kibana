@@ -27,8 +27,6 @@ export {
   cancelRunsOf,
   cancelWorkflowRuns,
   createAlertStartWorkflow,
-  createLlmConnector,
-  deleteConnector,
   deleteWorkflow,
   findInvestigationBySubject,
   findOrCreateSlackThread,

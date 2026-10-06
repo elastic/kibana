@@ -14,8 +14,6 @@ import {
   cancelRunsOf,
   cancelWorkflowRuns,
   createAlertStartWorkflow,
-  createLlmConnector,
-  deleteConnector,
   deleteWorkflow,
   findInvestigationBySubject,
   findOrCreateSlackThread,
@@ -64,13 +62,11 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
     let llm: Awaited<ReturnType<typeof startUnresponsiveLlm>>;
-    let connectorId: string;
     let alertWorkflowId: string;
 
     apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_OPERATOR_ROLE));
       llm = await startUnresponsiveLlm();
-      connectorId = await createLlmConnector(kbnClient, llm.url);
       alertWorkflowId = await createAlertStartWorkflow(kbnClient, uniqueId('scout-alert-start'));
     });
 
@@ -82,7 +78,6 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ kbnClient }) => {
       await deleteWorkflow(kbnClient, alertWorkflowId);
-      await deleteConnector(kbnClient, connectorId);
       llm.close();
     });
 
