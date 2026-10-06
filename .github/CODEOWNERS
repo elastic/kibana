@@ -3860,8 +3860,9 @@ src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility
 
-# API docs review
+# Docs: API docs review and changelog entries
 /.agents/skills/api-docs-review/** @elastic/ski-docs
+/.agents/skills/changelog-entry/** @elastic/ski-docs
 
 # No owner - generated files covered by CI checks
 **/moon.yml
