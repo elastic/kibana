@@ -288,6 +288,40 @@ describe('saved search embeddable', () => {
       ).toBeInTheDocument();
     });
 
+    it('should pass the dashboard query and the panel time range to pattern analysis', async () => {
+      const { search } = createSearchFnMock(0);
+      const query = { query: 'status:500', language: 'kuery' };
+      const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+      const parentApi = {
+        ...mockedDashboardApi,
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
+      };
+      const patternAnalysisComponent = jest.mocked(
+        discoverServiceMock.aiops!.PatternAnalysisComponent
+      );
+      patternAnalysisComponent.mockClear();
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.PATTERN_LEVEL, time_range: timeRange },
+      });
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi,
+      });
+      await waitOneTick();
+
+      render(<Component />);
+
+      const [{ props }] = patternAnalysisComponent.mock.calls[0];
+      expect(props.input).toEqual(
+        expect.objectContaining({ query, timeRange, lastReloadRequestTime: undefined })
+      );
+    });
+
     it('should fetch documents when the optional aiops plugin is unavailable', async () => {
       const { search, resolveSearch } = createSearchFnMock(0);
       discoverServiceMock.aiops = undefined;
