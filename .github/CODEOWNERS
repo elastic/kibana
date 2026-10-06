@@ -3847,6 +3847,7 @@ src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
 /.agents/skills/evals-create-suite/** @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 /.agents/skills/evals-write-spec/** @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
+/.agents/skills/redux-toolkit-best-practices/** @elastic/kibana-dashboards
 
 # Security team skills: API authorization, CodeQL, and privilege deprecation guidance.
 /.agents/skills/api-authz/** @elastic/kibana-security
