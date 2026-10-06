@@ -76,7 +76,6 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
-  openAfterDismissingOtherFlyouts,
   ErrorCallout,
   prepareDataViewForEditing,
   getEsqlDataView,
