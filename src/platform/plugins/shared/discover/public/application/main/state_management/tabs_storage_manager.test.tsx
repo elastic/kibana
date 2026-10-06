@@ -365,6 +365,7 @@ describe('TabsStorageManager', () => {
       allTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
       selectedTabId: 'tab2',
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
+      hasSessionVersionChanged: false,
     });
     expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
@@ -648,6 +649,7 @@ describe('TabsStorageManager', () => {
         toRestoredTab(mockRecentlyClosedTab),
         toRestoredTab(mockRecentlyClosedTab2),
       ],
+      hasSessionVersionChanged: false,
     });
     expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
@@ -1038,6 +1040,7 @@ describe('TabsStorageManager', () => {
       selectedTabId: mockTab2.id,
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
       updatedDiscoverSession: persistedDiscoverSession,
+      hasSessionVersionChanged: false,
     });
   });
 
@@ -1121,6 +1124,7 @@ describe('TabsStorageManager', () => {
 
     expect(loadedProps.allTabs.map((t) => t.id)).toEqual([mockTab1.id, mockTab2.id]);
     expect(loadedProps.selectedTabId).toBe(mockTab2.id);
+    expect(loadedProps.hasSessionVersionChanged).toBe(false);
   });
 
   it('should load persisted tabs when the persisted discover session was saved again after the stored tabs', () => {
@@ -1164,6 +1168,7 @@ describe('TabsStorageManager', () => {
 
     expect(loadedProps.allTabs.map((t) => t.label)).toEqual(['Updated tab']);
     expect(loadedProps.selectedTabId).toBe(mockTab1.id);
+    expect(loadedProps.hasSessionVersionChanged).toBe(true);
   });
 
   it('should load persisted tabs when persisted discover session id matches stored session id, but target open tab is not found', () => {

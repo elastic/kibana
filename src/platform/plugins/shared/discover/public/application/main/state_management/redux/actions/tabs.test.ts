@@ -28,7 +28,9 @@ import {
 } from '..';
 import * as runtimeStateModule from '../runtime_state';
 import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
-import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import { APP_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import { TABS_LOCAL_STORAGE_KEY } from '../../tabs_storage_manager';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
@@ -93,6 +95,60 @@ const setup = async () => {
 describe('tabs actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('initializeTabs', () => {
+    const initializeWithStoredVersion = async (persistedVersion: string) => {
+      const services = createDiscoverServicesMock();
+      services.storage = new Storage(localStorage);
+      const toolkit = getDiscoverInternalStateMock({
+        services,
+        tabsStorageEnabled: true,
+        persistedDataViews: [dataViewMockWithTimeField],
+      });
+      const persistedTab = getPersistedTabMock({ dataView: dataViewMockWithTimeField, services });
+
+      services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+        userId: '',
+        spaceId: '',
+        discoverSessionId: 'test-session',
+        discoverSessionVersion: 'version-1',
+        openTabs: [],
+        closedTabs: [],
+      });
+
+      const setUrlStateSpy = jest.spyOn(toolkit.stateStorageContainer, 'set');
+
+      await toolkit.initializeTabs({
+        persistedDiscoverSession: createDiscoverSessionMock({
+          id: 'test-session',
+          version: persistedVersion,
+          tabs: [persistedTab],
+        }),
+      });
+
+      return setUrlStateSpy;
+    };
+
+    it('clears app and profile URL state when the session was saved elsewhere', async () => {
+      const setUrlStateSpy = await initializeWithStoredVersion('version-2');
+
+      expect(setUrlStateSpy).toHaveBeenCalledWith(APP_STATE_URL_KEY, undefined, { replace: true });
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, undefined, {
+        replace: true,
+      });
+    });
+
+    it('keeps URL state when the session version is unchanged', async () => {
+      const setUrlStateSpy = await initializeWithStoredVersion('version-1');
+
+      expect(setUrlStateSpy).not.toHaveBeenCalledWith(APP_STATE_URL_KEY, undefined, {
+        replace: true,
+      });
+      expect(setUrlStateSpy).not.toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, undefined, {
+        replace: true,
+      });
+    });
   });
 
   describe('openInNewTabExtPointAction', () => {

@@ -390,7 +390,11 @@ export const initializeTabs = createInternalStateAsyncThunk(
       discoverSessionId,
       shouldClearAllTabs,
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
-    { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
+    {
+      dispatch,
+      getState,
+      extra: { services, tabsStorageManager, customizationContext, urlStateStorage },
+    }
   ) {
     const { userId: existingUserId, spaceId: existingSpaceId } = getState();
 
@@ -452,7 +456,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const initialTabsState = tabsStorageManager.loadLocally({
+    const { hasSessionVersionChanged, ...initialTabsState } = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       persistedDiscoverSession,
@@ -469,6 +473,15 @@ export const initializeTabs = createInternalStateAsyncThunk(
     // Hand the location state over to the tab initialization before updating the URL below, which
     // discards it, so initial state such as ad hoc data view specs is passed on
     services.initialTabStateService.capture(initialTabState);
+
+    // The URL still reflects the session version this browser saw last, which would override
+    // the newer saved state, e.g. after an API update followed by a reload.
+    if (hasSessionVersionChanged) {
+      await Promise.all([
+        urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true }),
+        urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true }),
+      ]);
+    }
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state

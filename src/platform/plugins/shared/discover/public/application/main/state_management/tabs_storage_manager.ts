@@ -103,6 +103,8 @@ export interface TabsStorageManager {
     ) => DiscoverSession;
   }) => TabsInternalStatePayload & {
     updatedDiscoverSession: DiscoverSession | undefined;
+    /** True when the same session was saved elsewhere since its tabs were stored locally. */
+    hasSessionVersionChanged: boolean;
   };
   getNRecentlyClosedTabs: (params: {
     previousOpenTabs: TabState[];
@@ -466,11 +468,14 @@ export const createTabsStorageManager = ({
     const { discoverSessionId: storedSessionId, discoverSessionVersion: storedSessionVersion } =
       storedTabsState;
     const persistedSessionVersion = persistedDiscoverSession?.version;
+    const hasSessionVersionChanged =
+      persistedDiscoverSession !== undefined &&
+      persistedDiscoverSession.id === storedSessionId &&
+      persistedSessionVersion !== undefined &&
+      storedSessionVersion !== undefined &&
+      persistedSessionVersion !== storedSessionVersion;
     const hasStoredSessionChanged =
-      persistedDiscoverSession?.id !== storedSessionId ||
-      (persistedSessionVersion !== undefined &&
-        storedSessionVersion !== undefined &&
-        persistedSessionVersion !== storedSessionVersion);
+      persistedDiscoverSession?.id !== storedSessionId || hasSessionVersionChanged;
 
     // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
     // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
@@ -503,6 +508,7 @@ export const createTabsStorageManager = ({
           allTabs: openTabs,
           selectedTabId,
           updatedDiscoverSession,
+          hasSessionVersionChanged,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -531,6 +537,7 @@ export const createTabsStorageManager = ({
           allTabs: allTabsWithNewTab,
           selectedTabId: newTab.id,
           updatedDiscoverSession,
+          hasSessionVersionChanged,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -552,6 +559,7 @@ export const createTabsStorageManager = ({
             allTabs: restoredTabs,
             selectedTabId,
             updatedDiscoverSession,
+            hasSessionVersionChanged,
             recentlyClosedTabs: getNRecentlyClosedTabs({
               previousOpenTabs,
               previousRecentlyClosedTabs: closedTabs,
@@ -584,6 +592,7 @@ export const createTabsStorageManager = ({
       allTabs,
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
+      hasSessionVersionChanged,
       recentlyClosedTabs: getNRecentlyClosedTabs({
         previousOpenTabs,
         previousRecentlyClosedTabs: closedTabs,
