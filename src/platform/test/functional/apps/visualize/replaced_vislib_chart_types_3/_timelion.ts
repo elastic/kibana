@@ -287,6 +287,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const expression = '.es(index=logstash-*, timefield=';
             await monacoEditor.setCodeEditorValue('');
             await typeExpressionTriggeringSuggestions(expression);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
               expect(suggestions.length).to.eql(4);
@@ -298,6 +299,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const expression = '.es(index=logstash-*, timefield=@timestamp, split=';
             await monacoEditor.setCodeEditorValue('');
             await typeExpressionTriggeringSuggestions(expression);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
 
@@ -309,6 +311,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const expression = '.es(index=logstash-*, timefield=@timestamp, metric=avg:';
             await monacoEditor.setCodeEditorValue('');
             await typeExpressionTriggeringSuggestions(expression);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
               expect(suggestions[0].includes('avg:bytes')).to.eql(true);
