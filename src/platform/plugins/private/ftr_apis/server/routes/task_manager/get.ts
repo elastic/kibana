@@ -14,15 +14,16 @@ import type {
   KibanaResponseFactory,
   RequestHandlerContext,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-export const registerTaskManagerRunSoonRoute = (
+export const registerTaskManagerGetRoute = (
   router: IRouter,
   getStartContract: () => TaskManagerStartContract | undefined
 ) => {
-  router.post(
+  router.get(
     {
-      path: '/internal/ftr/task_manager/{taskId}/run_soon',
+      path: '/internal/ftr/task_manager/{taskId}',
       security: {
         authz: {
           requiredPrivileges: ['ftrApis'],
@@ -30,20 +31,11 @@ export const registerTaskManagerRunSoonRoute = (
       },
       validate: {
         params: schema.object({
-          taskId: schema.string(),
+          taskId: schema.string({ maxLength: 200 }),
         }),
-        body: schema.nullable(
-          schema.object({
-            requestImmediateClaim: schema.maybe(schema.boolean()),
-          })
-        ),
       },
     },
-    async (
-      _context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ) => {
+    async (_context: RequestHandlerContext, req: KibanaRequest, res: KibanaResponseFactory) => {
       const startContract = getStartContract();
       if (!startContract) {
         return res.customError({
@@ -52,16 +44,19 @@ export const registerTaskManagerRunSoonRoute = (
         });
       }
 
-      const { taskId } = req.params;
+      const { taskId } = req.params as { taskId: string };
 
       try {
-        return res.ok({
-          body: await startContract.runSoon(taskId, {
-            requestImmediateClaim: req.body?.requestImmediateClaim,
-          }),
-        });
+        const { id, taskType, status, runAt, scheduledAt, attempts } = await startContract.get(
+          taskId
+        );
+        // Omits credentials such as `apiKey` and `userScope`.
+        return res.ok({ body: { id, taskType, status, runAt, scheduledAt, attempts } });
       } catch (err) {
-        return res.ok({ body: { id: taskId, error: `${err}` } });
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          return res.notFound({ body: { message: `Task ${taskId} not found` } });
+        }
+        throw err;
       }
     }
   );
