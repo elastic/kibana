@@ -51,17 +51,19 @@ const UTILITY_ROUTES = ['/profiling-not-enabled'];
 const makeStatus = ({
   otelData = false,
   universalProfilingData = false,
+  universalProfilingSetup = true,
   legacyData = false,
 }: {
   otelData?: boolean;
   universalProfilingData?: boolean;
+  universalProfilingSetup?: boolean;
   legacyData?: boolean;
 }): ProfilingStatus => ({
   isEnabled: true,
   otel: { isAvailable: true, hasData: otelData },
   universalProfiling: {
     isAvailable: true,
-    hasSetup: true,
+    hasSetup: universalProfilingSetup,
     hasData: universalProfilingData,
     hasLegacyData: legacyData,
     canSetup: true,
@@ -287,6 +289,23 @@ describe('useBackNavigation', () => {
         initialStatus: makeStatus({ otelData: true }),
       });
       expect(result.current.back).toEqual(pluginRootTarget);
+    });
+
+    it('returns the plugin root when there is only OTel data and Universal Profiling is not set up', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: makeStatus({ otelData: true, universalProfilingSetup: false }),
+      });
+      expect(result.current.back).toEqual(pluginRootTarget);
+    });
+
+    it('returns undefined when the Universal Profiling data is not set up', () => {
+      // Going back would only be redirected to this page again until the setup is done.
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: makeStatus({ universalProfilingData: true, universalProfilingSetup: false }),
+      });
+      expect(result.current.back).toBeUndefined();
     });
 
     it('returns undefined when profiling is disabled in Elasticsearch', () => {

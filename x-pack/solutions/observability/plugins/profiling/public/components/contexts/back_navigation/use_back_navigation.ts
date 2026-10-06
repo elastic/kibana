@@ -11,10 +11,10 @@ import type { AppHeaderBack } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import type { PathsOf } from '@kbn/typed-react-router-config';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
-import { hasProfilingData } from '../../../utils/has_profiling_data';
 import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
 import { PROFILING_PATHNAMES } from '../../../routing/pathnames';
+import { hasUsableProfilingData } from '../../../utils/has_usable_profiling_data';
 import { useSchemaQueryParam } from '../../../hooks/use_schema_query_param';
 
 // Routes that render a back button in AppHeader.
@@ -47,12 +47,12 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
     return undefined;
   }
 
-  // No back button on the add data page unless we positively know there is data. While the
+  // No back button on the add data page unless we positively know there is data to query. While the
   // status is unresolved the button would otherwise render and then vanish once it reports no data.
   // With data from before 8.9.1, going back would only redirect to this page again.
   if (
     pathname === PROFILING_PATHNAMES.addDataInstructions &&
-    (!hasProfilingData(data) || data.universalProfiling.hasLegacyData)
+    (!hasUsableProfilingData(data) || data.universalProfiling.hasLegacyData)
   ) {
     return undefined;
   }
