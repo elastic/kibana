@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useAutomationRunsInRange } from '../../hooks/use_automations';
 import { AutomationRunsCell } from './runs_cell';
 
@@ -23,9 +23,23 @@ describe('AutomationRunsCell', () => {
       .mocked(useAutomationRunsInRange)
       .mockReturnValue({ isInitialLoading: false, isError: true } as never);
 
-    render(<AutomationRunsCell id="automation-1" {...range} />);
+    render(<AutomationRunsCell id="automation-1" {...range} onOpen={jest.fn()} />);
 
     expect(screen.queryByText('0')).not.toBeInTheDocument();
     expect(document.querySelector('[data-euiicon-type="warning"]')).toBeInTheDocument();
+  });
+
+  it('opens the run history when the count is clicked', () => {
+    jest.mocked(useAutomationRunsInRange).mockReturnValue({
+      isInitialLoading: false,
+      isError: false,
+      data: { total: 3, runs: [] },
+    } as never);
+    const onOpen = jest.fn();
+
+    render(<AutomationRunsCell id="automation-1" {...range} onOpen={onOpen} />);
+    fireEvent.click(screen.getByTestId('automationRuns'));
+
+    expect(onOpen).toHaveBeenCalled();
   });
 });

@@ -10,7 +10,7 @@ import type { SlackTriggerKind } from '../automation_form_values';
 
 export const triggerLabels = {
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
-    defaultMessage: 'Triggers',
+    defaultMessage: 'Trigger',
   }),
   changeTrigger: i18n.translate('xpack.nightshift.automations.flyout.changeTriggerTooltip', {
     defaultMessage: 'Change trigger',

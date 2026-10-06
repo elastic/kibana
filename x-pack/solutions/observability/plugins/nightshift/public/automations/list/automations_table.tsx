@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiInMemoryTable, EuiSwitch, type EuiBasicTableColumn } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import {
+  Comparators,
+  EuiInMemoryTable,
+  EuiSwitch,
+  type Criteria,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useToggleAutomation, type Automation } from '../hooks/use_automations';
 import type { RunRange } from '../hooks/use_automation_usage';
@@ -29,6 +35,9 @@ export const AutomationsTable = ({
   onClone,
   onDelete,
   onOpenAutomation,
+  onOpenRuns,
+  selectedId,
+  onOrderChange,
 }: {
   automations: Automation[];
   canManage: boolean;
@@ -40,8 +49,21 @@ export const AutomationsTable = ({
   onClone: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
   onOpenAutomation: (automation: Automation) => void;
+  onOpenRuns: (automation: Automation) => void;
+  selectedId?: string;
+  onOrderChange: (ids: string[]) => void;
 }) => {
   const toggleAutomation = useToggleAutomation();
+  const [sort, setSort] = useState<{ field: string; direction: 'asc' | 'desc' }>({
+    field: 'name',
+    direction: 'asc',
+  });
+  useEffect(() => {
+    if (!selectedId) return;
+    document
+      .querySelector(`[data-automation-row="${selectedId}"]`)
+      ?.scrollIntoView({ block: 'nearest' });
+  }, [selectedId]);
   const getAuthorName = (automation: Automation) => getFacets(automation).author;
 
   const columns: Array<EuiBasicTableColumn<Automation>> = [
@@ -90,7 +112,13 @@ export const AutomationsTable = ({
       nameTooltip: { content: listLabels.runsTooltip },
       width: '170px',
       sortable: (automation) => runTotals.get(automation.id) ?? 0,
-      render: (automation: Automation) => <AutomationRunsCell id={automation.id} {...runRange} />,
+      render: (automation: Automation) => (
+        <AutomationRunsCell
+          id={automation.id}
+          {...runRange}
+          onOpen={() => onOpenRuns(automation)}
+        />
+      ),
     },
     {
       name: listLabels.usage,
@@ -122,17 +150,38 @@ export const AutomationsTable = ({
       : []),
   ];
 
+  const sortColumn = columns.find(
+    (column) => column.name === sort.field || ('field' in column && column.field === sort.field)
+  );
+  const sortable = sortColumn && 'sortable' in sortColumn ? sortColumn.sortable : undefined;
+  const orderKey = [...automations]
+    .sort(
+      typeof sortable === 'function'
+        ? Comparators.value(sortable, Comparators.default(sort.direction))
+        : Comparators.property(sort.field, Comparators.default(sort.direction))
+    )
+    .map(({ id }) => id)
+    .join('|');
+  useEffect(() => onOrderChange(orderKey ? orderKey.split('|') : []), [orderKey, onOrderChange]);
+
   return (
     <EuiInMemoryTable
       items={automations}
       columns={columns}
-      sorting={{ sort: { field: 'name', direction: 'asc' } }}
+      sorting={{ sort }}
+      onTableChange={({ sort: nextSort }: Criteria<Automation>) =>
+        nextSort && setSort({ field: String(nextSort.field), direction: nextSort.direction })
+      }
       pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
       rowHeader="name"
       tableCaption={listLabels.title}
       tableLayout="auto"
       hasBackground={false}
-      rowProps={(automation: Automation) => ({ onClick: () => onOpenAutomation(automation) })}
+      rowProps={(automation: Automation) => ({
+        onClick: () => onOpenAutomation(automation),
+        isSelected: automation.id === selectedId,
+        'data-automation-row': automation.id,
+      })}
     />
   );
 };

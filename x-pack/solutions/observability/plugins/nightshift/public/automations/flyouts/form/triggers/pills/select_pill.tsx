@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiPopoverTitle, EuiSelectable, EuiText, type EuiSelectableOption } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiText,
+  type EuiSelectableOption,
+} from '@elastic/eui';
 import { PillPopover } from './pill_popover';
 
 export const SelectPill = <T extends string>({
@@ -27,7 +33,7 @@ export const SelectPill = <T extends string>({
   readOnly?: boolean;
 }) =>
   readOnly ? (
-    <span>{options.find((option) => option.value === value)?.label ?? value}</span>
+    <EuiBadge>{options.find((option) => option.value === value)?.label ?? value}</EuiBadge>
   ) : (
     <PillPopover
       ariaLabel={ariaLabel}

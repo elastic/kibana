@@ -31,13 +31,11 @@ const ActionsSection = () => {
 describe('AutomationActionsSection', () => {
   beforeEach(() => onSlackActionChange.mockClear());
 
-  it('always shows the Learnings row', () => {
+  it('prompts to add an action when there is none', () => {
     render(<ActionsSection />);
 
-    expect(screen.getByText('Learnings')).toBeInTheDocument();
-    expect(
-      screen.getByText('Nightshift updates knowledge, decision trees, and memories on each run.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Choose what happens when this automation runs.')).toBeInTheDocument();
+    expect(screen.queryByText('Learnings')).not.toBeInTheDocument();
   });
 
   it('adds, edits, and removes a Slack action', async () => {

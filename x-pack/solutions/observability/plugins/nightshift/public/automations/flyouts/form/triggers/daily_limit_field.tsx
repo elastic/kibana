@@ -31,31 +31,40 @@ export const DailyLimitField = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <div css={{ paddingInline: euiTheme.size.s, paddingBlockEnd: euiTheme.size.s }}>
+    <div css={!readOnly && { paddingInline: euiTheme.size.s, paddingBlockEnd: euiTheme.size.s }}>
       <EuiHorizontalRule margin="s" />
+      {readOnly && <EuiSpacer size="xs" />}
       <Sentence>
         <EuiText size="s">
           <strong>{triggerLabels.dailyLimit}</strong>
         </EuiText>
-        <div css={{ width: 180 }}>
-          <EuiFieldNumber
-            compressed
-            aria-label={triggerLabels.dailyLimit}
-            min={1}
-            max={200}
-            step={1}
-            value={value}
-            disabled={readOnly}
-            isInvalid={!isValidDailyLimit(value)}
-            append={triggerLabels.perDay}
-            onChange={(event) => onChange(event.target.value)}
-            fullWidth
+        {readOnly ? (
+          <EuiBadge
             data-test-subj="automationDailyLimit"
-          />
-        </div>
-        <EuiBadge color="success">{triggerLabels.recommended}</EuiBadge>
+            css={{ marginInlineStart: euiTheme.size.xs }}
+          >
+            {value} {triggerLabels.perDay}
+          </EuiBadge>
+        ) : (
+          <div css={{ width: 180 }}>
+            <EuiFieldNumber
+              compressed
+              aria-label={triggerLabels.dailyLimit}
+              min={1}
+              max={200}
+              step={1}
+              value={value}
+              isInvalid={!isValidDailyLimit(value)}
+              append={triggerLabels.perDay}
+              onChange={(event) => onChange(event.target.value)}
+              fullWidth
+              data-test-subj="automationDailyLimit"
+            />
+          </div>
+        )}
+        {!readOnly && <EuiBadge color="success">{triggerLabels.recommended}</EuiBadge>}
       </Sentence>
-      <EuiSpacer size="s" />
+      <EuiSpacer size={readOnly ? 'xs' : 's'} />
       <EuiText size="s" color="subdued">
         {helpText}
       </EuiText>

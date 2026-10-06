@@ -157,7 +157,7 @@ export function NightshiftPage(): React.ReactElement | null {
       />
       <EuiPageTemplate.Section
         component="div"
-        restrictWidth={pathname.endsWith('/automations') ? false : '900px'}
+        restrictWidth={pathname.startsWith('/automations') ? false : '900px'}
       >
         {canUseInvestigationsPage ? (
           <Routes>

@@ -168,15 +168,12 @@ describe('CreateAutomationFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('enables the automation on save when the switch is on', async () => {
+  it('enables the automation with Save and enable', async () => {
     renderFlyout();
     rename('Alert triage');
     await addTrigger('Alert triggered');
 
-    expect(screen.getByText('Saves as disabled')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('automationEnabledSwitch'));
-    expect(screen.getByText('Enables when saved')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('submitAutomation'));
+    fireEvent.click(screen.getByTestId('submitAndEnableAutomation'));
 
     expect(mutate).toHaveBeenCalledWith(
       expect.objectContaining({ isEnabled: true }),

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFieldText, EuiText, useEuiTheme } from '@elastic/eui';
 import cronstrue from 'cronstrue';
 import type { TriggerFormValues } from '../../automation_form_values';
-import { Sentence } from '../pills/sentence';
+import { Sentence, SentenceIcon } from '../pills/sentence';
 import { TimezonePicker } from '../pills/timezone_picker';
 import { triggerLabels } from '../translations';
 import { isValidCron, validationLabels } from '../../validation';
@@ -31,18 +31,21 @@ export const CronTriggerEditor = ({
   return (
     <>
       <Sentence>
-        <EuiIcon type="calendar" aria-hidden={true} />
+        <SentenceIcon type="calendar" />
         <EuiText size="s">{triggerLabels.customCronLead}</EuiText>
-        <EuiFieldText
-          compressed
-          aria-label={triggerLabels.customCronLead}
-          placeholder="0 9 * * *"
-          isInvalid={isInvalid}
-          value={trigger.cronExpression}
-          disabled={readOnly}
-          onChange={(event) => onChange({ ...trigger, cronExpression: event.target.value })}
-          data-test-subj="automationCronExpression"
-        />
+        {readOnly ? (
+          <EuiBadge data-test-subj="automationCronExpression">{trigger.cronExpression}</EuiBadge>
+        ) : (
+          <EuiFieldText
+            compressed
+            aria-label={triggerLabels.customCronLead}
+            placeholder="0 9 * * *"
+            isInvalid={isInvalid}
+            value={trigger.cronExpression}
+            onChange={(event) => onChange({ ...trigger, cronExpression: event.target.value })}
+            data-test-subj="automationCronExpression"
+          />
+        )}
         <TimezonePicker
           timezone={trigger.timezone}
           readOnly={readOnly}

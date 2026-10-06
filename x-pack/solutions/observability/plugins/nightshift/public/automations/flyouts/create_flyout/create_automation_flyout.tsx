@@ -12,6 +12,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutResizable,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -76,6 +77,7 @@ export const CreateAutomationFlyout = ({
   const [isNameInvalid, setIsNameInvalid] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const titleId = useGeneratedHtmlId();
+  const { euiTheme } = useEuiTheme();
   const createAutomation = useCreateAutomation();
   const update = (changes: Partial<AutomationFormValues>) =>
     setValues((current) => ({ ...current, ...changes }));
@@ -85,14 +87,14 @@ export const CreateAutomationFlyout = ({
 
   const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
 
-  const save = () => {
+  const save = (isEnabled: boolean) => {
     const { trigger } = values;
     if (!isTriggerValid(trigger)) return;
     if (!values.name.trim()) {
       setIsNameInvalid(true);
       return;
     }
-    createAutomation.mutate(toAutomationRequestBody({ ...values, trigger }), {
+    createAutomation.mutate(toAutomationRequestBody({ ...values, isEnabled, trigger }), {
       onSuccess: onClose,
     });
   };
@@ -103,10 +105,11 @@ export const CreateAutomationFlyout = ({
       size={780}
       minWidth={420}
       maxWidth={960}
+      paddingSize="m"
       aria-labelledby={titleId}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" css={{ paddingBlock: euiTheme.size.s }}>
           <h2 id={titleId}>{labels.createTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -122,11 +125,9 @@ export const CreateAutomationFlyout = ({
         />
       </EuiFlyoutBody>
       <AutomationFlyoutFooter
-        isEnabled={values.isEnabled}
         canSave={canSave}
         isSaving={createAutomation.isLoading}
         saveBlocker={saveBlocker}
-        onEnabledChange={(isEnabled) => update({ isEnabled })}
         onSave={save}
       />
       {isDiscardOpen && (

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFieldText, EuiPanel, EuiText } from '@elastic/eui';
 import { actionLabels } from '../../actions/automation_actions_section';
 import type { SlackTriggerFormValues, TriggerFormValues } from '../../automation_form_values';
 import { ListPill } from '../pills/list_pill';
 import { PillPopover } from '../pills/pill_popover';
-import { Sentence } from '../pills/sentence';
+import { Sentence, SentenceIcon } from '../pills/sentence';
 import { triggerLabels, slackTriggerLeads } from '../translations';
 
 export const SlackTriggerEditor = ({
@@ -24,7 +24,7 @@ export const SlackTriggerEditor = ({
   readOnly?: boolean;
 }) => (
   <Sentence>
-    <EuiIcon type="logoSlack" aria-hidden={true} />
+    <SentenceIcon type="logoSlack" />
     <EuiText size="s">
       <strong>{slackTriggerLeads[trigger.kind]}</strong>
     </EuiText>
@@ -39,7 +39,7 @@ export const SlackTriggerEditor = ({
       readOnly={readOnly}
     />
     {readOnly ? (
-      <EuiText size="s">{trigger.messageFilter || triggerLabels.anyMessage}</EuiText>
+      <EuiBadge>{trigger.messageFilter || triggerLabels.anyMessage}</EuiBadge>
     ) : (
       <PillPopover
         ariaLabel={triggerLabels.anyMessage}

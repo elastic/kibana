@@ -31,7 +31,7 @@ export const RunsSparkline = ({
   const series = [
     {
       color: euiTheme.colors.vis.euiColorVisSuccess0,
-      matches: (status: string) => status === 'completed',
+      matches: (status: string) => status === 'succeeded',
     },
     {
       color: euiTheme.colors.vis.euiColorVisDanger0,

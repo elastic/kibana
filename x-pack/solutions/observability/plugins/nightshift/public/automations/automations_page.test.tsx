@@ -51,6 +51,10 @@ const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
 describe('AutomationsPage', () => {
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+  });
+
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
       services: { application: { capabilities: { nightshift: { manage: true } } } },
@@ -253,6 +257,7 @@ describe('AutomationsPage', () => {
       expect(createMutate).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'Triage incoming alerts (copy)' })
       );
+      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
     });
 
     it('deletes an automation after confirmation', async () => {
@@ -279,8 +284,32 @@ describe('AutomationsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Triage incoming alerts' }));
 
       expect(screen.getByTestId('automationDetailFlyout')).toBeInTheDocument();
+      expect(document.querySelector('.euiTableRow-isSelected')).toHaveTextContent(
+        'Triage incoming alerts'
+      );
       fireEvent.click(screen.getByTestId('automationCloseButton'));
       expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
+    });
+
+    it('steps through automations in the table sort order', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Triage incoming alerts' }));
+      expect(screen.getByTestId('automationPreviousButton')).toBeEnabled();
+      expect(screen.getByTestId('automationNextButton')).toBeDisabled();
+
+      fireEvent.click(screen.getAllByTestId('tableHeaderSortButton')[0]);
+      expect(screen.getByTestId('automationPreviousButton')).toBeDisabled();
+      expect(screen.getByTestId('automationNextButton')).toBeEnabled();
+    });
+
+    it('moves to the next automation with the arrow key while focus is in the flyout', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Daily report' }));
+      fireEvent.keyDown(screen.getByTestId('automationCloseButton'), { key: 'ArrowDown' });
+
+      expect(screen.getByRole('heading', { name: 'Triage incoming alerts' })).toBeInTheDocument();
     });
 
     it('filters by status with counts and clears the selection', async () => {

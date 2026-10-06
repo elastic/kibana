@@ -43,7 +43,14 @@ export const TriggerRow = ({
   `;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={rowCss}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      css={
+        readOnly ? { minBlockSize: euiTheme.size.xl, paddingBlockEnd: euiTheme.size.xs } : rowCss
+      }
+    >
       <EuiFlexItem>{children}</EuiFlexItem>
       {!readOnly && (
         <EuiFlexItem grow={false}>

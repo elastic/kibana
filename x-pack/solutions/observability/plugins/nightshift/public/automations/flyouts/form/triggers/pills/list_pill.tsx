@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiPanel } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, EuiPanel } from '@elastic/eui';
 import { PillPopover } from './pill_popover';
 
 export const ListPill = ({
@@ -27,7 +27,7 @@ export const ListPill = ({
   readOnly?: boolean;
 }) =>
   readOnly ? (
-    <span>{values.join(', ') || emptyLabel}</span>
+    <EuiBadge>{values.join(', ') || emptyLabel}</EuiBadge>
   ) : (
     <PillPopover
       ariaLabel={ariaLabel}

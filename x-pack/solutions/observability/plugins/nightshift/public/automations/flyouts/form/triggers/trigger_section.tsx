@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import {
   createTriggerFormValues,
   isSlackTrigger,
@@ -21,6 +21,7 @@ import { triggerLabels } from './translations';
 import { TriggerPicker } from './trigger_picker';
 import { TriggerRow } from './trigger_row';
 import { hasDailyLimit } from '../validation';
+import { SectionHeader } from '../section_header';
 
 export const AutomationTriggerSection = ({
   trigger,
@@ -28,12 +29,14 @@ export const AutomationTriggerSection = ({
   onTriggerChange,
   onDailyDispatchLimitChange,
   readOnly = false,
+  onEdit,
 }: {
   trigger?: TriggerFormValues;
   dailyDispatchLimit: string;
   onTriggerChange: (trigger?: TriggerFormValues) => void;
   onDailyDispatchLimitChange: (value: string) => void;
   readOnly?: boolean;
+  onEdit?: () => void;
 }) => {
   const [stashedTriggers, setStashedTriggers] = useState<
     Partial<Record<TriggerFormValues['kind'], TriggerFormValues>>
@@ -45,13 +48,9 @@ export const AutomationTriggerSection = ({
 
   return (
     <>
-      {!readOnly && (
-        <EuiTitle size="xs">
-          <h3>{triggerLabels.triggers}</h3>
-        </EuiTitle>
-      )}
+      <SectionHeader title={triggerLabels.triggers} onEdit={onEdit} />
       <EuiSpacer size="s" />
-      <EuiPanel hasBorder hasShadow={false} paddingSize={trigger ? 's' : 'm'}>
+      <EuiPanel hasBorder hasShadow={false} paddingSize={trigger && !readOnly ? 's' : 'm'}>
         {!trigger && (
           <>
             <EuiText size="s" color="subdued">
@@ -64,15 +63,15 @@ export const AutomationTriggerSection = ({
                 readOnly ? (
                   <></>
                 ) : (
-                  <EuiButtonEmpty
+                  <EuiButton
+                    size="s"
                     iconType="plus"
                     color="text"
-                    flush="left"
                     onClick={toggle}
                     data-test-subj="automationAddTrigger"
                   >
                     {triggerLabels.addTrigger}
-                  </EuiButtonEmpty>
+                  </EuiButton>
                 )
               }
             />

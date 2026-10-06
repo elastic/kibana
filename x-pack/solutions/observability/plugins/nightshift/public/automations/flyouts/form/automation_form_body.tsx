@@ -13,6 +13,7 @@ import { AutomationActionsSection } from './actions/automation_actions_section';
 import { AutomationInstructions } from './instructions/automation_instructions';
 import { AutomationTriggerSection } from './triggers/trigger_section';
 import { AutomationTagsField, tagLabels } from './tags_field';
+import { FormSection } from './section_header';
 
 const labels = {
   name: i18n.translate('xpack.nightshift.automations.flyout.nameLabel', { defaultMessage: 'Name' }),
@@ -37,6 +38,7 @@ export const AutomationFormBody = ({
   readOnly = false,
   showIdentityFields = true,
   onChange,
+  onEdit,
 }: {
   values: AutomationFormValues;
   tagSuggestions: string[];
@@ -44,86 +46,98 @@ export const AutomationFormBody = ({
   readOnly?: boolean;
   showIdentityFields?: boolean;
   onChange: (changes: Partial<AutomationFormValues>) => void;
-}) => (
-  <>
-    {showIdentityFields && (
-      <EuiFormRow fullWidth label={labels.name} isInvalid={isNameInvalid}>
-        <EuiFieldText
+  onEdit?: () => void;
+}) => {
+  return (
+    <>
+      {showIdentityFields && (
+        <EuiFormRow fullWidth label={labels.name} isInvalid={isNameInvalid}>
+          <EuiFieldText
+            fullWidth
+            compressed
+            value={values.name}
+            disabled={readOnly}
+            placeholder={labels.namePlaceholder}
+            isInvalid={isNameInvalid}
+            onChange={(event) => onChange({ name: event.target.value })}
+            data-test-subj="automationName"
+          />
+        </EuiFormRow>
+      )}
+      {showIdentityFields && <EuiSpacer size="m" />}
+      {showIdentityFields && (
+        <EuiFormRow
           fullWidth
-          compressed
-          value={values.name}
-          disabled={readOnly}
-          placeholder={labels.namePlaceholder}
-          isInvalid={isNameInvalid}
-          onChange={(event) => onChange({ name: event.target.value })}
-          data-test-subj="automationName"
-        />
-      </EuiFormRow>
-    )}
-    {showIdentityFields && (
-      <EuiFormRow
-        fullWidth
-        label={tagLabels.tags}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {labels.optional}
-          </EuiText>
-        }
-      >
-        <AutomationTagsField
-          tags={values.tags}
-          suggestions={tagSuggestions}
-          onChange={(tags) => onChange({ tags })}
-          disabled={readOnly}
-        />
-      </EuiFormRow>
-    )}
-    {showIdentityFields && (
-      <EuiFormRow
-        fullWidth
-        label={labels.description}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {labels.optional}
-          </EuiText>
-        }
-      >
-        <EuiTextArea
+          label={labels.description}
+          labelAppend={
+            <EuiText size="xs" color="subdued">
+              {labels.optional}
+            </EuiText>
+          }
+        >
+          <EuiTextArea
+            fullWidth
+            compressed
+            rows={3}
+            resize="vertical"
+            maxLength={200}
+            placeholder={labels.descriptionPlaceholder}
+            value={values.description}
+            disabled={readOnly}
+            onChange={(event) => onChange({ description: event.target.value })}
+            onBlur={(event) => onChange({ description: event.target.value.trim() })}
+            data-test-subj="automationDescription"
+          />
+        </EuiFormRow>
+      )}
+      {showIdentityFields && <EuiSpacer size="m" />}
+      {showIdentityFields && (
+        <EuiFormRow
           fullWidth
-          compressed
-          rows={1}
-          resize="none"
-          css={{ fieldSizing: 'content', minBlockSize: 0, maxBlockSize: 160 }}
-          maxLength={200}
-          placeholder={labels.descriptionPlaceholder}
-          value={values.description}
-          disabled={readOnly}
-          onChange={(event) => onChange({ description: event.target.value })}
-          data-test-subj="automationDescription"
+          label={tagLabels.tags}
+          labelAppend={
+            <EuiText size="xs" color="subdued">
+              {labels.optional}
+            </EuiText>
+          }
+        >
+          <AutomationTagsField
+            tags={values.tags}
+            suggestions={tagSuggestions}
+            onChange={(tags) => onChange({ tags })}
+            disabled={readOnly}
+          />
+        </EuiFormRow>
+      )}
+      {showIdentityFields && <EuiSpacer size="s" />}
+      <FormSection>
+        <AutomationTriggerSection
+          trigger={values.trigger}
+          dailyDispatchLimit={values.dailyDispatchLimit}
+          onTriggerChange={(trigger) => onChange({ trigger })}
+          onDailyDispatchLimitChange={(dailyDispatchLimit) => onChange({ dailyDispatchLimit })}
+          readOnly={readOnly}
+          onEdit={onEdit}
         />
-      </EuiFormRow>
-    )}
-    <EuiSpacer size="l" />
-    <AutomationTriggerSection
-      trigger={values.trigger}
-      dailyDispatchLimit={values.dailyDispatchLimit}
-      onTriggerChange={(trigger) => onChange({ trigger })}
-      onDailyDispatchLimitChange={(dailyDispatchLimit) => onChange({ dailyDispatchLimit })}
-      readOnly={readOnly}
-    />
-    <EuiSpacer size="l" />
-    <AutomationInstructions
-      instructions={values.instructions}
-      mode={values.mode}
-      onInstructionsChange={(instructions) => onChange({ instructions })}
-      onModeChange={(mode) => onChange({ mode })}
-      readOnly={readOnly}
-    />
-    <EuiSpacer size="l" />
-    <AutomationActionsSection
-      slackAction={values.slackAction}
-      onSlackActionChange={(slackAction) => onChange({ slackAction })}
-      readOnly={readOnly}
-    />
-  </>
-);
+      </FormSection>
+      <FormSection>
+        <AutomationInstructions
+          instructions={values.instructions}
+          mode={values.mode}
+          onInstructionsChange={(instructions) => onChange({ instructions })}
+          onModeChange={(mode) => onChange({ mode })}
+          readOnly={readOnly}
+          onEdit={onEdit}
+        />
+      </FormSection>
+      <FormSection>
+        <AutomationActionsSection
+          slackAction={values.slackAction}
+          onSlackActionChange={(slackAction) => onChange({ slackAction })}
+          readOnly={readOnly}
+          onEdit={onEdit}
+        />
+      </FormSection>
+    </>
+  );
+};

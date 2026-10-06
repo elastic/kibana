@@ -7,17 +7,17 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiFieldText,
   EuiComboBox,
   EuiFormRow,
-  EuiIcon,
   EuiPanel,
   EuiSelectable,
   EuiText,
 } from '@elastic/eui';
 import type { AlertStatus, TriggerFormValues } from '../../automation_form_values';
 import { PillPopover } from '../pills/pill_popover';
-import { Sentence } from '../pills/sentence';
+import { Sentence, SentenceIcon } from '../pills/sentence';
 import { triggerLabels } from '../translations';
 
 const ALERT_STATUSES = ['active', 'inactive'] as const;
@@ -36,11 +36,7 @@ const AlertStatusPicker = ({
   const selected = status === 'any' ? [] : [status];
 
   if (readOnly) {
-    return (
-      <EuiText size="s">
-        {status === 'any' ? triggerLabels.anyStatus : statusLabels[status]}
-      </EuiText>
-    );
+    return <EuiBadge>{status === 'any' ? triggerLabels.anyStatus : statusLabels[status]}</EuiBadge>;
   }
 
   return (
@@ -90,16 +86,16 @@ export const AlertTriggerEditor = ({
 }) => {
   return (
     <Sentence>
-      <EuiIcon type="logoElastic" aria-hidden={true} />
+      <SentenceIcon type="logoElastic" />
       <EuiText size="s">
         <strong>{triggerLabels.whenAnAlert}</strong>
       </EuiText>
       <EuiText size="s">{triggerLabels.from}</EuiText>
       {readOnly ? (
-        <EuiText size="s">
+        <EuiBadge>
           {[trigger.ruleNamePattern, ...trigger.ruleTags].filter(Boolean).join(', ') ||
             triggerLabels.anyRule}
-        </EuiText>
+        </EuiBadge>
       ) : (
         <PillPopover
           ariaLabel={triggerLabels.anyRule}

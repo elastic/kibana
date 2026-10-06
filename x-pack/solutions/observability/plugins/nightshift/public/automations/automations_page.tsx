@@ -52,6 +52,7 @@ export const AutomationsPage = (): React.ReactElement => {
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
   const [automationToDelete, setAutomationToDelete] = useState<Automation | undefined>();
   const [range, setRange] = useState<TimeRange>({ start: 'now-48h', end: 'now' });
+  const [order, setOrder] = useState<string[]>([]);
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
   const detailAutomation = automations.find((automation) => automation.id === id);
   const navigate = (path: string) => history.push(path);
@@ -65,6 +66,10 @@ export const AutomationsPage = (): React.ReactElement => {
   const rateLimitedCount = automations.filter(isRateLimited).length;
   const openCreateFlyout = canManage ? () => setIsCreateFlyoutOpen(true) : undefined;
   const isEmpty = !isInitialLoading && !error && automations.length === 0;
+
+  const orderedAutomations = order.flatMap((orderedId) =>
+    visibleAutomations.filter((automation) => automation.id === orderedId)
+  );
 
   const renderContent = () => {
     if (isInitialLoading) return <EuiLoadingSpinner size="l" />;
@@ -103,6 +108,9 @@ export const AutomationsPage = (): React.ReactElement => {
         onClone={(automation) => createAutomation.mutate(toCloneRequestBody(automation))}
         onDelete={setAutomationToDelete}
         onOpenAutomation={(automation) => navigate(`/automations/${automation.id}`)}
+        onOpenRuns={(automation) => navigate(`/automations/${automation.id}/runs`)}
+        selectedId={id}
+        onOrderChange={setOrder}
       />
     );
   };
@@ -148,7 +156,7 @@ export const AutomationsPage = (): React.ReactElement => {
       {detailAutomation && (
         <AutomationDetailFlyout
           key={detailAutomation.id}
-          automations={visibleAutomations}
+          automations={orderedAutomations}
           automation={detailAutomation}
           canManage={canManage}
           usedToday={usedToday.get(detailAutomation.id) ?? 0}

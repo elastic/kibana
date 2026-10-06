@@ -23,10 +23,12 @@ export const AutomationRunsCell = ({
   id,
   startedAfter,
   startedBefore,
+  onOpen,
 }: {
   id: string;
   startedAfter: string;
   startedBefore: string;
+  onOpen: () => void;
 }) => {
   const { data, isInitialLoading, isError } = useAutomationRunsInRange(
     id,
@@ -51,7 +53,10 @@ export const AutomationRunsCell = ({
       <EuiLink
         data-test-subj="automationRuns"
         color="primary"
-        onClick={(event: React.MouseEvent) => event.stopPropagation()}
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+          onOpen();
+        }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>

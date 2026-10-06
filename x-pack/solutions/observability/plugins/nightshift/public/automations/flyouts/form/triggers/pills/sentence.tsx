@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 
 export const Sentence = ({ children }: { children: React.ReactNode }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
@@ -16,3 +16,8 @@ export const Sentence = ({ children }: { children: React.ReactNode }) => (
     )}
   </EuiFlexGroup>
 );
+
+export const SentenceIcon = ({ type }: { type: string }) => {
+  const { euiTheme } = useEuiTheme();
+  return <EuiIcon type={type} aria-hidden={true} css={{ marginInlineEnd: euiTheme.size.xs }} />;
+};
