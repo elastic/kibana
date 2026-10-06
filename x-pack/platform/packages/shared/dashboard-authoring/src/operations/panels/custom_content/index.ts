@@ -18,8 +18,7 @@ import type { PanelResolutionRequestBase } from '../../../resolve_panel';
  *
  * Custom content is an HTML template generated server-side, so it is requested
  * like a Lens or Vega panel (`source: 'request'`, `renderer: 'custom_content'`).
- * The resolver that turns these requests into panel content lives in
- * `core/resolvers/custom_content_panel_resolver.ts`.
+ * The host provides the resolver that turns these requests into panel content.
  */
 
 /** Request to generate a new custom content panel's template. */
