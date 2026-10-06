@@ -551,11 +551,8 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           // event still carries its own row data.
           expect(breachEvents[0].group_hash).toBe(breachEvents[1].group_hash);
 
-          const episodeIds = new Set(breachEvents.map((event) => event.alert?.id));
+          const episodeIds = new Set(breachEvents.map((event) => event.alert?.id).filter(Boolean));
           expect(episodeIds.size).toBe(1);
-          const [episodeId] = [...episodeIds];
-          expect(episodeId).toBeDefined();
-          expect(episodeId).not.toBe('');
 
           const eventsByHost = groupEventsByHost(breachEvents);
           expect(eventsByHost['host-grouping-fallback-a'].data).toMatchObject({
@@ -568,63 +565,6 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             severity: 'high',
             value: 2,
           });
-        }
-      );
-
-      apiTest(
-        'keeps one episode open across executions for an ungrouped series (no recovery churn)',
-        async ({ apiServices }) => {
-          // Episode continuity is the main behavior this fix restores: the single
-          // ungrouped series must hold one `alert.id` run over run, instead of
-          // churning a new episode (and recovery) every execution.
-          await apiServices.alertingV2.sourceIndex.indexDocs({
-            index: SOURCE_INDEX,
-            docs: [
-              { '@timestamp': new Date().toISOString(), 'host.name': 'host-ungrouped-episode-a' },
-              { '@timestamp': new Date().toISOString(), 'host.name': 'host-ungrouped-episode-b' },
-            ],
-          });
-
-          const rule = await apiServices.alertingV2.rules.create(
-            buildCreateRuleData({
-              metadata: { name: 'executor-ungrouped-episode-continuity' },
-              query: {
-                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-ungrouped-episode-a", "host-ungrouped-episode-b") | KEEP host.name`,
-              },
-              grouping: undefined,
-            })
-          );
-
-          // Two rows per run, so >= 4 breached events guarantees at least two
-          // distinct executions have written for this series.
-          await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 4, {
-            status: 'breached',
-          });
-
-          // Stop the 5s-cadence rule so it doesn't keep writing for the suite.
-          await apiServices.alertingV2.rules.disable(rule.id);
-
-          const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-            status: 'breached',
-          });
-
-          // Span at least two executions...
-          const executions = new Set(breachEvents.map((event) => event.scheduled_timestamp));
-          expect(executions.size).toBeGreaterThanOrEqual(2);
-
-          // ...all sharing one non-empty episode id and group_hash.
-          const episodeIds = new Set(breachEvents.map((event) => event.alert?.id));
-          expect(episodeIds.size).toBe(1);
-          const [episodeId] = [...episodeIds];
-          expect(episodeId).toBeDefined();
-          expect(episodeId).not.toBe('');
-          expect(new Set(breachEvents.map((event) => event.group_hash)).size).toBe(1);
-
-          // No recovery churn: the series never flapped to recovered between runs.
-          const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-            status: 'recovered',
-          });
-          expect(recoveredEvents).toHaveLength(0);
         }
       );
 

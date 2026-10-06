@@ -25,9 +25,14 @@ import type { ITransitionStrategy, StateTransitionResult } from './strategies/ty
 import type { ExecutionContext } from '../execution_context';
 
 /**
- * Fixed namespace for deterministic (uuid v5) episode ids. Arbitrary but stable;
- * only the pairing of namespace + seed matters, and it must never change or
- * existing episode ids would stop reproducing.
+ * Namespace for deterministic (uuid v5) episode ids.
+ *
+ * uuid v5 requires the namespace itself to be a UUID, so it cannot be a readable
+ * string; the readable part of the identity is the seed (see
+ * {@link buildNewEpisodeId}). A dedicated namespace (rather than the RFC 4122
+ * `DNS`/`URL` ones) guarantees our ids never collide with any other v5 user
+ * hashing the same seed. Its value is arbitrary but must never change, or
+ * previously generated episode ids would stop reproducing.
  */
 const EPISODE_ID_NAMESPACE = '17969019-52cb-4d0f-b663-ffdf1b44f3eb';
 

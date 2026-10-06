@@ -53,18 +53,14 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
 
     collector.increment(RULE_EXECUTION_COUNTERS.ruleEventsGenerated, persistedDocs.length);
 
-    const newEpisodeIds = state.newEpisodeIds ? new Set(state.newEpisodeIds) : undefined;
-
     let signalsCount = 0;
-    // Distinct new episodes that actually landed. A single-series rule emits many
-    // docs sharing one new episode id, so counting docs would overcount episodes.
-    const persistedNewEpisodeIds = new Set<string>();
+    const persistedEpisodeIds = new Set<string>();
     for (const doc of persistedDocs) {
       if (doc.type === alertEventType.signal) {
         signalsCount += 1;
       }
-      if (newEpisodeIds && doc.alert && newEpisodeIds.has(doc.alert.id)) {
-        persistedNewEpisodeIds.add(doc.alert.id);
+      if (doc.alert) {
+        persistedEpisodeIds.add(doc.alert.id);
       }
     }
 
@@ -72,11 +68,18 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
       collector.increment(RULE_EXECUTION_COUNTERS.signalsGenerated, signalsCount);
     }
 
-    if (persistedNewEpisodeIds.size > 0) {
-      collector.increment(
-        RULE_EXECUTION_COUNTERS.newEpisodesGenerated,
-        persistedNewEpisodeIds.size
-      );
+    // Count episodes, not docs: a single-series rule writes many docs that share
+    // one new episode id, and that is one new episode. A new episode counts once
+    // if any of its docs landed, and not at all if they all failed to index.
+    let newEpisodesCount = 0;
+    for (const episodeId of new Set(state.newEpisodeIds)) {
+      if (persistedEpisodeIds.has(episodeId)) {
+        newEpisodesCount += 1;
+      }
+    }
+
+    if (newEpisodesCount > 0) {
+      collector.increment(RULE_EXECUTION_COUNTERS.newEpisodesGenerated, newEpisodesCount);
     }
   }
 }

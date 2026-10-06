@@ -1071,6 +1071,51 @@ describe('DirectorService', () => {
         expect(laterRun.alertEvents[0].alert?.id).toBe(seedId(laterTs));
         expect(laterRun.alertEvents[0].alert?.id).not.toBe(firstRun.alertEvents[0].alert?.id);
       });
+
+      it('does not change grouped rules: one episode per group, existing episodes preserved', async () => {
+        // Grouped rules emit one event per group per run. Each new group must
+        // still open its own episode (distinct ids, derived from its own hash),
+        // and a group with an open episode must keep that id rather than have
+        // it re-derived.
+        const groupedRow = (groupHash: string) =>
+          createAlertEvent({
+            group_hash: groupHash,
+            scheduled_timestamp: RUN_TS,
+            status: 'breached',
+            type: 'alert',
+            alert: undefined,
+            data: { 'host.name': groupHash },
+          });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'breached',
+              last_episode_id: 'existing-episode-c',
+              last_episode_status: 'active',
+              last_episode_status_count: null,
+              group_hash: 'hash-c',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [groupedRow('hash-a'), groupedRow('hash-b'), groupedRow('hash-c')],
+        });
+
+        const [a, b, c] = result.alertEvents.map((event) => event.alert?.id);
+        // New groups: one episode each, keyed by their own group hash.
+        expect(a).toBe(`episode:${rule.id}|hash-a|${RUN_TS}`);
+        expect(b).toBe(`episode:${rule.id}|hash-b|${RUN_TS}`);
+        expect(a).not.toBe(b);
+        // Existing active group: episode id preserved, not re-derived.
+        expect(c).toBe('existing-episode-c');
+        expect(new Set(result.stats.newEpisodeIds)).toEqual(new Set([a, b]));
+      });
     });
   });
 });
