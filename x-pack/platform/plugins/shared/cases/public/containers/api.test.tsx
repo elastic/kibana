@@ -43,6 +43,7 @@ import {
   getSimilarCases,
   patchObservable,
   deleteObservable,
+  bulkDeleteObservables,
 } from './api';
 
 import {
@@ -1490,6 +1491,36 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
       expect(resp).toEqual(undefined);
+    });
+  });
+
+  describe('bulkDeleteObservables', () => {
+    const observableIds = [
+      'afa44220-862c-4a21-b574-351ab4d0a732',
+      'bfa44220-862c-4a21-b574-351ab4d0a733',
+    ];
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct url, method, body, and signal', async () => {
+      await bulkDeleteObservables(mockCase.id, observableIds, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_bulk_delete`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ ids: observableIds }),
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await bulkDeleteObservables(mockCase.id, observableIds, abortCtrl.signal);
+      expect(resp).toEqual(basicCase);
     });
   });
 });
