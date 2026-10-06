@@ -77,7 +77,7 @@ export const getEmptyESQLResponse = (): EsqlQueryResponse => ({
  * `context_loaders/load_alert_action_states.ts`.
  */
 const ALERT_ACTION_STATE_COLUMNS: ReadonlyArray<{ name: string; type: string }> = [
-  { name: 'episode_id', type: 'keyword' },
+  { name: 'alert_id', type: 'keyword' },
   { name: 'last_ack_action', type: 'keyword' },
   { name: 'last_assign_at', type: 'date' },
   { name: 'last_assignee_at', type: 'date' },
@@ -93,7 +93,7 @@ const ALERT_ACTION_STATE_COLUMNS: ReadonlyArray<{ name: string; type: string }> 
  * through the paired `*_at` timestamps rather than a null value.
  */
 export interface AlertActionStateRowOverrides {
-  episode_id?: string;
+  alert_id?: string;
   last_ack_action?: 'ack' | 'unack' | null;
   last_assign_at?: string | null;
   last_assignee_at?: string | null;
@@ -124,7 +124,7 @@ const toAlertActionStateRow = (row: AlertActionStateRowOverrides): EsqlCell[] =>
   const tagAt = tags == null ? null : ACTION_STATE_TIMESTAMP;
 
   return [
-    row.episode_id ?? 'episode-1',
+    row.alert_id ?? 'episode-1',
     row.last_ack_action === undefined ? null : row.last_ack_action,
     row.last_assign_at === undefined ? assignAt : row.last_assign_at,
     row.last_assignee_at === undefined ? assignAt : row.last_assignee_at,

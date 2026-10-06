@@ -78,20 +78,20 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       });
       expect(actions).toHaveLength(2);
 
-      const firstAction = actions.find((doc) => doc.episode_id === episodeIdOne);
-      const secondAction = actions.find((doc) => doc.episode_id === episodeIdTwo);
+      const firstAction = actions.find((doc) => doc.alert_id === episodeIdOne);
+      const secondAction = actions.find((doc) => doc.alert_id === episodeIdTwo);
 
       // The group_hash is resolved server-side from the episode's events.
       expect(firstAction).toMatchObject({
         action_type: 'ack',
         group_hash: groupHashOne,
-        episode_id: episodeIdOne,
+        alert_id: episodeIdOne,
         rule_id: ruleId,
       });
       expect(secondAction).toMatchObject({
         action_type: 'ack',
         group_hash: groupHashTwo,
-        episode_id: episodeIdTwo,
+        alert_id: episodeIdTwo,
         rule_id: ruleId,
       });
     }
@@ -138,21 +138,21 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       });
       expect(actions).toHaveLength(2);
 
-      const firstAction = actions.find((doc) => doc.episode_id === episodeIdOne);
-      const secondAction = actions.find((doc) => doc.episode_id === episodeIdTwo);
+      const firstAction = actions.find((doc) => doc.alert_id === episodeIdOne);
+      const secondAction = actions.find((doc) => doc.alert_id === episodeIdTwo);
 
       // The group_hash is resolved server-side from the episode's events.
       expect(firstAction).toMatchObject({
         action_type: 'tag',
         group_hash: groupHashOne,
-        episode_id: episodeIdOne,
+        alert_id: episodeIdOne,
         rule_id: ruleId,
         tags: ['production'],
       });
       expect(secondAction).toMatchObject({
         action_type: 'tag',
         group_hash: groupHashTwo,
-        episode_id: episodeIdTwo,
+        alert_id: episodeIdTwo,
         rule_id: ruleId,
         tags: ['important', 'reviewed'],
       });
@@ -194,7 +194,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     expect(actions[0]).toMatchObject({
       action_type: 'unack',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
     });
   });
@@ -230,7 +230,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'assign',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         assignee_uid: 'u_someone',
       });
@@ -273,7 +273,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'ack',
         group_hash: knownGroup,
-        episode_id: knownEpisode,
+        alert_id: knownEpisode,
       });
     }
   );
@@ -317,7 +317,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'tag',
         group_hash: knownGroup,
-        episode_id: knownEpisode,
+        alert_id: knownEpisode,
         tags: ['production'],
       });
     }
@@ -384,7 +384,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'deactivate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         reason: 'bulk deactivate',
       });
@@ -440,7 +440,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'activate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         reason: 'bulk activate',
       });
 
@@ -505,7 +505,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
-        episode_id: episodeIdOk,
+        alert_id: episodeIdOk,
         action_type: 'deactivate',
         reason: 'should write',
       });
@@ -644,7 +644,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'ack',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
         rule_id: ruleId,
       });
     }
@@ -694,7 +694,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         actionTypes: ['ack'],
       });
       expect(actions).toHaveLength(2);
-      expect(actions.filter((doc) => doc.episode_id === acknowledgedEpisodeId)).toHaveLength(1);
+      expect(actions.filter((doc) => doc.alert_id === acknowledgedEpisodeId)).toHaveLength(1);
     }
   );
 

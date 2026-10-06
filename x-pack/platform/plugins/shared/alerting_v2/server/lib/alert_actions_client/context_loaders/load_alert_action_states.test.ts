@@ -27,7 +27,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
   });
 
-  it('issues a single query over .alert-actions keyed by a deduplicated episode_id IN clause', async () => {
+  it('issues a single query over .alert-actions keyed by a deduplicated alert_id IN clause', async () => {
     const { queryService, mockEsClient } = setup();
     mockEsClient.esql.query.mockResolvedValueOnce(getAlertActionStateESQLResponse());
 
@@ -41,9 +41,9 @@ describe('loadAlertActionStatesByEpisodeId', () => {
     const { query } = mockEsClient.esql.query.mock.calls[0][0];
     expect(query).toContain('FROM ".alert-actions"');
     expect(query).toContain(`space_id == "${SPACE_ID}"`);
-    expect(query).toMatch(/episode_id IN \("ep-1",\s*"ep-2"\)/);
+    expect(query).toMatch(/alert_id IN \("ep-1",\s*"ep-2"\)/);
     expect(query).toContain('action_type IN ("ack", "unack", "assign", "tag")');
-    expect(query).toContain('BY episode_id');
+    expect(query).toContain('BY alert_id');
   });
 
   it('reads the state of every returned alert, keyed by episode id', async () => {
@@ -51,12 +51,12 @@ describe('loadAlertActionStatesByEpisodeId', () => {
     mockEsClient.esql.query.mockResolvedValueOnce(
       getAlertActionStateESQLResponse([
         {
-          episode_id: 'ep-1',
+          alert_id: 'ep-1',
           last_ack_action: 'ack',
           last_assignee_uid: 'user-1',
           last_tags: ['prod', 'db'],
         },
-        { episode_id: 'ep-2' },
+        { alert_id: 'ep-2' },
       ])
     );
 
@@ -81,7 +81,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
   it('treats a trailing unack as not acknowledged', async () => {
     const { queryService, mockEsClient } = setup();
     mockEsClient.esql.query.mockResolvedValueOnce(
-      getAlertActionStateESQLResponse([{ episode_id: 'ep-1', last_ack_action: 'unack' }])
+      getAlertActionStateESQLResponse([{ alert_id: 'ep-1', last_ack_action: 'unack' }])
     );
 
     const states = await loadAlertActionStatesByEpisodeId({
@@ -96,7 +96,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
   it('normalizes a single returned tag into an array', async () => {
     const { queryService, mockEsClient } = setup();
     mockEsClient.esql.query.mockResolvedValueOnce(
-      getAlertActionStateESQLResponse([{ episode_id: 'ep-1', last_tags: 'prod' }])
+      getAlertActionStateESQLResponse([{ alert_id: 'ep-1', last_tags: 'prod' }])
     );
 
     const states = await loadAlertActionStatesByEpisodeId({
@@ -113,7 +113,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
     mockEsClient.esql.query.mockResolvedValueOnce(
       getAlertActionStateESQLResponse([
         {
-          episode_id: 'ep-1',
+          alert_id: 'ep-1',
           last_assignee_uid: 'user-1',
           last_assignee_at: '2025-01-01T00:00:00.000Z',
           last_assign_at: '2025-01-02T00:00:00.000Z',
@@ -135,7 +135,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
     mockEsClient.esql.query.mockResolvedValueOnce(
       getAlertActionStateESQLResponse([
         {
-          episode_id: 'ep-1',
+          alert_id: 'ep-1',
           last_tags: ['prod'],
           last_tagged_at: '2025-01-01T00:00:00.000Z',
           last_tag_at: '2025-01-02T00:00:00.000Z',

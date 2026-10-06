@@ -36,7 +36,7 @@ export const EMPTY_ALERT_ACTION_STATE: AlertActionState = {
  * `drop_null_columns` removes columns that are null for every row.
  */
 interface RawAlertActionStateRow {
-  episode_id: string;
+  alert_id: string;
   last_ack_action?: string | null;
   last_assign_at?: string | null;
   last_assignee_at?: string | null;
@@ -71,12 +71,12 @@ interface LoadAlertActionStatesParams {
 
 /**
  * Reduces the ack / assign / tag history of every requested alert to its
- * current state in a single ES|QL round-trip, keyed by `episode_id` so both
+ * current state in a single ES|QL round-trip, keyed by `alert_id` so both
  * the single and the bulk path can look an alert up directly. Alerts with no
  * such history are absent from the map; callers fall back to
  * {@link EMPTY_ALERT_ACTION_STATE}.
  *
- * Series-scoped actions are excluded by the `episode_id` filter, which is
+ * Series-scoped actions are excluded by the `alert_id` filter, which is
  * what makes the result safe to compare an episode-scoped request against.
  */
 export const loadAlertActionStatesByEpisodeId = async ({
@@ -93,7 +93,7 @@ export const loadAlertActionStatesByEpisodeId = async ({
   const query = esql`
     FROM ${ALERT_ACTIONS_DATA_STREAM}
     | WHERE space_id == ${spaceId}
-        AND episode_id IN (${episodeIdValues})
+        AND alert_id IN (${episodeIdValues})
         AND action_type IN ("ack", "unack", "assign", "tag")
     | STATS
         last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
@@ -103,13 +103,13 @@ export const loadAlertActionStatesByEpisodeId = async ({
         last_tag_at = MAX(@timestamp) WHERE action_type == "tag",
         last_tagged_at = MAX(@timestamp) WHERE action_type == "tag" AND tags IS NOT NULL,
         last_tags = LAST(tags, @timestamp) WHERE action_type == "tag"
-      BY episode_id
-    | KEEP episode_id, last_ack_action, last_assign_at, last_assignee_at, last_assignee_uid, last_tag_at, last_tagged_at, last_tags
+      BY alert_id
+    | KEEP alert_id, last_ack_action, last_assign_at, last_assignee_at, last_assignee_uid, last_tag_at, last_tagged_at, last_tags
   `.toRequest();
 
   const rows = queryResponseToRecords<RawAlertActionStateRow>(
     await queryService.executeQuery({ query: query.query })
   );
 
-  return new Map(rows.map((row) => [row.episode_id, toAlertActionState(row)]));
+  return new Map(rows.map((row) => [row.alert_id, toAlertActionState(row)]));
 };
