@@ -145,99 +145,99 @@ export const RuleSummaryFlyout = ({
 
   return (
     <FlyoutTemplate
-        type="overlay"
-        size="m"
-        resizable
-        ownFocus={false}
-        session={session}
-        onClose={onClose}
-        data-test-subj="ruleSummaryFlyout"
-      >
-        <Header title={rule.metadata.name} description={updatedAtFormatted}>
-          <Badge color="hollow" data-test-subj="universalRulesBadge">
-            {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.universalRulesBadge', {
-              defaultMessage: 'Universal',
-            })}
-          </Badge>
-          <Badge
-            color="hollow"
-            iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
-            data-test-subj="kindBadge"
-          >
-            {kindLabel}
-          </Badge>
-          <Badge
-            color={rule.enabled ? 'success' : 'default'}
-            data-test-subj={rule.enabled ? 'enabledBadge' : 'disabledBadge'}
-          >
-            {enabledLabel}
-          </Badge>
-          <InfoBlock
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
-              defaultMessage: 'Enabled',
-            })}
-            data-test-subj="ruleSummaryFlyoutEnabledBlock"
-          >
-            {isToggleLoading ? (
-              <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutEnabledSpinner" size="m" />
-            ) : (
-              <EuiSwitch
-                compressed
-                checked={rule.enabled}
-                disabled={!canWrite}
-                showLabel={false}
-                label={enabledLabel}
-                onChange={() => onToggleEnabled(rule)}
-                data-test-subj="ruleSummaryFlyoutEnabledSwitch"
-              />
-            )}
-          </InfoBlock>
-          {canReadExecutionHistory && (
-            <InfoBlock
-              title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
-                defaultMessage: 'Last execution',
-              })}
-              data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
-            >
-              {renderLastExecutionValue()}
-            </InfoBlock>
+      type="overlay"
+      size="m"
+      resizable
+      ownFocus={false}
+      session={session}
+      onClose={onClose}
+      data-test-subj="ruleSummaryFlyout"
+    >
+      <Header title={rule.metadata.name} description={updatedAtFormatted}>
+        <Badge color="hollow" data-test-subj="universalRulesBadge">
+          {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.universalRulesBadge', {
+            defaultMessage: 'Universal',
+          })}
+        </Badge>
+        <Badge
+          color="hollow"
+          iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
+          data-test-subj="kindBadge"
+        >
+          {kindLabel}
+        </Badge>
+        <Badge
+          color={rule.enabled ? 'success' : 'default'}
+          data-test-subj={rule.enabled ? 'enabledBadge' : 'disabledBadge'}
+        >
+          {enabledLabel}
+        </Badge>
+        <InfoBlock
+          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
+            defaultMessage: 'Enabled',
+          })}
+          data-test-subj="ruleSummaryFlyoutEnabledBlock"
+        >
+          {isToggleLoading ? (
+            <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutEnabledSpinner" size="m" />
+          ) : (
+            <EuiSwitch
+              compressed
+              checked={rule.enabled}
+              disabled={!canWrite}
+              showLabel={false}
+              label={enabledLabel}
+              onChange={() => onToggleEnabled(rule)}
+              data-test-subj="ruleSummaryFlyoutEnabledSwitch"
+            />
           )}
+        </InfoBlock>
+        {canReadExecutionHistory && (
           <InfoBlock
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
-              defaultMessage: 'Created by',
+            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
+              defaultMessage: 'Last execution',
             })}
-            data-test-subj="ruleSummaryFlyoutCreatedByBlock"
+            data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
           >
-            {createdByDisplay}
+            {renderLastExecutionValue()}
           </InfoBlock>
-          <InfoBlock
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.updatedBy', {
-              defaultMessage: 'Updated by',
-            })}
-            data-test-subj="ruleSummaryFlyoutUpdatedByBlock"
-          >
-            {updatedByDisplay}
-          </InfoBlock>
-        </Header>
+        )}
+        <InfoBlock
+          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
+            defaultMessage: 'Created by',
+          })}
+          data-test-subj="ruleSummaryFlyoutCreatedByBlock"
+        >
+          {createdByDisplay}
+        </InfoBlock>
+        <InfoBlock
+          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.updatedBy', {
+            defaultMessage: 'Updated by',
+          })}
+          data-test-subj="ruleSummaryFlyoutUpdatedByBlock"
+        >
+          {updatedByDisplay}
+        </InfoBlock>
+      </Header>
 
-        <Body>
-          <RuleSummaryBody rule={rule}>
-            <RuleSummaryAboutSection />
-            <RuleSummaryInvestigationSection />
-            <RuleSummaryArtifactsSection />
-          </RuleSummaryBody>
-        </Body>
+      <Body>
+        <RuleSummaryBody rule={rule}>
+          <RuleSummaryAboutSection />
+          <RuleSummaryInvestigationSection />
+          <RuleSummaryArtifactsSection />
+        </RuleSummaryBody>
+      </Body>
 
-        <Footer>
-          <Footer.PrimaryActionMenu
-            label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.takeAction', {
-              defaultMessage: 'Take action',
-            })}
-            aria-label={RULE_MENU_ARIA_LABEL}
-            panels={takeActionPanels}
-            data-test-subj="ruleSummaryFlyoutTakeActionButton"
-          />
-        </Footer>
+      <Footer>
+        <Footer.PrimaryActionMenu
+          label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.takeAction', {
+            defaultMessage: 'Take action',
+          })}
+          aria-label={RULE_MENU_ARIA_LABEL}
+          panels={takeActionPanels}
+          data-test-subj="ruleSummaryFlyoutTakeActionButton"
+        />
+      </Footer>
     </FlyoutTemplate>
   );
 };
