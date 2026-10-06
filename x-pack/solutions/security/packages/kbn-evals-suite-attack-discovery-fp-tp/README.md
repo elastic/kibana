@@ -114,4 +114,4 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 1. Add the claim-grounding evaluator.
 2. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
 
-Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
+Runs weekly on the core EIS models and on demand via the `evals:security-attack-discovery-fp-tp` label.
