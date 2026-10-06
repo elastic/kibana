@@ -321,8 +321,10 @@ describe('createMemoryPageStore', () => {
       query: { bool: { filter: object[] } };
       aggs: { archived: { aggs: { inScope: { filter: object } } } };
     };
-    expect(JSON.stringify(request.query)).toContain('"title":"checkout lag"');
-    expect(JSON.stringify(request.query)).toContain('"context":"checkout lag"');
+    expect(JSON.stringify(request.query)).toContain('"multi_match"');
+    expect(JSON.stringify(request.query)).toContain('"query":"checkout lag"');
+    expect(JSON.stringify(request.query)).toContain('"fields":["title","context"]');
+    expect(JSON.stringify(request.query)).toContain('"operator":"and"');
     expect(JSON.stringify(request.query)).toContain('"attributes.archive_reason"');
     // The header's archived count describes the whole Space, so the search does
     // not narrow it either.

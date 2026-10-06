@@ -505,14 +505,7 @@ export const createMemoryPageStore = ({
   ): object[] => {
     const tagClauses = tagFilterClauses(tags);
     const searchClauses: object[] = search
-      ? [
-          {
-            bool: {
-              should: [{ match: { title: search } }, { match: { context: search } }],
-              minimum_should_match: 1,
-            },
-          },
-        ]
+      ? [{ multi_match: { query: search, fields: ['title', 'context'], operator: 'and' } }]
       : [];
     switch (filter) {
       case 'active':

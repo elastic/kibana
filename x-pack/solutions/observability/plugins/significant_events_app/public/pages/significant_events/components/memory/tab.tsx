@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -34,8 +34,12 @@ export function MemoryTab() {
   const [keywords, setKeywords] = useState<string[]>([]);
 
   // One query serves the sidebar, Home and Activity, matching the Cortex tab.
-  const { rows, stats, isError, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { data, rows, stats, isError, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useMemoryPages(filter, search);
+  // A changed search is a new query, so `isLoading` flips true again. Unmounting
+  // the sidebar for that would drop the search it is typing into.
+  const hasLoadedRef = useRef(false);
+  if (data !== undefined) hasLoadedRef.current = true;
   const livePages = useMemo(() => rows.filter((page) => !page.archived), [rows]);
   const onToggleKeyword = useCallback((keyword: string) => {
     setKeywords((selected) =>
@@ -51,7 +55,7 @@ export function MemoryTab() {
     setSelection({ kind: 'home' });
   }, []);
 
-  if (isLoading) {
+  if (isLoading && !hasLoadedRef.current) {
     return <EuiLoadingSpinner size="xl" data-test-subj="nightshiftMemoryLoading" />;
   }
 
