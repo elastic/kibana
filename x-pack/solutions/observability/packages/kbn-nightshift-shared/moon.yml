@@ -17,7 +17,6 @@ project:
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/solutions/observability/packages/kbn-nightshift-shared
 dependsOn:
-  - '@kbn/data-view-utils'
   - '@kbn/std'
   - '@kbn/zod'
 tags:

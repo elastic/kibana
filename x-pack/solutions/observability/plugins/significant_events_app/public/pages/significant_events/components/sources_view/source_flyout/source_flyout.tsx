@@ -32,6 +32,7 @@ import {
   MAX_SOURCE_TAGS,
   MAX_SOURCE_TAG_LENGTH,
   MAX_SOURCE_TITLE_LENGTH,
+  validateSourceQuery,
   type NightshiftSource,
 } from '@kbn/nightshift-shared';
 import { hasSameEsql } from '@kbn/streams-schema';
@@ -112,10 +113,14 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     }
   };
 
-  const runPreview = async (esql: string) => {
-    const result = validateSourceEsql(esql);
-    if (result !== true) {
-      setError('esql', { message: result });
+  // Only the structural rules gate a run. The one-type rule is checked on save, so a user whose
+  // query mixes kinds can still preview it to see what to split.
+  const runPreview = (esql: string) => {
+    const structuralError = validateSourceQuery(esql);
+    if (structuralError) {
+      setError('esql', { message: structuralError });
+      // An older result next to an error on the new query would read as the new query's data.
+      setPreview(({ runId }) => ({ esql: '', runId }));
       return;
     }
     clearErrors('esql');
@@ -253,9 +258,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                   <Controller
                     name="esql"
                     control={control}
-                    rules={{
-                      validate: validateSourceEsql,
-                    }}
+                    rules={{ validate: validateSourceEsql }}
                     render={({ field, fieldState }) => (
                       <EuiFormRow
                         label={QUERY_LABEL}
@@ -267,7 +270,11 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                         <ESQLLangEditor
                           dataTestSubj="significantEventsAppSourceFlyoutQueryEditor"
                           query={{ esql: field.value }}
-                          onTextLangQueryChange={({ esql }) => field.onChange(esql)}
+                          onTextLangQueryChange={({ esql }) => {
+                            // A run error is set by hand, so it would otherwise outlive the edit.
+                            clearErrors('esql');
+                            field.onChange(esql);
+                          }}
                           onTextLangQuerySubmit={async (query) => {
                             if (query) {
                               runPreview(query.esql);
@@ -389,7 +396,7 @@ const QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.qu
 
 const QUERY_HELP_TEXT = i18n.translate('xpack.significantEventsApp.sources.flyout.queryHelpText', {
   defaultMessage:
-    'Start with FROM or TS; only WHERE may follow. A TS command is metrics. Every index must be the same kind of data. Run the query to preview it.',
+    'Start with FROM or TS; only WHERE may follow. A TS command is metrics. Every index must be the same kind of data. Index names decide the kind, for example logs-*, metrics-* or traces-*. Run the query to preview it.',
 });
 
 const RUN_QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.runQueryLabel', {

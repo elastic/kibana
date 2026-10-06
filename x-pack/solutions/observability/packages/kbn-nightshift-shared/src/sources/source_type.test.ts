@@ -25,6 +25,7 @@ describe('matchSourceTypes', () => {
   it('lets one type segment win over a dataset token', () => {
     expect(matchSourceTypes('metrics-logstash.node-*')).toEqual(['metrics']);
     expect(matchSourceTypes('metrics-microsoft_sqlserver.transaction_log-*')).toEqual(['metrics']);
+    expect(matchSourceTypes('logs-foo.metrics-*')).toEqual(['logs']);
   });
 
   it('treats ::data like the index name and ::failures as no match', () => {

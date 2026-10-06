@@ -6,13 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { SourceChangeListener } from './lib/source_change_emitter';
 import type { SourcesClient } from './lib/sources_client';
-
-export interface NightshiftSourcesServerStartDependencies {
-  features?: FeaturesPluginStart;
-}
 
 export type GetSourcesClient = (params: { request: KibanaRequest }) => Promise<SourcesClient>;
 

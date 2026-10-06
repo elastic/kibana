@@ -8,27 +8,19 @@
 import { validateSourceEsql } from './validate_source_esql';
 
 describe('validateSourceEsql', () => {
-  it('returns the structural error', () => {
-    expect(validateSourceEsql('FROM logs-* | STATS count(*)')).toMatch(/STATS/);
-  });
-
-  it('accepts a query whose indices are one type', () => {
+  it('returns true for a query whose indices are one type', () => {
     expect(validateSourceEsql('FROM my-a-*, my-b-*')).toBe(true);
   });
 
-  it('rejects an unscoped wildcard', () => {
-    expect(validateSourceEsql('FROM *')).toMatch(/unscoped wildcard/);
+  it('returns the structural error message', () => {
+    expect(validateSourceEsql('FROM logs-* | STATS count(*)')).toBe(
+      'Command "STATS" is not allowed in a source query: only WHERE may follow FROM or TS'
+    );
   });
 
-  it('rejects a query that mixes types', () => {
-    expect(validateSourceEsql('FROM logs-*, traces-*')).toMatch(/mixes/);
-  });
-
-  it('rejects a known type mixed with an unrecognized name', () => {
-    expect(validateSourceEsql('FROM logs-*, my-app-*')).toMatch(/mixes/);
-  });
-
-  it('rejects an index that matches more than one type', () => {
-    expect(validateSourceEsql('FROM logs-traces-*')).toMatch(/more than one kind/);
+  it('returns the one-type error message', () => {
+    expect(validateSourceEsql('FROM logs-*, traces-*')).toBe(
+      'A source query mixes logs (logs-*) and traces (traces-*). A source query must target one kind of data.'
+    );
   });
 });

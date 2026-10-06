@@ -13,7 +13,7 @@ import {
   MAX_SOURCE_TAGS,
   MAX_SOURCE_VIEW_NAME_LENGTH,
   NIGHTSHIFT_SOURCE_SO_TYPE,
-  sourceTypeFromEsql,
+  type SourceType,
 } from '@kbn/nightshift-shared';
 
 export { NIGHTSHIFT_SOURCE_SO_TYPE };
@@ -36,12 +36,23 @@ const nightshiftSourceAttributesSchemaV1 = schema.object({
   esql_updated_at: schema.string(),
 });
 
+// Frozen literals: a stored schema must not move when `SOURCE_TYPES` does. The assertion below
+// stops compiling when the two lists diverge, so a new type is added here on purpose.
 const nightshiftSourceTypeSchema = schema.oneOf([
   schema.literal('logs'),
   schema.literal('metrics'),
   schema.literal('traces'),
   schema.literal('unknown'),
 ]);
+
+type TSchemaSourceType = TypeOf<typeof nightshiftSourceTypeSchema>;
+
+/** Resolves to `true` only while the schema literals and `SOURCE_TYPES` are the same set. */
+export const SOURCE_TYPES_MATCH_SCHEMA: [SourceType] extends [TSchemaSourceType]
+  ? [TSchemaSourceType] extends [SourceType]
+    ? true
+    : never
+  : never = true;
 
 const nightshiftSourceAttributesSchemaV2 = nightshiftSourceAttributesSchemaV1.extends({
   // Derived from `esql` on every write. Not mapped: nothing searches or filters on it.
@@ -85,16 +96,8 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
       },
     },
     2: {
-      changes: [
-        {
-          type: 'data_backfill',
-          // A mix, a parse failure, or a name that is not logs, metrics or traces stays `unknown`
-          // until the query is edited.
-          backfillFn: (doc) => ({
-            attributes: { type: sourceTypeFromEsql(doc.attributes.esql) },
-          }),
-        },
-      ],
+      // No backfill: the source catalog starts empty, so no stored document predates `type`.
+      changes: [],
       schemas: {
         create: nightshiftSourceAttributesSchemaV2,
         forwardCompatibility: nightshiftSourceAttributesSchemaV2.extends(

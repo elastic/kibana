@@ -123,9 +123,7 @@ export {
 export {
   analyzeSourceQuery,
   getSourceCommandQuery,
-  getSourceType,
   hasMultipleSourceIndices,
-  sourceTypeFromEsql,
   validateSourceQuery,
   type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';

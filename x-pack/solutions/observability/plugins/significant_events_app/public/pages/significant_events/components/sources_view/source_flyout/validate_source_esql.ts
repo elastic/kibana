@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { getSourceType, validateSourceQuery } from '@kbn/nightshift-shared';
+import { analyzeSourceQuery } from '@kbn/nightshift-shared';
 
 /** Form rule for a source query. Structural errors come back before the one-type check. */
 export const validateSourceEsql = (esql: string): string | true => {
-  const structuralError = validateSourceQuery(esql);
-  if (structuralError) {
-    return structuralError;
-  }
-
-  const analysis = getSourceType({ esql });
+  const analysis = analyzeSourceQuery({ esql });
   return 'error' in analysis ? analysis.error : true;
 };
