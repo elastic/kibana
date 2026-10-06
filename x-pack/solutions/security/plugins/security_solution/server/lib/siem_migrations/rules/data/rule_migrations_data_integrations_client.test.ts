@@ -284,12 +284,14 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
           createMockPackage({ name: 'broken' }),
           createMockPackage({ name: 'healthy' }),
         ]);
-        mockGetFieldMetadata.mockImplementation(async ({ packageName }: { packageName: string }) => {
-          if (packageName === 'broken') {
-            throw new Error('metadata down');
+        mockGetFieldMetadata.mockImplementation(
+          async ({ packageName }: { packageName: string }) => {
+            if (packageName === 'broken') {
+              throw new Error('metadata down');
+            }
+            return undefined as never;
           }
-          return undefined as never;
-        });
+        );
         await client.populate();
 
         const indexedIds = (esClientMock.bulk as jest.Mock).mock.calls[0][0].operations

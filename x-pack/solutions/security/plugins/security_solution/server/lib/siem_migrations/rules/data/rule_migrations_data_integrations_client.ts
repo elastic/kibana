@@ -77,7 +77,9 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       }
     } catch (error) {
       this.logger.error(
-        `Failed to fetch fields metadata for package ${pkg.name}, it is skipped and will be retried on the next start: ${
+        `Failed to fetch fields metadata for package ${
+          pkg.name
+        }, it is skipped and will be retried on the next start: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
