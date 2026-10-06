@@ -5,7 +5,7 @@
     "@elastic/obs-signals-traces-team",
     "@elastic/streams-ui",
     "@elastic/obs-exploration-team",
-    "@elastic/nightshift-context-and-research-team"
+    "@elastic/nightshift"
   ],
   "group": "platform",
   "visibility": "shared",
