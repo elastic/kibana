@@ -58,6 +58,8 @@ describe('sendWaitForInputNotifications', () => {
           subActionParams: {
             channel: 'C0123',
             text: 'Please provide input\n\n<https://kibana.example/form?token=abc&amp;x=1|Open form>',
+            unfurlLinks: false,
+            unfurlMedia: false,
           },
         },
       })

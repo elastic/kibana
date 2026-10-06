@@ -187,6 +187,8 @@ describe('send_wait_for_approval_notifications', () => {
             subActionParams: {
               channel: 'C0123',
               text: 'Approve change?\n\n<https://kibana.example/approve|Approve>  <https://kibana.example/reject|Decline>',
+              unfurlLinks: false,
+              unfurlMedia: false,
             },
           },
         })
