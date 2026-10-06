@@ -15,7 +15,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { getDefaultSchema } from '../../../utils/get_default_schema';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
-import { useProfilingStatus } from '../profiling_status/use_profiling_status';
+import { useEnabledProfilingStatus } from '../profiling_status/use_enabled_profiling_status';
 
 export interface ProfilingSchemaContextValue {
   /** Schema selected in the URL, undefined until a default is selected. */
@@ -50,7 +50,7 @@ export function ProfilingSchemaContextProvider({
   } = useProfilingDependencies();
   const history = useHistory();
   const schema = useSchemaQueryParam();
-  const { data: profilingStatus } = useProfilingStatus();
+  const { data: profilingStatus } = useEnabledProfilingStatus();
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status, error } = useTimeRangeAsync(
@@ -71,9 +71,9 @@ export function ProfilingSchemaContextProvider({
     () =>
       Object.values(ProfilingSchema).filter((supportedSchema) =>
         supportedSchema === ProfilingSchema.ECS
-          ? profilingStatus?.universalProfiling.isAvailable &&
-            profilingStatus?.universalProfiling.hasData
-          : profilingStatus?.otel.isAvailable && profilingStatus?.otel.hasData
+          ? profilingStatus.universalProfiling.isAvailable &&
+            profilingStatus.universalProfiling.hasData
+          : profilingStatus.otel.isAvailable && profilingStatus.otel.hasData
       ),
     [profilingStatus]
   );

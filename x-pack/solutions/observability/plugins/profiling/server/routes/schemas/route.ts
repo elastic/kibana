@@ -10,6 +10,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ProfilingSchemasAvailability } from '@kbn/profiling-utils';
 import type { RouteRegisterParameters } from '..';
 import { getRoutePaths, MAX_KUERY_LENGTH } from '../../../common';
+import { PROFILING_API_PRIVILEGE } from '../../feature';
 import { handleRouteHandlerError } from '../../utils/handle_route_error_handler';
 import { getClient } from '../compat';
 import { createCommonFilter } from '../query';
@@ -26,7 +27,7 @@ export function registerSchemasRoute({
       path: getRoutePaths().Schemas,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       validate: {

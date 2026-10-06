@@ -197,7 +197,10 @@ describe('useBackNavigation', () => {
     });
 
     it.each(Object.values(ProfilingSchema))('keeps the %s schema of the current URL', (schema) => {
-      const { result } = renderBackNavigation({ initialEntry: `/settings?schema=${schema}` });
+      const { result } = renderBackNavigation({
+        initialEntry: `/settings?schema=${schema}`,
+        initialStatus: withData,
+      });
       expect(result.current.back).toEqual({
         ...pluginRootTarget,
         href: `/base/app/profiling?schema=${schema}`,
@@ -205,7 +208,10 @@ describe('useBackNavigation', () => {
     });
 
     it('does not keep an unknown schema', () => {
-      const { result } = renderBackNavigation({ initialEntry: '/settings?schema=semconv' });
+      const { result } = renderBackNavigation({
+        initialEntry: '/settings?schema=semconv',
+        initialStatus: withData,
+      });
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 

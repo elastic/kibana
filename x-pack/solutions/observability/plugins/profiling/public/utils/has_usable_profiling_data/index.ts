@@ -11,4 +11,5 @@ import type { ProfilingStatus } from '@kbn/profiling-utils';
  * OTel data can be used without any setup while Universal Profiling requires setup. */
 export const hasUsableProfilingData = (status?: ProfilingStatus): boolean =>
   status?.isEnabled === true &&
-  (status.otel.hasData || (status.universalProfiling.hasData && status.universalProfiling.hasSetup));
+  (status.otel.hasData ||
+    (status.universalProfiling.hasData && status.universalProfiling.hasSetup));
