@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Thrown by checkAuthorizationAndGetTotal when the requested rules exist but are hidden
+ * from the caller by authorization filters.
+ */
 export class RulesNotVisibleError extends Error {
   constructor(label: string) {
     super(`No rules found for bulk ${label}`);
