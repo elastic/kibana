@@ -10,7 +10,7 @@ import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelResolutionRequestBase } from '../../../resolve_panel';
+import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
 
 /**
@@ -29,7 +29,7 @@ import { defineRequestPanelKind } from '../panel_kind';
  */
 export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   /**
-   * Which engine renders the panel; Lens when omitted. On edits, `edit_panels`
+   * Which engine renders the panel; Lens when omitted. On edits, upsert
    * sets it from the existing panel, and the resolver trusts it.
    */
   renderer?: 'lens' | 'vega';

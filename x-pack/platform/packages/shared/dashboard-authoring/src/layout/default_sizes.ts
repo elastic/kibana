@@ -8,7 +8,7 @@
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '../operations/panels/markdown';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../panels/markdown';
 import { GRID_COLUMNS, type PanelSize } from './types';
 
 const DEFAULT_SIZE: PanelSize = { w: 24, h: 10 };

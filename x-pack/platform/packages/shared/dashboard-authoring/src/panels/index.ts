@@ -7,8 +7,7 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelContent, PanelContentAttempt } from '../../resolve_panel';
-import { withSectionId } from './panel_kind';
+import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
 import { lensPanelKind, vegaPanelKind, type VisPanelResolutionRequest } from './vis';
 import { markdownPanelKind } from './markdown';
 import { customContentPanelKind, type CustomContentPanelResolutionRequest } from './custom_content';
@@ -29,7 +28,7 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * - `'attachment'`: an existing visualization attachment from the conversation.
  *
  * Each kind's module describes it once (`defineConfigPanelKind` or `defineRequestPanelKind`). Registering
- * it in one of the lists below derives its members of the per-operation item schemas, the
+ * it in one of the lists below derives its members of the input schemas, the
  * embeddable-type lookups, and the type lists in descriptions and errors. List order is the order
  * of the schema unions sent to the model.
  */
@@ -59,13 +58,6 @@ const mapKinds = <TKinds extends readonly [object, ...object[]], TValue>(
   kinds: TKinds,
   pick: (kind: TKinds[number]) => TValue
 ): [TValue, ...TValue[]] => [pick(kinds[0]), ...kinds.slice(1).map(pick)];
-
-/** Joins items as "a, b, or c". */
-const formatList = (items: readonly string[]): string =>
-  items.length < 3 ? items.join(' or ') : `${items.slice(0, -1).join(', ')}, or ${items.at(-1)}`;
-
-/** The by-value panel types, quoted, e.g. `"markdown", …, or "ml_single_metric_viewer"`. */
-export const CONFIG_PANEL_TYPE_LIST = formatList(CONFIG_PANEL_KINDS.map(({ type }) => `"${type}"`));
 
 const configPanelInputSchema = z.discriminatedUnion(
   'type',
@@ -103,21 +95,8 @@ export const findConfigPanelType = (
   return kind && { type: kind.type, label: kind.label };
 };
 
-const REQUEST_PANEL_LABEL_LIST = formatList(REQUEST_PANEL_KINDS.map(({ label }) => label));
-
-/** Returns an error message when a by-value edit targets a panel of a different type. */
-export const getConfigPanelEditError = (
-  type: ConfigPanelInput['type'],
-  existingPanel: AttachmentPanel
-): string | undefined => {
-  const { embeddableType, label } = getConfigPanelKind(type);
-  return existingPanel.type === embeddableType
-    ? undefined
-    : `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as ${label}. Use source: "request" with the panel's renderer for ${REQUEST_PANEL_LABEL_LIST} panels.`;
-};
-
-/** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
-export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
+/** A new-panel input: a by-value config, a request to resolve, or a visualization attachment. */
+export const newPanelInputSchema = z.discriminatedUnion('source', [
   configPanelInputSchema,
   z.discriminatedUnion(
     'renderer',
@@ -126,33 +105,12 @@ export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
   attachmentPanelInputSchema,
 ]);
 
-/**
- * A "create a new panel" input: a by-value config, a request to resolve, or a
- * visualization attachment. The common shape that `add_panels` and `add_section`
- * materialize into panel content (`add_panels` items also carry a `sectionId`,
- * which is assignable to this base).
- */
-export type NewPanelInput = z.infer<typeof addSectionPanelItemSchema>;
+export type NewPanelInput = z.infer<typeof newPanelInputSchema>;
 
 export type PanelRequestInput = Extract<NewPanelInput, { source: 'request' }>;
 
-/** A single panel item accepted by `add_panels` (any panel input, optionally targeting a section). */
-export const addPanelsItemSchema = z.discriminatedUnion('source', [
-  z.discriminatedUnion(
-    'type',
-    mapKinds(CONFIG_PANEL_KINDS, ({ addPanelsInputSchema }) => addPanelsInputSchema)
-  ),
-  z.discriminatedUnion(
-    'renderer',
-    mapKinds(REQUEST_PANEL_KINDS, ({ addPanelsInputSchema }) => addPanelsInputSchema)
-  ),
-  withSectionId(attachmentPanelInputSchema),
-]);
-
-export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
-
-/** A single panel item accepted by `edit_panels` (targets an existing panel by id). */
-export const editPanelItemSchema = z.discriminatedUnion('source', [
+/** An edit of an existing panel, identified by `panelId`. */
+export const editPanelInputSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion(
     'renderer',
     mapKinds(REQUEST_PANEL_KINDS, ({ editInputSchema }) => editInputSchema)
@@ -163,13 +121,13 @@ export const editPanelItemSchema = z.discriminatedUnion('source', [
   ),
 ]);
 
-export type EditPanelItem = z.infer<typeof editPanelItemSchema>;
+export type EditPanelInput = z.infer<typeof editPanelInputSchema>;
 
-export type EditPanelRequestInput = Extract<EditPanelItem, { source: 'request' }>;
+export type EditPanelRequestInput = Extract<EditPanelInput, { source: 'request' }>;
 
 /**
  * Panel content of an `upsert_dashboard` item: the create and edit fields of any panel kind,
- * without placement. Upsert re-parses it with `addSectionPanelItemSchema` or `editPanelItemSchema`
+ * without placement. Upsert re-parses it with `newPanelInputSchema` or `editPanelInputSchema`
  * once it knows whether the panel exists.
  */
 export const upsertPanelContentSchema = z.discriminatedUnion('source', [
@@ -188,7 +146,7 @@ export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
 
 /**
  * Embeddable types an upsert content can edit in place. A request without a renderer edits Lens or
- * Vega panels, as in `edit_panels`. Attachment content always replaces the panel content.
+ * Vega panels. Attachment content always replaces the panel content.
  */
 export const getEditableEmbeddableTypes = (content: UpsertPanelContent): string[] => {
   if (content.source === 'config') {
@@ -217,7 +175,7 @@ const requestPanelKindByRenderer = new Map<PanelRenderer, RequestPanelKind>(
 
 /**
  * Embeddable type a renderer's panels are stored as. With `findPanelRenderer`, this is the only
- * mapping between renderers and panel types: `edit_panels` uses it to decide an existing panel's
+ * mapping between renderers and panel types: upsert uses it to decide an existing panel's
  * renderer once, and resolvers trust the `renderer` they receive.
  */
 export const getRendererEmbeddableType = (renderer: PanelRenderer): string => {

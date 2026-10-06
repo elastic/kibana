@@ -8,14 +8,6 @@
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 
-const sectionIdField = z
-  .string()
-  .max(256)
-  .optional()
-  .describe(
-    'Existing section id or the key of an add_section earlier in this call. If omitted, panel is added at the top level.'
-  );
-
 const PLACEMENT_KEYS: ReadonlySet<string> = new Set(['grid', 'panelId']);
 
 type OptionalField<TField extends z.core.SomeType> = TField extends z.ZodOptional
@@ -71,18 +63,14 @@ const toUpsertContentSchema = <TAddShape extends z.ZodRawShape, TEditShape exten
   ) as z.ZodObject<UpsertContentShape<TAddShape, TEditShape>>;
 };
 
-/** Adds the `sectionId` that `add_panels` items carry on top of a new-panel input. */
-export const withSectionId = <TShape extends z.ZodRawShape>(schema: z.ZodObject<TShape>) =>
-  schema.extend({ sectionId: sectionIdField });
-
 interface PanelKindDefinition<TAddShape extends z.ZodRawShape, TEdit extends z.ZodObject> {
   /** Embeddable type panels of this kind are stored as. Edits may only target panels of this type. */
   readonly embeddableType: string;
   /** Human-readable name used in errors and descriptions, e.g. "anomaly charts". */
   readonly label: string;
-  /** Input that creates a panel of this kind (`add_section` items). */
+  /** Input that creates a panel of this kind. */
   readonly addInputSchema: z.ZodObject<TAddShape>;
-  /** Input that edits an existing panel of this kind by id (`edit_panels` items). */
+  /** Input that edits an existing panel of this kind by id. */
   readonly editInputSchema: TEdit;
 }
 
@@ -111,7 +99,7 @@ interface RequestPanelKindDefinition<
 
 /**
  * Defines a by-value panel kind. Its module is the only place the kind is described; the registry
- * in `panels/index.ts` derives the operation schemas and lookups from it.
+ * in `panels/index.ts` derives the input schemas and lookups from it.
  */
 export const defineConfigPanelKind = <
   TType extends string,
@@ -122,7 +110,6 @@ export const defineConfigPanelKind = <
 ) => ({
   ...kind,
   source: 'config' as const,
-  addPanelsInputSchema: withSectionId(kind.addInputSchema),
   upsertContentSchema: toUpsertContentSchema<TAddShape, TEdit['shape']>(
     kind.addInputSchema.shape,
     kind.editInputSchema.shape
@@ -131,7 +118,7 @@ export const defineConfigPanelKind = <
 
 /**
  * Defines a server-generated panel kind. Its module is the only place the kind is described; the
- * registry in `panels/index.ts` derives the operation schemas and lookups from it.
+ * registry in `panels/index.ts` derives the input schemas and lookups from it.
  */
 export const defineRequestPanelKind = <
   TRenderer extends string,
@@ -142,7 +129,6 @@ export const defineRequestPanelKind = <
 ) => ({
   ...kind,
   source: 'request' as const,
-  addPanelsInputSchema: withSectionId(kind.addInputSchema),
   upsertContentSchema: toUpsertContentSchema<TAddShape, TEdit['shape']>(
     kind.addInputSchema.shape,
     kind.editInputSchema.shape

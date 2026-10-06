@@ -12,7 +12,7 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelResolutionRequestBase } from '../../../resolve_panel';
+import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
 
 /**

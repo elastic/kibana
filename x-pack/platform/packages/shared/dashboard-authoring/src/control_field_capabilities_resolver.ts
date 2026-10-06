@@ -7,7 +7,7 @@
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ControlFieldCapability, ResolveControlFieldCapabilities } from './operations/types';
+import type { ControlFieldCapability, ResolveControlFieldCapabilities } from './types';
 
 /**
  * A field is usable only with one ES type across the matching indices that is aggregatable in

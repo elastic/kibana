@@ -6,10 +6,27 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { controlInputSchema } from '../operations/add_controls';
-import { upsertPanelContentSchema } from '../operations/panels';
-import { setMetadataOperation } from '../operations/set_metadata';
+import { timeRangeSchema } from '@kbn/agent-builder-dashboards-common';
+import { controlInputSchema } from '../controls';
+import { upsertPanelContentSchema } from '../panels';
 import { GRID_COLUMNS } from '../layout';
+
+const metadataSchema = z.object({
+  title: z
+    .string()
+    .min(1)
+    .max(256)
+    .optional()
+    .describe(
+      "Non-empty dashboard title. If the current title is empty, missing, or a placeholder, invent one from the dashboard's contents."
+    ),
+  description: z.string().max(2048).optional(),
+  time_range: timeRangeSchema
+    .optional()
+    .describe(
+      'Override the dashboard time range. ONLY set this when the user explicitly requested a specific time window (e.g. "show the last 7 days", "set time range to May 20–24"). Do NOT set it otherwise — a data-aware default is applied automatically. Convert natural language to Kibana date math or ISO 8601: "last 30 minutes" → { from: "now-30m", to: "now" }, "last 90 days" → { from: "now-90d", to: "now" }, "May 20–24" → { from: "2024-05-20T00:00:00.000Z", to: "2024-05-24T23:59:59.999Z", mode: "absolute" }.'
+    ),
+});
 
 const idSchema = z.string().min(1).max(256);
 
@@ -61,8 +78,7 @@ const upsertPanelSchema = z.object({
  * create or update, ids to remove, and optional layout instructions.
  */
 export const upsertDashboardSchema = z.object({
-  set: setMetadataOperation.schema
-    .omit({ operation: true })
+  set: metadataSchema
     .optional()
     .describe('Dashboard metadata to set. A new dashboard requires a title.'),
   sections: z

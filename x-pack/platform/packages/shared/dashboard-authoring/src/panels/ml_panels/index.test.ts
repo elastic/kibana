@@ -6,7 +6,7 @@
  */
 
 import { MAX_STRING_LENGTH } from '@kbn/ml-server-schemas/constants';
-import { buildConfigPanelContent, getConfigPanelEditError } from '..';
+import { buildConfigPanelContent, getEditableEmbeddableTypes } from '..';
 import {
   anomalyChartsPanelConfigSchema,
   anomalySwimlaneConfigSchema,
@@ -77,27 +77,15 @@ describe('ml_anomaly_charts registry entry', () => {
     });
   });
 
-  describe('getConfigPanelEditError', () => {
-    it('accepts editing an anomaly charts panel', () => {
+  describe('getEditableEmbeddableTypes', () => {
+    it('edits only anomaly charts panels', () => {
       expect(
-        getConfigPanelEditError('ml_anomaly_charts', {
-          id: 'panel-1',
+        getEditableEmbeddableTypes({
+          source: 'config',
           type: 'ml_anomaly_charts',
           config: { job_ids: ['job-1'] },
-          grid: { x: 0, y: 0, w: 24, h: 10 },
         })
-      ).toBeUndefined();
-    });
-
-    it('rejects editing a non-charts panel', () => {
-      expect(
-        getConfigPanelEditError('ml_anomaly_charts', {
-          id: 'panel-1',
-          type: 'lens',
-          config: {},
-          grid: { x: 0, y: 0, w: 12, h: 5 },
-        })
-      ).toMatch(/panel-1.*lens.*cannot be edited as anomaly charts/);
+      ).toEqual(['ml_anomaly_charts']);
     });
   });
 });
@@ -174,16 +162,15 @@ describe('anomalySwimlaneConfigSchema', () => {
 });
 
 describe('ml_anomaly_swimlane registry entry', () => {
-  describe('getConfigPanelEditError', () => {
-    it('accepts editing a swim lane panel', () => {
+  describe('getEditableEmbeddableTypes', () => {
+    it('edits only swim lane panels', () => {
       expect(
-        getConfigPanelEditError('ml_anomaly_swimlane', {
-          id: 'panel-1',
+        getEditableEmbeddableTypes({
+          source: 'config',
           type: 'ml_anomaly_swimlane',
           config: { job_ids: ['job-1'], swimlane_type: 'overall' },
-          grid: { x: 0, y: 0, w: 24, h: 10 },
         })
-      ).toBeUndefined();
+      ).toEqual(['ml_anomaly_swimlane']);
     });
   });
 });
@@ -226,21 +213,20 @@ describe('singleMetricViewerConfigSchema', () => {
 });
 
 describe('ml_single_metric_viewer registry entry', () => {
-  describe('getConfigPanelEditError', () => {
-    it('accepts editing a single metric viewer panel', () => {
+  describe('getEditableEmbeddableTypes', () => {
+    it('edits only single metric viewer panels', () => {
       expect(
-        getConfigPanelEditError('ml_single_metric_viewer', {
-          id: 'panel-1',
+        getEditableEmbeddableTypes({
+          source: 'config',
           type: 'ml_single_metric_viewer',
           config: { job_ids: ['job-1'] },
-          grid: { x: 0, y: 0, w: 24, h: 18 },
         })
-      ).toBeUndefined();
+      ).toEqual(['ml_single_metric_viewer']);
     });
   });
 });
 
-describe('ML edit_panels input schemas', () => {
+describe('ML edit input schemas', () => {
   it('accepts an anomaly charts edit', () => {
     expect(
       editAnomalyChartsPanelConfigInputSchema.safeParse({

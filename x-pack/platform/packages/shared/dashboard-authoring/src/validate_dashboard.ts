@@ -204,7 +204,7 @@ const discardInvalidFields = ({
 /**
  * Discards the changes behind validation issues so only valid writes are kept: invalid new panels
  * and items are dropped, and invalid edits get their original value back. Issues in content the
- * operations did not change are ignored, so pre-existing invalid content never blocks an update.
+ * changes did not touch are ignored, so pre-existing invalid content never blocks an update.
  * New issues that belong to no single panel or field (e.g. section or panel count issues) discard
  * every change.
  */

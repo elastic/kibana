@@ -54,7 +54,7 @@ export const markdownPanelConfigInputSchema = z.object({
 });
 
 /**
- * The markdown variant of an `edit_panels` item: targets an existing markdown
+ * The markdown edit input: targets an existing markdown
  * panel by id and replaces its config. Derived from the add schema so the
  * `source`/`type`/`config` shape stays in sync.
  */

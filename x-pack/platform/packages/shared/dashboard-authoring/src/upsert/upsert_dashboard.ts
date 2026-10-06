@@ -27,24 +27,24 @@ import {
   getDefaultPanelSize,
   type ArrangeDashboardLayout,
 } from '../layout';
-import { appendControls } from '../operations/add_controls';
-import { toEditResolutionRequest } from '../operations/edit_panels';
-import { toCreationResolutionRequest } from '../operations/panel_creation';
+import { appendControls } from '../controls';
 import {
-  addSectionPanelItemSchema,
   buildConfigPanelContent,
-  editPanelItemSchema,
+  editPanelInputSchema,
   getEditableEmbeddableTypes,
+  newPanelInputSchema,
   type ResolvePanelContent,
   type UpsertPanelContent,
-} from '../operations/panels';
-import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '../operations/types';
+} from '../panels';
+import {
+  toCreationResolutionRequest,
+  toEditResolutionRequest,
+} from '../panels/resolution_requests';
+import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '../types';
 import type { PanelAuthoringNote, PanelContentAttempt } from '../resolve_panel';
 import type { OperationFailure } from '../utils';
 import { discardInvalidChanges, type ValidateDashboard } from '../validate_dashboard';
 import type { DashboardUpsert, UpsertPanelItem, UpsertSectionItem } from './schema';
-
-const OPERATION_TYPE = 'upsert_dashboard';
 
 /** Grid given to panel inputs while parsing; the layout step decides the real position. */
 const PARSE_GRID = { x: 0, y: 0, w: 24, h: 10 };
@@ -173,7 +173,7 @@ const planPanelContent = ({
     existingPanel !== undefined && getEditableEmbeddableTypes(content).includes(existingPanel.type);
 
   if (existingPanel && isEdit) {
-    const parsed = editPanelItemSchema.safeParse({ ...content, panelId: id });
+    const parsed = editPanelInputSchema.safeParse({ ...content, panelId: id });
     if (!parsed.success) {
       return { error: `Invalid content for panel "${id}": ${formatIssues(parsed.error)}` };
     }
@@ -186,14 +186,14 @@ const planPanelContent = ({
         }),
       };
     }
-    const result = toEditResolutionRequest(editInput, existingPanel, OPERATION_TYPE);
+    const result = toEditResolutionRequest(editInput, existingPanel);
     if ('error' in result) {
       return result;
     }
     return { resolveContent: () => resolveRequest(result.request) };
   }
 
-  const parsed = addSectionPanelItemSchema.safeParse({ ...content, grid: PARSE_GRID });
+  const parsed = newPanelInputSchema.safeParse({ ...content, grid: PARSE_GRID });
   if (!parsed.success) {
     return { error: `Invalid content for panel "${id}": ${formatIssues(parsed.error)}` };
   }
@@ -212,12 +212,12 @@ const planPanelContent = ({
         if (!resolveAttachmentPanel) {
           throw new Error('Attachment panel resolver is required for attachment-source panels.');
         }
-        return resolveAttachmentPanel(newInput.attachment_id, OPERATION_TYPE);
+        return resolveAttachmentPanel(newInput.attachment_id);
       },
     };
   }
   return {
-    resolveContent: () => resolveRequest(toCreationResolutionRequest(newInput, OPERATION_TYPE, id)),
+    resolveContent: () => resolveRequest(toCreationResolutionRequest(newInput, id)),
   };
 };
 
