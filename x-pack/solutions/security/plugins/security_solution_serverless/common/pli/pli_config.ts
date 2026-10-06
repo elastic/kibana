@@ -89,7 +89,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   },
   [ProductLine.cloud]: {
     search_ai_lake: [], // cloud add-on not available in search_ai_lake tier
-    essentials: [ProductFeatureKey.cloudSecurityPosture],
-    complete: [ProductFeatureKey.cloudSecurityPosture],
+    essentials: [ProductFeatureKey.cloudSecurityPosture, ProductFeatureKey.cloudDefend],
+    complete: [ProductFeatureKey.cloudSecurityPosture, ProductFeatureKey.cloudDefend],
   },
 } as const;

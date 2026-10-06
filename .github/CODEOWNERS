@@ -47,6 +47,7 @@ examples/unified_tabs_examples @elastic/kibana-discover
 examples/user_activity_example @elastic/kibana-core
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
+examples/vega_sandbox_example @elastic/kibana-visualizations
 examples/workflows_extensions_example @elastic/workflows-eng
 oas_docs @elastic/kibana-core
 packages/kbn-api-contracts @elastic/kibana-core
@@ -454,6 +455,7 @@ src/platform/packages/private/kbn-transpose-utils @elastic/kibana-dashboards
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
+src/platform/packages/private/kbn-vega-sandbox @elastic/kibana-visualizations
 src/platform/packages/private/kbn-workflow-graph-screenshot-cli @elastic/workflows-eng
 src/platform/packages/private/kbn-workflow-step-schema-cli @elastic/workflows-eng
 src/platform/packages/private/kbn-workflow-yaml-validate-cli @elastic/workflows-eng
@@ -923,6 +925,7 @@ src/platform/plugins/shared/saved_objects_management @elastic/kibana-core
 src/platform/plugins/shared/saved_objects_tagging_oss @elastic/appex-sharedux
 src/platform/plugins/shared/saved_search @elastic/kibana-discover
 src/platform/plugins/shared/screenshot_mode @elastic/response-ops
+src/platform/plugins/shared/search_sessions_management @elastic/kibana-discover
 src/platform/plugins/shared/share @elastic/appex-sharedux
 src/platform/plugins/shared/telemetry @elastic/kibana-core
 src/platform/plugins/shared/telemetry_collection_manager @elastic/kibana-core
@@ -2706,6 +2709,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** 
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/solarwinds_platform/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/threatq/** @elastic/workflows-eng
@@ -3875,6 +3879,7 @@ src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs
 /.github/workflows/shared/flaky-fix-guidelines.md @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-review-reminder.yml @elastic/appex-qa
 /.github/scripts/flaky_fix_review_reminder* @elastic/appex-qa
+/.github/scripts/bundle_size_limits_comment* @elastic/kibana-operations
 /.github/aw/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /moon.yml @elastic/kibana-operations

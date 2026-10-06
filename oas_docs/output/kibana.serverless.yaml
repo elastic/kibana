@@ -10844,7 +10844,7 @@ paths:
                     - alert_id: episode-1
                     - alert_id: episode-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_request'
       responses:
         '200':
           content:
@@ -10968,7 +10968,7 @@ paths:
                     - alert_id: episode-1
                       reason: manual reopen
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_request'
       responses:
         '200':
           content:
@@ -11090,7 +11090,7 @@ paths:
                     - alert_id: episode-2
                       assignee_uid: null
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_request'
       responses:
         '200':
           content:
@@ -11210,7 +11210,7 @@ paths:
                     - alert_id: episode-1
                       reason: false positive
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_request'
       responses:
         '200':
           content:
@@ -11334,7 +11334,7 @@ paths:
                       tags:
                         - production
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_alerts_request'
       responses:
         '200':
           content:
@@ -11454,7 +11454,7 @@ paths:
                     - alert_id: episode-1
                     - alert_id: episode-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_request'
       responses:
         '200':
           content:
@@ -11579,7 +11579,7 @@ paths:
                 summary: Acknowledge the alert episode
                 value: {}
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_ack_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_ack_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -11710,7 +11710,7 @@ paths:
                 value:
                   reason: Issue reappeared after silence window.
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_activate_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_activate_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -11857,7 +11857,7 @@ paths:
                 value:
                   assignee_uid: u_abc123
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_assign_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_assign_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -11988,7 +11988,7 @@ paths:
                 value:
                   reason: False positive confirmed by on-call.
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_deactivate_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_deactivate_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -12137,7 +12137,7 @@ paths:
                     - production
                     - investigating
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_tag_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_tag_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -12267,7 +12267,7 @@ paths:
                 summary: Unacknowledge the alert episode
                 value: {}
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unack_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unack_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -12860,6 +12860,8 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high
+                          routing_tags:
+                            - sre-oncall
                           tags:
                             - production
                             - infra
@@ -13001,6 +13003,8 @@ paths:
                   metadata:
                     description: Alerts when average CPU usage exceeds a threshold.
                     name: Host CPU high
+                    routing_tags:
+                      - sre-oncall
                     tags:
                       - production
                       - infra
@@ -13043,6 +13047,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -13180,6 +13186,8 @@ paths:
                       metadata:
                         description: Alerts when average CPU usage exceeds a threshold.
                         name: Host CPU high
+                        routing_tags:
+                          - sre-oncall
                         tags:
                           - production
                           - infra
@@ -13209,6 +13217,8 @@ paths:
                       metadata:
                         description: Alerts when average CPU usage exceeds a threshold.
                         name: Host CPU high (disabled)
+                        routing_tags:
+                          - sre-oncall
                         tags:
                           - production
                           - infra
@@ -13253,6 +13263,8 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high
+                          routing_tags:
+                            - sre-oncall
                           tags:
                             - production
                             - infra
@@ -13289,6 +13301,8 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high (disabled)
+                          routing_tags:
+                            - sre-oncall
                           tags:
                             - production
                             - infra
@@ -13804,6 +13818,8 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high
+                          routing_tags:
+                            - sre-oncall
                           tags:
                             - production
                             - infra
@@ -14693,6 +14709,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -14873,6 +14891,8 @@ paths:
                     metadata:
                       description: Updated description.
                       name: Host CPU high (updated)
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -15047,6 +15067,8 @@ paths:
                   metadata:
                     description: Alerts when average CPU usage exceeds a threshold.
                     name: Host CPU high
+                    routing_tags:
+                      - sre-oncall
                     tags:
                       - production
                       - infra
@@ -15089,6 +15111,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -15135,6 +15159,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -15301,6 +15327,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -15485,6 +15513,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -20543,6 +20573,15 @@ paths:
                     version:
                       example: WzIwNzMsMV0=
                       type: string
+                    workflowTags:
+                      description: |
+                        Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                      items:
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                      maxItems: 100
+                      type: array
                 type: array
           description: Indicates a successful call.
         '401':
@@ -20743,6 +20782,15 @@ paths:
                   version:
                     example: WzIwNzMsMV0=
                     type: string
+                  workflowTags:
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    items:
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    maxItems: 100
+                    type: array
           description: Indicates a successful call.
         '401':
           content:
@@ -20944,6 +20992,15 @@ paths:
                   version:
                     example: WzIwNzMsMV0=
                     type: string
+                  workflowTags:
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    items:
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    maxItems: 100
+                    type: array
           description: Indicates a successful call.
         '401':
           content:
@@ -22152,6 +22209,7 @@ paths:
                           value: ai-index-ds-customer-support
                         id: customer_support
                         managed: false
+                        memory_enabled: true
                         sources:
                           - type: esql
                             value: FROM support-cases | LIMIT 100
@@ -22285,6 +22343,9 @@ paths:
                         managed:
                           description: Whether the AI Index is managed by a plugin and therefore immutable.
                           type: boolean
+                        memory_enabled:
+                          description: Whether this AI Index accepts memory writes.
+                          type: boolean
                         sources:
                           description: Additional sources that provide context for the AI Index.
                           items:
@@ -22331,6 +22392,7 @@ paths:
                       required:
                         - id
                         - managed
+                        - memory_enabled
                         - date_created
                         - date_modified
                         - dest
@@ -22607,6 +22669,9 @@ paths:
                   maxLength: 256
                   minLength: 1
                   type: string
+                memory_enabled:
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  type: boolean
                 sources:
                   default: []
                   description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
@@ -23316,6 +23381,7 @@ paths:
                       value: ai-index-ds-customer-support
                     id: customer_support
                     managed: false
+                    memory_enabled: true
                     sources:
                       - type: esql
                         value: FROM support-cases | LIMIT 100
@@ -23448,6 +23514,9 @@ paths:
                   managed:
                     description: Whether the AI Index is managed by a plugin and therefore immutable.
                     type: boolean
+                  memory_enabled:
+                    description: Whether this AI Index accepts memory writes.
+                    type: boolean
                   sources:
                     description: Additional sources that provide context for the AI Index.
                     items:
@@ -23494,6 +23563,7 @@ paths:
                 required:
                   - id
                   - managed
+                  - memory_enabled
                   - date_created
                   - date_modified
                   - dest
@@ -23743,6 +23813,9 @@ paths:
                       description: Which signals the analysis reads. A read filter only.
                   required:
                     - enabled
+                memory_enabled:
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  type: boolean
                 sources:
                   default: []
                   description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
@@ -67648,6 +67721,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                excludedUserNames:
+                  items:
+                    type: string
+                  maxItems: 200
+                  type: array
                 historySnapshot:
                   additionalProperties: false
                   type: object
@@ -76392,6 +76470,11 @@ paths:
                       - service
                       - generic
                     type: string
+                  type: array
+                excludedUserNames:
+                  items:
+                    type: string
+                  maxItems: 200
                   type: array
                 historySnapshot:
                   additionalProperties: false
@@ -136017,6 +136100,8 @@ components:
           updated_at: null
           updated_by: null
           version: WzEyLDNd
+          workflowTags:
+            - soc-triage
     Cases_get_case_field_definition_response:
       summary: A reusable field definition.
       value:
@@ -136343,6 +136428,8 @@ components:
             name: template-1
             tags:
               - Template tag 1
+        workflowTags:
+          - soc-triage
     Cases_set_case_configuration_response:
       summary: This is an example response for case settings.
       value:
@@ -136402,6 +136489,8 @@ components:
         updated_at: null
         updated_by: null
         version: WzIwNzMsMV0=
+        workflowTags:
+          - soc-triage
     Cases_template_dry_run_response:
       summary: Dry-run validation succeeded without writing.
       value:
@@ -136447,6 +136536,9 @@ components:
             type: toggle
             required: false
         version: WzExOSw0XQ==
+        workflowTags:
+          - soc-triage
+          - enrichment
     Cases_update_case_configuration_response:
       summary: This is an example response when the case configuration was updated.
       value:
@@ -136497,6 +136589,9 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzI2LDNd
+        workflowTags:
+          - soc-triage
+          - enrichment
     Cases_update_case_request:
       summary: Update the case description, tags, and connector.
       value:
@@ -142065,6 +142160,15 @@ components:
           $ref: '#/components/schemas/Cases_owner'
         templates:
           $ref: '#/components/schemas/Cases_templates'
+        workflowTags:
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
       required:
         - closure_type
         - connector
@@ -142455,6 +142559,15 @@ components:
             The version of the connector. To retrieve the version value, use the get configuration API.
           example: WzIwMiwxXQ==
           type: string
+        workflowTags:
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
       required:
         - version
       title: Update case configuration request
@@ -143614,7 +143727,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -143730,7 +143843,7 @@ components:
           type: string
       required:
         - profile_uid
-    Kibana_HTTP_APIs_alerting_bulk_ack_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_ack_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -143741,20 +143854,20 @@ components:
           type: string
       required:
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_ack_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_ack_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 ack actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
       required:
         - items
-    Kibana_HTTP_APIs_alerting_bulk_activate_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_activate_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -143771,20 +143884,20 @@ components:
       required:
         - reason
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_activate_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_activate_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 activate actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
       required:
         - items
-    Kibana_HTTP_APIs_alerting_bulk_assign_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_assign_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -143794,7 +143907,7 @@ components:
           minLength: 1
           type: string
         assignee_uid:
-          description: User profile UID of the assignee, or null to remove the assignee from the episode.
+          description: User profile UID of the assignee, or null to remove the assignee from the alert.
           maxLength: 150
           minLength: 1
           nullable: true
@@ -143802,14 +143915,14 @@ components:
       required:
         - assignee_uid
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_assign_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_assign_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 assign actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
@@ -143965,7 +144078,7 @@ components:
       required:
         - items
         - errors
-    Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -143982,14 +144095,14 @@ components:
       required:
         - reason
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 deactivate actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
@@ -144088,7 +144201,7 @@ components:
       required:
         - ids
         - snoozed_until
-    Kibana_HTTP_APIs_alerting_bulk_tag_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_tag_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -144098,7 +144211,7 @@ components:
           minLength: 1
           type: string
         tags:
-          description: Replaces the episode's tags. Send `[]` to clear.
+          description: Replaces the alert's tags. Send `[]` to clear.
           items:
             maxLength: 128
             minLength: 1
@@ -144108,20 +144221,20 @@ components:
       required:
         - tags
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_tag_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_tag_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 tag actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
       required:
         - items
-    Kibana_HTTP_APIs_alerting_bulk_unack_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_unack_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -144132,14 +144245,14 @@ components:
           type: string
       required:
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_unack_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_unack_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 unack actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
@@ -144166,7 +144279,7 @@ components:
         - code
         - error
         - message
-    Kibana_HTTP_APIs_alerting_new_ack_episode_action:
+    Kibana_HTTP_APIs_alerting_new_ack_alert_action:
       additionalProperties: false
       type: object
       properties: {}
@@ -144202,7 +144315,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -144227,7 +144340,7 @@ components:
         - name
         - description
         - destinations
-    Kibana_HTTP_APIs_alerting_new_activate_episode_action:
+    Kibana_HTTP_APIs_alerting_new_activate_alert_action:
       additionalProperties: false
       type: object
       properties:
@@ -144238,19 +144351,19 @@ components:
           type: string
       required:
         - reason
-    Kibana_HTTP_APIs_alerting_new_assign_episode_action:
+    Kibana_HTTP_APIs_alerting_new_assign_alert_action:
       additionalProperties: false
       type: object
       properties:
         assignee_uid:
-          description: User profile UID of the assignee, or null to remove the assignee from the episode.
+          description: User profile UID of the assignee, or null to remove the assignee from the alert.
           maxLength: 150
           minLength: 1
           nullable: true
           type: string
       required:
         - assignee_uid
-    Kibana_HTTP_APIs_alerting_new_deactivate_episode_action:
+    Kibana_HTTP_APIs_alerting_new_deactivate_alert_action:
       additionalProperties: false
       type: object
       properties:
@@ -144309,12 +144422,12 @@ components:
         - metadata
         - schedule
         - query
-    Kibana_HTTP_APIs_alerting_new_tag_episode_action:
+    Kibana_HTTP_APIs_alerting_new_tag_alert_action:
       additionalProperties: false
       type: object
       properties:
         tags:
-          description: Replaces the episode's tags. Send `[]` to clear.
+          description: Replaces the alert's tags. Send `[]` to clear.
           items:
             maxLength: 128
             minLength: 1
@@ -144323,7 +144436,7 @@ components:
           type: array
       required:
         - tags
-    Kibana_HTTP_APIs_alerting_new_unack_episode_action:
+    Kibana_HTTP_APIs_alerting_new_unack_alert_action:
       additionalProperties: false
       type: object
       properties: {}
@@ -144510,7 +144623,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -144730,6 +144843,15 @@ components:
           maxLength: 256
           minLength: 1
           type: string
+        routing_tags:
+          description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
         tags:
           description: Tags for categorization, e.g. ["production", "infra"].
           items:
@@ -144757,7 +144879,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_alert'
     Kibana_HTTP_APIs_alerting_rule_no_data_alert:
       additionalProperties: false
-      description: Marks an existing alert episode `active` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.
+      description: Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.
       type: object
       properties:
         query:
@@ -144784,7 +144906,7 @@ components:
         - strategy
     Kibana_HTTP_APIs_alerting_rule_no_data_keep_last:
       additionalProperties: false
-      description: Holds the alert episode's current status when the rule finds no data.
+      description: Holds the alert's current status when the rule finds no data.
       type: object
       properties:
         query:
@@ -144800,7 +144922,7 @@ components:
         - strategy
     Kibana_HTTP_APIs_alerting_rule_no_data_resolve:
       additionalProperties: false
-      description: Closes the alert episode the first time the rule finds no data for a group.
+      description: Closes the alert the first time the rule finds no data for a group.
       type: object
       properties:
         query:
@@ -144829,7 +144951,7 @@ components:
       required:
         - base
     Kibana_HTTP_APIs_alerting_rule_recovery:
-      description: When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+      description: When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
       discriminator:
         mapping:
           condition: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_condition'
@@ -144844,7 +144966,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_manual'
     Kibana_HTTP_APIs_alerting_rule_recovery_condition:
       additionalProperties: false
-      description: Recovers the alert episode when `query.base` plus `segment` returns the group. Requires `query.breach`.
+      description: Recovers the alert when `query.base` plus `segment` returns the group. Requires `query.breach`.
       type: object
       properties:
         segment:
@@ -144861,7 +144983,7 @@ components:
         - segment
     Kibana_HTTP_APIs_alerting_rule_recovery_manual:
       additionalProperties: false
-      description: Does not recover automatically. Close the alert episode with a user action. `state_transition.recovering` has no effect.
+      description: Does not recover automatically. Close the alert with a user action. `state_transition.recovering` has no effect.
       type: object
       properties:
         strategy:
@@ -144872,7 +144994,7 @@ components:
         - strategy
     Kibana_HTTP_APIs_alerting_rule_recovery_no_breach:
       additionalProperties: false
-      description: Recovers the alert episode when its group no longer appears in the breach results.
+      description: Recovers the alert when its group no longer appears in the breach results.
       type: object
       properties:
         strategy:
@@ -144883,11 +145005,11 @@ components:
         - strategy
     Kibana_HTTP_APIs_alerting_rule_recovery_query:
       additionalProperties: false
-      description: Recovers the alert episode when this separate query returns the group.
+      description: Recovers the alert when this separate query returns the group.
       type: object
       properties:
         query:
-          description: Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert episode.
+          description: Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert.
           maxLength: 10000
           minLength: 1
           type: string
@@ -144999,21 +145121,21 @@ components:
         - every
     Kibana_HTTP_APIs_alerting_rule_state_transition:
       additionalProperties: false
-      description: Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
+      description: Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
       type: object
       properties:
         pending:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_pending'
-          description: Delay before a match opens an alert episode.
+          description: Delay before a match opens an alert.
         recovering:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_recovering'
-          description: Delay before a recovered match closes the alert episode. Has no effect when `recovery.strategy` is `manual`.
+          description: Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.
     Kibana_HTTP_APIs_alerting_rule_state_transition_pending:
       additionalProperties: false
       type: object
       properties:
         count:
-          description: Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
+          description: Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
           maximum: 1000
           minimum: 0
           type: integer
@@ -145032,7 +145154,7 @@ components:
       type: object
       properties:
         count:
-          description: Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
+          description: Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
           maximum: 1000
           minimum: 0
           type: integer
@@ -145093,7 +145215,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -145148,6 +145270,15 @@ components:
               maxLength: 256
               minLength: 1
               type: string
+            routing_tags:
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 20
+              minItems: 1
+              nullable: true
+              type: array
             tags:
               items:
                 maxLength: 128
