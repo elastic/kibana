@@ -66,7 +66,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
   spaceTest(
     'creates an ES|QL multi-value control and filters grid rows',
     async ({ pageObjects }) => {
-      const { controls, dataGrid, discover } = pageObjects;
+      const { controls, dataGrid, discover, esqlEditor } = pageObjects;
 
       await discover.createEsqlControl(ESQL_MULTI_VALUE_QUERY_START, { values: ['IN', 'US'] });
       await discover.waitUntilTabIsLoaded();
@@ -76,7 +76,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
         'FROM logstash-* | WHERE MV_CONTAINS( ?values'
       );
 
-      await discover.codeEditor.setCodeEditorValue(ESQL_MULTI_VALUE_QUERY);
+      await esqlEditor.setQuery(ESQL_MULTI_VALUE_QUERY);
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
       await dataGrid.waitForLoad();

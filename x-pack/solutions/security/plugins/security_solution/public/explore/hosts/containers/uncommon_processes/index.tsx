@@ -27,6 +27,15 @@ import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { InspectResponse } from '../../../../types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const UNCOMMON_PROCESSES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'uncommon_processes'
+);
 
 export const ID = 'hostsUncommonProcessesQuery';
 
@@ -103,6 +112,7 @@ export const useUncommonProcesses = ({
     },
     errorMessage: i18n.FAIL_UNCOMMON_PROCESSES,
     abort: skip,
+    executionContext: UNCOMMON_PROCESSES_CONTEXT,
   });
 
   const uncommonProcessesResponse = useMemo(

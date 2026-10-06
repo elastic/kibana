@@ -17,10 +17,6 @@ import { POLICY_MATCHER_DESCRIPTION, policyMatcherSchema } from './policy_matche
 export const actionPolicyResponseSchema = z
   .object({
     id: z.string().describe('The unique identifier for the action policy.'),
-    version: z
-      .string()
-      .optional()
-      .describe('The version, used for optimistic concurrency control.'),
     name: z.string().describe('The name of the action policy.'),
     description: z.string().describe('A description of the action policy.'),
     enabled: z.boolean().describe('Whether the action policy is enabled.'),
