@@ -7,8 +7,6 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
-import type { DiscoverPageObjects } from '@kbn/discover-plugin/test/scout/common/ui/fixtures';
-import { DiscoverPage } from '@kbn/discover-plugin/test/scout/common/ui/fixtures';
 import { OnboardingHomePage } from './onboarding_home';
 import { CustomLogsPage } from './custom_logs';
 import { ObservabilityNavigation } from './observability_navigation';
@@ -19,7 +17,7 @@ export {
   OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
 } from './observability_navigation';
 
-export interface ObltPageObjects extends DiscoverPageObjects {
+export interface ObltPageObjects extends PageObjects {
   onboardingHome: OnboardingHomePage;
   customLogs: CustomLogsPage;
   observabilityNavigation: ObservabilityNavigation;
@@ -28,7 +26,6 @@ export interface ObltPageObjects extends DiscoverPageObjects {
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): ObltPageObjects {
   return {
     ...pageObjects,
-    discover: createLazyPageObject(DiscoverPage, page),
     onboardingHome: createLazyPageObject(OnboardingHomePage, page),
     customLogs: createLazyPageObject(CustomLogsPage, page),
     observabilityNavigation: createLazyPageObject(ObservabilityNavigation, page),

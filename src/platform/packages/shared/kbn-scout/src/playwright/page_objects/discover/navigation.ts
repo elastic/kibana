@@ -121,4 +121,16 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
   async clickAppMenuItem(testId: string) {
     await this.appMenu.clickItem(testId);
   }
+
+  /** Returns true when the doc viewer flyout is visible. */
+  async isShowingDocViewer(): Promise<boolean> {
+    try {
+      await this.page.testSubj
+        .locator('kbnDocViewer')
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }
