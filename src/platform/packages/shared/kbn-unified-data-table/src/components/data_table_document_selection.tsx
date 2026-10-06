@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataSource } from '@kbn/data-source';
 import type { UseSelectedDocsState } from '../hooks/use_selected_docs';
 import { UnifiedDataTableContext } from '../table_context';
 import { DataTableCopyRowsAsText } from './data_table_copy_rows_as_text';
@@ -144,7 +145,7 @@ export const getSelectAllButton = (rows: DataTableRecord[]) => () => {
 };
 
 export function DataTableDocumentToolbarBtn({
-  isPlainRecord,
+  dataSource,
   isFilterActive,
   rows,
   setIsFilterActive,
@@ -159,7 +160,7 @@ export function DataTableDocumentToolbarBtn({
   customBulkActions,
   hideDefaultBulkActions,
 }: {
-  isPlainRecord: boolean;
+  dataSource?: DataSource;
   isFilterActive: boolean;
   rows: DataTableRecord[];
   setIsFilterActive: (value: boolean) => void;
@@ -176,6 +177,7 @@ export function DataTableDocumentToolbarBtn({
   hideDefaultBulkActions?: boolean;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
+  const isEsql = dataSource?.kind === 'esql';
   const { selectAllDocs, clearAllSelectedDocs, selectedDocsCount, docIdsInSelectionOrder } =
     selectedDocsState;
 
@@ -264,7 +266,7 @@ export function DataTableDocumentToolbarBtn({
                   setIsFilterActive(false);
                 }}
               >
-                {isPlainRecord ? (
+                {isEsql ? (
                   <FormattedMessage
                     id="unifiedDataTable.showAllResults"
                     defaultMessage="Show all results"
@@ -287,7 +289,7 @@ export function DataTableDocumentToolbarBtn({
                   setIsFilterActive(true);
                 }}
               >
-                {isPlainRecord ? (
+                {isEsql ? (
                   <FormattedMessage
                     id="unifiedDataTable.showSelectedResultsOnly"
                     defaultMessage="Show selected results only"
@@ -326,7 +328,7 @@ export function DataTableDocumentToolbarBtn({
     closePopover,
     rows,
     isFilterActive,
-    isPlainRecord,
+    isEsql,
     setIsFilterActive,
     clearAllSelectedDocs,
     customBulkActions,
@@ -363,7 +365,7 @@ export function DataTableDocumentToolbarBtn({
             }
           `}
         >
-          {isPlainRecord ? (
+          {isEsql ? (
             <FormattedMessage
               id="unifiedDataTable.selectedResultsButtonLabel"
               defaultMessage="Selected"

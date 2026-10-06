@@ -61,9 +61,8 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['extension', 'message'],
               dataViewMockWithTimeField.timeFieldName,
-              buildEsqlSource(dataViewMockWithTimeField),
-              showTimeCol,
-              false
+              undefined,
+              showTimeCol
             )
           ).toBe(showTimeCol);
         }
@@ -76,8 +75,7 @@ describe('getVisibleColumns utils', function () {
               ['extension', 'message'],
               dataViewMockWithTimeField.timeFieldName,
               buildEsqlSource(dataViewMockWithTimeField),
-              showTimeCol,
-              true
+              showTimeCol
             )
           ).toBe(showTimeCol);
         }
@@ -89,9 +87,8 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewMockWithTimeField.timeFieldName,
-              buildEsqlSource(dataViewMockWithTimeField),
-              showTimeCol,
-              false
+              undefined,
+              showTimeCol
             )
           ).toBe(showTimeCol);
         }
@@ -104,8 +101,7 @@ describe('getVisibleColumns utils', function () {
               ['_source'],
               dataViewMockWithTimeField.timeFieldName,
               buildEsqlSource(dataViewMockWithTimeField),
-              showTimeCol,
-              true
+              showTimeCol
             )
           ).toBe(showTimeCol);
         }
@@ -122,8 +118,7 @@ describe('getVisibleColumns utils', function () {
               ['_source'],
               dataViewMockWithTimeField.timeFieldName,
               dataSource,
-              showTimeCol,
-              true
+              showTimeCol
             )
           ).toBe(false);
         }
@@ -137,9 +132,8 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['extension', 'message'],
               dataViewMockWithoutTimeField.timeFieldName,
-              buildEsqlSource(dataViewMockWithoutTimeField),
-              showTimeCol,
-              false
+              undefined,
+              showTimeCol
             )
           ).toBe(false);
         }
@@ -152,8 +146,7 @@ describe('getVisibleColumns utils', function () {
               ['extension', 'message'],
               dataViewMockWithoutTimeField.timeFieldName,
               buildEsqlSource(dataViewMockWithoutTimeField),
-              showTimeCol,
-              true
+              showTimeCol
             )
           ).toBe(false);
         }
@@ -165,9 +158,8 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewMockWithoutTimeField.timeFieldName,
-              buildEsqlSource(dataViewMockWithoutTimeField),
-              showTimeCol,
-              false
+              undefined,
+              showTimeCol
             )
           ).toBe(false);
         }
@@ -180,8 +172,7 @@ describe('getVisibleColumns utils', function () {
               ['_source'],
               dataViewMockWithoutTimeField.timeFieldName,
               buildEsqlSource(dataViewMockWithoutTimeField),
-              showTimeCol,
-              true
+              showTimeCol
             )
           ).toBe(false);
         }

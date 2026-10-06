@@ -226,8 +226,7 @@ const InternalDocViewerTable = ({
           columns,
           dataView.timeFieldName,
           dataSource,
-          !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-          isEsqlMode
+          !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
         )
       );
     }
@@ -246,7 +245,6 @@ const InternalDocViewerTable = ({
     dataView,
     columns,
     dataSource,
-    isEsqlMode,
     uiSettings,
   ]);
 

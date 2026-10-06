@@ -1329,7 +1329,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
-    "isSortable": false,
+    "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
   },

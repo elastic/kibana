@@ -311,10 +311,6 @@ interface InternalUnifiedDataTableProps {
    */
   onUpdateDataGridDensity?: (dataGridDensity: DataGridDensity) => void;
   /**
-   * Is text base lang mode enabled
-   */
-  isPlainRecord?: boolean;
-  /**
    * Current state value for rowsPerPage
    */
   rowsPerPageState?: number;
@@ -606,7 +602,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       maxAllowedSampleSize,
       sampleSizeState,
       onUpdateSampleSize,
-      isPlainRecord = false,
       rowsPerPageState,
       onUpdateRowsPerPage,
       onFieldEdited,
@@ -750,14 +745,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     const timeFieldName = dataView.timeFieldName;
     const shouldPrependTimeFieldColumn = useCallback(
       (activeColumns: string[]) =>
-        canPrependTimeFieldColumn(
-          activeColumns,
-          timeFieldName,
-          dataSource,
-          showTimeCol,
-          isPlainRecord
-        ),
-      [timeFieldName, isPlainRecord, showTimeCol, dataSource]
+        canPrependTimeFieldColumn(activeColumns, timeFieldName, dataSource, showTimeCol),
+      [timeFieldName, showTimeCol, dataSource]
     );
 
     const visibleColumns = useMemo(() => {
@@ -774,7 +763,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataSource,
       sort,
       dataView,
-      isPlainRecord,
       isSortEnabled,
       isInMemorySortEnabled,
       isSummaryOnlyColumn,
@@ -936,7 +924,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         selectedDocsState,
         valueToStringConverter,
         componentsTourSteps,
-        isPlainRecord,
+        dataSource,
         documentsDisplayMode,
         pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
         pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
@@ -944,7 +932,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       [
         componentsTourSteps,
         dataView,
-        isPlainRecord,
+        dataSource,
         documentsDisplayMode,
         isPaginationEnabled,
         displayedRows,
@@ -988,7 +976,6 @@ const InternalUnifiedDataTable = React.forwardRef<
           fieldFormats,
           maxEntries: maxDocFieldsDisplayed,
           externalCustomRenderers,
-          isPlainRecord,
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
           dataSource,
           documentsDisplayMode,
@@ -1002,7 +989,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         maxDocFieldsDisplayed,
         fieldFormats,
         externalCustomRenderers,
-        isPlainRecord,
         dataGridDensity,
         dataSource,
         documentsDisplayMode,
@@ -1199,7 +1185,6 @@ const InternalUnifiedDataTable = React.forwardRef<
           dataView,
           isSummaryOnlyColumn,
           isSortEnabled,
-          isPlainRecord,
           services: {
             uiSettings,
             toastNotifications,
@@ -1232,7 +1217,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         displayedRows.length,
         editField,
         headerRowHeightLines,
-        isPlainRecord,
         isSortEnabled,
         onFilter,
         onResize,
@@ -1321,7 +1305,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           {Boolean(selectedDocsCount) && (
             <EuiFlexItem grow={false}>
               <DataTableDocumentToolbarBtn
-                isPlainRecord={isPlainRecord}
+                dataSource={dataSource}
                 isFilterActive={isFilterActive}
                 rows={displayedRows}
                 setIsFilterActive={setIsFilterActive}
@@ -1356,7 +1340,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalAdditionalControls,
       selectedDocsCount,
       inTableSearchControl,
-      isPlainRecord,
+      dataSource,
       isFilterActive,
       displayedRows,
       selectedDocsState,
@@ -1628,7 +1612,6 @@ const InternalUnifiedDataTable = React.forwardRef<
                 ariaLabelledBy={ariaLabelledBy}
                 dataView={dataView}
                 dataSource={dataSource}
-                isPlainRecord={isPlainRecord}
                 selectedFieldNames={visibleColumns}
                 selectedDocIds={docIdsInSelectionOrder}
                 schemaDetectors={schemaDetectors}

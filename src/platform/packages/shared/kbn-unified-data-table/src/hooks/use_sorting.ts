@@ -24,7 +24,6 @@ export const useSorting = ({
   dataSource,
   sort,
   dataView,
-  isPlainRecord,
   isSortEnabled,
   isInMemorySortEnabled,
   isSummaryOnlyColumn,
@@ -35,7 +34,6 @@ export const useSorting = ({
   dataSource: DataSource | undefined;
   sort: SortOrder[];
   dataView: DataView;
-  isPlainRecord: boolean;
   isSortEnabled: boolean;
   isInMemorySortEnabled: boolean;
   isSummaryOnlyColumn: boolean;
@@ -48,7 +46,7 @@ export const useSorting = ({
   }, [sort, visibleColumns]);
 
   const comparators = useMemo(() => {
-    if (!isInMemorySortEnabled || !isPlainRecord || !rows || !sortingColumns.length) {
+    if (!isInMemorySortEnabled || dataSource?.kind !== 'esql' || !rows || !sortingColumns.length) {
       return;
     }
 
@@ -68,7 +66,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [dataSource, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
+  }, [dataSource, dataView, isInMemorySortEnabled, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {
@@ -99,7 +97,7 @@ export const useSorting = ({
     // in ES|QL mode, sorting is disabled when in Document view
     // ideally we want the @timestamp column to be sortable server side
     // but it needs discussion before moving forward like this
-    if (isPlainRecord && isSummaryOnlyColumn) {
+    if (dataSource?.kind === 'esql' && isSummaryOnlyColumn) {
       return undefined;
     }
 
@@ -109,23 +107,23 @@ export const useSorting = ({
         onSort?.(sortingColumnsData.map(({ id, direction }): SortOrder => [id, direction]));
       },
     };
-  }, [isSortEnabled, isPlainRecord, isSummaryOnlyColumn, sortingColumns, onSort]);
+  }, [isSortEnabled, dataSource, isSummaryOnlyColumn, sortingColumns, onSort]);
 
   return { sortedRows, sorting };
 };
 
 export const isSortable = ({
-  isPlainRecord,
+  dataSource,
   columnName,
   columnSchema,
   dataViewField,
 }: {
-  isPlainRecord: boolean | undefined;
+  dataSource: DataSource | undefined;
   columnName: string;
   columnSchema: string;
   dataViewField: DataViewField | undefined;
 }): boolean => {
-  if (isPlainRecord) {
+  if (dataSource?.kind === 'esql') {
     // TODO: would be great to have something like `sortable` flag for text based columns too
     if (columnName === SOURCE_COLUMN) {
       return false; // _source column is not sortable

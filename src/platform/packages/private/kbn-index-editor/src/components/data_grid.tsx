@@ -272,7 +272,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       showKeyboardShortcuts={false}
       externalCustomRenderers={externalCustomRenderers}
       renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
-      isPlainRecord
       isSortEnabled={true}
       isInMemorySortEnabled={false}
       showMultiFields={false}

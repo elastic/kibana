@@ -386,7 +386,6 @@ export function SearchEmbeddableGridComponent({
       configRowHeight={defaults.rowHeight}
       headerRowHeightState={savedSearch.headerRowHeight}
       rowHeightState={savedSearch.rowHeight}
-      isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
       query={savedSearchQuery}

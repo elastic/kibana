@@ -621,7 +621,6 @@ function DiscoverDocumentsComponent({
             rowHeightState={rowHeight}
             onUpdateRowHeight={onUpdateRowHeight}
             isSortEnabled={true}
-            isPlainRecord={isEsqlMode}
             isPaginationEnabled={!isEsqlMode}
             rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
             onUpdateRowsPerPage={onUpdateRowsPerPage}

@@ -38,7 +38,6 @@ export const getRenderCellValueFn = ({
   fieldFormats,
   maxEntries,
   externalCustomRenderers,
-  isPlainRecord,
   isCompressed = true,
   dataSource,
   documentsDisplayMode,
@@ -52,7 +51,6 @@ export const getRenderCellValueFn = ({
   fieldFormats: FieldFormatsStart;
   maxEntries: number;
   externalCustomRenderers?: CustomCellRenderer;
-  isPlainRecord?: boolean;
   isCompressed?: boolean;
   dataSource: DataSource | undefined;
   documentsDisplayMode: DocumentsDisplayMode;
@@ -129,7 +127,8 @@ export const getRenderCellValueFn = ({
       return <span className={CELL_CLASS}>-</span>;
     }
 
-    const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
+    const isSourceColumn =
+      field?.type === '_source' || (dataSource?.kind === 'esql' && columnId === '_source');
 
     if (isSourceColumn && documentsDisplayMode === 'json') {
       return (
@@ -184,7 +183,7 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
-        isPlainRecord,
+        dataSource,
       });
     }
 
@@ -198,7 +197,6 @@ export const getRenderCellValueFn = ({
           fieldFormats={fieldFormats}
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={maxEntries}
-          isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
           dataSource={dataSource}
         />
@@ -238,7 +236,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
-  isPlainRecord,
+  dataSource,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -247,7 +245,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
-  isPlainRecord?: boolean;
+  dataSource: DataSource | undefined;
 }) {
   const closeButton = (
     <EuiToolTip
@@ -271,7 +269,7 @@ function renderPopoverContent({
   if (
     useTopLevelObjectColumns ||
     field?.type === '_source' ||
-    (isPlainRecord && columnId === '_source')
+    (dataSource?.kind === 'esql' && columnId === '_source')
   ) {
     return (
       <SourcePopoverContent

@@ -40,7 +40,6 @@ export function SourceDocument({
   dataView,
   shouldShowFieldHandler,
   maxEntries,
-  isPlainRecord,
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
   className,
@@ -53,7 +52,6 @@ export function SourceDocument({
   dataView: DataView;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   maxEntries: number;
-  isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
   className?: string;
@@ -61,6 +59,7 @@ export function SourceDocument({
   dataSource: DataSource | undefined;
 }) {
   const styles = useMemoCss(componentStyles);
+  const isEsql = dataSource?.kind === 'esql';
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairsReact(
         row,
@@ -69,7 +68,7 @@ export function SourceDocument({
         shouldShowFieldHandler,
         fieldFormats,
         dataSource,
-        Boolean(isPlainRecord)
+        isEsql
       ).slice(0, maxEntries)
     : formatHitReact(
         row,
@@ -78,7 +77,7 @@ export function SourceDocument({
         maxEntries,
         fieldFormats,
         dataSource,
-        isPlainRecord ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
+        isEsql ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
       );
 
   const renderedPairs: ReactNode[] = [];
@@ -96,7 +95,7 @@ export function SourceDocument({
     );
   }
 
-  if (isPlainRecord && renderedPairs.length === 0) {
+  if (isEsql && renderedPairs.length === 0) {
     return <span className={classnames(CELL_CLASS, className)}>—</span>;
   }
 

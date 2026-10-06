@@ -67,7 +67,6 @@ const renderCompareDocuments = ({
       ariaDescribedBy="test"
       ariaLabelledBy="test"
       dataView={dataViewWithTimefieldMock}
-      isPlainRecord={false}
       selectedFieldNames={['message', 'extension', 'bytes']}
       selectedDocIds={['0', '1', '2']}
       schemaDetectors={[]}

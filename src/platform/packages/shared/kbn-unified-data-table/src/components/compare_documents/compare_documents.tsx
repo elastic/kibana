@@ -39,7 +39,6 @@ export interface CompareDocumentsProps {
   ariaLabelledBy: string;
   dataView: DataView;
   dataSource?: DataSource;
-  isPlainRecord: boolean;
   selectedFieldNames: string[];
   selectedDocIds: string[];
   schemaDetectors: EuiDataGridSchemaDetector[];
@@ -69,7 +68,6 @@ const CompareDocuments = ({
   ariaLabelledBy,
   dataView,
   dataSource,
-  isPlainRecord,
   selectedFieldNames,
   selectedDocIds: originalSelectedDocIds,
   schemaDetectors,
@@ -129,7 +127,7 @@ const CompareDocuments = ({
   });
   const comparisonColumns = useComparisonColumns({
     wrapper,
-    isPlainRecord,
+    dataSource,
     fieldColumnId,
     selectedDocIds,
     docMap,
@@ -148,7 +146,7 @@ const CompareDocuments = ({
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
-        isPlainRecord={isPlainRecord}
+        dataSource={dataSource}
         selectedDocIds={selectedDocIds}
         showDiff={showDiff}
         diffMode={diffMode}
@@ -167,7 +165,7 @@ const CompareDocuments = ({
     [
       diffMode,
       forceShowAllFields,
-      isPlainRecord,
+      dataSource,
       selectedDocIds,
       setDiffMode,
       setIsCompareActive,

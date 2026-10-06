@@ -233,7 +233,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       dataSource={dataSource}
       services={services}
       enableInTableSearch
-      isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
       dataView={props.dataView}

@@ -61,8 +61,7 @@ export const SourceDocumentJsonMode = ({
 }: SourceDocumentJsonModeProps) => {
   const { inTableSearchTerm, isCounting: isInTableSearchCounting } =
     useContext(InTableSearchCellContext);
-  const { onFilter, hideFilteringOnComputedColumns, isPlainRecord } =
-    useContext(UnifiedDataTableContext);
+  const { onFilter, hideFilteringOnComputedColumns } = useContext(UnifiedDataTableContext);
 
   const hideNulls = jsonModeSettings?.hideNulls ?? false;
   const wrapLines = jsonModeSettings?.wrapLines ?? true;
@@ -86,7 +85,7 @@ export const SourceDocumentJsonMode = ({
         return [];
       }
       // For array items, we wrap the value in an array so it's filtered by using MV_CONTAINS.
-      const filterValue = isPlainRecord && isArrayItem ? [value] : value;
+      const filterValue = dataSource?.kind === 'esql' && isArrayItem ? [value] : value;
       return [
         {
           id: 'filterFor',
@@ -110,7 +109,7 @@ export const SourceDocumentJsonMode = ({
         },
       ];
     },
-    [dataView, dataSource, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
+    [dataView, dataSource, onFilter, hideFilteringOnComputedColumns, row]
   );
 
   const initialTreeState = useMemo(() => treeExpansionStore.get(row.raw), [row]);

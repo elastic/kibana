@@ -119,7 +119,6 @@ export class CascadedDocumentsFetcher {
       });
 
       records = fetchedRecords;
-      this.stateManager.setCascadedDocuments(nodeId, records);
 
       // The leaf query drops STATS, so its columns differ from the parent source. All leaves share
       // them, so the leaf source is only replaced when they change.
@@ -129,6 +128,7 @@ export class CascadedDocumentsFetcher {
       ) {
         this.cascadedLeafDataSource$.next(leafDataSource);
       }
+      this.stateManager.setCascadedDocuments(nodeId, records);
     } finally {
       this.abortControllers.delete(nodeId);
     }

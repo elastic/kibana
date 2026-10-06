@@ -54,6 +54,7 @@ import { useColumns } from '../hooks/use_data_grid_columns';
 import { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from '../hooks/use_full_screen_watcher';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const mockUseDataGridColumnsCellActions = jest.fn((_prop: unknown) => []);
 
@@ -600,7 +601,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           rows: generateEsHits(dataViewMock, 10).map((hit) =>
             buildDataTableRecord(hit, dataViewMock)
           ),
@@ -648,7 +649,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           isInMemorySortEnabled: false,
           rows: generateEsHits(dataViewMock, 10).map((hit) =>
             buildDataTableRecord(hit, dataViewMock)
@@ -779,7 +780,7 @@ describe('UnifiedDataTable', () => {
 
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           rows: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
         });
 

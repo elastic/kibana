@@ -111,10 +111,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       getRenderCustomToolbarWithElements({
         leftSide:
           typeof props.totalHitCount === 'number' ? (
-            <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={props.isPlainRecord} />
+            <TotalDocuments
+              totalHitCount={props.totalHitCount}
+              isEsqlMode={props.dataSource?.kind === 'esql'}
+            />
           ) : undefined,
       }),
-    [props.totalHitCount, props.isPlainRecord]
+    [props.totalHitCount, props.dataSource]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -153,7 +156,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DiscoverGrid
         {...gridProps}
-        isPaginationEnabled={!gridProps.isPlainRecord}
+        isPaginationEnabled={gridProps.dataSource?.kind !== 'esql'}
         totalHits={props.totalHitCount}
         setExpandedDoc={props.setExpandedDoc}
         expandedDoc={props.expandedDoc}

@@ -115,7 +115,6 @@ function buildEuiGridColumn({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
-  isPlainRecord,
   toastNotifications,
   hasEditDataViewPermission,
   valueToStringConverter,
@@ -143,7 +142,6 @@ function buildEuiGridColumn({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
-  isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
@@ -237,7 +235,7 @@ function buildEuiGridColumn({
     id: columnName,
     schema: columnSchema,
     isSortable:
-      isSortEnabled && isSortable({ isPlainRecord, columnName, columnSchema, dataViewField }),
+      isSortEnabled && isSortable({ dataSource, columnName, columnSchema, dataViewField }),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
@@ -368,7 +366,6 @@ export function getEuiGridColumns({
   isSummaryOnlyColumn,
   isSortEnabled,
   disableCellActions = false,
-  isPlainRecord,
   services,
   hasEditDataViewPermission,
   valueToStringConverter,
@@ -393,7 +390,6 @@ export function getEuiGridColumns({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
-  isPlainRecord?: boolean;
   disableCellActions?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
@@ -428,7 +424,6 @@ export function getEuiGridColumns({
       dataView,
       isSummaryOnlyColumn,
       isSortEnabled,
-      isPlainRecord,
       toastNotifications: services.toastNotifications,
       hasEditDataViewPermission,
       valueToStringConverter,

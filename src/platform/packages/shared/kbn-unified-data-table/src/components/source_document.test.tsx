@@ -21,6 +21,7 @@ import {
 } from '@kbn/discover-utils/src/__mocks__';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, within } from '@testing-library/react';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const mockServices = {
   fieldFormats: {
@@ -51,10 +52,9 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        dataSource={undefined}
+        dataSource={createMockEsqlSource()}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-        isPlainRecord={true}
         maxEntries={100}
         row={rows[0]}
         shouldShowFieldHandler={() => false}
@@ -87,10 +87,9 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="foo"
-        dataSource={undefined}
+        dataSource={createMockEsqlSource()}
         dataView={dataViewMock}
         fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
-        isPlainRecord={true}
         maxEntries={100}
         row={row}
         shouldShowFieldHandler={() => true}
@@ -115,10 +114,9 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        dataSource={undefined}
+        dataSource={createMockEsqlSource()}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-        isPlainRecord={true}
         maxEntries={100}
         row={row}
         shouldShowFieldHandler={() => false}
@@ -146,10 +144,9 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        dataSource={undefined}
+        dataSource={createMockEsqlSource()}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-        isPlainRecord={true}
         maxEntries={2}
         row={row}
         shouldShowFieldHandler={() => true}
@@ -184,10 +181,9 @@ describe('Unified data table source document cell rendering', () => {
       renderWithI18n(
         <SourceDocument
           columnId="_source"
-          dataSource={undefined}
+          dataSource={createMockEsqlSource()}
           dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          isPlainRecord={true}
           maxEntries={100}
           row={row}
           shouldShowFieldHandler={() => true}
@@ -224,7 +220,6 @@ describe('Unified data table source document cell rendering', () => {
           dataSource={esqlSourceOverridingBytesType}
           dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          isPlainRecord={true}
           maxEntries={100}
           row={row}
           shouldShowFieldHandler={() => true}

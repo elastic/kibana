@@ -183,7 +183,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             }}
           >
             <FileDropzone noResults={noResults}>
-              {dataView && dataViewColumns ? (
+              {dataView && dataViewColumns && dataSource ? (
                 <DataGridLazy
                   {...props}
                   dataView={dataView}

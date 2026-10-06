@@ -270,7 +270,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     );
     return (
       <UnifiedDataTable
-        isPlainRecord
         dataView={dataView}
         showTimeCol={showTimeCol}
         services={services}

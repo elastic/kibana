@@ -48,7 +48,6 @@ const renderCell = (
     onFilter,
     hideFilteringOnComputedColumns,
     dataSource,
-    isPlainRecord,
   }: {
     shouldShowFieldHandler?: (fieldName: string) => boolean;
     inTableSearch?: { term: string; isCounting: boolean };
@@ -57,7 +56,6 @@ const renderCell = (
     onFilter?: DocViewFilterFn;
     hideFilteringOnComputedColumns?: boolean;
     dataSource?: DataSource;
-    isPlainRecord?: boolean;
   } = {}
 ) => {
   let cell = (
@@ -90,7 +88,7 @@ const renderCell = (
           dataView: dataViewMock,
           onFilter,
           hideFilteringOnComputedColumns,
-          isPlainRecord,
+          dataSource,
         }}
       >
         {cell}
@@ -205,7 +203,11 @@ describe('SourceDocumentJsonMode', () => {
       const onFilter = jest.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
-        { onFilter, isPlainRecord: true, jsonModeSettings: { defaultRenderedNodes: 0 } }
+        {
+          onFilter,
+          dataSource: createMockEsqlSource(),
+          jsonModeSettings: { defaultRenderedNodes: 0 },
+        }
       );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));

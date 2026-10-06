@@ -14,15 +14,14 @@ export function canPrependTimeFieldColumn(
   columns: string[] | undefined,
   timeFieldName: string | undefined,
   dataSource: DataSource | undefined,
-  showTimeCol: boolean, // based on Advanced Settings `doc_table:hideTimeColumn`
-  isESQLMode: boolean
+  showTimeCol: boolean // based on Advanced Settings `doc_table:hideTimeColumn`
 ) {
   if (!showTimeCol || !timeFieldName) {
     return false;
   }
 
-  if (isESQLMode) {
-    return !!columns && dataSource?.kind === 'esql' && Boolean(dataSource.getColumn(timeFieldName));
+  if (dataSource?.kind === 'esql') {
+    return !!columns && Boolean(dataSource.getColumn(timeFieldName));
   }
 
   return true;
