@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type {
+  AlertsTableProps,
   BulkActionsConfig,
   ContentPanelConfig,
   RenderContentPanelProps,
@@ -18,7 +17,6 @@ import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strate
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import { useCaseAttachmentWorkflowRouting } from '@kbn/cases-plugin/public';
 import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux-v7';
 import * as i18n from '../../components/alerts_table/translations';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import {
@@ -39,15 +37,9 @@ import {
 import type { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useSignalIndexName } from '../../../data_view_manager/hooks/use_signal_index_name';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { combineQueries } from '../../../common/lib/kuery';
-import { useKibana } from '../../../common/lib/kibana';
-import { globalFiltersQuerySelector } from '../../../common/store/inputs/selectors';
 
 /** Distinct from the table's own id so this search does not disturb the table's query state. */
 const RUN_WORKFLOW_SELECTION_QUERY_ID = 'bulk-run-workflow-selection';
-
-const MATCH_ALL_FILTER_QUERY = JSON.stringify({ match_all: {} });
 
 interface BulkAlertWorkflowsPanelProps {
   alertItems: TimelineItem[];
@@ -83,10 +75,12 @@ const BulkAlertWorkflowsPanel = ({
 };
 
 export interface UseBulkRunAlertWorkflowPanelProps {
-  /** Filters derived from the alerts table query, as passed to the other bulk action hooks. */
-  localFilters: Filter[];
-  from: string;
-  to: string;
+  /**
+   * The query the alerts table runs, including its time range and filters, or the query a host
+   * such as a case supplies instead. A "select all" resolves with exactly this query, so it
+   * matches the alerts the table counted.
+   */
+  tableQuery: AlertsTableProps['query'];
   scopeId: PageScope;
   tableId: TableId;
 }
@@ -99,9 +93,7 @@ export interface UseBulkRunAlertWorkflowPanelResult {
 export const BULK_RUN_ALERT_WORKFLOW_ACTION_ID = 'bulk-run-alert-workflow';
 
 export const useBulkRunAlertWorkflowPanel = ({
-  localFilters,
-  from,
-  to,
+  tableQuery,
   scopeId,
   tableId,
 }: UseBulkRunAlertWorkflowPanelProps): UseBulkRunAlertWorkflowPanelResult => {
@@ -115,9 +107,7 @@ export const useBulkRunAlertWorkflowPanel = ({
     [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow, caseRouting]
   );
 
-  const { uiSettings } = useKibana().services;
   const { dataView } = useDataView(scopeId);
-  const browserFields = useBrowserFields(dataView);
   // The page's data view also covers raw event indices, which the alerts table never shows. Search
   // the alerts index alone so a "select all" cannot pick up events the table did not count.
   const signalIndexName = useSignalIndexName();
@@ -131,40 +121,18 @@ export const useBulkRunAlertWorkflowPanel = ({
   );
   const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
-  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
-  const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
-  const globalFilters = useSelector(selectGlobalFiltersQuerySelector);
-  const combinedFilters = useMemo(
-    () => [...localFilters, ...globalFilters],
-    [localFilters, globalFilters]
-  );
-
-  const filterQuery = useMemo(() => {
-    const combinedQuery = combineQueries({
-      config: esQueryConfig,
-      dataProviders: [],
-      dataView,
-      filters: combinedFilters,
-      kqlQuery: { query: '', language: 'kuery' },
-      browserFields,
-      kqlMode: 'filter',
-    });
-    // With no filters at all `combineQueries` returns null, and the timeline search does not run
-    // without a filter query. Everything in the time range is still a valid "select all".
-    return combinedQuery?.filterQuery ?? MATCH_ALL_FILTER_QUERY;
-  }, [esQueryConfig, dataView, combinedFilters, browserFields]);
+  // The table query already carries the time range, so the search adds none of its own.
+  const filterQuery = useMemo(() => JSON.stringify(tableQuery), [tableQuery]);
 
   const selectionScope: RunWorkflowSelectionScope = useMemo(
     () => ({
       dataViewId,
       indexNames: alertIndexNames,
       filterQuery,
-      from,
-      to,
       runtimeMappings,
       queryId: `${tableId}-${RUN_WORKFLOW_SELECTION_QUERY_ID}`,
     }),
-    [dataViewId, alertIndexNames, filterQuery, from, to, runtimeMappings, tableId]
+    [dataViewId, alertIndexNames, filterQuery, runtimeMappings, tableId]
   );
 
   const searchAlertIds = useRunWorkflowSelectionSearch(selectionScope);

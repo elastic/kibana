@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { isPlainObject } from 'lodash';
+import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type {
   CaseWorkflowRunOrigin,
   DocumentResponse,
@@ -111,7 +112,8 @@ export const parseSelectedDocumentPairs = (inputs: Record<string, unknown>): Doc
   const { documents, documentIds } = getRecord(inputs.event) ?? {};
   return [
     ...parseIndexedPairs(documents, 'inputs.event.documents', MAX_DOCUMENTS_PER_WORKFLOW_RUN),
-    ...parseIndexedPairs(documentIds, 'inputs.event.documentIds', MAX_DOCUMENTS_PER_WORKFLOW_RUN),
+    // The workflows server expands `documentIds` and enforces this same cap.
+    ...parseIndexedPairs(documentIds, 'inputs.event.documentIds', MAX_RUN_WORKFLOW_DOCS),
   ];
 };
 

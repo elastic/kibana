@@ -47,8 +47,9 @@ export interface RunWorkflowSelectionScope {
   indexNames: string[];
   /** Serialized ES query describing the table's current filters. */
   filterQuery: string | undefined;
-  from: string;
-  to: string;
+  /** Bounds the search to a time range. Omit both when `filterQuery` already does. */
+  from?: string;
+  to?: string;
   runtimeMappings: RunTimeMappings;
   /**
    * Identifies this search. Keep it distinct from the table's own id so resolving a selection

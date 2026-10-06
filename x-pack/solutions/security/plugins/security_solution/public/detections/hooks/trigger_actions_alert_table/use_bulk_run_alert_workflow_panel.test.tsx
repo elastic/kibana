@@ -20,7 +20,6 @@ import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/us
 import * as i18n from '../../components/alerts_table/translations';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useTimelineEventsHandler } from '../../../timelines/containers';
-import { combineQueries } from '../../../common/lib/kuery';
 import type { SelectionIdSearchHandler } from '../../components/alerts_table/timeline_actions/use_run_workflow_selection';
 import {
   NEWEST_FIRST_SORT,
@@ -39,23 +38,25 @@ jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
 jest.mock('../../../data_view_manager/hooks/use_signal_index_name', () => ({
   useSignalIndexName: () => '.alerts-security.alerts-default',
 }));
-jest.mock('../../../data_view_manager/hooks/use_browser_fields', () => ({
-  useBrowserFields: () => ({}),
-}));
-jest.mock('../../../common/lib/kuery', () => ({
-  combineQueries: jest.fn(),
-}));
-
-const combineQueriesMock = combineQueries as jest.MockedFunction<typeof combineQueries>;
 
 const useTimelineEventsHandlerMock = useTimelineEventsHandler as jest.MockedFunction<
   typeof useTimelineEventsHandler
 >;
 
+const tableQuery: UseBulkRunAlertWorkflowPanelProps['tableQuery'] = {
+  bool: {
+    filter: [
+      {
+        range: {
+          '@timestamp': { gte: '2020-07-07T08:20:18.966Z', lte: '2020-07-08T08:20:18.966Z' },
+        },
+      },
+    ],
+  },
+};
+
 const defaultProps: UseBulkRunAlertWorkflowPanelProps = {
-  localFilters: [],
-  from: '2020-07-07T08:20:18.966Z',
-  to: '2020-07-08T08:20:18.966Z',
+  tableQuery,
   scopeId: PageScope.alerts,
   tableId: 'alerts-page' as TableId,
 };
@@ -143,11 +144,6 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
     mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
-    combineQueriesMock.mockReturnValue({
-      filterQuery: '{"bool":{}}',
-      kqlError: undefined,
-      baseKqlQuery: { query: '', language: 'kuery' },
-    });
     mockAlertIdSearch({ events: [], totalCount: 0 });
   });
 
@@ -241,9 +237,10 @@ describe('useBulkRunAlertWorkflowPanel', () => {
 
   describe('panel renderContent', () => {
     const renderPanel = (
-      props: Partial<RenderContentPanelProps> & { alertItems: TimelineItem[] }
+      props: Partial<RenderContentPanelProps> & { alertItems: TimelineItem[] },
+      hookProps: UseBulkRunAlertWorkflowPanelProps = defaultProps
     ) => {
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultProps), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(hookProps), {
         wrapper: TestProviders,
       });
       const renderContent = result.current.runWorkflowPanels[0].renderContent;
@@ -328,13 +325,36 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       );
     });
 
-    it('searches everything in the time range when no filters apply', () => {
-      combineQueriesMock.mockReturnValue(null);
-
+    it('resolves the selection with the table query alone, adding no time range of its own', () => {
       renderPanel({ alertItems: [alertItem('alert-1', 'index-1')], isAllSelected: true });
 
       expect(useTimelineEventsHandlerMock).toHaveBeenCalledWith(
-        expect.objectContaining({ filterQuery: JSON.stringify({ match_all: {} }) })
+        expect.objectContaining({
+          filterQuery: JSON.stringify(tableQuery),
+          startDate: undefined,
+          endDate: undefined,
+        })
+      );
+    });
+
+    // Inside a case the table shows only the case's attached alerts, whatever the global time
+    // range. Resolving with the page query instead would reach alerts outside the case, which
+    // Cases then rejects.
+    it("resolves a case's selection from its attached alert ids", () => {
+      const caseQuery = { ids: { values: ['alert-1', 'alert-2'] } };
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      renderPanel(
+        { alertItems: [alertItem('alert-1', 'index-1')], isAllSelected: true },
+        { ...defaultProps, tableQuery: caseQuery }
+      );
+
+      expect(useTimelineEventsHandlerMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filterQuery: JSON.stringify(caseQuery),
+          startDate: undefined,
+          endDate: undefined,
+        })
       );
     });
 

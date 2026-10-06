@@ -9,6 +9,7 @@ import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { z } from '@kbn/zod/v4';
+import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { getAlertInfoFromComments, getEventInfoFromComments } from '../../common/utils';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import type { WorkflowAttachmentValidationContext } from '../../attachment_framework/types';
@@ -849,7 +850,10 @@ describe('parseSelectedDocumentPairs', () => {
     expect(() =>
       parseSelectedDocumentPairs({ event: { documentIds: [{ _id: 'event-1' }] } })
     ).toThrow('string "_id"');
-    const oversized = Array.from({ length: 1001 }, (_, i) => ({ _id: `e${i}`, _index: '.idx' }));
+    const oversized = Array.from({ length: MAX_RUN_WORKFLOW_DOCS + 1 }, (_, i) => ({
+      _id: `e${i}`,
+      _index: '.idx',
+    }));
     expect(() => parseSelectedDocumentPairs({ event: { documentIds: oversized } })).toThrow(
       /cannot contain more than/
     );
