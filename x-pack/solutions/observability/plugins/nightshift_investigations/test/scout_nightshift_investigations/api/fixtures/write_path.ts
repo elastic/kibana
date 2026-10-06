@@ -6,7 +6,6 @@
  */
 
 import { createServer, type Server } from 'http';
-import type { AddressInfo } from 'net';
 import type { ApiClientFixture, ApiClientResponse, KbnClient } from '@kbn/scout-oblt';
 import { COMMON_HEADERS } from './constants';
 
@@ -159,43 +158,26 @@ export const findOrCreateSlackThread = (
   });
 
 /**
+ * Port of the LLM endpoint the `nightshift_investigations` Scout config set preconfigures under
+ * Nightshift's default investigation model id. Keep it in sync with that config set.
+ */
+export const NIGHTSHIFT_SCOUT_LLM_PORT = 8095;
+
+/**
  * An LLM endpoint that accepts connections and never answers, so the investigation agent stays
  * on its first model call and the investigation stays in progress without a real LLM.
  */
-export const startUnresponsiveLlm = async (): Promise<{ url: string; close: () => void }> => {
+export const startUnresponsiveLlm = async (): Promise<{ close: () => void }> => {
   const server: Server = createServer(() => {});
-  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const { port } = server.address() as AddressInfo;
+  await new Promise<void>((resolve) =>
+    server.listen(NIGHTSHIFT_SCOUT_LLM_PORT, '127.0.0.1', resolve)
+  );
   return {
-    url: `http://127.0.0.1:${port}/v1/chat/completions`,
     close: () => {
       server.closeAllConnections();
       server.close();
     },
   };
-};
-
-/** Creates the connector investigations resolve for their agent, pointed at `apiUrl`. */
-export const createLlmConnector = async (kbnClient: KbnClient, apiUrl: string): Promise<string> => {
-  const { data } = await kbnClient.request<{ id: string }>({
-    method: 'POST',
-    path: '/api/actions/connector',
-    body: {
-      name: 'Nightshift Scout unresponsive LLM',
-      connector_type_id: '.gen-ai',
-      config: { apiProvider: 'OpenAI', apiUrl, defaultModel: 'gpt-4o' },
-      secrets: { apiKey: 'scout' },
-    },
-  });
-  return data.id;
-};
-
-export const deleteConnector = async (kbnClient: KbnClient, id: string): Promise<void> => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `/api/actions/connector/${id}`,
-    ignoreErrors: [404],
-  });
 };
 
 /** Cancels every run of a workflow, by default the investigation workflow. */
