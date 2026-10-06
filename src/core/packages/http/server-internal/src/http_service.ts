@@ -54,6 +54,7 @@ import type {
   GenerateOasArgs,
 } from './types';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
+import { validatePermissionsPolicyConfig } from './security_response_headers_config';
 import type { ExternalUrlConfigType } from './external_url';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import {
@@ -83,6 +84,9 @@ export class HttpService
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
+  private readonly rawPermissionsPolicyInputs$: Observable<
+    [HttpConfigType, PermissionsPolicyConfigType]
+  >;
   private configSubscription?: Subscription;
   private currentConfig?: HttpConfig;
   private selfClient?: InternalHttpSelfService;
@@ -111,14 +115,33 @@ export class HttpService
           new HttpConfig(http, csp, externalUrl, permissionsPolicy)
       )
     );
+    // `server.securityResponseHeaders.permissionsPolicy` and `permissionsPolicy.*` are
+    // separate config paths, so their mutual exclusion cannot be a schema validator and is
+    // checked against the raw values instead.
+    this.rawPermissionsPolicyInputs$ = combineLatest([
+      configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
+      configService.atPath<PermissionsPolicyConfigType>(permissionsPolicyConfig.path),
+    ]);
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
     this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
     this.httpServer = new HttpServer(coreContext, 'Kibana', shutdownTimeout$);
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
+  private async validatePermissionsPolicyConfiguration() {
+    const [rawHttpConfig, rawPermissionsPolicyConfig] = await firstValueFrom(
+      this.rawPermissionsPolicyInputs$
+    );
+    validatePermissionsPolicyConfig(
+      rawHttpConfig.securityResponseHeaders,
+      rawPermissionsPolicyConfig
+    );
+  }
+
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
     this.log.debug('setting up preboot server');
+
+    await this.validatePermissionsPolicyConfiguration();
 
     const config = await firstValueFrom(this.config$);
 
@@ -190,19 +213,29 @@ export class HttpService
 
   public async setup(deps: SetupDeps): Promise<InternalHttpServiceSetup> {
     this.requestHandlerContext = deps.context.createContextContainer();
-    this.configSubscription = this.config$.subscribe((config) => {
-      this.currentConfig = config;
-      if (this.httpServer.isListening()) {
-        // If the server is already running we can't make any config changes
-        // to it, so we warn and don't allow the config to pass through.
-        this.log.warn(
-          'Received new HTTP config after server was started. Config will **not** be applied.'
-        );
-      }
-    });
+
+    await this.validatePermissionsPolicyConfiguration();
 
     const config = await firstValueFrom(this.config$);
     this.currentConfig = config;
+
+    this.configSubscription = this.config$.subscribe({
+      next: (newConfig) => {
+        this.currentConfig = newConfig;
+        if (this.httpServer.isListening()) {
+          // If the server is already running we can't make any config changes
+          // to it, so we warn and don't allow the config to pass through.
+          this.log.warn(
+            'Received new HTTP config after server was started. Config will **not** be applied.'
+          );
+        }
+      },
+      error: (error) => {
+        this.log.error(
+          `Reloaded HTTP configuration is invalid and was not applied: ${error.message}`
+        );
+      },
+    });
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup({
       config$: this.config$,

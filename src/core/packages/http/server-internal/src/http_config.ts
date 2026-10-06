@@ -391,6 +391,39 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
         });
       }
     },
+    (settings, fromPath, addDeprecation) => {
+      const cfg = get(settings, fromPath);
+      // Only fires when the setting is present. A deprecation that fires on default configuration
+      // would break the "one warning by default" assertion in config_deprecation.test.ts.
+      if (cfg?.securityResponseHeaders?.permissionsPolicy !== undefined) {
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.securityResponseHeaders.permissionsPolicy`,
+          title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicy" is deprecated`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" replaces Kibana's entire permissions policy, so later changes to the built-in policy are lost. It is deprecated and will be removed in 10.0.0.`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "${fromPath}.securityResponseHeaders.permissionsPolicy" from your Kibana configuration file.`,
+              `Add only the sources you need to the matching "permissionsPolicy.<directive>" setting, for example "permissionsPolicy.camera: ['self']". These are added to Kibana's built-in policy rather than replacing it.`,
+            ],
+          },
+        });
+      }
+      if (cfg?.securityResponseHeaders?.permissionsPolicyReportOnly !== undefined) {
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly`,
+          title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" is deprecated`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" is deprecated and will be removed in 10.0.0.`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" from your Kibana configuration file.`,
+              `Add the sources you want to report on to the matching "permissionsPolicy.report_only.<directive>" setting, for example "permissionsPolicy.report_only.camera: ['self']".`,
+            ],
+          },
+        });
+      }
+    },
   ],
 };
 

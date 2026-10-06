@@ -103,15 +103,6 @@ groups:
           ech: unavailable
           self: ga
 
-      - setting: permissionsPolicy.report_to
-        description: |
-          Add sources for the [Permissions Policy `report-to` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy).
-        datatype: string
-        applies_to:
-          stack: ga
-          ech: unavailable
-          self: ga
-
       - setting: pid.file
         description: |
           Specifies the path where {{kib}} creates the process ID file.
@@ -336,6 +327,140 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
+
+  - group: Permissions Policy settings
+    id: permissions-policy-settings
+    settings:
+
+      - setting: permissionsPolicy.report_to
+        id: permissionspolicy-report-to
+        description: |
+          The reporting endpoint that [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) violation reports are sent to. The endpoint must also be declared through `server.customResponseHeaders.Reporting-Endpoints`. Browsers use only the first endpoint in the list, because the `report-to` parameter holds a single token. {{kib}} logs a warning if you configure more than one.
+        datatype: array of strings
+        applies_to:
+          - "stack: ga"
+          - "ech: unavailable"
+          - "self: ga"
+
+      - setting: permissionsPolicy.camera
+        id: permissionspolicy-camera
+        description: |
+          Add sources to the [`camera`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/camera) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.display_capture
+        id: permissionspolicy-displaycapture
+        description: |
+          Add sources to the [`display-capture`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/display-capture) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.fullscreen
+        id: permissionspolicy-fullscreen
+        description: |
+          Add sources to the [`fullscreen`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/fullscreen) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.geolocation
+        id: permissionspolicy-geolocation
+        description: |
+          Add sources to the [`geolocation`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/geolocation) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.microphone
+        id: permissionspolicy-microphone
+        description: |
+          Add sources to the [`microphone`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/microphone) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.web_share
+        id: permissionspolicy-webshare
+        description: |
+          Add sources to the [`web-share`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/web-share) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.report_only.camera
+        id: permissionspolicy-report-only-camera
+        description: |
+          Add sources to the `camera` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.report_only.display_capture
+        id: permissionspolicy-report-only-displaycapture
+        description: |
+          Add sources to the `display-capture` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.report_only.fullscreen
+        id: permissionspolicy-report-only-fullscreen
+        description: |
+          Add sources to the `fullscreen` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.report_only.geolocation
+        id: permissionspolicy-report-only-geolocation
+        description: |
+          Add sources to the `geolocation` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.report_only.microphone
+        id: permissionspolicy-report-only-microphone
+        description: |
+          Add sources to the `microphone` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
+
+      - setting: permissionsPolicy.report_only.web_share
+        id: permissionspolicy-report-only-webshare
+        description: |
+          Add sources to the `web-share` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+        datatype: array of strings
+        applies_to:
+          - "stack: preview"
+          - "ech: unavailable"
+          - "self: preview"
 
   - group: Elasticsearch connection settings
     id: elasticsearch-connection-settings
@@ -1340,21 +1465,22 @@ groups:
         description: |
           Controls whether the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. To disable, set to `null`.
         datatype: string
-        default: "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()"
         applies_to:
-          - "stack: preview"
+          - "stack: deprecated 9.6"
           - "ech: ga"
           - "self: ga"
+        deprecation_details: "Deprecated in 9.6.0 and removed in 10.0.0. This setting replaces Kibana's entire permissions policy, so later changes to the built-in policy are lost. Use the individual `permissionsPolicy.<directive>` settings instead, which are added to the built-in policy."
 
       - setting: server.securityResponseHeaders.permissionsPolicyReportOnly
         id: server-securityresponseheaders-permissionspolicyreportonly
         description: |
-          Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format.
+          Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. This header is only sent when `permissionsPolicy.report_to` is set.
         datatype: string
         applies_to:
-          - "stack: preview"
+          - "stack: deprecated 9.6"
           - "ech: ga"
           - "self: ga"
+        deprecation_details: "Deprecated in 9.6.0 and removed in 10.0.0. Use the individual `permissionsPolicy.report_only.<directive>` settings instead."
 
       - setting: server.securityResponseHeaders.disableEmbedding
         id: server-securityresponseheaders-disableembedding
