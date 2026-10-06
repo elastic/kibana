@@ -1,5 +1,5 @@
 {
-  "sha1": "0a4b0dbff0d73a32baba45aa7ca400936457fc9f",
+  "sha1": "c64ddd377d09f33295fa32bc4c00ddb233886c5f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_create_csv_dataset_wizard.spec.ts",
-        "line": 104,
+        "line": 120,
         "column": 28
       }
     },
@@ -58,6 +58,34 @@
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_datasets_crud.spec.ts",
         "line": 33,
         "column": 15
+      }
+    },
+    {
+      "id": "eaef1e5949ac83f-e443c3c74d87594",
+      "title": "ES|QL Data Federation — dataset Discover link opens the dataset in Discover with an ES|QL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_datasets_discover_link.spec.ts",
+        "line": 48,
+        "column": 57
+      }
+    },
+    {
+      "id": "eaef1e5949ac83f-162787ed3a84250",
+      "title": "ES|QL Data Federation — dataset Discover link hides the Discover action without Discover access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_datasets_discover_link.spec.ts",
+        "line": 60,
+        "column": 25
       }
     },
     {

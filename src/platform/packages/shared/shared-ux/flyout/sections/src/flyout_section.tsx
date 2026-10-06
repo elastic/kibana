@@ -44,7 +44,7 @@ export const FlyoutSection = ({
   hasBorder = false,
   borderOnChildren = false,
   children,
-  'data-test-subj': dataTestSubj,
+  ...sectionProps
 }: FlyoutSectionProps) => {
   const styles = useEuiMemoizedStyles(getSectionStyles);
   const sectionId = useGeneratedHtmlId({ conditionalId: id, prefix: 'flyoutSection' });
@@ -73,6 +73,7 @@ export const FlyoutSection = ({
 
   return (
     <section
+      {...sectionProps}
       id={sectionId}
       // An unnamed `section` is not exposed to assistive tech at all; naming it by its own
       // heading makes it a navigable region.
@@ -82,7 +83,8 @@ export const FlyoutSection = ({
       // Read by the divider rule above on the *following* sibling, so it must stay set even when
       // the panel itself lives on the children.
       data-bordered={hasBorder || undefined}
-      data-test-subj={dataTestSubj}
+      // Only accordions are ever open. Clearing it keeps a forwarded `data-open` out of the rule.
+      data-open={undefined}
     >
       {header}
       <EuiSpacer size="s" />

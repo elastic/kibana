@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/significant-events-plugin",
-  "owner": "@elastic/nightshift-sre-agent-team",
+  "owner": "@elastic/nightshift",
   "description": "Significant Events",
   "group": "observability",
   "visibility": "private",
@@ -28,7 +28,6 @@
       "cps",
       "nightshiftInvestigations",
       "serverless",
-      "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",
       "workflowsManagement",

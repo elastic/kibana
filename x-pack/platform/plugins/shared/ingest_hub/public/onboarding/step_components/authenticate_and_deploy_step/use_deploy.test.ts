@@ -719,6 +719,7 @@ function setupMocks({
   instances = undefined as
     | Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>
     | undefined,
+  serviceVars = {} as Record<string, unknown>,
 }: {
   selectedServiceIds?: string[];
   connectorId?: string;
@@ -730,6 +731,7 @@ function setupMocks({
   /** What getLatestFailedInstances answers: failures from earlier runs still outstanding. */
   latestFailedInstances?: string[];
   instances?: Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>;
+  serviceVars?: Record<string, unknown>;
 } = {}) {
   mockUseHistory.mockReturnValue({ location: { search: '', hash: '' }, replace: jest.fn() });
   mockUseParams.mockReturnValue({ integrationId: 'aws' });
@@ -754,7 +756,7 @@ function setupMocks({
     getLatestFailedInstances: jest.fn().mockReturnValue(latestFailedInstances),
   });
 
-  mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {}, instances }, jest.fn()]);
+  mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars, instances }, jest.fn()]);
   mockSendUpdateCloudConnector.mockResolvedValue({ data: { item: {} }, error: undefined });
   mockSendVerifyCloudConnectorIacKey.mockResolvedValue({ data: {}, error: undefined });
 
@@ -782,11 +784,10 @@ describe('useDeploy', () => {
     mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
   });
 
-  it('initializes with default namespace and idle state', () => {
+  it('initializes in idle state', () => {
     setupMocks();
     const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
-    expect(result.current.namespace).toBe('default');
     expect(result.current.isDeploying).toBe(false);
     expect(result.current.failedInstances).toEqual([]);
   });
@@ -982,6 +983,65 @@ describe('useDeploy', () => {
     const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
     expect(submittedInputs['ec2-aws-s3']?.enabled).not.toBe(true);
     expect(submittedInputs['lambda-aws/metrics'].enabled).toBe(true);
+  });
+
+  it('sends the instance namespace on the agentless policy', async () => {
+    setupMocks({
+      selectedServiceIds: ['ec2'],
+      serviceVars: {
+        ec2: { enabledDataStreams: ['ec2'], varsByDataStream: {}, namespace: 'prod' },
+      },
+    });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
+    expect(mockSendCreateAgentlessPolicy.mock.calls[0][0].namespace).toBe('prod');
+  });
+
+  it.each([
+    ['prod.eu', 'prod_eu'],
+    ['prod(}', 'prod)^'],
+  ])(
+    'gives distinct agentless policy names to namespaces %s and %s, which sanitize to the same string',
+    async (ec2Namespace, lambdaNamespace) => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1);
+      setupMocks({
+        selectedServiceIds: ['ec2', 'lambda'],
+        serviceVars: {
+          ec2: { enabledDataStreams: ['ec2'], varsByDataStream: {}, namespace: ec2Namespace },
+          lambda: {
+            enabledDataStreams: ['lambda'],
+            varsByDataStream: {},
+            namespace: lambdaNamespace,
+          },
+        },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      const names = mockSendCreateAgentlessPolicy.mock.calls.map(([body]) => body.name);
+      expect(names).toHaveLength(2);
+      expect(new Set(names).size).toBe(2);
+      nowSpy.mockRestore();
+    }
+  );
+
+  it('falls back to the default namespace on the agentless policy when none is set', async () => {
+    setupMocks({ selectedServiceIds: ['ec2'] });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockSendCreateAgentlessPolicy.mock.calls[0][0].namespace).toBe('default');
   });
 
   it('deploys duplicate instances as separate managed_integration policy calls', async () => {

@@ -15,16 +15,6 @@ import { DescribedOptionDisplay } from '../../components/described_option_displa
 export const SUPPORTED_DATASET_FORMATS = ['csv', 'tsv', 'ndjson', 'parquet'] as const;
 export type SupportedDatasetFormat = (typeof SUPPORTED_DATASET_FORMATS)[number];
 
-const formatOptionDisplay = ({
-  title,
-  description,
-  testSubj,
-}: {
-  title: string;
-  description: string;
-  testSubj: string;
-}) => <DescribedOptionDisplay title={title} description={description} testSubj={testSubj} />;
-
 const formatOptionSelectedDisplay = ({
   title,
   testSubj,
@@ -47,47 +37,37 @@ const formatOptionSelectedDisplay = ({
   </div>
 );
 
-const FORMAT_OPTION_DEFS: Array<{
-  value: DatasetFormatFormValue;
-  title: string;
-  description: string;
-}> = [
-  {
-    value: 'csv',
+const FORMAT_LABELS: Record<SupportedDatasetFormat, { title: string; description: string }> = {
+  csv: {
     title: createDatasetWizardStrings.settingsFormatCsv,
     description: createDatasetWizardStrings.settingsFormatCsvDescription,
   },
-  {
-    value: 'tsv',
+  tsv: {
     title: createDatasetWizardStrings.settingsFormatTsv,
     description: createDatasetWizardStrings.settingsFormatTsvDescription,
   },
-  {
-    value: 'ndjson',
+  ndjson: {
     title: createDatasetWizardStrings.settingsFormatNdjson,
     description: createDatasetWizardStrings.settingsFormatNdjsonDescription,
   },
-  {
-    value: 'parquet',
+  parquet: {
     title: createDatasetWizardStrings.settingsFormatParquet,
     description: createDatasetWizardStrings.settingsFormatParquetDescription,
   },
-  /* ORC is currently disabled but will be supported in the future.
-  {
-    value: 'orc',
-    inputDisplay: formatOptionSelectedDisplay({
-      title: createDatasetWizardStrings.settingsFormatOrc,
-      testSubj: 'createDatasetSettingsFormatInput-orc',
-    }),
-    dropdownDisplay: formatOptionDisplay({
-      title: createDatasetWizardStrings.settingsFormatOrc,
-      description: createDatasetWizardStrings.settingsFormatOrcDescription,
-      testSubj: 'createDatasetSettingsFormatDropdown-orc',
-    }),
-    'data-test-subj': 'createDatasetSettingsFormatOption-orc',
+  /* ORC is currently disabled but will be supported in the future; add 'orc' to
+     SUPPORTED_DATASET_FORMATS along with this entry.
+  orc: {
+    title: createDatasetWizardStrings.settingsFormatOrc,
+    description: createDatasetWizardStrings.settingsFormatOrcDescription,
   },
   */
-];
+};
+
+export const isSupportedDatasetFormat = (value: string): value is SupportedDatasetFormat =>
+  Object.hasOwn(FORMAT_LABELS, value);
+
+export const getFormatDisplayLabel = (value: string): string =>
+  isSupportedDatasetFormat(value) ? FORMAT_LABELS[value].title : value;
 
 export function FormatSelect({
   value,
@@ -102,25 +82,29 @@ export function FormatSelect({
   isInvalid: boolean;
   isAutoDetected?: boolean;
 }) {
-  const options: Array<EuiSuperSelectOption<DatasetFormatFormValue>> = FORMAT_OPTION_DEFS.map(
-    ({ value: optionValue, title, description }) => ({
-      value: optionValue,
-      inputDisplay: formatOptionSelectedDisplay({
-        title,
-        suffix:
-          isAutoDetected && optionValue === value
-            ? createDatasetWizardStrings.autoDetectedSuffix
-            : undefined,
-        testSubj: `createDatasetSettingsFormatInput-${optionValue}`,
-      }),
-      dropdownDisplay: formatOptionDisplay({
-        title,
-        description,
-        testSubj: `createDatasetSettingsFormatDropdown-${optionValue}`,
-      }),
-      'data-test-subj': `createDatasetSettingsFormatOption-${optionValue}`,
-    })
-  );
+  const options: Array<EuiSuperSelectOption<DatasetFormatFormValue>> =
+    SUPPORTED_DATASET_FORMATS.map((optionValue) => {
+      const { title, description } = FORMAT_LABELS[optionValue];
+      return {
+        value: optionValue,
+        inputDisplay: formatOptionSelectedDisplay({
+          title,
+          suffix:
+            isAutoDetected && optionValue === value
+              ? createDatasetWizardStrings.autoDetectedSuffix
+              : undefined,
+          testSubj: `createDatasetSettingsFormatInput-${optionValue}`,
+        }),
+        dropdownDisplay: (
+          <DescribedOptionDisplay
+            title={title}
+            description={description}
+            testSubj={`createDatasetSettingsFormatDropdown-${optionValue}`}
+          />
+        ),
+        'data-test-subj': `createDatasetSettingsFormatOption-${optionValue}`,
+      };
+    });
 
   return (
     <EuiSuperSelect

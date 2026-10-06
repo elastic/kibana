@@ -38,6 +38,11 @@ export interface ResolveLocaleArgs {
    * written to the response. Controlled by `i18n.allowLocaleCookie`.
    */
   allowLocaleCookie: boolean;
+  /**
+   * When false, the Accept-Language step is skipped. The browser preference is
+   * still computed for telemetry. Controlled by `i18n.detectBrowserLocale`.
+   */
+  detectBrowserLocale: boolean;
 }
 
 export interface ResolveLocaleResult {
@@ -63,7 +68,7 @@ export interface ResolveLocaleResult {
  *   1. User profile setting (when value is in `translationHashes`)
  *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
  *   3. Explicitly-configured `configLocale` (any `i18n.defaultLocale` other than the built-in `en`)
- *   4. Accept-Language header (exact match against `configuredLocales`, else language-level (region-optional) fallback)
+ *   4. Accept-Language header (only when `detectBrowserLocale` is `true`; exact match against `configuredLocales`, else language-level (region-optional) fallback)
  *   5. `configLocale` (the built-in `en` default)
  */
 export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
@@ -75,6 +80,7 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     translationHashes,
     serverBasePath,
     allowLocaleCookie,
+    detectBrowserLocale,
   } = args;
 
   // Computed for every render so telemetry sees the browser preference even when
@@ -108,7 +114,7 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     return resolved(configLocale, 'config');
   }
 
-  if (browserPreferredLocale) {
+  if (detectBrowserLocale && browserPreferredLocale) {
     return resolved(browserPreferredLocale, 'browser');
   }
 
