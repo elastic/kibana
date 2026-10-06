@@ -943,6 +943,7 @@
     "ai.attachmentDeleted",
     "ai.attachmentUpdated",
     "ai.conversation.metadataUpdated",
+    "ai.conversation.updated",
     "alert",
     "alerting.actions.alertAcked",
     "alerting.actions.alertActivated",
@@ -989,11 +990,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "e89577ea9d499e4a688c8ee15b6651d63ef0c6e8bfbd72f7bbcd85fee44c5f15"
+      "sha256": "d30f0ad7a76a1a20cc1e08e6d55bce5146735ada9e4fa4f8ff908de211eef23b"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "bf7f9ec56ad9cb7b2b6c49a51ae68388e3253d8ba4f650d4d66ea783cb44f2d1"
+      "sha256": "1ff8a720d32722ea8252b50389db362420e69342508196b68ab57ebeb64ec203"
     }
   }
 }

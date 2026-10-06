@@ -211,6 +211,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     const request = await this.backend.createFakeRequest({
       serviceAccountId: binding.serviceAccountId,
       spaceId: coordinates.spaceId,
+      boundAt: binding.boundAt,
       // No time-based lease: the binding check below runs before every re-mint, which is both
       // stricter and revocable — unbinding the workload denies a running execution its next
       // credential rather than waiting for a lease to lapse.
