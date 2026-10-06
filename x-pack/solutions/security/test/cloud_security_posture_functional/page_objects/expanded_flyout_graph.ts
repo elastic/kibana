@@ -48,6 +48,12 @@ const {
 
 type Filter = Parameters<FilterBarService['addFilter']>[0];
 
+/**
+ * Implicit wait for toolbar lookups. Callers poll via `retry.try`, so a miss should return
+ * immediately rather than hold the session open for the default find timeout.
+ */
+const TOOLBAR_FIND_TIMEOUT = 1000;
+
 export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrProviderContext> {
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -102,7 +108,6 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
       `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
     );
     expect(nodes.length).to.be(1);
-    await nodes[0].moveMouseTo();
     return nodes[0];
   }
 
@@ -127,30 +132,29 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   /**
-   * Finds a button inside the toolbar that belongs to a specific node.
+   * Finds toolbar buttons belonging to a specific node, matching any of the given test subjects.
    *
    * Label nodes render their toolbar via a ReactFlow NodeToolbar portal
    * (`.react-flow__node-toolbar[data-id="..."]`).
    * Entity nodes render their toolbar as an absolutely-positioned div inside the node element
    * (`.react-flow__node[data-id="..."]`) — no portal is used.
    *
-   * We try the portal first; if it doesn't exist we fall back to the node element so that
-   * both node types are handled without needing to know which type is being targeted.
+   * Both containers are matched in a single `findAll` rather than probing the portal first and
+   * falling back: a miss on `findByCssSelector` costs a full find-timeout plus its internal
+   * retries, which an entity node incurs on every call since it never has a portal.
    */
-  private async findNodeToolbarButton(
+  private async findNodeToolbarButtons(
     nodeId: string,
-    itemTestSubject: string
-  ): Promise<WebElementWrapper> {
+    itemTestSubjects: string[]
+  ): Promise<WebElementWrapper[]> {
     const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
-    let container: WebElementWrapper;
-    try {
-      // Label nodes: toolbar lives in the ReactFlow NodeToolbar portal
-      container = await graph.findByCssSelector(`.react-flow__node-toolbar[data-id="${nodeId}"]`);
-    } catch {
-      // Entity nodes: toolbar lives inside the node element itself
-      container = await graph.findByCssSelector(`.react-flow__node[data-id="${nodeId}"]`);
-    }
-    return container.findByCssSelector(`[data-test-subj="${itemTestSubject}"]`);
+    const selector = itemTestSubjects
+      .flatMap((itemTestSubject) => [
+        `.react-flow__node-toolbar[data-id="${nodeId}"] [data-test-subj="${itemTestSubject}"]`,
+        `.react-flow__node[data-id="${nodeId}"] [data-test-subj="${itemTestSubject}"]`,
+      ])
+      .join(', ');
+    return graph.findAllByCssSelector(selector, TOOLBAR_FIND_TIMEOUT);
   }
 
   /**
@@ -179,8 +183,9 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async clickOnNodeToolbarItem(nodeId: string, itemTestSubject: string): Promise<void> {
     await this.retry.try(async () => {
       await this.waitGraphIsLoaded();
-      const button = await this.findNodeToolbarButton(nodeId, itemTestSubject);
-      await this.clickToolbarButton(button, `"${itemTestSubject}" on node "${nodeId}"`);
+      const buttons = await this.findNodeToolbarButtons(nodeId, [itemTestSubject]);
+      expect(buttons.length).to.be(1);
+      await this.clickToolbarButton(buttons[0], `"${itemTestSubject}" on node "${nodeId}"`);
     });
   }
 
@@ -197,18 +202,11 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async showEntityDetails(nodeId: string): Promise<void> {
     await this.retry.try(async () => {
       await this.waitGraphIsLoaded();
-      const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
-      // Label nodes use the NodeToolbar portal; entity nodes use the in-node toolbar div.
-      let container: WebElementWrapper;
-      try {
-        container = await graph.findByCssSelector(`.react-flow__node-toolbar[data-id="${nodeId}"]`);
-      } catch {
-        container = await graph.findByCssSelector(`.react-flow__node[data-id="${nodeId}"]`);
-      }
       // Some nodes show individual entity details; grouped nodes show a grouped-entities variant
-      const buttons = await container.findAllByCssSelector(
-        `[data-test-subj="${GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID}"], [data-test-subj="${GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID}"]`
-      );
+      const buttons = await this.findNodeToolbarButtons(nodeId, [
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
+      ]);
       expect(buttons.length).to.be(1);
       await this.clickToolbarButton(buttons[0], `entity details on node "${nodeId}"`);
     });
