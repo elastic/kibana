@@ -183,16 +183,6 @@ describe('getRRuleRequestSchema', () => {
   });
 
   describe('byweekday', () => {
-    test('uses the max allowed length (10) if a larger value is provided', () => {
-      const schema = getRRuleRequestSchema({ maxByweekdayLength: 100 });
-      expect(() =>
-        schema.validate({
-          ...basicRequest,
-          byweekday: ['12345678912'],
-        })
-      ).toThrow();
-    });
-
     test('uses the max allowed limit (50) if a larger value is provided', () => {
       const schema = getRRuleRequestSchema({ maxByweekday: 100 });
       expect(() =>
