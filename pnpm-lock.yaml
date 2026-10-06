@@ -438,8 +438,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@elastic/schemas':
-        specifier: 0.7.2
-        version: 0.7.2
+        specifier: 0.10.0
+        version: 0.10.0
       '@elastic/search-ui':
         specifier: 1.24.2
         version: 1.24.2
@@ -11103,8 +11103,8 @@ packages:
   '@elastic/request-crypto@2.0.4':
     resolution: {integrity: sha512-15BH4l6BhHG73WEbeNLghEtAxI/zezFFdiOCx5ubsdxfuXh8tFV2XaRYkWgieTGAXCML9GSlztt1Ewf8WxsoPw==}
 
-  '@elastic/schemas@0.7.2':
-    resolution: {integrity: sha512-n82fOdrTWPny0mXJSAU5yVbxng8P66DCXsjlzUjk43Vl0JucgVXzUhKAs072YNi22HIp5wOR6xaDowzrse87SA==}
+  '@elastic/schemas@0.10.0':
+    resolution: {integrity: sha512-NBQJNDJ5rRvLOApi2Hjb75uns0cUsN6QdnVWs5X/a77OoK5soDIR7CpwzFlNsNwwttM+/NODgqyl3A005B0Fng==}
     engines: {node: '>=20'}
 
   '@elastic/search-ui-app-search-connector@1.24.1':
@@ -28090,7 +28090,7 @@ snapshots:
       '@types/node-jose': 1.1.10
       node-jose: 2.2.0
 
-  '@elastic/schemas@0.7.2':
+  '@elastic/schemas@0.10.0':
     optionalDependencies:
       zod: 4.4.3
 
