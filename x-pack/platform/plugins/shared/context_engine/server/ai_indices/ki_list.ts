@@ -59,7 +59,7 @@ const probeQuery = (expression: string): string =>
   `FROM ${JSON.stringify(expression)} METADATA _id, _index\n| LIMIT 0`;
 
 /** The mapped columns of one index expression, or undefined when it resolves to nothing. */
-const probeColumns = async (
+export const probeColumns = async (
   esClient: ElasticsearchClient,
   expression: string
 ): Promise<string[] | undefined> => {
