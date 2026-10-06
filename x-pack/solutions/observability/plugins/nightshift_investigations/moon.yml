@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/std'
   - '@kbn/workflows'
+  - '@kbn/workflows-execution-engine'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
@@ -74,6 +75,7 @@ fileGroups:
     - common/**/*
     - server/**/*
     - public/**/*
+    - integration_tests/**/*
     - test/scout*/**/*
     - '!target/**/*'
   jest-config:

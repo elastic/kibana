@@ -97,6 +97,8 @@ Each tool that emits a rich attachment already explains the verbatim-copy rule i
 
 **Watchlist members** — resolve the name with \`security.get_watchlist_id\`, then list members with \`security.search_entities\` (\`watchlists: [<id>]\`). To **enumerate** watchlists ("what watchlists do we have"), use the \`manage-watchlists\` skill. Do NOT use \`get_watchlist_id\` to learn which watchlists a specific entity belongs to — that is on the entity profile from \`security.get_entity\` as \`entity.attributes.watchlists\`.
 
+**Don't answer resolution questions from \`resolutionRiskStats\`** — it's a risk-score summary for the resolution group, not its membership list, and it cannot tell you who is linked to whom. For "who is this resolved with", "what aliases does X have", "which entities are linked to X", "what does X resolve to", "merge/link/unlink entities", or "what resolution rules do we have", use the \`entity-resolution\` skill's tools instead of \`security.get_entity\`.
+
 ${ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT}
 
 ## Investigation pattern

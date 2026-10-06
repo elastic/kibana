@@ -36,7 +36,9 @@ import {
   isLifecycleConfigAllowedForKind,
   isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
+  isRoutingTagsAllowedForKind,
   REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
@@ -151,7 +153,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data` and `state_transition` settings."
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data`,  `state_transition`, and `routing_tags`."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
@@ -173,7 +175,7 @@ export const setRecoveryOperationSchema = z
     operation: z.literal('set_recovery'),
     recovery: recoverySchema,
   })
-  .describe('Use `set_recovery` to control how alert episodes recover. Requires `kind: alert`.');
+  .describe('Use `set_recovery` to control how alerts recover. Requires `kind: alert`.');
 
 export const setNoDataOperationSchema = z
   .object({
@@ -189,7 +191,7 @@ export const setGroupingOperationSchema = groupingSchema
     operation: z.literal('set_grouping'),
   })
   .describe(
-    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own episode instead of one combined alert.'
+    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own alert instead of one combined alert.'
   );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema
@@ -359,17 +361,25 @@ export const executeRuleOperations = async (
             name: mergedName,
             ...(op.description !== undefined ? { description: op.description } : {}),
             ...(op.tags !== undefined ? { tags: op.tags } : {}),
+            ...(op.routing_tags !== undefined ? { routing_tags: op.routing_tags } : {}),
           },
         };
         break;
       }
 
       case 'set_kind':
-        // An alert draft always carries the alert-only fields and no operation
-        // can remove them, so converting to a signal has to clear them here.
+        /*
+         * No operation can remove the alert-only fields once set, so converting
+         * to a signal has to clear them here.
+         */
         next =
           op.kind === 'signal'
-            ? omit({ ...next, kind: op.kind }, ['recovery', 'no_data', 'state_transition'])
+            ? omit({ ...next, kind: op.kind }, [
+                'recovery',
+                'no_data',
+                'state_transition',
+                'metadata.routing_tags',
+              ])
             : { ...next, kind: op.kind };
         break;
 
@@ -567,6 +577,10 @@ export const executeRuleOperations = async (
 
   if (!isLifecycleConfigAllowedForKind(next)) {
     throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
+  }
+
+  if (!isRoutingTagsAllowedForKind(next)) {
+    throw new RuleOperationValidationError(ROUTING_TAGS_SIGNAL_RULE_MESSAGE);
   }
 
   // `set_query` replaces the query and `set_recovery` replaces the strategy, so

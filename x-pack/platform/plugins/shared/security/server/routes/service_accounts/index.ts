@@ -6,12 +6,16 @@
  */
 
 import { defineCreateServiceAccountRoute } from './create';
+import { defineDeleteServiceAccountRoute } from './delete';
 import { defineGetServiceAccountRoute } from './get';
 import { defineListServiceAccountsRoute } from './list';
+import { defineListServiceAccountWorkloadsRoute } from './list_workloads';
 import type { RouteDefinitionParams } from '..';
 
 export function defineServiceAccountsRoutes(params: RouteDefinitionParams) {
   defineCreateServiceAccountRoute(params);
   defineListServiceAccountsRoute(params);
   defineGetServiceAccountRoute(params);
+  defineDeleteServiceAccountRoute(params);
+  defineListServiceAccountWorkloadsRoute(params);
 }
