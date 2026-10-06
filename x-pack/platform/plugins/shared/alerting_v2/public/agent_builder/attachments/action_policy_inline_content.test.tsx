@@ -20,7 +20,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     name: 'My Policy',
     description: 'A test policy',
     destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
-    matcher: { expression: 'episode_status: "active"' },
+    matcher: { expression: 'alert_status: "active"' },
     groupingMode: 'per_alert' as const,
     throttle: { strategy: 'on_status_change' as const },
     enabled: overrides.enabled,
@@ -55,7 +55,7 @@ describe('ActionPolicyInlineContent', () => {
 
   it('renders the matcher summary', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText(/expr:\s*episode_status:\s*"active"/)).toBeDefined();
+    expect(screen.getByText(/expr:\s*alert_status:\s*"active"/)).toBeDefined();
   });
 
   it('renders "matches all" when matcher is null', () => {
