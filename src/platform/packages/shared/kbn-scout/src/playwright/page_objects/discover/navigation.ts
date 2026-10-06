@@ -93,7 +93,7 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
 
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
-    await this.codeEditor.setCodeEditorValue(query);
+    await this.esqlEditor.setQuery(query);
     await this.submitQueryAndWait();
   }
 
@@ -122,9 +122,9 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
     await this.appMenu.clickItem(testId);
   }
 
-  /** Returns the current value of the ES|QL editor (nth Monaco instance, default 0). */
-  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
-    return this.codeEditor.getCodeEditorValue(nthIndex);
+  /** Returns the current value of the ES|QL editor. */
+  async getEsqlQueryValue(): Promise<string> {
+    return this.esqlEditor.getQuery();
   }
 
   /** Returns true when the doc viewer flyout is visible. */
