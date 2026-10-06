@@ -26,7 +26,7 @@ export const DataRetention = ({ metadata }: DataRetentionProps) => {
         {i18n.translate(
           'xpack.searchInferenceEndpoints.modelDetailFlyout.zeroDataRetentionBadgeLabel',
           {
-            defaultMessage: 'Zero Data Retention',
+            defaultMessage: 'Zero data retention',
           }
         )}
       </EuiBadge>
