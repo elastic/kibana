@@ -30,6 +30,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - src/report/release_note.json
     - '!target/**/*'
   jest-config:
     - jest.config.js
