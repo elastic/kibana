@@ -97,38 +97,44 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
       return null;
     }, [action, agentId, dataTestSubj, textSize]);
 
-    return wasSuccessful ? (
-      <>
-        {showFile && (
-          <EuiFlexItem>
-            <ResponseActionFileDownloadLink
-              action={action}
-              canAccessFileDownloadLink={
-                (action.agentType === 'sentinel_one' ||
-                  action.agentType === 'microsoft_defender_endpoint' ||
-                  action.agentType === 'endpoint') &&
-                canWriteExecuteOperations
-              }
-              data-test-subj={`${dataTestSubj}-download`}
-              agentId={agentId}
-              textSize={textSize}
-              showPasscode={action.agentType === 'sentinel_one' || action.agentType === 'endpoint'}
-            />
-          </EuiFlexItem>
-        )}
-        {executionOutput && (
+    return (
+      <div data-test-subj={dataTestSubj}>
+        {wasSuccessful ? (
           <>
-            <EuiSpacer size="l" />
-            {executionOutput}
+            {showFile && (
+              <EuiFlexItem>
+                <ResponseActionFileDownloadLink
+                  action={action}
+                  canAccessFileDownloadLink={
+                    (action.agentType === 'sentinel_one' ||
+                      action.agentType === 'microsoft_defender_endpoint' ||
+                      action.agentType === 'endpoint') &&
+                    canWriteExecuteOperations
+                  }
+                  data-test-subj={`${dataTestSubj}-download`}
+                  agentId={agentId}
+                  textSize={textSize}
+                  showPasscode={
+                    action.agentType === 'sentinel_one' || action.agentType === 'endpoint'
+                  }
+                />
+              </EuiFlexItem>
+            )}
+            {executionOutput && (
+              <>
+                <EuiSpacer size="l" />
+                {executionOutput}
+              </>
+            )}
           </>
+        ) : (
+          <EndpointActionFailureMessage
+            action={action}
+            agentId={agentId}
+            data-test-subj={`${dataTestSubj}-outputFailureMessage`}
+          />
         )}
-      </>
-    ) : (
-      <EndpointActionFailureMessage
-        action={action}
-        agentId={agentId}
-        data-test-subj={`${dataTestSubj}-outputFailureMessage`}
-      />
+      </div>
     );
   }
 );
