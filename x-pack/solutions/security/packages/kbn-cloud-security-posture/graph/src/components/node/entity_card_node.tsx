@@ -41,6 +41,7 @@ import { getSpanIcon } from './get_span_icon';
 import { getCountryFlag } from './country_flags/country_codes';
 import { showStackedShape } from '../utils';
 import type { EntityNodeViewModel, NodeProps, NodeToolbarItem } from '../types';
+import { useGraphDisplayOptions } from '../graph/graph_display_options_context';
 
 /** Converts an ISO 3166-1 alpha-2 country code to its flag emoji. */
 const countryCodeToFlag = (code: string): string =>
@@ -575,41 +576,53 @@ const GroupedMetadataPanel = memo<{
   assetCriticality?: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}>(({ ips, countryCodes, sources, assetCriticality, euiTheme, onIpClick }) => (
-  <>
-    {/* Row 1: Asset Criticality | Source */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
-      {assetCriticality?.length ? (
-        <CriticalityDistribution levels={assetCriticality} euiTheme={euiTheme} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+}>(({ ips, countryCodes, sources, assetCriticality, euiTheme, onIpClick }) => {
+  const { entity: opts } = useGraphDisplayOptions();
+  return (
+    <>
+      {/* Asset Criticality — hidden when toggled off */}
+      {opts.assetCriticality && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+          {assetCriticality?.length ? (
+            <CriticalityDistribution levels={assetCriticality} euiTheme={euiTheme} />
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
       )}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
-      {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
-    </MetadataItem>
-
-    {/* Row 2: IP Address | Geolocation */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
-      {ips?.length ? (
-        <IpsCell ips={ips} onIpClick={onIpClick} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+      {/* Data Source — hidden when toggled off */}
+      {opts.dataSource && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
+          {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
+        </MetadataItem>
       )}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
-      {countryCodes?.length ? (
-        <GeoCell countryCodes={countryCodes} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+      {/* IP Address — hidden when toggled off */}
+      {opts.ipAddress && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
+          {ips?.length ? (
+            <IpsCell ips={ips} onIpClick={onIpClick} />
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
       )}
-    </MetadataItem>
-  </>
-));
+      {/* Geolocation — hidden when toggled off */}
+      {opts.geolocation && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
+          {countryCodes?.length ? (
+            <GeoCell countryCodes={countryCodes} />
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
+      )}
+    </>
+  );
+});
 GroupedMetadataPanel.displayName = 'GroupedMetadataPanel';
 
 /** Metadata panel for single-entity nodes (full redesign). */
@@ -621,49 +634,63 @@ const SingleEntityMetadataPanel = memo<{
   assetCriticality?: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}>(({ ips, countryCodes, sources, subType, assetCriticality, euiTheme, onIpClick }) => (
-  <>
-    {/* Row 1: Sub Type | Source */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{SUB_TYPE_LABEL}</MetadataLabel>
-      {subType ? <EuiText size="xs">{subType}</EuiText> : <DashValue euiTheme={euiTheme} />}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
-      {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
-    </MetadataItem>
-
-    {/* Row 2: IP Address | Geolocation */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
-      {ips?.length ? (
-        <IpsCell ips={ips} onIpClick={onIpClick} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+}>(({ ips, countryCodes, sources, subType, assetCriticality, euiTheme, onIpClick }) => {
+  const { entity: opts } = useGraphDisplayOptions();
+  return (
+    <>
+      {/* Sub Type — always visible (no checkbox) */}
+      <MetadataItem euiTheme={euiTheme}>
+        <MetadataLabel>{SUB_TYPE_LABEL}</MetadataLabel>
+        {subType ? <EuiText size="xs">{subType}</EuiText> : <DashValue euiTheme={euiTheme} />}
+      </MetadataItem>
+      {/* Data Source — hidden when toggled off */}
+      {opts.dataSource && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
+          {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
+        </MetadataItem>
       )}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
-      {countryCodes?.length ? (
-        <GeoCell countryCodes={countryCodes} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+      {/* IP Address — hidden when toggled off */}
+      {opts.ipAddress && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
+          {ips?.length ? (
+            <IpsCell ips={ips} onIpClick={onIpClick} />
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
       )}
-    </MetadataItem>
-
-    {/* Row 3: Asset Criticality */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
-      {assetCriticality?.length ? (
-        <EuiHealth color={getCriticalityColor(assetCriticality[0].level, euiTheme)} textSize="xs">
-          {formatCriticalityLevel(assetCriticality[0].level)}
-        </EuiHealth>
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+      {/* Geolocation — hidden when toggled off */}
+      {opts.geolocation && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
+          {countryCodes?.length ? (
+            <GeoCell countryCodes={countryCodes} />
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
       )}
-    </MetadataItem>
-  </>
-));
+      {/* Asset Criticality — hidden when toggled off */}
+      {opts.assetCriticality && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+          {assetCriticality?.length ? (
+            <EuiHealth
+              color={getCriticalityColor(assetCriticality[0].level, euiTheme)}
+              textSize="xs"
+            >
+              {formatCriticalityLevel(assetCriticality[0].level)}
+            </EuiHealth>
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
+      )}
+    </>
+  );
+});
 SingleEntityMetadataPanel.displayName = 'SingleEntityMetadataPanel';
 
 interface RiskBadgeEntry {

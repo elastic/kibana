@@ -29,6 +29,7 @@ import {
 } from '../styles';
 import type { LabelNodeViewModel, NodeProps, NodeToolbarItem } from '../../types';
 import { NodeExpandButton } from '../node_expand_button';
+import { useGraphDisplayOptions } from '../../graph/graph_display_options_context';
 import { GRAPH_LABEL_NODE_ID } from '../../test_ids';
 import { analyzeDocuments } from './analyze_documents';
 import { LabelNodeBadges } from './label_node_badges';
@@ -61,6 +62,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
+  const { event: eventDisplayOpts } = useGraphDisplayOptions();
 
   const text = label ? label : id;
 
@@ -228,8 +230,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
         />
       </LabelNodeContainer>
       <LabelNodeDetails
-        ips={ips}
-        countryCodes={countryCodes}
+        ips={eventDisplayOpts.sourceIpAddress ? ips : undefined}
+        countryCodes={eventDisplayOpts.sourceGeolocation ? countryCodes : undefined}
         onIpClick={ipClickHandler}
         onCountryClick={countryClickHandler}
       />
