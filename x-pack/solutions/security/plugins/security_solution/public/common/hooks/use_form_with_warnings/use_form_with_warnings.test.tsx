@@ -155,8 +155,13 @@ describe('useFormWithWarn', () => {
   });
 
   describe('w/ a newer validation still running', () => {
-    it('waits for it and passes its warnings to the submit handler', async () => {
-      const handleSubmit = jest.fn();
+    const warning = { code: 'warning', message: 'Validation warning' };
+
+    // Submits, then starts a second validation before the first one finishes, which supersedes it.
+    // Returns the resolvers of the pending validations in the order they were started.
+    const submitWithSupersededValidation = async (
+      handleSubmit: FormWithWarningsSubmitHandler
+    ): Promise<Array<(error?: ValidationError) => void>> => {
       const pendingValidations: Array<(error?: ValidationError) => void> = [];
       const asyncValidator = (): Promise<ValidationError | undefined> =>
         new Promise((resolve) => pendingValidations.push(resolve));
@@ -169,21 +174,27 @@ describe('useFormWithWarn', () => {
         />
       );
 
-      // The first validation is started by submitting.
       await submitForm();
       await waitFor(() => expect(pendingValidations).toHaveLength(1));
 
-      // A second validation starts before the first one finishes and supersedes it.
       await typeText('someValue');
       await waitFor(() => expect(pendingValidations).toHaveLength(2));
 
-      const warning = { code: 'warning', message: 'Validation warning' };
+      return pendingValidations;
+    };
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('waits for it and passes its warnings to the submit handler', async () => {
+      const handleSubmit = jest.fn();
+      const pendingValidations = await submitWithSupersededValidation(handleSubmit);
+
       await act(async () => {
         pendingValidations[0](warning);
       });
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 200));
-      });
+      await act(() => new Promise((resolve) => setTimeout(resolve, 200)));
 
       expect(handleSubmit).not.toHaveBeenCalled();
 
@@ -196,6 +207,27 @@ describe('useFormWithWarn', () => {
           errors: [],
           warnings: [expect.objectContaining({ code: 'warning', path: 'testField' })],
         });
+      });
+    });
+
+    it('stops waiting after the time limit when it never settles', async () => {
+      jest.useFakeTimers();
+      const handleSubmit = jest.fn();
+      const pendingValidations = await submitWithSupersededValidation(handleSubmit);
+
+      await act(async () => {
+        pendingValidations[0](warning);
+      });
+
+      // Still waiting shortly before the limit.
+      await act(() => jest.advanceTimersByTimeAsync(9000));
+      expect(handleSubmit).not.toHaveBeenCalled();
+
+      // Past the limit the form is submitted with what is known, instead of blocking forever.
+      await act(() => jest.advanceTimersByTimeAsync(2000));
+      expect(handleSubmit).toHaveBeenCalledWith({ testField: 'someValue' }, true, {
+        errors: [],
+        warnings: [],
       });
     });
   });
