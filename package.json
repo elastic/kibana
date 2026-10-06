@@ -2026,6 +2026,7 @@
     "@rspack/core": "2.1.8",
     "@rspack/plugin-react-refresh": "2.0.2",
     "@stoplight/http-spec": "7.1.0",
+    "@stoplight/prism-http": "5.16.0",
     "@stoplight/types": "14.1.1",
     "@storybook/addon-a11y": "8.6.18",
     "@storybook/addon-actions": "8.6.18",
