@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
@@ -19,7 +20,6 @@ import type {
   EsHitRecord,
 } from '../types';
 import { formatFieldValueReact } from './format_value';
-import type { EsqlColumnLookup } from './esql_column_lookup';
 
 // We use a special type here allowing formattedValue to be undefined because
 // we want to avoid formatting values which will not be shown to users since
@@ -46,7 +46,7 @@ const formattedHitCache = new WeakMap<
  * @param shouldShowFieldHandler
  * @param maxEntries
  * @param fieldFormats
- * @param esqlColumns ES|QL columns of the result, if any
+ * @param esqlSource ES|QL source of the result, if any
  * @param options
  */
 export function formatHitReact(
@@ -55,7 +55,7 @@ export function formatHitReact(
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart,
-  esqlColumns: EsqlColumnLookup | undefined,
+  esqlSource: EsqlSource | undefined,
   options?: FormatHitReactOptions
 ): FormattedHit {
   const skipNullishValues = Boolean(options?.skipNullishValues);
@@ -86,7 +86,7 @@ export function formatHitReact(
     const field = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: key,
-      column: esqlColumns?.getColumn(key),
+      column: esqlSource?.getColumn(key),
     });
     const displayKey = field?.displayName;
     const pairs = highlights[key] ? renderedPairs : otherPairs;
@@ -127,7 +127,7 @@ export function formatHitReact(
     const field = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: key,
-      column: esqlColumns?.getColumn(key),
+      column: esqlSource?.getColumn(key),
     });
     pair[1] = formatFieldValueReact({
       value: flattened[key],

@@ -21,7 +21,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableRecord, EsqlColumnLookup } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
 import type {
@@ -124,7 +125,7 @@ function buildEuiGridColumn({
   columnCellActions,
   cellActionsHandling,
   visibleCellActions,
-  esqlColumns,
+  esqlSource,
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
@@ -152,7 +153,7 @@ function buildEuiGridColumn({
   columnCellActions?: EuiDataGridColumnCellAction[];
   cellActionsHandling: 'replace' | 'append';
   visibleCellActions?: number;
-  esqlColumns?: EsqlColumnLookup;
+  esqlSource?: EsqlSource;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -167,7 +168,7 @@ function buildEuiGridColumn({
   const dataViewField = getDataViewFieldOrCreateFromColumn({
     dataView,
     fieldName: columnName,
-    column: esqlColumns?.getColumn(columnName),
+    column: esqlSource?.getColumn(columnName),
   });
   const editFieldButton =
     editField &&
@@ -243,7 +244,7 @@ function buildEuiGridColumn({
           dataView={dataView}
           columnName={columnName}
           columnDisplayName={columnDisplayName}
-          esqlColumns={esqlColumns}
+          esqlSource={esqlSource}
           showColumnTokens={showColumnTokens}
           headerRowHeight={headerRowHeight}
         />
@@ -325,7 +326,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         headerRowHeight={headerRowHeight}
         columnName={columnName}
-        esqlColumns={esqlColumns}
+        esqlSource={esqlSource}
       />
     );
   }
@@ -374,7 +375,7 @@ export function getEuiGridColumns({
   onFilter,
   editField,
   visibleCellActions,
-  esqlColumns,
+  esqlSource,
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
@@ -403,7 +404,7 @@ export function getEuiGridColumns({
   onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
-  esqlColumns?: EsqlColumnLookup;
+  esqlSource?: EsqlSource;
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -435,7 +436,7 @@ export function getEuiGridColumns({
       onFilter,
       editField,
       visibleCellActions,
-      esqlColumns,
+      esqlSource,
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,

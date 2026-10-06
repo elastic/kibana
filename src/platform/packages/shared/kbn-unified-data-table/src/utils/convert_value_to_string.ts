@@ -12,8 +12,8 @@ import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
-import type { EsqlColumnLookup } from '@kbn/discover-utils';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import type { DocumentsDisplayMode } from '../types';
 import { SOURCE_COLUMN } from './columns';
 import { sourceDocumentToJsonString } from './build_document_tree';
@@ -31,7 +31,7 @@ export const convertValueToString = ({
   columnId,
   dataView,
   fieldFormats,
-  esqlColumns,
+  esqlSource,
   options,
   documentsDisplayMode,
   shouldShowFieldHandler,
@@ -42,7 +42,7 @@ export const convertValueToString = ({
   columnId: string;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
-  esqlColumns: EsqlColumnLookup | undefined;
+  esqlSource: EsqlSource | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
     compatibleWithMarkdown?: boolean; // values as one-liner
@@ -74,7 +74,7 @@ export const convertValueToString = ({
   const field = getDataViewFieldOrCreateFromColumn({
     fieldName: columnId,
     dataView,
-    column: esqlColumns?.getColumn(columnId),
+    column: esqlSource?.getColumn(columnId),
   });
 
   return commonConvertValueToString({

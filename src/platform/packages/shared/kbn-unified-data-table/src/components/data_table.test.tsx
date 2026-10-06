@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type {
   EuiDataGridCellValueElementProps,
@@ -1101,7 +1100,6 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        undefined,
         undefined
       );
     },
@@ -1109,36 +1107,7 @@ describe('UnifiedDataTable', () => {
   );
 
   it(
-    'should pass the deprecated columnsMeta through to renderDocumentView without an ES|QL source',
-    async () => {
-      const { rows } = getProps();
-      const expandedDoc = rows?.[0];
-      const columnsMeta = { testField: { type: 'number' as DatatableColumnType } };
-      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
-        <div data-test-subj="test-document-view">{hit.id}</div>
-      ));
-
-      await renderComponent({
-        ...getProps(),
-        columnsMeta,
-        expandedDoc,
-        renderDocumentView: renderDocumentViewMock,
-        setExpandedDoc: jest.fn(),
-      });
-
-      expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
-        expandedDoc,
-        rows,
-        ['_source'],
-        columnsMeta,
-        undefined
-      );
-    },
-    EXTENDED_JEST_TIMEOUT
-  );
-
-  it(
-    'should give renderDocumentView the ES|QL data source and its columns meta',
+    'should give renderDocumentView the data source',
     async () => {
       const dataSource = await EsqlSource.create({
         query: 'FROM test_i | EVAL testField = 1',
@@ -1153,7 +1122,6 @@ describe('UnifiedDataTable', () => {
       await renderComponent({
         ...getProps(),
         dataSource,
-        columnsMeta: { otherField: { type: 'string' } },
         expandedDoc,
         renderDocumentView: renderDocumentViewMock,
         setExpandedDoc: jest.fn(),
@@ -1163,7 +1131,6 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         rows,
         ['_source'],
-        { testField: { type: 'number', esType: undefined, isComputedColumn: false } },
         dataSource
       );
     },

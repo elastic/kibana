@@ -72,7 +72,7 @@ describe('DataTableColumnHeader', () => {
     renderWithKibanaRenderContext(
       <DataTableColumnHeader
         columnDisplayName="bytesDisplayName"
-        esqlColumns={createMockEsqlSource([
+        esqlSource={createMockEsqlSource([
           { name: 'bytes', type: 'string', esType: 'keyword', source: 'index' },
         ])}
         columnName="bytes"

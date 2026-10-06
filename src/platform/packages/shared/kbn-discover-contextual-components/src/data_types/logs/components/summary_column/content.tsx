@@ -9,10 +9,9 @@
 
 import React, { useMemo, type ReactNode } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { EsqlColumnLookup, ShouldShowFieldInTableHandler } from '@kbn/discover-utils';
+import type { ShouldShowFieldInTableHandler } from '@kbn/discover-utils';
 import {
   formatFieldStringValueWithHighlights,
-  getEsqlColumnLookup,
   getMessageFieldWithFallbacks,
   getLogLevelCoalescedValue,
   getLogLevelColor,
@@ -23,6 +22,7 @@ import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { EsqlSource } from '@kbn/data-source';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -181,7 +181,7 @@ export const Content = ({
   dataSource,
 }: ContentProps) => {
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
-  const esqlColumns = useMemo(() => getEsqlColumnLookup({ dataSource }), [dataSource]);
+  const esqlSource = dataSource?.kind === 'esql' ? dataSource : undefined;
 
   const { euiTheme } = useEuiTheme();
   const isDarkTheme = useKibanaIsDarkMode();
@@ -217,7 +217,7 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
-      esqlColumns={esqlColumns}
+      esqlSource={esqlSource}
     />
   );
 };
@@ -225,7 +225,7 @@ export const Content = ({
 type FormattedSourceDocumentProps = Pick<
   ContentProps,
   'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
-> & { esqlColumns: EsqlColumnLookup | undefined };
+> & { esqlSource: EsqlSource | undefined };
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {
   const formattedRow = useMemo(() => formatJsonDocumentForContent(row), [row]);

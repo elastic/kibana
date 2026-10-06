@@ -34,7 +34,7 @@ describe('copyValueToClipboard', () => {
       fieldFormats: servicesMock.fieldFormats,
       rowIndex,
       columnId,
-      esqlColumns: undefined,
+      esqlSource: undefined,
       options,
     });
 

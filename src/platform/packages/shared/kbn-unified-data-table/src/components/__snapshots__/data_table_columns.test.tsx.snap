@@ -277,7 +277,7 @@ Array [
           "type": "default",
         }
       }
-      esqlColumns={
+      esqlSource={
         Object {
           "datasetKey": "esql:mock::",
           "fields": Array [],
@@ -1084,7 +1084,7 @@ Array [
           "type": "default",
         }
       }
-      esqlColumns={
+      esqlSource={
         Object {
           "datasetKey": "esql:mock::",
           "fields": Array [],
@@ -1298,7 +1298,7 @@ Array [
           "type": "default",
         }
       }
-      esqlColumns={
+      esqlSource={
         Object {
           "datasetKey": "esql:mock::",
           "fields": Array [],
@@ -2685,7 +2685,7 @@ Array [
           "type": "default",
         }
       }
-      esqlColumns={
+      esqlSource={
         Object {
           "datasetKey": "esql:mock::",
           "fields": Array [],
@@ -2898,7 +2898,7 @@ Array [
           "type": "default",
         }
       }
-      esqlColumns={
+      esqlSource={
         Object {
           "datasetKey": "esql:mock::",
           "fields": Array [],

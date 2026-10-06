@@ -16,7 +16,7 @@ import type {
 } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatFieldValueReact, formatHitReact, type EsqlColumnLookup } from '@kbn/discover-utils';
+import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
+import type { EsqlSource } from '@kbn/data-source';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -44,7 +45,7 @@ export function SourceDocument({
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
-  esqlColumns,
+  esqlSource,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -57,7 +58,7 @@ export function SourceDocument({
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
-  esqlColumns: EsqlColumnLookup | undefined;
+  esqlSource: EsqlSource | undefined;
 }) {
   const styles = useMemoCss(componentStyles);
   const pairs: FormattedHit = useTopLevelObjectColumns
@@ -67,7 +68,7 @@ export function SourceDocument({
         dataView,
         shouldShowFieldHandler,
         fieldFormats,
-        esqlColumns,
+        esqlSource,
         Boolean(isPlainRecord)
       ).slice(0, maxEntries)
     : formatHitReact(
@@ -76,7 +77,7 @@ export function SourceDocument({
         shouldShowFieldHandler,
         maxEntries,
         fieldFormats,
-        esqlColumns,
+        esqlSource,
         isPlainRecord ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
       );
 
@@ -122,7 +123,7 @@ function getTopLevelObjectPairsReact(
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   fieldFormats: FieldFormatsStart,
-  esqlColumns: EsqlColumnLookup | undefined,
+  esqlSource: EsqlSource | undefined,
   skipNullishValues: boolean
 ): FormattedHit {
   const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
@@ -138,7 +139,7 @@ function getTopLevelObjectPairsReact(
     const subField = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: key,
-      column: esqlColumns?.getColumn(key),
+      column: esqlSource?.getColumn(key),
     });
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName

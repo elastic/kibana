@@ -15,9 +15,10 @@ import {
   EuiIconTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { DataTableRecord, EsqlColumnLookup } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { EsqlSource } from '@kbn/data-source';
 import { AttributesTable } from './attributes_table';
 import { AttributesEmptyPrompt } from './attributes_empty_prompt';
 import type { AttributeField } from './attributes_overview';
@@ -31,7 +32,7 @@ interface AttributesAccordionProps {
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];
-  esqlColumns: EsqlColumnLookup | undefined;
+  esqlSource: EsqlSource | undefined;
   searchTerm: string;
   onAddColumn?: (col: string) => void;
   onRemoveColumn?: (col: string) => void;
@@ -47,7 +48,7 @@ export const AttributesAccordion = ({
   hit,
   dataView,
   columns,
-  esqlColumns,
+  esqlSource,
   searchTerm,
   onAddColumn,
   onRemoveColumn,
@@ -92,7 +93,7 @@ export const AttributesAccordion = ({
             hit={hit}
             dataView={dataView}
             columns={columns}
-            esqlColumns={esqlColumns}
+            esqlSource={esqlSource}
             fields={fields}
             searchTerm={searchTerm}
             onAddColumn={onAddColumn}

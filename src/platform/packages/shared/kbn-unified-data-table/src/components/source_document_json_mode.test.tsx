@@ -11,7 +11,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { buildDataTableRecord, type EsqlColumnLookup } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
@@ -24,6 +24,7 @@ import { dataTableContextMock } from '../../__mocks__/table_context';
 import { getNodeId } from './json_tree_viewer/tree_model';
 import type { JsonModeSettings } from '../types';
 import { MAX_TREE_VALUES } from '../utils/build_document_tree';
+import type { EsqlSource } from '@kbn/data-source';
 
 const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
 const filterForTestId = (path: string) => `jsonTreeViewerFilterFor-${path}`;
@@ -46,7 +47,7 @@ const renderCell = (
     selectedColumns,
     onFilter,
     hideFilteringOnComputedColumns,
-    esqlColumns,
+    esqlSource,
     isPlainRecord,
   }: {
     shouldShowFieldHandler?: (fieldName: string) => boolean;
@@ -55,7 +56,7 @@ const renderCell = (
     selectedColumns?: string[];
     onFilter?: DocViewFilterFn;
     hideFilteringOnComputedColumns?: boolean;
-    esqlColumns?: EsqlColumnLookup;
+    esqlSource?: EsqlSource;
     isPlainRecord?: boolean;
   } = {}
 ) => {
@@ -63,7 +64,7 @@ const renderCell = (
     <SourceDocumentJsonMode
       row={buildDataTableRecord(hit, dataViewMock)}
       dataView={dataViewMock}
-      esqlColumns={esqlColumns}
+      esqlSource={esqlSource}
       shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
       jsonModeSettings={jsonModeSettings}
@@ -220,7 +221,7 @@ describe('SourceDocumentJsonMode', () => {
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         {
           onFilter,
-          esqlColumns: createMockEsqlSource([
+          esqlSource: createMockEsqlSource([
             { name: 'computedField', type: 'number', source: 'esql-result' },
           ]),
         }
@@ -239,7 +240,7 @@ describe('SourceDocumentJsonMode', () => {
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         {
           onFilter: jest.fn(),
-          esqlColumns: createMockEsqlSource([
+          esqlSource: createMockEsqlSource([
             { name: 'computedField', type: 'number', source: 'esql-result' },
           ]),
           hideFilteringOnComputedColumns: true,

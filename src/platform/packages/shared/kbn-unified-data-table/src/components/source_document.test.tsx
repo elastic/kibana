@@ -51,7 +51,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        esqlColumns={undefined}
+        esqlSource={undefined}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
@@ -87,7 +87,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="foo"
-        esqlColumns={undefined}
+        esqlSource={undefined}
         dataView={dataViewMock}
         fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
@@ -115,7 +115,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        esqlColumns={undefined}
+        esqlSource={undefined}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
@@ -146,7 +146,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        esqlColumns={undefined}
+        esqlSource={undefined}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
@@ -184,7 +184,7 @@ describe('Unified data table source document cell rendering', () => {
       renderWithI18n(
         <SourceDocument
           columnId="_source"
-          esqlColumns={undefined}
+          esqlSource={undefined}
           dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
           isPlainRecord={true}
@@ -221,7 +221,7 @@ describe('Unified data table source document cell rendering', () => {
       renderWithI18n(
         <SourceDocument
           columnId="_source"
-          esqlColumns={esqlSourceOverridingBytesType}
+          esqlSource={esqlSourceOverridingBytesType}
           dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
           isPlainRecord={true}

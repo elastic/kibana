@@ -17,12 +17,9 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import type { DataSource } from '@kbn/data-source';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
-import {
-  formatFieldValueReact,
-  tryPrettyPrintJsonBlocks,
-  type EsqlColumnLookup,
-} from '@kbn/discover-utils';
+import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import type { EsqlSource } from '@kbn/data-source';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer, JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -45,7 +42,7 @@ export const getRenderCellValueFn = ({
   isPlainRecord,
   isCompressed = true,
   dataSource,
-  esqlColumns,
+  esqlSource,
   documentsDisplayMode,
   jsonModeSettings,
   selectedColumns,
@@ -60,7 +57,7 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
   dataSource?: DataSource;
-  esqlColumns: EsqlColumnLookup | undefined;
+  esqlSource: EsqlSource | undefined;
   documentsDisplayMode: DocumentsDisplayMode;
   jsonModeSettings?: JsonModeSettings;
   selectedColumns?: string[];
@@ -78,7 +75,7 @@ export const getRenderCellValueFn = ({
     const field = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: columnId,
-      column: esqlColumns?.getColumn(columnId),
+      column: esqlSource?.getColumn(columnId),
     });
     const ctx = useContext(UnifiedDataTableContext);
     const internalCellProps = useRef<EuiDataGridSetCellProps>({});
@@ -146,7 +143,7 @@ export const getRenderCellValueFn = ({
         <SourceDocumentJsonMode
           row={row}
           dataView={dataView}
-          esqlColumns={esqlColumns}
+          esqlSource={esqlSource}
           shouldShowFieldHandler={shouldShowFieldHandler}
           fieldFormats={fieldFormats}
           jsonModeSettings={jsonModeSettings}
@@ -210,7 +207,7 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
-          esqlColumns={esqlColumns}
+          esqlSource={esqlSource}
         />
       );
     }

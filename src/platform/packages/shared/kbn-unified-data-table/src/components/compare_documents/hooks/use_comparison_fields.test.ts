@@ -52,7 +52,7 @@ const renderFields = ({
   } = renderHook(() =>
     useComparisonFields({
       dataView,
-      esqlColumns: undefined,
+      esqlSource: undefined,
       selectedFieldNames: ['message', 'extension', 'bytes'],
       selectedDocIds: ['0', '1', '2'],
       showAllFields: true,
@@ -166,7 +166,7 @@ describe('useComparisonFields', () => {
 
   it('should display computed fields from ES|QL querys (EVALS, RENAMES, etc.)', () => {
     const { comparisonFields, totalFields } = renderFields({
-      props: { esqlColumns: esqlSourceWithCustomField },
+      props: { esqlSource: esqlSourceWithCustomField },
       transformHit: (hit) => {
         hit.fields!.custom_esql_field = 'test';
         return hit;

@@ -72,8 +72,6 @@ export {
   getFieldValue,
   getVisibleColumns,
   canPrependTimeFieldColumn,
-  getEsqlColumnLookup,
-  toDataTableColumnsMeta,
   DiscoverFlyouts,
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
@@ -122,7 +120,6 @@ export type {
   SimpleAggregation,
   LogDocument,
   ObservabilityIndexes,
-  EsqlColumnLookup,
 } from './src';
 
 export * from './src/types';

@@ -13,15 +13,16 @@ import { css } from '@emotion/react';
 import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
-import { isNestedFieldParent, type EsqlColumnLookup } from '@kbn/discover-utils';
+import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
+import type { EsqlSource } from '@kbn/data-source';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
   dataView: DataView;
   columnName: string | null;
   columnDisplayName: string;
-  esqlColumns?: EsqlColumnLookup;
+  esqlSource?: EsqlSource;
   headerRowHeight?: number;
   showColumnTokens?: boolean;
 }
@@ -30,18 +31,14 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   columnDisplayName,
   showColumnTokens,
   columnName,
-  esqlColumns,
+  esqlSource,
   dataView,
   headerRowHeight,
 }) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && (
-        <DataTableColumnToken
-          columnName={columnName}
-          esqlColumns={esqlColumns}
-          dataView={dataView}
-        />
+        <DataTableColumnToken columnName={columnName} esqlSource={esqlSource} dataView={dataView} />
       )}
       <DataTableColumnTitle columnDisplayName={columnDisplayName} />
     </ColumnHeaderTruncateContainer>
@@ -49,13 +46,13 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
 };
 
 const DataTableColumnToken: React.FC<
-  Pick<DataTableColumnHeaderProps, 'columnName' | 'esqlColumns' | 'dataView'>
+  Pick<DataTableColumnHeaderProps, 'columnName' | 'esqlSource' | 'dataView'>
 > = (props) => {
   const { euiTheme } = useEuiTheme();
-  const { columnName, esqlColumns, dataView } = props;
+  const { columnName, esqlSource, dataView } = props;
   const columnToken = useMemo(
-    () => getRenderedToken({ columnName, esqlColumns, dataView }),
-    [columnName, esqlColumns, dataView]
+    () => getRenderedToken({ columnName, esqlSource, dataView }),
+    [columnName, esqlSource, dataView]
   );
 
   return columnToken ? <span css={{ paddingRight: euiTheme.size.xs }}>{columnToken}</span> : null;
@@ -72,15 +69,15 @@ const fieldIconCss: CSSObject = { verticalAlign: 'bottom' };
 function getRenderedToken({
   dataView,
   columnName,
-  esqlColumns,
-}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'esqlColumns'>) {
+  esqlSource,
+}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'esqlSource'>) {
   if (!columnName || columnName === '_source') {
     return null;
   }
 
   // for text-based searches
-  if (esqlColumns) {
-    const columnIconType = getTextBasedColumnIconType(esqlColumns.getColumn(columnName));
+  if (esqlSource) {
+    const columnIconType = getTextBasedColumnIconType(esqlSource.getColumn(columnName));
     return columnIconType && columnIconType !== 'unknown' ? ( // renders an icon or nothing
       <FieldIcon type={columnIconType} css={fieldIconCss} />
     ) : null;
@@ -140,7 +137,7 @@ export const DataTableScoreColumnHeader = ({
   isSorted,
   showColumnTokens,
   columnName,
-  esqlColumns,
+  esqlSource,
   dataView,
   headerRowHeight,
   columnDisplayName,
@@ -153,11 +150,7 @@ export const DataTableScoreColumnHeader = ({
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && isSorted && (
-        <DataTableColumnToken
-          columnName={columnName}
-          esqlColumns={esqlColumns}
-          dataView={dataView}
-        />
+        <DataTableColumnToken columnName={columnName} esqlSource={esqlSource} dataView={dataView} />
       )}
       {!isSorted && (
         <span css={{ paddingRight: euiTheme.size.xs }}>

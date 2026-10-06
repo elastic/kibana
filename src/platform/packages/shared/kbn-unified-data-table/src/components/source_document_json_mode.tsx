@@ -18,13 +18,10 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import {
-  formatFieldStringValueWithHighlights,
-  getIgnoredReason,
-  type EsqlColumnLookup,
-} from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights, getIgnoredReason } from '@kbn/discover-utils';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_document_tree';
 import type { JsonModeSettings } from '../types';
@@ -42,7 +39,7 @@ const treeExpansionStore = new WeakMap<EsHitRecord, TreeExpansionState>();
 export interface SourceDocumentJsonModeProps {
   row: DataTableRecord;
   dataView: DataView;
-  esqlColumns: EsqlColumnLookup | undefined;
+  esqlSource: EsqlSource | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   fieldFormats: FieldFormatsStart;
   jsonModeSettings?: JsonModeSettings;
@@ -53,7 +50,7 @@ export interface SourceDocumentJsonModeProps {
 export const SourceDocumentJsonMode = ({
   row,
   dataView,
-  esqlColumns,
+  esqlSource,
   shouldShowFieldHandler,
   fieldFormats,
   jsonModeSettings,
@@ -76,7 +73,7 @@ export const SourceDocumentJsonMode = ({
       const field = getDataViewFieldOrCreateFromColumn({
         dataView,
         fieldName,
-        column: esqlColumns?.getColumn(fieldName),
+        column: esqlSource?.getColumn(fieldName),
       });
       if (
         !shouldShowFieldFilterInOutActions({
@@ -114,7 +111,7 @@ export const SourceDocumentJsonMode = ({
         },
       ];
     },
-    [dataView, esqlColumns, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
+    [dataView, esqlSource, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
   );
 
   const initialTreeState = useMemo(() => treeExpansionStore.get(row.raw), [row]);

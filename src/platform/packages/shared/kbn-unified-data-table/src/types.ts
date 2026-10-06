@@ -18,7 +18,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 export type { DataGridDensity } from './constants';
 
 /**

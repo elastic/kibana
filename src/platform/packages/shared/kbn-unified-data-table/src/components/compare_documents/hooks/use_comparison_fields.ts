@@ -9,9 +9,9 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { EsqlColumnLookup } from '@kbn/discover-utils';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
+import type { EsqlSource } from '@kbn/data-source';
 import type { DocMap } from '../../../types';
 import { SOURCE_COLUMN } from '../../../utils/columns';
 
@@ -19,7 +19,7 @@ export const MAX_COMPARISON_FIELDS = 250;
 
 export interface UseComparisonFieldsProps {
   dataView: DataView;
-  esqlColumns: EsqlColumnLookup | undefined;
+  esqlSource: EsqlSource | undefined;
   selectedFieldNames: string[];
   selectedDocIds: string[];
   showAllFields: boolean;
@@ -29,7 +29,7 @@ export interface UseComparisonFieldsProps {
 
 export const useComparisonFields = ({
   dataView,
-  esqlColumns,
+  esqlSource,
   selectedFieldNames,
   selectedDocIds,
   showAllFields,
@@ -53,7 +53,7 @@ export const useComparisonFields = ({
 
     if (showAllFields) {
       const dataViewFieldNames = dataView.fields.map((field) => field.name);
-      const esqlFieldNames = esqlColumns?.getColumns().map(({ name }) => name) ?? [];
+      const esqlFieldNames = esqlSource?.getColumns().map(({ name }) => name) ?? [];
       const fieldNames =
         esqlFieldNames.length > 0
           ? [...new Set([...dataViewFieldNames, ...esqlFieldNames])]
@@ -95,7 +95,7 @@ export const useComparisonFields = ({
   }, [
     baseDoc,
     comparisonDocs,
-    esqlColumns,
+    esqlSource,
     dataView,
     selectedFieldNames,
     showAllFields,

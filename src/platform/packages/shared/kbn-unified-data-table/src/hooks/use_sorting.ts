@@ -8,11 +8,12 @@
  */
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, EsqlColumnLookup } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
+import type { EsqlSource } from '@kbn/data-source';
 import type { SortOrder } from '../components/data_table';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
@@ -20,7 +21,7 @@ import { SOURCE_COLUMN } from '../utils/columns';
 export const useSorting = ({
   rows,
   visibleColumns,
-  esqlColumns,
+  esqlSource,
   sort,
   dataView,
   isPlainRecord,
@@ -31,7 +32,7 @@ export const useSorting = ({
 }: {
   rows: DataTableRecord[] | undefined;
   visibleColumns: string[];
-  esqlColumns: EsqlColumnLookup | undefined;
+  esqlSource: EsqlSource | undefined;
   sort: SortOrder[];
   dataView: DataView;
   isPlainRecord: boolean;
@@ -56,7 +57,7 @@ export const useSorting = ({
         const field = getDataViewFieldOrCreateFromColumn({
           dataView,
           fieldName: id,
-          column: esqlColumns?.getColumn(id),
+          column: esqlSource?.getColumn(id),
         });
 
         if (!field) {
@@ -71,7 +72,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [esqlColumns, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
+  }, [esqlSource, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {

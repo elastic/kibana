@@ -9,7 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataSource } from '@kbn/data-source';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { EbtClickAttrs } from '@kbn/ebt-click';
@@ -68,10 +68,6 @@ export interface DocViewRenderProps {
    * otherwise they are derived from the dataView field types.
    */
   dataSource?: DataSource;
-  /**
-   * @deprecated Read the columns from `dataSource` instead.
-   */
-  columnsMeta?: DataTableColumnsMeta;
   textBasedHits?: DataTableRecord[];
   hideActionsColumn?: boolean;
   filter?: DocViewFilterFn;

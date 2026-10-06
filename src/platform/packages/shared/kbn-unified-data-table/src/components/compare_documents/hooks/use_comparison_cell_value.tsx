@@ -10,7 +10,7 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { formatFieldValueReact, type EsqlColumnLookup } from '@kbn/discover-utils';
+import { formatFieldValueReact } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconProps } from '@kbn/field-utils';
@@ -19,6 +19,7 @@ import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
 import type { DocMap } from '../../../types';
@@ -36,7 +37,7 @@ import {
 
 export interface UseComparisonCellValueProps {
   dataView: DataView;
-  esqlColumns: EsqlColumnLookup | undefined;
+  esqlSource: EsqlSource | undefined;
   comparisonFields: string[];
   fieldColumnId: string;
   selectedDocIds: string[];
@@ -47,7 +48,7 @@ export interface UseComparisonCellValueProps {
 
 export const useComparisonCellValue = ({
   dataView,
-  esqlColumns,
+  esqlSource,
   comparisonFields,
   fieldColumnId,
   selectedDocIds,
@@ -64,7 +65,7 @@ export const useComparisonCellValue = ({
       <DiffProvider value={calculateDiffMemoized}>
         <CellValue
           dataView={dataView}
-          esqlColumns={esqlColumns}
+          esqlSource={esqlSource}
           comparisonFields={comparisonFields}
           fieldColumnId={fieldColumnId}
           baseDocId={baseDocId}
@@ -82,7 +83,7 @@ export const useComparisonCellValue = ({
       calculateDiffMemoized,
       comparisonFields,
       dataView,
-      esqlColumns,
+      esqlSource,
       diffMode,
       fieldColumnId,
       fieldFormats,
@@ -100,7 +101,7 @@ type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
 const EMPTY_VALUE = '-';
 
 const CellValue = (props: CellValueProps) => {
-  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, docMap, esqlColumns } =
+  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, docMap, esqlSource } =
     props;
   const fieldName = comparisonFields[rowIndex];
   const field = useMemo(
@@ -108,9 +109,9 @@ const CellValue = (props: CellValueProps) => {
       getDataViewFieldOrCreateFromColumn({
         dataView,
         fieldName,
-        column: esqlColumns?.getColumn(fieldName),
+        column: esqlSource?.getColumn(fieldName),
       }),
-    [dataView, fieldName, esqlColumns]
+    [dataView, fieldName, esqlSource]
   );
   const comparisonDoc = useMemo(() => docMap.get(columnId)?.doc, [columnId, docMap]);
 

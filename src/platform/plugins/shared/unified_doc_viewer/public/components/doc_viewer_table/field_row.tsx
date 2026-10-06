@@ -10,7 +10,6 @@
 import type { ReactNode } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { EsqlColumnLookup } from '@kbn/discover-utils';
 import type { Column } from '@kbn/data-source';
 import type { IgnoredReason } from '@kbn/discover-utils';
 import {
@@ -22,6 +21,7 @@ import {
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
+import type { EsqlSource } from '@kbn/data-source';
 
 export class FieldRow {
   readonly name: string;
@@ -51,7 +51,7 @@ export class FieldRow {
     dataView,
     fieldFormats,
     isPinned,
-    esqlColumns,
+    esqlSource,
   }: {
     name: string;
     displayNameOverride?: string;
@@ -60,7 +60,7 @@ export class FieldRow {
     dataView: DataView;
     fieldFormats: FieldFormatsStart;
     isPinned: boolean;
-    esqlColumns: EsqlColumnLookup | undefined;
+    esqlSource: EsqlSource | undefined;
   }) {
     this.#hit = hit;
     this.#dataView = dataView;
@@ -71,7 +71,7 @@ export class FieldRow {
     this.name = name;
     this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
-    this.esqlColumn = esqlColumns?.getColumn(name);
+    this.esqlColumn = esqlSource?.getColumn(name);
     this.dataViewField = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: name,
