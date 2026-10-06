@@ -106,6 +106,35 @@ const createV3PolicyDocument = (overrides: Record<string, unknown> = {}): SavedO
   references: [],
 });
 
+const createV4PolicyDocument = (overrides: Record<string, unknown> = {}): SavedObject => ({
+  id: 'policy-1',
+  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+  attributes: {
+    name: 'test-policy',
+    description: 'A test action policy',
+    enabled: true,
+    destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    matcher: { expression: 'tags : "production"' },
+    groupBy: null,
+    tags: null,
+    groupingMode: 'per_episode',
+    throttle: { strategy: 'on_status_change' },
+    snoozedUntil: null,
+    apiKeyOwner: 'elastic',
+    apiKeyCreatedByUser: true,
+    auth: {
+      owner: 'elastic',
+      createdByUser: true,
+    },
+    createdBy: { profile_uid: 'author_profile_uid' },
+    updatedBy: { profile_uid: 'editor_profile_uid' },
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-02T00:00:00.000Z',
+    ...overrides,
+  },
+  references: [],
+});
+
 describe('actionPolicyModelVersions', () => {
   describe('v1 to v2 migration', () => {
     const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
@@ -257,6 +286,56 @@ describe('actionPolicyModelVersions', () => {
         ...(document.attributes as Record<string, unknown>),
         createdBy: { profile_uid: 'author_profile_uid' },
         updatedBy: { profile_uid: 'editor_profile_uid' },
+      });
+    });
+  });
+
+  describe('v4 to v5 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
+
+    const migrate = (document: SavedObject) =>
+      migrator.migrate({ document, fromVersion: 4, toVersion: 5 }).attributes as Record<
+        string,
+        unknown
+      >;
+
+    it('renames the per_episode grouping mode to per_alert', () => {
+      expect(migrate(createV4PolicyDocument()).groupingMode).toBe('per_alert');
+    });
+
+    it('leaves the all grouping mode untouched', () => {
+      expect(migrate(createV4PolicyDocument({ groupingMode: 'all' })).groupingMode).toBe('all');
+    });
+
+    it('leaves the per_field grouping mode untouched', () => {
+      const document = createV4PolicyDocument({
+        groupingMode: 'per_field',
+        groupBy: ['host.name'],
+      });
+      expect(migrate(document).groupingMode).toBe('per_field');
+    });
+
+    it('keeps a null grouping mode null', () => {
+      expect(migrate(createV4PolicyDocument({ groupingMode: null })).groupingMode).toBeNull();
+    });
+
+    it('does not backfill a grouping mode when the attribute is absent', () => {
+      expect(
+        migrate(createV4PolicyDocument({ groupingMode: undefined })).groupingMode
+      ).toBeUndefined();
+    });
+
+    it('is idempotent for a policy already grouped per_alert', () => {
+      expect(migrate(createV4PolicyDocument({ groupingMode: 'per_alert' })).groupingMode).toBe(
+        'per_alert'
+      );
+    });
+
+    it('preserves unrelated attributes unchanged', () => {
+      const document = createV4PolicyDocument();
+      expect(migrate(document)).toEqual({
+        ...(document.attributes as Record<string, unknown>),
+        groupingMode: 'per_alert',
       });
     });
   });

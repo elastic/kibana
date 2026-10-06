@@ -49,8 +49,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   attachmentClient: AttachmentClient;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
-  getAlertEventsClient: () => Promise<AlertEventsClientApi | undefined>;
-  deleteLegacyRules: (ruleIds: string[]) => Promise<void>;
+  getAlertEventsClient: () => Promise<AlertEventsClientApi>;
   inferenceClient: InferenceClient;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;

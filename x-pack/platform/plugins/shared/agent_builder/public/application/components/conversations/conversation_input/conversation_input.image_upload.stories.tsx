@@ -78,9 +78,6 @@ const meta: Meta<typeof ConversationInput> = {
       </AgentBuilderStorybookProvider>
     ),
   ],
-  parameters: {
-    layout: 'padded',
-  },
 };
 export default meta;
 

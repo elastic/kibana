@@ -12,8 +12,14 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
-import type { PerOsDeviceControlAccessLevelSelectProps } from './per_os_device_control_access_level_select';
-import { PerOsDeviceControlAccessLevelSelect } from './per_os_device_control_access_level_select';
+import type {
+  PerOsDeviceControlAccessLevelSelectProps,
+  PerOsDeviceControlSelectValue,
+} from './per_os_device_control_access_level_select';
+import {
+  DEVICE_CONTROL_DISABLED,
+  PerOsDeviceControlAccessLevelSelect,
+} from './per_os_device_control_access_level_select';
 import {
   openOsControlAndScrollPage,
   selectOsControlOption,
@@ -41,11 +47,12 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
       ));
   });
 
-  it('renders all four access-level options with their existing labels', async () => {
+  it('renders the Disable option and all four access-level options with their existing labels', async () => {
     render();
 
     await userEvent.click(renderResult.getByTestId(testSubj));
 
+    expect(await renderResult.findByRole('option', { name: 'Disable' })).toBeInTheDocument();
     expect(
       await renderResult.findByRole('option', { name: 'Allow read, write and execute' })
     ).toBeInTheDocument();
@@ -54,7 +61,7 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
     expect(await renderResult.findByRole('option', { name: 'Block all' })).toBeInTheDocument();
   });
 
-  it('renders all four access-level options with translated labels in severity order', async () => {
+  it('renders Disable first, then the access-level options in severity order', async () => {
     render();
 
     await userEvent.click(renderResult.getByTestId(testSubj));
@@ -63,11 +70,15 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
       (option) => option.textContent
     );
     expect(optionLabels).toEqual([
+      'Disable',
       'Allow read, write and execute',
       'Read and write',
       'Read only',
       'Block all',
     ]);
+
+    const disableOption = await renderResult.findByRole('option', { name: /^Disable$/ });
+    expect(disableOption.querySelector('[color="danger"]')).toBeInTheDocument();
 
     const allowAllOption = await renderResult.findByRole('option', {
       name: /^Allow read, write and execute$/,
@@ -78,12 +89,13 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
     expect(blockAllOption.querySelector('[color="success"]')).toBeInTheDocument();
   });
 
-  it.each([
+  it.each<[PerOsDeviceControlSelectValue, string]>([
+    [DEVICE_CONTROL_DISABLED, 'Disable'],
     [DeviceControlAccessLevel.audit, 'Allow read, write and execute'],
     [DeviceControlAccessLevel.no_execute, 'Read and write'],
     [DeviceControlAccessLevel.read_only, 'Read only'],
     [DeviceControlAccessLevel.deny_all, 'Block all'],
-  ])('displays the selected %s access level', (accessLevel, label) => {
+  ])('displays the selected %s value', (accessLevel, label) => {
     render({ accessLevel });
 
     expect(renderResult.getByTestId(testSubj)).toHaveTextContent(label);
@@ -96,6 +108,15 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
 
     expect(props.onAccessLevelChange).toHaveBeenCalledTimes(1);
     expect(props.onAccessLevelChange).toHaveBeenCalledWith(DeviceControlAccessLevel.read_only);
+  });
+
+  it('fires onAccessLevelChange with the disabled value when Disable is selected', async () => {
+    render({ accessLevel: DeviceControlAccessLevel.deny_all });
+
+    await selectOsControlOption(renderResult, testSubj, 'Disable');
+
+    expect(props.onAccessLevelChange).toHaveBeenCalledTimes(1);
+    expect(props.onAccessLevelChange).toHaveBeenCalledWith(DEVICE_CONTROL_DISABLED);
   });
 
   describe('when the page scrolls', () => {
