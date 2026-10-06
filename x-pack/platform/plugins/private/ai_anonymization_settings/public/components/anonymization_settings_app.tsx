@@ -17,7 +17,7 @@ import {
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { useAnonymizationSettings } from '../hooks/use_anonymization_settings';
 import { BuiltInPatternsTable } from './built_in_patterns_table';
 import { CustomPatternsTable } from './custom_patterns_table';

@@ -8,7 +8,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { BuiltInPatternsTable } from './built_in_patterns_table';
 
 jest.mock('../hooks/use_pattern_tester', () => ({

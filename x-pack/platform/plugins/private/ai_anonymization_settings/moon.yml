@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ai-anonymization-settings-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-ml-ux'
+  defaultOwner: '@elastic/security-investigations'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/ai-anonymization-settings-plugin'
   description: Moon project for @kbn/ai-anonymization-settings-plugin
   channel: ''
-  owner: '@elastic/search-ml-ux'
+  owner: '@elastic/security-investigations'
   sourceRoot: x-pack/platform/plugins/private/ai_anonymization_settings
 dependsOn:
   - '@kbn/core'
@@ -23,7 +23,9 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/shared-ux-router'
-  - '@kbn/inference-common'
+  - '@kbn/ai-anonymization-common'
+  - '@kbn/ai-anonymization-server'
+  - '@kbn/config-schema'
   - '@kbn/react-kibana-context-render'
   - '@kbn/app-header'
   - '@kbn/code-editor'
@@ -38,6 +40,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - server/**/*
     - test/scout/**/*
     - '!target/**/*'
   jest-config:

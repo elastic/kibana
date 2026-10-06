@@ -11,13 +11,13 @@ import {
   aiAnonymizationSettings,
   isAnonymizationMaskingEnabled,
   refreshBuiltInAnonymizationRules,
-} from '@kbn/inference-common';
+} from '@kbn/ai-anonymization-common';
 import type {
   AnonymizationFailureMode,
   AnonymizationRule,
   AnonymizationSettings,
   RegexAnonymizationRule,
-} from '@kbn/inference-common';
+} from '@kbn/ai-anonymization-common';
 import type { CustomPatternEntityClass } from '../lib/entity_classes';
 import { useKibana } from './use_kibana';
 

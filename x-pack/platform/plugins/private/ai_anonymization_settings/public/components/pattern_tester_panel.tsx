@@ -24,7 +24,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { usePatternTester } from '../hooks/use_pattern_tester';
 import type { PatternTestAnonymization } from '../hooks/use_pattern_tester';
 

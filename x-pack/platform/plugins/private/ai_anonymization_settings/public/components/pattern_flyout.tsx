@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { CUSTOM_PATTERN_ENTITY_CLASSES } from '../lib/entity_classes';
 import type { CustomPatternEntityClass } from '../lib/entity_classes';
 import type { NewCustomPattern } from '../hooks/use_anonymization_settings';

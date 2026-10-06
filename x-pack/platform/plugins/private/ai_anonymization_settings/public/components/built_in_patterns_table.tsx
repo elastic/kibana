@@ -22,7 +22,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { SAMPLE_VALUES_BY_ENTITY_CLASS } from '../lib/entity_classes';
 import { usePatternTester } from '../hooks/use_pattern_tester';
 

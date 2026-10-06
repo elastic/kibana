@@ -16,7 +16,7 @@ The page has four tabs:
   `onFailure` behavior (`block` vs `allow_unsafe`) used when anonymization cannot run.
 
 Named-entity-recognition (NER) rule support still exists in the underlying schema and pipeline
-(`chat_complete/anonymization/*` in the inference plugin) but is intentionally not surfaced anywhere on
+(`@kbn/ai-anonymization-server`) but is intentionally not surfaced anywhere on
 this page.
 
 ## Limitations
@@ -27,11 +27,13 @@ this page.
   masks as irreversible.
 - **Built-in patterns are written to run the same on native `RegExp` and on RE2.** Do not add
   lookahead, lookbehind, backreferences or unbounded quantifiers to them;
-  `default_builtin_regex_rules.test.ts` fails if a rule behaves differently on the two engines or is
+  `default_builtin_regex_rules.test.ts` in `@kbn/ai-anonymization-common` fails if a rule behaves differently on the two engines or is
   slow on long inputs.
 - **Not covered by the built-ins:** email addresses in scripts other than Latin, Greek and Cyrillic
   (CJK, Arabic, Hebrew, ...), IPv6 addresses, and bare single-label host names (`server01`,
   `nas.local`). Four-part version numbers (`3.11.4.2`) are indistinguishable from IPv4 addresses and
   are masked.
 - **The pattern tester needs the `manage_advanced_settings` privilege** and runs on its own small
-  worker pool with a short timeout, separate from the pool serving AI requests.
+  worker pool with a short timeout, separate from the pool serving AI requests. It can be turned off
+  with `xpack.aiAnonymizationSettings.patternTester.enabled: false` (default `true`), in which case
+  the endpoint refuses requests.
