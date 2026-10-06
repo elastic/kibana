@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
+export {
+  getESQLAdHocDataview,
+  getESQLAdHocDataviewId,
+  getIndexForESQLQuery,
+} from './utils/get_esql_adhoc_dataview';
 export { getESQLTimeField } from './utils/get_time_field';
 export {
   getESQLSourceInfo,
@@ -55,6 +59,7 @@ export {
   getIndexPatternsFromESQLQuery,
   splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
 export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
@@ -106,8 +111,15 @@ export {
   createEsqlViewsManagementClient,
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
+  getViewEsqlQuery,
+  MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
+  MAX_ESQL_VIEW_NAME_LENGTH,
+  MAX_ESQL_VIEW_QUERY_LENGTH,
+  resolveViewColumnToIndexField,
+  validateEsqlViewName,
+  type EsqlViewNameValidationError,
   type EsqlViewsClient,
-} from './utils/esql_views_client';
+} from './utils/views';
 export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,
@@ -115,7 +127,6 @@ export {
   type ESQLHighlightTags,
 } from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
-export { resolveViewColumnToIndexField } from './utils/resolve_view_column_to_index_field';
 export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
 export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';

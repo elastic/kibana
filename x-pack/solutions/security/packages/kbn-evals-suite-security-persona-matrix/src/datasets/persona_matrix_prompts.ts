@@ -206,6 +206,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       question:
         "Now that we've confirmed this threat, help me close the detection gap - create a rule " +
         'so we catch this automatically next time, and ground it in the relevant Security Labs research.',
+      // Each example starts a new conversation, so "this threat" needs its antecedent supplied
+      // out-of-band; the attachment keeps the original question wording intact.
+      attachment:
+        'Confirmed Threat:\n' +
+        '  Host: srv-win-defend-01\n' +
+        '  Process: BluetoothService.exe side-loads log.dll\n' +
+        '  File hash (sha256): 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f\n' +
+        '  Path: C:\\Users\\Public\\\n' +
+        '  MITRE: T1574.002 (DLL Side-Loading)',
     },
     output: {
       reference:
@@ -290,7 +299,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     id: 'multi-step-a',
     category: 'multi-step',
     variant: 'A',
-    description: 'Triaged alert → threat-intel grounding → escalation summary',
+    description: 'Alert triage → VirusTotal check → on-call lookup → Slack channel',
     input: {
       question:
         'Analyze this alert. If it involves a file hash, verify the hash on VirusTotal. ' +
@@ -310,17 +319,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Reads the attached alert, checks the file hash against Security Labs research / entity risk ' +
-        'signal for a verdict, and produces a step-by-step summary ending in an explicit escalate-or-not ' +
-        'recommendation with the IOCs called out.',
+        'Reads the attached alert, verifies the file hash with the virustotal_lookup tool, looks up the ' +
+        'current on-call analyst with the on_call_lookup tool, and creates a Slack channel with that ' +
+        'analyst containing the verdict, IOCs, and on-call owner, narrating each step.',
     },
     metadata: {
       expectedSkill: 'alert-analysis',
-      expectedTools: [
-        'attachments.read',
-        'security.security_labs_search',
-        'security.entity_risk_score',
-      ],
+      // No Slack tool is seeded by this suite, so the channel-creation step is scored through the
+      // reference (correctness) rather than expectedTools.
+      expectedTools: ['attachments.read', 'virustotal_lookup', 'on_call_lookup'],
       severity: 'critical',
       tags: ['multi-step', 'orchestration'],
     },
@@ -329,7 +336,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     id: 'multi-step-b',
     category: 'multi-step',
     variant: 'B',
-    description: 'Full incident response: case creation with grounded findings',
+    description: 'Full incident response: VirusTotal, on-call, case, and Slack channel',
     input: {
       question:
         "There's a confirmed Chrysalis incident on srv-win-defend-01. Run the full response: " +
@@ -340,14 +347,16 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Searches Security Labs for research on the side-loading pattern, then calls the cases-management ' +
-        'skill/tool to open a critical-severity case with a summary of the confirmed findings, reporting ' +
-        'each step taken.',
+        'Verifies the loader hash with the virustotal_lookup tool, looks up the on-call responder with the ' +
+        'on_call_lookup tool, opens a critical-severity case via the cases tool with a summary of the ' +
+        'confirmed findings, then creates a Slack incident channel with the on-call responder and posts ' +
+        'the case summary and top IOCs, reporting each step taken.',
     },
     metadata: {
       expectedSkill: 'alert-analysis',
       allowSkills: ['cases-management'],
-      expectedTools: ['security.security_labs_search', 'platform.core.cases'],
+      // No Slack tool is seeded by this suite; that step is scored through the reference.
+      expectedTools: ['virustotal_lookup', 'on_call_lookup', 'platform.core.cases'],
       severity: 'critical',
       tags: ['multi-step', 'incident-response'],
     },
@@ -368,17 +377,20 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     output: {
       reference:
         "Pulls the host's alert queue, hunts for the named IOCs via ES|QL over process/network telemetry " +
-        'to confirm or refute the hypothesis, and conditionally produces an escalation summary only if ' +
-        'the hunt confirms a true positive — explicitly stating when it does not escalate.',
+        'to confirm or refute the hypothesis, looks up the on-call analyst with the on_call_lookup tool, ' +
+        'and only if the hunt confirms a true positive creates a Slack channel with that analyst ' +
+        'summarizing the confirmed findings and recommended actions — explicitly stating when it does ' +
+        'not escalate.',
     },
     metadata: {
       expectedSkill: 'alert-analysis',
       allowSkills: ['threat-hunting'],
+      // No Slack tool is seeded by this suite; that step is scored through the reference.
       expectedTools: [
         'security.alerts',
         'platform.core.generate_esql',
         'platform.core.execute_esql',
-        'security.entity_risk_score',
+        'on_call_lookup',
       ],
       severity: 'critical',
       tags: ['multi-step', 'conditional-escalation'],

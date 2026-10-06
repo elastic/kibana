@@ -6,6 +6,7 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/env.sh
 source .buildkite/scripts/common/setup_job_env.sh
 source .buildkite/scripts/common/setup_executors.sh
+source .buildkite/scripts/common/setup_ipv6_only.sh
 
 if [[ "${SKIP_NODE_SETUP:-}" =~ ^(1|true)$ ]]; then
   echo "Skipping node setup (SKIP_NODE_SETUP=$SKIP_NODE_SETUP)"
