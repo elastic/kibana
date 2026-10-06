@@ -5,45 +5,36 @@
  * 2.0.
  */
 
-import { ConversationOriginType, isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { HookLifecycle, HookExecutionMode, type HookHandler } from '@kbn/agent-builder-server';
+import { addSlackProjection } from '@kbn/agent-builder-surfaces';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/logging';
 import type { InternalSetupServices } from '../../services';
 
-/**
- * Adds the reply, as is, as a Slack payload to `round_complete` events of Slack rounds.
- */
-export const addSlackProjection: HookHandler<HookLifecycle.afterChatEvent> = ({
-  event,
-  execution,
-}) => {
-  if (
-    execution.agentParams.origin?.type !== ConversationOriginType.Slack ||
-    !isRoundCompleteEvent(event)
-  ) {
-    return;
-  }
-
-  const { message } = event.data.round.response;
-  if (!message) {
-    return;
-  }
-
-  const slack = { text: message, blocks: [{ type: 'markdown' as const, text: message }] };
-
-  return { event: { ...event, projection: { ...event.projection, slack } } };
-};
+export interface RegisterSlackHooksDeps {
+  logger: Logger;
+}
 
 /**
  * Registers the hooks for rounds whose origin is Slack:
- * - afterChatEvent (blocking): adds the Slack payload of the reply to `round_complete` events.
+ * - afterChatEvent (blocking): adds the reply, rendered as Block Kit, to `round_complete` events.
  */
-export const registerSlackHooks = (serviceSetups: InternalSetupServices): void => {
+export const registerSlackHooks = (
+  serviceSetups: InternalSetupServices,
+  { logger }: RegisterSlackHooksDeps
+): void => {
   serviceSetups.hooks.register({
     id: 'slack',
     hooks: {
       [HookLifecycle.afterChatEvent]: {
         mode: HookExecutionMode.blocking,
-        handler: addSlackProjection,
+        handler: ({ event, execution }) => {
+          const projected = addSlackProjection(event, {
+            originType: execution.agentParams.origin?.type,
+            logger,
+          });
+
+          return projected && { event: projected };
+        },
       },
     },
   });

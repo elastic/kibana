@@ -276,7 +276,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
-    registerSlackHooks(serviceSetups);
+    registerSlackHooks(serviceSetups, { logger: this.logger.get('slack') });
 
     const smlTools = createSmlTools({
       getAgentBuilderSml: () => {

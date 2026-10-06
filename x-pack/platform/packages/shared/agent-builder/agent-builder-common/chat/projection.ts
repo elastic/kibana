@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import type { SlackBlock } from '@elastic/isomer-sdk/slack';
+
+/**
+ * Slack `markdown` block, which renders standard markdown. Used when the reply can't be rendered
+ * as Block Kit.
+ */
+export interface SlackMarkdownBlock {
+  type: 'markdown';
+  text: string;
+}
+
 /**
  * Raw Slack message payload: `text` is the notification and fallback copy, `blocks` is what gets
- * posted, as Slack `markdown` blocks that render standard markdown.
- *
- * Placeholder until Agent Builder depends on Isomer, which will replace it with
- * `Pick<SlackEnvelopeResult, 'text' | 'blocks'>` from `@elastic/isomer-sdk/slack`.
+ * posted.
  */
 export interface SlackPayload {
   text: string;
-  blocks: Array<{ type: 'markdown'; text: string }>;
+  blocks: Array<SlackBlock | SlackMarkdownBlock>;
 }
 
 /**

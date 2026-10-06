@@ -8,92 +8,81 @@
 import {
   ChatEventType,
   ConversationOriginType,
-  type MessageCompleteEvent,
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import {
   HookExecutionMode,
   HookLifecycle,
   type AfterChatEventHookContext,
+  type HookHandler,
 } from '@kbn/agent-builder-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { createRound } from '../../test_utils';
-import { addSlackProjection, registerSlackHooks } from '.';
+import type { InternalSetupServices } from '../../services';
+import { registerSlackHooks } from '.';
 
 const createRoundCompleteEvent = (message: string): RoundCompleteEvent => ({
   type: ChatEventType.roundComplete,
   data: { round: createRound({ response: { message } }) },
 });
 
-const createExecution = (origin?: { type: ConversationOriginType }) =>
-  ({
-    executionId: 'execution-1',
-    agentParams: { origin },
-  } as AfterChatEventHookContext['execution']);
-
 const createContext = (
-  overrides: Partial<AfterChatEventHookContext> = {}
+  event: RoundCompleteEvent,
+  origin?: { type: ConversationOriginType }
 ): AfterChatEventHookContext => ({
   request: { headers: {} } as AfterChatEventHookContext['request'],
-  execution: createExecution({ type: ConversationOriginType.Slack }),
-  event: createRoundCompleteEvent('Hello'),
-  ...overrides,
+  execution: {
+    executionId: 'execution-1',
+    agentParams: { origin },
+  } as AfterChatEventHookContext['execution'],
+  event,
 });
 
-describe('addSlackProjection', () => {
-  it('adds the reply as is as a Slack markdown payload', () => {
-    const message = 'Here is the chart:\n\n<render_attachment id="a1" version="1" />';
-    const event = createRoundCompleteEvent(message);
+const registerHandler = () => {
+  const register = jest.fn();
 
-    expect(addSlackProjection(createContext({ event }))).toEqual({
-      event: {
-        ...event,
-        projection: { slack: { text: message, blocks: [{ type: 'markdown', text: message }] } },
-      },
-    });
+  registerSlackHooks({ hooks: { register } } as unknown as InternalSetupServices, {
+    logger: loggerMock.create(),
   });
 
-  it('does not mutate the original event', () => {
-    const event = createRoundCompleteEvent('Hello');
+  const [[{ id, hooks }]] = register.mock.calls;
+  const { mode, handler } = hooks[HookLifecycle.afterChatEvent];
 
-    addSlackProjection(createContext({ event }));
-
-    expect(event).not.toHaveProperty('projection');
-  });
-
-  it('returns nothing for rounds without a Slack origin', () => {
-    expect(addSlackProjection(createContext({ execution: createExecution() }))).toBeUndefined();
-  });
-
-  it('returns nothing when the reply is empty', () => {
-    expect(
-      addSlackProjection(createContext({ event: createRoundCompleteEvent('') }))
-    ).toBeUndefined();
-  });
-
-  it('returns nothing for events other than round_complete', () => {
-    const event: MessageCompleteEvent = {
-      type: ChatEventType.messageComplete,
-      data: { message_id: 'message-1', message_content: 'Hello' },
-    };
-
-    expect(addSlackProjection(createContext({ event }))).toBeUndefined();
-  });
-});
+  return { id, mode, handler: handler as HookHandler<HookLifecycle.afterChatEvent> };
+};
 
 describe('registerSlackHooks', () => {
   it('registers the Slack bundle with a blocking afterChatEvent hook', () => {
-    const register = jest.fn();
+    const { id, mode } = registerHandler();
 
-    registerSlackHooks({ hooks: { register } } as never);
+    expect(id).toBe('slack');
+    expect(mode).toBe(HookExecutionMode.blocking);
+  });
 
-    expect(register).toHaveBeenCalledWith({
-      id: 'slack',
-      hooks: {
-        [HookLifecycle.afterChatEvent]: {
-          mode: HookExecutionMode.blocking,
-          handler: addSlackProjection,
+  it('adds the reply of Slack rounds as Block Kit', async () => {
+    const { handler } = registerHandler();
+    const event = createRoundCompleteEvent('There are **3** open alerts.');
+
+    const result = await handler(createContext(event, { type: ConversationOriginType.Slack }));
+
+    expect(result).toEqual({
+      event: {
+        ...event,
+        projection: {
+          slack: {
+            text: expect.any(String),
+            blocks: [
+              { type: 'section', text: { type: 'mrkdwn', text: 'There are *3* open alerts.' } },
+            ],
+          },
         },
       },
     });
+  });
+
+  it('leaves events of rounds without an origin unchanged', async () => {
+    const { handler } = registerHandler();
+
+    expect(await handler(createContext(createRoundCompleteEvent('Hello')))).toBeUndefined();
   });
 });
