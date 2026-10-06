@@ -14,6 +14,7 @@ export class EisModelsPage {
   // Search and Filters
   readonly searchBar: Locator;
   readonly modelFamilyFilter: Locator;
+  readonly regionFilter: Locator;
 
   // Model Cards
   readonly allModelCards: Locator;
@@ -95,6 +96,7 @@ export class EisModelsPage {
     this.searchBar = this.page.testSubj.locator('contentListToolbar-searchBox');
     // Resolves to the popover's filter button, so it is clicked directly.
     this.modelFamilyFilter = this.page.testSubj.locator('modelFamilyFilterMultiselect');
+    this.regionFilter = this.page.testSubj.locator('regionFilterMultiselect');
 
     // Model Cards
     this.allModelCards = this.page.testSubj
@@ -251,6 +253,10 @@ export class EisModelsPage {
 
   public modelCard(modelName: string): Locator {
     return this.page.testSubj.locator(`eisModelCard-${modelName}`);
+  }
+
+  public modelCardMeta(modelName: string): Locator {
+    return this.page.testSubj.locator(`eisModelCardMeta-${modelName}`);
   }
 
   public flyoutRegionOption(key: string): Locator {

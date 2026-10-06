@@ -287,7 +287,7 @@ describe('aiIndexAutomationsSkill', () => {
         /\*\*When the projection exceeds one hour, put the estimate in bold between 🚨 markers\*\*/
       );
       expect(content).toMatch(
-        /"🚨 \*\*The full run over 300 units will take at least 80 minutes\*\* 🚨"/
+        /"🚨 \*\*The full run over 100 units will take at least 80 minutes\*\* 🚨"/
       );
       expect(content).toMatch(/Under an hour, write it in plain text/);
     });
@@ -420,15 +420,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).not.toMatch(/an `elasticsearch\.esql\.query` selecting `id`/);
     });
 
-    it('confirms cleanup on the newest revision per id, since a data stream keeps deleted ones', () => {
+    it('confirms cleanup through the query tool, which hides deleted revisions', () => {
       expect(content).toMatch(
-        /\| INLINE STATS latest = MAX\(@timestamp\) BY id\n\| WHERE @timestamp == latest/
+        /FROM <destination>\n\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"\n\| LIMIT 1/
       );
-      expect(content).toMatch(
-        /\| WHERE governance\.lifecycle\.status IS NULL OR governance\.lifecycle\.status != "deleted"/
-      );
-      // Mapping only appears once something wrote the field, so the filter needs a way out.
-      expect(content).toMatch(/unknown column, drop that line/);
+      expect(content).not.toMatch(/\| INLINE STATS latest = MAX\(@timestamp\) BY id/);
     });
 
     it('warns that the unexpanded query looks like a pilot that wrote nothing', () => {
@@ -441,11 +437,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/cleanup is not optional/);
     });
 
-    it('names the KI id as a second handle on pilot output, on either destination', () => {
-      expect(content).not.toMatch(/refuses `ki_id`/);
+    it('isolates pilot writes by prefixing ki_id with the run tag', () => {
       expect(content).toMatch(
-        /on a data stream each write appends a revision under the\s+same `id`/
+        /Prefix the\s+`ki_id` on `context-engine\.createKi` with the same `ce-pilot-<runId>-`/
       );
+      expect(content).toMatch(/the `ce-pilot-\*` prefix from `ki_id`/);
     });
 
     it('puts the pilot tag where the templates build the indicator, not on the write step', () => {
@@ -566,6 +562,43 @@ describe('aiIndexAutomationsSkill', () => {
     it('points at the skills on either side of it', () => {
       expect(content).toContain('analyze-and-improve');
       expect(content).toContain('ai-index-sources');
+    });
+  });
+
+  describe('the KI budget', () => {
+    const content = aiIndexAutomationsSkill.content;
+    const catalog =
+      (aiIndexAutomationsSkill.referencedContent ?? []).find(
+        ({ name }) => name === STRATEGY_CATALOG_REFERENCE_NAME
+      )?.content ?? '';
+
+    it('keeps the template bounds within the budget instead of inviting a larger run', () => {
+      expect(content).toMatch(/It defaults to 100, the KI budget;\s+keep it within that budget/);
+      expect(content).toMatch(/Keep `maxDocuments` within the KI budget/);
+      expect(content).not.toMatch(/defaults to 25/);
+      expect(content).not.toMatch(/raise it\s+deliberately/);
+    });
+
+    it('points the subagent brief at the budget rather than multiplying it per claim', () => {
+      expect(content).toMatch(/the KI budget: at most 100 KIs per run during onboarding/);
+      expect(content).not.toMatch(/multiplied by the claims per document/);
+    });
+
+    it('states the budget once in the catalog, with the bound a fan-out workflow writes for itself', () => {
+      expect(catalog).toMatch(/at most 100 during\s+onboarding/);
+      expect(catalog).toMatch(
+        /bound that count\s+with `maxItems` on the array in the `ai\.prompt` output schema/
+      );
+      expect(catalog).toMatch(
+        /set the workflow's own `max_documents` const to 100 ÷ N, rounded down/
+      );
+      expect(catalog).toMatch(/fails the step rather than being cut short/);
+      expect(catalog).not.toMatch(/1,000 KIs/);
+    });
+
+    it('lets the agent tell the user the KI count without presenting the budget as a limit', () => {
+      expect(catalog).toMatch(/tell the user how many KIs a\s+run will write/);
+      expect(catalog).toMatch(/do not present the budget itself as a limit or a policy/);
     });
   });
 });

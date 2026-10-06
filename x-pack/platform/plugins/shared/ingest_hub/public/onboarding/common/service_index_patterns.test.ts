@@ -51,6 +51,69 @@ describe('getServiceIndexPatterns', () => {
     expect(patterns).toEqual(['logs-aws.ec2_logs-*', 'metrics-aws.ec2_metrics-*']);
   });
 
+  it('uses the namespace instead of the wildcard when one is given', () => {
+    const entry = makeEntry({
+      varDefsByDataStream: {
+        ec2_logs: {
+          type: 'logs',
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+      },
+    });
+    expect(getServiceIndexPatterns(entry, 'prod_eu')).toEqual(['logs-aws.ec2_logs-prod_eu']);
+  });
+
+  it('falls back to the wildcard for an empty namespace', () => {
+    const entry = makeEntry({
+      varDefsByDataStream: {
+        ec2_logs: {
+          type: 'logs',
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+      },
+    });
+    expect(getServiceIndexPatterns(entry, '')).toEqual(['logs-aws.ec2_logs-*']);
+  });
+
+  it.each(['Prod', 'é'.repeat(51)])(
+    'falls back to the wildcard for the namespace %s, which the has_data route would reject',
+    (namespace) => {
+      const entry = makeEntry({
+        varDefsByDataStream: {
+          ec2_logs: {
+            type: 'logs',
+            dataset: 'aws.ec2_logs',
+            inputs: [],
+            defaultEnabledInputs: {},
+            varDefsByInput: {},
+          } as any,
+        },
+      });
+      expect(getServiceIndexPatterns(entry, namespace)).toEqual(['logs-aws.ec2_logs-*']);
+    }
+  );
+
+  it.each(['prod@eu', 'producción'])('keeps the Fleet-valid namespace %s concrete', (namespace) => {
+    const entry = makeEntry({
+      varDefsByDataStream: {
+        ec2_logs: {
+          type: 'logs',
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+      },
+    });
+    expect(getServiceIndexPatterns(entry, namespace)).toEqual([`logs-aws.ec2_logs-${namespace}`]);
+  });
+
   it('skips data streams missing dataset and falls back to package-level pattern', () => {
     const entry = makeEntry({
       varDefsByDataStream: {
@@ -117,6 +180,11 @@ describe('getServiceIndexPatterns', () => {
       expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws.cloudtrail.otel-*']);
     });
 
+    it('keeps the wildcard for ECF OTel log twins even when a namespace is given', () => {
+      const entry = makeEntry({ dataFormat: 'otel', ecfLogType: 'cloudtrail' as any });
+      expect(getServiceIndexPatterns(entry, 'prod')).toEqual(['logs-aws.cloudtrail.otel-*']);
+    });
+
     it('uses ecfLogType over any ECS-derived varDefsByDataStream dataset', () => {
       // ECF OTel twins alias ECS policy templates — varDefsByDataStream carries ECS datasets.
       const entry = makeEntry({
@@ -160,7 +228,29 @@ describe('getServiceIndexPatterns', () => {
           } as any,
         },
       });
-      expect(getServiceIndexPatterns(entry)).toEqual(['metrics-aws.ec2-*']);
+      expect(getServiceIndexPatterns(entry)).toEqual(['metrics-aws.ec2.otel-*']);
+      expect(getServiceIndexPatterns(entry, 'prod')).toEqual(['metrics-aws.ec2.otel-prod']);
+    });
+
+    it('does not append .otel twice when the dataset already ends with it', () => {
+      const entry = makeEntry({
+        dataFormat: 'otel',
+        packageName: 'aws_cloudwatch_input_otel',
+        varDefsByDataStream: {
+          ec2_otel: {
+            type: 'metrics',
+            dataset: undefined,
+            inputs: ['otelcol'],
+            defaultEnabledInputs: {},
+            varDefsByInput: {
+              otelcol: {
+                'data_stream.dataset': { type: 'text', default: 'aws.ec2.otel' } as any,
+              },
+            },
+          } as any,
+        },
+      });
+      expect(getServiceIndexPatterns(entry)).toEqual(['metrics-aws.ec2.otel-*']);
     });
 
     it('falls back to logs-packageName.*-* for OTel entry with no ecfLogType and no varDefsByDataStream', () => {

@@ -73,6 +73,10 @@ export class DataViewSource implements DataSourceBase {
     return field ? columnFromDataViewField(field) : undefined;
   }
 
+  public async getFilterableFields(): Promise<readonly Column[]> {
+    return this.getColumns();
+  }
+
   public isTimeBased(): boolean {
     return this.dataView.isTimeBased();
   }

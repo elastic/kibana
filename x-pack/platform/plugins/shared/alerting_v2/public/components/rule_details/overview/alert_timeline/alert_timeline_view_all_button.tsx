@@ -73,7 +73,7 @@ export const AlertTimelineViewAllButton: React.FC<AlertTimelineViewAllButtonProp
                       name: i18n.translate('xpack.alertingV2.alertTimeline.viewInDiscover', {
                         defaultMessage: 'View in Discover',
                       }),
-                      icon: 'discoverApp',
+                      icon: 'productDiscover',
                       href: discoverHref,
                       'data-test-subj': 'alertTimelineViewInDiscover',
                     },

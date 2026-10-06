@@ -137,6 +137,34 @@ describe('registerUpdateWorkerRoute', () => {
     });
   });
 
+  it('returns 403 when the caller lacks manage_security', async () => {
+    const update = jest.fn();
+    const { handler } = setupRoute(update);
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock({ manageSecurity: false }),
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { settingsRevision: 1, settings: { autonomy: 'manual' } },
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult: managedUpdateAuthzResult,
+        },
+      }),
+      response
+    );
+
+    expect(update).not.toHaveBeenCalled();
+    expect(response.forbidden).toHaveBeenCalledWith({
+      body: {
+        message: 'Modifying a worker requires the manage_security cluster privilege',
+      },
+    });
+  });
+
   it('updates settings without Workflows managed-update privileges', async () => {
     const update = jest.fn().mockResolvedValue({
       outcome: 'updated',

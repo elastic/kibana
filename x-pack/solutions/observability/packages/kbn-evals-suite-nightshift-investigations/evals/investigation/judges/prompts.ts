@@ -231,12 +231,11 @@ shortcut depending on what it actually touched — judge by the trajectory, not 
 - \`nightshift_sandbox_view_file\` reading an actual source file, or a file the agent itself wrote from
   a live query's output, is REAL WORK.
 - Any incident-management, chat, or post-resolution source that hands over the answer is LEAKED INFO.
-- A report evidence line with no query, no code reference, and no traceable trajectory step behind it
-  is an UNSUPPORTED assertion.
+- A report evidence entry with no traceable trajectory step behind it is an UNSUPPORTED assertion.
 
-A report evidence entry carrying \`esql_query\` or \`code\` is the model's own signal that it queried
-something live — verify that signal against the trajectory rather than taking it on faith; a query
-string in the report with no matching bash call in the trajectory is not grounded.
+Report evidence is self-contained (a Markdown description and/or a static chart) and carries no
+query of its own, so verify it against the trajectory rather than taking it on faith: a chart or
+table whose values match no query output in the trajectory is not grounded.
 
 ## Query (context only)
 {{{question}}}

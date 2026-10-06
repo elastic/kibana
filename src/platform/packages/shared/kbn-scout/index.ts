@@ -18,6 +18,7 @@ export {
   apiTest,
   globalSetupHook,
   globalTeardownHook,
+  getPlaywrightTagsFor,
   tags,
 } from './src/playwright';
 
@@ -58,6 +59,7 @@ export {
   QueryBar,
   UnifiedTabs,
   ListingTable,
+  EmbeddableAlertsTablePage,
 } from './src/playwright/page_objects';
 
 // Scout core types
@@ -116,3 +118,4 @@ export {
   OTEL_RECEIVER_PORT,
   OTEL_TEST_PROJECT_ID,
 } from './src/servers/configs/config_sets/security_audit_otel/shared';
+export { KIBANA_TLS_ORIGIN } from './src/servers/configs/config_sets/shared/tls_origin';
