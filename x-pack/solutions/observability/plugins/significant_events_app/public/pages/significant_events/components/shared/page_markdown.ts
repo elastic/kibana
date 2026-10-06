@@ -9,20 +9,11 @@ import { css } from '@emotion/css';
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-/**
- * The body of a written page, without the heading that repeats its title.
- *
- * Every page is authored with its own name as the first heading, and the view
- * already shows the title above it, so the same words would open the body twice.
- */
+/** Drops the leading heading that repeats the title the view already shows. */
 export const contentWithoutDuplicateTitle = (title: string, content: string): string =>
   content.replace(new RegExp(`^#{1,3}\\s*${escapeRegExp(title)}\\s*\\n+`, 'i'), '');
 
-/**
- * Inline code inside a page reads as part of the sentence; only fenced blocks
- * get the chip-like treatment. One definition, because it reaches into the
- * rendered markdown and two copies could drift apart silently.
- */
+/** Inline code reads as part of the sentence; only fenced blocks get the chip. */
 export const pageMarkdownCss = css`
   .euiMarkdownFormat :not(pre) > code {
     background: transparent;

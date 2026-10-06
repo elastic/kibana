@@ -7,10 +7,7 @@
 
 import React, { type FC } from 'react';
 
-/**
- * EUI's `cross` path (`assets/cross`) as a component, because `EuiIcon` imports
- * a string type's asset on demand and renders it one tick after first paint.
- */
+/** EUI's `cross` path inlined, which paints a tick before `EuiIcon`'s lazy asset. */
 export const CrossIcon: FC = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

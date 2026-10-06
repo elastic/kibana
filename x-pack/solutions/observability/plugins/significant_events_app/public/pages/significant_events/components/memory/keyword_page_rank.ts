@@ -8,14 +8,8 @@
 import { canonicalizeTag } from '@kbn/nightshift-investigations-plugin/common';
 
 /**
- * Keyword ranking by PageRank over memory tags.
- *
- * A port of Deductive's `computeKeywordPageRank`: the graph is keywords, two
- * keywords share an edge when one memory carries both, and a memory's
- * usefulness × confidence decides how much weight each of its co-occurrence
- * pairs contributes. PageRank then finds the keywords that sit at the centre of
- * that graph — the ones that tie many memories together — rather than the ones
- * merely repeated often.
+ * Keyword ranking by PageRank over memory tags: nodes are keywords, an edge joins
+ * the tags of one memory, and its usefulness × confidence weights the edge.
  */
 
 /** One memory, reduced to what the graph is built from. */
@@ -49,49 +43,24 @@ const DEFAULT_DAMPING = 0.85;
 const DEFAULT_TOLERANCE = 1e-6;
 const DEFAULT_MAX_ITERATIONS = 100;
 
-/**
- * Floor for a co-occurring pair: half a useful × five percent confident.
- *
- * A memory nobody has surfaced yet scores 0 × 0, and a graph that dropped those
- * edges would describe only the memories that happened to be read. The floor
- * keeps an unsurfaced memory contributing, at a fraction of a proven one's
- * weight.
- */
+/** Floor so an unsurfaced memory (0 × 0) still contributes to the graph. */
 export const MIN_EDGE_WEIGHT = 0.5 * 0.05;
 
-/**
- * Keywords kept before edges are built. The store's list route caps at
- * `MAX_PAGE_SIZE` pages, so this bounds the node count without cutting a real
- * store's vocabulary in practice.
- */
+/** Keywords kept before edges are built, bounding the node count. */
 export const MAX_RANKED_KEYWORDS = 200;
 
 /** Past this the cells stop being readable, and a treemap that big says nothing. */
 export const MAX_TREEMAP_CELLS = 20;
 
-/**
- * Area given to a keyword whose score is zero, so it still has a cell to be
- * clicked. A cell this small is a sliver, not a claim.
- */
+/** Area for a zero-score keyword, so it still has a clickable cell. */
 export const MIN_CELL_AREA = 1e-6;
 
-/**
- * The marker tag every stored document carries. It says "this is a memory", not
- * what the memory is about, so ranking it would only ever prove that the store
- * has memories.
- */
+/** The marker tag every document carries, which says nothing about its content. */
 export const MEMORY_MARKER_TAG = 'memory';
 
 const asUnit = (value: number): number => Math.min(Math.max(value, 0), 1);
 
-/**
- * The canonical keywords of one entry, in order, marker tag dropped.
- *
- * Canonicalization is the only deviation from the original port, which trimmed
- * and lowercased. Real tags arrive as `invoke_agent`, `invoke-agent`, and
- * `Invoke Agent` for one concept, and a graph that ranked those separately would
- * report three weak keywords where there is one strong one.
- */
+/** Canonical keywords of one entry, in order, marker tag dropped. */
 const entryKeywords = (keywords: readonly string[] | undefined): string[] => {
   const canonical: string[] = [];
   for (const keyword of keywords ?? []) {
@@ -102,11 +71,7 @@ const entryKeywords = (keywords: readonly string[] | undefined): string[] => {
   return canonical;
 };
 
-/**
- * Raw PageRank over the co-occurrence graph, keyed by canonical keyword.
- *
- * Scores sum to 1 across all keywords; the treemap normalizes them for display.
- */
+/** Raw PageRank over the co-occurrence graph, keyed by canonical keyword. */
 export function computeKeywordPageRank(
   entries: readonly KeywordEntry[],
   options: KeywordPageRankOptions = {}
@@ -116,8 +81,7 @@ export function computeKeywordPageRank(
   const maxKeywords = options.maxKeywords;
 
   let allowedKeywords: Set<string> | null = null;
-  // Canonicalized once per entry and reused by both passes: `normalize('NFKC')`
-  // is the most expensive thing in here, and this runs on the render path.
+  // Canonicalized once per entry and reused by both passes.
   const keywordsByEntry = entries.map((entry) => entryKeywords(entry.tags));
   if (maxKeywords !== undefined) {
     const counts = new Map<string, number>();
