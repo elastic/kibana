@@ -340,7 +340,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       aiIndices: experimentalEnabled && contextEngineEnabled,
       relevantSkills: experimentalEnabled,
       todos: experimentalEnabled,
-      datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
