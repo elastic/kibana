@@ -46,7 +46,9 @@ triggers:
             id_value:
               type: string
               minLength: 1
-              maxLength: 1024
+              # Matches the SSE entity value cap (`entityRefSchema.value`): ARN-shaped
+              # service names can run long.
+              maxLength: 2048
               description: The user.name or service.name to mark.
             criticality_level:
               type: string
@@ -117,11 +119,22 @@ steps:
       headers:
         elastic-api-version: "2023-10-31"
 
+  # Separate step: Liquid cannot read a variable written by the same data.set.
+  - name: capture_previous_status
+    type: data.set
+    with:
+      previous_read_http_status: "{{ steps.read_previous.error.message | slice: 0, 8 }}"
+
   - name: capture_previous
     type: data.set
     with:
       previous_level: "{{ steps.read_previous.output.criticality_level | default: '' }}"
       criticality_level: "{{ inputs.actionInput.criticality_level | default: 'high_impact' }}"
+      # A true 404 (no record) and a successful read (a record exists) both let the result
+      # say what the previous level was. Any other read failure (network blip, 403, 500)
+      # must not be mistaken for "no previous record" -- that would tell the approver to
+      # DELETE a record that may still exist, destroying it instead of restoring it.
+      previous_level_known: "{{ steps.read_previous.error == blank or variables.previous_read_http_status == 'HTTP 404' }}"
 
   # Upsert the record. No retries: a repeated POST is harmless but would hide
   # the real failure behind a later success. `refresh: wait_for` so the entity
@@ -156,5 +169,5 @@ steps:
       previous_level: "{{ variables.previous_level }}"
       message: >-
         {{ consts.actionLabel }} for {{ inputs.actionInput.id_field }} {{ inputs.actionInput.id_value }}
-        set to {{ steps.dispatch.output.criticality_level }}{% if variables.previous_level != "" %} (was {{ variables.previous_level }}){% endif %}.
-        {% if variables.previous_level != "" %}To revert, POST the previous level ({{ variables.previous_level }}) back.{% else %}To revert, DELETE /api/asset_criticality?id_field={{ inputs.actionInput.id_field }}&id_value={{ inputs.actionInput.id_value | url_encode }}.{% endif %}
+        set to {{ steps.dispatch.output.criticality_level }}{% if variables.previous_level_known and variables.previous_level != "" %} (was {{ variables.previous_level }}){% endif %}.
+        {% if variables.previous_level_known %}{% if variables.previous_level != "" %}To revert, POST the previous level ({{ variables.previous_level }}) back.{% else %}To revert, DELETE /api/asset_criticality?id_field={{ inputs.actionInput.id_field }}&id_value={{ inputs.actionInput.id_value | url_encode }}.{% endif %}{% else %}Could not confirm the previous level before writing ({{ steps.read_previous.error.message }}); check GET /api/asset_criticality?id_field={{ inputs.actionInput.id_field }}&id_value={{ inputs.actionInput.id_value | url_encode }} before reverting.{% endif %}

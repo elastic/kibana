@@ -148,6 +148,18 @@ describe('AlertZero set asset criticality workflow', () => {
     expect(capture?.with?.previous_level).toContain('steps.read_previous.output.criticality_level');
   });
 
+  it('only treats a confirmed 404 as "no previous record," not any other read failure', () => {
+    const captureStatus = stepByName('capture_previous_status');
+    const capture = stepByName('capture_previous');
+
+    expect(captureStatus?.type).toBe('data.set');
+    expect(captureStatus?.with?.previous_read_http_status).toContain(
+      'steps.read_previous.error.message'
+    );
+    expect(capture?.with?.previous_level_known).toContain('steps.read_previous.error == blank');
+    expect(capture?.with?.previous_level_known).toContain('HTTP 404');
+  });
+
   it('upserts through the public API with the versioned header, wait_for refresh, and no retry', () => {
     const dispatch = stepByName('dispatch');
     const body = dispatch?.with?.body as Record<string, string> | undefined;
@@ -179,5 +191,9 @@ describe('AlertZero set asset criticality workflow', () => {
     ]);
     expect(emit?.with?.previous_level).toBe('{{ variables.previous_level }}');
     expect(emit?.with?.message).toContain('DELETE /api/asset_criticality');
+    // Gated on previous_level_known: an unconfirmed read must not recommend DELETE,
+    // which would destroy a record that may still exist rather than restore it.
+    expect(emit?.with?.message).toContain('variables.previous_level_known');
+    expect(emit?.with?.message).toContain('Could not confirm the previous level');
   });
 });

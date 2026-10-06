@@ -154,7 +154,12 @@ export const packageReportMintPayloadSchema = z.object({
   subject: z
     .object({
       kind: z.enum(['host', 'process', 'user', 'service']),
-      value: z.string().max(1024),
+      // Matches the SSE entity value cap (`entityRefSchema.value` in
+      // significant_security_event_schema.ts): a user/service subject's value is read
+      // straight from an SSE entity, which allows up to 2048 (ARN-shaped service names
+      // run long). A tighter cap here would throw on mint and fail the whole package
+      // result, including the host/process proposals bundled in the same array.
+      value: z.string().max(2048),
     })
     .optional(),
   confidence: z.enum(['low', 'medium', 'high']).optional(),
