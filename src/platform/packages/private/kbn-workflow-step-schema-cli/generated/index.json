@@ -70,6 +70,7 @@
     ".slack2",
     ".slack_api",
     ".snowflake",
+    ".solarwinds_platform",
     ".sublime_security",
     ".swimlane",
     ".tavily_mcp",
@@ -832,6 +833,12 @@
     "snowflake.listTables",
     "snowflake.listViews",
     "snowflake.runQuery",
+    "solarwinds_platform.acknowledgeAlert",
+    "solarwinds_platform.getAlert",
+    "solarwinds_platform.getNode",
+    "solarwinds_platform.listActiveAlerts",
+    "solarwinds_platform.query",
+    "solarwinds_platform.searchNodes",
     "sublime_security.getAsaVerdict",
     "sublime_security.getAttackScore",
     "sublime_security.getMessage",
@@ -989,11 +996,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "61efe207aa570dd92932071a79a7ecce2643f83e8b5a780e4cb0292101348169"
+      "sha256": "381a5805515e4984791d9ef6b9e711b1281d8a008c9fbf60000602ccc0b3c743"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "4200cd6a42c1467431ecdcb7d245633b1c1146de1fba51b332e911eb1d7bf67f"
+      "sha256": "8ac24f83ce1ff1aa7f780e83f8f38975e5cf905fa507a24ad7bec4ef9ff3a690"
     }
   }
 }
