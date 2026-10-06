@@ -66,6 +66,13 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     {
       code: dedent`
         import { z } from '@kbn/zod';
+        const makeSchema = () => z.object({});
+        const Schema = makeSchema();
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
         class C {
           make() {
             const X = z.object({});
@@ -139,6 +146,29 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
   ],
 
   invalid: [
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const makeSchema = () => z.object({});
+        makeSchema();
+        makeSchema.describe('schema');
+      `,
+      errors: [{ messageId: 'schemaFactoryUsedAsSchema' }],
+      output: null,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const IpAddressSchema = () => z.union([z.string(), z.number()]);
+        export const Connector = { input: z.object({ ip: IpAddressSchema.describe('ip') }) };
+      `,
+      errors: [{ messageId: 'schemaFactoryUsedAsSchema' }, EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const IpAddressSchema = lazySchema(() => z.union([z.string(), z.number()]));
+        export const Connector = { input: lazySchema(() => z.object({ ip: IpAddressSchema.describe('ip') })) };
+      `,
+    },
     {
       code: dedent`
         import { z } from '@kbn/zod';

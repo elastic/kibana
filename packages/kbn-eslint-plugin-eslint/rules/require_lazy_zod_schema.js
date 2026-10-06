@@ -45,6 +45,22 @@ const AUTO_FIX_SCHEMA_METHODS = new Set([
   'tuple',
   'union',
 ]);
+const SCHEMA_VALUE_METHODS = new Set([
+  'array',
+  'default',
+  'describe',
+  'extend',
+  'max',
+  'min',
+  'nullable',
+  'omit',
+  'optional',
+  'parse',
+  'pick',
+  'refine',
+  'safeParse',
+  'superRefine',
+]);
 
 const UNWRAP_TYPES = new Set([
   esTypes.TSAsExpression,
@@ -458,6 +474,8 @@ module.exports = {
         'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use.',
       eagerDerivedZodSchema:
         'Wrap this module-level Zod schema derivation in `lazySchema(() => ...)` to defer it until first use.',
+      schemaFactoryUsedAsSchema:
+        'This function is used as a Zod schema. Use `lazySchema(() => ...)` to keep a schema value.',
     },
   },
 
@@ -466,12 +484,14 @@ module.exports = {
     let state;
     let sourceCode;
     let fileChangedLines;
+    /** @type {VariableDeclarator[]} */
+    let schemaFactoryCandidates;
 
-    const reportEagerSchema = (node, declaration, messageId) => {
+    const reportEagerSchema = (node, declaration, messageId, fixTarget = node, allowFix = true) => {
       if (!changedLines.touchesChangedLine(fileChangedLines, declaration)) {
         return;
       }
-      const canFix = canAutoFixSchemaCall(node) && !containsAwaitExpression(node);
+      const canFix = allowFix && canAutoFixSchemaCall(node) && !containsAwaitExpression(node);
       let lazySchemaName =
         state.lazySchemaNames.size === 1 ? state.lazySchemaNames.values().next().value : undefined;
       let importToUpdate;
@@ -495,7 +515,10 @@ module.exports = {
           ? {
               fix: (fixer) => {
                 const fixes = [
-                  fixer.replaceText(node, `${lazySchemaName}(() => ${sourceCode.getText(node)})`),
+                  fixer.replaceText(
+                    fixTarget,
+                    `${lazySchemaName}(() => ${sourceCode.getText(node)})`
+                  ),
                 ];
                 if (addImport) {
                   const namedImports = importToUpdate.specifiers.filter(
@@ -522,6 +545,7 @@ module.exports = {
         };
         sourceCode = context.sourceCode;
         fileChangedLines = changedLines.getChangedLines(context.filename);
+        schemaFactoryCandidates = [];
       },
       ImportDeclaration(node) {
         recordImportBindings(/** @type {ImportDeclaration} */ (node), state);
@@ -538,6 +562,18 @@ module.exports = {
 
         if (isLazySchemaCall(declarator.init, state)) {
           recordSchemaBinding(declarator, state);
+          return;
+        }
+
+        if (
+          declarator.id.type === esTypes.Identifier &&
+          declarator.init.type === esTypes.ArrowFunctionExpression &&
+          declarator.init.params.length === 0 &&
+          !declarator.init.async &&
+          declarator.init.body.type !== esTypes.BlockStatement &&
+          isEagerZodNamespaceChain(declarator.init.body, state)
+        ) {
+          schemaFactoryCandidates.push(declarator);
           return;
         }
 
@@ -566,6 +602,44 @@ module.exports = {
           isLazySchemaDerivationChain(value, state)
         ) {
           reportEagerSchema(value, property, 'eagerDerivedZodSchema');
+        }
+      },
+      'Program:exit'() {
+        for (const declarator of schemaFactoryCandidates) {
+          const binding = sourceCode.getScope(declarator).set.get(declarator.id.name);
+          if (!binding) {
+            continue;
+          }
+
+          let usedAsSchema = false;
+          let calledAsFunction = false;
+          for (const { identifier } of binding.references) {
+            const parent = identifier.parent;
+            if (
+              parent?.type === esTypes.MemberExpression &&
+              parent.object === identifier &&
+              !parent.computed &&
+              parent.property.type === esTypes.Identifier &&
+              SCHEMA_VALUE_METHODS.has(parent.property.name)
+            ) {
+              usedAsSchema = true;
+            } else if (parent?.type === esTypes.CallExpression && parent.callee === identifier) {
+              calledAsFunction = true;
+            }
+          }
+          if (!usedAsSchema) {
+            continue;
+          }
+
+          const ancestors = sourceCode.getAncestors(declarator);
+          const exported = ancestors[ancestors.length - 2]?.type === esTypes.ExportNamedDeclaration;
+          reportEagerSchema(
+            declarator.init.body,
+            declarator,
+            'schemaFactoryUsedAsSchema',
+            declarator.init,
+            !calledAsFunction && !exported
+          );
         }
       },
     };

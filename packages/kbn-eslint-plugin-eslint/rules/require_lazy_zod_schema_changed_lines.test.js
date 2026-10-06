@@ -24,6 +24,29 @@ const config = {
 afterEach(() => jest.restoreAllMocks());
 
 describe('changed-line scope for require_lazy_zod_schema', () => {
+  it('fixes both a changed schema factory used as a schema and an eager schema', () => {
+    jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([
+      { start: 2, end: 2 },
+      { start: 3, end: 3 },
+    ]);
+    const code = [
+      "import { z, lazySchema } from '@kbn/zod';",
+      'const IpAddressSchema = () => z.union([z.string(), z.number()]);',
+      "export const Connector = { input: z.object({ ip: IpAddressSchema.describe('ip') }) };",
+    ].join('\n');
+
+    expect(linter.verifyAndFix(code, config, 'schema.ts')).toEqual(
+      expect.objectContaining({
+        fixed: true,
+        output: [
+          "import { z, lazySchema } from '@kbn/zod';",
+          'const IpAddressSchema = lazySchema(() => z.union([z.string(), z.number()]));',
+          "export const Connector = { input: lazySchema(() => z.object({ ip: IpAddressSchema.describe('ip') })) };",
+        ].join('\n'),
+      })
+    );
+  });
+
   it('leaves existing schemas alone when a new schema is added', () => {
     jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([{ start: 3, end: 3 }]);
     const code = [
@@ -82,6 +105,17 @@ describe('changed-line scope for require_lazy_zod_schema', () => {
 
     expect(linter.verify(code, config, 'schema.ts')).toEqual([]);
     expect(linter.verifyAndFix(code, config, 'schema.ts').output).toBe(code);
+  });
+
+  it('leaves an unchanged schema factory alone', () => {
+    jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([{ start: 1, end: 1 }]);
+    const code = [
+      "import { z } from '@kbn/zod';",
+      'const Existing = () => z.object({});',
+      "Existing.describe('schema');",
+    ].join('\n');
+
+    expect(linter.verify(code, config, 'schema.ts')).toEqual([]);
   });
 });
 
