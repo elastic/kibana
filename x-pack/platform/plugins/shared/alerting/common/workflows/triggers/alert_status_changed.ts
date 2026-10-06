@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID } from './alert_status_changed_setting';
 
 /**
  * Fires once per alert instance per genuine state transition: when a lifecycle
@@ -124,7 +125,8 @@ export const alertStatusChangedV1TriggerDefinition: CommonTriggerDefinition<
   description: i18n.translate('xpack.alerting.workflowTriggers.alertStatusChanged.description', {
     defaultMessage:
       'Fires once per alert instance when it becomes active or recovers. ' +
-      'Ongoing alerts that have not changed status do not re-fire.',
+      'Ongoing alerts that have not changed status do not re-fire. ' +
+      'Technical preview: turn on the "Alert status workflow trigger" advanced setting in each space that uses it.',
   }),
   documentation: {
     details: i18n.translate(
@@ -134,7 +136,10 @@ export const alertStatusChangedV1TriggerDefinition: CommonTriggerDefinition<
           'Fires once per alert instance per genuine status transition. ' +
           'One alert becoming active = one trigger event. One alert recovering = one trigger event. ' +
           'Ongoing (unchanged) alerts produce no events. ' +
-          'Only fires for lifecycle rule types (autoRecoverAlerts: true).',
+          'Only fires for lifecycle rule types (autoRecoverAlerts: true). ' +
+          'Events are only published in spaces where the "Alert status workflow trigger" ' +
+          'advanced setting ({settingId}) is on. It is off by default.',
+        values: { settingId: ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID },
       }
     ),
     examples: [

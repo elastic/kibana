@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
+import { isAlertStatusWorkflowTriggerEnabled } from '../lib/events/alert_status_changed_setting';
 import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
 import type {
   IntervalSchedule,
@@ -594,7 +595,12 @@ export class TaskRunner<
       const newEntries = Object.entries(newAlerts);
       const recoveredEntries = Object.entries(recoveredAlerts);
 
-      if (newEntries.length > 0 || recoveredEntries.length > 0) {
+      // The per-space advanced setting is read only when there is something to emit, and after
+      // the executor has finished. While it is off, nothing is built or published.
+      if (
+        (newEntries.length > 0 || recoveredEntries.length > 0) &&
+        (await isAlertStatusWorkflowTriggerEnabled(executorServices.uiSettingsClient, this.logger))
+      ) {
         const rulePayload: AlertStatusChangedV1Payload['rule'] = {
           id: ruleId,
           name: rule.name,

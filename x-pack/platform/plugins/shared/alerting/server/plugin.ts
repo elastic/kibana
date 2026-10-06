@@ -65,6 +65,7 @@ import type {
   AlertingPublisherContext,
 } from './lib/workflow_extensions/events';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
+import { registerAlertStatusWorkflowTriggerSetting } from './lib/events/alert_status_changed_setting';
 import { AlertStatusChangedWorkflowSubscriber } from './lib/workflow_extensions/alert_status_changed_subscriber';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -516,6 +517,7 @@ export class AlertingPlugin {
         AlertingPublisherContext
       >(this.logger);
       registerTriggerDefinitions(plugins.workflowsExtensions);
+      registerAlertStatusWorkflowTriggerSetting(core.uiSettings);
     }
 
     return {
