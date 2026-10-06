@@ -265,7 +265,7 @@ export const claimGrounding: Evaluator = {
     let grounded = 0;
     let total = 0;
 
-    const rawChecks = (raw?.checks ?? []) as Array<RawCheck & { status?: string }>;
+    const rawChecks = (raw?.checks ?? []) as RawCheck[];
     const checkResults = new Map(
       rawChecks.map((check) => [check.name, { result: check.result, status: check.status }])
     );
