@@ -83,6 +83,12 @@ export const OBSERVABLE_REMOVED = i18n.translate('xpack.cases.caseView.observabl
   defaultMessage: 'Observable removed',
 });
 
+export const OBSERVABLES_BULK_REMOVED = (count: number) =>
+  i18n.translate('xpack.cases.caseView.observables.bulkRemoved', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# observable removed} other {# observables removed}}',
+  });
+
 export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observables.updated', {
   defaultMessage: 'Observable updated',
 });
