@@ -300,6 +300,7 @@ export class AnalyticsService {
     round,
     roundCount,
     conversationAttachments,
+    workflowExecutionId,
   }: {
     agentId: string;
     conversationId?: string;
@@ -308,6 +309,8 @@ export class AnalyticsService {
     round: ConversationRound;
     roundCount: number;
     conversationAttachments: VersionedAttachment[];
+    /** The workflow execution whose `ai.agent` step started the round, or its parent round. */
+    workflowExecutionId?: string;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -352,6 +355,7 @@ export class AnalyticsService {
           tools_invoked: toolsInvoked,
           tool_calls: toolCallSteps.length,
           tool_call_errors: toolCallErrors.length,
+          workflow_execution_id: workflowExecutionId,
         }
       );
     } catch (error) {
@@ -448,6 +452,7 @@ export class AnalyticsService {
     modelProvider,
     roundId,
     roundOrigin,
+    workflowExecutionId,
   }: {
     agentId: string;
     conversationId?: string;
@@ -456,6 +461,8 @@ export class AnalyticsService {
     modelProvider: ModelProvider;
     roundId?: string;
     roundOrigin?: TelemetryConversationOrigin;
+    /** The workflow execution whose `ai.agent` step started the round. */
+    workflowExecutionId?: string;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -470,6 +477,7 @@ export class AnalyticsService {
         model_provider: modelProvider,
         error_message: errorMessage,
         error_type: errorType,
+        workflow_execution_id: workflowExecutionId,
       });
     } catch (err) {
       // Do not fail the request if telemetry fails

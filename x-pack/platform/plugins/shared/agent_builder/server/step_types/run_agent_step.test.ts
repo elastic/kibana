@@ -1001,13 +1001,14 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(execution.executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
+            // No interactionId: the execution derives it from workflowExecutionId.
             telemetryMetadata: {
               pluginId: 'streams_significant_events_discovery',
               aggregateBy: 'streams_significant_events',
               productSolution: 'observability',
               productFeature: 'nightshift',
-              interactionId: 'exec-1',
             },
+            workflowExecutionId: 'exec-1',
           }),
         })
       );
@@ -1030,6 +1031,20 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       const callArg = execution.executeAgent.mock.calls[0][0];
       expect(callArg.params).not.toHaveProperty('telemetryMetadata');
+    });
+
+    it('passes the workflow execution id for round telemetry and EIS, with or without a plugin-id', async () => {
+      const execution = createExecutionMock(roundCompleteEvents());
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(createContext({ input: { message: 'hello' }, config: {} }));
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ workflowExecutionId: 'exec-1' }),
+        })
+      );
     });
   });
 

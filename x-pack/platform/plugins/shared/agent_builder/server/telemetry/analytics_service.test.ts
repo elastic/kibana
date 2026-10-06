@@ -283,6 +283,37 @@ describe('AnalyticsService', () => {
       );
     });
 
+    it('reports the workflow execution id', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+        workflowExecutionId: 'workflow-run-1',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
+      );
+    });
+
+    it('leaves the workflow execution id unset for a round no workflow step started', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      const [[, payload]] = analytics.reportEvent.mock.calls;
+      expect(payload).toEqual(expect.objectContaining({ workflow_execution_id: undefined }));
+    });
+
     it('does not throw when reporting throws', () => {
       analytics.reportEvent.mockImplementation(() => {
         throw new Error('boom');
@@ -815,6 +846,15 @@ describe('AnalyticsService', () => {
       expect(analytics.reportEvent).toHaveBeenCalledWith(
         AGENT_BUILDER_EVENT_TYPES.RoundError,
         expect.objectContaining({ origin: undefined })
+      );
+    });
+
+    it('reports the workflow execution id', () => {
+      service.reportRoundError({ ...defaultArgs, workflowExecutionId: 'workflow-run-1' });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundError,
+        expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
       );
     });
   });

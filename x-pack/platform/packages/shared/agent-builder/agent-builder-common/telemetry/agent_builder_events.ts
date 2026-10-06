@@ -107,6 +107,9 @@ export type TelemetryConversationOrigin = `${ConversationOriginType}`;
 const CONVERSATION_ORIGIN_DESCRIPTION =
   'External system the conversation round came from (e.g. Slack). Unset when the round is not attributed to an external system, which includes rounds from the UI, from the API, and from sub-agent runs.';
 
+const ROUND_WORKFLOW_EXECUTION_ID_DESCRIPTION =
+  'For a round started by a workflow ai.agent step, or by a sub-agent of such a round, the ID of that workflow execution (the engine-generated workflowExecutionId). Unset for every other round.';
+
 export interface ReportRoundCompleteParams {
   agent_id: string;
   attachments?: string[];
@@ -130,6 +133,7 @@ export interface ReportRoundCompleteParams {
   tool_calls: number;
   tool_call_errors: number;
   tools_invoked: string[];
+  workflow_execution_id?: string;
 }
 
 /** How a human resolved a HITL prompt. */
@@ -181,6 +185,7 @@ export interface ReportRoundErrorParams {
   origin?: TelemetryConversationOrigin;
   agent_id: string;
   round_id?: string;
+  workflow_execution_id?: string;
 }
 
 export interface ReportAgentCreatedParams {
@@ -1011,6 +1016,13 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
+    workflow_execution_id: {
+      type: 'keyword',
+      _meta: {
+        description: ROUND_WORKFLOW_EXECUTION_ID_DESCRIPTION,
+        optional: true,
+      },
+    },
     input_tokens: {
       type: 'integer',
       _meta: {
@@ -1393,6 +1405,13 @@ const ROUND_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
     _meta: {
       description: 'The ID of the agent involved in the conversation',
       optional: false,
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description: ROUND_WORKFLOW_EXECUTION_ID_DESCRIPTION,
+      optional: true,
     },
   },
 };
