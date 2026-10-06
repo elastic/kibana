@@ -9,7 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
-import { SolarWinds } from './solarwinds';
+import { SolarWindsPlatform } from './solarwinds_platform';
 import {
   AcknowledgeAlertInputSchema,
   GetAlertInputSchema,
@@ -22,7 +22,7 @@ import {
 const SWIS_URL = 'https://orion.example.com:17774/SolarWinds/InformationService/v3/Json';
 const NODE_URI = 'swis://orion.example.com/Orion/Orion.Nodes/NodeID=7';
 
-describe('SolarWinds', () => {
+describe('SolarWindsPlatform', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
@@ -35,7 +35,7 @@ describe('SolarWinds', () => {
   } as unknown as ActionContext;
 
   const runAction = (name: string, input: unknown) => {
-    const action = SolarWinds.actions[name];
+    const action = SolarWindsPlatform.actions[name];
     return action.handler(mockContext, action.input.parse(input));
   };
 
@@ -44,14 +44,16 @@ describe('SolarWinds', () => {
   });
 
   it('is discoverable via getConnectorSpec', () => {
-    expect(getConnectorSpec('.solarwinds')).toBe(SolarWinds);
+    expect(getConnectorSpec('.solarwinds_platform')).toBe(SolarWindsPlatform);
   });
 
   it('has the expected metadata and auth', () => {
-    expect(SolarWinds.metadata.id).toBe('.solarwinds');
-    expect(SolarWinds.metadata.supportedFeatureIds).toEqual(['workflows']);
-    expect(SolarWinds.test?.enabled).toBe(true);
-    const types = (SolarWinds.auth?.types as Array<{ type: string }>).map(({ type }) => type);
+    expect(SolarWindsPlatform.metadata.id).toBe('.solarwinds_platform');
+    expect(SolarWindsPlatform.metadata.supportedFeatureIds).toEqual(['workflows']);
+    expect(SolarWindsPlatform.test?.enabled).toBe(true);
+    const types = (SolarWindsPlatform.auth?.types as Array<{ type: string }>).map(
+      ({ type }) => type
+    );
     expect(types).toEqual(['basic_with_tls']);
   });
 
@@ -323,7 +325,7 @@ describe('SolarWinds', () => {
     it('counts the nodes', async () => {
       mockClient.post.mockResolvedValue({ data: { results: [{ NodeCount: 3 }] } });
 
-      const result = await SolarWinds.test?.handler(mockContext);
+      const result = await SolarWindsPlatform.test?.handler(mockContext);
 
       expect(result).toEqual({ nodeCount: 3 });
     });
@@ -331,7 +333,7 @@ describe('SolarWinds', () => {
     it('fails when the URL is not configured', async () => {
       const context = { ...mockContext, config: {} } as unknown as ActionContext;
 
-      await expect(SolarWinds.test?.handler(context)).rejects.toThrow(
+      await expect(SolarWindsPlatform.test?.handler(context)).rejects.toThrow(
         new Error('SolarWinds connector is missing the required URL configuration field.')
       );
       expect(mockClient.post).not.toHaveBeenCalled();

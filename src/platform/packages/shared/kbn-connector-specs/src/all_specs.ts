@@ -92,4 +92,4 @@ export * from './specs/gitlab/gitlab';
 export * from './specs/elasticsearch/elasticsearch';
 export * from './specs/azure_functions/azure_functions';
 export { ThreatQ } from './specs/threatq/threatq';
-export * from './specs/solarwinds/solarwinds';
+export * from './specs/solarwinds_platform/solarwinds_platform';

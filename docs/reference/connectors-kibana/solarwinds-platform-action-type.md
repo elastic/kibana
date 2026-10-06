@@ -1,23 +1,23 @@
 ---
-navigation_title: "SolarWinds"
+navigation_title: "SolarWinds Platform"
 type: reference
-description: "Use the SolarWinds connector to run SWQL queries, list, read, and acknowledge active alerts, and look up nodes in a self-hosted SolarWinds Platform server."
+description: "Use the SolarWinds Platform connector to run SWQL queries, list, read, and acknowledge active alerts, and look up nodes in a self-hosted SolarWinds Platform server."
 applies_to:
   stack: preview 9.6
   serverless: preview
 ---
 
-# SolarWinds connector [solarwinds-action-type]
+# SolarWinds Platform connector [solarwinds-platform-action-type]
 
-The SolarWinds connector uses the [SolarWinds Information Service (SWIS) REST API](https://solarwinds.github.io/OrionSDK/docs/rest/) to read alerts and device data from a self-hosted SolarWinds Platform (Orion) server, and to acknowledge alerts. Use it to triage SolarWinds network alerts in a workflow: find the active alerts, look up the affected device and the devices around it, and acknowledge the alert when the triage is done.
+The SolarWinds Platform connector uses the [SolarWinds Information Service (SWIS) REST API](https://solarwinds.github.io/OrionSDK/docs/rest/) to read alerts and device data from a self-hosted SolarWinds Platform server (formerly Orion Platform), and to acknowledge alerts. Use it to triage SolarWinds network alerts in a workflow: find the active alerts, look up the affected device and the devices around it, and acknowledge the alert when the triage is done.
 
 This connector is currently available in **Workflows** only.
 
-## Create connectors in {{kib}} [define-solarwinds-ui]
+## Create connectors in {{kib}} [define-solarwinds-platform-ui]
 
-Create a SolarWinds connector from the **{{connectors-ui}}** page. To open the page, find **{{connectors-ui}}** in the navigation or under **Alerts and Insights / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+Create a SolarWinds Platform connector from the **{{connectors-ui}}** page. To open the page, find **{{connectors-ui}}** in the navigation or under **Alerts and Insights / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 
-### Connector configuration [solarwinds-connector-configuration]
+### Connector configuration [solarwinds-platform-connector-configuration]
 
 SWIS URL
 :   The protocol, host, and port of the SolarWinds Information Service on the main polling engine, for example `https://orion.example.com:17774`. Don't include a path. SolarWinds Platform 2023.1 and later use port 17774. Earlier versions use port 17778.
@@ -28,7 +28,7 @@ Username and password
 CA certificate (PEM) and verification mode
 :   SWIS uses a self-signed certificate by default. Paste the certificate authority in PEM format to verify it, or set the verification mode to **none** to turn off verification.
 
-## Available actions [solarwinds-available-actions]
+## Available actions [solarwinds-platform-available-actions]
 
 | Action | Description |
 |--------|-------------|
@@ -41,13 +41,13 @@ CA certificate (PEM) and verification mode
 
 The list actions return `totalRows` and, when more rows exist, a `nextOffset` value to pass as `offset` in the next call.
 
-## Connector networking configuration [solarwinds-connector-networking-configuration]
+## Connector networking configuration [solarwinds-platform-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 {{kib}} must be able to reach the SWIS port on the main polling engine. Open that port in the server firewall for the {{kib}} host.
 
-## Get API credentials [solarwinds-api-credentials]
+## Get API credentials [solarwinds-platform-api-credentials]
 
 1. Sign in to the SolarWinds Platform web console as an administrator.
 2. Go to **Settings > All Settings > Manage Accounts** and add a SolarWinds individual account, or select an existing Windows account. The `query` action can read all data that this account can read, including device credentials such as SNMP community strings. Use an account with only the permissions and object limitations you need.

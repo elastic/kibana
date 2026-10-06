@@ -433,7 +433,12 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
-    '.solarwinds',
-    lazy(() => import(/* webpackChunkName: "connectorIconSolarWinds" */ './specs/solarwinds/icon')),
+    '.solarwinds_platform',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSolarWindsPlatform" */ './specs/solarwinds_platform/icon'
+        )
+    ),
   ],
 ]);
