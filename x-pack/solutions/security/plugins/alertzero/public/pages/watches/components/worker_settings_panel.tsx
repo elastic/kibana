@@ -135,6 +135,14 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const accordionButtonStyles = useMemo(
     () => css`
       width: auto;
+      /*
+       * EuiAccordion's trigger is itself a flex item with min-width: auto, whose automatic minimum
+       * size is the band's min-content width. With white-space: nowrap on the title the whole name
+       * is atomic, so that floor is the full name: without this relief the button cannot shrink
+       * below it, neither the badge wrap nor the title ellipsis fires, and a long name pushes the
+       * header past its panel.
+       */
+      min-width: 0;
 
       &,
       &:hover,
@@ -184,15 +192,31 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           alignItems="center"
           gutterSize="s"
           responsive={false}
-          wrap={false}
+          wrap
           css={css`
             width: 100%;
             min-width: 0;
           `}
         >
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ maxWidth: '100%' }}>
             <EuiTitle size="s">
-              <TitleTag id={titleId} css={{ margin: 0 }}>
+              {/*
+                The accordion band gives the trailing actions (View executions + Enabled switch)
+                width precedence, which used to squeeze the title until EUI's `overflow-wrap` stacked
+                the name one character per line. `nowrap` keeps it on one line, the group's `wrap`
+                moves the badges to their own line first, and the 100% clamp ellipsizes a name that
+                alone exceeds the band (`title` keeps the full name recoverable).
+              */}
+              <TitleTag
+                id={titleId}
+                title={name}
+                css={{
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 {name}
               </TitleTag>
             </EuiTitle>
