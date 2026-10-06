@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { deepFreeze } from '@kbn/std';
 import { z } from '@kbn/zod/v4';
 import {
   entitySchema,
@@ -91,18 +92,6 @@ const findCycle = (
 };
 
 /**
- * Always recurses, so an object frozen only at the top level still has its children frozen. Assumes
- * `findCycle` has already rejected cycles; `visited` only avoids re-walking shared references.
- */
-const deepFreeze = <T>(value: T, visited = new WeakSet<object>()): T => {
-  if (!isObject(value) || visited.has(value)) return value;
-  visited.add(value);
-  Object.values(value).forEach((child) => deepFreeze(child, visited));
-  if (!Object.isFrozen(value)) Object.freeze(value);
-  return value;
-};
-
-/**
  * In-memory registry of entity definitions. Validates on registration, logs and records rejections
  * instead of throwing. Only plugin-managed definitions are accepted at setup, and type name
  * uniqueness is the only name protection. `list()` returns definitions in registration order; the
@@ -131,7 +120,11 @@ export class EntityDefinitionRegistry {
         return this.reject(describeType(definition.type), reason, describeManager(definition));
       }
 
-      this.entries.set(definition.type, deepFreeze(definition));
+      // `@kbn/std`'s deepFreeze, as core's saved objects type registry uses. It recurses into
+      // already-frozen objects too, so a top-level-only freeze by the caller is completed, and it
+      // relies on the cycle check above. Its deep-readonly return type is deliberately not used.
+      deepFreeze(definition);
+      this.entries.set(definition.type, definition);
       return { ok: true };
     } catch (error) {
       return this.reject(
