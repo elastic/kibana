@@ -602,9 +602,14 @@
     "new_relic.runNrqlQuery",
     "new_relic.unacknowledgeIssue",
     "new_relic.updateMutingRule",
+    "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.memoryMaterializeToSandbox",
+    "nightshift.memoryOptimize",
+    "nightshift.obtainSandbox",
+    "nightshift.resolveModel",
     "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
@@ -796,6 +801,7 @@
     "shodan.getHostInfo",
     "shodan.getServices",
     "shodan.searchHosts",
+    "significantEvents.resolveModel",
     "slack",
     "slack2.createConversation",
     "slack2.getConversationHistory",
@@ -938,15 +944,15 @@
     "ai.attachmentUpdated",
     "ai.conversation.metadataUpdated",
     "alert",
-    "alerting.episodeAcked",
-    "alerting.episodeActivated",
-    "alerting.episodeAssigned",
-    "alerting.episodeDeactivated",
-    "alerting.episodeSnoozed",
-    "alerting.episodeTagged",
-    "alerting.episodeUnacked",
-    "alerting.episodeUnassigned",
-    "alerting.episodeUnsnoozed",
+    "alerting.actions.alertAcked",
+    "alerting.actions.alertActivated",
+    "alerting.actions.alertAssigned",
+    "alerting.actions.alertDeactivated",
+    "alerting.actions.alertSnoozed",
+    "alerting.actions.alertTagged",
+    "alerting.actions.alertUnacked",
+    "alerting.actions.alertUnassigned",
+    "alerting.actions.alertUnsnoozed",
     "alerting.ruleCreated",
     "alerting.ruleDeleted",
     "alerting.ruleDisabled",
@@ -983,11 +989,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "6771210358338d30fc1f24f0174b9795a963a067f96f2419fc6237a30a9fb436"
+      "sha256": "59212037792fb6747a7d7052ea6159c5003ccebf12abee3e4fc2786c92f130f2"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "c83bf9b37a26a226aabe5c019cc05c8f4e685a8df3d55cbd580dc2de075bc375"
+      "sha256": "ff2ab28c2f78c0b04cb97f53104d2618c4e2163f477accde130a3b15d6ddda0a"
     }
   }
 }
