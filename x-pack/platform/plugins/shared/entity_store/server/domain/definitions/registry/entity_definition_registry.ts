@@ -61,6 +61,15 @@ const describeType = (value: unknown): string => {
 
 const isObject = (value: unknown): value is object => typeof value === 'object' && value !== null;
 
+/** Runs `read` and returns `fallback` if it throws. For diagnostics read from untrusted input. */
+const safely = <T>(read: () => T, fallback: T): T => {
+  try {
+    return read();
+  } catch {
+    return fallback;
+  }
+};
+
 /** Best-effort "who registered this" for the rejection log, read before validation. */
 const describeManager = (definition: object): string | undefined => {
   const managedBy = (definition as { managedBy?: unknown }).managedBy;
@@ -127,12 +136,14 @@ export class EntityDefinitionRegistry {
       this.entries.set(definition.type, definition);
       return { ok: true };
     } catch (error) {
+      // Reading `type` or `managedBy` here could throw again (an accessor-backed input), so both
+      // are read through `safely`; the rejection must be reached whatever the input does.
       return this.reject(
-        describeType(definition.type),
+        safely(() => describeType(definition.type), '<unreadable>'),
         `unexpected error during registration: ${
           error instanceof Error ? error.message : String(error)
         }`,
-        describeManager(definition)
+        safely(() => describeManager(definition), undefined)
       );
     }
   }

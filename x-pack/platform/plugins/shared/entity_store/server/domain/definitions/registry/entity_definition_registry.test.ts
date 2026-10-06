@@ -157,6 +157,30 @@ describe('EntityDefinitionRegistry', () => {
       });
     });
 
+    it('rejects a definition whose type and managedBy getters throw, without throwing', () => {
+      const definition = makeDefinition('throwing_accessors');
+      for (const key of ['type', 'managedBy'] as const) {
+        Object.defineProperty(definition, key, {
+          enumerable: true,
+          get: () => {
+            throw new Error(`${key} getter`);
+          },
+        });
+      }
+
+      let result: RegisterResult | undefined;
+      expect(() => {
+        result = registry.register(definition);
+      }).not.toThrow();
+      expect(result).toEqual({
+        ok: false,
+        reason: 'unexpected error during registration: type getter',
+      });
+      expect(registry.rejected()).toEqual([
+        { type: '<unreadable>', reason: 'unexpected error during registration: type getter' },
+      ]);
+    });
+
     it('names the managing plugin in the rejection log', () => {
       registry.register(makeDefinition('host'));
       registry.register(makeDefinition('host'));
