@@ -60,6 +60,9 @@ const toTemplateValues = (
   ...(settings.scheduleInterval === undefined
     ? {}
     : { scheduleInterval: settings.scheduleInterval }),
+  ...(settings.serviceAccountId === undefined
+    ? {}
+    : { serviceAccountId: settings.serviceAccountId }),
   ...(settings.extras === undefined ? {} : { extras: settings.extras }),
 });
 
@@ -75,7 +78,14 @@ const parseWorkerValues = (
 ): WorkerSettings => {
   const raw = applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), stored);
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
+  const {
+    settingsVersion,
+    autonomyLevel,
+    scheduleInterval,
+    serviceAccountId,
+    extras,
+    ...unsupported
+  } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
@@ -94,6 +104,9 @@ const parseWorkerValues = (
     workerId,
     autonomy: projectStoredAutonomyLevel(getWorkerSettingsDeclaration(workerId), autonomyLevel),
     ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
+    ...(typeof serviceAccountId === 'string' && serviceAccountId.length > 0
+      ? { serviceAccountId }
+      : {}),
     ...(extras === undefined ? {} : { extras }),
   };
   const parsed = getCompleteWorkerSettingsSchema(workerId).safeParse(candidate);

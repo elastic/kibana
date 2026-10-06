@@ -21247,6 +21247,15 @@ paths:
                     version:
                       example: WzIwNzMsMV0=
                       type: string
+                    workflowTags:
+                      description: |
+                        Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                      items:
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                      maxItems: 100
+                      type: array
                 type: array
           description: Indicates a successful call.
         '401':
@@ -21447,6 +21456,15 @@ paths:
                   version:
                     example: WzIwNzMsMV0=
                     type: string
+                  workflowTags:
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    items:
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    maxItems: 100
+                    type: array
           description: Indicates a successful call.
         '401':
           content:
@@ -21648,6 +21666,15 @@ paths:
                   version:
                     example: WzIwNzMsMV0=
                     type: string
+                  workflowTags:
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    items:
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    maxItems: 100
+                    type: array
           description: Indicates a successful call.
         '401':
           content:
@@ -22651,6 +22678,174 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/chat/message:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/chat/message</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.
+
+        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.
+
+        The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: post-chat-message
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              messageContinueConversationRequestExample:
+                description: Continue a conversation with the `conversation_id` returned by a previous call
+                value:
+                  agent_id: elastic-ai-agent
+                  conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+                  message: And how does it differ from Kibana?
+              messageRequestExample:
+                description: Send a message to the default agent and start a new conversation.
+                value:
+                  message: What is Elasticsearch?
+              messageToAgentRequestExample:
+                description: Send a message to a specific agent
+                value:
+                  agent_id: elastic-ai-agent
+                  message: What is Elasticsearch?
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agent_id:
+                  default: elastic-ai-agent
+                  description: The ID of the agent to send the message to. Defaults to the default Elastic AI agent.
+                  maxLength: 64
+                  minLength: 1
+                  type: string
+                conversation_id:
+                  description: The ID of an existing conversation to continue. Omit it to start a new conversation; the response carries the ID to reuse on the next call.
+                  maxLength: 256
+                  type: string
+                message:
+                  description: The user message to send to the agent.
+                  maxLength: 100000
+                  minLength: 1
+                  type: string
+              required:
+                - message
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                messageDeclinedPromptResponseExample:
+                  description: The agent tried to call a tool that requires user confirmation. There is no user to ask on this endpoint, so the call was declined and the agent answered with what it could
+                  value:
+                    answer: I could not run the reindex because it requires confirmation, which is not available here. You can run it from a conversation in Kibana instead.
+                    conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+                    declined_prompts:
+                      - message: Agent running in non-interactive mode, user input not available - execution was declined
+                        tool_id: reindex-logs
+                messageResponseExample:
+                  description: The agent's answer and the ID of the conversation it was stored in. `declined_prompts` is absent because the agent asked for nothing.
+                  value:
+                    answer: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
+                    conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  answer:
+                    description: The agent's final text answer. Empty when the agent finished without a message.
+                    type: string
+                  conversation_id:
+                    description: 'The conversation the message was added to: the one requested, or the one created for it.'
+                    type: string
+                  declined_prompts:
+                    description: The prompts that the endpoint declined. In an interactive conversation, these prompts pause the agent until the user answers. Examples are tool confirmations, questions to the user, and destructive API approvals. This endpoint has no user, so it declines each prompt and tells the agent why. The property is absent if the agent raised no prompts.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: The explanation the agent received in place of the prompt.
+                          type: string
+                        tool_id:
+                          description: The tool whose call was declined.
+                          type: string
+                      required:
+                        - tool_id
+                        - message
+                    minItems: 1
+                    type: array
+                required:
+                  - conversation_id
+                  - answer
+          description: The agent answered. The response contains the answer and the ID of the conversation that stores the exchange.
+        '400':
+          content:
+            application/json:
+              examples:
+                messageEmptyExample:
+                  description: The `message` is empty
+                  value:
+                    error: Bad Request
+                    message: '[request body.message]: value has length [0] but it must have a minimum length of [1].'
+                    statusCode: 400
+                messageUnexpectedKeyExample:
+                  description: The body carries a key this endpoint does not accept
+                  value:
+                    error: Bad Request
+                    message: "[request body.connector_id]: Additional properties are not allowed ('connector_id' was unexpected)"
+                    statusCode: 400
+          description: 'Bad Request: the request body is not valid. Possible causes are an empty or too long `message`, a `conversation_id` that is not a UUID, or an unsupported property such as `connector_id` or `attachments`.'
+        '404':
+          content:
+            application/json:
+              examples:
+                messageNotFoundExample:
+                  description: The `conversation_id` is unknown, or the `agent_id` is unknown or not usable by the caller
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Not Found
+                    message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
+                    statusCode: 404
+          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist, an `agent_id` that the caller cannot use, or a disabled `agentBuilder:experimentalFeatures` advanced setting. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
+      summary: Send a message and get the answer
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/chat/message" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "message": "What is Elasticsearch?",
+                "agent_id": "elastic-ai-agent"
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/chat/message
+            {
+              "message": "What is Elasticsearch?",
+              "agent_id": "elastic-ai-agent"
+            }
+      x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/context_engine/ai_index:
     get:
       description: |-
@@ -22688,6 +22883,7 @@ paths:
                           value: ai-index-ds-customer-support
                         id: customer_support
                         managed: false
+                        memory_enabled: true
                         sources:
                           - type: esql
                             value: FROM support-cases | LIMIT 100
@@ -22821,6 +23017,9 @@ paths:
                         managed:
                           description: Whether the AI Index is managed by a plugin and therefore immutable.
                           type: boolean
+                        memory_enabled:
+                          description: Whether this AI Index accepts memory writes.
+                          type: boolean
                         sources:
                           description: Additional sources that provide context for the AI Index.
                           items:
@@ -22867,6 +23066,7 @@ paths:
                       required:
                         - id
                         - managed
+                        - memory_enabled
                         - date_created
                         - date_modified
                         - dest
@@ -23143,6 +23343,9 @@ paths:
                   maxLength: 256
                   minLength: 1
                   type: string
+                memory_enabled:
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  type: boolean
                 sources:
                   default: []
                   description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
@@ -23852,6 +24055,7 @@ paths:
                       value: ai-index-ds-customer-support
                     id: customer_support
                     managed: false
+                    memory_enabled: true
                     sources:
                       - type: esql
                         value: FROM support-cases | LIMIT 100
@@ -23984,6 +24188,9 @@ paths:
                   managed:
                     description: Whether the AI Index is managed by a plugin and therefore immutable.
                     type: boolean
+                  memory_enabled:
+                    description: Whether this AI Index accepts memory writes.
+                    type: boolean
                   sources:
                     description: Additional sources that provide context for the AI Index.
                     items:
@@ -24030,6 +24237,7 @@ paths:
                 required:
                   - id
                   - managed
+                  - memory_enabled
                   - date_created
                   - date_modified
                   - dest
@@ -24279,6 +24487,9 @@ paths:
                       description: Which signals the analysis reads. A read filter only.
                   required:
                     - enabled
+                memory_enabled:
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  type: boolean
                 sources:
                   default: []
                   description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
@@ -133912,6 +134123,120 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/synthetics/monitors/_bulk_create:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/_bulk_create</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create up to 1000 monitors in one request. Every monitor is validated before any monitor is persisted. The API creates the Saved Objects and synchronizes Fleet once for the batch.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges. If a monitor is shared to additional spaces, you must also have create privileges in each of those spaces.
+        This is a versioned public API (`elastic-api-version: 2023-10-31`).
+      operationId: post-synthetic-monitors-bulk-create
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkCreateRequestExample1:
+                summary: Two HTTP monitors
+                value: |-
+                  {
+                    "monitors": [
+                      {
+                        "type": "http",
+                        "name": "Storefront",
+                        "url": "https://example.com",
+                        "locations": ["united_kingdom"]
+                      },
+                      {
+                        "type": "http",
+                        "name": "Documentation",
+                        "url": "https://docs.example.com",
+                        "locations": ["united_kingdom"]
+                      }
+                    ]
+                  }
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                monitors:
+                  description: A non-empty list of monitor configurations, up to 1000 monitors.
+                  items:
+                    discriminator:
+                      propertyName: type
+                    oneOf:
+                      - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_apiMonitorFields'
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+              required:
+                - monitors
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkCreateResponseExample1:
+                  value: |-
+                    {
+                      "result": [
+                        {
+                          "id": "monitor1-id",
+                          "created": true
+                        },
+                        {
+                          "id": "monitor2-id",
+                          "created": true
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    description: Optional service-level errors from the bulk sync.
+                    items:
+                      description: A service-level error from the bulk sync.
+                    type: array
+                  result:
+                    items:
+                      type: object
+                      properties:
+                        created:
+                          description: Whether the monitor Saved Object was created.
+                          type: boolean
+                        error:
+                          description: Present when `created` is `false`.
+                          type: string
+                        id:
+                          description: The config ID of the created monitor.
+                          type: string
+                      required:
+                        - id
+                        - created
+                    type: array
+                required:
+                  - result
+          description: |
+            A successful response. `created: false` indicates an individual Saved Object creation or Fleet synchronization failure; see `error`. Batch-level Fleet synchronization errors are returned in `errors`.
+        '400':
+          description: |
+            Bad request. Returned when the batch is empty or too large, a monitor configuration is invalid, or two monitors use the same name.
+      summary: Bulk create monitors
+      tags:
+        - synthetics
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/synthetics/monitors/_bulk_delete:
     post:
       description: |
@@ -142397,6 +142722,8 @@ components:
           updated_at: null
           updated_by: null
           version: WzEyLDNd
+          workflowTags:
+            - soc-triage
     Cases_get_case_field_definition_response:
       summary: A reusable field definition.
       value:
@@ -142723,6 +143050,8 @@ components:
             name: template-1
             tags:
               - Template tag 1
+        workflowTags:
+          - soc-triage
     Cases_set_case_configuration_response:
       summary: This is an example response for case settings.
       value:
@@ -142782,6 +143111,8 @@ components:
         updated_at: null
         updated_by: null
         version: WzIwNzMsMV0=
+        workflowTags:
+          - soc-triage
     Cases_template_dry_run_response:
       summary: Dry-run validation succeeded without writing.
       value:
@@ -142827,6 +143158,9 @@ components:
             type: toggle
             required: false
         version: WzExOSw0XQ==
+        workflowTags:
+          - soc-triage
+          - enrichment
     Cases_update_case_configuration_response:
       summary: This is an example response when the case configuration was updated.
       value:
@@ -142877,6 +143211,9 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzI2LDNd
+        workflowTags:
+          - soc-triage
+          - enrichment
     Cases_update_case_request:
       summary: Update the case description, tags, and connector.
       value:
@@ -149868,6 +150205,15 @@ components:
           $ref: '#/components/schemas/Cases_owner'
         templates:
           $ref: '#/components/schemas/Cases_templates'
+        workflowTags:
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
       required:
         - closure_type
         - connector
@@ -150258,6 +150604,15 @@ components:
             The version of the connector. To retrieve the version value, use the get configuration API.
           example: WzIwMiwxXQ==
           type: string
+        workflowTags:
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
       required:
         - version
       title: Update case configuration request
@@ -151597,7 +151952,7 @@ components:
           minLength: 1
           type: string
         assignee_uid:
-          description: User profile UID of the assignee, or null to remove the assignee from the episode.
+          description: User profile UID of the assignee, or null to remove the assignee from the alert.
           maxLength: 150
           minLength: 1
           nullable: true
@@ -151901,7 +152256,7 @@ components:
           minLength: 1
           type: string
         tags:
-          description: Replaces the episode's tags. Send `[]` to clear.
+          description: Replaces the alert's tags. Send `[]` to clear.
           items:
             maxLength: 128
             minLength: 1
@@ -152046,7 +152401,7 @@ components:
       type: object
       properties:
         assignee_uid:
-          description: User profile UID of the assignee, or null to remove the assignee from the episode.
+          description: User profile UID of the assignee, or null to remove the assignee from the alert.
           maxLength: 150
           minLength: 1
           nullable: true
@@ -152117,7 +152472,7 @@ components:
       type: object
       properties:
         tags:
-          description: Replaces the episode's tags. Send `[]` to clear.
+          description: Replaces the alert's tags. Send `[]` to clear.
           items:
             maxLength: 128
             minLength: 1
@@ -152560,7 +152915,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_alert'
     Kibana_HTTP_APIs_alerting_rule_no_data_alert:
       additionalProperties: false
-      description: Marks an existing alert episode `active` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.
+      description: Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.
       type: object
       properties:
         query:
@@ -152587,7 +152942,7 @@ components:
         - strategy
     Kibana_HTTP_APIs_alerting_rule_no_data_keep_last:
       additionalProperties: false
-      description: Holds the alert episode's current status when the rule finds no data.
+      description: Holds the alert's current status when the rule finds no data.
       type: object
       properties:
         query:
@@ -152603,7 +152958,7 @@ components:
         - strategy
     Kibana_HTTP_APIs_alerting_rule_no_data_resolve:
       additionalProperties: false
-      description: Closes the alert episode the first time the rule finds no data for a group.
+      description: Closes the alert the first time the rule finds no data for a group.
       type: object
       properties:
         query:
@@ -152632,7 +152987,7 @@ components:
       required:
         - base
     Kibana_HTTP_APIs_alerting_rule_recovery:
-      description: When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+      description: When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
       discriminator:
         mapping:
           condition: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_condition'
@@ -152647,7 +153002,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_manual'
     Kibana_HTTP_APIs_alerting_rule_recovery_condition:
       additionalProperties: false
-      description: Recovers the alert episode when `query.base` plus `segment` returns the group. Requires `query.breach`.
+      description: Recovers the alert when `query.base` plus `segment` returns the group. Requires `query.breach`.
       type: object
       properties:
         segment:
@@ -152664,7 +153019,7 @@ components:
         - segment
     Kibana_HTTP_APIs_alerting_rule_recovery_manual:
       additionalProperties: false
-      description: Does not recover automatically. Close the alert episode with a user action. `state_transition.recovering` has no effect.
+      description: Does not recover automatically. Close the alert with a user action. `state_transition.recovering` has no effect.
       type: object
       properties:
         strategy:
@@ -152675,7 +153030,7 @@ components:
         - strategy
     Kibana_HTTP_APIs_alerting_rule_recovery_no_breach:
       additionalProperties: false
-      description: Recovers the alert episode when its group no longer appears in the breach results.
+      description: Recovers the alert when its group no longer appears in the breach results.
       type: object
       properties:
         strategy:
@@ -152686,11 +153041,11 @@ components:
         - strategy
     Kibana_HTTP_APIs_alerting_rule_recovery_query:
       additionalProperties: false
-      description: Recovers the alert episode when this separate query returns the group.
+      description: Recovers the alert when this separate query returns the group.
       type: object
       properties:
         query:
-          description: Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert episode.
+          description: Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert.
           maxLength: 10000
           minLength: 1
           type: string
@@ -152802,21 +153157,21 @@ components:
         - every
     Kibana_HTTP_APIs_alerting_rule_state_transition:
       additionalProperties: false
-      description: Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
+      description: Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
       type: object
       properties:
         pending:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_pending'
-          description: Delay before a match opens an alert episode.
+          description: Delay before a match opens an alert.
         recovering:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_recovering'
-          description: Delay before a recovered match closes the alert episode. Has no effect when `recovery.strategy` is `manual`.
+          description: Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.
     Kibana_HTTP_APIs_alerting_rule_state_transition_pending:
       additionalProperties: false
       type: object
       properties:
         count:
-          description: Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
+          description: Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
           maximum: 1000
           minimum: 0
           type: integer
@@ -152835,7 +153190,7 @@ components:
       type: object
       properties:
         count:
-          description: Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
+          description: Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
           maximum: 1000
           minimum: 0
           type: integer
@@ -161291,7 +161646,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -161417,7 +161772,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -161561,7 +161916,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -205351,6 +205706,42 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Synthetics_apiMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            certificate_error_spki_allowlist:
+              default: []
+              description: PEM certificates whose public keys (SPKI) are allowlisted so the API request context bypasses certificate errors for matching presented certificates. This does not add a CA to the trust store.
+              items:
+                type: string
+              type: array
+            ignore_https_errors:
+              default: false
+              description: Ignore HTTPS errors.
+              type: boolean
+            inline_script:
+              description: The inline API Journey script.
+              type: string
+            playwright_options:
+              description: Playwright API request context options.
+              type: object
+            synthetics_args:
+              description: Synthetics agent CLI arguments.
+              items:
+                type: string
+              type: array
+            type:
+              description: The monitor type.
+              enum:
+                - api
+              type: string
+          required:
+            - inline_script
+            - type
+      title: API Journey monitor fields
     Synthetics_browserMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
