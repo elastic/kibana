@@ -45,6 +45,7 @@ import {
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_LEGACY_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
 } from '@kbn/lens-common';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
@@ -1250,6 +1251,7 @@ export function DimensionEditorAdditionalSection({
                   dataBounds={currentMinMax}
                   showRangeTypeSelector={supportsPercentPalette}
                   maxSteps={DEFAULT_COLOR_STEPS}
+                  defaultBandCount={LENS_METRIC_DEFAULT_COLOR_STEPS}
                   setPalette={(newPalette) => {
                     setState({
                       ...state,

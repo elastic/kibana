@@ -1545,7 +1545,7 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  *   `steps` is reconstructed from the chart's `defaultBandCount`.
  * - custom palettes: mirror the transform's continuity-driven open/closed encoding (open above
  *   nulls `rangeMax` and the last multi-stop; open below nulls `rangeMin`), set the last
- *   multi-stop to the effective `rangeMax` when closed, set `steps` to the stop count, and
+ *   multi-stop to the effective `rangeMax` when closed, drop the unread `steps`, and
  *   default missing `rangeType` / `params.name` the transform always derives.
  *
  * For every palette the unread `maxSteps` (editor-only) and `progression` (deprecated) are
@@ -1623,6 +1623,10 @@ export function getPaletteNormalizer<T extends LensAttributes>(
             lastStop.stop = (isOpenAbove ? null : rangeMax) as unknown as number;
           }
         }
+
+        // A custom palette renders from its stops, so a stored `steps` is editor residue with no
+        // reader. The transform omits it.
+        delete palette.params.steps;
 
         if (!palette.params.rangeType) {
           palette.params.rangeType = 'percent';

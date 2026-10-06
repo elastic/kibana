@@ -93,6 +93,40 @@ describe('palette panel', () => {
       });
     });
 
+    it('should preview non-active palettes with the default band count', () => {
+      const getCategoricalColors = paletteRegistry.get('custom').getCategoricalColors as jest.Mock;
+      getCategoricalColors.mockClear();
+      mountWithIntl(
+        <CustomizablePalette
+          {...props}
+          activePalette={{ type: 'palette', name: 'positive', params: { steps: 2 } }}
+          defaultBandCount={4}
+        />
+      );
+      expect(getCategoricalColors).toHaveBeenCalledWith(4, undefined);
+      expect(getCategoricalColors).not.toHaveBeenCalledWith(2, undefined);
+    });
+
+    it('should apply the default band count when switching to a named palette', () => {
+      const instance = mountWithIntl(
+        <CustomizablePalette
+          {...props}
+          activePalette={{ type: 'palette', name: 'positive', params: { steps: 2 } }}
+          defaultBandCount={4}
+        />
+      );
+
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+
+      expect(props.setPalette).toHaveBeenCalledWith({
+        type: 'palette',
+        name: 'negative',
+        params: expect.objectContaining({ name: 'negative', steps: 4 }),
+      });
+    });
+
     it('should set the colorStops and stops when selecting the Custom palette from the list', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
 

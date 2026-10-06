@@ -57,7 +57,6 @@ describe('Color util transforms', () => {
           rangeType: 'number',
           continuity: 'all',
           reverse: false,
-          steps: 3,
           // @ts-expect-error - This can be null
           rangeMax: null,
           // @ts-expect-error - This can be null
@@ -98,7 +97,6 @@ describe('Color util transforms', () => {
           rangeType: 'percent',
           continuity: 'none',
           reverse: false,
-          steps: 2,
           rangeMin: 10,
           rangeMax: 90,
           stops: [
@@ -1067,7 +1065,6 @@ describe('Color util transforms', () => {
             // @ts-expect-error - This can be null
             { color: 'red', stop: null },
           ],
-          steps: 1,
         },
       };
 

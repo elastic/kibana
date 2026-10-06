@@ -15,7 +15,6 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
   name: 'custom',
   type: 'palette',
   params: {
-    steps: 3,
     name: 'custom',
     reverse: false,
     rangeType: 'percent',
@@ -60,7 +59,6 @@ export const lowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
   name: 'custom',
   type: 'palette',
   params: {
-    steps: 3,
     name: 'custom',
     reverse: false,
     rangeType: 'percent',
@@ -103,7 +101,6 @@ export const upperAndLowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
   name: 'custom',
   type: 'palette',
   params: {
-    steps: 3,
     name: 'custom',
     reverse: false,
     rangeType: 'number',

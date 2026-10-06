@@ -34,6 +34,7 @@ export interface ChangeColorPalettePayload {
   palettes: PaletteRegistry;
   dataBounds: DataBounds;
   disableSwitchingContinuity: boolean;
+  defaultBandCount?: number;
 }
 
 /** @internal **/

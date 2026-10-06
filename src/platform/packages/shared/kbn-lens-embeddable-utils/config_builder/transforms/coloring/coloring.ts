@@ -216,7 +216,6 @@ export function fromColorByValueAPIToLensState(
       stops,
       colorStops,
       continuity: getContinuity(rangeMin, rangeMax),
-      steps: stops.length,
     },
   };
 }

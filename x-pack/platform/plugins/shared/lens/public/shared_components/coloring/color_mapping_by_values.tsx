@@ -27,6 +27,7 @@ interface ColorMappingByValuesProps {
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   dataBounds: DataBounds;
+  defaultBandCount?: number;
 }
 
 export function ColorMappingByValues<T>({
@@ -36,6 +37,7 @@ export function ColorMappingByValues<T>({
   paletteService,
   panelRef,
   dataBounds,
+  defaultBandCount,
 }: ColorMappingByValuesProps) {
   const colors =
     palette.name === CUSTOM_PALETTE
@@ -67,6 +69,7 @@ export function ColorMappingByValues<T>({
             palettes={paletteService}
             dataBounds={dataBounds}
             activePalette={palette}
+            defaultBandCount={defaultBandCount}
             setPalette={(p) => {
               setPalette(p);
             }}
