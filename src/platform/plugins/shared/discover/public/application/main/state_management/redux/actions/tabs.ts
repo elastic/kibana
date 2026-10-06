@@ -427,8 +427,15 @@ export const initializeTabs = createInternalStateAsyncThunk(
           showSessionWarnings({ session, warnings, core: services.core });
         }
 
-        // Capture an omitted refresh interval once so initialization and unsaved-change checks
-        // use the same inherited value without hiding later user changes.
+        // Fill an omitted refresh interval once so the baseline matches the inherited value.
+        const tabsMissingRefreshInterval = session.tabs.filter(
+          (tab) => tab.timeRestore && tab.refreshInterval === undefined
+        );
+
+        if (tabsMissingRefreshInterval.length === 0) {
+          return session;
+        }
+
         const refreshInterval =
           urlStateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY)?.refreshInterval ??
           services.timefilter.getRefreshInterval();
