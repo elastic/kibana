@@ -152,7 +152,7 @@ export class MapsPage {
   }
 
   /**
-   * If the map is not currently loading, waits up to 1000 ms for a load cycle to begin —
+   * If the map is not currently loading, waits up to 2000 ms for a load cycle to begin —
    * bridging the gap between a triggering action resolving and the new request's loading
    * state reaching the DOM. Falls through if no load starts in that window
    * (e.g. the action required no re-fetch).
@@ -167,7 +167,7 @@ export class MapsPage {
               .querySelector('[data-test-subj="mapContainer"]')
               ?.getAttribute('data-map-loading') === 'true',
           undefined,
-          { timeout: 1000 }
+          { timeout: 2000 }
         )
         .catch(() => {});
     }
@@ -263,14 +263,16 @@ export class MapsPage {
    */
   async getResponse(requestName: string): ReturnType<typeof this.inspector.getResponse> {
     await this.inspector.open();
-    await this.inspector.openInspectorRequestsView();
+    try {
+      await this.inspector.openInspectorRequestsView();
 
-    const comboBox = this.page.components.comboBox('inspectorRequestChooser');
-    await comboBox.setSelectedOptions([requestName]);
+      const comboBox = this.page.components.comboBox('inspectorRequestChooser');
+      await comboBox.setSelectedOptions([requestName]);
 
-    const responseBody = await this.inspector.getResponse();
-    await this.inspector.close();
-    return responseBody;
+      return await this.inspector.getResponse();
+    } finally {
+      await this.inspector.close();
+    }
   }
 
   /**

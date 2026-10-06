@@ -17,8 +17,6 @@ const DEFAULT_INDEX_ID = 'c698b940-e149-11e8-a35a-370a8516603a';
 const TOP_HITS_MAP_ID = '68305470-87bc-11e9-a991-3b492a7c3e09';
 const TOP_HITS_SCRIPTED_FIELD_MAP_ID = '4ea1e4f0-4dba-11ea-b554-4ba0def79f86';
 
-const LOAD_FEATURES_REQUEST_NAME = 'load layer features (logstash)';
-
 test.describe(
   'Maps - geo top hits',
   {
@@ -51,18 +49,8 @@ test.describe(
     test('split on string field - should display top hits per entity', async ({ pageObjects }) => {
       await pageObjects.maps.openMapWithId(TOP_HITS_MAP_ID);
       await expect
-        .poll(
-          async () => {
-            const { rawResponse: response } = await pageObjects.maps.getResponse(
-              LOAD_FEATURES_REQUEST_NAME
-            );
-            const buckets: Array<{ entityHits: { hits: { hits: unknown[] } } }> =
-              response.aggregations?.entitySplit?.buckets ?? [];
-            return buckets.reduce((sum: number, b) => sum + b.entityHits.hits.hits.length, 0);
-          },
-          { timeout: 20_000 }
-        )
-        .toBe(10);
+        .poll(() => pageObjects.maps.getLayerTocTooltipMsg('logstash'), { timeout: 20_000 })
+        .toContain('Found 5 entities. Showing top 2 documents per entity.');
 
       // should not return any hits
       await expect.poll(() => pageObjects.maps.getHits(), { timeout: 20_000 }).toBe('0');
@@ -73,18 +61,8 @@ test.describe(
     }) => {
       await pageObjects.maps.openMapWithId(TOP_HITS_SCRIPTED_FIELD_MAP_ID);
       await expect
-        .poll(
-          async () => {
-            const { rawResponse: response } = await pageObjects.maps.getResponse(
-              LOAD_FEATURES_REQUEST_NAME
-            );
-            const buckets: Array<{ entityHits: { hits: { hits: unknown[] } } }> =
-              response.aggregations?.entitySplit?.buckets ?? [];
-            return buckets.reduce((sum: number, b) => sum + b.entityHits.hits.hits.length, 0);
-          },
-          { timeout: 20_000 }
-        )
-        .toBe(24);
+        .poll(() => pageObjects.maps.getLayerTocTooltipMsg('logstash'), { timeout: 20_000 })
+        .toContain('Found 24 entities. Showing top 1 documents per entity.');
     });
   }
 );
