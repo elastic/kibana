@@ -7,42 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AST } from 'eslint';
+import type { Comment } from '@oxlint/plugins';
 
-const ESLINT_DISABLE_RE = /^eslint-disable(?:-next-line|-line)?(?<rulesBlock>.*)/;
+const DISABLE_DIRECTIVE_RE =
+  /^(?<directive>(?:eslint|oxlint)-disable(?:-next-line|-line)?)(?<rulesBlock>.*)/;
 
-export enum ESLINT_DISABLE_VALUE {
-  DISABLE = 'eslint-disable',
-  DISABLE_NEXT_LINE = 'eslint-disable-next-line',
-  DISABLE_LINE = 'eslint-disable-line',
+export enum DISABLE_VALUE {
+  DISABLE = 'disable',
+  DISABLE_NEXT_LINE = 'disable-next-line',
+  DISABLE_LINE = 'disable-line',
 }
 
-export interface ParsedEslintDisableComment {
-  type: AST.Program['comments'][0]['type'];
-  range: AST.Program['comments'][0]['range'];
-  loc: AST.Program['comments'][0]['loc'];
-  value: AST.Program['comments'][0]['value'];
-  disableValueType: ESLINT_DISABLE_VALUE;
+export interface ParsedDisableComment {
+  type: Comment['type'];
+  range: Comment['range'];
+  loc: Comment['loc'];
+  value: Comment['value'];
+  /** The directive as written, e.g. `eslint-disable-next-line` or `oxlint-disable`. */
+  directive: string;
+  disableValueType: DISABLE_VALUE;
   rules: string[];
 }
 
-export function parseEslintDisableComment(
-  comment: AST.Program['comments'][0]
-): ParsedEslintDisableComment | undefined {
+/** Parses an `eslint-disable*` or `oxlint-disable*` comment; returns undefined for other comments. */
+export function parseDisableComment(comment: Comment): ParsedDisableComment | undefined {
   const commentVal = comment.value.trim();
-  const nakedESLintRegexResult = commentVal.match(ESLINT_DISABLE_RE);
-  const rulesBlock = nakedESLintRegexResult?.groups?.rulesBlock;
+  const regexResult = commentVal.match(DISABLE_DIRECTIVE_RE);
 
   // no regex match
-  if (!nakedESLintRegexResult) {
+  if (!regexResult?.groups) {
     return;
   }
 
-  const disableValueType = commentVal.includes(ESLINT_DISABLE_VALUE.DISABLE_NEXT_LINE)
-    ? ESLINT_DISABLE_VALUE.DISABLE_NEXT_LINE
-    : commentVal.includes(ESLINT_DISABLE_VALUE.DISABLE_LINE)
-    ? ESLINT_DISABLE_VALUE.DISABLE_LINE
-    : ESLINT_DISABLE_VALUE.DISABLE;
+  const { directive, rulesBlock } = regexResult.groups;
+  const disableValueType = directive.endsWith(DISABLE_VALUE.DISABLE_NEXT_LINE)
+    ? DISABLE_VALUE.DISABLE_NEXT_LINE
+    : directive.endsWith(DISABLE_VALUE.DISABLE_LINE)
+    ? DISABLE_VALUE.DISABLE_LINE
+    : DISABLE_VALUE.DISABLE;
 
   const rules = rulesBlock
     ? rulesBlock
@@ -56,6 +58,7 @@ export function parseEslintDisableComment(
     range: comment.range,
     loc: comment.loc,
     value: comment.value,
+    directive,
     disableValueType,
     rules,
   };

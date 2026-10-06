@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule, AST } from 'eslint';
-import { PROTECTED_RULES, getReportLocFromComment, parseEslintDisableComment } from '../helpers';
+import type { CreateOnceRule, Range, RuleMeta } from '@oxlint/plugins';
+import { PROTECTED_RULES, getReportLocFromComment, parseDisableComment } from '../helpers';
 
 export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';
 const messages = {
@@ -16,85 +16,64 @@ const messages = {
     "The rule '{{ disabledRuleName }}' is protected and disabling it is not allowed. Please remove it from the statement.",
 };
 
-const meta: Rule.RuleMetaData = {
+const meta: RuleMeta = {
   type: 'problem',
   fixable: 'code',
   docs: {
-    description: 'Prevents the disabling of protected rules within eslint-disable* comments.',
+    description:
+      'Prevents the disabling of protected rules within eslint-disable* or oxlint-disable* comments.',
   },
   messages,
 };
 
-const create = (context: Rule.RuleContext): Rule.RuleListener => {
-  return {
+export const NoProtectedESLintDisableRule: CreateOnceRule = {
+  meta,
+  createOnce: (context) => ({
     Program(node) {
-      const nodeComments = node.comments || [];
+      for (const comment of context.sourceCode.getAllComments()) {
+        const parsedDisable = parseDisableComment(comment);
 
-      nodeComments.forEach((comment) => {
-        // get parsedEslintDisable from comment
-        const parsedEslintDisable = parseEslintDisableComment(comment);
-
-        // no regex match, exit early
-        if (!parsedEslintDisable) {
-          return;
+        // no regex match or no rule block, exit early
+        if (!parsedDisable || parsedDisable.rules.length === 0) {
+          continue;
         }
 
-        // we do not have a rule block, exit early
-        if (parsedEslintDisable.rules.length === 0) {
-          return;
-        }
-
-        const disabledRules = parsedEslintDisable.rules;
+        const disabledRules = parsedDisable.rules;
         const disabledProtectedRule = disabledRules.find((r) => PROTECTED_RULES.has(r));
 
         // no protected rule was disabled, exit early
         if (!disabledProtectedRule) {
-          return;
+          continue;
         }
 
-        // at this point we'll collect the disabled rule position to report
-        const reportLoc = getReportLocFromComment(parsedEslintDisable);
-        if (!reportLoc) {
-          return;
-        }
-
-        // At this point we have a regex match, no rule name and a valid loc so lets report here
         context.report({
           node,
-          loc: reportLoc,
+          loc: getReportLocFromComment(parsedDisable),
           messageId: PROTECTED_DISABLE_MSG_ID,
           data: {
             disabledRuleName: disabledProtectedRule,
           },
           fix(fixer) {
+            const { range } = parsedDisable;
+
             // if we only have a single disabled rule and that is protected, we can remove the entire comment
             if (disabledRules.length === 1) {
-              return fixer.removeRange(parsedEslintDisable.range as AST.Range);
-            }
-
-            // it's impossible to fix as we don't have a range
-            if (!parsedEslintDisable.range) {
-              return null;
+              return fixer.removeRange(range);
             }
 
             const remainingRules = disabledRules.filter((rule) => !PROTECTED_RULES.has(rule));
-            const fixedComment = ` ${parsedEslintDisable.disableValueType} ${remainingRules.join(
-              ', '
-            )}${parsedEslintDisable.type === 'Block' ? ' ' : ''}`;
-            const rangeToFix: AST.Range =
-              parsedEslintDisable.type === 'Line'
-                ? [parsedEslintDisable.range[0] + 2, parsedEslintDisable.range[1]]
-                : [parsedEslintDisable.range[0] + 2, parsedEslintDisable.range[1] - 2];
+            const fixedComment = ` ${parsedDisable.directive} ${remainingRules.join(', ')}${
+              parsedDisable.type === 'Block' ? ' ' : ''
+            }`;
+            const rangeToFix: Range =
+              parsedDisable.type === 'Line'
+                ? [range[0] + 2, range[1]]
+                : [range[0] + 2, range[1] - 2];
 
             return fixer.replaceTextRange(rangeToFix, fixedComment);
           },
         });
-      });
+      }
     },
-  };
-};
-
-export const NoProtectedESLintDisableRule: Rule.RuleModule = {
-  meta,
-  create,
+  }),
 };
