@@ -163,8 +163,7 @@ export const useLabelMarquee = ({
 }: LabelMarqueeOptions): LabelMarquee => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => getStyles(euiTheme, gutter), [euiTheme, gutter]);
-  // State instead of refs so a remounted label, e.g. when the item switches to the
-  // highlighted button, is measured and observed again.
+  // State instead of refs so a remounted label is measured and observed again.
   const [label, setLabel] = useState<HTMLSpanElement | null>(null);
   const [track, setTrack] = useState<HTMLSpanElement | null>(null);
   const [overflowWidth, setOverflowWidth] = useState(0);

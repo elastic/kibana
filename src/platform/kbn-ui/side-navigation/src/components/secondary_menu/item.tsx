@@ -9,7 +9,13 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiIcon,
+  EuiToolTip,
+  useEuiButtonColorCSS,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -33,8 +39,8 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
 }
 
 /**
- * `EuiButton` and `EuiButtonEmpty` are used for consistency with the component library.
- * The only style overrides are making the button labels left-aligned.
+ * `EuiButtonEmpty` is used for consistency with the component library. When highlighted, it
+ * takes `EuiButton`'s colors instead of switching components, so the item does not remount.
  */
 export const SecondaryMenuItemComponent = ({
   badgeType,
@@ -51,6 +57,7 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const highlightedColorStyles = useEuiButtonColorCSS({ display: 'base' }).primary;
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
@@ -146,39 +153,21 @@ export const SecondaryMenuItemComponent = ({
         position="right"
         repositionOnScroll
       >
-        {isHighlighted ? (
-          <EuiButton
-            id={id}
-            aria-current={isCurrent ? 'page' : undefined}
-            css={buttonStyles}
-            data-highlighted="true"
-            data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
-            fullWidth
-            href={hasSubmenu ? undefined : href}
-            size="s"
-            textProps={false}
-            {...iconProps}
-            {...props}
-          >
-            {content}
-          </EuiButton>
-        ) : (
-          <EuiButtonEmpty
-            id={id}
-            aria-current={isCurrent ? 'page' : undefined}
-            color="text"
-            css={buttonStyles}
-            data-highlighted="false"
-            data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
-            href={hasSubmenu ? undefined : href}
-            size="s"
-            textProps={false}
-            {...iconProps}
-            {...props}
-          >
-            {content}
-          </EuiButtonEmpty>
-        )}
+        <EuiButtonEmpty
+          id={id}
+          aria-current={isCurrent ? 'page' : undefined}
+          color={isHighlighted ? 'primary' : 'text'}
+          css={[isHighlighted && highlightedColorStyles, buttonStyles]}
+          data-highlighted={isHighlighted ? 'true' : 'false'}
+          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
+          href={hasSubmenu ? undefined : href}
+          size="s"
+          textProps={false}
+          {...iconProps}
+          {...props}
+        >
+          {content}
+        </EuiButtonEmpty>
       </EuiToolTip>
     </li>
   );

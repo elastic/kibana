@@ -14,8 +14,7 @@ import { useLabelMarquee } from './use_label_marquee';
 
 const GUTTER = 8;
 
-// A new `labelKey` replaces the label elements while the hook stays mounted, like the item
-// switching between `EuiButtonEmpty` and `EuiButton` when it becomes highlighted.
+// A new `labelKey` replaces the label elements while the hook stays mounted.
 const Label = ({ labelKey }: { labelKey?: string }) => {
   const { isOverflowing, labelProps, trackProps } = useLabelMarquee({
     gutter: `${GUTTER}px`,
