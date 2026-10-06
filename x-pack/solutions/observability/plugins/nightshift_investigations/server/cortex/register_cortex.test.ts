@@ -131,7 +131,7 @@ describe('runCortexOptimize', () => {
     { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
   ];
   const recordHypotheses: InvestigationToolCall = {
-    tool_id: 'investigations.set_hypotheses',
+    tool_id: 'agentic_investigations.set_hypotheses',
     params: { hypotheses: [] },
   };
 

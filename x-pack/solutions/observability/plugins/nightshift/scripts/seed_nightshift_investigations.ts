@@ -1585,7 +1585,7 @@ const seedScenario = async (
       hypothesesDocumentId(conversationId),
       { ...base, hypotheses: scenario.hypotheses }
     );
-    // `investigations.set_hypotheses` labels the attachment it adds.
+    // `agentic_investigations.set_hypotheses` labels the attachment it adds.
     await attachDocument(
       client,
       conversationId,
