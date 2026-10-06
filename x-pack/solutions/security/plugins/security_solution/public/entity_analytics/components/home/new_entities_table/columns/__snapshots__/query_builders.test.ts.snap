@@ -208,7 +208,7 @@ Array [
 exports[`entities grid query builders enrich queries enrichRiskScoreChange builds its query from the page rows 1`] = `
 Array [
   "FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
 | WHERE host.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR user.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR service.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL entity_id = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
@@ -1177,7 +1177,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 exports[`entities grid query builders sort by risk_score_change builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -1211,7 +1211,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 exports[`entities grid query builders sort by risk_score_change builds the sort and count queries: sort 1`] = `
 "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`

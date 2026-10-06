@@ -21,20 +21,30 @@ import {
 } from '../common';
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
 
+/** Width of the reference window before the time range, as in the risk movers tile. */
+const REFERENCE_WINDOW_HOURS = 2;
+
 // A risk score doc stores its entity under host.risk, user.risk or service.risk.
 const RISK_ID_VALUE_COALESCE = `COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`;
 const RISK_ID_FIELD_COALESCE = `COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field)`;
 const RISK_SCORE_NORM_COALESCE = `COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`;
 
 /**
- * Risk score docs that can be the reference: scored at or before the start of the time
- * range, and keyed by EUID. The reference score is the last of these per entity.
+ * Risk score docs that can be the reference: scored in the two hours before the start of
+ * the time range, and keyed by EUID. The reference score is the last of these per entity.
  * Risk score change is the current entity score minus the reference score.
+ *
+ * This is the boundary window of the risk movers tile, so its rows agree with the tile.
+ * The two hours cover at least one hourly scoring run; the lower bound keeps the query
+ * from reading all older history.
  */
-const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] => [
-  `FROM ${riskScoreIndexOf(namespace)}`,
-  `| WHERE \`@timestamp\` <= NOW() - ${TIME_RANGE_DAYS[timeRange]} day`,
-];
+const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] => {
+  const windowStart = `NOW() - ${TIME_RANGE_DAYS[timeRange]} day`;
+  return [
+    `FROM ${riskScoreIndexOf(namespace)}`,
+    `| WHERE \`@timestamp\` >= ${windowStart} - ${REFERENCE_WINDOW_HOURS} hours AND \`@timestamp\` <= ${windowStart}`,
+  ];
+};
 
 // ── sort queries ──────────────────────────────────────────────────────────────
 
