@@ -124,7 +124,7 @@ describe('createActionPolicyManagementSkill', () => {
     );
 
     expect(byName['action-policy-matchers']).toContain('# Action Policy Matchers');
-    expect(byName['action-policy-matchers']).toContain('`episode_status`');
+    expect(byName['action-policy-matchers']).toContain('`alert_status`');
     expect(byName['action-policy-matchers']).toContain('matcher.tags');
     // rule.id/rule.tags appear in an exclusion note, not as usable KQL field:value syntax
     expect(byName['action-policy-matchers']).not.toContain('rule.id:');
