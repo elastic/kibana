@@ -117,3 +117,56 @@ export interface ServiceAccountsServiceContract
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
 }
+
+/**
+ * A bound workload, as {@link CoreSecurityDelegateServiceAccounts.resolveBoundWorkloads} takes it.
+ *
+ * @public
+ */
+export type ServiceAccountBoundWorkloadRef = Pick<
+  ServiceAccountWorkloadBinding,
+  'pluginId' | 'workloadType' | 'workloadId' | 'spaceId'
+>;
+
+/**
+ * A bound workload resolved by its workload type.
+ *
+ * @public
+ */
+export interface ResolvedServiceAccountWorkload {
+  /** Title of the workload, when its workload type could resolve it. */
+  title?: string;
+  /** Link to the workload, with the base path and the space of the binding already applied. */
+  href?: string;
+}
+
+/**
+ * What Core exposes to the security provider about the workload types plugins register.
+ *
+ * @public
+ */
+export interface CoreSecurityDelegateServiceAccounts {
+  /**
+   * Returns the name a plugin registered for a workload type, or `undefined` when no loaded plugin
+   * registered that type.
+   */
+  getWorkloadTypeName(pluginId: string, workloadType: string): string | undefined;
+
+  /**
+   * Resolves bound workloads to a title and a link through their workload types. Returns one
+   * entry per binding, in the same order. Never rejects: a binding whose type has no resolver, or
+   * whose resolver fails or times out, gets an empty entry.
+   */
+  resolveBoundWorkloads(
+    bindings: ReadonlyArray<ServiceAccountBoundWorkloadRef>
+  ): Promise<ResolvedServiceAccountWorkload[]>;
+}
+
+/**
+ * What Core hands back to the security provider when it registers its delegate.
+ *
+ * @public
+ */
+export interface CoreSecurityDelegateHandle {
+  serviceAccounts: CoreSecurityDelegateServiceAccounts;
+}

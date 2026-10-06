@@ -85,6 +85,7 @@ import {
   resolveInheritedWorkflowIdentity,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
+import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -260,6 +261,17 @@ export class WorkflowsExecutionEnginePlugin
     core.security.serviceAccounts.registerWorkloadType({
       type: WORKFLOW_SERVICE_ACCOUNT_TYPE,
       name: 'Workflow',
+      resolveWorkloads: async (workloads, options) => {
+        const [coreStart] = await core.getStartServices();
+        return resolveWorkflowWorkloads(
+          new WorkflowRepository({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            logger,
+          }),
+          workloads,
+          options
+        );
+      },
     });
 
     initializeLogsRepositoryDataStream(core.dataStreams);

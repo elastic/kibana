@@ -13,6 +13,7 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { CoreSecurityDelegateServiceAccounts } from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
@@ -51,6 +52,8 @@ export interface ServiceAccountsServiceStartParams {
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
   getSpaceId: (request: KibanaRequest) => string;
+  /** What Core knows about the workload types plugins register. */
+  workloadTypes: CoreSecurityDelegateServiceAccounts;
 }
 
 export class ServiceAccountsService {
@@ -74,6 +77,7 @@ export class ServiceAccountsService {
     getCurrentUser,
     getCurrentUserProfileId,
     getSpaceId,
+    workloadTypes,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
     if (!config.serviceAccounts.enabled) {
       this.logger.debug('Service accounts are not enabled.');
@@ -160,6 +164,7 @@ export class ServiceAccountsService {
         backend,
         store,
         checkPrivilegesWithRequest,
+        workloadTypes,
       }),
       workloads: new ServiceAccountWorkloadBindings({
         logger: bindingsLogger,

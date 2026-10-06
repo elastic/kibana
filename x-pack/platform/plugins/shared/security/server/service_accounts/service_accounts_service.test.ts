@@ -11,6 +11,7 @@ import {
   loggingSystemMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 import { EsServiceAccounts } from './es_service_accounts';
@@ -55,6 +56,7 @@ describe('ServiceAccountsService', () => {
       canEncrypt: true,
       getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
       getSpaceId: jest.fn().mockReturnValue('default'),
+      workloadTypes: securityServiceMock.createDelegateHandle().serviceAccounts,
       ...overrides,
     };
   };

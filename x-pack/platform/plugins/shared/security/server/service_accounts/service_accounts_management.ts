@@ -9,7 +9,11 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
+import type {
+  CoreSecurityDelegateServiceAccounts,
+  ResolvedServiceAccountWorkload,
+  ServiceAccountWorkloadBinding,
+} from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingStore } from './bindings';
@@ -67,17 +71,31 @@ export interface ServiceAccountsManagementOptions {
   backend: ServiceAccountsBackend;
   store: WorkloadBindingStore;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  /** What Core knows about the workload types plugins register. */
+  workloadTypes: CoreSecurityDelegateServiceAccounts;
 }
 
-const toBoundWorkload = ({
+/** A binding that still blocks a delete, and whether it passed verification. */
+interface BlockingBinding {
+  binding: ServiceAccountWorkloadBinding;
+  verified: boolean;
+}
+
+/**
+ * A bound workload as the routes report it. The space of the binding stays on the server; only
+ * the link carries it.
+ */
+const toBoundWorkload = (
+  { pluginId, workloadType, workloadId }: ServiceAccountWorkloadBinding,
+  typeName: string | undefined,
+  { title, href }: ResolvedServiceAccountWorkload
+): ServiceAccountBoundWorkload => ({
   pluginId,
   workloadType,
   workloadId,
-}: ServiceAccountWorkloadBinding): ServiceAccountBoundWorkload => ({
-  pluginId,
-  workloadType,
-  workloadId,
-  displayName: workloadId,
+  displayName: title ?? workloadId,
+  ...(typeName !== undefined && { typeName }),
+  ...(href !== undefined && { href }),
 });
 
 export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
@@ -86,6 +104,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
   private readonly backend: ServiceAccountsBackend;
   private readonly store: WorkloadBindingStore;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  private readonly workloadTypes: CoreSecurityDelegateServiceAccounts;
 
   constructor({
     logger,
@@ -93,12 +112,14 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
     backend,
     store,
     checkPrivilegesWithRequest,
+    workloadTypes,
   }: ServiceAccountsManagementOptions) {
     this.logger = logger;
     this.license = license;
     this.backend = backend;
     this.store = store;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
+    this.workloadTypes = workloadTypes;
   }
 
   async listWorkloads(
@@ -140,37 +161,69 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
    * A binding that is gone or bound to another account by then no longer counts. A binding that
    * fails verification still does: it cannot be trusted to say which account it names, and the
    * safe answer to "would deleting this account break it?" is yes.
+   *
+   * Each workload is named and linked through its workload type, except a binding that failed
+   * verification: its coordinates cannot be trusted, so it keeps its workload ID and gets no link.
    */
   private async findBoundWorkloads(
     serviceAccountId: string
   ): Promise<ServiceAccountBoundWorkload[]> {
     const candidates = await this.store.findByServiceAccountId(serviceAccountId);
 
-    const blocking = await pMap(
-      candidates,
-      async (candidate) => {
-        const { pluginId, workloadType, workloadId, spaceId } = candidate;
-        try {
-          const binding = await this.store.getVerified({
-            pluginId,
-            workloadType,
-            workloadId,
-            spaceId,
-          });
-          return binding?.serviceAccountId === serviceAccountId ? toBoundWorkload(binding) : null;
-        } catch (e) {
-          if (Boom.isBoom(e) && e.output.statusCode === 403) {
-            return toBoundWorkload(candidate);
+    const blocking = (
+      await pMap(
+        candidates,
+        async (candidate): Promise<BlockingBinding | null> => {
+          const { pluginId, workloadType, workloadId, spaceId } = candidate;
+          try {
+            const binding = await this.store.getVerified({
+              pluginId,
+              workloadType,
+              workloadId,
+              spaceId,
+            });
+            return binding?.serviceAccountId === serviceAccountId
+              ? { binding, verified: true }
+              : null;
+          } catch (e) {
+            if (Boom.isBoom(e) && e.output.statusCode === 403) {
+              return { binding: candidate, verified: false };
+            }
+            throw e;
           }
-          throw e;
-        }
-      },
-      { concurrency: VERIFY_CONCURRENCY }
+        },
+        { concurrency: VERIFY_CONCURRENCY }
+      )
+    ).filter((blockingBinding): blockingBinding is BlockingBinding => blockingBinding !== null);
+
+    const resolved = await this.resolve(
+      blocking.filter(({ verified }) => verified).map(({ binding }) => binding)
     );
 
-    return blocking.filter(
-      (workload): workload is ServiceAccountBoundWorkload => workload !== null
+    return blocking.map(({ binding, verified }) =>
+      toBoundWorkload(
+        binding,
+        this.workloadTypes.getWorkloadTypeName(binding.pluginId, binding.workloadType),
+        (verified && resolved.get(binding)) || {}
+      )
     );
+  }
+
+  /** Names and links the given bindings through their workload types. */
+  private async resolve(
+    bindings: ServiceAccountWorkloadBinding[]
+  ): Promise<Map<ServiceAccountWorkloadBinding, ResolvedServiceAccountWorkload>> {
+    if (bindings.length === 0) {
+      return new Map();
+    }
+
+    try {
+      const resolved = await this.workloadTypes.resolveBoundWorkloads(bindings);
+      return new Map(bindings.map((binding, index) => [binding, resolved[index] ?? {}]));
+    } catch (e) {
+      this.logger.warn(`Unable to resolve ${bindings.length} bound workload(s): ${e.message}`);
+      return new Map();
+    }
   }
 
   private async authorize(request: KibanaRequest, action: string): Promise<void> {

@@ -74,10 +74,20 @@ export interface ServiceAccountBoundWorkload {
   workloadType: string;
   workloadId: string;
   /**
-   * What to call the workload in the UI. The workload id for now, until a workload type can
-   * resolve its bindings to a title of its own.
+   * What to call the workload in the UI: the title its workload type resolved, or the workload id
+   * when there is none.
    */
   displayName: string;
+  /**
+   * The name the owning plugin registered for the workload type. Absent when that plugin is not
+   * loaded, in which case the UI shows `workloadType`.
+   */
+  typeName?: string;
+  /**
+   * Link to the workload. It already carries the base path and the space of the binding, so use
+   * it as is.
+   */
+  href?: string;
 }
 
 /** Every workload bound to one service account, across spaces. */

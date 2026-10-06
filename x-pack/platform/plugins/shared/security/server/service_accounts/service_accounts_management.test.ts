@@ -9,7 +9,11 @@ import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
+import type {
+  CoreSecurityDelegateServiceAccounts,
+  ServiceAccountWorkloadBinding,
+} from '@kbn/core-security-server';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingStore } from './bindings';
@@ -57,6 +61,8 @@ describe('ServiceAccountsManagement', () => {
   let license: ReturnType<typeof licenseMock.create>;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
   let request: KibanaRequest;
+  let workloadTypes: jest.MockedObjectDeep<CoreSecurityDelegateServiceAccounts>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     license = licenseMock.create();
@@ -70,13 +76,152 @@ describe('ServiceAccountsManagement', () => {
     mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
     mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(true));
     request = httpServerMock.createKibanaRequest();
+    workloadTypes = securityServiceMock.createDelegateHandle().serviceAccounts;
+    logger = loggingSystemMock.createLogger();
 
     management = new ServiceAccountsManagement({
-      logger: loggingSystemMock.createLogger(),
+      logger,
       license,
       backend,
       store,
       checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+      workloadTypes,
+    });
+  });
+
+  describe('naming bound workloads', () => {
+    const verified = binding({ workloadId: 'verified', spaceId: 'marketing' });
+    const tampered = binding({ workloadId: 'tampered' });
+    const unresolved = binding({
+      pluginId: 'alerting',
+      workloadType: 'rule',
+      workloadId: 'rule-1',
+    });
+
+    beforeEach(() => {
+      store.findByServiceAccountId.mockResolvedValue([verified, tampered, unresolved]);
+      store.getVerified.mockImplementation(async ({ workloadId }) => {
+        if (workloadId === 'tampered') {
+          throw Boom.forbidden('failed integrity verification');
+        }
+        return workloadId === 'verified' ? verified : unresolved;
+      });
+      workloadTypes.getWorkloadTypeName.mockImplementation((pluginId) =>
+        pluginId === 'workflows' ? 'Workflow' : undefined
+      );
+      workloadTypes.resolveBoundWorkloads.mockImplementation(async (bindings) =>
+        bindings.map(({ workloadId }) =>
+          workloadId === 'verified'
+            ? { title: 'Nightly report', href: '/s/marketing/app/workflows/verified' }
+            : {}
+        )
+      );
+    });
+
+    const expected = [
+      {
+        pluginId: 'workflows',
+        workloadType: 'workflow',
+        workloadId: 'verified',
+        displayName: 'Nightly report',
+        typeName: 'Workflow',
+        href: '/s/marketing/app/workflows/verified',
+      },
+      {
+        pluginId: 'workflows',
+        workloadType: 'workflow',
+        workloadId: 'tampered',
+        displayName: 'tampered',
+        typeName: 'Workflow',
+      },
+      {
+        pluginId: 'alerting',
+        workloadType: 'rule',
+        workloadId: 'rule-1',
+        displayName: 'rule-1',
+      },
+    ];
+
+    it('names and links verified bindings through their workload types, without their spaces', async () => {
+      const workloads = await management.listWorkloads(request, SERVICE_ACCOUNT_ID);
+
+      expect(workloads).toStrictEqual(expected);
+      for (const workload of workloads) {
+        expect(workload).not.toHaveProperty('spaceId');
+      }
+    });
+
+    it('does not resolve a binding that failed verification', async () => {
+      await management.listWorkloads(request, SERVICE_ACCOUNT_ID);
+
+      expect(workloadTypes.resolveBoundWorkloads).toHaveBeenCalledTimes(1);
+      expect(workloadTypes.resolveBoundWorkloads).toHaveBeenCalledWith([verified, unresolved]);
+      expect(workloadTypes.resolveBoundWorkloads.mock.calls[0][0][0]).toMatchObject(
+        coordinatesOf(verified)
+      );
+    });
+
+    it('names and links the workloads a refused delete reports', async () => {
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+      ).resolves.toStrictEqual({ deleted: false, workloads: expected });
+    });
+
+    it('falls back to workload IDs when resolving fails', async () => {
+      workloadTypes.resolveBoundWorkloads.mockRejectedValue(new Error('boom'));
+
+      await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).resolves.toStrictEqual([
+        {
+          pluginId: 'workflows',
+          workloadType: 'workflow',
+          workloadId: 'verified',
+          displayName: 'verified',
+          typeName: 'Workflow',
+        },
+        expected[1],
+        expected[2],
+      ]);
+      expect(logger.warn).toHaveBeenCalledWith('Unable to resolve 2 bound workload(s): boom');
+    });
+
+    it('resolves nothing when no workload is bound', async () => {
+      store.findByServiceAccountId.mockResolvedValue([]);
+
+      await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).resolves.toEqual([]);
+      expect(workloadTypes.resolveBoundWorkloads).not.toHaveBeenCalled();
+    });
+
+    it('resolves nothing for a forced delete', async () => {
+      await management.delete(request, SERVICE_ACCOUNT_ID, { force: true });
+
+      expect(workloadTypes.resolveBoundWorkloads).not.toHaveBeenCalled();
+      expect(workloadTypes.getWorkloadTypeName).not.toHaveBeenCalled();
+    });
+
+    describe.each([
+      [
+        'lacks `manage_security`',
+        () => mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false)),
+      ],
+      ['is on an instance with security disabled', () => license.isEnabled.mockReturnValue(false)],
+    ])('when the caller %s', (_, deny) => {
+      beforeEach(deny);
+
+      it('never resolves the workloads it lists', async () => {
+        await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).rejects.toMatchObject({
+          output: { statusCode: 403 },
+        });
+        expect(workloadTypes.resolveBoundWorkloads).not.toHaveBeenCalled();
+        expect(workloadTypes.getWorkloadTypeName).not.toHaveBeenCalled();
+      });
+
+      it('never resolves the workloads of an unforced delete', async () => {
+        await expect(
+          management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+        expect(workloadTypes.resolveBoundWorkloads).not.toHaveBeenCalled();
+        expect(workloadTypes.getWorkloadTypeName).not.toHaveBeenCalled();
+      });
     });
   });
 
