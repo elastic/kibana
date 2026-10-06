@@ -162,9 +162,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const [saveError, setSaveError] = useState<{
     title: string;
     message: string;
-    /** The evaluator moved on after this form loaded, so the edit was refused rather than written. */
     isStale?: boolean;
-    /** Why loading the latest version, offered after a stale edit, did not work. */
     reloadError?: string;
   } | null>(null);
   // Rendered beside the test controls rather than with `saveError` at the top of the form,
@@ -253,8 +251,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   };
 
   const buildDraft = (): LlmJudgeConfig | undefined => {
-    // Every field is checked before anything is reported, so one bad score cannot hide
-    // that the name, description, or prompts are missing too.
+    // Validate every field before reporting, so one bad score cannot hide other missing fields.
     let hasInvalidLabels = false;
     const parsedScores: JudgeScore[] = scores.map((score) => {
       const labels = score.type === 'categorical' ? parseLabels(score.labels) : undefined;
@@ -262,7 +259,6 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
         hasInvalidLabels = true;
       }
       return {
-        // A blank name stays blank, so the schema reports it against the scores.
         name: score.name.trim(),
         type: score.type,
         direction: score.direction,
@@ -294,8 +290,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     setFormError(
       invalidFields.length === 0
         ? i18n.REQUIRED_FIELDS_ERROR
-        : // Labels alone get their specific rule, since the scores group is the only field.
-        invalidFields.length === 1 && nextFieldErrors.scores === i18n.INVALID_LABELS_ERROR
+        : invalidFields.length === 1 && nextFieldErrors.scores === i18n.INVALID_LABELS_ERROR
         ? i18n.INVALID_LABELS_ERROR
         : i18n.HIGHLIGHTED_FIELDS_ERROR
     );
@@ -321,8 +316,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
         });
         toasts?.addSuccess(i18n.CREATE_SUCCESS(created.evaluator.name));
       } else if (evaluatorName) {
-        // The form sends every field, so without the version it was loaded from, a save would
-        // quietly restore whatever another edit changed in the meantime.
+        // The form sends every field, so the server must refuse a save over a newer version.
         const baseVersion = evaluatorData?.evaluator.version;
         const updated = await updateEvaluator.mutateAsync({
           name: evaluatorName,
@@ -352,10 +346,9 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   };
 
   const onLoadLatest = async () => {
-    // The refetched definition repopulates the form, which replaces the unsaved edit.
+    // A successful refetch repopulates the form, replacing the unsaved edit.
     const { error } = await refetchEvaluator();
     if (error) {
-      // The draft and the way back both stay, so a failed reload can simply be tried again.
       setSaveError((current) => current && { ...current, reloadError: getErrorMessage(error) });
       return;
     }
@@ -469,8 +462,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   };
 
   const isSaving = createEvaluator.isLoading || updateEvaluator.isLoading;
-  // Only a definition that never loaded replaces the form. A later refetch that fails (after a
-  // stale edit) keeps the loaded data, and with it the draft the user is still holding.
+  // A failed refetch keeps its data, so only a first load that failed replaces the form.
   const hasLoadFailedOnOpen = Boolean(loadEvaluatorError) && !evaluatorData;
   const isTesting = isRunningTest || testEvaluator.isLoading || resolveInstrumentation.isLoading;
   const TestResultCallout = testResult?.status === 'ok' ? KbnSuccessCallout : KbnDangerCallout;

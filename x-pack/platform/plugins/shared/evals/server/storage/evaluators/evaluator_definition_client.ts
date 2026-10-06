@@ -122,10 +122,7 @@ export interface UpdateEvaluatorDefinitionInput {
   description?: string;
   judge?: LlmJudgeConfig;
   createdBy?: string;
-  /**
-   * The version the edit was made from. When set, the update is refused once the latest
-   * version is anything else, so a full-form save cannot write over a newer edit it never saw.
-   */
+  /** The version the edit started from. When set, the update is refused once it is not the latest. */
   baseVersion?: string;
 }
 
@@ -199,8 +196,7 @@ interface LatestByNameAggregation {
  * the one it read, so a score naming `name@version` always resolves to the
  * definition that produced it. That also removes the read-modify-write datasets
  * need optimistic concurrency for — an id derived from the version an edit read,
- * written with `op_type: 'create'`, is enough to make two writers editing the same
- * version resolve to one winner.
+ * written with `op_type: 'create'`, lets only one edit of a version win.
  */
 export class EvaluatorDefinitionClient {
   private readonly storage: InternalIStorageClient<EvaluatorStorageDocument>;
@@ -301,9 +297,7 @@ export class EvaluatorDefinitionClient {
       if (!current) {
         throw new EvaluatorNotFoundError(name);
       }
-      // Checked on every attempt, so an edit that loses a race (its id taken, or its write
-      // overtaken) is refused here on the retry instead of being reapplied onto a version
-      // its author never saw.
+      // Checked on every attempt, so an edit that loses a race is refused, not reapplied.
       if (baseVersion && current.version !== baseVersion) {
         throw new EvaluatorVersionConflictError(name, baseVersion, current.version);
       }
@@ -340,10 +334,8 @@ export class EvaluatorDefinitionClient {
         ...(createdBy ?? current.created_by ? { created_by: createdBy ?? current.created_by } : {}),
       };
 
-      // Keyed by the version this edit read, so any concurrent edit of that version collides
-      // here whatever level it derived. Keying by `nextVersion` would let a patch and a minor
-      // from the same version both land, and whichever wrote last would silently drop the
-      // other's change from the head.
+      // Keyed by the version read, not `nextVersion`, so concurrent edits of it collide even
+      // when they derive different levels.
       const id = getEvaluatorSuccessorId(this.spaceId, name, current.version);
 
       try {
@@ -359,10 +351,8 @@ export class EvaluatorDefinitionClient {
         continue;
       }
 
-      // Successor ids make this write the only one on top of `current`, but a node still
-      // keying versions by their own number (during an upgrade) can land beside it. Whoever
-      // ends up below the head has to reapply onto it, or their edit is missing from the
-      // version everything else reads.
+      // A node still keying versions by number (mid-upgrade) can land beside this write, so
+      // whoever ends up below the head reapplies onto it.
       const latest = await this.getLatest(name);
       if (latest?.version === nextVersion) {
         return toDefinition(id, document);

@@ -18,10 +18,8 @@ export const getEvaluatorDefinitionId = (spaceId: string, name: string, version:
   uuidv5(JSON.stringify([spaceId, name, version]), EVALUATOR_UUID_NAMESPACE);
 
 /**
- * The id of the version written on top of `parentVersion`. Keying a new version by what it
- * was built on, rather than by its own number, gives every version a single successor slot:
- * concurrent edits of the same version compete for one id whatever level each derived, so
- * only one can become the next version and the rest are refused instead of landing beside it.
+ * The id of the version written on top of `parentVersion`, so concurrent edits of one version
+ * compete for a single id and only one of them can become its successor.
  */
 export const getEvaluatorSuccessorId = (
   spaceId: string,

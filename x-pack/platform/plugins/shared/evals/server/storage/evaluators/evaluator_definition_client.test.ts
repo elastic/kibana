@@ -752,9 +752,7 @@ describe('EvaluatorDefinitionClient', () => {
     });
 
     describe('when two edits of the same version derive different levels', () => {
-      // A description patch (1.0.1) and a prompt change (1.1.0) both start from 1.0.0. Keyed
-      // by their own numbers they would both land, and the later one would publish the old
-      // description over the patch. Keyed by the version they read, they compete for one id.
+      // A patch (1.0.1) and a minor (1.1.0) both start from 1.0.0, so they compete for one id.
       const racePatchInFirst = (
         storage: ReturnType<typeof createClient>,
         created: { id: string }

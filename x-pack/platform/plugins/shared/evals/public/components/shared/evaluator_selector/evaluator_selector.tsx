@@ -22,11 +22,7 @@ export interface SelectedEvaluator {
 
 interface EvaluatorOptionMeta {
   disabled?: boolean;
-  /**
-   * Why a disabled option cannot be picked, shown in the option itself. A tooltip would not
-   * do: a disabled option receives no hover or focus, so neither a pointer nor a screen
-   * reader would ever reach it.
-   */
+  /** Shown inside a disabled option, since a disabled option never receives hover or focus. */
   disabledReason?: string;
   append?: React.ReactNode;
 }

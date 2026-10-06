@@ -63,10 +63,8 @@ const getTemplateVariables = (template: string): TemplateVariables => {
       const isTag = type === 'name' || type === '&' || type === '#' || type === '^';
 
       if (isTag && value === IMPLICIT_ITERATOR) {
-        // Inside a `#` section, `.` is that section's own value, so
-        // `{{#tool_calls}}{{{.}}}{{/tool_calls}}` renders the calls only when there are any.
-        // Anywhere else there is nothing for it to be. Either way it is not a variable name,
-        // which splitting on "." would otherwise report as an empty one.
+        // `.` is the value of the enclosing `#` section and refers to nothing outside one.
+        // It is not a variable name, so it must not be split on "." like the others.
         if (!insideSection) {
           usesImplicitIterator = true;
         } else if (type === 'name') {
