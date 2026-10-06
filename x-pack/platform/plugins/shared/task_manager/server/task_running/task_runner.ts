@@ -49,17 +49,17 @@ import type {
 } from '../task';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import {
   createTaskRunError,
   isUnrecoverableError,
   isUserError,
-  getTaskReclaimReason,
-  isVersionConflictError,
-  resolveTaskDocumentConflicts,
   type DecoratedError,
 } from './errors';
-import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
+import {
+  resolveTaskDocumentConflicts,
+  isVersionConflictError,
+  getTaskReclaimReason,
+} from './resolve_so_conflicts';
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
