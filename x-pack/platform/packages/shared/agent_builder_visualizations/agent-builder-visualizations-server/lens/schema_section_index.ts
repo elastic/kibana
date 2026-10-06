@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { partition, uniq } from 'lodash';
+import { groupBy, partition, uniq } from 'lodash';
 import { z } from '@kbn/zod';
 
 /** A field and every schema it has across the union variants that hold it. */
@@ -66,7 +66,15 @@ const mergeVariantFields = (variants: Field[][]): Field[] => {
   return [...merged.values()];
 };
 
-/** Object fields of a schema, looking through wrappers, arrays, and unions. */
+/** Merges the fields of intersected parts. A field is required when any part requires it. */
+const mergePartFields = (fields: Field[]): Field[] =>
+  Object.values(groupBy(fields, 'name')).map((group) => ({
+    name: group[0].name,
+    required: group.some(({ required }) => required),
+    schemas: uniq(group.flatMap(({ schemas }) => schemas)),
+  }));
+
+/** Object fields of a schema, looking through wrappers, arrays, unions, and intersections. */
 const getFields = (schema: z.ZodType): Field[] => {
   const unwrapped = unwrap(schema);
   if (unwrapped instanceof z.ZodObject) {
@@ -75,6 +83,10 @@ const getFields = (schema: z.ZodType): Field[] => {
       required: !field.isOptional(),
       schemas: [field],
     }));
+  }
+  if (unwrapped instanceof z.ZodIntersection) {
+    const { left, right } = unwrapped.def;
+    return mergePartFields([...getFields(left as z.ZodType), ...getFields(right as z.ZodType)]);
   }
   return mergeVariantFields(getVariants(unwrapped).map(getFields));
 };
