@@ -150,3 +150,74 @@ describe('DuplicateServiceModal namespace', () => {
     expect(screen.getByTestId('duplicateServiceModal-addButton')).toBeDisabled();
   });
 });
+
+describe('ServiceSettingsFlyout Save gating', () => {
+  const optional = (name: string) => ({
+    name,
+    type: 'text' as const,
+    title: name,
+    required: false,
+    show_user: true,
+  });
+  const varDefsByInput = {
+    'aws-s3': { bucket_arn: optional('bucket_arn'), queue_url: optional('queue_url') },
+  };
+  const S3_SERVICE = {
+    ...makeService([{ method: 'ecf', preferred: true }]),
+    dataStreams: ['waf'],
+    inputs: ['aws-s3'],
+    optionalConfig: ['bucket_arn', 'queue_url'],
+    defaultEnabledInputs: ['aws-s3'],
+    ecfSettings: {
+      requiredConfig: ['bucket_arn'],
+      dataStreams: ['waf'],
+      inputs: ['aws-s3'],
+      defaultEnabledInputs: ['aws-s3'],
+    },
+    varDefsByInput,
+    varDefsByDataStream: {
+      waf: { inputs: ['aws-s3'], defaultEnabledInputs: ['aws-s3'], varDefsByInput },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+  const configWith = (vars: Record<string, string>): ServiceVars => ({
+    enabledDataStreams: ['waf'],
+    varsByDataStream: { waf: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': vars } } },
+    namespace: 'prod',
+  });
+  const renderSave = (service: AwsServiceMatrixEntry, config: ServiceVars) => {
+    render(
+      <I18nProvider>
+        <ServiceSettingsFlyout
+          service={service}
+          config={config}
+          globalRegion="us-east-1"
+          onApply={jest.fn()}
+          onClose={jest.fn()}
+        />
+      </I18nProvider>
+    );
+    return screen.getByTestId('serviceSettingsFlyout-saveButton');
+  };
+
+  it('disables Save while no S3 source is set under agent-based', () => {
+    expect(renderSave(S3_SERVICE, configWith({ bucket_arn: '' }))).toBeDisabled();
+  });
+
+  it('enables Save once a source is set', () => {
+    expect(renderSave(S3_SERVICE, configWith({ queue_url: 'https://q' }))).toBeEnabled();
+  });
+
+  const ECF_VIEW = {
+    ...S3_SERVICE,
+    settingsScope: 'ecf' as const,
+    requiredConfig: ['bucket_arn'],
+  };
+
+  it('disables Save for an empty required ARN in the ECF view', () => {
+    expect(renderSave(ECF_VIEW, configWith({ bucket_arn: '' }))).toBeDisabled();
+  });
+
+  it('enables Save for a filled ARN in the ECF view', () => {
+    expect(renderSave(ECF_VIEW, configWith({ bucket_arn: 'arn:aws:s3:::b' }))).toBeEnabled();
+  });
+});
