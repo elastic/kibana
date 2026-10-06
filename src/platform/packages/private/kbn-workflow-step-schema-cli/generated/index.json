@@ -822,6 +822,7 @@
     "slack2.resolveChannelId",
     "slack2.searchMessages",
     "slack2.sendMessage",
+    "slack2.updateMessage",
     "slack2.whoAmI",
     "slack_api.postBlockkit",
     "slack_api.postMessage",
@@ -1003,11 +1004,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "050b8dc44aa30179c4f67647c063fa91be0e1952cdc31d25e67af7dc55a15be6"
+      "sha256": "419b6469004306e57e8118a5ae829b3579eb122102c5037501a67f94c6917bb0"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "b08dda311f361ac33d18fd6ae37819b59c115d3b1b1ba268f4b7e00a3da3d663"
+      "sha256": "e57b7817b904e738ab6920185013dea3ca885c6e02000ddaea03c8b838e07abe"
     }
   }
 }
