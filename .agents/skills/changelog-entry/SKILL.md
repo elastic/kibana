@@ -1,6 +1,15 @@
 ---
 name: changelog-entry
-description: Write the release note for a Kibana pull request. Shapes the three things the docs team's tooling turns into a changelog entry after merge: the release_note:* label, the PR title (becomes the release-note title), and the "## Release note" section of the PR body (becomes the description). Use when opening or updating a PR with a release_note:feature, release_note:enhancement, release_note:fix, release_note:breaking, or release_note:deprecation label, when asked for a PR title or release note, or when a PR body needs a "## Release note" section. Applies the Elastic changelog standards (docs-fix-changelog and docs-review-changelog in elastic/elastic-docs-skills) and Kibana's docs/changelog.yml configuration.
+description: >
+  Write the release note for a Kibana pull request. Shapes the three things the docs team's
+  tooling turns into a changelog entry after merge: the release_note:* label, the PR title
+  (becomes the release-note title), and the "## Release note" section of the PR body
+  (becomes the description). Use when opening or updating a PR with a release_note:feature,
+  release_note:enhancement, release_note:fix, release_note:breaking, or
+  release_note:deprecation label, when asked for a PR title or release note, or when a PR
+  body needs a "## Release note" section. Applies the Elastic changelog standards (docs-fix-
+  changelog and docs-review-changelog in elastic/elastic-docs-skills) and Kibana's
+  docs/changelog.yml configuration.
 metadata:
   source: https://github.com/elastic/elastic-docs-skills/tree/main/skills/changelogs/docs-fix-changelog
   source_version: "2.6.3"
