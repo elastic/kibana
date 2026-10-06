@@ -11,7 +11,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
-import type { Range } from '../../../../../common/entity_analytics/risk_engine';
+import type { Range } from '../../../../common/entity_analytics/risk_engine';
 
 export const convertDateToISOString = (dateString: string): string => {
   const date = datemath.parse(dateString);

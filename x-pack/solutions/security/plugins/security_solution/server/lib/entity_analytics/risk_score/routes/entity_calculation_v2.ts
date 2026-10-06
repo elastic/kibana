@@ -21,7 +21,7 @@ import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_V2_URL } from '../../../../../com
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
+import { withRiskEnginePrivilegeCheck } from './risk_engine_privileges';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { recalculateEntityRiskScore } from '../recalculate_entity_risk_score';

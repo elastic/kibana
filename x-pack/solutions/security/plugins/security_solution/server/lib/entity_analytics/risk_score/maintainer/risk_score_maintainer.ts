@@ -28,11 +28,11 @@ import {
   initSavedObjects,
   getConfiguration,
   getDefaultRiskEngineConfiguration,
-} from '../../risk_engine/utils/saved_object_configuration';
+} from '../configuration/saved_object_configuration';
 import {
   buildScopedInternalSavedObjectsClientUnsafe,
   buildInternalSavedObjectsClientUnsafe,
-} from '../tasks/helpers';
+} from '../../utils/internal_clients';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';

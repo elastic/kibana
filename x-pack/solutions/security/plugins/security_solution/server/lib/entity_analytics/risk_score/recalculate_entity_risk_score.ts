@@ -12,7 +12,7 @@ import Boom from '@hapi/boom';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { DEFAULT_RISK_SCORE_PAGE_SIZE } from '../../../../common/constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
-import { getConfiguration } from '../risk_engine/utils/saved_object_configuration';
+import { getConfiguration } from './configuration/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { buildAlertFilters } from './maintainer/steps/build_alert_filters';
 import { getLookupIndexName } from './maintainer/lookup/lookup_index';

@@ -6,11 +6,11 @@
  */
 
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
+import { RiskScoreDataClient } from '../risk_score_data_client';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
-import { mappingComponentName } from '../../risk_score/configurations';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../utils/internal_clients';
+import { mappingComponentName } from '../configurations';
 
 export const MAX_PER_PAGE = 10_000;
 

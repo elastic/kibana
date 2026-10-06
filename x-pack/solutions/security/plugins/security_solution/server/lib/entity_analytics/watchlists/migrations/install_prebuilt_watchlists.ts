@@ -13,7 +13,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../utils/internal_clients';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import {
   getPrivilegedUserWatchlistSavedObjectId,
