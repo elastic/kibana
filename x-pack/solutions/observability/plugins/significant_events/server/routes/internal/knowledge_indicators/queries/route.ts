@@ -371,12 +371,7 @@ const reconcileQueriesRoute = createServerRoute({
       error?: string;
     }>;
   }> => {
-    const authUser = server.core.security.authc.getCurrentUser(request);
-    const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
-    const scopedClients = await getScopedClients({
-      request,
-      rulesClientOptions: { cloneApiKeysOnCreate },
-    });
+    const scopedClients = await getScopedClients({ request });
     const { sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
@@ -731,12 +726,7 @@ const persistQueriesRoute = createServerRoute({
     server,
     maintenanceService,
   }): Promise<PersistQueriesResult> => {
-    const authUser = server.core.security.authc.getCurrentUser(request);
-    const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
-    const scopedClients = await getScopedClients({
-      request,
-      rulesClientOptions: { cloneApiKeysOnCreate },
-    });
+    const scopedClients = await getScopedClients({ request });
     const { sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
@@ -793,12 +783,7 @@ const upsertQueryRoute = createServerRoute({
     server,
     maintenanceService,
   }): Promise<{ acknowledged: boolean }> => {
-    const authUser = server.core.security.authc.getCurrentUser(request);
-    const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
-    const scopedClients = await getScopedClients({
-      request,
-      rulesClientOptions: { cloneApiKeysOnCreate },
-    });
+    const scopedClients = await getScopedClients({ request });
     const { sourcesClient, licensing } = scopedClients;
     const {
       path: { queryId },
