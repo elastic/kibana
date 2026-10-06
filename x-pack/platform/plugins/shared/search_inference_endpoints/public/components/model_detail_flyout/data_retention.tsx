@@ -56,7 +56,7 @@ export const DataRetention = ({ metadata }: DataRetentionProps) => {
         data-test-subj="modelDetailFlyoutDataRetentionBadge"
       >
         {i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.retainsDataBadgeLabel', {
-          defaultMessage: 'Retains data',
+          defaultMessage: 'Data retained by provider',
         })}
       </EuiBadge>
     </EuiToolTip>
