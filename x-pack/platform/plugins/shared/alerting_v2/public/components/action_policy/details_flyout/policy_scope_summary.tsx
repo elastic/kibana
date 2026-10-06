@@ -17,7 +17,7 @@ export const POLICY_SCOPE_LABEL = i18n.translate(
 
 export type PolicyScopeKind = 'catchAll' | 'expressionOnly' | 'tagsOnly' | 'tagsAndExpression';
 
-const POLICY_SCOPE_SUMMARIES: Record<PolicyScopeKind, string> = {
+export const POLICY_SCOPE_SUMMARIES: Record<PolicyScopeKind, string> = {
   tagsAndExpression: i18n.translate(
     'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tagsAndExpression',
     {
