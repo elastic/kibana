@@ -13,7 +13,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
+import type { UISession } from '@kbn/data-plugin/public';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';

@@ -16,6 +16,7 @@ import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { searchSessionsManagementMock } from '@kbn/search-sessions-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
@@ -312,6 +313,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     savedSearch,
     discoverSessionService,
+    searchSessionsManagement: searchSessionsManagementMock.createStartContract(),
     dataViews: dataPlugin.dataViews,
     inlineDataViews: createInlineDataViewService({
       dataViews: dataPlugin.dataViews,

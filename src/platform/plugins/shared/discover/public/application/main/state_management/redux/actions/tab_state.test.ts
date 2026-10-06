@@ -26,14 +26,10 @@ import {
 } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { EsqlSource } from '@kbn/data-source';
-import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import {
-  dataViewMock,
-  dataViewMockWithTimeField,
-  esHitsMock,
-} from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -1229,10 +1225,9 @@ describe('tab_state actions', () => {
       },
       attributesOverrides: { controlGroupState: mockControlState },
     });
-    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockResolvedValue({
-      esqlSource: createMockEsqlSource(),
-      dataView: dataViewMockWithTimeField,
-    });
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(await createResolvedMockEsqlSource());
 
     await toolkit.initializeTabs({
       persistedDiscoverSession: createDiscoverSessionMock({
@@ -1284,10 +1279,10 @@ describe('tab_state actions', () => {
     jest.spyOn(toolkit.services.dataViews, 'getDefaultDataView').mockResolvedValue(logsDataView);
 
     const openingQuery = 'FROM logs*,-logstash*,filebeat-*';
-    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockResolvedValue({
-      esqlSource: createMockEsqlSource(),
-      dataView: dataViewMock,
-    });
+    const resolved = await createResolvedMockEsqlSource();
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(resolved);
 
     await toolkit.initializeTabs();
     toolkit.internalState.dispatch(
@@ -1305,7 +1300,7 @@ describe('tab_state actions', () => {
     expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
     expect(
       selectTabRuntimeState(toolkit.runtimeStateManager, tabId).currentDataView$.getValue()
-    ).toBe(dataViewMock);
+    ).toBe(resolved.dataView);
     resolveSpy.mockRestore();
   });
 });
