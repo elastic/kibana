@@ -19,30 +19,39 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_PROFILING_SCHEMA, ProfilingSchema } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { useProfilingSchema } from '../contexts/profiling_schema/use_profiling_schema';
 
 const SCHEMA_LABEL = i18n.translate('xpack.profiling.schemaSelector.label', {
   defaultMessage: 'Schema',
 });
 
-const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.profiling.schemaSelector.notAvailable', {
+export const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.profiling.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
 });
 
-const OTHER_SCHEMA_AVAILABLE = i18n.translate(
+export const PLACEHOLDER = i18n.translate('xpack.profiling.schemaSelector.placeholder', {
+  defaultMessage: 'Checking schemas...',
+});
+
+export const OTHER_SCHEMA_AVAILABLE = i18n.translate(
   'xpack.profiling.schemaSelector.otherSchemaAvailableHelpText',
   { defaultMessage: 'There is profiling data available in another schema' }
 );
 
-const AVAILABILITY_ERROR = i18n.translate(
+export const AVAILABILITY_ERROR = i18n.translate(
   'xpack.profiling.schemaSelector.availabilityErrorHelpText',
   {
     defaultMessage: 'Unable to check which schemas have data',
   }
 );
 
-const schemaTranslationMap: Readonly<Record<ProfilingSchema, string>> = {
+export const NO_SCHEMA_AVAILABLE = i18n.translate(
+  'xpack.profiling.schemaSelector.noSchemaAvailable',
+  { defaultMessage: 'No schema available' }
+);
+
+export const schemaTranslationMap: Readonly<Record<ProfilingSchema, string>> = {
   [ProfilingSchema.ECS]: i18n.translate('xpack.profiling.schemaSelector.ecsDisplay', {
     defaultMessage: 'Universal Profiling',
   }),
@@ -114,8 +123,6 @@ export function SchemaSelector() {
     useProfilingSchema();
   const { fontSize } = useEuiFontSize('s');
 
-  const value = schema ?? DEFAULT_PROFILING_SCHEMA;
-
   const offeredSchemas = schemas ?? supportedSchemas;
 
   const options = useMemo<Array<EuiSuperSelectOption<SelectOption>>>(
@@ -127,15 +134,13 @@ export function SchemaSelector() {
     [offeredSchemas]
   );
 
-  const isInvalid = !offeredSchemas.includes(value);
+  const isInvalid = schema !== undefined && !offeredSchemas.includes(schema);
 
   const displayOptions = useMemo<Array<EuiSuperSelectOption<SelectOption>>>(() => {
     if (options.length === 0) {
       return [
         {
-          inputDisplay: i18n.translate('xpack.profiling.schemaSelector.noSchemaAvailable', {
-            defaultMessage: 'No schema available',
-          }),
+          inputDisplay: NO_SCHEMA_AVAILABLE,
           value: UNKNOWN_OPTION,
         },
       ];
@@ -144,8 +149,8 @@ export function SchemaSelector() {
     if (isInvalid) {
       return [
         {
-          inputDisplay: <InvalidDisplay value={schemaTranslationMap[value]} />,
-          dropdownDisplay: <InvalidDropdownDisplay value={schemaTranslationMap[value]} />,
+          inputDisplay: <InvalidDisplay value={schemaTranslationMap[schema]} />,
+          dropdownDisplay: <InvalidDropdownDisplay value={schemaTranslationMap[schema]} />,
           value: UNKNOWN_OPTION,
           disabled: true,
         },
@@ -154,7 +159,7 @@ export function SchemaSelector() {
     }
 
     return options;
-  }, [isInvalid, options, value]);
+  }, [isInvalid, options, schema]);
 
   const onSelect = useCallback(
     (selectedValue: SelectOption) => {
@@ -178,10 +183,11 @@ export function SchemaSelector() {
         id="profilingSchemaSelectorSelect"
         options={displayOptions}
         compressed
-        valueOfSelected={isInvalid ? UNKNOWN_OPTION : value}
+        valueOfSelected={isInvalid ? UNKNOWN_OPTION : schema}
+        placeholder={PLACEHOLDER}
         onChange={onSelect}
         isLoading={isLoading}
-        disabled={isLoading}
+        disabled={isLoading || !schema}
         fullWidth
         css={{ fontSize }}
         prepend={<EuiFormLabel>{SCHEMA_LABEL}</EuiFormLabel>}

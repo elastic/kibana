@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { NoProfilingDataPrompt } from '.';
+import { NO_DATA_BODY, NO_DATA_TITLE, NoProfilingDataPrompt } from '.';
 
 const renderPrompt = (hasData: boolean) =>
   render(
@@ -29,7 +29,7 @@ describe('NoProfilingDataPrompt', () => {
 
     expect(screen.queryByTestId('profilingData')).not.toBeInTheDocument();
     expect(screen.getByTestId('profilingNoDataPrompt')).toHaveTextContent(
-      'No profiling data foundTry updating your search filters or selecting a different time range or schema'
+      `${NO_DATA_TITLE}${NO_DATA_BODY}`
     );
   });
 });

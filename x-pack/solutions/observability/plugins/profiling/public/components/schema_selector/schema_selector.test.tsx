@@ -14,10 +14,18 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ProfilingSchema } from '@kbn/profiling-utils';
 import type { ProfilingSchemaContextValue } from '../contexts/profiling_schema/profiling_schema_context';
 import { ProfilingSchemaContext } from '../contexts/profiling_schema/profiling_schema_context';
-import { SchemaSelector } from '.';
+import {
+  AVAILABILITY_ERROR,
+  NO_SCHEMA_AVAILABLE,
+  OTHER_SCHEMA_AVAILABLE,
+  PLACEHOLDER,
+  SCHEMA_NOT_AVAILABLE,
+  SchemaSelector,
+  schemaTranslationMap,
+} from '.';
 
-const OTHER_SCHEMA_HELP_TEXT = 'There is profiling data available in another schema';
-const AVAILABILITY_ERROR_HELP_TEXT = 'Unable to check which schemas have data';
+const UNIVERSAL_PROFILING_LABEL = schemaTranslationMap[ProfilingSchema.ECS];
+const OPENTELEMETRY_LABEL = schemaTranslationMap[ProfilingSchema.OTEL];
 
 const renderSelector = (
   context: Pick<ProfilingSchemaContextValue, 'schema' | 'schemas'> &
@@ -59,12 +67,12 @@ describe('SchemaSelector', () => {
       schemas: [ProfilingSchema.ECS, ProfilingSchema.OTEL],
     });
 
-    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent('OpenTelemetry');
-    expect(screen.getByText(OTHER_SCHEMA_HELP_TEXT)).toBeInTheDocument();
+    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent(OPENTELEMETRY_LABEL);
+    expect(screen.getByText(OTHER_SCHEMA_AVAILABLE)).toBeInTheDocument();
 
     await openDropdown();
 
-    expect(getOptionLabels()).toEqual(['Universal Profiling', 'OpenTelemetry']);
+    expect(getOptionLabels()).toEqual([UNIVERSAL_PROFILING_LABEL, OPENTELEMETRY_LABEL]);
   });
 
   it('only offers the selected schema when it is the only one with data', async () => {
@@ -73,12 +81,14 @@ describe('SchemaSelector', () => {
       schemas: [ProfilingSchema.ECS],
     });
 
-    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent('Universal Profiling');
-    expect(screen.queryByText(OTHER_SCHEMA_HELP_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent(
+      UNIVERSAL_PROFILING_LABEL
+    );
+    expect(screen.queryByText(OTHER_SCHEMA_AVAILABLE)).not.toBeInTheDocument();
 
     await openDropdown();
 
-    expect(getOptionLabels()).toEqual(['Universal Profiling']);
+    expect(getOptionLabels()).toEqual([UNIVERSAL_PROFILING_LABEL]);
   });
 
   it('flags the selected schema when only the other schema has data', async () => {
@@ -88,14 +98,16 @@ describe('SchemaSelector', () => {
     });
 
     expect(screen.getByTestId('profilingSchemaSelectorInvalidToken')).toBeInTheDocument();
-    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent('Universal Profiling');
-    expect(screen.getByText(OTHER_SCHEMA_HELP_TEXT)).toBeInTheDocument();
+    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent(
+      UNIVERSAL_PROFILING_LABEL
+    );
+    expect(screen.getByText(OTHER_SCHEMA_AVAILABLE)).toBeInTheDocument();
 
     await openDropdown();
 
     expect(getOptionLabels()).toEqual([
-      'Universal ProfilingSelected schema is not available for this query.',
-      'OpenTelemetry',
+      `${UNIVERSAL_PROFILING_LABEL}${SCHEMA_NOT_AVAILABLE}`,
+      OPENTELEMETRY_LABEL,
     ]);
   });
 
@@ -105,12 +117,12 @@ describe('SchemaSelector', () => {
       schemas: [],
     });
 
-    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent('No schema available');
-    expect(screen.queryByText(OTHER_SCHEMA_HELP_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent(NO_SCHEMA_AVAILABLE);
+    expect(screen.queryByText(OTHER_SCHEMA_AVAILABLE)).not.toBeInTheDocument();
 
     await openDropdown();
 
-    expect(getOptionLabels()).toEqual(['No schema available']);
+    expect(getOptionLabels()).toEqual([NO_SCHEMA_AVAILABLE]);
   });
 
   describe('while the schemas with data are unknown', () => {
@@ -120,13 +132,13 @@ describe('SchemaSelector', () => {
         schemas: undefined,
       });
 
-      expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent('OpenTelemetry');
+      expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent(OPENTELEMETRY_LABEL);
       expect(screen.queryByTestId('profilingSchemaSelectorInvalidToken')).not.toBeInTheDocument();
-      expect(screen.queryByText(OTHER_SCHEMA_HELP_TEXT)).not.toBeInTheDocument();
+      expect(screen.queryByText(OTHER_SCHEMA_AVAILABLE)).not.toBeInTheDocument();
 
       await openDropdown();
 
-      expect(getOptionLabels()).toEqual(['Universal Profiling', 'OpenTelemetry']);
+      expect(getOptionLabels()).toEqual([UNIVERSAL_PROFILING_LABEL, OPENTELEMETRY_LABEL]);
     });
 
     it('does not offer Universal Profiling when the deployment does not support it', async () => {
@@ -138,7 +150,7 @@ describe('SchemaSelector', () => {
 
       await openDropdown();
 
-      expect(getOptionLabels()).toEqual(['OpenTelemetry']);
+      expect(getOptionLabels()).toEqual([OPENTELEMETRY_LABEL]);
     });
 
     it('flags a selected schema the deployment does not support', () => {
@@ -158,16 +170,23 @@ describe('SchemaSelector', () => {
         error: new Error('Request failed'),
       });
 
-      expect(screen.getByText(AVAILABILITY_ERROR_HELP_TEXT)).toBeInTheDocument();
-      expect(screen.queryByText(OTHER_SCHEMA_HELP_TEXT)).not.toBeInTheDocument();
+      expect(screen.getByText(AVAILABILITY_ERROR)).toBeInTheDocument();
+      expect(screen.queryByText(OTHER_SCHEMA_AVAILABLE)).not.toBeInTheDocument();
     });
   });
 
-  it('shows the default schema until one is selected', () => {
-    renderSelector({ schema: undefined, schemas: undefined, isLoading: true });
+  it.each([
+    ['while the schemas with data are loading', { schemas: undefined, isLoading: true }],
+    ['once the schemas with data are known', { schemas: [ProfilingSchema.ECS], isLoading: false }],
+  ])('shows no schema until one is selected, %s', (_description, context) => {
+    renderSelector({ schema: undefined, ...context });
 
-    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent('OpenTelemetry');
-    expect(screen.getByTestId('profilingSchemaSelect')).toBeDisabled();
+    const select = screen.getByTestId('profilingSchemaSelect');
+    expect(select).toHaveTextContent(PLACEHOLDER);
+    expect(select).not.toHaveTextContent(OPENTELEMETRY_LABEL);
+    expect(select).not.toHaveTextContent(UNIVERSAL_PROFILING_LABEL);
+    expect(screen.queryByTestId('profilingSchemaSelectorInvalidToken')).not.toBeInTheDocument();
+    expect(select).toBeDisabled();
   });
 
   it('cannot be changed while the schemas with data are loading', () => {
@@ -187,7 +206,7 @@ describe('SchemaSelector', () => {
     });
 
     await openDropdown();
-    await userEvent.click(screen.getByRole('option', { name: 'OpenTelemetry' }));
+    await userEvent.click(screen.getByRole('option', { name: OPENTELEMETRY_LABEL }));
 
     expect(onSchemaChange).toHaveBeenCalledWith(ProfilingSchema.OTEL);
   });
@@ -199,7 +218,7 @@ describe('SchemaSelector', () => {
     });
 
     await openDropdown();
-    await userEvent.click(screen.getByRole('option', { name: 'No schema available' }));
+    await userEvent.click(screen.getByRole('option', { name: NO_SCHEMA_AVAILABLE }));
 
     expect(onSchemaChange).not.toHaveBeenCalled();
   });
