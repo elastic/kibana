@@ -48,11 +48,12 @@ import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_t
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { ensureMemoryIndex } from './memory/ensure_memory_index';
+import { registerMemoryAiIndex } from './memory/register_memory';
 import { registerCortexTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
-import { createMemoryService, type MemoryService } from './memory/internal_client';
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
@@ -123,13 +124,9 @@ export class NightshiftInvestigationsPlugin
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
-  private readonly memoryService: MemoryService;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
-    this.memoryService = createMemoryService({
-      getElasticsearch: () => this.elasticsearch,
-    });
   }
 
   setup(
@@ -149,6 +146,9 @@ export class NightshiftInvestigationsPlugin
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
       registerCortexTelemetryEvents(core.analytics);
+    }
+    if (this.memoryEnabled) {
+      registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
     // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
@@ -337,7 +337,6 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryMaterializeToSandboxStepDefinition({
             getSandboxStart: () => this.sandboxStart,
-            getMemoryEsClient: this.memoryService.getClientWhenReady,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -363,7 +362,6 @@ export class NightshiftInvestigationsPlugin
             getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
-            getMemoryEsClient: this.memoryService.getClientWhenReady,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -429,13 +427,8 @@ export class NightshiftInvestigationsPlugin
                 'elasticsearch is not available — plugin start() has not been called'
               );
             }
-            // Deliberately NOT `asScoped(request).asCurrentUser`, unlike the
-            // Cortex and decision-tree stores above. The Semantic Memory index is
-            // hidden and has no end-user index privileges by design, so a
-            // request-scoped client would 403 for every user. Tenancy still comes
-            // from the request's Space, so the store filters on it as usual.
             return createMemoryPageStore({
-              esClient: this.elasticsearch.client.asInternalUser,
+              esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('memory'),
               spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
@@ -481,7 +474,12 @@ export class NightshiftInvestigationsPlugin
     this.security = coreStart.security;
 
     if (this.memoryEnabled) {
-      void this.memoryService.initialize(this.logger.get('memory'));
+      ensureMemoryIndex({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger: this.logger.get('memory'),
+      }).catch((error) => {
+        this.logger.error(`Failed to ensure Semantic Memory index template: ${error.message}`);
+      });
     }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the

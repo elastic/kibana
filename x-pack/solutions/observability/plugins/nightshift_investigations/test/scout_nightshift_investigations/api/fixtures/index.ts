@@ -42,6 +42,5 @@ export {
   MEMORY_READER_ROLE,
   seedMemory,
   storedMemoryId,
-  waitForMemoryIndex,
 } from './memory';
 export type { SeededMemory } from './memory';

@@ -33,7 +33,6 @@ const hydrateMemoryWorkspaceMock = jest.mocked(hydrateMemoryWorkspace);
 describe('memoryMaterializeToSandboxStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
-  const getMemoryEsClient = jest.fn().mockResolvedValue(esClient);
   const mockSession = { writeFiles: jest.fn(), mkdirs: jest.fn() } as unknown as SandboxSession;
   const telemetry = {
     reportSemanticMemoryMaterialized: jest.fn(),
@@ -48,7 +47,6 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getScopedEsClient.mockReturnValue(esClient);
-    getMemoryEsClient.mockResolvedValue(esClient);
   });
 
   const createContext = (
@@ -85,11 +83,10 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       stepType: 'nightshift.memoryMaterializeToSandbox',
     } as never);
 
-  it('materializes memory with the injected internal client, never the scoped client', async () => {
+  it('materializes memory with the workflow-scoped client', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -99,8 +96,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     );
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
-    expect(getMemoryEsClient).toHaveBeenCalledTimes(1);
-    expect(getScopedEsClient).not.toHaveBeenCalled();
+    expect(getScopedEsClient).toHaveBeenCalledTimes(1);
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith({
       session: mockSession,
       esClient,
@@ -135,39 +131,10 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledTimes(1);
   });
 
-  it('waits for memory readiness before starting a store operation', async () => {
-    let resolveReadiness: (client: typeof esClient) => void = () => {};
-    getMemoryEsClient.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveReadiness = resolve;
-        })
-    );
-    const definition = memoryMaterializeToSandboxStepDefinition({
-      getSandboxStart: () => makeSandboxStart(),
-      getMemoryEsClient,
-      logger: loggerMock.create(),
-      telemetry: telemetry as never,
-    });
-
-    const operation = definition.handler(
-      createContext('default__conv-1', 'default', 'checkout lag', 'nightshift.investigation')
-    );
-    await Promise.resolve();
-
-    expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
-
-    resolveReadiness(esClient);
-    await operation;
-
-    expect(hydrateMemoryWorkspace).toHaveBeenCalledTimes(1);
-  });
-
   it('uses the obtained sandbox_id without re-scoping it', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -194,7 +161,6 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
   it('throws when the sandbox is not configured', async () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => undefined,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -211,7 +177,6 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     hydrateMemoryWorkspaceMock.mockRejectedValueOnce(new Error('write failed'));
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -233,7 +198,6 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
   it('skips materialize when the memory flag is off', async () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
-      getMemoryEsClient,
       logger: loggerMock.create(),
       isEnabled: () => false,
       telemetry: telemetry as never,
@@ -255,7 +219,6 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
   it('skips memory materialize when agent_id is missing', async () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -277,7 +240,6 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     const sandboxStart = makeSandboxStart();
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -298,12 +260,12 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
   });
 
-  it('fails clearly when the internal Memory client is unavailable', async () => {
+  it('propagates a scoped client failure', async () => {
+    getScopedEsClient.mockImplementationOnce(() => {
+      throw new Error('scoped client unavailable');
+    });
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
-      getMemoryEsClient: async () => {
-        throw new Error('Semantic Memory internal Elasticsearch client is unavailable');
-      },
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -312,7 +274,6 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       definition.handler(
         createContext('default__conv-1', 'default', 'task', 'nightshift.investigation')
       )
-    ).rejects.toThrow('Semantic Memory internal Elasticsearch client is unavailable');
-    expect(getScopedEsClient).not.toHaveBeenCalled();
+    ).rejects.toThrow('scoped client unavailable');
   });
 });

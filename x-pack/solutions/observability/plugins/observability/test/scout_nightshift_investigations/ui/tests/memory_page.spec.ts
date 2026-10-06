@@ -29,7 +29,6 @@ import {
   sidebarPageIds,
   storedMemoryId,
   telemetryPercent,
-  waitForMemoryIndex,
 } from '../fixtures/memory';
 
 const suffix = randomUUID().slice(0, 8);
@@ -138,8 +137,7 @@ test.describe(
     tag: tags.stateful.classic,
   },
   () => {
-    test.beforeAll(async ({ esClient, log, apiServices }) => {
-      await waitForMemoryIndex(esClient, log);
+    test.beforeAll(async ({ esClient, apiServices }) => {
       // The routes scope by `getSpaceId(request)`, so both Spaces this suite uses
       // are real ones rather than a space_id string on a document.
       await apiServices.spaces.create({ id: SUITE_SPACE_ID, name: SUITE_SPACE_ID });

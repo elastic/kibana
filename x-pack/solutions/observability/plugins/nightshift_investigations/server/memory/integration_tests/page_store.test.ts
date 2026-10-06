@@ -66,13 +66,10 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     await esServer?.stop();
   });
 
-  it('creates a hidden index with the production semantic_text mapping', async () => {
+  it('creates an AI-index-backed index with the task-recall semantic mapping', async () => {
     const mapping = await esClient.indices.getMapping({ index: MEMORY_INDEX });
-    const settings = await esClient.indices.getSettings({
-      index: MEMORY_INDEX,
-      flat_settings: true,
-    });
 
+    expect(MEMORY_INDEX.startsWith('ai-index-idx-')).toBe(true);
     expect(mapping[MEMORY_INDEX].mappings.properties?.context).toEqual(
       expect.objectContaining({
         type: 'text',
@@ -81,7 +78,6 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
         }),
       })
     );
-    expect(settings[MEMORY_INDEX].settings?.['index.hidden']).toBe('true');
   });
 
   it('exercises page lifecycle, isolation, and counter OCC on the semantic index', async () => {

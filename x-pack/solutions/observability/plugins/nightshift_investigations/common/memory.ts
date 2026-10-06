@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-/** Plugin-owned standard index. Must not use the `ai-index-idx-` prefix. */
-export const MEMORY_INDEX = 'nightshift-semantic-memory';
+/** Managed Context Engine AI index that stores Semantic Memory pages as KIs. */
+export const MEMORY_AI_INDEX_ID = 'nightshift-semantic-memory';
+
+/** Backing index for {@link MEMORY_AI_INDEX_ID}. Must use the `ai-index-idx-` prefix. */
+export const MEMORY_INDEX = 'ai-index-idx-nightshift-semantic-memory';
 
 /**
  * A memory is archived or it is not; there is no third state.

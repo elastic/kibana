@@ -6,48 +6,33 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
 import { MEMORY_INDEX } from '../../common/memory';
 
 export const MEMORY_INDEX_TEMPLATE_NAME = 'nightshift-semantic-memory';
 
+/** Above the managed `ai-index-idx` template's 500, so this field wins the merge. */
+export const MEMORY_INDEX_TEMPLATE_PRIORITY = 600;
+
 /**
- * Own mapping — not the Context Engine `ai-index-idx-*` KI template.
- * `context.semantic` is the task-recall lane (ELSER). `title` / `content` stay
- * lexical; they are the lesson, not the retrieve key.
+ * The managed `ai-index-idx` template maps title/description/content as
+ * semantic, but has no `context` field. A memory's recall key is the task that
+ * produced it, so this index-scoped template adds that one field on top.
  */
-export const MEMORY_INDEX_MAPPINGS = {
-  dynamic: 'false' as const,
+export const MEMORY_CONTEXT_MAPPING = {
   properties: {
-    '@timestamp': { type: 'date' as const },
-    type: { type: 'keyword' as const },
-    title: { type: 'text' as const },
-    description: { type: 'text' as const },
-    content: { type: 'text' as const },
     context: {
       type: 'text' as const,
       fields: {
         semantic: { type: 'semantic_text' as const },
       },
     },
-    tags: { type: 'keyword' as const },
-    attributes: { type: 'flattened' as const },
   },
 };
 
-const MEMORY_INDEX_SETTINGS = {
-  number_of_shards: 1,
-  auto_expand_replicas: '0-1',
-  // Hidden discovery plus no end-user privilege or API keeps Memory internal for ordinary users.
-  // Elasticsearch superusers can still explicitly inspect the backing index when necessary.
-  'index.hidden': true,
-};
-
-const isAlreadyExistsError = (error: unknown): boolean =>
-  isResponseError(error) &&
-  typeof error.body.error === 'object' &&
-  error.body.error.type === 'resource_already_exists_exception';
-
+/**
+ * Installs the plugin's one-field template. The backing index is auto-created from
+ * the managed `ai-index-idx` template on first write; no index is created here.
+ */
 export const ensureMemoryIndex = async ({
   esClient,
   logger,
@@ -55,47 +40,19 @@ export const ensureMemoryIndex = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<void> => {
-  // Install our template before creating the index so a racing first write
-  // still gets `context.semantic` instead of the AI-index KI mapping.
   await esClient.indices.putIndexTemplate({
     name: MEMORY_INDEX_TEMPLATE_NAME,
     index_patterns: [MEMORY_INDEX],
-    priority: 500,
+    priority: MEMORY_INDEX_TEMPLATE_PRIORITY,
     create: false,
     _meta: {
       managed: true,
-      description: 'Nightshift Semantic Memory — plugin-owned, not a Context Engine AI index.',
+      description:
+        'Nightshift Semantic Memory — adds the task-recall lane to the AI-index template.',
     },
     template: {
-      settings: MEMORY_INDEX_SETTINGS,
-      mappings: MEMORY_INDEX_MAPPINGS,
+      mappings: MEMORY_CONTEXT_MAPPING,
     },
   });
-
-  const exists = await esClient.indices.exists({ index: MEMORY_INDEX });
-  if (!exists) {
-    try {
-      await esClient.indices.create({
-        index: MEMORY_INDEX,
-        settings: MEMORY_INDEX_SETTINGS,
-        mappings: MEMORY_INDEX_MAPPINGS,
-      });
-      logger.info(`Created Semantic Memory index ${MEMORY_INDEX}`);
-      return;
-    } catch (err) {
-      if (!isAlreadyExistsError(err)) {
-        throw err;
-      }
-    }
-  }
-
-  await esClient.indices.putSettings({
-    index: MEMORY_INDEX,
-    settings: { 'index.hidden': true },
-  });
-  await esClient.indices.putMapping({
-    index: MEMORY_INDEX,
-    dynamic: MEMORY_INDEX_MAPPINGS.dynamic,
-    properties: MEMORY_INDEX_MAPPINGS.properties,
-  });
+  logger.debug(`Ensured Semantic Memory index template ${MEMORY_INDEX_TEMPLATE_NAME}`);
 };

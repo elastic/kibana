@@ -20,7 +20,6 @@ import {
   MEMORY_READER_ROLE,
   type SeededMemory,
   seedMemory,
-  waitForMemoryIndex,
 } from '../fixtures';
 
 const suffix = Math.random().toString(36).slice(2, 10);
@@ -41,12 +40,6 @@ apiTest.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     const seeded: SeededMemory[] = [];
-
-    apiTest.beforeAll(async ({ esClient, log }) => {
-      // `memoryService.initialize()` runs fire-and-forget on plugin start, so the
-      // index can still be being created when the first write lands.
-      await waitForMemoryIndex(esClient, log);
-    });
 
     apiTest.afterEach(async ({ esClient }) => {
       await deleteMemories(

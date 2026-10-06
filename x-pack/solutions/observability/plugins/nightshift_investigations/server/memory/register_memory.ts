@@ -7,8 +7,11 @@
 
 import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { MEMORY_AI_INDEX_ID, MEMORY_INDEX } from '../../common/memory';
 import {
   createInvestigationMemoryTelemetry,
   createOptimizeModel,
@@ -25,6 +28,34 @@ import {
   type MemoryOptimizeSummary,
 } from './optimize';
 import { createMemoryPageStore, type MemoryPageStore } from './page_store';
+
+/**
+ * Registers the Semantic Memory AI index with the Context Engine so it is managed and
+ * discoverable, the way Cortex and the decision trees do. The backing index is
+ * auto-created on first write from the `ai-index-idx-*` template.
+ */
+export const registerMemoryAiIndex = (
+  contextEngine: ContextEnginePluginSetup | undefined,
+  logger: Logger
+): void => {
+  if (!contextEngine) {
+    logger.debug(
+      'contextEngine is not available — Semantic Memory AI index will not be registered'
+    );
+    return;
+  }
+
+  contextEngine.registerAiIndex(MEMORY_AI_INDEX_ID, {
+    description: i18n.translate('xpack.nightshiftInvestigations.memory.aiIndexDescription', {
+      defaultMessage:
+        'Nightshift Semantic Memory — durable lessons the investigator recalls before a run, ranked by usefulness.',
+    }),
+    dest: { type: 'index', value: MEMORY_INDEX },
+    automations: [],
+    sources: [],
+    traces: [],
+  });
+};
 
 export const createMemoryStore = ({
   esClient,

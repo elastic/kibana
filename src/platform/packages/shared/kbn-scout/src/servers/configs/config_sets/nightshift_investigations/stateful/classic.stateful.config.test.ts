@@ -25,49 +25,21 @@ describe('nightshift_investigations config set', () => {
     );
   });
 
-  it('adds nothing beyond those two flags and the credential swap, so the set cannot drift from the default', () => {
+  it('adds nothing beyond those two flags, so the set cannot drift from the default', () => {
     const { defaultConfig } = jest.requireActual('../../default/stateful/base.config');
     const { servers } = load();
-    const baseArgs: string[] = defaultConfig.kbnTestServer.serverArgs;
-    const dropped = baseArgs.filter(
-      (arg: string) =>
-        arg.startsWith('--elasticsearch.username=') || arg.startsWith('--elasticsearch.password=')
-    );
 
-    expect(dropped).toHaveLength(2);
-    // Everything else is the default set's arguments, in order, then the swap and
-    // the two flags. A duplicate `--elasticsearch.username` would be ambiguous.
     expect(servers.kbnTestServer.serverArgs).toEqual([
-      ...baseArgs.filter(
-        (arg: string) =>
-          !arg.startsWith('--elasticsearch.username=') &&
-          !arg.startsWith('--elasticsearch.password=')
-      ),
-      '--elasticsearch.username=system_indices_superuser',
-      `--elasticsearch.password=${defaultConfig.servers.elasticsearch.password}`,
+      ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.memory.enabled=true',
     ]);
   });
 
-  // Kibana reaches `nightshift-semantic-memory` as `kibana_system` by default and
-  // cannot create or read it, so the plugin logs a security_exception on boot and
-  // the page lists nothing. The credentials have to be escalated or the suite tests
-  // an empty store.
-  it('runs Kibana as system_indices_superuser, which may manage the index Semantic Memory owns', () => {
+  it('keeps the default Kibana Elasticsearch principal', () => {
     const { defaultConfig } = jest.requireActual('../../default/stateful/base.config');
     const { servers } = load();
 
-    expect(defaultConfig.servers.elasticsearch.username).toBe('kibana_system');
-    expect(servers.servers.elasticsearch.username).toBe('system_indices_superuser');
-    // The password is unchanged: the default already pairs `kibana_system` with it.
-    expect(servers.servers.elasticsearch.password).toBe(
-      defaultConfig.servers.elasticsearch.password
-    );
-    // Only the user changes; the cluster the set talks to is still the default one.
-    expect(servers.servers.elasticsearch.hostname).toBe(
-      defaultConfig.servers.elasticsearch.hostname
-    );
-    expect(servers.servers.elasticsearch.port).toBe(defaultConfig.servers.elasticsearch.port);
+    expect(servers.servers?.elasticsearch).toEqual(defaultConfig.servers.elasticsearch);
   });
 });

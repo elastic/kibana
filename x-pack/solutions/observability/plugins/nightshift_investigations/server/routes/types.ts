@@ -35,11 +35,7 @@ export type GetCortexPageStore = (request: KibanaRequest) => CortexPageStore;
 
 export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore;
 
-/**
- * Deliberately not request-scoped: the Semantic Memory index is hidden and has
- * no end-user index privileges, so these routes read through Kibana's internal
- * client while still deriving Space tenancy from the request.
- */
+/** Request-scoped store: reads and writes run as the caller's Elasticsearch user. */
 export type GetMemoryPageStore = (request: KibanaRequest) => MemoryPageStore;
 
 export interface NightshiftInvestigationsRouteHandlerResources

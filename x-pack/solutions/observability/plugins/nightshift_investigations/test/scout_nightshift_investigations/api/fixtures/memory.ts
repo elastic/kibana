@@ -9,13 +9,22 @@ import { randomUUID } from 'crypto';
 import type { ApiClientFixture, ApiClientResponse, EsClient, KibanaRole } from '@kbn/scout-oblt';
 import { COMMON_HEADERS } from './constants';
 
-/** The plugin's own index. Not the `ai-index-idx-*` prefix, and hidden. */
-export const MEMORY_INDEX = 'nightshift-semantic-memory';
+/** The plugin's Context Engine AI index, under the managed `ai-index-idx-*` prefix. */
+export const MEMORY_INDEX = 'ai-index-idx-nightshift-semantic-memory';
 
 const MEMORY_PAGES_PATH = 'internal/nightshift/memory/pages';
 
+/**
+ * The routes run as the caller, so every role needs the backing-index privileges
+ * the routes use. Granting them to all three keeps the 403s about Kibana authz.
+ */
+const MEMORY_INDEX_PRIVILEGES = ['read', 'write', 'create_index', 'view_index_metadata'];
+
 const role = (nightshift: string[]): KibanaRole => ({
-  elasticsearch: { cluster: [], indices: [] },
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: [MEMORY_INDEX], privileges: MEMORY_INDEX_PRIVILEGES }],
+  },
   kibana: [
     {
       base: [],
@@ -164,19 +173,3 @@ export const deleteMemoryPage = (
     body,
     responseType: 'json',
   });
-
-/**
- * `memoryService.initialize()` runs fire-and-forget on plugin start, so the index
- * can still be being created when a test's first write lands. Wait for it.
- */
-export const waitForMemoryIndex = async (
-  esClient: EsClient,
-  log: { info: (message: string) => void }
-) => {
-  for (let attempt = 0; attempt < 60; attempt++) {
-    if (await esClient.indices.exists({ index: MEMORY_INDEX })) return;
-    log.info(`Memory index not created yet, waiting (attempt ${attempt + 1}/60)`);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-  throw new Error(`Index ${MEMORY_INDEX} was not created within 60s`);
-};

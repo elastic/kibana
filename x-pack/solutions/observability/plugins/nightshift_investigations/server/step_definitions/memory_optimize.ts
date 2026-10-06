@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
@@ -33,7 +33,6 @@ export const memoryOptimizeStepDefinition = ({
   getInference,
   getSavedObjects,
   getUiSettings,
-  getMemoryEsClient,
   logger,
   isEnabled,
   telemetry,
@@ -42,7 +41,6 @@ export const memoryOptimizeStepDefinition = ({
   getInference: () => InferenceServerStart | undefined;
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
-  getMemoryEsClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -156,7 +154,7 @@ export const memoryOptimizeStepDefinition = ({
               conversationId: context.input.conversation_id,
               roundId: context.input.round_id,
               recalledIds: context.input.recalled_ids ?? [],
-              esClient: await getMemoryEsClient(),
+              esClient: context.contextManager.getScopedEsClient(),
               spaceId,
               signal,
               logger,
