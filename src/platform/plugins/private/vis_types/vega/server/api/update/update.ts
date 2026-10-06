@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getVegaCRUResponseBody } from '../get_cru_response_body';
@@ -33,6 +34,8 @@ export const update = async (
   }
 
   if (isNew) {
+    // Existing items may have IDs that predate the as code ID rules, so only new IDs are validated.
+    asCodeIdSchema.parse(id);
     return { body: await create(requestCtx, body, id), operation: 'create' };
   }
 

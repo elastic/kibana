@@ -135,6 +135,39 @@ apiTest.describe('vega - update', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.data.title).toBe('Upserted Chart');
   });
 
+  apiTest('should return 400 when creating with an invalid id', async ({ apiClient }) => {
+    const response = await apiClient.put(`${VEGA_API_PATH}/Invalid-ID`, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: { title: 'Upserted Chart', spec: VEGA_SPEC_HJSON },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest(
+    'should update an existing item whose id does not satisfy the as code id rules',
+    async ({ apiClient, kbnClient }) => {
+      const legacyId = 'Legacy-Vega-ID';
+      await kbnClient.savedObjects.create({
+        type: 'vega',
+        id: legacyId,
+        overwrite: true,
+        attributes: { title: 'Legacy Chart', spec: VEGA_SPEC_HJSON },
+      });
+
+      const response = await apiClient.put(`${VEGA_API_PATH}/${legacyId}`, {
+        headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        body: { title: 'Updated Legacy Chart', spec: VEGA_SPEC_HJSON },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.id).toBe(legacyId);
+      expect(response.body.data.title).toBe('Updated Legacy Chart');
+    }
+  );
+
   apiTest('authorization - returns 403 for viewer', async ({ apiClient }) => {
     const response = await apiClient.put(`${VEGA_API_PATH}/${createdId}`, {
       headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },

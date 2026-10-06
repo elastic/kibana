@@ -1,5 +1,5 @@
 {
-  "sha1": "d9f7671514c8a5dbdf8e1fcff9a2a5789d71e90e",
+  "sha1": "0cf1886f61f42cc62f91431d5b0c010dc8bb1703",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -536,8 +536,8 @@
       }
     },
     {
-      "id": "fe2dc6b2ad75d29-dc5e694ee4b0807",
-      "title": "vega - update authorization - returns 403 for viewer",
+      "id": "fe2dc6b2ad75d29-16b4d7354838bc8",
+      "title": "vega - update should return 400 when creating with an invalid id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -553,6 +553,46 @@
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/update_vega.spec.ts",
         "line": 130,
         "column": 21
+      }
+    },
+    {
+      "id": "fe2dc6b2ad75d29-460a76f7cdc5824",
+      "title": "vega - update should update an existing item whose id does not satisfy the as code id rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/update_vega.spec.ts",
+        "line": 141,
+        "column": 13
+      }
+    },
+    {
+      "id": "fe2dc6b2ad75d29-dc5e694ee4b0807",
+      "title": "vega - update authorization - returns 403 for viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/update_vega.spec.ts",
+        "line": 160,
+        "column": 74
       }
     },
     {

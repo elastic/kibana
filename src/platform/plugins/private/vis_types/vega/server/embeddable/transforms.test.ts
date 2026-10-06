@@ -10,9 +10,8 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import type { VegaByValueState } from '../schema';
-import type { StoredVegaByValueState } from '../types';
-import { getTransforms } from './get_transforms';
+import type { VegaByValueState } from './schema';
+import { getTransforms, type StoredVegaState } from './transforms';
 
 const drilldownReference: SavedObjectReference = {
   name: 'drilldown_0',
@@ -25,7 +24,7 @@ const drilldownTransforms = {
     state,
     references: state.drilldowns?.length ? [drilldownReference] : [],
   })),
-  transformOut: jest.fn((state: StoredVegaByValueState) => state),
+  transformOut: jest.fn((state: StoredVegaState) => state),
 } as unknown as DrilldownTransforms;
 
 const spec: VegaByValueState['spec'] = { format: 'hjson', value: '{ mark: point }' };
@@ -36,16 +35,9 @@ const panelFilter: NonNullable<VegaByValueState['filters']>[number] = {
   condition: { field: 'status', operator: 'is', value: 'active' },
 };
 
-describe('Vega embeddable panel filter transforms', () => {
+describe('Vega embeddable transforms', () => {
   const logger = loggingSystemMock.createLogger();
-  const { transformIn, transformOut: transformEmbeddableOut } = getTransforms(
-    drilldownTransforms,
-    logger
-  );
-  const transformOut = (
-    storedState: StoredVegaByValueState,
-    references: SavedObjectReference[]
-  ): VegaByValueState => transformEmbeddableOut(storedState, references) as VegaByValueState;
+  const { transformIn, transformOut } = getTransforms(drilldownTransforms, logger);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,12 +45,11 @@ describe('Vega embeddable panel filter transforms', () => {
 
   it('moves panel filter data views into references and restores them on read', () => {
     const query: VegaByValueState['query'] = { language: 'kql', expression: 'bytes > 1000' };
-    const { state, references } = transformIn({
+    const { state: storedState, references } = transformIn({
       spec,
       query,
       filters: [panelFilter],
     } as VegaByValueState);
-    const storedState = state as StoredVegaByValueState;
 
     expect(references).toEqual([
       {
@@ -98,8 +89,7 @@ describe('Vega embeddable panel filter transforms', () => {
   });
 
   it('passes panels without filters through unchanged', () => {
-    const { state, references } = transformIn({ spec } as VegaByValueState);
-    const storedState = state as StoredVegaByValueState;
+    const { state: storedState, references } = transformIn({ spec } as VegaByValueState);
 
     expect(references).toEqual([]);
     expect(storedState.filters).toBeUndefined();
@@ -108,11 +98,10 @@ describe('Vega embeddable panel filter transforms', () => {
   });
 
   it('keeps filters and logs a warning when a filter reference is missing', () => {
-    const { state } = transformIn({
+    const { state: storedState } = transformIn({
       spec,
       filters: [panelFilter],
     } as VegaByValueState);
-    const storedState = state as StoredVegaByValueState;
 
     const apiState = transformOut(storedState, []);
 

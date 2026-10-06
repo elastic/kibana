@@ -68,9 +68,6 @@ export const registerReadRoute = (
           if (e.isBoom && e.output.statusCode === 404) {
             return res.notFound({ body: { message: e.message } });
           }
-          if (e.isBoom && e.output.statusCode === 403) {
-            return res.forbidden({ body: { message: e.message } });
-          }
           return writeErrorHandler(e, res, logger, req);
         }
       })

@@ -68,9 +68,6 @@ export const registerCreateRoute = (
           const result = await create(ctx, req.body);
           return res.created({ body: result });
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 403) {
-            return res.forbidden({ body: { message: e.message } });
-          }
           return writeErrorHandler(e, res, logger, req);
         }
       })

@@ -17,7 +17,7 @@ import type {
 } from './types';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
-import { getTransforms } from './embeddable/transforms/get_transforms';
+import { getTransforms } from './embeddable/transforms';
 import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
 import { registerRoutes } from './api/register_routes';
 

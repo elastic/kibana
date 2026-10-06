@@ -15,7 +15,6 @@ import type {
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
-  BY_REF_SCHEMA_META,
 } from '@kbn/presentation-publishing-schemas';
 import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
 import { vegaFiltersSchema, vegaQuerySchema, vegaSpecSchema } from '../api/schema';
@@ -48,30 +47,9 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
 };
 
 /**
- * `vis_types/vega` compiles with `strictNullChecks: false`, which makes the Zod-inferred drilldowns
- * output type incompatible with `SerializedDrilldowns` (e.g. `trigger` becomes optional). Replace
- * only that inferred property until strict null checks are enabled.
+ * NOTE: `vis_types/vega` compiles with `strictNullChecks: false`, which can make the Zod-inferred
+ * drilldowns output type incompatible with `SerializedDrilldowns` (e.g. `trigger` becomes optional).
  * See https://github.com/elastic/kibana/issues/287451
  */
-type WithSerializedDrilldowns<State> = Omit<State, keyof SerializedDrilldowns> &
+export type VegaByValueState = z.output<ReturnType<typeof getVegaEmbeddableSchema>> &
   SerializedDrilldowns;
-
-export type VegaByValueState = WithSerializedDrilldowns<
-  z.output<ReturnType<typeof getVegaEmbeddableSchema>>
->;
-
-export const vegaByReferenceStateSchema = z
-  .object({
-    ...serializedTitlesSchema.shape,
-    ref_id: z.string().meta({
-      description: 'The unique identifier of the Vega library item.',
-    }),
-  })
-  .strip()
-  .meta(BY_REF_SCHEMA_META);
-
-export type VegaByReferenceState = WithSerializedDrilldowns<
-  z.output<typeof vegaByReferenceStateSchema>
->;
-
-export type VegaEmbeddableState = VegaByValueState | VegaByReferenceState;
