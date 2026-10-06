@@ -154,17 +154,33 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   /**
-   * Clicks a toolbar button for a specific node using a scoped CSS selector and a JS click.
+   * Clicks a toolbar button with a raw DOM click.
    *
-   * Using `browser.execute('arguments[0].click()')` bypasses:
+   * `browser.execute('arguments[0].click()')` bypasses:
    * - WebDriver hit-test interception caused by `EuiToolTipAnchor` wrapping disabled buttons
    * - `pointer-events: none` on the invisible toolbar (opacity:0 state)
+   *
+   * It also bypasses WebDriver's enabled check, and browsers silently drop clicks on disabled
+   * buttons. Toolbar items stay disabled until entity enrichment arrives, so the button has to
+   * be confirmed enabled first — otherwise the click is a no-op and whatever assertion follows
+   * waits for a state change that never comes. Throwing lets the caller's `retry.try` poll
+   * until enrichment lands, and surfaces a named failure instead of a bare mocha timeout.
+   */
+  private async clickToolbarButton(button: WebElementWrapper, description: string): Promise<void> {
+    if (!(await button.isEnabled())) {
+      throw new Error(`Toolbar item ${description} is still disabled`);
+    }
+    await this.browser.execute('arguments[0].click()', button);
+  }
+
+  /**
+   * Clicks a toolbar button for a specific node using a scoped CSS selector and a JS click.
    */
   async clickOnNodeToolbarItem(nodeId: string, itemTestSubject: string): Promise<void> {
     await this.retry.try(async () => {
       await this.waitGraphIsLoaded();
       const button = await this.findNodeToolbarButton(nodeId, itemTestSubject);
-      await this.browser.execute('arguments[0].click()', button);
+      await this.clickToolbarButton(button, `"${itemTestSubject}" on node "${nodeId}"`);
     });
   }
 
@@ -194,7 +210,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
         `[data-test-subj="${GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID}"], [data-test-subj="${GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID}"]`
       );
       expect(buttons.length).to.be(1);
-      await this.browser.execute('arguments[0].click()', buttons[0]);
+      await this.clickToolbarButton(buttons[0], `entity details on node "${nodeId}"`);
     });
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
@@ -205,14 +221,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async hideActionsOnEntity(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.waitGraphIsLoaded();
-      const button = await this.findNodeToolbarButton(
-        nodeId,
-        GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID
-      );
-      await this.browser.execute('arguments[0].click()', button);
-    });
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
@@ -238,14 +247,10 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async hideEventsOfSameAction(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.waitGraphIsLoaded();
-      const button = await this.findNodeToolbarButton(
-        nodeId,
-        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
-      );
-      await this.browser.execute('arguments[0].click()', button);
-    });
+    await this.clickOnNodeToolbarItem(
+      nodeId,
+      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+    );
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
