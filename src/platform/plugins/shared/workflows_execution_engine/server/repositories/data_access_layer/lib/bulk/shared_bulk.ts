@@ -11,7 +11,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   BulkOperation,
-  DocumentVersion,
   QueueItem,
   Sendable,
   Settled,
@@ -76,49 +75,6 @@ const toBulkOperations = <TExecution extends { id: string }>(
     default:
       throw new Error(`Invalid operation: ${(item as SharedBulkItem<TExecution>).operation}`);
   }
-};
-
-const fetchFreshVersions = async (
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  ids: {
-    id: string;
-    index?: string;
-  }[],
-  fallbackIndexes: string[]
-): Promise<Map<string, DocumentVersion>> => {
-  const mgetDocs = ids.flatMap(({ id, index }) => {
-    if (index) {
-      return [{ _id: id, _index: index, _source: false as const }];
-    }
-
-    return fallbackIndexes.map((fallbackIndex) => ({
-      _id: id,
-      _index: fallbackIndex,
-      _source: false as const,
-    }));
-  });
-
-  const mgetResponse = await esClient.mget({ docs: mgetDocs });
-
-  const versionById = new Map<string, DocumentVersion>();
-  for (const doc of mgetResponse.docs) {
-    if (
-      'found' in doc &&
-      doc.found &&
-      doc._seq_no !== undefined &&
-      doc._primary_term !== undefined &&
-      !versionById.has(doc._id)
-    ) {
-      versionById.set(doc._id, {
-        index: doc._index,
-        seqNo: doc._seq_no,
-        primaryTerm: doc._primary_term,
-      });
-    }
-  }
-
-  return versionById;
 };
 
 const sendBulkRequest = async <TExecution extends { id: string }>(
@@ -295,13 +251,10 @@ const resolveBatchToSend = <TExecution extends { id: string }>(
   return { toSend, settled };
 };
 
-const requeueConflicts = async <TExecution extends { id: string }>(
-  esClient: ElasticsearchClient,
-  logger: Logger,
+const requeueConflicts = <TExecution extends { id: string }>(
   toSend: Array<Sendable<TExecution>>,
-  esResponse: estypes.BulkResponse,
-  fallbackIndexes: string[]
-): Promise<{ nextQueue: Array<QueueItem<TExecution>>; settled: Settled[] }> => {
+  esResponse: estypes.BulkResponse
+): { nextQueue: Array<QueueItem<TExecution>>; settled: Settled[] } => {
   const toBulkItemResponse = (esItem: estypes.BulkResponse['items'][number]): BulkItemResponse => {
     const esResult = esItem.create ?? esItem.index ?? esItem.update;
     if (!esResult?._id) {
@@ -319,11 +272,9 @@ const requeueConflicts = async <TExecution extends { id: string }>(
   };
 
   // - updater-origin: re-queue original BulkUpdaterItem so the next iteration re-mgets
-  // - plain OCC (seqNo set): mget fresh seqNo/primaryTerm before re-queuing
   // - plain non-OCC (no seqNo, using retry_on_conflict): re-queue unchanged
-  // Create 409s always settle: retryOnConflict is not valid for create.
+  // - plain OCC (seqNo set) and create 409s always settle.
   const conflictingUpdaters: Array<QueueItem<TExecution>> = [];
-  const conflictingOcc: Array<Sendable<TExecution>> = [];
   const nextQueue: Array<QueueItem<TExecution>> = [];
   const settled: Settled[] = [];
 
@@ -331,14 +282,16 @@ const requeueConflicts = async <TExecution extends { id: string }>(
     const { qi, plainItem } = toSend[idx];
     const responseItem = toBulkItemResponse(esItem);
     const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
+    // Caller-supplied seqNo is compare-and-set: a 409 must surface, never be retried.
     const canRetryConflict =
-      isConflict && qi.remainingRetries > 0 && plainItem.operation !== 'create';
+      isConflict &&
+      qi.remainingRetries > 0 &&
+      plainItem.operation !== 'create' &&
+      (isBulkUpdaterItem(qi.item) || plainItem.seqNo === undefined);
 
     if (canRetryConflict) {
       if (isBulkUpdaterItem(qi.item)) {
         conflictingUpdaters.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
-      } else if (plainItem.seqNo !== undefined) {
-        conflictingOcc.push({ qi, plainItem });
       } else {
         nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
       }
@@ -348,27 +301,6 @@ const requeueConflicts = async <TExecution extends { id: string }>(
   });
 
   nextQueue.push(...conflictingUpdaters);
-
-  if (conflictingOcc.length > 0) {
-    const versionById = await fetchFreshVersions(
-      esClient,
-      logger,
-      conflictingOcc.map(({ plainItem }) => ({
-        id: plainItem.document.id,
-        index: plainItem.index,
-      })),
-      fallbackIndexes
-    );
-
-    conflictingOcc.forEach(({ qi, plainItem }) => {
-      const version = versionById.get(plainItem.document.id);
-      nextQueue.push({
-        item: version ? { ...plainItem, ...version } : plainItem,
-        originalIndex: qi.originalIndex,
-        remainingRetries: qi.remainingRetries - 1,
-      });
-    });
-  }
 
   return { nextQueue, settled };
 };
@@ -433,13 +365,7 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
         },
         logger
       );
-      const { nextQueue, settled: conflictSettled } = await requeueConflicts(
-        esClient,
-        logger,
-        toSend,
-        esResponse,
-        fallbackIndexes
-      );
+      const { nextQueue, settled: conflictSettled } = requeueConflicts(toSend, esResponse);
       hasErrors = applySettled(result, conflictSettled, hasErrors);
       queuedItems = nextQueue;
     }
