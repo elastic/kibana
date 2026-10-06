@@ -15,7 +15,8 @@
  * works for any definition, including those other plugins register in the entity definition
  * registry. The form that takes a type name is a shortcut for the Entity Store's own built-in
  * definitions (`user`, `host`, `service`, `generic`): it resolves the definition by name and
- * calls the `...FromDefinition` form. It cannot know any other type.
+ * calls the `...FromDefinition` form. Any other name is a type error, and throws at runtime if
+ * it gets past the types.
  *
  * @example
  * import { euid } from '@kbn/entity-store/common/euid_helpers';
@@ -33,7 +34,8 @@ export const euid = {
   /** {@link euid.getEuidFromObjectFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
   getEuidFromObject: euidModule.getEuidFromObject,
   /**
-   * Resolves the entity unique id (EUID) for one document using entity definitions (in-memory only).
+   * Resolves the entity unique id (EUID) for one document in JavaScript, with no Elasticsearch
+   * round trip (the Painless, ES|QL and DSL forms below produce query fragments instead).
    * Input: an entity definition and a document body like ES `_source` (nested or flattened).
    * Output: EUID string such as `user:…` / `host:…`, or `undefined` when no id can be derived.
    * Applies the creation gate, so it answers whether a document may create an entity.
