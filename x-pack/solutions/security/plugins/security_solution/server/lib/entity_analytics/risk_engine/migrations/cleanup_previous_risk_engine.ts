@@ -67,7 +67,6 @@ export const cleanupLegacyRiskEngine = async ({
             `Failed to delete legacy latest transform ${transformId} for namespace ${namespace}: ${message}`
           );
         });
-
       }
     }
   } catch (err: unknown) {
