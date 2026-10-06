@@ -76,6 +76,27 @@ describe('registerAnonymizationTestRoute', () => {
     expect(body.stats).toEqual({ valuesMasked: 1, uniqueValues: 1, rulesApplied: 1 });
   });
 
+  it('masks a plain string input, not only JSON objects', async () => {
+    const { handler } = setup();
+
+    const response = await callHandler(handler, {
+      input: 'mail a.mehta@example.com about 10.0.0.1',
+      rules: [
+        {
+          type: 'RegExp',
+          enabled: true,
+          entityClass: 'EMAIL',
+          pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+        },
+      ],
+    });
+
+    const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+    expect(typeof body.maskedInput).toBe('string');
+    expect(body.maskedInput).toMatch(/^mail EMAIL_\w+ about 10\.0\.0\.1$/);
+    expect(body.stats).toEqual({ valuesMasked: 1, uniqueValues: 1, rulesApplied: 1 });
+  });
+
   it('ignores disabled rules', async () => {
     const { handler } = setup();
 
