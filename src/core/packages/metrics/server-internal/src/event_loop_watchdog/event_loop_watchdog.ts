@@ -79,10 +79,15 @@ export class EventLoopWatchdog {
     const shared = new BigInt64Array(
       new SharedArrayBuffer(SLOT_COUNT * BigInt64Array.BYTES_PER_ELEMENT)
     );
-    Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
+    let lastStampUs = monotonicUs();
+    Atomics.store(shared, Slot.heartbeat, BigInt(lastStampUs));
     this.heartbeatTimer = setInterval(() => {
-      Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
-      this.session?.tick(Number(Atomics.load(shared, Slot.blocks)));
+      const nowUs = monotonicUs();
+      const stalled = nowUs - lastStampUs >= BLOCK_THRESHOLD_MS * 1000;
+      lastStampUs = nowUs;
+      Atomics.store(shared, Slot.heartbeat, BigInt(nowUs));
+      // Right after a stall the worker has yet to count the block; let it before rotating.
+      if (!stalled) this.session?.tick(Number(Atomics.load(shared, Slot.blocks)));
     }, HEARTBEAT_INTERVAL_MS);
     this.heartbeatTimer.unref();
 
@@ -178,11 +183,13 @@ export class EventLoopWatchdog {
   }
 
   private sendProfile(profile: PprofProfile, window: ProfileWindow, kept: string): void {
+    // Only the worker that flagged the window knows its blocks.
+    const { post } = this;
     profile
       .encodeAsync()
       .then((bytes) => {
-        if (!this.post) throw new Error('watchdog worker unavailable');
-        this.post(
+        if (!post || post !== this.post) throw new Error('watchdog worker unavailable');
+        post(
           {
             type: 'profile',
             bytes,
