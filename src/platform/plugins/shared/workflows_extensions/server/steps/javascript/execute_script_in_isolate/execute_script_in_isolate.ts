@@ -45,6 +45,8 @@ export const executeScriptInIsolate = async ({
     isolate,
     executionTimeoutMs
   );
+  // Same as above: the timer can fire during setup, before wallClockTimeout is raced.
+  wallClockTimeout.catch(() => {});
 
   try {
     const ivmContext = await isolate.createContext();
