@@ -50,6 +50,7 @@ interface TabsStateInLocalStorage {
   userId: string;
   spaceId: string;
   discoverSessionId: string | undefined;
+  discoverSessionVersion: string | undefined;
   openTabs: TabStateInLocalStorage[];
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
 }
@@ -58,6 +59,7 @@ const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
   userId: '',
   spaceId: '',
   discoverSessionId: undefined,
+  discoverSessionVersion: undefined,
   openTabs: [],
   closedTabs: [],
 };
@@ -77,7 +79,8 @@ export interface TabsStorageManager {
   persistLocally: (
     props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
-    discoverSessionId: string | undefined
+    discoverSessionId: string | undefined,
+    discoverSessionVersion?: string
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
@@ -313,6 +316,7 @@ export const createTabsStorageManager = ({
       userId: storedTabsState?.userId || '',
       spaceId: storedTabsState?.spaceId || '',
       discoverSessionId: storedTabsState?.discoverSessionId || undefined,
+      discoverSessionVersion: storedTabsState?.discoverSessionVersion || undefined,
       openTabs: storedTabsState?.openTabs || [],
       closedTabs: storedTabsState?.closedTabs || [],
     };
@@ -363,7 +367,8 @@ export const createTabsStorageManager = ({
   const persistLocally: TabsStorageManager['persistLocally'] = async (
     { allTabs, recentlyClosedTabs },
     getInternalState,
-    discoverSessionId
+    discoverSessionId,
+    discoverSessionVersion
   ) => {
     if (!enabled) {
       return;
@@ -380,6 +385,7 @@ export const createTabsStorageManager = ({
       userId: sessionInfo.userId,
       spaceId: sessionInfo.spaceId,
       discoverSessionId,
+      discoverSessionVersion,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
     };
@@ -455,11 +461,21 @@ export const createTabsStorageManager = ({
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
     let updatedDiscoverSession = persistedDiscoverSession;
 
+    // Local tabs are discarded when the session was saved again since they were stored,
+    // for example via the API, so Discover does not hide the newer saved state.
+    const { discoverSessionId: storedSessionId, discoverSessionVersion: storedSessionVersion } =
+      storedTabsState;
+    const persistedSessionVersion = persistedDiscoverSession?.version;
+    const hasStoredSessionChanged =
+      persistedDiscoverSession?.id !== storedSessionId ||
+      (persistedSessionVersion !== undefined &&
+        storedSessionVersion !== undefined &&
+        persistedSessionVersion !== storedSessionVersion);
+
     // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
     // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
     if (persistedDiscoverSession && prepareSession) {
-      const localTabs =
-        persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];
+      const localTabs = hasStoredSessionChanged ? [] : openTabs;
       updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
     }
 
@@ -467,7 +483,7 @@ export const createTabsStorageManager = ({
       fromSavedObjectTabToTabState({ tab, profileStateRegistry })
     );
 
-    if (updatedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
+    if (hasStoredSessionChanged) {
       // if the discover session has changed, use the tabs from the session
       openTabs = persistedTabs ?? [];
     }
