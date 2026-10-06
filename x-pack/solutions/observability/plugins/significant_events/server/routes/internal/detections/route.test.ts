@@ -8,6 +8,10 @@
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { internalDetectionsRoutes } from './route';
 
+jest.mock('../../utils/assert_significant_events_access', () => ({
+  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
+}));
+
 const createRoute = internalDetectionsRoutes['POST /internal/significant_events/detections'];
 const markProcessedRoute =
   internalDetectionsRoutes['POST /internal/significant_events/detections/_mark_processed'];
@@ -83,5 +87,78 @@ describe('detection marker routes', () => {
       true
     );
     expect(bodySchema.safeParse({ rule_uuids: [], scanned_by: 'exec-1' }).success).toBe(false);
+  });
+});
+
+describe('while Significant Events is paused', () => {
+  // Handler resources the routes use; only the maintenance state and the write client matter.
+  const createResources = (state: string) => {
+    const bulkCreate = jest.fn().mockResolvedValue(undefined);
+    const resources = {
+      request: {},
+      server: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getDetectionClient: jest.fn().mockResolvedValue({ bulkCreate }),
+      }),
+      maintenanceService: { getState: jest.fn().mockResolvedValue(state) },
+    };
+    return { resources, bulkCreate };
+  };
+
+  const writes = [
+    {
+      name: 'create detections',
+      invoke: (state: string) => {
+        const { resources, bulkCreate } = createResources(state);
+        const params = { ...resources, params: { body: { detections: [detection] } } };
+        const result = createRoute.handler(
+          params as unknown as Parameters<typeof createRoute.handler>[0]
+        );
+        return { result, bulkCreate };
+      },
+    },
+    {
+      name: 'mark detections processed',
+      invoke: (state: string) => {
+        const { resources, bulkCreate } = createResources(state);
+        const params = {
+          ...resources,
+          params: { body: { detection_ids: ['d-1'], processed_by: 'exec-1' } },
+        };
+        const result = markProcessedRoute.handler(
+          params as unknown as Parameters<typeof markProcessedRoute.handler>[0]
+        );
+        return { result, bulkCreate };
+      },
+    },
+    {
+      name: 'mark rules scanned',
+      invoke: (state: string) => {
+        const { resources, bulkCreate } = createResources(state);
+        const params = {
+          ...resources,
+          params: { body: { rule_uuids: ['rule-1'], scanned_by: 'exec-1' } },
+        };
+        const result = markScannedRoute.handler(
+          params as unknown as Parameters<typeof markScannedRoute.handler>[0]
+        );
+        return { result, bulkCreate };
+      },
+    },
+  ];
+
+  it.each(writes)('rejects with 409 and writes nothing to $name', async ({ invoke }) => {
+    const { result, bulkCreate } = invoke('paused');
+
+    await expect(result).rejects.toMatchObject({ output: { statusCode: 409 } });
+    expect(bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it.each(writes)('writes to $name when it is not paused', async ({ invoke }) => {
+    const { result, bulkCreate } = invoke('enabled');
+
+    await expect(result).resolves.toEqual({ count: 1 });
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
   });
 });

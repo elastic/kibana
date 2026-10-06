@@ -15,6 +15,7 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { DetectionClient, StoredDetection } from '../../../lib/significant_events/detections';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 const detectionsSearchRoute = createServerRoute({
@@ -134,7 +135,7 @@ const createDetectionsRoute = createServerRoute({
     access: 'internal',
     summary: 'Create detections',
     description:
-      'Appends change-point detections to the current space. Detections are immutable; `@timestamp` is set by the server. Kibana writes as its internal user, so callers need the Nightshift manage privilege but no Elasticsearch privileges on the data stream.',
+      'Appends change-point detections to the current space. Detections are immutable; `@timestamp` is set by the server. Kibana writes as its internal user, so callers need the Nightshift manage privilege but no Elasticsearch privileges on the data stream. Rejected with 409 while Significant Events is paused.',
   },
   security: {
     authz: {
@@ -146,10 +147,17 @@ const createDetectionsRoute = createServerRoute({
       detections: z.array(createDetectionSchema).min(1).max(MAX_DETECTIONS_PER_REQUEST),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    maintenanceService,
+  }): Promise<{ count: number }> => {
     const { getDetectionClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     return appendDetectionDocuments({ getDetectionClient, documents: params.body.detections });
   },
@@ -161,7 +169,7 @@ const markDetectionsProcessedRoute = createServerRoute({
     access: 'internal',
     summary: 'Mark detections as processed',
     description:
-      'Records that detections in the current space were processed, which sets their derived `processed` flag. Stored as processed markers in the detections data stream.',
+      'Records that detections in the current space were processed, which sets their derived `processed` flag. Stored as processed markers in the detections data stream. Rejected with 409 while Significant Events is paused.',
   },
   security: {
     authz: {
@@ -174,10 +182,17 @@ const markDetectionsProcessedRoute = createServerRoute({
       processed_by: z.string().max(MAX_ID_LENGTH),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    maintenanceService,
+  }): Promise<{ count: number }> => {
     const { getDetectionClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { detection_ids: detectionIds, processed_by: processedBy } = params.body;
     return appendDetectionDocuments({
@@ -196,7 +211,7 @@ const markRulesScannedRoute = createServerRoute({
     access: 'internal',
     summary: 'Mark rules as scanned for detections',
     description:
-      'Records that rules in the current space were scanned for change points without a new detection, so scan scheduling treats them as recently covered. Stored as scan markers in the detections data stream.',
+      'Records that rules in the current space were scanned for change points without a new detection, so scan scheduling treats them as recently covered. Stored as scan markers in the detections data stream. Rejected with 409 while Significant Events is paused.',
   },
   security: {
     authz: {
@@ -209,10 +224,17 @@ const markRulesScannedRoute = createServerRoute({
       scanned_by: z.string().max(MAX_ID_LENGTH),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    maintenanceService,
+  }): Promise<{ count: number }> => {
     const { getDetectionClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { rule_uuids: ruleUuids, scanned_by: scannedBy } = params.body;
     return appendDetectionDocuments({
