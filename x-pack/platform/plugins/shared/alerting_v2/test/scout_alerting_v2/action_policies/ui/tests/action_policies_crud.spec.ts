@@ -27,7 +27,7 @@ test.describe('Action Policies - create and edit', { tag: ['@local-stateful-clas
   const EDITED_POLICY_NAME = `scout-action-policy-edited-${RUN_ID}`;
   // Intentionally includes a legacy `rule.*` field: with no form validation (AC#3) the expression
   // round-trips through the edit form unchanged, proving backward compatibility.
-  const MATCHER = 'episode_status: "active" and rule.tags: "scout"';
+  const MATCHER = 'alert_status: "active" and rule.tags: "scout"';
 
   let workflowId: string;
   let workflowName: string;
