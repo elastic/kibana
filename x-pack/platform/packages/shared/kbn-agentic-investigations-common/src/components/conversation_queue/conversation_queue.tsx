@@ -80,6 +80,8 @@ interface ConversationQueueProps {
   canManageEscalations?: boolean;
   /** When true the "Close investigation" action is shown on every card. */
   canCloseInvestigation?: boolean;
+  /** Adds a "Copy link" item to each card's menu. */
+  onCopyLink: BaseActionsProps['onCopyLink'];
   /**
    * Optional: render the assignee picker widget for a non-closed investigation card.
    * Supplied by the page so that hook calls stay outside this package.
@@ -128,6 +130,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     selectedIds,
     canManageEscalations,
     canCloseInvestigation,
+    onCopyLink,
     renderAssignees,
     renderInFlightStatus,
   }) => {
@@ -146,6 +149,10 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     }
     const rows = isOpen ? briefingList : heldRows;
 
+    // Filtered, the badge counts the matching rows. Rows still to load may match too, so
+    // the figure is a floor then.
+    const badgeCount = isFiltered ? `${rows.length}${remaining > 0 ? '+' : ''}` : count;
+
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -159,10 +166,10 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {isCountUnavailable ? null : count === undefined ? (
+          {isCountUnavailable ? null : badgeCount === undefined ? (
             <EuiLoadingSpinner size="s" aria-label={CONVERSATION_QUEUE_COUNT_LOADING} />
           ) : (
-            <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>{count}</EuiBadge>
+            <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>{badgeCount}</EuiBadge>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -183,6 +190,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,
             canCloseInvestigation,
+            onCopyLink,
           };
 
           return (

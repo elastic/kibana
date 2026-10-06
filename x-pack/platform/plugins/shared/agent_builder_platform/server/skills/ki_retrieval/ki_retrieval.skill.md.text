@@ -88,10 +88,14 @@ below opens with the two lifecycle filters, so the query reads as what it return
 ```
 
 `platform.context_engine.query_ai_indices` adds these two filters and `DROP governance.*` to any
-query that omits them, and on a data stream keeps only the newest revision per `id`. Naming a
-field switches off its default only: `WHERE governance.lifecycle.status == "deleted"` returns
-tombstones, `WHERE expires_at < NOW()` returns expired KIs, and `KEEP governance.provenance.created_by.uri`
-shows the writing automation while both filters still apply.
+query that omits them, and on a data stream keeps only the newest revision per `id`. A top-level `WHERE`
+command on a lifecycle field switches off its filter only: `WHERE governance.lifecycle.status == "deleted"` returns
+tombstones and `WHERE expires_at < NOW()` returns expired KIs. Any other top-level `WHERE` on
+`expires_at` switches that filter off as well, so add `expires_at > NOW()` back:
+`WHERE expires_at IS NOT NULL AND expires_at > NOW() | SORT expires_at` lists the soonest to expire.
+Naming a field elsewhere leaves the filters on: `KEEP title, expires_at` shows the expiry of
+active KIs, and `KEEP governance.provenance.created_by.uri` shows the writing automation while both
+filters still apply.
 
 ---
 
