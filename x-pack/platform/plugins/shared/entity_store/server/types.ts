@@ -32,7 +32,7 @@ import type {
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type {
   EntityMaintainersClient,
@@ -113,6 +113,10 @@ export interface EntityStoreStartContract {
     namespace: string
   ) => RelationshipsClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
+  createResolutionRulesClient: (
+    savedObjectsClient: SavedObjectsClientContract,
+    namespace: string
+  ) => ResolutionRulesClient;
   getMaintainerStatus: (
     namespace: string,
     ids?: string[]
