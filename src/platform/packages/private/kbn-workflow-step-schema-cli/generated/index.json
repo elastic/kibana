@@ -723,6 +723,7 @@
     "security.attack-discovery.persistDiscoveries",
     "security.attack-discovery.run",
     "security.buildAlertEntityGraph",
+    "security.buildExceptionEntriesFilter",
     "security.createExceptionListItem",
     "security.createNote",
     "security.createRule",
@@ -1002,11 +1003,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "b26e651d589809e39bbab4b2d3610a2f8f8f9e90319e8b83a0ef99107106f5e8"
+      "sha256": "050b8dc44aa30179c4f67647c063fa91be0e1952cdc31d25e67af7dc55a15be6"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "8e84864e9be854dc9716140635071e8e800f9f9821813e55e2a91ee579688069"
+      "sha256": "b08dda311f361ac33d18fd6ae37819b59c115d3b1b1ba268f4b7e00a3da3d663"
     }
   }
 }
