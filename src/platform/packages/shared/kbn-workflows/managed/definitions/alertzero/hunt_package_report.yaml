@@ -65,6 +65,23 @@ triggers:
         hasConfirmedHit:
           type: boolean
           description: Whether the hunt cleared the confirmed-hit bar.
+        # Number of SSE attachments the hunt child prepared (hunt.yaml's `sse_count` output).
+        # `attach_sse`'s foreach swallows a per-item attach failure with `continue`, so without
+        # this count, packaging has no way to tell a partial attach (some items landed, some
+        # did not) from a complete one -- it would read whatever current-run state exists and
+        # proceed as if the run were complete. Compared against what read_current_run_state
+        # actually finds; a shortfall reports run_incomplete instead of packaging.
+        #
+        # Not required: this workflow is a plain `yaml` definition, so its own content hash
+        # propagates to every space on the next reconciliation regardless of version, but the
+        # Worker calling it is a `yamlTemplate` definition whose hash does not cover the
+        # imported YAML it renders -- an already-installed Worker only starts sending this
+        # field once its own `version` bumps. Requiring it here would fail every such Worker's
+        # packaging call in that gap; the step itself treats a missing value as skip-the-check,
+        # not as an error.
+        expectedSseCount:
+          type: number
+          description: Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). Omit to skip the shortfall check.
       required:
         - reportId
         - investigationConversationId
@@ -101,6 +118,7 @@ steps:
       # `${{ }}`, not `{{ }}`: the step schema types this as a boolean, and the text form
       # renders it as the string "false", which fails input validation.
       hasConfirmedHit: "${{ inputs.hasConfirmedHit }}"
+      expectedSseCount: "${{ inputs.expectedSseCount }}"
     on-failure:
       fallback:
         - name: emit_package_failed

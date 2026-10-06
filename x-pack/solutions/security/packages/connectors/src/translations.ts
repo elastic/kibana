@@ -34,3 +34,9 @@ export const CONNECTOR_SELECTOR_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Select a connector',
   }
 );
+
+export const getConnectorButtonAriaLabel = (connectorName: string) =>
+  i18n.translate('securitySolutionPackages.connectors.connectorSelector.buttonAriaLabel', {
+    defaultMessage: 'Select connector, {connectorName}',
+    values: { connectorName },
+  });

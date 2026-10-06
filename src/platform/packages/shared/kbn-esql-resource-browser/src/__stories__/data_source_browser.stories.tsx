@@ -54,7 +54,7 @@ const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string
         get: async (path: string) =>
           path === VIEWS_ROUTE ? { views: mockViews } : { datasets: [] },
       } as any,
-      application: { capabilities: {} } as any,
+      application: { capabilities: { esqlViews: { read: true } } } as any,
     },
   };
 
