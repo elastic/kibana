@@ -8,6 +8,7 @@
  */
 
 const mockWatchdog = {
+  isProfiling: false,
   start: jest.fn(),
   stop: jest.fn().mockResolvedValue(undefined),
   runWithLabels: jest.fn((_context, run) => run()),
@@ -33,7 +34,8 @@ describe('EventLoopWatchdogService', () => {
     const executionContext = executionContextServiceMock.createInternalSetupContract();
     service.setup({ executionContext });
     const wrapper = executionContext.registerContextWrapper.mock.calls[0][0];
-    expect(wrapper({ toJSON: () => ({ type: 'a' }) } as never, () => 1)).toBe(1);
+    const toJSON = jest.fn(() => ({ type: 'a' }));
+    expect(wrapper({ toJSON } as never, () => 1)).toBe(1);
 
     const flag$ = new BehaviorSubject(false);
     const featureFlags = coreFeatureFlagsMock.createStart();
@@ -47,7 +49,11 @@ describe('EventLoopWatchdogService', () => {
     // toggles are serialised behind the initial (disabled) toggle
     await new Promise(setImmediate);
     expect(mockWatchdog.start).toHaveBeenCalledTimes(1);
-    expect(wrapper({ toJSON: () => ({ type: 'a' }) } as never, () => 2)).toBe(2);
+    // not profiling yet: the context is not even converted
+    expect(wrapper({ toJSON } as never, () => 2)).toBe(2);
+    expect(toJSON).not.toHaveBeenCalled();
+    mockWatchdog.isProfiling = true;
+    expect(wrapper({ toJSON } as never, () => 3)).toBe(3);
     expect(mockWatchdog.runWithLabels).toHaveBeenCalledWith({ type: 'a' }, expect.any(Function));
     flag$.next(false);
     await new Promise(setImmediate);

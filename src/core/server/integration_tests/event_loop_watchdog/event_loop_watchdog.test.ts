@@ -140,6 +140,17 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
     }
   );
 
+  it('locates unlabelled blocks too (every sample is timestamped on the epoch clock)', async () => {
+    spinTheEventLoop(500);
+    const [message, meta] = await waitFor(() => profileLogs()[0]);
+    expect(message).toContain('100% unlabelled');
+    expect(profileTopLocation(meta)).toContain('event_loop_watchdog.test.ts');
+    expect(
+      (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana.event_loop_watchdog
+        .profile.scope
+    ).toBe('blocks');
+  });
+
   it('discards windows without blocks', async () => {
     await waitFor(() => (rotations >= 1 ? true : undefined), limits.windowMs * 3);
     expect(profileLogs()).toHaveLength(0);

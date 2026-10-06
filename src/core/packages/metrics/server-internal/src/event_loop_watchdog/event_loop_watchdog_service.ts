@@ -52,8 +52,9 @@ export class EventLoopWatchdogService {
   }
 
   public setup({ executionContext }: EventLoopWatchdogSetupDeps): void {
+    // Only a getter check while not profiling: the context is converted only when labelling.
     executionContext.registerContextWrapper((context, run) =>
-      this.watchdog ? this.watchdog.runWithLabels(context.toJSON(), run) : run()
+      this.watchdog?.isProfiling ? this.watchdog.runWithLabels(context.toJSON(), run) : run()
     );
   }
 

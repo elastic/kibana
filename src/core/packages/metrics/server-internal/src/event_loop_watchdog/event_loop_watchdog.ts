@@ -111,6 +111,7 @@ export class EventLoopWatchdog {
       onExhausted: () => {
         clearInterval(this.heartbeatTimer);
         this.heartbeatTimer = undefined;
+        this.generation++; // cancels a session start still loading the profiler
         this.session?.end('watchdog worker unavailable');
       },
     });
@@ -119,6 +120,11 @@ export class EventLoopWatchdog {
       `Event loop watchdog started (threshold ${BLOCK_THRESHOLD_MS}ms, heartbeat ${HEARTBEAT_INTERVAL_MS}ms)`
     );
     void this.startProfiling(shared, ++this.generation);
+  }
+
+  /** Whether a profiling session is collecting samples (and so labels). */
+  public get isProfiling(): boolean {
+    return this.session?.isActive ?? false;
   }
 
   /** Runs `run` with profiler labels for `context` while a session is active. */

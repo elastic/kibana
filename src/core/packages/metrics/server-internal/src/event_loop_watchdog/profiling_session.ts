@@ -75,6 +75,8 @@ export const toLabels = (context: KibanaExecutionContext): Record<string, string
   return labels;
 };
 
+// The native profiler reports sample timestamps in epoch microseconds (it applies V8's epoch
+// offset), the clock the worker converts block boundaries to.
 const generateLabels: GenerateLabels = ({ context }) =>
   context
     ? {
