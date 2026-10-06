@@ -213,20 +213,26 @@ const handleConversationExecution = async ({
 
   // The execution service resolved the conversation, created it when it was new and wrote the
   // opening user message before this run was dispatched: the run reads the stored document and is
-  // told how the request resolved it, since its own read only ever sees an update. A run that does
-  // not store its conversation wrote nothing to read, so it resolves the placeholder here.
-  const conversation: ConversationWithOperation = storeConversation
-    ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
-    : await getConversation({
-        agentId,
-        conversationId,
-        autoCreateConversationWithId: true,
-        conversationClient,
-        accessControl,
-        readOnly,
-        origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-        subagentCreation,
-      });
+  // told how the request resolved it, since its own read only ever sees an update. An existing
+  // conversation is read even when the run stores nothing, so a deleted one fails the run instead of
+  // being replaced by an empty placeholder; only a non-storing new conversation resolves the
+  // placeholder here, as nothing was written for it.
+  const conversation: ConversationWithOperation =
+    storeConversation || conversationOperation === 'UPDATE'
+      ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
+      : await getConversation({
+          agentId,
+          conversationId,
+          autoCreateConversationWithId: true,
+          conversationClient,
+          accessControl,
+          readOnly,
+          origin: origin
+            ? { external_conversation_id: origin.external_conversation_id }
+            : undefined,
+          subagentCreation,
+        });
+  const readOnlyConversation = !storeConversation && conversationOperation === 'UPDATE';
 
   // Matches the receipt-time write's timestamp, so a rebuilt interruption event lands with the
   // same created_at rather than moving to when this run picked the record up.
@@ -272,6 +278,8 @@ const handleConversationExecution = async ({
       parentExecutionId: execution.parentExecutionId,
       projectRouting,
       roundId,
+      storeConversation,
+      readOnlyConversation,
     });
 
     // Generate title when creating a new conversation

@@ -140,6 +140,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     executionMode: manager.deps.executionMode,
     interactivity: manager.deps.interactivity,
     parentExecutionId: manager.deps.parentExecutionId,
+    storeConversation: manager.deps.storeConversation,
+    readOnlyConversation: manager.deps.readOnlyConversation,
     subAgentExecutor: manager.deps.subAgentExecutor,
     agentRegistry,
     conversationClient,

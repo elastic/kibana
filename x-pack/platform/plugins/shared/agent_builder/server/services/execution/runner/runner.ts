@@ -142,6 +142,10 @@ export interface CreateScopedRunnerDeps {
   interactivity: InteractivityConfig;
   /** Id of the parent execution that spawned this one, if any. */
   parentExecutionId?: string;
+  /** Whether this run persists anything that belongs to its conversation. */
+  storeConversation: boolean;
+  /** True when the run loaded an existing conversation but stores nothing to it. */
+  readOnlyConversation: boolean;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
   /** Experimental features enabled for this runner context. */
@@ -179,6 +183,8 @@ export type CreateRunnerDeps = Omit<
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'storeConversation'
+  | 'readOnlyConversation'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
@@ -278,6 +284,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode,
     interactivity,
     parentExecutionId,
+    storeConversation = true,
+    readOnlyConversation = false,
   }: {
     request: KibanaRequest;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
@@ -294,6 +302,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode: AgentExecutionMode;
     interactivity: InteractivityConfig;
     parentExecutionId?: string;
+    storeConversation?: boolean;
+    readOnlyConversation?: boolean;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -376,6 +386,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       executionMode,
       interactivity,
       parentExecutionId,
+      storeConversation,
+      readOnlyConversation,
       subAgentExecutor,
       experimentalFeatures,
       ...(deductive ? { deductive } : {}),
@@ -424,6 +436,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode = AgentExecutionMode.conversation,
         interactive,
         parentExecutionId,
+        storeConversation,
+        readOnlyConversation,
         ...otherParams
       } = params;
       const { agentId } = params;
@@ -443,9 +457,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode,
         interactivity,
         parentExecutionId,
+        storeConversation,
+        readOnlyConversation,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
+          allowResume: storeConversation !== false,
         }),
       });
       return runner.runAgent(otherParams);

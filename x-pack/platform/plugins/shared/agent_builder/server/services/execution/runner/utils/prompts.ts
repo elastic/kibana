@@ -135,12 +135,15 @@ export const createPromptManager = ({
 export const getAgentPromptStorageState = ({
   input,
   conversation,
+  allowResume = true,
 }: {
   input: ConverseInput;
   conversation?: Conversation;
+  /** When false, a paused conversation is not resumed, so its round-scoped responses don't apply. */
+  allowResume?: boolean;
 }): PromptStorageState => {
   const isResumingRound =
-    conversation !== undefined && getPendingResumeRound(conversation) !== undefined;
+    allowResume && conversation !== undefined && getPendingResumeRound(conversation) !== undefined;
 
   // Create a shallow copy to avoid mutating the original conversation state
   const responses = { ...(conversation?.state?.prompt?.responses ?? {}) };

@@ -1227,6 +1227,19 @@ describe('AgentExecutionService', () => {
       expect(events[0].id).toBe(`${roundId}::user_message`);
     });
 
+    it('writes nothing to an existing conversation it does not store, and records the run as such', async () => {
+      await converse({ storeConversation: false });
+
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      expect(agentParams).toMatchObject({
+        conversationId: 'conversation-1',
+        storeConversation: false,
+        conversationOperation: 'UPDATE',
+      });
+    });
+
     it('falls back to the conversation owner when the requester has no author, as the round rewrite does', async () => {
       await converse();
 

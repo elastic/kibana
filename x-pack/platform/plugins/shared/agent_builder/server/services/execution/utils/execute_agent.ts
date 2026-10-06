@@ -47,6 +47,8 @@ export const executeAgent$ = ({
   parentExecutionId,
   projectRouting,
   roundId,
+  storeConversation,
+  readOnlyConversation,
 }: {
   agentId: string;
   executionId: string;
@@ -70,6 +72,8 @@ export const executeAgent$ = ({
   parentExecutionId?: string;
   projectRouting?: string;
   roundId?: string;
+  storeConversation?: boolean;
+  readOnlyConversation?: boolean;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -85,6 +89,8 @@ export const executeAgent$ = ({
       interactive: interactivity,
       parentExecutionId,
       projectRouting,
+      storeConversation,
+      readOnlyConversation,
       agentParams: {
         nextInput,
         conversation,

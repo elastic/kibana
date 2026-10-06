@@ -39,6 +39,14 @@ export interface RunAgentParams {
    */
   parentExecutionId?: string;
   /**
+   * Whether this run persists anything that belongs to its conversation. Defaults to true.
+   */
+  storeConversation?: boolean;
+  /**
+   * True when the run loaded an existing conversation but stores nothing to it. Defaults to false.
+   */
+  readOnlyConversation?: boolean;
+  /**
    * ID of the agent to call.
    */
   agentId: string;

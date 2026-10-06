@@ -353,6 +353,16 @@ export interface AgentHandlerContext {
    */
   parentExecutionId?: string;
   /**
+   * Whether this run persists anything that belongs to its conversation: round, metadata,
+   * workspace, child conversations. False for one-shot runs and ephemeral runs.
+   */
+  storeConversation: boolean;
+  /**
+   * True when the run loaded an existing conversation but stores nothing to it (an ephemeral run).
+   * Unrelated to the presentational `read_only` conversation flag.
+   */
+  readOnlyConversation: boolean;
+  /**
    * Sub-agent executor for spawning child agent executions.
    */
   subAgentExecutor: SubAgentExecutor;
