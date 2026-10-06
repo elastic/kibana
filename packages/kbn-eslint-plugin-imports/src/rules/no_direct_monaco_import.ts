@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 
 /**
@@ -15,7 +15,7 @@ import { visitAllImportStatements } from '../helpers/visit_all_import_statements
  * `@kbn/code-editor` subpaths. Consumers should import from `@kbn/code-editor`
  * at the package root only.
  */
-export const NoDirectMonacoImportRule: Rule.RuleModule = {
+export const NoDirectMonacoImportRule: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     docs: {
@@ -33,7 +33,7 @@ export const NoDirectMonacoImportRule: Rule.RuleModule = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     return visitAllImportStatements((req, { node }) => {
       if (!req) {
         return;
@@ -54,7 +54,7 @@ export const NoDirectMonacoImportRule: Rule.RuleModule = {
       // Warn on any import from @kbn/monaco (root or subpath)
       if (req === '@kbn/monaco' || req.startsWith('@kbn/monaco/')) {
         context.report({
-          node: node as any,
+          node,
           messageId: 'noMonacoImport',
           data: { source: req },
         });
@@ -64,7 +64,7 @@ export const NoDirectMonacoImportRule: Rule.RuleModule = {
       // Warn on @kbn/code-editor subpath imports (anything beyond the package root)
       if (req.startsWith('@kbn/code-editor/')) {
         context.report({
-          node: node as any,
+          node,
           messageId: 'noCodeEditorSubpathImport',
           data: { source: req },
         });

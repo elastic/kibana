@@ -9,9 +9,9 @@
 
 import Path from 'path';
 
-import type { Rule } from 'eslint';
-import type { Node } from 'estree';
-import type { ModuleType } from '@kbn/repo-source-classifier';
+import type { CreateOnceRule } from '@oxlint/plugins';
+import type { ImportResolver } from '@kbn/import-resolver';
+import type { ModuleId, ModuleType, RepoSourceClassifier } from '@kbn/repo-source-classifier';
 
 import { isTypeOnlyImport } from '../helpers/ast';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
@@ -33,7 +33,7 @@ const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | typeof ANY> = {
   tooling: ANY,
 };
 
-export const NoBoundaryCrossingRule: Rule.RuleModule = {
+export const NoBoundaryCrossingRule: CreateOnceRule = {
   meta: {
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
@@ -42,57 +42,66 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
       TYPE_MISMATCH: `"{{importedType}}" code can not be imported from "{{ownType}}" code.{{suggestion}}`,
     },
   },
-  create(context) {
-    const resolver = getImportResolver(context);
-    const classifier = getRepoSourceClassifier(resolver);
-    const sourcePath = getSourcePath(context);
-    const ownDirname = Path.dirname(sourcePath);
+  createOnce(context) {
+    let resolver: ImportResolver;
+    let classifier: RepoSourceClassifier;
+    let ownDirname: string;
+    let self: ModuleId;
+    let importable: ModuleType[] | typeof ANY;
 
-    const self = classifier.classify(sourcePath);
-    const importable = IMPORTABLE_FROM[self.type];
+    return {
+      before() {
+        resolver = getImportResolver(context);
+        classifier = getRepoSourceClassifier(resolver);
+        const sourcePath = getSourcePath(context);
+        ownDirname = Path.dirname(sourcePath);
 
-    return visitAllImportStatements((req, { node, importer, type }) => {
-      if (
-        req === null ||
-        // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
-        req.endsWith('?raw') ||
-        // type only imports can stretch across all the boundaries
-        isTypeOnlyImport(importer)
-      ) {
-        return;
-      }
+        self = classifier.classify(sourcePath);
+        importable = IMPORTABLE_FROM[self.type];
+      },
+      ...visitAllImportStatements((req, { node, importer, type }) => {
+        if (
+          req === null ||
+          // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
+          req.endsWith('?raw') ||
+          // type only imports can stretch across all the boundaries
+          isTypeOnlyImport(importer)
+        ) {
+          return;
+        }
 
-      const result = resolver.resolve(req, ownDirname);
-      if (result?.type !== 'file' || result.nodeModule) {
-        return;
-      }
+        const result = resolver.resolve(req, ownDirname);
+        if (result?.type !== 'file' || result.nodeModule) {
+          return;
+        }
 
-      const imported = classifier.classify(result.absolute);
+        const imported = classifier.classify(result.absolute);
 
-      if (importable === ANY) {
-        return;
-      }
+        if (importable === ANY) {
+          return;
+        }
 
-      if (!importable.includes(imported.type)) {
-        context.report({
-          node: node as Node,
-          messageId: 'TYPE_MISMATCH',
-          data: {
-            ownType: self.type,
-            importedType: imported.type,
-            suggestion: formatSuggestions([
-              self.type.endsWith(' package') && imported.type === 'tests or mocks'
-                ? 'To expose mocks to other packages, they should be in their own package that is consumed by this package.'
-                : '',
-              `Remove the import statement.`,
-              importable.length > 0 ? `Limit your imports to ${toList(importable)} code.` : '',
-              `Covert to a type-only import.`,
-              `Reach out to #kibana-operations for help.`,
-            ]),
-          },
-        });
-        return;
-      }
-    });
+        if (!importable.includes(imported.type)) {
+          context.report({
+            node,
+            messageId: 'TYPE_MISMATCH',
+            data: {
+              ownType: self.type,
+              importedType: imported.type,
+              suggestion: formatSuggestions([
+                self.type.endsWith(' package') && imported.type === 'tests or mocks'
+                  ? 'To expose mocks to other packages, they should be in their own package that is consumed by this package.'
+                  : '',
+                `Remove the import statement.`,
+                importable.length > 0 ? `Limit your imports to ${toList(importable)} code.` : '',
+                `Covert to a type-only import.`,
+                `Reach out to #kibana-operations for help.`,
+              ]),
+            },
+          });
+          return;
+        }
+      }),
+    };
   },
 };

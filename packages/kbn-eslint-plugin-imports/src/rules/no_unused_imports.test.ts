@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { NoUnusedImportsRule } from './no_unused_imports';
+import { rules } from '../..';
 import dedent from 'dedent';
 
 const fmt = (str: TemplateStringsArray) => dedent(str) + '\n';
@@ -44,7 +44,7 @@ const babelTester = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/imports/no_unused_imports', NoUnusedImportsRule, {
+    tester.run('@kbn/imports/no_unused_imports', rules.no_unused_imports, {
       valid: [
         {
           filename: 'foo.ts',
@@ -129,14 +129,10 @@ for (const [name, tester] of [tsTester, babelTester]) {
             // @ts-expect-error
             // @ts-ignore
             // foo message
-            // eslint-disable-next-line some-other-rule
+            // eslint-disable-next-line no-console
             import type { foo, bar as Bar } from 'old'
           `,
           errors: [
-            {
-              line: 4,
-              message: `Definition for rule 'some-other-rule' was not found.`,
-            },
             {
               line: 5,
               message: 'All imports from "old" are unused and should be removed',

@@ -9,7 +9,8 @@
 
 import Path from 'path';
 
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
+import type { ImportResolver } from '@kbn/import-resolver';
 import { getRelativeImportReq, getPackageRelativeImportReq } from '@kbn/import-resolver';
 
 import { report } from '../helpers/report';
@@ -17,7 +18,7 @@ import { visitAllImportStatements } from '../helpers/visit_all_import_statements
 import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 
-export const UniformImportsRule: Rule.RuleModule = {
+export const UniformImportsRule: CreateOnceRule = {
   meta: {
     fixable: 'code',
     schema: [
@@ -36,33 +37,70 @@ export const UniformImportsRule: Rule.RuleModule = {
     },
   },
 
-  create(context) {
-    const preserveFileExtensions = context.options[0]?.preserveFileExtensions === true;
-    const resolver = getImportResolver(context);
-    const sourcePath = getSourcePath(context);
-    const sourceDirname = Path.dirname(sourcePath);
-    const ownPackageId = resolver.getPackageIdForPath(sourcePath);
+  createOnce(context) {
+    let preserveFileExtensions: boolean;
+    let resolver: ImportResolver;
+    let sourcePath: string;
+    let sourceDirname: string;
+    let ownPackageId: string | null;
 
-    return visitAllImportStatements((req, { node, type }) => {
-      if (!req) {
-        return;
-      }
+    return {
+      before() {
+        const [options] = context.options as Array<
+          { preserveFileExtensions?: boolean } | undefined
+        >;
+        preserveFileExtensions = options?.preserveFileExtensions === true;
+        resolver = getImportResolver(context);
+        sourcePath = getSourcePath(context);
+        sourceDirname = Path.dirname(sourcePath);
+        ownPackageId = resolver.getPackageIdForPath(sourcePath);
+      },
+      ...visitAllImportStatements((req, { node, type }) => {
+        if (!req) {
+          return;
+        }
 
-      const result = resolver.resolve(req, sourceDirname);
-      if (result?.type !== 'file' || result.nodeModule) {
-        return;
-      }
+        const result = resolver.resolve(req, sourceDirname);
+        if (result?.type !== 'file' || result.nodeModule) {
+          return;
+        }
 
-      const { pkgId } = result;
+        const { pkgId } = result;
 
-      if (pkgId === ownPackageId || !pkgId) {
-        const correct = getRelativeImportReq({
+        if (pkgId === ownPackageId || !pkgId) {
+          const correct = getRelativeImportReq({
+            ...result,
+            original: req,
+            dirname: sourceDirname,
+            sourcePath,
+            type,
+            preserveFileExtensions,
+          });
+
+          if (req !== correct) {
+            report(context, {
+              node,
+              message: `Use import request [${correct}]`,
+              correctImport: correct,
+            });
+          }
+          return;
+        }
+
+        const packageDir = resolver.getAbsolutePackageDir(pkgId);
+        if (!packageDir) {
+          report(context, {
+            node,
+            message: `Unable to determine location of package [${pkgId}]`,
+          });
+          return;
+        }
+
+        const correct = getPackageRelativeImportReq({
           ...result,
-          original: req,
-          dirname: sourceDirname,
-          sourcePath,
+          packageDir,
+          pkgId,
           type,
-          preserveFileExtensions,
         });
 
         if (req !== correct) {
@@ -71,34 +109,9 @@ export const UniformImportsRule: Rule.RuleModule = {
             message: `Use import request [${correct}]`,
             correctImport: correct,
           });
+          return;
         }
-        return;
-      }
-
-      const packageDir = resolver.getAbsolutePackageDir(pkgId);
-      if (!packageDir) {
-        report(context, {
-          node,
-          message: `Unable to determine location of package [${pkgId}]`,
-        });
-        return;
-      }
-
-      const correct = getPackageRelativeImportReq({
-        ...result,
-        packageDir,
-        pkgId,
-        type,
-      });
-
-      if (req !== correct) {
-        report(context, {
-          node,
-          message: `Use import request [${correct}]`,
-          correctImport: correct,
-        });
-        return;
-      }
-    });
+      }),
+    };
   },
 };

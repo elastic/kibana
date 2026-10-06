@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
-import type * as T from '@babel/types';
+import type { Visitor } from '@oxlint/plugins';
 import type { ImportType } from '@kbn/import-resolver';
 
 import type { Importer, SomeNode } from './ast';
-import { isIdentifier, isImportCallee, isStringLiteral, isTemplateLiteral } from './ast';
+import { isIdentifier, isStringLiteral, isTemplateLiteral } from './ast';
 
 const JEST_MODULE_METHODS = [
   'jest.createMockFromModule',
@@ -32,10 +29,10 @@ interface VisitorContext {
   type: ImportType;
   importer: Importer;
 }
-type Visitor = (req: string | null, context: VisitorContext) => void;
+type ImportVisitor = (req: string | null, context: VisitorContext) => void;
 
 function passSourceAsString(
-  fn: Visitor,
+  fn: ImportVisitor,
   node: SomeNode | null | undefined,
   importer: Importer,
   type: ImportType
@@ -69,31 +66,25 @@ function passSourceAsString(
 }
 
 /**
- * Create an ESLint rule visitor that calls fn() for every import string, including
+ * Create a rule visitor that calls fn() for every import string, including
  * 'export from' statements, require() calls, require.resolve(), jest.mock() calls, and more.
- * Works with both babel eslint and typescript-eslint parsers
  */
-export function visitAllImportStatements(fn: Visitor) {
-  const visitor = {
-    ImportDeclaration(node: TSESTree.ImportDeclaration | T.ImportDeclaration) {
+export function visitAllImportStatements(fn: ImportVisitor): Visitor {
+  return {
+    ImportDeclaration(node) {
       passSourceAsString(fn, node.source, node, 'esm');
     },
-    ExportNamedDeclaration(node: TSESTree.ExportNamedDeclaration | T.ExportNamedDeclaration) {
+    ExportNamedDeclaration(node) {
       passSourceAsString(fn, node.source, node, 'esm');
     },
-    ExportAllDeclaration(node: TSESTree.ExportAllDeclaration | T.ExportAllDeclaration) {
+    ExportAllDeclaration(node) {
       passSourceAsString(fn, node.source, node, 'esm');
     },
-    ImportExpression(node: TSESTree.ImportExpression) {
+    ImportExpression(node) {
       passSourceAsString(fn, node.source, node, 'esm');
     },
-    CallExpression(node: TSESTree.CallExpression | T.CallExpression) {
+    CallExpression(node) {
       const { callee, arguments: args } = node;
-      // babel's AST treats import() calls as CallExpressions with callees of type "Import"
-      if (isImportCallee(callee)) {
-        passSourceAsString(fn, args[0], node, 'esm');
-        return;
-      }
 
       // is this a `require()` call?
       if (isIdentifier(callee) && callee.name === 'require') {
@@ -103,7 +94,7 @@ export function visitAllImportStatements(fn: Visitor) {
 
       // is this an `obj.method()` call?
       if (
-        callee.type === AST_NODE_TYPES.MemberExpression &&
+        callee.type === 'MemberExpression' &&
         isIdentifier(callee.object) &&
         isIdentifier(callee.property)
       ) {
@@ -122,6 +113,4 @@ export function visitAllImportStatements(fn: Visitor) {
       }
     },
   };
-
-  return visitor as Rule.RuleListener;
 }

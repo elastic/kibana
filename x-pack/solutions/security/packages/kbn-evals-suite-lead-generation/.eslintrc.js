@@ -15,13 +15,5 @@ module.exports = {
         'import/no-nodejs-modules': 'off',
       },
     },
-    // Plain CJS scripts use Node built-ins via require() which the import
-    // resolver cannot statically resolve — disable the unresolvable rule.
-    {
-      files: ['scripts/**/*.js'],
-      rules: {
-        '@kbn/imports/no_unresolvable_imports': 'off',
-      },
-    },
   ],
 };
