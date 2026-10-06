@@ -42,11 +42,9 @@ import { InvestigationStatusService } from './investigations/services/investigat
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { createInvestigationsPrivilegesReader } from './investigations/services/check_investigations_privileges';
 import { deleteInvestigationDataAcrossSpaces } from './investigations/services/delete_investigation_data_across_spaces';
-import { InvestigationDriverWorkflowRegistry } from './investigations/services/driver_workflows';
 import { InProgressResolver } from './investigations/services/in_progress';
 import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
 import { createInvestigationsClient } from './investigations/services/investigations_client';
-import { createGetInvestigationTool } from './investigations/tools/get_investigation_tool';
 import { createConversationReadCheck } from './investigation_attachments';
 import { createUserResolver } from './services/resolve_user';
 import type { ResolveUser } from './services/resolve_user';
@@ -75,10 +73,6 @@ export class AgenticInvestigationsPlugin
   private assignmentsService?: AssignmentsService;
   private investigationStatusService?: InvestigationStatusService;
   private investigationsQueryService?: InvestigationsQueryService;
-  private readonly driverWorkflows = new InvestigationDriverWorkflowRegistry();
-  private workflowsManagement?: NonNullable<
-    AgenticInvestigationsSetupDependencies['workflowsManagement']
-  >['management'];
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveUser;
   private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
@@ -90,16 +84,9 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    {
-      features,
-      workflowsExtensions,
-      agentBuilder,
-      workflowsManagement,
-    }: AgenticInvestigationsSetupDependencies
+    { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
-    // Executions API lives on the setup contract only.
-    this.workflowsManagement = workflowsManagement?.management;
 
     // Attachment types, steps and tools register during setup but only run once Kibana has
     // started, so the authorization service is resolved per call rather than
@@ -144,14 +131,6 @@ export class AgenticInvestigationsPlugin
       createSetHypothesesTool({
         getHypothesesService: () => this.requireHypothesesService(),
         resolveUser: (request) => this.requireUserResolver()(request),
-        privileges: investigationsPrivileges,
-        logger: this.logger,
-      })
-    );
-
-    agentBuilder.tools.register(
-      createGetInvestigationTool({
-        getQueryService: () => this.requireInvestigationsQueryService(),
         privileges: investigationsPrivileges,
         logger: this.logger,
       })
@@ -206,9 +185,7 @@ export class AgenticInvestigationsPlugin
       getConversationClient: (request) => this.getConversationClient(request),
     });
 
-    return {
-      registerInvestigationWorkflow: (workflowId) => this.driverWorkflows.register(workflowId),
-    };
+    return {};
   }
 
   start(
@@ -260,8 +237,6 @@ export class AgenticInvestigationsPlugin
       getProposals: () => plugins.proposals,
       inProgress: new InProgressResolver({
         getAgentExecutions: () => plugins.agentBuilder.execution,
-        getWorkflowsManagement: () => this.workflowsManagement,
-        driverWorkflows: this.driverWorkflows,
         logger: this.logger,
       }),
       logger: this.logger,

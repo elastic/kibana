@@ -68,7 +68,7 @@ export const investigationFiltersSchema = z.object({
   status: multiValued(z.enum(INVESTIGATION_METADATA_STATUSES)),
   /** `none` matches investigations whose severity has not been set. */
   severity: multiValued(z.enum([...INVESTIGATION_SEVERITIES, INVESTIGATION_SEVERITY_NONE])),
-  /** True: only investigations an agent or driver workflow is working on now. False: the rest. */
+  /** True: only investigations an Agent Builder execution is running for now. False: the rest. */
   in_progress: booleanParam,
   subject_type: multiValued(z.enum(INVESTIGATION_SUBJECT_TYPES)),
   subject_id: multiValued(z.string().min(1).max(MAX_SUBJECT_ID_LENGTH)),
@@ -173,7 +173,7 @@ export interface InvestigationSummary {
   updated_at: string;
   agent_id: string;
   metadata: InvestigationMetadata;
-  /** An agent run or a registered driver workflow execution is working on it now. */
+  /** An Agent Builder execution is scheduled or running for its conversation. */
   in_progress: boolean;
   subjects: InvestigationSubjectResponse[];
   impact?: InvestigationImpactResponse;
