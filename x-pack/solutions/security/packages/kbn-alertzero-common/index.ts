@@ -37,6 +37,8 @@ export {
   ALERTZERO_WATCH_URL_TEMPLATE,
   ALERTZERO_WORKERS_URL,
   ALERTZERO_WORKER_URL_TEMPLATE,
+  ALERTZERO_ALERT_TRIAGE_ATTACH_RULES_URL,
+  SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID,
   HUNT_INTERNAL_ROUTE_BASE,
   HUNT_INDEX_SCOPE_URL,
   CANDIDATES_URL,
@@ -90,6 +92,8 @@ export type {
 } from './action_catalog_types';
 
 export {
+  AttachAlertTriageRulesRequestBody,
+  AttachAlertTriageRulesResponse,
   GetWatchResponse,
   Lifecycle,
   ListWatchesResponse,

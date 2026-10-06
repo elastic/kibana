@@ -18,6 +18,7 @@ import {
   AttackAssigneesChangedTriggerId,
   NoteCreatedTriggerId,
   NoteUpdatedTriggerId,
+  DetectionRulesCreatedTriggerId,
 } from '../../../common/workflows/triggers';
 
 const mockRequest = {} as KibanaRequest;
@@ -180,6 +181,25 @@ describe('registerSecurityWorkflowEventBridge', () => {
         noteId: 'n1',
         updatedBy: 'user',
         documentId: 'doc',
+      },
+    },
+    {
+      name: 'detectionRulesCreated',
+      triggerId: DetectionRulesCreatedTriggerId,
+      emit: (b: SecuritySolutionEventBus) =>
+        b.emitDetectionRulesCreated(mockRequest, {
+          ids: ['so-1'],
+          types: ['query'],
+          tags: [],
+          totalCount: 1,
+          source: 'import',
+        }),
+      expectedPayload: {
+        ids: ['so-1'],
+        types: ['query'],
+        tags: [],
+        totalCount: 1,
+        source: 'import',
       },
     },
   ])('$name', ({ triggerId, emit, expectedPayload }) => {

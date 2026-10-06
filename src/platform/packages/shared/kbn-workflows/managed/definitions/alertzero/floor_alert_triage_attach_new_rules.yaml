@@ -1,0 +1,62 @@
+version: "1"
+name: Alert Triage attach new rules
+description: >
+  Attaches the Alert Triage Worker to detection rules as they are created, so rules created after
+  the Worker was enabled are triaged too. Without it the Worker only runs for rules that existed
+  when it was enabled, because it is started by a rule action that new rules do not carry.
+
+  Started by the `security.detectionRulesCreated` trigger, which fires after rules are saved by
+  the rule management API, a prebuilt rules install, an import, a duplicate, a SIEM migration or a
+  restore. It makes one call to the AlertZero route that attaches the Worker's action. The route
+  checks that the Worker is enabled in the space and attaches in the same request, and answers
+  `worker_disabled` or `worker_unavailable` as a normal result when there is nothing to do, so a
+  space without the Worker, or a deployment without AlertZero for the space, ends the run cleanly.
+enabled: true
+tags:
+  - security
+  - alertzero
+  - alert-triage
+
+settings:
+  timeout: "10m"
+
+triggers:
+  # The event carries the saved object ids of the created rules (`event.ids`, at most 2000 per
+  # event, the route's limit). The run executes as the user whose request created the rules, so
+  # the attach is performed by that user, who can edit them.
+  - type: security.detectionRulesCreated
+
+steps:
+  # Not gated on a separate check of the Worker's state: a check in one request and the attach in
+  # another can be separated by a disable, which would leave the new rules carrying an action that
+  # targets a disabled workflow. The route does both in one call.
+  #
+  # A failure is retried and then fails the run, which is how an attach that did not happen shows
+  # up: the route answers 500 when the status cannot be read or the bulk edit fails, and never
+  # reports success for rules it did not attach.
+  - name: attach_rules
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/workers/system-security-floor-alert-triage/rules/_attach"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        ruleIds: "${{ event.ids }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+
+  # Leaves the outcome in the run history: why nothing was attached, or how many rules were.
+  - name: log_outcome
+    type: console
+    with:
+      message: >-
+        Alert Triage attach: {{ steps.attach_rules.output.outcome }}
+        {% if steps.attach_rules.output.outcome == 'attached' %}
+        ({{ steps.attach_rules.output.updated }} of {{ steps.attach_rules.output.matched }}
+        rules attached, {{ event.totalCount }} created)
+        {% endif %}

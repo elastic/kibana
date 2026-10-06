@@ -3106,6 +3106,8 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_attach_rules @elastic/security-solution
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/alertzero_attach_rules @elastic/security-solution
 
 /x-pack/solutions/security/plugins/security_solution_serverless/public/components/dashboards_landing_callout @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/threat_intelligence_paywall.tsx @elastic/security-investigations

@@ -55,6 +55,7 @@ const makeAttachmentService = (
           attached.delete(id);
           notAttached.add(id);
         }
+        return { matched: attachRuleIds.length + detachRuleIds.length, updated: 0 };
       }
     ),
   };
@@ -157,6 +158,18 @@ describe('detachRuleIdChunks', () => {
     expect(service.updateRuleAttachments).toHaveBeenNthCalledWith(2, {
       attachRuleIds: [],
       detachRuleIds: ['r2'],
+    });
+  });
+
+  it('passes ignoreMissingRules through, and does not set it by default', async () => {
+    const service = makeAttachmentService({ attachedIds: ['r1'] });
+
+    await detachRuleIdChunks(service, [['r1']], { ignoreMissingRules: true });
+
+    expect(service.updateRuleAttachments).toHaveBeenCalledWith({
+      attachRuleIds: [],
+      detachRuleIds: ['r1'],
+      ignoreMissingRules: true,
     });
   });
 
