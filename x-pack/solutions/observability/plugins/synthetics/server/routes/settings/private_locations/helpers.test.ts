@@ -266,11 +266,11 @@ describe('redeployPrivateLocationMonitors', () => {
     { id: 'monitor-3', attributes: { type: 'http', locations: [] }, namespaces: ['space-a'] },
   ];
 
-  it('redeploys per monitor space and sums the failed creates', async () => {
+  it('redeploys per monitor space and sums the failed deletes and creates', async () => {
     const redeployPrivateLocation = jest
       .fn()
-      .mockResolvedValueOnce({ created: [], failed: [{}] })
-      .mockResolvedValueOnce({ created: [], failed: [{}, {}] });
+      .mockResolvedValueOnce({ created: [], failed: [{}], notDeletedCount: 1 })
+      .mockResolvedValueOnce({ created: [], failed: [{}, {}], notDeletedCount: 0 });
     const routeContext = {
       syntheticsMonitorClient: { redeployPrivateLocation },
     } as unknown as RouteContext;
@@ -299,7 +299,7 @@ describe('redeployPrivateLocationMonitors', () => {
         monitors: [expect.objectContaining({ id: 'monitor-2' })],
       })
     );
-    expect(result).toEqual({ failedCount: 3 });
+    expect(result).toEqual({ failedCount: 4 });
   });
 });
 

@@ -356,4 +356,40 @@ describe('SyntheticsMonitorClient', () => {
       (client.privateLocationAPI.createPackagePolicies as jest.Mock).mock.invocationCallOrder[0]
     );
   });
+
+  it('does not recreate policies whose delete failed', async () => {
+    const spaceId = 'test-space';
+    syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue([]);
+    jest.spyOn(syntheticsService, 'getSyntheticsParams').mockResolvedValue({ [spaceId]: {} });
+
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    client.privateLocationAPI.deleteMonitors = jest
+      .fn()
+      .mockImplementation(async (configs: Array<{ id: string }>) =>
+        configs.map((config) => ({
+          id: client.privateLocationAPI.getPolicyId(config, 'loc-0'),
+          success: false,
+          statusCode: 500,
+        }))
+      );
+    client.privateLocationAPI.createPackagePolicies = jest.fn();
+
+    const result = await client.redeployPrivateLocation({
+      monitors: [
+        {
+          monitor: {
+            ...monitor,
+            locations: [{ id: 'loc-0', label: 'Test', isServiceManaged: false }],
+          } as unknown as MonitorFields,
+          id: 'test-id-1',
+        },
+      ],
+      locationId: 'loc-0',
+      allPrivateLocations: privateLocations,
+      spaceId,
+    });
+
+    expect(client.privateLocationAPI.createPackagePolicies).not.toHaveBeenCalled();
+    expect(result).toEqual({ created: [], failed: [], notDeletedCount: 1 });
+  });
 });

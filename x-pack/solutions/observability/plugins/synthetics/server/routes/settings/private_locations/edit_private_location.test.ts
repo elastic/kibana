@@ -9,7 +9,10 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { editPrivateLocationRoute, EditPrivateLocationSchema } from './edit_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { redeployPrivateLocationMonitors, updatePrivateLocationMonitors } from './helpers';
-import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import {
+  getPrivateLocations,
+  getPrivateLocationsForNamespaces,
+} from '../../../synthetics_service/get_private_locations';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
   getPrivateLocations: jest.fn().mockResolvedValue([]),
@@ -231,6 +234,7 @@ describe('editPrivateLocationRoute agent policy change', () => {
     (getPrivateLocations as jest.Mock).mockResolvedValue([
       { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
     ]);
+    (getPrivateLocationsForNamespaces as jest.Mock).mockResolvedValue([]);
     const { routeContext, response } = makeRouteContext(body);
     routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue(monitors);
     routeContext.server.security = {
@@ -300,16 +304,36 @@ describe('editPrivateLocationRoute agent policy change', () => {
 
   it('rejects an agent policy already used by another private location', async () => {
     const { edit, routeContext } = setup();
-    (getPrivateLocations as jest.Mock).mockResolvedValue([
+    (getPrivateLocationsForNamespaces as jest.Mock).mockResolvedValue([
       { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
-      { id: 'loc-2', label: 'Other', agentPolicyId: 'ap-2', isServiceManaged: false },
+      { id: 'loc-2', label: 'Secret label', agentPolicyId: 'ap-2', isServiceManaged: false },
     ]);
 
     const result = await editPrivateLocationRoute().handler(routeContext);
 
     expect(result).toEqual(expect.objectContaining({ status: 400 }));
+    expect(JSON.stringify(result)).not.toContain('Secret label');
+    expect(getPrivateLocationsForNamespaces).toHaveBeenCalledWith(
+      expect.anything(),
+      existingLocation.namespaces
+    );
     expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
     expect(edit).not.toHaveBeenCalled();
+  });
+
+  it('skips the in-place label rewrite when the agent policy changes too', async () => {
+    const { routeContext } = setup({ label: 'Barcelona', agentPolicyId: 'ap-2' });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(redeployPrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allPrivateLocations: [
+          expect.objectContaining({ label: 'Barcelona', agentPolicyId: 'ap-2' }),
+        ],
+      })
+    );
   });
 
   it('persists the new agent policy and reports monitors that failed to redeploy', async () => {

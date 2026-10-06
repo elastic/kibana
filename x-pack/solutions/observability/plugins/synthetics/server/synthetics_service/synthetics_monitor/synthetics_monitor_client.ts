@@ -216,17 +216,34 @@ export class SyntheticsMonitorClient {
       });
     }
 
-    await this.privateLocationAPI.deleteMonitors(
+    const deleteResults = await this.privateLocationAPI.deleteMonitors(
       privateConfigs.map(({ config }) => config),
       spaceId
     );
 
-    return this.privateLocationAPI.createPackagePolicies(
-      privateConfigs,
-      allPrivateLocations,
-      spaceId,
-      maintenanceWindows
-    );
+    // Recreating over a policy that survived its delete would conflict, leaving
+    // that monitor on the old agent policy, so leave it for a retry.
+    const failedDeleteIds = (deleteResults ?? [])
+      .filter((result) => result && !result.success && result.statusCode !== 404)
+      .map(({ id }) => id);
+    const isDeleted = ({ config }: PrivateConfig) => {
+      const policyId = this.privateLocationAPI.getPolicyId(config, locationId);
+      return !failedDeleteIds.some((id) => id.startsWith(policyId));
+    };
+    const deployable = privateConfigs.filter(isDeleted);
+    const notDeletedCount = privateConfigs.length - deployable.length;
+
+    const { created, failed } =
+      deployable.length > 0
+        ? await this.privateLocationAPI.createPackagePolicies(
+            deployable,
+            allPrivateLocations,
+            spaceId,
+            maintenanceWindows
+          )
+        : { created: [], failed: [] };
+
+    return { created, failed, notDeletedCount };
   }
 
   async testNowConfigs(

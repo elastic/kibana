@@ -12,7 +12,10 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { asRouteSchema, minLengthMessage, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
-import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import {
+  getPrivateLocations,
+  getPrivateLocationsForNamespaces,
+} from '../../../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
@@ -117,8 +120,12 @@ const validateNewAgentPolicy = async ({
     });
   }
 
-  const allLocations = await getPrivateLocations(internalSOClient, ALL_SPACES_ID);
-  const locationWithPolicy = allLocations.find(
+  // Same scope as create: only locations sharing a space with this one can conflict.
+  const locationsInSpaces = await getPrivateLocationsForNamespaces(
+    internalSOClient,
+    locationSpaces
+  );
+  const locationWithPolicy = locationsInSpaces.find(
     (location) => location.agentPolicyId === agentPolicyId && location.id !== locationId
   );
   if (locationWithPolicy) {
@@ -126,8 +133,8 @@ const validateNewAgentPolicy = async ({
       body: {
         message: i18n.translate('xpack.synthetics.editPrivateLocation.agentPolicyInUse', {
           defaultMessage:
-            'Agent policy {agentPolicyId} is already used by private location {locationLabel}.',
-          values: { agentPolicyId, locationLabel: locationWithPolicy.label },
+            'Agent policy {agentPolicyId} is already used by another private location in spaces [{locationSpaces}].',
+          values: { agentPolicyId, locationSpaces: locationSpaces.join(', ') },
         }),
       },
     });
@@ -276,7 +283,8 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
             ? await getPrivateLocations(savedObjectsClient)
             : [];
 
-        if (isLabelChanged) {
+        // A redeploy regenerates the package policies with the new label anyway.
+        if (isLabelChanged && !isAgentPolicyChanged) {
           await updatePrivateLocationMonitors({
             locationId,
             newLocationLabel,

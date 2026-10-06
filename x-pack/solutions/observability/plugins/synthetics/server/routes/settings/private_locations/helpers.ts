@@ -134,7 +134,7 @@ export const updatePrivateLocationMonitors = async ({
 
 /**
  * Moves this location's monitors onto the agent policy in `allPrivateLocations` by
- * deleting and recreating their package policies. Returns how many failed to recreate.
+ * deleting and recreating their package policies. Returns how many failed to delete or recreate.
  */
 export const redeployPrivateLocationMonitors = async ({
   locationId,
@@ -166,5 +166,10 @@ export const redeployPrivateLocationMonitors = async ({
     )
   );
 
-  return { failedCount: results.reduce((sum, { failed }) => sum + failed.length, 0) };
+  return {
+    failedCount: results.reduce(
+      (sum, { failed, notDeletedCount }) => sum + failed.length + notDeletedCount,
+      0
+    ),
+  };
 };
