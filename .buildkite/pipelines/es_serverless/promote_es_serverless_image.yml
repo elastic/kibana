@@ -1,0 +1,16 @@
+# https://buildkite.com/elastic/kibana-elasticsearch-serverless-promote/
+# Triggered by kibana-elasticsearch-serverless-verify-and-promote once an image passes verification.
+
+### Parameters for this job:
+# ES_SERVERLESS_IMAGE: the full image path of the verified docker image
+# PUBLISH_DOCKER_TAG: must be 1/true, otherwise promotion is skipped
+
+agents:
+  image: family/kibana-ubuntu-2404
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
+
+steps:
+  - label: ':arrow_up::elastic::arrow_up: Promote docker image'
+    command: .buildkite/scripts/steps/es_serverless/promote_es_serverless_image.sh "$$ES_SERVERLESS_IMAGE"

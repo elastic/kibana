@@ -25,6 +25,7 @@ spec:
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_ALL_BRANCHES: 'true'
+        SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: gh-readonly-queue/* gh-readonly-queue/*/*
       default_branch: main

@@ -48,7 +48,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.id).toBe(id);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual(body.metadata);
       expect(response.body.kind).toBe(body.kind);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
@@ -56,7 +56,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       const persisted = await apiServices.alertingV2.rules.get(id);
       expect(persisted.id).toBe(id);
       expect(persisted.metadata.name).toBe('created-via-upsert');
-      expect(persisted.metadata.version).toBe(1);
+      expect(persisted.version).toBe(1);
     }
   );
 
@@ -78,18 +78,16 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(response.body.metadata).toStrictEqual({
-        ...replacementBody.metadata,
-        version: created.metadata.version + 1,
-      });
+      expect(response.body.metadata).toStrictEqual(replacementBody.metadata);
       expect(response.body.schedule).toStrictEqual(replacementBody.schedule);
       expect(response.body.query).toStrictEqual(replacementBody.query);
       // createdAt / createdBy / enabled are preserved across an upsert-replace.
       expect(response.body.created_at).toBe(created.created_at);
       expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.enabled).toBe(created.enabled);
-      // updatedAt is refreshed on every replace.
+      // updatedAt is refreshed and version advances on every replace.
       expect(response.body.updated_at).not.toBe(created.updated_at);
+      expect(response.body.version).toBe(created.version + 1);
     }
   );
 
@@ -131,11 +129,9 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
-          recovery_strategy: undefined,
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | LIMIT 10' },
-          },
+          recovery: undefined,
+          no_data: undefined,
+          query: { base: 'FROM logs-* | LIMIT 10' },
           metadata: { name: 'alert-rule' },
         }),
       });
@@ -260,11 +256,11 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
-  apiTest('validation: should reject body with empty query.breach', async ({ apiClient }) => {
+  apiTest('validation: should reject body with an empty query.base', async ({ apiClient }) => {
     const response = await apiClient.put(getRuleUrl('any-id'), {
       headers: writerHeaders,
       body: buildCreateRuleData({
-        query: { format: 'standalone', breach: { query: '' } },
+        query: { base: '' },
       }),
     });
     expect(response).toHaveStatusCode(400);
@@ -272,14 +268,14 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'validation: should reject a recovering delay when recovery is disabled',
+    'validation: should reject a recovering delay when recovery never happens',
     async ({ apiClient }) => {
       const response = await apiClient.put(getRuleUrl('any-id'), {
         headers: writerHeaders,
         body: buildCreateRuleData({
           metadata: { name: 'upsert-inert-recovery-delay' },
-          recovery_strategy: 'none',
-          state_transition: { pending_count: 0, recovering_count: 2 },
+          recovery: { strategy: 'manual' },
+          state_transition: { pending: { count: 0 }, recovering: { count: 2 } },
         }),
       });
       expect(response).toHaveStatusCode(400);
