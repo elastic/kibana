@@ -51,4 +51,17 @@ describe('FileNameLink', () => {
 
     expect(defaultProps.showPreview).not.toHaveBeenCalled();
   });
+
+  it('renders simple text name for an image when preview is disabled', async () => {
+    render(<FileNameLink {...defaultProps} canPreview={false} />);
+
+    const nameText = await screen.findByTestId('cases-files-name-text');
+
+    expect(nameText).toBeInTheDocument();
+    expect(screen.queryByTestId('cases-files-name-link')).not.toBeInTheDocument();
+
+    await userEvent.click(nameText);
+
+    expect(defaultProps.showPreview).not.toHaveBeenCalled();
+  });
 });

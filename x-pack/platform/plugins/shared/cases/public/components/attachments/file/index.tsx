@@ -18,7 +18,12 @@ import {
   type UnifiedReferenceAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import * as i18n from './translations';
-import { getFileFromReferenceMetadata, isImage, isValidFileMetadata } from './utils';
+import {
+  getFileDisplayName,
+  getFileFromReferenceMetadata,
+  isImage,
+  isValidFileMetadata,
+} from './utils';
 
 export type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
 
@@ -121,7 +126,7 @@ const getFileCreationActivity = (props: FileViewProps) => {
   return {
     event: (
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <FileAttachmentEvent file={file} />
+        <FileAttachmentEvent file={file} isDeleted={props.isDeleted} />
       </Suspense>
     ),
     getActions: () => getFileAttachmentActions({ caseId, fileId, canDelete }),
@@ -130,13 +135,20 @@ const getFileCreationActivity = (props: FileViewProps) => {
   };
 };
 
+// The file blob is deleted with the attachment, so the name is plain text.
+const getFileRemovalActivity = ({ metadata }: FileViewProps) => ({
+  event: isValidFileMetadata(metadata)
+    ? i18n.REMOVED_FILE_NAME(getFileDisplayName(metadata.files[0]))
+    : i18n.REMOVED_FILE,
+});
+
 export const getFileAttachmentType = () =>
   defineAttachment({
     id: FILE_ATTACHMENT_TYPE,
     getIcon: getFileAttachmentIcon,
     getLabel: () => i18n.FILE_DISPLAY_NAME,
     getCreationActivity: getFileCreationActivity,
-    getRemovalActivity: () => ({ event: i18n.REMOVED_FILE }),
+    getRemovalActivity: getFileRemovalActivity,
     getAttachmentList: () => ({ children: CaseViewFiles }),
     schema: FileAttachmentPayloadSchema,
     // File attachments reference uploaded files by id; workflow authors can't

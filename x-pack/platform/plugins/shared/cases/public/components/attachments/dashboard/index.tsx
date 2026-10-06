@@ -17,7 +17,10 @@ import {
   type UnifiedReferenceAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import * as i18n from './translations';
-import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
+import {
+  SavedObjectAddedEvent,
+  getSavedObjectDeletedEvent,
+} from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 
 type DashboardViewProps = UnifiedReferenceAttachmentViewProps<
@@ -60,7 +63,15 @@ export const getDashboardAttachmentType = () =>
     getIcon: () => 'dashboardApp',
     getLabel: () => i18n.DASHBOARDS,
     getCreationActivity: getDashboardCreationActivity,
-    getRemovalActivity: () => ({ event: i18n.REMOVED_DASHBOARD }),
+    getRemovalActivity: ({ attachmentId, metadata }: DashboardViewProps) => ({
+      event: getSavedObjectDeletedEvent({
+        soType: DASHBOARD_SO_TYPE,
+        attachmentId,
+        title: metadata?.title,
+        label: i18n.REMOVED_DASHBOARD,
+        'data-test-subj': 'cases-dashboard-deleted-event-link',
+      }),
+    }),
     getAttachmentList: () => ({ children: DashboardAttachmentsTab }),
     schema: DashboardAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema

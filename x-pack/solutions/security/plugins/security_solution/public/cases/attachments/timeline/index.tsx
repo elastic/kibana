@@ -61,8 +61,19 @@ export const getTimelineAttachment = () =>
         deleteSuccessToast: i18n.DELETE_TIMELINE_SUCCESS_TOAST,
       };
     },
-    getRemovalActivity: () => ({
-      event: i18n.REMOVED_TIMELINE_LABEL,
+    getRemovalActivity: ({ savedObjectId, attachmentId, metadata }) => ({
+      event: metadata?.title ? (
+        <Suspense fallback={null}>
+          <LazyTimelineLink
+            savedObjectId={savedObjectId}
+            timelineId={attachmentId}
+            title={metadata.title}
+            isDeleted
+          />
+        </Suspense>
+      ) : (
+        i18n.REMOVED_TIMELINE_LABEL
+      ),
     }),
     getAttachmentList: () => ({ children: CaseViewTimelinesTab }),
   });

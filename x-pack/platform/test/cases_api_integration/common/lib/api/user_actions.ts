@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  getCaseFindUserActionsUrl,
-  getCaseUserActionStatsUrl,
-  getCaseUsersUrl,
-} from '@kbn/cases-plugin/common/api';
+import { getCaseUserActionStatsUrl, getCaseUsersUrl } from '@kbn/cases-plugin/common/api';
+import { CASE_FIND_USER_ACTIONS_URL } from '@kbn/cases-plugin/common/constants';
 import type {
   CaseUserActionStatsResponse,
   GetCaseUsersResponse,
@@ -46,7 +43,9 @@ export const findCaseUserActions = async ({
   auth?: { user: User; space: string | null };
 }): Promise<UserActionFindResponse> => {
   const { body: userActions } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindUserActionsUrl(caseID)}`)
+    .get(
+      `${getSpaceUrlPrefix(auth.space)}${CASE_FIND_USER_ACTIONS_URL.replace('{case_id}', caseID)}`
+    )
     .query(options)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
