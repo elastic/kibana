@@ -13,7 +13,9 @@ interface UseAgentBuilderAgentsOptions {
   includeHidden?: boolean;
 }
 
-export const useAgentBuilderAgents = ({ includeHidden = false }: UseAgentBuilderAgentsOptions = {}) => {
+export const useAgentBuilderAgents = ({
+  includeHidden = false,
+}: UseAgentBuilderAgentsOptions = {}) => {
   const { agentService } = useAgentBuilderServices();
 
   const { data, isLoading, error, isFetched } = useQuery({
