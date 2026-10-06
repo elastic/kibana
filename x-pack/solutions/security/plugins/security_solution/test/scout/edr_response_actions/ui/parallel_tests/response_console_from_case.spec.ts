@@ -78,7 +78,7 @@ spaceTest.describe(
           await expect(responseConsole.dateQuickMenu).toBeHidden();
           await expect(responseConsole.actionLogDatesButton).toContainText('Last 7 days');
           await responseConsole.closeActionLog();
-          await expect(responseConsole.userMenu).toBeVisible();
+          await responseConsole.userMenu.click({ trial: true });
         });
 
         await spaceTest.step('close the console', async () => {
