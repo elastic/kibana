@@ -90,6 +90,50 @@ describe('dedupeInlineDefinitions', () => {
     });
   });
 
+  it('keeps what only repeats inside copies of a shared subtree inline in its definition', () => {
+    const parent = {
+      type: 'object',
+      properties: { inner: sizable('inner'), side: sizable('side') },
+    };
+    const schema = {
+      type: 'object',
+      properties: { first: parent, second: { ...parent } },
+    };
+
+    const { root, definitions } = dedupeInlineDefinitions(schema);
+
+    const [name] = Object.keys(definitions);
+    expect(name).toMatch(hashedName('first'));
+    expect(definitions).toEqual({ [name]: parent });
+    expect(root).toEqual({
+      type: 'object',
+      properties: { first: referenceTo(name), second: referenceTo(name) },
+    });
+  });
+
+  it('shares a nested subtree that also repeats outside the copies of its parent', () => {
+    const inner = sizable('inner');
+    const parent = { type: 'object', properties: { inner, side: { type: 'string' } } };
+    const schema = {
+      type: 'object',
+      properties: { first: parent, second: parent, standalone: inner },
+    };
+
+    const { root, definitions } = dedupeInlineDefinitions(schema);
+
+    const [name] = Object.keys(definitions);
+    expect(name).toMatch(hashedName('inner'));
+    expect(definitions).toEqual({ [name]: inner });
+    const sharedParent = {
+      type: 'object',
+      properties: { inner: referenceTo(name), side: { type: 'string' } },
+    };
+    expect(root).toEqual({
+      type: 'object',
+      properties: { first: sharedParent, second: sharedParent, standalone: referenceTo(name) },
+    });
+  });
+
   it('finds subtrees under every keyword that holds a subschema', () => {
     const shared = sizable('shared');
     const schema = {

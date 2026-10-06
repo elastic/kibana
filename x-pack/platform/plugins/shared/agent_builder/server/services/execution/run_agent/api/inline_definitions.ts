@@ -138,8 +138,12 @@ export const dedupeInlineDefinitions = (schema: Schema): InlineDefinitions => {
   const countOccurrences = (node: Schema): void => {
     for (const { schema: child } of schemaChildrenOf(node)) {
       const hash = hashOf(child);
-      occurrences.set(hash, (occurrences.get(hash) ?? 0) + 1);
-      countOccurrences(child);
+      const seen = occurrences.get(hash) ?? 0;
+      occurrences.set(hash, seen + 1);
+      // A repeated subtree is shared as a whole, so its descendants are counted in one copy only.
+      if (seen === 0) {
+        countOccurrences(child);
+      }
     }
   };
 
