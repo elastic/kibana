@@ -236,7 +236,12 @@ export type SingleFieldIdentity = z.infer<typeof singleFieldIdentitySchema>;
 export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-time identity (full or singleField)
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
-/** A definition whose type name is not restricted to the built-in `EntityType` values. */
+/**
+ * A definition whose type name is not restricted to the built-in `EntityType` values. The id
+ * compiler emits `type` verbatim as the `<type>:` id prefix inside ES|QL and Painless string
+ * literals, so it must match the registry's type-name pattern (lowercase alphanumerics with `.`,
+ * `_` or `-` separators). Definitions read from the registry always do.
+ */
 export type EntityDefinitionOfAnyType = Omit<EntityDefinitionWithoutId, 'type'> & {
   type: EntityDefinitionType;
 };
