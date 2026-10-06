@@ -10,13 +10,15 @@ import { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { PARITY_DOCS } from './chrysalis_parity_docs';
 import { seedPersonaMatrixTools, cleanupPersonaMatrixTools } from './persona_matrix_tools_seed';
-import { ALERT_INDEX } from './chrysalis_seed';
 
 // This suite exercises the parity profile end to end, so force it before the
 // seed module is loaded — regardless of the caller's SEED_PROFILE — and load
-// chrysalis_seed inside isolateModules so it reads the forced value. Restore
-// the original value afterwards so 'parity' cannot leak into sibling suites
-// sharing this worker.
+// chrysalis_seed inside isolateModules so it reads the forced value. Nothing
+// from './chrysalis_seed' may be statically imported: the module validates
+// SEED_PROFILE at initialization, and a static import would evaluate it before
+// the forced value below is set (failing collection even when skipped).
+// Restore the original value afterwards so 'parity' cannot leak into sibling
+// suites sharing this worker.
 const outerSeedProfile = process.env.SEED_PROFILE;
 process.env.SEED_PROFILE = 'parity';
 let chrysalisSeed: typeof import('./chrysalis_seed');
@@ -24,7 +26,7 @@ jest.isolateModules(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   chrysalisSeed = require('./chrysalis_seed');
 });
-const { seedChrysalisAlerts, cleanupChrysalisAlerts } = chrysalisSeed!;
+const { seedChrysalisAlerts, cleanupChrysalisAlerts, ALERT_INDEX } = chrysalisSeed!;
 afterAll(() => {
   if (outerSeedProfile === undefined) {
     delete process.env.SEED_PROFILE;
