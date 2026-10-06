@@ -269,7 +269,7 @@ describe('ServiceAccountsManagement', () => {
           event: expect.objectContaining({
             action: 'service_account_delete',
             category: ['iam'],
-            type: ['deletion'],
+            type: ['user', 'deletion'],
             outcome,
           }),
           user: { target: { id: SERVICE_ACCOUNT_ID } },

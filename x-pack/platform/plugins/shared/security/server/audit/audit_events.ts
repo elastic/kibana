@@ -497,7 +497,8 @@ export function serviceAccountAuditEvent({
     event: {
       action,
       category: [serviceAccountAuditCategories[action]],
-      type: [serviceAccountAuditTypes[action]],
+      // ECS gives an IAM event two types: the activity, and that a user (not a group) is managed.
+      type: ['user', serviceAccountAuditTypes[action]],
       outcome: outcome ?? (error ? 'failure' : 'success'),
     },
     ...(targetAttributes.length > 0 ? { user: { target } } : {}),

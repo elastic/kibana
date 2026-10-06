@@ -196,7 +196,7 @@ describe('ServiceAccountWorkloadBindings', () => {
           event: expect.objectContaining({
             action: 'service_account_workload_bind',
             category: ['iam'],
-            type: ['change'],
+            type: ['user', 'change'],
             outcome,
           }),
           user: { target: { id: 'service-account-id' } },
@@ -423,7 +423,7 @@ describe('ServiceAccountWorkloadBindings', () => {
           event: expect.objectContaining({
             action: 'service_account_workload_unbind',
             category: ['iam'],
-            type: ['change'],
+            type: ['user', 'change'],
             outcome,
           }),
           kibana: { workload: AUDIT_WORKLOAD },

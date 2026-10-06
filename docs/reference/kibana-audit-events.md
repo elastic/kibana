@@ -367,6 +367,8 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 | | `failure` | Failed attempt to delete service account [id=x]: the user is not authorized. |
 
 ::::{note}
+Following ECS, every event in this category has two values in `event.type`: the type it is listed under and `user`, for example `[user, creation]`. An `ignore_filters` rule that matches on `types` has to list both.
+
 Across the `service_account_*` events, `failure` means the user was not authorized. Other errors, such as a missing license or encryption key or an invalid request, leave no event. Binding and delete events follow the convention for writes: `unknown` is logged once the user is authorized and before the write, so it records the attempt, not the result. It is also written when an unbind matches no binding or a delete names no account, and a write that later fails or is refused leaves no further event; refer to the {{kib}} server logs for write errors. A delete refused because workloads are still bound to the account leaves no event. `service_account_create` is logged after the operation instead, because the backend assigns the id.
 ::::
 
@@ -396,7 +398,7 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | --- | --- |
 | `event.action` | The action captured by the event.<br>Refer to [Audit events](./kibana-audit-events.md#xpack-security-ecs-audit-logging) for a table of possible actions. |
 | `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication`,`iam` |
-| `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion` |
+| `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion`,`user` |
 | `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`, unless the event's own description says otherwise (for example `service_account_create` is logged after the operation)<br><br>Possible values: `success`, `failure`, `unknown`<br> |
 
 ### User fields

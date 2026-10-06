@@ -772,7 +772,7 @@ describe('EsServiceAccounts', () => {
           event: expect.objectContaining({
             action: 'service_account_create',
             category: ['iam'],
-            type: ['creation'],
+            type: ['user', 'creation'],
             outcome,
           }),
         });

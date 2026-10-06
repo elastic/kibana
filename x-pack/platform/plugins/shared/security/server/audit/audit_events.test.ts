@@ -768,6 +768,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "success",
           "type": Array [
+            "user",
             "creation",
           ],
         },
@@ -802,6 +803,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "failure",
           "type": Array [
+            "user",
             "creation",
           ],
         },
@@ -836,6 +838,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "unknown",
           "type": Array [
+            "user",
             "creation",
           ],
         },
@@ -869,6 +872,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "failure",
           "type": Array [
+            "user",
             "creation",
           ],
         },
@@ -895,6 +899,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "unknown",
           "type": Array [
+            "user",
             "change",
           ],
         },
@@ -936,6 +941,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "failure",
           "type": Array [
+            "user",
             "change",
           ],
         },
@@ -973,6 +979,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "unknown",
           "type": Array [
+            "user",
             "change",
           ],
         },
@@ -1005,6 +1012,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "unknown",
           "type": Array [
+            "user",
             "deletion",
           ],
         },
@@ -1036,6 +1044,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "unknown",
           "type": Array [
+            "user",
             "deletion",
           ],
         },
@@ -1070,6 +1079,7 @@ describe('#serviceAccountAuditEvent', () => {
           ],
           "outcome": "failure",
           "type": Array [
+            "user",
             "deletion",
           ],
         },
