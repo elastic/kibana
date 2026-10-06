@@ -9,6 +9,7 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import { findWithTagFilter } from '@kbn/as-code-utils';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { VegaSearchRequestQuery, VegaSearchResponseBody } from './types';
@@ -36,11 +37,13 @@ export const search = async (
   return {
     data: soResponse.saved_objects.map((so) => {
       const { description, title } = so.attributes;
+      const { tags } = toAsCodeTags(so.references);
 
       return {
         id: so.id,
         data: {
           ...(description && { description }),
+          tags,
           title: title ?? '',
         },
         meta: getMeta(so),

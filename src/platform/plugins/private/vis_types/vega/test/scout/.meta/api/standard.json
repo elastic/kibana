@@ -1,5 +1,5 @@
 {
-  "sha1": "0cf1886f61f42cc62f91431d5b0c010dc8bb1703",
+  "sha1": "208b66ef12e9c5a231f10f044e29b0757dcc6a1e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -416,8 +416,8 @@
       }
     },
     {
-      "id": "d9c42512dda4ded-a215627ec185d2c",
-      "title": "vega - search should include items by tag",
+      "id": "d9c42512dda4ded-53b496a65692fa3",
+      "title": "vega - search should include tags in the results",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -436,6 +436,46 @@
       }
     },
     {
+      "id": "d9c42512dda4ded-c4b78ba48a7d905",
+      "title": "vega - search should return empty tags for untagged items",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/search_vega.spec.ts",
+        "line": 85,
+        "column": 16
+      }
+    },
+    {
+      "id": "d9c42512dda4ded-a215627ec185d2c",
+      "title": "vega - search should include items by tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/search_vega.spec.ts",
+        "line": 94,
+        "column": 67
+      }
+    },
+    {
       "id": "d9c42512dda4ded-4d12e1da61601b5",
       "title": "vega - search should exclude items by tag",
       "expectedStatus": "passed",
@@ -451,8 +491,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/search_vega.spec.ts",
-        "line": 84,
-        "column": 22
+        "line": 104,
+        "column": 51
       }
     },
     {

@@ -80,6 +80,27 @@ apiTest.describe('vega - search', { tag: tags.deploymentAgnostic }, () => {
     ).not.toContain('Search Test Chart Beta');
   });
 
+  apiTest('should include tags in the results', async ({ apiClient }) => {
+    const response = await apiClient.get(`${VEGA_API_PATH}?query=Tagged`, {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].data.tags).toStrictEqual(['tag-2']);
+  });
+
+  apiTest('should return empty tags for untagged items', async ({ apiClient }) => {
+    const response = await apiClient.get(`${VEGA_API_PATH}?query=Alpha`, {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.data[0].data.tags).toStrictEqual([]);
+  });
+
   apiTest('should include items by tag', async ({ apiClient }) => {
     const response = await apiClient.get(`${VEGA_API_PATH}?tags=tag-2`, {
       headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },

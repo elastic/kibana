@@ -245,7 +245,7 @@ const vegaSearchResponseExamples = {
   searchVegaResponse: {
     summary: 'Search Vega library items response',
     description:
-      'Paginated list of Vega library item summaries with `title`, `description`, and metadata. The spec, query, and filters are not included; use `GET /api/vega/{id}` to retrieve a specific item.',
+      'Paginated list of Vega library item summaries with `title`, `description`, `tags`, and metadata. The spec, query, and filters are not included; use `GET /api/vega/{id}` to retrieve a specific item.',
     value: {
       data: [
         {
@@ -253,6 +253,7 @@ const vegaSearchResponseExamples = {
           data: {
             title: vegaCreateHjsonBody.title,
             description: vegaCreateHjsonBody.description,
+            tags: [] as string[],
           },
           meta: createdMeta,
         },

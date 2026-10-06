@@ -29,7 +29,7 @@ export const registerSearchRoute = (
     summary: 'List Vega library items',
     ...commonRouteConfig,
     description:
-      'Returns a paginated list of Vega library items. Each result includes title, description, and metadata, but not the spec. Use `GET /api/vega/{id}` to retrieve the complete state.',
+      'Returns a paginated list of Vega library items. Each result includes title, description, tags, and metadata, but not the spec. Use `GET /api/vega/{id}` to retrieve the complete state.',
   });
 
   searchRoute.addVersion(
