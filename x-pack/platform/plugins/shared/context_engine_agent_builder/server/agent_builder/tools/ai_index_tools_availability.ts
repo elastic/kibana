@@ -11,8 +11,9 @@ import {
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
   CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 
-// Only reads a setting, so caching per space is safe. Privileges are checked in each handler.
+// Only reads settings, so caching per space is safe. Privileges are checked in each handler.
 export const aiIndexToolsAvailability: ToolAvailabilityConfig = {
   cacheMode: 'space',
   handler: async ({ uiSettings }) => {
@@ -49,3 +50,31 @@ export const createMemoryToolsAvailability = (
       : { status: 'unavailable', reason: 'Context Engine memory is disabled.' };
   },
 });
+
+/**
+ * save_automation is the tool that persists agent-authored workflow YAML — the only action
+ * that the feedback loop setting gates. Checking it server-side here means the tool is
+ * unavailable regardless of what the LLM instructions or the client-provided attachment say.
+ */
+export const saveAutomationToolAvailability: ToolAvailabilityConfig = {
+  cacheMode: 'space',
+  handler: async ({ uiSettings }) => {
+    const contextEngineEnabled = await uiSettings
+      .get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)
+      .catch(() => false);
+    if (!contextEngineEnabled) {
+      return { status: 'unavailable', reason: 'Context Engine is disabled in this space.' };
+    }
+    const feedbackLoopEnabled = await uiSettings
+      .get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)
+      .catch(() => false);
+    if (!feedbackLoopEnabled) {
+      return {
+        status: 'unavailable',
+        reason:
+          'Saving agent-authored workflow automations requires the contextEngine:feedbackLoopEnabled advanced setting to be on.',
+      };
+    }
+    return { status: 'available' };
+  },
+};

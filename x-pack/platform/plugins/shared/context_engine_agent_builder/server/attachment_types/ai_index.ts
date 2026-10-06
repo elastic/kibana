@@ -92,7 +92,7 @@ const formatAiIndex = (data: AiIndexAttachmentData): string => {
       : 'Traces: none configured'
   );
 
-  parts.push(`feedbackLoopEnabled: ${data.feedbackLoopEnabled === true}`);
+  parts.push(`feedbackLoopEnabled: ${data.feedbackLoopEnabled ?? false}`);
 
   return parts.join('\n');
 };

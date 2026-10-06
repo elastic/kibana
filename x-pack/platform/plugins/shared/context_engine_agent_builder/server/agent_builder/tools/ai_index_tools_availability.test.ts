@@ -12,9 +12,11 @@ import {
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
   CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 import {
   aiIndexToolsAvailability,
   createMemoryToolsAvailability,
+  saveAutomationToolAvailability,
 } from './ai_index_tools_availability';
 
 describe('aiIndexToolsAvailability', () => {
@@ -98,5 +100,71 @@ describe('aiIndexToolsAvailability', () => {
         reason: 'Context Engine memory is disabled.',
       });
     });
+  });
+});
+
+describe('saveAutomationToolAvailability', () => {
+  const createContext = (settings: Record<string, boolean | Error>): AvailabilityContext => ({
+    request: httpServerMock.createKibanaRequest(),
+    spaceId: 'default',
+    uiSettings: {
+      get: jest.fn(async (key: string) => {
+        const value = settings[key];
+        if (value instanceof Error) {
+          throw value;
+        }
+        return value;
+      }),
+    } as unknown as AvailabilityContext['uiSettings'],
+  });
+
+  it('caches per space', () => {
+    expect(saveAutomationToolAvailability.cacheMode).toBe('space');
+  });
+
+  it('is available when both Context Engine and feedback loop are enabled', async () => {
+    const result = await saveAutomationToolAvailability.handler(
+      createContext({
+        [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true,
+        [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: true,
+      })
+    );
+
+    expect(result).toEqual({ status: 'available' });
+  });
+
+  it('is unavailable when Context Engine is off', async () => {
+    const result = await saveAutomationToolAvailability.handler(
+      createContext({
+        [CONTEXT_ENGINE_ENABLED_SETTING_ID]: false,
+        [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: true,
+      })
+    );
+
+    expect(result.status).toBe('unavailable');
+    expect(result.reason).toContain('Context Engine');
+  });
+
+  it('is unavailable when feedbackLoopEnabled is off', async () => {
+    const result = await saveAutomationToolAvailability.handler(
+      createContext({
+        [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true,
+        [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: false,
+      })
+    );
+
+    expect(result.status).toBe('unavailable');
+    expect(result.reason).toContain('feedbackLoopEnabled');
+  });
+
+  it('treats an unreadable feedbackLoop setting as disabled', async () => {
+    const result = await saveAutomationToolAvailability.handler(
+      createContext({
+        [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true,
+        [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: new Error('unregistered'),
+      })
+    );
+
+    expect(result.status).toBe('unavailable');
   });
 });

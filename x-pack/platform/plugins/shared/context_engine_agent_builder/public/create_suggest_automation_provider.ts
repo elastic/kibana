@@ -77,6 +77,9 @@ export const createSuggestAutomationProvider = ({
     if (!agentBuilder?.openChat) {
       return;
     }
+    // Snapshot at chat-open time; reactive updates would require threading an observable
+    // through the attachment, which is out of scope. The server-side gate on save_automation
+    // is the authoritative enforcement — this value is advisory for the LLM instructions only.
     const feedbackLoopEnabled = uiSettings.get<boolean>(
       CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
       false
