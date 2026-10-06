@@ -7,7 +7,7 @@
 
 import Path from 'path';
 import { readFile } from 'fs/promises';
-import { promqlFunctionDefinitions } from '@kbn/esql-language';
+import { promqlFunctionDefinitions } from '@elastic/esql-definitions/promql-functions';
 
 export enum EsqlDocEntry {
   syntax = 'syntax.md',

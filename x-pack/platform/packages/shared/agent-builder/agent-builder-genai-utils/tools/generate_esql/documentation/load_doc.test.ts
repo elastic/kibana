@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { promqlFunctionDefinitions } from '@kbn/esql-language';
+import { promqlFunctionDefinitions } from '@elastic/esql-definitions/promql-functions';
 import { _loadDocumentation, EsqlDocEntry, PROMQL_FUNCTIONS_PLACEHOLDER } from './load_doc';
 
 describe('loadDocumentation', () => {

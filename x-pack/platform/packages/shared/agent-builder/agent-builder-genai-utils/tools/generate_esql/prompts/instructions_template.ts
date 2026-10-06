@@ -107,6 +107,8 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     - "TS mytsds | WHERE TRANGE(?_tstart, ?_tend)"
     - "PROMQL index=mytsds start=?_tstart end=?_tend request_rate=(sum by (host) (rate(requests)))"
 
+    The query runs with these parameters rather than with Kibana's date picker, so set the PROMQL start and end options to them, even though the PROMQL documentation recommends omitting them in Kibana.
+
     NEVER hardcode time ranges into the query itself (absolute or using now() syntax)
 
     It is also preferred to use  "... BUCKET(@timestamp, 100, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 100)"
