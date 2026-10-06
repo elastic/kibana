@@ -33,6 +33,7 @@ import { useRiskScorePreview } from '../../api/hooks/use_preview_risk_scores';
 import { EntityIconByType } from '../entity_store/helpers';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
+import { RiskScoreStatusPanel, useRiskScoreStatus } from '../risk_score_status_panel';
 import type { AlertFilter } from './common';
 
 interface IRiskScorePreviewPanel {
@@ -182,6 +183,23 @@ const RiskEnginePreview: React.FC<{
     filters: alertFilters && alertFilters.length > 0 ? alertFilters : undefined,
   });
 
+  // The preview returns one bucket per entity type. We treat the result as
+  // empty only once the request has resolved and every bucket is empty, so we
+  // don't flash the status callout during the initial fetch.
+  const isPreviewEmpty =
+    !isLoading &&
+    !!data &&
+    entityTypes.every(
+      (entityType) =>
+        getRiskiestScores(data.scores[entityType], EntityTypeToIdentifierField[entityType])
+          .length === 0
+    );
+
+  const status = useRiskScoreStatus({
+    isResultEmpty: isPreviewEmpty,
+    facts: { scoringWindow: { start: from, end: to } },
+  });
+
   if (isError) {
     return (
       <EuiCallOut
@@ -209,6 +227,27 @@ const RiskEnginePreview: React.FC<{
 
       <EuiSpacer />
       <EuiSpacer />
+
+      {/*
+       * When the preview yields zero scores across every entity type, surface
+       * a status callout explaining *why* before the (empty) accordions below.
+       * The status hook returns `unknown` whenever there is real data, so this
+       * block is naturally suppressed in the happy path.
+       */}
+      {!isLoading && status.reason !== 'unknown' && (
+        <>
+          <RiskScoreStatusPanel
+            reason={status.reason}
+            facts={status.facts}
+            variant="callout"
+            // We're already on the management page; the destination of the
+            // default action is the page the user is viewing.
+            primaryAction={null}
+            data-test-subj="risk-score-preview-status"
+          />
+          <EuiSpacer />
+        </>
+      )}
 
       {entityTypes.map((entityType) => (
         <Fragment key={entityType}>
