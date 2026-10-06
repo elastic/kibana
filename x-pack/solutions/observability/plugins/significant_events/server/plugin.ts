@@ -78,6 +78,7 @@ import {
   createSignificantEventsServices,
 } from './lib/significant_events/significant_events_clients';
 import { detectionsDataStream } from './lib/significant_events/detections';
+import { deleteLegacyEventsDataStream } from './lib/significant_events/events';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
@@ -470,6 +471,13 @@ export class SignificantEventsPlugin
       this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
+
+      // Significant Events history moved to `.rule-events`; remove the retired stream without
+      // backfilling its history into the shared Alerting v2 stream.
+      void deleteLegacyEventsDataStream({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
 
       // The Elastic Slack connector is in-memory, so it survives neither a restart nor a connect
       // handled by another node. The connection document is namespace-agnostic, so one internal

@@ -89,7 +89,7 @@ async function cleanDetectionAndEventHistory(
     {
       bool: {
         filter: [
-          { terms: { 'rule.id': ruleIds } },
+          { terms: { 'data.signals.metadata.rule_uuid': ruleIds } },
           { term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE } },
           { term: { space_id: space } },
         ],
@@ -122,10 +122,6 @@ export async function cleanSeedData(
   const ruleIds = allQueries.map((query) =>
     computeRuleId(ctx.streamName, query.id, query.esql.query)
   );
-
-  if (queryIds.length > 0) {
-    await deleteByQuery(esClient, '.rule-events', { terms: { 'rule.id': ruleIds } }, log);
-  }
 
   await cleanDetectionAndEventHistory(esClient, ruleIds, ctx.space, log);
 
