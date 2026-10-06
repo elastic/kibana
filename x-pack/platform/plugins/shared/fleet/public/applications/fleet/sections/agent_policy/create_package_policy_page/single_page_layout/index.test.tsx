@@ -434,6 +434,41 @@ describe('When on the package policy create page', () => {
       expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
     });
 
+    it('should not initialize the inputs before the FIPS status is loaded', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: false, isLoading: true });
+
+      act(() => {
+        render();
+      });
+
+      expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+
+      (useFleetStatus as jest.Mock).mockReturnValue({
+        isReady: true,
+        isLoading: false,
+        isFipsEnabled: true,
+      });
+      act(() => {
+        renderResult.rerender(
+          <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
+            <CreatePackagePolicySinglePage
+              from="package"
+              prerelease={false}
+              pkgName={'nginx'}
+              pkgVersion={'1.3.0'}
+            />
+          </Route>
+        );
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+    });
+
     it('should show the inputs of the non FIPS policy template when FIPS is not enabled', async () => {
       mockPackageWithNonFipsTemplate();
       (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true, isFipsEnabled: false });

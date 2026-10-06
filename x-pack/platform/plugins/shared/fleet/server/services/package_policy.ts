@@ -3957,7 +3957,7 @@ function assertFipsCompatiblePackageOrThrow(
   packagePolicy: Pick<NewPackagePolicy, 'inputs'>,
   pkgInfo: PackageInfo,
   force?: boolean,
-  oldInputs?: Array<Pick<PackagePolicyInput, 'type' | 'policy_template' | 'enabled'>>
+  oldInputs?: Array<Pick<PackagePolicyInput, 'type' | 'name' | 'policy_template' | 'enabled'>>
 ) {
   if (force || !appContextService.getIsFipsEnabled()) {
     return;
@@ -3982,6 +3982,7 @@ function assertFipsCompatiblePackageOrThrow(
       (oldInput) =>
         oldInput.enabled &&
         oldInput.type === input.type &&
+        getInputEffectiveName(oldInput) === getInputEffectiveName(input) &&
         resolveInputPolicyTemplateName(oldInput, pkgInfo) === templateName
     );
   });

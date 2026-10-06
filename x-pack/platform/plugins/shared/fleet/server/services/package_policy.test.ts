@@ -2209,6 +2209,31 @@ describe('Package policy service', () => {
           ).resolves.toBeDefined();
         });
 
+        describe('with several named inputs of the same type in the non FIPS policy template', () => {
+          const namedInput = (name: string, enabled: boolean) => ({
+            ...input('bad', enabled),
+            name,
+          });
+
+          it('should reject enabling a named input when only a sibling was enabled', async () => {
+            await expect(
+              runUpdate(
+                [namedInput('first', true), namedInput('second', false)],
+                [namedInput('first', true), namedInput('second', true)]
+              )
+            ).rejects.toBeInstanceOf(PackageFipsIncompatibleError);
+          });
+
+          it('should allow the named inputs that were already enabled', async () => {
+            await expect(
+              runUpdate(
+                [namedInput('first', true), namedInput('second', true)],
+                [namedInput('first', true), namedInput('second', true)]
+              )
+            ).resolves.toBeDefined();
+          });
+        });
+
         it('should allow enabling an input of the FIPS compatible policy template', async () => {
           await expect(
             runUpdate([input('good', false)], [input('good', true)])
