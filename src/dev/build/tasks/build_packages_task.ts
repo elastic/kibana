@@ -19,6 +19,8 @@ import { getNodeSwcConfig } from '@kbn/swc-config/node';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
+import { REPO_ROOT } from '@kbn/repo-info';
+import execa from 'execa';
 import type { Task } from '../lib';
 import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
@@ -109,6 +111,13 @@ export const BuildPackages: Task = {
   async run(config, log, build) {
     const packages = config.getDistPackagesFromRepo();
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
+
+    const vegaSandbox = packages.find((pkg) => pkg.manifest.id === '@kbn/vega-sandbox');
+    if (vegaSandbox) {
+      // Shared-deps and Monaco are emitted by BuildBundles. Vega sandbox is still webpack.
+      log.info('Building @kbn/vega-sandbox');
+      await buildVegaSandbox(config.resolveFromRepo(vegaSandbox.normalizedRepoRelativeDir));
+    }
 
     await asyncForEachWithLimit(packages, cpus().length, async (pkg) => {
       const allPaths = new Set(Array.from(pkgFileMap.getFiles(pkg), (p) => p.abs));
@@ -242,6 +251,20 @@ export const BuildPackages: Task = {
           },
         });
 
+        if (pkg.manifest.id === '@kbn/vega-sandbox') {
+          await scanCopy({
+            source: config.resolveFromRepo(
+              'target',
+              'build',
+              pkg.normalizedRepoRelativeDir,
+              'target_vega_sandbox'
+            ),
+            destination: build.resolvePath(pkg.normalizedRepoRelativeDir, 'target_vega_sandbox'),
+            permissions: distPerms,
+            filter: (rec) => rec.source.ext !== '.map',
+          });
+        }
+
         if (pkg.manifest.id === '@kbn/repo-packages') {
           // rewrite package map to point into node_modules
           await write(
@@ -304,3 +327,17 @@ export const BuildPackages: Task = {
     });
   },
 };
+
+function buildVegaSandbox(packageDir: string) {
+  return execa(
+    'node',
+    [
+      Path.resolve(REPO_ROOT, 'scripts/build_package.js'),
+      packageDir,
+      '--task-name',
+      'target_vega_sandbox',
+      '--dist',
+    ],
+    { cwd: REPO_ROOT, stdio: 'inherit' }
+  );
+}

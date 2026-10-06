@@ -92,7 +92,7 @@ export const OnboardingIntroPromo: React.FC = () => {
               iconSide="right"
               data-test-subj="alertZeroOnboardingReadMoreLink"
             >
-              {i18n.READ_MORE}
+              {i18n.INTRO_READ_MORE}
             </EuiButton>
           </div>
         </EuiFlexItem>
