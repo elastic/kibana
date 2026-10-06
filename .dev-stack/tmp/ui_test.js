@@ -1,0 +1,33 @@
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
+  const K = 'http://localhost:5611';
+  await page.goto(`${K}/login`);
+  await page.fill('[data-test-subj="loginUsername"]', 'elastic');
+  await page.fill('[data-test-subj="loginPassword"]', 'changeme');
+  await page.click('[data-test-subj="loginSubmit"]');
+  await page.waitForURL(/app/, { timeout: 120000 });
+  await page.goto(`${K}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors/github-kibana`);
+  const desc = page.locator('[data-test-subj="connectorDescriptionInput"]');
+  await desc.waitFor({ timeout: 180000 });
+  console.log('edit prefilled:', await desc.inputValue());
+  await page.screenshot({ path: '/tmp/edit_flyout.png' });
+  await desc.fill('Use for elastic/kibana only. Edited in the UI.');
+  await page.click('[data-test-subj="edit-connector-flyout-save-btn"]');
+  await page.waitForTimeout(3000);
+  // create flow
+  await page.goto(`${K}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`);
+  await page.click('[data-test-subj="createConnectorButton"]', { timeout: 120000 });
+  await page.click('[data-test-subj=".webhook-card"]', { timeout: 60000 });
+  await page.fill('[data-test-subj="nameInput"]', 'UI webhook');
+  await page.fill('[data-test-subj="connectorDescriptionInput"]', 'Created from the UI flyout.');
+  await page.fill('[data-test-subj="webhookUrlText"]', 'https://example.com/hook');
+  await page.screenshot({ path: '/tmp/create_flyout.png' });
+  const noneAuth = page.locator('[data-test-subj="authNone"]');
+  if (await noneAuth.count()) await noneAuth.click();
+  await page.click('[data-test-subj="create-connector-flyout-save-btn"]');
+  await page.waitForTimeout(4000);
+  await page.screenshot({ path: '/tmp/after_create.png' });
+  await browser.close();
+})().catch((e) => { console.error(e); process.exit(1); });

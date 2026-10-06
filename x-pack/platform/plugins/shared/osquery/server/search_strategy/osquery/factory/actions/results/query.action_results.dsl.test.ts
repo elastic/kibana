@@ -750,5 +750,16 @@ describe('buildActionResultsQuery', () => {
         },
       });
     });
+
+    it('omits the space filter from aggregations but keeps the action_id term when skipSpaceFilter is set', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+        matchActionDataSpaceId: true,
+        skipSpaceFilter: true,
+      });
+
+      expect(getAggFilterMust(result)).toEqual([{ term: { action_id: 'action-123' } }]);
+    });
   });
 });

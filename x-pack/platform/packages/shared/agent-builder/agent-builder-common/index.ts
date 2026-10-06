@@ -12,10 +12,16 @@ export {
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
+  ConversationUpdatedTriggerId,
+  conversationWriteSources,
+  conversationChangeKinds,
   type ConversationMetadataUpdatedEvent,
   type AttachmentAddedTriggerEvent,
   type AttachmentUpdatedTriggerEvent,
   type AttachmentDeletedTriggerEvent,
+  type ConversationUpdatedTriggerEvent,
+  type ConversationWriteSource,
+  type ConversationChangeKind,
 } from './triggers';
 export {
   internalNamespaces as toolNamespaces,
@@ -64,6 +70,8 @@ export {
   type ResourceResult,
   type EsqlResults,
   type OtherResult,
+  NON_INTERACTIVE_DECLINED_REASON,
+  isNonInteractiveDeclinedResult,
   type IndexSearchToolDefinitionWithSchema,
   type BrowserApiToolMetadata,
 } from './tools';
