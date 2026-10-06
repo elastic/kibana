@@ -1753,6 +1753,9 @@ importers:
       '@kbn/dag-layout':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dag-layout
+      '@kbn/dashboard-authoring':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/dashboard-authoring
       '@kbn/dashboard-markdown':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dashboard_markdown
@@ -8974,6 +8977,8 @@ importers:
   x-pack/platform/packages/shared/custom-content/custom-content-renderer: {}
 
   x-pack/platform/packages/shared/custom-content/custom-content-server: {}
+
+  x-pack/platform/packages/shared/dashboard-authoring: {}
 
   x-pack/platform/packages/shared/file-upload: {}
 

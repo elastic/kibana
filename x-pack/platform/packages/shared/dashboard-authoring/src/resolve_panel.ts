@@ -13,7 +13,7 @@ import type { OperationFailure } from './utils';
  * result, the failure helper, and the request fields shared by every panel type.
  * Each renderer contributes its own request shape (see `operations/panels/<type>`),
  * and the panels barrel aggregates them into the `ResolvePanelContent` contract,
- * whose default implementation lives in `resolvers/panel_resolver.ts`.
+ * which the host implements and injects.
  */
 
 /** Resolved panel content: the embeddable `type` plus its by-value `config`. */

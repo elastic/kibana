@@ -87,7 +87,7 @@ export type ConfigPanelInput = z.infer<typeof configPanelInputSchema>;
  * charts, single metric viewer), and any other panel type whose config the agent
  * authors directly. Each type registers here, next to its members of the
  * `config` unions. Panels generated server-side belong in the `request` unions
- * instead, with a resolver branch in `core/resolvers/panel_resolver.ts`.
+ * instead, with a branch in the host's `ResolvePanelContent` implementation.
  */
 const CONFIG_PANEL_TYPES: Record<ConfigPanelInput['type'], ConfigPanelTypeDefinition> = {
   markdown: markdownPanelDefinition,
@@ -216,8 +216,8 @@ export const findPanelRenderer = (embeddableType: string): PanelRenderer | undef
 
 /**
  * Contract for inline panel content resolution. The generate core consumes this
- * to turn a panel resolution request into panel content. The default resolver
- * (see `core/resolvers/panel_resolver.ts`) routes each request to the resolver
- * for its `renderer`; it is injected so tests can supply a fake.
+ * to turn a panel resolution request into panel content. The host implements it
+ * by routing each request to the resolver for its `renderer`; it is injected so
+ * the core stays host-agnostic and tests can supply a fake.
  */
 export type ResolvePanelContent = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;
