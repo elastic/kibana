@@ -167,6 +167,7 @@ export class ServiceAccountsService {
         store,
         backend,
         checkPrivilegesWithRequest,
+        clusterClient,
         getCurrentUser,
         getCurrentUserProfileId,
         getSpaceId,

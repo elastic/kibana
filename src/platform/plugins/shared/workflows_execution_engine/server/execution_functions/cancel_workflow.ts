@@ -8,10 +8,13 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreServiceAccountsService } from '@kbn/core-security-server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
+
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { releaseStoredServiceAccountBearerBinding } from '../service_account_bearer';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
@@ -32,6 +35,7 @@ export const cancelWorkflow = async ({
   schedulingRequest,
   workflowExecutionRepository,
   workflowTaskManager,
+  serviceAccounts,
   logger,
 }: {
   workflowExecutionId: string;
@@ -39,6 +43,7 @@ export const cancelWorkflow = async ({
   schedulingRequest: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
+  serviceAccounts: CoreServiceAccountsService;
   logger: Logger;
 }): Promise<void> => {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -86,7 +91,15 @@ export const cancelWorkflow = async ({
   );
 
   // QUEUED: dormant task was removed above — forceRunIdleTasks would runSoon that id and throw not-found.
-  if (!wasQueued) {
+  // The run task is the only other place that drops the bearer binding, and it will not start.
+  if (wasQueued) {
+    await releaseStoredServiceAccountBearerBinding({
+      serviceAccounts,
+      spaceId: workflowExecution.spaceId,
+      executionId: workflowExecution.id,
+      logger,
+    });
+  } else {
     await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {
       spaceId: workflowExecution.spaceId,
       fakeRequest: schedulingRequest,
