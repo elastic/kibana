@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
@@ -37,13 +38,30 @@ const createWorker = (workflowId: string | null): Worker => ({
   },
 });
 
+const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+const featureSettingsLocator = {
+  getUrl: jest.fn(async () => FEATURE_SETTINGS_URL),
+  navigate: jest.fn(async () => undefined),
+};
+
 const renderPanel = (
   workflowId: string | null,
   isAccordion: boolean,
-  overrides: { enabled?: boolean; serviceAccountId?: string } = {}
+  overrides: { enabled?: boolean; serviceAccountId?: string; hasFeatureSettings?: boolean } = {}
 ) => {
   const core = coreMock.createStart();
   core.http.get.mockResolvedValue(undefined);
+  const hasFeatureSettings = overrides.hasFeatureSettings ?? true;
+  const share = {
+    url: {
+      locators: {
+        get: (id: string) =>
+          hasFeatureSettings && id === 'SEARCH_INFERENCE_ENDPOINTS'
+            ? featureSettingsLocator
+            : undefined,
+      },
+    },
+  };
   core.application.getUrlForApp.mockImplementation(
     (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
   );
@@ -53,22 +71,24 @@ const renderPanel = (
   };
 
   render(
-    <KibanaContextProvider services={core}>
-      <WorkerSettingsPanel
-        worker={createWorker(workflowId)}
-        isAccordion={isAccordion}
-        isExpanded
-        onToggle={jest.fn()}
-        enabled={overrides.enabled ?? true}
-        settings={settings}
-        warningReasons={[]}
-        settingsLocked={false}
-        isSaving={false}
-        canWrite
-        onEnabledChange={jest.fn()}
-        onSettingsChange={jest.fn()}
-      />
-    </KibanaContextProvider>
+    <I18nProvider>
+      <KibanaContextProvider services={{ ...core, share }}>
+        <WorkerSettingsPanel
+          worker={createWorker(workflowId)}
+          isAccordion={isAccordion}
+          isExpanded
+          onToggle={jest.fn()}
+          enabled={overrides.enabled ?? true}
+          settings={settings}
+          warningReasons={[]}
+          settingsLocked={false}
+          isSaving={false}
+          canWrite
+          onEnabledChange={jest.fn()}
+          onSettingsChange={jest.fn()}
+        />
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 
   return core;
@@ -110,6 +130,45 @@ describe('WorkerSettingsPanel view executions link', () => {
       screen.queryByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel models', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('points the Models row at Feature settings', async () => {
+    renderPanel(WORKFLOW_ID, false);
+
+    expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
+      'This Worker uses models configured in Feature settings.'
+    );
+    const link = await screen.findByTestId(`alertZeroModelsLink-${WORKER_ID}`);
+    expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
+
+    fireEvent.click(link);
+
+    expect(featureSettingsLocator.navigate).toHaveBeenCalledWith({});
+  });
+
+  it('leaves a modified click to the browser so the page can open in a new tab', async () => {
+    renderPanel(WORKFLOW_ID, false);
+
+    fireEvent.click(await screen.findByTestId(`alertZeroModelsLink-${WORKER_ID}`), {
+      metaKey: true,
+    });
+
+    expect(featureSettingsLocator.navigate).not.toHaveBeenCalled();
+  });
+
+  it('names Feature settings without a link when the page has no locator', () => {
+    renderPanel(WORKFLOW_ID, false, { hasFeatureSettings: false });
+
+    expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
+      'This Worker uses models configured in Feature settings.'
+    );
+    expect(screen.queryByTestId(`alertZeroModelsLink-${WORKER_ID}`)).not.toBeInTheDocument();
   });
 });
 

@@ -8,7 +8,14 @@
 import React from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render as renderWithoutProviders,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -121,6 +128,8 @@ jest.mock('./components/watches_section_layout', () => ({
     );
   },
 }));
+
+const render = (ui: React.ReactElement) => renderWithoutProviders(ui, { wrapper: I18nProvider });
 
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
@@ -358,6 +367,11 @@ describe('WatchDetailPage', () => {
       )
     ).toBeInTheDocument();
     expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
+    expect(
+      within(section).getByTestId(
+        `alertZeroModelsRow-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
   });
 
@@ -366,6 +380,7 @@ describe('WatchDetailPage', () => {
 
     for (const worker of floorWorkers) {
       expect(screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`alertZeroModelsRow-${worker.id}`)).toBeInTheDocument();
     }
 
     // A Watch with exactly one Worker has no accordion chrome — its settings are a static panel.
