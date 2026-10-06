@@ -834,10 +834,10 @@ steps:
         current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %},
         proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
-        Current query preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
+        Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
         {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
-        Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
+        Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
         No backtest: this rule is not a plain query rule (saved query, data view,
