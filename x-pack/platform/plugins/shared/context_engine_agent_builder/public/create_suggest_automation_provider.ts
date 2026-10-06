@@ -7,7 +7,9 @@
 
 import { isToolResultEvent, ToolResultType, type ToolResult } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { ApplicationStart, SettingsStart } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart } from '@kbn/core/public';
+
+type SettingsStart = CoreStart['settings'];
 import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/public/types';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
