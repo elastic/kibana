@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import {
-  ConversationOriginType,
-  isRoundCompleteEvent,
-  type SlackPayload,
-} from '@kbn/agent-builder-common';
+import { ConversationOriginType, isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { HookLifecycle, HookExecutionMode, type HookHandler } from '@kbn/agent-builder-server';
 import type { InternalSetupServices } from '../../services';
 
 /**
- * Turns a reply into a raw Slack payload, keeping the message text as is.
- */
-const buildSlackPayload = (message: string): SlackPayload => ({
-  text: message,
-  blocks: [{ type: 'markdown', text: message }],
-});
-
-/**
- * Adds the Slack payload of the reply to `round_complete` events of Slack rounds.
+ * Adds the reply, as is, as a Slack payload to `round_complete` events of Slack rounds.
  */
 export const addSlackProjection: HookHandler<HookLifecycle.afterChatEvent> = ({
   event,
@@ -40,9 +28,9 @@ export const addSlackProjection: HookHandler<HookLifecycle.afterChatEvent> = ({
     return;
   }
 
-  return {
-    event: { ...event, projection: { ...event.projection, slack: buildSlackPayload(message) } },
-  };
+  const slack = { text: message, blocks: [{ type: 'markdown' as const, text: message }] };
+
+  return { event: { ...event, projection: { ...event.projection, slack } } };
 };
 
 /**
