@@ -56,6 +56,7 @@ export function TimeseriesDataSection({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
+            compressed
             showLabel={false}
             label={createDatasetWizardStrings.timeseriesDataLabel}
             checked={isEnabled}
