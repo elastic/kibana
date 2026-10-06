@@ -295,6 +295,8 @@ export function useStreamDocCountsFetch({
         entry.settled = true;
         parentSignal.removeEventListener('abort', abortWithParent);
       };
+      // Keep both handlers on `.then` rather than `.finally`, which returns a new promise that rejects
+      // on every abort with nothing to catch it. Callers still get the rejection from `histogramPromise`.
       histogramPromise.then(markSettled, markSettled);
       histogramCache.current.set(cacheKey, entry);
       histogramEntriesByPromise.current.set(histogramPromise, entry);
