@@ -71,6 +71,7 @@
     ".slack2",
     ".slack_api",
     ".snowflake",
+    ".solarwinds_platform",
     ".sublime_security",
     ".swimlane",
     ".tavily_mcp",
@@ -610,6 +611,9 @@
     "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
+    "nightshift.decisionTreeHydrate",
+    "nightshift.decisionTreePrepare",
+    "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
@@ -837,6 +841,12 @@
     "snowflake.listTables",
     "snowflake.listViews",
     "snowflake.runQuery",
+    "solarwinds_platform.acknowledgeAlert",
+    "solarwinds_platform.getAlert",
+    "solarwinds_platform.getNode",
+    "solarwinds_platform.listActiveAlerts",
+    "solarwinds_platform.query",
+    "solarwinds_platform.searchNodes",
     "sublime_security.getAsaVerdict",
     "sublime_security.getAttackScore",
     "sublime_security.getMessage",
@@ -995,11 +1005,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "1fb890f48166fd9728cf6d36ac87bb67bcd15505938a4541a7473c2e2c2cbb5a"
+      "sha256": "5bb43a1ed1eb229f4bdef307d81df96233b1157f83e7c99122406a9daf10c5b0"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "73d3740266612f95b51c13ae1f9d09ff01822f71b4538403de0d71046338cfce"
+      "sha256": "01409088ef0fe7a9b0efc384d87ab63e541f48b476e9d212bb30885e0f2d536f"
     }
   }
 }
