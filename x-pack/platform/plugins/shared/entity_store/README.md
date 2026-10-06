@@ -154,7 +154,7 @@ The `euid` helper (`@kbn/entity-store/common/euid_helpers`) has two forms of eve
 ```ts
 const definitions = entityStore.getEntityDefinitionsClientForSpace(spaceId);
 const definition = await definitions.get('k8s.pod');
-const esql = euid.esql.getEuidEsqlEvaluationFromDefinition(definition, 'entity.id');
+const esql = euid.esql.getEuidEvaluationFromDefinition(definition, 'entity.id');
 ```
 
 ### Reading definitions

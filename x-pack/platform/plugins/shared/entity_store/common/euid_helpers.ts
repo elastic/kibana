@@ -25,7 +25,7 @@
  * // Any definition, for example one read from the registry on the server:
  * const definition = await entityStore.getEntityDefinitionsClientForSpace(space).get('k8s.pod');
  * euid.getEuidFromObjectFromDefinition(definition, doc);
- * euid.esql.getEuidEsqlEvaluationFromDefinition(definition, 'entity.id');
+ * euid.esql.getEuidEvaluationFromDefinition(definition, 'entity.id');
  */
 
 import * as euidModule from './domain/euid';
