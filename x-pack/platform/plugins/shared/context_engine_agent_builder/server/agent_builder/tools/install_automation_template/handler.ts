@@ -103,8 +103,8 @@ const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: stri
 };
 
 /**
- * The workflow this template already attached to the AI index, if one exists.
- * A tag match wins; a matching workflow name covers a copy saved before the tag existed.
+ * The automation on the AI index with exactly the requested name, if one exists. A workflow tagged
+ * as a different template is never matched, so one template cannot overwrite another.
  */
 export const findInstalledTemplateWorkflowId = async ({
   aiIndexId,
@@ -157,11 +157,6 @@ export const findInstalledTemplateWorkflowId = async ({
     // Matching is by exact name only. A workflow carrying a different template's tag is skipped
     // to prevent cross-template overwrites. Return immediately on match so later unrelated
     // workflow reads cannot block an already-found replacement target.
-    //
-    // NOTE: automations installed before the name requirement existed (e.g. the default
-    // "Document KI automation") will NOT be matched by a caller-supplied name and will remain
-    // as separate attached workflows. Users upgrading from pre-name installations should delete
-    // the old automation manually and reinstall with the new named API.
     if (workflow.name === templateName) {
       const hasOtherTemplateTag = Object.values(AUTOMATION_TEMPLATE_TAGS).some(
         (tag) => tag !== templateTag && workflow.tags?.includes(tag)

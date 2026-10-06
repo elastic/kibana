@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
@@ -312,6 +313,8 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',
+      // Owned by agentic investigations; imported rather than typed so a moved route fails here.
+      IMPACT_INTERNAL_URL,
     ]);
     const SPACE_PREFIX = '/s/{{ workflow.spaceId }}';
     const stripSpacePrefix = (path: string): string | undefined =>
