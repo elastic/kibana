@@ -48,7 +48,6 @@ import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_t
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
-import { ensureMemoryIndex } from './memory/ensure_memory_index';
 import { registerMemoryAiIndex } from './memory/register_memory';
 import { registerCortexTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
@@ -472,15 +471,6 @@ export class NightshiftInvestigationsPlugin
     this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
-
-    if (this.memoryEnabled) {
-      ensureMemoryIndex({
-        esClient: coreStart.elasticsearch.client.asInternalUser,
-        logger: this.logger.get('memory'),
-      }).catch((error) => {
-        this.logger.error(`Failed to ensure Semantic Memory index template: ${error.message}`);
-      });
-    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

@@ -102,7 +102,6 @@ export interface VersionedMemoryPage extends MemoryPageVersion {
 export interface MemoryPageWrite {
   slug: string;
   title: string;
-  description?: string;
   content: string;
   context?: string;
   tags: string[];
@@ -150,13 +149,16 @@ export interface MemoryPageStore {
      * AND across keywords, OR across one keyword's spellings.
      */
     tags?: readonly string[];
-    /** Lexical match against `title` or `context`, ANDed with the other filters. */
+    /** Lexical match against `title` or `description`, ANDed with the other filters. */
     search?: string;
   }) => Promise<MemoryPageListResult>;
   retrieve: (options?: {
     query?: string;
     size?: number;
-    /** Task recall uses `context` (default). Duplicate-detection uses `content`. */
+    /**
+     * Task recall (default) matches the stored `description`; duplicate-detection
+     * matches `content`.
+     */
     match?: MemoryRetrieveMatch;
   }) => Promise<MemoryPage[]>;
   get: (id: string) => Promise<MemoryPage | undefined>;
@@ -274,9 +276,8 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
     id,
     slug,
     title: source.title,
-    description: source.description,
     content: source.content ?? '',
-    context: source.context,
+    context: source.description,
     tags: source.tags ?? [],
     archived,
     source: source.attributes?.source,
@@ -336,9 +337,10 @@ export const createMemoryPageStore = ({
       '@timestamp': nowIso,
       type: 'memory',
       title: page.title,
-      description: page.description,
+      // The managed AI-index mapping has no `context` field, so the task-recall
+      // context is stored in `description` and read back out of it.
+      description: page.context ?? existing?.context,
       content: page.content,
-      context: page.context ?? existing?.context,
       tags: memoryTags(page.tags),
       attributes: {
         slug: page.slug,
@@ -400,7 +402,6 @@ export const createMemoryPageStore = ({
   const toWrite = (page: MemoryPage): MemoryPageWrite => ({
     slug: page.slug,
     title: page.title,
-    description: page.description,
     content: page.content,
     context: page.context,
     tags: page.tags,
@@ -505,7 +506,7 @@ export const createMemoryPageStore = ({
   ): object[] => {
     const tagClauses = tagFilterClauses(tags);
     const searchClauses: object[] = search
-      ? [{ multi_match: { query: search, fields: ['title', 'context'], operator: 'and' } }]
+      ? [{ multi_match: { query: search, fields: ['title', 'description'], operator: 'and' } }]
       : [];
     switch (filter) {
       case 'active':
@@ -714,8 +715,8 @@ export const createMemoryPageStore = ({
               retriever: {
                 rrf: {
                   retrievers: [
-                    { standard: { query: { match: { context: queryText } } } },
-                    { standard: { query: { match: { 'context.semantic': queryText } } } },
+                    { standard: { query: { match: { description: queryText } } } },
+                    { standard: { query: { match: { 'description.semantic': queryText } } } },
                   ],
                   filter: {
                     bool: {
@@ -746,7 +747,7 @@ export const createMemoryPageStore = ({
                 bool: {
                   filter: spaceAndTagFilter,
                   must_not: [archived],
-                  must: [{ match: { context: queryText } }],
+                  must: [{ match: { description: queryText } }],
                 },
               },
               size: pageSize,

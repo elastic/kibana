@@ -91,8 +91,8 @@ export interface SeedMemoryOptions {
   slug: string;
   title: string;
   content?: string;
-  /** The user task this memory was learned from. The sidebar search reads it. */
-  context?: string;
+  /** The user task this memory was learned from, stored in `description`. */
+  description?: string;
   tags?: string[];
   impressions?: number;
   conversions?: number;
@@ -122,7 +122,7 @@ export const toMemoryDocument = ({
   slug,
   title,
   content = `Notes about ${title}.`,
-  context = `Investigate ${title}`,
+  description = `Investigate ${title}`,
   tags = [],
   impressions = 0,
   conversions = 0,
@@ -137,7 +137,7 @@ export const toMemoryDocument = ({
   type: 'memory',
   title,
   content,
-  context,
+  description,
   // The `memory` tag is the store's tenancy filter alongside `space_id`.
   tags: ['memory', ...tags],
   attributes: {

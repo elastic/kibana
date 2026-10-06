@@ -32,17 +32,17 @@ export const MEMORY_FILTERS = ['all', 'active', 'archived'] as const;
 export type MemoryFilter = (typeof MEMORY_FILTERS)[number];
 
 /**
- * Semantic Memory document. Recall key is `context` (the task that produced the
- * page). `title` / `content` are what the agent reads after recall.
+ * Semantic Memory document. The task-recall context is stored in `description`,
+ * the managed AI-index mapping's field for it; the mapping has no `context`
+ * field. `title` / `content` are what the agent reads after recall.
  */
 export interface StoredMemoryPage {
   '@timestamp'?: string;
   type?: string;
   title?: string;
+  /** Task-recall context, stored under the managed `description` field. */
   description?: string;
   content?: string;
-  /** User task at extract time — the field hydrate searches. */
-  context?: string;
   tags?: string[];
   attributes: {
     impressions?: number;
@@ -71,8 +71,8 @@ export interface MemoryPage {
   id: string;
   slug: string;
   title: string;
-  description?: string;
   content: string;
+  /** User task at extract time — read from the stored `description` field. */
   context?: string;
   tags: string[];
   /** True when `archive_reason` is set. */

@@ -303,7 +303,7 @@ describe('createMemoryPageStore', () => {
     );
   });
 
-  it('ANDs a lexical search on title and context without narrowing the archived count', async () => {
+  it('ANDs a lexical search on title and description without narrowing the archived count', async () => {
     const search = jest.fn().mockResolvedValue({
       hits: { total: { value: 1 }, hits: [] },
       aggregations: { archived: { inScope: { doc_count: 1 } } },
@@ -323,7 +323,7 @@ describe('createMemoryPageStore', () => {
     };
     expect(JSON.stringify(request.query)).toContain('"multi_match"');
     expect(JSON.stringify(request.query)).toContain('"query":"checkout lag"');
-    expect(JSON.stringify(request.query)).toContain('"fields":["title","context"]');
+    expect(JSON.stringify(request.query)).toContain('"fields":["title","description"]');
     expect(JSON.stringify(request.query)).toContain('"operator":"and"');
     expect(JSON.stringify(request.query)).toContain('"attributes.archive_reason"');
     // The header's archived count describes the whole Space, so the search does
@@ -1149,8 +1149,8 @@ describe('createMemoryPageStore', () => {
         retriever: expect.objectContaining({
           rrf: expect.objectContaining({
             retrievers: [
-              { standard: { query: { match: { context: 'checkout lag' } } } },
-              { standard: { query: { match: { 'context.semantic': 'checkout lag' } } } },
+              { standard: { query: { match: { description: 'checkout lag' } } } },
+              { standard: { query: { match: { 'description.semantic': 'checkout lag' } } } },
             ],
           }),
         }),
@@ -1187,7 +1187,7 @@ describe('createMemoryPageStore', () => {
     expect(esClient.search.mock.calls[1][0]).toEqual(
       expect.objectContaining({
         query: expect.objectContaining({
-          bool: expect.objectContaining({ must: [{ match: { context: 'checkout lag' } }] }),
+          bool: expect.objectContaining({ must: [{ match: { description: 'checkout lag' } }] }),
         }),
       })
     );
@@ -1279,7 +1279,7 @@ describe('createMemoryPageStore', () => {
       expect.objectContaining({
         index: MEMORY_INDEX,
         document: expect.objectContaining({
-          context: 'why is checkout slow?',
+          description: 'why is checkout slow?',
         }),
       }),
       expect.anything()
@@ -1296,7 +1296,7 @@ describe('createMemoryPageStore', () => {
         _primary_term: 2,
         _source: {
           ...source,
-          context: 'why is checkout slow?',
+          description: 'why is checkout slow?',
           attributes: {
             ...source.attributes,
             source: 'Merged from memories: memory_a',
@@ -1321,7 +1321,7 @@ describe('createMemoryPageStore', () => {
         if_seq_no: 4,
         if_primary_term: 2,
         document: expect.objectContaining({
-          context: 'why is checkout slow?',
+          description: 'why is checkout slow?',
           attributes: expect.objectContaining({
             archive_reason: 'merged',
             source: 'Merged from memories: memory_a',

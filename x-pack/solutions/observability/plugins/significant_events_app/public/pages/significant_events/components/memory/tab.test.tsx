@@ -62,7 +62,6 @@ const summary = (overrides: Partial<MemoryPageSummary> = {}): MemoryPageSummary 
     id: 'memory_kafka-lag',
     slug: 'kafka-lag',
     title: 'Kafka consumer lag',
-    description: 'Checkout consumer lag',
     content: 'Scale the consumer.',
     context: 'Checkout latency spike',
     tags: ['memory', 'kafka'],

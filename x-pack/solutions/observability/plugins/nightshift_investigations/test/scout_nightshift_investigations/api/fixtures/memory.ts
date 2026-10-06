@@ -103,7 +103,8 @@ export const seedMemory = async (
       type: 'memory',
       title: resolvedTitle,
       content: `Notes about ${resolvedTitle}.`,
-      context: `Investigate ${resolvedTitle}`,
+      // The task-recall context, stored in the managed `description` field.
+      description: `Investigate ${resolvedTitle}`,
       tags: ['memory'],
       attributes: {
         slug,

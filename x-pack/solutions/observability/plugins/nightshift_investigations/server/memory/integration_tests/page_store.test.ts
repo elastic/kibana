@@ -11,7 +11,6 @@ import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { MEMORY_INDEX } from '../../../common/memory';
-import { ensureMemoryIndex, MEMORY_INDEX_COMPONENT_TEMPLATE_NAME } from '../ensure_memory_index';
 import { createMemoryPageStore, epochSecondsToIso, type MemoryPageWrite } from '../page_store';
 
 const SPACE_A = 'space-a';
@@ -37,42 +36,41 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
 
   const logger = loggerMock.create();
 
-  const deleteComponentTemplate = async (): Promise<void> => {
-    try {
-      await esClient.cluster.deleteComponentTemplate({
-        name: MEMORY_INDEX_COMPONENT_TEMPLATE_NAME,
-      });
-    } catch (error) {
-      if ((error as { statusCode?: number }).statusCode !== 404) {
-        throw error;
-      }
-    }
-  };
-
   beforeAll(async () => {
     esServer = createTestEsCluster({
       log: new ToolingLog({ writeTo: process.stdout, level: 'error' }),
+      // The managed mapping writes semantic_text, which needs a trial license to
+      // run the inference endpoint on write.
+      license: 'trial',
     });
     await esServer.start();
     esClient = esServer.getClient();
 
     await esClient.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
-    await deleteComponentTemplate();
-    await ensureMemoryIndex({ esClient, logger });
   });
 
   afterAll(async () => {
     await esClient?.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
-    await deleteComponentTemplate();
     await esClient?.close();
     await esServer?.stop();
   });
 
-  it('creates an AI-index-backed index with the task-recall semantic mapping', async () => {
+  it('auto-creates the managed ai-index mapping on first write', async () => {
+    const store = createMemoryPageStore({
+      esClient,
+      logger,
+      spaceId: SPACE_A,
+      now: () => NOW_SECONDS,
+    });
+    await store.create(createPage('mapping-probe'));
+
     const mapping = await esClient.indices.getMapping({ index: MEMORY_INDEX });
+    const properties = mapping[MEMORY_INDEX].mappings.properties;
 
     expect(MEMORY_INDEX.startsWith('ai-index-idx-')).toBe(true);
-    expect(mapping[MEMORY_INDEX].mappings.properties?.context).toEqual(
+    // The task-recall context is stored in the managed `description` field, the
+    // same semantic shape as `title` and `content`.
+    expect(properties?.description).toEqual(
       expect.objectContaining({
         type: 'text',
         fields: expect.objectContaining({
@@ -80,6 +78,16 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
         }),
       })
     );
+    // Memory adds no field of its own: the managed mapping has no `context`,
+    // and no `ai-index@custom` component template exists.
+    expect(properties?.context).toBeUndefined();
+    expect(properties?.attributes).toEqual(expect.objectContaining({ type: 'flattened' }));
+    await expect(
+      esClient.cluster.getComponentTemplate({ name: 'ai-index@custom' })
+    ).rejects.toThrow();
+
+    // Start the lifecycle test from an empty, auto-created index.
+    await esClient.indices.delete({ index: MEMORY_INDEX });
   });
 
   it('exercises page lifecycle, isolation, and counter OCC on the semantic index', async () => {

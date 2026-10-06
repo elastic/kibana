@@ -78,7 +78,7 @@ const SOURCE_TASK_PATH = `/app/agent_builder/agents/${SEEDED_AGENT_ID}/conversat
 /** Every reader is in the suite's own Space, so its URLs are Space-scoped. */
 const scoped = (path: string): string => `/s/${SUITE_SPACE_ID}${path}`;
 
-/** The `context` E11 searches for: only this memory carries the phrase. */
+/** The task-recall text (`context`, stored as `description`) E11 searches for. */
 const SEARCH_PHRASE = 'ingest-2 queue backlog';
 
 /**
@@ -150,7 +150,7 @@ test.describe(
           '## What happened\n\nConsumer lag on the checkout topic climbed to 40k while DNS ' +
           'resolution flapped inside the pod.\n\n## Fix\n\nRaise the cache size and keep the ' +
           'resolver warm.',
-        context: 'Investigate why checkout latency spiked after the DNS cache change',
+        description: 'Investigate why checkout latency spiked after the DNS cache change',
         tags: ['checkout', 'dns'],
         // 6 of 8 → 75%, and nothing to decay between the seed and the assertion.
         impressions: 8,
@@ -160,13 +160,13 @@ test.describe(
         agentId: SEEDED_AGENT_ID,
       });
 
-      // E11's target. Only this document's `context` carries the phrase, and it
-      // is older than the 30 pagination documents, so it is beyond the sidebar's
-      // first 25-row page: finding it proves the search ran on the server.
+      // E11's target. Only this document's `description` carries the phrase, and
+      // it is older than the 30 pagination documents, so it is beyond the
+      // sidebar's first 25-row page: finding it proves the search ran on the server.
       await seed(esClient, {
         slug: slug('ingest-backlog-runbook'),
         title: 'Ingest backlog runbook',
-        context: `Diagnose the ${SEARCH_PHRASE} using ES|QL over logs-*`,
+        description: `Diagnose the ${SEARCH_PHRASE} using ES|QL over logs-*`,
         impressions: 5,
         conversions: 4,
         updatedAt: minutesAgo(120),
