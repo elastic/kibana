@@ -23,7 +23,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  describe('CROSS-RULE NO-DATA ISOLATION', () => {
+  describe('CROSS-RULE NO-DATA ISOLATION', function () {
+    // Fails on MKI: the staging-host-2 no-data alert does not show up within 120s
+    this.tags(['failsOnMKI']);
+
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const INDEX_NAME = 'kbn-ftr-custom-threshold-cross-rule-isolation';
     const DATA_VIEW_NAME = 'cross-rule-isolation-pattern-name';

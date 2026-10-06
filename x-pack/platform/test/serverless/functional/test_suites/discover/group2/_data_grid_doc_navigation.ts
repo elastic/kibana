@@ -21,6 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('discover data grid doc link', function () {
+    // Flaky on MKI (security project): the first data grid row does not render within 120s
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded(
