@@ -232,9 +232,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       } catch (cause) {
         throw createTaskRunError(
           new Error(
-            `Inference endpoint [${this.inferenceId}] returned status code ${
-              response.statusCode
-            }; upstream body stream failed: ${buildInferenceErrorMessage(cause)}`
+            truncateUpstreamBody(
+              `Inference endpoint [${this.inferenceId}] returned status code ${
+                response.statusCode
+              }; upstream body stream failed: ${buildInferenceErrorMessage(cause)}`
+            )
           ),
           TaskErrorSource.FRAMEWORK
         );
