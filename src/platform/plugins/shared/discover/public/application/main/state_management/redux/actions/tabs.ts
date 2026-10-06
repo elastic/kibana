@@ -390,7 +390,11 @@ export const initializeTabs = createInternalStateAsyncThunk(
       discoverSessionId,
       shouldClearAllTabs,
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
-    { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
+    {
+      dispatch,
+      getState,
+      extra: { services, tabsStorageManager, customizationContext, urlStateStorage },
+    }
   ) {
     const { userId: existingUserId, spaceId: existingSpaceId } = getState();
 
@@ -423,7 +427,22 @@ export const initializeTabs = createInternalStateAsyncThunk(
           showSessionWarnings({ session, warnings, core: services.core });
         }
 
-        return session;
+        // Capture an omitted refresh interval once so initialization and unsaved-change checks
+        // use the same inherited value without hiding later user changes.
+        const refreshInterval =
+          urlStateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY)?.refreshInterval ??
+          services.timefilter.getRefreshInterval();
+
+        return {
+          ...session,
+          tabs: session.tabs.map((tab) => {
+            if (!tab.timeRestore || tab.refreshInterval !== undefined) {
+              return tab;
+            }
+
+            return { ...tab, refreshInterval };
+          }),
+        };
       } catch (error) {
         if (error instanceof SavedObjectNotFound) {
           forgetDiscoverSession(services.core.http, services.chrome, discoverSessionId);

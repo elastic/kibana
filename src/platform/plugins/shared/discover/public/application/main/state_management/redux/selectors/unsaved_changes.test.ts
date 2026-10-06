@@ -12,6 +12,7 @@ import { cloneDeep } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
@@ -19,6 +20,7 @@ import { internalStateActions } from '..';
 import { selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
+import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { createContextAwarenessMocks } from '../../../../../context_awareness/__mocks__/context_awareness';
 import { DataSourceCategory } from '../../../../../context_awareness';
 import {
@@ -329,6 +331,103 @@ describe('selectHasUnsavedChanges', () => {
 
       return { internalState, runtimeStateManager, services, getCurrentTab };
     };
+
+    describe('saved time range without a refresh interval', () => {
+      const timeRange = { from: 'now-15m', to: 'now' };
+      const timefilterRefreshInterval = { pause: true, value: 60000 };
+
+      const setupOmittedRefreshIntervalTest = async (urlRefreshInterval?: RefreshInterval) => {
+        const services = createDiscoverServicesMock();
+        let currentRefreshInterval = timefilterRefreshInterval;
+        jest
+          .spyOn(services.timefilter, 'getRefreshInterval')
+          .mockImplementation(() => currentRefreshInterval);
+        jest
+          .spyOn(services.timefilter, 'setRefreshInterval')
+          .mockImplementation((refreshInterval) => {
+            currentRefreshInterval = { ...currentRefreshInterval, ...refreshInterval };
+          });
+
+        const {
+          internalState,
+          runtimeStateManager,
+          initializeTabs,
+          initializeSingleTab,
+          getCurrentTab,
+          stateStorageContainer,
+        } = getDiscoverInternalStateMock({
+          services,
+          persistedDataViews: [dataViewWithTimefieldMock],
+        });
+
+        const persistedTab = getPersistedTabMock({
+          tabId: 'persisted-tab',
+          dataView: dataViewWithTimefieldMock,
+          globalStateOverrides: { timeRange },
+          attributesOverrides: { timeRestore: true },
+          services,
+        });
+        const persistedDiscoverSession = createDiscoverSessionMock({
+          id: 'test-id',
+          tabs: [persistedTab],
+        });
+
+        if (urlRefreshInterval) {
+          await stateStorageContainer.set(GLOBAL_STATE_URL_KEY, {
+            refreshInterval: urlRefreshInterval,
+          });
+        }
+
+        await initializeTabs({ persistedDiscoverSession });
+        await initializeSingleTab({ tabId: persistedTab.id });
+
+        return { internalState, runtimeStateManager, services, getCurrentTab, persistedTab };
+      };
+
+      it('does not detect unsaved changes when the inherited refresh interval is loaded', async () => {
+        const { internalState, runtimeStateManager, services, getCurrentTab, persistedTab } =
+          await setupOmittedRefreshIntervalTest();
+
+        expect(persistedTab.refreshInterval).toBeUndefined();
+        expect(getCurrentTab().globalState).toMatchObject({
+          timeRange,
+          refreshInterval: timefilterRefreshInterval,
+        });
+        expect(
+          selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+        ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+      });
+
+      it('detects a refresh interval change after loading', async () => {
+        const { internalState, runtimeStateManager, services, persistedTab } =
+          await setupOmittedRefreshIntervalTest();
+
+        internalState.dispatch(
+          internalStateActions.updateGlobalState({
+            tabId: persistedTab.id,
+            globalState: { refreshInterval: { pause: false, value: 30000 } },
+          })
+        );
+
+        expect(
+          selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+        ).toEqual({ hasUnsavedChanges: true, unsavedTabIds: [persistedTab.id] });
+      });
+
+      it('does not detect unsaved changes when the URL supplies the refresh interval', async () => {
+        const urlRefreshInterval = { pause: true, value: 30000 };
+        const { internalState, runtimeStateManager, services, getCurrentTab } =
+          await setupOmittedRefreshIntervalTest(urlRefreshInterval);
+
+        expect(getCurrentTab().globalState).toMatchObject({
+          timeRange,
+          refreshInterval: urlRefreshInterval,
+        });
+        expect(
+          selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+        ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+      });
+    });
 
     it('detects unsaved changes when timeRestore is true and timeRange changes', async () => {
       const { internalState, runtimeStateManager, services, getCurrentTab } =
