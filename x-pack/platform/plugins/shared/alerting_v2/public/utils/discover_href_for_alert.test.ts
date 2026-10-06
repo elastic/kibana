@@ -12,10 +12,10 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   DISCOVER_CONTEXT_HALF_WINDOW_MINUTES,
-  getDiscoverHrefForRuleAndEpisodeTimestamp,
+  getDiscoverHrefForRuleAndAlertTimestamp,
   getDiscoverHrefForRuleQuery,
   getDiscoverTimeRangeAroundTimestamp,
-} from './discover_href_for_episode';
+} from './discover_href_for_alert';
 
 const getCapabilities = (show: boolean) => ({ discover_v2: { show } } as unknown as Capabilities);
 const defaultUiSettingsGet = (key: string) => (key === ENABLE_ESQL ? true : false);
@@ -124,7 +124,7 @@ describe('getDiscoverHrefForRuleQuery', () => {
   });
 });
 
-describe('getDiscoverHrefForRuleAndEpisodeTimestamp', () => {
+describe('getDiscoverHrefForRuleAndAlertTimestamp', () => {
   const getRedirectUrl = jest.fn(() => '/app/discover#/?_a=...');
   const share = sharePluginMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
@@ -139,26 +139,26 @@ describe('getDiscoverHrefForRuleAndEpisodeTimestamp', () => {
     });
   });
 
-  it('returns undefined when episode timestamp is invalid', () => {
+  it('returns undefined when alert timestamp is invalid', () => {
     expect(
-      getDiscoverHrefForRuleAndEpisodeTimestamp({
+      getDiscoverHrefForRuleAndAlertTimestamp({
         share,
         capabilities: getCapabilities(true),
         uiSettings,
         ruleEsql: 'FROM logs | LIMIT 10',
-        episodeIsoTimestamp: undefined,
+        alertIsoTimestamp: undefined,
       })
     ).toBeUndefined();
     expect(share.url.locators.get).not.toHaveBeenCalled();
   });
 
-  it('builds URL with ±30m range around the episode timestamp', () => {
-    const href = getDiscoverHrefForRuleAndEpisodeTimestamp({
+  it('builds URL with ±30m range around the alert timestamp', () => {
+    const href = getDiscoverHrefForRuleAndAlertTimestamp({
       share,
       capabilities: getCapabilities(true),
       uiSettings,
       ruleEsql: 'FROM logs | LIMIT 10',
-      episodeIsoTimestamp: '2024-06-15T12:00:00.000Z',
+      alertIsoTimestamp: '2024-06-15T12:00:00.000Z',
     });
     expect(href).toBe('/app/discover#/?_a=...');
     expect(getRedirectUrl).toHaveBeenCalledWith({

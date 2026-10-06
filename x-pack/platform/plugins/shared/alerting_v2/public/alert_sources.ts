@@ -17,7 +17,7 @@ export const CLASSIC_ALERT_RULE_TYPE_IDS = Array.from(
   new Set([...OBSERVABILITY_RULE_TYPE_IDS, ...STACK_RULE_TYPE_IDS])
 );
 
-export const CLASSIC_EPISODES_DATA_SOURCE: EpisodeDataSource = createClassicEpisodeSource({
+export const CLASSIC_ALERTS_DATA_SOURCE: EpisodeDataSource = createClassicEpisodeSource({
   ruleTypeIds: CLASSIC_ALERT_RULE_TYPE_IDS,
   host: {
     app: OBSERVABILITY_ALERTING_APP_ID,
