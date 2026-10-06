@@ -65,18 +65,10 @@ export interface AfterExecutionHookContext extends AgentHookContextBase {
 }
 
 /**
- * Context of an `afterChatEvent` hook. `event` is the copy delivered to clients and written to the
- * execution document; the stored conversation never sees changes made to it. Message chunks never
- * go through hooks: they arrive once per token, and awaiting hooks on each one would slow down
- * streaming.
+ * Context of an `afterChatEvent` hook, which runs on every chat event except message chunks.
  */
 export interface AfterChatEventHookContext extends AgentHookContextBase {
   event: Exclude<ChatEvent, MessageChunkEvent>;
-  /**
-   * The conversation execution the event belongs to, including the round's origin in
-   * `agentParams.origin`. `status`, `events` and `eventCount` are a snapshot from when the run
-   * started, not the live state.
-   */
   execution: Readonly<ConversationAgentExecution>;
 }
 
