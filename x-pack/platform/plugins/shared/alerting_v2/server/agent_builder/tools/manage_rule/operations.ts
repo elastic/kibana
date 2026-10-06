@@ -144,7 +144,7 @@ export const setMetadataOperationSchema = metadataSchema
   .partial()
   .extend({ operation: z.literal('set_metadata') })
   .describe(
-    'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
+    'Use `set_metadata` to name the rule and add a description or `tags` so the user can filter by it later. `tags` do not link action policies: to link this rule to an action policy, set `routing_tags` to values in the policy `matcher.tags`. `routing_tags` is only allowed on `alert` rules.'
   );
 
 export const setKindOperationSchema = z
@@ -153,7 +153,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data`,  `state_transition`, and `routing_tags`."
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data`, `state_transition` and `metadata.routing_tags` settings."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
