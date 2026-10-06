@@ -659,6 +659,197 @@ describe('atPathSync', () => {
   });
 });
 
+describe('addMetaSetting', () => {
+  test('expands the config based on the meta setting and removes the meta setting', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({
+      myPlugin: { metaSetting: true },
+    });
+    const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    configService.setSchema(
+      'myPlugin',
+      schema.object({ someValue: schema.string(), someOtherValue: schema.maybe(schema.string()) })
+    );
+    configService.addMetaSetting('myPlugin.metaSetting', {
+      schema: schema.literal(true),
+      priority: 100,
+      config: {
+        'myPlugin.someValue': 'new-value',
+        'myPlugin.someOtherValue': 'other-value',
+      },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'new-value',
+      someOtherValue: 'other-value',
+    });
+
+    // After disabling the meta setting, the user config should be restored.
+    rawConfig$.next({
+      myPlugin: { metaSetting: false, someValue: 'value' },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'value',
+    });
+  });
+
+  test('expands the config based on the meta setting, preserves the user config overrides and removes the meta setting', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({
+      myPlugin: { metaSetting: true, someValue: 'user-value' },
+    });
+    const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    configService.setSchema(
+      'myPlugin',
+      schema.object({ someValue: schema.string(), someOtherValue: schema.maybe(schema.string()) })
+    );
+    configService.addMetaSetting('myPlugin.metaSetting', {
+      schema: schema.literal(true),
+      priority: 100,
+      config: {
+        'myPlugin.someValue': 'new-value',
+        'myPlugin.someOtherValue': 'other-value',
+      },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'user-value',
+      someOtherValue: 'other-value',
+    });
+
+    // After disabling the meta setting, the user config should be restored.
+    rawConfig$.next({
+      myPlugin: { metaSetting: false, someValue: 'value' },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'value',
+    });
+  });
+
+  test('supports registering the same meta setting with different priorities', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({
+      myPlugin: { metaSetting: true },
+    });
+    const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    configService.setSchema(
+      'myPlugin',
+      schema.object({ someValue: schema.string(), someOtherValue: schema.maybe(schema.string()) })
+    );
+    configService.addMetaSetting('myPlugin.metaSetting', {
+      schema: schema.literal(true),
+      priority: 100,
+      config: {
+        'myPlugin.someValue': 'new-value',
+        'myPlugin.someOtherValue': 'other-value',
+      },
+    });
+
+    configService.addMetaSetting('myPlugin.metaSetting', {
+      schema: schema.literal(true),
+      priority: 200,
+      config: {
+        'myPlugin.someOtherValue': 'yet-another-value',
+      },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'new-value',
+      someOtherValue: 'yet-another-value',
+    });
+
+    // After disabling the meta setting, the user config should be restored.
+    rawConfig$.next({
+      myPlugin: { metaSetting: false, someValue: 'value' },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'value',
+    });
+  });
+
+  test('supports registering multiple meta settings with different priorities', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({
+      anotherMetaSetting: true,
+      myPlugin: { metaSetting: true },
+    });
+    const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    configService.setSchema(
+      'myPlugin',
+      schema.object({ someValue: schema.string(), someOtherValue: schema.maybe(schema.string()) })
+    );
+    configService.addMetaSetting('myPlugin.metaSetting', {
+      schema: schema.literal(true),
+      priority: 100,
+      config: {
+        'myPlugin.someValue': 'new-value',
+        'myPlugin.someOtherValue': 'other-value',
+      },
+    });
+
+    configService.addMetaSetting('anotherMetaSetting', {
+      schema: schema.literal(true),
+      priority: 200,
+      config: {
+        'myPlugin.someOtherValue': 'yet-another-value',
+      },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'new-value',
+      someOtherValue: 'yet-another-value',
+    });
+
+    // Enabling only 1 meta setting at a time.
+    rawConfig$.next({
+      anotherMetaSetting: true,
+      myPlugin: { metaSetting: false, someValue: 'value' },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'value',
+      someOtherValue: 'yet-another-value',
+    });
+
+    rawConfig$.next({
+      anotherMetaSetting: false,
+      myPlugin: { metaSetting: true },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'new-value',
+      someOtherValue: 'other-value',
+    });
+
+    // After disabling the meta settings, the user config should be restored.
+    rawConfig$.next({
+      anotherMetaSetting: false,
+      myPlugin: { metaSetting: false, someValue: 'value' },
+    });
+    await configService.validate();
+
+    expect(configService.atPathSync('myPlugin')).toEqual({
+      someValue: 'value',
+    });
+  });
+});
+
 describe('getHandledDeprecatedConfigs', () => {
   it('returns all handled deprecated configs', async () => {
     const rawConfig = getRawConfigProvider({ base: { unused: 'unusedConfig' } });

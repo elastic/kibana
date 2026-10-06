@@ -7,22 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '@kbn/core/server/mocks';
+import { createTestEnv, rawConfigServiceMock } from '@kbn/config-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { ConfigService } from '@kbn/config';
 import { config } from './config';
+import type { TelemetryConfigType } from './config';
+import { firstValueFrom } from 'rxjs';
 
-const applyConfigDeprecations = (telemetrySettings: Record<string, unknown> = {}) => {
-  const deprecationContext = configDeprecationsMock.createContext();
-  const deprecations = config.deprecations!(configDeprecationFactory);
-  const { config: migrated } = applyDeprecations(
-    { telemetry: telemetrySettings },
-    deprecations.map((deprecation) => ({
-      deprecation,
-      path: 'telemetry',
-      context: deprecationContext,
-    }))
+const validateConfig = async (telemetrySettings: Record<string, unknown> = {}) => {
+  const configService = new ConfigService(
+    rawConfigServiceMock.create({ rawConfig: { telemetry: telemetrySettings } }),
+    createTestEnv(),
+    loggerMock.create()
   );
-  return migrated as Record<string, Record<string, unknown>>;
+  configService.setSchema('telemetry', config.schema);
+  Object.entries(config.metaSettings || {}).forEach(([metaSetting, metaSettingValue]) => {
+    configService.addMetaSetting(metaSetting, metaSettingValue);
+  });
+
+  await configService.validate();
+
+  const telemetry = await firstValueFrom(configService.atPath<TelemetryConfigType>('telemetry'));
+
+  return { telemetry };
 };
 
 describe('config', () => {
@@ -83,21 +90,20 @@ describe('config', () => {
     describe('when telemetry.enabled is set to a falsy value, the plugin stays enabled and telemetry is opted out', () => {
       test.each([false, 'false', 'False', 'FALSE'])(
         'migrates telemetry.enabled: %p → removes enabled, sets optIn and allowChangingOptInStatus to false',
-        (enabledValue) => {
-          const migrated = applyConfigDeprecations({ enabled: enabledValue });
+        async (enabledValue) => {
+          const validated = await validateConfig({ enabled: enabledValue });
 
-          expect(migrated.telemetry.enabled).toBeUndefined();
-          expect(migrated.telemetry.optIn).toBe(false);
-          expect(migrated.telemetry.allowChangingOptInStatus).toBe(false);
+          expect(validated.telemetry.optIn).toBe(false);
+          expect(validated.telemetry.allowChangingOptInStatus).toBe(false);
         }
       );
 
       test.each([false, 'false', 'False', 'FALSE'])(
         'also disables tracing and metrics when telemetry.enabled: %p',
-        (enabledValue) => {
-          const migrated = applyConfigDeprecations({ enabled: enabledValue });
+        async (enabledValue) => {
+          const validated = await validateConfig({ enabled: enabledValue });
 
-          const telemetry = migrated.telemetry as Record<string, Record<string, unknown>>;
+          const telemetry = validated.telemetry;
           expect(telemetry.tracing?.enabled).toBe(false);
           expect(telemetry.metrics?.enabled).toBe(false);
         }
@@ -105,22 +111,20 @@ describe('config', () => {
     });
 
     describe('when telemetry.enabled is absent or truthy, the deprecation does not fire', () => {
-      test('does not modify config when telemetry.enabled is not set', () => {
-        const migrated = applyConfigDeprecations({});
+      test('does not modify config when telemetry.enabled is not set', async () => {
+        const validated = await validateConfig({});
 
-        expect(migrated.telemetry.enabled).toBeUndefined();
-        expect(migrated.telemetry.optIn).toBeUndefined();
-        expect(migrated.telemetry.allowChangingOptInStatus).toBeUndefined();
+        expect(validated.telemetry.optIn).toBe(true); // Default value
+        expect(validated.telemetry.allowChangingOptInStatus).toBe(true); // Default value
       });
 
       test.each([true, 'true', 'True', 'TRUE'])(
         'does not modify config when telemetry.enabled: %p',
-        (enabledValue) => {
-          const migrated = applyConfigDeprecations({ enabled: enabledValue });
+        async (enabledValue) => {
+          const validated = await validateConfig({ enabled: enabledValue });
 
-          expect(migrated.telemetry.enabled).toBe(enabledValue);
-          expect(migrated.telemetry.optIn).toBeUndefined();
-          expect(migrated.telemetry.allowChangingOptInStatus).toBeUndefined();
+          expect(validated.telemetry.optIn).toBe(true); // Default value
+          expect(validated.telemetry.allowChangingOptInStatus).toBe(true); // Default value
         }
       );
     });
