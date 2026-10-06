@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -40,7 +43,17 @@ const createWorker = (workflowId: string | null): Worker => ({
 const renderPanel = (
   workflowId: string | null,
   isAccordion: boolean,
-  overrides: { enabled?: boolean; serviceAccountId?: string } = {}
+  {
+    enabled = true,
+    serviceAccountId,
+    showManagedWorkflows = true,
+    canChangeAdvancedSettings = true,
+  }: {
+    enabled?: boolean;
+    serviceAccountId?: string;
+    showManagedWorkflows?: boolean;
+    canChangeAdvancedSettings?: boolean;
+  } = {}
 ) => {
   const core = coreMock.createStart();
   core.http.get.mockResolvedValue(undefined);
@@ -49,7 +62,14 @@ const renderPanel = (
   );
   const settings = {
     ...createWorker(workflowId).settings,
-    ...(overrides.serviceAccountId ? { serviceAccountId: overrides.serviceAccountId } : {}),
+    ...(serviceAccountId ? { serviceAccountId } : {}),
+  };
+  core.settings.client.get.mockReturnValue(showManagedWorkflows);
+  core.settings.client.get$.mockReturnValue(of(showManagedWorkflows));
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    advancedSettings: { show: true, save: canChangeAdvancedSettings },
+    workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
   };
 
   render(
@@ -59,7 +79,7 @@ const renderPanel = (
         isAccordion={isAccordion}
         isExpanded
         onToggle={jest.fn()}
-        enabled={overrides.enabled ?? true}
+        enabled={enabled}
         settings={settings}
         warningReasons={[]}
         settingsLocked={false}
@@ -99,6 +119,35 @@ describe('WorkerSettingsPanel view executions link', () => {
       path: `/${WORKFLOW_ID}?tab=executions`,
     });
   });
+
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])(
+    'offers the managed workflows setting instead of the workflow when it is off (%s)',
+    (_layout, isAccordion) => {
+      renderPanel(WORKFLOW_ID, isAccordion, { showManagedWorkflows: false });
+
+      const link = screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`);
+      expect(link).not.toHaveAttribute('href');
+
+      fireEvent.click(link);
+
+      expect(
+        screen.getByText(
+          'Execution history lives in Managed workflows, which is turned off for this space.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}-open-advanced-settings`)
+      ).toHaveAttribute(
+        'href',
+        `/app/management/kibana/settings?query=${encodeURIComponent(
+          WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID
+        )}`
+      );
+    }
+  );
 
   it.each([
     ['accordion', true],
