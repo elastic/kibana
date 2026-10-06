@@ -138,6 +138,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     renderers,
     conversationClient,
     storeConversation,
+    readOnlyConversation,
   } = context;
 
   // The context is built from the normalized event timeline (legacy conversations serialized
@@ -231,6 +232,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput: processedConversation.nextInput,
     agentId,
     conversationId: conversation?.id,
+    storeConversation,
+    readOnlyConversation,
     // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
     // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
     roundExecutionIndex: pendingTurn
@@ -563,6 +566,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentId,
       round,
       conversationId: conversation?.id,
+      storeConversation,
+      readOnlyConversation,
       connectorId: model.connector.connectorId,
       agentConfiguration,
     });

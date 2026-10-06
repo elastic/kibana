@@ -135,6 +135,8 @@ describe('runAfterExecutionWorkflows', () => {
     agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-1'] },
     agentId: 'agent-1',
     conversationId: 'conv-1',
+    storeConversation: true,
+    readOnlyConversation: false,
     ...overrides,
   });
 
@@ -153,6 +155,24 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('early-exit guards', () => {
+    it('does nothing for an ephemeral run on an existing conversation', async () => {
+      const { workflowApi, getInternalServices } = createDeps();
+      const context = createContext({ storeConversation: false, readOnlyConversation: true });
+
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+    });
+
+    it('still runs for a one-shot run that stores nothing', async () => {
+      const { workflowApi, getInternalServices } = createDeps();
+      const context = createContext({ storeConversation: false, readOnlyConversation: false });
+
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+      expect(executeWorkflowMock).toHaveBeenCalledTimes(1);
+    });
+
     it('does nothing when post_execution_workflow_ids is empty', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({

@@ -792,6 +792,24 @@ describe('runDefaultAgentMode', () => {
       expect(context.conversationClient.patchMetadata).not.toHaveBeenCalled();
     });
 
+    it('passes the storage flags to both agent hooks', async () => {
+      const { context } = setup();
+      context.storeConversation = false;
+      context.readOnlyConversation = true;
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      for (const lifecycle of [HookLifecycle.beforeAgent, HookLifecycle.afterExecution]) {
+        expect(context.hooks.run).toHaveBeenCalledWith(
+          lifecycle,
+          expect.objectContaining({ storeConversation: false, readOnlyConversation: true })
+        );
+      }
+    });
+
     it('runs beforeAgent on resume without replacing the initial workflow step', async () => {
       const { context, streamEvents } = setup();
       (context.hooks.run as jest.Mock).mockImplementation(async (_lifecycle, hookContext) => ({

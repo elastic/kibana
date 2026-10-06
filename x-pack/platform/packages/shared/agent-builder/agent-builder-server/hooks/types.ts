@@ -33,11 +33,21 @@ export interface BeforeAgentHookContext extends AgentHookContextBase {
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
   /**
    * Id of the conversation this round belongs to. Absent for standalone (sub-agent) runs.
-   * Present but ephemeral for `ai.agent` workflow steps that set neither `create-conversation`
-   * nor `conversation_id`: those resolve a placeholder conversation that is never persisted, so
-   * the id is safe to correlate a single round but not to key anything that must outlive it.
+   * For `ai.agent` workflow steps that set neither `create-conversation` nor `conversation_id`,
+   * it names a placeholder conversation that is never persisted, so the id is safe to correlate a
+   * single round but not to key anything that must outlive it.
    */
   conversationId?: string;
+  /**
+   * False when the run persists nothing that belongs to its conversation (one-shot and ephemeral
+   * runs).
+   */
+  storeConversation: boolean;
+  /**
+   * True for a run that loaded an existing conversation but stores nothing to it: `conversationId`
+   * names a real conversation that will not receive this round.
+   */
+  readOnlyConversation: boolean;
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {
@@ -56,6 +66,16 @@ export interface AfterToolCallHookContext extends ToolCallHookContextBase {
 export interface AfterExecutionHookContext extends AgentHookContextBase {
   round: ConversationRound;
   conversationId?: string;
+  /**
+   * False when the run persists nothing that belongs to its conversation (one-shot and ephemeral
+   * runs).
+   */
+  storeConversation: boolean;
+  /**
+   * True for a run that loaded an existing conversation but stores nothing to it: `conversationId`
+   * names a real conversation that will not receive this round.
+   */
+  readOnlyConversation: boolean;
   /** Connector used by this execution, which may differ from a folded pending round's connector. */
   connectorId?: string;
   agentConfiguration: AgentConfiguration;

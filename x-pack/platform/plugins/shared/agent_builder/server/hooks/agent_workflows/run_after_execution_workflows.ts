@@ -74,6 +74,11 @@ export const runAfterExecutionWorkflows = async ({
     return;
   }
 
+  // The conversation and round ids would name a conversation that never gets this round.
+  if (context.readOnlyConversation) {
+    return;
+  }
+
   if (context.round.status !== ConversationRoundStatus.completed) {
     return;
   }
