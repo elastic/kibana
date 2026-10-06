@@ -249,7 +249,7 @@ overrides:
   qs: 6.16.0
   redux-thunk-v2>redux: npm:redux@4.2.1
   remark-parse>trim: 1.0.1
-  serialize-javascript: 7.0.5
+  serialize-javascript: 7.1.2
   sharp: 0.35.4
   socket.io-parser: 4.2.7
   typescript: 6.0.3
@@ -24146,8 +24146,8 @@ packages:
     resolution: {integrity: sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ==}
     engines: {node: '>= 18'}
 
-  serialize-javascript@7.0.5:
-    resolution: {integrity: sha512-F4LcB0UqUl1zErq+1nYEEzSHJnIwb3AF2XWB94b+afhrekOUijwooAYqFyRbjYkm2PAKBabx6oYv/xDxNi8IBw==}
+  serialize-javascript@7.1.2:
+    resolution: {integrity: sha512-GL2BWwVa6JydKO6l/ljVgjAZF4QJ3S7dWDWi53s5GZT8PJzD2fNxi67HANQGKAqPrwEpL5ba7gUBGi0Ls/sEoQ==}
     engines: {node: '>=20.0.0'}
 
   serve-index@1.9.2:
@@ -40398,7 +40398,7 @@ snapshots:
       minimatch: 5.1.9
       ms: 2.1.3
       picocolors: 1.1.1
-      serialize-javascript: 7.0.5
+      serialize-javascript: 7.1.2
       strip-json-comments: 3.1.1
       supports-color: 8.1.1
       workerpool: 6.5.1
@@ -43304,7 +43304,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  serialize-javascript@7.0.5: {}
+  serialize-javascript@7.1.2: {}
 
   serve-index@1.9.2(supports-color@10.2.2):
     dependencies:
