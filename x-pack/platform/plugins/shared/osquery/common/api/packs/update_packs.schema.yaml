@@ -21,7 +21,7 @@ components:
         shards:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
         queries:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueriesInput'
         schedule_type:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleTypeOrUndefined'
         interval:
@@ -30,7 +30,7 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
         # V5: Pack-level execution defaults. Nullable for explicit clear (null = unset).
         min_osquery_version:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/MinOsqueryVersionOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/MinOsqueryVersionInputOrUndefined'
         result_type:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultTypeOrUndefined'
         platform:
