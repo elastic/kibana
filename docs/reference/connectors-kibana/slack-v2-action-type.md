@@ -190,7 +190,7 @@ Send message
     - `unfurlLinks` (optional): Turn on unfurling of primarily text-based content.
     - `unfurlMedia` (optional): Turn on unfurling of media content.
 
-Update message
+Update message {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Edit a message the connector posted earlier, using Slack `chat.update`. The new text replaces the old text, and Slack removes any blocks the message had, so a Block Kit or richly formatted message comes back as plain text.
     - `channel` (required): Conversation ID that holds the message (for example, `C123...`). Slack does not accept a channel name here.
     - `messageTs` (required): Timestamp of the message to edit, as returned in `ts` by **Send message**.
