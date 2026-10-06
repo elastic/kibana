@@ -22,12 +22,18 @@ export interface SelectedEvaluator {
 
 interface EvaluatorOptionMeta {
   disabled?: boolean;
-  toolTipContent?: string;
+  /**
+   * Why a disabled option cannot be picked, shown in the option itself. A tooltip would not
+   * do: a disabled option receives no hover or focus, so neither a pointer nor a screen
+   * reader would ever reach it.
+   */
+  disabledReason?: string;
   append?: React.ReactNode;
 }
 
 interface Props {
   label: string;
+  helpText?: React.ReactNode;
   evaluators: EvaluatorDefinition[];
   selectedEvaluators: SelectedEvaluator[];
   connectorOptions: ConnectorSelectorOption[];
@@ -44,6 +50,7 @@ interface Props {
 
 export const EvaluatorSelector = ({
   label,
+  helpText,
   evaluators,
   selectedEvaluators,
   connectorOptions,
@@ -66,11 +73,19 @@ export const EvaluatorSelector = ({
   const evaluatorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
       availableEvaluators.map((evaluator) => {
-        const meta = evaluatorOptionMeta?.(evaluator);
+        const { disabledReason, append, disabled } = evaluatorOptionMeta?.(evaluator) ?? {};
         return {
           label: evaluatorOptionLabel(evaluator),
           value: evaluator.name,
-          ...meta,
+          disabled,
+          append:
+            disabled && disabledReason ? (
+              <EuiText size="xs" color="subdued" component="span">
+                {disabledReason}
+              </EuiText>
+            ) : (
+              append
+            ),
         };
       }),
     [availableEvaluators, evaluatorOptionLabel, evaluatorOptionMeta]
@@ -114,7 +129,7 @@ export const EvaluatorSelector = ({
 
   return (
     <>
-      <EuiFormRow label={label} fullWidth>
+      <EuiFormRow label={label} helpText={helpText} fullWidth>
         <EuiComboBox<string>
           fullWidth
           isLoading={isEvaluatorsLoading}

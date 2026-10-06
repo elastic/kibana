@@ -220,6 +220,56 @@ describe('EvaluatorDetailFlyout', () => {
     expect(screen.queryByTestId('evalsEvaluatorDetailPending')).not.toBeInTheDocument();
   });
 
+  it('keeps the displayed version when another fails to load, and retries in place', async () => {
+    // A failed query drops its data, so the flyout has to hold on to what it last showed.
+    const older = { ...USER_DEFINED, version: '1.0.0', description: 'The first tone judge' };
+    let olderFails = true;
+    mockedUseEvaluator.mockImplementation(
+      (_name?: string, version?: string) =>
+        (version === '1.0.0'
+          ? olderFails
+            ? {
+                data: undefined,
+                isLoading: false,
+                error: new Error('Version 1.0.0 is unavailable'),
+              }
+            : { data: { evaluator: older }, isLoading: false, error: null }
+          : {
+              data: { evaluator: USER_DEFINED },
+              isLoading: false,
+              error: null,
+            }) as unknown as ReturnType<typeof useEvaluator>
+    );
+    render(
+      <I18nProvider>
+        <EvaluatorDetailFlyout
+          evaluatorName="tone-judge"
+          canEdit
+          onEdit={jest.fn()}
+          onClose={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.change(screen.getByTestId('evalsEvaluatorDetailVersion'), {
+      target: { value: '1.0.0' },
+    });
+
+    const failure = await screen.findByTestId('evalsEvaluatorDetailVersionError');
+    expect(failure).toHaveTextContent('Could not load version 1.0.0');
+    expect(failure).toHaveTextContent('Version 1.0.0 is unavailable');
+    expect(screen.getByTestId('evalsEvaluatorDetailVersion')).toHaveValue('1.2.0');
+    expect(screen.getByText('Rates tone of the response')).toBeInTheDocument();
+    expect(screen.queryByTestId('evalsEvaluatorDetailError')).not.toBeInTheDocument();
+
+    olderFails = false;
+    fireEvent.click(screen.getByTestId('evalsEvaluatorDetailVersionRetry'));
+
+    expect(await screen.findByText('The first tone judge')).toBeInTheDocument();
+    expect(screen.getByTestId('evalsEvaluatorDetailVersion')).toHaveValue('1.0.0');
+    expect(screen.queryByTestId('evalsEvaluatorDetailVersionError')).not.toBeInTheDocument();
+  });
+
   it('offers no version picker when nothing has been edited yet', () => {
     renderFlyout({ evaluator: { ...USER_DEFINED, versions: ['1.0.0'], version: '1.0.0' } });
 

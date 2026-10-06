@@ -171,6 +171,35 @@ describe('EvaluatorEditorFlyout', () => {
       expect(createMutateAsync).not.toHaveBeenCalled();
     });
 
+    it('marks every missing required field at once on an empty form', async () => {
+      renderCreate();
+
+      save();
+
+      expect(
+        await screen.findByText('Fix the highlighted fields and try again.')
+      ).toBeInTheDocument();
+      for (const message of [
+        /^Enter at least 2 characters/i,
+        /description of up to 2048/i,
+        /system prompt of up to 32768/i,
+        /evaluation prompt of up to 32768/i,
+        /Name every score/i,
+      ]) {
+        expect(screen.getByText(message)).toBeInTheDocument();
+      }
+      for (const testSubj of [
+        'evalsEvaluatorName',
+        'evalsEvaluatorDescription',
+        'evalsEvaluatorSystemPrompt',
+        'evalsEvaluatorPrompt',
+        'evalsEvaluatorScoreName-0',
+      ]) {
+        expect(screen.getByTestId(testSubj)).toHaveAttribute('aria-invalid', 'true');
+      }
+      expect(createMutateAsync).not.toHaveBeenCalled();
+    });
+
     it('requires at least one evidence field', async () => {
       renderCreate();
       fillValidDraft();
@@ -346,6 +375,57 @@ describe('EvaluatorEditorFlyout', () => {
 
       await waitFor(() => expect(updateMutateAsync).toHaveBeenCalled());
       expect(mockAddSuccess).toHaveBeenCalledWith('Saved tone-judge as version 1.1.0');
+    });
+
+    it('saves against the version the form was loaded from', async () => {
+      renderEdit();
+      setField('evalsEvaluatorDescription', 'Rates tone, strictly');
+
+      save();
+
+      await waitFor(() => expect(updateMutateAsync).toHaveBeenCalled());
+      expect(updateMutateAsync.mock.calls[0][0].updates.base_version).toBe('1.0.0');
+    });
+
+    it('offers to load the latest version when another edit got there first', async () => {
+      const refetch = jest.fn().mockResolvedValue({});
+      mockedUseEvaluator.mockReturnValue({
+        data: {
+          evaluator: {
+            name: 'tone-judge',
+            version: '1.0.0',
+            description: 'Rates tone',
+            judge: JUDGE,
+          },
+        },
+        isLoading: false,
+        error: null,
+        refetch,
+      } as unknown as ReturnType<typeof useEvaluator>);
+      const conflict = Object.assign(new Error('Conflict'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status: 409 },
+        body: {
+          message:
+            'Evaluator "tone-judge" changed to version 1.0.1 after this edit started from version 1.0.0. Reload the latest version and apply the edit again.',
+        },
+      });
+      updateMutateAsync.mockRejectedValueOnce(conflict);
+      render(<EvaluatorEditorFlyout mode="edit" evaluatorName="tone-judge" onClose={onClose} />);
+      setField('evalsEvaluatorDescription', 'Rates tone, strictly');
+
+      save();
+
+      const callout = await screen.findByTestId('evalsEvaluatorSubmitError');
+      expect(callout).toHaveTextContent('This evaluator changed while you were editing it');
+      expect(callout).toHaveTextContent('Nothing was saved.');
+      expect(onClose).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId('evalsEvaluatorLoadLatest'));
+
+      await waitFor(() => expect(refetch).toHaveBeenCalled());
+      expect(screen.queryByTestId('evalsEvaluatorSubmitError')).not.toBeInTheDocument();
     });
 
     it('does not claim a version was written when nothing changed', async () => {

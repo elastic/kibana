@@ -32,7 +32,11 @@ export class InvalidJudgeConfigError extends Error {
 interface TemplateVariables {
   all: string[];
   escaped: string[];
+  /** Whether the template reads `{{.}}`, Mustache's "current item", rather than a name. */
+  usesImplicitIterator: boolean;
 }
+
+const IMPLICIT_ITERATOR = '.';
 
 /**
  * Reads variables and records interpolations that Mustache would HTML-escape.
@@ -46,6 +50,7 @@ interface TemplateVariables {
 const getTemplateVariables = (template: string): TemplateVariables => {
   const all = new Set<string>();
   const escaped = new Set<string>();
+  let usesImplicitIterator = false;
   const writer = new Mustache.Writer();
 
   const collect = (tokens: unknown[]): void => {
@@ -55,6 +60,11 @@ const getTemplateVariables = (template: string): TemplateVariables => {
       }
 
       const [type, value, , , children] = token as [string, string, ...unknown[]];
+      if (value === IMPLICIT_ITERATOR && (type === 'name' || type === '&')) {
+        // Splitting it on "." would otherwise report it as a variable with an empty name.
+        usesImplicitIterator = true;
+        continue;
+      }
       if (type === 'name' || type === '&' || type === '#' || type === '^') {
         all.add(value.split('.')[0]);
       }
@@ -69,7 +79,7 @@ const getTemplateVariables = (template: string): TemplateVariables => {
   };
 
   collect(writer.parse(template));
-  return { all: [...all], escaped: [...escaped] };
+  return { all: [...all], escaped: [...escaped], usesImplicitIterator };
 };
 
 const findDuplicates = (values: string[]): string[] => {
@@ -171,6 +181,13 @@ export const validateJudgeConfig = (judge: LlmJudgeConfig): void => {
         `The ${label} is not a valid template: ${
           error instanceof Error ? error.message : String(error)
         }`
+      );
+    }
+
+    if (variables.usesImplicitIterator) {
+      // Every input is a single string, so there is no list for "the current item" to walk.
+      throw new InvalidJudgeConfigError(
+        `The ${label} uses {{.}}, which reads the current item of a list, but every input the evaluator is given is a single value. Reference the input by name instead, for example {{{agent_response}}}.`
       );
     }
 

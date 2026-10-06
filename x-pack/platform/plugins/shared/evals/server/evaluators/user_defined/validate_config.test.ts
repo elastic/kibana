@@ -162,6 +162,14 @@ describe('validateJudgeConfig', () => {
       );
     });
 
+    it.each(['{{{.}}}', '{{.}}', '{{& .}}', '{{#agent_response}}{{{.}}}{{/agent_response}}'])(
+      'explains that %s has no list to read, rather than naming an empty variable',
+      (prompt) => {
+        expectRejection(config({ prompt }), 'The prompt uses {{.}}, which reads the current item');
+        expect(() => validateJudgeConfig(config({ prompt }))).not.toThrow('references ""');
+      }
+    );
+
     it('rejects a template that does not parse', () => {
       expectRejection(config({ prompt: 'Rate {{{agent_response}}' }), 'is not a valid template');
     });

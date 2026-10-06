@@ -15,6 +15,7 @@ import { InvalidJudgeConfigError } from '../../evaluators/user_defined/validate_
 import { BuiltInEvaluatorNameError } from './built_in_evaluator_name_error';
 import { EvaluatorAlreadyExistsError } from './evaluator_already_exists_error';
 import { EvaluatorNotFoundError } from './evaluator_not_found_error';
+import { EvaluatorVersionConflictError } from './evaluator_version_conflict_error';
 import { InvalidEvaluatorNameError } from './invalid_evaluator_name_error';
 import type { EvaluatorsStorageAdapter } from './evaluator_definition_client';
 import { EvaluatorDefinitionClient } from './evaluator_definition_client';
@@ -747,6 +748,65 @@ describe('EvaluatorDefinitionClient', () => {
       await expect(client.getLatest('tone')).resolves.toEqual(
         expect.objectContaining({ version: '2.0.1', description: 'Sharper' })
       );
+    });
+
+    describe('with a base version', () => {
+      it('writes when the latest version is still the one the edit started from', async () => {
+        const { client } = createClient();
+        await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+
+        const updated = await client.update('tone', {
+          description: 'Sharper',
+          baseVersion: '1.0.0',
+        });
+
+        expect(updated.version).toBe('1.0.1');
+      });
+
+      it('refuses an edit made from a version that has since been superseded', async () => {
+        const { client, docs } = createClient();
+        await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+        // Two tabs open at 1.0.0: the first saves a description change...
+        await client.update('tone', { description: 'Sharper', baseVersion: '1.0.0' });
+        const sizeAfterFirstSave = docs.size;
+
+        // ...and the second, still holding the original description, must not restore it.
+        await expect(
+          client.update('tone', {
+            description: 'Tone',
+            judge: { ...JUDGE, prompt: 'Rate {{{agent_response}}} hard' },
+            baseVersion: '1.0.0',
+          })
+        ).rejects.toBeInstanceOf(EvaluatorVersionConflictError);
+        expect(docs.size).toBe(sizeAfterFirstSave);
+        await expect(client.getLatest('tone')).resolves.toEqual(
+          expect.objectContaining({ version: '1.0.1', description: 'Sharper' })
+        );
+      });
+
+      it('refuses rather than reapplies when a concurrent edit overtakes its write', async () => {
+        const { client, docs, index } = createClient();
+        const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+
+        // Same race as the reapply case above, but this edit knows what it started from.
+        index.mockImplementationOnce(async (params: Record<string, unknown>) => {
+          docs.set(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '2.0.0'), {
+            ...docs.get(created.id)!,
+            version: '2.0.0',
+            judge: { ...JUDGE, evidence: ['input', 'response'] },
+            created_at: '2126-01-01T00:00:00.000Z',
+          });
+          docs.set(params.id as string, params.document as EvaluatorStorageProperties);
+          return { result: 'created' };
+        });
+
+        await expect(
+          client.update('tone', { description: 'Sharper', baseVersion: '1.0.0' })
+        ).rejects.toThrow('changed to version 2.0.0 after this edit started from version 1.0.0');
+        await expect(client.getLatest('tone')).resolves.toEqual(
+          expect.objectContaining({ version: '2.0.0', description: 'Tone' })
+        );
+      });
     });
 
     it('settles without a new version when the head already carries the edit', async () => {

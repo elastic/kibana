@@ -26,6 +26,7 @@ import { validateJudgeConfig } from '../../evaluators/user_defined/validate_conf
 import { EvaluatorAlreadyExistsError } from './evaluator_already_exists_error';
 import { BuiltInEvaluatorNameError } from './built_in_evaluator_name_error';
 import { EvaluatorNotFoundError } from './evaluator_not_found_error';
+import { EvaluatorVersionConflictError } from './evaluator_version_conflict_error';
 import { InvalidEvaluatorNameError } from './invalid_evaluator_name_error';
 import type { EvaluatorStorageProperties, evaluatorsStorageSettings } from './evaluators_storage';
 
@@ -120,6 +121,11 @@ export interface UpdateEvaluatorDefinitionInput {
   description?: string;
   judge?: LlmJudgeConfig;
   createdBy?: string;
+  /**
+   * The version the edit was made from. When set, the update is refused once the latest
+   * version is anything else, so a full-form save cannot write over a newer edit it never saw.
+   */
+  baseVersion?: string;
 }
 
 export interface EvaluatorDefinitionDeleteResult {
@@ -279,7 +285,7 @@ export class EvaluatorDefinitionClient {
    */
   async update(
     name: string,
-    { description, judge, createdBy }: UpdateEvaluatorDefinitionInput
+    { description, judge, createdBy, baseVersion }: UpdateEvaluatorDefinitionInput
   ): Promise<EvaluatorDefinitionDocument> {
     if (this.isBuiltIn(name)) {
       throw new BuiltInEvaluatorNameError(name);
@@ -292,6 +298,12 @@ export class EvaluatorDefinitionClient {
       const current = await this.getLatest(name);
       if (!current) {
         throw new EvaluatorNotFoundError(name);
+      }
+      // Checked on every attempt, so an edit that loses a race (its id taken, or its write
+      // overtaken) is refused here on the retry instead of being reapplied onto a version
+      // its author never saw.
+      if (baseVersion && current.version !== baseVersion) {
+        throw new EvaluatorVersionConflictError(name, baseVersion, current.version);
       }
 
       const nextDescription = description ?? current.description;

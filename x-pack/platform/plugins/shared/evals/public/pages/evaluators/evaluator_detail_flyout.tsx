@@ -28,7 +28,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { getScoreDirection, type JudgeEvidence, type LlmJudgeConfig } from '@kbn/evals-common';
 import { useEvaluator } from '../../hooks/use_evaluators_api';
 import { getErrorMessage } from '../../utils/get_error_message';
@@ -160,7 +160,15 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
   // Undefined means the current version, which is also what the catalog row links to.
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
   const { data, isLoading, error } = useEvaluator(evaluatorName, selectedVersion);
-  const evaluator = data?.evaluator;
+  // The last definition that loaded for the selection that asked for it. A failed fetch
+  // clears `data` (previous data is only kept while loading), so this is what stays on
+  // screen when a version in the history cannot be read.
+  const [lastLoaded, setLastLoaded] = useState<{
+    evaluator: NonNullable<typeof data>['evaluator'];
+    selection: string | undefined;
+  }>();
+  const [failedVersion, setFailedVersion] = useState<{ version: string; message: string }>();
+  const evaluator = data?.evaluator ?? (error ? lastLoaded?.evaluator : undefined);
 
   // The previous definition stays on screen while the chosen one loads, so the two can
   // disagree for a moment. While they do, the body is not the selected version and must
@@ -168,14 +176,32 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
   const isShowingOtherVersion =
     Boolean(evaluator) && Boolean(selectedVersion) && selectedVersion !== evaluator?.version;
 
+  const loadedEvaluator = data?.evaluator;
   useEffect(() => {
-    // A failed fetch would otherwise leave the selector naming a version that never
-    // loaded, beside a body from a different one. Falling back to what is rendered keeps
-    // the label honest; that version is already cached, so nothing flickers.
-    if (error && evaluator && selectedVersion && selectedVersion !== evaluator.version) {
-      setSelectedVersion(evaluator.version);
+    if (!loadedEvaluator || (selectedVersion && loadedEvaluator.version !== selectedVersion)) {
+      return;
     }
-  }, [error, evaluator, selectedVersion]);
+    setLastLoaded((previous) =>
+      previous?.evaluator === loadedEvaluator && previous.selection === selectedVersion
+        ? previous
+        : { evaluator: loadedEvaluator, selection: selectedVersion }
+    );
+  }, [loadedEvaluator, selectedVersion]);
+
+  useEffect(() => {
+    // A failed fetch would otherwise leave the selector naming a version that never loaded,
+    // beside a body from a different one. Returning to the selection that produced what is
+    // rendered keeps the label honest, and that selection is cached, so nothing flickers.
+    if (error && lastLoaded && selectedVersion && selectedVersion !== lastLoaded.selection) {
+      setFailedVersion({ version: selectedVersion, message: getErrorMessage(error) });
+      setSelectedVersion(lastLoaded.selection);
+    }
+  }, [error, lastLoaded, selectedVersion]);
+
+  const selectVersion = (version: string) => {
+    setFailedVersion(undefined);
+    setSelectedVersion(version);
+  };
 
   // `versions` is newest-first, so the head is the one an experiment would pick up.
   const [currentVersion] = evaluator?.versions ?? [];
@@ -219,7 +245,7 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
                     // while the chosen one loads, and the control has to follow the click.
                     value={selectedVersion ?? evaluator.version}
                     options={versionOptions}
-                    onChange={(event) => setSelectedVersion(event.target.value)}
+                    onChange={(event) => selectVersion(event.target.value)}
                     aria-label={i18n.VERSION_LABEL}
                     data-test-subj="evalsEvaluatorDetailVersion"
                   />
@@ -240,12 +266,31 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {error ? (
+        {error && !evaluator ? (
           <>
             <KbnDangerCallout
               title={i18n.DETAILS_LOAD_ERROR_TITLE}
               text={getErrorMessage(error)}
               data-test-subj="evalsEvaluatorDetailError"
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+
+        {failedVersion ? (
+          <>
+            <KbnWarningCallout
+              announceOnMount
+              title={i18n.VERSION_LOAD_ERROR_TITLE(failedVersion.version)}
+              text={<p>{failedVersion.message}</p>}
+              data-test-subj="evalsEvaluatorDetailVersionError"
+              actionProps={{
+                primary: {
+                  children: i18n.RETRY_BUTTON,
+                  onClick: () => selectVersion(failedVersion.version),
+                  'data-test-subj': 'evalsEvaluatorDetailVersionRetry',
+                },
+              }}
             />
             <EuiSpacer size="m" />
           </>
