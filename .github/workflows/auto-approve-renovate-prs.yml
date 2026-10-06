@@ -26,26 +26,19 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            const allowedFiles = [
-              'package.json',
-              'pnpm-lock.yaml',
-            ];
-            const pull = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-            };
+            const allowedFiles = ['package.json', 'pnpm-lock.yaml'];
+            const pull = { ...context.repo, pull_number: context.payload.pull_request.number };
 
             // Commit author metadata is spoofable, so each commit must be either GitHub-signed (web-flow) by the
             // Renovate app, or a Renovate helper fix commit that kibanamachine itself pushed to this branch.
             const commits = await github.paginate(github.rest.pulls.listCommits, pull);
             const kibanamachinePushes = await github.paginate(github.rest.repos.listActivities, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              ...context.repo,
               ref: `refs/heads/${context.payload.pull_request.head.ref}`,
               actor: 'kibanamachine',
               activity_type: 'push',
             });
+            const kibanamachinePushedShas = new Set(kibanamachinePushes.map(({ after }) => after));
             const isRenovateCommit = ({ author, committer, commit }) =>
               author?.login === 'elastic-renovate-prod[bot]' &&
               committer?.login === 'web-flow' &&
@@ -55,7 +48,7 @@ jobs:
               committer?.login === 'kibanamachine' &&
               parents.length === 1 &&
               commit.message.startsWith('Changes from Renovate helper') &&
-              kibanamachinePushes.some(({ after }) => after === sha);
+              kibanamachinePushedShas.has(sha);
             const foreignCommits = commits.filter(
               (commit) => !isRenovateCommit(commit) && !isRenovateHelperCommit(commit)
             );
@@ -94,11 +87,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            const pull = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-            };
+            const pull = { ...context.repo, pull_number: context.payload.pull_request.number };
             const reviews = await github.paginate(github.rest.pulls.listReviews, pull);
             const botApprovals = reviews.filter(
               ({ user, state }) => user?.login === 'github-actions[bot]' && state === 'APPROVED'
