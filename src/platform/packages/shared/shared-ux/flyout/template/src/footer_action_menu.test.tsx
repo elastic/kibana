@@ -189,6 +189,22 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
     expect(container.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
   });
 
+  it('a modified click on a handler-only item fires its onClick and closes the menu', async () => {
+    const onClick = jest.fn();
+    const panels: FlyoutFooterMenuPanel[] = [{ id: 0, items: [{ name: 'Do it', onClick }] }];
+
+    const { container } = renderMenu({ panels });
+
+    await user.click(screen.getByRole('button', { name: /take action/i }));
+    const item = await screen.findByRole('menuitem', { name: 'Do it' });
+    await user.keyboard('{Meta>}');
+    await user.click(item);
+    await user.keyboard('{/Meta}');
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(container.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
+  });
+
   it('clicking an item that opens a nested panel does not close the menu', async () => {
     renderMenu({ panels: NESTED_PANELS });
 

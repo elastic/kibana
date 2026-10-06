@@ -87,7 +87,7 @@ const resolvePanels = (
             ...item,
             onClick: (event: React.MouseEvent<Element, globalThis.MouseEvent>) => {
               onClick?.(event);
-              if (!isModifiedClick(event)) {
+              if (!href || !isModifiedClick(event)) {
                 closePopover();
               }
             },
