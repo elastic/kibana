@@ -7,11 +7,13 @@
 
 import { panelGridSchema, type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
+import { defineRequestPanelKind } from '../panel_kind';
 
 /**
  * Custom content panel requests.
@@ -99,3 +101,11 @@ export const customContentEditPanelRequestSchema = z
   .refine(({ query, esql }) => query !== undefined || esql !== undefined, {
     message: 'At least one of query or esql must be provided.',
   });
+
+export const customContentPanelKind = defineRequestPanelKind({
+  renderer: 'custom_content',
+  embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  label: 'custom content',
+  addInputSchema: customContentPanelRequestSchema,
+  editInputSchema: customContentEditPanelRequestSchema,
+});
