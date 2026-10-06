@@ -18,6 +18,7 @@ import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-ev
 import { DetectionFlyout } from './detection_flyout';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
@@ -81,12 +82,11 @@ const webFrontendFeature = {
 const mockEvent: SignificantEvent = {
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.web-frontend'],
   title: 'Web latency spike',
   summary: 'Latency increased on web-frontend.',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.92,
   blast_radius: [
     {

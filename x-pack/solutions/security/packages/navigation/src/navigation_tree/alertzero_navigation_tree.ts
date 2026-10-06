@@ -13,8 +13,9 @@ import { alertZeroLink } from '../links';
 /**
  * Solution navigation for the AlertZero app, shared by ESS and serverless so the two cannot drift.
  *
- * Nodes are omitted from the rendered tree when `xpack.alertzero.enabled` is false, because the deep links
- * they reference are only registered by the AlertZero plugin when it is enabled.
+ * Nodes are omitted from the rendered tree when the `securitySolution:enableAlertZero` advanced setting is
+ * off (or the `xpack.alertzero.enabled` deployment kill switch is off): the AlertZero app is then either
+ * unregistered or `AppStatus.inaccessible`, and core drops the deep links these nodes reference.
  */
 
 /**
@@ -35,12 +36,8 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
 /** AlertZero nodes that follow the platform Discover / Dashboards entries. */
 export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
   {
-    link: alertZeroLink(SecurityPageName.alerts),
-    icon: 'bell',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.attacks),
-    icon: 'warning',
+    link: alertZeroLink(SecurityPageName.alertZeroEscalations),
+    icon: 'flag',
   },
   {
     // Kept a flat entry on purpose: the per-watch, Workers and Skills links are registered as deep
@@ -49,13 +46,5 @@ export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
     // that `NodeDefinition` cannot express.
     link: alertZeroLink(SecurityPageName.alertZeroWatches),
     icon: 'eye',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroThreatHunt),
-    icon: 'inspect',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroStreams),
-    icon: 'aggregate',
   },
 ];

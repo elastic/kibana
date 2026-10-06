@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import type { Query } from '@elastic/eui';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
-import { EuiFieldSearch, EuiText } from '@elastic/eui';
 import { SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
-import { filter, useFieldQueryFilter } from '@kbn/content-list-toolbar';
+import { filter } from '@kbn/content-list-toolbar';
 import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '@kbn/react-hooks';
-import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
+import { createTagsFilter } from '../../components/create_tags_filter';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { ENABLED_FILTER_ID, KIND_FILTER_ID, TAG_FILTER_ID } from './rules_query_params';
-
-const TAG_SEARCH_DEBOUNCE_MS = 300;
 
 const STATUS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.statusFilter.label', {
   defaultMessage: 'Status',
@@ -26,10 +22,6 @@ const STATUS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.statusFil
 
 const KIND_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.kindFilter.label', {
   defaultMessage: 'Outcome',
-});
-
-const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.tagsFilter.label', {
-  defaultMessage: 'Tags',
 });
 
 export const STATUS_FILTER_OPTIONS = [
@@ -116,79 +108,9 @@ export const KindFilter = filter.createComponent({
   }),
 });
 
-const TagsFilterComponent = ({
-  query,
-  onChange,
-}: {
-  query?: Query;
-  onChange?: (query: Query) => void;
-}) => {
-  const [tagSearch, setTagSearch] = useState('');
-  const debouncedTagSearch = useDebouncedValue(tagSearch, TAG_SEARCH_DEBOUNCE_MS);
-  const { selection } = useFieldQueryFilter({
-    fieldName: TAG_FILTER_ID,
-    query,
-    onChange,
-  });
-  const { data: tagNames = [], isLoading } = useFetchRuleTags({
-    search: debouncedTagSearch || undefined,
-  });
-
-  const options = useMemo(() => {
-    const apiTagSet = new Set(tagNames);
-    const orphans = Object.keys(selection)
-      .filter((tag) => !apiTagSet.has(tag))
-      .map((tag) => ({ key: tag, label: tag }));
-    return [...orphans, ...tagNames.map((tag) => ({ key: tag, label: tag }))];
-  }, [tagNames, selection]);
-
-  const showCapGuidance = tagNames.length >= TAGS_RESPONSE_LIMIT;
-
-  return (
-    <SelectableFilterPopover
-      fieldName={TAG_FILTER_ID}
-      title={TAGS_FILTER_TITLE}
-      query={query}
-      onChange={onChange}
-      options={options}
-      isLoading={isLoading}
-      hideSearch
-      headerContent={
-        <EuiFieldSearch
-          compressed
-          value={tagSearch}
-          onChange={(event) => setTagSearch(event.target.value)}
-          placeholder={i18n.translate('xpack.alertingV2.rulesList.tagsFilter.searchPlaceholder', {
-            defaultMessage: 'Search tags',
-          })}
-          data-test-subj="rulesListTagsFilterSearch"
-        />
-      }
-      footerContent={
-        showCapGuidance ? (
-          <EuiText size="xs" color="subdued" data-test-subj="rulesListTagsFilterCapGuidance">
-            {i18n.translate('xpack.alertingV2.rulesList.tagsFilter.capGuidance', {
-              defaultMessage: 'Showing first {cap} most-used, type to search',
-              values: { cap: TAGS_RESPONSE_LIMIT },
-            })}
-          </EuiText>
-        ) : undefined
-      }
-      renderOption={(option, { isActive }) => (
-        <StandardFilterOption isActive={isActive}>
-          <span data-test-subj={`rulesListTagsFilterOption-${option.key}`}>{option.label}</span>
-        </StandardFilterOption>
-      )}
-      data-test-subj="rulesListTagsFilter"
-    />
-  );
-};
-
-export const TagsFilter = filter.createComponent({
-  resolve: () => ({
-    type: 'custom_component' as const,
-    component: TagsFilterComponent,
-  }),
+export const TagsFilter = createTagsFilter({
+  useFetchTags: useFetchRuleTags,
+  testSubjectPrefix: 'rulesListTagsFilter',
 });
 
 const enabledFieldDefinition: FieldDefinition = {

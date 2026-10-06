@@ -111,7 +111,8 @@ export const findLiveQueryRoute = (
                 request,
                 cpsActive
               );
-              const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+              // A fanned-out CPS read does not also add CCS `*:` remote expressions.
+              const ccsEnabled = !cpsActive && (await hasConnectedRemoteClusters(internalEsClient));
               let integrationNamespaces: string[] | undefined;
 
               if (osqueryContext?.service?.getIntegrationNamespaces) {
@@ -147,7 +148,6 @@ export const findLiveQueryRoute = (
               const resultCountsMap = await getResultCountsForActions(
                 readEsClient,
                 allActionIds,
-                spaceId,
                 integrationNamespaces,
                 ccsEnabled
               );

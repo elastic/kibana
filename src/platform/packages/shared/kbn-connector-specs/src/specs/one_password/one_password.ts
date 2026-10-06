@@ -89,9 +89,23 @@ export const OnePasswordConnector: ConnectorSpec = {
       ),
       input: lazySchema(() =>
         z.object({
-          filter: z.enum(['user.isActive()', 'user.isSuspended()']).optional(),
-          maxPageSize: z.number().optional(),
-          pageToken: z.string().optional(),
+          filter: z
+            .enum(['user.isActive()', 'user.isSuspended()'])
+            .optional()
+            .describe(
+              'Filter users by state: "user.isActive()" or "user.isSuspended()". Omit to list all users'
+            ),
+          maxPageSize: z
+            .number()
+            .optional()
+            .describe(
+              'Maximum number of users to return per page. Uses the API default if omitted'
+            ),
+          pageToken: z
+            .string()
+            .max(2048)
+            .optional()
+            .describe('Pagination token from a previous response to fetch the next page'),
         })
       ),
       handler: async (ctx, input) => {
@@ -126,7 +140,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       ),
       input: lazySchema(() =>
         z.object({
-          uuid: z.string().min(1),
+          uuid: z.string().min(1).max(200).describe('UUID of the 1Password user to retrieve'),
         })
       ),
       handler: async (ctx, input) => {
@@ -156,7 +170,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       ),
       input: lazySchema(() =>
         z.object({
-          uuid: z.string().min(1),
+          uuid: z.string().min(1).max(200).describe('UUID of the active 1Password user to suspend'),
         })
       ),
       handler: async (ctx, input) => {
@@ -183,7 +197,11 @@ export const OnePasswordConnector: ConnectorSpec = {
       ),
       input: lazySchema(() =>
         z.object({
-          uuid: z.string().min(1),
+          uuid: z
+            .string()
+            .min(1)
+            .max(200)
+            .describe('UUID of the suspended 1Password user to reactivate'),
         })
       ),
       handler: async (ctx, input) => {

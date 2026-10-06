@@ -9,18 +9,23 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
-import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
-import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
+import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
+import { ReopenInvestigationStepId } from '../common/investigations/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
 } from './escalations/constants';
+import {
+  INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+  INVESTIGATIONS_API_PRIVILEGE_READ,
+} from './investigations/constants';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
+import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
 
 jest.mock('./impact/routes/register_routes', () => ({
@@ -31,15 +36,25 @@ jest.mock('./escalations/routes/register_routes', () => ({
   registerEscalationRoutes: jest.fn(),
 }));
 
-const createContext = () =>
+jest.mock('./investigations/routes/register_routes', () => ({
+  registerInvestigationRoutes: jest.fn(),
+}));
+
+const createContext = ({ escalationsEnabled = true }: { escalationsEnabled?: boolean } = {}) =>
   ({
     logger: { get: () => loggerMock.create() },
+    config: {
+      get: () => ({ enabled: true, escalations: { enabled: escalationsEnabled } }),
+    },
   } as unknown as ConstructorParameters<typeof AgenticInvestigationsPlugin>[0]);
 
-const setupPlugin = () => {
-  const plugin = new AgenticInvestigationsPlugin(createContext());
+const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = {}) => {
+  const plugin = new AgenticInvestigationsPlugin(createContext({ escalationsEnabled }));
   const coreSetup = coreMock.createSetup();
   const features = { registerKibanaFeature: jest.fn() };
+
+  const workflowsExtensions = { registerStepDefinition: jest.fn() };
+  const agentBuilder = { attachments: { registerType: jest.fn() } };
 
   plugin.setup(
     coreSetup as never,
@@ -47,10 +62,12 @@ const setupPlugin = () => {
       features,
       // agentBuilderPlatform is a required dep for ordering; it exposes no API used at setup time.
       agentBuilderPlatform: {},
+      agentBuilder,
+      workflowsExtensions,
     } as never
   );
 
-  return { plugin, coreSetup, features };
+  return { plugin, coreSetup, features, agentBuilder, workflowsExtensions };
 };
 
 const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
@@ -63,6 +80,8 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
         list: jest.fn(),
         search: jest.fn(),
         create: jest.fn(),
+        addAccessControlEntries: jest.fn(),
+        removeAccessControlEntries: jest.fn(),
         patchMetadata: jest.fn(),
         update: jest.fn(),
       }),
@@ -85,9 +104,8 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   return { coreStart, contract, agentBuilder };
 };
 
-/** The single registered feature config, for assertions on its shape. */
-const registeredFeature = (features: { registerKibanaFeature: jest.Mock }) =>
-  features.registerKibanaFeature.mock.calls[0][0];
+const registeredFeature = (features: { registerKibanaFeature: jest.Mock }, id: string) =>
+  features.registerKibanaFeature.mock.calls.find(([f]: [{ id: string }]) => f.id === id)[0];
 
 describe('AgenticInvestigationsPlugin', () => {
   beforeEach(() => {
@@ -107,36 +125,47 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('grants the impact capabilities from the top-level all privilege', () => {
+    it('grants the investigations read API privilege with both base privileges', () => {
       const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features);
+      const { privileges } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
 
-      expect(privileges.all.api).toEqual([IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE]);
-      expect(privileges.all.ui).toEqual([IMPACT_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_MANAGE]);
+      expect(INVESTIGATIONS_API_PRIVILEGE_READ).toBe('read_investigations');
+      expect(privileges.all.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
+      expect(privileges.all.ui).toEqual([]);
+      expect(privileges.read.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
+      expect(privileges.read.ui).toEqual([]);
     });
 
-    it('withholds manage from read, so a reader cannot attach impact', () => {
+    it('keeps investigations in a sub-feature with a manage privilege', () => {
       const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features);
+      const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+      const [investigationsAll] = subFeatures[0].privilegeGroups[0].privileges;
 
-      expect(privileges.read.api).toEqual([IMPACT_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([IMPACT_UI_CAPABILITY_SHOW]);
+      expect(investigationsAll).toEqual(
+        expect.objectContaining({
+          id: 'investigations_all',
+          includeIn: 'all',
+          api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+        })
+      );
     });
 
-    it('keeps escalations in a sub-feature, joined to the base levels by includeIn', () => {
+    it('registers escalations as a sub-feature alongside investigations with all/read privileges', () => {
       const { features } = setupPlugin();
-      const { subFeatures } = registeredFeature(features);
-      const [escalationsAll, escalationsRead] = subFeatures[0].privilegeGroups[0].privileges;
+      const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+      const [escalationsAll, escalationsRead] = subFeatures[1].privilegeGroups[0].privileges;
 
       expect(escalationsAll).toEqual(
         expect.objectContaining({
-          includeIn: 'all',
+          id: 'escalations_all',
+          includeIn: 'none',
           api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
         })
       );
       expect(escalationsRead).toEqual(
         expect.objectContaining({
+          id: 'escalations_read',
           includeIn: 'read',
           api: [ESCALATIONS_API_PRIVILEGE_READ],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
@@ -144,10 +173,51 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
+    it('registers no escalations sub-feature when escalations are disabled', () => {
+      const { features } = setupPlugin({ escalationsEnabled: false });
+      const feature = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+
+      expect(feature.subFeatures).toHaveLength(1);
+      expect(feature.subFeatures[0].privilegeGroups[0].privileges[0].id).toBe('investigations_all');
+      expect(JSON.stringify(feature)).not.toMatch(/escalations/i);
+    });
+
+    it('tells the escalation routes whether escalations are enabled', () => {
+      setupPlugin({ escalationsEnabled: false });
+
+      expect(registerEscalationRoutes).toHaveBeenCalledWith(
+        expect.objectContaining({ escalationsEnabled: false })
+      );
+    });
+
+    it('registers the impact attachment type and workflow steps during setup', () => {
+      const { workflowsExtensions, agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+
+      const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
+        ([definition]) => definition.id
+      );
+      expect(registeredIds).toEqual([
+        AttachImpactStepId,
+        GetImpactStepId,
+        ReopenInvestigationStepId,
+      ]);
+    });
+
+    it('does not resolve the authorization service until a step actually runs', () => {
+      const { coreSetup } = setupPlugin();
+
+      // Steps register during setup, when `security.authz` does not exist yet.
+      expect(coreSetup.getStartServices).not.toHaveBeenCalled();
+    });
+
     it('grants no proposals privilege, which the proposals feature owns instead', () => {
       const { features } = setupPlugin();
 
-      expect(JSON.stringify(registeredFeature(features))).not.toMatch(/proposals/i);
+      expect(
+        JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
+      ).not.toMatch(/proposals/i);
     });
 
     it('registers the HTTP routes for every entity', () => {
@@ -155,6 +225,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(registerImpactRoutes).toHaveBeenCalledTimes(1);
       expect(registerEscalationRoutes).toHaveBeenCalledTimes(1);
+      expect(registerInvestigationRoutes).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -166,6 +237,14 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(contract.getImpactClient).toEqual(expect.any(Function));
       expect(contract.getEscalationsService()).toBeDefined();
+    });
+
+    it('refuses the escalations service when escalations are disabled', () => {
+      const { plugin } = setupPlugin({ escalationsEnabled: false });
+
+      const { contract } = startPlugin(plugin);
+
+      expect(() => contract.getEscalationsService()).toThrow(/escalations are disabled/i);
     });
 
     it('exposes no proposals getter, which the proposals plugin owns instead', () => {

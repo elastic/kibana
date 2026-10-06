@@ -10,6 +10,7 @@ CONFIG_PATHS=(
   "x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/playwright.config.ts"
   "x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts"
   "x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts"
+  "x-pack/platform/plugins/shared/alerting/test/scout_cps_local/api/playwright.config.ts"
 )
 
 SPACES_CPS_CONFIG="x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts"

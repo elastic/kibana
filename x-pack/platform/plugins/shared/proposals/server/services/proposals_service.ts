@@ -20,7 +20,12 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
-import { PROPOSALS_RESUME_CHANNEL } from '@kbn/proposals-common';
+import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import {
+  DEFAULT_PROPOSAL_TITLE,
+  PROPOSAL_ATTACHMENT_TYPE,
+  PROPOSALS_RESUME_CHANNEL,
+} from '@kbn/proposals-common';
 import type {
   CreateProposalRequest,
   DismissReason,
@@ -37,7 +42,6 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import type { ReviseProposalRequest } from '@kbn/proposals-common';
-import { isExpired } from '@kbn/proposals-common';
 import {
   anchorQuery,
   bucketedEventQuery,
@@ -46,10 +50,9 @@ import {
 } from './esql';
 import type { ChartsWindow } from './esql';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
-import { toSortRanks } from '../storage/sort_ranks';
+import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -93,6 +96,7 @@ export interface ProposalsServiceDeps {
   storage: ProposalsStorageClient;
   logger: Logger;
   getWorkflowsApi: () => WorkflowsManagementApi;
+  getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
 }
 
 /**
@@ -116,7 +120,7 @@ export class ProposalsService {
    */
   async create(
     params: CreateProposalRequest,
-    { spaceId, user }: { spaceId: string; user?: ProposalUser }
+    { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
   ): Promise<ProposalWithMetadata> {
     const id = uuidv4();
     // Workflow callers reach us through Liquid templates, which render an
@@ -130,7 +134,7 @@ export class ProposalsService {
     // that produced it), and rejecting an `actionInput` the action could not
     // accept — before an analyst is asked to approve something that cannot run.
     const metadata = actionWorkflowId
-      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId)
+      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId, request)
       : undefined;
 
     // Caller first in both: it knows the situation the proposal came out of,
@@ -144,15 +148,17 @@ export class ProposalsService {
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
     const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
-    // Both are required on the stored document, so a blank has to resolve to
-    // something rather than to an omission: `confidence` feeds the queue's
-    // secondary sort rank, and `origin` says who proposed it.
+    // Required on the stored document, so a blank has to resolve to something
+    // rather than to an omission: it feeds the queue's secondary sort rank.
     const confidence = blankToUndefined(params.confidence) ?? 'medium';
-    const origin = blankToUndefined(params.origin) ?? 'worker';
 
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
+      // Resolved once here rather than re-derived by every reader: same
+      // precedence as `category`, with the action's own name behind it and a
+      // constant behind that, so every proposal is named exactly once.
+      title: blankToUndefined(params.title) ?? metadata?.name ?? DEFAULT_PROPOSAL_TITLE,
       comment: params.comment,
       actionWorkflowId,
       actionInput: params.actionInput,
@@ -160,7 +166,7 @@ export class ProposalsService {
       impact,
       confidence,
       category,
-      origin,
+      origin: params.origin,
       ...toSortRanks({ impact, confidence }),
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
@@ -174,13 +180,52 @@ export class ProposalsService {
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
+    await this.attachToConversation(id, params.conversationId, document.title, request);
+
     const proposal = toProposal(id, document);
-    return { ...proposal, action: metadata, expired: isExpired(proposal) };
+    return { ...proposal, action: metadata };
   }
 
-  async get(id: string, spaceId: string): Promise<ProposalWithMetadata> {
+  /**
+   * Surfaces the proposal in its conversation, so an analyst meets the decision
+   * in the chat rather than only in the queue.
+   *
+   * Best-effort: the proposal is the record, and the attachment is a view of it.
+   * Losing the card is worth a warning, not the loss of the proposal that the
+   * gate workflow is already parked on.
+   */
+  private async attachToConversation(
+    proposalId: string,
+    conversationId: string,
+    title: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    try {
+      const client = await this.deps.getAttachmentsClient(request);
+      await client.create({
+        conversationId,
+        type: PROPOSAL_ATTACHMENT_TYPE,
+        // Both: `origin` is what the card reads to look the proposal up, and a
+        // payload is required because this type declares no `resolve()` hook.
+        origin: proposalId,
+        // The title rides along because the card's label is rendered
+        // synchronously and so cannot read the proposal; everything else the
+        // card shows is read live.
+        data: { proposalId, title },
+        // The analyst has to see the decision on opening the conversation; the
+        // agent referencing it first would make the card conditional on chat.
+        render_inline: true,
+      });
+    } catch (error) {
+      this.deps.logger.warn(
+        `Failed to attach proposal ${proposalId} to conversation ${conversationId}: ${error}`
+      );
+    }
+  }
+
+  async get(id: string, spaceId: string, request: KibanaRequest): Promise<ProposalWithMetadata> {
     const { proposal } = await this.load(id, spaceId);
-    return this.withMetadata(stripRanks(proposal), spaceId);
+    return this.withMetadata(stripRanks(proposal), spaceId, request);
   }
 
   /**
@@ -197,6 +242,7 @@ export class ProposalsService {
   async list(
     query: ListProposalsQuery,
     spaceId: string,
+    request: KibanaRequest,
     /** Replaces the default priority sort; the queues page by recency instead. */
     sort?: SortCombinations[]
   ): Promise<ListProposalsResponse> {
@@ -206,8 +252,8 @@ export class ProposalsService {
       from: query.from,
       query: { bool: { filter: toFilterClauses(query, spaceId) } },
       sort: sort ?? [
-        { impactRank: { order: 'asc' } },
-        { confidenceRank: { order: 'asc' } },
+        { [IMPACT_RANK_FIELD]: { order: 'asc' } },
+        { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
         // Soonest deadline first; proposals without one come after those with.
         { expiresAt: { order: 'asc', missing: '_last' } },
         // Final tiebreak, so paging over equally-ranked proposals is stable.
@@ -219,7 +265,8 @@ export class ProposalsService {
       response.hits.hits
         .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
         .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
-      spaceId
+      spaceId,
+      request
     );
 
     return {
@@ -238,7 +285,7 @@ export class ProposalsService {
    * keeping this to four queries rather than one per bucket.
    */
   async chartsSummary(
-    { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
+    { windowHours, bucketMinutes, origin }: ProposalChartsSummaryQuery,
     spaceId: string
   ): Promise<ProposalChartsSummaryResponse> {
     const now = Date.now();
@@ -256,7 +303,7 @@ export class ProposalsService {
       currentOpen: 0,
     });
 
-    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes };
+    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes, origin };
 
     let anchorResponse;
     let opensResponse;
@@ -508,7 +555,11 @@ export class ProposalsService {
    * `workflowExecutionId` is the original's, because the gate execution is
    * still running and parked — approving the clone resumes that same execution.
    */
-  async clone({ id, executionError }: CloneProposalParams, spaceId: string): Promise<string> {
+  async clone(
+    { id, executionError }: CloneProposalParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
     // Asserted here rather than left to the caller, because this is reachable
@@ -533,6 +584,10 @@ export class ProposalsService {
     const cloneId = uuidv4();
     const { id: _id, ...original } = proposal;
 
+    // What the predecessor will carry once the supersession write below lands,
+    // resolved here so both documents agree on it.
+    const failure = executionError ?? original.executionError;
+
     const document: ProposalDocument = {
       ...original,
       status: 'pending',
@@ -543,6 +598,9 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // Why the attempt this one re-offers failed. Denormalised from the
+      // predecessor so the queue can say so from the row it already has.
+      previousExecutionError: failure,
     };
 
     // The clone is created before the original is marked, deliberately. The
@@ -557,10 +615,12 @@ export class ProposalsService {
     const superseded: ProposalDocument = {
       ...original,
       supersededBy: cloneId,
-      ...(executionError !== undefined ? { executionError } : {}),
+      ...(failure !== undefined ? { executionError: failure } : {}),
     };
 
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+
+    await this.attachToConversation(cloneId, document.conversationId, document.title, request);
 
     return cloneId;
   }
@@ -574,8 +634,9 @@ export class ProposalsService {
    * any single revision — mirroring `clone()`'s inheritance of the same fields.
    */
   async revise(
-    { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
-    spaceId: string
+    { id, title, comment, actionInput, impact, confidence }: ReviseProposalParams,
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<{ proposalId: string; revision: number }> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
@@ -598,12 +659,6 @@ export class ProposalsService {
         `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
       );
     }
-    // Mirrors `assertDecidable`, for the same lag: a deadline can pass before the
-    // workflow settles the record, so a revision cut here would be born expired.
-    if (isExpired(proposal)) {
-      throw new ProposalExpiredError(id);
-    }
-
     const { id: _id, ...original } = proposal;
 
     // The override is merged over the predecessor's input and the merged object is
@@ -615,12 +670,20 @@ export class ProposalsService {
         : { ...original.actionInput, ...actionInput };
 
     if (mergedActionInput !== undefined && original.actionWorkflowId !== undefined) {
-      await this.resolveAndValidateAction(original.actionWorkflowId, mergedActionInput, spaceId);
+      await this.resolveAndValidateAction(
+        original.actionWorkflowId,
+        mergedActionInput,
+        spaceId,
+        request
+      );
     }
 
     // Resolved once, so the enums and the ranks derived from them cannot drift.
     const nextImpact = impact ?? original.impact;
     const nextConfidence = confidence ?? original.confidence;
+    // Only a real override replaces the predecessor's: a blank would strip the
+    // proposal of the name `create()` resolved for it.
+    const nextTitle = blankToUndefined(title);
 
     const revisionId = uuidv4();
     const rootProposalId = original.rootProposalId ?? id;
@@ -641,6 +704,10 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // `previousExecutionError` rides along with the spread untouched: a
+      // revision corrects a proposal, it does not run anything, so the last
+      // attempt to fail is still the one the predecessor was re-offered for.
+      ...(nextTitle !== undefined ? { title: nextTitle } : {}),
       ...(comment !== undefined ? { comment } : {}),
       ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
       impact: nextImpact,
@@ -680,6 +747,8 @@ export class ProposalsService {
       }
       throw error;
     }
+
+    await this.attachToConversation(revisionId, document.conversationId, document.title, request);
 
     return { proposalId: revisionId, revision };
   }
@@ -818,9 +887,10 @@ export class ProposalsService {
    */
   async resolveActionMetadata(
     actionWorkflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionMetadata | undefined> {
-    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId);
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
     return definition && this.readActionMetadata(actionWorkflowId, definition);
   }
 
@@ -832,9 +902,10 @@ export class ProposalsService {
   private async resolveAndValidateAction(
     actionWorkflowId: string,
     actionInput: Record<string, unknown> | undefined,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionMetadata | undefined> {
-    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId);
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
     if (!definition) {
       return undefined;
     }
@@ -875,10 +946,13 @@ export class ProposalsService {
 
   private async fetchActionDefinition(
     actionWorkflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionWorkflowDefinition | undefined> {
     try {
-      const workflow = await this.deps.getWorkflowsApi().getWorkflow(actionWorkflowId, spaceId);
+      const workflow = await this.deps
+        .getWorkflowsApi()
+        .getWorkflow(actionWorkflowId, spaceId, request);
       return workflow?.definition as ActionWorkflowDefinition | undefined;
     } catch (error) {
       this.deps.logger.warn(
@@ -945,10 +1019,11 @@ export class ProposalsService {
    * stays at `pending` for as long as the gate workflow's post-gate steps take
    * to run, so a status check alone would let a second approver through.
    *
-   * The status catches what the decision cannot: the workflow settles an
-   * unanswered proposal as `expired` on attempt exhaustion or a failure before
-   * anyone decided, which leaves no decision behind and can happen well before
-   * the wall-clock deadline. The date check below would still read it as live.
+   * The `status` catches what the decision cannot: the workflow settles an
+   * undecided proposal as `expired` on attempt exhaustion or a failure before
+   * anyone decided, which leaves no decision behind. A deadline that has
+   * passed but not yet been swept to `expired` still reads `pending` here
+   * which is accepted lag, rather than a second check against `expiresAt`.
    *
    * `pending` is the only status that is valid while undecided, so anything
    * else is already settled.
@@ -963,12 +1038,6 @@ export class ProposalsService {
       throw new ProposalConflictError(
         `Proposal [${proposal.id}] has settled as ${proposal.status}`
       );
-    }
-    // Kept alongside the status check for the lag between a deadline passing
-    // and the workflow settling the record, during which it still reads
-    // `pending`.
-    if (isExpired(proposal)) {
-      throw new ProposalExpiredError(proposal.id);
     }
   }
 
@@ -1016,7 +1085,9 @@ export class ProposalsService {
     }
 
     const api = this.deps.getWorkflowsApi();
-    const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId);
+    const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId, {
+      request,
+    });
     if (!execution) {
       throw new ProposalConflictError(
         `Execution [${proposal.workflowExecutionId}] for proposal [${proposal.id}] not found`
@@ -1039,12 +1110,16 @@ export class ProposalsService {
     );
   }
 
-  private async withMetadata(proposal: Proposal, spaceId: string): Promise<ProposalWithMetadata> {
+  private async withMetadata(
+    proposal: Proposal,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ProposalWithMetadata> {
     const action = proposal.actionWorkflowId
-      ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId)
+      ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId, request)
       : undefined;
 
-    return { ...proposal, action, expired: isExpired(proposal) };
+    return { ...proposal, action };
   }
 
   /**
@@ -1056,7 +1131,8 @@ export class ProposalsService {
    */
   private async withMetadataBatch(
     proposals: Proposal[],
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ProposalWithMetadata[]> {
     const uniqueWorkflowIds = [
       ...new Set(
@@ -1065,7 +1141,7 @@ export class ProposalsService {
     ];
 
     const metaEntries = await asyncMapWithLimit(uniqueWorkflowIds, 10, async (id) => {
-      const meta = await this.resolveActionMetadata(id, spaceId);
+      const meta = await this.resolveActionMetadata(id, spaceId, request);
       return [id, meta] as [string, ActionMetadata | undefined];
     });
 
@@ -1077,7 +1153,6 @@ export class ProposalsService {
         proposal.actionWorkflowId !== undefined
           ? metaMap.get(proposal.actionWorkflowId)
           : undefined,
-      expired: isExpired(proposal),
     }));
   }
 }
@@ -1128,6 +1203,9 @@ const toFilterClauses = (
   if (filters.conversationId) {
     filter.push({ term: { conversationId: filters.conversationId } });
   }
+  if (filters.origin) {
+    filter.push({ term: { origin: filters.origin } });
+  }
   if (filters.category) {
     filter.push({ term: { category: filters.category } });
   }
@@ -1158,10 +1236,10 @@ const toFilterClauses = (
 
 /**
  * Drops the storage-only sort ranks, so they never reach the API contract.
- * Destructuring is the point: adding a rank field forces this to be updated.
+ * One key rather than a list, because they are nested under `ranks`: a third
+ * rank is a change to `ProposalSortRanks` alone.
  */
-const stripRanks = ({ impactRank, confidenceRank, ...proposal }: StoredProposalRecord): Proposal =>
-  proposal;
+const stripRanks = ({ ranks, ...proposal }: StoredProposalRecord): Proposal => proposal;
 
 const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });

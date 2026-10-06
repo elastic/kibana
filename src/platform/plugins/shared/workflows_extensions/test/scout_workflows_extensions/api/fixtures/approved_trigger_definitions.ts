@@ -40,55 +40,59 @@
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
     id: 'ai.attachmentAdded',
-    schemaHash: '843b39ae3d48c95ab9b31c0f0c88be551b2498700535062b186aca8114c783bf',
+    schemaHash: 'c82f96366f59ded38993b577bbeea35d01d916dc9403881636f193c4ccf39526',
   },
   {
     id: 'ai.attachmentDeleted',
-    schemaHash: 'e89135cede7bc011a830318bbaec7e29709e72d41a71e4a04d747fe3cc6549b6',
+    schemaHash: '1867659824969a51ef31fb3f7a808a1dfec1cccc0beb8976eb94a4c7a5b701ae',
   },
   {
     id: 'ai.attachmentUpdated',
-    schemaHash: '4725f1ac547f598dbef94ac23d8bf667a75cdba14e64697126e2fd10263cd687',
+    schemaHash: '73a6023bf61fccf1dab6d9f6a35f028e6b89d054565444262a3e7da734fbe1d1',
   },
   {
     id: 'ai.conversation.metadataUpdated',
     schemaHash: '3ddfb053989618f32071989376a39b001b3ed1bead0e81bf9f48c20253a53c57',
   },
   {
-    id: 'alerting.episodeAcked',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+    id: 'ai.conversation.updated',
+    schemaHash: '56e3a676eb337ba1384fa50792dfeea9d2c77d23b92b3caded8a3cefc8141ca1',
   },
   {
-    id: 'alerting.episodeActivated',
-    schemaHash: 'c5a55a218565c7d084269021a9d6252d9ea972a8a9ce496082da5c6e76d09a01',
+    id: 'alerting.actions.alertAcked',
+    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
   },
   {
-    id: 'alerting.episodeAssigned',
-    schemaHash: 'b99211de1fdabb5e2a2942031495b8c34d317a3feccd7efaa81bf997c0412439',
+    id: 'alerting.actions.alertActivated',
+    schemaHash: '07ee0fd838d1d21ae735b5060d4529e1242bb156f83c85b86ed336053780bdfc',
   },
   {
-    id: 'alerting.episodeDeactivated',
-    schemaHash: '623ec35bd18482cc9a3bc7a9ecaf3b3de4f203c8cacc207e102b8a5b14fa554a',
+    id: 'alerting.actions.alertAssigned',
+    schemaHash: '91e8aea06c5d64a463a4d785a813cf010b08781d4e1fd6dca56bd1f71da62e81',
   },
   {
-    id: 'alerting.episodeSnoozed',
-    schemaHash: 'f0517884b4e0560f86a62515c0d84420fed367ef2cfdda501cfedad010f22914',
+    id: 'alerting.actions.alertDeactivated',
+    schemaHash: '44071e937ad35416cc28959c12df5dbbc5edff8a2950f1218bfc11c7803834f5',
   },
   {
-    id: 'alerting.episodeTagged',
-    schemaHash: 'd6ad1872b85995d8088dfacbad85f775236ceb61a3982b077c7a00902c84bf95',
+    id: 'alerting.actions.alertSnoozed',
+    schemaHash: '1bc74f115b351daa1f6c04ccc4d50949112b974b5a1d0aea2e043d73472fd143',
   },
   {
-    id: 'alerting.episodeUnacked',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+    id: 'alerting.actions.alertTagged',
+    schemaHash: 'd75b12a1fa3e7770bb15a3d63c1985b8c17006a652b8b2f32ab1569600d6a97c',
   },
   {
-    id: 'alerting.episodeUnassigned',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+    id: 'alerting.actions.alertUnacked',
+    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
   },
   {
-    id: 'alerting.episodeUnsnoozed',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+    id: 'alerting.actions.alertUnassigned',
+    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
+  },
+  {
+    id: 'alerting.actions.alertUnsnoozed',
+    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
   },
   {
     id: 'alerting.ruleCreated',
@@ -200,11 +204,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'significant-events.eventCreated',
-    schemaHash: '537230a2eb86302d4a80e93f396effd93681ba4a2e11fd70c5b7b5b56fe4c3fb',
+    schemaHash: 'b2a0b53f92992ef70e61a58d6b708092a98d85d9478694914bc00692bcb69123',
   },
   {
     id: 'significant-events.eventStatusChanged',
-    schemaHash: 'f140133a6ecef997484c3d4ef94b326207b4f1124cce889d34fef6e38fa019fe',
+    schemaHash: '99541eb32dae94be8bf4b1828f92b756ae7181320a285e5cef76f9391f42f9a6',
   },
   {
     id: 'workflows.failed',

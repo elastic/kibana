@@ -6,111 +6,84 @@
  */
 
 import { isEqual } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type {
-  Severity,
   SignificantEventInvestigation,
-  SignificantEventStatus,
-  TriggerFeedback,
+  SignificantEventResponse,
 } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { EventClient } from './event_client';
+import type { SignificantEventsReadClient } from './event_client';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
-
-interface SignificantEventFieldChanges {
-  status?: SignificantEventStatus;
-  severity?: Severity;
-  summary?: string;
-}
-
-export type SignificantEventTriggerFeedback = ReadonlyArray<TriggerFeedback>;
-
-/**
- * Narrow a requested field patch to only the attributes that actually differ from the current
- * version, so proposing the current value is a no-op and never writes a redundant version.
- */
-const pickChangedFields = (
-  current: SignificantEventFieldChanges,
-  fields: SignificantEventFieldChanges
-): SignificantEventFieldChanges => {
-  const changed: SignificantEventFieldChanges = {};
-  if (fields.status !== undefined && fields.status !== current.status) {
-    changed.status = fields.status;
-  }
-  if (fields.severity !== undefined && fields.severity !== current.severity) {
-    changed.severity = fields.severity;
-  }
-  if (fields.summary !== undefined && fields.summary !== current.summary) {
-    changed.summary = fields.summary;
-  }
-  return changed;
-};
-
-const fieldsFromTriggerFeedback = (
-  current: SignificantEventFieldChanges,
-  triggerFeedback: SignificantEventTriggerFeedback | undefined,
-  eventId: string,
-  logger?: Logger
-): SignificantEventFieldChanges => {
-  const fields: SignificantEventFieldChanges = {};
-  const counts = new Map<TriggerFeedback['field'], number>();
-  for (const feedback of triggerFeedback ?? []) {
-    counts.set(feedback.field, (counts.get(feedback.field) ?? 0) + 1);
-  }
-
-  for (const feedback of triggerFeedback ?? []) {
-    // Multiple proposals for one field are ambiguous; ignore that field rather than choosing
-    // based on array order.
-    if (counts.get(feedback.field) !== 1) {
-      logger?.warn(
-        `Ignoring ambiguous trigger feedback for significant event "${eventId}" field "${feedback.field}"`
-      );
-      continue;
-    }
-
-    const currentValue = current[feedback.field];
-    if (currentValue !== feedback.from) {
-      logger?.warn(
-        `Ignoring stale trigger feedback for significant event "${eventId}" field "${feedback.field}"`
-      );
-      continue;
-    }
-    switch (feedback.field) {
-      case 'status':
-        fields.status = feedback.to;
-        break;
-      case 'severity':
-        fields.severity = feedback.to;
-        break;
-      case 'summary':
-        fields.summary = feedback.to;
-        break;
-    }
-  }
-  return fields;
-};
+import { toRuleEvent } from './to_rule_event';
 
 export const attachInvestigationToEvent = async ({
   eventClient,
+  eventSearchClient,
   eventId,
   investigation,
-  triggerFeedback,
+  alertEventsClient,
   logger,
 }: {
+  /** Full-surface EventClient — all writes and canonical lineage reads go here. */
   eventClient: EventClient;
+  /**
+   * Flag-aware read surface (`getEventSearchClient()`). When provided, `resolvedSearchClient`
+   * uses this for the initial read; canonical investigations are always sourced from `eventClient`.
+   * Defaults to `eventClient` for legacy tests. Production callers must always supply this.
+   */
+  eventSearchClient?: SignificantEventsReadClient;
   eventId: string;
   investigation: SignificantEventInvestigation;
-  triggerFeedback?: SignificantEventTriggerFeedback;
+  alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
-}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
-  const { hits } = await eventClient.findByEventId(eventId);
-  const latest = hits[hits.length - 1];
-
-  if (!latest) {
-    return { event_uuid: eventId, updated: 0, ignored: 1 };
+}): Promise<{ updated: number; ignored: number }> => {
+  const resolvedSearchClient = eventSearchClient ?? eventClient;
+  let latestByEventId: SignificantEventResponse | undefined;
+  let readStoreThrew = false;
+  try {
+    latestByEventId = await resolvedSearchClient.findLatestByEventId(eventId);
+  } catch (err) {
+    readStoreThrew = true;
+    logger?.warn(
+      `attach_investigation: read-store lookup failed, falling back to canonical client: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
   }
 
-  const existing = latest.investigations ?? [];
+  // Dual-write lag guard: when the flag-aware read store returns nothing *or throws*, fall back
+  // to the canonical eventClient. An empty or errored read-store result is not proof of absence —
+  // the dual-write to `.rule-events` can lag behind a successful legacy write, or the read store
+  // may be temporarily unavailable.
+  const usedLegacyFallback =
+    (latestByEventId === undefined || readStoreThrew) && eventSearchClient !== undefined;
+  const latest = usedLegacyFallback
+    ? await eventClient.findLatestByEventId(eventId)
+    : latestByEventId;
+
+  if (!latest) {
+    return { updated: 0, ignored: 1 };
+  }
+
+  // RuleEventsClient uses `group_hash` as a synthetic identifier, so writes must source the
+  // current canonical event from EventClient.
+  // If we already fell back to eventClient above, reuse that result — no second round-trip needed.
+  const latestLegacy =
+    usedLegacyFallback || resolvedSearchClient === eventClient
+      ? latest
+      : await eventClient.findLatestByEventId(eventId);
+
+  if (!latestLegacy) {
+    // The event exists in the read store (resolvedSearchClient) but not in the write store
+    // (eventClient) — most likely a dual-write lag race. Surface a retryable error so the caller
+    // can distinguish this from a genuine not-found.
+    throw new Error(
+      `Significant event "${eventId}" exists in the read store but not the write store — possible dual-write lag, retry later`
+    );
+  }
+
+  const existing = latestLegacy.investigations ?? [];
 
   // Replace-by-workflow_execution_id: completion events are safe to redeliver.
   const existingIdx = existing.findIndex(
@@ -124,38 +97,41 @@ export const attachInvestigationToEvent = async ({
     investigations = [...existing, investigation];
   } else {
     // At the schema-enforced 100-entry cap, do not exceed investigations.max(100).
+    logger?.warn(
+      `attach_investigation: investigation cap (100) reached for event_id "${eventId}"; new investigation entry dropped`
+    );
     investigations = existing;
   }
 
-  const changedFields = pickChangedFields(
-    latest,
-    fieldsFromTriggerFeedback(latest, triggerFeedback, eventId, logger)
-  );
-
-  // No-op only when neither the investigation list nor any reassessed field actually changed.
-  if (isEqual(investigations, existing) && Object.keys(changedFields).length === 0) {
-    return { event_uuid: latest.event_uuid, updated: 0, ignored: 1 };
+  if (isEqual(investigations, existing)) {
+    return { updated: 0, ignored: 1 };
   }
 
   const now = new Date().toISOString();
-  const nextEventUuid = uuidv4();
   const updatedEvent = {
-    ...latest,
+    ...latestLegacy,
     '@timestamp': now,
-    event_uuid: nextEventUuid,
-    previous_event_uuid: latest.event_uuid,
     investigations,
     workflow_execution_id: investigation.workflow_execution_id,
-    ...changedFields,
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
 
+  alertEventsClient
+    ?.createAlertEvent(toRuleEvent(updatedEvent))
+    .catch((err) =>
+      logger?.error(
+        `attach_investigation dual-write to .rule-events failed: ${
+          err instanceof Error ? err.message : err
+        }`
+      )
+    );
+
   emitSignificantEventWriteTriggers({
     eventClient,
     significantEvent: updatedEvent,
-    priorSignificantEvent: latest,
+    priorSignificantEvent: latestLegacy,
   });
 
-  return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
+  return { updated: 1, ignored: 0 };
 };

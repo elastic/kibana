@@ -104,7 +104,7 @@ describe('createListPoliciesTool', () => {
       schema: options.schema,
       maxResultTokens: options.maxResultTokens,
       handler: async (params) => ({
-        results: [createOtherResult(await options.run(params, mockService))],
+        results: [createOtherResult(await options.run(params, mockService, createContext()))],
       }),
     }));
     mockedListPolicies.mockReset();

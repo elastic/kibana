@@ -50,18 +50,20 @@ export const getCreateProposalStepDefinition = ({
         const proposal = await getProposalsService().create(
           {
             conversationId: input.conversationId,
+            title: input.title,
             comment: input.comment,
             actionWorkflowId: input.actionWorkflowId,
             actionInput: input.actionInput,
             impact: input.impact,
             category: input.category,
             confidence: input.confidence ?? 'medium',
-            origin: input.origin ?? 'worker',
+            origin: input.origin,
             expiresAt: resolveExpiresAt(input.expiresIn),
             workflowExecutionId,
           },
           {
             spaceId,
+            request,
             // `execution.executedBy` is only ever a username, so it is the last
             // resort when the request yields no identity at all.
             user: user ?? {
