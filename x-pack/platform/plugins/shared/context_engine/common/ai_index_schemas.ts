@@ -103,6 +103,7 @@ export const aiIndexAttachmentDataSchema = aiIndexPropertiesSchema.omit({ traces
       ])
     )
     .max(MAX_AI_INDEX_TRACES),
+  feedbackLoopEnabled: z.boolean().optional(),
 });
 
 /**
@@ -113,4 +114,5 @@ export const aiIndexAttachmentDataSchema = aiIndexPropertiesSchema.omit({ traces
 export type AiIndexAttachmentData = Omit<AiIndexProperties, 'traces'> & {
   id: string;
   traces: AiIndexTraceWithQuery[];
+  feedbackLoopEnabled?: boolean;
 };

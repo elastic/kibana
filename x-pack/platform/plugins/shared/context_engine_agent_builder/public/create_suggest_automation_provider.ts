@@ -7,8 +7,9 @@
 
 import { isToolResultEvent, ToolResultType, type ToolResult } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
 import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/public/types';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
@@ -56,9 +57,11 @@ export const buildSuggestAutomationSessionTag = (spaceId: string, aiIndexId: str
 export const createSuggestAutomationProvider = ({
   agentBuilder,
   application,
+  uiSettings,
 }: {
   agentBuilder: AgentBuilderPluginStart | undefined;
   application: ApplicationStart;
+  uiSettings: IUiSettingsClient;
 }): SuggestAutomationProvider => ({
   canSuggest: ({ aiIndex, isManaged }) =>
     aiIndex !== undefined &&
@@ -74,6 +77,10 @@ export const createSuggestAutomationProvider = ({
     if (!agentBuilder?.openChat) {
       return;
     }
+    const feedbackLoopEnabled = uiSettings.get<boolean>(
+      CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
+      false
+    );
     const attachmentData: AiIndexAttachmentData = {
       id: aiIndex.id,
       description: aiIndex.description,
@@ -81,6 +88,7 @@ export const createSuggestAutomationProvider = ({
       sources: aiIndex.sources,
       automations: aiIndex.automations,
       traces: aiIndex.traces,
+      feedbackLoopEnabled,
     };
     agentBuilder.openChat({
       autoSendInitialMessage: true,
