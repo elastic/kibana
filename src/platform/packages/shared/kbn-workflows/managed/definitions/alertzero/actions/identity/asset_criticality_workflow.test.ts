@@ -13,6 +13,7 @@ import {
   ALERTZERO_ACTION_SET_ASSET_CRITICALITY_WORKFLOW_ID,
 } from './action_set_asset_criticality';
 import { ALERTZERO_ACTION_WORKFLOW_IDS } from '../..';
+import { createWorkflowLiquidEngine } from '../../../../../common/utils';
 import { WorkflowSchema } from '../../../../../spec/schema';
 
 /**
@@ -158,6 +159,43 @@ describe('AlertZero set asset criticality workflow', () => {
     );
     expect(capture?.with?.previous_level_known).toContain('steps.read_previous.error == blank');
     expect(capture?.with?.previous_level_known).toContain('HTTP 404');
+  });
+
+  // The text-only assertions above would still pass even if the field accidentally
+  // rendered as the string "false" (a non-empty, truthy string in Liquid's `{% if %}`,
+  // which would make the guard upstream a silent no-op). Evaluate the real expression
+  // through the Liquid engine to pin the actual boolean it produces.
+  const evaluatePreviousLevelKnown = (readPreviousError: { message: string } | undefined) => {
+    const capture = stepByName('capture_previous');
+    const expression = String(capture?.with?.previous_level_known)
+      .replace(/^\$\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim();
+    const captureStatus = stepByName('capture_previous_status');
+    const statusExpression = String(captureStatus?.with?.previous_read_http_status)
+      .replace(/^\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim();
+    const engine = createWorkflowLiquidEngine();
+    const previousReadHttpStatus = engine.evalValueSync(statusExpression, {
+      steps: { read_previous: { error: readPreviousError } },
+    });
+    return engine.evalValueSync(expression, {
+      steps: { read_previous: { error: readPreviousError } },
+      variables: { previous_read_http_status: previousReadHttpStatus },
+    });
+  };
+
+  it.each([
+    ['a successful read (record exists) -> known: true', undefined, true],
+    ['a confirmed 404 (no record) -> known: true', { message: 'HTTP 404: Not Found' }, true],
+    [
+      'a non-404 read failure (network blip, 403, 500) -> known: false',
+      { message: 'HTTP 500: Internal Server Error' },
+      false,
+    ],
+  ] as const)('evaluates previous_level_known for %s', (_label, readPreviousError, expected) => {
+    expect(evaluatePreviousLevelKnown(readPreviousError)).toBe(expected);
   });
 
   it('upserts through the public API with the versioned header, wait_for refresh, and no retry', () => {

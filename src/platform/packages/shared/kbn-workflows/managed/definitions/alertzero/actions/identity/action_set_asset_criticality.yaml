@@ -134,7 +134,10 @@ steps:
       # say what the previous level was. Any other read failure (network blip, 403, 500)
       # must not be mistaken for "no previous record" -- that would tell the approver to
       # DELETE a record that may still exist, destroying it instead of restoring it.
-      previous_level_known: "{{ steps.read_previous.error == blank or variables.previous_read_http_status == 'HTTP 404' }}"
+      # `${{ }}` (not `{{ }}`) evaluates as an expression and keeps the native boolean;
+      # plain `{{ }}` output always stringifies, and the literal text "false" is truthy
+      # in Liquid's `{% if %}`, which would make the guard below a no-op.
+      previous_level_known: "${{ steps.read_previous.error == blank or variables.previous_read_http_status == 'HTTP 404' }}"
 
   # Upsert the record. No retries: a repeated POST is harmless but would hide
   # the real failure behind a later success. `refresh: wait_for` so the entity
