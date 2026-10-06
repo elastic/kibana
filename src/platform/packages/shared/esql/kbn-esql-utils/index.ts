@@ -116,6 +116,7 @@ export {
   type ESQLSourceInfo,
   type ESQLSourceInfoColumn,
   clearESQLSourceInfoCache,
+  ESQL_SOURCE_INFO_CACHE_TTL,
   buildEsqlSourceCacheKey,
 } from './src';
 

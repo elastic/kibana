@@ -16,6 +16,7 @@ export { getESQLTimeField } from './utils/get_time_field';
 export {
   getESQLSourceInfo,
   clearESQLSourceInfoCache,
+  ESQL_SOURCE_INFO_CACHE_TTL,
   buildEsqlSourceCacheKey,
 } from './utils/get_source_info';
 export type { ESQLSourceInfo, ESQLSourceInfoColumn } from './utils/get_source_info';
