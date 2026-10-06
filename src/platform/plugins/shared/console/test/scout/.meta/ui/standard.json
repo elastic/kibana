@@ -1,8 +1,7 @@
 {
-  "sha1": "b347e793fed51970ad1e6ca0f72317c7b0c3c118",
+  "sha1": "2643534700835fa2a2667f8953d49d054a70cb99",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -61,7 +60,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 36,
+        "line": 39,
         "column": 9
       }
     },
@@ -81,7 +80,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 61,
+        "line": 64,
         "column": 13
       }
     },
@@ -101,7 +100,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 66,
+        "line": 79,
         "column": 5
       }
     },
@@ -121,8 +120,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 78,
-        "column": 62
+        "line": 90,
+        "column": 55
       }
     },
     {
@@ -141,8 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 85,
-        "column": 8
+        "line": 95,
+        "column": 62
       }
     },
     {
@@ -161,8 +160,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 89,
-        "column": 44
+        "line": 101,
+        "column": 8
       }
     },
     {
@@ -181,8 +180,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 95,
-        "column": 5
+        "line": 106,
+        "column": 23
       }
     },
     {
@@ -201,8 +200,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 100,
-        "column": 23
+        "line": 111,
+        "column": 87
       }
     },
     {
@@ -221,8 +220,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 112,
-        "column": 11
+        "line": 122,
+        "column": 23
       }
     },
     {
@@ -241,7 +240,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 128,
+        "line": 138,
         "column": 23
       }
     },
@@ -261,8 +260,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 141,
-        "column": 5
+        "line": 150,
+        "column": 11
       }
     },
     {
@@ -281,7 +280,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 189,
+        "line": 200,
         "column": 1
       }
     },
@@ -301,7 +300,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
-        "line": 196,
+        "line": 207,
         "column": 1
       }
     },
@@ -321,8 +320,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/tests/vector_tile_response.spec.ts",
-        "line": 24,
-        "column": 23
+        "line": 38,
+        "column": 26
       }
     }
   ]

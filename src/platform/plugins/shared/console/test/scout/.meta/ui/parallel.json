@@ -1,8 +1,7 @@
 {
-  "sha1": "b347e793fed51970ad1e6ca0f72317c7b0c3c118",
+  "sha1": "2643534700835fa2a2667f8953d49d054a70cb99",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -789,8 +788,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
-        "line": 61,
-        "column": 23
+        "line": 67,
+        "column": 29
       }
     },
     {
