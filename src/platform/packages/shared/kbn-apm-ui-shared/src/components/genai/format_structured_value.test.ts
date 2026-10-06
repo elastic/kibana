@@ -35,9 +35,9 @@ describe('formatStructuredValue', () => {
     );
   });
 
-  it('keeps line breaks of multi-line strings in | blocks', () => {
+  it('keeps line breaks of multi-line strings in literal blocks', () => {
     expect(formatStructuredValue({ text: 'line 1\nline 2', empty: '', none: null })).toBe(
-      ['text: |', '  line 1', '  line 2', 'empty: ""', 'none: null'].join('\n')
+      ['text: |-', '  line 1', '  line 2', 'empty: ""', 'none: null'].join('\n')
     );
   });
 

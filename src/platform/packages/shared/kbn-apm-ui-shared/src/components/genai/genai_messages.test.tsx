@@ -204,7 +204,7 @@ describe('GenAiMessages', () => {
     expect(message).not.toHaveTextContent('\\n');
     expect(message).toHaveTextContent('type: other');
     expect(screen.getByTestId('genAiStructuredValue').textContent).toContain(
-      'text: |\n        line 1\n        line 2'
+      'text: |-\n        line 1\n        line 2'
     );
   });
 

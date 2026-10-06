@@ -8,74 +8,50 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Document, isScalar, visit } from 'yaml';
 import { isRecord } from './parse_genai_value';
 
 export const MAX_ARRAY_ITEMS = 200;
 
-const INDENT = '  ';
+// Appended to truncated arrays, then swapped for a YAML comment once the document is built.
+const HIDDEN_ITEMS_MARKER = '\u0000kbn-genai-hidden-items:';
 
-const isEmptyCollection = (value: unknown): boolean =>
-  (Array.isArray(value) && value.length === 0) ||
-  (isRecord(value) && Object.keys(value).length === 0);
-
-const isMultiline = (value: unknown): value is string =>
-  typeof value === 'string' && value.includes('\n');
-
-// Strings YAML would read as something else (a nested key, comment, number,
-// boolean, null, or an indicator character) are quoted, as a YAML serializer would.
-const AMBIGUOUS_STRING =
-  /^\s|\s$|: |:$| #|^[-?:,[\]{}#&*!|>'"%@`]|^(true|false|null|~|yes|no|on|off)$|^[-+]?(\d|\.\d)/i;
-
-const formatScalar = (value: unknown): string => {
-  if (value == null) return 'null';
-  if (Array.isArray(value)) return '[]';
-  if (typeof value === 'object') return '{}';
-  if (typeof value === 'string' && (value === '' || AMBIGUOUS_STRING.test(value))) {
-    return JSON.stringify(value);
-  }
-  return String(value);
-};
-
-const isScalar = (value: unknown): boolean =>
-  (value == null || typeof value !== 'object' || isEmptyCollection(value)) && !isMultiline(value);
-
-const formatBlockString = (value: string, indent: string): string[] =>
-  value.split('\n').map((line) => `${indent}${line}`);
-
-const formatLines = (value: unknown, indent: string): string[] => {
-  if (isScalar(value)) return [`${indent}${formatScalar(value)}`];
-  if (isMultiline(value)) return formatBlockString(value, indent);
-
+/** Caps arrays before serializing so very large tool outputs stay cheap to render. */
+const truncateArrays = (value: unknown): unknown => {
   if (Array.isArray(value)) {
-    const lines = value.slice(0, MAX_ARRAY_ITEMS).flatMap((item) => {
-      if (isScalar(item)) return [`${indent}- ${formatScalar(item)}`];
-      if (isMultiline(item)) return [`${indent}- |`, ...formatBlockString(item, indent + INDENT)];
-      // Nested collections start on the dash line, YAML-style.
-      const [first, ...rest] = formatLines(item, indent + INDENT);
-      return [`${indent}- ${first.trimStart()}`, ...rest];
-    });
+    const items = value.slice(0, MAX_ARRAY_ITEMS).map(truncateArrays);
     const hidden = value.length - MAX_ARRAY_ITEMS;
-    if (hidden > 0) {
-      lines.push(
-        `${indent}# ${i18n.translate('apmUiShared.genAi.structuredValue.moreItems', {
-          defaultMessage: '… {count} more items',
-          values: { count: hidden },
-        })}`
-      );
-    }
-    return lines;
+    return hidden > 0 ? [...items, `${HIDDEN_ITEMS_MARKER}${hidden}`] : items;
   }
-
-  return Object.entries(value as Record<string, unknown>).flatMap(([key, item]) => {
-    if (isScalar(item)) return [`${indent}${key}: ${formatScalar(item)}`];
-    if (isMultiline(item))
-      return [`${indent}${key}: |`, ...formatBlockString(item, indent + INDENT)];
-    return [`${indent}${key}:`, ...formatLines(item, indent + INDENT)];
-  });
+  if (isRecord(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, truncateArrays(item)])
+    );
+  }
+  return value;
 };
 
 /**
- * Formats structured data as YAML-like text: `key: value` rows, `-` list
- * items, and multi-line strings as `|` blocks so their line breaks are kept.
+ * Formats structured data as YAML for display: `key: value` rows, `-` list
+ * items, and multi-line strings as literal `|` blocks so their line breaks are kept.
  */
-export const formatStructuredValue = (value: unknown): string => formatLines(value, '').join('\n');
+export const formatStructuredValue = (value: unknown): string => {
+  const doc = new Document(truncateArrays(value));
+
+  visit(doc, {
+    Seq(_, seq) {
+      const last = seq.items[seq.items.length - 1];
+      if (!isScalar(last) || typeof last.value !== 'string') return;
+      if (!last.value.startsWith(HIDDEN_ITEMS_MARKER)) return;
+
+      seq.items.pop();
+      seq.comment = ` ${i18n.translate('apmUiShared.genAi.structuredValue.moreItems', {
+        defaultMessage: '… {count} more items',
+        values: { count: Number(last.value.slice(HIDDEN_ITEMS_MARKER.length)) },
+      })}`;
+    },
+  });
+
+  // lineWidth 0 disables folding, so long lines are left to the code block to wrap.
+  return doc.toString({ lineWidth: 0, blockQuote: 'literal' }).trimEnd();
+};
