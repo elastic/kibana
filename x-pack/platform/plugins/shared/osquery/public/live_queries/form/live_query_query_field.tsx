@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash';
 import type { EuiAccordionProps, UseEuiTheme } from '@elastic/eui';
 import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { QUERY_TIMEOUT } from '../../../common/constants';
@@ -47,7 +47,13 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     () => (isEmpty(formState.defaultValues?.ecs_mapping) ? 'closed' : 'open')
   );
   const permissions = useKibana().services.application.capabilities.osquery;
-  const [queryType] = watch(['queryType']);
+  const [queryType, savedQueryId] = watch(['queryType', 'savedQueryId']);
+
+  // SQL value that was present when the saved query was last bound (on selection or initial load).
+  // Comparing against this rather than the stored object's raw SQL keeps flyout entries working,
+  // because their editor shows client-substituted SQL.
+  const boundSqlRef = useRef<string | null>(null);
+
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -64,6 +70,25 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     defaultValue: '',
   });
 
+  // Record the bound SQL when a savedQueryId is present on initial render
+  useEffect(() => {
+    if (savedQueryId && value && boundSqlRef.current === null) {
+      boundSqlRef.current = value;
+    }
+  }, [savedQueryId, value]);
+
+  const handleEditorChange = useCallback(
+    (newValue: string | undefined) => {
+      onChange(newValue);
+
+      if (savedQueryId && boundSqlRef.current !== null && newValue !== boundSqlRef.current) {
+        resetField('savedQueryId');
+        boundSqlRef.current = null;
+      }
+    },
+    [onChange, resetField, savedQueryId]
+  );
+
   const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
     (savedQuery) => {
       if (savedQuery) {
@@ -72,11 +97,15 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
         resetField('timeout', { defaultValue: savedQuery.timeout ?? QUERY_TIMEOUT.DEFAULT });
 
+        // Record the SQL at bind time so we can detect divergence on edit
+        boundSqlRef.current = savedQuery.query ?? null;
+
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setAdvancedContentState('open');
         }
       } else {
         resetField('savedQueryId');
+        boundSqlRef.current = null;
       }
     },
     [resetField]
@@ -143,7 +172,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
             {value}
           </EuiCodeBlock>
         ) : (
-          <OsqueryEditor defaultValue={value} onChange={onChange} commands={commands} />
+          <OsqueryEditor defaultValue={value} onChange={handleEditorChange} commands={commands} />
         )}
       </EuiFormRow>
 

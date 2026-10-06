@@ -30,6 +30,7 @@ import {
 } from '../../lib/check_response_action_authz';
 import { createLiveQueryResponseSchema } from './response_schemas';
 import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
+import type { DispatchSource } from '../../handlers/action/dispatch_source';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -188,6 +189,26 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           });
           const username = currentUser?.username ?? undefined;
           const userProfileUid = currentUser?.profile_uid ?? undefined;
+
+          // Build the dispatch source once after authorization.
+          let liveDispatchSource: Exclude<DispatchSource, { kind: 'unresolved' }>;
+          if (writeLiveQueries) {
+            liveDispatchSource = { kind: 'caller' };
+          } else if (isInvalid) {
+            // investigation_guide recovery path
+            liveDispatchSource = { kind: 'investigation_guide' };
+          } else if (resolved?.isPack) {
+            liveDispatchSource = { kind: 'pack', packSavedObjectId: resolved.savedObjectId };
+          } else if (resolved) {
+            liveDispatchSource = {
+              kind: 'saved_query',
+              savedQueryId: request.body.saved_query_id?.trim() ?? '',
+              stored: resolved,
+            };
+          } else {
+            liveDispatchSource = { kind: 'caller' };
+          }
+
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
@@ -195,14 +216,16 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               metadata: { currentUser: username, userProfileUid },
               alertData,
               space,
-              // Investigation-guide match keeps caller SQL; otherwise stored SO is dispatched.
-              useStoredQuery: !isInvalid && !writeLiveQueries,
-              storedQuery: !isInvalid && !writeLiveQueries ? resolved : undefined,
+              dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
             }
           );
+
           if (!fleetActionsCount) {
+            // Return the first errored row's message rather than always PARAMETER_NOT_FOUND.
+            const firstError = (osqueryAction.queries as Array<{ error?: string }>)?.[0]?.error;
+
             return response.badRequest({
-              body: PARAMETER_NOT_FOUND,
+              body: firstError ?? PARAMETER_NOT_FOUND,
             });
           }
 

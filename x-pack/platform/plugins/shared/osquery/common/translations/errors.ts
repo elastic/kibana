@@ -50,3 +50,10 @@ export const PACK_LOOKUP_FAILED = i18n.translate(
       "This query hasn't been called because the pack it references could not be loaded.",
   }
 );
+
+export const QUERY_NOT_PROVIDED = i18n.translate(
+  'xpack.osquery.liveQueryActions.error.queryNotProvided',
+  {
+    defaultMessage: "This query hasn't been called because no SQL query was provided.",
+  }
+);

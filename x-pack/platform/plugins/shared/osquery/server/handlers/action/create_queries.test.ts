@@ -231,9 +231,10 @@ describe('create queries', () => {
       expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
     });
 
-    it('prefers the stored ecs_mapping over a caller mapping when stored SQL is dispatched', async () => {
-      // A mapping describes how that query's columns map to ECS, so stored SQL paired with an
-      // unrelated caller mapping would yield mis-shaped results.
+    it('prefers a non-empty caller ecs_mapping over stored when stored SQL is dispatched (design D3)', async () => {
+      // D3: nonEmpty(persisted) ?? stored. A writeLiveQueries author's custom mapping is honoured;
+      // the rule-form defaulting ecs_mapping to {} is handled by the empty-check below.
+      // Reverts 7cff2e2's stored-wins; see design.md D3 for the rationale.
       const get = jest.fn().mockResolvedValue({
         attributes: {
           query: 'select 1;',
@@ -256,7 +257,8 @@ describe('create queries', () => {
         useStoredQuery: true,
       });
 
-      expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
+      // Caller's non-empty mapping wins (D3: nonEmpty(persisted) ?? stored).
+      expect(queries[0].ecs_mapping).toEqual({ 'process.name': { field: 'name' } });
     });
 
     it('keeps the caller ecs_mapping for ad-hoc dispatch', async () => {

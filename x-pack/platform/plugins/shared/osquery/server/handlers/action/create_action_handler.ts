@@ -7,27 +7,27 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
+import { filter, map, omit, pick, some } from 'lodash';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
-import { createDynamicQueries, replacedQueries } from './create_queries';
+import { buildQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import {
-  convertSOQueriesToPack,
-  isPackQueryEnabled,
-  resolveEffectiveQueryExecution,
-} from '../../routes/pack/utils';
 import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
-import { PACK_LOOKUP_FAILED, PACK_NOT_FOUND } from '../../../common/translations/errors';
+import {
+  PACK_LOOKUP_FAILED,
+  PACK_NOT_FOUND,
+  QUERY_NOT_PROVIDED,
+} from '../../../common/translations/errors';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
-import type { ResolvedQueryReference } from '../../lib/resolve_query_reference';
+import type { DispatchEntryPoint } from './dispatch_source';
+import { resolveRuleRunDispatchSource } from './dispatch_source';
 
 interface Metadata {
   currentUser: string | undefined;
@@ -51,15 +51,7 @@ interface CreateActionHandlerOptions {
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
-  /** When true, dispatch stored SO content even if the caller supplied a query. */
-  useStoredQuery?: boolean;
-  /** Authz-resolved saved query; when set, dispatch skips a second lookup. */
-  storedQuery?: ResolvedQueryReference;
-  /**
-   * Rule runs cannot surface a thrown status code to a caller, so unresolvable stored content
-   * is recorded on the action document instead of throwing.
-   */
-  reportErrorsOnAction?: boolean;
+  dispatch: DispatchEntryPoint;
 }
 
 export const createActionHandler = async (
@@ -76,7 +68,7 @@ export const createActionHandler = async (
     actionSpaceId
   );
 
-  const { metadata, alertData, error, useStoredQuery, storedQuery, reportErrorsOnAction } = options;
+  const { metadata, alertData, error, dispatch } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   const {
     agent_all: agentAll,
@@ -101,29 +93,77 @@ export const createActionHandler = async (
     throw new CustomHttpRequestError('No agents found for selection', 400);
   }
 
-  let packSO;
-  let unresolvedPackError: string | undefined;
+  // Resolve the dispatch source once per entry point.
+  let dispatchSource =
+    dispatch.entryPoint === 'live_query'
+      ? dispatch.source
+      : await resolveRuleRunDispatchSource(
+          params,
+          dispatch.preflight,
+          spaceScopedInternalSavedObjectsClient
+        );
+
+  // Load pack SO when the dispatch source references one, or when a caller is running pack_id.
+  let packSO: { attributes: PackSavedObject; id: string; references: Array<{ type: string }> } | undefined;
   const packId = params.pack_id?.trim();
 
-  if (packId) {
+  const needsPackLoad =
+    (dispatchSource.kind === 'caller' && packId) || dispatchSource.kind === 'pack';
+
+  if (needsPackLoad) {
+    const resolvedPackId =
+      dispatchSource.kind === 'pack' ? dispatchSource.packSavedObjectId : packId!;
+
     try {
       packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
         packSavedObjectType,
-        storedQuery?.savedObjectId ?? packId
+        resolvedPackId
       );
     } catch (packError) {
-      // A rule run cannot surface a thrown status code to a caller: letting this propagate
-      // makes the run report `succeeded` with no action document at all. Record the failure
-      // on the action instead, mirroring the saved-query path in `createDynamicQueries`.
-      if (!reportErrorsOnAction) {
+      const isRuleRun = dispatch.entryPoint === 'rule_run';
+      const errorLabel = SavedObjectsErrorHelpers.isNotFoundError(packError)
+        ? PACK_NOT_FOUND
+        : PACK_LOOKUP_FAILED;
+
+      if (!isRuleRun) {
+        // Live queries throw — the caller gets a 400.
         throw packError;
       }
 
-      unresolvedPackError = SavedObjectsErrorHelpers.isNotFoundError(packError)
-        ? PACK_NOT_FOUND
-        : PACK_LOOKUP_FAILED;
+      // Rule runs record an error row so the alert's Osquery Results tab shows why nothing ran.
+      dispatchSource = {
+        kind: 'unresolved',
+        referenceId: resolvedPackId,
+        error: errorLabel,
+      };
     }
   }
+
+  const queries = await buildQueries({
+    source: dispatchSource,
+    params,
+    alertData,
+    agents: selectedAgents,
+    osqueryContext,
+    error,
+    spaceId: actionSpaceId,
+    spaceScopedClient: spaceScopedInternalSavedObjectsClient,
+    packSO,
+  });
+
+  // D5: empty-SQL invariant — every dispatchable row must carry non-empty SQL.
+  const isRuleRun = dispatch.entryPoint === 'rule_run';
+  const queriesWithEmptySqlFixed = queries.map((row) => {
+    if (!row.error && !row.query) {
+      if (!isRuleRun) {
+        throw new CustomHttpRequestError(QUERY_NOT_PROVIDED, 400);
+      }
+
+      return { ...row, error: QUERY_NOT_PROVIDED };
+    }
+
+    return row;
+  });
 
   const osqueryAction = {
     action_id: uuidv4(),
@@ -147,61 +187,7 @@ export const createActionHandler = async (
     pack_prebuilt: packId ? some(packSO?.references, ['type', 'osquery-pack-asset']) : undefined,
     tags: [],
     space_id: actionSpaceId,
-    queries: unresolvedPackError
-      ? // No pack means no stored content to dispatch. Emit a single error-bearing entry so the
-        // failure is visible in the alert's Osquery Results tab rather than silently dropped.
-        [
-          {
-            action_id: uuidv4(),
-            id: packId,
-            error: unresolvedPackError,
-            agents: selectedAgents,
-          },
-        ]
-      : packSO
-      ? map(
-          pickBy(convertSOQueriesToPack(packSO.attributes.queries), isPackQueryEnabled),
-          (packQuery, packQueryId) => {
-            // Only flag unsubstituted templates when this run is dispatching stored content on
-            // the caller's behalf. A `writeLiveQueries` caller running a pack ad hoc is entitled
-            // to send `{{...}}` through, exactly as before this change.
-            const replacedQuery = replacedQueries(packQuery.query, alertData, useStoredQuery);
-            // Same per-query-wins / empty-or-all-OS-inherits rule as the
-            // scheduled emit. `result_type` is intentionally not applied —
-            // live-query Fleet actions do not carry snapshot/removed.
-            const { version, platform } = resolveEffectiveQueryExecution(packQuery, {
-              min_osquery_version: packSO.attributes.min_osquery_version,
-              platform: packSO.attributes.platform ?? undefined,
-            });
-
-            return pickBy(
-              {
-                action_id: uuidv4(),
-                id: packQueryId,
-                ...replacedQuery,
-                ...(error ? { error } : {}),
-                ecs_mapping: packQuery.ecs_mapping,
-                version,
-                platform,
-                timeout: packQuery.timeout,
-                agents: selectedAgents,
-              },
-              (value) => !isEmpty(value) || isNumber(value)
-            );
-          }
-        )
-      : await createDynamicQueries({
-          params,
-          alertData,
-          agents: selectedAgents,
-          osqueryContext,
-          error,
-          spaceId: actionSpaceId,
-          spaceScopedClient: spaceScopedInternalSavedObjectsClient,
-          useStoredQuery,
-          storedQuery,
-          reportErrorsOnAction,
-        }),
+    queries: queriesWithEmptySqlFixed,
   };
 
   const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
@@ -220,12 +206,6 @@ export const createActionHandler = async (
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
           data: {
             ...pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
-            // The top-level space_id above never reaches the agent: Fleet Server's
-            // action model has no such field, and its checkin conversion copies a
-            // fixed whitelist. `data` is an opaque passthrough, and osquerybeat
-            // copies it verbatim onto result and action-response documents as
-            // `action_data` — so this is what makes the originating space visible
-            // in named spaces. Read back via `matchActionDataSpaceId`.
             space_id: actionSpaceId,
           } as {
             [k: string]: unknown;

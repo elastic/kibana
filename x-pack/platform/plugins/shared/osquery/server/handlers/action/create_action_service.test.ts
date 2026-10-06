@@ -224,7 +224,7 @@ describe('createActionService', () => {
   });
 
   describe('create', () => {
-    it('forwards useStoredQuery, reportErrorsOnAction, and storedQuery to createActionHandler', async () => {
+    it('forwards rule_run dispatch with preflight to createActionHandler', async () => {
       const { context } = buildContext();
       const service = createActionService(context);
       const storedQuery = { savedObjectId: 'so-1', query: STATIC_SQL };
@@ -238,9 +238,7 @@ describe('createActionService', () => {
         context,
         expect.objectContaining({ saved_query_id: 'sq-1' }),
         expect.objectContaining({
-          useStoredQuery: true,
-          reportErrorsOnAction: true,
-          storedQuery,
+          dispatch: { entryPoint: 'rule_run', preflight: storedQuery },
           space: { id: 'default' },
         })
       );

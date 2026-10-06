@@ -9,6 +9,7 @@ import { isEmpty, isNumber, map, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import {
@@ -24,8 +25,16 @@ import {
 import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
 import { lookupSavedQuery, type ResolvedQueryReference } from '../../lib/resolve_query_reference';
 import { CustomHttpRequestError } from '../../common/error';
+import type { DispatchSource } from './dispatch_source';
+import {
+  convertSOQueriesToPack,
+  isPackQueryEnabled,
+  resolveEffectiveQueryExecution,
+} from '../../routes/pack/utils';
+import type { PackSavedObject } from '../../common/types';
 
-interface CreateDynamicQueriesParams {
+interface BuildQueriesParams {
+  source: DispatchSource;
   params: CreateLiveQueryRequestBodySchema;
   alertData?: ParsedTechnicalFields & { _index: string };
   agents: string[];
@@ -33,19 +42,16 @@ interface CreateDynamicQueriesParams {
   error?: string;
   spaceId: string;
   spaceScopedClient: SavedObjectsClient;
-  /** When true, dispatch stored SO content even if the caller supplied a query. */
-  useStoredQuery?: boolean;
-  /** Authz-resolved saved query; when set, skip a second SO lookup. */
-  storedQuery?: ResolvedQueryReference;
-  /**
-   * Rule runs have no caller to return a status code to — a throw here is swallowed by
-   * `osqueryResponseAction` and the run still reports success. Record the failure on the
-   * action document instead so it surfaces in the alert's Osquery Results tab.
-   */
-  reportErrorsOnAction?: boolean;
+  /** Pack saved object when source.kind is 'caller' with a pack_id, or 'pack'. */
+  packSO?: { attributes: PackSavedObject };
 }
 
-export const createDynamicQueries = async ({
+/**
+ * Builds the query rows to dispatch to Fleet, per the DispatchSource discriminated union (design D2).
+ * One builder, one exhaustive switch — every dispatch decision lives here.
+ */
+export const buildQueries = async ({
+  source,
   params,
   alertData,
   agents,
@@ -53,119 +59,201 @@ export const createDynamicQueries = async ({
   error,
   spaceId,
   spaceScopedClient,
-  useStoredQuery,
-  storedQuery,
-  reportErrorsOnAction,
-}: CreateDynamicQueriesParams) => {
-  const savedQueryId = params.saved_query_id?.trim();
-  const enforceStoredSavedQuery = Boolean(useStoredQuery && savedQueryId);
-  let storedSavedQuery = storedQuery;
-  let unresolvedSavedQueryError: string | undefined;
+  packSO,
+}: BuildQueriesParams) => {
+  switch (source.kind) {
+    case 'caller': {
+      // Pre-#287882 behaviour: dispatch request/rule params as-is.
+      // Pack SO takes priority over inline queries[] (pre-PR behaviour: pack is always loaded when pack_id is set).
+      if (packSO) {
+        return map(
+          pickBy(convertSOQueriesToPack(packSO.attributes.queries), isPackQueryEnabled),
+          (packQuery, packQueryId) => {
+            // writeLiveQueries callers may send literal {{...}} templates — don't flag them
+            const replacedQuery = replacedQueries(packQuery.query, alertData, false);
+            const { version, platform } = resolveEffectiveQueryExecution(packQuery, {
+              min_osquery_version: packSO.attributes.min_osquery_version,
+              platform: packSO.attributes.platform ?? undefined,
+            });
 
-  // Lookup and stored-content fallbacks are only for `useStoredQuery`. A `writeLiveQueries`
-  // caller must not have omitted SQL/mapping filled in from the saved object.
-  const shouldLookupSavedQuery = enforceStoredSavedQuery && storedSavedQuery === undefined;
-
-  if (shouldLookupSavedQuery) {
-    try {
-      storedSavedQuery = await lookupSavedQuery(spaceScopedClient, savedQueryId ?? '');
-    } catch (lookupError) {
-      // Live-query callers need the throw. Rule runs have no caller to receive a status code, so
-      // record a distinct lookup failure on the action instead of mislabeling it as not-found.
-      if (!reportErrorsOnAction) {
-        throw lookupError;
+            return pickBy(
+              {
+                action_id: uuidv4(),
+                id: packQueryId,
+                ...replacedQuery,
+                ...(error ? { error } : {}),
+                ecs_mapping: packQuery.ecs_mapping,
+                version,
+                platform,
+                timeout: packQuery.timeout,
+                agents,
+              },
+              (value) => !isEmpty(value) || isNumber(value)
+            );
+          }
+        );
       }
 
-      unresolvedSavedQueryError = SAVED_QUERY_LOOKUP_FAILED;
-    }
-  }
+      if (params.queries?.length) {
+        return map(params.queries, ({ query: packQuery, ...restQuery }) => {
+          const replacedQuery = replacedQueries(packQuery, alertData, false);
 
-  if (enforceStoredSavedQuery && params.queries?.length) {
-    // An action carrying both a `saved_query_id` and a `queries[]` is ambiguous: the saved
-    // query wins, so the other entries would be dropped without a trace. Only rules created
-    // through the API or import can reach this, and they are never re-validated at run time.
-    osqueryContext.logFactory
-      .get('createDynamicQueries')
-      .warn(
-        `Response action specifies both saved_query_id [${savedQueryId}] and ${params.queries.length} inline queries; dispatching the saved query only.`
+          return pickBy(
+            {
+              ...replacedQuery,
+              ...restQuery,
+              ...(error ? { error } : {}),
+              action_id: uuidv4(),
+              alert_ids: params.alert_ids,
+              agents,
+            },
+            (value) => !isEmpty(value) || value === true || isNumber(value)
+          );
+        });
+      }
+
+      return [
+        pickBy(
+          {
+            action_id: uuidv4(),
+            id: uuidv4(),
+            ...replacedQueries(params.query, alertData, false),
+            saved_query_id: params.saved_query_id,
+            saved_query_prebuilt: params.saved_query_id
+              ? await isSavedQueryPrebuilt(
+                  osqueryContext.service.getPackageService()?.asInternalUser,
+                  params.saved_query_id,
+                  spaceScopedClient,
+                  spaceId
+                )
+              : undefined,
+            ecs_mapping: isEmpty(params.ecs_mapping) ? undefined : params.ecs_mapping,
+            alert_ids: params.alert_ids,
+            timeout: params.timeout,
+            agents,
+            ...(error ? { error } : {}),
+          },
+          (value) => !isEmpty(value) || isNumber(value)
+        ),
+      ];
+    }
+
+    case 'investigation_guide': {
+      return [
+        pickBy(
+          {
+            action_id: uuidv4(),
+            id: uuidv4(),
+            ...replacedQueries(params.query, alertData, false),
+            ecs_mapping: isEmpty(params.ecs_mapping) ? undefined : params.ecs_mapping,
+            alert_ids: params.alert_ids,
+            timeout: params.timeout,
+            agents,
+            ...(error ? { error } : {}),
+          },
+          (value) => !isEmpty(value) || isNumber(value)
+        ),
+      ];
+    }
+
+    case 'saved_query': {
+      const { stored, savedQueryId } = source;
+
+      if (params.queries?.length) {
+        osqueryContext.logFactory
+          .get('buildQueries')
+          .warn(
+            `Response action specifies both saved_query_id [${savedQueryId}] and ${params.queries.length} inline queries; dispatching the saved query only.`
+          );
+      }
+
+      // nonEmpty(persisted) ?? stored for ecs_mapping (design D3 — stored-wins reverted)
+      const suppliedEcsMapping = isEmpty(params.ecs_mapping) ? undefined : params.ecs_mapping;
+      const ecsMapping = suppliedEcsMapping ?? stored.ecs_mapping;
+      const prebuiltId = stored.savedObjectId ?? savedQueryId;
+
+      return [
+        pickBy(
+          {
+            action_id: uuidv4(),
+            id: uuidv4(),
+            ...replacedQueries(stored.query, alertData, true),
+            saved_query_id: savedQueryId,
+            saved_query_prebuilt: prebuiltId
+              ? await isSavedQueryPrebuilt(
+                  osqueryContext.service.getPackageService()?.asInternalUser,
+                  prebuiltId,
+                  spaceScopedClient,
+                  spaceId
+                )
+              : undefined,
+            ecs_mapping: ecsMapping,
+            alert_ids: params.alert_ids,
+            timeout: params.timeout,
+            agents,
+            ...(error ? { error } : {}),
+          },
+          (value) => !isEmpty(value) || isNumber(value)
+        ),
+      ];
+    }
+
+    case 'pack': {
+      if (!packSO) {
+        return [
+          {
+            action_id: uuidv4(),
+            id: source.packSavedObjectId,
+            error: 'Pack could not be loaded',
+            agents,
+          },
+        ];
+      }
+
+      return map(
+        pickBy(convertSOQueriesToPack(packSO.attributes.queries), isPackQueryEnabled),
+        (packQuery, packQueryId) => {
+          const replacedQuery = replacedQueries(packQuery.query, alertData, true);
+          const { version, platform } = resolveEffectiveQueryExecution(packQuery, {
+            min_osquery_version: packSO.attributes.min_osquery_version,
+            platform: packSO.attributes.platform ?? undefined,
+          });
+
+          return pickBy(
+            {
+              action_id: uuidv4(),
+              id: packQueryId,
+              ...replacedQuery,
+              ...(error ? { error } : {}),
+              ecs_mapping: packQuery.ecs_mapping,
+              version,
+              platform,
+              timeout: packQuery.timeout,
+              agents,
+            },
+            (value) => !isEmpty(value) || isNumber(value)
+          );
+        }
       );
-  }
-
-  // A resolved object with no `query` is a valid SO shape (`schema.maybe(string)`). Treat that
-  // like a 404 on the enforced path so caller SQL never fills in. Empty string is kept (`== null`
-  // is nullish-only, matching `??`).
-  if (enforceStoredSavedQuery && storedSavedQuery?.query == null && !unresolvedSavedQueryError) {
-    if (!reportErrorsOnAction) {
-      throw new CustomHttpRequestError(`Saved query [${savedQueryId}] could not be resolved`, 400);
     }
 
-    unresolvedSavedQueryError = SAVED_QUERY_NOT_FOUND;
-  }
-
-  // Never fall back to caller-supplied SQL when the stored query it named is gone.
-  const effectiveError = error ?? unresolvedSavedQueryError;
-
-  const query = unresolvedSavedQueryError
-    ? undefined
-    : useStoredQuery
-    ? storedSavedQuery?.query
-    : params.query;
-  // True when the SQL below came from the saved object rather than the caller.
-  const isStoredQueryDispatched = Boolean(useStoredQuery && storedSavedQuery?.query);
-  // When the stored SQL is what gets dispatched, the stored mapping has to travel with it: a
-  // mapping describes how that query's columns map to ECS, so pairing stored SQL with an
-  // unrelated caller mapping yields mis-shaped results. The rule-action form defaults
-  // `ecs_mapping` to `{}`, which is not `undefined`, so an empty caller mapping must be treated
-  // as "not set" rather than as an intentional override or the saved query's own mapping would
-  // never reach the agent from a rule.
-  const suppliedEcsMapping = isEmpty(params.ecs_mapping) ? undefined : params.ecs_mapping;
-  const ecsMapping = isStoredQueryDispatched
-    ? storedSavedQuery?.ecs_mapping ?? suppliedEcsMapping
-    : suppliedEcsMapping;
-  const prebuiltId = storedSavedQuery?.savedObjectId ?? savedQueryId;
-
-  if (params.queries?.length && !enforceStoredSavedQuery) {
-    return map(params.queries, ({ query: packQuery, ...restQuery }) => {
-      const replacedQuery = replacedQueries(packQuery, alertData);
-
-      return pickBy(
+    case 'unresolved': {
+      return [
         {
-          ...replacedQuery,
-          ...restQuery,
-          ...(effectiveError ? { error: effectiveError } : {}),
           action_id: uuidv4(),
-          alert_ids: params.alert_ids,
+          id: source.referenceId,
+          error: source.error,
           agents,
         },
-        (value) => !isEmpty(value) || value === true || isNumber(value)
-      );
-    });
-  }
+      ];
+    }
 
-  return [
-    pickBy(
-      {
-        action_id: uuidv4(),
-        id: uuidv4(),
-        ...replacedQueries(query, alertData, isStoredQueryDispatched),
-        saved_query_id: params.saved_query_id,
-        saved_query_prebuilt: prebuiltId
-          ? await isSavedQueryPrebuilt(
-              osqueryContext.service.getPackageService()?.asInternalUser,
-              prebuiltId,
-              spaceScopedClient,
-              spaceId
-            )
-          : undefined,
-        ecs_mapping: ecsMapping,
-        alert_ids: params.alert_ids,
-        timeout: params.timeout,
-        agents,
-        ...(effectiveError ? { error: effectiveError } : {}),
-      },
-      (value) => !isEmpty(value) || isNumber(value)
-    ),
-  ];
+    default: {
+      const _exhaustive: never = source;
+
+      return _exhaustive;
+    }
+  }
 };
 
 export const replacedQueries = (
@@ -197,4 +285,121 @@ export const replacedQueries = (
   }
 
   return { query };
+};
+
+interface CreateDynamicQueriesParams {
+  params: CreateLiveQueryRequestBodySchema;
+  alertData?: ParsedTechnicalFields & { _index: string };
+  agents: string[];
+  osqueryContext: OsqueryAppContext;
+  error?: string;
+  spaceId: string;
+  spaceScopedClient: SavedObjectsClient;
+  /** When true, dispatch stored SO content even if the caller supplied a query. */
+  useStoredQuery?: boolean;
+  /** Authz-resolved saved query; when set, skip a second SO lookup. */
+  storedQuery?: ResolvedQueryReference;
+  /**
+   * Rule runs have no caller to return a status code to — a throw here is swallowed by
+   * `osqueryResponseAction` and the run still reports success. Record the failure on the
+   * action document instead so it surfaces in the alert's Osquery Results tab.
+   */
+  reportErrorsOnAction?: boolean;
+}
+
+/**
+ * Legacy wrapper kept for backward compatibility during the migration. Production dispatch
+ * goes through `buildQueries` directly. Tests will be migrated in task 2.8.
+ */
+export const createDynamicQueries = async ({
+  params,
+  alertData,
+  agents,
+  osqueryContext,
+  error,
+  spaceId,
+  spaceScopedClient,
+  useStoredQuery,
+  storedQuery,
+  reportErrorsOnAction,
+}: CreateDynamicQueriesParams) => {
+  const savedQueryId = params.saved_query_id?.trim();
+  const enforceStoredSavedQuery = Boolean(useStoredQuery && savedQueryId);
+  let resolvedStoredQuery = storedQuery;
+  let unresolvedSavedQueryError: string | undefined;
+
+  const shouldLookupSavedQuery = enforceStoredSavedQuery && resolvedStoredQuery === undefined;
+
+  if (shouldLookupSavedQuery) {
+    try {
+      resolvedStoredQuery = await lookupSavedQuery(spaceScopedClient, savedQueryId ?? '');
+    } catch (lookupError) {
+      if (!reportErrorsOnAction) {
+        throw lookupError;
+      }
+
+      unresolvedSavedQueryError = SavedObjectsErrorHelpers.isNotFoundError(lookupError)
+        ? SAVED_QUERY_NOT_FOUND
+        : SAVED_QUERY_LOOKUP_FAILED;
+    }
+  }
+
+  if (enforceStoredSavedQuery && params.queries?.length) {
+    osqueryContext.logFactory
+      .get('createDynamicQueries')
+      .warn(
+        `Response action specifies both saved_query_id [${savedQueryId}] and ${params.queries.length} inline queries; dispatching the saved query only.`
+      );
+  }
+
+  if (enforceStoredSavedQuery && resolvedStoredQuery?.query == null && !unresolvedSavedQueryError) {
+    if (!reportErrorsOnAction) {
+      throw new CustomHttpRequestError(`Saved query [${savedQueryId}] could not be resolved`, 400);
+    }
+
+    unresolvedSavedQueryError = SAVED_QUERY_NOT_FOUND;
+  }
+
+  if (unresolvedSavedQueryError) {
+    return [
+      pickBy(
+        {
+          action_id: uuidv4(),
+          id: uuidv4(),
+          error: unresolvedSavedQueryError,
+          alert_ids: params.alert_ids,
+          agents,
+        },
+        (value) => !isEmpty(value) || isNumber(value)
+      ),
+    ];
+  }
+
+  if (enforceStoredSavedQuery && resolvedStoredQuery) {
+    return buildQueries({
+      source: {
+        kind: 'saved_query',
+        savedQueryId: savedQueryId as string,
+        stored: resolvedStoredQuery,
+      },
+      params,
+      alertData,
+      agents,
+      osqueryContext,
+      error,
+      spaceId,
+      spaceScopedClient,
+    });
+  }
+
+  return buildQueries({
+    source: { kind: 'caller' },
+    params,
+    alertData,
+    agents,
+    osqueryContext,
+    error,
+    spaceId,
+    spaceScopedClient,
+  });
 };

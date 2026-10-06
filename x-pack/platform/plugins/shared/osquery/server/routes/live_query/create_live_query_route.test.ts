@@ -251,7 +251,7 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ pack_id: packId }),
-      expect.objectContaining({ useStoredQuery: true })
+      expect.objectContaining({ dispatch: expect.objectContaining({ entryPoint: 'live_query' }) })
     );
   });
 
@@ -323,8 +323,10 @@ describe('createLiveQueryRoute', () => {
       expect.anything(),
       expect.objectContaining({ saved_query_id: SAVED_QUERY_ID }),
       expect.objectContaining({
-        useStoredQuery: true,
-        storedQuery: expect.objectContaining({ query: STORED_QUERY }),
+        dispatch: expect.objectContaining({
+          entryPoint: 'live_query',
+          source: expect.objectContaining({ kind: 'saved_query' }),
+        }),
       })
     );
   });
@@ -342,7 +344,9 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ saved_query_id: SAVED_QUERY_ID }),
-      expect.objectContaining({ useStoredQuery: true })
+      expect.objectContaining({
+        dispatch: expect.objectContaining({ entryPoint: 'live_query' }),
+      })
     );
   });
 
@@ -369,7 +373,9 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
-      expect.objectContaining({ useStoredQuery: true })
+      expect.objectContaining({
+        dispatch: expect.objectContaining({ entryPoint: 'live_query' }),
+      })
     );
   });
 
@@ -384,7 +390,7 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).not.toHaveBeenCalled();
   });
 
-  it('still sets useStoredQuery when the caller posted matching SQL', async () => {
+  it('dispatches via saved_query source when the caller posted matching SQL', async () => {
     await invokeRoute({
       saved_query_id: SAVED_QUERY_ID,
       query: STORED_QUERY,
@@ -394,7 +400,12 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ query: STORED_QUERY, saved_query_id: SAVED_QUERY_ID }),
-      expect.objectContaining({ useStoredQuery: true })
+      expect.objectContaining({
+        dispatch: expect.objectContaining({
+          entryPoint: 'live_query',
+          source: expect.objectContaining({ kind: 'saved_query' }),
+        }),
+      })
     );
   });
 
@@ -419,8 +430,10 @@ describe('createLiveQueryRoute', () => {
       expect.anything(),
       expect.objectContaining({ query: adHocSql, saved_query_id: SAVED_QUERY_ID }),
       expect.objectContaining({
-        useStoredQuery: false,
-        storedQuery: undefined,
+        dispatch: expect.objectContaining({
+          entryPoint: 'live_query',
+          source: { kind: 'caller' },
+        }),
       })
     );
   });
@@ -456,7 +469,12 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
-      expect.objectContaining({ useStoredQuery: false })
+      expect.objectContaining({
+        dispatch: expect.objectContaining({
+          entryPoint: 'live_query',
+          source: { kind: 'investigation_guide' },
+        }),
+      })
     );
   });
 
