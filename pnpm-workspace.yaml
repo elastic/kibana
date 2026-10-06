@@ -98,7 +98,7 @@ overrides:
   'isomorphic-fetch>node-fetch': '2.7.0'
   'qs': '6.16.0'
   'remark-parse>trim': '1.0.1'
-  'serialize-javascript': '7.0.5'
+  'serialize-javascript': '7.1.2'
   'sharp': '0.35.4'
   'typescript': '5.9.3'
   'util': '0.12.5'
