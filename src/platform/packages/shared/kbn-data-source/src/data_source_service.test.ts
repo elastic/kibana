@@ -82,57 +82,6 @@ describe('DataSourceService', () => {
     });
   });
 
-  describe('fromDataView', () => {
-    it('wraps a DataView in DataViewSource synchronously (no lookup)', async () => {
-      const dv = makeDataViewMock('dv-42');
-      const lookup = makeDataViewLookup(async () => {
-        throw new Error('should not be called for fromDataView');
-      });
-      const service = new DataSourceService(lookup);
-
-      const source = service.fromDataView(dv);
-
-      expect(source).toBeInstanceOf(DataViewSource);
-      expect(source?.id).toBe('dv-42');
-      expect(lookup.get).not.toHaveBeenCalled();
-    });
-
-    it('returns the registered EsqlSource when the DataView has an esql- id', async () => {
-      const lookup = makeDataViewLookup(async () => {
-        throw new Error('should not be called for esql ids');
-      });
-      const service = new DataSourceService(lookup);
-      const esql = await EsqlSource.create({
-        query: 'FROM logs-*',
-        resultColumns: [],
-      });
-      service.registerEsqlSource(esql);
-
-      const dv = makeDataViewMock(esql.id);
-      expect(service.fromDataView(dv)).toBe(esql);
-    });
-
-    it('returns undefined when the DataView has an esql- id but no source is registered', () => {
-      const lookup = makeDataViewLookup(async () => {
-        throw new Error('not used');
-      });
-      const service = new DataSourceService(lookup);
-      const dv = makeDataViewMock('esql-deadbeef');
-
-      expect(service.fromDataView(dv)).toBeUndefined();
-    });
-
-    it('returns undefined when the DataView has no id', () => {
-      const lookup = makeDataViewLookup(async () => {
-        throw new Error('not used');
-      });
-      const service = new DataSourceService(lookup);
-      const dv = { id: undefined } as unknown as DataView;
-
-      expect(service.fromDataView(dv)).toBeUndefined();
-    });
-  });
-
   describe('register / unregister', () => {
     let service: DataSourceService;
 

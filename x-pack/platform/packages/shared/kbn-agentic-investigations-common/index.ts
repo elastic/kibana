@@ -17,6 +17,7 @@ export {
 } from './src/components/escalation_queue';
 
 export { ActionButton } from './src/components/actions/action_button';
+export { getCopyLinkFlyoutAction } from './src/components/actions/copy_link_action';
 export {
   BaseActions,
   type BaseActionsProps,
