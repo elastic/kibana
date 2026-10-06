@@ -16,6 +16,7 @@ import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from './constants';
+import { renderCommonWorkerYaml } from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 // `system-attack-discovery-generation` is already taken by the discoveries plugin,
@@ -56,8 +57,8 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 8,
-  yaml: ATTACK_DISCOVERY_REVIEW_YAML,
+  version: 9,
+  yaml: renderCommonWorkerYaml(ATTACK_DISCOVERY_REVIEW_YAML),
 } as const satisfies ManagedWorkflowDefinition;
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { HUNT_COVERAGE_AI_INDEX_ID } from '../../../../../common/step_types/package_report';
+import { SECURITY_INVESTIGATIONS_AI_INDEX_ID } from '@kbn/workflows/managed';
 import { createCoverageWriter } from './write_coverage_kis';
 
 describe('createCoverageWriter', () => {
@@ -139,7 +139,7 @@ describe('createCoverageWriter', () => {
   // Context Engine owns the id-to-backing-store mapping, so this asserts the dest its own helper
   // returns rather than a literal: a prefix change there has to reach this writer.
   it('reads and writes the backing store Context Engine maps the AI index id to', async () => {
-    const { value: dest } = getAiIndexDest('index', HUNT_COVERAGE_AI_INDEX_ID);
+    const { value: dest } = getAiIndexDest('index', SECURITY_INVESTIGATIONS_AI_INDEX_ID);
     const get = jest.fn().mockRejectedValue({ statusCode: 404 });
     const index = jest.fn().mockResolvedValue({});
     const write = createCoverageWriter({
