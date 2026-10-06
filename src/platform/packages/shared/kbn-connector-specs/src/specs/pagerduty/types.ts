@@ -31,7 +31,14 @@ const limitSchema = lazySchema(() => z.number().int().min(1).max(100));
 const offsetSchema = lazySchema(() => z.number().int().min(0));
 
 const referenceSchema = lazySchema(() =>
-  z.object({ id: idSchema, summary: z.string().max(500).optional() })
+  z.object({
+    id: idSchema.describe('The ID of the referenced object'),
+    summary: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('A short server-generated summary of the referenced object'),
+  })
 );
 
 const pageSchema = () => ({
@@ -57,9 +64,9 @@ const zonedTimeSchema = lazySchema(() =>
 
 const rotationEventDataSchema = lazySchema(() =>
   z.object({
-    name: z.string().min(1).max(200),
-    start_time: zonedTimeSchema,
-    end_time: zonedTimeSchema,
+    name: z.string().min(1).max(200).describe('The name of the rotation event'),
+    start_time: zonedTimeSchema.describe('The start time, ISO 8601 with UTC offset'),
+    end_time: zonedTimeSchema.describe('The end time, ISO 8601 with UTC offset'),
     effective_since: dateTimeSchema.describe(
       'When the event takes effect; past values are clamped to now'
     ),
@@ -72,24 +79,31 @@ const rotationEventDataSchema = lazySchema(() =>
       .describe(
         "RFC 5545 rules: exactly one RRULE (e.g. 'RRULE:FREQ=WEEKLY;BYDAY=MO,TU'), plus optional EXDATE/RDATE entries"
       ),
-    assignment_strategy: z.object({
-      type: z.enum(['rotating_member_assignment_strategy', 'every_member_assignment_strategy']),
-      members: z.array(memberSchema).max(20),
-      shifts_per_member: z
-        .number()
-        .int()
-        .optional()
-        .describe("Required when type is 'rotating_member_assignment_strategy'"),
-    }),
+    assignment_strategy: z
+      .object({
+        type: z
+          .enum(['rotating_member_assignment_strategy', 'every_member_assignment_strategy'])
+          .describe('The assignment strategy type'),
+        members: z
+          .array(memberSchema)
+          .max(20)
+          .describe('The members participating in this assignment strategy'),
+        shifts_per_member: z
+          .number()
+          .int()
+          .optional()
+          .describe("Required when type is 'rotating_member_assignment_strategy'"),
+      })
+      .describe('How members are assigned to shifts'),
   })
 );
 
 const customShiftDataSchema = lazySchema(() =>
   z.object({
-    start_time: dateTimeSchema,
-    end_time: dateTimeSchema,
+    start_time: dateTimeSchema.describe('The start time, ISO 8601 with UTC offset'),
+    end_time: dateTimeSchema.describe('The end time, ISO 8601 with UTC offset'),
     assignments: z
-      .array(z.object({ member: memberSchema }))
+      .array(z.object({ member: memberSchema.describe('The member assigned to this shift') }))
       .length(1)
       .describe('The single assignment covering this shift'),
   })
@@ -97,33 +111,46 @@ const customShiftDataSchema = lazySchema(() =>
 
 const overrideDataSchema = lazySchema(() =>
   z.object({
-    start_time: dateTimeSchema,
-    end_time: dateTimeSchema,
-    overridden_member: memberSchema,
-    overriding_member: memberSchema,
+    start_time: dateTimeSchema.describe('The start time, ISO 8601 with UTC offset'),
+    end_time: dateTimeSchema.describe('The end time, ISO 8601 with UTC offset'),
+    overridden_member: memberSchema.describe('The member being overridden'),
+    overriding_member: memberSchema.describe('The member covering the override'),
   })
 );
 
 const legacyScheduleSchema = lazySchema(() =>
   z.object({
-    name: z.string().min(1).max(200),
-    time_zone: z.string().min(1).max(100),
-    description: textSchema.optional(),
+    name: z.string().min(1).max(200).describe('The name of the schedule'),
+    time_zone: z.string().min(1).max(100).describe('IANA time zone, e.g. America/New_York'),
+    description: textSchema.optional().describe('The description of the schedule'),
     schedule_layers: z
       .array(
         z.object({
-          name: z.string().min(1).max(200),
-          start: dateTimeSchema,
-          end: dateTimeSchema.optional(),
-          rotation_virtual_start: dateTimeSchema,
-          rotation_turn_length_seconds: z.number().int(),
-          users: z.array(z.object({ user: referenceSchema })).max(100),
+          name: z.string().min(1).max(200).describe('The name of the schedule layer'),
+          start: dateTimeSchema.describe('The start time, ISO 8601'),
+          end: dateTimeSchema.optional().describe('The end time, ISO 8601'),
+          rotation_virtual_start: dateTimeSchema.describe(
+            'The effective start time of the layer; can be before the schedule start'
+          ),
+          rotation_turn_length_seconds: z
+            .number()
+            .int()
+            .describe('Duration of each on-call shift in seconds'),
+          users: z
+            .array(z.object({ user: referenceSchema.describe('The user') }))
+            .max(100)
+            .describe('The users in this layer'),
           restrictions: z
             .array(
               z.object({
-                type: z.enum(['daily_restriction', 'weekly_restriction']),
+                type: z
+                  .enum(['daily_restriction', 'weekly_restriction'])
+                  .describe('The restriction type'),
                 start_time_of_day: z.string().max(16).describe('HH:MM:SS'),
-                duration_seconds: z.number().int(),
+                duration_seconds: z
+                  .number()
+                  .int()
+                  .describe('Duration of the restriction in seconds'),
                 start_day_of_week: z
                   .number()
                   .int()
@@ -132,10 +159,12 @@ const legacyScheduleSchema = lazySchema(() =>
               })
             )
             .max(25)
-            .optional(),
+            .optional()
+            .describe('Restrictions on when the layer accepts assignments'),
         })
       )
-      .max(25),
+      .max(25)
+      .describe('The layers of the schedule'),
   })
 );
 
@@ -165,73 +194,114 @@ const routerRuleConditionsSchema = lazySchema(() =>
 
 const alertGroupingSettingSchema = lazySchema(() =>
   z.object({
-    name: z.string().max(200).optional(),
-    description: textSchema.optional(),
+    name: z.string().max(200).optional().describe('The name of the alert grouping setting'),
+    description: textSchema.optional().describe('The description of the alert grouping setting'),
     type: z
       .enum(['content_based', 'content_based_intelligent', 'intelligent', 'time'])
       .describe('The alert grouping algorithm'),
     config: z
       .object({
-        aggregate: z.enum(['all', 'any']).optional(),
-        fields: z.array(z.string().max(200)).max(25).optional(),
+        aggregate: z
+          .enum(['all', 'any'])
+          .optional()
+          .describe('Group when all or any of the fields match'),
+        fields: z
+          .array(z.string().max(200))
+          .max(25)
+          .optional()
+          .describe('The fields to group alerts on'),
         time_window: z
           .number()
           .int()
           .optional()
           .describe('Seconds; 0 uses the recommended window, otherwise 300-3600 (or 86400)'),
-        recommended_time_window: z.number().int().optional(),
+        recommended_time_window: z
+          .number()
+          .int()
+          .optional()
+          .describe('The recommended time window calculated by PagerDuty'),
         timeout: z.number().int().optional().describe('Time-based only: seconds, 60-86400'),
-        iag_fields: z.array(z.string().max(200)).max(25).optional(),
+        iag_fields: z
+          .array(z.string().max(200))
+          .max(25)
+          .optional()
+          .describe('The fields used for intelligent alert grouping'),
       })
       .describe('Configuration matching the setting type'),
-    services: z.array(referenceSchema).max(100),
+    services: z.array(referenceSchema).max(100).describe('The services the object applies to'),
   })
 );
 
 const statusPageReferenceSchema = (type: string) =>
-  z.object({ id: idSchema, type: z.literal(type).optional() });
+  z.object({
+    id: idSchema.describe('The ID of the referenced object'),
+    type: z.literal(type).optional().describe('The type of the referenced status page object'),
+  });
 
 const postUpdateSchema = lazySchema(() =>
   z.object({
-    message: z.string().min(1).max(5000),
-    status: statusPageReferenceSchema('status_page_status'),
-    severity: statusPageReferenceSchema('status_page_severity'),
+    message: z.string().min(1).max(5000).describe('The message text'),
+    status: statusPageReferenceSchema('status_page_status').describe(
+      'The status page status reference'
+    ),
+    severity: statusPageReferenceSchema('status_page_severity').describe(
+      'The severity of the post update'
+    ),
     impacted_services: z
       .array(
         z.object({
-          service: statusPageReferenceSchema('status_page_service'),
-          impact: statusPageReferenceSchema('status_page_impact'),
+          service: statusPageReferenceSchema('status_page_service').describe(
+            'The service the object belongs to'
+          ),
+          impact: statusPageReferenceSchema('status_page_impact').describe(
+            'The impact on the service'
+          ),
         })
       )
       .max(100)
-      .optional(),
-    update_frequency_ms: z.number().int().optional(),
-    notify_subscribers: z.boolean().optional(),
-    reported_at: dateTimeSchema.optional(),
-    post: statusPageReferenceSchema('status_page_post').optional(),
+      .optional()
+      .describe('The status page services affected by the update'),
+    update_frequency_ms: z.number().int().optional().describe('Milliseconds until the next update'),
+    notify_subscribers: z
+      .boolean()
+      .optional()
+      .describe('Whether to notify subscribers of the update'),
+    reported_at: dateTimeSchema.optional().describe('When the update was reported, ISO 8601'),
+    post: statusPageReferenceSchema('status_page_post').optional().describe('The status page post'),
   })
 );
 
 const serviceDataSchema = lazySchema(() =>
   z.object({
-    service: z.object({
-      id: idSchema.optional(),
-      name: z.string().max(200).optional(),
-      description: textSchema.optional(),
-      escalation_policy: referenceSchema,
-      teams: z.array(referenceSchema).max(25).optional(),
-      status: z.string().max(100).optional(),
-    }),
+    service: z
+      .object({
+        id: idSchema.optional().describe('The ID of the referenced object'),
+        name: z.string().max(200).optional().describe('The name of the service'),
+        description: textSchema.optional().describe('The description of the service'),
+        escalation_policy: referenceSchema.describe('The escalation policy of the service'),
+        teams: z
+          .array(referenceSchema)
+          .max(25)
+          .optional()
+          .describe('The teams associated with the object'),
+        status: z.string().max(100).optional().describe('The current state of the service'),
+      })
+      .describe('The service the object belongs to'),
   })
 );
 
 const teamDataSchema = lazySchema(() =>
   z.object({
-    team: z.object({
-      name: z.string().min(1).max(200),
-      description: textSchema.optional(),
-      default_role: z.enum(['manager', 'none']).optional(),
-    }),
+    team: z
+      .object({
+        name: z.string().min(1).max(200).describe('The name of the team'),
+        description: textSchema.optional().describe('The description of the team'),
+        default_role: z
+          .enum(['manager', 'none'])
+          .optional()
+          .describe('The default role granted to users added to the team'),
+      })
+      .describe('The team definition'),
   })
 );
 
@@ -244,277 +314,374 @@ export type ListToolsInput = z.infer<typeof ListToolsInputSchema>;
 
 export const BrowseUsersInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({ action: z.literal('get') }),
-      z.object({
-        action: z.literal('list'),
-        query: textSchema.optional(),
-        team_ids: idsSchema.optional(),
-        ...pageSchema(),
-      }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({ action: z.literal('get').describe('The operation to run') }),
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          query: textSchema.optional().describe('Free-text search string'),
+          team_ids: idsSchema.optional().describe('Filter by team IDs'),
+          ...pageSchema(),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseUsersInput = z.infer<typeof BrowseUsersInputSchema>;
 
 export const BrowseSchedulesInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list'),
-        query: textSchema.optional().describe('Filter by schedule name'),
-        team_ids: idsSchema.optional(),
-        user_ids: idsSchema
-          .optional()
-          .describe('Filter by member user IDs. Lists legacy (v2) schedules only.'),
-        include: z
-          .array(z.enum(['schedule_layers', 'overrides_subschedule', 'final_schedule']))
-          .max(3)
-          .optional()
-          .describe('Extra detail for legacy (v2) schedules. Lists legacy schedules only.'),
-        kind: z
-          .enum(['legacy', 'shift_based'])
-          .optional()
-          .describe('Restrict to one scheduling system; omit to list both'),
-        ...pageSchema(),
-      }),
-      z.object({
-        action: z.literal('get'),
-        schedule_id: idSchema,
-        kind: z
-          .enum(['legacy', 'shift_based'])
-          .optional()
-          .describe('Omit unless certain; the tool detects the kind'),
-      }),
-      z.object({ action: z.literal('list_users'), schedule_id: idSchema }),
-      z.object({
-        action: z.literal('list_oncalls'),
-        time_zone: z
-          .string()
-          .max(100)
-          .optional()
-          .describe("IANA time zone, e.g. 'America/New_York'"),
-        user_ids: idsSchema.optional(),
-        escalation_policy_ids: idsSchema.optional(),
-        schedule_ids: idsSchema.optional(),
-        service_ids: idsSchema
-          .optional()
-          .describe('Filter by the escalation policies of these services'),
-        since: dateTimeSchema.optional().describe('Start of the range; defaults to now'),
-        until: dateTimeSchema
-          .optional()
-          .describe('End of the range, at most 90 days ahead; defaults to now'),
-        earliest: z
-          .boolean()
-          .optional()
-          .describe(
-            'Return only the earliest on-call per escalation policy, level and user (default true)'
-          ),
-        ...pageSchema(),
-      }),
-      z.object({ action: z.literal('list_rotations'), schedule_id: idSchema, ...pageSchema() }),
-      z.object({
-        action: z.literal('get_rotation'),
-        schedule_id: idSchema,
-        rotation_id: idSchema,
-      }),
-      z.object({
-        action: z.literal('list_rotation_events'),
-        schedule_id: idSchema,
-        rotation_id: idSchema,
-        ...pageSchema(),
-      }),
-      z.object({
-        action: z.literal('get_rotation_event'),
-        schedule_id: idSchema,
-        rotation_id: idSchema,
-        event_id: idSchema,
-      }),
-      z.object({
-        action: z.literal('list_custom_shifts'),
-        schedule_id: idSchema,
-        since: dateTimeSchema,
-        until: dateTimeSchema,
-        ...pageSchema(),
-      }),
-      z.object({
-        action: z.literal('get_custom_shift'),
-        schedule_id: idSchema,
-        custom_shift_id: idSchema,
-      }),
-      z.object({
-        action: z.literal('list_overrides'),
-        schedule_id: idSchema,
-        since: dateTimeSchema,
-        until: dateTimeSchema,
-        ...pageSchema(),
-      }),
-      z.object({
-        action: z.literal('get_override'),
-        schedule_id: idSchema,
-        override_id: idSchema,
-      }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          query: textSchema.optional().describe('Filter by schedule name'),
+          team_ids: idsSchema.optional().describe('Filter by team IDs'),
+          user_ids: idsSchema
+            .optional()
+            .describe('Filter by member user IDs. Lists legacy (v2) schedules only.'),
+          include: z
+            .array(z.enum(['schedule_layers', 'overrides_subschedule', 'final_schedule']))
+            .max(3)
+            .optional()
+            .describe('Extra detail for legacy (v2) schedules. Lists legacy schedules only.'),
+          kind: z
+            .enum(['legacy', 'shift_based'])
+            .optional()
+            .describe('Restrict to one scheduling system; omit to list both'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          kind: z
+            .enum(['legacy', 'shift_based'])
+            .optional()
+            .describe('Omit unless certain; the tool detects the kind'),
+        }),
+        z.object({
+          action: z.literal('list_users').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+        }),
+        z.object({
+          action: z.literal('list_oncalls').describe('The operation to run'),
+          time_zone: z
+            .string()
+            .max(100)
+            .optional()
+            .describe("IANA time zone, e.g. 'America/New_York'"),
+          user_ids: idsSchema.optional().describe('Filter by user IDs'),
+          escalation_policy_ids: idsSchema.optional().describe('Filter by escalation policy IDs'),
+          schedule_ids: idsSchema.optional().describe('Filter by schedule IDs'),
+          service_ids: idsSchema
+            .optional()
+            .describe('Filter by the escalation policies of these services'),
+          since: dateTimeSchema.optional().describe('Start of the range; defaults to now'),
+          until: dateTimeSchema
+            .optional()
+            .describe('End of the range, at most 90 days ahead; defaults to now'),
+          earliest: z
+            .boolean()
+            .optional()
+            .describe(
+              'Return only the earliest on-call per escalation policy, level and user (default true)'
+            ),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('list_rotations').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get_rotation').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          rotation_id: idSchema.describe('The ID of the rotation'),
+        }),
+        z.object({
+          action: z.literal('list_rotation_events').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          rotation_id: idSchema.describe('The ID of the rotation'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get_rotation_event').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          rotation_id: idSchema.describe('The ID of the rotation'),
+          event_id: idSchema.describe('The ID of the rotation event'),
+        }),
+        z.object({
+          action: z.literal('list_custom_shifts').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          since: dateTimeSchema.describe('Start of the time range, ISO 8601'),
+          until: dateTimeSchema.describe('End of the time range, ISO 8601'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get_custom_shift').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          custom_shift_id: idSchema.describe('The ID of the custom shift'),
+        }),
+        z.object({
+          action: z.literal('list_overrides').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          since: dateTimeSchema.describe('Start of the time range, ISO 8601'),
+          until: dateTimeSchema.describe('End of the time range, ISO 8601'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get_override').describe('The operation to run'),
+          schedule_id: idSchema.describe('The ID of the schedule'),
+          override_id: idSchema.describe('The ID of the override'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseSchedulesInput = z.infer<typeof BrowseSchedulesInputSchema>;
 
 export const BrowseEscalationPoliciesInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list'),
-        query: textSchema.optional(),
-        user_ids: idsSchema.optional(),
-        team_ids: idsSchema.optional(),
-        include: z
-          .array(z.enum(['services', 'teams']))
-          .max(2)
-          .optional(),
-        ...pageSchema(),
-      }),
-      z.object({ action: z.literal('get'), policy_id: idSchema }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          query: textSchema.optional().describe('Free-text search string'),
+          user_ids: idsSchema.optional().describe('Filter by user IDs'),
+          team_ids: idsSchema.optional().describe('Filter by team IDs'),
+          include: z
+            .array(z.enum(['services', 'teams']))
+            .max(2)
+            .optional()
+            .describe('Related resources to include in the response'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get').describe('The operation to run'),
+          policy_id: idSchema.describe('The ID of the escalation policy'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseEscalationPoliciesInput = z.infer<typeof BrowseEscalationPoliciesInputSchema>;
 
 export const BrowseIncidentsInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list'),
-        request_scope: z.enum(['all', 'teams', 'assigned']).optional(),
-        statuses: z
-          .array(z.enum(['triggered', 'acknowledged', 'resolved']))
-          .max(3)
-          .optional(),
-        since: dateTimeSchema.optional().describe('ISO 8601 start time'),
-        until: dateTimeSchema.optional().describe('ISO 8601 end time'),
-        urgencies: z
-          .array(z.enum(['high', 'low']))
-          .max(2)
-          .optional(),
-        priorities: idsSchema.optional().describe('Filter by priority ID (not name/level)'),
-        service_ids: idsSchema.optional(),
-        team_ids: idsSchema
-          .optional()
-          .describe("Overrides the caller's own teams when request_scope is 'teams'"),
-        ...pageSchema(),
-      }),
-      z.object({
-        action: z.literal('get'),
-        incident_id: idSchema,
-        include: z.array(z.string().max(100)).max(10).optional(),
-      }),
-      z.object({ action: z.literal('list_alerts'), incident_id: idSchema, ...pageSchema() }),
-      z.object({ action: z.literal('get_alert'), incident_id: idSchema, alert_id: idSchema }),
-      z.object({ action: z.literal('list_notes'), incident_id: idSchema, ...pageSchema() }),
-      z.object({
-        action: z.literal('context'),
-        incident_id: idSchema,
-        context_type: z
-          .enum(['related', 'past', 'outlier'])
-          .describe(
-            "'related' returns related incidents; 'past' returns similar historical incidents; 'outlier' reports whether the incident deviates from the norm for its service"
-          ),
-        limit: limitSchema.optional().describe('Past incidents only: max results'),
-        additional_details: z
-          .array(z.string().max(100))
-          .max(10)
-          .optional()
-          .describe('Related incidents only: additional attributes to include'),
-      }),
-      z.object({
-        action: z.literal('list_change_events'),
-        incident_id: idSchema,
-        ...pageSchema(),
-      }),
-      z.object({
-        action: z.literal('list_workflows'),
-        query: textSchema.optional(),
-        include: z
-          .array(z.enum(['steps', 'team']))
-          .max(2)
-          .optional(),
-        ...pageSchema(),
-      }),
-      z.object({ action: z.literal('get_workflow'), workflow_id: idSchema }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          request_scope: z
+            .enum(['all', 'teams', 'assigned'])
+            .optional()
+            .describe('Which incidents to list: all, teams, or assigned to the current user'),
+          statuses: z
+            .array(z.enum(['triggered', 'acknowledged', 'resolved']))
+            .max(3)
+            .optional()
+            .describe('Filter by status'),
+          since: dateTimeSchema.optional().describe('ISO 8601 start time'),
+          until: dateTimeSchema.optional().describe('ISO 8601 end time'),
+          urgencies: z
+            .array(z.enum(['high', 'low']))
+            .max(2)
+            .optional()
+            .describe('Filter by urgency'),
+          priorities: idsSchema.optional().describe('Filter by priority ID (not name/level)'),
+          service_ids: idsSchema.optional().describe('Filter by service IDs'),
+          team_ids: idsSchema
+            .optional()
+            .describe("Overrides the caller's own teams when request_scope is 'teams'"),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get').describe('The operation to run'),
+          incident_id: idSchema.describe('The ID of the incident'),
+          include: z
+            .array(z.string().max(100))
+            .max(10)
+            .optional()
+            .describe('Related resources to include in the response'),
+        }),
+        z.object({
+          action: z.literal('list_alerts').describe('The operation to run'),
+          incident_id: idSchema.describe('The ID of the incident'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get_alert').describe('The operation to run'),
+          incident_id: idSchema.describe('The ID of the incident'),
+          alert_id: idSchema.describe('The ID of the alert'),
+        }),
+        z.object({
+          action: z.literal('list_notes').describe('The operation to run'),
+          incident_id: idSchema.describe('The ID of the incident'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('context').describe('The operation to run'),
+          incident_id: idSchema.describe('The ID of the incident'),
+          context_type: z
+            .enum(['related', 'past', 'outlier'])
+            .describe(
+              "'related' returns related incidents; 'past' returns similar historical incidents; 'outlier' reports whether the incident deviates from the norm for its service"
+            ),
+          limit: limitSchema.optional().describe('Past incidents only: max results'),
+          additional_details: z
+            .array(z.string().max(100))
+            .max(10)
+            .optional()
+            .describe('Related incidents only: additional attributes to include'),
+        }),
+        z.object({
+          action: z.literal('list_change_events').describe('The operation to run'),
+          incident_id: idSchema.describe('The ID of the incident'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('list_workflows').describe('The operation to run'),
+          query: textSchema.optional().describe('Free-text search string'),
+          include: z
+            .array(z.enum(['steps', 'team']))
+            .max(2)
+            .optional()
+            .describe('Related resources to include in the response'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get_workflow').describe('The operation to run'),
+          workflow_id: idSchema.describe('The ID of the incident workflow'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseIncidentsInput = z.infer<typeof BrowseIncidentsInputSchema>;
 
 export const BrowseTeamsInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list'),
-        scope: z.enum(['all', 'my']).optional(),
-        query: textSchema.optional(),
-        ...pageSchema(),
-      }),
-      z.object({ action: z.literal('get'), team_id: idSchema }),
-      z.object({ action: z.literal('list_members'), team_id: idSchema, ...pageSchema() }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          scope: z
+            .enum(['all', 'my'])
+            .optional()
+            .describe("Which teams to list: all or the current user's"),
+          query: textSchema.optional().describe('Free-text search string'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get').describe('The operation to run'),
+          team_id: idSchema.describe('The ID of the team'),
+        }),
+        z.object({
+          action: z.literal('list_members').describe('The operation to run'),
+          team_id: idSchema.describe('The ID of the team'),
+          ...pageSchema(),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseTeamsInput = z.infer<typeof BrowseTeamsInputSchema>;
 
 export const BrowseServicesInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list'),
-        query: textSchema.optional(),
-        team_ids: idsSchema.optional(),
-        ...pageSchema(),
-      }),
-      z.object({ action: z.literal('get'), service_id: idSchema }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          query: textSchema.optional().describe('Free-text search string'),
+          team_ids: idsSchema.optional().describe('Filter by team IDs'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get').describe('The operation to run'),
+          service_id: idSchema.describe('The ID of the service'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseServicesInput = z.infer<typeof BrowseServicesInputSchema>;
 
 export const BrowseEventOrchestrationsInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list'),
-        sort_by: z
-          .enum([
-            'name:asc',
-            'name:desc',
-            'routes:asc',
-            'routes:desc',
-            'created_at:asc',
-            'created_at:desc',
-          ])
-          .optional(),
-        ...pageSchema(),
-      }),
-      z.object({ action: z.literal('get'), orchestration_id: idSchema }),
-      z.object({ action: z.literal('get_router'), orchestration_id: idSchema }),
-      z.object({ action: z.literal('get_service'), service_id: idSchema }),
-      z.object({ action: z.literal('get_global'), orchestration_id: idSchema }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          sort_by: z
+            .enum([
+              'name:asc',
+              'name:desc',
+              'routes:asc',
+              'routes:desc',
+              'created_at:asc',
+              'created_at:desc',
+            ])
+            .optional()
+            .describe('Sort order'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get').describe('The operation to run'),
+          orchestration_id: idSchema.describe('The ID of the event orchestration'),
+        }),
+        z.object({
+          action: z.literal('get_router').describe('The operation to run'),
+          orchestration_id: idSchema.describe('The ID of the event orchestration'),
+        }),
+        z.object({
+          action: z.literal('get_service').describe('The operation to run'),
+          service_id: idSchema.describe('The ID of the service'),
+        }),
+        z.object({
+          action: z.literal('get_global').describe('The operation to run'),
+          orchestration_id: idSchema.describe('The ID of the event orchestration'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseEventOrchestrationsInput = z.infer<typeof BrowseEventOrchestrationsInputSchema>;
 
 export const BrowseAlertGroupingInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list'),
-        service_ids: idsSchema.optional(),
-        limit: limitSchema.optional(),
-        after: z.string().max(500).optional().describe('Cursor for the next page'),
-        before: z.string().max(500).optional().describe('Cursor for the previous page'),
-        total: z.boolean().optional(),
-      }),
-      z.object({ action: z.literal('get'), setting_id: idSchema }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          service_ids: idsSchema.optional().describe('Filter by service IDs'),
+          limit: limitSchema.optional().describe('Maximum number of results to return'),
+          after: z.string().max(500).optional().describe('Cursor for the next page'),
+          before: z.string().max(500).optional().describe('Cursor for the previous page'),
+          total: z.boolean().optional().describe('Whether to include the total count of results'),
+        }),
+        z.object({
+          action: z.literal('get').describe('The operation to run'),
+          setting_id: idSchema.describe('The ID of the alert grouping setting'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseAlertGroupingInput = z.infer<typeof BrowseAlertGroupingInputSchema>;
@@ -522,82 +689,115 @@ export type BrowseAlertGroupingInput = z.infer<typeof BrowseAlertGroupingInputSc
 const changeEventFilters = () => ({
   since: dateTimeSchema.optional().describe('ISO 8601 start time'),
   until: dateTimeSchema.optional().describe('ISO 8601 end time'),
-  total: z.boolean().optional(),
-  team_ids: idsSchema.optional(),
-  integration_ids: idsSchema.optional(),
+  total: z.boolean().optional().describe('Whether to include the total count of results'),
+  team_ids: idsSchema.optional().describe('Filter by team IDs'),
+  integration_ids: idsSchema.optional().describe('Filter by integration IDs'),
   ...pageSchema(),
 });
 
 export const BrowseChangeEventsInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({ action: z.literal('list'), ...changeEventFilters() }),
-      z.object({ action: z.literal('get'), change_event_id: idSchema }),
-      z.object({
-        action: z.literal('list_service'),
-        service_id: idSchema,
-        ...changeEventFilters(),
-      }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          ...changeEventFilters(),
+        }),
+        z.object({
+          action: z.literal('get').describe('The operation to run'),
+          change_event_id: idSchema.describe('The ID of the change event'),
+        }),
+        z.object({
+          action: z.literal('list_service').describe('The operation to run'),
+          service_id: idSchema.describe('The ID of the service'),
+          ...changeEventFilters(),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseChangeEventsInput = z.infer<typeof BrowseChangeEventsInputSchema>;
 
 export const BrowseStatusPagesInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list'),
-        status_page_type: z.enum(['public', 'private', 'audience_specific']).optional(),
-        ...pageSchema(),
-      }),
-      z.object({
-        action: z.literal('list_severities'),
-        status_page_id: idSchema,
-        ...pageSchema(),
-      }),
-      z.object({ action: z.literal('list_impacts'), status_page_id: idSchema, ...pageSchema() }),
-      z.object({
-        action: z.literal('list_statuses'),
-        status_page_id: idSchema,
-        ...pageSchema(),
-      }),
-      z.object({
-        action: z.literal('get_post'),
-        status_page_id: idSchema,
-        post_id: idSchema,
-        include: z.array(z.literal('status_page_post_update')).max(1).optional(),
-      }),
-      z.object({
-        action: z.literal('list_post_updates'),
-        status_page_id: idSchema,
-        post_id: idSchema,
-        ...pageSchema(),
-      }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list').describe('The operation to run'),
+          status_page_type: z
+            .enum(['public', 'private', 'audience_specific'])
+            .optional()
+            .describe('Filter by status page type'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('list_severities').describe('The operation to run'),
+          status_page_id: idSchema.describe('The ID of the status page'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('list_impacts').describe('The operation to run'),
+          status_page_id: idSchema.describe('The ID of the status page'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('list_statuses').describe('The operation to run'),
+          status_page_id: idSchema.describe('The ID of the status page'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get_post').describe('The operation to run'),
+          status_page_id: idSchema.describe('The ID of the status page'),
+          post_id: idSchema.describe('The ID of the status page post'),
+          include: z
+            .array(z.literal('status_page_post_update'))
+            .max(1)
+            .optional()
+            .describe('Related resources to include in the response'),
+        }),
+        z.object({
+          action: z.literal('list_post_updates').describe('The operation to run'),
+          status_page_id: idSchema.describe('The ID of the status page'),
+          post_id: idSchema.describe('The ID of the status page post'),
+          ...pageSchema(),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseStatusPagesInput = z.infer<typeof BrowseStatusPagesInputSchema>;
 
 export const BrowseActivityInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('list_log_entries'),
-        since: dateTimeSchema.optional().describe('ISO 8601 start time (default: 7 days ago)'),
-        until: dateTimeSchema.optional().describe('ISO 8601 end time (default: now)'),
-        is_overview: z
-          .boolean()
-          .optional()
-          .describe('If true, returns only the most important changes to the incident'),
-        include: z
-          .array(z.enum(['incidents', 'services', 'channels', 'teams']))
-          .max(4)
-          .optional(),
-        ...pageSchema(),
-      }),
-      z.object({ action: z.literal('get_log_entry'), log_entry_id: idSchema }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('list_log_entries').describe('The operation to run'),
+          since: dateTimeSchema.optional().describe('ISO 8601 start time (default: 7 days ago)'),
+          until: dateTimeSchema.optional().describe('ISO 8601 end time (default: now)'),
+          is_overview: z
+            .boolean()
+            .optional()
+            .describe('If true, returns only the most important changes to the incident'),
+          include: z
+            .array(z.enum(['incidents', 'services', 'channels', 'teams']))
+            .max(4)
+            .optional()
+            .describe('Related resources to include in the response'),
+          ...pageSchema(),
+        }),
+        z.object({
+          action: z.literal('get_log_entry').describe('The operation to run'),
+          log_entry_id: idSchema.describe('The ID of the log entry'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type BrowseActivityInput = z.infer<typeof BrowseActivityInputSchema>;
@@ -854,307 +1054,492 @@ export type RunResponsePlayInput = z.infer<typeof RunResponsePlayInputSchema>;
 
 export const ManageIncidentsInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('create'),
-        incident: z.object({
-          title: z.string().min(1).max(1024),
-          service: referenceSchema.describe('The service the incident belongs to'),
-          urgency: z.enum(['high', 'low']).optional(),
-          body: z.object({ details: z.string().max(10000) }).optional(),
-          assignments: z
-            .array(z.object({ assignee: referenceSchema }))
-            .max(25)
-            .optional()
-            .describe('When set, only these users receive the initial notification'),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('create').describe('The operation to run'),
+          incident: z
+            .object({
+              title: z.string().min(1).max(1024).describe('The title of the incident'),
+              service: referenceSchema.describe('The service the incident belongs to'),
+              urgency: z.enum(['high', 'low']).optional().describe('The urgency, high or low'),
+              body: z
+                .object({
+                  details: z.string().max(10000).describe('Free-form details of the incident'),
+                })
+                .optional()
+                .describe('The body of the incident'),
+              assignments: z
+                .array(z.object({ assignee: referenceSchema.describe('The user to assign') }))
+                .max(25)
+                .optional()
+                .describe('When set, only these users receive the initial notification'),
+            })
+            .describe('The incident'),
         }),
-      }),
-      z.object({
-        action: z.literal('update'),
-        manage_request: z.object({
-          incident_ids: idsSchema.min(1),
-          assignment: referenceSchema.optional().describe('The user to assign'),
-          status: z.enum(['acknowledged', 'resolved']).optional(),
-          urgency: z.enum(['high', 'low']).optional(),
-          escalation_level: z.number().int().optional(),
+        z.object({
+          action: z.literal('update').describe('The operation to run'),
+          manage_request: z
+            .object({
+              incident_ids: idsSchema.min(1).describe('The IDs of the incidents to update'),
+              assignment: referenceSchema.optional().describe('The user to assign'),
+              status: z
+                .enum(['acknowledged', 'resolved'])
+                .optional()
+                .describe('The status to set the incident to'),
+              urgency: z.enum(['high', 'low']).optional().describe('The urgency, high or low'),
+              escalation_level: z.number().int().optional().describe('The escalation level to set'),
+            })
+            .describe('The incident update to apply'),
         }),
-      }),
-      z.object({
-        action: z.literal('add_note'),
-        incident_id: idSchema,
-        note: z.string().min(1).max(10000),
-      }),
-      z.object({
-        action: z.literal('add_responders'),
-        incident_id: idSchema,
-        request: z.object({
-          message: z.string().min(1).max(2000),
-          responder_request_targets: z
-            .array(
-              z.object({
-                responder_request_target: z.object({
-                  id: idSchema,
-                  type: z.enum(['user_reference', 'escalation_policy_reference']),
-                }),
-              })
-            )
-            .min(1)
-            .max(25),
+        z.object({
+          action: z.literal('add_note').describe('The operation to run'),
+          incident_id: idSchema.describe('The ID of the incident'),
+          note: z.string().min(1).max(10000).describe('The text of the note'),
         }),
-      }),
-      z.object({
-        action: z.literal('start_workflow'),
-        workflow_id: idSchema,
-        instance_request: z.object({
-          incident_workflow_instance: z.object({
-            id: idSchema.optional().describe('Identifier to tell workflow executions apart'),
-            incident: referenceSchema,
-          }),
+        z.object({
+          action: z.literal('add_responders').describe('The operation to run'),
+          incident_id: idSchema.describe('The ID of the incident'),
+          request: z
+            .object({
+              message: z.string().min(1).max(2000).describe('The message text'),
+              responder_request_targets: z
+                .array(
+                  z.object({
+                    responder_request_target: z
+                      .object({
+                        id: idSchema.describe('The ID of the referenced object'),
+                        type: z
+                          .enum(['user_reference', 'escalation_policy_reference'])
+                          .describe('The type of target: a user or an escalation policy'),
+                      })
+                      .describe('The user or escalation policy to request as a responder'),
+                  })
+                )
+                .min(1)
+                .max(25)
+                .describe('The users or escalation policies to request as responders'),
+            })
+            .describe(
+              "The request to send. Set action to the operation to run and provide that operation's fields"
+            ),
         }),
-      }),
-    ]),
+        z.object({
+          action: z.literal('start_workflow').describe('The operation to run'),
+          workflow_id: idSchema.describe('The ID of the incident workflow'),
+          instance_request: z
+            .object({
+              incident_workflow_instance: z
+                .object({
+                  id: idSchema.optional().describe('Identifier to tell workflow executions apart'),
+                  incident: referenceSchema.describe('The incident'),
+                })
+                .describe('The incident workflow instance to start'),
+            })
+            .describe('The incident workflow instance request'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type ManageIncidentsInput = z.infer<typeof ManageIncidentsInputSchema>;
 
 export const ManageServicesInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({ action: z.literal('create'), service_data: serviceDataSchema }),
-      z.object({
-        action: z.literal('update'),
-        service_id: idSchema,
-        service_data: serviceDataSchema,
-      }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('create').describe('The operation to run'),
+          service_data: serviceDataSchema.describe('The service definition'),
+        }),
+        z.object({
+          action: z.literal('update').describe('The operation to run'),
+          service_id: idSchema.describe('The ID of the service'),
+          service_data: serviceDataSchema.describe('The service definition'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type ManageServicesInput = z.infer<typeof ManageServicesInputSchema>;
 
 export const ManageSchedulesInputSchema = lazySchema(() => {
-  const scheduleIds = () => ({ schedule_id: idSchema });
-  const rotationIds = () => ({ ...scheduleIds(), rotation_id: idSchema });
+  const scheduleIds = () => ({ schedule_id: idSchema.describe('The ID of the schedule') });
+  const rotationIds = () => ({
+    ...scheduleIds(),
+    rotation_id: idSchema.describe('The ID of the rotation'),
+  });
   return z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('create'),
-        schedule_data: z.discriminatedUnion('kind', [
-          z.object({ kind: z.literal('legacy'), schedule: legacyScheduleSchema }),
-          z.object({
-            kind: z.literal('shift_based'),
-            name: z.string().min(1).max(200),
-            time_zone: z.string().min(1).max(100),
-            description: textSchema.optional(),
-            teams: z.array(referenceSchema).max(25).optional(),
-          }),
-        ]),
-      }),
-      z.object({
-        action: z.literal('update'),
-        ...scheduleIds(),
-        schedule_data: z.discriminatedUnion('kind', [
-          z.object({ kind: z.literal('legacy'), schedule: legacyScheduleSchema }),
-          z.object({
-            kind: z.literal('shift_based'),
-            name: z.string().max(200).optional(),
-            time_zone: z.string().max(100).optional(),
-            description: textSchema.optional(),
-            teams: z.array(referenceSchema).max(25).optional(),
-          }),
-        ]),
-      }),
-      z.object({
-        action: z.literal('create_override'),
-        ...scheduleIds(),
-        override_request: z.object({
-          overrides: z
-            .array(z.object({ start: dateTimeSchema, end: dateTimeSchema, user_id: idSchema }))
-            .min(1)
-            .max(50),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('create').describe('The operation to run'),
+          schedule_data: z
+            .discriminatedUnion('kind', [
+              z.object({
+                kind: z
+                  .literal('legacy')
+                  .describe('The scheduling system: legacy (v2) or shift_based (v3)'),
+                schedule: legacyScheduleSchema.describe('The schedule definition'),
+              }),
+              z.object({
+                kind: z
+                  .literal('shift_based')
+                  .describe('The scheduling system: legacy (v2) or shift_based (v3)'),
+                name: z.string().min(1).max(200).describe('The name of the schedule'),
+                time_zone: z
+                  .string()
+                  .min(1)
+                  .max(100)
+                  .describe('IANA time zone, e.g. America/New_York'),
+                description: textSchema.optional().describe('The description of the schedule'),
+                teams: z
+                  .array(referenceSchema)
+                  .max(25)
+                  .optional()
+                  .describe('The teams associated with the object'),
+              }),
+            ])
+            .describe('The schedule definition'),
         }),
-      }),
-      z.object({ action: z.literal('delete_schedule_v3'), ...scheduleIds() }),
-      z.object({ action: z.literal('create_rotation'), ...scheduleIds() }),
-      z.object({ action: z.literal('delete_rotation'), ...rotationIds() }),
-      z.object({
-        action: z.literal('create_rotation_event'),
-        ...rotationIds(),
-        event_data: rotationEventDataSchema,
-      }),
-      z.object({
-        action: z.literal('update_rotation_event'),
-        ...rotationIds(),
-        event_id: idSchema,
-        event_data: rotationEventDataSchema.describe(
-          'Full replacement; for a started event only effective_until may change'
-        ),
-      }),
-      z.object({
-        action: z.literal('delete_rotation_event'),
-        ...rotationIds(),
-        event_id: idSchema,
-      }),
-      z.object({
-        action: z.literal('create_custom_shifts'),
-        ...scheduleIds(),
-        shifts: z.array(customShiftDataSchema).min(1).max(50),
-      }),
-      z.object({
-        action: z.literal('update_custom_shift'),
-        ...scheduleIds(),
-        custom_shift_id: idSchema,
-        shift_data: customShiftDataSchema,
-      }),
-      z.object({
-        action: z.literal('delete_custom_shift'),
-        ...scheduleIds(),
-        custom_shift_id: idSchema,
-      }),
-      z.object({
-        action: z.literal('create_overrides'),
-        ...scheduleIds(),
-        overrides: z
-          .array(
-            overrideDataSchema.extend({
-              rotation_id: idSchema
-                .optional()
-                .describe('Mutually exclusive with custom_shift_id; exactly one must be set'),
-              custom_shift_id: idSchema
-                .optional()
-                .describe('Mutually exclusive with rotation_id; exactly one must be set'),
+        z.object({
+          action: z.literal('update').describe('The operation to run'),
+          ...scheduleIds(),
+          schedule_data: z
+            .discriminatedUnion('kind', [
+              z.object({
+                kind: z
+                  .literal('legacy')
+                  .describe('The scheduling system: legacy (v2) or shift_based (v3)'),
+                schedule: legacyScheduleSchema.describe('The schedule definition'),
+              }),
+              z.object({
+                kind: z
+                  .literal('shift_based')
+                  .describe('The scheduling system: legacy (v2) or shift_based (v3)'),
+                name: z.string().max(200).optional().describe('The name of the schedule'),
+                time_zone: z
+                  .string()
+                  .max(100)
+                  .optional()
+                  .describe('IANA time zone, e.g. America/New_York'),
+                description: textSchema.optional().describe('The description of the schedule'),
+                teams: z
+                  .array(referenceSchema)
+                  .max(25)
+                  .optional()
+                  .describe('The teams associated with the object'),
+              }),
+            ])
+            .describe('The schedule definition'),
+        }),
+        z.object({
+          action: z.literal('create_override').describe('The operation to run'),
+          ...scheduleIds(),
+          override_request: z
+            .object({
+              overrides: z
+                .array(
+                  z.object({
+                    start: dateTimeSchema.describe('The start time, ISO 8601'),
+                    end: dateTimeSchema.describe('The end time, ISO 8601'),
+                    user_id: idSchema.describe('The ID of the user'),
+                  })
+                )
+                .min(1)
+                .max(50)
+                .describe('The overrides to create'),
             })
-          )
-          .min(1)
-          .max(50),
-      }),
-      z.object({
-        action: z.literal('update_override'),
-        ...scheduleIds(),
-        override_id: idSchema,
-        override_data: overrideDataSchema,
-      }),
-      z.object({
-        action: z.literal('delete_override'),
-        ...scheduleIds(),
-        override_id: idSchema,
-      }),
-    ]),
+            .describe('The overrides to create'),
+        }),
+        z.object({
+          action: z.literal('delete_schedule_v3').describe('The operation to run'),
+          ...scheduleIds(),
+        }),
+        z.object({
+          action: z.literal('create_rotation').describe('The operation to run'),
+          ...scheduleIds(),
+        }),
+        z.object({
+          action: z.literal('delete_rotation').describe('The operation to run'),
+          ...rotationIds(),
+        }),
+        z.object({
+          action: z.literal('create_rotation_event').describe('The operation to run'),
+          ...rotationIds(),
+          event_data: rotationEventDataSchema.describe('The rotation event definition'),
+        }),
+        z.object({
+          action: z.literal('update_rotation_event').describe('The operation to run'),
+          ...rotationIds(),
+          event_id: idSchema.describe('The ID of the rotation event'),
+          event_data: rotationEventDataSchema.describe(
+            'Full replacement; for a started event only effective_until may change'
+          ),
+        }),
+        z.object({
+          action: z.literal('delete_rotation_event').describe('The operation to run'),
+          ...rotationIds(),
+          event_id: idSchema.describe('The ID of the rotation event'),
+        }),
+        z.object({
+          action: z.literal('create_custom_shifts').describe('The operation to run'),
+          ...scheduleIds(),
+          shifts: z
+            .array(customShiftDataSchema)
+            .min(1)
+            .max(50)
+            .describe('The custom shifts to create'),
+        }),
+        z.object({
+          action: z.literal('update_custom_shift').describe('The operation to run'),
+          ...scheduleIds(),
+          custom_shift_id: idSchema.describe('The ID of the custom shift'),
+          shift_data: customShiftDataSchema.describe('The replacement custom shift data'),
+        }),
+        z.object({
+          action: z.literal('delete_custom_shift').describe('The operation to run'),
+          ...scheduleIds(),
+          custom_shift_id: idSchema.describe('The ID of the custom shift'),
+        }),
+        z.object({
+          action: z.literal('create_overrides').describe('The operation to run'),
+          ...scheduleIds(),
+          overrides: z
+            .array(
+              overrideDataSchema.extend({
+                rotation_id: idSchema
+                  .optional()
+                  .describe('Mutually exclusive with custom_shift_id; exactly one must be set'),
+                custom_shift_id: idSchema
+                  .optional()
+                  .describe('Mutually exclusive with rotation_id; exactly one must be set'),
+              })
+            )
+            .min(1)
+            .max(50)
+            .describe('The overrides to create'),
+        }),
+        z.object({
+          action: z.literal('update_override').describe('The operation to run'),
+          ...scheduleIds(),
+          override_id: idSchema.describe('The ID of the override'),
+          override_data: overrideDataSchema.describe('The replacement override data'),
+        }),
+        z.object({
+          action: z.literal('delete_override').describe('The operation to run'),
+          ...scheduleIds(),
+          override_id: idSchema.describe('The ID of the override'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   });
 });
 export type ManageSchedulesInput = z.infer<typeof ManageSchedulesInputSchema>;
 
 export const ManageTeamsInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({ action: z.literal('create'), create_model: teamDataSchema }),
-      z.object({
-        action: z.literal('update'),
-        team_id: idSchema,
-        update_model: teamDataSchema,
-      }),
-      z.object({ action: z.literal('delete'), team_id: idSchema }),
-      z.object({
-        action: z.literal('add_member'),
-        team_id: idSchema,
-        member_data: z.object({
-          user_id: idSchema,
-          role: z.enum(['observer', 'responder', 'manager']).optional(),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('create').describe('The operation to run'),
+          create_model: teamDataSchema.describe('The object to create'),
         }),
-      }),
-      z.object({ action: z.literal('remove_member'), team_id: idSchema, user_id: idSchema }),
-    ]),
+        z.object({
+          action: z.literal('update').describe('The operation to run'),
+          team_id: idSchema.describe('The ID of the team'),
+          update_model: teamDataSchema.describe('The object updates to apply'),
+        }),
+        z.object({
+          action: z.literal('delete').describe('The operation to run'),
+          team_id: idSchema.describe('The ID of the team'),
+        }),
+        z.object({
+          action: z.literal('add_member').describe('The operation to run'),
+          team_id: idSchema.describe('The ID of the team'),
+          member_data: z
+            .object({
+              user_id: idSchema.describe('The ID of the user'),
+              role: z
+                .enum(['observer', 'responder', 'manager'])
+                .optional()
+                .describe('The role of the user on the team'),
+            })
+            .describe('The team member to add'),
+        }),
+        z.object({
+          action: z.literal('remove_member').describe('The operation to run'),
+          team_id: idSchema.describe('The ID of the team'),
+          user_id: idSchema.describe('The ID of the user'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type ManageTeamsInput = z.infer<typeof ManageTeamsInputSchema>;
 
 export const ManageEventOrchestrationsInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('update_router'),
-        orchestration_id: idSchema,
-        router_update: z.object({
-          orchestration_path: z.object({
-            type: z.literal('router').optional(),
-            sets: z
-              .array(
-                z.object({
-                  id: z.string().max(200).optional().describe("Defaults to 'start'"),
-                  rules: z
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('update_router').describe('The operation to run'),
+          orchestration_id: idSchema.describe('The ID of the event orchestration'),
+          router_update: z
+            .object({
+              orchestration_path: z
+                .object({
+                  type: z.literal('router').optional().describe("Set to 'router'"),
+                  sets: z
                     .array(
                       z.object({
-                        id: idSchema,
-                        label: z.string().max(500).optional(),
-                        conditions: routerRuleConditionsSchema,
-                        actions: routerActionsSchema,
-                        disabled: z.boolean().optional(),
+                        id: z.string().max(200).optional().describe("Defaults to 'start'"),
+                        rules: z
+                          .array(
+                            z.object({
+                              id: idSchema.describe('The ID of the referenced object'),
+                              label: z
+                                .string()
+                                .max(500)
+                                .optional()
+                                .describe("A description of the rule's purpose"),
+                              conditions: routerRuleConditionsSchema.describe(
+                                'Conditions for matching an event; the rule matches if any condition matches'
+                              ),
+                              actions: routerActionsSchema.describe(
+                                'The actions to take when an event matches'
+                              ),
+                              disabled: z
+                                .boolean()
+                                .optional()
+                                .describe('Whether the rule is disabled'),
+                            })
+                          )
+                          .max(1000)
+                          .describe('The rules in this set'),
                       })
                     )
-                    .max(1000),
+                    .max(1)
+                    .describe('The sets of routing rules'),
+                  catch_all: z
+                    .object({
+                      actions: routerActionsSchema.describe(
+                        'The actions to take when an event matches'
+                      ),
+                    })
+                    .describe('Routing used when no rule matches an event'),
                 })
-              )
-              .max(1),
-            catch_all: z.object({ actions: routerActionsSchema }),
-          }),
+                .describe('The orchestration router path configuration'),
+            })
+            .describe('The router configuration to apply'),
         }),
-      }),
-      z.object({
-        action: z.literal('append_router_rule'),
-        orchestration_id: idSchema,
-        new_rule: z.object({
-          label: z.string().max(500).optional(),
-          conditions: routerRuleConditionsSchema,
-          actions: routerActionsSchema,
-          disabled: z.boolean().optional(),
+        z.object({
+          action: z.literal('append_router_rule').describe('The operation to run'),
+          orchestration_id: idSchema.describe('The ID of the event orchestration'),
+          new_rule: z
+            .object({
+              label: z.string().max(500).optional().describe("A description of the rule's purpose"),
+              conditions: routerRuleConditionsSchema.describe(
+                'Conditions for matching an event; the rule matches if any condition matches'
+              ),
+              actions: routerActionsSchema.describe('The actions to take when an event matches'),
+              disabled: z.boolean().optional().describe('Whether the rule is disabled'),
+            })
+            .describe('The routing rule to append'),
         }),
-      }),
-    ]),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type ManageEventOrchestrationsInput = z.infer<typeof ManageEventOrchestrationsInputSchema>;
 
 export const ManageAlertGroupingInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('create'),
-        create_model: z.object({ alert_grouping_setting: alertGroupingSettingSchema }),
-      }),
-      z.object({
-        action: z.literal('update'),
-        setting_id: idSchema,
-        update_model: z.object({ alert_grouping_setting: alertGroupingSettingSchema }),
-      }),
-      z.object({ action: z.literal('delete'), setting_id: idSchema }),
-    ]),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('create').describe('The operation to run'),
+          create_model: z
+            .object({
+              alert_grouping_setting: alertGroupingSettingSchema.describe(
+                'The alert grouping setting'
+              ),
+            })
+            .describe('The object to create'),
+        }),
+        z.object({
+          action: z.literal('update').describe('The operation to run'),
+          setting_id: idSchema.describe('The ID of the alert grouping setting'),
+          update_model: z
+            .object({
+              alert_grouping_setting: alertGroupingSettingSchema.describe(
+                'The alert grouping setting'
+              ),
+            })
+            .describe('The object updates to apply'),
+        }),
+        z.object({
+          action: z.literal('delete').describe('The operation to run'),
+          setting_id: idSchema.describe('The ID of the alert grouping setting'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type ManageAlertGroupingInput = z.infer<typeof ManageAlertGroupingInputSchema>;
 
 export const ManageStatusPagesInputSchema = lazySchema(() =>
   z.object({
-    request: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('create_post'),
-        status_page_id: idSchema,
-        create_model: z.object({
-          post: z.object({
-            title: z.string().min(1).max(500),
-            post_type: z.enum(['incident', 'maintenance']),
-            starts_at: dateTimeSchema,
-            ends_at: dateTimeSchema,
-            updates: z.array(postUpdateSchema).min(1).max(25),
-            status_page: statusPageReferenceSchema('status_page'),
-          }),
+    request: z
+      .discriminatedUnion('action', [
+        z.object({
+          action: z.literal('create_post').describe('The operation to run'),
+          status_page_id: idSchema.describe('The ID of the status page'),
+          create_model: z
+            .object({
+              post: z
+                .object({
+                  title: z.string().min(1).max(500).describe('The title of the post'),
+                  post_type: z
+                    .enum(['incident', 'maintenance'])
+                    .describe('The type of the post: incident or maintenance'),
+                  starts_at: dateTimeSchema.describe('When the post becomes effective, ISO 8601'),
+                  ends_at: dateTimeSchema.describe('When the post concludes, ISO 8601'),
+                  updates: z
+                    .array(postUpdateSchema)
+                    .min(1)
+                    .max(25)
+                    .describe('The updates to create with the post'),
+                  status_page: statusPageReferenceSchema('status_page').describe('The status page'),
+                })
+                .describe('The status page post'),
+            })
+            .describe('The object to create'),
         }),
-      }),
-      z.object({
-        action: z.literal('create_post_update'),
-        status_page_id: idSchema,
-        post_id: idSchema,
-        create_model: z.object({ post_update: postUpdateSchema }),
-      }),
-    ]),
+        z.object({
+          action: z.literal('create_post_update').describe('The operation to run'),
+          status_page_id: idSchema.describe('The ID of the status page'),
+          post_id: idSchema.describe('The ID of the status page post'),
+          create_model: z
+            .object({ post_update: postUpdateSchema.describe('The status page post update') })
+            .describe('The object to create'),
+        }),
+      ])
+      .describe(
+        "The request to send. Set action to the operation to run and provide that operation's fields"
+      ),
   })
 );
 export type ManageStatusPagesInput = z.infer<typeof ManageStatusPagesInputSchema>;
