@@ -749,6 +749,16 @@ describe('"now" anchoring', () => {
 
     expect(range.endDate!.getTime() - range.startDate!.getTime()).toBe(15 * 60 * 1000);
   });
+
+  it('truncates "now" to the last whole second', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('-15m to now', { roundRelativeTime: false });
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T11:45:00.000Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.000Z');
+  });
 });
 
 describe('matchPreset', () => {
