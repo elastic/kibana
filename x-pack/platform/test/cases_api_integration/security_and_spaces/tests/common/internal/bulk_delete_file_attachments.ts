@@ -10,7 +10,7 @@ import type { Case } from '@kbn/cases-plugin/common';
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import type { Owner } from '@kbn/cases-plugin/common/constants/types';
 import { CASES_TEST_FIXTURE_FILE_KIND_ID } from '@kbn/cases-api-integration-test-plugin/server/files';
-import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
+import { getUnifiedFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   bulkCreateAttachments,
@@ -103,8 +103,8 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: postedSecCase.id,
           params: [
-            getFilesAttachmentReq({
-              externalReferenceId: create.file.id,
+            getUnifiedFilesAttachmentReq({
+              attachmentId: create.file.id,
               owner: 'securitySolution',
             }),
           ],
@@ -423,8 +423,8 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            getFilesAttachmentReq({
-              externalReferenceId: 'abc',
+            getUnifiedFilesAttachmentReq({
+              attachmentId: 'abc',
               owner: 'securitySolution',
             }),
           ],
@@ -477,8 +477,8 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            getFilesAttachmentReq({
-              externalReferenceId: create.file.id,
+            getUnifiedFilesAttachmentReq({
+              attachmentId: create.file.id,
               owner: 'securitySolution',
             }),
           ],
@@ -556,12 +556,12 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            getFilesAttachmentReq({
-              externalReferenceId: fileInfo1.create.file.id,
+            getUnifiedFilesAttachmentReq({
+              attachmentId: fileInfo1.create.file.id,
               owner: 'securitySolution',
             }),
-            getFilesAttachmentReq({
-              externalReferenceId: fileInfo2.create.file.id,
+            getUnifiedFilesAttachmentReq({
+              attachmentId: fileInfo2.create.file.id,
               owner: 'securitySolution',
             }),
           ],
@@ -668,8 +668,8 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             params: [
-              getFilesAttachmentReq({
-                externalReferenceId: create.file.id,
+              getUnifiedFilesAttachmentReq({
+                attachmentId: create.file.id,
                 owner: scenario.owner,
               }),
             ],
@@ -816,8 +816,8 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             params: [
-              getFilesAttachmentReq({
-                externalReferenceId: create.file.id,
+              getUnifiedFilesAttachmentReq({
+                attachmentId: create.file.id,
                 owner: scenario.attachmentOwner,
               }),
             ],

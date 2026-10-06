@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/observability-plugin'
   - '@kbn/core-spaces-common'
+  - '@kbn/config'
 tags:
   - plugin
   - prod
@@ -35,7 +36,6 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - common/**/*
     - server/**/*
     - jest.config.js
     - '!target/**/*'

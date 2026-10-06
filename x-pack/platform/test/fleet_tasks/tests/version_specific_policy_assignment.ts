@@ -30,12 +30,12 @@ export default function (providerContext: FtrProviderContextWithServices) {
     return res.body.item;
   }
 
-  async function getFleetPolicies(policyIdPrefix: string) {
+  async function getFleetPolicies(baseId: string) {
     const res = await es.search({
       index: '.fleet-policies',
       query: {
-        prefix: {
-          policy_id: policyIdPrefix,
+        term: {
+          policy_base_id: baseId,
         },
       },
       size: 100,
@@ -267,11 +267,15 @@ export default function (providerContext: FtrProviderContextWithServices) {
         expect(agent1.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
         expect(agent2.policy_id).to.be(`${secondPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}9.0`);
       } finally {
-        // Cleanup the second policy
+        // Cleanup the second policy. Policy deletion is rejected while agents are assigned, so
+        // remove the agent docs first and assert the deletion; a leftover version-conditioned
+        // parent would break suites that run later with expensive queries disabled.
+        await cleanupAgentDocs(providerContext);
         await supertest
           .post('/api/fleet/agent_policies/delete')
           .send({ agentPolicyId: secondPolicyId })
-          .set('kbn-xsrf', 'xxxx');
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
       }
     });
 
@@ -451,4 +455,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(variantDoc.revision_idx).to.be.greaterThan(0);
     });
   });
+
+  // Agents enrolled by a downlevel fleet-server after the last startup backfill have a versioned
+  // `policy_id` but no `policy_base_id`. The sweep must still reassign them when the parent no
+  // longer has version conditions, with `search.allow_expensive_queries` disabled.
 }

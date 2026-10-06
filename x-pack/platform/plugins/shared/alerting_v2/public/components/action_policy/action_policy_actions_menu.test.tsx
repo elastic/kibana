@@ -19,7 +19,6 @@ jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
-  version: 'v1',
   name: 'Test policy',
   description: '',
   enabled: true,

@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EsqlEditor } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class DataVisualizerSelector {
@@ -20,9 +20,8 @@ export class DataVisualizerSelector {
   private readonly indexPage: Locator;
   private readonly dataSourceSelectorButton: Locator;
   private readonly fileUploadPage: Locator;
-  private readonly esqlEditor: Locator;
+  private readonly esqlEditor: EsqlEditor;
   private readonly refreshPageButton: Locator;
-  private readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.importDataCard = this.page.testSubj.locator('mlDataVisualizerCardImportData');
@@ -35,9 +34,8 @@ export class DataVisualizerSelector {
     this.indexPage = this.page.testSubj.locator('dataVisualizerIndexPage');
     this.dataSourceSelectorButton = this.page.testSubj.locator('mlDataSourceSelectorButton');
     this.fileUploadPage = this.page.testSubj.locator('dataVisualizerPageFileUpload');
-    this.esqlEditor = this.page.testSubj.locator('DataVisualizerESQLEditor');
+    this.esqlEditor = new EsqlEditor(page, 'DataVisualizerESQLEditor');
     this.refreshPageButton = this.page.testSubj.locator('~mlDatePickerRefreshPageButton');
-    this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
   async waitForImportDataCard() {
@@ -80,15 +78,14 @@ export class DataVisualizerSelector {
   }
 
   async setESQLQuery(query: string) {
-    await this.esqlEditor.waitFor({ state: 'visible' });
-    await this.codeEditor.waitCodeEditorReady('DataVisualizerESQLEditor');
+    await this.esqlEditor.waitReady();
     await this.refreshPageButton.waitFor({ state: 'visible' });
 
     // Programmatically set the Monaco model (Discover/Streams Scout pattern). fill() and
     // insertText() can update the hidden textarea without firing onChange, so localQuery
     // never updates and the date picker stays on Refresh.
     await expect(async () => {
-      await this.codeEditor.setCodeEditorValue(query);
+      await this.esqlEditor.setQuery(query);
       await expect(this.refreshPageButton.filter({ hasText: 'Update' })).toBeVisible();
     }).toPass({ timeout: 30_000 });
 

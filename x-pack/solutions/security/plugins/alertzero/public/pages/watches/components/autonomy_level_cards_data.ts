@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -218,42 +218,12 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         ],
       },
       {
-        level: 'assisted',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.who',
-          {
-            defaultMessage: 'Closes false positives on its own; you review and can reopen.',
-          }
-        ),
-        facts: [
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.classifies',
-              { defaultMessage: 'Classifies' }
-            ),
-            value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.classifiesValue',
-              '<worker> every batch'
-            ),
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closures',
-              { defaultMessage: 'Closures' }
-            ),
-            value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closuresValue',
-              '<worker> closes false positives on its own — <you> reopen any you disagree with'
-            ),
-          },
-        ],
-      },
-      {
         level: 'supervised',
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.who',
           {
-            defaultMessage: 'Closes false positives on its own — same as Assisted for this Worker.',
+            defaultMessage:
+              'Closes false positives on its own — you can reopen any you disagree with.',
           }
         ),
         facts: [
@@ -453,7 +423,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
       },
     ],
   },
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: {
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.intro', {
       defaultMessage:
         'Decides whether an entry checkpoint stands before drafting. Installing always waits for your approval.',
