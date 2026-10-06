@@ -161,9 +161,12 @@ export const retrieveFromVault = async (
   vault: KbnEvalsVaultType,
   vaultPath: string,
   filePath: string,
-  field: string
+  field: string,
+  /** An earlier KV v2 version to read, e.g. to roll back a bad upload. */
+  version?: number
 ) => {
-  const stdout = await runVaultKv(vault, ['get', `-field=${field}`, vaultPath]);
+  const versionArgs = version === undefined ? [] : [`-version=${version}`];
+  const stdout = await runVaultKv(vault, ['get', `-field=${field}`, ...versionArgs, vaultPath]);
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
   const parsed = JSON.parse(value);
@@ -173,12 +176,13 @@ export const retrieveFromVault = async (
   console.log(`Config written to: ${filePath}`);
 };
 
-export const retrieveConfigFromVault = async (vault: KbnEvalsVaultType) => {
+export const retrieveConfigFromVault = async (vault: KbnEvalsVaultType, version?: number) => {
   await retrieveFromVault(
     vault,
     getVaultPath(vault),
     KBN_EVALS_CONFIG_FILE,
-    KBN_EVALS_CONFIG_FIELD
+    KBN_EVALS_CONFIG_FIELD,
+    version
   );
 };
 
