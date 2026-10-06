@@ -25,15 +25,21 @@ export class SecurityAccountSettingsPage {
   }
 
   async openChangePasswordForm() {
-    await this.page.getByRole('button', { name: 'Change password' }).click();
+    await this.page.testSubj.locator('openChangePasswordForm').click();
     await this.changePasswordFormSubmitButton.waitFor({ state: 'visible' });
   }
 
   async changePassword(currentPassword: string, newPassword: string) {
     await this.openChangePasswordForm();
-    await this.page.getByLabel('Current password').fill(currentPassword);
-    await this.page.getByLabel('New password', { exact: true }).fill(newPassword);
-    await this.page.getByLabel('Confirm password').fill(newPassword);
+    await this.page.testSubj
+      .locator('editUserChangePasswordCurrentPasswordInput')
+      .pressSequentially(currentPassword);
+    await this.page.testSubj
+      .locator('editUserChangePasswordNewPasswordInput')
+      .pressSequentially(newPassword);
+    await this.page.testSubj
+      .locator('editUserChangePasswordConfirmPasswordInput')
+      .pressSequentially(newPassword);
     await this.changePasswordFormSubmitButton.click();
     await this.page.testSubj
       .locator('euiToastHeader__title')

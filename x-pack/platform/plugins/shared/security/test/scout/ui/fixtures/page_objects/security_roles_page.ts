@@ -151,15 +151,9 @@ export class SecurityRolesPage {
   async addKibanaSpacePrivilege(base: string = 'all') {
     await this.page.testSubj.locator('addSpacePrivilegeButton').click();
 
-    const spaceSelectorSearchInput = this.page.testSubj
-      .locator('spaceSelectorComboBox')
-      .getByTestId('comboBoxSearchInput');
-    await spaceSelectorSearchInput.click();
-    await this.page
-      .locator('[data-test-subj~="spaceSelectorComboBox-optionsList"]')
-      .locator('#spaceOption_\\*')
-      .click();
-    await spaceSelectorSearchInput.blur();
+    await this.page.components
+      .comboBox('spaceSelectorComboBox')
+      .setSelectedOptions(['* All Spaces']);
 
     await this.page.testSubj.locator(`basePrivilege_${base}`).click();
     await this.page.testSubj.locator('createSpacePrivilegeButton').click();
