@@ -326,12 +326,14 @@ export const bulkDeleteAttachments = async ({
   supertest,
   caseId,
   attachmentIds,
+  includeRelated,
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
   attachmentIds: string[];
+  includeRelated?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<{} | Error> => {
@@ -340,7 +342,7 @@ export const bulkDeleteAttachments = async ({
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
     .auth(auth.user.username, auth.user.password)
-    .send({ ids: attachmentIds })
+    .send({ ids: attachmentIds, include_related: includeRelated })
     .expect(expectedHttpCode);
 
   return body;
