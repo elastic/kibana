@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
@@ -56,6 +58,7 @@ function TimeseriesVisualization({
 }: TimeseriesVisualizationProps) {
   const [indexPattern, setIndexPattern] = useState<FetchedIndexPattern['indexPattern']>(null);
   const [palettesService, setPalettesService] = useState<PaletteRegistry | null>(null);
+  const interactive = handlers.isInteractive();
 
   useEffect(() => {
     getCharts()
@@ -194,12 +197,10 @@ function TimeseriesVisualization({
         >
           <VisComponent
             getConfig={getConfig}
-            model={model}
+            model={interactive ? model : omit(model, 'drilldown_url')}
             visData={visData}
             uiState={uiState}
-            onBrush={onBrush}
             initialRender={initialRender}
-            onFilterClick={handleFilterClick}
             onUiState={handleUiState}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
@@ -207,6 +208,7 @@ function TimeseriesVisualization({
             palettesService={palettesService}
             indexPattern={indexPattern}
             fieldFormatMap={indexPattern?.fieldFormatMap}
+            {...(interactive && { onBrush, onFilterClick: handleFilterClick })}
           />
         </Suspense>
       </EuiFlexItem>

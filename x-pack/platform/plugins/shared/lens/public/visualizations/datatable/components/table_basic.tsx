@@ -94,7 +94,7 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
-  const isInteractive = props.interactive;
+  const isInteractive = props.interactive && props.viewMode !== 'non-interactive';
   const isDarkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const { euiTheme } = useEuiTheme();
@@ -350,7 +350,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         columnCellValueActions,
         dataGridRef.current?.closeCellPopover,
         props.columnFilterable,
-        isInteractive
+        props.viewMode !== 'non-interactive'
       ),
     [
       bucketedColumns,
@@ -367,7 +367,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       headerRowLines,
       columnCellValueActions,
       props.columnFilterable,
-      isInteractive,
+      props.viewMode,
     ]
   );
 
@@ -514,7 +514,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       isDarkMode,
       getCellColor,
       props.paletteService,
-      isInteractive,
+      props.viewMode !== 'non-interactive',
       props.args.fitRowToContent,
       props.args.density
     );
@@ -522,7 +522,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     formatters,
     columnConfig,
     isDarkMode,
-    isInteractive,
+    props.viewMode,
     props.args.fitRowToContent,
     props.args.density,
     props.paletteService,
@@ -682,7 +682,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellPopover={renderCellPopover}
           gridStyle={gridStyle}
           schemaDetectors={schemaDetectors}
-          sorting={isInteractive ? sorting : undefined}
+          sorting={props.viewMode === 'non-interactive' ? undefined : sorting}
           pagination={
             pagination && {
               ...pagination,

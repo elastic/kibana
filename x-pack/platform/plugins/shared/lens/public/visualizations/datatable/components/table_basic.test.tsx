@@ -157,6 +157,7 @@ describe('DatatableComponent', () => {
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
       interactive: true,
+      viewMode: 'view',
       syncColors: false,
       renderComplete,
       ...propsOverrides,

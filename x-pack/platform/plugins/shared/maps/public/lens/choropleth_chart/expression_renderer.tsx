@@ -64,6 +64,8 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         await coreSetup.getStartServices();
       const { ChoroplethChart } = await import('./choropleth_chart');
       const { getEmsFileLayers } = await import('../../util');
+      const renderMode = handlers.getRenderMode();
+
       let emsFileLayers: FileLayer[] = [];
       try {
         emsFileLayers = await getEmsFileLayers();
@@ -96,7 +98,6 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       };
 
       handlers.event(chartSizeEvent);
-
       ReactDOM.render(
         <KibanaRenderContextProvider {...getCore()}>
           <ChoroplethChart
@@ -106,6 +107,7 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
             emsFileLayers={emsFileLayers}
             onRenderComplete={renderComplete}
             interactive={handlers.isInteractive()}
+            viewMode={renderMode === 'preview' ? 'non-interactive' : renderMode}
           />
         </KibanaRenderContextProvider>,
         domNode
