@@ -6,7 +6,12 @@
  */
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { AlertEpisode, AlertEpisodeSuppression, LastNotifiedRecord } from '../types';
+import type {
+  AlertEpisode,
+  EpisodeSuppressionRow,
+  LastNotifiedRecord,
+  SeriesSuppressionRow,
+} from '../types';
 
 export const createDispatchableAlertEventsResponse = (
   alertEpisodes: AlertEpisode[]
@@ -35,17 +40,41 @@ export const createDispatchableAlertEventsResponse = (
   };
 };
 
-export const createAlertEpisodeSuppressionsResponse = (
-  suppressions: AlertEpisodeSuppression[]
+export const createEpisodeSuppressionsResponse = (
+  suppressions: EpisodeSuppressionRow[] = []
 ): EsqlQueryResponse => {
   return {
     columns: [
       { name: 'rule_id', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
-      { name: 'episode_id', type: 'keyword' },
+      { name: 'alert_id', type: 'keyword' },
       { name: 'should_suppress', type: 'boolean' },
       { name: 'last_ack_action', type: 'keyword' },
       { name: 'last_deactivate_action', type: 'keyword' },
+      { name: 'source', type: 'keyword' },
+      { name: 'space_id', type: 'keyword' },
+    ],
+    values: suppressions.map((suppression) => [
+      suppression.rule_id,
+      suppression.group_hash,
+      suppression.alert_id,
+      suppression.should_suppress,
+      suppression.last_ack_action ?? null,
+      suppression.last_deactivate_action ?? null,
+      suppression.source,
+      suppression.space_id,
+    ]),
+  };
+};
+
+export const createSeriesSuppressionsResponse = (
+  suppressions: SeriesSuppressionRow[] = []
+): EsqlQueryResponse => {
+  return {
+    columns: [
+      { name: 'rule_id', type: 'keyword' },
+      { name: 'group_hash', type: 'keyword' },
+      { name: 'should_suppress', type: 'boolean' },
       { name: 'last_snooze_action', type: 'keyword' },
       { name: 'source', type: 'keyword' },
       { name: 'space_id', type: 'keyword' },
@@ -53,10 +82,7 @@ export const createAlertEpisodeSuppressionsResponse = (
     values: suppressions.map((suppression) => [
       suppression.rule_id,
       suppression.group_hash,
-      suppression.episode_id,
       suppression.should_suppress,
-      suppression.last_ack_action ?? null,
-      suppression.last_deactivate_action ?? null,
       suppression.last_snooze_action ?? null,
       suppression.source,
       suppression.space_id,
@@ -86,7 +112,8 @@ export const createLastNotifiedTimestampsResponse = (
     columns: [
       { name: 'action_group_id', type: 'keyword' },
       { name: 'last_notified', type: 'date' },
+      { name: 'alert_status', type: 'keyword' },
     ],
-    values: records.map((r) => [r.action_group_id, r.last_notified]),
+    values: records.map((r) => [r.action_group_id, r.last_notified, r.alert_status ?? null]),
   };
 };

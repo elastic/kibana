@@ -277,16 +277,11 @@ describe('create-investigation-proposal workflow', () => {
      *
      * Managed workflows install under `lightweightValidation`, which does not
      * validate steps at all, so production neither rejects nor strips such a
-     * key: whether it does anything is entirely up to the engine. Both keys
-     * below are honoured by it — `handleStepLevelOnFailure` wraps any step
-     * that declares `on-failure`, with no exclusion by type — but neither
-     * `WaitForApprovalStepSchema` nor `WorkflowExecuteStepSchema` merges
-     * `StepWithOnFailureSchema`, unlike the connector-derived schema every
-     * custom step gets. This is the only place that names what is load-bearing
-     * by accident, so the list shrinks when
-     * elastic/security-team#19315 lands rather than silently staying stale.
+     * key: whether it does anything is entirely up to the engine. This keeps
+     * every key the proposal steps declare — including `on-failure` on the
+     * gate and the action, which both handlers rely on — modelled by a schema.
      */
-    it('declares no unmodelled key beyond the two the platform still owes us', () => {
+    it('declares no key its step schema does not model', () => {
       const unmodelled = allSteps().flatMap((step) => {
         const schema = step.type ? BUILT_IN_STEP_SCHEMAS[step.type] : undefined;
         if (!schema) {
@@ -302,15 +297,7 @@ describe('create-investigation-proposal workflow', () => {
           .map((key) => `${step.name} (${step.type}): ${key}`);
       });
 
-      // Both are load-bearing and covered end to end by the plugin's
-      // integration tests: the gate's handler keeps an unanswered proposal
-      // inside the loop to be settled as `expired`, and the action's keeps a
-      // failed action inside the loop so it can be cloned and re-offered.
-      // Pinned, not removed.
-      expect(unmodelled.sort()).toEqual([
-        'await_decision (waitForApproval): on-failure',
-        'execute_action (workflow.execute): on-failure',
-      ]);
+      expect(unmodelled).toEqual([]);
     });
   });
 

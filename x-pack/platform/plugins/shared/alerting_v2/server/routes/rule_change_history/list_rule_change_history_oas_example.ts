@@ -18,8 +18,8 @@ export const LIST_RULE_CHANGE_HISTORY_RESPONSE: ListRuleChangeHistoryResponse = 
       actor: { name: 'elastic', profile_id: 'u_profile_1' },
       action: 'rule_update',
       changes: {
-        count: 1,
-        summary: { metadata: { name: 'Host CPU high' } },
+        count: 2,
+        summary: { version: 1, metadata: { name: 'Host CPU high' } },
       },
       is_current: true,
       version: 2,
