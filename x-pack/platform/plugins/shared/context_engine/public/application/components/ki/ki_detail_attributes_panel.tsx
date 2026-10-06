@@ -5,43 +5,44 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { KiDocument } from '../../../../common/http_api/knowledge_indicators';
 import { documentAttributesToRows } from './ki_detail_helpers';
+import {
+  KiDetailSidebarBreakableText,
+  KiDetailSidebarDescriptionList,
+  KiDetailSidebarSectionTitle,
+} from './ki_detail_sidebar';
 
 interface KiDetailAttributesPanelProps {
   document: KiDocument;
 }
 
-export const KiDetailAttributesPanel = ({ document }: KiDetailAttributesPanelProps) => {
+export const KiDetailAttributesSection = ({ document }: KiDetailAttributesPanelProps) => {
   const viewItems = useMemo(
     () =>
       documentAttributesToRows(document)
         .filter((row) => row.key.trim().length > 0)
         .map((row) => ({
           title: row.key,
-          description: row.value,
+          description: <KiDetailSidebarBreakableText>{row.value}</KiDetailSidebarBreakableText>,
         })),
     [document]
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextKiDetailAttributesPanel">
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.contextEngine.kiDetail.attributes.title"
-            defaultMessage="Attributes"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+    <section data-test-subj="contextKiDetailAttributesPanel">
+      <KiDetailSidebarSectionTitle>
+        <FormattedMessage
+          id="xpack.contextEngine.kiDetail.attributes.title"
+          defaultMessage="Attributes"
+        />
+      </KiDetailSidebarSectionTitle>
+      <EuiSpacer size="s" />
       {viewItems.length > 0 ? (
-        <EuiDescriptionList
-          type="column"
-          compressed
+        <KiDetailSidebarDescriptionList
           listItems={viewItems}
           data-test-subj="contextKiDetailAttributesList"
         />
@@ -53,6 +54,6 @@ export const KiDetailAttributesPanel = ({ document }: KiDetailAttributesPanelPro
           />
         </EuiText>
       )}
-    </EuiPanel>
+    </section>
   );
 };

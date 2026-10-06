@@ -5,26 +5,38 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
-const MIN_EDITOR_HEIGHT = 200;
-const VIEWPORT_BOTTOM_OFFSET = 24;
+export const MIN_KI_DETAIL_VIEWPORT_HEIGHT = 200;
+export const KI_DETAIL_CONTENT_EDIT_BOTTOM_OFFSET = 88;
+export const KI_DETAIL_RAW_JSON_BOTTOM_OFFSET = 24;
 
-export const useKiDetailViewportHeight = () => {
+export const useKiDetailViewportHeight = (
+  enabled = true,
+  bottomOffset = KI_DETAIL_CONTENT_EDIT_BOTTOM_OFFSET
+) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number>();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!enabled) {
+      return undefined;
+    }
+
     const updateHeight = () => {
       const top = containerRef.current?.getBoundingClientRect().top ?? 0;
-      const nextHeight = window.innerHeight - top - VIEWPORT_BOTTOM_OFFSET;
-      setHeight(Math.max(MIN_EDITOR_HEIGHT, nextHeight));
+      const nextHeight = window.innerHeight - top - bottomOffset;
+      setHeight(Math.max(MIN_KI_DETAIL_VIEWPORT_HEIGHT, nextHeight));
     };
 
     updateHeight();
+    const frameId = requestAnimationFrame(updateHeight);
     window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
-  }, []);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [enabled, bottomOffset]);
 
   return { containerRef, height };
 };

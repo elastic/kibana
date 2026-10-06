@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { KiDocument } from '../../../../common/http_api/knowledge_indicators';
@@ -22,34 +14,33 @@ import {
   getKiReferenceRelationLabel,
   isHttpUri,
 } from './ki_detail_helpers';
+import { KiDetailSidebarSectionTitle, kiDetailSidebarBreakWordStyle } from './ki_detail_sidebar';
 
 interface KiDetailReferencesPanelProps {
   document: KiDocument;
 }
 
-export const KiDetailReferencesPanel = ({ document }: KiDetailReferencesPanelProps) => {
+export const KiDetailReferencesSection = ({ document }: KiDetailReferencesPanelProps) => {
   const viewReferences = useMemo(() => documentReferencesToRows(document), [document]);
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextKiDetailReferencesPanel">
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.contextEngine.kiDetail.references.title"
-            defaultMessage="References"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+    <section data-test-subj="contextKiDetailReferencesPanel">
+      <KiDetailSidebarSectionTitle>
+        <FormattedMessage
+          id="xpack.contextEngine.kiDetail.references.title"
+          defaultMessage="References"
+        />
+      </KiDetailSidebarSectionTitle>
+      <EuiSpacer size="s" />
       {viewReferences.length > 0 ? (
         <EuiFlexGroup
           direction="column"
-          gutterSize="s"
+          gutterSize="m"
           data-test-subj="contextKiDetailReferencesList"
         >
           {viewReferences.map((row, index) => (
-            <EuiPanel key={`${row.uri}-${index}`} paddingSize="s" hasBorder>
-              <EuiText size="s">
+            <div key={`${row.uri}-${index}`}>
+              <EuiText size="s" css={kiDetailSidebarBreakWordStyle}>
                 {isHttpUri(row.uri) ? (
                   <EuiLink href={row.uri} target="_blank" external>
                     {row.uri}
@@ -59,14 +50,20 @@ export const KiDetailReferencesPanel = ({ document }: KiDetailReferencesPanelPro
                 )}
               </EuiText>
               {row.relation !== '' && (
-                <EuiBadge color="hollow">{getKiReferenceRelationLabel(row.relation)}</EuiBadge>
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiBadge color="hollow">{getKiReferenceRelationLabel(row.relation)}</EuiBadge>
+                </>
               )}
               {row.description.length > 0 && (
-                <EuiText size="s" color="subdued">
-                  <p>{row.description}</p>
-                </EuiText>
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs" color="subdued" css={kiDetailSidebarBreakWordStyle}>
+                    <p>{row.description}</p>
+                  </EuiText>
+                </>
               )}
-            </EuiPanel>
+            </div>
           ))}
         </EuiFlexGroup>
       ) : (
@@ -77,6 +74,6 @@ export const KiDetailReferencesPanel = ({ document }: KiDetailReferencesPanelPro
           />
         </EuiText>
       )}
-    </EuiPanel>
+    </section>
   );
 };

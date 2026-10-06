@@ -115,8 +115,7 @@ const ebtAction = {
     SAVE: 'save_ki',
     CANCEL: 'cancel_ki',
     TAB_DETAILS: 'tab_details',
-    TAB_FIELDS: 'tab_fields',
-    TAB_RAW_JSON: 'tab_raw_json',
+    TAB_DOCUMENT: 'tab_document',
   },
 } as const;
 

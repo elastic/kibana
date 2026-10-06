@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiSkeletonRectangle,
+  EuiSkeletonText,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import {
   KI_LIST_ACTIVE_AND_DELETED_LIFECYCLE_STATUSES,
@@ -17,20 +24,16 @@ import {
 } from '../../../common/ki_list_lifecycle';
 import { isMemoryKiType } from '../../../common/memory';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AI_INDEX_KNOWLEDGE_INDICATORS_TAB_LOCATION_STATE } from '../ai_index_created_location_state';
-import { KiDetailAttributesPanel } from '../components/ki/ki_detail_attributes_panel';
 import {
   KiDetailContentPanel,
   type KiDetailContentPanelSaveFields,
 } from '../components/ki/ki_detail_content_panel';
+import { KiDetailDetailsPanel } from '../components/ki/ki_detail_details_panel';
 import { readKiGovernance } from '../components/ki/ki_detail_helpers';
 import { KiDetailMemoryConfirmModals } from '../components/ki/ki_detail_memory_confirm_modals';
-import { KiDetailSummary } from '../components/ki/ki_detail_summary';
-import { KiDetailMetadataPanel } from '../components/ki/ki_detail_metadata_panel';
-import { KiDetailFieldsPanel } from '../components/ki/ki_detail_fields_panel';
 import { KiDetailRawJsonPanel } from '../components/ki/ki_detail_raw_json_panel';
-import { KiDetailReferencesPanel } from '../components/ki/ki_detail_references_panel';
-import { KiDetailTagsPanel } from '../components/ki/ki_detail_tags_panel';
 import { getKiDisplayTypeLabel } from '../components/ki/helpers';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useCanWriteContextEngine } from '../hooks/use_can_write_context_engine';
@@ -45,22 +48,22 @@ import {
 } from '../layout/context_engine_page_template';
 import { getAiIndexDetailPath } from '../paths';
 
-type KiDetailTabId = 'details' | 'fields' | 'raw_json';
+type KiDetailTabId = 'details' | 'document';
 
 const backDestinationLabel = i18n.translate('xpack.contextEngine.kiDetail.backDestination', {
   defaultMessage: 'AI index',
 });
 
-const detailsTabLabel = i18n.translate('xpack.contextEngine.kiDetail.tabs.details', {
-  defaultMessage: 'Details',
+const contentTabLabel = i18n.translate('xpack.contextEngine.kiDetail.tabs.content', {
+  defaultMessage: 'Content',
 });
 
-const fieldsTabLabel = i18n.translate('xpack.contextEngine.kiDetail.tabs.fields', {
-  defaultMessage: 'Fields',
+const editContentLabel = i18n.translate('xpack.contextEngine.kiDetail.editButton', {
+  defaultMessage: 'Edit',
 });
 
-const rawJsonTabLabel = i18n.translate('xpack.contextEngine.kiDetail.tabs.rawJson', {
-  defaultMessage: 'Raw JSON',
+const documentTabLabel = i18n.translate('xpack.contextEngine.kiDetail.tabs.document', {
+  defaultMessage: 'Document',
 });
 
 const getPageTitle = (ki: GetKiResponse | undefined, kiId: string): string => {
@@ -75,6 +78,43 @@ const getPageTitle = (ki: GetKiResponse | undefined, kiId: string): string => {
 };
 
 export const KiDetailPage = () => {
+  const { euiTheme } = useEuiTheme();
+  const kiDetailContentTabLayoutStyle = css`
+    display: flex;
+    flex-direction: column;
+    gap: ${euiTheme.size.xl};
+
+    @media (min-width: 768px) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 26rem;
+      column-gap: ${euiTheme.size.xl};
+      align-items: stretch;
+    }
+  `;
+  const kiDetailMainColumnStyle = css`
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+
+    @media (min-width: 768px) {
+      grid-column: 1;
+    }
+  `;
+  const kiDetailSidebarStyle = css`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 26rem;
+    min-width: 0;
+    min-height: 0;
+
+    @media (min-width: 768px) {
+      grid-column: 2;
+      width: 26rem;
+    }
+  `;
+
   const { id: aiIndexId = '', kiId = '' } = useParams<{ id: string; kiId: string }>();
   const location = useLocation();
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -106,8 +146,13 @@ export const KiDetailPage = () => {
   } = useKibana();
 
   const [selectedTab, setSelectedTab] = useState<KiDetailTabId>('details');
+  const [isContentEditing, setIsContentEditing] = useState(false);
   const [isForgetConfirmOpen, setIsForgetConfirmOpen] = useState(false);
   const [isRestoreConfirmOpen, setIsRestoreConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    setIsContentEditing(false);
+  }, [kiId, selectedTab]);
 
   const pageTitle = getPageTitle(ki, kiId);
   const backHref = createContextEngineUrl(getAiIndexDetailPath(aiIndexId));
@@ -153,32 +198,45 @@ export const KiDetailPage = () => {
     return [
       {
         id: 'details',
-        label: detailsTabLabel,
+        label: contentTabLabel,
         isSelected: selectedTab === 'details',
         onClick: () => setSelectedTab('details'),
         'data-test-subj': 'contextKiDetailTab-details',
       },
       {
-        id: 'fields',
-        label: fieldsTabLabel,
-        isSelected: selectedTab === 'fields',
-        onClick: () => setSelectedTab('fields'),
-        'data-test-subj': 'contextKiDetailTab-fields',
-      },
-      {
-        id: 'raw_json',
-        label: rawJsonTabLabel,
-        isSelected: selectedTab === 'raw_json',
-        onClick: () => setSelectedTab('raw_json'),
-        'data-test-subj': 'contextKiDetailTab-raw_json',
+        id: 'document',
+        label: documentTabLabel,
+        isSelected: selectedTab === 'document',
+        onClick: () => setSelectedTab('document'),
+        'data-test-subj': 'contextKiDetailTab-document',
       },
     ];
   }, [error, ki, selectedTab]);
+
+  const showContentEditAction = canEditContent && selectedTab === 'details' && !isContentEditing;
 
   const headerMenu = useMemo((): AppHeaderMenu | undefined => {
     if (!ki || error) {
       return undefined;
     }
+
+    const menuItems = showContentEditAction
+      ? [
+          {
+            id: 'editContent',
+            label: editContentLabel,
+            iconType: 'pencil',
+            overflow: true,
+            order: 10,
+            run: () => setIsContentEditing(true),
+            testId: 'contextKiDetailEditButton',
+            ebt: {
+              action: CONTEXT_ENGINE_UI_EBT.action.kiDetail.EDIT,
+              detail: CONTEXT_ENGINE_UI_EBT.element.kiDetailPage,
+            },
+          },
+        ]
+      : [];
 
     if (canRestoreMemory) {
       return {
@@ -192,6 +250,7 @@ export const KiDetailPage = () => {
           isLoading: restoreMemoryMutation.isLoading,
           testId: 'contextKiDetailRestoreButton',
         },
+        items: menuItems.length > 0 ? menuItems : undefined,
       };
     }
 
@@ -207,6 +266,13 @@ export const KiDetailPage = () => {
           isLoading: forgetMemoryMutation.isLoading,
           testId: 'contextKiDetailForgetButton',
         },
+        items: menuItems.length > 0 ? menuItems : undefined,
+      };
+    }
+
+    if (menuItems.length > 0) {
+      return {
+        items: menuItems,
       };
     }
 
@@ -218,6 +284,7 @@ export const KiDetailPage = () => {
     forgetMemoryMutation.isLoading,
     ki,
     restoreMemoryMutation.isLoading,
+    showContentEditAction,
   ]);
 
   const handleBackClick = useCallback(
@@ -357,27 +424,23 @@ export const KiDetailPage = () => {
 
   const mainContent =
     ki && !error ? (
-      selectedTab === 'raw_json' ? (
+      selectedTab === 'document' ? (
         <KiDetailRawJsonPanel ki={ki} />
-      ) : selectedTab === 'fields' ? (
-        <KiDetailFieldsPanel ki={ki} />
       ) : (
-        <>
-          <KiDetailTagsPanel document={ki.document} />
-          <KiDetailSummary document={ki.document} showMemoryFields={isMemoryKi} />
-          <KiDetailContentPanel
-            document={ki.document}
-            canEdit={canEditContent}
-            isSaving={updateKiMutation.isLoading}
-            onSave={handleSaveContent}
-          />
-          <EuiSpacer size="m" />
-          <KiDetailMetadataPanel kiId={ki.id} backingIndex={index} document={ki.document} />
-          <EuiSpacer size="m" />
-          <KiDetailAttributesPanel document={ki.document} />
-          <EuiSpacer size="m" />
-          <KiDetailReferencesPanel document={ki.document} />
-        </>
+        <div css={kiDetailContentTabLayoutStyle} data-test-subj="contextKiDetailContentTabLayout">
+          <div css={kiDetailMainColumnStyle} data-test-subj="contextKiDetailMainColumn">
+            <KiDetailContentPanel
+              document={ki.document}
+              isEditing={isContentEditing}
+              onEditingChange={setIsContentEditing}
+              isSaving={updateKiMutation.isLoading}
+              onSave={handleSaveContent}
+            />
+          </div>
+          <div css={kiDetailSidebarStyle} data-test-subj="contextKiDetailSidebar">
+            <KiDetailDetailsPanel kiId={ki.id} document={ki.document} />
+          </div>
+        </div>
       )
     ) : null;
 
@@ -410,8 +473,8 @@ export const KiDetailPage = () => {
         }}
       />
       <ContextEnginePageSection
-        restrictWidth={selectedTab === 'raw_json' ? false : undefined}
-        paddingSize={selectedTab === 'raw_json' ? 'none' : undefined}
+        restrictWidth={selectedTab === 'document' || selectedTab === 'details' ? false : undefined}
+        paddingSize={selectedTab === 'document' ? 'none' : undefined}
       >
         {pageBody}
       </ContextEnginePageSection>

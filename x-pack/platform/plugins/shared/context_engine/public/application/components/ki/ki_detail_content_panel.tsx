@@ -10,26 +10,25 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiFormRow,
-  EuiPanel,
+  EuiMarkdownEditor,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
-  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { KiDocument } from '../../../../common/http_api/knowledge_indicators';
 import { MAX_KI_CONTENT_LENGTH } from '../../../../common/step_types/ki';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
-import { getTextInputHardMaxLength, validateTextInput } from '../../utils/validate_text_input';
+import { validateTextInput } from '../../utils/validate_text_input';
 import { getDocumentString } from './ki_detail_helpers';
-
-const preWrapStyle = css`
-  white-space: pre-wrap;
+import { KiDetailMarkdownReadOnly } from './ki_detail_markdown_read_only';
+import { useKiDetailContentPanelStyles } from './use_ki_detail_content_panel_styles';
+const editingActionsStyle = css`
+  flex-shrink: 0;
 `;
 
 export interface KiDetailContentPanelSaveFields {
@@ -38,104 +37,86 @@ export interface KiDetailContentPanelSaveFields {
 
 interface KiDetailContentPanelProps {
   document: KiDocument;
-  canEdit: boolean;
+  isEditing: boolean;
+  onEditingChange: (isEditing: boolean) => void;
   isSaving: boolean;
   onSave: (fields: KiDetailContentPanelSaveFields) => void;
 }
 
 export const KiDetailContentPanel = ({
   document,
-  canEdit,
+  isEditing,
+  onEditingChange,
   isSaving,
   onSave,
 }: KiDetailContentPanelProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [contentDraft, setContentDraft] = useState('');
+  const panelStyles = useKiDetailContentPanelStyles();
   const contentValue = getDocumentString(document, 'content');
+  const [contentDraft, setContentDraft] = useState(contentValue);
 
   const contentValidation = validateTextInput({
     value: contentDraft,
     maxLength: MAX_KI_CONTENT_LENGTH,
   });
 
-  const startEditing = () => {
-    setContentDraft(contentValue);
-    setIsEditing(true);
-  };
+  const hasUnsavedChanges = contentDraft !== contentValue;
+
+  useEffect(() => {
+    if (isEditing) {
+      setContentDraft(contentValue);
+    }
+  }, [contentValue, isEditing]);
 
   const cancelEditing = () => {
     setContentDraft(contentValue);
-    setIsEditing(false);
+    onEditingChange(false);
   };
 
   const saveDraft = () => {
-    if (!contentValidation.valid) {
+    if (!contentValidation.valid || !hasUnsavedChanges) {
       return;
     }
     onSave({ content: contentDraft });
-    setIsEditing(false);
+    onEditingChange(false);
   };
 
+  const markdownEditorLabel = i18n.translate('xpack.contextEngine.kiDetail.content.editorLabel', {
+    defaultMessage: 'Content markdown editor',
+  });
+
+  const hasContent = contentValue.length > 0;
+
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextKiDetailContentPanel">
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.contextEngine.kiDetail.content.title"
-                defaultMessage="Content"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        {!isEditing && canEdit && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="pencil"
-              onClick={startEditing}
-              data-test-subj="contextKiDetailEditButton"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.kiDetailPage,
-                action: CONTEXT_ENGINE_UI_EBT.action.kiDetail.EDIT,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.kiDetail.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
+    <div css={panelStyles.panelRoot} data-test-subj="contextKiDetailContentPanel">
       {isEditing ? (
         <>
-          <EuiForm fullWidth component="div">
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.contextEngine.kiDetail.content.contentLabel"
-                  defaultMessage="Content"
-                />
-              }
-              isInvalid={Boolean(contentValidation.error)}
-              error={contentValidation.error}
-              helpText={contentValidation.warning}
-            >
-              <EuiTextArea
+          <div css={[panelStyles.shell, panelStyles.editingShell]}>
+            <div css={[panelStyles.body, panelStyles.editingBody]}>
+              <EuiFormRow
+                css={panelStyles.editingFormRow}
                 isInvalid={Boolean(contentValidation.error)}
-                value={contentDraft}
-                onChange={(event) => setContentDraft(event.target.value)}
-                rows={8}
-                maxLength={getTextInputHardMaxLength(MAX_KI_CONTENT_LENGTH)}
-                data-test-subj="contextKiDetailContentField"
-              />
-            </EuiFormRow>
-          </EuiForm>
+                error={contentValidation.error}
+                helpText={contentValidation.warning}
+                fullWidth
+              >
+                <EuiMarkdownEditor
+                  value={contentDraft}
+                  onChange={setContentDraft}
+                  height="full"
+                  css={panelStyles.markdownEditorFill}
+                  aria-label={markdownEditorLabel}
+                  data-test-subj="contextKiDetailContentField"
+                />
+              </EuiFormRow>
+            </div>
+          </div>
           <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            gutterSize="s"
+            responsive={false}
+            css={editingActionsStyle}
+          >
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={cancelEditing}
@@ -156,7 +137,7 @@ export const KiDetailContentPanel = ({
                 fill
                 size="s"
                 onClick={saveDraft}
-                disabled={!contentValidation.valid}
+                disabled={!contentValidation.valid || !hasUnsavedChanges}
                 isLoading={isSaving}
                 data-test-subj="contextKiDetailSaveButton"
                 {...getEbtProps({
@@ -172,18 +153,18 @@ export const KiDetailContentPanel = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
-      ) : contentValue.length > 0 ? (
-        <EuiText size="s" data-test-subj="contextKiDetailContent">
-          <p css={preWrapStyle}>{contentValue}</p>
-        </EuiText>
+      ) : hasContent ? (
+        <KiDetailMarkdownReadOnly content={contentValue} />
       ) : (
-        <EuiText size="s" color="subdued" data-test-subj="contextKiDetailContentEmpty">
-          <FormattedMessage
-            id="xpack.contextEngine.kiDetail.content.empty"
-            defaultMessage="No content"
-          />
-        </EuiText>
+        <div css={[panelStyles.shell, panelStyles.emptyShell]}>
+          <EuiText size="s" color="subdued" data-test-subj="contextKiDetailContentEmpty">
+            <FormattedMessage
+              id="xpack.contextEngine.kiDetail.content.empty"
+              defaultMessage="No content"
+            />
+          </EuiText>
+        </div>
       )}
-    </EuiPanel>
+    </div>
   );
 };

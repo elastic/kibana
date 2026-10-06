@@ -5,40 +5,43 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionList,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiText, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { KiDocument } from '../../../../common/http_api/knowledge_indicators';
 import {
   formatWriterMetadata,
+  getDocumentStringArray,
   readKiGovernance,
   type KiGovernanceWriter,
 } from './ki_detail_helpers';
+import {
+  KiDetailSidebarBreakableText,
+  KiDetailSidebarDescriptionList,
+  kiDetailSidebarBreakWordStyle,
+} from './ki_detail_sidebar';
+
+const descriptionTextStyle = css`
+  white-space: pre-wrap;
+`;
 
 interface KiDetailMetadataPanelProps {
   kiId: string;
-  backingIndex: string;
   document: KiDocument;
 }
 
 const formatWriterDescription = (writer: KiGovernanceWriter): React.ReactElement => {
   const metadataText = formatWriterMetadata(writer.metadata);
   if (metadataText.length === 0) {
-    return <>{writer.uri}</>;
+    return <KiDetailSidebarBreakableText>{writer.uri}</KiDetailSidebarBreakableText>;
   }
   return (
     <>
-      {writer.uri}
+      <KiDetailSidebarBreakableText>{writer.uri}</KiDetailSidebarBreakableText>
       <EuiText size="xs" color="subdued">
-        <p>{metadataText}</p>
+        <p css={kiDetailSidebarBreakWordStyle}>{metadataText}</p>
       </EuiText>
     </>
   );
@@ -81,28 +84,58 @@ const KiMetadataFormattedDate = ({ value }: { value: string }) => {
   );
 };
 
-export const KiDetailMetadataPanel = ({
-  kiId,
-  backingIndex,
-  document,
-}: KiDetailMetadataPanelProps) => {
+export const KiDetailMetadataSection = ({ kiId, document }: KiDetailMetadataPanelProps) => {
   const governance = readKiGovernance(document);
 
   const listItems = useMemo(() => {
+    const tags = getDocumentStringArray(document, 'tags');
     const items: Array<{ title: string; description: React.ReactElement | string }> = [];
 
     items.push({
       title: i18n.translate('xpack.contextEngine.kiDetail.metadata.id', {
         defaultMessage: 'ID',
       }),
-      description: kiId,
+      description: <KiDetailSidebarBreakableText>{kiId}</KiDetailSidebarBreakableText>,
+    });
+
+    const description = getDocumentString(document, 'description');
+    items.push({
+      title: i18n.translate('xpack.contextEngine.kiDetail.metadata.description', {
+        defaultMessage: 'Description',
+      }),
+      description: description ? (
+        <EuiText
+          size="s"
+          css={[kiDetailSidebarBreakWordStyle, descriptionTextStyle]}
+          data-test-subj="contextKiDetailDescription"
+        >
+          {description}
+        </EuiText>
+      ) : (
+        i18n.translate('xpack.contextEngine.kiDetail.metadata.descriptionNone', {
+          defaultMessage: 'None',
+        })
+      ),
     });
 
     items.push({
-      title: i18n.translate('xpack.contextEngine.kiDetail.metadata.backingIndex', {
-        defaultMessage: 'Backing index',
+      title: i18n.translate('xpack.contextEngine.kiDetail.metadata.tags', {
+        defaultMessage: 'Tags',
       }),
-      description: backingIndex,
+      description:
+        tags.length > 0 ? (
+          <EuiBadgeGroup data-test-subj="contextKiDetailTagsList">
+            {tags.map((tag) => (
+              <EuiBadge key={tag} color="hollow">
+                {tag}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        ) : (
+          i18n.translate('xpack.contextEngine.kiDetail.metadata.tagsNone', {
+            defaultMessage: 'None',
+          })
+        ),
     });
 
     if (governance.lifecycleStatus) {
@@ -167,25 +200,14 @@ export const KiDetailMetadataPanel = ({
     }
 
     return items;
-  }, [backingIndex, document, governance, kiId]);
+  }, [document, governance, kiId]);
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextKiDetailMetadataPanel">
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.contextEngine.kiDetail.metadata.title"
-            defaultMessage="Metadata"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiDescriptionList
-        type="column"
-        compressed
+    <section data-test-subj="contextKiDetailMetadataPanel">
+      <KiDetailSidebarDescriptionList
         listItems={listItems}
         data-test-subj="contextKiDetailMetadataList"
       />
-    </EuiPanel>
+    </section>
   );
 };
