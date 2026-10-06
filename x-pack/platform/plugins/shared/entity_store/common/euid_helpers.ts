@@ -106,6 +106,10 @@ export const euid = {
      * Applies the creation gate, so it answers whether a document may create an entity.
      */
     getEuidEvaluation: euidModule.getEuidPainlessEvaluation,
+    /**
+     * Like {@link euid.painless.getEuidEvaluation}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidEvaluationFromDefinition: euidModule.getEuidPainlessEvaluationFromDefinition,
 
     /**
      * Like {@link euid.painless.getEuidEvaluation} without the creation gate, so IdP and
@@ -113,12 +117,21 @@ export const euid = {
      * and enrichment; the caller checks store membership.
      */
     getEuidEvaluationForSearch: euidModule.getEuidPainlessEvaluationForSearch,
+    /**
+     * Like {@link euid.painless.getEuidEvaluationForSearch}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidEvaluationForSearchFromDefinition:
+      euidModule.getEuidPainlessEvaluationForSearchFromDefinition,
 
     /**
      * Elasticsearch `runtime_mappings` entry that exposes the EUID as a `keyword` runtime field (`entity_id`).
      * Input: entity type. Output: mapping object suitable for the Search API `runtime_mappings` map.
      */
     getEuidRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
+    /**
+     * Like {@link euid.painless.getEuidRuntimeMapping}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidRuntimeMappingFromDefinition: euidModule.getEuidPainlessRuntimeMappingFromDefinition,
   },
 
   /**
@@ -130,24 +143,42 @@ export const euid = {
      * Input: entity type only. Output: ESQL boolean fragment for `WHERE` (no leading `WHERE`).
      */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
+    /**
+     * Like {@link euid.esql.getEuidDocumentsContainsIdFilter}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidDocumentsContainsIdFilterFromDefinition:
+      euidModule.getEuidEsqlDocumentsContainsIdFilterFromDefinition,
 
     /**
      * Full ESQL expression used in extraction to compute the typed EUID (e.g. inside `EVAL` / `STATS`).
      * Input: entity type. Output: ESQL expression string (often a `CONCAT`/`CASE` around identity fields).
      */
     getEuidEvaluation: euidModule.getEuidEsqlEvaluation,
+    /**
+     * Like {@link euid.esql.getEuidEvaluation}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidEvaluationFromDefinition: euidModule.getEuidEsqlEvaluationFromDefinition,
 
     /**
      * ESQL predicate that locates documents matching one sample document's identity (mirrors per-doc DSL).
      * Input: entity type and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
+    /**
+     * Like {@link euid.esql.getEuidFilterBasedOnDocument}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidFilterBasedOnDocumentFromDefinition:
+      euidModule.getEuidEsqlFilterBasedOnDocumentFromDefinition,
 
     /**
      * Returns the ESQL `EVAL` expressions for field evaluations (e.g. entity.namespace derivation).
      * Input: entity type. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
      */
     getFieldEvaluations: euidModule.getFieldEvaluationsEsql,
+    /**
+     * Like {@link euid.esql.getFieldEvaluations}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getFieldEvaluationsFromDefinition: euidModule.getFieldEvaluationsEsqlFromDefinition,
   },
 
   /**
@@ -162,6 +193,11 @@ export const euid = {
      * (e.g. `host.id`) to be absent and never match stored entities.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
+    /**
+     * Like {@link euid.dsl.getEuidFilterBasedOnDocument}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidFilterBasedOnDocumentFromDefinition:
+      euidModule.getEuidDslFilterBasedOnDocumentFromDefinition,
 
     /**
      * Query DSL that matches raw source documents belonging to an already-resolved entity-store record.
@@ -171,12 +207,22 @@ export const euid = {
      * bool/term-style filter, or `undefined` if the record lacks enough identity.
      */
     getEuidFilterBasedOnEntityRecord: euidModule.getEuidDslFilterBasedOnEntityRecord,
+    /**
+     * Like {@link euid.dsl.getEuidFilterBasedOnEntityRecord}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidFilterBasedOnEntityRecordFromDefinition:
+      euidModule.getEuidDslFilterBasedOnEntityRecordFromDefinition,
 
     /**
      * Broad DSL filter: documents that may participate in the entity pipeline and could have an EUID for this type.
      * Input: entity type only. Output: query DSL equivalent to documentsFilter (and postAgg when defined).
      */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
+    /**
+     * Like {@link euid.dsl.getEuidDocumentsContainsIdFilter}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidDocumentsContainsIdFilterFromDefinition:
+      euidModule.getEuidDslDocumentsContainsIdFilterFromDefinition,
   },
   kql: {
     /**
@@ -184,6 +230,11 @@ export const euid = {
      * Input: entity type and one document; output: KQL, or `undefined` if identity or pipeline gate fails.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidKqlFilterBasedOnDocument,
+    /**
+     * Like {@link euid.kql.getEuidFilterBasedOnDocument}, but takes a definition (for example from the server-side registry) instead of a type name.
+     */
+    getEuidFilterBasedOnDocumentFromDefinition:
+      euidModule.getEuidKqlFilterBasedOnDocumentFromDefinition,
   },
 
   /**

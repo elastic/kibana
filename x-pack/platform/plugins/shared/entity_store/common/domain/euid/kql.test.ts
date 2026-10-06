@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getEuidKqlFilterBasedOnDocument, conditionToKql } from './kql';
+import type { EntityType } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import {
+  getEuidKqlFilterBasedOnDocument,
+  getEuidKqlFilterBasedOnDocumentFromDefinition,
+  conditionToKql,
+} from './kql';
 
 const fieldMissingOrEmpty = (field: string) => `(NOT ${field}: * OR ${field}: "")`;
 
@@ -462,5 +468,34 @@ describe('conditionToKql', () => {
     it('converts never condition', () => {
       expect(conditionToKql({ never: {} })).toBe('NOT *');
     });
+  });
+});
+
+describe('FromDefinition variants', () => {
+  const documentsByType: Array<[EntityType, object[]]> = [
+    ['generic', [{ entity: { id: 'e-123' } }, { _source: { entity: { id: 'e-123' } } }]],
+    ['host', [{ host: { name: 'to-be-ignored', id: 'host-id-1' } }, { host: { name: 'server1' } }]],
+    [
+      'user',
+      [
+        { user: { email: 'alice@example.com' }, event: { kind: 'asset', module: 'okta' } },
+        { user: { name: 'alice' }, host: { id: 'host-1' }, event: { category: 'authentication' } },
+        {},
+      ],
+    ],
+    [
+      'service',
+      [{ service: { name: 'api-gateway' } }, { service: { entity: { id: 'svc-entity-1' } } }],
+    ],
+  ];
+
+  it.each(documentsByType)('match the type-name functions for %s', (type, docs) => {
+    const definition = getEntityDefinitionWithoutId(type);
+
+    for (const doc of docs) {
+      expect(getEuidKqlFilterBasedOnDocumentFromDefinition(definition, doc)).toEqual(
+        getEuidKqlFilterBasedOnDocument(type, doc)
+      );
+    }
   });
 });

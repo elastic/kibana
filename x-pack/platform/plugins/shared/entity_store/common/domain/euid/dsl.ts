@@ -7,7 +7,11 @@
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { EntityType, FieldEvaluation } from '../definitions/entity_schema';
+import type {
+  EntityDefinitionOfAnyType,
+  EntityType,
+  FieldEvaluation,
+} from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
@@ -44,7 +48,15 @@ import {
 export function getEuidDslDocumentsContainsIdFilter(
   entityType: EntityType
 ): QueryDslQueryContainer {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  return getEuidDslDocumentsContainsIdFilterFromDefinition(
+    getEntityDefinitionWithoutId(entityType)
+  );
+}
+
+/** Like {@link getEuidDslDocumentsContainsIdFilter}, but takes a definition instead of a type name. */
+export function getEuidDslDocumentsContainsIdFilterFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType
+): QueryDslQueryContainer {
   const { identityField } = entityDefinition;
   if (isSingleFieldIdentity(identityField)) {
     return conditionToQueryDsl(
@@ -96,6 +108,19 @@ export function getEuidDslDocumentsContainsIdFilter(
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
   doc: any,
+  options: { excludeHigherRankedFields?: boolean } = {}
+): QueryDslQueryContainer | undefined {
+  return getEuidDslFilterBasedOnDocumentFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    doc,
+    options
+  );
+}
+
+/** Like {@link getEuidDslFilterBasedOnDocument}, but takes a definition instead of a type name. */
+export function getEuidDslFilterBasedOnDocumentFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  doc: any,
   { excludeHigherRankedFields = true }: { excludeHigherRankedFields?: boolean } = {}
 ): QueryDslQueryContainer | undefined {
   if (!doc) {
@@ -103,7 +128,6 @@ export function getEuidDslFilterBasedOnDocument(
   }
 
   doc = getDocument(doc);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -220,16 +244,26 @@ export function getEuidDslFilterBasedOnEntityRecord(
   entityType: EntityType,
   record: any
 ): QueryDslQueryContainer | undefined {
+  return getEuidDslFilterBasedOnEntityRecordFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    record
+  );
+}
+
+/** Like {@link getEuidDslFilterBasedOnEntityRecord}, but takes a definition instead of a type name. */
+export function getEuidDslFilterBasedOnEntityRecordFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  record: any
+): QueryDslQueryContainer | undefined {
   if (!record) {
     return undefined;
   }
 
   const doc = getDocument(record);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField) || !identityField.fieldEvaluations?.length) {
-    return getEuidDslFilterBasedOnDocument(entityType, record);
+    return getEuidDslFilterBasedOnDocumentFromDefinition(entityDefinition, record);
   }
 
   const fieldEvaluations = identityField.fieldEvaluations;

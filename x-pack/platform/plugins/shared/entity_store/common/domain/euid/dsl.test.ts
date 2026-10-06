@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { EntityType } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
   getEuidDslFilterBasedOnDocument,
+  getEuidDslFilterBasedOnDocumentFromDefinition,
   getEuidDslFilterBasedOnEntityRecord,
+  getEuidDslFilterBasedOnEntityRecordFromDefinition,
   getEuidDslDocumentsContainsIdFilter,
+  getEuidDslDocumentsContainsIdFilterFromDefinition,
 } from './dsl';
 
 const fieldMissingOrEmpty = (field: string) => ({
@@ -885,5 +890,50 @@ describe('getEuidDslFilterBasedOnDocument with excludeHigherRankedFields: false 
       expect(result?.bool?.filter).toContainEqual({ term: { 'user.name': 'alice' } });
       expect(result?.bool?.must).toBeUndefined();
     });
+  });
+});
+
+describe('FromDefinition variants', () => {
+  const documentsByType: Array<[EntityType, object[]]> = [
+    ['generic', [{ entity: { id: 'e-123' } }, { _source: { entity: { id: 'e-123' } } }]],
+    ['host', [{ host: { name: 'to-be-ignored', id: 'host-id-1' } }, { host: { name: 'server1' } }]],
+    [
+      'user',
+      [
+        { user: { email: 'alice@example.com' }, event: { kind: 'asset', module: 'okta' } },
+        { user: { name: 'alice' }, host: { id: 'host-1' }, event: { category: 'authentication' } },
+        {},
+      ],
+    ],
+    [
+      'service',
+      [{ service: { name: 'api-gateway' } }, { service: { entity: { id: 'svc-entity-1' } } }],
+    ],
+  ];
+
+  const userRecords = [
+    { entity: { namespace: 'okta' }, user: { email: 'alice@example.com' } },
+    { entity: { namespace: 'local' }, user: { name: 'alice' }, host: { id: 'host-1' } },
+  ];
+
+  it.each(documentsByType)('match the type-name functions for %s', (type, docs) => {
+    const definition = getEntityDefinitionWithoutId(type);
+
+    expect(getEuidDslDocumentsContainsIdFilterFromDefinition(definition)).toEqual(
+      getEuidDslDocumentsContainsIdFilter(type)
+    );
+    for (const doc of [...docs, ...(type === 'user' ? userRecords : [])]) {
+      expect(getEuidDslFilterBasedOnDocumentFromDefinition(definition, doc)).toEqual(
+        getEuidDslFilterBasedOnDocument(type, doc)
+      );
+      expect(
+        getEuidDslFilterBasedOnDocumentFromDefinition(definition, doc, {
+          excludeHigherRankedFields: false,
+        })
+      ).toEqual(getEuidDslFilterBasedOnDocument(type, doc, { excludeHigherRankedFields: false }));
+      expect(getEuidDslFilterBasedOnEntityRecordFromDefinition(definition, doc)).toEqual(
+        getEuidDslFilterBasedOnEntityRecord(type, doc)
+      );
+    }
   });
 });

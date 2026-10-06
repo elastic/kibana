@@ -20,21 +20,34 @@ export {
 } from './non_ecs_timeline_data';
 export {
   getEuidPainlessEvaluation,
+  getEuidPainlessEvaluationFromDefinition,
   getEuidPainlessEvaluationForSearch,
+  getEuidPainlessEvaluationForSearchFromDefinition,
   getEuidPainlessRuntimeMapping,
+  getEuidPainlessRuntimeMappingFromDefinition,
 } from './painless';
 export {
   getEuidDslFilterBasedOnDocument,
+  getEuidDslFilterBasedOnDocumentFromDefinition,
   getEuidDslFilterBasedOnEntityRecord,
+  getEuidDslFilterBasedOnEntityRecordFromDefinition,
   getEuidDslDocumentsContainsIdFilter,
+  getEuidDslDocumentsContainsIdFilterFromDefinition,
 } from './dsl';
-export { getEuidKqlFilterBasedOnDocument } from './kql';
+export {
+  getEuidKqlFilterBasedOnDocument,
+  getEuidKqlFilterBasedOnDocumentFromDefinition,
+} from './kql';
 
 export {
   getEuidEsqlDocumentsContainsIdFilter,
+  getEuidEsqlDocumentsContainsIdFilterFromDefinition,
   getEuidEsqlEvaluation,
+  getEuidEsqlEvaluationFromDefinition,
   getEuidEsqlFilterBasedOnDocument,
+  getEuidEsqlFilterBasedOnDocumentFromDefinition,
   getFieldEvaluationsEsql,
+  getFieldEvaluationsEsqlFromDefinition,
   getHostScopedUserEuidEsql,
 } from './esql';
 export {

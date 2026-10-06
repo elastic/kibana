@@ -7,6 +7,7 @@
 
 import type { Condition } from '@kbn/streamlang';
 import type {
+  EntityDefinitionOfAnyType,
   EntityDefinitionWithoutId,
   EntityType,
   EuidAttribute,
@@ -82,7 +83,21 @@ export function getEuidPainlessRuntimeMapping(
   type: 'keyword';
   script: { source: string };
 } {
-  const returnScript = getEuidPainlessEvaluation(entityType, options);
+  return getEuidPainlessRuntimeMappingFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    options
+  );
+}
+
+/** Like {@link getEuidPainlessRuntimeMapping}, but takes a definition instead of a type name. */
+export function getEuidPainlessRuntimeMappingFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  options?: EuidGateOptions
+): {
+  type: 'keyword';
+  script: { source: string };
+} {
+  const returnScript = getEuidPainlessEvaluationFromDefinition(entityDefinition, options);
   const emitScript = wrapEvaluationScriptForKeywordRuntimeField(returnScript);
   return {
     type: 'keyword',
@@ -112,9 +127,16 @@ export function getEuidPainlessEvaluation(
   entityType: EntityType,
   options?: EuidGateOptions
 ): string {
+  return getEuidPainlessEvaluationFromDefinition(getEntityDefinitionWithoutId(entityType), options);
+}
+
+/** Like {@link getEuidPainlessEvaluation}, but takes a definition instead of a type name. */
+export function getEuidPainlessEvaluationFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  options?: EuidGateOptions
+): string {
   const { applyPostAggFilter = true } = options ?? {};
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  const { identityField } = entityDefinition;
+  const { identityField, type: entityType } = entityDefinition;
   const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -225,7 +247,14 @@ export function getEuidPainlessEvaluation(
  * @returns A Painless evaluation string that computes the entity id.
  */
 export function getEuidPainlessEvaluationForSearch(entityType: EntityType): string {
-  return getEuidPainlessEvaluation(entityType, { applyPostAggFilter: false });
+  return getEuidPainlessEvaluationForSearchFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
+/** Like {@link getEuidPainlessEvaluationForSearch}, but takes a definition instead of a type name. */
+export function getEuidPainlessEvaluationForSearchFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType
+): string {
+  return getEuidPainlessEvaluationFromDefinition(entityDefinition, { applyPostAggFilter: false });
 }
 
 function painlessFieldNonEmpty(field: string): string {

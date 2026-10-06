@@ -8,7 +8,8 @@
 import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condition_to_esql';
 import { castField } from '../../esql/cast';
 import type {
-  EntityDefinitionWithoutId,
+  EntityDefinitionOfAnyType,
+  EntityDefinitionType,
   EuidRankingBranch,
   FieldEvaluation,
   EntityType,
@@ -67,12 +68,22 @@ export function getEuidEsqlFilterBasedOnDocument(
   entityType: EntityType,
   doc: any
 ): string | undefined {
+  return getEuidEsqlFilterBasedOnDocumentFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    doc
+  );
+}
+
+/** Like {@link getEuidEsqlFilterBasedOnDocument}, but takes a definition instead of a type name. */
+export function getEuidEsqlFilterBasedOnDocumentFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  doc: any
+): string | undefined {
   if (!doc) {
     return undefined;
   }
 
   doc = getDocument(doc);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -387,7 +398,7 @@ export function getHostScopedUserEuidEsql(): {
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
 export function getFieldEvaluationsEsqlFromDefinition(
-  definition: EntityDefinitionWithoutId
+  definition: EntityDefinitionOfAnyType
 ): string | undefined {
   // Use only top-level shared evaluations (e.g. entity.source).
   // Identity-specific evaluations (e.g. entity.namespace) are emitted by
@@ -424,7 +435,7 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 
 /** Same filter for callers that already resolved a definition. */
 export function getEuidEsqlDocumentsContainsIdFilterFromDefinition(
-  definition: EntityDefinitionWithoutId
+  definition: EntityDefinitionOfAnyType
 ) {
   const { identityField } = definition;
 
@@ -453,8 +464,23 @@ export function getEuidEsqlEvaluation(
   outputColumn: string,
   { withTypeId = true, options }: { withTypeId?: boolean; options?: EntityDefinitionOptions } = {}
 ): string {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType, undefined, options);
-  const { identityField } = entityDefinition;
+  return getEuidEsqlEvaluationFromDefinition(
+    getEntityDefinitionWithoutId(entityType, undefined, options),
+    outputColumn,
+    { withTypeId }
+  );
+}
+
+/**
+ * Like {@link getEuidEsqlEvaluation}, but takes a definition instead of a type name. Lookup-only
+ * options (such as `excludedUserNames`) are already applied to the definition passed in.
+ */
+export function getEuidEsqlEvaluationFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  outputColumn: string,
+  { withTypeId = true }: { withTypeId?: boolean } = {}
+): string {
+  const { identityField, type: entityType } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -521,7 +547,7 @@ export function getEuidEsqlEvaluation(
 }
 
 function appendTypeIdIfNeeded(
-  entityType: EntityType,
+  entityType: EntityDefinitionType,
   euidLogic: string,
   mustPrependTypeId: boolean
 ) {

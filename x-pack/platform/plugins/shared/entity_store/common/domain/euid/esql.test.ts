@@ -7,8 +7,11 @@
 
 import {
   getEuidEsqlEvaluation,
+  getEuidEsqlEvaluationFromDefinition,
   getEuidEsqlDocumentsContainsIdFilter,
+  getEuidEsqlDocumentsContainsIdFilterFromDefinition,
   getEuidEsqlFilterBasedOnDocument,
+  getEuidEsqlFilterBasedOnDocumentFromDefinition,
   getFieldEvaluationsEsql,
   getFieldEvaluationsEsqlFromDefinition,
   collectRankingFields,
@@ -18,13 +21,17 @@ import {
   buildOneFieldEvaluationEsql,
   getHostScopedUserEuidEsql,
 } from './esql';
+import { getEuidDslDocumentsContainsIdFilterFromDefinition } from './dsl';
+import { getEuidKqlFilterBasedOnDocumentFromDefinition } from './kql';
+import { getEuidPainlessEvaluationFromDefinition } from './painless';
 import type {
+  EntityType,
   EuidRankingBranch,
   FieldEvaluation,
   FieldEvaluationWhenClause,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinition } from '../definitions/registry';
+import { getEntityDefinition, getEntityDefinitionWithoutId } from '../definitions/registry';
 import { userEntityDefinition } from '../definitions/user';
 
 const normalize = (s: string) =>
@@ -748,5 +755,70 @@ describe('getHostScopedUserEuidEsql', () => {
       // user.email belongs to the IDP ranking branch, not this one.
       expect(presenceGate).not.toContain('user.email');
     });
+  });
+});
+
+describe('FromDefinition variants', () => {
+  const documentsByType: Array<[EntityType, object[]]> = [
+    ['generic', [{ entity: { id: 'e-123' } }, { _source: { entity: { id: 'e-123' } } }]],
+    ['host', [{ host: { name: 'to-be-ignored', id: 'host-id-1' } }, { host: { name: 'server1' } }]],
+    [
+      'user',
+      [
+        { user: { email: 'alice@example.com' }, event: { kind: 'asset', module: 'okta' } },
+        { user: { name: 'alice' }, host: { id: 'host-1' }, event: { category: 'authentication' } },
+        {},
+      ],
+    ],
+    [
+      'service',
+      [{ service: { name: 'api-gateway' } }, { service: { entity: { id: 'svc-entity-1' } } }],
+    ],
+  ];
+
+  it.each(documentsByType)('match the type-name functions for %s', (type, docs) => {
+    const definition = getEntityDefinitionWithoutId(type);
+
+    expect(getEuidEsqlDocumentsContainsIdFilterFromDefinition(definition)).toEqual(
+      getEuidEsqlDocumentsContainsIdFilter(type)
+    );
+    expect(getFieldEvaluationsEsqlFromDefinition(definition)).toEqual(
+      getFieldEvaluationsEsql(type)
+    );
+    for (const options of [undefined, { withTypeId: false }]) {
+      expect(getEuidEsqlEvaluationFromDefinition(definition, 'entity.id', options)).toEqual(
+        getEuidEsqlEvaluation(type, 'entity.id', options)
+      );
+    }
+    for (const doc of docs) {
+      expect(getEuidEsqlFilterBasedOnDocumentFromDefinition(definition, doc)).toEqual(
+        getEuidEsqlFilterBasedOnDocument(type, doc)
+      );
+    }
+  });
+});
+
+describe('definition type names in compiled output', () => {
+  // `k8s.pod-v2_x` uses every separator the registry type-name pattern allows (`.`, `-`, `_`).
+  const typeName = 'k8s.pod-v2_x';
+  const definition = { ...getEntityDefinitionWithoutId('host'), type: typeName };
+  const doc = { host: { id: 'host-id-1' } };
+
+  it('emits the type name verbatim as the id prefix, with no escaping needed', () => {
+    expect(getEuidEsqlEvaluationFromDefinition(definition, 'entity.id')).toContain(
+      `CONCAT("${typeName}:", `
+    );
+    expect(getEuidPainlessEvaluationFromDefinition(definition)).toContain(`"${typeName}:" + `);
+  });
+
+  it('does not depend on the type name for DSL and KQL document filters', () => {
+    const builtIn = getEntityDefinitionWithoutId('host');
+
+    expect(getEuidDslDocumentsContainsIdFilterFromDefinition(definition)).toEqual(
+      getEuidDslDocumentsContainsIdFilterFromDefinition(builtIn)
+    );
+    expect(getEuidKqlFilterBasedOnDocumentFromDefinition(definition, doc)).toEqual(
+      getEuidKqlFilterBasedOnDocumentFromDefinition(builtIn, doc)
+    );
   });
 });

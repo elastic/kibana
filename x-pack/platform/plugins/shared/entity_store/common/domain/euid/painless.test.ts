@@ -6,11 +6,15 @@
  */
 
 import { EntityType } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   getEuidPainlessEvaluation,
+  getEuidPainlessEvaluationFromDefinition,
   getEuidPainlessEvaluationForSearch,
+  getEuidPainlessEvaluationForSearchFromDefinition,
   getEuidPainlessRuntimeMapping,
+  getEuidPainlessRuntimeMappingFromDefinition,
   streamlangConditionToPainlessDoc,
 } from './painless';
 
@@ -314,5 +318,23 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
     const script = getEuidPainlessEvaluation(EntityType.enum.host);
 
     expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
+  });
+});
+
+describe('FromDefinition variants', () => {
+  it.each(Object.values(EntityType.enum))('match the type-name functions for %s', (type) => {
+    const definition = getEntityDefinitionWithoutId(type);
+
+    for (const options of [undefined, { applyPostAggFilter: false }]) {
+      expect(getEuidPainlessEvaluationFromDefinition(definition, options)).toEqual(
+        getEuidPainlessEvaluation(type, options)
+      );
+      expect(getEuidPainlessRuntimeMappingFromDefinition(definition, options)).toEqual(
+        getEuidPainlessRuntimeMapping(type, options)
+      );
+    }
+    expect(getEuidPainlessEvaluationForSearchFromDefinition(definition)).toEqual(
+      getEuidPainlessEvaluationForSearch(type)
+    );
   });
 });

@@ -16,7 +16,11 @@ import {
   isNotCondition,
   isAlwaysCondition,
 } from '@kbn/streamlang';
-import type { EntityType, FieldEvaluation } from '../definitions/entity_schema';
+import type {
+  EntityDefinitionOfAnyType,
+  EntityType,
+  FieldEvaluation,
+} from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
@@ -70,12 +74,22 @@ export function getEuidKqlFilterBasedOnDocument(
   entityType: EntityType,
   doc: any
 ): string | undefined {
+  return getEuidKqlFilterBasedOnDocumentFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    doc
+  );
+}
+
+/** Like {@link getEuidKqlFilterBasedOnDocument}, but takes a definition instead of a type name. */
+export function getEuidKqlFilterBasedOnDocumentFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  doc: any
+): string | undefined {
   if (!doc) {
     return undefined;
   }
 
   doc = getDocument(doc);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
