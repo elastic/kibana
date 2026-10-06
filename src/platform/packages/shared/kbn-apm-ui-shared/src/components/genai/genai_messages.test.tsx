@@ -90,13 +90,13 @@ describe('GenAiMessages', () => {
     expect(codeBlocks.length).toBeGreaterThan(0);
   });
 
-  it('renders role labels in each message header', () => {
+  it('renders the raw role in each message header', () => {
     renderMessages([
       { role: 'user', content: 'Hi' },
       { role: 'assistant', content: 'Hello' },
     ]);
-    expect(screen.getByTestId('genAiRoleLabel-user')).toHaveTextContent('User');
-    expect(screen.getByTestId('genAiRoleLabel-assistant')).toHaveTextContent('Assistant');
+    expect(screen.getByTestId('genAiRoleLabel-user')).toHaveTextContent(/^user$/);
+    expect(screen.getByTestId('genAiRoleLabel-assistant')).toHaveTextContent(/^assistant$/);
   });
 
   it('renders assistant tool calls as cards with the tool name, call ID and arguments', () => {
@@ -158,7 +158,7 @@ describe('GenAiMessages', () => {
         parts: [{ type: 'tool_call_response', id: 'call-1', response: '{"hits":[]}' }],
       },
     ]);
-    expect(screen.getByTestId('genAiRoleLabel-tool')).toHaveTextContent('Tool');
+    expect(screen.getByTestId('genAiRoleLabel-tool')).toHaveTextContent(/^tool$/);
     expect(screen.getByTestId('genAiToolOutputCopy-1')).toHaveAttribute(
       'aria-label',
       'Copy tool output'

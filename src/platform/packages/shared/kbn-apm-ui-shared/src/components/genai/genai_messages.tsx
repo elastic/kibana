@@ -29,20 +29,6 @@ import { getMessageBlocks, getToolNamesById } from './get_message_blocks';
 import { GenAiMessageContent } from './genai_message_content';
 import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
-const ROLE_LABELS: Record<string, string> = {
-  system: i18n.translate('apmUiShared.genAi.messages.role.system', { defaultMessage: 'System' }),
-  user: i18n.translate('apmUiShared.genAi.messages.role.user', { defaultMessage: 'User' }),
-  assistant: i18n.translate('apmUiShared.genAi.messages.role.assistant', {
-    defaultMessage: 'Assistant',
-  }),
-  tool: i18n.translate('apmUiShared.genAi.messages.role.tool', { defaultMessage: 'Tool' }),
-  function: i18n.translate('apmUiShared.genAi.messages.role.function', {
-    defaultMessage: 'Function',
-  }),
-};
-
-const getRoleLabel = (role: string): string => ROLE_LABELS[role.toLowerCase()] ?? role;
-
 /**
  * Fixed-size role avatar using EUI semantic background tokens so the circle
  * is always the same size regardless of the role label length — keeping all
@@ -184,9 +170,7 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
         return (
           <EuiComment
             key={`${msg.role}-${i}`}
-            username={
-              <span data-test-subj={`genAiRoleLabel-${msg.role}`}>{getRoleLabel(msg.role)}</span>
-            }
+            username={<span data-test-subj={`genAiRoleLabel-${msg.role}`}>{msg.role}</span>}
             event={
               toolNames.length > 0 || callIds.length > 0 ? (
                 <EuiFlexGroup
