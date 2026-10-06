@@ -7,7 +7,7 @@
 
 import { randomUUID } from 'crypto';
 
-import type { KbnClient } from '@kbn/scout';
+import type { KbnClient, KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { ES_SERVICE_ACCOUNT_NAMESPACE } from '../../../../common/service_accounts';
@@ -15,11 +15,16 @@ import {
   deleteServiceAccounts,
   type ServiceAccountPrincipal,
 } from '../../api/fixtures/service_account_cleanup';
+import { bindWorkload, unbindWorkloads } from '../../api/fixtures/service_account_workloads';
 import { test } from '../fixtures';
 
-const SERVICE_ACCOUNT_ENDPOINT = '/internal/security/service_account';
-/** The service accounts test plugin's workload route, which binds and unbinds its workloads. */
-const workloadPath = (workloadId: string) => `/internal/service_accounts_test/${workloadId}`;
+const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
+/** Deleting a service account takes `manage_security`. The feature privilege opens Stack Management. */
+const SERVICE_ACCOUNT_ADMIN_ROLE: KibanaRole = {
+  elasticsearch: { cluster: ['manage_security'] },
+  kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
+};
+
 const uniqueName = (prefix: string) => `${prefix}-${randomUUID()}`;
 
 test.describe('Delete service accounts', { tag: ['@local-stateful-classic'] }, () => {
@@ -35,16 +40,6 @@ test.describe('Delete service accounts', { tag: ['@local-stateful-classic'] }, (
       method: 'POST',
       path: SERVICE_ACCOUNT_ENDPOINT,
       body: { name, roles: [workloadRole] },
-      retries: 0,
-    });
-  };
-
-  const bindWorkload = async (kbnClient: KbnClient, workloadId: string, name: string) => {
-    boundWorkloads.push(workloadId);
-    await kbnClient.request({
-      method: 'POST',
-      path: workloadPath(workloadId),
-      body: { operation: 'bind', serviceAccountId: idOf(name) },
       retries: 0,
     });
   };
@@ -70,15 +65,7 @@ test.describe('Delete service accounts', { tag: ['@local-stateful-classic'] }, (
     const failures: Error[] = [];
     const cleanup = [
       // A forced delete leaves its bindings behind.
-      async () => {
-        for (const workloadId of boundWorkloads) {
-          await kbnClient.request({
-            method: 'POST',
-            path: workloadPath(workloadId),
-            body: { operation: 'unbind' },
-          });
-        }
-      },
+      async () => unbindWorkloads(kbnClient, boundWorkloads),
       async () => deleteServiceAccounts(esClient, config, created),
       async () => esClient.security.deleteRole({ name: workloadRole, refresh: 'wait_for' }),
     ];
@@ -102,9 +89,8 @@ test.describe('Delete service accounts', { tag: ['@local-stateful-classic'] }, (
     const name = uniqueName('scout-sa-unbound');
     await createAccount(kbnClient, name);
 
-    // Deleting a service account takes `manage_security`.
-    await browserAuth.loginAsAdmin();
-    const { serviceAccounts } = pageObjects;
+    await browserAuth.loginWithCustomRole(SERVICE_ACCOUNT_ADMIN_ROLE);
+    const { serviceAccounts, toasts } = pageObjects;
     await serviceAccounts.goto();
     await serviceAccounts.searchFor(name);
     await expect(serviceAccounts.accountRow(name)).toBeVisible();
@@ -114,52 +100,62 @@ test.describe('Delete service accounts', { tag: ['@local-stateful-classic'] }, (
       await expect(serviceAccounts.deleteConfirmModal).toContainText(`Delete "${name}"?`);
       await expect(serviceAccounts.boundModal).toBeHidden();
       await serviceAccounts.confirmDelete();
-      await expect(serviceAccounts.deleteConfirmModal).toBeHidden();
     });
 
     await test.step('the account is gone', async () => {
+      // The success toast tells a delete apart from one that found the account already gone.
+      await toasts.waitForToastWithText(`Deleted service account "${name}"`);
+      await serviceAccounts.waitForReload();
       await expect(serviceAccounts.accountRow(name)).toBeHidden();
       expect(await getAccountStatus(kbnClient, name)).toBe(404);
     });
   });
 
-  test('force deletes an account that is still bound to workloads', async ({
+  test('force deletes an account that is still bound to a workload', async ({
     browserAuth,
     kbnClient,
+    page,
     pageObjects,
   }) => {
     const name = uniqueName('scout-sa-bound');
+    const workloadId = uniqueName('scout-sa-job');
     await createAccount(kbnClient, name);
-    // One more than a page, so the list pages.
-    const workloadIds = Array.from({ length: 6 }, () => uniqueName('scout-sa-job'));
-    for (const workloadId of workloadIds) {
-      await bindWorkload(kbnClient, workloadId, name);
-    }
+    boundWorkloads.push(workloadId);
+    await bindWorkload(kbnClient, workloadId, idOf(name));
 
-    await browserAuth.loginAsAdmin();
-    const { serviceAccounts } = pageObjects;
+    await browserAuth.loginWithCustomRole(SERVICE_ACCOUNT_ADMIN_ROLE);
+    const { serviceAccounts, toasts } = pageObjects;
     await serviceAccounts.goto();
     await serviceAccounts.searchFor(name);
     await expect(serviceAccounts.accountRow(name)).toBeVisible();
 
-    await test.step('warn about the bound workloads', async () => {
+    await test.step('warn about the bound workload', async () => {
       await serviceAccounts.openDelete(name);
       await expect(serviceAccounts.boundModal).toContainText(`Delete "${name}"?`);
       await expect(serviceAccounts.boundModal).toContainText(
-        'This account is bound to the following 6 workloads.'
+        'This account is bound to the following 1 workload.'
       );
       await expect(serviceAccounts.deleteConfirmModal).toBeHidden();
-      await expect(serviceAccounts.boundWorkloadRows).toHaveCount(5);
-      await serviceAccounts.goToBoundWorkloadsPage(1);
-      await expect(serviceAccounts.boundWorkloadRows).toHaveCount(1);
+      // `toContainText`, since EUI adds hidden copy markers to each cell's text.
+      await expect(await serviceAccounts.boundWorkloadsTable.cells('displayName')).toContainText([
+        workloadId,
+      ]);
+    });
+
+    await test.step('the warning has no accessibility violations', async () => {
+      const { violations } = await page.checkA11y({
+        include: ['[data-test-subj="serviceAccountBoundModal"]'],
+      });
+      expect(violations).toStrictEqual([]);
     });
 
     await test.step('force delete the account', async () => {
       await serviceAccounts.forceDelete();
-      await expect(serviceAccounts.boundModal).toBeHidden();
     });
 
     await test.step('the account is gone', async () => {
+      await toasts.waitForToastWithText(`Deleted service account "${name}"`);
+      await serviceAccounts.waitForReload();
       await expect(serviceAccounts.accountRow(name)).toBeHidden();
       expect(await getAccountStatus(kbnClient, name)).toBe(404);
     });

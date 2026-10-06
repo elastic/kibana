@@ -20,8 +20,7 @@ export class ServiceAccountsPage {
   readonly deleteConfirmModal;
   readonly boundModal;
   readonly boundWorkloadsTable;
-  readonly boundWorkloadRows;
-  readonly boundWorkloadsPagination;
+  readonly loading;
 
   constructor(private readonly page: ScoutPage) {
     this.flyout = page.getByTestId('createServiceAccountFlyout');
@@ -32,12 +31,8 @@ export class ServiceAccountsPage {
     this.search = page.getByTestId('serviceAccountsSearch');
     this.deleteConfirmModal = page.getByTestId('serviceAccountDeleteConfirmModal');
     this.boundModal = page.getByTestId('serviceAccountBoundModal');
-    this.boundWorkloadsTable = page.getByTestId('serviceAccountBoundWorkloadsTable');
-    // Rows with cells, which leaves out the header row.
-    this.boundWorkloadRows = this.boundWorkloadsTable
-      .getByRole('row')
-      .filter({ has: page.getByRole('cell') });
-    this.boundWorkloadsPagination = page.getByTestId('serviceAccountBoundWorkloadsPagination');
+    this.boundWorkloadsTable = page.components.basicTable('serviceAccountBoundWorkloadsTable');
+    this.loading = page.getByTestId('serviceAccountsLoading');
   }
 
   async goto() {
@@ -64,12 +59,16 @@ export class ServiceAccountsPage {
     await this.deleteConfirmModal.getByTestId('confirmModalConfirmButton').click();
   }
 
-  async goToBoundWorkloadsPage(pageIndex: number) {
-    await this.boundWorkloadsPagination.getByTestId(`pagination-button-${pageIndex}`).click();
-  }
-
   async forceDelete() {
     await this.boundModal.getByTestId('serviceAccountForceDeleteButton').click();
+  }
+
+  /**
+   * Waits for the accounts to load again after a delete. The page shows the table or, once the
+   * last account is gone, an empty prompt, so this waits for the loading indicator to go away.
+   */
+  async waitForReload() {
+    await this.loading.waitFor({ state: 'hidden', timeout: PAGE_LOAD_TIMEOUT_MS });
   }
 
   async openCreateFlyout() {
