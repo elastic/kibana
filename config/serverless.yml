@@ -58,11 +58,9 @@ xpack.features.overrides:
           privileges: [ "read" ]
     ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
-    ### response-ops-team#750: generate_report (PDF/PNG export) is left enabled here — see
-    ### the matching `dashboard_v2: generate_report` entry added to the `reporting` feature's
-    ### composedOf below.
     subFeatures.privileges:
       download_csv_report.disabled: true
+      generate_report.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -87,6 +85,9 @@ xpack.features.overrides:
   ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
   maps_v2.hidden: true
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
+  ### response-ops-team#750: `generate_report` for Dashboard (PDF/PNG export) is granted here, like the
+  ### CSV privilege. The sub-feature stays disabled above so it is not shown in Role management; the
+  ### share menu entries are separately gated by the `reporting.serverlessExportEnabled` feature flag.
   reporting:
     privileges:
       all.composedOf:

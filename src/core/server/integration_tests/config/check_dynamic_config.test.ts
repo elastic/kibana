@@ -142,6 +142,10 @@ if (getFips() === 0) {
         'telemetry.labels',
         // This allow to test fleet features flags while in devlopment
         'xpack.fleet.experimentalFeatures',
+        // The origin page-render-service uses to reach this Kibana embeds the project id, so it can't be a
+        // static per-environment setting. Until an orchestrator renders it per project, it is set on live
+        // QA projects through the dynamic settings API.
+        'xpack.pageRenderScreenshotting.kibanaBaseUrl',
       ]);
     });
   });
