@@ -21,6 +21,10 @@ interface CacheEntry {
   value: JsonValue | null;
 }
 
+// lru-cache only accepts positive integer sizes; unmeasured or empty values count as 1 byte.
+const toValidSize = (bytes: number | null | undefined): number =>
+  bytes != null && Number.isFinite(bytes) ? Math.max(1, Math.ceil(bytes)) : 1;
+
 /**
  * Byte-bounded LRU cache for step IO.
  *
@@ -47,7 +51,7 @@ export class StepIoCache {
     this.lru = new LRUCache({
       maxSize,
       // Fallback size used when the caller does not supply an explicit byte count.
-      sizeCalculation: (entry: CacheEntry) => safeOutputSize(entry.value) ?? 0,
+      sizeCalculation: (entry: CacheEntry) => toValidSize(safeOutputSize(entry.value)),
       dispose: cacheLogger
         ? (_entry, key, reason) => {
             if (reason === 'evict') {
@@ -70,7 +74,11 @@ export class StepIoCache {
    * When omitted, `sizeCalculation` measures the entry automatically.
    */
   public set(id: string, type: StepIoType, value: JsonValue | null, bytes?: number): void {
-    this.lru.set(`${type}_${id}`, { value }, bytes !== undefined ? { size: bytes } : undefined);
+    this.lru.set(
+      `${type}_${id}`,
+      { value },
+      bytes !== undefined ? { size: toValidSize(bytes) } : undefined
+    );
   }
 
   public has(id: string, type: StepIoType): boolean {

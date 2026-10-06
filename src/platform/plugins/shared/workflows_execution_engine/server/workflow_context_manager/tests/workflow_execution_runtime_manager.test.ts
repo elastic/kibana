@@ -117,6 +117,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       getLatestStepExecution: jest.fn(),
       getStepExecutionsByStepId: jest.fn(),
       getAllStepExecutions: jest.fn().mockReturnValue([]),
+      getDataSetStepExecutions: jest.fn().mockReturnValue([]),
+      getDataSetStepExecutionCount: jest.fn().mockReturnValue(0),
+      getStepIoVersion: jest.fn().mockReturnValue(0),
       upsertStep: jest.fn(),
     } as unknown as WorkflowExecutionState;
 

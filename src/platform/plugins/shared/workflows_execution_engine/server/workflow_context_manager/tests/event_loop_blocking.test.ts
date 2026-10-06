@@ -181,6 +181,7 @@ const createBroaderSurfaceContainer = () => {
     });
   workflowExecutionState.getStepExecution = jest.fn().mockReturnValue(undefined);
   workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+  workflowExecutionState.getDataSetStepExecutions = jest.fn().mockReturnValue([]);
 
   const esClient = {
     search: jest.fn(),

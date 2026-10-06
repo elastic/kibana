@@ -75,6 +75,10 @@ export class WorkflowExecutionState {
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
 
+  /** Execution IDs of `data.set` steps in creation order. Avoids scanning every execution. */
+  private dataSetExecutionIds = new Set<string>();
+  private stepIoVersion = 0;
+
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
     private workflowExecutionRepository: WorkflowExecutionRepository,
@@ -156,6 +160,28 @@ export class WorkflowExecutionState {
   }
 
   /**
+   * Returns all `data.set` executions in creation order, using a maintained index.
+   */
+  public getDataSetStepExecutions(): StepExecutionMetadata[] {
+    const result: StepExecutionMetadata[] = [];
+    for (const id of this.dataSetExecutionIds) {
+      const exec = this.stepExecutions.get(id);
+      if (exec) result.push(exec);
+    }
+    return result;
+  }
+
+  /** O(1) count of `data.set` executions; lets callers cheaply detect index changes. */
+  public getDataSetStepExecutionCount(): number {
+    return this.dataSetExecutionIds.size;
+  }
+
+  /** Monotonic counter bumped on every `setStepIo`; lets callers memoise IO-derived aggregates. */
+  public getStepIoVersion(): number {
+    return this.stepIoVersion;
+  }
+
+  /**
    * Retrieves all executions for a workflow step in chronological order.
    */
   public getStepExecutionsByStepId(stepId: string): StepExecutionMetadata[] {
@@ -208,6 +234,7 @@ export class WorkflowExecutionState {
     stepExecutionId: string,
     io: { input?: JsonValue; output?: JsonValue | null }
   ): void {
+    this.stepIoVersion++;
     const existing = this.stepIo.get(stepExecutionId) ?? {};
     this.stepIo.set(stepExecutionId, { ...existing, ...io });
     const existingPending = this.pendingStepIo.get(stepExecutionId) ?? {};
@@ -338,7 +365,22 @@ export class WorkflowExecutionState {
     }
 
     await this.stepExecutionRepository.bulkUpsert(updates);
-    this.clearFlushedOutputs([...ioChanges.keys()]);
+    // Skip outputs rewritten while the bulk write was in flight; the next flush persists them.
+    this.clearFlushedOutputs([...ioChanges.keys()].filter((id) => !this.pendingStepIo.has(id)));
+  }
+
+  /**
+   * Flushes the workflow document and step changes. A terminal workflow status
+   * is only written after step outputs and errors are durable, so consumers
+   * that trust the terminal status never read incomplete step results.
+   */
+  public async flushWorkflowAndSteps(): Promise<void> {
+    if (isTerminalStatus(this.workflowExecution.status)) {
+      await this.flushStepChanges();
+      await this.flushWorkflowDoc();
+      return;
+    }
+    await Promise.all([this.flushWorkflowDoc(), this.flushStepChanges()]);
   }
 
   /**
@@ -400,6 +442,7 @@ export class WorkflowExecutionState {
       managed: Boolean(this.workflowExecution.managed),
     } as StepExecutionMetadata;
     this.stepExecutions.set(id, newStep);
+    if (newStep.stepType === 'data.set') this.dataSetExecutionIds.add(id);
     this.stepDocumentsChanges.set(id, newStep);
     this.updateWorkflowExecution({
       stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), id],
@@ -416,6 +459,7 @@ export class WorkflowExecutionState {
       ...step,
     };
     this.stepExecutions.set(stepId, updatedStep);
+    if (updatedStep.stepType === 'data.set') this.dataSetExecutionIds.add(stepId);
     this.stepDocumentsChanges.set(stepId, {
       ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
@@ -424,7 +468,9 @@ export class WorkflowExecutionState {
 
   private buildStepIdExecutionIdIndex(): void {
     this.stepIdExecutionIdIndex.clear();
+    this.dataSetExecutionIds.clear();
     for (const step of this.stepExecutions.values()) {
+      if (step.stepType === 'data.set') this.dataSetExecutionIds.add(step.id);
       let idsList = this.stepIdExecutionIdIndex.get(step.stepId);
       if (!idsList) {
         idsList = [];

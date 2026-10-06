@@ -41,8 +41,7 @@ describe('workflowExecutionLoop', () => {
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
-      flushWorkflowDoc: jest.fn().mockResolvedValue(undefined),
-      flushStepChanges: jest.fn().mockResolvedValue(undefined),
+      flushWorkflowAndSteps: jest.fn().mockResolvedValue(undefined),
     },
     stepIoService: {
       rehydrate: jest.fn().mockResolvedValue(undefined),
@@ -74,8 +73,7 @@ describe('workflowExecutionLoop', () => {
     expect(flushState).toHaveBeenCalled();
     expect(params.workflowExecutionCursor.start).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.workflowExecutionState.flushWorkflowDoc).toHaveBeenCalled();
-    expect(params.workflowExecutionState.flushStepChanges).toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).toHaveBeenCalled();
     expect(params.eventQueue.flush).toHaveBeenCalled();
   });
 
@@ -131,8 +129,7 @@ describe('workflowExecutionLoop', () => {
       workflowLogFlushSignal: params.signal,
     });
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.workflowExecutionState.flushWorkflowDoc).toHaveBeenCalled();
-    expect(params.workflowExecutionState.flushStepChanges).toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).toHaveBeenCalled();
     expect(params.eventQueue.flush).toHaveBeenCalledWith({
       signal: params.signal,
     });

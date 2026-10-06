@@ -69,8 +69,8 @@ export function resolveRehydrationTargets(
   }
 
   // `getVariables()` reads every `data.set` output, so those must be resident too.
-  for (const step of state.getAllStepExecutions()) {
-    if (step.stepType === 'data.set') neededIds.add(step.id);
+  for (const step of state.getDataSetStepExecutions()) {
+    neededIds.add(step.id);
   }
 
   const executionId = state.getWorkflowExecutionId();
@@ -128,6 +128,9 @@ export class WorkflowContextManager {
    */
   private predecessorsCache: GraphNodeUnion[] | undefined;
 
+  /** Memoised `getVariables()` aggregate, keyed by data.set count and step IO version. */
+  private variablesCache: { version: string; value: Record<string, unknown> } | undefined;
+
   private get predecessors(): ReadonlyArray<GraphNodeUnion> {
     if (!this.predecessorsCache) {
       this.predecessorsCache = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
@@ -165,6 +168,8 @@ export class WorkflowContextManager {
       this.stackFrames
     );
     await this.stepIoService.rehydrate([...neededIds]);
+    // Rehydration changes what `read()` returns without touching state IO.
+    this.variablesCache = undefined;
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -337,15 +342,23 @@ export class WorkflowContextManager {
   /**
    * Aggregates outputs from all `data.set` step executions in execution order.
    * Outputs are read via the normal IO read path (LRU cache → state fallback).
-   * O(N) over data.set executions — acceptable; improving static analysis is out of scope.
+   * The aggregate is memoised per instance and recomputed only when a data.set execution
+   * is added or any step IO is written, so repeated `getContext()` calls within a step
+   * do not re-scan every data.set execution.
    */
   public getVariables(): Record<string, unknown> {
+    const { workflowExecutionState: state } = this;
+    const version = `${state.getDataSetStepExecutionCount()}:${state.getStepIoVersion()}`;
+    if (this.variablesCache?.version !== version) {
+      this.variablesCache = { version, value: this.computeVariables() };
+    }
+    return { ...this.variablesCache.value };
+  }
+
+  private computeVariables(): Record<string, unknown> {
     const result: Record<string, unknown> = {};
     const readerBranchScopes = getParallelBranchScopes(this.stackFrames);
-    const dataSetSteps = this.workflowExecutionState.getAllStepExecutions().filter((step) => {
-      if (step.stepType !== 'data.set') {
-        return false;
-      }
+    const dataSetSteps = this.workflowExecutionState.getDataSetStepExecutions().filter((step) => {
       if (readerBranchScopes.length === 0) {
         return true;
       }

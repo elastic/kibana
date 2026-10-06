@@ -109,6 +109,10 @@ describe('WorkflowContextManager', () => {
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
     workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+    // Tests mock `getAllStepExecutions`; derive the data.set index from it.
+    workflowExecutionState.getDataSetStepExecutions = jest.fn(() =>
+      workflowExecutionState.getAllStepExecutions().filter((exec) => exec.stepType === 'data.set')
+    );
 
     // Service is sovereign over IO. The mock keeps its own input/output
     // maps but also falls back to reading IO directly off the state mock
@@ -125,14 +129,26 @@ describe('WorkflowContextManager', () => {
         | undefined;
       return exec?.[field];
     };
+    // The mocked service writes bypass state, so track an IO version for the variables memo.
+    let ioVersion = 0;
+    workflowExecutionState.getDataSetStepExecutionCount = jest.fn(
+      () => workflowExecutionState.getDataSetStepExecutions().length
+    );
+    workflowExecutionState.getStepIoVersion = jest.fn(() => ioVersion);
     const stepIoService = {
       hasEvictedOutputs: jest.fn().mockReturnValue(false),
       rehydrate: jest.fn().mockResolvedValue(undefined),
       rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
       releaseReadPins: jest.fn(),
       releaseTransientlyRehydratedOutputs: jest.fn(),
-      setStepInput: jest.fn((id: string, input: unknown) => stepInputs.set(id, input)),
-      setStepOutput: jest.fn((id: string, output: unknown) => stepOutputs.set(id, output)),
+      setStepInput: jest.fn((id: string, input: unknown) => {
+        ioVersion++;
+        return stepInputs.set(id, input);
+      }),
+      setStepOutput: jest.fn((id: string, output: unknown) => {
+        ioVersion++;
+        return stepOutputs.set(id, output);
+      }),
       getStepInput: jest.fn((id: string) => readIo(id, 'input')),
       getStepOutput: jest.fn((id: string) => readIo(id, 'output')),
       getStepError: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),

@@ -28,10 +28,9 @@ const makeParams = (
       flush: jest.fn().mockResolvedValue(undefined),
     },
     workflowExecutionState: {
-      flushWorkflowDoc: jest
+      flushWorkflowAndSteps: jest
         .fn()
         .mockImplementation(() => new Promise<void>((resolve) => setTimeout(resolve, flushDelay))),
-      flushStepChanges: jest.fn().mockResolvedValue(undefined),
     },
     eventQueue: {
       flush: jest.fn().mockResolvedValue(undefined),
@@ -52,7 +51,7 @@ describe('persistenceLoop', () => {
   it('exits immediately when the execution cursor is not executing', async () => {
     const params = makeParams({ isExecuting: false });
     await persistenceLoop(params);
-    expect(params.workflowExecutionState.flushWorkflowDoc).not.toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).not.toHaveBeenCalled();
   });
 
   it('exits when the persistenceAbortSignal fires during the wait interval', async () => {
@@ -125,6 +124,6 @@ describe('persistenceLoop', () => {
     await persistenceLoop(params, abortController.signal);
 
     // The loop should return immediately without flushing
-    expect(params.workflowExecutionState.flushWorkflowDoc).not.toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).not.toHaveBeenCalled();
   });
 });
