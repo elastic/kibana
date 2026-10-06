@@ -51,6 +51,7 @@ const swagger: OpenApiDocument = {
             description: 'ok',
             schema: { $ref: '#/definitions/Item' },
             headers: { 'X-Rate-Limit': { type: 'integer' } },
+            examples: { 'application/json': { note: 'example' } },
           },
           '404': { $ref: '#/responses/NotFound' },
         },
@@ -131,6 +132,7 @@ describe('convertSwagger2', () => {
           {
             mediaType: 'application/json',
             schema: { schema: { $ref: '#/components/schemas/Item' } },
+            examples: [{ note: 'example' }],
           },
         ],
       },

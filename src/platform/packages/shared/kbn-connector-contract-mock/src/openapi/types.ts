@@ -54,6 +54,8 @@ export interface OperationParameter {
 export interface MediaTypeContent {
   readonly mediaType: string;
   readonly schema?: SpecSchema;
+  /** The media type's `example`, then the values of its `examples`. */
+  readonly examples: readonly unknown[];
 }
 
 export interface OperationHeader {

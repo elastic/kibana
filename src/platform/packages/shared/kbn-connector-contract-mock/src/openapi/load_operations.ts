@@ -42,13 +42,33 @@ const toSchema = (owner: Record<string, unknown>, pointer: string): SpecSchema |
     ? { pointer: appendPointer(pointer, 'schema'), schema: owner.schema }
     : undefined;
 
-const toContents = (owner: Record<string, unknown>, pointer: string): MediaTypeContent[] =>
-  entriesOf(owner.content).map(([mediaType, content]) => ({
-    mediaType,
-    schema: isRecord(content)
-      ? toSchema(content, appendPointer(pointer, 'content', mediaType))
-      : undefined,
-  }));
+type Resolve = (node: unknown, pointer: string) => ReturnType<typeof resolveObject>;
+
+// `example` and the values of `examples`, which may be refs to `components/examples`.
+const toExamples = (content: Record<string, unknown>, pointer: string, resolve: Resolve) => [
+  ...(content.example === undefined ? [] : [content.example]),
+  ...entriesOf(content.examples).flatMap(([name, example]) => {
+    if (!isRecord(example)) {
+      return [];
+    }
+    const { value } = resolve(example, appendPointer(pointer, 'examples', name)).value;
+    return value === undefined ? [] : [value];
+  }),
+];
+
+const toContents = (
+  owner: Record<string, unknown>,
+  pointer: string,
+  resolve: Resolve
+): MediaTypeContent[] =>
+  entriesOf(owner.content).map(([mediaType, content]) => {
+    const contentPointer = appendPointer(pointer, 'content', mediaType);
+    return {
+      mediaType,
+      schema: isRecord(content) ? toSchema(content, contentPointer) : undefined,
+      examples: isRecord(content) ? toExamples(content, contentPointer, resolve) : [],
+    };
+  });
 
 const toServers = (servers: unknown): OperationServer[] | undefined => {
   if (!Array.isArray(servers) || servers.length === 0) {
@@ -153,7 +173,7 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
           parameters: [...inherited, ...ownParameters],
           requestBody: body && {
             required: body.value.required === true,
-            contents: toContents(body.value, body.pointer),
+            contents: toContents(body.value, body.pointer, resolve),
           },
           responses: entriesOf(operation.responses).map(([code, response]) => {
             const { value, pointer: resolved } = resolve(
@@ -162,7 +182,7 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
             );
             return {
               code,
-              contents: toContents(value, resolved),
+              contents: toContents(value, resolved, resolve),
               headers: entriesOf(value.headers).map(([name, header]) => {
                 const target = resolve(header, appendPointer(resolved, 'headers', name));
                 return {
