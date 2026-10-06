@@ -79,6 +79,10 @@ export class DataViewDetailPage {
 
   async openScriptedFieldsTab(): Promise<void> {
     await this.scriptedFieldsTab.click();
+    // The tab content has no unique test subject, so wait for the tab itself to become selected
+    await this.scriptedFieldsTab
+      .and(this.page.locator('[aria-selected="true"]'))
+      .waitFor({ state: 'visible' });
   }
 
   async getFieldNames(): Promise<string[]> {

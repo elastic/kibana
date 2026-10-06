@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest } from '../../../common/ui/fixtures';
 
 const scriptedField = (name: string, type: string, script: string) => ({
   name,
@@ -43,25 +43,68 @@ const SCRIPTED_FIELDS = {
   ),
 };
 
-const TIME_RANGE = { from: '2015-09-17T06:31:44.000Z', to: '2015-09-18T18:31:44.000Z' };
-const DATE_FIELD_TIME_RANGE = { from: '2015-09-17T19:22:00.000Z', to: '2015-09-18T07:00:00.000Z' };
+const GB = 1024 ** 3;
+
+// Newest first, so the default time sort puts the first document on top of the grid. The expected
+// values below follow from these documents: ram in GB is 18, 14, 14, 20, 30 and -1 (no ram),
+// `good` is status 200 (three documents) and `bad` is anything else (three documents).
+const DOCUMENTS = [
+  { '@timestamp': '2015-09-18T06:20:57.916Z', ram: 18 * GB, response: '200' },
+  { '@timestamp': '2015-09-18T05:00:00.000Z', ram: 14 * GB, response: '200' },
+  { '@timestamp': '2015-09-18T04:00:00.000Z', ram: 14 * GB, response: '404' },
+  { '@timestamp': '2015-09-18T03:00:00.000Z', ram: 20 * GB, response: '404' },
+  { '@timestamp': '2015-09-18T02:00:00.000Z', ram: 30 * GB, response: '500' },
+  { '@timestamp': '2015-09-18T01:00:00.000Z', ram: undefined, response: '200' },
+];
+
+const TIME_RANGE = { from: '2015-09-18T00:00:00.000Z', to: '2015-09-19T00:00:00.000Z' };
 
 spaceTest.describe('Using scripted fields in Discover', { tag: '@local-stateful-classic' }, () => {
-  let dataViewId: string;
+  // The index is owned by this spec and named per space, so parallel workers and other suites
+  // never see its documents
+  let indexName: string;
 
-  spaceTest.beforeAll(async ({ apiServices, kbnClient, scoutSpace }) => {
-    // Only the makelogs indices: the scripts read fields that logstash_functional does not map.
+  spaceTest.beforeAll(async ({ apiServices, esClient, kbnClient, scoutSpace }) => {
+    indexName = `scripted-fields-discover-${scoutSpace.id}`.toLowerCase();
+    if (await esClient.indices.exists({ index: indexName })) {
+      await esClient.indices.delete({ index: indexName });
+    }
+    await esClient.indices.create({
+      index: indexName,
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          utc_time: { type: 'date' },
+          machine: { properties: { ram: { type: 'long' } } },
+          response: { type: 'text', fields: { raw: { type: 'keyword' } } },
+        },
+      },
+    });
+    await esClient.bulk({
+      index: indexName,
+      refresh: 'wait_for',
+      operations: DOCUMENTS.flatMap(({ ram, response, ...doc }) => [
+        { index: {} },
+        {
+          ...doc,
+          utc_time: doc['@timestamp'],
+          response,
+          ...(ram === undefined ? {} : { machine: { ram } }),
+        },
+      ]),
+    });
+
     const { data } = await apiServices.dataViews.create({
-      title: 'logstash-2015.09.1*',
+      title: indexName,
       timeFieldName: '@timestamp',
       override: true,
       spaceId: scoutSpace.id,
     });
-    dataViewId = data.id;
+    const dataViewId = data.id;
 
     // The scripted fields are added to the saved object because the data views API drops their
-    // `lang`, which Discover needs to build script filters. The management form is covered by
-    // scripted_fields.spec.ts. painDate carries its own date format, which Discover must apply.
+    // `lang`, which Discover needs to build script filters. painDate carries its own date format,
+    // which Discover must apply.
     const { attributes } = await kbnClient.savedObjects.get<{ fields: string }>({
       type: 'index-pattern',
       id: dataViewId,
@@ -90,9 +133,10 @@ spaceTest.describe('Using scripted fields in Discover', { tag: '@local-stateful-
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
+  spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
     await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
     await scoutSpace.savedObjects.cleanStandardList();
+    await esClient.indices.delete({ index: indexName }, { ignore: [404] });
   });
 
   spaceTest(
@@ -131,7 +175,7 @@ spaceTest.describe('Using scripted fields in Discover', { tag: '@local-stateful-
         await page.testSubj.click(`plus-${field}-14`);
         await discover.waitUntilSearchingHasFinished();
 
-        await expect(discover.getHitCountLocator()).toHaveText('31');
+        await expect(discover.getHitCountLocator()).toHaveText('2');
       });
 
       await spaceTest.step('hands the field over to Lens', async () => {
@@ -181,7 +225,7 @@ spaceTest.describe('Using scripted fields in Discover', { tag: '@local-stateful-
       await page.testSubj.click(`plus-${field}-bad`);
       await discover.waitUntilSearchingHasFinished();
 
-      await expect(discover.getHitCountLocator()).toHaveText('27');
+      await expect(discover.getHitCountLocator()).toHaveText('3');
     });
   });
 
@@ -206,7 +250,7 @@ spaceTest.describe('Using scripted fields in Discover', { tag: '@local-stateful-
       await page.testSubj.click(`plus-${field}-true`);
       await discover.waitUntilSearchingHasFinished();
 
-      await expect(discover.getHitCountLocator()).toHaveText('359');
+      await expect(discover.getHitCountLocator()).toHaveText('3');
     });
   });
 
@@ -215,7 +259,7 @@ spaceTest.describe('Using scripted fields in Discover', { tag: '@local-stateful-
     async ({ scoutSpace, pageObjects }) => {
       const { discover, dataGrid } = pageObjects;
       const field = 'painDate';
-      await scoutSpace.uiSettings.setDefaultTime(DATE_FIELD_TIME_RANGE);
+      await scoutSpace.uiSettings.setDefaultTime(TIME_RANGE);
 
       await spaceTest.step('applies the format of the scripted field', async () => {
         await discover.goto({ queryMode: 'classic' });
