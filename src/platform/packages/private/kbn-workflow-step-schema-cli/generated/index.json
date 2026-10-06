@@ -606,6 +606,9 @@
     "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
+    "nightshift.decisionTreeHydrate",
+    "nightshift.decisionTreePrepare",
+    "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
@@ -997,11 +1000,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "539e5131bb5fafb6b4b5de77e24399ba355a739baa6e4eb20d3caae51892b1c9"
+      "sha256": "3ce2e68e83a342335ed1d0507016aba0e7f8876380b00ebaa57dde18d6c07e72"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "f90e2ad0189a3a9e7a097c6517c13c14d8717b618f412bca0524a2e2b15ee052"
+      "sha256": "e8eeface077a49c308e7d1c4bfef67dfd4837c4f46857e82c6ca507105a4fb41"
     }
   }
 }

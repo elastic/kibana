@@ -23,7 +23,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  describe('CROSS-RULE NO-DATA ISOLATION', () => {
+  describe('CROSS-RULE NO-DATA ISOLATION', function () {
+    // Fails on MKI, see https://github.com/elastic/kibana/issues/295624
+    this.tags(['failsOnMKI']);
+
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const INDEX_NAME = 'kbn-ftr-custom-threshold-cross-rule-isolation';
     const DATA_VIEW_NAME = 'cross-rule-isolation-pattern-name';

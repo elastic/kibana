@@ -73,6 +73,16 @@ describe('createImpactClient', () => {
       expect(result).toEqual(new Map([['c1', ['host-1', 'user-1']]]));
     });
 
+    it('should map an impact recorded without entities to no entity ids', async () => {
+      const { client } = createClient({
+        listByConversationIds: jest
+          .fn()
+          .mockResolvedValue([{ conversationId: 'c1', summary: 'Checkout failed' }]),
+      });
+
+      expect(await client.getEntityIdsByConversationId(['c1'])).toEqual(new Map([['c1', []]]));
+    });
+
     it('should dedupe the ids and read in chunks of the per-read cap', async () => {
       const ids = Array.from({ length: MAX_IMPACT_CONVERSATION_IDS + 5 }, (_, i) => `c${i}`);
       const { client, listByConversationIds } = createClient();
