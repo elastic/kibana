@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineMemoryTools,
   contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
@@ -85,6 +86,11 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.generate_leads`,
   `${internalNamespaces.security}.dismiss_lead`,
   `${internalNamespaces.security}.set_asset_criticality`,
+  `${internalNamespaces.security}.get_resolution_group`,
+  `${internalNamespaces.security}.link_entities`,
+  `${internalNamespaces.security}.unlink_entities`,
+  `${internalNamespaces.security}.list_resolution_rules`,
+  `${internalNamespaces.security}.set_resolution_rules`,
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
@@ -123,6 +129,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   contextEngineAutomationTools.saveAutomation,
   contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
+  ...Object.values(contextEngineMemoryTools),
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',
@@ -135,6 +142,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_record_system_learning',
   'nightshift_record_tool_learning',
   'nightshift_record_remediation',
+
+  // Platform – Agentic Investigations
+  `${internalNamespaces.agenticInvestigations}.set_impact`,
+  `${internalNamespaces.agenticInvestigations}.set_hypotheses`,
+
+  // Platform – Proposals
+  `${internalNamespaces.proposals}.create`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -254,6 +268,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic_troubleshooting',
   'entity-analytics',
   'manage-watchlists',
+  'entity-resolution',
   'alert-analysis',
   'alert-triage',
   'detection-rule-edit',
@@ -421,6 +436,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Agentic Investigations
   'investigation_impact',
+  'investigation_subject',
+  'investigation_hypotheses',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

@@ -556,6 +556,10 @@ The only exception to this is if you use `ensureScheduled` to schedule a task wi
 
 Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`. The default behavior is to throw an error if the task is already in the `Running` or `Claiming` phase. Set the `force` flag to `true` to reset a task in the `Running` phase back to `Idle`. We allow this for manual resets of tasks with long timeouts that may get stuck with a `Running` status during Kibana upgrades and restarts but are not actually running. Please use caution when setting this flag! This does not cancel in-progress task runs if they are still running.
 
+Pass `runSoon(id, { requestImmediateClaim: true })` to also request a best-effort extra claim cycle on background task nodes, instead of waiting for the next poll. `runSoon` refreshes the task update but does not wait for the request to be delivered; if delivery fails, regular polling claims the task. Requests are throttled to one admitted nudge per 500ms per node, and ignored while Task Manager is backing off from Elasticsearch errors. `xpack.task_manager.claim_nudge.enabled: false` turns this off.
+
+The extra cycle may claim any eligible task, not just this one, so a task that needs a delay before running must encode it in its own eligibility or rescheduling logic. The `kibana.task_manager.claim_nudge.count` metric counts successful opted-in `runSoon` calls.
+
 ```js
 export class Plugin {
   constructor() {}
