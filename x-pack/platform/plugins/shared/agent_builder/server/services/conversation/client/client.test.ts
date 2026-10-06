@@ -41,7 +41,6 @@ import { CONVERSATION_BULK_GET_MAX_IDS } from '../../../../common/constants';
 import { createRound } from '../../../test_utils';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
-import { feedbackIndexName } from './feedback_storage';
 import type { Document } from './converters';
 import { roundToEvents } from './rounds_to_events';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
@@ -78,7 +77,6 @@ interface MockRawEsClient {
   index: jest.Mock;
   delete: jest.Mock;
   search: jest.Mock;
-  deleteByQuery: jest.Mock;
 }
 
 const mockRawEsClient: MockRawEsClient = {
@@ -86,7 +84,6 @@ const mockRawEsClient: MockRawEsClient = {
   index: jest.fn(),
   delete: jest.fn(),
   search: jest.fn(),
-  deleteByQuery: jest.fn(),
 };
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
@@ -285,16 +282,13 @@ describe('ConversationClient', () => {
     mockRawEsClient.index.mockReset();
     mockRawEsClient.delete.mockReset();
     mockRawEsClient.search.mockReset();
-    mockRawEsClient.deleteByQuery.mockReset();
     mockEsClient.search.mockReset();
     mockEsClient.delete.mockReset();
     mockEsClient.index.mockReset();
     // Default OCC-style index response; describes that need something else override it.
     mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
-    // Default resolved value for feedback index/delete/search/deleteByQuery (raw ES client).
     mockRawEsClient.index.mockResolvedValue({});
     mockRawEsClient.delete.mockResolvedValue({});
-    mockRawEsClient.deleteByQuery.mockResolvedValue({});
     mockRawEsClient.search.mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });
@@ -1794,51 +1788,25 @@ describe('ConversationClient', () => {
   describe('updateRoundFeedback', () => {
     const executionId = 'round-1::execution';
 
-    const makeTerminatedEvent = (overrides?: {
-      model_usage?: {
-        connector_id: string;
-        model: string;
-        input_tokens: number;
-        output_tokens: number;
-        llm_calls: number;
-      };
-    }): TimelineEvent =>
+    const makeTerminalEvent = (): ConversationEvent =>
       ({
-        id: 'round-1::execution_terminated',
+        id: `${executionId}_terminated`,
         type: TimelineEventType.executionTerminated,
         created_at: '2025-01-01T00:00:00.000Z',
         actor: { type: EventActorType.agent, id: 'agent-1' },
         execution_id: executionId,
         trigger_event_id: 'round-1::user_message',
         data: {
-          model_usage: overrides?.model_usage ?? {
-            connector_id: 'connector-default',
-            model: 'model-default',
-            input_tokens: 1,
-            output_tokens: 1,
-            llm_calls: 1,
-          },
+          model_usage: { connector_id: 'connector-1', model: 'model-1', input_tokens: 1, output_tokens: 1, llm_calls: 1 },
           time_to_first_token: 1,
           time_to_last_token: 1,
           outcome: { type: 'responded', response: { message: 'ok' } },
         },
-      } as TimelineEvent);
+      } as ConversationEvent);
 
-    it('persists a vote with chips and comment, stamping connector and model from model_usage', async () => {
-      const terminatedEvent = makeTerminatedEvent({
-        model_usage: {
-          connector_id: 'connector-abc',
-          model: 'claude-4.6-sonnet',
-          input_tokens: 10,
-          output_tokens: 5,
-          llm_calls: 1,
-        },
-      });
+    it('stores vote, chips, and comment on the conversation doc via OCC write', async () => {
       mockGetDocumentResponse(
-        createConversationDocument({
-          schemaVersion: CONVERSATION_SCHEMA_VERSION,
-          events: [terminatedEvent] as ConversationEvent[],
-        })
+        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
       );
 
       await client.updateRoundFeedback('conversation-1', executionId, {
@@ -1847,56 +1815,53 @@ describe('ConversationClient', () => {
         comment: 'great answer',
       });
 
-      expect(mockRawEsClient.index).toHaveBeenCalledWith(
+      expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: feedbackIndexName,
-          id: `conversation-1::${executionId}`,
-          refresh: 'wait_for',
           document: expect.objectContaining({
-            conversation_id: 'conversation-1',
-            execution_id: executionId,
-            vote: 'up',
-            chips: ['useful'],
-            comment: 'great answer',
-            connector_id: 'connector-abc',
-            model: 'claude-4.6-sonnet',
+            feedback: {
+              [executionId]: expect.objectContaining({
+                vote: 'up',
+                chips: ['useful'],
+                comment: 'great answer',
+                submitted_at: expect.any(String),
+              }),
+            },
           }),
         })
       );
     });
 
-    it('deletes the feedback document on retract (vote: null)', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({
-          schemaVersion: CONVERSATION_SCHEMA_VERSION,
-          events: [makeTerminatedEvent()] as ConversationEvent[],
-        })
-      );
-      await client.updateRoundFeedback('conversation-1', executionId, { vote: null });
-
-      expect(mockRawEsClient.delete).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: feedbackIndexName,
-          id: `conversation-1::${executionId}`,
-          refresh: 'wait_for',
-        })
-      );
-      expect(mockRawEsClient.index).not.toHaveBeenCalled();
-    });
-
     it('throws not found when no terminal event matches the executionId', async () => {
       mockGetDocumentResponse(
-        createConversationDocument({
-          schemaVersion: CONVERSATION_SCHEMA_VERSION,
-          events: [makeTerminatedEvent()] as ConversationEvent[],
-        })
+        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
       );
 
       await expect(
         client.updateRoundFeedback('conversation-1', 'nonexistent::execution', { vote: 'up' })
       ).rejects.toMatchObject({ message: 'Conversation conversation-1 not found' });
 
-      expect(mockRawEsClient.index).not.toHaveBeenCalled();
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('removes the feedback entry on retract (vote: null)', async () => {
+      const base = createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION });
+      mockGetDocumentResponse({
+        ...base,
+        _source: {
+          ...base._source!,
+          feedback: {
+            [executionId]: { vote: 'up', chips: [], comment: '', submitted_at: '2025-01-01T00:00:00.000Z' },
+          },
+        },
+      } as Document);
+
+      await client.updateRoundFeedback('conversation-1', executionId, { vote: null });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.not.objectContaining({ feedback: expect.anything() }),
+        })
+      );
     });
 
     it('is restricted to the conversation owner', async () => {
@@ -1906,7 +1871,6 @@ describe('ConversationClient', () => {
           username: 'other-user',
           accessMode: ConversationAccessControlMode.Private,
           schemaVersion: CONVERSATION_SCHEMA_VERSION,
-          events: [makeTerminatedEvent()] as ConversationEvent[],
         })
       );
 
@@ -1914,7 +1878,38 @@ describe('ConversationClient', () => {
         client.updateRoundFeedback('conversation-1', executionId, { vote: 'up' })
       ).rejects.toMatchObject({ message: 'Conversation conversation-1 not found' });
 
-      expect(mockRawEsClient.index).not.toHaveBeenCalled();
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('retries on a 409 conflict, re-reading the document with the updated sequence', async () => {
+      mockGetDocumentResponseOnce(
+        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
+      );
+      mockGetDocumentResponse(
+        createConversationDocument({ seqNo: 2, schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
+      );
+      mockEsClient.index.mockRejectedValueOnce(createConflictError()).mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      await client.updateRoundFeedback('conversation-1', executionId, { vote: 'down' });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.index).toHaveBeenLastCalledWith(
+        expect.objectContaining({ if_seq_no: 2, if_primary_term: 1 })
+      );
+    });
+
+    it('throws a write conflict error once retries are exhausted', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
+      );
+      mockEsClient.index.mockRejectedValue(createConflictError());
+
+      const error = await client
+        .updateRoundFeedback('conversation-1', executionId, { vote: 'up' })
+        .catch((e) => e);
+
+      expect(isConversationWriteConflictError(error)).toBe(true);
+      expect(error.meta.statusCode).toBe(409);
     });
   });
 

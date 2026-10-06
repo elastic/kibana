@@ -20,6 +20,7 @@ import type {
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type { ConversationRoundFeedback } from '@kbn/agent-builder-common';
 import type {
   ConversationPinnedByEntry,
   ConversationReadByEntry,
@@ -128,6 +129,7 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      feedback: types.object({ dynamic: false, properties: {} }),
       metadata: types.flattened({}),
       template_id: types.keyword({}),
       template_version: types.long({}),
@@ -169,6 +171,7 @@ export interface ConversationProperties {
   access_control?: Optional<ConversationAccessControl, 'entries'>;
   parent_conversation?: PersistentConversationParentLink;
   origin?: ConversationOrigin;
+  feedback?: Record<string, ConversationRoundFeedback>;
   metadata?: Record<string, SerializedMetadataValue>;
   template_id?: string;
   template_version?: number;

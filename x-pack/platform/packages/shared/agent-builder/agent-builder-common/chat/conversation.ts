@@ -516,16 +516,6 @@ export interface ConversationRoundFeedback {
   comment?: string;
   /** ISO timestamp when the feedback was (most recently) submitted */
   submitted_at: string;
-  /**
-   * Connector ID from the round's model_usage at submission time.
-   * Present whenever model_usage is available on the round.
-   */
-  connector_id?: string;
-  /**
-   * Model identifier. Only populated when the LLM provider returns the model
-   * in its response — many connectors omit it.
-   */
-  model?: string;
 }
 
 /**

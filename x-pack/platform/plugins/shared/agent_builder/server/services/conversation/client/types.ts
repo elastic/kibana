@@ -63,6 +63,7 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'pinned'
       | 'workspace_id'
       | 'access_control'
+      | 'feedback'
       | 'metadata'
       | 'template_id'
       | 'template_version'
