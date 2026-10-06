@@ -127,5 +127,36 @@ const getResponseErrorMessage = ({ body }: IHttpFetchError): string | undefined 
   }
 
   const { message } = body;
-  return typeof message === 'string' ? message : undefined;
+  if (typeof message !== 'string') {
+    return undefined;
+  }
+
+  return getValidationIssueMessages(message) ?? message;
+};
+
+/** Zod-validated routes return their issues as a JSON string; keeps only the issue messages. */
+const getValidationIssueMessages = (responseMessage: string): string | undefined => {
+  let issues: unknown;
+
+  try {
+    issues = JSON.parse(responseMessage);
+  } catch {
+    return undefined;
+  }
+
+  if (!Array.isArray(issues)) {
+    return undefined;
+  }
+
+  const issueMessages = issues
+    .filter(
+      (issue: unknown): issue is { message: string } =>
+        typeof issue === 'object' &&
+        issue !== null &&
+        'message' in issue &&
+        typeof issue.message === 'string'
+    )
+    .map(({ message }) => message);
+
+  return issueMessages.length > 0 ? issueMessages.join('\n') : undefined;
 };
