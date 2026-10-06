@@ -389,6 +389,9 @@ export function QueryList({
     }
     border-bottom-left-radius: ${euiTheme.border.radius.medium};
     border-top-left-radius: ${euiTheme.border.radius.medium};
+    max-height: ${height}px;
+    overflow-y: auto;
+    ${scrollBarStyles}
     ${extraStyling}
   `;
 
@@ -399,17 +402,7 @@ export function QueryList({
   });
 
   return (
-    <div
-      data-test-subj={dataTestSubj ?? 'ESQLEditor-queryList'}
-      css={[
-        containerCSS,
-        css`
-          max-height: ${height}px;
-          overflow-y: auto;
-          ${scrollBarStyles}
-        `,
-      ]}
-    >
+    <div data-test-subj={dataTestSubj ?? 'ESQLEditor-queryList'} css={containerCSS}>
       <EuiInMemoryTable
         tableCaption={
           tableCaption ||

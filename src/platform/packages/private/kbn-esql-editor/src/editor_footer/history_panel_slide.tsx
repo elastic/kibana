@@ -15,7 +15,7 @@ const prefersReducedMotion = () =>
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** Slides the recent-queries panel open and closed under the editor footer. */
+/** Slides the recent-queries panel open and closed. */
 export function HistoryPanelSlide({
   isOpen,
   children,
@@ -30,9 +30,7 @@ export function HistoryPanelSlide({
   useEffect(() => {
     if (!isOpen) {
       setIsExpanded(false);
-      if (prefersReducedMotion()) {
-        setIsMounted(false);
-      }
+      if (prefersReducedMotion()) setIsMounted(false);
       return;
     }
 
@@ -46,42 +44,33 @@ export function HistoryPanelSlide({
     return () => window.cancelAnimationFrame(frame);
   }, [isOpen]);
 
-  if (!isMounted) {
-    return null;
-  }
+  if (!isMounted) return null;
 
   return (
     <div
       data-test-subj="ESQLEditor-history-panel-slide"
       data-expanded={isExpanded ? 'true' : 'false'}
-      aria-hidden={isExpanded ? undefined : true}
-      inert={!isExpanded ? '' : undefined}
+      inert={isExpanded ? undefined : ''}
       onTransitionEnd={(event) => {
-        if (event.propertyName === 'grid-template-rows' && !isOpen) {
-          setIsMounted(false);
-        }
+        if (event.propertyName === 'grid-template-rows' && !isOpen) setIsMounted(false);
       }}
       css={css`
         display: grid;
         flex: 0 0 auto;
         width: 100%;
-        min-block-size: 0;
         overflow: hidden;
         grid-template-rows: ${isExpanded ? '1fr' : '0fr'};
         @media (prefers-reduced-motion: no-preference) {
           transition: grid-template-rows ${euiTheme.animation.normal}
             ${euiTheme.animation.resistance};
         }
-      `}
-    >
-      <div
-        css={css`
+        > div {
           min-block-size: 0;
           overflow: hidden;
-        `}
-      >
-        {children}
-      </div>
+        }
+      `}
+    >
+      <div>{children}</div>
     </div>
   );
 }

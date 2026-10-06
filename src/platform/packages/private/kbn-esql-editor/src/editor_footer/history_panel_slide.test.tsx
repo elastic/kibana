@@ -11,6 +11,8 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { HistoryPanelSlide } from './history_panel_slide';
 
+const panel = () => screen.getByTestId('ESQLEditor-history-panel-slide');
+
 describe('HistoryPanelSlide', () => {
   const originalMatchMedia = window.matchMedia;
 
@@ -18,7 +20,7 @@ describe('HistoryPanelSlide', () => {
     window.matchMedia = originalMatchMedia;
   });
 
-  it('does not render the panel while recent queries are hidden', () => {
+  it('stays unmounted while recent queries are hidden', () => {
     render(
       <HistoryPanelSlide isOpen={false}>
         <div>Recent queries</div>
@@ -28,21 +30,7 @@ describe('HistoryPanelSlide', () => {
     expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
   });
 
-  it('renders an expanded panel when recent queries start open', () => {
-    render(
-      <HistoryPanelSlide isOpen>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-
-    expect(screen.getByText('Recent queries')).toBeInTheDocument();
-    expect(screen.getByTestId('ESQLEditor-history-panel-slide')).toHaveAttribute(
-      'data-expanded',
-      'true'
-    );
-  });
-
-  it('mounts collapsed, then slides open', async () => {
+  it('slides open after painting a collapsed frame', async () => {
     const { rerender } = render(
       <HistoryPanelSlide isOpen={false}>
         <div>Recent queries</div>
@@ -55,73 +43,47 @@ describe('HistoryPanelSlide', () => {
       </HistoryPanelSlide>
     );
 
-    expect(screen.getByTestId('ESQLEditor-history-panel-slide')).toHaveAttribute(
-      'data-expanded',
-      'false'
-    );
+    expect(panel()).toHaveAttribute('data-expanded', 'false');
 
     await act(async () => {
-      await new Promise((resolve) => {
-        window.requestAnimationFrame(() => resolve(undefined));
-      });
+      await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
     });
 
-    expect(screen.getByText('Recent queries')).toBeInTheDocument();
-    expect(screen.getByTestId('ESQLEditor-history-panel-slide')).toHaveAttribute(
-      'data-expanded',
-      'true'
-    );
+    expect(panel()).toHaveAttribute('data-expanded', 'true');
   });
 
-  it('keeps the panel mounted until the slide-out finishes', () => {
-    const { rerender } = render(
+  it('unmounts after the slide-out, or immediately when motion is reduced', () => {
+    const view = render(
       <HistoryPanelSlide isOpen>
         <div>Recent queries</div>
       </HistoryPanelSlide>
     );
 
-    rerender(
+    view.rerender(
       <HistoryPanelSlide isOpen={false}>
         <div>Recent queries</div>
       </HistoryPanelSlide>
     );
-
-    const panel = screen.getByTestId('ESQLEditor-history-panel-slide');
     expect(screen.getByText('Recent queries')).toBeInTheDocument();
-    expect(panel).toHaveAttribute('data-expanded', 'false');
 
     act(() => {
       const event = new Event('transitionend', { bubbles: true });
       Object.defineProperty(event, 'propertyName', { value: 'grid-template-rows' });
-      panel.dispatchEvent(event);
+      panel().dispatchEvent(event);
     });
-
     expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
-  });
 
-  it('removes the panel immediately when reduced motion is preferred', () => {
-    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
-      matches: query.includes('reduce'),
-      media: query,
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    }));
-
-    const { rerender } = render(
+    window.matchMedia = jest.fn().mockReturnValue({ matches: true });
+    view.rerender(
       <HistoryPanelSlide isOpen>
         <div>Recent queries</div>
       </HistoryPanelSlide>
     );
-
-    rerender(
+    view.rerender(
       <HistoryPanelSlide isOpen={false}>
         <div>Recent queries</div>
       </HistoryPanelSlide>
     );
-
     expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
   });
 });

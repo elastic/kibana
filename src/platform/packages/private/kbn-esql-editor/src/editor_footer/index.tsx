@@ -44,7 +44,6 @@ interface EditorFooterProps {
   setIsLanguageComponentOpen: (status: boolean) => void;
   measuredContainerWidth: number;
   resizableContainerButton?: JSX.Element;
-  historyResizeButton?: JSX.Element;
   resizableContainerHeight: number;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
@@ -68,7 +67,6 @@ export const EditorFooter = memo(function EditorFooter({
   editorIsInline,
   isSpaceReduced,
   resizableContainerButton,
-  historyResizeButton,
   resizableContainerHeight,
   isHistoryOpen,
   setIsHistoryOpen,
@@ -184,25 +182,26 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {resizableContainerButton}
       <HistoryPanelSlide isOpen={isHistoryOpen}>
-        <HistoryAndStarredQueriesTabs
-          containerCSS={styles.historyContainer}
-          onUpdateAndSubmit={onUpdateAndSubmitQuery}
-          onClose={() => setIsHistoryOpen(false)}
-          containerWidth={measuredContainerWidth}
-          height={resizableContainerHeight}
-          isSpaceReduced={isSpaceReduced}
-          starredQueriesService={starredQueriesService}
-          enableCreateView={enableCreateView}
-        />
-        {historyResizeButton}
+        <EuiFlexItem grow={false}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={styles.historyContainer}
+            onUpdateAndSubmit={onUpdateAndSubmitQuery}
+            onClose={() => setIsHistoryOpen(false)}
+            containerWidth={measuredContainerWidth}
+            height={resizableContainerHeight}
+            isSpaceReduced={isSpaceReduced}
+            starredQueriesService={starredQueriesService}
+            enableCreateView={enableCreateView}
+          />
+        </EuiFlexItem>
       </HistoryPanelSlide>
       {isLanguageComponentOpen && editorIsInline && (
         <EuiFlexItem grow={false}>
           <LanguageDocumentationInline searchInDescription height={resizableContainerHeight} />
         </EuiFlexItem>
       )}
+      {resizableContainerButton}
     </EuiFlexGroup>
   );
 });

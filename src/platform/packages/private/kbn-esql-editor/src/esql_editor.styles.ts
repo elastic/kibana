@@ -17,8 +17,6 @@ export const EDITOR_MAX_HEIGHT = 400;
 // the resizable container is the container that holds the history component or the inline docs
 // they are never open simultaneously
 export const RESIZABLE_CONTAINER_INITIAL_HEIGHT = 190;
-export const RESIZABLE_CONTAINER_MIN_HEIGHT = 120;
-export const RESIZABLE_CONTAINER_MAX_HEIGHT = 600;
 
 export const esqlEditorStyles = (
   euiTheme: EuiThemeComputed,
