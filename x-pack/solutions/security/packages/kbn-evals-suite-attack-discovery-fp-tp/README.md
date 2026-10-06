@@ -6,7 +6,7 @@ Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](http
 
 The suite runs the managed analysis workflow (`system-security-attack-discovery-fp-tp-analysis`, shipped as `attack_discovery_fp_tp_analysis.yaml`) in place — it is not installed or modified by the suite. There is no sample copy: a second YAML would drift from the managed one (a stranded-reader bug on PR #294309 came from exactly that), so the managed workflow is the single source of truth.
 
-Caveat: scores measure the shipped prompt, not the finished product — the baseline is the managed-path measurement, not a claim about the finished product.
+Caveat: scores measure the shipped managed prompt, not the finished product.
 
 The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
 
@@ -74,7 +74,7 @@ src/
 - `OutcomeAccuracy` (primary): the outcome matches the gold; a `failed` gold also needs an explicit `FAILED` execution, so a timeout or cancellation does not pass. The label is the predicted outcome, so the report reads as a confusion matrix.
 - `UnsafeClose`: 0 when the run predicts `false_positive` and the gold is anything else. A false positive closes the attack.
 - `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
-- `ClaimGrounding`: every `claims.world` entry cites a seeded document (`entity_store` ids resolve to a seeded entity's `entity.id`, `raw_event` ids to a seeded event `_id`) and its `result` matches the same check in `raw.checks`; an `alert_link` cites only seeded alerts, at least two, and every listed alert's source carries the pivot `field` with the claimed `value`. Score is grounded claims / total claims; `no-claims` (score 1) for an `inconclusive` verdict or a truncation downgrade, `missing-claims` (score 0) for a TP/FP verdict with empty `claims.world`.
+- `ClaimGrounding`: every `claims.world` entry cites a seeded document with a `source` (`entity_store` ids resolve to a seeded entity's `entity.id`, `raw_event` ids to a seeded event `_id`) and its `result` matches a completed (not skipped) check in `raw.checks`; an `alert_link` is only grounded when `raw.checks` has `alert_linkage: supports`, cites only seeded alerts, at least two, and every listed alert's source carries the pivot `field`'s value by membership (arrays and numeric pids included). Score is grounded claims / total claims; `missing-claims` (score 0) for a TP/FP verdict with empty `claims.world`, regardless of an `alert_link` claim. No claims (inconclusive, truncation downgrade, or no payload) is `N/A` (score null) so inconclusive rate does not pad the mean.
 - `trajectory`: the agent called no tools. N/A when traces are unavailable.
 - LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the discovery's and alerts' story is stated as fact only where the entities or raw events show it, the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
 

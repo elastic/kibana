@@ -244,7 +244,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
           outcomeAccuracy,
           unsafeClose,
           payloadConformance,
-          claimGrounding,
+          skipFailedRuns(claimGrounding),
           createFpTpTrajectoryEvaluator(),
           skipFailedRuns(evaluators.criteria(SUMMARY_CRITERIA)),
         ])

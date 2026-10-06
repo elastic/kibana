@@ -214,19 +214,13 @@ const dottedValue = (source: Record<string, unknown>, path: string): unknown => 
   return value;
 };
 
-const valuesEqual = (a: unknown, b: unknown): boolean => {
-  const asStrings = (v: unknown): string[] | undefined =>
-    v === undefined
-      ? undefined
-      : Array.isArray(v)
-      ? v.every((item) => typeof item === 'string' || typeof item === 'number')
-        ? v.map(String)
-        : undefined
-      : [String(v)];
-  const left = asStrings(a);
-  const right = asStrings(b);
-  return left !== undefined && right !== undefined && left.join('\u0000') === right.join('\u0000');
-};
+/** Membership match: the alert's value(s) for the pivot field include the claimed value. */
+const pivotCarries = (actual: unknown, claimed: unknown): boolean =>
+  [actual]
+    .flat()
+    .filter((item) => item !== undefined && item !== null)
+    .map(String)
+    .includes(String(claimed));
 
 /**
  * Grounds the model's `claims` against the seeded documents without an LLM: every
@@ -243,16 +237,23 @@ export const claimGrounding: Evaluator = {
     const { payload, raw, seededEvidence } = task;
     const problems: string[] = [];
 
-    const downgraded =
-      payload?.verdict === 'inconclusive' &&
-      ((raw?.coverage?.entities as { truncated?: boolean } | undefined)?.truncated === true ||
-        (raw?.coverage?.events as { truncated?: boolean } | undefined)?.truncated === true);
+    if (!payload) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No payload, so there are no claims to ground.',
+      };
+    }
+
     const claims = (raw?.claims ?? {}) as RawClaims;
     const worldClaims = claims.world ?? [];
 
-    if (worldClaims.length === 0 && !claims.alert_link) {
-      if (downgraded || payload?.verdict === 'inconclusive') {
-        return { score: 1, label: 'no-claims', explanation: null };
+    if (worldClaims.length === 0) {
+      if (payload.verdict === 'inconclusive') {
+        // Including a downgraded truncation: an inconclusive verdict claims nothing
+        // about the world. Scoring it would pad the mean by the inconclusive rate and
+        // confound model comparison.
+        return { score: null, label: 'N/A', explanation: null };
       }
       return {
         score: 0,
@@ -264,8 +265,9 @@ export const claimGrounding: Evaluator = {
     let grounded = 0;
     let total = 0;
 
+    const rawChecks = (raw?.checks ?? []) as Array<RawCheck & { status?: string }>;
     const checkResults = new Map(
-      ((raw?.checks ?? []) as RawCheck[]).map((check) => [check.name, check.result])
+      rawChecks.map((check) => [check.name, { result: check.result, status: check.status }])
     );
     const seededEntityIds = new Set(
       seededEvidence.entities.map(
@@ -283,17 +285,22 @@ export const claimGrounding: Evaluator = {
           : claim.source === 'raw_event'
           ? seededEventIds.has(claim.id ?? '')
           : false;
+      if (!claim.source) {
+        claimProblems.push('no source');
+      }
       if (!claim.id) {
         claimProblems.push('no id');
       } else if (!seeded) {
         claimProblems.push(`id "${claim.id}" not in the seeded ${claim.source ?? 'unknown'}`);
       }
-      const checkResult = checkResults.get(claim.check ?? '');
-      if (checkResult === undefined) {
+      const check = checkResults.get(claim.check ?? '');
+      if (check === undefined) {
         claimProblems.push(`check "${claim.check ?? ''}" missing from raw.checks`);
-      } else if (checkResult !== claim.result) {
+      } else if (check.status === 'skipped') {
+        claimProblems.push(`check "${claim.check ?? ''}" is skipped, so it has no result to cite`);
+      } else if (check.result !== claim.result) {
         claimProblems.push(
-          `result "${claim.result}" contradicts raw.checks "${checkResult}" for "${claim.check}"`
+          `result "${claim.result}" contradicts raw.checks "${check.result}" for "${claim.check}"`
         );
       }
       if (claimProblems.length === 0) {
@@ -307,6 +314,12 @@ export const claimGrounding: Evaluator = {
     if (alertLink) {
       total++;
       const linkProblems: string[] = [];
+      const alertLinkageResult = checkResults.get('alert_linkage')?.result;
+      if (alertLinkageResult !== 'supports') {
+        linkProblems.push(
+          `alert_linkage in raw.checks is "${alertLinkageResult ?? 'missing'}", not "supports"`
+        );
+      }
       const seededAlerts = new Map(seededEvidence.alerts.map(({ id, source }) => [id, source]));
       if ((alertLink.alert_ids ?? []).length < 2) {
         linkProblems.push('fewer than 2 alert_ids');
@@ -315,7 +328,7 @@ export const claimGrounding: Evaluator = {
         const source = seededAlerts.get(alertId);
         if (source === undefined) {
           linkProblems.push(`alert "${alertId}" not seeded`);
-        } else if (!valuesEqual(dottedValue(source, alertLink.field ?? ''), alertLink.value)) {
+        } else if (!pivotCarries(dottedValue(source, alertLink.field ?? ''), alertLink.value)) {
           linkProblems.push(
             `alert "${alertId}" does not carry ${alertLink.field}="${alertLink.value}"`
           );

@@ -201,6 +201,7 @@ describe('ClaimGrounding', () => {
         { name: 'entity_role', status: 'completed', result: 'contradicts', details: 'd' },
         { name: 'process_parent', status: 'completed', result: 'contradicts', details: 'd' },
         { name: 'network_destination', status: 'completed', result: 'contradicts', details: 'd' },
+        { name: 'alert_linkage', status: 'completed', result: 'supports', details: 'd' },
       ],
       claims: {
         world: [
@@ -289,6 +290,9 @@ describe('ClaimGrounding', () => {
       raw: {
         ...groundedRun().raw!,
         claims: {
+          world: [
+            { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+          ],
           alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-2'] },
         },
       },
@@ -303,6 +307,9 @@ describe('ClaimGrounding', () => {
         raw: {
           ...groundedRun().raw!,
           claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+            ],
             alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'ghost'] },
           },
         },
@@ -310,7 +317,7 @@ describe('ClaimGrounding', () => {
       expected: { outcome: 'false_positive' },
       metadata: {},
     });
-    expect(result.score).toBe(0);
+    expect(result.score).toBe(0.5);
     expect(result.explanation).toContain('"ghost" not seeded');
   });
 
@@ -321,6 +328,9 @@ describe('ClaimGrounding', () => {
         raw: {
           ...groundedRun().raw!,
           claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+            ],
             alert_link: {
               field: 'host.name',
               value: 'other-01',
@@ -332,7 +342,7 @@ describe('ClaimGrounding', () => {
       expected: { outcome: 'false_positive' },
       metadata: {},
     });
-    expect(result.score).toBe(0);
+    expect(result.score).toBe(0.5);
     expect(result.explanation).toContain('does not carry host.name');
   });
 
@@ -342,17 +352,22 @@ describe('ClaimGrounding', () => {
       output: groundedRun({
         raw: {
           ...groundedRun().raw!,
-          claims: { alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1'] } },
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+            ],
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1'] },
+          },
         },
       }),
       expected: { outcome: 'false_positive' },
       metadata: {},
     });
-    expect(result.score).toBe(0);
+    expect(result.score).toBe(0.5);
     expect(result.explanation).toContain('fewer than 2 alert_ids');
   });
 
-  it('scores 1 with label no-claims for an inconclusive verdict', async () => {
+  it('scores N/A for an inconclusive verdict with no claims', async () => {
     const result = await claimGrounding.evaluate({
       input: {},
       output: groundedRun({
@@ -363,11 +378,11 @@ describe('ClaimGrounding', () => {
       expected: { outcome: 'inconclusive' },
       metadata: {},
     });
-    expect(result.score).toBe(1);
-    expect(result.label).toBe('no-claims');
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
   });
 
-  it('scores 1 for a truncation downgrade that omits claims', async () => {
+  it('scores N/A for a truncation downgrade that omits claims', async () => {
     const result = await claimGrounding.evaluate({
       input: {},
       output: groundedRun({
@@ -381,8 +396,39 @@ describe('ClaimGrounding', () => {
       expected: { outcome: 'inconclusive' },
       metadata: {},
     });
-    expect(result.score).toBe(1);
-    expect(result.label).toBe('no-claims');
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  it('returns N/A when there is no payload', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: { ...groundedRun(), payload: undefined },
+      expected: { outcome: 'failed' },
+      metadata: {},
+    });
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  it('scores 0 for a TP with only an alert_link claim and empty claims.world', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        outcome: 'true_positive',
+        payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-2'] },
+          },
+        },
+      }),
+      expected: { outcome: 'true_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('missing-claims');
   });
 
   it('scores 0 with label missing-claims for a TP with empty claims.world', async () => {
@@ -418,5 +464,124 @@ describe('ClaimGrounding', () => {
       metadata: {},
     });
     expect(result.score).toBe(0.5);
+  });
+
+  it('grounds a pivot on an array-valued field by membership', async () => {
+    const run = groundedRun({
+      seededEvidence: {
+        ...groundedRun().seededEvidence,
+        alerts: [
+          { id: 'alert-1', source: { host: { name: ['web-01', 'app-02'] } } },
+          { id: 'alert-2', source: { 'host.name': ['web-01'] } },
+        ],
+      },
+      raw: {
+        ...groundedRun().raw!,
+        claims: {
+          world: [
+            { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+          ],
+          alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-2'] },
+        },
+      },
+    });
+    expect(await score(claimGrounding, run, 'false_positive')).toBe(1);
+  });
+
+  it('grounds a numeric process.pid pivot against a string claim', async () => {
+    const run = groundedRun({
+      raw: {
+        ...groundedRun().raw!,
+        claims: {
+          world: [
+            { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+          ],
+          alert_link: { field: 'process.pid', value: '4242', alert_ids: ['alert-1', 'alert-2'] },
+        },
+      },
+      seededEvidence: {
+        ...groundedRun().seededEvidence,
+        alerts: [
+          { id: 'alert-1', source: { process: { pid: 4242 } } },
+          { id: 'alert-2', source: { 'process.pid': 4242 } },
+        ],
+      },
+    });
+    expect(await score(claimGrounding, run, 'false_positive')).toBe(1);
+  });
+
+  it('scores 0 when alert_link is claimed but raw.checks alert_linkage does not support', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          checks: (
+            groundedRun().raw!.checks as Array<{ name?: string; status?: string; result?: string }>
+          ).map((check) =>
+            check.name === 'alert_linkage' ? { ...check, result: 'neutral' } : check
+          ),
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+            ],
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-2'] },
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain(
+      'alert_linkage in raw.checks is "neutral", not "supports"'
+    );
+  });
+
+  it('scores 0 for a world claim with no source', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: undefined, id: 'ent-1' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('no source');
+  });
+
+  it('scores 0 for a world claim citing a skipped check', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          checks: (
+            groundedRun().raw!.checks as Array<{ name?: string; status?: string; result?: string }>
+          ).map((check) =>
+            check.name === 'entity_role'
+              ? { ...check, status: 'skipped', result: undefined }
+              : check
+          ),
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('is skipped, so it has no result to cite');
   });
 });
