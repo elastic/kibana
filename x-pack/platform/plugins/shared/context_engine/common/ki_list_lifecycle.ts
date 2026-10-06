@@ -7,7 +7,7 @@
 
 import { KI_LIFECYCLE_STATUSES, type KiLifecycleStatus } from './step_types/ki';
 
-/** Default list filter: current, recallable KIs (excludes tombstoned memories). */
+/** Default list filter: current, recallable KIs (excludes deleted KIs). */
 export const DEFAULT_KI_LIST_LIFECYCLE_STATUSES: KiLifecycleStatus[] = ['active'];
 
 export const DEFAULT_KI_LIST_LIFECYCLE_STATUSES_QUERY = 'active';
@@ -41,7 +41,7 @@ export const parseKiListLifecycleStatusesQuery = (value: string): KiLifecycleSta
 export const formatKiListLifecycleStatusesQuery = (statuses: KiLifecycleStatus[]): string =>
   [...new Set(statuses)].join(',');
 
-/** Include tombstoned KIs (for example after forget). */
+/** Include deleted KIs (for example after soft delete). */
 export const KI_LIST_ACTIVE_AND_DELETED_LIFECYCLE_STATUSES: KiLifecycleStatus[] = [
   'active',
   'deleted',

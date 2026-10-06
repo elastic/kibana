@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useMemo } from 'react';
 import type { GetKiResponse } from '../../../../common/http_api/knowledge_indicators';
@@ -42,10 +41,7 @@ export const KiDetailRawJsonPanel = ({ ki }: KiDetailRawJsonPanelProps) => {
   return (
     <div
       ref={containerRef}
-      css={css`
-        width: 100%;
-        max-width: 100%;
-      `}
+      style={{ width: '100%', maxWidth: '100%' }}
       data-test-subj="contextKiDetailRawJsonPanel"
     >
       <CodeEditor

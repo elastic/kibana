@@ -10,15 +10,15 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import {
   AI_INDEX_INTERNAL_API_VERSION,
   AI_INDEX_KI_BY_ID_PATH,
-  AI_INDEX_KI_FORGET_PATH,
+  AI_INDEX_KI_DELETE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_KI_RESTORE_PATH,
 } from '../../../common/constants';
 import type {
-  ForgetMemoryKiResponse,
+  DeleteKiResponse,
   GetKiResponse,
   ListKisResponse,
-  RestoreMemoryKiResponse,
+  RestoreKiResponse,
   UpdateKiRequestBody,
   UpdateKiResponse,
 } from '../../../common/http_api/knowledge_indicators';
@@ -91,26 +91,26 @@ export const updateKi = (
   });
 };
 
-interface ForgetMemoryKiArgs {
+interface DeleteKiArgs {
   aiIndexId: string;
   kiId: string;
   index: string;
 }
 
-export const forgetMemoryKi = (
+export const deleteKi = (
   http: HttpStart,
-  { aiIndexId, kiId, index }: ForgetMemoryKiArgs
-): Promise<ForgetMemoryKiResponse> =>
-  http.post<ForgetMemoryKiResponse>(buildPath(AI_INDEX_KI_FORGET_PATH, { aiIndexId, kiId }), {
+  { aiIndexId, kiId, index }: DeleteKiArgs
+): Promise<DeleteKiResponse> =>
+  http.post<DeleteKiResponse>(buildPath(AI_INDEX_KI_DELETE_PATH, { aiIndexId, kiId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
     query: { index },
   });
 
-export const restoreMemoryKi = (
+export const restoreKi = (
   http: HttpStart,
-  { aiIndexId, kiId, index }: ForgetMemoryKiArgs
-): Promise<RestoreMemoryKiResponse> =>
-  http.post<RestoreMemoryKiResponse>(buildPath(AI_INDEX_KI_RESTORE_PATH, { aiIndexId, kiId }), {
+  { aiIndexId, kiId, index }: DeleteKiArgs
+): Promise<RestoreKiResponse> =>
+  http.post<RestoreKiResponse>(buildPath(AI_INDEX_KI_RESTORE_PATH, { aiIndexId, kiId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
     query: { index },
   });

@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { EuiMarkdownFormat } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useKiDetailContentPanelStyles } from './use_ki_detail_content_panel_styles';
 
 interface KiDetailMarkdownReadOnlyProps {
   content: string;
 }
 
-export const KiDetailMarkdownReadOnly = ({ content }: KiDetailMarkdownReadOnlyProps) => {
-  const panelStyles = useKiDetailContentPanelStyles();
-
-  return (
-    <div css={[panelStyles.shell, panelStyles.shellFill]} data-test-subj="contextKiDetailContent">
-      <div css={panelStyles.body}>
-        <div data-test-subj="contextKiDetailMarkdownRendered">
-          <EuiMarkdownFormat textSize="s">{content}</EuiMarkdownFormat>
-        </div>
-      </div>
+export const KiDetailMarkdownReadOnly = ({ content }: KiDetailMarkdownReadOnlyProps) => (
+  <EuiPanel
+    hasBorder
+    paddingSize="l"
+    style={{ height: '100%' }}
+    data-test-subj="contextKiDetailContent"
+  >
+    <div data-test-subj="contextKiDetailMarkdownRendered">
+      <EuiMarkdownFormat textSize="s">{content}</EuiMarkdownFormat>
     </div>
-  );
-};
+  </EuiPanel>
+);

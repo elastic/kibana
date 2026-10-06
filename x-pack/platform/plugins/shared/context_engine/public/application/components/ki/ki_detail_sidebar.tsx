@@ -6,52 +6,35 @@
  */
 
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import { EuiDescriptionList, EuiText } from '@elastic/eui';
+import { EuiDescriptionList, EuiText, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-
-const sectionTitleStyle = css`
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-`;
 
 export const kiDetailSidebarBreakWordStyle = css`
   word-break: break-word;
   overflow-wrap: anywhere;
 `;
 
-const sidebarDescriptionListStyle = css`
-  dt {
-    margin-block-end: 4px;
-  }
-
-  dd {
-    margin-block-end: 12px;
-    ${kiDetailSidebarBreakWordStyle}
-  }
-
-  dd:last-of-type {
-    margin-block-end: 0;
-  }
-`;
-
 export const KiDetailSidebarSectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <EuiText size="xs" color="subdued">
-    <p css={sectionTitleStyle}>{children}</p>
-  </EuiText>
+  <EuiTitle size="xxxs">
+    <h3>{children}</h3>
+  </EuiTitle>
 );
+
+interface KiDetailSidebarDescriptionListProps {
+  listItems: EuiDescriptionListProps['listItems'];
+  'data-test-subj'?: string;
+}
 
 export const KiDetailSidebarDescriptionList = ({
   listItems,
   'data-test-subj': dataTestSubj,
-}: Pick<EuiDescriptionListProps, 'listItems' | 'data-test-subj'>) => (
+}: KiDetailSidebarDescriptionListProps) => (
   <EuiDescriptionList
-    type="stacked"
+    type="column"
     compressed
     listItems={listItems}
     data-test-subj={dataTestSubj}
-    css={sidebarDescriptionListStyle}
   />
 );
 

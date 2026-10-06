@@ -12,10 +12,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiMarkdownEditor,
+  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,10 +26,14 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { validateTextInput } from '../../utils/validate_text_input';
 import { getDocumentString } from './ki_detail_helpers';
 import { KiDetailMarkdownReadOnly } from './ki_detail_markdown_read_only';
-import { useKiDetailContentPanelStyles } from './use_ki_detail_content_panel_styles';
-const editingActionsStyle = css`
-  flex-shrink: 0;
-`;
+
+const panelFillStyle: React.CSSProperties = {
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  flex: '1 1 auto',
+  minHeight: 0,
+};
 
 export interface KiDetailContentPanelSaveFields {
   content: string;
@@ -50,7 +54,6 @@ export const KiDetailContentPanel = ({
   isSaving,
   onSave,
 }: KiDetailContentPanelProps) => {
-  const panelStyles = useKiDetailContentPanelStyles();
   const contentValue = getDocumentString(document, 'content');
   const [contentDraft, setContentDraft] = useState(contentValue);
 
@@ -87,35 +90,27 @@ export const KiDetailContentPanel = ({
   const hasContent = contentValue.length > 0;
 
   return (
-    <div css={panelStyles.panelRoot} data-test-subj="contextKiDetailContentPanel">
+    <div style={panelFillStyle} data-test-subj="contextKiDetailContentPanel">
       {isEditing ? (
         <>
-          <div css={[panelStyles.shell, panelStyles.shellFill]}>
-            <div css={panelStyles.body}>
-              <EuiFormRow
-                css={panelStyles.editingFormRow}
-                isInvalid={Boolean(contentValidation.error)}
-                error={contentValidation.error}
-                helpText={contentValidation.warning}
-                fullWidth
-              >
-                <EuiMarkdownEditor
-                  value={contentDraft}
-                  onChange={setContentDraft}
-                  height={400}
-                  aria-label={markdownEditorLabel}
-                  data-test-subj="contextKiDetailContentField"
-                />
-              </EuiFormRow>
-            </div>
-          </div>
+          <EuiPanel hasBorder paddingSize="l" style={panelFillStyle}>
+            <EuiFormRow
+              isInvalid={Boolean(contentValidation.error)}
+              error={contentValidation.error}
+              helpText={contentValidation.warning}
+              fullWidth
+            >
+              <EuiMarkdownEditor
+                value={contentDraft}
+                onChange={setContentDraft}
+                height={400}
+                aria-label={markdownEditorLabel}
+                data-test-subj="contextKiDetailContentField"
+              />
+            </EuiFormRow>
+          </EuiPanel>
           <EuiSpacer size="m" />
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            gutterSize="s"
-            responsive={false}
-            css={editingActionsStyle}
-          >
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={cancelEditing}
@@ -155,14 +150,22 @@ export const KiDetailContentPanel = ({
       ) : hasContent ? (
         <KiDetailMarkdownReadOnly content={contentValue} />
       ) : (
-        <div css={[panelStyles.shell, panelStyles.shellFill, panelStyles.emptyShell]}>
+        <EuiPanel
+          hasBorder
+          paddingSize="l"
+          style={{
+            ...panelFillStyle,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <EuiText size="s" color="subdued" data-test-subj="contextKiDetailContentEmpty">
             <FormattedMessage
               id="xpack.contextEngine.kiDetail.content.empty"
               defaultMessage="No content"
             />
           </EuiText>
-        </div>
+        </EuiPanel>
       )}
     </div>
   );

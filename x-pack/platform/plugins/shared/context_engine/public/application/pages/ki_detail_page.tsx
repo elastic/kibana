@@ -7,12 +7,12 @@
 
 import {
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,7 +22,6 @@ import {
   KI_LIST_ACTIVE_AND_DELETED_LIFECYCLE_STATUSES,
   parseKiListLifecycleStatusesQuery,
 } from '../../../common/ki_list_lifecycle';
-import { isMemoryKiType } from '../../../common/memory';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AI_INDEX_KNOWLEDGE_INDICATORS_TAB_LOCATION_STATE } from '../ai_index_created_location_state';
@@ -32,12 +31,11 @@ import {
 } from '../components/ki/ki_detail_content_panel';
 import { KiDetailDetailsPanel } from '../components/ki/ki_detail_details_panel';
 import { readKiGovernance } from '../components/ki/ki_detail_helpers';
-import { KiDetailMemoryConfirmModals } from '../components/ki/ki_detail_memory_confirm_modals';
+import { KiDetailConfirmModals } from '../components/ki/ki_detail_confirm_modals';
 import { KiDetailRawJsonPanel } from '../components/ki/ki_detail_raw_json_panel';
 import { getKiDisplayTypeLabel } from '../components/ki/helpers';
-import { useAiIndex } from '../hooks/use_ai_index';
 import { useCanWriteContextEngine } from '../hooks/use_can_write_context_engine';
-import { useForgetMemoryKi, useRestoreMemoryKi, useUpdateKi } from '../hooks/use_ki_mutations';
+import { useDeleteKi, useRestoreKi, useUpdateKi } from '../hooks/use_ki_mutations';
 import { useKi } from '../hooks/use_ki';
 import { useKibana } from '../hooks/use_kibana';
 import { useNavigation } from '../hooks/use_navigation';
@@ -78,41 +76,6 @@ const getPageTitle = (ki: GetKiResponse | undefined, kiId: string): string => {
 };
 
 export const KiDetailPage = () => {
-  const { euiTheme } = useEuiTheme();
-  const kiDetailContentTabLayoutStyle = css`
-    display: flex;
-    flex-direction: column;
-    gap: ${euiTheme.size.xl};
-
-    @media (min-width: 768px) {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 26rem;
-      column-gap: ${euiTheme.size.xl};
-      align-items: stretch;
-    }
-  `;
-  const kiDetailMainColumnStyle = css`
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-
-    @media (min-width: 768px) {
-      grid-column: 1;
-      min-height: 100%;
-    }
-  `;
-  const kiDetailSidebarStyle = css`
-    width: 100%;
-    max-width: 26rem;
-    min-width: 0;
-
-    @media (min-width: 768px) {
-      grid-column: 2;
-      width: 26rem;
-      align-self: start;
-    }
-  `;
-
   const { id: aiIndexId = '', kiId = '' } = useParams<{ id: string; kiId: string }>();
   const location = useLocation();
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -132,11 +95,10 @@ export const KiDetailPage = () => {
     lifecycleStatuses,
     enabled: index.length > 0,
   });
-  const { aiIndex } = useAiIndex(aiIndexId);
   const canWrite = useCanWriteContextEngine();
   const updateKiMutation = useUpdateKi({ aiIndexId, kiId, index });
-  const forgetMemoryMutation = useForgetMemoryKi({ aiIndexId, kiId, index });
-  const restoreMemoryMutation = useRestoreMemoryKi({ aiIndexId, kiId, index });
+  const deleteKiMutation = useDeleteKi({ aiIndexId, kiId, index });
+  const restoreKiMutation = useRestoreKi({ aiIndexId, kiId, index });
 
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const {
@@ -145,7 +107,7 @@ export const KiDetailPage = () => {
 
   const [selectedTab, setSelectedTab] = useState<KiDetailTabId>('details');
   const [isContentEditing, setIsContentEditing] = useState(false);
-  const [isForgetConfirmOpen, setIsForgetConfirmOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isRestoreConfirmOpen, setIsRestoreConfirmOpen] = useState(false);
 
   useEffect(() => {
@@ -155,13 +117,11 @@ export const KiDetailPage = () => {
   const pageTitle = getPageTitle(ki, kiId);
   const backHref = createContextEngineUrl(getAiIndexDetailPath(aiIndexId));
 
-  const kiType = typeof ki?.document.type === 'string' ? ki.document.type : undefined;
-  const isMemoryKi = kiType !== undefined && isMemoryKiType(kiType);
   const { lifecycleStatus } = ki ? readKiGovernance(ki.document) : { lifecycleStatus: undefined };
   const isDeleted = lifecycleStatus === 'deleted';
   const canEditContent = canWrite && !isDeleted;
-  const canForgetMemory = canWrite && isMemoryKi && !isDeleted && aiIndex?.memory_enabled === true;
-  const canRestoreMemory = canWrite && isMemoryKi && isDeleted && aiIndex?.memory_enabled === true;
+  const canDelete = canWrite && !isDeleted;
+  const canRestore = canWrite && isDeleted;
 
   const headerBadges = useMemo((): AppHeaderBadge[] | undefined => {
     if (!ki) {
@@ -236,33 +196,33 @@ export const KiDetailPage = () => {
         ]
       : [];
 
-    if (canRestoreMemory) {
+    if (canRestore) {
       return {
         primaryActionItem: {
-          id: 'restoreMemory',
-          label: i18n.translate('xpack.contextEngine.kiDetail.memory.restoreButton', {
-            defaultMessage: 'Restore memory',
+          id: 'restore',
+          label: i18n.translate('xpack.contextEngine.kiDetail.restore.button', {
+            defaultMessage: 'Restore',
           }),
           iconType: 'refresh',
           run: () => setIsRestoreConfirmOpen(true),
-          isLoading: restoreMemoryMutation.isLoading,
+          isLoading: restoreKiMutation.isLoading,
           testId: 'contextKiDetailRestoreButton',
         },
         items: menuItems.length > 0 ? menuItems : undefined,
       };
     }
 
-    if (canForgetMemory) {
+    if (canDelete) {
       return {
         primaryActionItem: {
-          id: 'forgetMemory',
-          label: i18n.translate('xpack.contextEngine.kiDetail.memory.forgetButton', {
-            defaultMessage: 'Forget memory',
+          id: 'delete',
+          label: i18n.translate('xpack.contextEngine.kiDetail.delete.button', {
+            defaultMessage: 'Delete',
           }),
           iconType: 'trash',
-          run: () => setIsForgetConfirmOpen(true),
-          isLoading: forgetMemoryMutation.isLoading,
-          testId: 'contextKiDetailForgetButton',
+          run: () => setIsDeleteConfirmOpen(true),
+          isLoading: deleteKiMutation.isLoading,
+          testId: 'contextKiDetailDeleteButton',
         },
         items: menuItems.length > 0 ? menuItems : undefined,
       };
@@ -276,12 +236,12 @@ export const KiDetailPage = () => {
 
     return undefined;
   }, [
-    canForgetMemory,
-    canRestoreMemory,
+    canDelete,
+    canRestore,
+    deleteKiMutation.isLoading,
     error,
-    forgetMemoryMutation.isLoading,
     ki,
-    restoreMemoryMutation.isLoading,
+    restoreKiMutation.isLoading,
     showContentEditAction,
   ]);
 
@@ -322,15 +282,15 @@ export const KiDetailPage = () => {
     [notifications.toasts, updateKiMutation]
   );
 
-  const handleForgetMemory = useCallback(() => {
-    forgetMemoryMutation.mutate(undefined, {
+  const handleDeleteKi = useCallback(() => {
+    deleteKiMutation.mutate(undefined, {
       onSuccess: () => {
         notifications.toasts.addSuccess({
-          title: i18n.translate('xpack.contextEngine.kiDetail.forgetSuccess.title', {
-            defaultMessage: 'Memory forgotten',
+          title: i18n.translate('xpack.contextEngine.kiDetail.deleteSuccess.title', {
+            defaultMessage: 'Knowledge Indicator deleted',
           }),
-          text: i18n.translate('xpack.contextEngine.kiDetail.forgetSuccess.text', {
-            defaultMessage: 'This memory will no longer be recalled by agents.',
+          text: i18n.translate('xpack.contextEngine.kiDetail.deleteSuccess.text', {
+            defaultMessage: 'It will no longer be retrieved by default.',
           }),
         });
         navigateToContextEngine(
@@ -339,37 +299,37 @@ export const KiDetailPage = () => {
           AI_INDEX_KNOWLEDGE_INDICATORS_TAB_LOCATION_STATE
         );
       },
-      onError: (forgetError) => {
-        notifications.toasts.addError(forgetError, {
-          title: i18n.translate('xpack.contextEngine.kiDetail.forgetError.title', {
-            defaultMessage: 'Unable to forget memory',
+      onError: (deleteError) => {
+        notifications.toasts.addError(deleteError, {
+          title: i18n.translate('xpack.contextEngine.kiDetail.deleteError.title', {
+            defaultMessage: 'Unable to delete Knowledge Indicator',
           }),
         });
       },
     });
-  }, [aiIndexId, forgetMemoryMutation, navigateToContextEngine, notifications.toasts]);
+  }, [aiIndexId, deleteKiMutation, navigateToContextEngine, notifications.toasts]);
 
-  const handleRestoreMemory = useCallback(() => {
-    restoreMemoryMutation.mutate(undefined, {
+  const handleRestoreKi = useCallback(() => {
+    restoreKiMutation.mutate(undefined, {
       onSuccess: () => {
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.contextEngine.kiDetail.restoreSuccess.title', {
-            defaultMessage: 'Memory restored',
+            defaultMessage: 'Knowledge Indicator restored',
           }),
           text: i18n.translate('xpack.contextEngine.kiDetail.restoreSuccess.text', {
-            defaultMessage: 'Agents can recall this memory again.',
+            defaultMessage: 'It can be retrieved again.',
           }),
         });
       },
       onError: (restoreError) => {
         notifications.toasts.addError(restoreError, {
           title: i18n.translate('xpack.contextEngine.kiDetail.restoreError.title', {
-            defaultMessage: 'Unable to restore memory',
+            defaultMessage: 'Unable to restore Knowledge Indicator',
           }),
         });
       },
     });
-  }, [notifications.toasts, restoreMemoryMutation]);
+  }, [notifications.toasts, restoreKiMutation]);
 
   const missingIndexContent = (
     <EuiEmptyPrompt
@@ -425,8 +385,13 @@ export const KiDetailPage = () => {
       selectedTab === 'document' ? (
         <KiDetailRawJsonPanel ki={ki} />
       ) : (
-        <div css={kiDetailContentTabLayoutStyle} data-test-subj="contextKiDetailContentTabLayout">
-          <div css={kiDetailMainColumnStyle} data-test-subj="contextKiDetailMainColumn">
+        <EuiFlexGroup
+          gutterSize="xl"
+          responsive
+          alignItems="stretch"
+          data-test-subj="contextKiDetailContentTabLayout"
+        >
+          <EuiFlexItem data-test-subj="contextKiDetailMainColumn">
             <KiDetailContentPanel
               document={ki.document}
               isEditing={isContentEditing}
@@ -434,11 +399,15 @@ export const KiDetailPage = () => {
               isSaving={updateKiMutation.isLoading}
               onSave={handleSaveContent}
             />
-          </div>
-          <div css={kiDetailSidebarStyle} data-test-subj="contextKiDetailSidebar">
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            style={{ width: '26rem' }}
+            data-test-subj="contextKiDetailSidebar"
+          >
             <KiDetailDetailsPanel kiId={ki.id} document={ki.document} />
-          </div>
-        </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )
     ) : null;
 
@@ -456,18 +425,18 @@ export const KiDetailPage = () => {
         tabs={headerTabs}
         menu={headerMenu}
       />
-      <KiDetailMemoryConfirmModals
-        isForgetConfirmOpen={isForgetConfirmOpen}
-        onCloseForgetConfirm={() => setIsForgetConfirmOpen(false)}
-        onConfirmForget={() => {
-          setIsForgetConfirmOpen(false);
-          handleForgetMemory();
+      <KiDetailConfirmModals
+        isDeleteConfirmOpen={isDeleteConfirmOpen}
+        onCloseDeleteConfirm={() => setIsDeleteConfirmOpen(false)}
+        onConfirmDelete={() => {
+          setIsDeleteConfirmOpen(false);
+          handleDeleteKi();
         }}
         isRestoreConfirmOpen={isRestoreConfirmOpen}
         onCloseRestoreConfirm={() => setIsRestoreConfirmOpen(false)}
         onConfirmRestore={() => {
           setIsRestoreConfirmOpen(false);
-          handleRestoreMemory();
+          handleRestoreKi();
         }}
       />
       <ContextEnginePageSection

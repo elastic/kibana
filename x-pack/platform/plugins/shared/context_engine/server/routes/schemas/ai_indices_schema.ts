@@ -318,7 +318,7 @@ const kiListLifecycleStatusQuerySchema = () =>
     },
     meta: {
       description:
-        'Comma-separated lifecycle statuses to include (`active`, `deleted`). Defaults to `active` (excludes tombstoned KIs). Use `active,deleted` to include forgotten memories.',
+        'Comma-separated lifecycle statuses to include (`active`, `deleted`). Defaults to `active` (excludes deleted KIs). Use `active,deleted` to include deleted KIs.',
     },
   });
 
@@ -358,7 +358,7 @@ export const updateKiResponseSchema = schema.object({
   result: schema.oneOf([schema.literal('updated'), schema.literal('noop')]),
 });
 
-export const forgetMemoryKiResponseSchema = schema.object({
+export const deleteKiResponseSchema = schema.object({
   id: schema.string(),
 });
 

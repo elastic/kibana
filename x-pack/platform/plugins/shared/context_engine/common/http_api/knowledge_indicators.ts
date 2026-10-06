@@ -46,11 +46,11 @@ export interface UpdateKiResponse {
   result: 'updated' | 'noop';
 }
 
-export interface ForgetMemoryKiResponse {
+export interface DeleteKiResponse {
   id: string;
 }
 
-export type RestoreMemoryKiResponse = ForgetMemoryKiResponse;
+export type RestoreKiResponse = DeleteKiResponse;
 
 export interface UpdateKiRequestBody {
   ki: KiPartialFields;

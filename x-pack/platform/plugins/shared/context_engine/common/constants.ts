@@ -19,7 +19,7 @@ export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexI
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
-export const AI_INDEX_KI_FORGET_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_forget`;
+export const AI_INDEX_KI_DELETE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_delete`;
 export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */

@@ -8,11 +8,11 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { KiPartialFields } from '../../../common/step_types/ki';
 import type {
-  ForgetMemoryKiResponse,
-  RestoreMemoryKiResponse,
+  DeleteKiResponse,
+  RestoreKiResponse,
   UpdateKiResponse,
 } from '../../../common/http_api/knowledge_indicators';
-import { forgetMemoryKi, restoreMemoryKi, updateKi } from '../api/knowledge_indicators';
+import { deleteKi, restoreKi, updateKi } from '../api/knowledge_indicators';
 import { useKibana } from './use_kibana';
 
 interface KiMutationArgs {
@@ -59,28 +59,28 @@ const invalidateKiQueries =
     });
   };
 
-export const useForgetMemoryKi = ({ aiIndexId, kiId, index }: KiMutationArgs) => {
+export const useDeleteKi = ({ aiIndexId, kiId, index }: KiMutationArgs) => {
   const {
     services: { http },
   } = useKibana();
   const queryClient = useQueryClient();
 
-  return useMutation<ForgetMemoryKiResponse, Error, void>({
-    mutationFn: () => forgetMemoryKi(http, { aiIndexId, kiId, index }),
+  return useMutation<DeleteKiResponse, Error, void>({
+    mutationFn: () => deleteKi(http, { aiIndexId, kiId, index }),
     onSuccess: async () => {
       await invalidateKiQueries(aiIndexId, index, kiId)(queryClient);
     },
   });
 };
 
-export const useRestoreMemoryKi = ({ aiIndexId, kiId, index }: KiMutationArgs) => {
+export const useRestoreKi = ({ aiIndexId, kiId, index }: KiMutationArgs) => {
   const {
     services: { http },
   } = useKibana();
   const queryClient = useQueryClient();
 
-  return useMutation<RestoreMemoryKiResponse, Error, void>({
-    mutationFn: () => restoreMemoryKi(http, { aiIndexId, kiId, index }),
+  return useMutation<RestoreKiResponse, Error, void>({
+    mutationFn: () => restoreKi(http, { aiIndexId, kiId, index }),
     onSuccess: async () => {
       await invalidateKiQueries(aiIndexId, index, kiId)(queryClient);
     },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   INDEX_MANAGEMENT_LOCATOR_ID,

@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { isMemoryKiType } from '../../common/memory';
 import type { KiPartialFields } from '../../common/step_types/ki';
 import { omitNullKiAttributes } from '../../common/step_types/ki';
 import type { KiLifecycleStatus } from '../../common/step_types/ki';
@@ -137,33 +136,26 @@ export const updateKiDocument = async ({
   };
 };
 
-export interface ForgetMemoryKiOptions {
+export interface DeleteKiOptions {
   esClient: ElasticsearchClient;
   aiIndexId: string;
   dest: AiIndexDest;
   kiId: string;
   backingIndex?: string;
-  memoryEnabled: boolean;
   writer: KiWriter;
   abortSignal?: AbortSignal;
 }
 
-/** Tombstones a memory KI (same outcome as the Agent Builder forget tool). */
-export const forgetMemoryKi = async ({
+/** Soft-deletes a Knowledge Indicator by setting lifecycle status to deleted. */
+export const deleteKi = async ({
   esClient,
   aiIndexId,
   dest,
   kiId,
   backingIndex,
-  memoryEnabled,
   writer,
   abortSignal,
-}: ForgetMemoryKiOptions): Promise<{ id: string }> => {
-  if (!memoryEnabled) {
-    throw new KiWriteValidationError(
-      `AI index '${aiIndexId}' does not have memory writes enabled.`
-    );
-  }
+}: DeleteKiOptions): Promise<{ id: string }> => {
   assertBackingIndex(dest, backingIndex);
 
   const signal = abortSignal ?? new AbortController().signal;
@@ -177,13 +169,6 @@ export const forgetMemoryKi = async ({
   });
   if (!revision) {
     throw new KiNotFoundError(aiIndexId, kiId);
-  }
-
-  const storedType = revision.source.type;
-  if (typeof storedType !== 'string' || !isMemoryKiType(storedType)) {
-    throw new KiWriteValidationError(
-      `Document '${kiId}' in AI index '${aiIndexId}' is not a memory knowledge indicator.`
-    );
   }
 
   if (isKiDeleted(revision.source)) {
@@ -206,24 +191,18 @@ export const forgetMemoryKi = async ({
   return { id: kiId };
 };
 
-export type RestoreMemoryKiOptions = ForgetMemoryKiOptions;
+export type RestoreKiOptions = DeleteKiOptions;
 
-/** Restores a tombstoned memory KI so agents can recall it again. */
-export const restoreMemoryKi = async ({
+/** Restores a soft-deleted Knowledge Indicator by setting lifecycle status to active. */
+export const restoreKi = async ({
   esClient,
   aiIndexId,
   dest,
   kiId,
   backingIndex,
-  memoryEnabled,
   writer,
   abortSignal,
-}: RestoreMemoryKiOptions): Promise<{ id: string }> => {
-  if (!memoryEnabled) {
-    throw new KiWriteValidationError(
-      `AI index '${aiIndexId}' does not have memory writes enabled.`
-    );
-  }
+}: RestoreKiOptions): Promise<{ id: string }> => {
   assertBackingIndex(dest, backingIndex);
 
   const signal = abortSignal ?? new AbortController().signal;
@@ -237,13 +216,6 @@ export const restoreMemoryKi = async ({
   });
   if (!revision) {
     throw new KiNotFoundError(aiIndexId, kiId);
-  }
-
-  const storedType = revision.source.type;
-  if (typeof storedType !== 'string' || !isMemoryKiType(storedType)) {
-    throw new KiWriteValidationError(
-      `Document '${kiId}' in AI index '${aiIndexId}' is not a memory knowledge indicator.`
-    );
   }
 
   if (!isKiDeleted(revision.source)) {

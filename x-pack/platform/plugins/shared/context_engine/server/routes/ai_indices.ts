@@ -31,7 +31,7 @@ import {
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
-  AI_INDEX_KI_FORGET_PATH,
+  AI_INDEX_KI_DELETE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_PATH,
@@ -47,10 +47,10 @@ import type {
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
 import type {
-  ForgetMemoryKiResponse,
+  DeleteKiResponse,
   GetKiResponse,
   ListKisResponse,
-  RestoreMemoryKiResponse,
+  RestoreKiResponse,
   UpdateKiResponse,
 } from '../../common/http_api/knowledge_indicators';
 import { parseKiListLifecycleStatusesQuery } from '../../common/ki_list_lifecycle';
@@ -74,12 +74,7 @@ import {
   KiUpdateConflictError,
   KiWriteValidationError,
 } from '../ai_indices/errors';
-import {
-  forgetMemoryKi,
-  kiWriterFromUi,
-  restoreMemoryKi,
-  updateKiDocument,
-} from '../ai_indices/ki_update';
+import { deleteKi, kiWriterFromUi, restoreKi, updateKiDocument } from '../ai_indices/ki_update';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
 import {
@@ -840,12 +835,12 @@ export const registerAiIndexRoutes = ({
 
   router.versioned
     .post({
-      path: AI_INDEX_KI_FORGET_PATH,
+      path: AI_INDEX_KI_DELETE_PATH,
       security: WRITE_SECURITY,
       access: 'internal',
-      summary: 'Forget a memory Knowledge Indicator',
+      summary: 'Delete a Knowledge Indicator',
       description:
-        'Marks a memory.session or memory.session_fact Knowledge Indicator as deleted so it is no longer recalled.',
+        'Marks a Knowledge Indicator as deleted so it is no longer retrieved by default.',
     })
     .addVersion(
       {
@@ -865,13 +860,12 @@ export const registerAiIndexRoutes = ({
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-          const body: ForgetMemoryKiResponse = await forgetMemoryKi({
+          const body: DeleteKiResponse = await deleteKi({
             esClient,
             aiIndexId,
             dest: aiIndex.dest,
             kiId,
             backingIndex,
-            memoryEnabled: aiIndex.memory_enabled,
             writer: kiWriterFromUi(spaceId),
           });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
@@ -890,9 +884,9 @@ export const registerAiIndexRoutes = ({
       path: AI_INDEX_KI_RESTORE_PATH,
       security: WRITE_SECURITY,
       access: 'internal',
-      summary: 'Restore a forgotten memory Knowledge Indicator',
+      summary: 'Restore a deleted Knowledge Indicator',
       description:
-        'Sets lifecycle status back to active for a tombstoned memory.session or memory.session_fact so agents can recall it again.',
+        'Sets lifecycle status back to active so the Knowledge Indicator can be retrieved again.',
     })
     .addVersion(
       {
@@ -912,13 +906,12 @@ export const registerAiIndexRoutes = ({
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-          const body: RestoreMemoryKiResponse = await restoreMemoryKi({
+          const body: RestoreKiResponse = await restoreKi({
             esClient,
             aiIndexId,
             dest: aiIndex.dest,
             kiId,
             backingIndex,
-            memoryEnabled: aiIndex.memory_enabled,
             writer: kiWriterFromUi(spaceId),
           });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
