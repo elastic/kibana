@@ -60,6 +60,7 @@ export class AttachmentBridge {
     | ((params: { proposalId: string; toolId: string; workflowId?: string }) => void)
     | undefined;
   private isReadOnly: () => boolean = () => false;
+  private onProposalDeferred: (() => void) | undefined;
   private deferredPayload: WorkflowYamlChangedPayload | null = null;
   private attachmentId: string | undefined;
   private workflowId: string | undefined;
@@ -91,6 +92,8 @@ export class AttachmentBridge {
       }) => void;
       /** Read on every proposal; while true, the proposal waits for `applyDeferred`. */
       isReadOnly?: () => boolean;
+      /** Called when the bridge holds a proposal because the editor is read-only. */
+      onProposalDeferred?: () => void;
     }
   ): void {
     this.proposalManager = proposalManager;
@@ -99,6 +102,7 @@ export class AttachmentBridge {
     this.onError = options.onError ?? (() => {});
     this.onProposalReceived = options.onProposalReceived;
     this.isReadOnly = options.isReadOnly ?? (() => false);
+    this.onProposalDeferred = options.onProposalDeferred;
     this.attachmentId = options.attachmentId;
     this.workflowId = options.workflowId;
     this.getChatEvents$ = options.getChatEvents$;
@@ -172,6 +176,7 @@ export class AttachmentBridge {
     this.processedProposals.clear();
     this.deferredPayload = null;
     this.isReadOnly = () => false;
+    this.onProposalDeferred = undefined;
     this.attachmentId = undefined;
     this.workflowId = undefined;
     this.conversationId = undefined;
@@ -204,6 +209,7 @@ export class AttachmentBridge {
     if (this.isReadOnly()) {
       // Each proposal holds the full YAML, so the latest one replaces any earlier one.
       this.deferredPayload = payload;
+      this.onProposalDeferred?.();
       return;
     }
 

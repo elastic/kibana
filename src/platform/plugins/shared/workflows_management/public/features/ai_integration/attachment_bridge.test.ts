@@ -695,6 +695,7 @@ describe('AttachmentBridge: read-only editor', () => {
     const bridge = new AttachmentBridge();
     const readOnly = { current: true };
     const onProposalReceived = jest.fn();
+    const onProposalDeferred = jest.fn();
 
     bridge.start(manager, editorRef, tracker, {
       ...events,
@@ -702,9 +703,10 @@ describe('AttachmentBridge: read-only editor', () => {
       workflowId: 'workflow-a',
       isReadOnly: () => readOnly.current,
       onProposalReceived,
+      onProposalDeferred,
     });
 
-    return { bridge, events, manager, tracker, readOnly, onProposalReceived };
+    return { bridge, events, manager, tracker, readOnly, onProposalReceived, onProposalDeferred };
   };
 
   const yamlChange = (proposalId: string, afterYaml: string) =>
@@ -716,12 +718,13 @@ describe('AttachmentBridge: read-only editor', () => {
     });
 
   it('holds the proposal instead of showing it in a read-only editor', () => {
-    const { bridge, events, manager, tracker, onProposalReceived } = setup();
+    const { bridge, events, manager, tracker, onProposalReceived, onProposalDeferred } = setup();
 
     events.emit(yamlChange('p-1', 'yaml: fixed'));
 
     expect(manager.applyAfterYaml).not.toHaveBeenCalled();
     expect(tracker.getAllRecords()).toHaveLength(0);
+    expect(onProposalDeferred).toHaveBeenCalledTimes(1);
     expect(onProposalReceived).not.toHaveBeenCalled();
 
     bridge.stop();

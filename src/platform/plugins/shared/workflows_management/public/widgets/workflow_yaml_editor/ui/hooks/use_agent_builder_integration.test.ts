@@ -1412,12 +1412,14 @@ describe('useAgentBuilderIntegration', () => {
       setupKibanaMock(agentBuilder);
       const editorRef = { current: createMockEditor(mockModel) };
 
+      const onProposalDeferred = jest.fn();
       const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
         initialProps: {
           editorRef,
           isEditorMounted: true,
           workflowId: 'workflow-a',
           canApplyProposals: false,
+          onProposalDeferred,
         },
       });
       await flushChatAccessCheck();
@@ -1426,6 +1428,8 @@ describe('useAgentBuilderIntegration', () => {
       const startOptions = bridge.start.mock.calls[0][3];
       expect(startOptions.isReadOnly()).toBe(true);
 
+      startOptions.onProposalDeferred();
+      expect(onProposalDeferred).toHaveBeenCalledTimes(1);
       expect(bridge.applyDeferred).not.toHaveBeenCalled();
 
       rerender({
@@ -1433,6 +1437,7 @@ describe('useAgentBuilderIntegration', () => {
         isEditorMounted: true,
         workflowId: 'workflow-a',
         canApplyProposals: true,
+        onProposalDeferred,
       });
 
       expect(startOptions.isReadOnly()).toBe(false);

@@ -46,6 +46,8 @@ interface UseAgentBuilderIntegrationParams {
    * it turns true. Defaults to true.
    */
   canApplyProposals?: boolean;
+  /** Called when a proposal arrives while `canApplyProposals` is false. */
+  onProposalDeferred?: () => void;
 }
 
 export interface OpenAgentChatOptions {
@@ -83,6 +85,7 @@ export const useAgentBuilderIntegration = ({
   validationErrors,
   readOnlyReason,
   canApplyProposals = true,
+  onProposalDeferred,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement, application } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
@@ -104,6 +107,8 @@ export const useAgentBuilderIntegration = ({
   const syncAttachmentRef = useRef<((yaml: string) => void) | null>(null);
   const canApplyProposalsRef = useRef(canApplyProposals);
   canApplyProposalsRef.current = canApplyProposals;
+  const onProposalDeferredRef = useRef(onProposalDeferred);
+  onProposalDeferredRef.current = onProposalDeferred;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
   const hasAutoOpenedRef = useRef(false);
   const unsavedWorkflowIdRef = useRef<string>(v4());
@@ -243,6 +248,7 @@ export const useAgentBuilderIntegration = ({
       attachmentId,
       workflowId,
       isReadOnly: () => !canApplyProposalsRef.current,
+      onProposalDeferred: () => onProposalDeferredRef.current?.(),
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,

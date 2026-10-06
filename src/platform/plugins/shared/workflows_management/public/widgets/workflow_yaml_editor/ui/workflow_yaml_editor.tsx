@@ -86,6 +86,7 @@ import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEditorReadOnlyReason } from '../../../hooks/use_workflow_editor_read_only';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -214,6 +215,7 @@ export const WorkflowYAMLEditor = ({
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
   const readOnlyReason = useWorkflowEditorReadOnlyReason();
+  const { setActiveTab } = useWorkflowUrlState();
   const isReadOnlyYaml = readOnlyReason !== undefined;
   const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
   isReadOnlyYamlRef.current = isReadOnlyYaml;
@@ -370,6 +372,8 @@ export const WorkflowYAMLEditor = ({
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
   }, [validationErrors, dispatch]);
 
+  const onExecutionsTabProposal = useCallback(() => setActiveTab('workflow'), [setActiveTab]);
+
   // Agent Builder integration for AI-assisted editing
   const { isAgentBuilderAvailable, openAgentChat } = useAgentBuilderIntegration({
     editorRef,
@@ -381,6 +385,9 @@ export const WorkflowYAMLEditor = ({
     // The store shows the workflow YAML only after it catches up with the URL
     // tab, so proposals wait for both.
     canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
+    // The user asked the agent for a fix, so open the tab where they can
+    // review and save it. The held proposal shows once the editor is editable.
+    onProposalDeferred: readOnlyReason === 'executions_tab' ? onExecutionsTabProposal : undefined,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
