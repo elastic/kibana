@@ -37,6 +37,7 @@ export function StepMapping() {
   ).invalid;
   const schemaResolutionIsValid = useWatch({ control, name: 'ui.schemaResolutionIsValid' });
   const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
+  const [hasUnsavedFieldChanges, setHasUnsavedFieldChanges] = useState(false);
 
   const setMappings = useCallback(
     (next: SetStateAction<MappingEditorValue>) => {
@@ -179,9 +180,11 @@ export function StepMapping() {
         const isSchemaResolutionValid = await trigger('settings.schema_resolution');
         return isMappingStepValid && isSchemaResolutionValid;
       },
+      hasUnsavedChanges: hasUnsavedFieldChanges,
     });
   }, [
     hasAttemptedValidation,
+    hasUnsavedFieldChanges,
     isMappingStepValid,
     isSchemaResolutionInvalid,
     trigger,
@@ -235,6 +238,7 @@ export function StepMapping() {
           value={{ ...field.value, fields: splitFields.otherFields }}
           onChange={onEditorChange}
           reservedFieldNames={isTimeseriesEnabled ? [TIMESTAMP_LOGICAL_FIELD_NAME] : undefined}
+          onUnsavedChangesChange={setHasUnsavedFieldChanges}
         />
       </div>
     </div>

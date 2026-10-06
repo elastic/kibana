@@ -159,4 +159,66 @@ describe('MappingEditor', () => {
 
     expect(queryByText('foo')).toBeNull();
   });
+
+  describe('WHEN reporting unsaved field changes', () => {
+    const renderWithUnsavedChangesSpy = () => {
+      const onUnsavedChangesChange = jest.fn();
+      const Wrapper = () => {
+        const [value, setValue] = useState<MappingEditorValue>({
+          dynamic: true,
+          fields: [{ id: 'field-1', name: 'foo', path: '', type: 'keyword', format: '' }],
+        });
+
+        return (
+          <I18nProvider>
+            <EuiProvider>
+              <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+                <MappingEditor
+                  value={value}
+                  onChange={setValue}
+                  onUnsavedChangesChange={onUnsavedChangesChange}
+                />
+              </KibanaContextProvider>
+            </EuiProvider>
+          </I18nProvider>
+        );
+      };
+      return { ...render(<Wrapper />), onUnsavedChangesChange };
+    };
+
+    it('SHOULD not report an opened but untouched draft', () => {
+      const { getByTestId, onUnsavedChangesChange } = renderWithUnsavedChangesSpy();
+
+      fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
+      fireEvent.click(getByTestId('dataFederationMappingEditorEditField'));
+
+      expect(onUnsavedChangesChange).not.toHaveBeenCalledWith(true);
+    });
+
+    it('SHOULD report a changed add-field draft until the form is cancelled', () => {
+      const { getByTestId, onUnsavedChangesChange } = renderWithUnsavedChangesSpy();
+
+      fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
+      fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
+        target: { value: 'bar' },
+      });
+      expect(onUnsavedChangesChange).toHaveBeenLastCalledWith(true);
+
+      fireEvent.click(getByTestId('dataFederationMappingEditorCancelField'));
+      expect(onUnsavedChangesChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('SHOULD report a changed edit draft until it is applied', () => {
+      const { getByTestId, onUnsavedChangesChange } = renderWithUnsavedChangesSpy();
+
+      fireEvent.click(getByTestId('dataFederationMappingEditorEditField'));
+      fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
+        target: { value: 'bar' },
+      });
+      expect(onUnsavedChangesChange).toHaveBeenLastCalledWith(true);
+
+      fireEvent.click(getByTestId('dataFederationMappingEditorUpdateField'));
+      expect(onUnsavedChangesChange).toHaveBeenLastCalledWith(false);
+    });
+  });
 });

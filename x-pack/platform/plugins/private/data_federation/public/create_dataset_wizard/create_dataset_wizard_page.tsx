@@ -26,12 +26,12 @@ import { DATASETS_PATH } from '../app_paths';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import { buildDatasetPayload } from './build_dataset_payload';
-import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from './constants';
 import { type CreateDatasetFormValues } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
 import { StepAdditional } from './options_step/step_additional';
 import { StepDataset } from './define_step/step_dataset';
+import { DiscardFieldChangesModal } from './mapping_step/discard_field_changes_modal';
 import { StepMapping } from './mapping_step/step_mapping';
 import { StepReview } from './review_step/step_review';
 import { getValidStepIds } from './step_validity';
@@ -94,6 +94,10 @@ export function CreateDatasetWizardPage({
 
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [stepContent, setStepContent] = useState(INITIAL_STEP_CONTENT);
+  const [pendingNavigation, setPendingNavigation] = useState<{
+    index: number;
+    isActiveStepValid: boolean;
+  } | null>(null);
   // Field rules only run while their step is mounted, so a step can only be skipped over once it
   // has passed validation, and its result is re-recorded whenever it is left in either direction.
   // A saved dataset's steps start out validated when its values pass them; a new dataset's
@@ -111,12 +115,7 @@ export function CreateDatasetWizardPage({
     );
   };
 
-  const goToStep = async (index: number) => {
-    if (index === activeStepIndex) return;
-    const isForward = index > activeStepIndex;
-    if (isForward && skipsUnvalidatedStep(index)) return;
-    const isActiveStepValid = await stepContent.validate();
-    if (isForward && !isActiveStepValid) return;
+  const leaveActiveStep = (index: number, isActiveStepValid: boolean) => {
     const activeId = STEPS[activeStepIndex].id;
     setValidatedStepIds((prev) => {
       const next = new Set(prev);
@@ -128,6 +127,25 @@ export function CreateDatasetWizardPage({
     setActiveStepIndex(index);
   };
 
+  const goToStep = async (index: number) => {
+    if (index === activeStepIndex) return;
+    const isForward = index > activeStepIndex;
+    if (isForward && skipsUnvalidatedStep(index)) return;
+    const isActiveStepValid = await stepContent.validate();
+    if (isForward && !isActiveStepValid) return;
+    if (stepContent.hasUnsavedChanges) {
+      setPendingNavigation({ index, isActiveStepValid });
+      return;
+    }
+    leaveActiveStep(index, isActiveStepValid);
+  };
+
+  const confirmPendingNavigation = () => {
+    if (!pendingNavigation) return;
+    setPendingNavigation(null);
+    leaveActiveStep(pendingNavigation.index, pendingNavigation.isActiveStepValid);
+  };
+
   const goToDatasets = useCallback(() => {
     history.push(DATASETS_PATH);
   }, [history]);
@@ -135,20 +153,6 @@ export function CreateDatasetWizardPage({
   const onSave = useCallback(async () => {
     const values = methods.getValues();
     setSaveError(null);
-
-    const formatValid = await methods.trigger('settings.format');
-    if (!formatValid) {
-      setSaveError(toSaveError(createDatasetWizardStrings.settingsFormatRequired));
-      return;
-    }
-
-    const timestampField = values.mappings.fields.find(
-      (f) => f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME
-    );
-    if (timestampField && timestampField.path.trim() === '') {
-      setSaveError(toSaveError(createDatasetWizardStrings.timestampFieldPathRequiredSave));
-      return;
-    }
 
     setIsSaving(true);
     const previousName = initialDataSet?.name.trim();
@@ -321,6 +325,12 @@ export function CreateDatasetWizardPage({
           </FormProvider>
         </div>
       </EuiPageSection>
+      {pendingNavigation ? (
+        <DiscardFieldChangesModal
+          onCancel={() => setPendingNavigation(null)}
+          onConfirm={confirmPendingNavigation}
+        />
+      ) : null}
     </>
   );
 }

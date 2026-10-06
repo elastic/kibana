@@ -104,11 +104,9 @@ export function FieldMappingForm({
   const isDateType = Boolean(draft.type) && isDateLikeType(draft.type as DatasetMappingFieldType);
 
   const updateDraft = (patch: Partial<FieldMappingFormValue>) => {
-    setDraft((prev) => {
-      const next = { ...prev, ...patch };
-      onDraftChange?.(next);
-      return next;
-    });
+    const next = { ...draft, ...patch };
+    setDraft(next);
+    onDraftChange?.(next);
   };
 
   return (

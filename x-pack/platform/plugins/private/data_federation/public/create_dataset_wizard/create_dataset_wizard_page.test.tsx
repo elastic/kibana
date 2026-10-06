@@ -1090,6 +1090,90 @@ describe('CreateDatasetWizardPage', () => {
     expect(timestampFormatInput as HTMLInputElement).toHaveValue('yyyy-MM-dd');
   });
 
+  describe('WHEN the mapping step holds an unapplied field draft', () => {
+    const goToMappingStepWithDraft = async () => {
+      const rendered = renderWizard();
+      const { getByTestId, findByTestId } = rendered;
+
+      fireEvent.click(getByTestId('createDatasetDataSource'));
+      fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+      fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+      fireEvent.change(getByTestId('createDatasetResource'), {
+        target: { value: 's3://bucket/*' },
+      });
+      selectFormat(getByTestId, 'csv');
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      ).toBeInTheDocument();
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardMappingStep'))
+      ).toBeInTheDocument();
+
+      fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+        target: { value: 'event_time' },
+      });
+      await act(async () => {
+        fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
+      });
+      fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
+        target: { value: 'host' },
+      });
+      return rendered;
+    };
+
+    it('SHOULD ask for confirmation on Next and stay on the step with the draft when cancelled', async () => {
+      const { getByTestId, findByTestId, queryByTestId } = await goToMappingStepWithDraft();
+
+      await clickNext(getByTestId);
+      const modal = await findByTestId('createDatasetWizardDiscardFieldChangesModal');
+      expect(modal).toHaveTextContent(createDatasetWizardStrings.discardFieldChangesTitle);
+
+      await act(async () => {
+        fireEvent.click(within(modal).getByTestId('confirmModalCancelButton'));
+      });
+
+      expect(queryByTestId('createDatasetWizardDiscardFieldChangesModal')).toBeNull();
+      expect(getByTestId('createDatasetWizardMappingStep')).toBeInTheDocument();
+      expect(getByTestId('dataFederationMappingEditorFieldName')).toHaveValue('host');
+    });
+
+    it('SHOULD leave the step when the discard is confirmed', async () => {
+      const { getByTestId, findByTestId, queryByTestId } = await goToMappingStepWithDraft();
+
+      await clickNext(getByTestId);
+      const modal = await findByTestId('createDatasetWizardDiscardFieldChangesModal');
+      await act(async () => {
+        fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+      });
+
+      expect(await findByTestId('createDatasetWizardReviewStep')).toBeInTheDocument();
+      expect(queryByTestId('createDatasetWizardDiscardFieldChangesModal')).toBeNull();
+    });
+
+    it('SHOULD ask for confirmation on Back', async () => {
+      const { getByTestId, findByTestId } = await goToMappingStepWithDraft();
+
+      await clickBack(getByTestId);
+
+      expect(await findByTestId('createDatasetWizardDiscardFieldChangesModal')).toBeInTheDocument();
+      expect(getByTestId('createDatasetWizardMappingStep')).toBeInTheDocument();
+    });
+
+    it('SHOULD not ask for confirmation once the draft is added', async () => {
+      const { getByTestId, findByTestId, queryByTestId } = await goToMappingStepWithDraft();
+
+      await act(async () => {
+        fireEvent.click(getByTestId('dataFederationMappingEditorDraftAddField'));
+      });
+      await clickNext(getByTestId);
+
+      expect(await findByTestId('createDatasetWizardReviewStep')).toBeInTheDocument();
+      expect(queryByTestId('createDatasetWizardDiscardFieldChangesModal')).toBeNull();
+    });
+  });
+
   it('keeps unsaved edits to a mapped field when the timestamp field name changes', async () => {
     const { getByTestId, getAllByTestId, findByTestId } = renderWizard();
 

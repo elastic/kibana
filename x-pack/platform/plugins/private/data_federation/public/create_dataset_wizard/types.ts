@@ -10,4 +10,6 @@ export type DatasetWizardStepId = 'dataset' | 'settings' | 'mapping' | 'review';
 export interface DatasetWizardStepContent {
   isValid?: boolean;
   validate: () => Promise<boolean>;
+  /** Whether the step holds in-progress edits that are lost when the user navigates away. */
+  hasUnsavedChanges?: boolean;
 }

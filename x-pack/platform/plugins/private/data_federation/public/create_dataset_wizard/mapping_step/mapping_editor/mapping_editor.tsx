@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
 import {
   EuiBadge,
@@ -63,7 +63,18 @@ export interface MappingEditorProps {
   value: MappingEditorValue;
   onChange: (next: SetStateAction<MappingEditorValue>) => void;
   reservedFieldNames?: readonly string[];
+  /** Called when the open add or edit field form starts or stops holding changes not yet applied. */
+  onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void;
 }
+
+const isDraftChanged = (
+  draft: FieldMappingFormValue,
+  initial: Pick<FieldMappingFormValue, 'type' | 'name' | 'path' | 'format'>
+): boolean =>
+  draft.type !== initial.type ||
+  draft.name !== initial.name ||
+  draft.path !== initial.path ||
+  draft.format !== initial.format;
 
 export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings | undefined => {
   const properties = value.fields.reduce<DatasetMappings['properties']>((acc, f) => {
@@ -97,7 +108,12 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
 
 const generateFieldId = htmlIdGenerator('mapping-field');
 
-export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reservedFieldNames }) => {
+export const MappingEditor: FC<MappingEditorProps> = ({
+  value,
+  onChange,
+  reservedFieldNames,
+  onUnsavedChangesChange,
+}) => {
   const { euiTheme } = useEuiTheme();
   const isDefineSchemaSelected = !value.dynamic;
   const isInferSchemaSelected = value.dynamic;
@@ -119,6 +135,17 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
     () => ({ type: 'keyword', name: '', path: '', format: '' }),
     []
   );
+  const [addDraft, setAddDraft] = useState<FieldMappingFormValue | null>(null);
+  const [editDraft, setEditDraft] = useState<FieldMappingFormValue | null>(null);
+
+  const editingField = value.fields.find((f) => f.id === editingFieldId);
+  const hasUnsavedChanges =
+    (isAddFieldFormOpen && addDraft !== null && isDraftChanged(addDraft, emptyDraftInitialValue)) ||
+    (editingField !== undefined && editDraft !== null && isDraftChanged(editDraft, editingField));
+
+  useEffect(() => {
+    onUnsavedChangesChange?.(hasUnsavedChanges);
+  }, [hasUnsavedChanges, onUnsavedChangesChange]);
 
   const hasValidatedFieldErrors = useMemo(() => {
     return validatedFieldIds.some((id) => fieldErrorsById[id] !== undefined);
@@ -135,6 +162,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
 
   const closeAddFieldForm = useCallback(() => {
     setIsAddFieldFormOpen(false);
+    setAddDraft(null);
     setDraftErrors({});
     setDraftFormKey((k) => k + 1);
   }, []);
@@ -177,6 +205,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
       }));
 
       // Keep the form open so additional fields can be added.
+      setAddDraft(null);
       setDraftErrors({});
       setDraftFormKey((k) => k + 1);
     },
@@ -211,6 +240,9 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
 
   const startEditingField = useCallback((id: string) => {
     setEditingFieldId(id);
+    setEditDraft(null);
+    // The add field form unmounts while a field is edited, so its draft does not survive.
+    setAddDraft(null);
   }, []);
 
   const cancelEditingField = useCallback((id: string) => {
@@ -219,6 +251,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
       return rest;
     });
     setEditingFieldId(null);
+    setEditDraft(null);
   }, []);
 
   const validateFieldCandidate = useCallback(
@@ -350,6 +383,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
                           mode="edit"
                           onCancel={() => cancelEditingField(f.id)}
                           onDraftChange={(draftValue) => {
+                            setEditDraft(draftValue);
                             if (!validatedFieldIds.includes(f.id)) return;
                             const candidate = { ...f, ...draftValue } as MappingEditorField;
                             const errors = validateFieldCandidate(f.id, candidate);
@@ -376,6 +410,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
                               format: candidate.format.trim(),
                             });
                             setEditingFieldId(null);
+                            setEditDraft(null);
                             setFieldErrorsById((prev) => {
                               const { [f.id]: _removed, ...rest } = prev;
                               return rest;
@@ -428,7 +463,8 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
               key={draftFormKey}
               value={emptyDraftInitialValue}
               errors={draftErrors}
-              onDraftChange={() => {
+              onDraftChange={(draftValue) => {
+                setAddDraft(draftValue);
                 if (Object.keys(draftErrors).length === 0) return;
                 setDraftErrors({});
               }}

@@ -203,6 +203,24 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Could not delete the previous dataset',
     }
   ),
+  discardFieldChangesTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.discardFieldChangesTitle',
+    {
+      defaultMessage: 'Discard unsaved field mapping?',
+    }
+  ),
+  discardFieldChangesCancelButton: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.discardFieldChangesCancelButton',
+    {
+      defaultMessage: 'Keep editing',
+    }
+  ),
+  discardFieldChangesConfirmButton: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.discardFieldChangesConfirmButton',
+    {
+      defaultMessage: 'Discard changes',
+    }
+  ),
   dataSourceRefreshAfterSaveError: (savedName: string, reason: string) =>
     i18n.translate('xpack.dataFederation.createDatasetWizard.dataSourceRefreshAfterSaveError', {
       defaultMessage:
@@ -301,13 +319,6 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Format is required.',
     }
   ),
-  timestampFieldPathRequiredSave: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.timestampFieldPathRequiredSave',
-    {
-      defaultMessage: 'When timeseries data is enabled, Field name is required.',
-    }
-  ),
-
   settingsFormatLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatLabel',
     {
