@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { CHAT_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { ConversationInput } from './conversation_input';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -177,6 +178,7 @@ const editorController = {
   setContent: jest.fn(),
   clear: jest.fn(),
   isEmpty: false,
+  characterCount: 0,
   getPlaceholderNames: jest.fn(() => []),
   removePlaceholderByName: jest.fn(),
 };
@@ -191,6 +193,7 @@ describe('ConversationInput', () => {
     jest.clearAllMocks();
     editorController.getContent.mockReturnValue('hello agent');
     editorController.isEmpty = false;
+    editorController.characterCount = 0;
 
     mockedUseConversationStream.mockReturnValue({
       pendingMessage: undefined,
@@ -258,6 +261,29 @@ describe('ConversationInput', () => {
     expect(submitMessage).toHaveBeenCalledTimes(1);
     expect(submitMessage).toHaveBeenCalledWith('hello agent');
     expect(editorController.clear).toHaveBeenCalledTimes(1);
+  });
+
+  describe('message length limit', () => {
+    it('does not show a warning for a message within the limit', () => {
+      editorController.characterCount = CHAT_MESSAGE_MAX_LENGTH;
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.queryByTestId('agentBuilderConversationInputTooLong')).not.toBeInTheDocument();
+    });
+
+    it('shows a warning and blocks submit when the message exceeds the limit', () => {
+      editorController.characterCount = CHAT_MESSAGE_MAX_LENGTH + 1;
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(screen.getByTestId('agentBuilderConversationInputTooLong')).toHaveTextContent(
+        'Message is too long'
+      );
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(editorController.clear).not.toHaveBeenCalled();
+    });
   });
 
   describe('trigger mode selector', () => {

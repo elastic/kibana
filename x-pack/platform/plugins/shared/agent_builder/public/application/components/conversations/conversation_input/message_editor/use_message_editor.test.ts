@@ -100,4 +100,20 @@ describe('useMessageEditor setContent', () => {
 
     expect(result.current.controller.getPlaceholderNames()).toEqual(['photo.png']);
   });
+
+  it('tracks the character count and resets it on clear', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.setContent('hello world');
+    });
+    expect(result.current.controller.characterCount).toBe('hello world'.length);
+
+    act(() => {
+      result.current.controller.clear();
+    });
+    expect(result.current.controller.characterCount).toBe(0);
+    expect(result.current.controller.isEmpty).toBe(true);
+  });
 });

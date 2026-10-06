@@ -45,6 +45,7 @@ export interface MessageEditorController {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
+  characterCount: number;
   getPlaceholderNames: () => string[];
   removePlaceholderByName: (name: string) => void;
 }
@@ -160,12 +161,12 @@ const useMessageEditorController = ({
   ref,
   syncIsEmpty,
   isEmpty,
-  setIsEmpty,
+  characterCount,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   isEmpty: boolean;
-  setIsEmpty: (next: boolean) => void;
+  characterCount: number;
 }): MessageEditorController => {
   const controller = useMemo(
     () => ({
@@ -202,7 +203,7 @@ const useMessageEditorController = ({
       clear: () => {
         if (ref.current) {
           ref.current.innerHTML = '';
-          setIsEmpty(true);
+          syncIsEmpty();
         }
       },
       getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
@@ -213,8 +214,9 @@ const useMessageEditorController = ({
         }
       },
       isEmpty,
+      characterCount,
     }),
-    [ref, isEmpty, setIsEmpty, syncIsEmpty]
+    [ref, isEmpty, characterCount, syncIsEmpty]
   );
   return controller;
 };
@@ -244,12 +246,14 @@ export const useMessageEditor = (
   const { onEditorFocus, onContentChange } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
+  const [characterCount, setCharacterCount] = useState(0);
 
   const syncIsEmpty = useCallback(() => {
     if (!ref?.current) {
       return;
     }
     const textContent = stripZeroWidthSpaces(ref.current.textContent ?? '');
+    setCharacterCount(textContent.length);
     const nextIsEmpty = !textContent || textContent.trim() === '';
     if (nextIsEmpty) {
       // If current text content is empty clear innerHTML
@@ -260,7 +264,7 @@ export const useMessageEditor = (
   }, []);
 
   const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
-  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, setIsEmpty });
+  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, characterCount });
   const messageEditor = useMemo(
     () => ({
       messageEditor: instance,
