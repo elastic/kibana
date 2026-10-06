@@ -10,10 +10,8 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
-import type { MainCategories } from '@kbn/siem-readiness';
 import {
-  getIndexCategoryMap,
-  isCriticalFailureRate,
+  buildContinuitySummary,
   filterPipelinesByCategories,
   enrichFindings,
 } from '@kbn/siem-readiness';
@@ -28,6 +26,10 @@ import { SIEM_READINESS_CONTINUITY_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
 
+/** Category-scoped `noData` message for the agent tool (differs from the dimension default). */
+const CATEGORIZED_NO_DATA_SUMMARY =
+  'No ingest pipeline statistics available for categorized indices.';
+
 export const getContinuityTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
@@ -36,7 +38,7 @@ export const getContinuityTool = (
   id: SIEM_READINESS_CONTINUITY_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieves SIEM ingest pipeline continuity health. Returns active pipelines with document counts, failure rates, and which indices they serve — filtered to pipelines that serve categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for: (1) pipelines with critical failure rates, (2) data streams that have gone silent (no events received beyond the category-specific threshold), and (3) data streams showing a significant volume drop versus the 7-day baseline. Each actionable finding includes blast radius data (affectedRules, affectedTactics, affectedPlatform) and a type field (pipeline_failure | silence | volume_drop_warning | volume_drop_critical). When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
+    'Retrieves SIEM ingest pipeline continuity health. Returns active pipelines with document counts, failure rates, and which indices they serve — filtered to pipelines that serve categorized SIEM indices. Each pipeline has a `categories` array (the full union of SIEM main categories it serves — never filter by substring in the pipeline name). Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for: (1) pipelines with critical failure rates, (2) data streams that have gone silent (no events received beyond the category-specific threshold), and (3) data streams showing a significant volume drop versus the 7-day baseline. Each actionable finding includes blast radius data (affectedRules, affectedTactics, affectedPlatform), a `categories` array, and a type field (pipeline_failure | silence | volume_drop_warning | volume_drop_critical). When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics. To answer questions about a specific SIEM category/tab (Endpoint, Identity, Network, Cloud, Application/SaaS), include every pipeline and finding whose `categories` array contains that category — a pipeline serving multiple categories (e.g. ["Endpoint","Network"]) must be included for each of them. Never require an exact single-category match, and never filter by pipeline name substring. On serverless, silence and volume-drop checks are evaluated; pipeline failure-rate (nodes.stats) is not available. Continuity signals are real-time: each call fetches live state. For any current/now/latest silence, volume-drop, or pipeline-health question — or any follow-up after an earlier continuity result in this conversation — always re-call this tool; never answer from a prior-turn result.',
   schema,
   tags: ['security', 'siem-readiness', 'continuity'],
   annotations: {
@@ -89,8 +91,6 @@ export const getContinuityTool = (
         dimension: 'continuity',
       });
 
-      const indexToCategoryMap = getIndexCategoryMap(categoriesResult);
-
       // Shared predicate — same function used by the UI continuity tab
       const categorizedItems = filterPipelinesByCategories(payload.items, categoriesResult);
 
@@ -98,27 +98,23 @@ export const getContinuityTool = (
         .filter((finding) => categorizedItems.some((p) => p.name === finding.resource))
         .map((finding) => {
           const pipeline = categorizedItems.find((p) => p.name === finding.resource);
-          const category = pipeline?.indices
-            .map((idx) => indexToCategoryMap.get(idx))
-            .find(Boolean) as MainCategories | undefined;
-          return category ? { ...finding, category } : finding;
+          const categories = pipeline?.categories;
+          return categories?.length ? { ...finding, categories } : finding;
         });
 
-      const failingCount = categorizedItems.filter(
-        (p) => p.statsAvailable && isCriticalFailureRate(p.failedDocsCount, p.docsCount)
-      ).length;
       const filteredStatus =
         categorizedItems.length === 0
           ? ('noData' as const)
-          : failingCount > 0
+          : enrichedFindings.length > 0
           ? ('actionsRequired' as const)
           : ('healthy' as const);
-      const filteredSummary =
-        filteredStatus === 'noData'
-          ? 'No ingest pipeline statistics available for categorized indices.'
-          : failingCount > 0
-          ? `${failingCount} of ${categorizedItems.length} active pipelines have critical failure rates.`
-          : `All ${categorizedItems.length} active ingest pipelines are functioning properly, with no document failures.`;
+
+      const filteredSummary = buildContinuitySummary(
+        filteredStatus,
+        categorizedItems.length,
+        enrichedFindings,
+        CATEGORIZED_NO_DATA_SUMMARY
+      );
 
       return {
         results: [

@@ -14,6 +14,7 @@ import type { MainCategories } from '@kbn/siem-readiness';
 import {
   isRetentionNonCompliant,
   filterRetentionItemsByCategories,
+  getIndexCategoriesMap,
   enrichFindings,
 } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -35,7 +36,7 @@ export const getRetentionTool = (
   id: SIEM_READINESS_RETENTION_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieves SIEM data retention health. Returns data streams and standalone indices with their retention configuration (ILM policy or DSL), retention period in days, and compliance status against the 365-day FedRAMP threshold — filtered to categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for non-compliant indices. Each actionable finding includes blast radius data. When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
+    'Retrieves SIEM data retention health. Returns data streams and standalone indices with their retention configuration (ILM policy or DSL), retention period in days, and compliance status against the 365-day FedRAMP threshold — filtered to categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for non-compliant indices. Each actionable finding includes blast radius data and a `categories` array (filter by this field for category/tab questions). When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
   schema,
   tags: ['security', 'siem-readiness', 'retention'],
   annotations: {
@@ -87,30 +88,43 @@ export const getRetentionTool = (
 
       // Shared predicate — same function used by the UI retention tab
       const categorizedItems = filterRetentionItemsByCategories(payload.items, categoriesResult);
+      const indexToCategoriesMap = getIndexCategoriesMap(categoriesResult);
 
-      // Build the category lookup once from the already-filtered items so findings enrichment
-      // stays in sync with the filter predicate — no separate closure needed.
-      const resourceToCategoryMap = new Map<string, MainCategories>();
-      for (const group of categoriesResult.mainCategoriesMap ?? []) {
-        for (const item of categorizedItems) {
-          if (group.indices.some((idx) => idx.indexName.includes(item.indexName))) {
-            resourceToCategoryMap.set(item.indexName, group.category as MainCategories);
+      // Retention items are data-stream names; categories map keys are often backing indices.
+      // Resolve categories by contains-match (same strategy as filterRetentionItemsByCategories).
+      const resolveCategories = (indexName: string): MainCategories[] => {
+        const direct = indexToCategoriesMap.get(indexName);
+        if (direct?.length) return direct;
+
+        const matched = new Set<MainCategories>();
+        for (const [mapIndex, cats] of indexToCategoriesMap) {
+          if (mapIndex.includes(indexName)) {
+            cats.forEach((c) => matched.add(c));
           }
         }
-      }
+        return Array.from(matched);
+      };
+
+      // Populate categories on items using the same resolver as findings, so item grouping
+      // (UI retention tab + agent attachment) and finding grouping agree — mirroring how
+      // fetchPipelines writes pipeline.categories server-side for continuity.
+      const categorizedItemsWithCategories = categorizedItems.map((item) => {
+        const categories = resolveCategories(item.indexName);
+        return categories.length > 0 ? { ...item, categories } : item;
+      });
 
       const enrichedFindings = allEnrichedFindings
-        .filter((finding) => resourceToCategoryMap.has(finding.resource))
+        .filter((finding) => categorizedItems.some((item) => item.indexName === finding.resource))
         .map((finding) => {
-          const category = resourceToCategoryMap.get(finding.resource);
-          return category !== undefined ? { ...finding, category } : finding;
+          const categories = resolveCategories(finding.resource);
+          return categories.length > 0 ? { ...finding, categories } : finding;
         });
 
-      const nonCompliantCount = categorizedItems.filter((item) =>
+      const nonCompliantCount = categorizedItemsWithCategories.filter((item) =>
         isRetentionNonCompliant(item.status)
       ).length;
       const filteredStatus =
-        categorizedItems.length === 0
+        categorizedItemsWithCategories.length === 0
           ? ('noData' as const)
           : nonCompliantCount > 0
           ? ('actionsRequired' as const)
@@ -119,8 +133,8 @@ export const getRetentionTool = (
         filteredStatus === 'noData'
           ? 'No retention data available for categorized indices.'
           : nonCompliantCount > 0
-          ? `${nonCompliantCount} of ${categorizedItems.length} data streams or indices have retention below the 365-day threshold.`
-          : `All ${categorizedItems.length} data streams and indices meet the 365-day retention requirement.`;
+          ? `${nonCompliantCount} of ${categorizedItemsWithCategories.length} data streams or indices have retention below the 365-day threshold.`
+          : `All ${categorizedItemsWithCategories.length} data streams and indices meet the 365-day retention requirement.`;
 
       return {
         results: [
@@ -131,7 +145,7 @@ export const getRetentionTool = (
               ...payload,
               status: filteredStatus,
               summary: filteredSummary,
-              items: categorizedItems,
+              items: categorizedItemsWithCategories,
               actionableFindings: enrichedFindings,
             },
           },
