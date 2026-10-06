@@ -20,7 +20,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type {
   BulkDeleteExceptionListsRequestBodyInput,
@@ -290,7 +290,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteExceptionListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -315,7 +315,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/items`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteExceptionListItemResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -340,7 +340,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/_duplicate`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, DuplicateExceptionListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -365,7 +365,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/_export`;
 
     return apiClient.post<ScoutResponseBody<TResponseType>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -390,7 +390,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/items/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindExceptionListItemsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -415,7 +415,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindExceptionListsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -440,7 +440,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/_import`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, ImportExceptionListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -465,7 +465,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -490,7 +490,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/items`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListItemResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -517,7 +517,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/summary`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListSummaryResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',

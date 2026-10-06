@@ -109,6 +109,12 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Import artifacts to your artifact list.',
     }
   ),
+  importFlyoutFilePickerLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutFilePickerLabel',
+    {
+      defaultMessage: 'Select or drag and drop a file',
+    }
+  ),
   importFlyoutImportSubmitButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
     {

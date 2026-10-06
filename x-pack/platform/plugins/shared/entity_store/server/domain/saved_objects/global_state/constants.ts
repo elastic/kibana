@@ -24,6 +24,8 @@ export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
+export const MAX_EXCLUDED_USER_NAMES = 200;
+
 /** Bounds for HTTP/SO string fields to prevent unbounded-input DoS. */
 export const MAX_DURATION_STRING_LENGTH = 32;
 export const MAX_INDEX_PATTERN_LENGTH = 2048;
@@ -136,16 +138,20 @@ export const LATEST_LOG_EXTRACTION_DEFAULTS: LogExtractionConfig = LogExtraction
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
 export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
 
+/** User-settable fields with no defaults — use this for HTTP request body schemas. */
+export type HistorySnapshotParams = z.infer<typeof HistorySnapshotParams>;
+export const HistorySnapshotParams = z.object({
+  frequency: durationString,
+  retentionDays: z.number().int().min(1).max(MAX_HISTORY_SNAPSHOT_RETENTION_DAYS),
+});
+
 export type HistorySnapshotState = z.infer<typeof HistorySnapshotState>;
 export const HistorySnapshotState = z.object({
   status: HistorySnapshotStatus.default('started'),
-  frequency: durationString.default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
-  retentionDays: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_HISTORY_SNAPSHOT_RETENTION_DAYS)
-    .default(DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS),
+  frequency: HistorySnapshotParams.shape.frequency.default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
+  retentionDays: HistorySnapshotParams.shape.retentionDays.default(
+    DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS
+  ),
   lastExecutionTimestamp: z.string().max(MAX_TIMESTAMP_STRING_LENGTH).optional(),
   lastError: z
     .object({
@@ -159,6 +165,7 @@ export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;
 export const EntityStoreGlobalState = z.object({
   historySnapshot: HistorySnapshotState,
   logsExtraction: LogExtractionConfig,
+  excludedUserNames: z.array(z.string()).max(MAX_EXCLUDED_USER_NAMES).default([]),
 });
 
 export type EntityStoreGlobalStateOverrides = z.infer<typeof EntityStoreGlobalStateOverrides>;
@@ -171,5 +178,6 @@ export const EntityStoreGlobalStateOverrides = z
     defaultsVersion: z.enum(['legacy', 'latest']),
     historySnapshot: HistorySnapshotState,
     logsExtraction: LogExtractionObj.partial(),
+    excludedUserNames: z.array(z.string()).max(MAX_EXCLUDED_USER_NAMES),
   })
   .partial();

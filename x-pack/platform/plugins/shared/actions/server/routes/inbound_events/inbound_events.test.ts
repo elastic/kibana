@@ -103,6 +103,35 @@ describe('inboundEventsRoute', () => {
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
   });
 
+  it('forwards Authorization ApiKey and the request space to ingest', async () => {
+    const ingest = jest.fn().mockResolvedValue({ status: 'accepted', body: { ok: true } });
+    getSpaceId.mockReturnValueOnce('space-a');
+    const { addVersionMock } = registerRoute({ ingest });
+    const handler = addVersionMock.mock.calls[0][1];
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { connector_type_id: '.slack2', connector_id: 'elastic-apps-slack' },
+      headers: { authorization: `ApiKey ${apiKey}` },
+      query: {},
+      body: { type: 'event_callback' },
+    });
+    const [, , res] = mockHandlerArguments({}, request, ['accepted']);
+
+    await handler({}, request, res);
+
+    expect(ingest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorTypeId: '.slack2',
+        connectorId: 'elastic-apps-slack',
+        spaceId: 'space-a',
+        headers: expect.objectContaining({ authorization: `ApiKey ${apiKey}` }),
+        body: { type: 'event_callback' },
+      })
+    );
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+  });
+
   it('maps forbidden ingest results to 403', async () => {
     const ingest = jest
       .fn()

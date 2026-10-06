@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import type { ActionSourceType } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { findCommentReferenceId } from '../../common/references';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
@@ -37,6 +38,7 @@ import type { UserActionPersistedAttributes } from '../../common/types/user_acti
  *     works without an extra transform.
  *   - `attributes.action` → `action.verb` (`action.action` would be
  *     confusing in queries).
+ *   - `attributes.source` → `source`, same shape; omitted when absent.
  */
 export interface ActivityAnalyticsDoc {
   '@timestamp': string;
@@ -72,6 +74,15 @@ export interface ActivityAnalyticsDoc {
     // hence the distinct name. Present only on `comment` user actions.
     attachment_reference_id?: string;
   };
+  // Omitted when the SO has no `source`.
+  source?: ActivitySourceDoc;
+}
+
+interface ActivitySourceDoc {
+  type: ActionSourceType;
+  id: string;
+  name?: string;
+  run_id?: string;
 }
 
 interface ActivityActorDoc {
@@ -117,6 +128,7 @@ export function buildActivityDoc(
   // to that SO's id, which equals `.cases-attachments._id`. Absent on
   // non-comment actions, which carry no such reference.
   const attachmentReferenceId = findCommentReferenceId(so.references);
+  const source = toSource(a.source);
 
   return {
     '@timestamp': a.created_at,
@@ -135,6 +147,7 @@ export function buildActivityDoc(
       payload_json: stringifyPayload(a.payload),
       ...extractCuratedFields(a.type, a.payload, connectorId, attachmentReferenceId),
     },
+    ...(source ? { source } : {}),
   };
 }
 
@@ -160,6 +173,20 @@ function toActor(user: UserActionPersistedAttributes['created_by'] | null): Acti
     full_name: user.full_name,
     email: user.email,
     profile_uid: user.profile_uid,
+  };
+}
+
+/**
+ * Projects the SO `source`, dropping absent optional fields so the index stays sparse.
+ */
+function toSource(source: UserActionPersistedAttributes['source']): ActivitySourceDoc | undefined {
+  if (source == null) return undefined;
+  const { type, id, name, run_id: runId } = source;
+  return {
+    type,
+    id,
+    ...(name ? { name } : {}),
+    ...(runId ? { run_id: runId } : {}),
   };
 }
 

@@ -115,9 +115,21 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     }),
   };
 
+  const attachmentsClient = {
+    bulkCreate: jest.fn().mockResolvedValue({ created: [], errors: [] }),
+  };
+  const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
+
+  const impactClient = {
+    getEntityIdsByConversationId: jest.fn().mockResolvedValue(new Map<string, string[]>()),
+  };
+  const getImpactClient = jest.fn().mockReturnValue(impactClient);
+
   const service = new EscalationsService({
     logger,
+    getImpactClient,
     getConversationClient,
+    getAttachmentsClient,
     conversationTemplates,
     getInvestigationStatusService: () => investigationStatusService as never,
   });
@@ -126,8 +138,12 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     service,
     client,
     getConversationClient,
+    getAttachmentsClient,
+    attachmentsClient,
     conversationTemplates,
     investigationStatusService,
+    getImpactClient,
+    impactClient,
   };
 };
 
@@ -138,7 +154,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(client.create).toHaveBeenCalledWith(
@@ -152,7 +168,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(client.create).toHaveBeenCalledWith(
@@ -168,7 +184,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(applyTemplate).not.toHaveBeenCalled();
@@ -186,7 +202,7 @@ describe('EscalationsService.create', () => {
       service.create(request, {
         linked_investigation_id: 'inv-1',
         visibility: 'public',
-        collaborators: [],
+        assignees: ['user-a'],
       })
     ).rejects.toBeInstanceOf(InvalidLinkedInvestigationError);
   });
@@ -197,7 +213,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -210,7 +226,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -223,7 +239,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -243,7 +259,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -257,7 +273,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { accessControl } = client.create.mock.calls[0][0];
@@ -265,13 +281,13 @@ describe('EscalationsService.create', () => {
     expect(accessControl).not.toHaveProperty('entries');
   });
 
-  it('sets access_mode: Private with mapped collaborator entries when visibility is "private"', async () => {
+  it('sets access_mode: Private with assignees mapped to ACL entries when visibility is "private"', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'private',
-      collaborators: ['user-a', 'user-b'],
+      assignees: ['user-a', 'user-b'],
     });
 
     const { accessControl } = client.create.mock.calls[0][0];
@@ -284,13 +300,44 @@ describe('EscalationsService.create', () => {
     expect(accessControl.entries[0]).not.toHaveProperty('added_at');
   });
 
+  it('deduplicates repeated assignees in both the private ACL entries and metadata', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'private',
+      assignees: ['user-a', 'user-b', 'user-a'],
+    });
+
+    const { accessControl, metadata } = client.create.mock.calls[0][0];
+    expect(accessControl.entries).toEqual([
+      { type: 'user', id: 'user-a', role: ConversationAccessControlRole.Member },
+      { type: 'user', id: 'user-b', role: ConversationAccessControlRole.Member },
+    ]);
+    expect(metadata.assignees).toEqual(['user-a', 'user-b']);
+  });
+
+  it('does not add ACL entries for a public escalation', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'public',
+      assignees: ['user-a'],
+    });
+
+    const { accessControl } = client.create.mock.calls[0][0];
+    expect(accessControl.access_mode).toBe(ConversationAccessControlMode.Public);
+    expect(accessControl.entries).toBeUndefined();
+  });
+
   it('uses the investigation title as the escalation initial title', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { title } = client.create.mock.calls[0][0];
@@ -304,7 +351,7 @@ describe('EscalationsService.create', () => {
       linked_investigation_id: 'inv-1',
       title: 'Custom escalation title',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { title } = client.create.mock.calls[0][0];
@@ -319,41 +366,26 @@ describe('EscalationsService.create', () => {
       service.create(request, {
         linked_investigation_id: 'inv-1',
         visibility: 'public',
-        collaborators: [],
+        assignees: ['user-a'],
       })
     ).rejects.toThrow(/"escalation" not found/);
   });
 
-  it('sets assignees in metadata when provided', async () => {
+  it('always sets assignees in metadata', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
       assignees: ['uid-creator'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
     expect(metadata.assignees).toEqual(['uid-creator']);
   });
-
-  it('does not set assignees in metadata when empty', async () => {
-    const { service, client } = makeService();
-
-    await service.create(request, {
-      linked_investigation_id: 'inv-1',
-      visibility: 'public',
-      collaborators: [],
-      assignees: [],
-    });
-
-    const { metadata } = client.create.mock.calls[0][0];
-    expect(metadata).not.toHaveProperty('assignees');
-  });
 });
 
-describe('EscalationsService.update', () => {
+describe('EscalationsService.link', () => {
   it('throws NotAnEscalationError when target is not an escalation', async () => {
     const { service } = makeService({
       get: jest.fn().mockResolvedValue({
@@ -363,11 +395,11 @@ describe('EscalationsService.update', () => {
     });
 
     await expect(
-      service.update(request, 'not-an-escalation', { title: 'New title' })
+      service.link(request, 'not-an-escalation', { linked_investigations: ['inv-1'] })
     ).rejects.toBeInstanceOf(NotAnEscalationError);
   });
 
-  it('calls patchMetadata when linked_investigations are provided (appends, not replaces)', async () => {
+  it('calls patchMetadata with appended linked_investigations (not replace)', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -376,7 +408,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-2'],
     });
 
@@ -398,7 +430,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-2', 'inv-3'],
     });
 
@@ -407,35 +439,7 @@ describe('EscalationsService.update', () => {
     expect(updated).toEqual(['inv-1', 'inv-2', 'inv-3']);
   });
 
-  it('calls client.update when title is provided', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {},
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { title: 'Renamed' });
-
-    expect(client.update).toHaveBeenCalledWith({ id: 'escalation-1', title: 'Renamed' });
-  });
-
-  it('does not call patchMetadata for a title-only update', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {},
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { title: 'Renamed' });
-
-    expect(client.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('does not call client.update for a links-only update', async () => {
+  it('does not call client.update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -444,7 +448,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-1'],
     });
 
@@ -550,6 +554,63 @@ describe('EscalationsService.list', () => {
     expect(result).toEqual({
       pagination: { total: 42, page: 2, per_page: 10 },
       results: [MOCK_SUMMARY],
+    });
+  });
+
+  describe('entity_ids', () => {
+    const withLinked = (id: string, linked: string[]) => ({
+      ...MOCK_SUMMARY,
+      id,
+      metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
+    });
+
+    it('attaches the deduped union of the linked investigations entity ids', async () => {
+      const { service, impactClient, getImpactClient } = makeService({
+        search: jest.fn().mockResolvedValue({
+          results: [withLinked('e1', ['inv-1', 'inv-2']), withLinked('e2', ['inv-3'])],
+          total: 2,
+        }),
+      });
+      impactClient.getEntityIdsByConversationId.mockResolvedValue(
+        new Map([
+          ['inv-1', ['host-1', 'user-1']],
+          ['inv-2', ['host-1', 'svc-1']],
+        ])
+      );
+
+      const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(getImpactClient).toHaveBeenCalledWith(request);
+      expect(impactClient.getEntityIdsByConversationId).toHaveBeenCalledTimes(1);
+      expect(impactClient.getEntityIdsByConversationId).toHaveBeenCalledWith([
+        'inv-1',
+        'inv-2',
+        'inv-3',
+      ]);
+      expect(result.results[0].entity_ids).toEqual(['host-1', 'user-1', 'svc-1']);
+      expect(result.results[1]).not.toHaveProperty('entity_ids');
+    });
+
+    it('skips the impact read when no escalation links an investigation', async () => {
+      const { service, getImpactClient } = makeService({
+        search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
+      });
+
+      await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(getImpactClient).not.toHaveBeenCalled();
+    });
+
+    it('still returns the rows when the impact read fails', async () => {
+      const row = withLinked('e1', ['inv-1']);
+      const { service, impactClient } = makeService({
+        search: jest.fn().mockResolvedValue({ results: [row], total: 1 }),
+      });
+      impactClient.getEntityIdsByConversationId.mockRejectedValue(new Error('forbidden'));
+
+      const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(result.results).toEqual([row]);
     });
   });
 
@@ -1074,5 +1135,73 @@ describe('EscalationsService.listLinkedInvestigations', () => {
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
 
     expect(result.results.map((r) => r.id)).toEqual(['inv-a']);
+  });
+});
+
+describe('EscalationsService.addAttachments', () => {
+  const MOCK_INVESTIGATION_WITH_ATTACHMENTS = {
+    ...MOCK_INVESTIGATION,
+    attachments: [
+      {
+        id: 'att-1',
+        type: 'text',
+        active: true,
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: { text: 'hello' },
+            created_at: '2026-01-01T00:00:00.000Z',
+            content_hash: 'h1',
+            estimated_tokens: 2,
+          },
+        ],
+      },
+    ],
+  };
+
+  it('copies attachments from a linked investigation into the escalation', async () => {
+    const { service, attachmentsClient } = makeService({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_ESCALATION)
+        .mockResolvedValueOnce(MOCK_INVESTIGATION_WITH_ATTACHMENTS),
+    });
+    (attachmentsClient.bulkCreate as jest.Mock).mockResolvedValue({
+      created: [MOCK_INVESTIGATION_WITH_ATTACHMENTS.attachments[0]],
+      errors: [],
+    });
+
+    const result = await service.addAttachments(request, 'escalation-1', ['inv-1']);
+
+    expect(result).toEqual({ copied: 1, failed: 0 });
+    expect(attachmentsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'escalation-1' })
+    );
+  });
+
+  it('throws NotAnEscalationError when the target is not an escalation', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION),
+    });
+
+    await expect(service.addAttachments(request, 'not-an-escalation', ['inv-1'])).rejects.toThrow(
+      NotAnEscalationError
+    );
+  });
+
+  it('skips non-investigation conversations and warns', async () => {
+    const { service, attachmentsClient } = makeService({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_ESCALATION)
+        .mockResolvedValueOnce({ ...MOCK_ESCALATION, id: 'other-conv' }),
+    });
+
+    const result = await service.addAttachments(request, 'escalation-1', ['other-conv']);
+
+    expect(result).toEqual({ copied: 0, failed: 0 });
+    expect(attachmentsClient.bulkCreate).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-investigation'));
   });
 });
