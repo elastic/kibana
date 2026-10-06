@@ -15,10 +15,7 @@ import {
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
 import { core as otelCore, metrics, resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
-import { createAnalytics } from '@elastic/ebt/client';
-import type { Event } from '@elastic/ebt/client';
 import {
   getInferenceTracer,
   initInferenceTracerProvider,
@@ -30,10 +27,10 @@ import type {
   SemanticLogSearchResult,
 } from '../../../common/services/semantic_log_search/types';
 import { createSemanticSearchTelemetry, TELEMETRY_SCOPE } from './telemetry';
-import { registerSemanticSearchEvent, SEARCH_COMPLETED_EVENT } from './telemetry_events';
 import { createSemanticLogSearchService, search } from './service';
 import { searchDeps } from './test_helpers';
 import { configSchema } from '../../config';
+import type { RegisterServicesParams } from '../register_services';
 
 class TestMetricReader extends metrics.MetricReader {
   protected async onForceFlush(): Promise<void> {}
@@ -45,7 +42,6 @@ describe('semantic log search telemetry', () => {
   let provider: tracing.BasicTracerProvider;
   let reader: TestMetricReader;
   let meterProvider: metrics.MeterProvider;
-  let analytics: ReturnType<typeof coreMock.createStart>['analytics'];
   let telemetry: ReturnType<typeof createSemanticSearchTelemetry>;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let params: SemanticLogSearchParams;
@@ -59,8 +55,7 @@ describe('semantic log search telemetry', () => {
     trace.setGlobalTracerProvider(provider);
     reader = new TestMetricReader();
     meterProvider = new metrics.MeterProvider({ readers: [reader] });
-    analytics = coreMock.createStart().analytics;
-    telemetry = createSemanticSearchTelemetry(analytics, meterProvider.getMeter(TELEMETRY_SCOPE));
+    telemetry = createSemanticSearchTelemetry(meterProvider.getMeter(TELEMETRY_SCOPE));
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.fieldCaps.mockResolvedValue({
       indices: ['private-logs'],
@@ -104,10 +99,15 @@ describe('semantic log search telemetry', () => {
 
   const execute = () =>
     telemetry.search((observation) => search(params, { ...searchDeps(), observation }));
-  const completedEvent = () =>
-    analytics.reportEvent.mock.calls.find(([type]) => type === SEARCH_COMPLETED_EVENT)?.[1];
   const rootSpan = () =>
     exporter.getFinishedSpans().find(({ name }) => name === 'semantic_log_search.search');
+  const summaryOf = (span?: tracing.ReadableSpan) =>
+    Object.fromEntries(
+      Object.entries(span?.attributes ?? {})
+        .filter(([key]) => key.startsWith(`${TELEMETRY_SCOPE}.`))
+        .map(([key, value]) => [key.slice(TELEMETRY_SCOPE.length + 1), value])
+    );
+  const summary = () => summaryOf(rootSpan());
   const readMetric = async (suffix: string) => {
     const result = await reader.collect();
     return result.resourceMetrics.scopeMetrics
@@ -115,32 +115,24 @@ describe('semantic log search telemetry', () => {
       .find(({ descriptor }) => descriptor.name === `${TELEMETRY_SCOPE}.${suffix}`);
   };
 
-  it('registers the completion schema and instruments the runtime service factory', async () => {
-    const core = coreMock.createStart();
-    const setup = coreMock.createSetup();
-    registerSemanticSearchEvent(setup.analytics);
-    expect(setup.analytics.registerEventType).toHaveBeenCalledWith(
-      expect.objectContaining({ eventType: SEARCH_COMPLETED_EVENT })
-    );
+  it('instruments the runtime service factory', async () => {
     const service = createSemanticLogSearchService({
       logger: searchDeps().logger,
       config: configSchema.validate({}),
-      deps: core,
+      deps: { savedObjects: {}, uiSettings: {} } as RegisterServicesParams['deps'],
     });
     await expect(service.search(params)).resolves.toEqual({ status: 'success', patterns: [] });
-    expect(core.analytics.reportEvent).toHaveBeenCalledWith(
-      SEARCH_COMPLETED_EVENT,
-      expect.objectContaining({ outcome: 'empty' })
-    );
+    expect(summary()).toEqual(expect.objectContaining({ outcome: 'empty' }));
   });
 
   it('records one empty completion, an exact metric count and only the executed phases', async () => {
     await execute();
-    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(completedEvent()).toEqual({
+    expect(summary()).toEqual({
       outcome: 'empty',
       pattern_count: 0,
       caller: 'other',
+      rerank_endpoint: '.rerank-v1-elasticsearch',
+      rerank_service: 'elasticsearch',
       duration_ms: expect.any(Number),
     });
     expect(exporter.getFinishedSpans().map(({ name }) => name)).toEqual([
@@ -150,12 +142,62 @@ describe('semantic log search telemetry', () => {
     ]);
     expect(rootSpan()?.status.code).toBe(SpanStatusCode.OK);
     expect((await readMetric('requests'))?.dataPoints).toEqual([
-      expect.objectContaining({ value: 1, attributes: { outcome: 'empty', caller: 'other' } }),
+      expect.objectContaining({
+        value: 1,
+        attributes: {
+          outcome: 'empty',
+          caller: 'other',
+          rerank_endpoint: '.rerank-v1-elasticsearch',
+        },
+      }),
     ]);
     expect((await readMetric('active_requests'))?.dataPoints[0].value).toBe(0);
     expect((await readMetric('duration'))?.dataPoints[0].value).toEqual(
       expect.objectContaining({ count: 1, sum: expect.any(Number) })
     );
+  });
+
+  it('reports a custom rerank endpoint without its id and a missing one without a service', async () => {
+    esClient.inference.get.mockResolvedValue({
+      endpoints: [
+        {
+          inference_id: 'SECRET-cohere-reranker',
+          task_type: 'rerank',
+          service: 'cohere',
+          service_settings: {},
+          task_settings: {},
+        },
+      ],
+    });
+    await telemetry.search((observation) =>
+      search(params, {
+        ...searchDeps(),
+        rerankInferenceId: 'SECRET-cohere-reranker',
+        observation,
+      })
+    );
+    expect(summary()).toEqual(
+      expect.objectContaining({ rerank_endpoint: 'custom', rerank_service: 'cohere' })
+    );
+
+    exporter.reset();
+    esClient.inference.get.mockResolvedValue({ endpoints: [] });
+    await telemetry.search((observation) =>
+      search(params, { ...searchDeps(), rerankInferenceId: '.jina-reranker-v3', observation })
+    );
+    expect(summary()).toEqual(
+      expect.objectContaining({ outcome: 'unavailable', rerank_endpoint: '.jina-reranker-v3' })
+    );
+    expect(summary()).not.toHaveProperty('rerank_service');
+
+    const requests = (await readMetric('requests'))?.dataPoints ?? [];
+    expect(requests.map(({ attributes }) => attributes.rerank_endpoint).sort()).toEqual([
+      '.jina-reranker-v3',
+      'custom',
+    ]);
+    expect(
+      JSON.stringify({ spans: exporter.getFinishedSpans().map(({ attributes }) => attributes) })
+    ).not.toContain('SECRET');
   });
 
   it('keeps caught failures ERROR and omits request content and raw exception data', async () => {
@@ -165,7 +207,7 @@ describe('semantic log search telemetry', () => {
     await expect(execute()).resolves.toEqual(
       expect.objectContaining({ status: 'error', reason: 'execution' })
     );
-    expect(completedEvent()).toEqual(
+    expect(summary()).toEqual(
       expect.objectContaining({
         outcome: 'failed',
         reason: 'execution',
@@ -179,7 +221,6 @@ describe('semantic log search telemetry', () => {
       SpanStatusCode.ERROR
     );
     const signals = JSON.stringify({
-      events: analytics.reportEvent.mock.calls,
       spans: spans.map(({ attributes, events, status }) => ({ attributes, events, status })),
       metrics: (await reader.collect()).resourceMetrics,
     });
@@ -196,7 +237,7 @@ describe('semantic log search telemetry', () => {
   it('records a partial probe as a failure without changing its result', async () => {
     esClient.esql.query.mockResolvedValue({ is_partial: true, columns: [], values: [] });
     await expect(execute()).resolves.toEqual({ status: 'error', reason: 'scope_too_large' });
-    expect(completedEvent()).toEqual(
+    expect(summary()).toEqual(
       expect.objectContaining({ failure_phase: 'probe', reason: 'scope_too_large' })
     );
     expect(
@@ -215,7 +256,7 @@ describe('semantic log search telemetry', () => {
     if (outcome === 'cancelled')
       esClient.fieldCaps.mockRejectedValue(new errors.RequestAbortedError('SECRET cancelled'));
     await execute();
-    expect(completedEvent()).toEqual(expect.objectContaining({ outcome, reason }));
+    expect(summary()).toEqual(expect.objectContaining({ outcome, reason }));
     expect(rootSpan()?.status.code).toBe(SpanStatusCode.UNSET);
     expect(exporter.getFinishedSpans().flatMap(({ events }) => events)).toEqual([]);
   });
@@ -223,7 +264,7 @@ describe('semantic log search telemetry', () => {
   it('retains the timeout classification', async () => {
     esClient.fieldCaps.mockRejectedValue(new errors.TimeoutError('SECRET timeout'));
     await execute();
-    expect(completedEvent()).toEqual(
+    expect(summary()).toEqual(
       expect.objectContaining({
         outcome: 'failed',
         reason: 'timeout',
@@ -249,7 +290,7 @@ describe('semantic log search telemetry', () => {
     esClient.inference.rerank.mockResolvedValue({ rerank: [{ index: 0, relevance_score: 0.8 }] });
     const result = await execute();
     expect(result.status).toBe('success');
-    expect(completedEvent()).toEqual(
+    expect(summary()).toEqual(
       expect.objectContaining({
         outcome: 'success',
         sampled: true,
@@ -299,7 +340,7 @@ describe('semantic log search telemetry', () => {
     const service = spans.find(({ name }) => name === 'semantic_log_search.search');
     expect(service?.parentSpanContext?.spanId).toBe(parent?.spanContext().spanId);
     expect(service?.spanContext().traceId).toBe(parent?.spanContext().traceId);
-    expect(completedEvent()).toEqual(expect.objectContaining({ caller: 'inference' }));
+    expect(summaryOf(service)).toEqual(expect.objectContaining({ caller: 'inference' }));
   });
 
   it('reports candidate selection and a possible row-limit truncation without exporting patterns', async () => {
@@ -321,7 +362,7 @@ describe('semantic log search telemetry', () => {
       });
     esClient.inference.rerank.mockResolvedValue({ rerank: [] });
     await execute();
-    expect(completedEvent()).toEqual(
+    expect(summary()).toEqual(
       expect.objectContaining({
         sampled: false,
         candidate_count: 1000,
@@ -349,15 +390,13 @@ describe('semantic log search telemetry', () => {
     trace.setGlobalTracerProvider(unsampled);
     await execute();
     expect(exporter.getFinishedSpans()).toHaveLength(0);
-    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect((await readMetric('requests'))?.dataPoints[0].value).toBe(1);
     await unsampled.shutdown();
   });
 
-  it('respects shared tracing suppression while retaining completion metrics and events', async () => {
+  it('respects shared tracing suppression while retaining completion metrics', async () => {
     await context.with(otelCore.suppressTracing(context.active()), execute);
     expect(exporter.getFinishedSpans()).toHaveLength(0);
-    expect(completedEvent()).toEqual(expect.objectContaining({ outcome: 'empty' }));
     expect((await readMetric('requests'))?.dataPoints[0].value).toBe(1);
   });
 
@@ -371,7 +410,7 @@ describe('semantic log search telemetry', () => {
         throw error;
       })
     ).rejects.toBe(error);
-    expect(completedEvent()).toEqual(
+    expect(summary()).toEqual(
       expect.objectContaining({ outcome: 'cancelled', reason: 'cancelled' })
     );
     expect(rootSpan()?.status.code).toBe(SpanStatusCode.UNSET);
@@ -397,82 +436,19 @@ describe('semantic log search telemetry', () => {
     finish({ status: 'success', patterns: [] });
     await first;
     expect((await readMetric('active_requests'))?.dataPoints[0].value).toBe(0);
-    expect(analytics.reportEvent.mock.calls.map(([, event]) => event)).toEqual([
+    expect(
+      exporter
+        .getFinishedSpans()
+        .filter(({ name }) => name === 'semantic_log_search.search')
+        .map(summaryOf)
+    ).toEqual([
       expect.objectContaining({ outcome: 'failed' }),
       expect.objectContaining({ outcome: 'empty', sampled: true }),
     ]);
-    expect(completedEvent()).not.toHaveProperty('sampled');
+    expect(summary()).not.toHaveProperty('sampled');
     expect(JSON.stringify(exporter.getFinishedSpans().map(({ events }) => events))).not.toContain(
       'SECRET'
     );
-  });
-
-  it('preserves the result and records metrics when analytics reporting fails', async () => {
-    analytics.reportEvent.mockImplementation(() => {
-      throw new Error('reporting failed');
-    });
-    await expect(execute()).resolves.toEqual({ status: 'success', patterns: [] });
-    expect((await readMetric('requests'))?.dataPoints[0].value).toBe(1);
-  });
-
-  it('uses EBT schema validation, trace enrichment and opt-out without a custom reporting pipeline', async () => {
-    const reportEvents = jest.fn<void, [Event[]]>();
-    const client = createAnalytics({
-      isDev: true,
-      logger: searchDeps().logger,
-      // Core supplies this callback (preferring legacy APM when present).
-      getTraceContext: () => ({ id: trace.getActiveSpan()?.spanContext().traceId }),
-    });
-    const TestShipper = Object.assign(
-      jest.fn(() => ({
-        reportEvents,
-        optIn: jest.fn(),
-        flush: async () => {},
-        shutdown: jest.fn(),
-      })),
-      { shipperName: 'semantic-search-test' }
-    );
-    try {
-      registerSemanticSearchEvent(client);
-      client.registerShipper(TestShipper, {});
-      client.optIn({ global: { enabled: true } });
-      telemetry = createSemanticSearchTelemetry(client, meterProvider.getMeter(TELEMETRY_SCOPE));
-      await execute();
-      expect(reportEvents).toHaveBeenCalledTimes(1);
-      expect(reportEvents.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          event_type: SEARCH_COMPLETED_EVENT,
-          properties: expect.objectContaining({
-            outcome: 'empty',
-            duration_ms: expect.any(Number),
-          }),
-          trace: { id: rootSpan()?.spanContext().traceId },
-        }),
-      ]);
-
-      esClient.esql.query.mockRejectedValue(new errors.TimeoutError('SECRET timeout'));
-      await execute();
-      expect(reportEvents.mock.calls[1][0][0].properties).toEqual(
-        expect.objectContaining({
-          outcome: 'failed',
-          error_type: 'TimeoutError',
-          failure_phase: 'probe',
-        })
-      );
-      expect(JSON.stringify(reportEvents.mock.calls)).not.toContain('SECRET');
-
-      client.optIn({ global: { enabled: false } });
-      await execute();
-      expect(reportEvents).toHaveBeenCalledTimes(2);
-      expect(
-        (await readMetric('requests'))?.dataPoints.reduce(
-          (sum, point) => sum + Number(point.value),
-          0
-        )
-      ).toBe(3);
-    } finally {
-      await client.shutdown();
-    }
   });
 
   it('does not expose raw errors through shared tracing when ending a span fails', async () => {
@@ -495,7 +471,7 @@ describe('semantic log search telemetry', () => {
     expect(
       JSON.stringify(exporter.getFinishedSpans().map(({ events, status }) => ({ events, status })))
     ).not.toContain('SECRET');
-    expect(completedEvent()).toEqual(expect.objectContaining({ outcome: 'failed' }));
+    expect(summary()).toEqual(expect.objectContaining({ outcome: 'failed' }));
   });
 
   it('does not execute requests twice when tracing fails', async () => {
@@ -504,19 +480,19 @@ describe('semantic log search telemetry', () => {
     });
     await expect(execute()).resolves.toEqual({ status: 'success', patterns: [] });
     expect(esClient.esql.query).toHaveBeenCalledTimes(1);
-    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect((await readMetric('requests'))?.dataPoints[0].value).toBe(1);
   });
 
-  it('preserves results and analytics when a metric instrument throws', async () => {
+  it('preserves results and spans when a metric instrument throws', async () => {
     const meter = meterProvider.getMeter('failing_metric');
     const counter = meter.createCounter('failing_counter');
     jest.spyOn(counter, 'add').mockImplementation(() => {
       throw new Error('metric failed');
     });
     jest.spyOn(meter, 'createCounter').mockReturnValue(counter);
-    telemetry = createSemanticSearchTelemetry(analytics, meter);
+    telemetry = createSemanticSearchTelemetry(meter);
     await expect(execute()).resolves.toEqual({ status: 'success', patterns: [] });
-    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(summary()).toEqual(expect.objectContaining({ outcome: 'empty' }));
     expect(rootSpan()?.status.code).toBe(SpanStatusCode.OK);
   });
 
@@ -524,9 +500,9 @@ describe('semantic log search telemetry', () => {
     jest.spyOn(metricsApi, 'getMeter').mockImplementation(() => {
       throw new Error('meter unavailable');
     });
-    telemetry = createSemanticSearchTelemetry(analytics);
+    telemetry = createSemanticSearchTelemetry();
     await expect(execute()).resolves.toEqual({ status: 'success', patterns: [] });
-    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(summary()).toEqual(expect.objectContaining({ outcome: 'empty' }));
     expect(rootSpan()?.status.code).toBe(SpanStatusCode.OK);
   });
 
@@ -537,9 +513,9 @@ describe('semantic log search telemetry', () => {
       jest.spyOn(meter, method).mockImplementation(() => {
         throw new Error('instrument unavailable');
       });
-      telemetry = createSemanticSearchTelemetry(analytics, meter);
+      telemetry = createSemanticSearchTelemetry(meter);
       await expect(execute()).resolves.toEqual({ status: 'success', patterns: [] });
-      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(summary()).toEqual(expect.objectContaining({ outcome: 'empty' }));
       expect(rootSpan()?.status.code).toBe(SpanStatusCode.OK);
     }
   );
@@ -550,8 +526,6 @@ describe('semantic log search telemetry', () => {
     });
     await expect(execute()).resolves.toEqual({ status: 'success', patterns: [] });
     expect(esClient.esql.query).toHaveBeenCalledTimes(1);
-    expect(completedEvent()).toEqual(
-      expect.objectContaining({ outcome: 'empty', caller: 'other' })
-    );
+    expect(summary()).toEqual(expect.objectContaining({ outcome: 'empty', caller: 'other' }));
   });
 });

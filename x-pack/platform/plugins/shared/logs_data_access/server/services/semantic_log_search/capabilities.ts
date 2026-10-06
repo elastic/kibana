@@ -60,19 +60,25 @@ export async function hasRequiredFields(
   return hasAllFields ? 'ok' : 'missing_fields';
 }
 
-/** Returns true when the configured RERANK inference endpoint is available on the cluster. */
-export async function detectRerankCapability(
+export interface RerankEndpoint {
+  /** Elasticsearch inference service backing the endpoint, for example `elastic` or `cohere`. */
+  service: string;
+}
+
+/** Returns the configured RERANK inference endpoint, or undefined when the cluster does not have it. */
+export async function getRerankEndpoint(
   esClient: ElasticsearchClient,
   inferenceId: string
-): Promise<boolean> {
+): Promise<RerankEndpoint | undefined> {
   try {
     const response = await esClient.inference.get({ inference_id: inferenceId });
-    return (response.endpoints?.length ?? 0) > 0;
+    const [endpoint] = response.endpoints ?? [];
+    return endpoint ? { service: endpoint.service } : undefined;
   } catch (error) {
     // Only a genuine 404 means the endpoint is absent. Authorization (403) and transport (503)
     // failures must propagate so callers do not misreport them as a missing cluster feature.
     if (isNotFoundError(error)) {
-      return false;
+      return undefined;
     }
     throw error;
   }

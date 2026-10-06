@@ -16,7 +16,6 @@ import { uiSettings } from '../common/ui_settings';
 import type { LogsDataAccessConfig } from './config';
 import { registerServices } from './services/register_services';
 import type { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
-import { registerSemanticSearchEvent } from './services/semantic_log_search/telemetry_events';
 
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
 export type LogsDataAccessPluginStart = ReturnType<LogsDataAccessPlugin['start']>;
@@ -39,11 +38,6 @@ export class LogsDataAccessPlugin
   }
   public setup(core: CoreSetup, plugins: LogsDataAccessPluginSetupDeps) {
     core.uiSettings.register(uiSettings);
-    try {
-      registerSemanticSearchEvent(core.analytics);
-    } catch {
-      this.logger.warn('Semantic log search completion telemetry could not be registered.');
-    }
   }
 
   public start(core: CoreStart, plugins: LogsDataAccessPluginStartDeps) {
@@ -51,7 +45,6 @@ export class LogsDataAccessPlugin
       logger: this.logger,
       config: this.config,
       deps: {
-        analytics: core.analytics,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
       },

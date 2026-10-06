@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { hasRequiredFields, detectRerankCapability } from './capabilities';
+import { hasRequiredFields, getRerankEndpoint } from './capabilities';
 import { RERANK_ENDPOINT } from './constants';
 
 describe('capabilities', () => {
@@ -135,8 +135,8 @@ describe('capabilities', () => {
     });
   });
 
-  describe('detectRerankCapability', () => {
-    it('returns true when rerank endpoint exists', async () => {
+  describe('getRerankEndpoint', () => {
+    it('returns the backing service when the rerank endpoint exists', async () => {
       const mockEsClient = {
         inference: {
           get: jest.fn().mockResolvedValue({
@@ -144,21 +144,22 @@ describe('capabilities', () => {
               {
                 inference_id: '.rerank-v1-elasticsearch',
                 task_type: 'rerank',
+                service: 'elasticsearch',
               },
             ],
           }),
         },
       } as unknown as ElasticsearchClient;
 
-      const result = await detectRerankCapability(mockEsClient, RERANK_ENDPOINT);
+      const result = await getRerankEndpoint(mockEsClient, RERANK_ENDPOINT);
 
-      expect(result).toBe(true);
+      expect(result).toEqual({ service: 'elasticsearch' });
       expect(mockEsClient.inference.get).toHaveBeenCalledWith({
         inference_id: '.rerank-v1-elasticsearch',
       });
     });
 
-    it('returns false when the rerank endpoint does not exist (genuine 404)', async () => {
+    it('returns undefined when the rerank endpoint does not exist (genuine 404)', async () => {
       const notFoundError = new errors.ResponseError({
         body: { error: { type: 'resource_not_found_exception' } },
         statusCode: 404,
@@ -172,9 +173,9 @@ describe('capabilities', () => {
         },
       } as unknown as ElasticsearchClient;
 
-      const result = await detectRerankCapability(mockEsClient, RERANK_ENDPOINT);
+      const result = await getRerankEndpoint(mockEsClient, RERANK_ENDPOINT);
 
-      expect(result).toBe(false);
+      expect(result).toBeUndefined();
     });
 
     it('propagates a 403 authorization error rather than reporting the endpoint as absent', async () => {
@@ -196,10 +197,10 @@ describe('capabilities', () => {
         },
       } as unknown as ElasticsearchClient;
 
-      await expect(detectRerankCapability(mockEsClient, RERANK_ENDPOINT)).rejects.toThrow();
+      await expect(getRerankEndpoint(mockEsClient, RERANK_ENDPOINT)).rejects.toThrow();
     });
 
-    it('returns false when endpoints array is empty', async () => {
+    it('returns undefined when endpoints array is empty', async () => {
       const mockEsClient = {
         inference: {
           get: jest.fn().mockResolvedValue({
@@ -208,21 +209,21 @@ describe('capabilities', () => {
         },
       } as unknown as ElasticsearchClient;
 
-      const result = await detectRerankCapability(mockEsClient, RERANK_ENDPOINT);
+      const result = await getRerankEndpoint(mockEsClient, RERANK_ENDPOINT);
 
-      expect(result).toBe(false);
+      expect(result).toBeUndefined();
     });
 
-    it('returns false when endpoints is undefined', async () => {
+    it('returns undefined when endpoints is undefined', async () => {
       const mockEsClient = {
         inference: {
           get: jest.fn().mockResolvedValue({}),
         },
       } as unknown as ElasticsearchClient;
 
-      const result = await detectRerankCapability(mockEsClient, RERANK_ENDPOINT);
+      const result = await getRerankEndpoint(mockEsClient, RERANK_ENDPOINT);
 
-      expect(result).toBe(false);
+      expect(result).toBeUndefined();
     });
   });
 });

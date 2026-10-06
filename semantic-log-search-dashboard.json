@@ -1,0 +1,628 @@
+{
+  "title": "Semantic log search — health",
+  "description": "OTel metrics, spans and logs for semanticLogSearch.search(). Success rate excludes unavailable, cancelled and rejected searches.",
+  "time_range": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "vis",
+      "id": "kpi-searches",
+      "grid": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 5
+      },
+      "config": {
+        "title": "",
+        "type": "metric",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.requests IS NOT NULL | STATS `Searches` = SUM(TO_LONG(metrics.kibana.logs.semantic_search.requests))"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "Searches"
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "kpi-success-rate",
+      "grid": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 5
+      },
+      "config": {
+        "title": "",
+        "type": "metric",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.requests IS NOT NULL | EVAL n = TO_LONG(metrics.kibana.logs.semantic_search.requests) | STATS ok = SUM(CASE(attributes.outcome IN (\"success\", \"empty\"), n, 0)), failed = SUM(CASE(attributes.outcome == \"failed\", n, 0)) | EVAL `Success rate` = ok * 1.0 / (ok + failed) | KEEP `Success rate`"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "Success rate",
+            "format": {
+              "type": "percent",
+              "decimals": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "kpi-p95",
+      "grid": {
+        "x": 24,
+        "y": 0,
+        "w": 12,
+        "h": 5
+      },
+      "config": {
+        "title": "",
+        "type": "metric",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.duration IS NOT NULL | STATS `p95 latency` = PERCENTILE(metrics.kibana.logs.semantic_search.duration, 95) * 1000"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "p95 latency",
+            "format": {
+              "type": "duration",
+              "from": "ms",
+              "to": "auto",
+              "decimals": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "kpi-unavailable",
+      "grid": {
+        "x": 36,
+        "y": 0,
+        "w": 12,
+        "h": 5
+      },
+      "config": {
+        "title": "",
+        "type": "metric",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.requests IS NOT NULL | EVAL n = TO_LONG(metrics.kibana.logs.semantic_search.requests) | STATS `Unavailable` = SUM(CASE(attributes.outcome == \"unavailable\", n, 0))"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "Unavailable"
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "searches-by-outcome",
+      "grid": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 10
+      },
+      "config": {
+        "title": "Searches by outcome",
+        "type": "xy",
+        "legend": {
+          "visibility": "visible",
+          "position": "bottom"
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": false
+            },
+            "scale": "temporal",
+            "domain": {
+              "type": "fit",
+              "rounding": false
+            }
+          },
+          "y": {
+            "title": {
+              "visible": false
+            }
+          }
+        },
+        "layers": [
+          {
+            "type": "bar_stacked",
+            "data_source": {
+              "type": "esql",
+              "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.requests IS NOT NULL | STATS searches = SUM(TO_LONG(metrics.kibana.logs.semantic_search.requests)) BY BUCKET(@timestamp, 60, ?_tstart, ?_tend), outcome = attributes.outcome"
+            },
+            "x": {
+              "column": "BUCKET(@timestamp, 60, ?_tstart, ?_tend)",
+              "label": "@timestamp"
+            },
+            "y": [
+              {
+                "column": "searches"
+              }
+            ],
+            "breakdown_by": {
+              "column": "outcome"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "latency-over-time",
+      "grid": {
+        "x": 24,
+        "y": 5,
+        "w": 24,
+        "h": 10
+      },
+      "config": {
+        "title": "Search latency (p50 / p95)",
+        "type": "xy",
+        "legend": {
+          "visibility": "visible",
+          "position": "bottom"
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": false
+            },
+            "scale": "temporal",
+            "domain": {
+              "type": "fit",
+              "rounding": false
+            }
+          },
+          "y": {
+            "title": {
+              "visible": false
+            }
+          }
+        },
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "esql",
+              "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.duration IS NOT NULL | STATS p50 = PERCENTILE(metrics.kibana.logs.semantic_search.duration, 50) * 1000, p95 = PERCENTILE(metrics.kibana.logs.semantic_search.duration, 95) * 1000 BY BUCKET(@timestamp, 60, ?_tstart, ?_tend)"
+            },
+            "x": {
+              "column": "BUCKET(@timestamp, 60, ?_tstart, ?_tend)",
+              "label": "@timestamp"
+            },
+            "y": [
+              {
+                "column": "p50",
+                "format": {
+                  "type": "duration",
+                  "from": "ms",
+                  "to": "auto",
+                  "decimals": 0
+                }
+              },
+              {
+                "column": "p95",
+                "format": {
+                  "type": "duration",
+                  "from": "ms",
+                  "to": "auto",
+                  "decimals": 0
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "phase-p95",
+      "grid": {
+        "x": 0,
+        "y": 15,
+        "w": 16,
+        "h": 10
+      },
+      "config": {
+        "title": "p95 latency by phase",
+        "type": "xy",
+        "axis": {
+          "x": {
+            "title": {
+              "visible": false
+            }
+          },
+          "y": {
+            "title": {
+              "visible": false
+            }
+          }
+        },
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "esql",
+              "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.phase.duration IS NOT NULL | STATS p95 = PERCENTILE(metrics.kibana.logs.semantic_search.phase.duration, 95) * 1000 BY phase = attributes.phase | SORT p95 DESC"
+            },
+            "x": {
+              "column": "phase"
+            },
+            "y": [
+              {
+                "column": "p95",
+                "format": {
+                  "type": "duration",
+                  "from": "ms",
+                  "to": "auto",
+                  "decimals": 0
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "phase-over-time",
+      "grid": {
+        "x": 16,
+        "y": 15,
+        "w": 16,
+        "h": 10
+      },
+      "config": {
+        "title": "p95 phase latency over time",
+        "type": "xy",
+        "legend": {
+          "visibility": "visible",
+          "position": "bottom"
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": false
+            },
+            "scale": "temporal",
+            "domain": {
+              "type": "fit",
+              "rounding": false
+            }
+          },
+          "y": {
+            "title": {
+              "visible": false
+            }
+          }
+        },
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "esql",
+              "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.phase.duration IS NOT NULL | STATS p95 = PERCENTILE(metrics.kibana.logs.semantic_search.phase.duration, 95) * 1000 BY BUCKET(@timestamp, 60, ?_tstart, ?_tend), phase = attributes.phase"
+            },
+            "x": {
+              "column": "BUCKET(@timestamp, 60, ?_tstart, ?_tend)",
+              "label": "@timestamp"
+            },
+            "y": [
+              {
+                "column": "p95",
+                "format": {
+                  "type": "duration",
+                  "from": "ms",
+                  "to": "auto",
+                  "decimals": 0
+                }
+              }
+            ],
+            "breakdown_by": {
+              "column": "phase"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "active-requests",
+      "grid": {
+        "x": 32,
+        "y": 15,
+        "w": 16,
+        "h": 10
+      },
+      "config": {
+        "title": "Peak concurrent searches",
+        "type": "xy",
+        "axis": {
+          "x": {
+            "title": {
+              "visible": false
+            },
+            "scale": "temporal",
+            "domain": {
+              "type": "fit",
+              "rounding": false
+            }
+          },
+          "y": {
+            "title": {
+              "visible": false
+            }
+          }
+        },
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "esql",
+              "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.active_requests IS NOT NULL | STATS peak = MAX(TO_LONG(metrics.kibana.logs.semantic_search.active_requests)) BY BUCKET(@timestamp, 60, ?_tstart, ?_tend)"
+            },
+            "x": {
+              "column": "BUCKET(@timestamp, 60, ?_tstart, ?_tend)",
+              "label": "@timestamp"
+            },
+            "y": [
+              {
+                "column": "peak"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "failures-by-reason",
+      "grid": {
+        "x": 0,
+        "y": 25,
+        "w": 20,
+        "h": 10
+      },
+      "config": {
+        "title": "Failed and unavailable searches by reason and phase",
+        "type": "data_table",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM metrics-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND metrics.kibana.logs.semantic_search.requests IS NOT NULL AND attributes.outcome NOT IN (\"success\", \"empty\") | STATS searches = SUM(TO_LONG(metrics.kibana.logs.semantic_search.requests)) BY outcome = attributes.outcome, reason = attributes.reason, phase = attributes.failure_phase | SORT searches DESC"
+        },
+        "metrics": [
+          {
+            "column": "searches"
+          }
+        ],
+        "rows": [
+          {
+            "column": "outcome"
+          },
+          {
+            "column": "reason"
+          },
+          {
+            "column": "phase"
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "recent-warnings",
+      "grid": {
+        "x": 20,
+        "y": 25,
+        "w": 28,
+        "h": 10
+      },
+      "config": {
+        "title": "Service log messages by level",
+        "type": "data_table",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM logs-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND attributes.log.logger == \"plugins.logsDataAccess\" | EVAL message = SUBSTRING(body.text, 0, 160) | STATS occurrences = COUNT(*), last_seen = MAX(@timestamp) BY level = severity_text, message | SORT last_seen DESC | LIMIT 50"
+        },
+        "metrics": [
+          {
+            "column": "occurrences"
+          }
+        ],
+        "rows": [
+          {
+            "column": "level"
+          },
+          {
+            "column": "message"
+          },
+          {
+            "column": "last_seen"
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "kpi-sampled",
+      "grid": {
+        "x": 0,
+        "y": 35,
+        "w": 12,
+        "h": 5
+      },
+      "config": {
+        "title": "",
+        "type": "metric",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM traces-generic.otel-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND name == \"semantic_log_search.search\" AND attributes.kibana.logs.semantic_search.sampled IS NOT NULL | STATS `Sampled searches` = AVG(CASE(attributes.kibana.logs.semantic_search.sampled == true, 1.0, 0.0))"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "Sampled searches",
+            "format": {
+              "type": "percent",
+              "decimals": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "kpi-capped",
+      "grid": {
+        "x": 12,
+        "y": 35,
+        "w": 12,
+        "h": 5
+      },
+      "config": {
+        "title": "",
+        "type": "metric",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM traces-generic.otel-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND name == \"semantic_log_search.search\" AND attributes.kibana.logs.semantic_search.candidates_capped IS NOT NULL | STATS `Candidates capped` = AVG(CASE(attributes.kibana.logs.semantic_search.candidates_capped == true, 1.0, 0.0))"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "Candidates capped",
+            "format": {
+              "type": "percent",
+              "decimals": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "kpi-row-limit",
+      "grid": {
+        "x": 24,
+        "y": 35,
+        "w": 12,
+        "h": 5
+      },
+      "config": {
+        "title": "",
+        "type": "metric",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM traces-generic.otel-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND name == \"semantic_log_search.search\" AND attributes.kibana.logs.semantic_search.categorize_row_limit_reached IS NOT NULL | STATS `Categorize row limit hit` = AVG(CASE(attributes.kibana.logs.semantic_search.categorize_row_limit_reached == true, 1.0, 0.0))"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "Categorize row limit hit",
+            "format": {
+              "type": "percent",
+              "decimals": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "kpi-candidates",
+      "grid": {
+        "x": 36,
+        "y": 35,
+        "w": 12,
+        "h": 5
+      },
+      "config": {
+        "title": "",
+        "type": "metric",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM traces-generic.otel-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND name == \"semantic_log_search.search\" AND attributes.kibana.logs.semantic_search.candidate_count IS NOT NULL | STATS `p95 rerank candidates` = PERCENTILE(attributes.kibana.logs.semantic_search.candidate_count, 95)"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "p95 rerank candidates"
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "id": "slowest-searches",
+      "grid": {
+        "x": 0,
+        "y": 40,
+        "w": 48,
+        "h": 12
+      },
+      "config": {
+        "title": "Slowest searches (open trace_id in Discover for the phase breakdown)",
+        "type": "data_table",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM traces-generic.otel-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart AND name == \"semantic_log_search.search\" | EVAL duration_ms = ROUND(duration / 1000000.0, 1) | KEEP @timestamp, duration_ms, attributes.kibana.logs.semantic_search.outcome, attributes.kibana.logs.semantic_search.caller, attributes.kibana.logs.semantic_search.candidate_count, attributes.kibana.logs.semantic_search.pattern_count, attributes.kibana.logs.semantic_search.sampled, attributes.kibana.logs.semantic_search.candidates_capped, attributes.kibana.logs.semantic_search.rerank_input_characters, trace_id | RENAME attributes.kibana.logs.semantic_search.outcome AS outcome, attributes.kibana.logs.semantic_search.caller AS caller, attributes.kibana.logs.semantic_search.candidate_count AS candidates, attributes.kibana.logs.semantic_search.pattern_count AS patterns, attributes.kibana.logs.semantic_search.sampled AS sampled, attributes.kibana.logs.semantic_search.candidates_capped AS capped, attributes.kibana.logs.semantic_search.rerank_input_characters AS rerank_chars | SORT duration_ms DESC | LIMIT 20"
+        },
+        "metrics": [
+          {
+            "column": "duration_ms"
+          },
+          {
+            "column": "candidates"
+          },
+          {
+            "column": "patterns"
+          },
+          {
+            "column": "rerank_chars"
+          }
+        ],
+        "rows": [
+          {
+            "column": "@timestamp"
+          },
+          {
+            "column": "outcome"
+          },
+          {
+            "column": "caller"
+          },
+          {
+            "column": "sampled"
+          },
+          {
+            "column": "capped"
+          },
+          {
+            "column": "trace_id"
+          }
+        ]
+      }
+    }
+  ]
+}

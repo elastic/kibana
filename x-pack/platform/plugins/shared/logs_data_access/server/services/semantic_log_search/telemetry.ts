@@ -8,19 +8,21 @@
 import { performance } from 'perf_hooks';
 import { context, metrics, SpanStatusCode, ValueType } from '@opentelemetry/api';
 import type { Attributes, Meter, Span } from '@opentelemetry/api';
-import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { getInferenceTracer, isInInferenceContext } from '@kbn/inference-tracing';
 import type {
   SemanticLogSearchResult,
   LogPattern,
 } from '../../../common/services/semantic_log_search/types';
-import type { SearchPhase } from '../../../common/services/semantic_log_search/constants';
-import { classifyTelemetryError, SEARCH_COMPLETED_EVENT } from './telemetry_events';
-import type { SearchCompletedEvent, SearchOutcome } from './telemetry_events';
+import type {
+  ErrorReason,
+  SearchPhase,
+  UnavailableReason,
+} from '../../../common/services/semantic_log_search/constants';
 import { isCancellationError } from './results';
 
 export const TELEMETRY_SCOPE = 'kibana.logs.semantic_search';
+const CUSTOM_RERANK_ENDPOINT = 'custom';
 const DURATION_BUCKETS = [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60, 90];
 const PHASE_SPAN_NAMES = {
   capabilities: 'capabilities',
@@ -28,14 +30,54 @@ const PHASE_SPAN_NAMES = {
   search: 'collect_candidates',
   rerank: 'rerank',
 } as const;
+const ERROR_TYPES = [
+  'parsing_exception',
+  'verification_exception',
+  'security_exception',
+  'circuit_breaking_exception',
+  'es_rejected_execution_exception',
+  'resource_not_found_exception',
+  'index_not_found_exception',
+  'model_deployment_timeout_exception',
+  'timeout_exception',
+  'TimeoutError',
+  'ResponseError',
+  'TypeError',
+  'Error',
+] as const;
+type TelemetryErrorType = (typeof ERROR_TYPES)[number] | 'other';
+
+type SearchOutcome = 'success' | 'empty' | 'unavailable' | 'rejected' | 'cancelled' | 'failed';
+
+/** Root span attributes, unprefixed. Every value is bounded and free of request content. */
+interface SearchSummary {
+  outcome: SearchOutcome;
+  duration_ms: number;
+  caller: 'inference' | 'other';
+  reason?: ErrorReason | UnavailableReason;
+  error_type?: TelemetryErrorType;
+  failure_phase?: SearchPhase | 'validation' | 'unknown';
+  pattern_count?: number;
+  sampled?: boolean;
+  candidate_count?: number;
+  selected_candidate_count?: number;
+  candidates_capped?: boolean;
+  categorize_row_limit_reached?: boolean;
+  rerank_endpoint?: string;
+  rerank_service?: string;
+}
 type Evidence = Pick<
-  SearchCompletedEvent,
+  SearchSummary,
   | 'sampled'
   | 'candidate_count'
   | 'selected_candidate_count'
   | 'candidates_capped'
   | 'categorize_row_limit_reached'
 >;
+
+/** Bounds error classifiers that can otherwise contain arbitrary Error names or Elasticsearch strings. */
+export const classifyTelemetryError = (type: string): TelemetryErrorType =>
+  ERROR_TYPES.find((allowed) => allowed === type) ?? 'other';
 interface CategorizeAttributes {
   pass: 'single' | 'head' | 'rare' | 'fallback';
   sampling_probability: number;
@@ -56,6 +98,7 @@ export interface SearchObservation {
   ) => Promise<LogPattern[]>;
   evidence: (values: Evidence) => void;
   inputSize: (characters: number) => void;
+  rerankEndpoint: (inferenceId: string, service?: string) => void;
 }
 
 export interface SemanticSearchTelemetry {
@@ -79,6 +122,13 @@ const attributesFor = (values: Attributes): Attributes =>
   Object.fromEntries(
     Object.entries(values).map(([key, value]) => [`${TELEMETRY_SCOPE}.${key}`, value])
   );
+
+/**
+ * Bounds the configured inference id for metric and span attributes. Elasticsearch rejects
+ * user-created ids that start with a dot, so those are always Elastic's preconfigured catalog.
+ */
+export const toRerankEndpointLabel = (inferenceId: string): string =>
+  inferenceId.startsWith('.') ? inferenceId : CUSTOM_RERANK_ENDPOINT;
 
 const getOutcome = (result: SemanticLogSearchResult): SearchOutcome => {
   if (result.status === 'success') return result.patterns.length ? 'success' : 'empty';
@@ -151,10 +201,7 @@ export const observePhase = <T>(
 ): Promise<T> => (observation ? observation.phase(phase, run, failed) : run());
 
 /** Creates service telemetry with stable metric instruments and request-local observation state. */
-export const createSemanticSearchTelemetry = (
-  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>,
-  configuredMeter?: Meter
-): SemanticSearchTelemetry => {
+export const createSemanticSearchTelemetry = (configuredMeter?: Meter): SemanticSearchTelemetry => {
   const meter = safely(() => configuredMeter ?? metrics.getMeter(TELEMETRY_SCOPE));
   const completed = safely(() =>
     meter?.createCounter(`${TELEMETRY_SCOPE}.requests`, {
@@ -194,7 +241,8 @@ export const createSemanticSearchTelemetry = (
       const start = performance.now();
       const caller = inInferenceContext() ? 'inference' : 'other';
       const evidence: Evidence = {};
-      let lastPhase: SearchCompletedEvent['failure_phase'] = 'validation';
+      const rerank: Pick<SearchSummary, 'rerank_endpoint' | 'rerank_service'> = {};
+      let lastPhase: SearchSummary['failure_phase'] = 'validation';
       safely(() => active?.add(1));
 
       return withServiceSpan('semantic_log_search.search', { caller }, async (rootSpan) => {
@@ -221,6 +269,7 @@ export const createSemanticSearchTelemetry = (
                 phaseDuration?.record((performance.now() - phaseStart) / 1000, {
                   phase: name,
                   outcome,
+                  ...(rerank.rerank_endpoint ? { rerank_endpoint: rerank.rerank_endpoint } : {}),
                 })
               );
               finishSpan(span, outcome);
@@ -256,9 +305,13 @@ export const createSemanticSearchTelemetry = (
               rootSpan?.setAttribute(`${TELEMETRY_SCOPE}.rerank_input_characters`, characters)
             );
           },
+          rerankEndpoint: (inferenceId, service) => {
+            rerank.rerank_endpoint = toRerankEndpointLabel(inferenceId);
+            if (service) rerank.rerank_service = service;
+          },
         };
 
-        let completion: Omit<SearchCompletedEvent, 'duration_ms' | 'caller'> = {
+        let completion: Omit<SearchSummary, 'duration_ms' | 'caller'> = {
           outcome: 'failed',
           reason: 'execution',
           failure_phase: 'unknown',
@@ -292,9 +345,10 @@ export const createSemanticSearchTelemetry = (
           throw error;
         } finally {
           const elapsed = performance.now() - start;
-          const event: SearchCompletedEvent = {
+          const summary: SearchSummary = {
             ...completion,
             ...evidence,
+            ...rerank,
             duration_ms: elapsed,
             caller,
           };
@@ -303,12 +357,12 @@ export const createSemanticSearchTelemetry = (
             caller,
             ...(completion.reason ? { reason: completion.reason } : {}),
             ...(completion.failure_phase ? { failure_phase: completion.failure_phase } : {}),
+            ...(rerank.rerank_endpoint ? { rerank_endpoint: rerank.rerank_endpoint } : {}),
           };
           safely(() => active?.add(-1));
           safely(() => completed?.add(1, attributes));
           safely(() => duration?.record(elapsed / 1000, attributes));
-          safely(() => analytics.reportEvent(SEARCH_COMPLETED_EVENT, event));
-          safely(() => rootSpan?.setAttributes(attributesFor({ ...event })));
+          safely(() => rootSpan?.setAttributes(attributesFor({ ...summary })));
           finishSpan(rootSpan, completion.outcome, completion.error_type ?? completion.reason);
         }
       });

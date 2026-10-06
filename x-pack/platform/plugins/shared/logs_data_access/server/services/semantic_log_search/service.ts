@@ -16,7 +16,7 @@ import {
   UNAVAILABLE_REASON,
 } from '../../../common/services/semantic_log_search/constants';
 import type { RegisterServicesParams } from '../register_services';
-import { hasRequiredFields, detectRerankCapability } from './capabilities';
+import { hasRequiredFields, getRerankEndpoint } from './capabilities';
 import { RERANK_ENDPOINT } from './constants';
 import { searchWithEsqlRerank } from './strategies';
 import { semanticLogSearchInputSchema } from './schema';
@@ -57,7 +57,9 @@ export async function search(
         if (fieldCheck === 'missing_fields') {
           return unavailableResult(UNAVAILABLE_REASON.MISSING_FIELDS);
         }
-        if (!(await detectRerankCapability(esClient, rerankInferenceId))) {
+        const rerankEndpoint = await getRerankEndpoint(esClient, rerankInferenceId);
+        deps.observation?.rerankEndpoint(rerankInferenceId, rerankEndpoint?.service);
+        if (!rerankEndpoint) {
           // The tool response cannot tell these apart — it carries a fixed reason whose warning tells
           // the model not to retry — so the distinction is drawn here, where an operator will see it.
           if (rerankInferenceId !== RERANK_ENDPOINT) {
@@ -88,7 +90,7 @@ export function createSemanticLogSearchService(
   params: RegisterServicesParams
 ): SemanticLogSearchService {
   const { logger, config } = params;
-  const telemetry = createSemanticSearchTelemetry(params.deps.analytics);
+  const telemetry = createSemanticSearchTelemetry();
   const deps: SemanticLogSearchDeps = {
     logger,
     rerankInferenceId: config.semanticLogSearch.rerankInferenceId,
