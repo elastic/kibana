@@ -325,7 +325,8 @@ export const ActionPolicyDetailsFlyout = ({
               label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
                 defaultMessage: 'Take action',
               })}
-              iconType="chevronSingleDown"
+              iconType={isTakeActionOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+              iconSide="right"
               onClick={() => setIsTakeActionOpen((open) => !open)}
               data-test-subj="detailsFlyoutTakeActionButton"
             />

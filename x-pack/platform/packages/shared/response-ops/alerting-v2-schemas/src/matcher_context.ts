@@ -29,11 +29,11 @@ export interface MatcherContextFieldDescriptor {
  * and for Agent Builder skill docs (`generateMatcherContextDoc`).
  */
 export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
-  { path: 'episode_id', type: 'string', description: 'The episode UUID' },
+  { path: 'episode_id', type: 'string', description: 'The alert UUID' },
   {
     path: 'episode_status',
     type: 'string',
-    description: 'Episode lifecycle status',
+    description: 'Alert lifecycle status',
   },
   { path: 'group_hash', type: 'string', description: 'Hash of the grouping fields' },
   {
@@ -41,7 +41,7 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
     type: 'string',
     description: 'Timestamp of the most recent event',
   },
-  { path: 'severity', type: 'string', description: 'Episode severity when present' },
+  { path: 'severity', type: 'string', description: 'Alert severity when present' },
   {
     path: 'data',
     type: 'object',

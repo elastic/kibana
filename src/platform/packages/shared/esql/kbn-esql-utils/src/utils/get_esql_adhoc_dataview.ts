@@ -32,7 +32,8 @@ async function sha256(str: string) {
   }
 }
 
-async function getESQLAdHocDataviewId({
+/** Id of the ES|QL ad-hoc DataView of a dataset (index pattern, time field, project routing). */
+export async function getESQLAdHocDataviewId({
   indexPattern,
   timeFieldName,
   projectRouting,

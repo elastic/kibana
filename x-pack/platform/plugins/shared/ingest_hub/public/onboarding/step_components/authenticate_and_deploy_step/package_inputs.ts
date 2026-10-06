@@ -9,7 +9,11 @@ import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
-import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config';
+import {
+  resolveFieldMeta,
+  shouldDefaultCollectS3Logs,
+  toTyped,
+} from '../service_settings_step/field_config';
 import type {
   ServiceVars,
   ServiceDataStreamVars,
@@ -52,6 +56,11 @@ export function buildStreamVars(
       continue;
     }
     result[key] = toTyped(value, meta);
+  }
+
+  // An S3 input with a bucket ARN but no explicit toggle must read from the bucket, not SQS.
+  if (shouldDefaultCollectS3Logs(service, activeInput, dsVars.varsByInput[activeInput])) {
+    result.collect_s3_logs = true;
   }
 
   // Emit manifest defaults for show_user fields belonging to this input not explicitly set.
@@ -109,8 +118,7 @@ function resolveActiveInputs(
 /**
  * Distinguish "never configured" (key absent → default to all DS) from "explicitly emptied"
  * (key present with enabledDataStreams: [] → user turned everything off → skip).
- * Vars are keyed by instance id since duplicates exist; `instanceId` falls back to the service id
- * for sessions predating instance keying — the same chain deployGroup applies.
+ * Vars are keyed by instance id since duplicates exist.
  */
 function resolveServiceVars(
   storedServiceVars: Record<string, ServiceVars>,

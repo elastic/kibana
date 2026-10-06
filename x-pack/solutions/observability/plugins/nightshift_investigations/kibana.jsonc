@@ -18,9 +18,11 @@
     "optionalPlugins": [
       "actions",
       "agentBuilder",
+      "agenticInvestigations",
       "contextEngine",
       "encryptedSavedObjects",
       "inference",
+      "proposals",
       "ruleRegistry",
       "sandbox",
       "security",
