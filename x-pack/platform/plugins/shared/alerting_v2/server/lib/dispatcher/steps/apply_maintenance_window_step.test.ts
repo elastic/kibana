@@ -158,6 +158,32 @@ describe('ApplyMaintenanceWindowStep', () => {
     expect(result).toEqual({ type: 'continue' });
   });
 
+  it.each([
+    ['alert_id: "alert-1" and alert_status: active', 1],
+    ['episode_id: "alert-1"', 0],
+    ['episode_status: active', 0],
+  ])('suppresses alerts matching the KQL filter %s: %i', async (kql, expectedSuppressed) => {
+    service.getEnabledMaintenanceWindows.mockResolvedValue([
+      buildMw({ scope: { alertingV2: { enabled: true, kql } } }),
+    ]);
+
+    const alert = createAlert({
+      last_event_timestamp: '2026-01-22T07:30:00.000Z',
+      alert_id: 'alert-1',
+      alert_status: 'active',
+    });
+    const state = createDispatcherPipelineState({
+      dispatchable: [alert],
+      rules: new Map([[alert.rule_id!, createRule({ id: alert.rule_id!, spaceId: 'default' })]]),
+      suppressed: [],
+    });
+
+    const result = await step.execute(state, logger);
+    const suppressed = result.type === 'continue' ? result.data?.triage?.suppressed ?? [] : [];
+
+    expect(suppressed).toHaveLength(expectedSuppressed);
+  });
+
   it('suppresses with the id of the first MW that matches when multiple MWs are in the same space', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([
       buildMw({
