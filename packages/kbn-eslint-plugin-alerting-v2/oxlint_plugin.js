@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-alerting-v2'],
-  moduleNameMapper: {
-    '^@oxlint/plugins$': '<rootDir>/node_modules/@oxlint/plugins/index.cjs',
-  },
-};
+// Oxlint imports plugins with native Node, which cannot load this TypeScript package; register the
+// same transpiler ESLint runs under (`@kbn/setup-node-env`).
+require('@kbn/swc-register').install();
+
+module.exports = require('.');

@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Rule } from 'eslint';
 import { RuleTester } from 'eslint';
-import { PreferKbnUiCallout } from './prefer_kbn_ui_callout';
+import { rules } from '..';
+
+// The plugin's `eslintCompatPlugin` gives the rule the `create` method ESLint's RuleTester calls.
+const rule = rules.prefer_kbn_ui_callout as unknown as Rule.RuleModule;
 
 const tester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -21,7 +25,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('prefer_kbn_ui_callout', PreferKbnUiCallout, {
+tester.run('prefer_kbn_ui_callout', rule, {
   valid: [
     {
       name: 'using a semantic KbnInfoCallout wrapper component is allowed',

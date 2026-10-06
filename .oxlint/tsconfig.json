@@ -11,7 +11,9 @@
     "**/*.mts"
   ],
   "kbn_references": [
-    "@kbn/babel-preset"
+    "@kbn/babel-preset",
+    "@kbn/repo-info",
+    "@kbn/repo-packages"
   ],
   "exclude": [
     "target/**/*"

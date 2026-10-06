@@ -9,13 +9,14 @@
 
 import path from 'path';
 import { createRequire } from 'module';
+import type { Rule } from 'eslint';
 import { RuleTester } from 'eslint';
 import { REPO_ROOT } from '@kbn/repo-info';
-import {
-  assertBoundariesConfig,
-  BOUNDARIES_PATH,
-  NoRestrictedPackageImports,
-} from './no_restricted_package_imports';
+import { rules } from '..';
+import { assertBoundariesConfig, BOUNDARIES_PATH } from './no_restricted_package_imports';
+
+// The plugin's `eslintCompatPlugin` gives the rule the `create` method ESLint's RuleTester calls.
+const rule = rules.no_restricted_package_imports as unknown as Rule.RuleModule;
 
 const tester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -64,7 +65,7 @@ const opts = [
   },
 ];
 
-tester.run('no_restricted_package_imports', NoRestrictedPackageImports, {
+tester.run('no_restricted_package_imports', rule, {
   valid: [
     {
       name: 'unlisted package is unrestricted',

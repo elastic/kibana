@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Rule } from 'eslint';
 import { RuleTester } from 'eslint';
-import { RequireEuiFormCompressed } from './require_eui_form_compressed';
+import { rules } from '..';
+
+// The plugin's `eslintCompatPlugin` gives the rule the `create` method ESLint's RuleTester calls.
+const rule = rules.require_eui_form_compressed as unknown as Rule.RuleModule;
 
 const tester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -21,7 +25,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('@kbn/alerting-v2/require_eui_form_compressed', RequireEuiFormCompressed, {
+tester.run('@kbn/alerting-v2/require_eui_form_compressed', rule, {
   valid: [
     {
       code: '<EuiFieldText compressed />',

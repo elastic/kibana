@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-alerting-v2'],
-  moduleNameMapper: {
-    '^@oxlint/plugins$': '<rootDir>/node_modules/@oxlint/plugins/index.cjs',
+import type { OxlintOverride } from 'oxlint';
+
+export const alertingV2Overrides: OxlintOverride[] = [
+  /**
+   * Alerting V2 rule form — require compressed prop on EUI form controls
+   */
+  {
+    files: ['x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/**/*.{ts,tsx}'],
+    rules: {
+      '@kbn/alerting-v2/require_eui_form_compressed': 'error',
+    },
   },
-};
+];

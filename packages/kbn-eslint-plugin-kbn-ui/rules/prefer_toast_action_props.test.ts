@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Rule } from 'eslint';
 import { RuleTester } from 'eslint';
-import { PreferToastActionProps } from './prefer_toast_action_props';
+import { rules } from '..';
+
+// The plugin's `eslintCompatPlugin` gives the rule the `create` method ESLint's RuleTester calls.
+const rule = rules.prefer_toast_action_props as unknown as Rule.RuleModule;
 
 const tester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -40,7 +44,7 @@ const ACTION_ELEMENTS = [
   { elementName: 'EuiLink', jsx: '<EuiLink href="/details">View details</EuiLink>' },
 ];
 
-tester.run('prefer_toast_action_props', PreferToastActionProps, {
+tester.run('prefer_toast_action_props', rule, {
   valid: [
     {
       name: 'actionProps usage is allowed',
@@ -186,19 +190,21 @@ tester.run('prefer_toast_action_props', PreferToastActionProps, {
         },
       ],
     })),
-    // every action element
-    ...ACTION_ELEMENTS.map(({ elementName, jsx }) => ({
-      name: `${elementName} is flagged`,
-      code: `toasts.addSuccess({ title: 'Title', text: ${mount(jsx)} });`,
-      errors: [
-        {
-          messageId: 'actionElementInMountContent',
-          data: { elementName, method: 'addSuccess', mountFn: 'mountReactNode' },
-        },
-      ],
-    })),
-    // every toast method
-    ...METHODS.map((method) => ({
+    // every other action element (`EuiButton` is the mount function case above)
+    ...ACTION_ELEMENTS.filter(({ elementName }) => elementName !== 'EuiButton').map(
+      ({ elementName, jsx }) => ({
+        name: `${elementName} is flagged`,
+        code: `toasts.addSuccess({ title: 'Title', text: ${mount(jsx)} });`,
+        errors: [
+          {
+            messageId: 'actionElementInMountContent',
+            data: { elementName, method: 'addSuccess', mountFn: 'mountReactNode' },
+          },
+        ],
+      })
+    ),
+    // every other toast method (`addSuccess` is the mount function case above)
+    ...METHODS.filter((method) => method !== 'addSuccess').map((method) => ({
       name: `toasts.${method}() is flagged`,
       code: `toasts.${method}({ title: 'Title', text: ${mount(
         '<EuiButton>Reload</EuiButton>'
