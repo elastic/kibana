@@ -521,15 +521,28 @@ describe('Hunt Watch worker chain', () => {
     const render = (template: string, context: Record<string, unknown>) =>
       liquid.parseAndRenderSync(template, context).trim();
 
-    const dismissCase = (dismissStep: Record<string, unknown> | undefined) => ({
-      inputs: { investigationConversationId: 'conv-1' },
-      variables: { dispatch_failed_count: 0 },
-      steps: {
-        decide_and_package: { output: { status: 'packaged', dismiss: true, proposals: [] } },
-        // A skipped step has no entry at all; a continued failure has an `error` and no `output`.
-        ...(dismissStep ? { dismiss_investigation_if_clean: dismissStep } : {}),
-      },
-    });
+    const dismissOutcomeWith = stepIn(packageReportSteps, 'resolve_dismiss_outcome')?.with as Record<
+      string,
+      string
+    >;
+
+    const dismissCase = (dismissStep: Record<string, unknown> | undefined) => {
+      const base = {
+        inputs: { investigationConversationId: 'conv-1' },
+        steps: {
+          decide_and_package: { output: { status: 'packaged', dismiss: true, proposals: [] } },
+          // A skipped step has no entry at all; a continued failure has an `error` and no `output`.
+          ...(dismissStep ? { dismiss_investigation_if_clean: dismissStep } : {}),
+        },
+      };
+      return {
+        ...base,
+        variables: {
+          dispatch_failed_count: 0,
+          dismiss_close_failed: evaluateExpression(dismissOutcomeWith.dismiss_close_failed, base),
+        },
+      };
+    };
 
     it('resolves the dismiss attempt before the status and summary read it', () => {
       const order = packageReport.steps.map((step) => step.name);
@@ -549,8 +562,13 @@ describe('Hunt Watch worker chain', () => {
         variables: { ...ctx.variables, package_status: status, package_reason: reason },
       });
 
+      expect(ctx.variables.dismiss_close_failed).toBe(true);
       expect(status).toBe('run_incomplete');
       expect(reason).toContain('patch rejected');
+      // The Worker journal shows only `reason` on a run_incomplete packaging, so the
+      // retry guidance has to live here and not just in the summary.
+      expect(reason).toContain('still open');
+      expect(reason).toContain('manual run');
       expect(summary).toContain('still open');
       expect(summary).not.toContain('closed this Investigation as benign');
     });
@@ -563,6 +581,7 @@ describe('Hunt Watch worker chain', () => {
         variables: { ...ctx.variables, package_status: status },
       });
 
+      expect(ctx.variables.dismiss_close_failed).toBe(false);
       expect(status).toBe('success');
       expect(summary).toContain('closed this Investigation as benign');
     });
@@ -570,6 +589,7 @@ describe('Hunt Watch worker chain', () => {
     it('is unchanged when the dismiss step never ran', () => {
       const ctx = dismissCase(undefined);
 
+      expect(ctx.variables.dismiss_close_failed).toBe(false);
       expect(render(statusWith.package_status, ctx)).toBe('success');
     });
   });
