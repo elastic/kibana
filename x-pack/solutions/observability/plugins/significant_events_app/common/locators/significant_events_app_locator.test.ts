@@ -61,11 +61,10 @@ describe('SignificantEventsAppLocatorDefinition', () => {
       tab: 'significant_events',
       status: ['open', 'closed'],
       severity: ['80-critical', '60-high'],
-      stream: 'logs',
     });
 
     expect(path).toBe(
-      '/significant_events?status=open&status=closed&severity=80-critical&severity=60-high&stream=logs'
+      '/significant_events?status=open&status=closed&severity=80-critical&severity=60-high'
     );
   });
 
@@ -74,7 +73,6 @@ describe('SignificantEventsAppLocatorDefinition', () => {
       tab: 'significant_events',
       status: [],
       severity: [],
-      stream: [],
     });
 
     expect(path).toBe('/significant_events?status=&severity=');
