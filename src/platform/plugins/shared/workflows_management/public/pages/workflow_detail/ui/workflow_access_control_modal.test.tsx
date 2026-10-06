@@ -8,7 +8,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
@@ -27,6 +27,24 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: mockHttp, userProfile: mockUserProfile } }),
 }));
 
+const ownershipNotice = 'You will become the owner when you make this workflow private.';
+
+const renderOwnerlessModal = (accessMode: 'public' | 'private') =>
+  render(
+    <TestWrapper>
+      <EuiProvider>
+        <WorkflowAccessControlModal
+          workflow={createMockWorkflowDetailDto({
+            owner_id: undefined,
+            access_control: { access_mode: accessMode, entries: [] },
+            permissions: { read: true, edit: true, execute: true, manage: true },
+          })}
+          onClose={jest.fn()}
+        />
+      </EuiProvider>
+    </TestWrapper>
+  );
+
 describe('WorkflowAccessControlModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,26 +54,19 @@ describe('WorkflowAccessControlModal', () => {
   });
 
   it('warns before claiming an ownerless workflow as private', async () => {
-    const workflow = createMockWorkflowDetailDto({
-      owner_id: undefined,
-      access_control: { access_mode: 'public', entries: [] },
-      permissions: { read: true, edit: true, execute: true, manage: true },
-    });
-    render(
-      <TestWrapper>
-        <EuiProvider>
-          <WorkflowAccessControlModal workflow={workflow} onClose={jest.fn()} />
-        </EuiProvider>
-      </TestWrapper>
-    );
-    const notice = 'You will become the owner when you make this workflow private.';
-    expect(screen.queryByText(notice)).not.toBeInTheDocument();
-    await userEvent.click(screen.getByLabelText('Visibility'));
-    await userEvent.click(screen.getByRole('option', { name: /^Private/ }));
-    expect(await screen.findByText(notice)).toBeInTheDocument();
-    await userEvent.click(screen.getByLabelText('Visibility'));
-    await userEvent.click(screen.getByRole('option', { name: /^Public/ }));
-    expect(screen.queryByText(notice)).not.toBeInTheDocument();
+    renderOwnerlessModal('public');
+    expect(screen.queryByText(ownershipNotice)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Visibility'));
+    fireEvent.click(screen.getByRole('option', { name: /^Private/ }));
+    expect(await screen.findByText(ownershipNotice)).toBeInTheDocument();
+  });
+
+  it('drops the ownership warning when an ownerless workflow goes back to public', async () => {
+    renderOwnerlessModal('private');
+    expect(await screen.findByText(ownershipNotice)).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Visibility'));
+    fireEvent.click(screen.getByRole('option', { name: /^Public/ }));
+    expect(screen.queryByText(ownershipNotice)).not.toBeInTheDocument();
   });
 
   it('shows the admin notice and updates execution permission after a self-grant', async () => {
