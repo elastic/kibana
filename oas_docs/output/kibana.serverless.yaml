@@ -12860,6 +12860,8 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high
+                          routing_tags:
+                            - sre-oncall
                           tags:
                             - production
                             - infra
@@ -13001,6 +13003,8 @@ paths:
                   metadata:
                     description: Alerts when average CPU usage exceeds a threshold.
                     name: Host CPU high
+                    routing_tags:
+                      - sre-oncall
                     tags:
                       - production
                       - infra
@@ -13043,6 +13047,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -13180,6 +13186,8 @@ paths:
                       metadata:
                         description: Alerts when average CPU usage exceeds a threshold.
                         name: Host CPU high
+                        routing_tags:
+                          - sre-oncall
                         tags:
                           - production
                           - infra
@@ -13209,6 +13217,8 @@ paths:
                       metadata:
                         description: Alerts when average CPU usage exceeds a threshold.
                         name: Host CPU high (disabled)
+                        routing_tags:
+                          - sre-oncall
                         tags:
                           - production
                           - infra
@@ -13253,6 +13263,8 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high
+                          routing_tags:
+                            - sre-oncall
                           tags:
                             - production
                             - infra
@@ -13289,6 +13301,8 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high (disabled)
+                          routing_tags:
+                            - sre-oncall
                           tags:
                             - production
                             - infra
@@ -13804,6 +13818,8 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high
+                          routing_tags:
+                            - sre-oncall
                           tags:
                             - production
                             - infra
@@ -14693,6 +14709,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -14873,6 +14891,8 @@ paths:
                     metadata:
                       description: Updated description.
                       name: Host CPU high (updated)
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -15047,6 +15067,8 @@ paths:
                   metadata:
                     description: Alerts when average CPU usage exceeds a threshold.
                     name: Host CPU high
+                    routing_tags:
+                      - sre-oncall
                     tags:
                       - production
                       - infra
@@ -15089,6 +15111,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -15135,6 +15159,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -15301,6 +15327,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -15485,6 +15513,8 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      routing_tags:
+                        - sre-oncall
                       tags:
                         - production
                         - infra
@@ -144813,6 +144843,15 @@ components:
           maxLength: 256
           minLength: 1
           type: string
+        routing_tags:
+          description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
         tags:
           description: Tags for categorization, e.g. ["production", "infra"].
           items:
@@ -145231,6 +145270,15 @@ components:
               maxLength: 256
               minLength: 1
               type: string
+            routing_tags:
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 20
+              minItems: 1
+              nullable: true
+              type: array
             tags:
               items:
                 maxLength: 128
