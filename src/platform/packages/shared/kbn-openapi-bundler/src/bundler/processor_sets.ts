@@ -21,6 +21,7 @@ import {
 import type { DocumentNodeProcessor } from './process_document/document_processors/types/document_node_processor';
 import { createIncludeLabelsProcessor } from './process_document/document_processors/include_labels';
 import { createNamespaceComponentsProcessor } from './process_document/document_processors/namespace_components';
+import { createStripXStateVersionProcessor } from './process_document/document_processors/strip_x_state_version';
 
 /**
  * Document modification includes the following
@@ -48,6 +49,17 @@ export function withIncludeLabelsProcessor(
   includeLabels: string[]
 ): Readonly<DocumentNodeProcessor[]> {
   return [...processors, createIncludeLabelsProcessor(includeLabels)];
+}
+
+/**
+ * Adds createStripXStateVersionProcessor processor, see createStripXStateVersionProcessor
+ * description for more details. Intended for serverless bundles, where an "added in
+ * <version>" note in `x-state` is meaningless.
+ */
+export function withStripXStateVersionProcessor(
+  processors: Readonly<DocumentNodeProcessor[]>
+): Readonly<DocumentNodeProcessor[]> {
+  return [...processors, createStripXStateVersionProcessor()];
 }
 
 export function withNamespaceComponentsProcessor(

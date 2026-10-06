@@ -38,3 +38,10 @@ export const X_CODEGEN_ENABLED = 'x-codegen-enabled';
  * marked with specific labels into the resulting bundle. See README for more details.
  */
 export const X_LABELS = 'x-labels';
+
+/**
+ * `x-state` describes an operation's stability tier ("Generally available", "Technical Preview",
+ * "Experimental") and, optionally, the stack version it was added in ("; added in <version>").
+ * The version is meaningful only for versioned deployments, not for Elastic Cloud Serverless.
+ */
+export const X_STATE = 'x-state';
