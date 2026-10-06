@@ -352,7 +352,7 @@ It also reports exported class names that appear in more than one Scout module (
 
 A shared page object the owners reviewed and want to keep in `@kbn/scout` goes in `REVIEWED_PAGE_OBJECTS` in `src/cli/audit.ts` with the reason, and the census leaves it out. The duplicate class name check reports a name only when the classes also share most of their member names, a name collision between unrelated page objects is not a copy.
 
-A config set that must stay separate on purpose (for example its tests change the license or need a clean cluster) goes in `KEEP_SEPARATE` in `src/cli/audit_config_sets.ts` with the reason. The audit skips it, so it is not suggested for merging again.
+A config set that must stay separate on purpose (for example its tests change the license or need a clean cluster) goes in `MUST_STAY_SEPARATE` in `src/cli/audit_config_sets.ts` with the reason. The audit skips it, so it is not suggested for merging again. The audit also ignores config sets that CI does not run (every test config of the set is in `excluded_configs` of `.buildkite/scout_ci_config.yml`, or the set has no test config), since they cost no lane.
 
 Run it by hand when you add, move, or remove a page object or a config set. A scheduled Buildkite pipeline (`kibana / scout / quality-audit`) also runs it on the 1st and 15th of each month and posts a summary to `#kibana-scout-stats`, with the full report in the build annotation. Read the output against the placement policy above. The command reports facts only, it does not decide.
 
