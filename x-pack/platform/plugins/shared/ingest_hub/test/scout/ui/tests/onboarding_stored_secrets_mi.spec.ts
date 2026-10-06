@@ -46,6 +46,7 @@ test.describe(
     useOnboardingFeatureFlag();
 
     const DEP_ID = 'dep-stored-secrets-mi-001';
+    let soGets = 0;
 
     test.beforeEach(async ({ page }) => {
       await mockCommonRoutes(page);
@@ -57,6 +58,13 @@ test.describe(
           policyIdsByInstance: { elb: MI_POLICY_ID },
         })
       );
+      // After a reload the drift check re-runs several times while the page settles, and the
+      // section re-collapses on each settle. Counting its SO GETs tells the tests when it is done.
+      soGets = 0;
+      await page.route(soRoute(DEP_ID), (route) => {
+        if (route.request().method() === 'GET') soGets++;
+        return route.fallback();
+      });
       // The deployed policy holds both keys as secret refs.
       await page.route(
         (url) => new RegExp(`/api/fleet/managed_integrations/${MI_POLICY_ID}$`).test(url.pathname),
@@ -78,12 +86,15 @@ test.describe(
     /**
      * Resume at Step 3. Entering with `?deploymentId=` hydrates the session from the SO, so the
      * deployed instance and any session-only settings are seeded afterwards and the page reloaded.
-     * A deployed, unchanged section is collapsed.
+     *
+     * By default the session carries a bucket the SO does not know about, so the service has
+     * drifted and the section stays open. With `drift: false` the deployment is unchanged: the
+     * section collapses once the drift check settles, and is opened here once that has happened.
      */
     async function resume(
       browserAuth: { loginAsAdmin: () => Promise<void> },
       page: ScoutPage,
-      serviceVars: Record<string, unknown> = DRIFTED_SERVICE_VARS
+      { drift = true }: { drift?: boolean } = {}
     ) {
       await browserAuth.loginAsAdmin();
       await page.gotoApp('onboarding/aws', {
@@ -105,35 +116,45 @@ test.describe(
         },
         {
           key: SERVICE_SETTINGS_SESSION_KEY,
-          value: { globalRegion: 'us-east-1', instances: [ELB_INSTANCE], serviceVars },
+          value: {
+            globalRegion: 'us-east-1',
+            instances: [ELB_INSTANCE],
+            serviceVars: drift ? DRIFTED_SERVICE_VARS : {},
+          },
         },
       ]);
-      // The drift check (SO GET) and the stored-secret lookup (policy GET) both run on mount.
-      const soGet = page.waitForResponse(
-        (resp) =>
-          resp.request().method() === 'GET' && soRoute(DEP_ID)(new URL(resp.url())) && resp.ok()
-      );
-      const policyGet = page.waitForResponse(
-        (resp) =>
-          resp.request().method() === 'GET' &&
-          new RegExp(`/api/fleet/managed_integrations/${MI_POLICY_ID}$`).test(
-            new URL(resp.url()).pathname
-          )
-      );
+      soGets = 0;
       await page.reload();
-      await Promise.all([soGet, policyGet]);
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+      if (!drift) {
+        // Wait until the drift check has stopped re-running (read-only poll on our own counter).
+        let lastSeen = -1;
+        await expect
+          .poll(
+            async () => {
+              const stable = soGets > 0 && soGets === lastSeen;
+              lastSeen = soGets;
+              return stable;
+            },
+            { intervals: [500], timeout: 20_000 }
+          )
+          .toBe(true);
+        await expect(
+          page.testSubj.locator('managedIntegrationsSection').getByText('Done')
+        ).toBeVisible();
+        await page.testSubj.locator('managedIntegrationsSection-headerButton').click();
+        await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
+      }
     }
 
-    test('shows the stored keys instead of the replace-keys view', async ({
-      browserAuth,
-      page,
-    }) => {
+    test('shows the stored keys as placeholders, not inputs', async ({ browserAuth, page }) => {
       await resume(browserAuth, page);
 
       await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
       await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeVisible();
-      await expect(page.testSubj.locator('staticKeysReplace-accessKeyId-toggle')).toBeHidden();
+      await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId')).toBeHidden();
+      await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey')).toBeHidden();
     });
 
     test('a settings change redeploys without retyping and sends the stored refs back', async ({
@@ -172,17 +193,25 @@ test.describe(
       expect(JSON.stringify(body)).toContain('drift-bucket');
     });
 
-    test('replacing the secret access key sends the new value and keeps the access key id', async ({
+    test('replacing the secret access key alone redeploys, sending the new value and keeping the access key id', async ({
       browserAuth,
       page,
     }) => {
-      await resume(browserAuth, page);
+      await resume(browserAuth, page, { drift: false });
+
+      // The deployment is unchanged until a stored value is replaced.
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+      await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
 
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey-replace').click();
       await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeHidden();
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('NEW-SECRET-VALUE');
       // The stored access key id is untouched.
       await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
+
+      // Replacing the key is the only change, and it marks the deployment as changed.
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+      await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
       const policyPut = page.waitForRequest(
         (req) =>

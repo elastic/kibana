@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -43,7 +43,6 @@ import type {
   RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { StaticKeysReplaceView } from './static_keys_replace_view';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
@@ -98,13 +97,8 @@ export function ManagedIntegrationsSection({
   onReplaceFormDirtyChange,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
-  const {
-    setConnectorId,
-    setStaticKeys,
-    clearStagedStaticKeys,
-    setPendingIacTemplate,
-    authenticateAndDeployStep,
-  } = useOnboardingFlow();
+  const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
+    useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
   // The Existing Identity check renders the stack update without writing the key; the template
@@ -151,7 +145,7 @@ export function ManagedIntegrationsSection({
 
   // Re-seed from session so the user doesn't have to re-enter credentials they already provided
   // (e.g. after navigating Back/Forward or adding a new service without changing auth).
-  // isStaticKeysEditMode intentionally skips the seed: the replace-flow requires new credentials.
+  // isStaticKeysEditMode intentionally skips the seed: the credentials are not in memory there.
   // isDeployReady is authoritative — set to true only when the form explicitly reports ready.
   // Do not seed true from connectorId: if the IaC key check fails, the form will not emit a
   // second false (it was already false internally), so the seed would leave Deploy enabled for
@@ -170,47 +164,16 @@ export function ManagedIntegrationsSection({
     [setConnectorId]
   );
 
-  const handleStaticKeysChange = useCallback(
-    (fields: AwsStaticKeyCredentials | undefined) => {
-      setStaticKeys(fields);
-    },
-    [setStaticKeys]
-  );
-
-  // With stored secrets the form is the same in edit mode and outside it; only replacing a stored
-  // value (typing into its field) is a change to deploy, keeping them all is not.
+  // In edit mode (resume) typing into a key field, replacing a stored one or not, is a change to
+  // deploy; keeping every stored value is not. Emptying the fields again clears the change.
   const handleStoredKeysFormChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
       setStaticKeys(fields);
-      if (isStaticKeysEditMode && storedSecretFields.length > 0) {
+      if (isStaticKeysEditMode) {
         onReplaceFormDirtyChange?.(Boolean(fields?.access_key_id || fields?.secret_access_key));
       }
     },
-    [setStaticKeys, isStaticKeysEditMode, storedSecretFields.length, onReplaceFormDirtyChange]
-  );
-
-  // Whether the replace form has ever reported ready in this component lifetime.
-  // Used to distinguish the initial-mount false (empty fields on fresh mount after Back+Next)
-  // from an explicit cancellation (user entered keys then cleared them), so remounting the form
-  // does not propagate false to the parent and clear a persisted isDirty flag.
-  const replaceFormEverReady = useRef(false);
-  const handleStaticKeyReplaceReadyChange = useCallback(
-    (ready: boolean) => {
-      setIsDeployReady(ready);
-      if (ready) {
-        replaceFormEverReady.current = true;
-        onReplaceFormDirtyChange?.(true);
-      } else if (replaceFormEverReady.current) {
-        // Form was previously ready — user cleared the fields, treat as cancellation.
-        // Clear only the in-memory staged keys without touching persisted authMethod/connectorId so
-        // isStaticKeysEditMode stays true and the SO comparison does not report false auth drift.
-        clearStagedStaticKeys();
-        onReplaceFormDirtyChange?.(false);
-      }
-      // If form was never ready, its false is a mount-time event, not a cancellation —
-      // don't forward it so the persisted isDirty from a prior visit is preserved.
-    },
-    [clearStagedStaticKeys, onReplaceFormDirtyChange]
+    [setStaticKeys, isStaticKeysEditMode, onReplaceFormDirtyChange]
   );
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
@@ -379,11 +342,6 @@ export function ManagedIntegrationsSection({
                 />
               ) : isStoredSecretsLoading ? (
                 <EuiLoadingSpinner />
-              ) : isStaticKeysEditMode && storedSecretFields.length === 0 ? (
-                <StaticKeysReplaceView
-                  onReadyChange={handleStaticKeyReplaceReadyChange}
-                  onFieldsChange={handleStaticKeysChange}
-                />
               ) : (
                 <LazyAwsStaticKeysForm
                   initialValues={authenticateAndDeployStep.staticKeys}
