@@ -25,9 +25,11 @@ import {
  * - `newEpisodesGenerated` is the one metric that needs a second input: which
  *   episodes are *new* is the director's knowledge, not a property of the doc.
  *   `DirectorStep` threads the freshly-opened episode ids on
- *   `state.newEpisodeIds`; here we count the persisted docs whose `episode.id`
- *   is one of them. A new episode whose rule event failed to index is absent
- *   from `docs`, so it is correctly not counted.
+ *   `state.newEpisodeIds`; here we count the *distinct* new `episode.id`s that
+ *   landed in `docs`. Counting distinct ids (not docs) matters for single-series
+ *   (ungrouped) rules, where many rule events of one run share one new episode
+ *   id — that is one new episode, not one per row. A new episode whose rule
+ *   event failed to index is absent from `docs`, so it is correctly not counted.
  *
  * Observes only `store_alert_events`, so the docs array is always an
  * `AlertEventDocument[]` at runtime (the emission-meta type widens to
@@ -54,13 +56,15 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
     const newEpisodeIds = state.newEpisodeIds ? new Set(state.newEpisodeIds) : undefined;
 
     let signalsCount = 0;
-    let newEpisodesCount = 0;
+    // Distinct new episodes that actually landed. A single-series rule emits many
+    // docs sharing one new episode id, so counting docs would overcount episodes.
+    const persistedNewEpisodeIds = new Set<string>();
     for (const doc of persistedDocs) {
       if (doc.type === alertEventType.signal) {
         signalsCount += 1;
       }
       if (newEpisodeIds && doc.alert && newEpisodeIds.has(doc.alert.id)) {
-        newEpisodesCount += 1;
+        persistedNewEpisodeIds.add(doc.alert.id);
       }
     }
 
@@ -68,8 +72,11 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
       collector.increment(RULE_EXECUTION_COUNTERS.signalsGenerated, signalsCount);
     }
 
-    if (newEpisodesCount > 0) {
-      collector.increment(RULE_EXECUTION_COUNTERS.newEpisodesGenerated, newEpisodesCount);
+    if (persistedNewEpisodeIds.size > 0) {
+      collector.increment(
+        RULE_EXECUTION_COUNTERS.newEpisodesGenerated,
+        persistedNewEpisodeIds.size
+      );
     }
   }
 }
