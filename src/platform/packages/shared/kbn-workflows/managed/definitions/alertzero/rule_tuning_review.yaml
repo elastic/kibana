@@ -839,8 +839,8 @@ steps:
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest: this rule is not a plain query rule (data view, timestamp
-        override, or alert suppression are not supported by the preview),
+        No backtest: this rule is not a plain query rule (saved query, data view,
+        timestamp override, or alert suppression are not supported by the preview),
         or the proposed exception could not be converted into a preview filter.
         Approving still applies the proposed change, so judge it on the change itself
         and the false positives above rather than on a simulated alert count.
