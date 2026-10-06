@@ -7,7 +7,7 @@
 
 import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import { ROUTING_TAGS_SIGNAL_RULE_MESSAGE, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RotationCandidate } from './types';
 import {
@@ -81,6 +81,17 @@ describe('utils', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
       expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('maps routing tags into saved object attributes', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        metadata: { name: 'test-rule', routing_tags: ['sre'] },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.metadata.routing_tags).toEqual(['sre']);
     });
 
     it('sets metadata.builder_type to undefined when not provided', () => {
@@ -252,6 +263,49 @@ describe('utils', () => {
       });
 
       expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
+    it('clears routing tags when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', routing_tags: ['sre'] },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { routing_tags: null } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.metadata.routing_tags).toBeUndefined();
+    });
+
+    it('preserves existing routing tags when update omits them', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', routing_tags: ['sre'] },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.metadata.routing_tags).toEqual(['sre']);
+    });
+
+    it('sets routing tags independently of tags', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod'], routing_tags: ['old'] },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { routing_tags: ['sre', 'payments'] } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.metadata.routing_tags).toEqual(['sre', 'payments']);
+      expect(result.metadata.tags).toEqual(['prod']);
     });
 
     it('clears state_transition when update sends null (immediate mode)', () => {
@@ -624,6 +678,17 @@ describe('utils', () => {
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
+    it('returns routing tags alongside tags in a response that satisfies the schema', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'test-rule', tags: ['prod'], routing_tags: ['sre'] },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata).toMatchObject({ tags: ['prod'], routing_tags: ['sre'] });
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
     it('returns artifacts that satisfy the strict response schema', () => {
       const attrs = createRuleSoAttributesWithArtifacts();
 
@@ -880,6 +945,25 @@ describe('utils', () => {
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
         expect.objectContaining({
           message: 'Signal rules cannot set recovery or no_data.',
+          data: {
+            code: 'INVALID_SIGNAL_RULE',
+            details: { rule_id: 'rule-1', rule_kind: 'signal' },
+          },
+        })
+      );
+    });
+
+    it('throws INVALID_SIGNAL_RULE when a signal rule sets routing tags', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+        metadata: { name: 'signal-rule', routing_tags: ['sre'] },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
           data: {
             code: 'INVALID_SIGNAL_RULE',
             details: { rule_id: 'rule-1', rule_kind: 'signal' },
