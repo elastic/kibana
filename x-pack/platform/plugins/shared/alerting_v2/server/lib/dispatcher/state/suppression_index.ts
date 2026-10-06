@@ -20,9 +20,9 @@ export class SuppressionIndex {
   public static of(suppressions: readonly SuppressionRow[]): SuppressionIndex {
     const byKey = new Map<string, SuppressionRow>();
     for (const suppression of suppressions) {
-      const { episode_id: episodeId } = suppression;
-      const key = episodeId
-        ? suppressionEpisodeKey({ ...suppression, episode_id: episodeId })
+      const { alert_id: alertId } = suppression;
+      const key = alertId
+        ? suppressionEpisodeKey({ ...suppression, episode_id: alertId })
         : suppressionSeriesKey(suppression);
       byKey.set(key, suppression);
     }
