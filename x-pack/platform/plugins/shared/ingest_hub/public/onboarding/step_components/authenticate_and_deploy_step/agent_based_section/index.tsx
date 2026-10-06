@@ -96,11 +96,12 @@ export function AgentBasedSection({
 
   // Keys are never persisted, but the deployed package policies still hold them as secrets: the
   // forms offer to keep them instead of asking again (resume, or Back then forward).
+  const isKeysMethod = credentialMethod === 'static_keys' || credentialMethod === 'temporary_keys';
   const { existingSecretRefs, isLoading: isStoredSecretsLoading } = useExistingSecretRefs(
-    Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0],
+    // Only the key methods have secrets to keep.
+    isKeysMethod ? Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0] : undefined,
     fetchPackagePolicySecretRefs
   );
-  const isKeysMethod = credentialMethod === 'static_keys' || credentialMethod === 'temporary_keys';
   const storedStaticFields = useMemo(
     () => STATIC_KEY_FIELDS.filter((field) => isKeysMethod && existingSecretRefs.has(field)),
     [isKeysMethod, existingSecretRefs]

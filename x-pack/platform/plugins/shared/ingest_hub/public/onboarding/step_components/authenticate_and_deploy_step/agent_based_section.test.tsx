@@ -765,6 +765,7 @@ describe('AgentBasedSection', () => {
         renderSection();
         await waitFor(() => expect(screen.getByTestId('assume-role-form')).toBeInTheDocument());
         expect(screen.queryByTestId('static-keys-form')).not.toBeInTheDocument();
+        expect(mockFetchSecretRefs).not.toHaveBeenCalled();
       });
     });
 

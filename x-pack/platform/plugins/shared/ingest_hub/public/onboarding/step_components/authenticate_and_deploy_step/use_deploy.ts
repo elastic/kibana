@@ -170,8 +170,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
   // The credentials of a resumed or revisited session are never in memory, but the deployed
   // policies still hold them as secrets; the form offers to keep them.
+  // No lookup for policies that authenticate through an identity: they have no keys to keep.
   const { existingSecretRefs, isLoading: isStoredSecretsLoading } = useExistingSecretRefs(
-    Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0],
+    authenticateAndDeployStep.connectorId
+      ? undefined
+      : Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0],
     fetchAgentlessSecretRefs
   );
   const storedSecretFields = useMemo(

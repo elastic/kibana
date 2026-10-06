@@ -5,7 +5,21 @@
  * 2.0.
  */
 
-import { detectSecretRefs } from './secret_refs';
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  sendGetAgentlessPolicy: jest.fn(),
+  sendGetOnePackagePolicy: jest.fn(),
+}));
+
+import { renderHook, waitFor } from '@testing-library/react';
+import { sendGetAgentlessPolicy, sendGetOnePackagePolicy } from '@kbn/fleet-plugin/public';
+
+import {
+  detectSecretRefs,
+  fetchAgentlessSecretRefs,
+  fetchPackagePolicySecretRefs,
+  useExistingSecretRefs,
+} from './secret_refs';
+import type { ExistingSecretRefs } from './secret_refs';
 
 describe('detectSecretRefs', () => {
   it('returns no refs for an undefined policy or one without secrets', () => {
@@ -72,5 +86,95 @@ describe('detectSecretRefs', () => {
       vars: { other_secret: { isSecretRef: true, id: 'x' }, secret_access_key: { value: '' } },
     });
     expect(refs.size).toBe(0);
+  });
+});
+
+describe('useExistingSecretRefs', () => {
+  const refsOf = (id: string): ExistingSecretRefs =>
+    new Map([['secret_access_key', { isSecretRef: true as const, id }]]);
+
+  it('does nothing and is not loading without a policy id', () => {
+    const fetchRefs = jest.fn();
+    const { result } = renderHook(() => useExistingSecretRefs(undefined, fetchRefs));
+    expect(fetchRefs).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.existingSecretRefs.size).toBe(0);
+  });
+
+  it('is loading until the fetch settles, then returns the refs', async () => {
+    const fetchRefs = jest.fn().mockResolvedValue(refsOf('r1'));
+    const { result } = renderHook(() => useExistingSecretRefs('p1', fetchRefs));
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.existingSecretRefs.size).toBe(0);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.existingSecretRefs.get('secret_access_key')?.id).toBe('r1');
+    expect(fetchRefs).toHaveBeenCalledWith('p1');
+  });
+
+  it('is loading again when the policy id changes and does not expose the previous refs', async () => {
+    const fetchRefs = jest.fn(async (id?: string) => refsOf(`ref-${id}`));
+    const { result, rerender } = renderHook(
+      ({ policyId }) => useExistingSecretRefs(policyId, fetchRefs),
+      { initialProps: { policyId: 'p1' } }
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    rerender({ policyId: 'p2' });
+    expect(result.current.isLoading).toBe(true);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.existingSecretRefs.get('secret_access_key')?.id).toBe('ref-p2');
+  });
+
+  it('ignores a slow result for a policy id that is no longer current', async () => {
+    let resolveFirst: (refs: ExistingSecretRefs) => void = () => {};
+    const fetchRefs = jest.fn((id?: string) =>
+      id === 'p1'
+        ? new Promise<ExistingSecretRefs>((resolve) => {
+            resolveFirst = resolve;
+          })
+        : Promise.resolve(refsOf('ref-p2'))
+    );
+    const { result, rerender } = renderHook(
+      ({ policyId }) => useExistingSecretRefs(policyId, fetchRefs),
+      { initialProps: { policyId: 'p1' } }
+    );
+    rerender({ policyId: 'p2' });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    resolveFirst(refsOf('ref-p1'));
+    await Promise.resolve();
+    expect(result.current.existingSecretRefs.get('secret_access_key')?.id).toBe('ref-p2');
+  });
+});
+
+describe('fetching secret refs', () => {
+  const REF = { isSecretRef: true, id: 'r1' };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns no refs without a policy id and does not call Fleet', async () => {
+    expect((await fetchAgentlessSecretRefs(undefined)).size).toBe(0);
+    expect((await fetchPackagePolicySecretRefs(undefined)).size).toBe(0);
+    expect(sendGetAgentlessPolicy).not.toHaveBeenCalled();
+    expect(sendGetOnePackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('reads refs from an agentless policy', async () => {
+    (sendGetAgentlessPolicy as jest.Mock).mockResolvedValue({
+      item: { vars: { access_key_id: REF } },
+    });
+    expect((await fetchAgentlessSecretRefs('p1')).get('access_key_id')).toEqual(REF);
+  });
+
+  it('reads refs from a package policy', async () => {
+    (sendGetOnePackagePolicy as jest.Mock).mockResolvedValue({
+      data: { item: { vars: { access_key_id: { value: REF } } } },
+    });
+    expect((await fetchPackagePolicySecretRefs('p1')).get('access_key_id')).toEqual(REF);
+  });
+
+  it('treats a failed lookup as nothing stored', async () => {
+    (sendGetAgentlessPolicy as jest.Mock).mockRejectedValue(new Error('boom'));
+    (sendGetOnePackagePolicy as jest.Mock).mockRejectedValue(new Error('boom'));
+    expect((await fetchAgentlessSecretRefs('p1')).size).toBe(0);
+    expect((await fetchPackagePolicySecretRefs('p1')).size).toBe(0);
   });
 });

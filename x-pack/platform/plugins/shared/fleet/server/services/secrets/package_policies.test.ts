@@ -1344,6 +1344,30 @@ describe('Package policy secrets', () => {
       });
     });
 
+    describe('when a var carries a multi-id secret reference', () => {
+      it('tracks every id of the reference', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-multi-secret': { value: { isSecretRef: true, ids: ['multi-1', 'multi-2'] } },
+            'pkg-secret-1': { value: 'pkg-secret-1-val' },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+        expect(result.secretReferences).toHaveLength(3);
+        expect(result.secretReferences).toEqual(
+          expect.arrayContaining([{ id: 'multi-1' }, { id: 'multi-2' }])
+        );
+      });
+    });
+
     describe('when both required and optional secret values are provided', () => {
       it('returns secret reference for both required and optional secret', async () => {
         const mockPackagePolicy = {
