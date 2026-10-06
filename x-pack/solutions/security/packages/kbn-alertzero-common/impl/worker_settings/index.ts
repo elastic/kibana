@@ -61,7 +61,10 @@ export const createDefaultWorkerSettings = (workerId: string): WorkerSettings =>
 export const getAllowedAutonomyLevels = (workerId: string): readonly WatchAutonomyLevel[] =>
   getContract(workerId).declaration.allowedAutonomyLevels;
 
-export { nearestLowerAutonomyLevel, upgradeStoredWorkerSettings } from './upgrade_stored_settings';
+export {
+  nearestLowerAutonomyLevel,
+  upgradeStoredWorkerSettings,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,

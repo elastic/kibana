@@ -1,8 +1,9 @@
 {
   "settingsVersion": 1,
-  "autonomyLevel": "supervised",
+  "autonomyLevel": "manual",
+  "scheduleInterval": "2h",
   "extras": {
-    "autoCloseConfidenceScoreMinThreshold": 0.9
+    "analysisWindowDays": 14
   },
   "serviceAccountId": "kibana/az-worker-1"
 }

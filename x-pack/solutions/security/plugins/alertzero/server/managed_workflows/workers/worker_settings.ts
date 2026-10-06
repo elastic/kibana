@@ -62,7 +62,7 @@ export const toTemplateValues = (
 });
 
 /**
- * Reads persisted template values after the same upgrade the startup pass writes back, so the
+ * Reads persisted template values after the same upgrade the Worker's renderer applies, so the
  * settings page and the running workflow see the same values. Anything else present is left as
  * stored, so an out-of-range value still fails here and the Worker projects as unavailable.
  */
@@ -118,8 +118,6 @@ export const createWorkerSettingsRegistration = (
   workerId: RegisteredWorkerId
 ): WorkerSettingsRegistration => ({
   createDefaultValues: () => toTemplateValues(workerId, createDefaultWorkerSettings(workerId)),
-  upgradeStoredValues: (raw) =>
-    upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(workerId), raw),
   applyPatch: (raw, patch) => {
     const next = applyWorkerSettingsWrite(parseWorkerValues(workerId, raw), patch);
     const result = getCompleteWorkerSettingsSchema(workerId).safeParse(next);

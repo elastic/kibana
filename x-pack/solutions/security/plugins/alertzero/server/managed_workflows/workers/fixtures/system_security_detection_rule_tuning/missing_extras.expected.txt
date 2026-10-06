@@ -1,3 +1,4 @@
 every: "2h"
 scheduleInterval: "2h"
 autonomy: "manual"
+run_as: "kibana/az-worker-1"

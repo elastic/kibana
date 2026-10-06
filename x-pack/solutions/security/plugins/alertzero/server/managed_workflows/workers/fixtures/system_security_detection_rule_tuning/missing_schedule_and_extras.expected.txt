@@ -1,3 +1,2 @@
-settingsVersion: 1
 autonomy: "manual"
 run_as: "kibana/az-worker-1"

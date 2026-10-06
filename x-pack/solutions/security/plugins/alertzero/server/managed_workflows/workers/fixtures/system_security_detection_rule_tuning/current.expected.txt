@@ -3,3 +3,4 @@ autonomy: "assisted"
 "analysisWindowDays":21
 "fpCountThreshold":4
 "fpRateThresholdPct":80
+run_as: "kibana/az-worker-1"

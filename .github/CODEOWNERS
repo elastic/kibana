@@ -3228,6 +3228,8 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts @elastic/alertzero-common-layer
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts @elastic/alertzero-common-layer
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.test.ts @elastic/alertzero-common-layer
 
 
 ## Security Threat Hunting owner connectors

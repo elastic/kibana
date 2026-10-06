@@ -19,11 +19,9 @@ export interface WorkerSettingsRegistration {
     values: ManagedWorkflowTemplateValues,
     patch: WorkerSettingsWrite
   ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
-  /** `upgradeStoredWorkerSettings` from `@kbn/alertzero-common`, for this Worker's declaration. */
-  upgradeStoredValues(values: ManagedWorkflowTemplateValues): ManagedWorkflowTemplateValues;
   /**
-   * Parses persisted template values into complete settings, after the same upgrade the startup
-   * pass writes back. Throws when a present value does not match the current shape.
+   * Parses persisted template values into complete settings, after the same upgrade the Worker's
+   * renderer applies. Throws when a present value does not match the current shape.
    */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }

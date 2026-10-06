@@ -13,7 +13,7 @@ import {
   assertSchemaDefaultsDeclared,
   buildWorkerSettingsContracts,
   describeContractChanges,
-  describeUnacceptedBreakingChanges,
+  describeBaseBranchFailure,
   diffWorkerSettingsContracts,
   nextSettingsContractSnapshot,
   normalizeSettingsSchema,
@@ -160,7 +160,7 @@ describe('Worker settings contract', () => {
         'removed extras entirely',
         contractFor(undefined, {}),
         baseContract(),
-        '[safe] removed rule-tuning.extras. Stored extras are dropped at startup.',
+        '[safe] removed rule-tuning.extras. Stored extras are ignored on read and render.',
       ],
     ])('%s', (_label, next, previous, expected) => {
       const message = contractChangeMessage(next, previous);
@@ -181,12 +181,14 @@ describe('Worker settings contract', () => {
       expect(message).not.toContain('[breaking]');
     });
 
-    it('changing a default, which reaches fresh installs only', () => {
+    it('changing a default, which reaches every document that does not store the field', () => {
       const message = contractChangeMessage(
         contractFor({ analysisWindowDays: windowDays() }, { analysisWindowDays: 8 })
       );
       expect(message).toContain('[safe] default extras.analysisWindowDays changed from 7 to 8');
-      expect(message).toContain('fresh installs only and never rewrites stored values');
+      expect(message).toContain(
+        'fresh installs and to every stored document that does not hold the field; a stored value always wins'
+      );
     });
 
     it('adding a schedule, which takes effect on the next save or enable', () => {
@@ -209,7 +211,7 @@ describe('Worker settings contract', () => {
         withLevels(['manual', 'assisted', 'supervised'])
       );
       expect(message).toContain(
-        '[safe] removed supervised from rule-tuning.autonomy. A stored supervised is lowered to assisted at startup.'
+        '[safe] removed supervised from rule-tuning.autonomy. A stored supervised is read and rendered as assisted.'
       );
       expect(message).toContain('Scheduled runs pick this up on the next save or enable');
       expect(message).not.toContain('[breaking]');
@@ -218,7 +220,7 @@ describe('Worker settings contract', () => {
         withLevels(['manual', 'assisted']),
         withLevels(['manual', 'supervised'])
       );
-      expect(replaced).toContain('A stored supervised is lowered to assisted at startup.');
+      expect(replaced).toContain('A stored supervised is read and rendered as assisted.');
       expect(replaced).toContain('[safe] widened rule-tuning.autonomy, adding assisted');
     });
 
@@ -351,7 +353,7 @@ describe('Worker settings contract', () => {
       ).toContain('[breaking] stopped allowing null on rule-tuning.extras.field');
     });
 
-    it('a new required key inside a nested object, which the startup fill does not reach', () => {
+    it('a new required key inside a nested object, which the upgrade does not reach', () => {
       expect(
         contractChangeMessage(
           withField(z.object({ a: z.number(), b: z.number() }).strict(), { a: 1, b: 2 }),
@@ -423,7 +425,7 @@ describe('Worker settings contract', () => {
 
   describe('against the base branch', () => {
     it('stays red when the snapshot was regenerated without accepting the breaking change', () => {
-      const message = describeUnacceptedBreakingChanges(
+      const message = describeBaseBranchFailure(
         snapshot(baseContract()),
         snapshot(tightened()),
         tightened()
@@ -434,7 +436,7 @@ describe('Worker settings contract', () => {
 
     it('passes once the breaking change is accepted', () => {
       expect(
-        describeUnacceptedBreakingChanges(
+        describeBaseBranchFailure(
           snapshot(baseContract()),
           snapshot(tightened(), [accepted(1)]),
           tightened()
@@ -445,14 +447,14 @@ describe('Worker settings contract', () => {
     it('stays red when the only entry is one the base branch already has', () => {
       const earlier = accepted(1, ['removed rule-tuning.extras.old']);
       expect(
-        describeUnacceptedBreakingChanges(
+        describeBaseBranchFailure(
           snapshot(baseContract(), [earlier]),
           snapshot(tightened(), [earlier]),
           tightened()
         )
       ).toContain('it was not accepted');
       expect(
-        describeUnacceptedBreakingChanges(
+        describeBaseBranchFailure(
           snapshot(baseContract(), [earlier]),
           snapshot(tightened(), [earlier, accepted(2)]),
           tightened()
@@ -463,7 +465,7 @@ describe('Worker settings contract', () => {
     it('fails when entries from the base branch were dropped or changed', () => {
       const earlier = accepted(1, ['removed rule-tuning.extras.old']);
       expect(
-        describeUnacceptedBreakingChanges(
+        describeBaseBranchFailure(
           snapshot(baseContract(), [earlier]),
           snapshot(baseContract(), [accepted(2)]),
           baseContract()
@@ -474,7 +476,7 @@ describe('Worker settings contract', () => {
     it('passes a safe change without accepting anything', () => {
       const added = withField(z.boolean(), false);
       expect(
-        describeUnacceptedBreakingChanges(snapshot(baseContract()), snapshot(added), added)
+        describeBaseBranchFailure(snapshot(baseContract()), snapshot(added), added)
       ).toBeUndefined();
     });
   });

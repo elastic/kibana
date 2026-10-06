@@ -1,3 +1,4 @@
 every: "5d"
 scheduleInterval: "5d"
 autonomy: "supervised"
+run_as: "kibana/az-worker-1"

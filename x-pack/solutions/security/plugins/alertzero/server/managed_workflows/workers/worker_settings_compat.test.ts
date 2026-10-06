@@ -21,7 +21,7 @@ import {
   SETTINGS_CONTRACT_SNAPSHOT_FILE,
   buildWorkerSettingsContracts,
   describeContractChanges,
-  describeUnacceptedBreakingChanges,
+  describeBaseBranchFailure,
   diffWorkerSettingsContracts,
   parseSettingsContractSnapshot,
 } from './test_helpers/settings_contract';
@@ -129,42 +129,63 @@ const expectedAfterUpgrade = (
   return lowered === undefined ? stored : { ...stored, autonomyLevel: lowered };
 };
 
-/**
- * Keys the document did not store may be filled. A key it did store must survive both the read
- * (what the page shows and a save would write) and the startup fill (what the workflow runs).
- */
+/** Keys the document did not store may be filled. A key it did store must survive the read. */
 const changedStoredValues = (
   stored: Record<string, unknown>,
-  readBack: Record<string, unknown>,
-  kept: Record<string, unknown>
+  readBack: Record<string, unknown>
 ): string[] => {
   const lines: string[] = [];
   for (const [key, storedValue] of Object.entries(stored)) {
-    if (isRecord(storedValue)) {
-      const readChild = readBack[key];
-      const keptChild = kept[key];
-      if (!isRecord(readChild) || !isRecord(keptChild)) {
-        lines.push(
-          `${key} stored ${JSON.stringify(storedValue)}, read ${JSON.stringify(
-            readBack[key]
-          )}, startup ${JSON.stringify(kept[key])}`
-        );
-        continue;
-      }
-      for (const nested of changedStoredValues(storedValue, readChild, keptChild)) {
+    const readValue = readBack[key];
+    if (isRecord(storedValue) && isRecord(readValue)) {
+      for (const nested of changedStoredValues(storedValue, readValue)) {
         lines.push(`${key}.${nested}`);
       }
       continue;
     }
-    if (!isEqual(readBack[key], storedValue) || !isEqual(kept[key], storedValue)) {
-      lines.push(
-        `${key} stored ${JSON.stringify(storedValue)}, read ${JSON.stringify(
-          readBack[key]
-        )}, startup ${JSON.stringify(kept[key])}`
-      );
+    if (!isEqual(readValue, storedValue)) {
+      lines.push(`${key} stored ${JSON.stringify(storedValue)}, read ${JSON.stringify(readValue)}`);
     }
   }
   return lines;
+};
+
+/** Paths the renderer and the read path fill from the Worker's defaults when a document lacks them. */
+const filledDefaultPaths = (defaults: Record<string, unknown>): string[][] => [
+  ...(Object.hasOwn(defaults, 'scheduleInterval') ? [['scheduleInterval']] : []),
+  ...(isRecord(defaults.extras)
+    ? [['extras'], ...Object.keys(defaults.extras).map((key) => ['extras', key])]
+    : []),
+];
+
+const valueAt = (values: Record<string, unknown>, path: readonly string[]): unknown =>
+  path.reduce<unknown>((cursor, key) => (isRecord(cursor) ? cursor[key] : undefined), values);
+
+const withStoredKey = (
+  values: Record<string, unknown>,
+  path: readonly string[],
+  value: unknown
+): Record<string, unknown> => {
+  const next = structuredClone(values);
+  const parent = path.length === 1 ? next : valueAt(next, path.slice(0, -1));
+  if (!isRecord(parent)) {
+    throw new Error(`Cannot set stored key ${path.join('.')}`);
+  }
+  const leaf = path[path.length - 1];
+  if (value === undefined) {
+    delete parent[leaf];
+  } else {
+    parent[leaf] = value;
+  }
+  return next;
+};
+
+const deepFreeze = <T>(value: T): T => {
+  if (typeof value === 'object' && value !== null) {
+    Object.values(value).forEach(deepFreeze);
+    Object.freeze(value);
+  }
+  return value;
 };
 
 const storedKeyPaths = (values: Record<string, unknown>): string[][] => {
@@ -260,7 +281,7 @@ describe('stored Worker settings compatibility', () => {
   );
 
   it.each(ALL_FIXTURES)(
-    '$workerId $name parses, and the filled values render without undefined or leftover tokens',
+    '$workerId $name parses, and renders without undefined or leftover tokens',
     ({ workerId, name, values, expectedInRender }) => {
       const registration = createWorkerSettingsRegistration(workerId);
       try {
@@ -275,11 +296,11 @@ describe('stored Worker settings compatibility', () => {
       const yamlTemplate = getYamlTemplate(workerId);
       let rendered: string;
       try {
-        rendered = yamlTemplate(registration.upgradeStoredValues(values));
+        rendered = yamlTemplate(values);
       } catch (error) {
         const detail = error instanceof Error ? error.message : String(error);
         throw new Error(
-          `yamlTemplate threw for the filled fixture "${name}" of "${workerId}": ${detail}\n\n${FIXTURE_FAILURE_HINT}`
+          `yamlTemplate threw for the fixture "${name}" of "${workerId}": ${detail}\n\n${FIXTURE_FAILURE_HINT}`
         );
       }
 
@@ -320,9 +341,7 @@ describe('stored Worker settings compatibility', () => {
   it.each(ALL_FIXTURES)(
     '$workerId $name renders a workflow that passes the workflow schema',
     ({ workerId, name, values }) => {
-      const registration = createWorkerSettingsRegistration(workerId);
-      const rendered = getYamlTemplate(workerId)(registration.upgradeStoredValues(values));
-      const invalid = workflowSchemaFailure(rendered);
+      const invalid = workflowSchemaFailure(getYamlTemplate(workerId)(values));
       if (invalid) {
         throw new Error(
           `This stored shape renders a workflow that fails the workflow schema (${workerId} ${name}): ${invalid}\n\n${FIXTURE_FAILURE_HINT}`
@@ -334,12 +353,18 @@ describe('stored Worker settings compatibility', () => {
   it.each(ALL_FIXTURES)(
     '$workerId $name: changing any single stored key changes the rendered YAML',
     ({ workerId, name, values }) => {
-      const registration = createWorkerSettingsRegistration(workerId);
-      const filled = registration.upgradeStoredValues(values);
       const yamlTemplate = getYamlTemplate(workerId);
-      const baseline = yamlTemplate(filled);
-      const unchanged = storedKeyPaths(filled).filter(
-        (path) => yamlTemplate(withStoredKeyChanged(filled, path)) === baseline
+      const baseline = yamlTemplate(values);
+      // A disallowed level renders as a lower allowed one, so the changed level must be allowed.
+      const otherAllowedLevel = getAllowedAutonomyLevels(workerId).find(
+        (level) => level !== expectedAfterUpgrade(workerId, values).autonomyLevel
+      );
+      const changed = (path: readonly string[]) =>
+        path.join('.') === 'autonomyLevel'
+          ? withStoredKey(values, path, otherAllowedLevel)
+          : withStoredKeyChanged(values, path);
+      const unchanged = storedKeyPaths(values).filter(
+        (path) => yamlTemplate(changed(path)) === baseline
       );
       if (unchanged.length > 0) {
         throw new Error(
@@ -347,7 +372,7 @@ describe('stored Worker settings compatibility', () => {
             .map((path) => path.join('.'))
             .join(
               ', '
-            )} on "${workerId}" fixture "${name}" left the rendered YAML unchanged. When a settings save lands between the startup read and its rewrite, the rewrite is skipped, so the save's rendered YAML must carry every stored key. Forward the key in the Worker's yamlTemplate and bump the definition version, or stop storing it.`
+            )} on "${workerId}" fixture "${name}" left the rendered YAML unchanged, so the running workflow never sees it. Forward the key in the Worker's yamlTemplate and bump the definition version, or stop storing it.`
         );
       }
     }
@@ -368,8 +393,7 @@ describe('stored Worker settings compatibility', () => {
       }
 
       const readBack = toTemplateValues(workerId, settings);
-      const kept = registration.upgradeStoredValues(values);
-      const changed = changedStoredValues(expectedAfterUpgrade(workerId, values), readBack, kept);
+      const changed = changedStoredValues(expectedAfterUpgrade(workerId, values), readBack);
       if (changed.length > 0) {
         throw new Error(
           `Reading "${workerId}" document "${name}" changed a stored value: ${changed.join(
@@ -396,17 +420,15 @@ describe('stored Worker settings compatibility', () => {
   });
 
   it.each(DISALLOWED_LEVEL_DOCUMENTS)(
-    '$workerId: a stored $level is read, written at startup and rendered as the same lower level',
+    '$workerId: a stored $level is read and rendered as the same lower level',
     ({ workerId, level, lowered, values }) => {
       const registration = createWorkerSettingsRegistration(workerId);
       if (lowered === undefined) {
         expect(() => registration.toSettings(values)).toThrow(/settings are invalid: autonomy/);
         return;
       }
-      const upgraded = registration.upgradeStoredValues(values);
       expect(registration.toSettings(values).autonomy).toBe(lowered);
-      expect(upgraded.autonomyLevel).toBe(lowered);
-      const rendered = getYamlTemplate(workerId)(upgraded);
+      const rendered = getYamlTemplate(workerId)(values);
       if (
         !rendered.includes(`autonomy: "${lowered}"`) ||
         rendered.includes(`autonomy: "${level}"`)
@@ -415,6 +437,47 @@ describe('stored Worker settings compatibility', () => {
           `The workflow for "${workerId}" rendered from a stored "${level}" does not run at "${lowered}", so the settings page and the running workflow disagree.`
         );
       }
+    }
+  );
+
+  /** Each key a Worker fills from its defaults, removed from its current.json. */
+  const MISSING_DEFAULT_DOCUMENTS = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => {
+    const current = ALL_FIXTURES.find(
+      (fixture) => fixture.workerId === workerId && fixture.name === 'current.json'
+    );
+    const defaults = createWorkerSettingsRegistration(workerId).createDefaultValues();
+    return current === undefined
+      ? []
+      : filledDefaultPaths(defaults).map((path) => ({
+          workerId,
+          key: path.join('.'),
+          missing: withStoredKey(current.values, path, undefined),
+          withDefault: withStoredKey(current.values, path, valueAt(defaults, path)),
+        }));
+  });
+
+  it.each(MISSING_DEFAULT_DOCUMENTS)(
+    '$workerId: a stored document without $key reads and renders its default',
+    ({ workerId, key, missing, withDefault }) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+      const yamlTemplate = getYamlTemplate(workerId);
+      expect(registration.toSettings(missing)).toEqual(registration.toSettings(withDefault));
+      if (yamlTemplate(missing) !== yamlTemplate(withDefault)) {
+        throw new Error(
+          `The workflow for "${workerId}" rendered from a document without ${key} differs from one that stores the default, so a setting added with a default does not reach configured spaces.`
+        );
+      }
+    }
+  );
+
+  it.each(ALL_FIXTURES)(
+    '$workerId $name renders without changing the stored values it was given',
+    ({ workerId, values }) => {
+      const before = JSON.stringify(values);
+      const frozen = deepFreeze(structuredClone(values));
+      getYamlTemplate(workerId)(frozen);
+      createWorkerSettingsRegistration(workerId).toSettings(frozen);
+      expect(JSON.stringify(frozen)).toBe(before);
     }
   );
 
@@ -440,7 +503,7 @@ describe('stored Worker settings compatibility', () => {
       if (baseText === undefined) {
         return;
       }
-      const failure = describeUnacceptedBreakingChanges(
+      const failure = describeBaseBranchFailure(
         parseSettingsContractSnapshot(baseText),
         committed,
         current

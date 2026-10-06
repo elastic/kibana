@@ -1,1 +1,0 @@
-autonomy: "manual"

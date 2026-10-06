@@ -2,7 +2,5 @@
   "settingsVersion": 1,
   "autonomyLevel": "manual",
   "scheduleInterval": "2h",
-  "extras": {
-    "analysisWindowDays": 14
-  }
+  "serviceAccountId": "kibana/az-worker-1"
 }

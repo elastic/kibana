@@ -6,5 +6,6 @@
     "analysisWindowDays": 21,
     "fpCountThreshold": 4,
     "fpRateThresholdPct": 80
-  }
+  },
+  "serviceAccountId": "kibana/az-worker-1"
 }

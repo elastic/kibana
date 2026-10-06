@@ -7,6 +7,7 @@
 
 import {
   getAllowedAutonomyLevels,
+  getWorkerSettingsDeclaration,
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
@@ -16,6 +17,7 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
+  upgradeStoredWorkerSettings,
   WorkerScheduleInterval,
   WorkerSettings,
 } from '@kbn/alertzero-common';
@@ -123,7 +125,9 @@ describe('createWorkerSettingsRegistration', () => {
     it('fills a missing schedule interval from the declaration default', () => {
       const stored = { settingsVersion: 1, autonomyLevel: 'manual' };
 
-      expect(registration.upgradeStoredValues(stored)).toEqual({
+      expect(
+        upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(AD_WORKER_ID), stored)
+      ).toEqual({
         ...stored,
         scheduleInterval: '24h',
       });
@@ -172,7 +176,9 @@ describe('createWorkerSettingsRegistration', () => {
         autonomy: 'manual',
         scheduleInterval: '24h',
       });
-      expect(registration.upgradeStoredValues(stored)).toEqual({
+      expect(
+        upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(AD_WORKER_ID), stored)
+      ).toEqual({
         ...stored,
         autonomyLevel: 'manual',
       });
@@ -274,7 +280,9 @@ describe('createWorkerSettingsRegistration', () => {
         scheduleInterval: '2h',
       };
 
-      expect(registration.upgradeStoredValues(stored)).toEqual({
+      expect(
+        upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(RULE_TUNING_WORKER_ID), stored)
+      ).toEqual({
         ...stored,
         extras: defaultExtras,
       });
@@ -294,7 +302,9 @@ describe('createWorkerSettingsRegistration', () => {
         scheduleInterval: '2h',
       };
 
-      expect(registration.upgradeStoredValues(stored)).toEqual({
+      expect(
+        upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(RULE_TUNING_WORKER_ID), stored)
+      ).toEqual({
         ...stored,
         extras: defaultExtras,
       });
@@ -312,7 +322,9 @@ describe('createWorkerSettingsRegistration', () => {
         extras: { analysisWindowDays: 21 },
       };
 
-      expect(registration.upgradeStoredValues(stored)).toEqual({
+      expect(
+        upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(RULE_TUNING_WORKER_ID), stored)
+      ).toEqual({
         ...storedDefaults,
         extras: { ...defaultExtras, analysisWindowDays: 21 },
       });
@@ -325,13 +337,20 @@ describe('createWorkerSettingsRegistration', () => {
     });
 
     it('leaves a complete extras object untouched', () => {
-      expect(registration.upgradeStoredValues(storedDefaults)).toBe(storedDefaults);
+      expect(
+        upgradeStoredWorkerSettings(
+          getWorkerSettingsDeclaration(RULE_TUNING_WORKER_ID),
+          storedDefaults
+        )
+      ).toBe(storedDefaults);
     });
 
     it('fills every extras key when the stored object is empty', () => {
       const stored = { ...storedDefaults, extras: {} };
 
-      expect(registration.upgradeStoredValues(stored)).toEqual(storedDefaults);
+      expect(
+        upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(RULE_TUNING_WORKER_ID), stored)
+      ).toEqual(storedDefaults);
       expect(registration.toSettings(stored)).toEqual({
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'manual',
@@ -460,7 +479,12 @@ describe('createWorkerSettingsRegistration', () => {
     it('reads a pre-existing v1 document with no extras and a since-dropped autonomy level', () => {
       const stored = { settingsVersion: 1, autonomyLevel: 'assisted' };
 
-      expect(registration.upgradeStoredValues(stored)).toEqual({
+      expect(
+        upgradeStoredWorkerSettings(
+          getWorkerSettingsDeclaration(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+          stored
+        )
+      ).toEqual({
         ...stored,
         autonomyLevel: 'manual',
         extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
@@ -598,7 +622,9 @@ describe('createWorkerSettingsRegistration', () => {
     it('drops a stale extras value from a document stored before the dials were retired', () => {
       const stale = { ...storedDefaults, extras: { tier2When: 'always', candidateLimit: 10 } };
 
-      expect(registration.upgradeStoredValues(stale)).toEqual(storedDefaults);
+      expect(
+        upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(HUNT_WORKER_ID), stale)
+      ).toEqual(storedDefaults);
       expect(registration.toSettings(stale)).toEqual({
         workerId: HUNT_WORKER_ID,
         autonomy: 'manual',

@@ -43,7 +43,7 @@ export const ACCEPT_BREAKING_CHANGE_COMMAND = `${GENERATE_SETTINGS_CONTRACT_SNAP
 const ACCEPT_BREAKING_CHANGE_INSTRUCTIONS = `Before customers exist, a breaking change can go in only with a coordinated reset of the affected environments. Agree it with the Common Worker Layer team on an issue, then run:\n${ACCEPT_BREAKING_CHANGE_COMMAND}`;
 
 const TAKES_EFFECT_ON_NEXT_SAVE =
-  'Scheduled runs pick this up on the next save or enable in each space, because startup rewrites the workflow without rescheduling it.';
+  'Scheduled runs pick this up on the next save or enable in each space, because re-rendering the workflow does not reschedule it.';
 
 const KNOWN_SCHEMA_KEYS = new Set([
   '$schema',
@@ -306,13 +306,13 @@ export const buildWorkerSettingsContracts = (): WorkerSettingsContracts => {
   return contracts;
 };
 
-/** Must match the keys `fillMissingSchedule` and `fillMissingExtras` fill in `@kbn/alertzero-common`. */
-const isFilledAtStartup = (path: readonly string[]): boolean =>
+/** Must match the keys `upgradeStoredWorkerSettings` fills in `worker_settings_defaults.ts`. */
+const isFilledFromDefaults = (path: readonly string[]): boolean =>
   (path.length === 1 && (path[0] === 'scheduleInterval' || path[0] === 'extras')) ||
   (path.length === 2 && path[0] === 'extras');
 
 const hasFilledDefault = (defaults: unknown, path: readonly string[]): boolean => {
-  if (!isFilledAtStartup(path)) {
+  if (!isFilledFromDefaults(path)) {
     return false;
   }
   const parent = path.length === 1 ? defaults : isRecord(defaults) ? defaults[path[0]] : undefined;
@@ -352,8 +352,8 @@ const isWatchAutonomyLevel = (value: unknown): value is WatchAutonomyLevel =>
   typeof value === 'string' && (WATCH_AUTONOMY_LEVELS as readonly string[]).includes(value);
 
 /**
- * A removed autonomy level is safe when a lower allowed level remains: the startup pass writes that
- * level into every document that stored the removed one, and the read returns the same.
+ * A removed autonomy level is safe when a lower allowed level remains: the read path and the
+ * renderer both lower a stored removed level to it.
  */
 const pushRemovedAutonomyLevels = (
   removed: ReadonlyArray<string | number | boolean>,
@@ -379,7 +379,7 @@ const pushRemovedAutonomyLevels = (
             kind: 'safe',
             text: `removed ${String(level)} from ${label}. A stored ${String(
               level
-            )} is lowered to ${lowered} at startup.`,
+            )} is read and rendered as ${lowered}.`,
             note: TAKES_EFFECT_ON_NEXT_SAVE,
           }
     );
@@ -505,7 +505,7 @@ const diffNodes = (
       field.path === 'extras'
         ? {
             kind: 'safe',
-            text: `removed ${label}.${key}. Stored extras are dropped at startup.`,
+            text: `removed ${label}.${key}. Stored extras are ignored on read and render.`,
             field,
           }
         : { kind: 'breaking', text: `removed ${label}.${key}`, field, mayBeLabelChange: true }
@@ -552,7 +552,8 @@ const diffNodes = (
   }
 };
 
-const FRESH_INSTALLS_ONLY = 'It applies to fresh installs only and never rewrites stored values.';
+const DEFAULT_CHANGE_REACH =
+  'It applies to fresh installs and to every stored document that does not hold the field; a stored value always wins.';
 
 const diffDefaults = (
   previous: unknown,
@@ -576,7 +577,7 @@ const diffDefaults = (
       kind: 'safe',
       text: `default ${key} changed from ${JSON.stringify(previous)} to ${JSON.stringify(
         next
-      )}. ${FRESH_INSTALLS_ONLY}`,
+      )}. ${DEFAULT_CHANGE_REACH}`,
     });
   }
 };
@@ -656,10 +657,11 @@ const unacceptedAtBase = (
     : breakingChanges(diffWorkerSettingsContracts(base.workers, current));
 
 /**
- * Against the base branch, a breaking diff must come with a newly accepted breaking change.
- * Regenerating the snapshot without the flag does not add one, so the reflexive fix stays red.
+ * Against the base branch: accepted entries stay append-only, and a breaking diff comes with a
+ * newly accepted breaking change. Regenerating the snapshot without the flag does not add one, so
+ * the reflexive fix stays red.
  */
-export const describeUnacceptedBreakingChanges = (
+export const describeBaseBranchFailure = (
   base: SettingsContractSnapshot,
   committed: SettingsContractSnapshot,
   current: WorkerSettingsContracts

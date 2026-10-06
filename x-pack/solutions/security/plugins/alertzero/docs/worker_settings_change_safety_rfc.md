@@ -12,9 +12,11 @@ AlertZero Workers keep one copy of their settings per Kibana space. When a Watch
 Worker's settings schema, every space that already stored the old shape must still read after the
 upgrade. Today nothing checks that. This PR adds unit tests that fail in CI when a settings change
 would break stored documents, tell the developer whether the change is safe or breaking, and give
-the exact next step. It changes one thing at runtime: a stored autonomy level the Worker no longer
-allows is now written back at startup as the nearest allowed level below it, so the settings page
-and the running workflow agree. It adds nothing to the Buildkite pipeline.
+the exact next step. It changes one thing at runtime: every Worker's renderer upgrades the stored
+values the same way the settings read path does (missing defaults filled, a disallowed autonomy
+level lowered), without rewriting the stored document, so the settings page and the running
+workflow agree for Workers that run as a service account. It adds nothing to the Buildkite
+pipeline.
 
 ## Background
 
@@ -67,7 +69,7 @@ Where each piece lives:
 | Per-Worker settings schema: fields, bounds, allowed autonomy levels | `kbn-alertzero-common/impl/schemas/components/*_watch_settings.schema.yaml`, generated into `*.gen.ts` | Watch team |
 | Declaration: allowed levels, schedule default, extras defaults | `kbn-alertzero-common/impl/worker_settings/<watch>.ts` | Watch team |
 | Reading stored settings | `plugins/alertzero/server/managed_workflows/workers/worker_settings.ts` | CWL |
-| Startup fill of missing keys | `plugins/alertzero/server/managed_workflows/apply_missing_installed_worker_settings.ts` | CWL |
+| Per-Worker allowed levels and defaults, and the upgrade applied on read and render | `kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts` | Watch team (values), CWL (upgrade) |
 | Workflow YAML and render helpers | `kbn-workflows/managed/definitions/alertzero/` | Watch team (YAML), CWL (helpers) |
 | The guard added by this PR | `plugins/alertzero/server/managed_workflows/workers/fixtures/`, `test_helpers/`, `worker_settings_compat.test.ts` | CWL |
 
@@ -110,32 +112,37 @@ so a breaking change has nowhere safe to go. It must at least fail loudly in CI.
 
 ## What already exists on `main`
 
-- **Missing keys are filled from defaults.** When a stored document lacks a `scheduleInterval` or
-  an `extras` key that the current declaration has, the default is filled in on read and written back
-  by a startup pass before the plugin reports ready
-  ([kibana#293419](https://github.com/elastic/kibana/pull/293419), with a concurrency fix in
-  [kibana#293558](https://github.com/elastic/kibana/pull/293558)). This is what makes adding a
-  field safe at runtime. Stored values are never overwritten.
+- **Missing keys are filled on read.** When a stored document lacks a `scheduleInterval` or an
+  `extras` key that the current declaration has, the read path fills the default
+  ([kibana#293419](https://github.com/elastic/kibana/pull/293419)).
+- **Every Worker runs as a service account**
+  ([kibana#295215](https://github.com/elastic/kibana/pull/295215)). The platform rejects a write
+  without a user request that changes a bound workflow's stored values.
 - **YAML edits need a definition version bump**, enforced by `managed_workflow_definitions.test.ts`.
 
 ## The solution
 
 | Part | What it catches | Kind of change |
 |---|---|---|
-| Lowering a disallowed autonomy level at startup | A settings page and a running workflow that disagree after levels are narrowed | Runtime |
+| Render-time upgrade of stored settings | A settings page and a running workflow that disagree after a setting is added or levels are narrowed | Runtime |
 | Stored fixtures with expected output | A stored shape that no longer reads, renders or installs | Test |
 | Settings contract snapshot and generator | Any schema or default change, classified safe or breaking | Test, one committed JSON file, a script |
 | Comparison with the base branch | Regenerating the snapshot to hide a breaking change | Test |
 
-### 1. The one runtime change: a narrowed autonomy level is written back, lowered
+### 1. The one runtime change: stored settings are upgraded at render time
 
-Workers' allowed autonomy levels get narrowed as product decisions land. Rule Tuning and Rule
-Creation dropped `supervised`, Attack Discovery dropped `assisted`, and more narrowing is planned.
-Spaces that saved a level before it was removed still store it.
+A stored document can be behind the current declaration in two ways. A Watch team adds a setting
+with a default, and every space that stored settings before that has no value for it. Or a Watch
+team narrows a Worker's allowed autonomy levels (Rule Tuning dropped `supervised`, Attack Discovery
+dropped `assisted`, more is planned), and spaces that saved a removed level still store it.
 
-On `main`, the read path lowered such a level: Rule Tuning `supervised` was read as `assisted`. The
-stored copy was never rewritten, so the running workflow kept `supervised`. The child workflows only
-accept the allowed levels:
+The settings read path already fills missing keys and lowers a disallowed level, so the page looks
+right. The running workflow is a different matter. A Worker runs as a service account, and the
+Workflows platform lets a write without a user request touch a bound workflow only when its stored
+template values stay the same. That is how a definition upgrade at `ready()` re-renders YAML from
+the stored values. Any background rewrite of the values is rejected. So the running workflow would
+keep the old shape: a missing setting renders as nothing (Alert Triage renders the literal text
+`undefined`), and a removed level renders as is, which the child workflows reject on every run:
 
 ```yaml
 # rule_tuning_worker.yaml, the sweep Rule Tuning dispatches
@@ -144,55 +151,59 @@ autonomy_level:
   enum: [manual, assisted]
 ```
 
-So the sweep rejected its input on every run, while the settings page showed a healthy Worker at
-`assisted`. Only a manual save on the settings page fixed it.
-
-This PR makes the startup pass apply the same lowering and write it back, in the same step that
-already fills missing keys. Both the read path and the startup pass call one function:
+This PR makes every Worker's renderer apply the same upgrade the read path applies, and never
+rewrites the stored document:
 
 ```ts
-export const upgradeStoredWorkerSettings = (declaration, stored) =>
-  lowerDisallowedAutonomy(
-    declaration,
-    fillMissingExtras(declaration, fillMissingSchedule(declaration, stored))
-  );
+yamlTemplate: (values: RuleTuningWorkerTemplateValues): string =>
+  renderRuleTuningWorkerYaml(
+    DETECTION_RULE_TUNING_YAML,
+    upgradeStoredWorkerSettings(RULE_TUNING_WORKER_SETTINGS_DEFAULTS, values)
+  ),
 ```
 
-`lowerDisallowedAutonomy` picks the most autonomous allowed level strictly below the stored one. It
-never raises autonomy, and it keeps a stored level that has nothing allowed below it, which then
-fails validation as before. The startup pass reinstalls the document before the plugin reports
-ready, bound to the document version it read so a concurrent save is not overwritten, and logs
-each change:
+`upgradeStoredWorkerSettings` fills a missing schedule or `extras` key from the Worker's default,
+ignores `extras` a Worker no longer declares, and lowers a disallowed autonomy level to the most
+autonomous allowed level strictly below it. It never raises autonomy, keeps a stored level that has
+nothing allowed below it (which then fails validation as before), and never modifies the values it
+is given, which matters because the platform persists those same values after rendering.
 
-```text
-Requested a reinstall of AlertZero worker "system-security-detection-rule-tuning-default" in space
-"default" with its stored settings upgraded to the current declaration, lowering autonomy from
-"supervised" to "assisted" because the Worker no longer allows it. The write is skipped if the
-document changed since it was read.
-```
+The function and each Worker's allowed levels and defaults live in
+`kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts`, because the renderers are
+in that platform package and it cannot import `@kbn/alertzero-common`. That module has no imports,
+so `@kbn/alertzero-common` builds its declarations from it and re-exports the function for the read
+path, also from the browser. Nothing is defined twice.
 
-The startup pass writes the workflow document but does not reschedule its Task Manager task, so a
-Worker whose trigger depends on the level keeps its old schedule until the next save or enable in
-that space. The contract message says so.
+Stored values are unchanged, so the platform treats the re-render as a trusted code upgrade, and an
+installed copy picks the change up the next time its definition version moves and `ready()`
+re-renders it. The existing version check in `managed_workflow_definitions.test.ts` enforces that:
+each Worker's fingerprint row now covers its settings defaults as well as its YAML, so changing a
+default, the allowed levels or the declared extras fails the same row a YAML edit does. No new
+mechanism, and a YAML-only edit still touches nothing CWL owns. The page, the rendered workflow and the stored document then agree on what runs, with no
+manual step, no reset and no write without a user request. A re-render does not reschedule the
+Task Manager task, so a trigger that depends on the level changes on the next save or enable.
 
-After startup the page, the stored document and the running workflow all hold the same level, with
-no manual step and no reset. A test covers every Worker and every level it does not allow: the read
-and the startup pass must produce the same lower level, and the rendered workflow must run at it.
+Tests cover every Worker: a document missing each defaulted key reads and renders exactly like one
+that stores the default; every level a Worker does not allow reads and renders as the same lower
+level; and rendering a frozen copy of every fixture leaves it unchanged.
 
 ### 2. Stored fixtures
 
-`workers/fixtures/<worker_id_in_snake_case>/*.json` are copies of document shapes that environments
-have actually stored. They are written by hand, not generated from code, because their job is to
-stay the same when the code changes.
+`workers/fixtures/<worker_id_in_snake_case>/*.json` are stored document shapes. They are written by
+hand, not generated from code, because their job is to stay the same when the code changes. Every
+fixture carries a `serviceAccountId`, as every stored Worker document does, so the rendered
+`run_as` line is covered too.
 
-A Worker has several fixtures when its stored shape changed over time. Rule Tuning has four:
+`current.json` is the shape a space stores today, with non-default values so a wrong read shows up.
+The others are named by the case they test. A document missing a key added later is not legacy; it
+is what every configured space looks like after a Watch team adds a setting. Rule Tuning has four:
 
-| Fixture | The shape it stands for |
+| Fixture | The case it tests |
 |---|---|
-| `autonomy_only.json` | Early builds, before the schedule and extras existed |
-| `qa_schedule_only.json` | A schedule, no extras |
-| `analysis_window_only.json` | After `analysisWindowDays` was added, before the FP thresholds |
-| `current.json` | Today's full shape, with non-default values so a wrong read shows up |
+| `missing_schedule_and_extras.json` | No schedule and no extras |
+| `missing_extras.json` | A schedule, no extras |
+| `partial_extras.json` | Some extras keys, not all |
+| `current.json` | Today's full shape |
 
 Next to a fixture, `<name>.expected.txt` lists lines the rendered workflow must contain, one per
 line, only for values the fixture stores:
@@ -257,16 +268,16 @@ The test compares the live code with this file. Each difference is labelled:
 
 | Change | Classified as | Why |
 |---|---|---|
-| New field with a default, new optional field | Safe | The startup fill supplies it to stored documents |
+| New field with a default, new optional field | Safe | The read path and the renderer fill it for stored documents |
 | Loosened bound, widened enum, allowed `null` | Safe | Every stored value still passes |
-| Changed default | Safe | Stored documents keep their value; the new default reaches fresh installs only |
+| Changed default | Safe | Stored values win; the new default reaches fresh installs and every stored document that does not hold the field |
 | New schedule on an existing Worker | Safe | It starts on the next save or enable in each space |
-| Removed autonomy level that has a lower allowed level | Safe | The startup pass lowers stored documents to the nearest allowed level; scheduled runs pick it up on the next save or enable |
-| Removed `extras` from a Worker | Safe | The startup pass drops stored extras |
+| Removed autonomy level that has a lower allowed level | Safe | The read path and the renderer lower it to the nearest allowed level; a level-dependent trigger changes on the next save or enable |
+| Removed `extras` from a Worker | Safe | The read path and the renderer ignore stored extras |
 | Removed lowest autonomy level | Breaking | There is no lower level to move stored documents to |
 | Removed, renamed or retyped field | Breaking | Stored documents hold a key or type the schema rejects |
 | Tightened bound or array size, narrowed enum (other than autonomy), free string turned into an enum, dropped `null` | Breaking | Stored values may fall outside |
-| New required field without a default, or one the startup fill cannot reach (inside a nested object) | Breaking | Stored documents cannot supply it |
+| New required field without a default, or one the upgrade cannot reach (inside a nested object) | Breaking | Stored documents cannot supply it |
 | Removed Worker | Breaking | Its stored documents no longer have a reader |
 
 A safe change fails once and asks for the snapshot to be regenerated:
@@ -373,8 +384,8 @@ states that a render-helper change needs a definition version bump.
 |---|---|
 | 1. Breaking changes cannot ship by mistake | The contract test classifies every change. The generator refuses a breaking one without `--accept-breaking-change`. The base-branch comparison keeps a deleted-and-regenerated snapshot red. CODEOWNERS routes `fixtures/`, `test_helpers/` and `worker_settings_compat.test.ts` to `@elastic/alertzero-common-layer`; once that team has write access to the repository, an accepted breaking change needs its review |
 | 2. Does not depend on documentation | The tests fire on the change itself, and each message names the next command |
-| 3. Customers are never affected | The guard is unit tests only. Test helpers and snapshots live in `test_helpers/`, which the distributable build excludes. The one runtime change moves a narrowed autonomy level to the nearest allowed level below it, never above, so page and workflow agree |
-| 4. Adding a setting never strands configured Workers | Defaults are filled at startup (already on `main`). An added field with a default, including a boolean or an array, produces only a `[safe]` line |
+| 3. Customers are never affected | The guard is unit tests only. Test helpers and snapshots live in `test_helpers/`, which the distributable build excludes. The one runtime change renders stored settings through the same upgrade the read path applies, never writes a stored document without a user request, and never raises autonomy |
+| 4. Adding a setting never strands configured Workers | The read path and every renderer fill a missing key from its default, so a Worker bound to a service account runs the new setting after the version bump re-renders it. An added field with a default, including a boolean or an array, produces only a `[safe]` line |
 | 5. Clear for Watch teams | The plugin README has a "Changing Worker settings safely" section with a change-kind table. Every failure line is labelled `[safe]` or `[breaking]` |
 | 6. Future cases are caught | The snapshot is compared field by field, so any removal, retype, tightened bound or narrowed enum is caught without a hand-kept list. A narrowed autonomy level is reported with the level stored documents are moved to. Unknown schema features fail loudly |
 | 7. No reliance on remembering fixtures | The snapshot is generated from the declarations. A new field needs no fixture. A new Worker without fixtures fails with a message naming the files to add |
@@ -382,32 +393,37 @@ states that a render-helper change needs a definition version bump.
 ## What a Watch team does
 
 **Add a setting.** Add the field to the schema YAML and run `yarn openapi:generate`, then add a
-default:
+default in `worker_settings_defaults.ts`:
 
 ```ts
-export const RULE_TUNING_DEFAULT_EXTRAS = {
-  analysisWindowDays: 7,
-  fpCountThreshold: 10,
-  fpRateThresholdPct: 50,
-  maxGaps: 3, // new
-};
+export const RULE_TUNING_WORKER_SETTINGS_DEFAULTS = {
+  allowedAutonomyLevels: REVIEW_GATED_AUTONOMY_LEVELS,
+  scheduleInterval: { defaultValue: '2h' },
+  extras: {
+    defaultValue: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50, maxGaps: 3 },
+  },
+} as const satisfies WorkerSettingsDefaults;
 ```
 
-Use it in the YAML and bump the definition version, as `main` already requires. CI then reports
-`[safe] added …extras.maxGaps with a default`; run the generator and push. On the next startup,
-every configured space gets `maxGaps: 3`, and values it already stores stay as they are.
+Use it in the YAML and bump the definition version. CI then reports
+`[safe] added …extras.maxGaps with a default`; run the generator and push. After the upgrade,
+`ready()` re-renders every configured space with `maxGaps: 3`, the settings page shows 3, and values
+a space already stores stay as they are. No stored document is rewritten.
 
-**Change a default.** Reported as `[safe]`. Run the generator. The new default reaches fresh
-installs only.
+**Change a default.** Reported as `[safe]`. Bump the definition version, which the fingerprint row
+asks for, and run the generator. The
+new default reaches fresh installs and every space that does not store the field; a stored value
+wins.
 
-**Edit only the YAML (a prompt, a step).** The settings guard does not fire. Bump the definition
-version, as `main` already requires.
+**Edit only the YAML (a prompt, a step).** The settings classification does not fire. Bump the
+definition version, as `main` already requires. Nothing in the settings guard changes.
 
 **Remove an allowed autonomy level.** When a lower allowed level remains, for example Attack
 Discovery moving from `manual`/`supervised` to `manual`/`assisted`, CI reports
-`[safe] removed supervised … A stored supervised is lowered to assisted at startup`. Run the
-generator; configured spaces are moved at the next startup. Removing the lowest allowed level is
-breaking.
+`[safe] removed supervised … A stored supervised is read and rendered as assisted`. Bump the
+definition version (the fingerprint row asks for it) and run the generator; configured spaces run
+at the lower level once `ready()`
+re-renders them. Removing the lowest allowed level is breaking.
 
 **Rename, remove or retype a field, tighten a bound.** Reported as
 `[breaking]`. Prefer keeping the stored key and changing only the label. Otherwise, before
@@ -433,10 +449,14 @@ contain, then run the generator. The contract test reports `[safe] added Worker 
 - **Only the input side of the pipe is in the contract.** Each Worker's schema is piped into the
   generated `WorkerSettings`. Tightening `WorkerSettings` itself fails stored documents with no
   snapshot diff; type coupling catches most enum narrowing, not added bounds or patterns.
-- **Scheduled tasks are not re-synced at startup.** Lowering autonomy rewrites the workflow
-  document only; a trigger that depends on the level changes on the next save or enable.
-- **The startup pass reads at most 1000 managed workflow documents across spaces**, the same
-  platform limit every definition upgrade has. Documents past it heal on their next save.
+- **Scheduled tasks are not re-synced by a re-render.** A trigger that depends on the level, or a
+  new schedule, changes on the next save or enable in each space.
+- **`ready()` re-renders at most 1000 managed workflow documents across spaces**, a platform limit
+  every definition upgrade has. Documents past it pick changes up on their next save.
+- **Stored documents are not healed.** They keep their old shape until the next save; the read path
+  and the renderer interpret them. A platform hook that lets a managed definition upgrade its own
+  stored values at boot would need the Workflows team and a security review, and would call the same
+  upgrade function.
 - **Render-helper edits** without a definition version bump are not caught, as described above.
 - **Rollback.** An older Kibana reading a document written by a newer one rejects unknown keys and
   shows the Worker as unavailable, leaving the stored values untouched. That is the MVP behaviour
