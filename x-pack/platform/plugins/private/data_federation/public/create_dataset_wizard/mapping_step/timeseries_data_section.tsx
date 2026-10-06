@@ -89,7 +89,7 @@ export function TimeseriesDataSection({
       {isEnabled ? (
         <>
           <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
               <EuiFormRow
                 label={i18n.translate(
