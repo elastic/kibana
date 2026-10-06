@@ -14,7 +14,7 @@ import type {
   ColumnHeaderOptions,
   TimelineItem,
   TimelineNonEcsData,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-common';
 import type { SortColumnTable, SortDirectionTable } from '../../common/types';
 
 /**
