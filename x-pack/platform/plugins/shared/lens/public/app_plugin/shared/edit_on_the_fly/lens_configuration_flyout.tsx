@@ -56,6 +56,7 @@ import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_sessi
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
+import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 import { useEsqlConversionCheck } from './use_esql_conversion_check';
 
 export function LensEditConfigurationFlyout({
@@ -417,9 +418,13 @@ export function LensEditConfigurationFlyout({
   });
   const showSuggestions = !textBasedMode || !hasMultipleVisibleLayers;
 
-  const showConvertToEsqlButton = useMemo(() => {
-    return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
-  }, [textBasedMode]);
+  const hasFormBasedLayers = Boolean(
+    Object.keys(
+      (datasourceStates[LENS_DATASOURCE_ID.FORM_BASED]?.state as { layers?: object } | undefined)
+        ?.layers ?? {}
+    ).length
+  );
+  const showConvertToEsqlButton = getLensFeatureFlags().enableEsqlConversion && hasFormBasedLayers;
 
   const {
     isConvertToEsqlButtonDisabled,
@@ -428,7 +433,13 @@ export function LensEditConfigurationFlyout({
     attributes: esqlConvertAttributes,
   } = useEsqlConversionCheck(
     showConvertToEsqlButton,
-    { attributes: currentAttributes, datasourceId, layerIds, visualization, activeVisualization },
+    {
+      attributes: currentAttributes,
+      datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+      layerIds,
+      visualization,
+      activeVisualization,
+    },
     { framePublicAPI, coreStart, startDependencies }
   );
 
@@ -452,6 +463,38 @@ export function LensEditConfigurationFlyout({
     // Also update the embeddable's attributes for persistence
     updateSuggestion?.(esqlConvertAttributes);
   }, [closeModal, setCurrentAttributes, updateSuggestion, esqlConvertAttributes]);
+
+  const handleConvertLayerToEsql = useCallback(
+    (layerId: string) => {
+      if (!currentAttributes || !visualization.state) return;
+
+      const layerToConvert = convertibleLayers.find(
+        (layer) => layer.id === layerId && layer.type === 'data' && layer.isConvertibleToEsql
+      );
+      if (!layerToConvert) return;
+
+      const convertedAttributes = convertFormBasedToTextBasedLayer({
+        layersToConvert: [layerToConvert],
+        attributes: currentAttributes,
+        visualizationState: visualization.state,
+        datasourceStates,
+        framePublicAPI,
+      });
+      if (!convertedAttributes) return;
+
+      setCurrentAttributes?.(convertedAttributes);
+      updateSuggestion?.(convertedAttributes);
+    },
+    [
+      convertibleLayers,
+      currentAttributes,
+      datasourceStates,
+      framePublicAPI,
+      setCurrentAttributes,
+      updateSuggestion,
+      visualization.state,
+    ]
+  );
 
   if (isLoading) return null;
 
@@ -489,6 +532,11 @@ export function LensEditConfigurationFlyout({
       coreStart={coreStart}
       uiActions={startDependencies.uiActions}
       framePublicAPI={framePublicAPI}
+      onConvertToEsql={
+        showConvertToEsqlButton && !isConvertToEsqlButtonDisabled
+          ? handleConvertLayerToEsql
+          : undefined
+      }
     />
   );
 

@@ -59,6 +59,7 @@ interface Arguments {
    */
   titleForInspector?: string;
   descriptionForInspector?: string;
+  partialRows?: boolean;
   ignoreGlobalFilters?: boolean;
 }
 
@@ -92,7 +93,9 @@ function mapResponseToDatatable(
   body: ESQLSearchResponse,
   query: string,
   input: Input,
-  warning?: string
+  warning?: string,
+  partialRows?: boolean,
+  timeField?: string
 ): Datatable {
   // all_columns in the response means that there is a separation between
   // columns with data and empty columns
@@ -180,6 +183,37 @@ function mapResponseToDatatable(
 
   const rows = normalizedValues.map((row) => zipObject(columnNames, row));
 
+  const timeFilter =
+    input?.timeRange &&
+    getTime(undefined, input.timeRange, {
+      fieldName: timeField,
+    });
+
+  if (rows.length >= 2 && timeFilter && timeField) {
+    const tf = timeField;
+    // Only apply time filtering if the result rows contain the time field
+    if (rows[0][tf] !== undefined) {
+      let firstEntry = new Date(rows[0][tf] as string | number);
+      const fromRange = new Date(timeFilter.query.range[tf].gte);
+      const lastEntry = new Date(rows[rows.length - 1][tf] as string | number);
+      const toRange = new Date(timeFilter.query.range[tf].lte);
+
+      const step =
+        new Date(rows[rows.length - 1][tf] as string | number).getTime() -
+        new Date(rows[rows.length - 2][tf] as string | number).getTime();
+      const end = new Date(lastEntry.getTime() + step);
+
+      if (partialRows === false) {
+        while (fromRange > firstEntry && rows.length > 0) {
+          rows.shift();
+          if (rows.length === 0) break;
+          firstEntry = new Date(rows[0][tf] as string | number);
+        }
+        if (end > toRange) rows.pop();
+      }
+    }
+  }
+
   return {
     type: 'datatable',
     meta: {
@@ -240,6 +274,13 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
+      partialRows: {
+        types: ['boolean'],
+        default: false,
+        help: i18n.translate('data.search.esql.partialRows.help', {
+          defaultMessage: 'Whether to return rows that only contain partial data',
+        }),
+      },
       ignoreGlobalFilters: {
         types: ['boolean'],
         default: false,
@@ -255,7 +296,15 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     },
     async fn(
       input,
-      { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
+      {
+        query,
+        timeField,
+        locale,
+        titleForInspector,
+        descriptionForInspector,
+        ignoreGlobalFilters,
+        partialRows,
+      },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId, getExecutionContext }
     ) {
       const { searchService, uiSettings } = await getStartDependencies(() => {
@@ -424,7 +473,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
-        return mapResponseToDatatable(rawResponse as any, query, input, warning);
+        return mapResponseToDatatable(
+          rawResponse as any,
+          query,
+          input,
+          warning,
+          partialRows,
+          timeField
+        );
       } catch (error) {
         // Inspector logging on error
         logInspectorRequest()

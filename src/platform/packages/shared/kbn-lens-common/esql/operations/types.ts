@@ -14,6 +14,7 @@ import type {
   CardinalityIndexPatternColumn,
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  FiltersIndexPatternColumn,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MinIndexPatternColumn,
@@ -61,6 +62,7 @@ export interface EsqlOperationColumnMap {
   median: MedianIndexPatternColumn;
   standard_deviation: StandardDeviationIndexPatternColumn;
   date_histogram: DateHistogramIndexPatternColumn;
+  filters: FiltersIndexPatternColumn;
   range: RangeIndexPatternColumn;
   static_value: StaticValueIndexPatternColumn;
   terms: TermsIndexPatternColumn;

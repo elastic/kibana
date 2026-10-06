@@ -50,6 +50,11 @@ const typeLabels: Record<LayerType, (count: number) => string> = {
       defaultMessage: '{count, plural, one {Reference line} other {Reference lines}}',
       values: { count },
     }),
+  esql: (count: number) =>
+    i18n.translate('xpack.lens.config.esqlDescription', {
+      defaultMessage: '{count, plural, one {ES|QL layer} other {ES|QL layers}}',
+      values: { count },
+    }),
 };
 
 export const ConvertToEsqlModal: React.FunctionComponent<{

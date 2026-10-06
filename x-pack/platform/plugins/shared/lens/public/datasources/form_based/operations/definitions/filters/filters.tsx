@@ -25,6 +25,7 @@ import type {
   LensAggFilterValue as FilterValue,
   IndexPattern,
 } from '@kbn/lens-common';
+import { FILTERS_ID, toEsqlRegistry } from '@kbn/lens-common';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import { FilterPopover } from './filter_popover';
@@ -107,6 +108,8 @@ export const filtersOperation: OperationDefinition<
       scale: 'ordinal',
     };
   },
+
+  toESQL: toEsqlRegistry[FILTERS_ID],
 
   toEsAggsFn: (column, columnId, indexPattern) => {
     const validFilters = column.params.filters?.filter((f: Filter) =>

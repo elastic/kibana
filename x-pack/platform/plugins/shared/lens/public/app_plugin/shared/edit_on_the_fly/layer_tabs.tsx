@@ -7,10 +7,11 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 
 import type { LayerAction, Visualization } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -57,6 +58,7 @@ export function LayerTabs({
   coreStart,
   framePublicAPI,
   uiActions,
+  onConvertToEsql,
 }: LayerTabsProps & {
   activeVisualization: Visualization;
 }) {
@@ -155,7 +157,27 @@ export function LayerTabs({
     const visualizationState = visualization.state;
 
     return visibleLayerConfigs.map((layerConfig, layerIndex) => {
+      const canConvertLayer =
+        layerConfig.layerType === 'data' &&
+        framePublicAPI.datasourceLayers[layerConfig.layerId]?.datasourceId ===
+          LENS_DATASOURCE_ID.FORM_BASED &&
+        onConvertToEsql;
+
       const compatibleActions: LayerAction[] = [
+        ...(canConvertLayer
+          ? [
+              {
+                execute: () => onConvertToEsql?.(layerConfig.layerId),
+                displayName: i18n.translate('xpack.lens.convertLayerToEsql', {
+                  defaultMessage: 'Convert layer to ES|QL',
+                }),
+                icon: 'code',
+                'data-test-subj': 'lnsConvertLayer',
+                order: -1,
+                isCompatible: true,
+              },
+            ]
+          : []),
         ...(activeVisualization
           .getSupportedActionsForLayer?.(
             layerConfig.layerId,
@@ -220,6 +242,7 @@ export function LayerTabs({
     isSaveable,
     layerIds.length,
     getLayerTabsLabel,
+    onConvertToEsql,
     onRemoveLayer,
     registerLibraryAnnotationGroupFunction,
     visibleLayerConfigs,
