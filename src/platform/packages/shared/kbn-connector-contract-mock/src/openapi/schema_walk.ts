@@ -35,6 +35,7 @@ const SUBSCHEMA_KEYWORDS = [
 const SUBSCHEMA_MAP_KEYWORDS = [
   '$defs',
   'definitions',
+  'dependencies',
   'dependentSchemas',
   'patternProperties',
   'properties',
