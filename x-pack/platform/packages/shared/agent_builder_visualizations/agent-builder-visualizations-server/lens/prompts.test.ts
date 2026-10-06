@@ -7,6 +7,7 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createGenerateConfigPrompt } from './prompts';
+import type { VisualizationConfig } from './types';
 
 describe('Lens config prompt', () => {
   const createPrompt = (applyChartRules?: boolean) =>
@@ -15,7 +16,6 @@ describe('Lens config prompt', () => {
         nlQuery: 'Improve this chart',
         esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
         chartType: SupportedChartType.XY,
-        schema: {},
         existingConfig: JSON.stringify({ type: 'xy', layers: [] }),
         applyChartRules,
         preserveESQL: true,
@@ -49,7 +49,6 @@ describe('Lens config prompt', () => {
       nlQuery: 'count of logs',
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
       chartType: SupportedChartType.Metric,
-      schema: {},
     });
 
     expect(system).toEqual(['system', expect.not.stringContaining('EDIT RULES')]);
@@ -72,7 +71,6 @@ describe('Lens config prompt', () => {
       nlQuery,
       esqlQuery: 'FROM logs-* | STATS hosts = COUNT_DISTINCT(host)',
       chartType: SupportedChartType.Metric,
-      schema: {},
       existingConfig,
       preserveESQL: true,
       applyChartRules: true,
@@ -93,11 +91,67 @@ describe('Lens config prompt', () => {
       nlQuery: 'Apply presentation defaults.',
       esqlQuery: 'FROM logs-* | STATS hosts = COUNT_DISTINCT(host)',
       chartType,
-      schema: {},
     });
 
     expect(system).toEqual(['system', expect.stringContaining(expected)]);
     expect(system).toEqual(['system', expect.not.stringContaining(unexpected)]);
+  });
+
+  it('replaces the full schema with house-style examples and a section index', () => {
+    const [system] = createGenerateConfigPrompt({
+      nlQuery: 'count of logs',
+      esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
+      chartType: SupportedChartType.Metric,
+    });
+
+    expect(system).toEqual(['system', expect.not.stringContaining('<schema')]);
+    expect(system).toEqual(['system', expect.stringContaining('HOUSE-STYLE EXAMPLES')]);
+    expect(system).toEqual(['system', expect.stringMatching(/^- metrics: \S/m)]);
+    expect(system).toEqual([
+      'system',
+      expect.stringContaining('Call `load_schema_sections` only when'),
+    ]);
+  });
+
+  describe('edits', () => {
+    const existingConfig = { type: 'xy', layers: [] };
+    const createEditPrompt = (applyChartRules: boolean) =>
+      createGenerateConfigPrompt({
+        nlQuery: 'Move the legend to the top',
+        esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
+        chartType: SupportedChartType.XY,
+        existingConfig: JSON.stringify(existingConfig),
+        parsedExistingConfig: existingConfig as unknown as VisualizationConfig,
+        preserveESQL: true,
+        applyChartRules,
+      });
+
+    it('shows the examples only as setting shapes for a focused edit', () => {
+      const [system] = createEditPrompt(false);
+
+      expect(system).toEqual(['system', expect.stringContaining('HOUSE-STYLE EXAMPLES')]);
+      expect(system).toEqual([
+        'system',
+        expect.stringContaining('The existing configuration decides the presentation.'),
+      ]);
+      expect(system).toEqual([
+        'system',
+        expect.not.stringContaining('Keep the settings the example shows'),
+      ]);
+    });
+
+    it('shows the examples as the house style when reauthoring an existing chart', () => {
+      const [system] = createEditPrompt(true);
+
+      expect(system).toEqual([
+        'system',
+        expect.stringContaining('that the examples and the existing configuration show'),
+      ]);
+      expect(system).toEqual([
+        'system',
+        expect.stringContaining('Keep the settings the example shows'),
+      ]);
+    });
   });
 
   it('gives a pie no color mechanics or threshold guidance', () => {
@@ -105,7 +159,6 @@ describe('Lens config prompt', () => {
       nlQuery: 'traffic by browser',
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY browser',
       chartType: SupportedChartType.Pie,
-      schema: {},
     });
 
     expect(system).toEqual(['system', expect.stringContaining('default palette')]);

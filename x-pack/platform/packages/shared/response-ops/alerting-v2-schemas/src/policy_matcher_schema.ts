@@ -12,22 +12,22 @@ import { MAX_KQL_LENGTH } from './constants';
 /** Maximum number of tags that can be set on a policy matcher. */
 export const POLICY_MATCHER_TAGS_MAX = 50;
 /**
- * Matcher tags are compared against rule tags, so a longer one could never
+ * Matcher tags are compared against rule routing tags, so a longer one could never
  * match anything.
  */
 export const POLICY_MATCHER_TAG_MAX_LENGTH = MAX_TAG_LENGTH;
 
 export const POLICY_MATCHER_TAGS_DESCRIPTION =
-  'Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.';
+  'Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.';
 
 export const POLICY_MATCHER_EXPRESSION_DESCRIPTION =
-  "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone.";
+  "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone.";
 
 export const POLICY_MATCHER_DESCRIPTION =
-  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.';
+  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.';
 
 export const POLICY_MATCHER_UPDATE_DESCRIPTION =
-  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.';
+  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.';
 
 export const policyMatcherSchema = z.object({
   tags: z

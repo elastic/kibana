@@ -77,6 +77,21 @@ export const workersSelectedCount = (selected: number, total: number) =>
     values: { selected, total },
   });
 
+export const BEFORE_YOU_ENABLE_RUNS_AS = i18n.translate(
+  'xpack.alertzero.onboarding.beforeYouEnable.runsAs',
+  {
+    defaultMessage:
+      'Workers run as the service account you select. Anything they do is attributed to that account.',
+  }
+);
+
+export const SERVICE_ACCOUNT_LABEL = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountLabel',
+  {
+    defaultMessage: 'Run as',
+  }
+);
+
 export const BACK = i18n.translate('xpack.alertzero.onboarding.back', {
   defaultMessage: 'Back',
 });
