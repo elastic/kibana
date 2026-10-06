@@ -13,7 +13,6 @@ import type {
   AgentToolEventSearchProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
-  CodeAnalysisGroundingProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
@@ -30,7 +29,6 @@ import {
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
@@ -85,10 +83,6 @@ export class EbtTelemetryClient {
       SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
       params
     );
-  }
-
-  public trackCodeAnalysisGrounding(params: CodeAnalysisGroundingProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE, params);
   }
 
   public trackSignificantEventsDiscoveryTriggered(params: DiscoveryTriggeredProps) {

@@ -57,9 +57,8 @@ interface KIQueryGenerationTaskOutput {
   queries: Query[];
   toolUsage?: SignificantEventsToolUsage;
   traceId?: string | null;
-  /** Resolved KI source and grounding mode for this task's run. */
+  /** Resolved KI source for this task's run. */
   ki_source?: 'canonical' | 'snapshot' | 'auto' | 'none';
-  grounding_mode?: 'baseline' | 'grounded';
   /** Reasoning-loop diagnostics from the shared agent, for treatment verification. */
   reasoning_diagnostics?: ReasoningPromptDiagnostics;
   sample_logs?: string[];
