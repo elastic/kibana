@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Rule } from 'eslint';
 import { RuleTester } from 'eslint';
-import {
-  StringsShouldBeTranslatedWithI18n,
-  RULE_WARNING_MESSAGE,
-} from './strings_should_be_translated_with_i18n';
+import { rules } from '..';
+import { RULE_WARNING_MESSAGE } from './strings_should_be_translated_with_i18n';
+
+// `eslintCompatPlugin` gave the rule the `create` method ESLint's RuleTester calls.
+const StringsShouldBeTranslatedWithI18n =
+  rules.strings_should_be_translated_with_i18n as unknown as Rule.RuleModule;
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -429,6 +432,18 @@ import React from 'react';
 function TestComponent() {
   return (
     <div>\`\`\`hello\`\`\`</div>
+  )
+}`,
+  },
+  {
+    name: 'A JSXText element or attribute made up of HTML entities and special characters should not be translated',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
+    code: `
+import React from 'react';
+
+function TestComponent() {
+  return (
+    <div title="&nbsp;">&nbsp;&mdash;&nbsp;</div>
   )
 }`,
   },

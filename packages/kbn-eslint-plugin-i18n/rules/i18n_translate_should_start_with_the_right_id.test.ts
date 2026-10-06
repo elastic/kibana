@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Rule } from 'eslint';
 import { RuleTester } from 'eslint';
+import { rules } from '..';
 import {
-  I18nTranslateShouldStartWithTheRightId,
   RULE_WARNING_MESSAGE,
   NO_IDENTIFIER_MESSAGE,
 } from './i18n_translate_should_start_with_the_right_id';
+
+// `eslintCompatPlugin` gave the rule the `create` method ESLint's RuleTester calls.
+const I18nTranslateShouldStartWithTheRightId =
+  rules.i18n_translate_should_start_with_the_right_id as unknown as Rule.RuleModule;
 
 const tsTester = [
   '@typescript-eslint/parser',

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
+import type { Scope } from 'eslint';
+import type { CreateOnceRule, SourceCode } from '@oxlint/plugins';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
 import { checkNodeForExistingDataTestSubjProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
@@ -29,23 +30,22 @@ export const EVENT_GENERATING_ELEMENTS = [
   'EuiTextArea',
 ];
 
-export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
+export const EventGeneratingElementsShouldBeInstrumented: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     fixable: 'code',
   },
-  create(context) {
-    const { getCwd, getFilename, sourceCode, report } = context;
+  createOnce(context) {
+    let cwd: string;
+    let filename: string;
+    let sourceCode: SourceCode;
 
     return {
-      JSXIdentifier: (node: TSESTree.Node) => {
-        if (!('name' in node)) {
-          return;
-        }
-
-        const name = String(node.name);
-        const range = node.range;
-        const parent = node.parent;
+      before() {
+        ({ cwd, filename, sourceCode } = context);
+      },
+      JSXIdentifier(node) {
+        const { name, range, parent } = node as unknown as TSESTree.JSXIdentifier;
 
         if (
           parent?.type !== AST_NODE_TYPES.JSXOpeningElement ||
@@ -54,9 +54,9 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
           return;
         }
 
-        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, () =>
-          // @ts-expect-error upgrade typescript v5.1.6
-          sourceCode.getScope(node as TSNode)
+        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(
+          parent,
+          () => sourceCode.getScope(node) as Scope.Scope
         );
 
         if (hasDataTestSubjProp) {
@@ -67,15 +67,12 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         // Start building the suggestion.
 
         // 1. The app name
-        const cwd = getCwd();
-        const fileName = getFilename();
-        const appName = getAppName(fileName, cwd);
+        const appName = getAppName(filename, cwd);
 
         // 2. Component name
-        // @ts-expect-error upgrade typescript v5.1.6
-        const functionDeclaration = sourceCode.getScope(node as TSNode)
-          .block as TSESTree.FunctionDeclaration;
-        const functionName = getFunctionName(functionDeclaration);
+        const functionName = getFunctionName(
+          sourceCode.getScope(node).block as unknown as TSESTree.Node
+        );
         const componentName = `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}`;
 
         // 3. The intention of the element (i.e. "Select date", "Submit", "Cancel")
@@ -87,14 +84,14 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const suggestion = `${appName}${componentName}${intent}${element}`; // 'o11yHeaderActionsSubmitButton'
 
         // 6. Report feedback to engineer
-        report({
-          node: node as any,
+        context.report({
+          node,
           message: `<${name}> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
           fix(fixer) {
             return fixer.insertTextAfterRange(range, ` data-test-subj="${suggestion}"`);
           },
         });
       },
-    } as Rule.RuleListener;
+    };
   },
 };

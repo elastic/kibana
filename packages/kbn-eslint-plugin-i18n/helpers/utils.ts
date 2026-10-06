@@ -9,6 +9,7 @@
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
+import { decodeJsxEntities } from './decode_jsx_entities';
 
 export function lowerCaseFirstLetter(str: string) {
   if (isUpperCase(str)) return str.toLowerCase();
@@ -79,9 +80,9 @@ export function getStringValue(node: TSESTree.Node): string | false {
 export function getValueFromJSXAttribute(attrValue: TSESTree.JSXAttribute['value']): string {
   if (!attrValue) return '';
 
-  // label="foo" - direct string literal
+  // label="foo" - direct string literal, read from its source without the quotes
   if (attrValue.type === AST_NODE_TYPES.Literal && typeof attrValue.value === 'string') {
-    return getTranslatableValueFromString(attrValue.value);
+    return getTranslatableValueFromString(decodeJsxEntities(attrValue.raw.slice(1, -1)));
   }
 
   // label={'foo'} - expression container with string literal

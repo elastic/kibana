@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Rule } from 'eslint';
 import { RuleTester } from 'eslint';
-import {
-  EventGeneratingElementsShouldBeInstrumented,
-  EVENT_GENERATING_ELEMENTS,
-} from './event_generating_elements_should_be_instrumented';
+import { rules } from '..';
+import { EVENT_GENERATING_ELEMENTS } from './event_generating_elements_should_be_instrumented';
+
+// `eslintCompatPlugin` gave the rule the `create` method ESLint's RuleTester calls.
+const EventGeneratingElementsShouldBeInstrumented =
+  rules.event_generating_elements_should_be_instrumented as unknown as Rule.RuleModule;
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -53,20 +56,34 @@ for (const [name, tester] of [tsTester, babelTester]) {
           code: `<${element} data-test-subj="foo" />`,
         })),
 
-        invalid: EVENT_GENERATING_ELEMENTS.map((element) => ({
-          filename: 'foo.tsx',
-          code: `<${element}>Value</${element}>`,
-          errors: [
-            {
-              line: 1,
-              message: `<${element}> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
-            },
-          ],
-          output: `<${element} data-test-subj="Value${element
-            .replace('Eui', '')
-            .replace('Empty', '')
-            .replace('Icon', '')}">Value</${element}>`,
-        })),
+        invalid: [
+          ...EVENT_GENERATING_ELEMENTS.map((element) => ({
+            filename: 'foo.tsx',
+            code: `<${element}>Value</${element}>`,
+            errors: [
+              {
+                line: 1,
+                message: `<${element}> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
+              },
+            ],
+            output: `<${element} data-test-subj="Value${element
+              .replace('Eui', '')
+              .replace('Empty', '')
+              .replace('Icon', '')}">Value</${element}>`,
+          })),
+          // HTML entities in the text are decoded before building the suggestion
+          {
+            filename: 'foo.tsx',
+            code: `<EuiButton>Save&nbsp;changes</EuiButton>`,
+            errors: [
+              {
+                line: 1,
+                message: `<EuiButton> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
+              },
+            ],
+            output: `<EuiButton data-test-subj="SaveChangesButton">Save&nbsp;changes</EuiButton>`,
+          },
+        ],
       }
     );
   });

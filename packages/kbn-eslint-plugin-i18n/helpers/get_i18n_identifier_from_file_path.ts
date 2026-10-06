@@ -10,11 +10,27 @@
 import fs from 'fs';
 import { join, parse, resolve } from 'path';
 
+const REPO_ROOT = resolve(join(__dirname, '../../../'));
+
+let i18nrcPaths: Record<string, string | string[]> | undefined;
+
+// Both `.i18nrc.json` files are read once per process instead of for every checked node.
+const getI18nrcPaths = () => {
+  if (!i18nrcPaths) {
+    const xpackI18nrc = JSON.parse(
+      fs.readFileSync(resolve(REPO_ROOT, 'x-pack/.i18nrc.json'), 'utf8')
+    );
+    const rootI18nrc = JSON.parse(fs.readFileSync(resolve(REPO_ROOT, '.i18nrc.json'), 'utf8'));
+    const paths: Record<string, string | string[]> = { ...xpackI18nrc.paths, ...rootI18nrc.paths };
+    i18nrcPaths = paths;
+  }
+  return i18nrcPaths;
+};
+
 export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
 
-  const repoRoot = resolve(join(__dirname, '../../../'));
-  const relativePathToFile = dir.replace(repoRoot, '');
+  const relativePathToFile = dir.replace(REPO_ROOT, '');
 
   // We need to match the path of the file with entries in i18nrc.json files.
   // The two i18nrc files use different path formats:
@@ -46,16 +62,7 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const fullPath = relativePathArray.slice(0, pluginNameIndex).join('/');
   const pathWithoutXpack = fullPath.replace('x-pack/', '');
 
-  const xpackRC = resolve(join(__dirname, '../../../'), 'x-pack/.i18nrc.json');
-  const rootRC = resolve(join(__dirname, '../../../'), '.i18nrc.json');
-
-  const xpackI18nrcFile = fs.readFileSync(xpackRC, 'utf8');
-  const xpackI18nrc = JSON.parse(xpackI18nrcFile);
-
-  const rootI18nrcFile = fs.readFileSync(rootRC, 'utf8');
-  const rootI18nrc = JSON.parse(rootI18nrcFile);
-
-  const allPaths = { ...xpackI18nrc.paths, ...rootI18nrc.paths };
+  const allPaths = getI18nrcPaths();
 
   if (Object.keys(allPaths).length === 0) return 'could_not_find_i18nrc';
 

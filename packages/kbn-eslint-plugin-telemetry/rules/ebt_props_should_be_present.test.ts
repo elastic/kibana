@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Rule } from 'eslint';
 import { RuleTester } from 'eslint';
-import { EbtPropsShouldBePresent, EBT_INTERACTIVE_ELEMENTS } from './ebt_props_should_be_present';
+import { rules } from '..';
+import { EBT_INTERACTIVE_ELEMENTS } from './ebt_props_should_be_present';
+
+// `eslintCompatPlugin` gave the rule the `create` method ESLint's RuleTester calls.
+const EbtPropsShouldBePresent = rules.ebt_props_should_be_present as unknown as Rule.RuleModule;
 
 const tsTester = [
   '@typescript-eslint/parser',

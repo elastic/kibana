@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-telemetry'],
-  moduleNameMapper: {
-    '^@oxlint/plugins$': '<rootDir>/node_modules/@oxlint/plugins/index.cjs',
-  },
-};
+import { execFileSync } from 'child_process';
+import { resolve } from 'path';
+
+it('replays each rule test case with Oxlint', () => {
+  execFileSync(process.execPath, [resolve(__dirname, '__fixtures__/run_oxlint_rule_tests.mjs')], {
+    cwd: resolve(__dirname, '../../..'),
+    stdio: 'inherit',
+  });
+});

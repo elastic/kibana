@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
+import type { Scope } from 'eslint';
+import type { CreateOnceRule, SourceCode } from '@oxlint/plugins';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { checkNodeForExistingEbtProps } from '../helpers/check_node_for_existing_ebt_props';
 
@@ -45,7 +46,7 @@ export const EBT_INTERACTIVE_ELEMENTS = [
   'input',
 ];
 
-export const EbtPropsShouldBePresent: Rule.RuleModule = {
+export const EbtPropsShouldBePresent: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     docs: {
@@ -53,17 +54,15 @@ export const EbtPropsShouldBePresent: Rule.RuleModule = {
         'Interactive elements should carry `data-ebt-action` and `data-ebt-element` attributes for EBT click tracking. Use `getEbtProps()` from `@kbn/ebt-click`.',
     },
   },
-  create(context) {
-    const { report, sourceCode } = context;
+  createOnce(context) {
+    let sourceCode: SourceCode;
 
     return {
-      JSXIdentifier: (node: TSESTree.Node) => {
-        if (!('name' in node)) {
-          return;
-        }
-
-        const name = String(node.name);
-        const parent = node.parent;
+      before() {
+        ({ sourceCode } = context);
+      },
+      JSXIdentifier(node) {
+        const { name, parent } = node as unknown as TSESTree.JSXIdentifier;
 
         if (parent?.type !== AST_NODE_TYPES.JSXOpeningElement) {
           return;
@@ -76,20 +75,20 @@ export const EbtPropsShouldBePresent: Rule.RuleModule = {
           return;
         }
 
-        const hasEbtProps = checkNodeForExistingEbtProps(parent, () =>
-          // @ts-expect-error upgrade typescript v5.1.6
-          sourceCode.getScope(node as TSNode)
+        const hasEbtProps = checkNodeForExistingEbtProps(
+          parent,
+          () => sourceCode.getScope(node) as Scope.Scope
         );
 
         if (hasEbtProps) {
           return;
         }
 
-        report({
-          node: node as any,
+        context.report({
+          node,
           message: `<${name}> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
         });
       },
-    } as Rule.RuleListener;
+    };
   },
 };

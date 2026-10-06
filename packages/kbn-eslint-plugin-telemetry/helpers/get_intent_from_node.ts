@@ -9,6 +9,7 @@
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { camelCase } from 'lodash';
+import { decodeJsxEntities } from './decode_jsx_entities';
 
 /*
     Attempts to get a string representation of the intent
@@ -38,7 +39,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
     switch (currentNode.type) {
       case 'JSXText':
         // When node is a string primitive
-        return `${acc}${strip(currentNode.value)}`;
+        return `${acc}${strip(decodeJsxEntities(currentNode.raw))}`;
 
       case 'JSXElement':
         // Determining whether node is of form `<FormattedMessage defaultMessage="message" />`
@@ -64,7 +65,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
           return '';
         }
 
-        return `${acc}${strip(defaultMessageProp.value.value)}`;
+        return `${acc}${strip(decodeJsxEntities(defaultMessageProp.value.raw.slice(1, -1)))}`;
 
       case 'JSXExpressionContainer':
         // Determining whether node is of form `{i18n.translate('foo', { defaultMessage: 'message'})}`
