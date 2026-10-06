@@ -20,11 +20,11 @@ export type {
   Responder,
   Violation,
 } from './src/contract/types';
-export { loadContractOperations, SchemaCompileError } from './src/openapi';
+export { InvalidSchemaError, loadContractOperations } from './src/openapi';
 export type {
   ContractOperation,
   ContractSpec,
+  InvalidSchemaFailure,
   OpenApiDocument,
-  SchemaCompileFailure,
   SpecSchema,
 } from './src/openapi';
