@@ -55,6 +55,9 @@ const isNightshiftSourceViewPattern = (name: string): boolean => {
 
 // `::` is the selector separator (`logs-*::data`), not a cluster prefix.
 const CLUSTER_PREFIX = /^[^:]+:(?!:)/;
+// Date math (`<logs-{now/d{yyyy.MM.dd|+01:00}}>`) can hold colons, which would read as a cluster
+// prefix and break the name matching. The braces only vary the date, so they act as a wildcard.
+const DATE_MATH_BRACES = /\{.*\}/;
 const BACKTICK_QUOTES = /^`(.*)`$/;
 
 /**
@@ -69,7 +72,11 @@ const indexPatternOf = (source: ESQLSource): string | undefined => {
   if (raw === undefined) {
     return undefined;
   }
-  return raw.replace(BACKTICK_QUOTES, '$1').replace(CLUSTER_PREFIX, '');
+  const unquoted = raw.replace(BACKTICK_QUOTES, '$1');
+  const withoutDateMath = unquoted.startsWith('<')
+    ? unquoted.replace(DATE_MATH_BRACES, '*')
+    : unquoted;
+  return withoutDateMath.replace(CLUSTER_PREFIX, '');
 };
 
 /**

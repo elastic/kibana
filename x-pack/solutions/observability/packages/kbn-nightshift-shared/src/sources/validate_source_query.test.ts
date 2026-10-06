@@ -136,6 +136,10 @@ describe('source type', () => {
     expectType('FROM logs-*, -remote:*', 'logs');
     expectType('FROM logs-*, cluster:-traces-*', 'logs');
     expectType('FROM logs-foo.metrics-*', 'logs');
+    // The `+01:00` form only parses quoted.
+    expectType('FROM "<logs-{now/d{yyyy.MM.dd|+01:00}}>"', 'logs');
+    expectType('FROM "<logs-{now/d{yyyy.MM.dd|+01:00}}>", logs-*', 'logs');
+    expectType('FROM remote:<logs-{now/d}>', 'logs');
   });
 
   it('rejects an unscoped wildcard', () => {

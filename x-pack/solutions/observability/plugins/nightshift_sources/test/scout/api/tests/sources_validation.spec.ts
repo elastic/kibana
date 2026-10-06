@@ -104,6 +104,22 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
+    apiTest(
+      'accepts METADATA on the source command and keeps it in the view',
+      async ({ apiClient, esClient }) => {
+        const response = await createSource(apiClient, manager.cookieHeader, {
+          title: `${TITLE_PREFIX}-${suffix}-metadata`,
+          esql: `FROM ${index} METADATA _id | WHERE status >= 500`,
+        });
+        expect(response).toHaveStatusCode(200);
+
+        const view = await readView(esClient, response.body.source.view_name);
+        expect(view?.query).toContain('METADATA _id');
+
+        await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
+      }
+    );
+
     apiTest('accepts FROM with WHERE filters', async ({ apiClient }) => {
       const response = await createSource(apiClient, manager.cookieHeader, {
         title: `${TITLE_PREFIX}-${suffix}-from`,
