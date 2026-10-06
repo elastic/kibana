@@ -9,13 +9,18 @@
 
 import type { LogDocument } from '@kbn/synthtrace-client';
 import type {
+  RequestResult,
   ServiceEdge,
   ServiceFailure,
   ServiceErrorType,
   ServiceGraph,
+  ServiceNamesOf,
   ServiceNode,
+  ServiceStats,
+  SpanRecord,
 } from '../types';
 import { ERROR_TYPE_STATUS, isInfraErrorType } from '../types';
+import type { Protocols } from '../constants';
 import {
   ASYNC_PROTOCOLS,
   DOWNSTREAM_ATTEMPT_ON_ERROR_PROB,
@@ -26,8 +31,10 @@ import {
   SUCCESS_LATENCY_JITTER_MS,
 } from '../constants';
 import { deriveSeed } from '../utils/seed';
+import { mulberry32 } from '../placeholders';
 import { getOrBuildMetadata, type MetadataCache } from '../utils/metadata';
-import { buildLogDoc, resolveLogLevel } from './shared';
+import { buildLogDoc } from '../log_builder';
+import { resolveLogLevel } from './shared';
 import {
   pickHealthyMessage,
   pickErrorMessage,
@@ -37,6 +44,9 @@ import {
 } from '../utils/templates';
 
 const AMBIENT_ERROR_RATE = 0.01;
+const INFRA_SPAN_BASE_MS = 5;
+const INFRA_SPAN_JITTER_MS = 45;
+const DURATION_SEED_OFFSET = 0x44555221;
 
 interface DownstreamOutcome {
   edge: ServiceEdge;
@@ -44,6 +54,9 @@ interface DownstreamOutcome {
   errored: boolean;
   childHttpStatus: number;
   docs: Array<Partial<LogDocument>>;
+  spanRecord: SpanRecord;
+  durationMs: number;
+  serviceStats: Record<string, ServiceStats>;
 }
 
 interface ErrorContext {
@@ -55,7 +68,44 @@ interface ErrorContext {
   isInfraKill: boolean;
 }
 
+interface VisitResult {
+  errored: boolean;
+  httpStatus: number;
+  docs: Array<Partial<LogDocument>>;
+  spanRecord: SpanRecord;
+  durationMs: number;
+  serviceStats: Record<string, ServiceStats>;
+}
+
 type Metadata = Record<string, string | undefined>;
+
+const EMPTY_SPAN_RECORD: SpanRecord = {
+  service: '',
+  operation: '',
+  durationMs: 0,
+  isError: false,
+  httpStatus: 200,
+  protocol: 'http',
+  infraDeps: [],
+  children: [],
+};
+
+function mergeServiceStats(
+  ...statsList: Array<Record<string, ServiceStats>>
+): Record<string, ServiceStats> {
+  const merged: Record<string, ServiceStats> = {};
+  for (const stats of statsList) {
+    for (const [svcName, s] of Object.entries(stats)) {
+      if (!merged[svcName]) {
+        merged[svcName] = { requests: 0, errors: 0, totalLatencyUs: 0 };
+      }
+      merged[svcName].requests += s.requests;
+      merged[svcName].errors += s.errors;
+      merged[svcName].totalLatencyUs += s.totalLatencyUs;
+    }
+  }
+  return merged;
+}
 
 function buildSelfLogs({
   serviceNode,
@@ -108,13 +158,19 @@ function buildOutboundLogs({
   });
 }
 
-function resolveErrorContext(
-  directError: boolean,
-  directFailConf: ServiceFailure | undefined,
-  failedDownstreams: DownstreamOutcome[],
-  serviceNode: ServiceNode,
-  rng: () => number
-): ErrorContext {
+function resolveErrorContext({
+  directError,
+  directFailConf,
+  failedDownstreams,
+  serviceNode,
+  rng,
+}: {
+  directError: boolean;
+  directFailConf: ServiceFailure | undefined;
+  failedDownstreams: DownstreamOutcome[];
+  serviceNode: ServiceNode;
+  rng: () => number;
+}): ErrorContext {
   const cascadeError = !directError && failedDownstreams.length > 0 && !serviceNode.resilient;
   const isError = directError || cascadeError;
 
@@ -152,7 +208,287 @@ function resolveErrorContext(
   };
 }
 
-export function simulateRequest({
+function resolveMessage({
+  errorCtx,
+  serviceNode,
+  svcSeed,
+  svcTickSeed,
+  directError,
+}: {
+  errorCtx: ErrorContext;
+  serviceNode: ServiceNode;
+  svcSeed: number;
+  svcTickSeed: number;
+  directError: boolean;
+}): string {
+  const { isError, errorType, isInfraKill, sourceDep, overrides } = errorCtx;
+
+  if (isError && errorType === 'internal_error' && !isInfraKill) {
+    const stackTrace = getStackTrace({
+      runtime: serviceNode.runtime,
+      seed: svcSeed,
+      serviceName: serviceNode.name,
+    });
+    if (stackTrace) return stackTrace;
+  }
+
+  return isError
+    ? pickErrorMessage({
+        errorType,
+        seed: svcSeed,
+        tickSeed: svcTickSeed,
+        runtime: serviceNode.runtime,
+        serviceName: serviceNode.name,
+        overrides,
+        sourceDep,
+        overridePool: directError ? serviceNode.serviceLogs?.error : undefined,
+      })
+    : pickHealthyMessage({
+        seed: svcSeed,
+        tickSeed: svcTickSeed,
+        runtime: serviceNode.runtime,
+        serviceName: serviceNode.name,
+        overrides,
+        infraDeps: serviceNode.infraDeps,
+        overridePool: serviceNode.serviceLogs?.success,
+      });
+}
+
+function buildWarnLog({
+  emitWarn,
+  directFailConf,
+  serviceNode,
+  svcSeed,
+  svcTickSeed,
+  metadata,
+}: {
+  emitWarn: boolean;
+  directFailConf: ServiceFailure | undefined;
+  serviceNode: ServiceNode;
+  svcSeed: number;
+  svcTickSeed: number;
+  metadata: Metadata;
+}): Partial<LogDocument> | undefined {
+  if (!emitWarn || !directFailConf) return undefined;
+  return buildLogDoc({
+    service: serviceNode,
+    level: 'warn',
+    message: pickWarnMessage({
+      errorType: isInfraErrorType(directFailConf.errorType)
+        ? 'internal_error'
+        : directFailConf.errorType,
+      seed: svcSeed,
+      tickSeed: svcTickSeed,
+      runtime: serviceNode.runtime,
+      serviceName: serviceNode.name,
+      sourceDep: directFailConf.sourceDep,
+    }),
+    metadata,
+  });
+}
+
+function computeSpanTiming({
+  svcTickSeed,
+  current,
+  isError,
+  downstreamOutcomes,
+  serviceNode,
+  directFailConf,
+}: {
+  svcTickSeed: number;
+  current: string;
+  isError: boolean;
+  downstreamOutcomes: DownstreamOutcome[];
+  serviceNode: ServiceNode;
+  directFailConf: ServiceFailure | undefined;
+}): { totalDurationMs: number; infraDepRecords: SpanRecord['infraDeps'] } {
+  const durationRng = mulberry32(
+    deriveSeed(svcTickSeed, `${current}:duration`) + DURATION_SEED_OFFSET
+  );
+  const selfProcessingMs = isError
+    ? ERROR_LATENCY_BASE_MS + Math.floor(durationRng() * ERROR_LATENCY_JITTER_MS)
+    : SUCCESS_LATENCY_BASE_MS + Math.floor(durationRng() * SUCCESS_LATENCY_JITTER_MS);
+  const downstreamDurationMs = downstreamOutcomes.reduce((sum, o) => sum + o.durationMs, 0);
+  const totalDurationMs = selfProcessingMs + downstreamDurationMs;
+
+  const infraDepRecords = serviceNode.infraDeps.map((dep) => {
+    const depDurationMs = INFRA_SPAN_BASE_MS + Math.floor(durationRng() * INFRA_SPAN_JITTER_MS);
+    return {
+      dep,
+      durationMs: depDurationMs,
+      isError: isError && directFailConf?.sourceDep === dep,
+    };
+  });
+
+  return { totalDurationMs, infraDepRecords };
+}
+
+function toDownstreamOutcome(
+  edge: ServiceEdge,
+  childResult: VisitResult,
+  services: readonly ServiceNode[]
+): DownstreamOutcome {
+  const targetNode = services.find((s) => s.name === edge.target);
+  return {
+    edge,
+    targetLabel: targetNode?.displayName ?? edge.target,
+    errored: childResult.errored,
+    childHttpStatus: childResult.httpStatus,
+    docs: childResult.docs,
+    spanRecord: childResult.spanRecord,
+    durationMs: childResult.durationMs,
+    serviceStats: childResult.serviceStats,
+  };
+}
+
+function buildSpanRecord({
+  service,
+  entryService,
+  isError,
+  httpStatus,
+  protocol,
+  durationMs,
+  infraDeps,
+  children,
+}: {
+  service: string;
+  entryService: string;
+  isError: boolean;
+  httpStatus: number;
+  protocol: Protocols;
+  durationMs: number;
+  infraDeps: SpanRecord['infraDeps'];
+  children: SpanRecord[];
+}): SpanRecord {
+  return {
+    service,
+    operation: `${entryService} request`,
+    durationMs,
+    isError,
+    httpStatus,
+    protocol,
+    infraDeps,
+    children,
+  };
+}
+
+function buildVisitLogDocs({
+  serviceNode,
+  errorCtx,
+  directError,
+  directFailConf,
+  emitWarn,
+  svcSeed,
+  svcTickSeed,
+  metadata,
+  downstreamOutcomes,
+  rng,
+}: {
+  serviceNode: ServiceNode;
+  errorCtx: ErrorContext;
+  directError: boolean;
+  directFailConf: ServiceFailure | undefined;
+  emitWarn: boolean;
+  svcSeed: number;
+  svcTickSeed: number;
+  metadata: Metadata;
+  downstreamOutcomes: DownstreamOutcome[];
+  rng: () => number;
+}): Array<Partial<LogDocument>> {
+  const message = resolveMessage({ errorCtx, serviceNode, svcSeed, svcTickSeed, directError });
+  const docCount = errorCtx.isError ? (directError ? directFailConf?.multiplier ?? 1 : 1) : 1;
+  const selfLogs = buildSelfLogs({
+    serviceNode,
+    level: errorCtx.isError ? 'error' : 'info',
+    message,
+    docCount,
+    metadata,
+  });
+  const warnLog = buildWarnLog({
+    emitWarn,
+    directFailConf,
+    serviceNode,
+    svcSeed,
+    svcTickSeed,
+    metadata,
+  });
+  const outboundLogs = buildOutboundLogs({
+    serviceNode,
+    outcomes: downstreamOutcomes,
+    svcSeed,
+    svcTickSeed,
+    metadata,
+    rng,
+  });
+  return [
+    ...downstreamOutcomes.flatMap((o) => o.docs),
+    ...selfLogs,
+    ...(warnLog ? [warnLog] : []),
+    ...outboundLogs,
+  ];
+}
+
+function assembleVisitResult({
+  current,
+  entryService,
+  errorCtx,
+  incomingProtocol,
+  totalDurationMs,
+  infraDepRecords,
+  docs,
+  downstreamOutcomes,
+}: {
+  current: string;
+  entryService: string;
+  errorCtx: ErrorContext;
+  incomingProtocol: Protocols;
+  totalDurationMs: number;
+  infraDepRecords: SpanRecord['infraDeps'];
+  docs: Array<Partial<LogDocument>>;
+  downstreamOutcomes: DownstreamOutcome[];
+}): VisitResult {
+  const serviceStats = mergeServiceStats(
+    {
+      [current]: {
+        requests: 1,
+        errors: errorCtx.isError ? 1 : 0,
+        totalLatencyUs: totalDurationMs * 1000,
+      },
+    },
+    ...downstreamOutcomes.map((o) => o.serviceStats)
+  );
+
+  const spanRecord = buildSpanRecord({
+    service: current,
+    entryService,
+    isError: errorCtx.isError,
+    httpStatus: errorCtx.httpStatus,
+    protocol: incomingProtocol,
+    durationMs: totalDurationMs,
+    infraDeps: infraDepRecords,
+    children: downstreamOutcomes.map((o) => o.spanRecord),
+  });
+
+  return {
+    errored: errorCtx.isError,
+    httpStatus: errorCtx.httpStatus,
+    docs,
+    spanRecord,
+    durationMs: totalDurationMs,
+    serviceStats,
+  };
+}
+
+const cyclicVisitResult = (service: string): VisitResult => ({
+  errored: false,
+  httpStatus: 200,
+  docs: [],
+  spanRecord: { ...EMPTY_SPAN_RECORD, service },
+  durationMs: 0,
+  serviceStats: {},
+});
+
+export function simulateRequest<TServiceGraph extends ServiceGraph>({
   serviceGraph,
   entryService,
   rng,
@@ -161,25 +497,20 @@ export function simulateRequest({
   tickSeed,
   metadataCache,
 }: {
-  serviceGraph: ServiceGraph;
-  entryService: string;
+  serviceGraph: TServiceGraph;
+  entryService: ServiceNamesOf<TServiceGraph>;
   rng: () => number;
   resolvedFailures: Record<string, ServiceFailure> | undefined;
   stableSeed: number;
   tickSeed: number;
   metadataCache?: MetadataCache;
-}): Array<Partial<LogDocument>> {
+}): RequestResult {
   function visit(
     current: string,
-    path: ReadonlySet<string> = new Set()
-  ): {
-    errored: boolean;
-    httpStatus: number;
-    docs: Array<Partial<LogDocument>>;
-  } {
-    if (path.has(current)) {
-      return { errored: false, httpStatus: 200, docs: [] };
-    }
+    path: ReadonlySet<string> = new Set(),
+    incomingProtocol: Protocols = 'http'
+  ): VisitResult {
+    if (path.has(current)) return cyclicVisitResult(current);
     const childPath = new Set(path);
     childPath.add(current);
 
@@ -192,118 +523,68 @@ export function simulateRequest({
     const svcTickSeed = deriveSeed(tickSeed, current);
     const metadata = getOrBuildMetadata(serviceNode, svcSeed, metadataCache);
 
-    // Failure roll
     const directFailConf = resolvedFailures?.[current];
     const errorRate = directFailConf ? directFailConf.rate ?? 1 : AMBIENT_ERROR_RATE;
     const directError = rng() < errorRate;
     const isFailing = directFailConf !== undefined && errorRate > 0;
     const emitWarn = !directError && isFailing && resolveLogLevel(isFailing, rng) === 'warn';
 
-    // Visit downstream
     const downstreamOutcomes: DownstreamOutcome[] =
       !directError || rng() < DOWNSTREAM_ATTEMPT_ON_ERROR_PROB
         ? serviceGraph.edges
             .filter((e) => e.source === current)
-            .map((edge) => {
-              const { errored, httpStatus: childHttpStatus, docs } = visit(edge.target, childPath);
-              const targetNode = serviceGraph.services.find((s) => s.name === edge.target);
-              return {
+            .map((edge) =>
+              toDownstreamOutcome(
                 edge,
-                targetLabel: targetNode?.displayName ?? edge.target,
-                errored,
-                childHttpStatus,
-                docs,
-              };
-            })
+                visit(edge.target, childPath, edge.protocol),
+                serviceGraph.services
+              )
+            )
         : [];
-
-    // Resolve error context
     const failedDownstreams = downstreamOutcomes.filter(
       (o) => o.errored && !ASYNC_PROTOCOLS.has(o.edge.protocol)
     );
-    const { isError, httpStatus, errorType, sourceDep, overrides, isInfraKill } =
-      resolveErrorContext(directError, directFailConf, failedDownstreams, serviceNode, rng);
 
-    // Select message
-    const stackTrace =
-      isError && errorType === 'internal_error' && !isInfraKill
-        ? getStackTrace({
-            runtime: serviceNode.runtime,
-            seed: svcSeed,
-            serviceName: serviceNode.name,
-          })
-        : '';
-    const message =
-      stackTrace ||
-      (isError
-        ? pickErrorMessage({
-            errorType,
-            seed: svcSeed,
-            tickSeed: svcTickSeed,
-            runtime: serviceNode.runtime,
-            serviceName: serviceNode.name,
-            overrides,
-            sourceDep,
-            overridePool: directError ? serviceNode.serviceLogs?.error : undefined,
-          })
-        : pickHealthyMessage({
-            seed: svcSeed,
-            tickSeed: svcTickSeed,
-            runtime: serviceNode.runtime,
-            serviceName: serviceNode.name,
-            overrides,
-            infraDeps: serviceNode.infraDeps,
-            overridePool: serviceNode.serviceLogs?.success,
-          }));
-
-    // Build docs
-    const docCount = isError ? (directError ? directFailConf?.multiplier ?? 1 : 1) : 1;
-    const selfLogs = buildSelfLogs({
+    const errorCtx = resolveErrorContext({
+      directError,
+      directFailConf,
+      failedDownstreams,
       serviceNode,
-      level: isError ? 'error' : 'info',
-      message,
-      docCount,
-      metadata,
+      rng,
     });
-    const warnLog =
-      emitWarn && directFailConf
-        ? buildLogDoc({
-            service: serviceNode,
-            level: 'warn',
-            message: pickWarnMessage({
-              errorType: isInfraErrorType(directFailConf.errorType)
-                ? 'internal_error'
-                : directFailConf.errorType,
-              seed: svcSeed,
-              tickSeed: svcTickSeed,
-              runtime: serviceNode.runtime,
-              serviceName: serviceNode.name,
-              sourceDep: directFailConf.sourceDep,
-            }),
-            metadata,
-          })
-        : undefined;
-    const outboundLogs = buildOutboundLogs({
+    const docs = buildVisitLogDocs({
       serviceNode,
-      outcomes: downstreamOutcomes,
+      errorCtx,
+      directError,
+      directFailConf,
+      emitWarn,
       svcSeed,
       svcTickSeed,
       metadata,
+      downstreamOutcomes,
       rng,
     });
+    const { totalDurationMs, infraDepRecords } = computeSpanTiming({
+      svcTickSeed,
+      current,
+      isError: errorCtx.isError,
+      downstreamOutcomes,
+      serviceNode,
+      directFailConf,
+    });
 
-    return {
-      errored: isError,
-      httpStatus,
-      docs: [
-        ...downstreamOutcomes.flatMap((o) => o.docs),
-        ...selfLogs,
-        ...(warnLog ? [warnLog] : []),
-        ...outboundLogs,
-      ],
-    };
+    return assembleVisitResult({
+      current,
+      entryService,
+      errorCtx,
+      incomingProtocol,
+      totalDurationMs,
+      infraDepRecords,
+      docs,
+      downstreamOutcomes,
+    });
   }
 
-  const { docs } = visit(entryService);
-  return docs;
+  const { docs, spanRecord, serviceStats } = visit(entryService);
+  return { docs, rootSpan: spanRecord, serviceStats };
 }

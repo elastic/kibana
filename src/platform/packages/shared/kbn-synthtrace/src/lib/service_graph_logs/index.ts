@@ -11,7 +11,7 @@ import { DEFAULT_SERVICE_GRAPH } from './service_graph';
 
 import { buildLogsGenerator } from './build_logs_generator';
 
-export type { LogsManifest } from './types';
+export type { LogsManifest, TickOutput, ServiceStats, SpanRecord, RequestResult } from './types';
 
 export const sigEvents = {
   DEFAULT_SERVICE_GRAPH,
