@@ -8,6 +8,7 @@
  */
 
 export { createContractMockFetch } from './src/fetch/create_contract_mock_fetch';
+export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export type {
   ContractCall,
   ContractMock,
