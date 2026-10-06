@@ -871,7 +871,7 @@ describe('StepExecutionRuntime', () => {
 
       await underTest.rehydrateStepOutputs(['a', 'b']);
 
-      expect(rehydrate).toHaveBeenCalledWith(['a', 'b']);
+      expect(rehydrate).toHaveBeenCalledWith(['a', 'b'], ['a', 'b']);
     });
   });
 });

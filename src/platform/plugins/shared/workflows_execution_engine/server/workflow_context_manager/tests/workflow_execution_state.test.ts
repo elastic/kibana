@@ -665,14 +665,14 @@ describe('WorkflowExecutionState', () => {
       );
     });
 
-    it('should load inputs into the live IO map and leave outputs to on-demand rehydration', async () => {
+    it('should load inputs of unfinished steps into the live IO map and leave outputs to on-demand rehydration', async () => {
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
       (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
         {
           id: '11',
           stepId: 'connectorStep',
           stepType: 'connector',
-          status: ExecutionStatus.COMPLETED,
+          status: ExecutionStatus.RUNNING,
           input: { url: 'https://example.com' },
         } as unknown as EsWorkflowStepExecution,
         {
@@ -690,6 +690,23 @@ describe('WorkflowExecutionState', () => {
       expect(underTest.getDataSetStepExecutions().map((step) => step.id)).toEqual(['22']);
       // A single fetch: outputs are no longer eagerly fetched for any step type.
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not load inputs of finished steps into the live IO map but mark them evicted', async () => {
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11'] });
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+        {
+          id: '11',
+          stepId: 'connectorStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+          input: { url: 'https://example.com' },
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+      await underTest.load();
+
+      expect(underTest.getStepIo('11', 'input')).toBeUndefined();
+      expect(underTest.isInputEvicted('11')).toBe(true);
     });
 
     it('should not queue loaded inputs for the next flush', async () => {

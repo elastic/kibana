@@ -2130,8 +2130,8 @@ describe('WorkflowContextManager', () => {
     it('delegates to stepIoService.rehydrate with resolved IDs', async () => {
       await testContainer.underTest.ensureContextReady();
 
-      // step_a has no predecessors and no scope-stack frames → empty ID set.
-      expect(testContainer.stepIoService.rehydrate).toHaveBeenCalledWith([]);
+      // step_a has no predecessors and no scope-stack frames → empty output and input ID sets.
+      expect(testContainer.stepIoService.rehydrate).toHaveBeenCalledWith([], []);
     });
   });
 
