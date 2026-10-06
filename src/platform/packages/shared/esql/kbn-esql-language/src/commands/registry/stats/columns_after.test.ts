@@ -217,4 +217,54 @@ describe('STATS', () => {
       },
     ]);
   });
+
+  it('keeps the rightmost BY assignment when a name is reused', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'address', type: 'keyword', userDefined: false },
+      { name: 'doubleField', type: 'double', userDefined: false },
+    ];
+
+    const queryString = `FROM a | STATS COUNT() BY addr = address, addr = doubleField`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'COUNT()', type: 'long', userDefined: true, location: { min: 15, max: 21 } },
+      { name: 'addr', type: 'double', userDefined: true, location: { min: 42, max: 45 } },
+    ]);
+  });
+
+  it('keeps the grouping column when an aggregation output reuses its name', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'address', type: 'keyword', userDefined: false },
+    ];
+
+    const queryString = `FROM a | STATS addr = COUNT() BY addr = address`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'addr', type: 'keyword', userDefined: true, location: { min: 33, max: 36 } },
+    ]);
+  });
 });

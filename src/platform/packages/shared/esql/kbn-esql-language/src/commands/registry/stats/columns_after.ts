@@ -12,15 +12,25 @@ import type { SupportedDataType } from '../../definitions/types';
 import { getExpressionType } from '../../definitions/utils';
 import type { ESQLColumnData, ESQLUserDefinedColumn, UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';
-import { getColumnsDefinedInByClause } from './utils';
+import { getColumnsDefinedInByClause, isByOption } from './utils';
 
 type ExpressionType = (thing: ESQLAstItem) => SupportedDataType | 'unknown';
+
+/**
+ * Keeps the last column for each name, preserving order.
+ * When a name is reused, the rightmost definition wins, matching how
+ * Elasticsearch resolves repeated BY assignments and aggregation/grouping collisions.
+ */
+const keepLastByName = (columns: ESQLUserDefinedColumn[]): ESQLUserDefinedColumn[] => {
+  const lastIndexByName = new Map<string, number>();
+  columns.forEach((column, index) => lastIndexByName.set(column.name, index));
+  return columns.filter((column, index) => lastIndexByName.get(column.name) === index);
+};
 
 const getUserDefinedColumns = (
   command: ESQLCommand | ESQLCommandOption,
   typeOf: ExpressionType,
-  query: string,
-  byTypeOf: ExpressionType = typeOf
+  query: string
 ): ESQLUserDefinedColumn[] => {
   const columns: ESQLUserDefinedColumn[] = [];
 
@@ -38,7 +48,7 @@ const getUserDefinedColumns = (
     }
 
     if (isOptionNode(expression) && expression.name === 'by') {
-      columns.push(...getUserDefinedColumns(expression, byTypeOf, query, byTypeOf));
+      columns.push(...getUserDefinedColumns(expression, typeOf, query));
       continue;
     }
 
@@ -115,10 +125,25 @@ export const columnsAfter = (
   const assignments = getColumnsDefinedInByClause(command, inputColumns, unmappedFieldsStrategy);
   const aggregatingColumns = new Map([...inputColumns, ...assignments]);
 
+  // Aggregation expressions can reference columns defined in the BY clause, while
+  // the BY expressions themselves are typed using the input columns only.
   const typeOf = (thing: ESQLAstItem) =>
     getExpressionType(thing, aggregatingColumns, unmappedFieldsStrategy);
   const byTypeOf = (thing: ESQLAstItem) =>
     getExpressionType(thing, inputColumns, unmappedFieldsStrategy);
 
-  return getUserDefinedColumns(command, typeOf, query, byTypeOf);
+  const aggregatingArgs: ESQLAstItem[] = [];
+  const byArgs: ESQLAstItem[] = [];
+  for (const arg of command.args) {
+    if (isByOption(arg)) {
+      byArgs.push(arg);
+    } else {
+      aggregatingArgs.push(arg);
+    }
+  }
+
+  return keepLastByName([
+    ...getUserDefinedColumns({ ...command, args: aggregatingArgs }, typeOf, query),
+    ...getUserDefinedColumns({ ...command, args: byArgs }, byTypeOf, query),
+  ]);
 };

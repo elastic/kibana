@@ -11,7 +11,6 @@ import type { ESQLAstAllCommands, ESQLAst, ESQLAstItem } from '@elastic/esql/typ
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import type { ESQLMessage } from '../../definitions/types';
-import type { StatsCommand } from './utils';
 import { getColumnsDefinedInByClause, isByOption, isStatsCommand } from './utils';
 
 export const validate = (
@@ -67,7 +66,10 @@ export const validate = (
   };
   messages.push(
     ...validateCommandArguments(
-      filterCommandArgs(command, aggregatingArgs),
+      {
+        ...command,
+        args: aggregatingArgs,
+      },
       ast,
       aggregatingContext,
       callbacks
@@ -76,16 +78,16 @@ export const validate = (
 
   // 5. We validate the BY clause with the original columns.
   messages.push(
-    ...validateCommandArguments(filterCommandArgs(command, byArgs), ast, context, callbacks)
+    ...validateCommandArguments(
+      {
+        ...command,
+        args: byArgs,
+      },
+      ast,
+      context,
+      callbacks
+    )
   );
 
   return messages;
 };
-
-/**
- * Filters the arguments of a STATS command, returning a new command with the given arguments.
- */
-const filterCommandArgs = (command: StatsCommand, args: ESQLAstItem[]): StatsCommand => ({
-  ...command,
-  args,
-});
