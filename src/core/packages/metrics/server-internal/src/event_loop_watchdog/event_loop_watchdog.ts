@@ -20,6 +20,7 @@ import type { PprofProfile, PprofTime, ProfileWindow, SessionLimits } from './pr
 import {
   BLOCK_THRESHOLD_MS,
   HEARTBEAT_INTERVAL_MS,
+  MAX_CLASSIFY_WAIT_MS,
   SLOT_COUNT,
   Slot,
   WATCHDOG_WORKER_NAME,
@@ -80,14 +81,24 @@ export class EventLoopWatchdog {
       new SharedArrayBuffer(SLOT_COUNT * BigInt64Array.BYTES_PER_ELEMENT)
     );
     let lastStampUs = monotonicUs();
+    let stallEndedUs = 0;
     Atomics.store(shared, Slot.heartbeat, BigInt(lastStampUs));
     this.heartbeatTimer = setInterval(() => {
       const nowUs = monotonicUs();
-      const stalled = nowUs - lastStampUs >= BLOCK_THRESHOLD_MS * 1000;
+      if (nowUs - lastStampUs >= BLOCK_THRESHOLD_MS * 1000) stallEndedUs = nowUs;
       lastStampUs = nowUs;
       Atomics.store(shared, Slot.heartbeat, BigInt(nowUs));
-      // Right after a stall the worker has yet to count the block; let it before rotating.
-      if (!stalled) this.session?.tick(Number(Atomics.load(shared, Slot.blocks)));
+      // After a stall, hold rotations until the worker has classified it (and counted any block),
+      // so that the window holding the block is the one that gets flagged.
+      if (
+        stallEndedUs &&
+        Number(Atomics.load(shared, Slot.classified)) < stallEndedUs &&
+        nowUs - stallEndedUs < MAX_CLASSIFY_WAIT_MS * 1000
+      ) {
+        return;
+      }
+      stallEndedUs = 0;
+      this.session?.tick(Number(Atomics.load(shared, Slot.blocks)));
     }, HEARTBEAT_INTERVAL_MS);
     this.heartbeatTimer.unref();
 

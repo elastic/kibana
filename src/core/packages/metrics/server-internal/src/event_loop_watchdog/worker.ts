@@ -21,7 +21,7 @@ import Zlib from 'node:zlib';
 import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { Profile } from 'pprof-format';
-import { BlockDetector } from './block_detector';
+import { BlockDetector, type DetectedBlock } from './block_detector';
 import { formatSummary, summarizeProfile } from './profile_summary';
 import {
   BLOCK_THRESHOLD_MS,
@@ -70,11 +70,14 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     port.postMessage({ type: 'log', level, message, meta } satisfies LogMessage);
 
   const poll = () => {
-    const block = detector.poll(
-      monotonicUs() / 1000,
-      Number(Atomics.load(shared, Slot.heartbeat)) / 1000
-    );
-    if (!block) return;
+    const heartbeat = Atomics.load(shared, Slot.heartbeat);
+    const block = detector.poll(monotonicUs() / 1000, Number(heartbeat) / 1000);
+    if (block) onBlock(block);
+    // Acknowledge after counting, so the main thread can rotate knowing the block is flagged.
+    Atomics.store(shared, Slot.classified, heartbeat);
+  };
+
+  const onBlock = (block: DetectedBlock) => {
     const startUs = block.startedAt * 1000;
     const endUs = block.endedAt * 1000;
     const profilerCaused = overlapsRotation(

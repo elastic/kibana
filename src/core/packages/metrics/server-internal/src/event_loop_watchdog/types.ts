@@ -40,8 +40,12 @@ export const Slot = {
   /** Written by the main thread around each profile rotation. */
   rotationStart: 2,
   rotationEnd: 3,
+  /** Last heartbeat the worker has classified, published after counting any block it ended. */
+  classified: 4,
 } as const;
-export const SLOT_COUNT = 4;
+export const SLOT_COUNT = 5;
+/** Longest the main thread defers rotation after a stall, waiting for the worker to classify it. */
+export const MAX_CLASSIFY_WAIT_MS = 2_000;
 
 export const monotonicUs = (): number => Number(process.hrtime.bigint() / 1000n);
 
