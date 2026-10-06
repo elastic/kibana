@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   ChatCompletionReasoningEffort,
   ConnectorTelemetryMetadata,
@@ -86,6 +87,7 @@ import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -97,6 +99,7 @@ export interface CreateScopedRunnerDeps {
   // external plugin deps
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
+  licensing: LicensingPluginStart;
   // internal service deps
   modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
@@ -150,6 +153,8 @@ export interface CreateScopedRunnerDeps {
    * Populated only for the `deductive.ai` agent when the deployment opted in.
    */
   deductive?: DeductiveRuntimeConfig;
+  /** Static deployment information exposed to agents. */
+  deploymentInfo: DeploymentInfo;
   /**
    * `xpack.agentBuilder.deductive.register` for this deployment. One half of the
    * Deductive double switch; the other is the `agentBuilder:deductiveEnabled` setting.
@@ -335,7 +340,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       aiIndices: experimentalEnabled && contextEngineEnabled,
       relevantSkills: experimentalEnabled,
       todos: experimentalEnabled,
-      datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
