@@ -66,6 +66,7 @@ function makeParams(overrides: Partial<UseMiDeployParams> = {}): UseMiDeployPara
     removeDeployInstances: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
     persistPendingIacTemplate: jest.fn().mockResolvedValue(undefined),
+    clearStagedStaticKeys: jest.fn(),
     setIsDeploying: jest.fn(),
     setFailedInstances: jest.fn(),
     createDeployment: jest.fn(),
@@ -161,6 +162,35 @@ describe('useMiDeploy — kept secret refs', () => {
 
     expect(mockFetchRefs).not.toHaveBeenCalled();
     expect(mockDeployGroup).not.toHaveBeenCalled();
+  });
+
+  it('drops the typed keys from memory after a successful deploy so the next one reuses the stored secrets', async () => {
+    const clearStagedStaticKeys = jest.fn();
+    await runDeploy(
+      makeParams({
+        clearStagedStaticKeys,
+        authenticateAndDeployStep: {
+          staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
+        },
+      })
+    );
+
+    expect(clearStagedStaticKeys).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the typed keys when a policy failed to deploy, so Retry can send them', async () => {
+    mockDeployGroup.mockRejectedValue(new Error('boom'));
+    const clearStagedStaticKeys = jest.fn();
+    await runDeploy(
+      makeParams({
+        clearStagedStaticKeys,
+        authenticateAndDeployStep: {
+          staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
+        },
+      })
+    );
+
+    expect(clearStagedStaticKeys).not.toHaveBeenCalled();
   });
 
   it('skips the lookup when both keys were typed', async () => {

@@ -93,6 +93,47 @@ describe('AwsStaticKeysForm stored secrets', () => {
   });
 });
 
+describe('AwsStaticKeysForm stored secrets with values kept in memory', () => {
+  const IN_MEMORY = { access_key_id: 'previous-key', secret_access_key: 'previous-secret' };
+
+  it('does not seed a stored field from the in-memory value', () => {
+    const onFieldsChange = jest.fn();
+    renderWithI18n(
+      <AwsStaticKeysForm
+        initialValues={IN_MEMORY}
+        storedSecretFields={['access_key_id', 'secret_access_key']}
+        onFieldsChange={onFieldsChange}
+      />
+    );
+    fireEvent.click(screen.getByTestId('awsStaticKeysForm-secretAccessKey-replace'));
+    fireEvent.change(screen.getByTestId('awsStaticKeysForm-secretAccessKey'), {
+      target: { value: 'new' },
+    });
+    expect(onFieldsChange).toHaveBeenLastCalledWith({
+      access_key_id: '',
+      secret_access_key: 'new',
+    });
+  });
+
+  it('shows an empty input after Replace, not the previous value', () => {
+    renderWithI18n(
+      <AwsStaticKeysForm
+        initialValues={IN_MEMORY}
+        storedSecretFields={['access_key_id', 'secret_access_key']}
+      />
+    );
+    fireEvent.click(screen.getByTestId('awsStaticKeysForm-accessKeyId-replace'));
+    expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('');
+  });
+
+  it('still seeds fields that are not stored', () => {
+    renderWithI18n(
+      <AwsStaticKeysForm initialValues={IN_MEMORY} storedSecretFields={['secret_access_key']} />
+    );
+    expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('previous-key');
+  });
+});
+
 describe('AwsTemporaryKeysForm stored secrets', () => {
   it('is ready when all three fields are stored and not ready after replacing one', () => {
     const onReadyChange = jest.fn();

@@ -48,6 +48,11 @@ export interface UseMiDeployParams {
   removeDeployInstances: (instanceIds: string[]) => void;
   getLatestFailedInstances: () => string[];
   persistPendingIacTemplate: () => Promise<void>;
+  /**
+   * Drops the typed keys from memory. After a successful deploy their secrets live in Fleet, and
+   * the next deploy reuses those instead of creating a duplicate secret from the typed value.
+   */
+  clearStagedStaticKeys: () => void;
   setIsDeploying: (deploying: boolean) => void;
   setFailedInstances: (instances: string[]) => void;
   createDeployment: UseOnboardingSOResult['createDeployment'];
@@ -230,6 +235,7 @@ export function useMiDeploy({
   removeDeployInstances,
   getLatestFailedInstances,
   persistPendingIacTemplate,
+  clearStagedStaticKeys,
   setIsDeploying,
   setFailedInstances,
   createDeployment,
@@ -412,6 +418,7 @@ export function useMiDeploy({
             }
             setIsDeploying(false);
             updateDetectAndReviewStep({ isDeploying: false, isDirty: false, isAuthDirty: false });
+            clearStagedStaticKeys();
             await persistPendingIacTemplate();
             return { cleanupFailed: false };
           }
@@ -686,6 +693,7 @@ export function useMiDeploy({
       }
 
       if (mergedFailed.length === 0) {
+        clearStagedStaticKeys();
         await persistPendingIacTemplate();
       }
 
@@ -726,6 +734,7 @@ export function useMiDeploy({
       removeDeployInstances,
       getLatestFailedInstances,
       persistPendingIacTemplate,
+      clearStagedStaticKeys,
       setIsDeploying,
       setFailedInstances,
       createDeployment,

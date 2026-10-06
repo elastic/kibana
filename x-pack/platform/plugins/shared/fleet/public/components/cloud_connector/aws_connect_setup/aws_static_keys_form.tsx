@@ -39,11 +39,20 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
   onFieldsChange,
 }) => {
   const [fields, setFields] = useState<AwsStaticKeyCredentials>({
-    access_key_id: initialValues?.access_key_id ?? '',
-    secret_access_key: initialValues?.secret_access_key ?? '',
+    access_key_id: storedSecretFields?.includes('access_key_id')
+      ? ''
+      : initialValues?.access_key_id ?? '',
+    secret_access_key: storedSecretFields?.includes('secret_access_key')
+      ? ''
+      : initialValues?.secret_access_key ?? '',
   });
 
   const { isStored, replace } = useStoredSecretFields(storedSecretFields);
+  // A replaced field starts empty: the value kept in memory from an earlier entry is not shown.
+  const handleReplace = (field: keyof typeof fields) => {
+    replace(field);
+    setFields((prev) => ({ ...prev, [field]: '' }));
+  };
   const hasAccessKeyId = !!fields.access_key_id || isStored('access_key_id');
   const hasSecretAccessKey = !!fields.secret_access_key || isStored('secret_access_key');
 
@@ -79,7 +88,7 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
       >
         {isStored('access_key_id') ? (
           <StoredSecretField
-            onReplace={() => replace('access_key_id')}
+            onReplace={() => handleReplace('access_key_id')}
             data-test-subj={`${AWS_STATIC_KEYS_FORM_TEST_SUBJ}-accessKeyId`}
           />
         ) : (
@@ -111,7 +120,7 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
       >
         {isStored('secret_access_key') ? (
           <StoredSecretField
-            onReplace={() => replace('secret_access_key')}
+            onReplace={() => handleReplace('secret_access_key')}
             data-test-subj={`${AWS_STATIC_KEYS_FORM_TEST_SUBJ}-secretAccessKey`}
           />
         ) : (

@@ -747,6 +747,7 @@ function setupMocks({
     servicesStep: { selectedServiceIds },
     authenticateAndDeployStep: { connectorId, authMethod, staticKeys, pendingIacTemplate },
     setPendingIacTemplate: jest.fn(),
+    clearStagedStaticKeys: jest.fn(),
     detectAndReviewStep: {
       isDeploying: false,
       serviceStatuses: {},
