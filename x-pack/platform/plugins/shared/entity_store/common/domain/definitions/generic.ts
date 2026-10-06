@@ -24,7 +24,6 @@ export const genericEntityDefinition = {
   type: 'generic',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
   name: `Security 'generic' Entity Store Definition`,
-  materialization: 'extracted',
   identityField: { singleField: 'entity.id', skipTypePrepend: true },
   indexPatterns: [],
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],

@@ -17,13 +17,6 @@ export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 /** Registry type name. Wider than the closed `EntityType`, which only covers the built-ins. */
 export type EntityDefinitionType = string;
 
-/**
- * How entities of a definition are materialised. `'extracted'` means they are extracted from logs
- * into the entity store. Omission means the definition is not extracted. More values may follow.
- */
-export type EntityMaterialization = z.infer<typeof EntityMaterialization>;
-export const EntityMaterialization = z.enum(['extracted']);
-
 /** Which extraction process a task is running as. */
 export type ExtractionMode = z.infer<typeof ExtractionMode>;
 export const ExtractionMode = z.enum(['single', 'priority', 'nonPriority']);
@@ -233,8 +226,6 @@ export const entitySchema = z.object({
   whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
   // Omission disables single-document creation for the entity type.
   creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
-  // Omission means entities of this type are not materialised (not extracted).
-  materialization: z.optional(EntityMaterialization),
   // Who manages the definition. Optional here; the registry requires it.
   managedBy: z.optional(EntityDefinitionManagedBy),
 });

@@ -9,17 +9,13 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { EntityDefinitionRegistry, type RegistrableEntityDefinition } from '.';
 import { createEntityDefinitionsClient } from './entity_definitions_client';
 
-const makeDefinition = (
-  type: string,
-  materialization?: RegistrableEntityDefinition['materialization']
-): RegistrableEntityDefinition => ({
+const makeDefinition = (type: string): RegistrableEntityDefinition => ({
   type,
   name: `Test '${type}' definition`,
   fields: [],
   identityField: { singleField: `${type}.name` },
   indexPatterns: ['logs-*'],
   managedBy: { kind: 'plugin', id: 'testPlugin' },
-  ...(materialization ? { materialization } : {}),
 });
 
 describe('createEntityDefinitionsClient', () => {
@@ -27,7 +23,7 @@ describe('createEntityDefinitionsClient', () => {
 
   beforeEach(() => {
     registry = new EntityDefinitionRegistry(loggerMock.create());
-    registry.register(makeDefinition('k8s.pod', 'extracted'));
+    registry.register(makeDefinition('k8s.pod'));
     registry.register(makeDefinition('k8s.node'));
   });
 
@@ -35,13 +31,12 @@ describe('createEntityDefinitionsClient', () => {
     expect(createEntityDefinitionsClient(registry, 'space-a').namespace).toBe('space-a');
   });
 
-  it('delegates get, list and listMaterialized to the registry', async () => {
+  it('delegates get and list to the registry', async () => {
     const client = createEntityDefinitionsClient(registry, 'default');
 
     await expect(client.get('k8s.pod')).resolves.toBe(registry.get('k8s.pod'));
     await expect(client.get('unknown')).resolves.toBeUndefined();
     expect((await client.list()).map(({ type }) => type)).toEqual(['k8s.pod', 'k8s.node']);
-    expect((await client.listMaterialized()).map(({ type }) => type)).toEqual(['k8s.pod']);
   });
 
   it('reflects registrations made after the client was created', async () => {

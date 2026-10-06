@@ -19,7 +19,6 @@ export interface EntityDefinitionsClient {
   readonly namespace: string;
   get(type: string): Promise<RegisteredEntityDefinition | undefined>;
   list(): Promise<RegisteredEntityDefinition[]>;
-  listMaterialized(): Promise<RegisteredEntityDefinition[]>;
 }
 
 /** Creates an `EntityDefinitionsClient` backed by the given registry. */
@@ -30,5 +29,4 @@ export const createEntityDefinitionsClient = (
   namespace,
   get: async (type) => registry.get(type),
   list: async () => registry.list(),
-  listMaterialized: async () => registry.listMaterialized(),
 });

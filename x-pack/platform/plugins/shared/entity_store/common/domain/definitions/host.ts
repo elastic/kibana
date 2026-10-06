@@ -23,7 +23,6 @@ export const hostEntityDefinition: EntityDefinitionWithoutId & {
   type: 'host',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
   name: `Security 'host' Entity Store Definition`,
-  materialization: 'extracted',
   identityField: {
     euidRanking: {
       branches: [

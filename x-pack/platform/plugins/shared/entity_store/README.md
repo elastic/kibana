@@ -104,7 +104,7 @@ Consumers implement their maintenance logic in `run` (and optionally in `setup`)
 
 ## Entity definition registry
 
-The Entity Store keeps an in-memory **entity definition registry**: the set of entity types (their fields, identity and source index patterns) known to this Kibana instance. Other plugins can add their own definitions through the setup contract. The registry is not yet read by the store's own extraction code.
+The Entity Store keeps an in-memory **entity definition registry**: the set of entity types (their fields, identity and source index patterns) known to this Kibana instance. Other plugins can add their own definitions through the setup contract. The registry is not yet read by the store's own extraction code. Registering a definition has no side effects in the entity store: it creates no templates, mappings, engines or tasks, and the store's own routes keep validating against the four types it owns.
 
 ### Registering a definition
 
@@ -147,17 +147,13 @@ Every registered definition has a `managedBy` field saying who manages it:
 
 Only `plugin` can be registered today. The four built-ins are managed by the `entityStore` plugin (`{ kind: 'plugin', id: 'entityStore' }`). `managedBy` is returned on every definition read from the registry, so readers can tell who manages it.
 
-### Materialization
-
-The optional `materialization` field says how entities of that type are materialized. The only value today is `'extracted'`: entities are extracted from logs into the entity store. When omitted, the definition is not materialized. The four built-ins are `'extracted'`.
-
 ### Reading definitions
 
-The start contract exposes two ways to get an `EntityDefinitionsClient` (`get(type)`, `list()`, `listMaterialized()`, all async):
+The start contract exposes two ways to get an `EntityDefinitionsClient` (`get(type)` and `list()`, both async):
 
 - `getEntityDefinitionsClient(request)` for request-scoped work. The space is derived from the request.
 - `getEntityDefinitionsClientForSpace(spaceId)` for background work without a request.
 
-`list()` returns definitions in registration order. The built-ins (`user`, `host`, `service`, `generic`) come first because the Entity Store registers them during its own setup. `listMaterialized()` applies the same order to materialized definitions only.
+`list()` returns definitions in registration order. The built-ins (`user`, `host`, `service`, `generic`) come first because the Entity Store registers them during its own setup.
 
 Reading definitions requires no Kibana privilege today, because every definition is plugin code. Authorisation will apply once definitions can be stored and managed outside plugin code; the request parameter exists so that can be added without changing callers.

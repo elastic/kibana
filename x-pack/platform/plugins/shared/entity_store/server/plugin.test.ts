@@ -137,10 +137,10 @@ describe('EntityStorePlugin entity definition registry', () => {
     expect(types(await client.list())).toEqual(BUILT_IN_TYPES);
   });
 
-  it('lists the built-ins as materialized', async () => {
+  it('lists the built-ins', async () => {
     const client = startPlugin().getEntityDefinitionsClientForSpace('default');
 
-    expect(types(await client.listMaterialized())).toEqual(BUILT_IN_TYPES);
+    expect(types(await client.list())).toEqual(BUILT_IN_TYPES);
     expect(client.namespace).toBe('default');
   });
 

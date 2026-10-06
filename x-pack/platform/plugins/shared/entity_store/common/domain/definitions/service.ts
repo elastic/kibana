@@ -20,7 +20,6 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId & {
   type: 'service',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
   name: `Security 'service' Entity Store Definition`,
-  materialization: 'extracted',
   identityField: { singleField: 'service.name' },
   indexPatterns: [],
   entityTypeFallback: 'Service',

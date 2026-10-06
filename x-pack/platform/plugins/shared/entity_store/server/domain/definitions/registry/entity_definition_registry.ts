@@ -122,10 +122,6 @@ export class EntityDefinitionRegistry {
     return [...this.entries.values()];
   }
 
-  public listMaterialized(): RegisteredEntityDefinition[] {
-    return this.list().filter(({ materialization }) => materialization === 'extracted');
-  }
-
   public rejected(): RegistrationRejection[] {
     return [...this.rejections];
   }

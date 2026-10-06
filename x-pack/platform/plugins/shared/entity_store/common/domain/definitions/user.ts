@@ -42,7 +42,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId & {
   type: 'user',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
   name: `Security 'user' Entity Store Definition`,
-  materialization: 'extracted',
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   identityField: {
     /**

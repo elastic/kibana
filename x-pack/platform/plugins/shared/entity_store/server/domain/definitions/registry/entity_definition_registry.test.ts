@@ -83,15 +83,6 @@ describe('EntityDefinitionRegistry', () => {
       expectRejected('bad_schema', /failed schema validation: indexPatterns/);
     });
 
-    it('rejects an unknown materialization value', () => {
-      const definition = makeDefinition('bad_materialization', {
-        materialization: 'virtual' as unknown as 'extracted',
-      });
-
-      expect(registry.register(definition).ok).toBe(false);
-      expectRejected('bad_materialization', /failed schema validation: materialization/);
-    });
-
     it.each(['Host', '1host', 'host..pod', 'host-', '_host', 'host pod', 'hôst', ''])(
       'rejects type name %p that does not match the pattern',
       (type) => {
@@ -216,28 +207,6 @@ describe('EntityDefinitionRegistry', () => {
 
       expect(types(registry.list())).toEqual(['zeta', 'generic', 'alpha', 'host', 'middle']);
     });
-
-    it('filters listMaterialized to extracted definitions, preserving order', () => {
-      registry.register(makeDefinition('not_extracted'));
-      registry.register(makeDefinition('extracted_custom', { materialization: 'extracted' }));
-      registry.register(makeDefinition('service'));
-      registry.register(makeDefinition('host', { materialization: 'extracted' }));
-
-      expect(types(registry.list())).toEqual([
-        'not_extracted',
-        'extracted_custom',
-        'service',
-        'host',
-      ]);
-      expect(types(registry.listMaterialized())).toEqual(['extracted_custom', 'host']);
-    });
-
-    it('treats a definition without materialization as not extracted', () => {
-      registry.register(makeDefinition('plain'));
-
-      expect(registry.get('plain')?.materialization).toBeUndefined();
-      expect(registry.listMaterialized()).toEqual([]);
-    });
   });
 
   describe('immutability', () => {
@@ -312,12 +281,12 @@ describe('EntityDefinitionRegistry', () => {
       genericEntityDefinition,
     ];
 
-    it('registers all four built-ins and lists them as materialized', () => {
+    it('registers all four built-ins and lists them', () => {
       const results = builtIns.map((definition) => registry.register(definition));
 
       expect(results).toEqual(builtIns.map(() => ({ ok: true })));
       expect(registry.rejected()).toEqual([]);
-      expect(types(registry.listMaterialized())).toEqual(['user', 'host', 'service', 'generic']);
+      expect(types(registry.list())).toEqual(['user', 'host', 'service', 'generic']);
       expect(registry.get('host')).toBe(hostEntityDefinition);
       expect(Object.isFrozen(hostEntityDefinition)).toBe(true);
     });
