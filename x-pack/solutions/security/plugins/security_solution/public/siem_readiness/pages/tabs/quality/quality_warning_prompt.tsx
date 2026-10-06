@@ -26,6 +26,7 @@ export const QualityWarningPrompt: React.FC<QualityWarningPromptProps> = ({
         defaultMessage: 'Some indices have ECS compatibility issues.',
       })}
       color="warning"
+      data-test-subj="qualityWarningPrompt"
       iconType="warning"
       size="s"
     >
