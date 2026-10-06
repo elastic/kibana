@@ -157,7 +157,7 @@ export const deleteMemoryPage = (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,
   id: string,
-  body: { confirm_title: string; version: { seq_no: number; primary_term: number } }
+  body: { version: { seq_no: number; primary_term: number } }
 ): Promise<ApiClientResponse> =>
   apiClient.delete(`${MEMORY_PAGES_PATH}/${id}`, {
     ...headers(cookieHeader),

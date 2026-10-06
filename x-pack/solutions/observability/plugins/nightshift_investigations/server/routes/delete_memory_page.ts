@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, conflict, notFound } from '@hapi/boom';
+import { conflict, notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
@@ -38,10 +38,9 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
     access: 'internal',
     summary: 'Delete a Semantic Memory page',
     description:
-      'Permanently removes a Semantic Memory page. Irreversible. The caller must confirm ' +
-      'by echoing the page title, so a mistyped or reflexive click cannot destroy content, ' +
-      'and must name the revision it reviewed, so a concurrent write answers 409 instead of ' +
-      'deleting content the operator never saw.',
+      'Permanently removes a Semantic Memory page. Irreversible. The caller must name the ' +
+      'revision it reviewed, so a concurrent write answers 409 instead of deleting content ' +
+      'the operator never saw.',
   },
   security: {
     authz: { requiredPrivileges: memoryDeletePrivileges },
@@ -51,8 +50,6 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
       id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
     body: z.object({
-      /** Must equal the page's current title. */
-      confirm_title: z.string().min(1).max(MAX_KEYWORD_LENGTH),
       /** The revision the operator reviewed, as the detail route returned it. */
       version: z.object({
         seq_no: z.number().int().min(0),
@@ -65,22 +62,10 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
 
     const store = getMemoryPageStore(request);
     const { version } = params.body;
-    // Read the title only to echo the real one back, so a mistyped or stale
-    // confirmation can be corrected rather than merely rejected.
-    const versioned = await store.getVersioned(params.path.id);
-    if (!versioned) {
-      throw notFound(`Semantic Memory page ${params.path.id} was not found`);
-    }
-    if (versioned.page.title !== params.body.confirm_title) {
-      throw badRequest('confirm_title does not match the page title', {
-        title: versioned.page.title,
-      });
-    }
 
     try {
       // Conditional on the revision the operator reviewed, not on this read: the
-      // optimizer rewrites content without changing the title, so a fresh read
-      // would accept the confirmation for a replacement they never saw.
+      // optimizer can rewrite content between the read and the delete.
       await store.delete(params.path.id, {
         seqNo: version.seq_no,
         primaryTerm: version.primary_term,

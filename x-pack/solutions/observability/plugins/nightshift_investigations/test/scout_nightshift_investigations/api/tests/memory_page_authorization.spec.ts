@@ -100,12 +100,11 @@ apiTest.describe(
       async ({ apiClient, esClient, samlAuth }) => {
         const memory = await givenMemory(esClient, 'delete-reader');
         const { cookieHeader: configure } = await samlAuth.asInteractiveUser(MEMORY_CONFIGURE_ROLE);
-        // The revision and title a caller has to echo, read by someone who may.
+        // The revision a caller has to name, read by someone who may.
         const current = await getMemoryPage(apiClient, configure, memory.pageId);
 
         const { cookieHeader: reader } = await samlAuth.asInteractiveUser(MEMORY_READER_ROLE);
         const response = await deleteMemoryPage(apiClient, reader, memory.pageId, {
-          confirm_title: memory.title,
           version: current.body.version,
         });
 
@@ -123,7 +122,6 @@ apiTest.describe(
 
         const { cookieHeader: manager } = await samlAuth.asInteractiveUser(MEMORY_MANAGER_ROLE);
         const response = await deleteMemoryPage(apiClient, manager, memory.pageId, {
-          confirm_title: memory.title,
           version: current.body.version,
         });
 

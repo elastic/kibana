@@ -24,10 +24,9 @@ import type {
 
 type MemoryClient = NonNullable<ReturnType<typeof useMemoryClient>>;
 
-/** What a delete needs: the page, the title it was read with, and its revision. */
+/** What a delete needs: the page and the revision the operator reviewed. */
 interface DeleteMemoryPageVariables {
   id: string;
-  confirmTitle: string;
   version: MemoryDetailResult['version'];
 }
 
@@ -255,20 +254,16 @@ export const useSetMemoryArchived = () =>
   );
 
 /**
- * Permanently removes a memory. `confirmTitle` must match the page's current
- * title, and `version` is the revision the detail route handed over, so the
- * delete is conditional on the document that was actually read rather than on
- * whatever the server finds when the request lands.
+ * Permanently removes a memory. `version` is the revision the detail route
+ * handed over, so the delete is conditional on the document that was actually
+ * read rather than on whatever the server finds when the request lands.
  */
 export const useDeleteMemoryPage = () =>
   useMemoryMutation(
-    (client, { id, confirmTitle, version }: DeleteMemoryPageVariables) =>
+    (client, { id, version }: DeleteMemoryPageVariables) =>
       client.fetch('DELETE /internal/nightshift/memory/pages/{id}', {
         signal: null,
-        params: {
-          path: { id },
-          body: { confirm_title: confirmTitle, version },
-        },
+        params: { path: { id }, body: { version } },
       }),
     i18n.translate('xpack.significantEventsApp.memory.deleteErrorTitle', {
       defaultMessage: 'Could not delete Semantic Memory page',

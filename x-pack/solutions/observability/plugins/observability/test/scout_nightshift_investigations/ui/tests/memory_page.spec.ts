@@ -548,19 +548,8 @@ test.describe(
       await page.testSubj.locator('nightshiftMemoryDeleteButton').click();
       const confirm = page.testSubj.locator('nightshiftMemoryDeleteConfirm');
       await expect(confirm).toBeVisible();
-      // The route refuses a title mismatch, so the dialog makes the operator
-      // produce it rather than supplying it for them.
-      const confirmButton = confirm.getByRole('button', { name: 'Delete permanently' });
-      await expect(confirmButton).toBeDisabled();
-      await page.testSubj
-        .locator('nightshiftMemoryDeleteConfirmTitle')
-        .fill('Delete me permanentlyy');
-      await expect(confirmButton).toBeDisabled();
-      await page.testSubj
-        .locator('nightshiftMemoryDeleteConfirmTitle')
-        .fill('Delete me permanently');
       await attachScreenshot(page, testInfo, 'memory-e10-delete-confirm');
-      await confirmButton.click();
+      await confirm.getByRole('button', { name: 'Delete permanently' }).click();
 
       await expect(page.testSubj.locator('nightshiftMemoryHome')).toBeVisible();
       await expect(page.testSubj.locator(`nightshiftMemoryLink-memory_${DELETE_ME}`)).toHaveCount(

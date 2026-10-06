@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { badRequest, conflict, notFound } from '@hapi/boom';
+import { conflict, notFound } from '@hapi/boom';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { MemoryPage } from '../../common/memory';
 import {
@@ -188,7 +188,6 @@ describe('memory route request bounds', () => {
     path: { id },
     body: {
       archived: true,
-      confirm_title: 'Kafka consumer lag',
       version: { seq_no: 7, primary_term: 1 },
     },
   });
@@ -217,16 +216,11 @@ describe('memory route request bounds', () => {
     // A delete without the reviewed revision would be blind, which is exactly
     // what the optimistic-concurrency guard exists to prevent.
     const params = deleteMemoryPageRoute['DELETE /internal/nightshift/memory/pages/{id}'].params;
-    expect(params.safeParse({ path: { id: ID }, body: { confirm_title: 'Kafka' } }).success).toBe(
-      false
-    );
+    expect(params.safeParse({ path: { id: ID }, body: {} }).success).toBe(false);
     expect(
       params.safeParse({
         path: { id: ID },
-        body: {
-          confirm_title: 'Kafka consumer lag',
-          version: { seq_no: -1, primary_term: 0 },
-        },
+        body: { version: { seq_no: -1, primary_term: 0 } },
       }).success
     ).toBe(false);
   });
@@ -277,17 +271,9 @@ describe('memory route request bounds', () => {
     expect(params.safeParse({ query: { tags } }).success).toBe(true);
   });
 
-  it('rejects an over-long cursor and an over-long confirm title', () => {
+  it('rejects an over-long cursor', () => {
     const list = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
     expect(list.safeParse({ query: { cursor: 'c'.repeat(4097) } }).success).toBe(false);
-
-    const remove = deleteMemoryPageRoute['DELETE /internal/nightshift/memory/pages/{id}'].params;
-    expect(
-      remove.safeParse({
-        path: { id: ID },
-        body: { confirm_title: 't'.repeat(MAX_KEYWORD_LENGTH + 1) },
-      }).success
-    ).toBe(false);
   });
 });
 
@@ -419,91 +405,40 @@ describe('archiveMemoryPageRoute', () => {
 describe('deleteMemoryPageRoute', () => {
   const { handler } = deleteMemoryPageRoute['DELETE /internal/nightshift/memory/pages/{id}'];
   const REVIEWED = { seq_no: 7, primary_term: 1 };
-  const body = (confirm_title: string, version = REVIEWED) => ({
-    path: { id: ID },
-    body: { confirm_title, version },
-  });
-  const versionedPage = versioned;
-  /** A store whose `getVersioned` answers with `page`, or nothing when it is absent. */
-  const storeWith = (
-    page: MemoryPage | undefined,
-    remove = jest.fn().mockResolvedValue(undefined)
-  ) => ({
-    getVersioned: jest.fn().mockResolvedValue(page ? versionedPage(page) : undefined),
-    delete: remove,
-  });
+  const body = (version = REVIEWED) => ({ path: { id: ID }, body: { version } });
+  const storeWith = (remove = jest.fn().mockResolvedValue(undefined)) => ({ delete: remove });
 
-  it('deletes only when the confirmed title matches', async () => {
-    const store = storeWith(memory());
+  it('deletes at the revision the operator reviewed', async () => {
+    const store = storeWith();
 
-    await handler(context(store, true, body('Kafka consumer lag')));
+    await handler(context(store, true, body()));
 
     // Conditional on the revision the operator reviewed, so a concurrent
     // optimizer write cannot slip a document past the confirmation.
     expect(store.delete).toHaveBeenCalledWith(ID, { seqNo: 7, primaryTerm: 1 });
   });
 
-  it('deletes the revision that was reviewed, not the one this request read', async () => {
-    // The optimizer rewrites content without changing the title, so the read here
-    // agrees with the confirmation while the document behind it is already a
-    // replacement the operator never saw.
-    const rewritten = versioned(memory({ content: 'Rewritten by the optimizer.' }));
-    const store = {
-      getVersioned: jest.fn().mockResolvedValue({
-        ...rewritten,
-        seqNo: rewritten.seqNo + 1,
-      }),
-      delete: jest.fn().mockResolvedValue(undefined),
-    };
-
-    await handler(context(store, true, body('Kafka consumer lag')));
-
-    // The reviewed revision, seq 7, not the seq 8 this request happened to read.
-    expect(store.delete).toHaveBeenCalledWith(ID, { seqNo: 7, primaryTerm: 1 });
-  });
-
-  it('refuses a stale or mistyped title, and reports the real one', async () => {
-    const store = storeWith(memory());
-
-    await expect(handler(context(store, true, body('something else')))).rejects.toEqual(
-      badRequest('confirm_title does not match the page title', { title: 'Kafka consumer lag' })
-    );
-    expect(store.delete).not.toHaveBeenCalled();
-  });
-
-  it('throws not found rather than confirming against a missing page', async () => {
-    const store = storeWith(undefined);
-
-    await expect(handler(context(store, true, body('Kafka consumer lag')))).rejects.toEqual(
-      notFound(`Semantic Memory page ${ID} was not found`)
-    );
-    expect(store.delete).not.toHaveBeenCalled();
-  });
-
   it('answers 409 rather than 500 when the document changed under the confirmation', async () => {
     const store = storeWith(
-      memory(),
       jest.fn().mockRejectedValue(new MemoryVersionConflictError('Memory changed'))
     );
 
-    await expect(handler(context(store, true, body('Kafka consumer lag')))).rejects.toEqual(
+    await expect(handler(context(store, true, body()))).rejects.toEqual(
       conflict('The memory changed while you were reviewing it. Reload and try again.')
     );
   });
 
   it('does not disguise an unrelated delete failure as a conflict', async () => {
-    const store = storeWith(memory(), jest.fn().mockRejectedValue(new Error('cluster blocked')));
+    const store = storeWith(jest.fn().mockRejectedValue(new Error('cluster blocked')));
 
-    await expect(handler(context(store, true, body('Kafka consumer lag')))).rejects.toThrow(
-      'cluster blocked'
-    );
+    await expect(handler(context(store, true, body()))).rejects.toThrow('cluster blocked');
   });
 
   it('throws not found when Semantic Memory is disabled', async () => {
-    const getVersioned = jest.fn();
-    await expect(
-      handler(context({ getVersioned }, false, body('Kafka consumer lag')))
-    ).rejects.toEqual(notFound('Semantic Memory is not enabled'));
-    expect(getVersioned).not.toHaveBeenCalled();
+    const remove = jest.fn();
+    await expect(handler(context({ delete: remove }, false, body()))).rejects.toEqual(
+      notFound('Semantic Memory is not enabled')
+    );
+    expect(remove).not.toHaveBeenCalled();
   });
 });

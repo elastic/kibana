@@ -46,7 +46,7 @@ const mockSetArchived = jest.fn(
     options?.onSuccess?.()
 );
 const mockDelete = jest.fn(
-  (_variables: { id: string; confirmTitle: string }, options?: { onSuccess?: () => void }) =>
+  (_variables: { id: string; version: { seq_no: number; primary_term: number } }, options?: { onSuccess?: () => void }) =>
     options?.onSuccess?.()
 );
 const mockUseSetArchived = useSetMemoryArchived as jest.MockedFunction<typeof useSetMemoryArchived>;
@@ -365,18 +365,13 @@ describe('MemoryPageView', () => {
     const { onDeleted } = renderView();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
-    await userEvent.type(
-      screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
-      'Kafka consumer lag'
-    );
     await userEvent.click(screen.getByText('Delete permanently'));
 
     await waitFor(() => {
-      // The title is echoed so the route can refuse a stale confirmation, and the
-      // revision travelled with it: the delete has to be conditional on what was
-      // read, not on what the server finds when the request lands.
+      // The revision travels with the request: the delete has to be conditional
+      // on what was read, not on what the server finds when it lands.
       expect(mockDelete).toHaveBeenCalledWith(
-        { id: 'memory_kafka-lag', confirmTitle: 'Kafka consumer lag', version: VERSION },
+        { id: 'memory_kafka-lag', version: VERSION },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -398,10 +393,6 @@ describe('MemoryPageView', () => {
     const { rerenderView } = renderView();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
-    await userEvent.type(
-      screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
-      'Kafka consumer lag'
-    );
     mockUseMemoryPage.mockReturnValue(detail(rewritten));
     rerenderView();
     await userEvent.click(screen.getByText('Delete permanently'));
@@ -414,47 +405,14 @@ describe('MemoryPageView', () => {
     );
   });
 
-  it('keeps the destructive button disabled until the exact title is typed', async () => {
+  it('deletes in one click once the dialog is open', async () => {
     mockUseMemoryPage.mockReturnValue(asDetail());
     renderView();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
-    const confirm = () => screen.getByRole('button', { name: 'Delete permanently' });
-    const field = screen.getByTestId('nightshiftMemoryDeleteConfirmTitle');
+    await userEvent.click(screen.getByRole('button', { name: 'Delete permanently' }));
 
-    // Deleting is irreversible, so a reflexive click cannot destroy content: the
-    // operator has to name the memory first.
-    expect(confirm()).toBeDisabled();
-
-    // A near miss is still a miss — the route compares the whole title.
-    await userEvent.type(field, 'Kafka consumer lag ');
-    expect(confirm()).toBeDisabled();
-    expect(mockDelete).not.toHaveBeenCalled();
-
-    await userEvent.clear(field);
-    await userEvent.type(field, 'Kafka consumer lag');
-    expect(confirm()).toBeEnabled();
-
-    await userEvent.click(confirm());
     await waitFor(() => expect(mockDelete).toHaveBeenCalled());
-  });
-
-  it('clears the typed title when the confirmation is cancelled', async () => {
-    mockUseMemoryPage.mockReturnValue(asDetail());
-    renderView();
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
-    await userEvent.type(
-      screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
-      'Kafka consumer lag'
-    );
-    const dialog = screen.getByRole('alertdialog', { name: /delete this memory permanently/i });
-    await userEvent.click(within(dialog).getByRole('button', { name: /closes this modal/i }));
-
-    // Reopening must not leave a stale confirmation armed from the last attempt.
-    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
-    expect(screen.getByTestId('nightshiftMemoryDeleteConfirmTitle')).toHaveValue('');
-    expect(screen.getByRole('button', { name: 'Delete permanently' })).toBeDisabled();
   });
 
   it('cancelling the confirmation leaves the memory alone', async () => {
@@ -483,10 +441,6 @@ describe('MemoryPageView', () => {
     const { onDeleted } = renderView();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
-    await userEvent.type(
-      screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
-      'Kafka consumer lag'
-    );
     await userEvent.click(screen.getByText('Delete permanently'));
 
     await waitFor(() => expect(mockDelete).toHaveBeenCalled());

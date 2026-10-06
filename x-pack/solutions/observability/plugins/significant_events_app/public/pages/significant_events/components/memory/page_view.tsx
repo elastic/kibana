@@ -15,10 +15,8 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiEmptyPrompt,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
@@ -88,9 +86,8 @@ export function MemoryPageView({
   // Snapshotted when the dialog opens: a refetch while it is open must not swap
   // in a revision the operator never reviewed.
   const [deleteTarget, setDeleteTarget] = useState<
-    { id: string; title: string; version: MemoryDetailResult['version'] } | undefined
+    { id: string; version: MemoryDetailResult['version'] } | undefined
   >();
-  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const modalTitleId = useGeneratedHtmlId({ prefix: 'memoryDeleteTitle' });
 
   const page = data?.page;
@@ -211,7 +208,7 @@ export function MemoryPageView({
               iconType="trash"
               isDisabled={isDeleting}
               onClick={() =>
-                setDeleteTarget({ id: page.id, title: page.title, version: data.version })
+                setDeleteTarget({ id: page.id, version: data.version })
               }
               data-test-subj="nightshiftMemoryDeleteButton"
             >
@@ -418,7 +415,6 @@ export function MemoryPageView({
           }
           onCancel={() => {
             setDeleteTarget(undefined);
-            setDeleteConfirmation('');
           }}
           confirmButtonText={
             <FormattedMessage
@@ -426,25 +422,17 @@ export function MemoryPageView({
               defaultMessage="Delete permanently"
             />
           }
-          // The route echoes the title back and refuses a mismatch, so the dialog
-          // makes the operator produce it rather than supplying it for them.
-          confirmButtonDisabled={deleteConfirmation !== deleteTarget.title}
           buttonColor="danger"
           data-test-subj="nightshiftMemoryDeleteConfirm"
           onConfirm={() => {
             setDeleteTarget(undefined);
-            setDeleteConfirmation('');
             // Navigating away only on success: the memory may well still be
             // there, and a failed write must leave the page in place to retry.
             // The revision travels with the request, so a write that landed
             // after the dialog opened answers 409 instead of taking the
             // replacement the operator never saw.
             deletePage(
-              {
-                id: deleteTarget.id,
-                confirmTitle: deleteTarget.title,
-                version: deleteTarget.version,
-              },
+              { id: deleteTarget.id, version: deleteTarget.version },
               { onSuccess: onDeleted }
             );
           }}
@@ -452,25 +440,9 @@ export function MemoryPageView({
           <EuiText size="s">
             <FormattedMessage
               id="xpack.significantEventsApp.memory.deleteConfirmBody"
-              defaultMessage="“{title}” will be removed from Semantic Memory. This cannot be undone — archiving keeps the record and is reversible."
-              values={{ title: deleteTarget.title }}
+              defaultMessage="This memory will be removed from Semantic Memory. This cannot be undone — archiving keeps the record and is reversible."
             />
           </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.significantEventsApp.memory.deleteConfirmFieldLabel"
-                defaultMessage="Type the memory title to confirm"
-              />
-            }
-          >
-            <EuiFieldText
-              value={deleteConfirmation}
-              onChange={(event) => setDeleteConfirmation(event.target.value)}
-              data-test-subj="nightshiftMemoryDeleteConfirmTitle"
-            />
-          </EuiFormRow>
         </EuiConfirmModal>
       )}
     </div>

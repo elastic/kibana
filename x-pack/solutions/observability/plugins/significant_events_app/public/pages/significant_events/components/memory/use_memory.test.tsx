@@ -357,7 +357,7 @@ describe('useSetMemoryArchived', () => {
 describe('useDeleteMemoryPage', () => {
   const version = { seq_no: 7, primary_term: 1 };
 
-  it('deletes the reviewed revision with the confirmed title, and refetches the list', async () => {
+  it('deletes the reviewed revision, and refetches the list', async () => {
     fetchMock.mockResolvedValue(listResult(['memory_a']));
     const { wrapper } = createWrapper();
     const { result: list } = renderHook(() => useMemoryPages('active'), { wrapper });
@@ -366,20 +366,13 @@ describe('useDeleteMemoryPage', () => {
 
     const { result } = renderHook(() => useDeleteMemoryPage(), { wrapper });
     await act(async () => {
-      await result.current.mutateAsync({
-        id: 'memory_a',
-        confirmTitle: 'Memory memory_a',
-        version,
-      });
+      await result.current.mutateAsync({ id: 'memory_a', version });
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
       'DELETE /internal/nightshift/memory/pages/{id}',
       expect.objectContaining({
-        params: {
-          path: { id: 'memory_a' },
-          body: { confirm_title: 'Memory memory_a', version },
-        },
+        params: { path: { id: 'memory_a' }, body: { version } },
       })
     );
     await waitFor(() => expect(listQueries().length).toBeGreaterThan(before));
@@ -392,11 +385,7 @@ describe('useDeleteMemoryPage', () => {
     const { result } = renderHook(() => useDeleteMemoryPage(), { wrapper });
     await act(async () => {
       await expect(
-        result.current.mutateAsync({
-          id: 'memory_a',
-          confirmTitle: 'Memory memory_a',
-          version,
-        })
+        result.current.mutateAsync({ id: 'memory_a', version })
       ).rejects.toThrow('version conflict');
     });
 
