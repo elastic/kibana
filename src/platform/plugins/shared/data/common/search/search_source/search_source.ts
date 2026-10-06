@@ -59,20 +59,7 @@
  *    `appSearchSource`.
  */
 
-import { setWith } from '@kbn/safer-lodash-set';
-import {
-  difference,
-  isEqual,
-  isFunction,
-  isObject,
-  keyBy,
-  pick,
-  uniqueId,
-  concat,
-  omitBy,
-  isNil,
-  omit,
-} from 'lodash';
+import { difference, isFunction, keyBy, pick, uniqueId, concat, omitBy, isNil, omit } from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
@@ -659,10 +646,6 @@ export class SearchSource {
         // NOTE: While the fields API supports wildcards within names, e.g. `user.*`
         //       scripted fields won't be considered for this.
         return addToBody('fields', val);
-      case 'fieldsFromSource':
-        // preserves legacy behavior
-        const fields = [...new Set((data.fieldsFromSource || []).concat(val))];
-        return addToRoot(key, fields);
       case 'index':
       case 'type':
       case 'highlightAll':
@@ -797,7 +780,6 @@ export class SearchSource {
       'filters',
       'nonHighlightingFilters',
       'highlightAll',
-      'fieldsFromSource',
       'body',
       'timezone',
     ]);
@@ -821,18 +803,12 @@ export class SearchSource {
     // get filter if data view specified, otherwise null filter
     const filter = this.getFieldFilter({ bodySourceExcludes: _source?.excludes, metaFields });
 
-    const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
     // apply source filters from index pattern if specified by the user
     const filteredDocvalueFields = filter(docvalueFields);
 
-    const sourceFieldsProvided = !!fieldsFromSource.length;
+    const fields = fieldListProvided ? filter(body.fields || []) : filteredDocvalueFields;
 
-    const fields =
-      fieldListProvided || sourceFieldsProvided
-        ? filter(body.fields || [])
-        : filteredDocvalueFields;
-
-    const uniqFieldNames = this.getUniqueFieldNames({ fields, fieldsFromSource });
+    const uniqFieldNames = this.getUniqueFieldNames(fields);
 
     const scriptedFields = (() => {
       const flds = this.dependencies.scriptedFieldsEnabled
@@ -840,7 +816,7 @@ export class SearchSource {
         : {};
 
       // specific fields were provided, so we need to exclude any others
-      return fieldListProvided || sourceFieldsProvided
+      return fieldListProvided
         ? this.filterScriptFields({
             uniqFieldNames,
             scriptFields: flds,
@@ -877,13 +853,6 @@ export class SearchSource {
     // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
     body._source = _source;
-
-    // only include unique values
-    if (sourceFieldsProvided && !isEqual(remainingFields, fieldsFromSource)) {
-      setWith(body, '_source.includes', remainingFields, (nsValue) => {
-        return isObject(nsValue) ? {} : nsValue;
-      });
-    }
 
     // Evaluate filters if they are functions
     const filters =
@@ -932,31 +901,21 @@ export class SearchSource {
             : getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
           : undefined,
       // remove _source, since everything's coming from fields API, scripted, or stored fields
-      _source: fieldListProvided && !sourceFieldsProvided ? false : body._source,
-      stored_fields:
-        fieldListProvided || sourceFieldsProvided ? [...new Set(remainingFields)] : ['*'],
+      _source: fieldListProvided ? false : body._source,
+      stored_fields: fieldListProvided ? [...new Set(remainingFields)] : ['*'],
       runtime_mappings: runtimeFields,
       script_fields: scriptedFields,
       fields: this.getFieldsList({
         index: dataView,
         fields,
-        docvalueFields: body.docvalue_fields,
-        fieldsFromSource,
         filteredDocvalueFields,
         metaFields,
         fieldListProvided,
-        sourceFieldsProvided,
       }),
     };
 
     return omitByIsNil({
-      ...omit(searchRequest, [
-        'query',
-        'filters',
-        'nonHighlightingFilters',
-        'fieldsFromSource',
-        'timezone',
-      ]),
+      ...omit(searchRequest, ['query', 'filters', 'nonHighlightingFilters', 'timezone']),
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(searchRequest.index),
       highlightAll:
@@ -976,15 +935,9 @@ export class SearchSource {
       fieldsToFilter.filter((fld) => filter(this.getFieldName(fld)));
   }
 
-  private getUniqueFieldNames({
-    fields,
-    fieldsFromSource,
-  }: {
-    fields: SearchFieldValue[];
-    fieldsFromSource: SearchFieldValue[];
-  }) {
+  private getUniqueFieldNames(fields: SearchFieldValue[]) {
     const bodyFieldNames = fields.map((field) => this.getFieldName(field));
-    return [...new Set([...bodyFieldNames, ...fieldsFromSource])];
+    return [...new Set(bodyFieldNames)];
   }
 
   private filterScriptFields({
@@ -1046,44 +999,26 @@ export class SearchSource {
   private getFieldsList({
     index,
     fields,
-    docvalueFields,
-    fieldsFromSource,
     filteredDocvalueFields,
     metaFields,
     fieldListProvided,
-    sourceFieldsProvided,
   }: {
     index?: DataView;
     fields: SearchFieldValue[];
-    docvalueFields: Array<{ field: string; format: string }>;
-    fieldsFromSource: SearchFieldValue[];
     filteredDocvalueFields: SearchFieldValue[];
     metaFields: string[];
     fieldListProvided: boolean;
-    sourceFieldsProvided: boolean;
   }) {
-    if (fieldListProvided || sourceFieldsProvided) {
+    if (fieldListProvided) {
       // if items that are in the docvalueFields are provided, we should
       // make sure those are added to the fields API unless they are
       // already set in docvalue_fields
-      if (!sourceFieldsProvided) {
-        return this.getUniqueFields({
-          index,
-          fields,
-          metaFields,
-          filteredDocvalueFields,
-        });
-      }
-      return [
-        ...fields,
-        ...filteredDocvalueFields.filter((fld) => {
-          const fldName = this.getFieldName(fld);
-          return (
-            fieldsFromSource.includes(fldName) &&
-            !(docvalueFields || []).map((d) => this.getFieldName(d)).includes(fldName)
-          );
-        }),
-      ];
+      return this.getUniqueFields({
+        index,
+        fields,
+        metaFields,
+        filteredDocvalueFields,
+      });
     }
 
     return fields;
