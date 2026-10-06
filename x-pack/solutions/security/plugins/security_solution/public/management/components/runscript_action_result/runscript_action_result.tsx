@@ -11,6 +11,7 @@ import { EndpointActionFailureMessage } from '../endpoint_action_failure_message
 import { EndpointHostExecutionResponseOutput } from '../endpoint_host_execution_response_output';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 import type {
   ActionDetails,
   MaybeImmutable,
@@ -53,7 +54,10 @@ export interface RunscriptActionResultProps {
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
   ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
-    const { wasSuccessful } = agentId ? action.agentState[agentId] : action;
+    const { wasSuccessful } = useMemo(
+      () => (agentId ? getAgentActionState(action, agentId) : action),
+      [action, agentId]
+    );
     const showFile = action.agentType !== 'crowdstrike';
     const executionOutput = useMemo(() => {
       if (action.agentType === 'microsoft_defender_endpoint') {

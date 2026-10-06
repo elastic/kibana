@@ -29,6 +29,7 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 
 const STYLE_INHERIT_FONT_FAMILY = {
   fontFamily: 'inherit',
@@ -136,13 +137,12 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const getTestId = useTestIdGenerator(dataTestSubj);
     const http = useHttp();
 
-    const isCompleted = useMemo(() => {
-      return agentId ? action.agentState[agentId]?.isCompleted : action.isCompleted;
-    }, [action.agentState, action.isCompleted, agentId]);
+    const agentActionState = useMemo(() => {
+      return agentId ? getAgentActionState(action, agentId) : undefined;
+    }, [action, agentId]);
 
-    const wasSuccessful = useMemo(() => {
-      return agentId ? action.agentState[agentId]?.wasSuccessful : action.wasSuccessful;
-    }, [action.agentState, action.wasSuccessful, agentId]);
+    const isCompleted = agentActionState ? agentActionState.isCompleted : action.isCompleted;
+    const wasSuccessful = agentActionState ? agentActionState.wasSuccessful : action.wasSuccessful;
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
       return isCompleted && wasSuccessful;

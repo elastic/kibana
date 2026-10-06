@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import type { EuiTextColorProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { getAgentActionState } from './utils';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
@@ -55,7 +56,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
 
     if (agentId && !action.agents.includes(agentId)) {
       window.console.warn(
-        `EndpointUploadActionResult: Agent id [${agentId}] not in list of agents for action [${command} - ${action.id}]`
+        `ResponseActionResults: Agent id [${agentId}] not in list of agents for action [${command} - ${action.id}]`
       );
       return <></>;
     }
@@ -64,7 +65,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
       <EuiText data-test-subj={getTestId()} size={textSize}>
         {/* eslint-disable-next-line complexity */}
         {agents.map((hostAgentId, index) => {
-          const agentActionState = action.agentState[hostAgentId];
+          const agentActionState = getAgentActionState(action, hostAgentId);
           const hostName = action.hosts[hostAgentId]?.name ?? hostAgentId;
           const hostStatusMessage = !agentActionState.isCompleted
             ? OUTPUT_MESSAGES.isPending(consoleCommandName)

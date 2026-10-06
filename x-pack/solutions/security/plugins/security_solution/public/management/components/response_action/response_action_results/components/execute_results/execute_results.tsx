@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 import { EndpointActionFailureMessage } from '../../../../endpoint_action_failure_message';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { getAgentActionState } from '../../utils';
 import type {
   ActionDetails,
   MaybeImmutable,
@@ -34,10 +35,15 @@ export interface ExecuteResultsProps {
 export const ExecuteResults = memo<ExecuteResultsProps>(
   ({ action, agentId, textSize, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { wasSuccessful } = agentId ? action.agentState[agentId] : action;
+    const { wasSuccessful } = useMemo(
+      () => getAgentActionState(action, agentId),
+      [action, agentId]
+    );
 
-    // Component wrapper created only to pass along the `canAccessFileDowloadLink` prop, which after
-    // review, it is not necessary in the component at all.
+    // Component wrapper created only to pass along the `canAccessFileDowloadLink` prop set to `true`.
+    // The prior implementation passed `canAccessFileDownloadLink={canAccessEndpointActionsLogManagement || canReadActionsLogManagement}`,
+    // but this is unnecessary since the Action Details API is already gated by these privileges,
+    // thus it would not even be possible to retrieve the action details much less attempt to display it.
 
     return wasSuccessful ? (
       <ExecuteActionHostResponse

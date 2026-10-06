@@ -23,6 +23,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { KeyValueDisplay } from '../key_value_display';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 
 const LABELS = Object.freeze<Record<string, string>>({
   path: i18n.translate('xpack.securitySolution.endpointUploadActionResult.savedTo', {
@@ -82,13 +83,13 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
       for (const agent of agents) {
         hosts.push({
           name: action.hosts[agent].name,
-          state: action.agentState[agent],
+          state: getAgentActionState(action, agent),
           result: action.outputs?.[agent],
         });
       }
 
       return hosts;
-    }, [action.agentState, action.agents, action.hosts, action.outputs, agentId]);
+    }, [action, agentId]);
 
     const showHostName = outputs.length > 1;
 

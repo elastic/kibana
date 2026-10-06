@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 import { EndpointActionFailureMessage } from '../../../../endpoint_action_failure_message';
 import { ResponseActionFileDownloadLink } from '../../../../response_action_file_download_link';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import type { ActionDetails } from '../../../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { getAgentActionState } from '../../utils';
 
 export interface GetFileResultsProps {
   action: ActionDetails;
@@ -25,7 +26,7 @@ export const GetFileResults = memo<GetFileResultsProps>(
     // For get-file, we only allow a user to access the files if they have file operations privilage
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const agentActionState = action.agentState[agentId];
+    const agentActionState = useMemo(() => getAgentActionState(action, agentId), [action, agentId]);
 
     if (!agentActionState.isCompleted) {
       return <></>;

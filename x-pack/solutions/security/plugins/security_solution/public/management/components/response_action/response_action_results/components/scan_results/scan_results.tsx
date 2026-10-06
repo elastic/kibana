@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { ActionDetails, MaybeImmutable } from '../../../../../../../common/endpoint/types';
 import { EndpointActionFailureMessage } from '../action_failure_message';
+import { getAgentActionState } from '../../utils';
 
 export interface ScanResultsProps {
   action: MaybeImmutable<ActionDetails>;
@@ -19,7 +20,7 @@ export interface ScanResultsProps {
 export const ScanResults = memo<ScanResultsProps>(
   ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const agentActionState = action.agentState[agentId];
+    const agentActionState = useMemo(() => getAgentActionState(action, agentId), [action, agentId]);
 
     if (!agentActionState.isCompleted) {
       return <></>;
