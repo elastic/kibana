@@ -373,16 +373,11 @@ const ClientProviderExtensionsList = ({ history }: { history: MockHistory }) => 
         ...clientProviderFeatures,
         sorting: {
           ...clientProviderFeatures.sorting,
-          // Offer the recents sort, and land on it, only when there is history.
-          initialSort: recents.hasHistory
-            ? { field: recents.sortField.id, direction: 'desc' }
-            : clientProviderFeatures.sorting.initialSort,
-          fields: (defaults) => {
-            const fields = clientProviderFeatures.sorting.fields(defaults);
-            return recents.hasHistory
-              ? { ...fields, [recents.sortField.id]: recents.sortField }
-              : fields;
-          },
+          initialSort: recents.initialSort ?? clientProviderFeatures.sorting.initialSort,
+          fields: (defaults) => ({
+            ...clientProviderFeatures.sorting.fields(defaults),
+            ...recents.sortFields,
+          }),
         },
       } satisfies ContentListClientProviderProps['features']),
     [recents]

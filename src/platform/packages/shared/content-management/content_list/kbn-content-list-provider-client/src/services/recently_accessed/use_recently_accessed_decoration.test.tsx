@@ -141,7 +141,7 @@ describe('useRecentlyAccessedDecoration', () => {
     });
   });
 
-  describe('sortField', () => {
+  describe('sortFields', () => {
     const createMockItem = (id: string): UserContentCommonSchema => ({
       id,
       type: 'dashboard',
@@ -156,7 +156,7 @@ describe('useRecentlyAccessedDecoration', () => {
     it('has the expected id so the strategy resolves it against the decorated field', () => {
       const source = buildSource([{ id: 'a' }]);
       const { result } = renderHook(() => useRecentlyAccessedDecoration(source));
-      expect(result.current.sortField.id).toBe(ACCESSED_AT_FIELD);
+      expect(result.current.sortFields[ACCESSED_AT_FIELD].id).toBe(ACCESSED_AT_FIELD);
     });
 
     it('getValue returns the accessedAt score based on history order', () => {
@@ -170,7 +170,7 @@ describe('useRecentlyAccessedDecoration', () => {
         hits: [createMockItem('a'), createMockItem('b')],
       });
 
-      const { getValue } = result.current.sortField;
+      const { getValue } = result.current.sortFields[ACCESSED_AT_FIELD];
       expect(getValue?.(hits[0])).toBe(1); // 'a' — older
       expect(getValue?.(hits[1])).toBe(2); // 'b' — most recent
     });
@@ -184,22 +184,26 @@ describe('useRecentlyAccessedDecoration', () => {
         hits: [createMockItem('a'), createMockItem('z')],
       });
 
-      const { getValue } = result.current.sortField;
+      const { getValue } = result.current.sortFields[ACCESSED_AT_FIELD];
       expect(getValue?.(hits[0])).toBe(1); // in history
       expect(getValue?.(hits[1])).toBeNull(); // not in history
     });
 
     it('is descending-only', () => {
-      const { result } = renderHook(() => useRecentlyAccessedDecoration(buildSource([])));
-      const { allowedDirections } = result.current.sortField;
+      const { result } = renderHook(() =>
+        useRecentlyAccessedDecoration(buildSource([{ id: 'a' }]))
+      );
+      const { allowedDirections } = result.current.sortFields[ACCESSED_AT_FIELD];
 
       expect(allowedDirections).toEqual(['desc']);
     });
 
     it('falls back to updatedAt descending', () => {
-      const { result } = renderHook(() => useRecentlyAccessedDecoration(buildSource([])));
+      const { result } = renderHook(() =>
+        useRecentlyAccessedDecoration(buildSource([{ id: 'a' }]))
+      );
 
-      expect(result.current.sortField.fallbackSort).toEqual({
+      expect(result.current.sortFields[ACCESSED_AT_FIELD].fallbackSort).toEqual({
         field: 'updatedAt',
         direction: 'desc',
       });
@@ -219,7 +223,7 @@ describe('useRecentlyAccessedDecoration', () => {
         undefined,
         undefined,
         undefined,
-        { [result.current.sortField.id]: result.current.sortField }
+        result.current.sortFields
       );
       const response = await findItems({
         searchQuery: '',
@@ -233,30 +237,21 @@ describe('useRecentlyAccessedDecoration', () => {
     });
   });
 
-  describe('hasHistory', () => {
-    it('is true when the source has entries on mount', () => {
+  describe('with and without history', () => {
+    it('offers the sort field and selects it by default when the source has entries', () => {
       const { result } = renderHook(() =>
         useRecentlyAccessedDecoration(buildSource([{ id: 'a' }]))
       );
 
-      expect(result.current.hasHistory).toBe(true);
+      expect(Object.keys(result.current.sortFields)).toEqual([ACCESSED_AT_FIELD]);
+      expect(result.current.initialSort).toEqual({ field: ACCESSED_AT_FIELD, direction: 'desc' });
     });
 
-    it('is false when the source is empty on mount', () => {
+    it('offers no sort field and no initial sort when the source is empty', () => {
       const { result } = renderHook(() => useRecentlyAccessedDecoration(buildSource([])));
 
-      expect(result.current.hasHistory).toBe(false);
-    });
-
-    it('is read once and does not change when the history changes after mount', () => {
-      const entries: Array<{ id: string }> = [];
-      const source: RecentlyAccessedHistorySource = { get: () => entries.slice() };
-      const { result, rerender } = renderHook(() => useRecentlyAccessedDecoration(source));
-
-      entries.push({ id: 'a' });
-      rerender();
-
-      expect(result.current.hasHistory).toBe(false);
+      expect(result.current.sortFields).toEqual({});
+      expect(result.current.initialSort).toBeUndefined();
     });
   });
 });

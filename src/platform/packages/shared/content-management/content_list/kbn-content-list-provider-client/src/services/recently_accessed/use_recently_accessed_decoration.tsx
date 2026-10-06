@@ -11,9 +11,10 @@ import React, { useMemo, type ComponentType } from 'react';
 import { filter } from '@kbn/content-list-toolbar';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { SortingConfig } from '@kbn/content-list-provider';
 import { RecentsFilterRenderer, RECENT_FIELD } from './recents_filter_renderer';
 import type { RecentlyAccessedHistorySource } from './types';
-import { defineContentListSortField } from '../../sorting';
+import { defineContentListSortField, type ContentListSortFieldMap } from '../../sorting';
 
 const RECENTLY_ACCESSED_SORT_LABEL = i18n.translate(
   'contentManagement.contentListProviderClient.recentlyAccessed.sortField.title',
@@ -90,17 +91,37 @@ export interface RecentlyAccessedDecoration {
    */
   RecentsFilter: ComponentType<Record<never, never>>;
   /**
-   * Add to `features.sorting.fields` so the sort dropdown exposes "Recently viewed".
+   * Spread into `features.sorting.fields` so the sort dropdown exposes "Recently viewed".
    * Recently-accessed items sort first in history order (most recent first);
    * items not in the history follow, ordered by `updatedAt` descending.
+   * Empty when the history has no entries, so the option isn't offered.
    */
-  sortField: ReturnType<typeof defineContentListSortField>;
+  sortFields: ContentListSortFieldMap;
   /**
-   * Whether the history had entries when the hook mounted. Register `sortField` and make it the
-   * initial sort only when this is `true`.
+   * Initial sort for `features.sorting.initialSort`: "Recently viewed" when the history has
+   * entries, otherwise `undefined`. Fall back to your own default with `??`.
    */
-  hasHistory: boolean;
+  initialSort: SortingConfig['initialSort'];
 }
+
+/** Builds the "Recently viewed" sort entry, or no entries when there's no history to sort by. */
+const getSortFields = (hasHistory: boolean): ContentListSortFieldMap => {
+  return hasHistory
+    ? {
+        [ACCESSED_AT_FIELD]: defineContentListSortField<UserContentCommonSchema & RecentDecoration>(
+          {
+            id: ACCESSED_AT_FIELD,
+            title: RECENTLY_ACCESSED_SORT_LABEL,
+            descLabel: RECENTLY_ACCESSED_SORT_LABEL,
+            allowedDirections: ['desc'],
+            description: RECENTLY_ACCESSED_SORT_DESCRIPTION,
+            getValue: (item) => item.accessedAt || null,
+            fallbackSort: { field: 'updatedAt', direction: 'desc' },
+          }
+        ),
+      }
+    : {};
+};
 
 /**
  * Build the recently-accessed integration for a saved-object listing in one
@@ -167,16 +188,8 @@ export const useRecentlyAccessedDecoration = (
       },
       flag: { flagName: RECENT_FIELD, modelKey: 'recent' },
       RecentsFilter,
-      sortField: defineContentListSortField<UserContentCommonSchema & RecentDecoration>({
-        id: ACCESSED_AT_FIELD,
-        title: RECENTLY_ACCESSED_SORT_LABEL,
-        descLabel: RECENTLY_ACCESSED_SORT_LABEL,
-        allowedDirections: ['desc'],
-        description: RECENTLY_ACCESSED_SORT_DESCRIPTION,
-        getValue: (item) => item.accessedAt || null,
-        fallbackSort: { field: 'updatedAt', direction: 'desc' },
-      }),
-      hasHistory,
+      sortFields: getSortFields(hasHistory),
+      initialSort: hasHistory ? { field: ACCESSED_AT_FIELD, direction: 'desc' } : undefined,
     }),
     [RecentsFilter, source, hasHistory]
   );
