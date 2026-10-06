@@ -10,7 +10,11 @@ import {
   buildVegaConfig,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import {
+  readVegaPanelSpec,
+  toVegaPanelSpec,
+  VEGA_VIS_TYPE,
+} from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -29,10 +33,8 @@ export interface VisPanelResolverDeps {
 }
 
 /** Pull the serialized Vega spec out of an existing Vega panel's attachment config. */
-const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
-  const spec = (existingPanel?.config as { spec?: unknown } | undefined)?.spec;
-  return typeof spec === 'string' ? spec : undefined;
-};
+const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined =>
+  readVegaPanelSpec((existingPanel?.config as { spec?: unknown } | undefined)?.spec);
 
 /**
  * Resolves Lens and Vega panel requests for the generate core's
@@ -41,7 +43,7 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * Builds inline visualization panel content from natural language / ES|QL using
  * Kibana plumbing (model provider, ES client, the visualization builders). It
  * resolves to a Lens panel (`buildLensConfig`) or, when the caller asks
- * for Vega, a `vega` panel carrying a serialized Vega-Lite spec in its config
+ * for Vega, a native `vega` panel carrying the Vega-Lite spec as HJSON in its config
  * (`buildVegaConfig`), and returns it to the core through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *
@@ -85,15 +87,14 @@ export const createVisPanelResolver = ({
           esClient,
         });
 
-        // Store the (future) native Vega API shape in the attachment: a `vega`
-        // panel whose `config.spec` is the serialized spec. A temporary converter
-        // expands this to the legacy-vis embeddable when the dashboard is
+        // Store the native Vega API shape in the attachment. A temporary converter
+        // expands it to the legacy-vis embeddable when the dashboard is
         // materialized for rendering.
         return {
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { spec, ...(title ? { title } : {}) },
+            config: { spec: toVegaPanelSpec(spec), ...(title ? { title } : {}) },
           },
           ...(authoringNote ? { authoringNote } : {}),
         };

@@ -76,7 +76,10 @@ describe('createAttachmentPanelResolver', () => {
 
     expect(resolve('att-1', 'add_panels')).toEqual({
       type: 'success',
-      panelContent: { type: VEGA_VIS_TYPE, config: { spec: '{"$schema":"vega-lite"}' } },
+      panelContent: {
+        type: VEGA_VIS_TYPE,
+        config: { spec: { format: 'hjson', value: '{"$schema":"vega-lite"}' } },
+      },
     });
   });
 

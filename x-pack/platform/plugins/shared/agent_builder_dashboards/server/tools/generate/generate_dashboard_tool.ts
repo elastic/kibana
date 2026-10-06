@@ -31,6 +31,7 @@ import {
   type DashboardUpdatedUiEventData,
 } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
+import { normalizeLegacyVegaPanels } from './legacy_vega_panels';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { createPanelValidator } from './panel_validator';
@@ -146,7 +147,7 @@ Use operations[] to:
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
         const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
-          dashboardData: latestVersion?.data,
+          dashboardData: latestVersion && normalizeLegacyVegaPanels(latestVersion.data),
           operations,
           logger,
           resolvePanelContent: createPanelResolver({

@@ -18,10 +18,11 @@ const SPEC = JSON.stringify(
   2
 );
 const MINIFIED_SPEC = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json","mark":"bar"}';
+const NATIVE_SPEC = { format: 'hjson', value: SPEC };
 const grid = { x: 0, y: 0, w: 24, h: 15 };
 
 describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => {
-  it('from_attachment expands a `vega` attachment panel into a by-value legacy-vis panel', () => {
+  it('from_attachment expands a legacy string-spec `vega` attachment panel into a by-value legacy-vis panel', () => {
     const attachmentData = {
       title: 'Dash',
       panels: [
@@ -75,7 +76,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
         type: VEGA_VIS_TYPE,
         id: 'p1',
         grid,
-        config: { spec: SPEC, title: 'Chart', description: 'Desc' },
+        config: { spec: NATIVE_SPEC, title: 'Chart', description: 'Desc' },
       },
     ]);
   });
@@ -85,7 +86,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
       type: VEGA_VIS_TYPE,
       id: 'p1',
       grid,
-      config: { spec: SPEC, title: 'Chart', description: 'Desc' },
+      config: { spec: NATIVE_SPEC, title: 'Chart', description: 'Desc' },
     };
     const attachmentData = {
       title: 'Dash',
@@ -135,7 +136,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
           hide_title: true,
           hide_border: true,
           drilldowns: [{ id: 'd1' }],
-          spec: SPEC,
+          spec: NATIVE_SPEC,
         },
       },
     ]);
@@ -147,7 +148,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
       id: 'p1',
       grid,
       config: {
-        spec: SPEC,
+        spec: NATIVE_SPEC,
         title: 'Panel title edited',
         description: 'Panel description edited',
         hide_title: true,
