@@ -156,11 +156,20 @@ export function chunksIntoMessage(obs$: Observable<UnifiedChatCompleteResponse>)
  */
 export const detectandThrowUserError = (error: string) => {
   if (error.includes('status [429]') && error.includes('quota')) {
-    throw createTaskRunError(new Error(error), TaskErrorSource.USER);
+    throw createTaskRunError(new Error(truncateUpstreamBody(error)), TaskErrorSource.USER);
   }
 };
 
 export const MAX_UPSTREAM_BODY_LENGTH = 1000;
+
+const redactUpstreamSecrets = (text: string): string =>
+  text
+    .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
+    .replace(/sk-[A-Za-z0-9_-]{8,}/g, '[redacted]')
+    .replace(
+      /((?:api_key|x-api-key|authorization)["']?\s*[:=]\s*["']?)[^\s"',}]+/gi,
+      '$1[redacted]'
+    );
 
 const stringifyUpstreamBody = (body: unknown): string => {
   if (body === undefined || body === null) return '';
@@ -181,8 +190,9 @@ export const truncateUpstreamBody = (
   body: unknown,
   maxLength: number = MAX_UPSTREAM_BODY_LENGTH
 ): string => {
-  const text = stringifyUpstreamBody(body);
-  return text.length > maxLength ? `${text.slice(0, maxLength)}... [truncated]` : text;
+  const text = redactUpstreamSecrets(stringifyUpstreamBody(body));
+  const marker = '... [truncated]';
+  return text.length > maxLength ? `${text.slice(0, maxLength - marker.length)}${marker}` : text;
 };
 
 /**
@@ -190,29 +200,40 @@ export const truncateUpstreamBody = (
  * Handles AxiosError-shaped (response.status / response.data) and Elasticsearch client
  * ResponseError-shaped (statusCode / body / meta) errors, as well as plain errors. Never throws.
  */
+interface ErrorLike {
+  message?: unknown;
+  response?: { status?: unknown; data?: unknown };
+  statusCode?: unknown;
+  status?: unknown;
+  body?: unknown;
+  data?: unknown;
+  meta?: { statusCode?: unknown; body?: unknown };
+}
+
 export const buildInferenceErrorMessage = (error: unknown): string => {
   try {
     if (error === undefined || error === null) return 'Unknown error';
-    if (typeof error === 'string') return error;
+    if (typeof error === 'string') return truncateUpstreamBody(error);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const err = error as any;
-    const baseMessage: string =
-      typeof err.message === 'string' && err.message.length > 0 ? err.message : '';
+    const err = error as ErrorLike;
+    const baseMessage = typeof err.message === 'string' ? err.message : '';
     const statusCode = err.response?.status ?? err.statusCode ?? err.status ?? err.meta?.statusCode;
     const rawBody = err.response?.data ?? err.body ?? err.data ?? err.meta?.body;
-    const body = truncateUpstreamBody(rawBody);
+    const body = stringifyUpstreamBody(rawBody);
 
     const parts: string[] = [];
     if (baseMessage) parts.push(baseMessage);
-    if (statusCode !== undefined && statusCode !== null && !baseMessage.includes(`${statusCode}`)) {
+    if (
+      statusCode !== undefined &&
+      statusCode !== null &&
+      !baseMessage.includes(`status code ${statusCode}`)
+    ) {
       parts.push(`Status code: ${statusCode}`);
     }
-    // avoid repeating the body when it is already part of the error message
     if (body && !baseMessage.includes(body)) {
       parts.push(`Upstream response: ${body}`);
     }
-    if (parts.length > 0) return parts.join('. ');
+    if (parts.length > 0) return truncateUpstreamBody(parts.join('. '));
 
     const fallback = truncateUpstreamBody(err);
     return fallback && fallback !== '{}' ? fallback : 'Unknown error';

@@ -17,6 +17,7 @@ import type {
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import { trace } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
@@ -225,12 +226,26 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     );
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
-      const error = await streamToString(response.body as unknown as Readable);
+      let error: string;
+      try {
+        error = await streamToString(response.body as unknown as Readable);
+      } catch (cause) {
+        throw createTaskRunError(
+          new Error(
+            `Inference endpoint [${this.inferenceId}] returned status code ${
+              response.statusCode
+            }; upstream body stream failed: ${buildInferenceErrorMessage(cause)}`
+          ),
+          TaskErrorSource.FRAMEWORK
+        );
+      }
       detectandThrowUserError(error);
-      throw new Error(
-        `Inference endpoint [${this.inferenceId}] returned status code ${
-          response.statusCode
-        }: ${truncateUpstreamBody(error)}`
+      const message = `Inference endpoint [${this.inferenceId}] returned status code ${
+        response.statusCode
+      }${error ? `: ${error}` : ''}`;
+      throw createTaskRunError(
+        new Error(truncateUpstreamBody(message)),
+        response.statusCode < 500 ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
       );
     }
 
@@ -271,6 +286,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         throw e;
       }
       const errorMessage = this.getResponseErrorMessage(e);
+      if (e instanceof Error) {
+        e.message = errorMessage;
+        throw e;
+      }
       throw new Error(errorMessage);
     }
   }

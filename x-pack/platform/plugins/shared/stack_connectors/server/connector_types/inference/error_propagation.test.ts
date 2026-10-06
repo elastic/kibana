@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+// Connector-level upstream error paths; pure helper coverage lives in helpers.test.ts.
+import { Readable } from 'node:stream';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -13,7 +14,6 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { InferenceConnector } from './inference';
-import { buildInferenceErrorMessage, truncateUpstreamBody } from './helpers';
 
 describe('InferenceConnector upstream error propagation', () => {
   const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
@@ -52,8 +52,7 @@ describe('InferenceConnector upstream error propagation', () => {
     it('includes the inference id, status code and upstream body for >= 400 responses', async () => {
       const upstreamBody =
         '{"error":{"message":"maximum context length is 8192 tokens. However, you requested 9000 tokens","type":"BadRequestError","code":400}}';
-      // @ts-ignore
-      mockEsClient.transport.request.mockResolvedValue({
+      (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
         body: Readable.from([upstreamBody]),
         statusCode: 400,
       });
@@ -64,11 +63,11 @@ describe('InferenceConnector upstream error propagation', () => {
       expect(error.message).toContain('sglang-chat');
       expect(error.message).toContain('400');
       expect(error.message).toContain('maximum context length is 8192 tokens');
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
     });
 
     it('caps the upstream body included in the error message', async () => {
-      // @ts-ignore
-      mockEsClient.transport.request.mockResolvedValue({
+      (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
         body: Readable.from(['x'.repeat(5000)]),
         statusCode: 500,
       });
@@ -76,15 +75,57 @@ describe('InferenceConnector upstream error propagation', () => {
       const error = await connector.performApiUnifiedCompletionStream(params).catch((e) => e);
 
       expect(error.message).toContain('500');
-      expect(error.message).toContain('x'.repeat(1000));
-      expect(error.message).not.toContain('x'.repeat(1001));
+      expect(error.message).toHaveLength(1000);
+      expect(error.message).toContain('... [truncated]');
+      expect(getErrorSource(error)).toBe(TaskErrorSource.FRAMEWORK);
     });
+  });
+
+  it('keeps the status when the upstream body stream fails mid-read', async () => {
+    const body = new Readable({
+      read() {
+        this.push('partial body');
+        this.destroy(new Error('connection reset'));
+      },
+    });
+    (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
+      body,
+      statusCode: 502,
+    });
+    const error = await connector.performApiUnifiedCompletionStream(params).catch((e) => e);
+    expect(error.message).toContain('status code 502');
+    expect(error.message).toContain('connection reset');
+    expect(getErrorSource(error)).toBe(TaskErrorSource.FRAMEWORK);
+  });
+
+  it('omits a dangling separator for an empty upstream body', async () => {
+    (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
+      body: Readable.from([]),
+      statusCode: 403,
+    });
+    const error = await connector.performApiUnifiedCompletionStream(params).catch((e) => e);
+    expect(error.message).toContain('status code 403');
+    expect(error.message).not.toMatch(/: $/);
+    expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+  });
+
+  it('redacts upstream credentials from the connector error', async () => {
+    (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
+      body: Readable.from([
+        '{"error":"Bearer abc123 sk-live-abcdef123456 api_key: secret123 authorization: token123"}',
+      ]),
+      statusCode: 401,
+    });
+    const error = await connector.performApiUnifiedCompletionStream(params).catch((e) => e);
+    expect(error.message).toContain('[redacted]');
+    for (const secret of ['abc123', 'sk-live-abcdef123456', 'secret123', 'token123']) {
+      expect(error.message).not.toContain(secret);
+    }
   });
 
   describe('performApiUnifiedCompletionAsyncIterator', () => {
     it('propagates the upstream body for >= 400 responses', async () => {
-      // @ts-ignore
-      mockEsClient.transport.request.mockResolvedValue({
+      (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
         body: Readable.from(['{"error":{"message":"context length exceeded"}}']),
         statusCode: 400,
       });
@@ -99,17 +140,20 @@ describe('InferenceConnector upstream error propagation', () => {
     });
 
     it('includes the underlying message for transport errors, not "Method not implemented"', async () => {
-      const transportError = Object.assign(new Error('connect ECONNREFUSED 10.0.0.5:30000'), {
-        name: 'ConnectionError',
+      const transportError = Object.assign(new Error(''), {
+        name: 'ResponseError',
+        statusCode: 502,
+        body: 'upstream boom',
       });
-      // @ts-ignore
-      mockEsClient.transport.request.mockRejectedValue(transportError);
+      (mockEsClient.transport.request as unknown as jest.Mock).mockRejectedValue(transportError);
 
       const error = await connector
         .performApiUnifiedCompletionAsyncIterator(params, connectorUsageCollector)
         .catch((e) => e);
 
-      expect(error.message).toContain('connect ECONNREFUSED 10.0.0.5:30000');
+      expect(error.message).toContain('upstream boom');
+      expect(error.message).toContain('502');
+      expect(error).toBe(transportError);
       expect(error.message).not.toContain('Method not implemented');
     });
 
@@ -119,8 +163,7 @@ describe('InferenceConnector upstream error propagation', () => {
         statusCode: 502,
         body: { error: { reason: 'upstream connect error or disconnect/reset before headers' } },
       });
-      // @ts-ignore
-      mockEsClient.transport.request.mockRejectedValue(responseError);
+      (mockEsClient.transport.request as unknown as jest.Mock).mockRejectedValue(responseError);
 
       const error = await connector
         .performApiUnifiedCompletionAsyncIterator(params, connectorUsageCollector)
@@ -132,11 +175,8 @@ describe('InferenceConnector upstream error propagation', () => {
     });
 
     it('still bubbles up user errors as-is', async () => {
-      // @ts-ignore
-      mockEsClient.transport.request.mockResolvedValue({
-        body: Readable.from([
-          '{"error":{"message":"Received a rate limit status code for request from inference entity id [x] status [429]. Error message: [You exceeded your current quota]"}}',
-        ]),
+      (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
+        body: Readable.from([`{"error":{"message":"status [429] quota ${'x'.repeat(2000)}"}}`]),
         statusCode: 400,
       });
 
@@ -145,55 +185,7 @@ describe('InferenceConnector upstream error propagation', () => {
         .catch((e) => e);
 
       expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message.length).toBeLessThanOrEqual(1000);
     });
-  });
-});
-
-describe('truncateUpstreamBody', () => {
-  it('returns short strings as-is and stringifies objects', () => {
-    expect(truncateUpstreamBody('short')).toBe('short');
-    expect(truncateUpstreamBody({ a: 1 })).toBe('{"a":1}');
-    expect(truncateUpstreamBody(undefined)).toBe('');
-  });
-
-  it('caps long bodies at 1000 chars', () => {
-    const result = truncateUpstreamBody('y'.repeat(3000));
-    expect(result).toContain('y'.repeat(1000));
-    expect(result).not.toContain('y'.repeat(1001));
-  });
-
-  it('does not throw on circular structures', () => {
-    const circular: Record<string, unknown> = {};
-    circular.self = circular;
-    expect(() => truncateUpstreamBody(circular)).not.toThrow();
-  });
-});
-
-describe('buildInferenceErrorMessage', () => {
-  it('handles AxiosError-shaped errors', () => {
-    const message = buildInferenceErrorMessage({
-      message: 'Request failed with status code 400',
-      response: { status: 400, data: { error: 'context length exceeded' } },
-    });
-    expect(message).toContain('Request failed with status code 400');
-    expect(message).toContain('context length exceeded');
-  });
-
-  it('handles ES ResponseError-shaped errors', () => {
-    const message = buildInferenceErrorMessage({
-      message: 'Response Error',
-      statusCode: 503,
-      body: 'model overloaded',
-    });
-    expect(message).toContain('Response Error');
-    expect(message).toContain('Status code: 503');
-    expect(message).toContain('model overloaded');
-  });
-
-  it('handles plain errors, strings and nullish values without throwing', () => {
-    expect(buildInferenceErrorMessage(new Error('boom'))).toBe('boom');
-    expect(buildInferenceErrorMessage('plain')).toBe('plain');
-    expect(buildInferenceErrorMessage(undefined)).toBe('Unknown error');
-    expect(buildInferenceErrorMessage({})).toBe('Unknown error');
   });
 });

@@ -7,7 +7,11 @@
 
 import { Readable } from 'node:stream';
 import { toArray, firstValueFrom } from 'rxjs';
-import { eventSourceStreamIntoObservable } from './helpers';
+import {
+  buildInferenceErrorMessage,
+  eventSourceStreamIntoObservable,
+  truncateUpstreamBody,
+} from './helpers';
 
 describe('eventSourceStreamIntoObservable', () => {
   it('emits SSE events from the stream', async () => {
@@ -93,5 +97,82 @@ describe('eventSourceStreamIntoObservable', () => {
 
     const error = await error$;
     expect(error).toEqual(expect.objectContaining({ message: 'boom' }));
+  });
+});
+
+describe('truncateUpstreamBody', () => {
+  it('returns short strings as-is and stringifies objects', () => {
+    expect(truncateUpstreamBody('short')).toBe('short');
+    expect(truncateUpstreamBody({ a: 1 })).toBe('{"a":1}');
+    expect(truncateUpstreamBody(undefined)).toBe('');
+  });
+
+  it('caps long bodies at 1000 chars', () => {
+    const result = truncateUpstreamBody('y'.repeat(3000));
+    expect(result).toHaveLength(1000);
+    expect(result).toContain('... [truncated]');
+  });
+
+  it('does not throw on circular structures', () => {
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+    expect(() => truncateUpstreamBody(circular)).not.toThrow();
+  });
+});
+
+describe('buildInferenceErrorMessage', () => {
+  it('handles AxiosError-shaped errors', () => {
+    const message = buildInferenceErrorMessage({
+      message: 'Request failed with status code 400',
+      response: { status: 400, data: { error: 'context length exceeded' } },
+    });
+    expect(message).toContain('Request failed with status code 400');
+    expect(message).toContain('context length exceeded');
+  });
+
+  it('handles ES ResponseError-shaped errors', () => {
+    const message = buildInferenceErrorMessage({
+      message: 'Response Error',
+      statusCode: 503,
+      body: 'model overloaded',
+    });
+    expect(message).toContain('Response Error');
+    expect(message).toContain('Status code: 503');
+    expect(message).toContain('model overloaded');
+  });
+
+  it('handles plain errors, strings and nullish values without throwing', () => {
+    expect(buildInferenceErrorMessage(new Error('boom'))).toBe('boom');
+    expect(buildInferenceErrorMessage('plain')).toBe('plain');
+    expect(buildInferenceErrorMessage(undefined)).toBe('Unknown error');
+    expect(buildInferenceErrorMessage({})).toBe('Unknown error');
+  });
+});
+
+describe('error message boundaries and redaction', () => {
+  it('keeps exactly 1000 chars and caps 1001 with the marker', () => {
+    expect(truncateUpstreamBody('x'.repeat(1000))).toBe('x'.repeat(1000));
+    const result = truncateUpstreamBody('x'.repeat(1001));
+    expect(result).toHaveLength(1000);
+    expect(result).toContain('... [truncated]');
+  });
+
+  it('caps long messages and thrown strings', () => {
+    expect(buildInferenceErrorMessage(new Error('m'.repeat(5000)))).toHaveLength(1000);
+    expect(buildInferenceErrorMessage('q'.repeat(5000))).toHaveLength(1000);
+  });
+
+  it('does not confuse token count with status code', () => {
+    expect(
+      buildInferenceErrorMessage({ message: 'requested 400 tokens', statusCode: 400, body: 'nope' })
+    ).toContain('Status code: 400');
+  });
+
+  it('redacts key-bearing bodies while keeping surrounding text', () => {
+    const result = buildInferenceErrorMessage({
+      response: { data: { error: 'Incorrect API key provided: sk-live-abcdef123456' } },
+    });
+    expect(result).toContain('Incorrect API key provided: [redacted]');
+    expect(result).not.toContain('sk-live-abcdef123456');
   });
 });
