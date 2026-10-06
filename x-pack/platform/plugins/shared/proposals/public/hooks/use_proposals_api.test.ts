@@ -657,7 +657,7 @@ describe('useSettleDeclinedProposal', () => {
 
     let settled: Promise<void> | undefined;
     act(() => {
-      settled = result.current.settle.mutateAsync({ id: 'p-1' });
+      settled = result.current.settle('p-1');
     });
 
     await waitFor(() => expect(result.current.isDecliningP1).toBe(true));

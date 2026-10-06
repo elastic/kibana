@@ -9,10 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  queryKeys as platformQueryKeys,
-  useSettleDeclinedProposal,
-} from '@kbn/proposals-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import type { DismissReason } from '@kbn/proposals-common';
 import type { CloseInvestigationModalRenderProps } from '@kbn/agentic-investigations-common';
 import { escalationQueryKeys } from '../../../escalations/query_keys';
@@ -21,6 +18,7 @@ import {
   useInvestigationClosePreview,
 } from '../../../investigations/hooks/use_investigations_api';
 import { statusSignal } from './status_signal';
+import { useSettleDeclinedProposals } from './use_settle_declined_proposals';
 import { getCloseErrorCode } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
 import * as i18n from '../close_confirmation/translations';
@@ -68,7 +66,6 @@ export const ConnectedCloseInvestigationModal: React.FC<
     enabled: Boolean(conversationId),
   });
   const setStatus = useSetInvestigationStatus();
-  const { mutateAsync: settleDeclined } = useSettleDeclinedProposal();
 
   const invalidateInvestigations = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
@@ -79,19 +76,7 @@ export const ConnectedCloseInvestigationModal: React.FC<
     queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
   }, [invalidateInvestigations, queryClient]);
 
-  // Closing releases each pending proposal's gate, but the decline itself is written by the gate
-  // workflow afterwards. Like a single decline: the rows stay put and read `Declining` until the
-  // decision lands, then leave the queue and Closed picks them up. Refreshing any earlier would
-  // read them as pending and restore the rows.
-  const settleDeclinedProposals = useCallback(
-    async (proposalIds: string[]) => {
-      await Promise.all(proposalIds.map((id) => settleDeclined({ id })));
-      await Promise.all(proposalIds.map((id) => dropDecidedProposal?.(id)));
-      invalidateAll();
-      statusSignal.bump();
-    },
-    [dropDecidedProposal, invalidateAll, settleDeclined]
-  );
+  const settleDeclinedProposals = useSettleDeclinedProposals(dropDecidedProposal);
 
   const handleConfirm = useCallback(
     async ({ dismissReason, rationale }: { dismissReason?: DismissReason; rationale?: string }) => {

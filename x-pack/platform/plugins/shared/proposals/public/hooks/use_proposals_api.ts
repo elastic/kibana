@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { UseInfiniteQueryResult } from '@kbn/react-query';
+import { useCallback } from 'react';
+import type { QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
+  MutationObserver,
   useInfiniteQuery,
   useIsMutating,
   useMutation,
@@ -281,14 +283,24 @@ export const useDismissProposal = () => {
  * pending proposal's gate server-side — until its decision lands. Shares the decline
  * `mutationKey`, so `useIsDecliningProposal` reads "Declining" for the row while it settles.
  * Resolves once the decision is recorded or the bounded wait gives up; it never rejects.
+ *
+ * Takes the `QueryClient` to track it on, since the surface that closes (the flyout's status
+ * toggle) can run in a different client than the one the cards read `Declining` from. Defaults
+ * to the one in context.
  */
 export const useSettleDeclinedProposal = () => {
   const { services } = useKibana();
+  const contextClient = useQueryClient();
 
-  return useMutation({
-    mutationKey: mutationKeys.proposals.decline,
-    mutationFn: ({ id }: { id: string }): Promise<void> => waitForDecision(services.http!, id),
-  });
+  return useCallback(
+    (id: string, queryClient: QueryClient = contextClient): Promise<void> =>
+      new MutationObserver(queryClient, {
+        mutationKey: mutationKeys.proposals.decline,
+        mutationFn: ({ id: proposalId }: { id: string }): Promise<void> =>
+          waitForDecision(services.http!, proposalId),
+      }).mutate({ id }),
+    [contextClient, services.http]
+  );
 };
 
 /**
