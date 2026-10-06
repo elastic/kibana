@@ -24,15 +24,13 @@ export interface PanelRemovals {
 /**
  * Which seed panels the result dropped, and which of those drops the mode
  * allows. Both modes may drop markdown: deleting a narrating text panel is as
- * good as rewriting it. Content mode may also drop a panel the seed declares
- * removable (its query cannot be satisfied, or it measures something
- * unrelated), and all but one copy of a duplicate, whichever copy stays.
+ * good as rewriting it. Content mode may also drop all but one copy of a
+ * duplicate, whichever copy stays.
  */
 export const findPanelRemovals = (
   seed: DashboardAttachmentData,
   result: DashboardAttachmentData,
-  mode: EnhanceMode,
-  removablePanelIds: readonly string[] = []
+  mode: EnhanceMode
 ): PanelRemovals => {
   const resultIds = new Set(getLeafPanels(result).map(({ id }) => id));
   const seedPanels = getLeafPanels(seed);
@@ -54,9 +52,7 @@ export const findPanelRemovals = (
       return true;
     }
     const queries = getPanelQueries(panel);
-    const duplicateSurvives =
-      queries.length > 0 && survivingQueryKeys.has(getPanelQueryKey(queries));
-    return !removablePanelIds.includes(panel.id) && !duplicateSurvives;
+    return queries.length === 0 || !survivingQueryKeys.has(getPanelQueryKey(queries));
   });
 
   return { removed: removed.map(({ id }) => id), disallowed: disallowed.map(({ id }) => id) };

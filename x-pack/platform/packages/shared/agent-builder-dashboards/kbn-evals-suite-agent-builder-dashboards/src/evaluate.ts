@@ -7,7 +7,7 @@
 
 import { evaluate as evalsBase } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import type { EvaluateDataset } from './evaluate_dataset';
+import type { EvaluateDataset } from './types';
 import { createEvaluateDataset } from './evaluate_dataset';
 
 export const evaluate = evalsBase.extend<

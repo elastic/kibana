@@ -7,7 +7,7 @@
 
 import { dashboard, metric, section, xy } from '../test_helpers';
 import { dashboardStructureEvaluator } from './dashboard_structure';
-import type { DashboardStructureGold } from '../evaluate_dataset';
+import type { DashboardStructureGold } from '../types';
 
 const grid = { x: 0, y: 0, w: 12, h: 5 };
 

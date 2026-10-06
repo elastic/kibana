@@ -9,7 +9,7 @@ import type {
   AttachmentPanel,
   DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
-import { getLeafPanels, getPanelKind } from '../dashboard_panels';
+import { getLeafPanels, getPanelKind, isChartPanel } from '../dashboard_panels';
 
 export interface RuleViolation<TRuleId extends string = string> {
   rule: TRuleId;
@@ -33,8 +33,12 @@ export type RuleScope = 'appearance' | 'content';
  */
 export type RuleStrictness = 'must' | 'should';
 
-/** Panel kinds a rule inspects: every panel, a list of kinds, or none for dashboard-level rules. */
-export type RuleTarget = 'all' | 'dashboard' | readonly string[];
+/**
+ * Panels a rule inspects, which are also the panels it is scored over: every
+ * panel, every chart (all but markdown), a list of kinds, or none for
+ * dashboard-level rules.
+ */
+export type RuleTarget = 'all' | 'charts' | 'dashboard' | readonly string[];
 
 export interface DashboardRule<TRuleId extends string = string> {
   scope: RuleScope;
@@ -43,8 +47,15 @@ export interface DashboardRule<TRuleId extends string = string> {
   check: (dashboard: DashboardAttachmentData) => Array<RuleViolation<TRuleId>>;
 }
 
-export const targetsPanel = (appliesTo: RuleTarget, panel: AttachmentPanel): boolean =>
-  appliesTo === 'all' || (appliesTo !== 'dashboard' && appliesTo.includes(getPanelKind(panel)));
+export const targetsPanel = (appliesTo: RuleTarget, panel: AttachmentPanel): boolean => {
+  if (appliesTo === 'all') {
+    return true;
+  }
+  if (appliesTo === 'charts') {
+    return isChartPanel(panel);
+  }
+  return appliesTo !== 'dashboard' && appliesTo.includes(getPanelKind(panel));
+};
 
 /** Builds a rule that inspects each targeted panel on its own. */
 export const panelRule = <TRuleId extends string>(

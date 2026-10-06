@@ -5,14 +5,11 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { EvaluationResult } from '@kbn/evals';
 import { getLeafPanels, getPanelQueries, normalizeQuery } from '../dashboard_panels';
-import type {
-  DashboardAgentEvaluator,
-  DashboardAgentTaskOutput,
-  EnhanceGold,
-} from '../evaluate_dataset';
+import type { DashboardAgentEvaluator, DashboardAgentTaskOutput, EnhanceGold } from '../types';
 import { skippedResult } from '../evaluator_utils';
 import {
   GENERATE_DASHBOARD_TOOL_ID,
@@ -140,9 +137,9 @@ const checkInvariants = (
     before.time_range?.from === after.time_range?.from &&
     before.time_range?.to === after.time_range?.to;
   if (mode === 'content') {
-    // Content mode may drop markdown, one copy of a duplicate and the panels
-    // the seed declares removable, and nothing else: deleting a chart must not
-    // count as fixing it, and adding a new one does not make up for it.
+    // Content mode may drop markdown and one copy of a duplicate, and nothing
+    // else: deleting a chart must not count as fixing it, and adding a new one
+    // does not make up for it.
     return [
       ['removed panels', disallowed.length === 0],
       ['time range', timeRangeKept],
@@ -161,19 +158,18 @@ const checkInvariants = (
         ([id, queries]) => !afterQueries.has(id) || sameList(queries, afterQueries.get(id) ?? [])
       ),
     ],
-    ['controls', (before.pinned_panels ?? []).length === (after.pinned_panels ?? []).length],
-    ['filters', (before.filters ?? []).length === (after.filters ?? []).length],
+    ['controls', isEqual(before.pinned_panels ?? [], after.pinned_panels ?? [])],
+    ['filters', isEqual(before.filters ?? [], after.filters ?? [])],
     ['time range', timeRangeKept],
   ];
 };
 
 /**
  * Appearance mode keeps every panel id except markdown, every kept panel's
- * ES|QL, the controls, filters, and time range; content mode keeps the time
- * range and every panel except markdown, one copy of a duplicate and the ones
- * the seed declares removable. Any broken invariant scores 0: changing the
- * data a user did not ask to change is a data-integrity failure, not a partial
- * success.
+ * ES|QL, the controls and filters as they were, and the time range; content
+ * mode keeps the time range and every panel except markdown and one copy of a
+ * duplicate. Any broken invariant scores 0: changing the data a user did not
+ * ask to change is a data-integrity failure, not a partial success.
  */
 export const enhanceModeComplianceEvaluator: DashboardAgentEvaluator = {
   name: ENHANCE_MODE_COMPLIANCE_EVALUATOR_NAME,
@@ -193,7 +189,7 @@ export const enhanceModeComplianceEvaluator: DashboardAgentEvaluator = {
       return noWrite;
     }
 
-    const removals = findPanelRemovals(before, dashboard, enhance.mode, enhance.removablePanelIds);
+    const removals = findPanelRemovals(before, dashboard, enhance.mode);
     const broken = checkInvariants(enhance, before, dashboard, removals)
       .filter(([, held]) => !held)
       .map(([name]) => name);
@@ -253,9 +249,7 @@ export const enhanceDefectResolutionEvaluator: DashboardAgentEvaluator = {
 
     // A panel the agent deleted without the rules allowing it keeps its seeded
     // defects: deleting a chart is not fixing it.
-    const deleted = new Set(
-      findPanelRemovals(before, dashboard, enhance.mode, enhance.removablePanelIds).disallowed
-    );
+    const deleted = new Set(findPanelRemovals(before, dashboard, enhance.mode).disallowed);
     const seedViolations = [
       ...findViolations(before, ruleDefects),
       ...findRemainingSeedDefects(seedDefects, before, before),
@@ -339,7 +333,7 @@ export const enhanceNoRegressionEvaluator: DashboardAgentEvaluator = {
       SCORED_RULES.filter((rule) => getRuleTarget(rule) === 'dashboard').length;
 
     return {
-      score: Math.max(0, 1 - (flaggedPanels.size + brokenDashboardRules.size) / units),
+      score: 1 - (flaggedPanels.size + brokenDashboardRules.size) / units,
       label: introduced.length === 0 ? 'no-regression' : 'regressed',
       explanation:
         introduced.length === 0

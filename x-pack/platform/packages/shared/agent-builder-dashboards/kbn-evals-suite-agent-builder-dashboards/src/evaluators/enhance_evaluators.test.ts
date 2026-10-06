@@ -11,7 +11,7 @@ import type {
   DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
-import type { DashboardAgentTaskOutput, EnhanceGold } from '../evaluate_dataset';
+import type { DashboardAgentTaskOutput, EnhanceGold } from '../types';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../extract_dashboard';
 import { MESSY_LOGS_DASHBOARD } from '../fixtures/messy_logs_dashboard';
 import {

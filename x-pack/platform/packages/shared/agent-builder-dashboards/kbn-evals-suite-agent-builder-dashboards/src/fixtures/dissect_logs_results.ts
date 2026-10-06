@@ -14,14 +14,16 @@ import { SAMPLE_LOGS_INDEX } from './sample_logs_fields';
  */
 export const ESQL_QUERY_RESULTS_ATTACHMENT_TYPE = 'esql.query_results';
 
-/** Payload Discover's `buildEsqlResultsAttachment` sends, validated server-side by the same schema. */
+/**
+ * Payload Discover's `buildEsqlResultsAttachment` sends, minus the optional
+ * `playbookContribution` no example uses.
+ */
 export interface EsqlQueryResultsData {
   query: string;
   columns: Array<{ name: string; type: string }>;
   sampleRows: Array<Record<string, unknown>>;
   totalHits: number;
   timeRange?: { from: string; to: string };
-  [key: string]: unknown;
 }
 
 /**

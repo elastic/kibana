@@ -7,7 +7,7 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { getLeafPanels } from '../dashboard_panels';
-import type { DashboardAgentEvaluator } from '../evaluate_dataset';
+import type { DashboardAgentEvaluator } from '../types';
 import { noDashboardResult, skippedResult } from '../evaluator_utils';
 import {
   COLOR_FORMAT_RULES,

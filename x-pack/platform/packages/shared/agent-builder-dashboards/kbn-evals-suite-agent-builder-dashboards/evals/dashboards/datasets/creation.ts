@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DashboardDatasetExample } from '../../../src/evaluate_dataset';
+import type { DashboardDatasetExample } from '../../../src/types';
 import { dashboardExample } from './factories';
 
 /**

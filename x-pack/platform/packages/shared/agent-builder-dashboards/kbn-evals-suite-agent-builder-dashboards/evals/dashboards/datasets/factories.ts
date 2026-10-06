@@ -12,7 +12,7 @@ import type {
   DashboardRoute,
   DashboardStructureGold,
   EnhanceMode,
-} from '../../../src/evaluate_dataset';
+} from '../../../src/types';
 import { getDefectScope } from '../../../src/evaluators/seed_defects';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../../../src/extract_dashboard';
 import { DISSECT_LOGS_RESULTS } from '../../../src/fixtures/dissect_logs_results';

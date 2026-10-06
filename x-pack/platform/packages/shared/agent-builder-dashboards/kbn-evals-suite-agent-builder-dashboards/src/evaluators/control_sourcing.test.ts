@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DashboardAgentTaskOutput, DashboardDatasetExample } from '../evaluate_dataset';
+import type { DashboardAgentTaskOutput, DashboardDatasetExample } from '../types';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../extract_dashboard';
 import { control, dashboard } from '../test_helpers';
 import { dashboardControlSourcingEvaluator } from './control_sourcing';

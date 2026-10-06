@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DashboardAgentEvaluator, DashboardRoute } from '../evaluate_dataset';
+import type { DashboardAgentEvaluator, DashboardRoute } from '../types';
 import { skippedResult } from '../evaluator_utils';
 import {
   dashboardSkillActivatedEvaluator,

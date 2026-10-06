@@ -118,8 +118,9 @@ const overlaps = (a: AttachmentPanel, b: AttachmentPanel): boolean =>
   b.grid.y < a.grid.y + a.grid.h;
 
 /**
- * A rule that checks the dashboard as a whole. With `appliesTo: 'all'` its
- * violations name the panels involved, which are scored like panel rules.
+ * A rule that checks the dashboard as a whole. With a panel `appliesTo` its
+ * violations name the panels involved, which are scored like panel rules, so
+ * `appliesTo` must match the panels `check` inspects.
  */
 const dashboardRule = (
   scope: RuleScope,
@@ -214,7 +215,7 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
               },
             ];
       }),
-    { appliesTo: 'all' }
+    { appliesTo: 'charts' }
   ),
   placeholder_title: dashboardRule('appearance', ({ title }) =>
     PLACEHOLDER_TITLES.has(withoutCopyNumber(title))
@@ -301,32 +302,32 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
   ),
 };
 
-export const LAYOUT_RULES: DashboardRuleId[] = [
+export const LAYOUT_RULES: readonly DashboardRuleId[] = [
   'out_of_bounds',
   'overlapping_panels',
   'full_width_kpi',
   'size_by_kind',
   'width_divides_48',
 ];
-export const COMPOSITION_RULES: DashboardRuleId[] = ['summary_not_first', 'no_sections'];
-export const CONTROL_RULES: DashboardRuleId[] = [
+export const COMPOSITION_RULES: readonly DashboardRuleId[] = ['summary_not_first', 'no_sections'];
+export const CONTROL_RULES: readonly DashboardRuleId[] = [
   'too_many_controls',
   'multiple_time_sliders',
   'high_cardinality_control',
 ];
-export const TITLE_RULES: DashboardRuleId[] = [
+export const TITLE_RULES: readonly DashboardRuleId[] = [
   'placeholder_title',
   'summary_panel_titled',
   'chart_panel_untitled',
   'xy_axis_title',
 ];
-export const STYLING_RULES: DashboardRuleId[] = [
+export const STYLING_RULES: readonly DashboardRuleId[] = [
   'area_solid_fill',
   'xy_legend',
   'pie_legend_set',
   'metric_colors_background',
 ];
-export const COLOR_FORMAT_RULES: DashboardRuleId[] = [
+export const COLOR_FORMAT_RULES: readonly DashboardRuleId[] = [
   'legacy_palette',
   'static_color_override',
   'percent_format_on_0_100',
@@ -342,7 +343,7 @@ export const COLOR_FORMAT_RULES: DashboardRuleId[] = [
  * purpose: controls are optional, and the seeded enhance fixture declares it
  * as a content defect instead.
  */
-const SCORED_RULE_CANDIDATES: DashboardRuleId[] = [
+const SCORED_RULE_CANDIDATES: readonly DashboardRuleId[] = [
   ...LAYOUT_RULES,
   ...COMPOSITION_RULES,
   'duplicate_measure',
@@ -352,7 +353,7 @@ const SCORED_RULE_CANDIDATES: DashboardRuleId[] = [
   ...CONTROL_RULES,
 ];
 
-export const SCORED_RULES: DashboardRuleId[] = SCORED_RULE_CANDIDATES.filter(
+export const SCORED_RULES: readonly DashboardRuleId[] = SCORED_RULE_CANDIDATES.filter(
   (rule) => DASHBOARD_RULES[rule].strictness === 'must'
 );
 

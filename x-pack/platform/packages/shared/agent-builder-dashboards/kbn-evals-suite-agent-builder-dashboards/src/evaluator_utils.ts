@@ -10,7 +10,7 @@ import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-comm
 import type { ToolingLog } from '@kbn/tooling-log';
 import { formatDashboard } from './dashboard_panels';
 
-/** Shared result for evaluators with nothing to check; `null` keeps them out of averages. */
+/** Shared result for a missing dashboard; it scores 0, so the run counts against the average. */
 export const noDashboardResult: EvaluationResult = {
   score: 0,
   label: 'no-dashboard',

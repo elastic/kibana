@@ -11,7 +11,7 @@ import {
   getControls,
   withoutKeyword,
 } from '../dashboard_panels';
-import type { ControlsGold, DashboardAgentEvaluator } from '../evaluate_dataset';
+import type { ControlsGold, DashboardAgentEvaluator } from '../types';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 import {
   getAddControlsFailures,
@@ -36,14 +36,17 @@ const isMapped = (field: string, mappedFields: readonly string[]): boolean =>
 
 const sameField = (a: string, b: string): boolean => withoutKeyword(a) === withoutKeyword(b);
 
-const isDataControl = ({ type, field }: AttemptedControl): boolean =>
-  type !== TIME_SLIDER_CONTROL && field !== undefined;
+type DataControl = AttemptedControl & { field: string };
+
+const isDataControl = (control: AttemptedControl): control is DataControl =>
+  control.type !== TIME_SLIDER_CONTROL && control.field !== undefined;
 
 const unique = (values: string[]): string[] => [...new Set(values)];
 
-/** Controls a failure entry covers: the server groups same-message failures as "a, b, c". */
-// The server groups failures that share an error as "a, b"; a field retried
-// and rejected again is still one failed control.
+/**
+ * Controls the failures cover: the server groups same-message failures as
+ * "a, b, c", and a field retried and rejected again is still one failed control.
+ */
 const countFailedControls = (failures: OperationFailure[]): number =>
   unique(
     failures.flatMap(({ identifier }) =>
@@ -58,7 +61,7 @@ const countFailedControls = (failures: OperationFailure[]): number =>
  * that succeeded alongside the failure fill other requests, so they do not count.
  */
 const countReplacements = (
-  attemptedData: AttemptedControl[],
+  attemptedData: DataControl[],
   failures: OperationFailure[],
   storedFields: string[]
 ): number => {
@@ -68,10 +71,10 @@ const countReplacements = (
   const firstFailedCall = Math.min(...failures.map(({ call }) => call));
   const fieldsUpToFailure = attemptedData
     .filter(({ call }) => call <= firstFailedCall)
-    .map(({ field }) => field ?? '');
+    .map(({ field }) => field);
   const replacements = attemptedData
     .filter(({ userRequested, call }) => userRequested && call > firstFailedCall)
-    .map(({ field }) => field ?? '')
+    .map(({ field }) => field)
     .filter(
       (field) =>
         !fieldsUpToFailure.some((earlier) => sameField(earlier, field)) &&
@@ -117,7 +120,7 @@ const checkSourcing = (
   });
 
   const attemptedData = attempted.filter(isDataControl);
-  const attemptedFields = unique(attemptedData.map(({ field }) => field ?? ''));
+  const attemptedFields = unique(attemptedData.map(({ field }) => field));
   const unmappedAttempted = attemptedFields.filter((field) => !isMapped(field, mappedFields));
   if (requested && attemptedData.length === 0) {
     checks.push({
@@ -193,7 +196,9 @@ const checkSourcing = (
   const failedCount = countFailedControls(failures);
   const satisfiedCount = countReplacements(attemptedData, failures, storedFields);
   if (requested && failedCount > satisfiedCount) {
-    const acknowledged = MENTIONS_CONTROL.test(message) && MENTIONS_LEFT_OUT.test(message);
+    const acknowledged = sentences.some(
+      (sentence) => MENTIONS_CONTROL.test(sentence) && MENTIONS_LEFT_OUT.test(sentence)
+    );
     checks.push({
       assertion: 'droppedFiltersAcknowledged',
       passed: acknowledged,

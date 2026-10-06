@@ -7,7 +7,7 @@
 
 import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { getLeafPanels, getPanelKind } from '../dashboard_panels';
-import type { DashboardAgentEvaluator, DashboardStructureGold } from '../evaluate_dataset';
+import type { DashboardAgentEvaluator, DashboardStructureGold } from '../types';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 
 export const DASHBOARD_STRUCTURE_EVALUATOR_NAME = 'Dashboard Structure';

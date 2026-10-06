@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DashboardAgentTaskOutput } from './evaluate_dataset';
+import type { DashboardAgentTaskOutput } from './types';
 import {
   dashboardSkillActivatedEvaluator,
   dashboardSkillNotActivatedEvaluator,

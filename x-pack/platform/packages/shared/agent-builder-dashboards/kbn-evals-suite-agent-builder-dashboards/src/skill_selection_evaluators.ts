@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationResult, Evaluator } from '@kbn/evals';
-import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './evaluate_dataset';
+import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './types';
 
 const DASHBOARD_GENERATE_TOOL_ID = 'platform.dashboard.generate_dashboard';
 

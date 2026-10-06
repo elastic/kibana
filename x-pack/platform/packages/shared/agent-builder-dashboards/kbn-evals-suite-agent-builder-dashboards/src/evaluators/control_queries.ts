@@ -7,7 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { getControlFields, getControls, isRecord } from '../dashboard_panels';
-import type { DashboardAgentEvaluator } from '../evaluate_dataset';
+import type { DashboardAgentEvaluator } from '../types';
 import { noDashboardResult, skippedResult } from '../evaluator_utils';
 
 export const DASHBOARD_CONTROL_QUERIES_EVALUATOR_NAME = 'Dashboard Control Queries';
