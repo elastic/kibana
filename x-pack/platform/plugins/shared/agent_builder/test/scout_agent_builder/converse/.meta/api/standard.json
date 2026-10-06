@@ -1,5 +1,5 @@
 {
-  "sha1": "dce3d2a08b3467e9f34da62232865f6cc09a6985",
+  "sha1": "b3afbc0ae73378a7664cbec9dc90f444bb11905e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -304,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 183,
-        "column": 30
+        "line": 182,
+        "column": 22
       }
     },
     {
@@ -320,7 +320,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 240,
+        "line": 239,
         "column": 16
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 254,
+        "line": 253,
         "column": 11
       }
     },
@@ -352,7 +352,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 274,
+        "line": 273,
         "column": 7
       }
     },

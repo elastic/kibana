@@ -33,6 +33,7 @@ interface ConversationCardCompactProps {
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
   chatHref?: string;
+  onCopyLink: BaseActionsProps['onCopyLink'];
 }
 
 /**
@@ -50,6 +51,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     onClickCard,
     onOpenChat,
     chatHref,
+    onCopyLink,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -125,6 +127,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
               onClickAction={onClickAction}
               onOpenChat={() => onOpenChat(investigation.id)}
               chatHref={chatHref}
+              onCopyLink={onCopyLink}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
