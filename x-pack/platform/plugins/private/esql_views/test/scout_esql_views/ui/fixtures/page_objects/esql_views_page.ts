@@ -21,6 +21,10 @@ export class EsqlViewsPage {
   readonly saveButton: Locator;
   readonly deleteModal: Locator;
   readonly noSearchResults: Locator;
+  readonly managementNavigationLink: Locator;
+  readonly managementLandingHeading: Locator;
+  readonly previewResultsAccordion: Locator;
+  readonly previewGrid: Locator;
   readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
@@ -34,12 +38,28 @@ export class EsqlViewsPage {
     this.saveButton = page.testSubj.locator('esqlViewSaveButton');
     this.deleteModal = page.testSubj.locator('esqlViewsDeleteConfirmModal');
     this.noSearchResults = page.testSubj.locator('esqlViewsNoSearchResults');
+    this.managementNavigationLink = page.testSubj.locator('esql_views');
+    this.managementLandingHeading = page.getByRole('heading', {
+      name: /Welcome to Stack Management/,
+    });
+    this.previewResultsAccordion = page.testSubj.locator('esqlViewPreviewResultsAccordion');
+    this.previewGrid = page.testSubj.locator('discoverDocTable');
     this.codeEditor = new KibanaCodeEditorWrapper(page);
+  }
+
+  async gotoManagement(): Promise<void> {
+    await this.page.gotoApp('management');
+    await this.page.testSubj.locator('mgtSideBarNav').waitFor({ state: 'visible' });
   }
 
   async goto(): Promise<void> {
     await this.page.gotoApp('management/data/esql_views');
     await this.table.waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  async gotoExpectUnavailable(): Promise<void> {
+    await this.page.gotoApp('management/data/esql_views');
+    await this.managementLandingHeading.waitFor({ state: 'visible' });
   }
 
   getViewRow(name: string): Locator {
@@ -91,16 +111,28 @@ export class EsqlViewsPage {
     await this.saveButton.click();
   }
 
+  async runPreview(): Promise<void> {
+    await this.page.testSubj.click('ESQLEditor-run-query-button');
+    await this.previewResultsAccordion
+      .getByRole('button', { expanded: true })
+      .waitFor({ state: 'visible' });
+    await this.previewGrid
+      .and(this.page.locator('[data-table-loaded="true"]'))
+      .waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  async openRowActions(name: string): Promise<void> {
+    await this.getViewRow(name).getByTestId('esqlViewsActionsButton').click();
+  }
+
   async openEditFlyout(name: string): Promise<void> {
-    const row = this.getViewRow(name);
-    await row.getByTestId('esqlViewsActionsButton').click();
+    await this.openRowActions(name);
     await this.page.testSubj.click('esqlViewsEditButton');
     await this.formFlyout.waitFor();
   }
 
   async requestSingleDelete(name: string): Promise<void> {
-    const row = this.getViewRow(name);
-    await row.getByTestId('esqlViewsActionsButton').click();
+    await this.openRowActions(name);
     await this.page.testSubj.click('esqlViewsDeleteButton');
     await this.deleteModal.waitFor();
   }
