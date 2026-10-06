@@ -49,7 +49,12 @@ import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { ServiceAccountsServiceStart } from '../service_accounts';
 import type { Session } from '../session_management';
-import type { UiamServicePublic } from '../uiam';
+import {
+  getProtectedResource,
+  getProtectedResourceMetadataUrl,
+  getRequestSpacePrefix,
+  type UiamServicePublic,
+} from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
@@ -237,10 +242,11 @@ export class AuthenticationService {
         config.mcp?.oauth2 &&
         request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)
       ) {
-        const baseUrl =
-          http.basePath.publicBaseUrl ??
-          `${request.url.protocol}//${request.url.host}${http.basePath.serverBasePath}`;
-        const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource`;
+        const resource = getProtectedResource(
+          config.mcp.oauth2.metadata.resource,
+          getRequestSpacePrefix(http.basePath, request)
+        );
+        const resourceMetadataUrl = getProtectedResourceMetadataUrl(resource);
 
         return toolkit.render({
           body: JSON.stringify({
