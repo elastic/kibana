@@ -22,6 +22,11 @@ describe('parsePath', () => {
     expect(parsePath('a["b"].c')).toEqual(['a', 'b', 'c']);
   });
 
+  it('keeps a quoted bracket key that contains a dot as one segment', () => {
+    expect(parsePath('a["b.c"].d')).toEqual(['a', 'b.c', 'd']);
+    expect(parsePath("a['b.c']")).toEqual(['a', 'b.c']);
+  });
+
   it('normalizes numeric bracket keys', () => {
     expect(parsePath('a[0].b')).toEqual(['a', '0', 'b']);
   });
@@ -297,6 +302,16 @@ describe('getSchemaAtPath: Liquid built-in properties', () => {
     ]);
     expectZodSchemaEqual(getSchemaAtPath(union, 'size.unit').schema as z.ZodType, z.string());
     expectZodSchemaEqual(getSchemaAtPath(union, 'size').schema as z.ZodType, z.number());
+  });
+
+  it('resolves a quoted key that contains a dot, in an object and through a union', () => {
+    const withDottedKey = z.object({ a: z.object({ 'b.c': z.object({ d: z.string() }) }) });
+    const union = z.union([z.object({ x: z.string() }), withDottedKey]);
+    expectZodSchemaEqual(
+      getSchemaAtPath(withDottedKey, 'a["b.c"].d').schema as z.ZodType,
+      z.string()
+    );
+    expectZodSchemaEqual(getSchemaAtPath(union, 'a["b.c"].d').schema as z.ZodType, z.string());
   });
 
   it('prefers an own size key over the built-in size', () => {

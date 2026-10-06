@@ -38,19 +38,29 @@ const unquoteBracketKey = (inner: string): string | null => {
   return inner.slice(1, -1);
 };
 
+// Stands in for a bracket key while splitting on dots, so a quoted key like `["b.c"]` stays whole
+const BRACKET_KEY_PLACEHOLDER = '\u0000';
+
+const getBracketKey = (inner: string): string => {
+  const quoted = unquoteBracketKey(inner);
+  if (quoted !== null) {
+    return quoted;
+  }
+  return /^-?\d+$/.test(inner) ? inner : LIQUID_DYNAMIC_KEY_SEGMENT;
+};
+
 export function parsePath(path: string): string[] | null {
+  const bracketKeys: string[] = [];
   const normalized = path.replace(/\[([^\]]+)\]/g, (_, raw: string) => {
-    const inner = raw.trim();
-    const quoted = unquoteBracketKey(inner);
-    if (quoted !== null) {
-      return `.${quoted}`;
-    }
-    if (/^-?\d+$/.test(inner)) {
-      return `.${inner}`;
-    }
-    return `.${LIQUID_DYNAMIC_KEY_SEGMENT}`;
+    bracketKeys.push(getBracketKey(raw.trim()));
+    return `.${BRACKET_KEY_PLACEHOLDER}`;
   });
-  const segments = normalized.split('.');
+  let bracketKeyIndex = 0;
+  const segments = normalized
+    .split('.')
+    .map((segment) =>
+      segment === BRACKET_KEY_PLACEHOLDER ? bracketKeys[bracketKeyIndex++] : segment
+    );
   return segments.some((segment) => segment === '') ? null : segments;
 }
 
@@ -72,12 +82,20 @@ export function getSchemaAtPath(
   path: string,
   { partial = false }: { partial?: boolean } = {}
 ): GetSchemaAtPathResult {
-  try {
-    const segments = parsePath(path);
-    if (!segments) {
-      return { schema: null, scopedToPath: null };
-    }
+  const segments = parsePath(path);
+  if (!segments) {
+    return { schema: null, scopedToPath: null };
+  }
+  return getSchemaAtSegments(schema, segments, partial);
+}
 
+// Recurses on parsed segments: joining them back into a path would split quoted keys again
+function getSchemaAtSegments(
+  schema: z.ZodType,
+  segments: string[],
+  partial = false
+): GetSchemaAtPathResult {
+  try {
     let current: z.ZodType = schema;
 
     for (const [index, segment] of segments.entries()) {
@@ -125,15 +143,17 @@ export function getSchemaAtPath(
         const branches = current.options;
         // Prefer a branch that resolves the whole remaining path, so a built-in property
         // (e.g. `size`) in one branch does not hide a real key in another
-        const remainingPath = segments.slice(index).join('.');
         for (const branch of branches) {
-          const { schema: resolved } = getSchemaAtPath(branch as z.ZodType, remainingPath);
+          const { schema: resolved } = getSchemaAtSegments(
+            branch as z.ZodType,
+            segments.slice(index)
+          );
           if (resolved) {
             return { schema: resolved, scopedToPath: segments.join('.') };
           }
         }
         const validBranch = branches.find(
-          (branch) => getSchemaAtPath(branch as z.ZodType, segment).schema !== null
+          (branch) => getSchemaAtSegments(branch as z.ZodType, [segment]).schema !== null
         );
         if (!validBranch) {
           return partial
@@ -141,7 +161,7 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         // We found a valid branch, now we need to traverse into it with the current segment
-        const branchResult = getSchemaAtPath(validBranch as z.ZodType, segment);
+        const branchResult = getSchemaAtSegments(validBranch as z.ZodType, [segment]);
         if (!branchResult.schema) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -151,7 +171,7 @@ export function getSchemaAtPath(
       } else if (current instanceof z.ZodIntersection) {
         const branches = [current.def.left as z.ZodType, current.def.right as z.ZodType];
         const validBranch = branches.find(
-          (branch) => getSchemaAtPath(branch as z.ZodType, segment).schema !== null
+          (branch) => getSchemaAtSegments(branch as z.ZodType, [segment]).schema !== null
         );
         if (!validBranch) {
           return partial
@@ -159,7 +179,7 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         // We found a valid branch, now we need to traverse into it with the current segment
-        const branchResult = getSchemaAtPath(validBranch as z.ZodType, segment);
+        const branchResult = getSchemaAtSegments(validBranch as z.ZodType, [segment]);
         if (!branchResult.schema) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }

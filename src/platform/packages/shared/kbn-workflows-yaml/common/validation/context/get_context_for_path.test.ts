@@ -593,6 +593,28 @@ describe('getContextSchemaForPath', () => {
       expect(getSchemaAtPath(context, 'variables.value').schema).toBeInstanceOf(z.ZodNumber);
     });
 
+    it('resolves a ${{ }} reference through a quoted key that contains a dot', () => {
+      const dottedKeyDefinition = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        consts: { obj: { 'b.c': { d: 'hi' } } },
+        steps: [
+          { name: 'set_vars', type: 'data.set', with: { nested: '${{ consts.obj["b.c"] }}' } },
+          { name: 'use', type: 'console', with: { message: '{{ variables.nested.d }}' } },
+        ],
+      } as unknown as WorkflowYaml;
+      const context = getContextSchemaForPath(
+        emptyRegistry,
+        dottedKeyDefinition,
+        WorkflowGraph.fromWorkflowDefinition(dottedKeyDefinition),
+        ['steps', 1, 'with', 'message']
+      );
+
+      expect(getSchemaAtPath(context, 'variables.nested.d').schema).toBeInstanceOf(z.ZodLiteral);
+    });
+
     it('keeps {{ }} templates as strings and literals as their own type', () => {
       expect(getVariablesSchemaAt('rendered')).toBeInstanceOf(z.ZodString);
       expect(getVariablesSchemaAt('literal')).toBeInstanceOf(z.ZodNumber);
