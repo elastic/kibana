@@ -20,8 +20,8 @@ import {
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -155,14 +155,14 @@ describe('ObservabilityAlertingApp', () => {
     mockTriggersActionsUi.getClassicRulesPage.mockClear();
   });
 
-  it('redirects / to inbox', () => {
+  it('redirects / to alerts', () => {
     const { history } = renderAt('/');
 
-    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_INBOX_PATH);
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
   });
 
-  it('renders EpisodesPage at /inbox with observability host', async () => {
-    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_INBOX_PATH);
+  it('renders EpisodesPage at /alerts with observability host', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
     await waitFor(() => {
       expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
@@ -292,15 +292,15 @@ describe('ObservabilityAlertingApp', () => {
     });
   });
 
-  it('redirects unknown paths to inbox', () => {
+  it('redirects unknown paths to alerts', () => {
     const { history } = renderAt('/unknown');
 
-    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_INBOX_PATH);
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
   });
 
   it.each([
     {
-      path: OBSERVABILITY_ALERTING_INBOX_PATH,
+      path: OBSERVABILITY_ALERTING_ALERTS_PATH,
       testId: `episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
       hasPrivilegeCheck: 'true',
     },
@@ -338,7 +338,7 @@ describe('ObservabilityAlertingApp', () => {
 
   it('passes manageRulesHref pointing to /rules/v2 for a v2-only user', async () => {
     const { getByTestId, coreStart } = renderAt(
-      OBSERVABILITY_ALERTING_INBOX_PATH,
+      OBSERVABILITY_ALERTING_ALERTS_PATH,
       v2RulesCapabilities
     );
     const prepend = coreStart.http.basePath.prepend;
@@ -354,7 +354,7 @@ describe('ObservabilityAlertingApp', () => {
 
   it('passes manageRulesHref pointing to /rules/v2 for a mixed v1+v2 user', async () => {
     const { getByTestId, coreStart } = renderAt(
-      OBSERVABILITY_ALERTING_INBOX_PATH,
+      OBSERVABILITY_ALERTING_ALERTS_PATH,
       mixedRulesCapabilities
     );
     const prepend = coreStart.http.basePath.prepend;
@@ -370,7 +370,7 @@ describe('ObservabilityAlertingApp', () => {
 
   it('passes manageRulesHref pointing to /rules/v1 for a v1-only user', async () => {
     const { getByTestId, coreStart } = renderAt(
-      OBSERVABILITY_ALERTING_INBOX_PATH,
+      OBSERVABILITY_ALERTING_ALERTS_PATH,
       v1RulesCapabilities
     );
     const prepend = coreStart.http.basePath.prepend;

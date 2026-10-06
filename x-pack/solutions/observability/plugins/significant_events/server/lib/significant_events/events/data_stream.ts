@@ -17,9 +17,10 @@ export const eventsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
+    // Kept while the legacy read path is selectable. EventClient uses this as the fallback
+    // stable identifier for documents written before event_id was introduced.
     event_uuid: mappings.keyword(),
     event_id: mappings.keyword(),
-    previous_event_uuid: mappings.keyword(),
     stream_names: mappings.keyword(),
     status: mappings.keyword(),
     severity: mappings.keyword(),
@@ -62,7 +63,7 @@ export type { SignificantEvent };
 
 /**
  * Stored form of a SignificantEvent document:
- * - `severity` is encoded as a sortable prefixed keyword (e.g. `"60-high"`)
+ * - `severity` uses the canonical alerting-v2 severity vocabulary
  * - `stream_names` is derived from `signals[].stream_name` when not provided
  */
 export const storedEventSchema = significantEventSchema.transform((doc) => ({

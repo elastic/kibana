@@ -11,9 +11,9 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import { createAgentNotFoundError } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import type { AgentsServiceStart } from '../../agents';
 import { createModelProvider } from '../runner/model_provider';
+import { resolveExecutionConnectorId } from './resolve_execution_connector_id';
 
 export const resolveServices = async ({
   agentId,
@@ -34,14 +34,11 @@ export const resolveServices = async ({
   agentService: AgentsServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }) => {
-  const selectedConnectorId =
-    connectorId ??
-    (
-      await searchInferenceEndpoints.endpoints.getForFeature(
-        AGENT_BUILDER_INFERENCE_FEATURE_ID,
-        request
-      )
-    ).endpoints[0]?.connectorId;
+  const selectedConnectorId = await resolveExecutionConnectorId({
+    connectorId,
+    request,
+    searchInferenceEndpoints,
+  });
 
   if (!selectedConnectorId) {
     throw new Error('No connector available for chat execution');

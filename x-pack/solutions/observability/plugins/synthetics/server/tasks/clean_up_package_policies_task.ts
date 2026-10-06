@@ -50,7 +50,9 @@ export const registerCleanUpTask = (
       maxAttempts: 3,
       paramsSchema,
       createTaskRunner: ({ taskInstance, signal }) => ({
-        run: async () => runCleanUpTask(serverSetup, taskInstance, signal),
+        // Every agent policy bump looks up package info per package policy; the cache makes that once per run.
+        run: async () =>
+          serverSetup.fleet.runWithCache(() => runCleanUpTask(serverSetup, taskInstance, signal)),
       }),
     },
   });

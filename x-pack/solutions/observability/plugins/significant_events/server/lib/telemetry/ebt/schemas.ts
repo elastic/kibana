@@ -367,7 +367,15 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   event_uuid: {
     type: 'keyword',
     _meta: {
-      description: 'The identifier of the updated significant event',
+      description:
+        'Deprecated — superseded by `event_id`. The identifier of the updated significant event',
+      optional: true,
+    },
+  },
+  event_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The stable event id of the updated significant event',
     },
   },
   status: {
