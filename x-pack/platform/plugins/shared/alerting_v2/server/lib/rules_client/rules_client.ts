@@ -299,8 +299,11 @@ export class RulesClient {
         {
           code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
           details: isSingle
-            ? { interval: limitItems[0].updatedEvery, maxScheduledPerMinute }
-            : { maxScheduledPerMinute },
+            ? {
+                interval: limitItems[0].updatedEvery,
+                max_scheduled_per_minute: maxScheduledPerMinute,
+              }
+            : { max_scheduled_per_minute: maxScheduledPerMinute },
         }
       );
     }
@@ -320,7 +323,7 @@ export class RulesClient {
         `Rule schedule interval of "${every}" is shorter than the allowed minimum of "${minimumScheduleInterval}"`,
         {
           code: ALERTING_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
-          details: { interval: every, minimumScheduleInterval },
+          details: { interval: every, minimum_schedule_interval: minimumScheduleInterval },
         }
       );
     }
@@ -658,7 +661,7 @@ export class RulesClient {
     const errors: BulkOperationError[] = [];
     const prepared: PreparedRule[] = [];
 
-    for (const item of parsed.rules) {
+    for (const item of parsed.items) {
       const { id, enabled, ...data } = item;
       try {
         prepared.push(

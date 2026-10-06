@@ -140,7 +140,7 @@ describe('DispatchStep', () => {
               id: 'g1',
               policyId: 'p1',
               groupKey: group.groupKey,
-              episodes: group.episodes,
+              alerts: [expect.objectContaining({ alert_id: 'episode-1', alert_status: 'active' })],
             }),
           }),
           triggeredBy: 'action_policy',
@@ -460,6 +460,61 @@ describe('DispatchStep', () => {
       [
         expect.objectContaining({
           inputs: expect.objectContaining({ payload: expect.objectContaining({ rules: {} }) }),
+        }),
+      ],
+      expect.anything()
+    );
+  });
+
+  it('maps group episodes to payload alerts with alert_id and alert_status', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    const episode = createAlertEpisode({
+      episode_id: 'ep-1',
+      episode_status: 'recovering',
+      severity: 'high',
+      data: { host: { name: 'web-1' } },
+    });
+    const group = createActionGroup({
+      id: 'g1',
+      policyId: 'p1',
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      episodes: [episode],
+    });
+    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([['p1', policy]]),
+    });
+
+    await step.execute(state, loggerService);
+
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          inputs: expect.objectContaining({
+            payload: expect.objectContaining({
+              alerts: [
+                {
+                  last_event_timestamp: '2026-01-22T07:10:00.000Z',
+                  rule_id: 'rule-1',
+                  source: 'internal',
+                  space_id: 'default',
+                  group_hash: 'hash-1',
+                  alert_id: 'ep-1',
+                  alert_status: 'recovering',
+                  severity: 'high',
+                  data: { host: { name: 'web-1' } },
+                },
+              ],
+            }),
+          }),
         }),
       ],
       expect.anything()
