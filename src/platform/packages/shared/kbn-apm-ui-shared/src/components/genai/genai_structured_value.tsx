@@ -28,7 +28,9 @@ export function GenAiStructuredValue({ value, 'data-test-subj': dataTestSubj }: 
         paddingSize="m"
         fontSize="s"
         isCopyable
-        overflowHeight={300}
+        // A string height keeps the full screen button without adding the code block's own
+        // scroll; MaybeViewMore owns collapsing, so "View more" reveals the whole value.
+        overflowHeight="100%"
         data-test-subj={dataTestSubj ?? 'genAiStructuredValue'}
       >
         {text}

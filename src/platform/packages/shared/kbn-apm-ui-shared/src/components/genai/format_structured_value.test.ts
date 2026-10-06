@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { formatStructuredValue, MAX_ARRAY_ITEMS } from './format_structured_value';
+import { formatStructuredValue } from './format_structured_value';
 
 describe('formatStructuredValue', () => {
   it('formats objects as key: value rows with nested indentation', () => {
@@ -61,10 +61,10 @@ describe('formatStructuredValue', () => {
     );
   });
 
-  it('truncates long arrays with a comment noting the hidden items', () => {
-    const items = Array.from({ length: MAX_ARRAY_ITEMS + 5 }, (_, i) => i);
+  it('renders every item of long arrays', () => {
+    const items = Array.from({ length: 1000 }, (_, i) => i);
     const lines = formatStructuredValue(items).split('\n');
-    expect(lines).toHaveLength(MAX_ARRAY_ITEMS + 1);
-    expect(lines[lines.length - 1]).toBe('# … 5 more items');
+    expect(lines).toHaveLength(1000);
+    expect(lines[lines.length - 1]).toBe('- 999');
   });
 });
