@@ -437,8 +437,8 @@ export const SignificantEventsTab = () => {
         .sort((a, b) => (a.title ?? a.id).localeCompare(b.title ?? b.id)),
     [featuresData]
   );
-  // `id` is the stream-local slug stored in `causal_features` / `blast_radius`, so the same
-  // service seen in several streams collapses into one option.
+  // `id` is the source-local slug stored in `causal_features` / `blast_radius`, so the same
+  // service seen in several sources collapses into one option.
   const serviceOptions = useMemo(
     () => [...new Set(serviceFeatures.map((f) => f.id))],
     [serviceFeatures]
