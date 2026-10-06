@@ -77,7 +77,7 @@ export const getHypothesesWarnings = (hypotheses: Hypothesis[]): string[] =>
     ? [MULTIPLE_CONFIRMED_WARNING]
     : [];
 
-/** `investigations.set_hypotheses`: the agent's write path for `investigation_hypotheses`. */
+/** `agentic_investigations.set_hypotheses`: the agent's write path for `investigation_hypotheses`. */
 export const createSetHypothesesTool = ({
   getHypothesesService,
   resolveUser,
