@@ -6,8 +6,8 @@
  */
 
 import type { ProfilingSchema } from '@kbn/profiling-utils';
-import { profilingSchemaRt } from '@kbn/profiling-utils';
 import { useLocation } from 'react-router-dom';
+import { getSchemaQueryParam } from '../utils/get_schema_query_param';
 
 /**
  * Returns the valid `schema` URL param, if any. It reads the URL rather than the router params so
@@ -15,7 +15,6 @@ import { useLocation } from 'react-router-dom';
  */
 export const useSchemaQueryParam = (): ProfilingSchema | undefined => {
   const { search } = useLocation();
-  const schema = new URLSearchParams(search).get('schema');
 
-  return profilingSchemaRt.is(schema) ? schema : undefined;
+  return getSchemaQueryParam(search);
 };
