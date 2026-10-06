@@ -92,6 +92,15 @@ describe('createRuleAttachmentDefinition', () => {
     });
   });
 
+  describe('getHeader', () => {
+    it('returns the bell icon', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+
+      expect(definition.getHeader!({ attachment: {} as any })).toEqual({ icon: 'bell' });
+    });
+  });
+
   describe('getActionButtons', () => {
     it('returns Preview button when not in canvas and openCanvas is provided', () => {
       const services = createMockServices();
@@ -135,7 +144,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('draft')).toBeDefined();
+      expect(getByText('Draft')).toBeDefined();
     });
 
     it('shows enabled status when origin set and enabled is undefined (server default)', () => {
@@ -147,7 +156,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('enabled')).toBeDefined();
+      expect(getByText('Enabled')).toBeDefined();
     });
 
     it('shows disabled status when origin set and enabled is false', () => {
@@ -159,7 +168,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('disabled')).toBeDefined();
+      expect(getByText('Disabled')).toBeDefined();
     });
 
     it('shows schedule interval', () => {
@@ -171,7 +180,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('Every 5m')).toBeDefined();
+      expect(getByText('Every 5 min')).toBeDefined();
     });
   });
 

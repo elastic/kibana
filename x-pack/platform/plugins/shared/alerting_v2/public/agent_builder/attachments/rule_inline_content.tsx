@@ -6,71 +6,144 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import { formatDuration } from '@kbn/alerting-plugin/common';
+import { RULE_KIND_ICONS } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
+import { BadgeList } from '../../components/action_policy/badge_list';
 import type { RuleAttachment } from './rule_attachment_definition';
+
+// TODO: map the outcome to the real rule field once it is defined; hardcoded to `alert` for now.
+const OUTCOME_KIND = 'alert';
+const OUTCOME_LABEL = i18n.translate('xpack.alertingV2.ruleAttachment.outcomeAlert', {
+  defaultMessage: 'Alert',
+});
 
 export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({
   attachment,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { data, origin: savedObjectId } = attachment;
   const isDraft = !savedObjectId;
   const isEnabled = data.enabled ?? true;
   const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
+  const { description, tags } = data.metadata;
+
+  const containerCss = css`
+    padding: ${euiTheme.size.m};
+  `;
+
+  const infoItemCss = css`
+    flex: 1;
+    min-width: 0;
+    padding: ${euiTheme.size.s} ${euiTheme.size.base};
+    &:not(:first-of-type) {
+      border-left: ${euiTheme.border.thin};
+    }
+  `;
 
   return (
-    <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={containerCss}>
+      {(description || (tags && tags.length > 0)) && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={statusColor}>{status}</EuiBadge>
+              <EuiTitle size="xxs">
+                <h5>
+                  {i18n.translate('xpack.alertingV2.ruleAttachment.description', {
+                    defaultMessage: 'Description',
+                  })}
+                </h5>
+              </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{data.kind}</EuiBadge>
-            </EuiFlexItem>
+            {description && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{description}</EuiText>
+              </EuiFlexItem>
+            )}
+            {tags && tags.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <BadgeList items={tags} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
+      )}
 
-        {data.schedule?.every && (
-          <EuiFlexItem>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.alertingV2.ruleAttachment.scheduleEvery', {
-                defaultMessage: 'Every {interval}',
-                values: { interval: data.schedule.every },
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        )}
-
-        {data.metadata.description && (
-          <EuiFlexItem>
-            <EuiText size="s">{data.metadata.description}</EuiText>
-          </EuiFlexItem>
-        )}
-
-        {data.metadata.tags && data.metadata.tags.length > 0 && (
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs" wrap>
-              {data.metadata.tags.map((tag: string) => (
-                <EuiFlexItem key={tag} grow={false}>
-                  <EuiBadge color="default">{tag}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
+      <EuiFlexItem grow={false}>
+        <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+          <EuiFlexGroup gutterSize="none" responsive={false}>
+            <EuiFlexItem css={infoItemCss} data-test-subj="ruleInlineOutcome">
+              <InfoItem
+                title={i18n.translate('xpack.alertingV2.ruleAttachment.outcome', {
+                  defaultMessage: 'Outcome',
+                })}
+              >
+                <EuiBadge color="hollow" iconType={RULE_KIND_ICONS[OUTCOME_KIND]}>
+                  {OUTCOME_LABEL}
+                </EuiBadge>
+              </InfoItem>
+            </EuiFlexItem>
+            <EuiFlexItem css={infoItemCss} data-test-subj="ruleInlineStatus">
+              <InfoItem
+                title={i18n.translate('xpack.alertingV2.ruleAttachment.status', {
+                  defaultMessage: 'Status',
+                })}
+              >
+                <EuiBadge color={statusColor}>{status}</EuiBadge>
+              </InfoItem>
+            </EuiFlexItem>
+            <EuiFlexItem css={infoItemCss} data-test-subj="ruleInlineSchedule">
+              <InfoItem
+                title={i18n.translate('xpack.alertingV2.ruleAttachment.schedule', {
+                  defaultMessage: 'Schedule',
+                })}
+              >
+                {data.schedule?.every && (
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate('xpack.alertingV2.ruleAttachment.scheduleEvery', {
+                        defaultMessage: 'Every {interval}',
+                        values: { interval: formatDuration(data.schedule.every) },
+                      })}
+                    </strong>
+                  </EuiText>
+                )}
+              </InfoItem>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
+
+const InfoItem: React.FC<React.PropsWithChildren<{ title: string }>> = ({ title, children }) => (
+  <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued">
+        {title}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
   if (isDraft)
     return {
       label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDraft', {
-        defaultMessage: 'draft',
+        defaultMessage: 'Draft',
       }),
       color: 'default',
     };
@@ -78,14 +151,14 @@ const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
   if (isEnabled)
     return {
       label: i18n.translate('xpack.alertingV2.ruleAttachment.statusEnabled', {
-        defaultMessage: 'enabled',
+        defaultMessage: 'Enabled',
       }),
       color: 'success',
     };
 
   return {
     label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDisabled', {
-      defaultMessage: 'disabled',
+      defaultMessage: 'Disabled',
     }),
     color: 'warning',
   };
