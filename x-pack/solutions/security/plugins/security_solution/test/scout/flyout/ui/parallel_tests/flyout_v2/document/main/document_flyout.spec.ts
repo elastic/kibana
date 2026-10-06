@@ -22,6 +22,11 @@ spaceTest.describe(
   'Document flyout v2 — alerts page entry',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
+    // The assignees popover (~370px once users load) opens below the header "+" (y~335). At the
+    // default 720px height it overflows the viewport, so EuiPopover keeps re-placing it as its
+    // content changes and the Apply button ends up clipped or moving under the pointer.
+    spaceTest.use({ viewport: { width: 1280, height: 1080 } });
+
     let ruleName: string;
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
