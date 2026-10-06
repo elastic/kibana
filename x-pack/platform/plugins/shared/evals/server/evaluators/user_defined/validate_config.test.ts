@@ -165,7 +165,7 @@ describe('validateJudgeConfig', () => {
     it.each(['{{{.}}}', '{{.}}', '{{& .}}', '{{#.}}x{{/.}}', '{{^.}}x{{/.}}'])(
       'explains that %s outside a section refers to nothing, rather than naming an empty variable',
       (prompt) => {
-        expectRejection(config({ prompt }), 'The prompt uses {{.}} outside a section');
+        expectRejection(config({ prompt }), 'The prompt uses {{.}} outside a {{#…}} section');
         expect(() => validateJudgeConfig(config({ prompt }))).not.toThrow('references ""');
       }
     );
@@ -176,6 +176,28 @@ describe('validateJudgeConfig', () => {
         validateJudgeConfig(
           config({
             prompt: '{{{agent_response}}}{{#tool_calls}} Calls: {{{.}}}{{/tool_calls}}',
+            evidence: ['response', 'steps'],
+          })
+        )
+      ).not.toThrow();
+    });
+
+    it('rejects {{.}} inside an inverted section, which has no value to refer to', () => {
+      // `^` keeps the enclosing context, so this would render the whole view as [object Object].
+      expectRejection(
+        config({
+          prompt: '{{{agent_response}}}{{^tool_calls}}{{{.}}}{{/tool_calls}}',
+          evidence: ['response', 'steps'],
+        }),
+        'The prompt uses {{.}} outside a {{#…}} section'
+      );
+    });
+
+    it('accepts {{.}} in an inverted section nested in a regular one, which keeps its value', () => {
+      expect(() =>
+        validateJudgeConfig(
+          config({
+            prompt: '{{#agent_response}}{{^tool_calls}}{{{.}}}{{/tool_calls}}{{/agent_response}}',
             evidence: ['response', 'steps'],
           })
         )

@@ -63,9 +63,9 @@ const getTemplateVariables = (template: string): TemplateVariables => {
       const isTag = type === 'name' || type === '&' || type === '#' || type === '^';
 
       if (isTag && value === IMPLICIT_ITERATOR) {
-        // Inside a section, `.` is that section's own value, so
+        // Inside a `#` section, `.` is that section's own value, so
         // `{{#tool_calls}}{{{.}}}{{/tool_calls}}` renders the calls only when there are any.
-        // Outside one there is nothing for it to be. Either way it is not a variable name,
+        // Anywhere else there is nothing for it to be. Either way it is not a variable name,
         // which splitting on "." would otherwise report as an empty one.
         if (!insideSection) {
           usesImplicitIterator = true;
@@ -82,7 +82,9 @@ const getTemplateVariables = (template: string): TemplateVariables => {
       }
 
       if (Array.isArray(children)) {
-        collect(children, insideSection || type === '#' || type === '^');
+        // Only `#` pushes its value. An inverted `^` section renders its children in the same
+        // context, so a `.` inside one is still the whole view (`[object Object]`).
+        collect(children, insideSection || type === '#');
       }
     }
   };
@@ -195,7 +197,7 @@ export const validateJudgeConfig = (judge: LlmJudgeConfig): void => {
 
     if (variables.usesImplicitIterator) {
       throw new InvalidJudgeConfigError(
-        `The ${label} uses {{.}} outside a section, where it refers to nothing. Reference an input by name, for example {{{agent_response}}}, or use {{.}} inside that input's section, for example {{#tool_calls}}{{{.}}}{{/tool_calls}}.`
+        `The ${label} uses {{.}} outside a {{#…}} section, where it refers to nothing. Reference an input by name, for example {{{agent_response}}}, or use {{.}} inside that input's section, for example {{#tool_calls}}{{{.}}}{{/tool_calls}}. An inverted {{^…}} section does not count, because it renders only when its input is empty.`
       );
     }
 
