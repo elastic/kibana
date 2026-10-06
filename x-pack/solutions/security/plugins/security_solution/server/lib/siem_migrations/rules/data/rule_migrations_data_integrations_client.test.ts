@@ -249,27 +249,56 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
       });
 
-      it('should index a complete integration with its package version', async () => {
+      afterEach(() => {
+        // jest.clearAllMocks() does not reset implementations set by a test
+        mockPackageService.asInternalUser.getPackage.mockReset();
+      });
+
+      it('should index each integration with its package version', async () => {
         mockGetPackages.mockResolvedValue([createMockPackage({ version: '1.2.0' })]);
         await client.populate();
         expect(bulkedDoc().version).toBe('1.2.0');
       });
 
-      it('should not mark an integration as indexed when its package archive cannot be read', async () => {
-        mockGetPackages.mockResolvedValue([createMockPackage()]);
-        // `Once`: the suite uses jest.clearAllMocks(), which does not reset implementations
-        mockPackageService.asInternalUser.getPackage.mockRejectedValueOnce(
-          new Error('registry down')
-        );
+      it('should still index the other integrations when one package archive cannot be read', async () => {
+        mockGetPackages.mockResolvedValue([
+          createMockPackage({ name: 'broken' }),
+          createMockPackage({ name: 'healthy' }),
+        ]);
+        mockPackageService.asInternalUser.getPackage.mockImplementation(async (name: string) => {
+          if (name === 'broken') {
+            throw new Error('registry down');
+          }
+          return undefined as never;
+        });
         await client.populate();
-        expect(bulkedDoc()).not.toHaveProperty('version');
+
+        const indexedIds = (esClientMock.bulk as jest.Mock).mock.calls[0][0].operations
+          .filter((operation: { update?: unknown }) => operation.update)
+          .map((operation: { update: { _id: string } }) => operation.update._id);
+        expect(indexedIds).toEqual(['healthy']);
       });
 
-      it('should not mark an integration as indexed when its fields metadata cannot be read', async () => {
+      it('should fail when the fields metadata cannot be read', async () => {
         mockGetPackages.mockResolvedValue([createMockPackage()]);
         mockGetFieldMetadata.mockRejectedValueOnce(new Error('metadata down'));
-        await client.populate();
-        expect(bulkedDoc()).not.toHaveProperty('version');
+        await expect(client.populate()).rejects.toThrow('metadata down');
+      });
+
+      it('should not index anything when the fields metadata cannot be read', async () => {
+        mockGetPackages.mockResolvedValue([createMockPackage()]);
+        mockGetFieldMetadata.mockRejectedValueOnce(new Error('metadata down'));
+        await client.populate().catch(() => undefined);
+        expect(esClientMock.bulk).not.toHaveBeenCalled();
+      });
+
+      it('should log which package failed when its fields metadata cannot be read', async () => {
+        mockGetPackages.mockResolvedValue([createMockPackage({ name: 'broken' })]);
+        mockGetFieldMetadata.mockRejectedValueOnce(new Error('metadata down'));
+        await client.populate().catch(() => undefined);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Failed to fetch fields metadata for package broken: metadata down'
+        );
       });
 
       it('should not index any integration when every package version is unchanged', async () => {
@@ -427,13 +456,19 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('token limit'));
     });
 
-    it('should return empty string when getPackage throws', async () => {
+    it('should not index an integration whose package archive cannot be read', async () => {
       mockGetPackage.mockRejectedValue(new Error('archive not found'));
 
       await client.populate();
 
-      const kb = getKnowledgeBaseFromMockEsCall();
-      expect(kb).toBe('');
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should warn that the integration will be retried when its package archive cannot be read', async () => {
+      mockGetPackage.mockRejectedValue(new Error('archive not found'));
+
+      await client.populate();
+
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to fetch package archive')
       );

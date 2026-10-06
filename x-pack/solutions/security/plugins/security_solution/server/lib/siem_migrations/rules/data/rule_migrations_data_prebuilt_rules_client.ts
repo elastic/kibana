@@ -37,9 +37,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
    * Note: changes to how the doc or `elser_embedding` is built only apply to a rule once its version changes.
    */
   async populate(ruleVersionsMap: PrebuildRuleVersionsMap): Promise<void> {
-    // `version` is optional on the stored type (docs indexed before this change have none),
-    // but it is always set on the docs we are about to write
-    const prebuiltRules: Array<RuleMigrationPrebuiltRule & { version: string }> = [];
+    const prebuiltRules: RuleMigrationPrebuiltRule[] = [];
 
     ruleVersionsMap.forEach((ruleVersions) => {
       const rule = ruleVersions.target;

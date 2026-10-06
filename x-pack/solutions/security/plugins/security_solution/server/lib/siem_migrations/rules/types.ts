@@ -31,8 +31,8 @@ export interface RuleMigrationIntegration {
   elser_embedding: string;
   fields_metadata: Record<string, Record<string, unknown>> | undefined;
   knowledge_base?: string;
-  /** Fleet package version the doc was built from. Absent when the doc is incomplete, so it gets rebuilt */
-  version?: string;
+  /** Fleet package version the doc was built from; used to skip re-embedding unchanged packages */
+  version: string;
 }
 
 export interface RuleMigrationPrebuiltRule {
@@ -42,7 +42,7 @@ export interface RuleMigrationPrebuiltRule {
   elser_embedding: string;
   mitre_attack_ids?: string[];
   /** Prebuilt rule asset version the doc was built from; used to skip re-embedding unchanged rules */
-  version?: string;
+  version: string;
 }
 
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;

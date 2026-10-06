@@ -55,36 +55,40 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
     return packages?.filter((pkg) => pkg.data_streams?.some(({ type }) => type === 'logs'));
   }
 
+  /**
+   * Builds the document to index for a package.
+   * Returns `null` when the package has no logs data stream, or when its archive could not be read:
+   * in that case the package is left out of this run and, as it is not indexed with its version,
+   * it is picked up again on the next populate.
+   * Throws when the fields metadata cannot be fetched.
+   */
   private async processIntegration(pkg: PackageListItem): Promise<RuleMigrationIntegration | null> {
     const logsDataStreams = pkg.data_streams?.filter(({ type }) => type === 'logs');
     if (!logsDataStreams?.length) {
       return null;
     }
 
-    let isComplete = true;
-
     let fieldsMetadata: Record<string, Record<string, unknown>> | undefined;
-    try {
-      if (this.dependencies.packageService) {
+    if (this.dependencies.packageService) {
+      try {
         fieldsMetadata =
           await this.dependencies.packageService.asInternalUser.getPackageFieldsMetadata({
             packageName: pkg.name,
           });
+      } catch (error) {
+        this.logger.error(
+          `Failed to fetch fields metadata for package ${pkg.name}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        throw error;
       }
-    } catch (error) {
-      isComplete = false;
-      this.logger.warn(
-        `Failed to fetch fields metadata for package ${pkg.name}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
     }
 
-    const fetchedKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
-    if (fetchedKnowledgeBase === undefined) {
-      isComplete = false;
+    const packageKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
+    if (packageKnowledgeBase === undefined) {
+      return null;
     }
-    const packageKnowledgeBase = fetchedKnowledgeBase ?? '';
 
     return {
       title: pkg.title,
@@ -103,12 +107,11 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         packageKnowledgeBase,
       ].join(' - '),
       fields_metadata: fieldsMetadata,
-      // only complete docs are versioned, incomplete ones are rebuilt on the next populate
-      ...(isComplete && { version: pkg.version }),
+      version: pkg.version,
     };
   }
 
-  /** Returns `undefined` when the package archive could not be read, so the caller can tell it apart from a package without knowledge base files */
+  /** Returns `undefined` when the package archive could not be read, so the caller can tell it apart from a package without knowledge base files (an empty string) */
   private async fetchPackageKnowledgeBase(pkg: PackageListItem): Promise<string | undefined> {
     let packageKnowledgeBase = '';
 
@@ -155,7 +158,9 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
     } catch (error) {
       this.logger.warn(
-        `Failed to fetch package archive for ${pkg.name}: ${
+        `Failed to fetch package archive for ${
+          pkg.name
+        }, it is skipped and will be retried on the next start: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
