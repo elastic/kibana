@@ -17,6 +17,7 @@ import type {
 export type StepToParentEvent =
   | { type: 'step.cancel'; id: string }
   | { type: 'step.change'; id: string }
+  | { type: 'step.processorTypeChanged'; id: string }
   | { type: 'step.parentChanged'; id: string }
   | { type: 'step.delete'; id: string }
   | { type: 'step.edit'; id: string }
