@@ -600,7 +600,7 @@ describe('CasesParamsFields renders', () => {
       render(<CasesParamsFields {...defaultProps} producerId="siem" />);
 
       const select = await screen.findByTestId('extract-observables-select');
-      expect(within(select).getByText('Use space default (Yes)')).toBeInTheDocument();
+      expect(within(select).getByText('Use space default (On)')).toBeInTheDocument();
     });
 
     it('labels "Use space default" with the resolved value when it is off', async () => {
@@ -617,7 +617,7 @@ describe('CasesParamsFields renders', () => {
       render(<CasesParamsFields {...defaultProps} producerId="siem" />);
 
       const select = await screen.findByTestId('extract-observables-select');
-      expect(within(select).getByText('Use space default (No)')).toBeInTheDocument();
+      expect(within(select).getByText('Use space default (Off)')).toBeInTheDocument();
     });
 
     it('updates extractObservables to true when "On" is selected', async () => {

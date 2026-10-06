@@ -305,7 +305,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         value: 'inherit',
         // When a v2 template is selected the executor resolves its pinned version server-side
         // (params.templateVersion), so the client-side latest copy may differ. Avoid showing a
-        // potentially wrong Yes/No; fall back to the unambiguous space-only label instead.
+        // potentially wrong value; fall back to the unambiguous space-only label instead.
         text:
           isTemplatesV2Enabled && templateId
             ? i18n.EXTRACT_OBSERVABLES_INHERIT_TEMPLATE

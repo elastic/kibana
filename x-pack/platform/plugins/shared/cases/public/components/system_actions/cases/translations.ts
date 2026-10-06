@@ -155,35 +155,6 @@ export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
   }
 );
 
-const EXTRACT_OBSERVABLES_INHERIT_YES = i18n.translate(
-  'xpack.cases.systemActions.casesConnector.extractObservablesInheritYes',
-  {
-    defaultMessage: 'Yes',
-  }
-);
-
-const EXTRACT_OBSERVABLES_INHERIT_NO = i18n.translate(
-  'xpack.cases.systemActions.casesConnector.extractObservablesInheritNo',
-  {
-    defaultMessage: 'No',
-  }
-);
-
-export const EXTRACT_OBSERVABLES_INHERIT = (spaceDefault: boolean) =>
-  i18n.translate('xpack.cases.systemActions.casesConnector.extractObservablesInherit', {
-    defaultMessage: 'Use space default ({value})',
-    values: {
-      value: spaceDefault ? EXTRACT_OBSERVABLES_INHERIT_YES : EXTRACT_OBSERVABLES_INHERIT_NO,
-    },
-  });
-
-export const EXTRACT_OBSERVABLES_INHERIT_TEMPLATE = i18n.translate(
-  'xpack.cases.systemActions.casesConnector.extractObservablesInheritTemplate',
-  {
-    defaultMessage: 'Use template/space default',
-  }
-);
-
 export const EXTRACT_OBSERVABLES_ON = i18n.translate(
   'xpack.cases.systemActions.casesConnector.extractObservablesOn',
   {
@@ -195,5 +166,20 @@ export const EXTRACT_OBSERVABLES_OFF = i18n.translate(
   'xpack.cases.systemActions.casesConnector.extractObservablesOff',
   {
     defaultMessage: 'Off',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_INHERIT = (spaceDefault: boolean) =>
+  i18n.translate('xpack.cases.systemActions.casesConnector.extractObservablesInherit', {
+    defaultMessage: 'Use space default ({value})',
+    values: {
+      value: spaceDefault ? EXTRACT_OBSERVABLES_ON : EXTRACT_OBSERVABLES_OFF,
+    },
+  });
+
+export const EXTRACT_OBSERVABLES_INHERIT_TEMPLATE = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesInheritTemplate',
+  {
+    defaultMessage: 'Use template/space default',
   }
 );
