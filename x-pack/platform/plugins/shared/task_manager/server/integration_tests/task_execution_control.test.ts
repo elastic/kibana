@@ -61,6 +61,13 @@ const config: TaskManagerConfig = {
     authenticate_background_task_utilization: true,
   },
   event_loop_delay: { monitor: true, warn_threshold: 5000 },
+  event_loop_watchdog: {
+    enabled: false,
+    threshold_ms: 500,
+    heartbeat_interval_ms: 100,
+    live_report_interval_ms: 3000,
+    dedup_window_ms: 300000,
+  },
   worker_utilization_running_average_window: 5,
   metrics_reset_interval: 3000,
   claim_strategy: 'update_by_query',
