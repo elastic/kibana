@@ -179,6 +179,24 @@ const tagGroupByFields = (isElasticOn: boolean, isPhase1 = false): GroupByFieldD
     valueOf: (entity: Entity) => entity.tags[key] || UNKNOWN,
   }));
 
+/** Always offered in Group by, even when those tags are hidden as filter pills. */
+const ENVIRONMENT_REGION_FIELDS: readonly GroupByFieldDef[] = [
+  {
+    id: 'tag:environment',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.environment', {
+      defaultMessage: 'Environment',
+    }),
+    valueOf: (entity: Entity) => entity.tags.environment || UNKNOWN,
+  },
+  {
+    id: 'tag:region',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.region', {
+      defaultMessage: 'Region',
+    }),
+    valueOf: (entity: Entity) => entity.tags.region || UNKNOWN,
+  },
+];
+
 /**
  * Fields offered in the Group by dropdown. Includes the per-category "extra"
  * attributes (e.g. Hosts → OS / Cloud provider / Service name) when the
@@ -245,7 +263,19 @@ export const getGroupByFields = (
           },
         ]
       : [];
-  return [...fields, ...alertsField, ...k8sFields, ...tagGroupByFields(isElasticOn, isPhase1), ...attrFields];
+  const tagFields = tagGroupByFields(isElasticOn, isPhase1);
+  const tagFieldIds = new Set(tagFields.map((field) => field.id));
+  const environmentRegionFields = ENVIRONMENT_REGION_FIELDS.filter(
+    (field) => !tagFieldIds.has(field.id)
+  );
+  return [
+    ...fields,
+    ...alertsField,
+    ...k8sFields,
+    ...tagFields,
+    ...environmentRegionFields,
+    ...attrFields,
+  ];
 };
 
 export const getGroupByFieldDef = (
