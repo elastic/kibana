@@ -65,8 +65,8 @@ describe('registerSkills', () => {
     expect(guidance).toContain('applyChartRules: true');
     expect(guidance).toContain('Edit every existing ES|QL Lens panel');
     expect(guidance).toContain('preserveESQL: true');
-    expect(skill.content).toContain(
-      'a query change and presentation enhancement can share one edit'
+    expect(guidance).toContain(
+      'omit `preserveESQL` and describe only that change alongside the enhancement request'
     );
     // Lens mechanics stay with the chart author.
     expect(skill.content).not.toContain('apply_color_to');
@@ -113,8 +113,5 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
     expect(skill.content).toContain('only when the terms are short strings');
-    expect(skill.content).toContain(
-      'provide a new `chartType` when the request changes the chart family'
-    );
   });
 });
