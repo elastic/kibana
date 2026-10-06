@@ -75,7 +75,7 @@ export const StepDetailAccordionSection = React.memo<StepDetailAccordionSectionP
             />
           </EuiToolTip>
           <EuiTitle
-            size="s"
+            size="xs"
             css={{
               flex: 1,
               minWidth: 0,

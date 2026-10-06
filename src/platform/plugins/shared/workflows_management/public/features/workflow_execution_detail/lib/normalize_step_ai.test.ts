@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { normalizeStepAi, stepAiToTokenUsage } from './normalize_step_ai';
+import { isAiStepType, normalizeStepAi, stepAiToTokenUsage } from './normalize_step_ai';
 
 describe('normalizeStepAi', () => {
   it('returns undefined when nothing is available', () => {
@@ -129,6 +129,17 @@ describe('normalizeStepAi', () => {
         connectorId: 'from-definition',
       })
     ).toMatchObject({ model: 'gpt-4o', connectorId: 'from-definition' });
+  });
+});
+
+describe('isAiStepType', () => {
+  it('accepts ai.* and inference, rejects connector and control steps', () => {
+    expect(isAiStepType('ai.agent')).toBe(true);
+    expect(isAiStepType('ai.prompt')).toBe(true);
+    expect(isAiStepType('inference')).toBe(true);
+    expect(isAiStepType('confirm_lambda')).toBe(false);
+    expect(isAiStepType('http')).toBe(false);
+    expect(isAiStepType(undefined)).toBe(false);
   });
 });
 
