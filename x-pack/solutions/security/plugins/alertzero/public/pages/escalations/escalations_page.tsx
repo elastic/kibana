@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -14,21 +14,24 @@ import {
   EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
-import { EscalationQueue, type EscalationQueueItem } from '@kbn/agentic-investigations-common';
+import {
+  EscalationQueue,
+  Impact,
+  matchesEntityFilter,
+  useEntityFilter,
+  type EscalationQueueItem,
+} from '@kbn/agentic-investigations-common';
 import {
   useAssignEscalation,
   useListEscalations,
   escalationQueryKeys,
+  useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useQueryClient } from '@kbn/react-query';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useConversationsUrlParams } from '../conversations/conversations_url_params';
-import { useInvestigationDetails } from '../conversations/use_investigation_details';
-import { useStatusSignal } from '../../components/connected_status/use_status_signal';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
@@ -38,34 +41,11 @@ export const EscalationsPage: React.FC = () => {
   useAlertZeroDocTitle(ESCALATIONS_PAGE_INFO.pageTitle);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
-  const { manageEscalations: canManage } = useAgenticInvestigationsCapabilities();
+  const { manageEscalations: canManage } = useAlertZeroInvestigationsCapabilities();
 
-  // ---------------------------------------------------------------------------
-  // Flyout — reuse the conversation URL params / details hook, which is
-  // template-agnostic (it just calls agentBuilder.openConversationDetails).
-  // ---------------------------------------------------------------------------
-  const queryClient = useQueryClient();
-
-  const { selectedConversationId, selectConversation, clearSelectedConversation } =
-    useConversationsUrlParams();
-
-  const handleFlyoutClose = useCallback(() => {
-    // Invalidate both open/closed pages so the list reflects any changes made in the flyout
-    // (e.g. assignees updated via the header picker).
-    void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
-    clearSelectedConversation();
-  }, [queryClient, clearSelectedConversation]);
-
-  useInvestigationDetails({
-    conversationId: selectedConversationId,
-    onClose: handleFlyoutClose,
-  });
-
-  // When the flyout's status toggle changes status (isolated QueryClient), bump the signal
-  // so this page's QueryClient invalidates its escalation queries and the queue refreshes.
-  useStatusSignal(() => {
-    void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
-  });
+  // Clicking a row navigates to Agent Builder with the conversation details flyout open.
+  // getChatHref is also forwarded so cards render as real links (Cmd-click, URL on hover).
+  const { getChatHref, openChat } = useOpenInChat();
 
   // ---------------------------------------------------------------------------
   // Per-bucket current page (1-based). Incremented by "Show more"; never reset here.
@@ -125,6 +105,23 @@ export const EscalationsPage: React.FC = () => {
 
   const allItems = useMemo(() => [...openItems, ...closedItems], [openItems, closedItems]);
 
+  // One selection filters both queues. Pills come from every loaded row, open and closed.
+  const { entityFilter, setEntityFilter } = useEntityFilter(allItems);
+  const visibleOpenItems = useMemo(
+    () =>
+      entityFilter
+        ? openItems.filter((item) => matchesEntityFilter(item, entityFilter))
+        : openItems,
+    [openItems, entityFilter]
+  );
+  const visibleClosedItems = useMemo(
+    () =>
+      entityFilter
+        ? closedItems.filter((item) => matchesEntityFilter(item, entityFilter))
+        : closedItems,
+    [closedItems, entityFilter]
+  );
+
   const renderAssignees = useQueueAssignees({
     items: allItems,
     getRowKey: (e) => e.id,
@@ -178,27 +175,38 @@ export const EscalationsPage: React.FC = () => {
         {!isLoading && !pageError ? (
           <>
             <EuiFlexItem grow={false}>
+              <Impact
+                items={allItems}
+                entityFilter={entityFilter}
+                onEntityFilterChange={setEntityFilter}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="open"
-                escalations={openItems}
+                escalations={visibleOpenItems}
+                loadedCount={openItems.length}
+                isFiltered={Boolean(entityFilter)}
                 totalItemCount={openQuery.data?.pagination.total}
                 onLoadMore={() => setOpenPage((p) => p + 1)}
                 error={openQuery.error as Error | null}
                 renderAssignees={renderAssignees}
-                onClickCard={selectConversation}
-                selectedConversationId={selectedConversationId}
+                onClickCard={(item) => openChat(item.id, item.agentId)}
+                getHref={(item) => getChatHref(item.id, item.agentId)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="closed"
-                escalations={closedItems}
+                escalations={visibleClosedItems}
+                loadedCount={closedItems.length}
+                isFiltered={Boolean(entityFilter)}
                 totalItemCount={closedQuery.data?.pagination.total}
                 onLoadMore={() => setClosedPage((p) => p + 1)}
                 error={closedQuery.error as Error | null}
                 renderAssignees={renderAssignees}
-                onClickCard={selectConversation}
-                selectedConversationId={selectedConversationId}
+                onClickCard={(item) => openChat(item.id, item.agentId)}
+                getHref={(item) => getChatHref(item.id, item.agentId)}
               />
             </EuiFlexItem>
           </>

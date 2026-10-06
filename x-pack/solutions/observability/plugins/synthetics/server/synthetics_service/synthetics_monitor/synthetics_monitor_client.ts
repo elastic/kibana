@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/server';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { SyntheticsServerSetup } from '../../types';
 import { normalizeSecrets, redactInspectedSecrets } from '../utils';
 import type { PrivateConfig } from '../private_location/synthetics_private_location';
@@ -47,13 +48,18 @@ export class SyntheticsMonitorClient {
   async addMonitors(
     monitors: Array<{ monitor: MonitorFields; id: string }>,
     allPrivateLocations: SyntheticsPrivateLocations,
-    spaceId: string
+    spaceId: string,
+    maintenanceWindows?: MaintenanceWindow[]
   ) {
     const privateConfigs: PrivateConfig[] = [];
     const publicConfigs: ConfigData[] = [];
 
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
+    const [paramsBySpace, resolvedMaintenanceWindows] = await Promise.all([
+      this.syntheticsService.getSyntheticsParams({ spaceId }),
+      maintenanceWindows
+        ? Promise.resolve(maintenanceWindows)
+        : this.syntheticsService.getMaintenanceWindows(spaceId),
+    ]);
 
     for (const monitorObj of monitors) {
       const { formattedConfig, params, config } = await this.formatConfigWithParams(
@@ -76,10 +82,10 @@ export class SyntheticsMonitorClient {
       privateConfigs,
       allPrivateLocations,
       spaceId,
-      maintenanceWindows
+      resolvedMaintenanceWindows
     );
 
-    const syncErrors = this.syntheticsService.addConfigs(publicConfigs, maintenanceWindows);
+    const syncErrors = this.syntheticsService.addConfigs(publicConfigs, resolvedMaintenanceWindows);
 
     return await Promise.all([newPolicies, syncErrors]);
   }

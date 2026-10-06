@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { types } from 'util';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { connectorsSpecs, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
+import { ActionTypeRegistry, type ActionTypeRegistryOpts } from '../../action_type_registry';
+import { validateConfig, validateParams, validateSecrets } from '../validate_with_schema';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
 import * as createConnectorNetworkSettingsModule from './create_connector_network_settings';
+import * as generateConfigSchemaModule from './generate_config_schema';
+import * as generateParamsSchemaModule from './generate_params_schema';
+import * as generateSecretsSchemaModule from './generate_secrets_schema';
 import { WorkflowsConnectorFeatureId } from '../../../common';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -22,7 +28,7 @@ describe('createConnectorTypeFromSpec', () => {
   const mockActionsPlugin: ActionsPluginSetupContract = {
     getActionsConfigurationUtilities: () => mockActionsConfigUtils,
     getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-    getCredential: jest.fn().mockReturnValue({ getAuthHeaders: jest.fn() }),
+    getCredential: jest.fn().mockReturnValue({ getAuthHeaders: jest.fn().mockResolvedValue({}) }),
     getClientLeasePool: jest.fn().mockReturnValue({ lease: jest.fn() }),
   } as unknown as ActionsPluginSetupContract;
 
@@ -52,6 +58,20 @@ describe('createConnectorTypeFromSpec', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('shipped specs', () => {
+    for (const spec of Object.values(connectorsSpecs)) {
+      it(`builds validators for ${spec.metadata.id}`, () => {
+        const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+        expect(() => connectorType.validate.config.schema).not.toThrow();
+        expect(() => connectorType.validate.secrets.schema).not.toThrow();
+        if (connectorType.validate.params) {
+          expect(() => connectorType.validate.params?.schema).not.toThrow();
+        }
+      });
+    }
   });
 
   it('uses _test as the reserved test subAction', () => {
@@ -381,19 +401,21 @@ describe('createConnectorTypeFromSpec', () => {
   });
 
   describe('secrets schema validation', () => {
-    it('generates secrets schema correctly', () => {
+    it('reads webhook settings when the secrets validator is first used', () => {
       const spec = createMockSpec({
         auth: {
           types: [{ type: 'api_key_header', defaults: { headerField: 'Key' } }],
         },
       });
 
-      createConnectorTypeFromSpec(spec, mockActionsPlugin);
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
 
+      expect(mockActionsConfigUtils.getWebhookSettings).not.toHaveBeenCalled();
+      void connectorType.validate.secrets.schema;
       expect(mockActionsConfigUtils.getWebhookSettings).toHaveBeenCalled();
     });
 
-    it('generates secrets schema with pfx enabled', () => {
+    it('reads pfx settings from webhook configuration when secrets are materialized', () => {
       mockActionsConfigUtils.getWebhookSettings.mockReturnValue({
         ssl: { pfx: { enabled: true } },
       });
@@ -403,7 +425,126 @@ describe('createConnectorTypeFromSpec', () => {
       const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
 
       expect(connectorType.validate.secrets).toBeDefined();
+      expect(mockActionsConfigUtils.getWebhookSettings).not.toHaveBeenCalled();
+      void connectorType.validate.secrets.schema;
       expect(mockActionsConfigUtils.getWebhookSettings).toHaveBeenCalled();
+    });
+  });
+
+  describe('lazy registration validators', () => {
+    const installEvictableWeakRef = () => {
+      const RealWeakRef = globalThis.WeakRef;
+      const refs: Array<{ evict: () => void }> = [];
+
+      class EvictableWeakRef<T extends object> {
+        private target: T | undefined;
+
+        constructor(target: T) {
+          this.target = target;
+          refs.push(this);
+        }
+
+        deref(): T | undefined {
+          return this.target;
+        }
+
+        evict(): void {
+          this.target = undefined;
+        }
+      }
+
+      (globalThis as { WeakRef: typeof WeakRef }).WeakRef =
+        EvictableWeakRef as unknown as typeof WeakRef;
+
+      return {
+        evict: () => {
+          for (const ref of refs) {
+            ref.evict();
+          }
+        },
+        restore: () => {
+          (globalThis as { WeakRef: typeof WeakRef }).WeakRef = RealWeakRef;
+        },
+      };
+    };
+
+    it('keeps registry validators lazy and validates again after the generated graphs are released', () => {
+      const configSpy = jest.spyOn(generateConfigSchemaModule, 'generateConfigSchema');
+      const secretsSpy = jest.spyOn(generateSecretsSchemaModule, 'generateSecretsSchema');
+      const paramsSpy = jest.spyOn(generateParamsSchemaModule, 'generateParamsSchema');
+      const weakRefs = installEvictableWeakRef();
+
+      try {
+        const spec = createMockSpec();
+        const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+        expect(types.isProxy(connectorType.validate.config)).toBe(true);
+        expect(types.isProxy(connectorType.validate.secrets)).toBe(true);
+        expect(types.isProxy(connectorType.validate.params)).toBe(true);
+        expect(configSpy).not.toHaveBeenCalled();
+        expect(secretsSpy).not.toHaveBeenCalled();
+        expect(paramsSpy).not.toHaveBeenCalled();
+
+        const registry = new ActionTypeRegistry({
+          licensing: { featureUsage: { register: jest.fn() } },
+          taskManager: { registerTaskDefinitions: jest.fn() },
+          taskRunnerFactory: { create: jest.fn() },
+          actionsConfigUtils: mockActionsConfigUtils,
+          licenseState: {
+            ensureLicenseForActionType() {},
+            isLicenseValidForActionType: () => ({ isValid: true }),
+          },
+          inMemoryConnectors: [],
+        } as unknown as ActionTypeRegistryOpts);
+
+        registry.register(connectorType);
+
+        const registered = registry.get(spec.metadata.id);
+        const listed = registry.list({ exposeValidation: true });
+        expect(registered.validate.config).toBe(connectorType.validate.config);
+        expect(listed[0].validate?.params).toBe(connectorType.validate.params);
+        expect(configSpy).not.toHaveBeenCalled();
+        expect(secretsSpy).not.toHaveBeenCalled();
+        expect(paramsSpy).not.toHaveBeenCalled();
+
+        const services = { configurationUtilities: mockActionsConfigUtils };
+        const params = { subAction: 'testAction', subActionParams: { test: 'hello' } };
+
+        expect(listed[0].validate?.params.schema.parse(params)).toEqual(params);
+        expect(validateConfig(registered, {}, services)).toEqual({});
+        expect(validateSecrets(registered, { authType: 'none' }, services)).toEqual({
+          authType: 'none',
+        });
+        expect(validateParams(registered, params, services)).toEqual(params);
+        expect(() => validateParams(registered, { subAction: 'missing' }, services)).toThrow(
+          /error validating action params/
+        );
+        expect(() => validateConfig(registered, { selectedActions: [] }, services)).toThrow(
+          /selectedActions must include at least one action/
+        );
+        expect(configSpy).toHaveBeenCalledTimes(1);
+        expect(secretsSpy).toHaveBeenCalledTimes(1);
+        expect(paramsSpy).toHaveBeenCalledTimes(1);
+
+        weakRefs.evict();
+
+        expect(validateConfig(registered, {}, services)).toEqual({});
+        expect(validateSecrets(registered, { authType: 'none' }, services)).toEqual({
+          authType: 'none',
+        });
+        expect(validateParams(registered, params, services)).toEqual(params);
+        expect(() => validateConfig(registered, { selectedActions: [] }, services)).toThrow(
+          /selectedActions must include at least one action/
+        );
+        expect(configSpy).toHaveBeenCalledTimes(2);
+        expect(secretsSpy).toHaveBeenCalledTimes(2);
+        expect(paramsSpy).toHaveBeenCalledTimes(2);
+      } finally {
+        weakRefs.restore();
+        configSpy.mockRestore();
+        secretsSpy.mockRestore();
+        paramsSpy.mockRestore();
+      }
     });
   });
 
