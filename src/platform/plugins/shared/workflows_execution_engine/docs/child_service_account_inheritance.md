@@ -1,6 +1,6 @@
 # Managed child service-account inheritance
 
-`workflow.execute` and `workflow.executeAsync` can delegate the parent's service account to a managed child. The service-account feature flag must be enabled. The engine uses the latest saved child definition when the call is admitted, with the normal execution snapshot retained for that run; there is no revision pinning or child approval bundle.
+`workflow.execute` and `workflow.executeAsync` can delegate the parent's service account to a managed child. The service-account feature flag must be enabled. The engine loads the latest saved child definition for each call and retains that execution snapshot even if a trusted publisher updates the definition during admission; there is no revision pinning or child approval bundle.
 
 ```yaml
 - name: child
@@ -22,7 +22,7 @@ The YAML editor suggests identity fields only for managed workflows with SAs ena
 
 ## Authorization and lifetime
 
-Every inherited hop requires a managed child stored in the execution space or globally (`spaceId: "*"`), and a live parent SA request. Global definitions execute in the parent's space using the root parent's binding; the child needs no global binding. Definitions stored in another concrete space remain ineligible. The original caller must still have execution access to the child. Admission checks that the loaded managed definition is current and the root parent's workload binding still matches. Further inherited calls retain that root binding.
+Every inherited hop requires a managed child stored in the execution space or globally (`spaceId: "*"`), and a live parent SA request. Global definitions execute in the parent's space using the root parent's binding; the child needs no global binding. Definitions stored in another concrete space remain ineligible. The final live admission check requires the child to still exist, be managed, enabled, valid, and not deleted; it does not compare YAML or definition revisions. The original caller must still have execution access to the child. Admission also checks that the root parent's workload binding still matches the inherited SA. Further inherited calls retain that root binding.
 
 The child execution stores its effective identity, immediate parent workflow/execution, root workload ID, and a hash of the executed YAML for audit. The hash is internal metadata, not a user-maintained revision. Run and resume obtain fresh scoped credentials from the root binding, including after an async parent completes. Binding changes, revocation, or disabling SAs fail the child without falling back to the caller. `executedBy` continues to identify the initiating caller.
 

@@ -605,7 +605,7 @@ describe('WorkflowRepository.isWorkflowEnabledRealtime', () => {
   });
 });
 
-describe('WorkflowRepository.isWorkflowRevisionCurrent', () => {
+describe('WorkflowRepository inherited execution admission', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const repository = new WorkflowRepository({ esClient, logger: loggingSystemMock.create().get() });
   const workflow = {
@@ -625,10 +625,10 @@ describe('WorkflowRepository.isWorkflowRevisionCurrent', () => {
 
   it.each([
     [{}, true],
-    [{ yaml: 'changed' }, false],
+    [{ yaml: 'changed' }, true],
     [
-      { definition: { ...workflow.definition, steps: [{ name: 'injected', type: 'console' }] } },
-      false,
+      { definition: { ...workflow.definition, steps: [{ name: 'updated', type: 'console' }] } },
+      true,
     ],
     [{ managed: false }, false],
     [{ managed: undefined }, false],
@@ -637,9 +637,11 @@ describe('WorkflowRepository.isWorkflowRevisionCurrent', () => {
     [{ spaceId: 'other' }, false],
     [{ spaceId: '*' }, false],
     [{ deleted_at: '2026-09-30' }, false],
-  ])('checks the exact live snapshot: %j', async (override, expected) => {
+  ])('checks eligibility without comparing content: %j', async (override, expected) => {
     esClient.get.mockResolvedValue({ _source: { ...source, ...override } } as never);
-    await expect(repository.isWorkflowRevisionCurrent(workflow, 'default')).resolves.toBe(expected);
+    await expect(
+      repository.isWorkflowEnabledRealtime(workflow.id, 'default', { requireManaged: true })
+    ).resolves.toBe(expected);
     expect(esClient.get).toHaveBeenLastCalledWith(
       expect.objectContaining({ id: 'child', realtime: true })
     );
@@ -653,24 +655,32 @@ describe('WorkflowRepository.isWorkflowRevisionCurrent', () => {
     [{ enabled: false }, false],
     [{ valid: false }, false],
     [{ spaceId: 'other' }, false],
-    [{ yaml: 'changed' }, false],
-    [{ definition: { ...workflow.definition, name: 'Changed' } }, false],
+    [{ yaml: 'changed' }, true],
+    [{ definition: { ...workflow.definition, name: 'Changed' } }, true],
     [{ deleted_at: '2026-10-06' }, false],
-  ])('checks global managed snapshots when explicitly allowed: %j', async (override, expected) => {
-    esClient.get.mockResolvedValue({ _source: { ...source, spaceId: '*', ...override } } as never);
-    await expect(
-      repository.isWorkflowRevisionCurrent(workflow, 'default', {
-        includeGlobal: true,
-      })
-    ).resolves.toBe(expected);
-  });
+  ])(
+    'checks global managed eligibility without comparing content: %j',
+    async (override, expected) => {
+      esClient.get.mockResolvedValue({
+        _source: { ...source, spaceId: '*', ...override },
+      } as never);
+      await expect(
+        repository.isWorkflowEnabledRealtime(workflow.id, 'default', {
+          includeGlobal: true,
+          requireManaged: true,
+        })
+      ).resolves.toBe(expected);
+    }
+  );
 
   it('rejects missing children and propagates storage failures', async () => {
     esClient.get.mockRejectedValueOnce({ statusCode: 404 });
-    await expect(repository.isWorkflowRevisionCurrent(workflow, 'default')).resolves.toBe(false);
+    await expect(
+      repository.isWorkflowEnabledRealtime(workflow.id, 'default', { requireManaged: true })
+    ).resolves.toBe(false);
     esClient.get.mockRejectedValueOnce(new Error('Unavailable'));
-    await expect(repository.isWorkflowRevisionCurrent(workflow, 'default')).rejects.toThrow(
-      'Unavailable'
-    );
+    await expect(
+      repository.isWorkflowEnabledRealtime(workflow.id, 'default', { requireManaged: true })
+    ).rejects.toThrow('Unavailable');
   });
 });

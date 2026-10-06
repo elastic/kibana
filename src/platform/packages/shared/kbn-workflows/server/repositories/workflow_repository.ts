@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import isEqual from 'lodash/isEqual';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
 import { storedWorkflowAccessControlSchema } from '../../common/access_control';
@@ -139,72 +138,23 @@ export class WorkflowRepository {
     return map.get(`${spaceId}:${workflowId}`) ?? false;
   }
 
-  /** Confirms that the loaded child definition and managed status are still current. */
-  async isWorkflowRevisionCurrent(
-    workflow: Pick<EsWorkflow, 'id' | 'yaml' | 'definition' | 'managed'>,
-    spaceId: string,
-    options?: Pick<WorkflowLookupOptions, 'includeGlobal'>
-  ): Promise<boolean> {
-    try {
-      const response = await this.options.esClient.get<{
-        spaceId: string;
-        yaml: string;
-        definition: EsWorkflow['definition'];
-        managed?: boolean;
-        enabled: boolean;
-        valid: boolean;
-        deleted_at?: string | null;
-      }>({
-        index: this.options.indexName,
-        id: workflow.id,
-        _source_includes: [
-          'spaceId',
-          'yaml',
-          'definition',
-          'managed',
-          'enabled',
-          'valid',
-          'deleted_at',
-        ],
-        realtime: true,
-      });
-      const source = response._source;
-      return Boolean(
-        source &&
-          (source.spaceId === spaceId ||
-            (options?.includeGlobal === true &&
-              source.spaceId === GLOBAL_WORKFLOW_SPACE_ID &&
-              source.managed === true &&
-              workflow.managed === true)) &&
-          source.enabled &&
-          source.valid &&
-          !source.deleted_at &&
-          source.managed === workflow.managed &&
-          source.yaml === workflow.yaml &&
-          isEqual(source.definition, workflow.definition)
-      );
-    } catch (error) {
-      if (error.statusCode === 404) return false;
-      throw error;
-    }
-  }
-
-  /** Reads the enabled state from the translog after an execution becomes searchable. */
+  /** Checks live admission state, requiring valid managed definitions for inherited execution. */
   async isWorkflowEnabledRealtime(
     workflowId: string,
     spaceId: string,
-    options?: Pick<WorkflowLookupOptions, 'includeGlobal'>
+    options?: Pick<WorkflowLookupOptions, 'includeGlobal'> & { requireManaged?: boolean }
   ): Promise<boolean> {
     try {
       const response = await this.options.esClient.get<{
         enabled?: boolean;
         spaceId?: string;
         managed?: boolean;
+        valid?: boolean;
         deleted_at?: string | null;
       }>({
         index: this.options.indexName,
         id: workflowId,
-        _source_includes: ['enabled', 'spaceId', 'managed', 'deleted_at'],
+        _source_includes: ['enabled', 'spaceId', 'managed', 'valid', 'deleted_at'],
         realtime: true,
       });
       const source = response._source;
@@ -215,6 +165,7 @@ export class WorkflowRepository {
               source.spaceId === GLOBAL_WORKFLOW_SPACE_ID &&
               source.managed === true)) &&
           source.enabled === true &&
+          (!options?.requireManaged || (source.managed === true && source.valid === true)) &&
           !source.deleted_at
       );
     } catch (error) {
