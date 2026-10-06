@@ -11281,7 +11281,7 @@ paths:
                     - alert_id: episode-1
                     - alert_id: episode-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_request'
       responses:
         '200':
           content:
@@ -11405,7 +11405,7 @@ paths:
                     - alert_id: episode-1
                       reason: manual reopen
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_request'
       responses:
         '200':
           content:
@@ -11527,7 +11527,7 @@ paths:
                     - alert_id: episode-2
                       assignee_uid: null
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_request'
       responses:
         '200':
           content:
@@ -11647,7 +11647,7 @@ paths:
                     - alert_id: episode-1
                       reason: false positive
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_request'
       responses:
         '200':
           content:
@@ -11771,7 +11771,7 @@ paths:
                       tags:
                         - production
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_alerts_request'
       responses:
         '200':
           content:
@@ -11891,7 +11891,7 @@ paths:
                     - alert_id: episode-1
                     - alert_id: episode-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_episodes_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_request'
       responses:
         '200':
           content:
@@ -12016,7 +12016,7 @@ paths:
                 summary: Acknowledge the alert episode
                 value: {}
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_ack_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_ack_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -12147,7 +12147,7 @@ paths:
                 value:
                   reason: Issue reappeared after silence window.
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_activate_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_activate_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -12294,7 +12294,7 @@ paths:
                 value:
                   assignee_uid: u_abc123
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_assign_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_assign_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -12425,7 +12425,7 @@ paths:
                 value:
                   reason: False positive confirmed by on-call.
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_deactivate_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_deactivate_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -12574,7 +12574,7 @@ paths:
                     - production
                     - investigating
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_tag_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_tag_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -12704,7 +12704,7 @@ paths:
                 summary: Unacknowledge the alert episode
                 value: {}
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unack_episode_action'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unack_alert_action'
       responses:
         '204':
           description: Indicates the action was created.
@@ -71571,6 +71571,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                excludedUserNames:
+                  items:
+                    type: string
+                  maxItems: 200
+                  type: array
                 historySnapshot:
                   additionalProperties: false
                   type: object
@@ -80315,6 +80320,11 @@ paths:
                       - service
                       - generic
                     type: string
+                  type: array
+                excludedUserNames:
+                  items:
+                    type: string
+                  maxItems: 200
                   type: array
                 historySnapshot:
                   additionalProperties: false
@@ -151772,7 +151782,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -151888,7 +151898,7 @@ components:
           type: string
       required:
         - profile_uid
-    Kibana_HTTP_APIs_alerting_bulk_ack_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_ack_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -151899,20 +151909,20 @@ components:
           type: string
       required:
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_ack_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_ack_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 ack actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
       required:
         - items
-    Kibana_HTTP_APIs_alerting_bulk_activate_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_activate_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -151929,20 +151939,20 @@ components:
       required:
         - reason
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_activate_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_activate_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 activate actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
       required:
         - items
-    Kibana_HTTP_APIs_alerting_bulk_assign_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_assign_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -151960,14 +151970,14 @@ components:
       required:
         - assignee_uid
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_assign_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_assign_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 assign actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
@@ -152123,7 +152133,7 @@ components:
       required:
         - items
         - errors
-    Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -152140,14 +152150,14 @@ components:
       required:
         - reason
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 deactivate actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
@@ -152246,7 +152256,7 @@ components:
       required:
         - ids
         - snoozed_until
-    Kibana_HTTP_APIs_alerting_bulk_tag_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_tag_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -152266,20 +152276,20 @@ components:
       required:
         - tags
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_tag_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_tag_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 tag actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
       required:
         - items
-    Kibana_HTTP_APIs_alerting_bulk_unack_episodes_item:
+    Kibana_HTTP_APIs_alerting_bulk_unack_alerts_item:
       additionalProperties: false
       type: object
       properties:
@@ -152290,14 +152300,14 @@ components:
           type: string
       required:
         - alert_id
-    Kibana_HTTP_APIs_alerting_bulk_unack_episodes_request:
+    Kibana_HTTP_APIs_alerting_bulk_unack_alerts_request:
       additionalProperties: false
       type: object
       properties:
         items:
           description: List of 1 to 100 unack actions to create.
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_episodes_item'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_item'
           maxItems: 100
           minItems: 1
           type: array
@@ -152324,7 +152334,7 @@ components:
         - code
         - error
         - message
-    Kibana_HTTP_APIs_alerting_new_ack_episode_action:
+    Kibana_HTTP_APIs_alerting_new_ack_alert_action:
       additionalProperties: false
       type: object
       properties: {}
@@ -152360,7 +152370,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -152385,7 +152395,7 @@ components:
         - name
         - description
         - destinations
-    Kibana_HTTP_APIs_alerting_new_activate_episode_action:
+    Kibana_HTTP_APIs_alerting_new_activate_alert_action:
       additionalProperties: false
       type: object
       properties:
@@ -152396,7 +152406,7 @@ components:
           type: string
       required:
         - reason
-    Kibana_HTTP_APIs_alerting_new_assign_episode_action:
+    Kibana_HTTP_APIs_alerting_new_assign_alert_action:
       additionalProperties: false
       type: object
       properties:
@@ -152408,7 +152418,7 @@ components:
           type: string
       required:
         - assignee_uid
-    Kibana_HTTP_APIs_alerting_new_deactivate_episode_action:
+    Kibana_HTTP_APIs_alerting_new_deactivate_alert_action:
       additionalProperties: false
       type: object
       properties:
@@ -152467,7 +152477,7 @@ components:
         - metadata
         - schedule
         - query
-    Kibana_HTTP_APIs_alerting_new_tag_episode_action:
+    Kibana_HTTP_APIs_alerting_new_tag_alert_action:
       additionalProperties: false
       type: object
       properties:
@@ -152481,7 +152491,7 @@ components:
           type: array
       required:
         - tags
-    Kibana_HTTP_APIs_alerting_new_unack_episode_action:
+    Kibana_HTTP_APIs_alerting_new_unack_alert_action:
       additionalProperties: false
       type: object
       properties: {}
@@ -152668,7 +152678,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -153251,7 +153261,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
