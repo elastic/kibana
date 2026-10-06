@@ -383,8 +383,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const resolvedSpaceId = spaceId ?? 'default';
 
   const {
-    alertsCount,
-    alertsEntityIds,
+    severeAlertsCount,
+    severeAlertsEntityIds,
     watchlistedCount,
     watchlistedEntityIds,
     isLoading: alertBasedLoading,
@@ -450,7 +450,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     }
     switch (activeTile) {
       case 'entitiesWithAlerts':
-        return alertsEntityIds;
+        return severeAlertsEntityIds;
       case 'entitiesWithAnomalies':
         return anomaliesEntityIds;
       case 'riskMovers':
@@ -466,7 +466,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     }
   }, [
     activeTile,
-    alertsEntityIds,
+    severeAlertsEntityIds,
     anomaliesEntityIds,
     riskMoversEntityIds,
     newlyHCEntityIds,
@@ -571,7 +571,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             defaultMessage: 'Entities with alerts',
           }
         ),
-        value: alertsCount,
+        value: severeAlertsCount,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -743,7 +743,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       },
     ],
     [
-      alertsCount,
+      severeAlertsCount,
       alertBasedLoading,
       anomaliesCount,
       anomaliesLoading,

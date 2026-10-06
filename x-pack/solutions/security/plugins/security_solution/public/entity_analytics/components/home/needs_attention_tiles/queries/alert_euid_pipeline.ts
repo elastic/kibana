@@ -31,7 +31,12 @@ const indentBranch = (esql: string): string =>
  *
  * After MV_EXPAND the entity.id column is always scalar; nulls are filtered out so
  * non-matching entity types don't produce phantom rows downstream.
+ *
+ * Emits one row per entity with `has_severe_alert`: whether any of its alerts is high
+ * or critical severity.
  */
+const KEEP_COLUMNS = '_ea_entity_id, `kibana.alert.severity`';
+
 export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
   const derivedSteps: string[] = ['WHERE `kibana.alert.entity.id` IS NULL'];
 
@@ -43,13 +48,13 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     derivedSteps.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
   derivedSteps.push(evalGuardedTypedEuids('_ea_entity_id'));
-  derivedSteps.push('| KEEP _ea_entity_id');
+  derivedSteps.push(`| KEEP ${KEEP_COLUMNS}`);
 
   const fork = [
     '| FORK (',
     '    WHERE `kibana.alert.entity.id` IS NOT NULL',
     '    | EVAL _ea_entity_id = `kibana.alert.entity.id`',
-    '    | KEEP _ea_entity_id',
+    `    | KEEP ${KEEP_COLUMNS}`,
     '  )',
     '  (',
     indentBranch(derivedSteps.join('\n')),
@@ -60,9 +65,10 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     fork,
     '| MV_EXPAND _ea_entity_id',
     '| WHERE _ea_entity_id IS NOT NULL',
+    '| EVAL is_severe_alert = `kibana.alert.severity` IN ("high", "critical")',
     // Rename only after STATS to avoid STATS BY grouping on the mapped entity.id field
     // in the alerts index rather than our computed EUID column.
-    '| STATS BY _ea_entity_id',
+    '| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id',
     '| RENAME _ea_entity_id AS `entity.id`',
   ];
 };

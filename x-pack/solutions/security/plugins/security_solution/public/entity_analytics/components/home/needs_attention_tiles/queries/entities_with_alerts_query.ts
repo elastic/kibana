@@ -12,8 +12,9 @@ import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
 
 /**
- * Builds a single ES|QL query that computes both the entities-with-alerts count
- * and the watchlisted-entities-with-alerts count in one pass over the alerts index.
+ * Builds a single ES|QL query that computes both the severely-alerting count (entities
+ * with at least one high- or critical-severity alert) and the watchlisted-entities-with-
+ * alerts count (any severity) in one pass over the alerts index.
  *
  * This avoids running the EUID pipeline twice (once per tile). Both tile 1 and tile 5
  * consume their respective columns from the single STATS result.
@@ -53,16 +54,17 @@ export const buildAlertBasedTilesQuery = (
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );
 
-  // Compute watchlist columns — null for non-watchlisted rows so COUNT_DISTINCT/VALUES ignore them.
+  // Per-tile ids — null for rows outside the tile so COUNT_DISTINCT/VALUES ignore them.
+  parts.push(`| EVAL severe_effective_id = CASE(has_severe_alert, effective_id, null)`);
   parts.push(`| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL`);
   parts.push(`| EVAL watchlisted_effective_id = CASE(is_watchlisted, effective_id, null)`);
   parts.push(`| EVAL watchlisted_entity_id    = CASE(is_watchlisted, entity.id, null)`);
 
   parts.push(`| STATS`);
-  parts.push(`    alerts_count           = COUNT_DISTINCT(effective_id),`);
-  parts.push(`    alerts_entity_ids      = VALUES(effective_id),`);
-  parts.push(`    watchlisted_count      = COUNT_DISTINCT(watchlisted_effective_id),`);
-  parts.push(`    watchlisted_entity_ids = VALUES(watchlisted_effective_id)`);
+  parts.push(`    severe_alerts_count      = COUNT_DISTINCT(severe_effective_id),`);
+  parts.push(`    severe_alerts_entity_ids = VALUES(severe_effective_id),`);
+  parts.push(`    watchlisted_count        = COUNT_DISTINCT(watchlisted_effective_id),`);
+  parts.push(`    watchlisted_entity_ids   = VALUES(watchlisted_effective_id)`);
 
   return parts.join('\n');
 };

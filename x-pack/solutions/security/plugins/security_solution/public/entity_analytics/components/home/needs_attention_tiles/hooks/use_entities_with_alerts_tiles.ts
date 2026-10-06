@@ -26,8 +26,8 @@ import {
 } from '../../new_entities_table';
 
 interface AlertBasedTilesResult {
-  alertsCount: number;
-  alertsEntityIds: string[];
+  severeAlertsCount: number;
+  severeAlertsEntityIds: string[];
   watchlistedCount: number;
   watchlistedEntityIds: string[];
 }
@@ -35,7 +35,12 @@ interface AlertBasedTilesResult {
 export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
   const row = raw.values?.[0];
   if (!row)
-    return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
+    return {
+      severeAlertsCount: 0,
+      severeAlertsEntityIds: [],
+      watchlistedCount: 0,
+      watchlistedEntityIds: [],
+    };
 
   const col = (name: string) => raw.columns?.findIndex((c) => c.name === name) ?? -1;
   const toIds = (idx: number): string[] => {
@@ -47,9 +52,11 @@ export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBase
   };
 
   return {
-    alertsCount:
-      typeof row[col('alerts_count')] === 'number' ? (row[col('alerts_count')] as number) : 0,
-    alertsEntityIds: toIds(col('alerts_entity_ids')),
+    severeAlertsCount:
+      typeof row[col('severe_alerts_count')] === 'number'
+        ? (row[col('severe_alerts_count')] as number)
+        : 0,
+    severeAlertsEntityIds: toIds(col('severe_alerts_entity_ids')),
     watchlistedCount:
       typeof row[col('watchlisted_count')] === 'number'
         ? (row[col('watchlisted_count')] as number)
@@ -108,8 +115,8 @@ export const useAlertBasedTiles = ({
     async ({ signal }) => {
       if (!query)
         return {
-          alertsCount: 0,
-          alertsEntityIds: [],
+          severeAlertsCount: 0,
+          severeAlertsEntityIds: [],
           watchlistedCount: 0,
           watchlistedEntityIds: [],
         };
@@ -139,10 +146,10 @@ export const useAlertBasedTiles = ({
   );
 
   return {
-    alertsCount: queryResult?.alertsCount ?? 0,
-    alertsEntityIds: isFetching
+    severeAlertsCount: queryResult?.severeAlertsCount ?? 0,
+    severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.alertsEntityIds ?? EMPTY_ENTITY_IDS,
+      : queryResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
     watchlistedCount: queryResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS

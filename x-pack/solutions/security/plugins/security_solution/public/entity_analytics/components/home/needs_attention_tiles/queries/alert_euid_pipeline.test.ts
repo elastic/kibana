@@ -45,7 +45,7 @@ describe('buildAlertEuidPipeline', () => {
     const pipeline = buildAlertEuidPipeline(mockEuid);
     expect(pipeline).toContain('| MV_EXPAND _ea_entity_id');
     expect(pipeline).toContain('| WHERE _ea_entity_id IS NOT NULL');
-    expect(pipeline).toContain('| STATS BY _ea_entity_id');
+    expect(pipeline).toContain('| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id');
     expect(pipeline).toContain('| RENAME _ea_entity_id AS `entity.id`');
   });
 
