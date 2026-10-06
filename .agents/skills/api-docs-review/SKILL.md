@@ -1,79 +1,421 @@
 ---
 name: api-docs-review
-description: Review Kibana public HTTP API documentation and versioning at its source. Use when a PR adds or changes a route with access 'public', a route summary or description, options.availability (stability, since), deprecated or discontinued, oas-tag tags, meta.description or meta.availability in @kbn/config-schema, .describe() or .meta() in Zod, oasOperationObject examples or examples/*.yaml, or spec-first OpenAPI YAML (x-state, deprecated) under docs/openapi, common/api, *.schema.yaml, or oas_docs. Checks that every new or changed public endpoint and property carries correct availability and since version, plus accuracy, completeness, and Elastic API docs style; comments on the source line, never on oas_docs/output.
+description: >
+  Review a Kibana PR for OpenAPI Spec (OAS) and API docs compliance against the
+  Elastic API docs checklist, core guidelines, and Kibana quickstart. Checks
+  availability, summaries, descriptions, parameters, examples, tags, links,
+  defaults, enums, deprecation, and generated YAML correctness. Use when reviewing
+  a Kibana PR that touches public API routes (access 'public'), route summaries or
+  descriptions, options.availability, schema meta descriptions, oasOperationObject
+  examples, or OAS output files, or when asked to check OAS, availability, x-state,
+  or API docs compliance on a PR.
+metadata:
+  source: https://github.com/elastic/elastic-docs-skills/tree/main/skills/review/docs-check-kibana-oas
+  source_version: "1.0.1"
 ---
 
-# API docs review
+# Check Kibana OAS
 
-Review the documentation that Kibana generates into its public OpenAPI documents, at the source that produces it.
+You are reviewing a Kibana PR from `elastic/kibana` against the [Elastic API docs checklist](https://www.elastic.co/docs/contribute-docs/api-docs/checklist), [core guidelines](https://www.elastic.co/docs/contribute-docs/api-docs/guidelines), and [Kibana quickstart](https://www.elastic.co/docs/contribute-docs/api-docs/kibana-api-docs-quickstart). Every finding names the file and line to change.
 
 ## Scope
 
-- Only routes with `access: 'public'` and the request, query, path, and response schemas they reference. Internal routes (`access: 'internal'` or no `access`) are out of scope. If every changed route is internal and no spec-first YAML changed, stop without findings.
-- Skip backport PRs: `backport` label, a version prefix in the title such as `[9.5]` or `[8.19]`, or a base branch other than `main`.
-- Never suggest editing `oas_docs/output/**`. It is generated. Every finding points at the TypeScript, Zod, or spec-first YAML line that produces the text.
-- Report on changed lines only. If the problem is in a line the PR did not touch, do not report it unless the PR made the route public in this diff.
+- Only routes registered with `access: 'public'` and the schemas they reference are published, so only those are in scope. Routes with `access: 'internal'` or no `access` are out of scope. If no public route or schema changed, stop without findings.
+- Skip backport PRs (`backport` label, a `[9.5]`-style title prefix, or a base branch other than `main`); the review belongs on the original PR.
 
-## Where the documentation lives
+## Key principle: YAML is generated, TypeScript is the source of truth
 
-Code-first (most plugins):
+The files under `oas_docs/output/` (`kibana.yaml`, `kibana.serverless.yaml`) are auto-generated from TypeScript route definitions. CI regenerates them on push. Use the YAML diff, when you have it, to detect problems (missing `x-state`, wrong stability label, empty values), but every finding must point at the TypeScript source that generates it. Never suggest manually editing the YAML.
 
-- Route: `summary`, `description`, `operationId`, `deprecated`, `discontinued` on `router.versioned.<method>({...})` or `router.<method>({...})`; `options.tags` with an `oas-tag:` entry; `options.availability: { stability, since }`.
-- `@kbn/config-schema` fields: `meta: { description, availability: { stability, since }, deprecated }`.
-- Zod (`@kbn/zod` / `@kbn/zod/v4`): `.describe('...')` or `.meta({ description, openapi: { availability: { stability, since } } })`.
-- Examples: `options.oasOperationObject` returning an object or a path to `examples/*.yaml`.
+## Inputs
 
-Spec-first (Security solution, cases, osquery, some others): `summary`, `description`, `x-state`, `deprecated`, `tags`, `examples` in `*.schema.yaml`, `docs/openapi/**`, or `common/api/**`. Never edit `*.gen.ts`.
+**Automated review (Libra).** The changed-file list and the review-scope diff are supplied. `oas_docs/output/**` is excluded from that diff, so work from the source files. Use `read_file` to open changed files and their siblings at the PR head for exact line numbers; never compute line numbers from diff hunk headers. Use `search_code` only to answer a specific question about a changed route.
 
-## Versioning and availability (check first)
+**Local review.** Given a PR number or URL:
 
-Every added or changed public endpoint or property needs versioning metadata. Treat each of these as a P3 finding unless noted.
+```bash
+gh pr diff <PR_NUMBER> --repo elastic/kibana
+gh pr view <PR_NUMBER> --repo elastic/kibana --json title,body,files,headRefName
+gh pr checkout <PR_NUMBER>
+```
 
-1. **A route added in this PR, or switched to `access: 'public'` in this PR, must have `options.availability` with both `stability` and `since`.** `stability` is `'experimental'`, `'tech_preview'`, or `'stable'`. With no `availability` block the generated operation gets no `x-state` and the docs show no lifecycle badge. With `since` but no `stability` the stateful docs show `Added in <since>` and the serverless docs show an empty badge. Do not flag pre-existing routes that lack `availability` when the PR touched them for other reasons; most of the legacy surface is unannotated.
-2. **`since` must be the version this PR ships in.** Read `package.json` at the repository root with `read_file` and compare its `version`. Flag `since` greater than that version. Flag `since` lower than that version unless the PR has a backport label (`backport:*`, `v9.x.y`) targeting that lower version; when it does, `since` should equal the lowest targeted version. If you cannot see labels, report the mismatch as a question (P4), not an error.
-3. **Stability changes are documentation changes.** If the PR removes an experimental or tech-preview gate, a feature flag, or a "technical preview" note from a public route, `stability` must change in the same PR. A route still behind a feature flag must not declare `'stable'`.
-4. **A new property on an existing public route needs its own availability** when the route's `since` is older than the current `package.json` version: `meta: { availability: { stability, since } }` in `@kbn/config-schema`, `.meta({ openapi: { availability: { stability, since } } })` in Zod v4. Applies to request body, query, path, and response fields. A property with `availability` missing either `stability` or `since` is also a finding.
-5. **Spec-first YAML carries `x-state` by hand, and it drifts.** Operation level: `x-state: Technical Preview; added in 9.6.0` (or `Experimental; ...`, `Generally available; ...`). Property level: `x-state: Added in 9.6.0` next to `description`. Flag a new operation or property with no `x-state`, with a lifecycle label but no version, or with a version but no label. Use the generator's exact strings (`Technical Preview`, `Generally available`, `Experimental`, `; added in X.Y.Z`) so spec-first and code-first render the same badge.
-6. **Deprecation is explicit in both places.** Code-first: `deprecated: { documentationUrl, severity, reason }` on the route and, if a removal version is known, `discontinued: 'X.Y.Z'`; `meta: { deprecated: true }` on a field. Spec-first: `deprecated: true` plus a description that opens with `**Deprecated in X.Y.Z.** Use <replacement> instead.` A description that says "deprecated" with no flag, or a flag with no version and replacement in the description, is a finding.
-7. **Version-dependent behavior goes in the description.** If the handler checks an agent, package, or API version at runtime, or behaves differently on serverless, the description must say so with the number ("agents on version 9.6.0 or later"). `since` is stripped from serverless docs, so serverless-specific constraints must be in prose. This rule is about versions the handler compares against, not about the PR itself: do not ask for "since version X" prose because an existing endpoint's behavior changed in this PR. That is what `since` and property-level availability are for.
+Read source files from the checkout, not from the diff, for line numbers. If no Kibana checkout is available, ask for the path.
 
-Link one of these in the finding: `https://www.elastic.co/docs/contribute-docs/api-docs/organize-annotate#specify-api-lifecycle-status`, `https://www.elastic.co/docs/contribute-docs/api-docs/kibana-api-docs-quickstart#make-your-docs-changes`.
+## Workflow
 
-## Completeness
+### 1. Classify the changes
 
-8. **Summary.** Every new public route has a `summary`: 5 to 45 characters, starts with a basic verb (Get, Create, Update, Delete), includes articles ("Delete a space"), sentence case, no trailing period.
-9. **Description.** Every new public route has a `description` that adds something beyond the summary: purpose, prerequisites, constraints, how parameters interact. A description that restates the summary is a finding.
-10. **Narrative doc link.** When sibling routes on the same resource end with "To learn more, refer to the [docs](...)" and the new route does not, flag it (P4; the page may not exist yet). Check siblings with `read_file` on the same file or directory, not with `search_code`.
-11. **Tags.** Exactly one `oas-tag:` entry per public route, sentence case, same string as sibling routes.
-12. **Path parameters** have `meta.description` (or `description` in YAML).
-13. **Properties.** Every new request, query, or response property has a description. `'The name.'` on `name` is a finding.
-14. **Enum values** are described when the meaning is not obvious from the name (`read`/`write`/`admin` yes; `asc`/`desc` no).
-15. **Defaults.** Optional fields say what happens when omitted and name the default, either via `defaultValue` plus description or in the description alone when the default is server-side.
-16. **Examples.** New public routes should reference an example via `oasOperationObject` (P4 if missing). Example files must not contain placeholder or empty values and must include a success response example.
-17. **Operation ID.** Advisory only: mention a missing or non-kebab-case `operationId` in one line only if a route in the diff already sets one inconsistently. Never a finding on its own.
+From the diff, sort changed files into:
 
-## Description quality
+- **Route definitions**: `.ts` files under `server/routes/` registering `router.versioned.*` or `router.*` endpoints
+- **Schema definitions**: `.ts` files with `schema.object` / `schema.maybe` / etc. used in route validation
+- **Generated YAML**: `oas_docs/output/` (local review only) — scan for diagnostic signals only
+- **Example files**: YAML under `routes/examples/`
+- **Other**: types, tests, mocks — note but do not audit
 
-Report as P4 with a suggestion block when the fix is a single-line string replacement; preserve the existing quote style.
+### 2. Audit
 
-18. Field descriptions start with a noun phrase ("Maximum number of results..."); operation descriptions start with a verb.
-19. Active voice. No semicolons, no chained parentheticals. Field names and literal values in backticks.
-20. No implementation detail or internal names: executor task, registry, saved object type, `v1`, "alerting engine", internal setting names a serverless user cannot change.
-21. Constraints are named: ranges, max items, allowed combinations, cross-field dependencies ("Combine with `count` using `operator`").
-22. Terminology matches sibling routes in the same file or directory (read them with `read_file`). Flag the same concept named two ways ("alert" vs "alert episode", "AI index" vs "AI Index"). Consistency applies to terms and casing only, never to length: do not propose shortening a description to match a terser sibling. When the new text is more informative than its siblings, keep it.
-23. Error-message strings a user will see explain how to resolve the problem, not internal state.
-24. Behavior on omission is stated for every optional field ("Omit to keep the stored value").
+Apply every rule from the rules section below against the diff. If you have the generated YAML, use it as a cross-check signal: if it looks wrong (missing `x-state`, empty `x-state`, wrong label), trace it back to the TypeScript source to find the root cause.
 
-## Evidence gate
+For every finding, read the actual file at the PR head to confirm the exact line number. Point at the line where the developer needs to make the change.
 
-- Before claiming something is missing, open the file at PR head with `read_file`. Absence from the diff is not absence from the file.
-- Before flagging terminology or a missing doc link, read at least one sibling route in the same directory.
-- Before flagging `since`, read `package.json` `version`.
-- Do not report lint the OAS linters already catch on the output (missing `operationId`, summary length) unless the fix is on a changed line.
+### 3. Cross-check sibling routes
 
-## Reporting
+When the PR adds a new route to an existing resource, read the existing routes from the same file or directory to compare conventions. Look for patterns like narrative doc links, tag usage, or example files that siblings use but the new route does not.
 
-- One finding per problem, anchored to the changed source line. Severity per the service rubric: inaccurate or missing availability, deprecation, or description is P3; wording, style, and missing doc links are P4.
-- Put the rule number in the evidence as `api-docs rule N`.
-- Use a suggestion block only for a minimal single-line replacement of the description string. Otherwise describe the change in prose.
-- Finish without findings when nothing in scope changed.
+### 4. Output
+
+**Automated review (Libra).** Report one finding per issue, anchored to a changed line in a changed file. Use the service severity rubric: missing or incorrect availability, deprecation, or description is P3; wording, style, a missing doc link, or a missing example is P4. Name the rule in the evidence as `OAS rule N`. Include the before → after when the fix is a one-liner, as a suggestion block when it replaces a single line. Do not report pre-existing issues on lines the PR did not change. Do not print a report.
+
+**Local review.** Print a flat action list, then a summary. Be terse. No diagnosis essays.
+
+```
+## OAS review — PR #<NUMBER>
+
+**<PR title>**
+
+### Actions
+
+1. ❌ **Add `stability` to availability** — agents.ts:689
+   `availability: { since: '9.5.0' }` → `availability: { stability: 'experimental', since: '9.5.0' }`
+
+2. ❌ **Add description for `user_id` path param** — agents.ts:140
+   Path parameters must have `meta: { description: '...' }`.
+
+### Passes
+
+- ✅ `summary` and `description` present — agents.ts:684
+- ✅ Tags include `oas-tag` — agents.ts:680
+
+### Verdict
+
+**N actions** (X required, Y suggested)
+```
+
+- ❌ for actions the author needs to address
+- ✅ for passes — list briefly, one line each
+- Tag pre-existing issues as "(pre-existing)" so the PR author knows what they introduced vs. inherited
+- Always include the before → after when the fix is a one-liner
+
+---
+
+## Rules
+
+These rules come from the [Elastic API docs checklist](https://www.elastic.co/docs/contribute-docs/api-docs/checklist), the [core guidelines](https://www.elastic.co/docs/contribute-docs/api-docs/guidelines), the [organize and annotate guide](https://www.elastic.co/docs/contribute-docs/api-docs/organize-annotate), and the [Kibana quickstart](https://www.elastic.co/docs/contribute-docs/api-docs/kibana-api-docs-quickstart). They also incorporate conventions observed across existing Kibana routes.
+
+### 1. Route-level availability (lifecycle status)
+
+Every new route MUST have `availability` in its `options` block with both `stability` and `since`. This powers the version badges and tech preview labels in the published API docs.
+
+Valid `stability` values and their rendered labels:
+
+| Value | Rendered label | Meaning |
+|---|---|---|
+| `'experimental'` | Experimental | Can change or be removed in future versions |
+| `'tech_preview'` | Technical preview | Pre-release, may change |
+| `'stable'` | Generally available | Stable for production use. Not a default: omitting `stability` renders no lifecycle label at all |
+
+`since` is a version string like `'9.2.0'`. It marks the version when the API first shipped. It appears in Elastic Stack docs and is omitted from serverless docs.
+
+Correct pattern:
+
+```typescript
+router.versioned.get({
+  path: '...',
+  options: {
+    tags: ['...', 'oas-tag:Agent builder'],
+    availability: {
+      stability: 'experimental',
+      since: '9.6.0',
+    },
+  },
+})
+```
+
+What to flag:
+- ❌ `availability` block missing entirely
+- ❌ `stability` missing from `availability`
+- ❌ `since` missing from `availability`
+- ❌ `stability` has an invalid value
+
+### 2. Route summary
+
+Every new route MUST have a `summary`. Summaries appear in IDEs, search results, and documentation overviews.
+
+Summary guidelines:
+- **5–45 characters** — keep it short because space is limited in many contexts
+- **Start with a verb** — "Get", "Create", "Update", "Delete"
+- **Use basic verbs** — "Get" not "Retrieve", "Update" not "Modify"
+- **Include articles** — "Delete a space", "Delete spaces"
+- **Sentence case** — capitalize only the first word and proper nouns
+- **No trailing period**
+
+What to flag:
+- ❌ `summary` missing
+- ❌ Summary exceeds 45 characters
+- ❌ Summary does not start with a verb
+- ❌ Summary uses title case or ends with a period
+
+### 3. Route description
+
+Every new route MUST have a `description`. Descriptions support markdown formatting and should cover:
+
+- **Purpose and impact**: what does this operation do and why would a user need it?
+- **Prerequisites or context**: what should users know before calling this endpoint?
+- **Constraints**: valid values, formats, size limits, rate limits
+- **Relationships**: how parameters interact, how multiple values are handled
+
+A good description adds detail beyond the summary. A bad description just restates it.
+
+Good: `'Create a new conversation with an agent. The conversation persists across sessions and can be shared with other users via access control. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/...).'`
+
+Bad: `'Creates a conversation.'` (restates the summary, adds nothing)
+
+What to flag:
+- ❌ `description` missing
+- ❌ Description is just a copy or restatement of the summary
+- ❌ Description omits constraints or prerequisites that a user would need
+
+### 4. Narrative documentation link
+
+Route descriptions should include a trailing sentence linking to the relevant narrative docs page. This is a convention observed across existing Kibana routes. It is most important when sibling routes on the same resource already include such a link.
+
+Pattern:
+
+```typescript
+description:
+  'List all conversations. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/...).',
+```
+
+How to check: compare against sibling routes. If other routes on the same resource include a "To learn more..." or "refer to the [docs](...)" link and the new route does not, flag it.
+
+What to flag:
+- ❌ Missing narrative doc link when siblings include one (warning, not error — the link might not exist yet for a brand-new feature)
+
+### 5. Tags
+
+Routes MUST have at least one `oas-tag:` entry in their `tags` array. Tags group APIs by feature in the published docs.
+
+Tag guidelines:
+- Use sentence case: `'oas-tag:Agent builder'` not `'oas-tag:agent builder'`
+- Use consistent tag names across related routes
+- One `oas-tag` per route for clean navigation
+
+What to flag:
+- ❌ No `oas-tag:*` in the tags array
+- ❌ Tag name uses inconsistent casing vs. sibling routes
+- ❌ Multiple `oas-tag:` entries on a single route
+
+### 6. Path parameter descriptions
+
+Every path parameter MUST have `meta: { description: '...' }` in its schema definition.
+
+Correct pattern:
+
+```typescript
+params: schema.object({
+  conversation_id: schema.string({
+    meta: { description: 'The unique identifier of the conversation.' },
+  }),
+}),
+```
+
+What to flag:
+- ❌ A path parameter has no `meta` or no `description` inside `meta`
+
+### 7. Property descriptions
+
+Every new request body, query, or response property MUST have `meta: { description: '...' }`.
+
+A good property description explains what the value controls, its format, and any constraints:
+
+- ❌ `'The page size.'` — vague, no constraints, no default
+- ✅ `'The maximum number of results to return. Must be between 1 and 1000. Defaults to 20.'`
+
+What to flag:
+- ❌ New property has no `meta` at all
+- ❌ `meta` exists but has no `description`
+- ❌ Description is a single generic phrase that restates the property name (for example, `'The name.'` on a property called `name`)
+
+### 8. Enum value descriptions
+
+When a property uses `schema.oneOf` or `schema.literal` to define a fixed set of values, each value should be described, either in the property description or in the individual schema options.
+
+Skip documenting values that are self-explanatory:
+- `true` / `false`, `asc` / `desc`, `enabled` / `disabled` — obvious from the name
+- `read` / `write` / `admin` — not obvious; what does `admin` grant beyond `write`?
+- `low` / `medium` / `high` — not obvious; what concretely changes at each level?
+
+What to flag:
+- ❌ Enum values with no descriptions when the meaning or behavioral difference is unclear from the name
+
+### 9. Default values
+
+Optional parameters and properties should document their defaults. In Kibana route schemas, this means using `schema.maybe(schema.string({ defaultValue: '...' }))` or documenting the server-side default in the description.
+
+Correct pattern:
+
+```typescript
+page_size: schema.maybe(
+  schema.number({
+    defaultValue: 20,
+    meta: { description: 'Number of results per page. Defaults to 20.' },
+  })
+),
+```
+
+When the default is set server-side (not in the schema), document it in the description instead: `'Sort order. The server defaults to descending if not specified.'`
+
+How to check: compare against sibling routes on the same resource. If a sibling documents its `page_size` default but the new route does not, flag it.
+
+What to flag:
+- ❌ Optional parameter with an undocumented default when the behavior changes based on the value
+
+### 10. Property-level availability
+
+When a new property is added to an existing route's schema, and that property ships in a later version than the route itself, the property MUST have its own `meta.availability` with `stability` and `since`.
+
+How to detect: look for added `schema.maybe(...)` or `schema.object(...)` fields inside an existing route's validation block. If the route has `since: '9.2.0'` and the new property ships in `'9.6.0'`, the property needs its own availability.
+
+Correct pattern:
+
+```typescript
+new_field: schema.maybe(
+  schema.string({
+    meta: {
+      availability: { stability: 'experimental', since: '9.6.0' },
+      description: 'Description of the new field.',
+    },
+  })
+),
+```
+
+What to flag:
+- ❌ New property on an older route has no `meta.availability`
+- ❌ Property has `availability` but is missing `stability` or `since`
+
+### 11. Deprecation
+
+Deprecated routes or properties should be marked. In Kibana, the route's `options` supports a `deprecated` flag, and property descriptions should explain the deprecation.
+
+What to flag:
+- ❌ A property or route is described as deprecated in comments or description text but has no `deprecated: true` marker
+- ❌ Deprecated property has no description explaining what to use instead
+
+### 12. Response examples
+
+New routes SHOULD have an example file referenced via `oasOperationObject`. Examples significantly improve API documentation usability.
+
+Inline TypeScript examples (type-checked at dev time):
+
+```typescript
+.addVersion({
+  version: '2023-10-31',
+  options: {
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              example1: {
+                summary: 'An example request',
+                value: { name: 'Example' } as MyType,
+              },
+            },
+          },
+        },
+      },
+    }),
+  },
+})
+```
+
+YAML file examples:
+
+```typescript
+import path from 'node:path';
+.addVersion({
+  version: '2023-10-31',
+  options: {
+    oasOperationObject: () => path.join(__dirname, 'examples/my_route.yaml'),
+  },
+})
+```
+
+Example YAML structure (in `server/routes/examples/`):
+
+```yaml
+requestBody:
+  content:
+    application/json:
+      examples:
+        example1:
+          summary: Example request
+          description: An example of creating a resource
+          value:
+            name: 'Example'
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          success:
+            summary: Successful response
+            value:
+              id: '12345'
+              name: 'Example'
+```
+
+Example guidelines:
+- Use realistic data, not placeholders
+- Write clear summaries (under 45 characters) for each example
+- Include at least one success response example (HTTP 200)
+- Consider adding `x-codeSamples` for cURL and Console examples
+
+What to flag:
+- ❌ No `oasOperationObject` reference (warning — strongly recommended)
+- ❌ Example file contains placeholder or empty values
+- ❌ No response example for the success case
+
+### 13. Operation ID (advisory only — do not include in the Actions list)
+
+Public routes can optionally set an explicit `operationId`. SDK and CLI generators use this ID as the method/command name; if omitted, the generator derives one from the method and path (for example, `post-foo`), which is often unclear.
+
+Correct pattern:
+
+```typescript
+router.versioned.post({
+  path: '/api/foo',
+  access: 'public',
+  summary: 'Create a foo resource',
+  operationId: 'create-foo',
+  options: { ... },
+});
+```
+
+Guidelines:
+- Use kebab-case `verb-resource` names, for example `create-foo`, `get-foo`, `delete-foo`.
+- Keep operation IDs stable across versions of the same route — don't rename gratuitously.
+
+This is a suggestion, not a compliance rule — do not add it to the ❌ Actions list or count it against the verdict. Only raise it as a one-line side note ("Consider adding an explicit `operationId`") when the user specifically asks about SDK/CLI generation, operation IDs, or when a route in the diff already sets one inconsistently with the kebab-case `verb-resource` convention.
+
+### 14. Cross-check: generated YAML as a diagnostic signal
+
+The YAML files under `oas_docs/output/` are auto-generated. Never suggest editing the YAML directly. Every fix goes in the TypeScript source.
+
+Use the YAML `x-state` values to detect problems:
+
+| YAML `x-state` | TypeScript meaning |
+|---|---|
+| `Experimental; added in 9.6.0` | `availability: { stability: 'experimental', since: '9.6.0' }` |
+| `Technical Preview; added in 9.2.0` | `availability: { stability: 'tech_preview', since: '9.2.0' }` |
+| `Generally available; added in 9.0.0` | `availability: { stability: 'stable', since: '9.0.0' }` |
+| `Added in 9.0.0` (no label) | `availability: { since: '9.0.0' }` — `stability` missing |
+| `Experimental` (no version) | Normal for `kibana.serverless.yaml` — serverless omits `added in` |
+| `''` (empty string, serverless only) | `availability: { since }` with no `stability`; serverless drops `since` and nothing is left |
+| Missing entirely | Missing `availability` block in the TypeScript |
+
+What to flag (always pointing at the TypeScript file):
+- ❌ Empty or missing `x-state` → trace to the TS route and flag missing `availability` or `stability`
+- ❌ YAML label does not match TS stability → flag the TS mismatch
+- The serverless YAML omitting `added in` is expected, not a finding
