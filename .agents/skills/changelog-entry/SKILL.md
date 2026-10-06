@@ -1,6 +1,6 @@
 ---
 name: changelog-entry
-description: Write or review release-note content for Kibana. For PR authors, shapes the PR title, release_note:* label, and "## Release note" body section that the docs team's tooling turns into a changelog entry after merge. For reviewers, checks docs/changelog/<pr-number>.yaml entries and docs/releases/ bundles when a PR changes them. Use when a PR has a release_note:feature, release_note:enhancement, release_note:fix, release_note:breaking, or release_note:deprecation label, when a PR body has or needs a "## Release note" section, or when a PR touches docs/changelog/ or docs/releases/. Applies the Elastic changelog standards (docs-fix-changelog and docs-review-changelog in elastic/elastic-docs-skills) and Kibana's docs/changelog.yml configuration.
+description: Write the release note for a Kibana pull request. Shapes the three things the docs team's tooling turns into a changelog entry after merge: the release_note:* label, the PR title (becomes the release-note title), and the "## Release note" section of the PR body (becomes the description). Use when opening or updating a PR with a release_note:feature, release_note:enhancement, release_note:fix, release_note:breaking, or release_note:deprecation label, when asked for a PR title or release note, or when a PR body needs a "## Release note" section. Applies the Elastic changelog standards (docs-fix-changelog and docs-review-changelog in elastic/elastic-docs-skills) and Kibana's docs/changelog.yml configuration.
 metadata:
   source: https://github.com/elastic/elastic-docs-skills/tree/main/skills/changelogs/docs-fix-changelog
   source_version: "2.6.3"
@@ -8,7 +8,7 @@ metadata:
 
 # Changelog entry
 
-Release notes for Kibana and serverless are generated after merge. At release time the docs team runs `docs-builder` over the merged PRs: the `release_note:*` label becomes the entry `type`, the PR title (with any `[Team]` prefix stripped) becomes the entry `title`, and the `## Release note` section of the PR body becomes the `description`. The result is `docs/changelog/<pr-number>.yaml`, bundled into `docs/releases/`. PR authors do not add that file; they control the three inputs. Write the PR title and `## Release note` section as the final text users will read, because that is what they become.
+Release notes for Kibana and serverless are generated after merge. At release time the docs team runs `docs-builder` over the merged PRs: the `release_note:*` label becomes the entry `type`, the PR title (with any `[Team]` prefix stripped) becomes the entry `title`, and the `## Release note` section of the PR body becomes the `description`. PR authors do not write that entry; they control the three inputs. Write the PR title and `## Release note` section as the final text users will read, because that is what they become.
 
 Accuracy over style. Never trade a correct statement for a better-sounding one. When the PR does not tell you what the user sees, ask; do not infer a symptom.
 
@@ -23,8 +23,6 @@ Read, in this order: PR title, labels, body, linked issues, and the changed file
 
 If the PR title contains an acronym or internal shorthand you cannot resolve from the body or diff, ask what it stands for. Do not guess an expansion.
 
-In automated review (Libra) you receive the PR title, body, base branch, changed-file list, and diff, and you can `read_file` at the PR head. You do not receive labels and cannot run commands. Skip every check below that needs a label.
-
 ## Labels (check first)
 
 Every release-noted PR needs all three. Report any that are missing or wrong; do not add labels yourself unless asked.
@@ -37,19 +35,19 @@ Every release-noted PR needs all three. Report any that are missing or wrong; do
 
 The PR title becomes the changelog `title`, the bullet users see in the release notes. It must stand alone. Shape: `[Verb] [user-visible outcome] [in/on/for feature, app, page, tab, flyout, or integration]`.
 
-Verb, by type. Base form, never third person (`Fix`, not `Fixes`), never a noun phrase or gerund (`Ability to`, `Adding`), never a negative imperative (`Don't`, `Do not`):
+Verb, by label. Base form, never third person (`Fix`, not `Fixes`), never a noun phrase or gerund (`Ability to`, `Adding`), never a negative imperative (`Don't`, `Do not`):
 
-| `type` | Expected leading verbs |
+| Label | Expected leading verbs |
 |---|---|
-| `bug-fix` | `Fix`, `Resolve`, `Correct` |
-| `enhancement` | `Improve`, `Update`, `Optimize`, `Enable`, `Expand`, `Enhance`, `Add` (minor capability) |
-| `feature` | `Add`, `Introduce`, `Enable`, `Support` |
-| `breaking-change` | any clear verb; the title must say what changes for the user |
-| `deprecation` | `Deprecate`, `Remove` |
+| `release_note:fix` | `Fix`, `Resolve`, `Correct` |
+| `release_note:enhancement` | `Improve`, `Update`, `Optimize`, `Enable`, `Expand`, `Enhance`, `Add` (minor capability) |
+| `release_note:feature` | `Add`, `Introduce`, `Enable`, `Support` |
+| `release_note:breaking` | any clear verb; the title must say what changes for the user |
+| `release_note:deprecation` | `Deprecate`, `Remove` |
 
-Type and title must agree. A `bug-fix` titled "Improve ..." or an `enhancement` titled "Fix ..." means one of them is wrong: broken behavior is `bug-fix`, optimizing working behavior is `enhancement`, substantial new capability is `feature`. When you cannot tell from the PR, offer both options (keep the type and rewrite the title, or keep the title and change the type) and say which the PR evidence favors.
+Label and title must agree. A `release_note:fix` titled "Improve ..." or a `release_note:enhancement` titled "Fix ..." means one of them is wrong: broken behavior is a fix, optimizing working behavior is an enhancement, substantial new capability is a feature. When you cannot tell from the PR, offer both options (keep the label and rewrite the title, or keep the title and change the label) and say which the PR evidence favors.
 
-Bug fixes name the symptom, not the restriction. "Don't allow runtime fields to shadow index sort fields" tells users what is now blocked; "Fix shard recovery failures when runtime fields shadow index sort fields" tells them what was broken. If a `bug-fix` title has restriction words (`allow`, `disallow`, `prevent`, `reject`, `validate`, `block`) and no symptom words (`fail`, `error`, `crash`, `hang`, `timeout`, `incorrect`, `missing`), rewrite it symptom-first, using the linked issue's wording when there is one. If the change only adds validation and nothing was failing before, the type is `enhancement`.
+Bug fixes name the symptom, not the restriction. "Don't allow runtime fields to shadow index sort fields" tells users what is now blocked; "Fix shard recovery failures when runtime fields shadow index sort fields" tells them what was broken. If a fix title has restriction words (`allow`, `disallow`, `prevent`, `reject`, `validate`, `block`) and no symptom words (`fail`, `error`, `crash`, `hang`, `timeout`, `incorrect`, `missing`), rewrite it symptom-first, using the linked issue's wording when there is one. If the change only adds validation and nothing was failing before, the label is `release_note:enhancement`.
 
 Describe what users see, not how the code changed. "Fix splitValue nullability coercion when constructing ColorSeries" becomes "Fix inline charts with grey time series for ES|QL queries". Class names, method names, hooks, tasks, saved object types, plugin IDs, flag names, and phrases like "Repro and fix" do not belong in a title.
 
@@ -72,14 +70,14 @@ Terms and formatting:
 
 ## `## Release note` section
 
-The `## Release note` section of the PR body becomes the changelog `description`. Add it to the PR body under exactly that heading (the extractor also accepts `Release note:`). It must be present for a breaking change or deprecation; for other types it is recommended whenever the title alone leaves a question.
+The `## Release note` section of the PR body becomes the changelog `description`. Put it in the PR body under a `Release note` heading at any level (`##` or `###`) or a `Release note:` label; the extractor reads the text that follows. It must be present for a breaking change or deprecation; for other types it is recommended whenever the title alone leaves a question.
 
 - Third-person present, verb first: `Fixes`, `Adds`, `Improves`, `Enables`, `Removes`. Not past tense (`Fixed`), not base form (`Fix`), not "This PR adds".
 - It must add something the title does not: what was wrong and what is now correct for a fix, what you can now do for a feature or enhancement. If it would only restate the title, omit the section. Never "See PR" or "Internal refactoring".
 - Address the reader as "you". Never "users" or "customers".
 - One sentence for a fix or small enhancement. One short paragraph at most for a feature or breaking change. Under 600 characters.
 - Same term and formatting rules as the title: no internal names, backticks for code identifiers, `ES|QL`.
-- `breaking-change` and `deprecation` need `impact` and `action`, also in third-person present. Write them as two labeled paragraphs inside the section (`**Impact:** ...` and `**Action:** ...`) so the docs team can lift them into the entry's `impact` and `action` fields. `impact` says what breaks and who is affected. `action` gives the concrete step, names the replacement API, setting, or workflow, and links to migration guidance when it exists.
+- `release_note:breaking` and `release_note:deprecation` need `impact` and `action`, also in third-person present. Write them as two labeled paragraphs inside the section (`**Impact:** ...` and `**Action:** ...`) so the docs team can lift them into the entry's `impact` and `action` fields. `impact` says what breaks and who is affected. `action` gives the concrete step, names the replacement API, setting, or workflow, and links to migration guidance when it exists.
 
 Links and code inside these fields:
 
@@ -87,60 +85,14 @@ Links and code inside these fields:
 - Links to Kibana docs use the docs path with its `.md` extension (`[Kibana settings](/reference/configuration-reference/general-settings.md)`); links to other Elastic docs use the cross-repo form (`[Reindex](elasticsearch://reference/...md)`). Never `https://www.elastic.co/docs/...` for Elastic docs. External links use the full `https://` URL.
 - Code fences carry a language (`yaml`, `json`, `console`, `bash`); use `console` for Elasticsearch requests.
 
-## The changelog entry
-
-`docs/changelog/<pr-number>.yaml` is generated by the docs team at release time, not added by the PR author. Apply this section when you are asked to write, edit, or review an entry: a docs-team release-notes PR, a correction to a published entry, or an explicit request to supply the file.
-
-```yaml
-prs:
-- https://github.com/elastic/kibana/pull/<pr-number>
-issues:                                   # omit if none
-- https://github.com/elastic/kibana/issues/<n>
-type: bug-fix                             # from the release_note label via docs/changelog.yml
-subtype: api                              # breaking-change only; see docs/changelog.yml
-products:
-- product: kibana
-- product: cloud-serverless               # include only the products the change reaches
-areas:
-- Alerting and reporting                  # exact strings from pivot.areas in docs/changelog.yml
-title: "Fix dashboard filters not applying to embedded visualizations"
-description: "Fixes dashboard filters not being applied to visualizations embedded by reference, so the filtered data matches what you see in the filter bar."
-impact: "..."                             # breaking-change and deprecation only
-action: "..."                             # breaking-change and deprecation only
-```
-
-- `type` comes from the label mapping in `docs/changelog.yml`: `release_note:fix` is `bug-fix`, `release_note:breaking` is `breaking-change`, `release_note:feature` is `feature`, `release_note:enhancement` is `enhancement`, `release_note:deprecation` is `deprecation`.
-- `products`: `kibana` and `cloud-serverless` unless the change cannot reach one of them (a stateful-only setting, a serverless-only project type). Add `observability` or `security` only when a PR label maps to it under `pivot.products`. Never add `versions` or `target` to a product; a PR-linked entry gets its versions from the PR labels.
-- `areas`: exact values from `pivot.areas`, chosen by the PR's labels. Omit the field when no label maps to an area; do not pick `Other` or invent a name.
-- Wrap every text value (`title`, `description`, `impact`, `action`) in double quotes, always, and escape inner double quotes as `\"`. Unquoted `: `, `#`, `[`, `]`, `{`, or `}` break the YAML parse.
-
 ## Before finishing
 
 Check your own output against these and fix it:
 
 1. Would a user who has not read the PR know what changed and why they care, from the title alone?
 2. Is the title a symptom or capability the user can see, not an implementation detail or a new restriction?
-3. Do the `release_note:*` label (or `type`), the title's leading verb, and the release note's leading verb agree?
-4. For an entry file: are all `areas` and `products` values present in `docs/changelog.yml`, and is every text value double-quoted?
+3. Do the `release_note:*` label, the title's leading verb, and the release note's leading verb agree?
+4. Does the PR carry the `release_note:*`, version, and team labels, and does the body have a `Release note` heading with the text under it?
 5. Is anything in the text an internal name, an unexpanded acronym, or a term a serverless user could not see?
 
-## Reviewing a PR
-
-This section applies only when the diff touches `docs/changelog/*.yaml` or `docs/releases/**`. In practice that is a docs-team release-notes PR or a correction to a published entry. An ordinary feature or fix PR has nothing here to review: its release note lives in the title, labels, and body, which are not diff lines, so do not report anything about them. Anchor every finding to a changed line in a changed file and name the rule you applied; do not print a report.
-
-`docs/releases/**` bundles are generated by `docs-builder` from the entries in `docs/changelog/`. A hand edit to a bundle is lost at the next build; report it on the changed lines and point to the entry file (or an amend sidecar next to the bundle) instead. `docs/release-notes/*.md` are hand-maintained by the docs team for stateful releases and are not generated; leave them alone unless the PR is from the docs team.
-
-When the diff contains `docs/changelog/*.yaml`, read `docs/changelog.yml` at the PR head, then check each entry line by line. The `prs` URL names the source PR; the title and body you receive are for the release-notes PR, not that one, so judge the entry on its own text.
-
-- File name is `<pr-number>.yaml` matching the number in `prs`.
-- `type` is one of the values under `pivot.types`, and it agrees with the title's leading verb and the description. Offer both fixes (rewrite the title, or change the type) and say which the entry's own description supports.
-- `title`: base-form verb from the table above, symptom-first for a `bug-fix`, user-visible outcome with a surface, no development prefix or team tag, no implementation names, sentence case, no trailing period. Over 80 characters is a note, not an error, unless the length comes from implementation detail.
-- `description`: third-person present, adds something the title does not. Over 600 characters is a note.
-- Every `areas` value is an exact string under `pivot.areas`; every `products[].product` is `kibana`, `cloud-serverless`, or a value under `pivot.products`; no `versions` or `target` on a product. Report an unknown value with the nearest valid one.
-- `breaking-change` and `deprecation` entries have `impact` and `action`, and `action` names the replacement.
-- A plain (unquoted) text value containing `: `, `#`, `[`, `]`, `{`, or `}` is a finding because it breaks the YAML parse. Do not flag quoting otherwise: an unquoted value without those characters and a block (`>-`) scalar are both fine. Links have descriptive text and no `https://www.elastic.co/docs/` URLs; code fences have a language.
-- No internal names or unexpanded dev acronyms anywhere in `title`, `description`, `impact`, or `action`.
-
-Do not report a missing changelog entry. Entries are generated after merge, so their absence from a PR is expected.
-
-Reference: [Changelogs content type](https://www.elastic.co/docs/contribute-docs/content-types/changelogs) for the schema and the title cleanup checklist, [Elastic style guide](https://www.elastic.co/docs/contribute-docs/style-guide) for wording.
+Reference: [Changelogs content type](https://www.elastic.co/docs/contribute-docs/content-types/changelogs) for the title cleanup checklist, [Elastic style guide](https://www.elastic.co/docs/contribute-docs/style-guide) for wording.
