@@ -5,11 +5,14 @@ on:
     types:
       - opened
       - synchronize
-    paths:
-      - 'packages/kbn-rspack-optimizer/limits.yml'
+      - edited
+    # No `paths:` filter. A retarget can drop limits.yml from the diff, and the run is what
+    # deletes a stale comment. The script checks the PR's files itself.
 
 jobs:
   comment:
+    # Ignore title and description edits; only react to base branch changes.
+    if: github.event.action != 'edited' || github.event.changes.base
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write

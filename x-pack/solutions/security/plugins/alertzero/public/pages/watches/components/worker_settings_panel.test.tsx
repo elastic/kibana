@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -37,11 +40,37 @@ const createWorker = (workflowId: string | null): Worker => ({
   },
 });
 
-const renderPanel = (workflowId: string | null, isAccordion: boolean) => {
+const renderPanel = (
+  workflowId: string | null,
+  isAccordion: boolean,
+  {
+    enabled = true,
+    serviceAccountId,
+    showManagedWorkflows = true,
+    canChangeAdvancedSettings = true,
+  }: {
+    enabled?: boolean;
+    serviceAccountId?: string;
+    showManagedWorkflows?: boolean;
+    canChangeAdvancedSettings?: boolean;
+  } = {}
+) => {
   const core = coreMock.createStart();
+  core.http.get.mockResolvedValue(undefined);
   core.application.getUrlForApp.mockImplementation(
     (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
   );
+  const settings = {
+    ...createWorker(workflowId).settings,
+    ...(serviceAccountId ? { serviceAccountId } : {}),
+  };
+  core.settings.client.get.mockReturnValue(showManagedWorkflows);
+  core.settings.client.get$.mockReturnValue(of(showManagedWorkflows));
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    advancedSettings: { show: true, save: canChangeAdvancedSettings },
+    workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
+  };
 
   render(
     <KibanaContextProvider services={core}>
@@ -50,8 +79,8 @@ const renderPanel = (workflowId: string | null, isAccordion: boolean) => {
         isAccordion={isAccordion}
         isExpanded
         onToggle={jest.fn()}
-        enabled
-        settings={createWorker(workflowId).settings}
+        enabled={enabled}
+        settings={settings}
         warningReasons={[]}
         settingsLocked={false}
         isSaving={false}
@@ -94,6 +123,35 @@ describe('WorkerSettingsPanel view executions link', () => {
   it.each([
     ['accordion', true],
     ['single-Worker', false],
+  ])(
+    'offers the managed workflows setting instead of the workflow when it is off (%s)',
+    (_layout, isAccordion) => {
+      renderPanel(WORKFLOW_ID, isAccordion, { showManagedWorkflows: false });
+
+      const link = screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`);
+      expect(link).not.toHaveAttribute('href');
+
+      fireEvent.click(link);
+
+      expect(
+        screen.getByText(
+          'Execution history lives in Managed workflows, which is turned off for this space.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}-open-advanced-settings`)
+      ).toHaveAttribute(
+        'href',
+        `/app/management/kibana/settings?query=${encodeURIComponent(
+          WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID
+        )}`
+      );
+    }
+  );
+
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
   ])('omits the link when the per-space workflow is not installed (%s)', (_layout, isAccordion) => {
     renderPanel(null, isAccordion);
 
@@ -101,5 +159,31 @@ describe('WorkerSettingsPanel view executions link', () => {
       screen.queryByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel service account', () => {
+  it('shows that saving an enabled worker requires a service account', () => {
+    renderPanel(WORKFLOW_ID, false);
+
+    expect(screen.getByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)).toHaveTextContent(
+      'Select a service account to save while this worker stays on. You can turn it off without one.'
+    );
+  });
+
+  it('hides that notice when the worker is off', () => {
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
+
+    expect(
+      screen.queryByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides that notice when an account is selected', () => {
+    renderPanel(WORKFLOW_ID, false, { serviceAccountId: 'kibana/az-worker-1' });
+
+    expect(
+      screen.queryByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)
+    ).not.toBeInTheDocument();
   });
 });

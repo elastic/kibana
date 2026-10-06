@@ -27,7 +27,6 @@ const createHandlerContext = () =>
   ({
     esClient: { asCurrentUser: {} },
     attachments: { getActive: () => [] } as unknown as AttachmentStateManager,
-    experimentalFeatures: { datasets: false },
     modelProvider: {},
     logger: { debug: jest.fn() },
     events: {},

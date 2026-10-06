@@ -14,10 +14,7 @@ import type {
   FindActionPoliciesResponse,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import {
-  ALERTING_V2_ACTION_POLICY_API_PATH,
-  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
-} from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
 import { COMMON_HEADERS } from '../constants';
 
 export interface ActionPoliciesApiService {
@@ -55,7 +52,7 @@ export const getActionPoliciesApiService = ({
     measurePerformanceAsync(log, 'actionPolicies.list', async () => {
       const response = await kbnClient.request<FindActionPoliciesResponse>({
         method: 'GET',
-        path: ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
+        path: ALERTING_V2_ACTION_POLICY_API_PATH,
         query,
       });
       return response.data;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getScoreDirection, type Direction } from '@kbn/evals-common';
+import { getJudgeScoreDirection, type Direction } from '@kbn/evals-common';
 import { createPrompt } from '@kbn/inference-common';
 import type { Prompt, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
@@ -72,7 +72,7 @@ const buildScoreProperty = (score: JudgeScoreDefinition): ToolSchemaType => {
         }
       : {
           type: 'number',
-          description: NUMERIC_SCORE_DESCRIPTIONS[getScoreDirection(score)],
+          description: NUMERIC_SCORE_DESCRIPTIONS[getJudgeScoreDirection(score)],
         };
 
   const judgementKey = score.type === 'categorical' ? 'label' : 'score';

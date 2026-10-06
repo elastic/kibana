@@ -276,6 +276,7 @@ dependsOn:
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/agent-builder-browser'
   - '@kbn/agentic-investigations-common'
+  - '@kbn/agentic-investigations-plugin'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/security-mitre-attack-common'
   - '@kbn/lazy-object'
@@ -319,6 +320,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
   - '@kbn/test-es-server'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
