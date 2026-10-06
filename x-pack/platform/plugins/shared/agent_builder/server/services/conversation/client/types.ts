@@ -11,10 +11,12 @@ import type {
   ConversationRoundStepMixin,
   ReasoningStep,
   CompactionStep,
+  SubstitutionStep,
   BackgroundAgentCompleteStep,
   TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
+  PreExecutionWorkflowStep,
   SubagentRosterUpdatedStep,
   ConversationRoundStepType,
   Conversation,
@@ -26,7 +28,12 @@ import type {
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
-import type { TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
+import type {
+  ConversationEvent,
+  ConversationWriteSource,
+  TimelineEvent,
+  UserIdAndName,
+} from '@kbn/agent-builder-common';
 import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
@@ -77,8 +84,8 @@ export interface GetEventsOptions {
 /** Appends timeline events onto a conversation.*/
 export interface AppendEventsRequest {
   id: string;
-  /** Timeline events to append; already materialized (ids, actor, created_at set). */
-  events: TimelineEvent[];
+  /** Events to append; must be fully materialized (id, actor, created_at set). */
+  events: ConversationEvent[];
   /** Generated title to persist in the same write (rides the END append). */
   title?: string;
   /** Round status to persist alongside the append. */
@@ -163,7 +170,9 @@ export type PersistentConversationRoundStep =
   | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
-  | SubagentRosterUpdatedStep;
+  | PreExecutionWorkflowStep
+  | SubagentRosterUpdatedStep
+  | SubstitutionStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.
@@ -217,3 +226,9 @@ export type NormalizedConversation = Conversation & {
   read_by?: ConversationReadByEntry[];
   pinned_by?: ConversationPinnedByEntry[];
 };
+
+/** Options of every conversation write that can emit `ai.conversation.updated`. */
+export interface ConversationWriteOptions {
+  /** The code path performing the write, recorded on the trigger event. */
+  source: ConversationWriteSource;
+}

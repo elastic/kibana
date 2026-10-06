@@ -32,8 +32,11 @@ export function useManagedOtlp(): UseManagedOtlpResult {
 
   const isServerless = Boolean(cloud?.isServerlessEnabled);
   const managedOtlpUrl = cloud?.managedOtlp?.url;
-  const isFeatureEnabled =
-    isServerless || featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false);
+  const isManagedOtlpFlagEnabled = featureFlags.useBooleanValue(
+    IS_MANAGED_OTLP_SERVICE_ENABLED,
+    false
+  );
+  const isFeatureEnabled = isServerless || isManagedOtlpFlagEnabled;
   const available = isFeatureEnabled && Boolean(managedOtlpUrl);
   const endpoint = available && managedOtlpUrl ? `${managedOtlpUrl}:443` : undefined;
 

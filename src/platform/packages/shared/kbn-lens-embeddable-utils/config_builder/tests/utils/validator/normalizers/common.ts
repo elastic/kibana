@@ -53,8 +53,6 @@ import { toApiFieldSettings } from '../../../../transforms/columns/field_setting
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const COMMON_STATE_IGNORE_PATHS = [
-  'savedObjectId', // panel-level SO reference, not part of LensAttributes
-  'state.visualization.title', // removed by-value nested title
   // TODO: check missing properties striped out in transforms
   'state.datasourceStates.formBased.layers.*.indexPatternId',
   'state.datasourceStates.formBased.currentIndexPatternId',
@@ -801,16 +799,16 @@ const isLastValueColumn = (col: GenericIndexPatternColumn): col is LastValueInde
   col.operationType === 'last_value';
 
 /**
- * Default a missing/`null` `params.showArrayValues` to `true` on `last_value` columns on the ORIGINAL
- * side to match the 8.2.0 saved-object migration `commonSetLastValueShowArrayValues`
- * (`server/migrations/common_migrations.ts`) that coerces any non-boolean `showArrayValues` to `true` at load.
+ * Default a missing/`null` `params.showArrayValues` to `false` on `last_value` columns on the ORIGINAL
+ * side to match the `?? false` fallback in `fromLastValueLensStateToAPI`
+ * (`config_builder/transforms/columns/last_value.ts`).
  */
 const normalizeLastValueShowArrayValues = (col: GenericIndexPatternColumn): void => {
   if (!isLastValueColumn(col)) {
     return;
   }
   if (col.params.showArrayValues == null) {
-    col.params.showArrayValues = true;
+    col.params.showArrayValues = false;
   }
 };
 
@@ -1218,6 +1216,23 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     // if the transform ever re-emits it, transformed still carries it and the strict compare fails.
     if ('type' in attributes && attributes.type === 'lens') {
       delete attributes.type;
+    }
+
+    // 'savedObjectId' is the twin of 'type': a legacy by-reference pointer that old library saves baked
+    // into the stored attributes and unlink copied into by-value panels. It is not part of LensAttributes,
+    // is never read at runtime (the link lives on the panel-level ref_id), and is dropped by toAPIFormat.
+    if ('savedObjectId' in attributes) {
+      delete attributes.savedObjectId;
+    }
+
+    // 'state.visualization.title' is a legacy default the XY/heatmap `initialize()` wrote for freshly
+    // created charts ('Empty XY chart' / 'Empty Heatmap chart'). It is untyped (absent from the
+    // visualization state types) and never read at render: the displayed title comes from the panel-level
+    // title when set, otherwise the document `attributes.title` (`defaultTitle$`) — never from
+    // `state.visualization.title`. It is dropped by toAPIFormat.
+    const { visualization } = attributes.state;
+    if (isRecord(visualization) && 'title' in visualization) {
+      delete visualization.title;
     }
 
     // Canonicalize filters and collect (in a single pass) the reference names they consumed, so the

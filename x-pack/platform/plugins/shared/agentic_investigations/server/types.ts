@@ -5,33 +5,47 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type {
-  WorkflowsExtensionsServerPluginSetup,
-  WorkflowsExtensionsServerPluginStart,
-} from '@kbn/workflows-extensions/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ProposalsService } from './proposals/services/proposals_service';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { ImpactReadClient } from './impact/services/impact_client';
+import type { SubjectsClient } from './subjects/services/subjects_client';
+import type { EscalationsService } from './escalations/services/escalations_service';
 
 export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
+  /**
+   * No API is read from it. Required for ordering: it registers the
+   * `escalation` and `investigation` conversation templates this plugin's
+   * entities are built on, and `EscalationsService` throws at runtime without
+   * them.
+   */
+  agentBuilderPlatform: AgentBuilderPlatformPluginSetup;
+  /**
+   * Registers the readonly investigation_impact, investigation_subject, and
+   * investigation_hypotheses attachment types and the `agentic_investigations.set_impact` and
+   * `agentic_investigations.set_hypotheses` tools.
+   */
+  agentBuilder: AgentBuilderPluginSetup;
+  /** Registers Impact workflow steps. */
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  workflowsManagement: WorkflowsServerPluginSetup;
-  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
   /**
-   * Needed to authorize a principal that did not arrive through a route — a
-   * workflow execution deciding or writing a proposal. Optional because Kibana
-   * can run without it; the privilege checks fail closed when it is absent.
+   * Needed to authorize an in-process impact read, which bypasses the route's
+   * `security.authz`. Optional because Kibana can run without it; the privilege
+   * checks fail closed when it is absent.
    */
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  proposals?: ProposalsPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 }
 
 /**
@@ -40,7 +54,19 @@ export interface AgenticInvestigationsStartDependencies {
  * per entity this plugin owns.
  */
 export interface AgenticInvestigationsPluginStart {
-  getProposalsService: () => ProposalsService;
+  /**
+   * Request-scoped impact reads. Checks the investigations manage privilege and
+   * derives the space from the request, because in-process callers bypass
+   * route `security.authz`.
+   */
+  getImpactClient: (request: KibanaRequest) => ImpactReadClient;
+  /**
+   * Request-scoped investigation subjects: record them when starting or following up on an
+   * investigation, find investigations by subject, and claim subjects for a race-safe start.
+   * Checks the investigations manage privilege; space and user come from the request.
+   */
+  getSubjectsClient: (request: KibanaRequest) => SubjectsClient;
+  getEscalationsService: () => EscalationsService;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

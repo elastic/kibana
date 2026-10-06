@@ -130,6 +130,8 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    licensing,
+    deploymentInfo,
     deductiveRegister,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
@@ -212,8 +214,8 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       agents,
-      attachments,
       eventBus: conversationEventBus,
+      conversationEvents,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -231,6 +233,7 @@ export class ServiceManager {
       conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
+      conversationEventsService: conversationEvents,
       skillServiceStart: skillsServiceStart,
       pluginsServiceStart: plugins,
       trackingService,
@@ -239,6 +242,8 @@ export class ServiceManager {
       getExecutionService,
       searchInferenceEndpoints,
       conversationTemplates: conversationTemplatesStart,
+      licensing,
+      deploymentInfo,
       deductiveRegister,
     });
     runner = runnerFactory.getRunner();

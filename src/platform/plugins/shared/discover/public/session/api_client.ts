@@ -7,51 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildPath, isHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath, isHttpFetchError, type IHttpFetchError } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearchType, type DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
-  DISCOVER_SESSION_API_BASE_PATH,
+  DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../common/constants';
 import type {
-  DiscoverSessionApiDataInput,
-  DiscoverSessionApiResponse,
-  DiscoverSessionGetResponse,
-} from '../../server';
+  DiscoverSessionInternalDataInput,
+  DiscoverSessionInternalResponse,
+  DiscoverSessionInternalGetResponse,
+} from '../../server/api/internal_schema';
 import type { deserializeEsqlControls } from '../../common/session/control_panels';
 
 export interface DiscoverSessionClient {
-  create: (data: DiscoverSessionRequestData) => Promise<DiscoverSessionApiResponse>;
-  get: (id: string) => Promise<DiscoverSessionGetResult>;
-  upsert: (id: string, data: DiscoverSessionRequestData) => Promise<DiscoverSessionApiResponse>;
+  create: (data: DiscoverSessionClientRequestData) => Promise<DiscoverSessionInternalResponse>;
+  get: (id: string) => Promise<DiscoverSessionClientGetResult>;
+  upsert: (
+    id: string,
+    data: DiscoverSessionClientRequestData
+  ) => Promise<DiscoverSessionInternalResponse>;
 }
 
-export type DiscoverSessionRequestData = Omit<DiscoverSessionApiDataInput, 'tabs'> & {
-  tabs: DiscoverSessionRequestTab[];
+export type DiscoverSessionClientRequestData = Omit<DiscoverSessionInternalDataInput, 'tabs'> & {
+  tabs: DiscoverSessionClientRequestTab[];
 };
 
-export type DiscoverSessionRequestTab<Tab = DiscoverSessionApiDataInput['tabs'][number]> = {
+export type DiscoverSessionClientRequestTab<
+  Tab = DiscoverSessionInternalDataInput['tabs'][number]
+> = {
   [Key in keyof Tab]: Key extends 'control_panels'
     ? ReturnType<typeof deserializeEsqlControls>
     : Tab[Key];
 };
 
-export type DiscoverSessionResolve = Pick<
+export type DiscoverSessionResolveMetadata = Pick<
   NonNullable<DiscoverSession['sharingSavedObjectProps']>,
   'outcome' | 'aliasTargetId' | 'aliasPurpose'
 >;
 
-export type DiscoverSessionGetResult = DiscoverSessionGetResponse & {
-  resolve: DiscoverSessionResolve;
+export type DiscoverSessionClientGetResult = DiscoverSessionInternalGetResponse & {
+  resolve: DiscoverSessionResolveMetadata;
 };
 
-/** Creates the browser client used by Discover's core session flows. */
+/** Uses the internal session routes so Discover keeps inline Data View IDs. */
 export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionClient => ({
   create: (data) =>
     requestWithReadableError(() =>
-      http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
+      http.post<DiscoverSessionInternalResponse>(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
         version: DISCOVER_SESSION_API_VERSION,
         body: JSON.stringify(data),
       })
@@ -60,7 +65,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
   get: (id) =>
     requestWithReadableError(
       async () => {
-        const { body, response } = await http.get<DiscoverSessionGetResponse>(
+        const { body, response } = await http.get<DiscoverSessionInternalGetResponse>(
           buildDiscoverSessionPath(id),
           {
             version: DISCOVER_SESSION_API_VERSION,
@@ -75,14 +80,14 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
             aliasTargetId: response?.headers.get('kbn-resolve-alias-target-id') ?? undefined,
             aliasPurpose: response?.headers.get('kbn-resolve-purpose') ?? undefined,
           },
-        } as DiscoverSessionGetResult;
+        } as DiscoverSessionClientGetResult;
       },
       () => new SavedObjectNotFound({ type: SavedSearchType, id })
     ),
 
   upsert: (id, data) =>
     requestWithReadableError(() =>
-      http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
+      http.put<DiscoverSessionInternalResponse>(buildDiscoverSessionPath(id), {
         version: DISCOVER_SESSION_API_VERSION,
         body: JSON.stringify(data),
       })
@@ -92,9 +97,9 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
 
 /** Builds the path for one Discover session. */
 const buildDiscoverSessionPath = (id: string) =>
-  buildPath(`${DISCOVER_SESSION_API_BASE_PATH}/{id}`, { id });
+  buildPath(`${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/{id}`, { id });
 
-/** Preserves server error details while allowing callers to handle missing sessions separately. */
+/** Preserves the server message through Redux and handles missing sessions separately. */
 const requestWithReadableError = async <T>(
   request: () => Promise<T>,
   getNotFoundError?: () => Error
@@ -106,8 +111,8 @@ const requestWithReadableError = async <T>(
       throw getNotFoundError();
     }
 
-    const message = getResponseErrorMessage(error);
-    if (message) {
+    if (isHttpFetchError(error)) {
+      const message = getResponseErrorMessage(error) || error.message;
       throw new Error(message, { cause: error });
     }
 
@@ -116,11 +121,11 @@ const requestWithReadableError = async <T>(
 };
 
 /** Returns the human-readable message included in an HTTP error response. */
-const getResponseErrorMessage = (error: unknown) => {
-  if (!isHttpFetchError(error) || !error.body || typeof error.body !== 'object') {
+const getResponseErrorMessage = ({ body }: IHttpFetchError): string | undefined => {
+  if (!body || typeof body !== 'object' || !('message' in body)) {
     return undefined;
   }
 
-  const { message } = error.body as { message?: unknown };
+  const { message } = body;
   return typeof message === 'string' ? message : undefined;
 };

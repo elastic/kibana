@@ -11,37 +11,19 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   pageTitle: i18n.translate('xpack.alertzero.queue.pageTitle', {
     defaultMessage: 'AlertZero - Proposals queue',
   }),
-  loading: i18n.translate('xpack.alertzero.queue.loading', {
-    defaultMessage: 'Loading investigations...',
+  assignSuccess: i18n.translate('xpack.alertzero.queue.assignSuccess', {
+    defaultMessage: 'Assignees updated',
   }),
-  loadError: i18n.translate('xpack.alertzero.queue.loadError', {
-    defaultMessage: 'Unable to load the investigation queue.',
+  assignError: i18n.translate('xpack.alertzero.queue.assignError', {
+    defaultMessage: 'Could not update assignees',
   }),
-  emptyQueue: i18n.translate('xpack.alertzero.queue.emptyQueue', {
-    defaultMessage: 'No items in the queue.',
-  }),
-  conversationNotFound: (conversationId: string) =>
-    i18n.translate('xpack.alertzero.queue.conversationNotFound', {
-      defaultMessage: 'No investigation exists for conversation id {conversationId}.',
-      values: { conversationId },
-    }),
 });
 
-/** Keyed by the HTTP status the proposals route returns for a refused decision. */
-export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Object.freeze({
-  400: i18n.translate('xpack.alertzero.queue.decisionInvalidInput', {
-    defaultMessage: 'The action rejected its inputs, so nothing was run.',
+export const COPY_LINK_TOASTS = Object.freeze({
+  copied: i18n.translate('xpack.alertzero.queue.copyLinkCopied', {
+    defaultMessage: 'Link copied',
   }),
-  404: i18n.translate('xpack.alertzero.queue.decisionMissing', {
-    defaultMessage: 'This action no longer exists. Reload to see the current queue.',
-  }),
-  409: i18n.translate('xpack.alertzero.queue.decisionConflict', {
-    defaultMessage: 'This action was already decided. Reload to see the current queue.',
-  }),
-  410: i18n.translate('xpack.alertzero.queue.decisionExpired', {
-    defaultMessage: 'This action expired before it was submitted, so it was not run.',
-  }),
-  default: i18n.translate('xpack.alertzero.queue.decisionFailed', {
-    defaultMessage: 'The decision could not be submitted. Try again.',
+  failed: i18n.translate('xpack.alertzero.queue.copyLinkFailed', {
+    defaultMessage: 'Could not copy the link',
   }),
 });

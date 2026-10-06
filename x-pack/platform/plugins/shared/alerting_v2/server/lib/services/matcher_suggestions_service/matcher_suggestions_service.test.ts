@@ -27,7 +27,42 @@ const buildSearchResponse = (
   },
 });
 
-describe('MatcherSuggestionsService.getDataFieldNames', () => {
+describe('MatcherSuggestionsService.getSuggestions', () => {
+  let esClient: ReturnType<typeof createMockEsClient>;
+  let service: MatcherSuggestionsService;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    esClient = createMockEsClient();
+    service = new MatcherSuggestionsService(esClient);
+  });
+
+  it('suggests the alert statuses for alert_status without querying', async () => {
+    expect(await service.getSuggestions('alert_status', 'rec')).toEqual(['recovering']);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it.each(['episode_status', 'episode_id'])('suggests nothing for %s', async (field) => {
+    expect(await service.getSuggestions(field, '')).toEqual([]);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('suggests the alert.id values for alert_id', async () => {
+    esClient.search.mockResolvedValue({
+      ...buildSearchResponse([]),
+      aggregations: { suggestions: { buckets: [{ key: 'alert-1' }] } },
+    } as SearchResponse<unknown>);
+
+    expect(await service.getSuggestions('alert_id', 'al')).toEqual(['alert-1']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: { suggestions: { terms: expect.objectContaining({ field: 'alert.id' }) } },
+      })
+    );
+  });
+});
+
+describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
   let esClient: ReturnType<typeof createMockEsClient>;
   let service: MatcherSuggestionsService;
 
@@ -49,20 +84,20 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   it('queries with the original four filter clauses when no matcher is provided', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([{ data: { 'host.name': 'a' } }]));
 
-    await service.getDataFieldNames();
+    await service.getRuleEventFieldNames();
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
     expect(filters[0]).toEqual({ term: { type: 'alert' } });
     expect(filters[1]).toEqual({ range: { '@timestamp': { gte: 'now-24h' } } });
     expect(filters[2]).toEqual({ exists: { field: 'data' } });
-    expect(filters[3]).toMatchObject({ terms: { 'episode.status': expect.any(Array) } });
+    expect(filters[3]).toMatchObject({ terms: { 'alert.status': expect.any(Array) } });
   });
 
   it('appends matcher-derived filters to bool.filter when a valid matcher is provided', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('episode_id: "abc"');
+    await service.getRuleEventFieldNames('alert_id: "abc"');
 
     const filters = getSearchFilters();
     expect(filters.length).toBeGreaterThan(4);
@@ -71,7 +106,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   it('falls back to the original four filters when the matcher is malformed', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('not valid kql (((');
+    await service.getRuleEventFieldNames('not valid kql (((');
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
@@ -80,7 +115,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   it('falls back to the original four filters when every matcher clause is unsupported', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('unknown_field: "x"');
+    await service.getRuleEventFieldNames('unknown_field: "x"');
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
@@ -95,7 +130,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
       ])
     );
 
-    const result = await service.getDataFieldNames();
+    const result = await service.getRuleEventFieldNames();
 
     expect(result).toEqual(['data.count', 'data.host.name']);
   });
@@ -105,7 +140,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });
 
-    const result = await service.getDataFieldNames();
+    const result = await service.getRuleEventFieldNames();
 
     expect(result).toEqual([]);
   });
@@ -114,6 +149,6 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
     const error = new Error('boom');
     esClient.search.mockRejectedValue(error);
 
-    await expect(service.getDataFieldNames()).rejects.toBe(error);
+    await expect(service.getRuleEventFieldNames()).rejects.toBe(error);
   });
 });

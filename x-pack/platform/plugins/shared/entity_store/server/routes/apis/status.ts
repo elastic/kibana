@@ -43,13 +43,18 @@ interface LegacyEngineDescriptorV1 {
 
 type StatusEngine = Omit<
   GetStatusSuccessResult['engines'][number],
-  'versionState' | 'logExtractionState' | 'logExtractionConfig'
+  | 'versionState'
+  | 'logExtractionState'
+  | 'logExtractionConfig'
+  | 'nonPriorityLogExtractionConfig'
+  | 'nonPriorityLogExtractionState'
 > &
   LegacyEngineDescriptorV1;
 
 export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
   engines: StatusEngine[];
+  excludedUserNames?: string[];
 }
 
 const querySchema = z.object({
@@ -63,7 +68,14 @@ function toPublicEngine(
   engine: GetStatusSuccessResult['engines'][number],
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
-  const { versionState, logExtractionState, logExtractionConfig, ...rest } = engine;
+  const {
+    versionState,
+    logExtractionState,
+    logExtractionConfig,
+    nonPriorityLogExtractionConfig,
+    nonPriorityLogExtractionState,
+    ...rest
+  } = engine;
   const {
     delay,
     timeout,
@@ -140,7 +152,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
             });
           }
 
-          const { logsExtractionConfig, logsExtractionConfigByType } =
+          const { logsExtractionConfig, logsExtractionConfigByType, excludedUserNames } =
             rest as GetStatusSuccessResult;
 
           return res.ok({
@@ -152,6 +164,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
                   logsExtractionConfigByType[engine.type] ?? logsExtractionConfig
                 )
               ),
+              excludedUserNames,
             },
           });
         }

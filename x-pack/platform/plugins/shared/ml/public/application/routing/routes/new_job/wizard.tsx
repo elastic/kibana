@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -196,7 +196,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
     index,
     savedSearchId,
     project_routing: projectRoutingFromUrl,
-  }: Record<string, any> = parse(location.search, { sort: false });
+  }: Record<string, any> = queryString.parse(location.search, { sort: false });
 
   const {
     services: {

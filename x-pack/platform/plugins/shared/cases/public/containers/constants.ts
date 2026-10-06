@@ -36,7 +36,6 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.fieldDefinitions, 'list', params] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
-  casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
   casesStatuses: () => [...casesQueriesKeys.casesList(), 'statuses'] as const,
   cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
   similarCases: (id: string, params: unknown) =>
@@ -72,6 +71,7 @@ export const casesQueriesKeys = {
   alertFeatureIds: (alertIds: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
+  workflowTagAggs: () => [...casesQueriesKeys.all, 'workflow-tag-aggs'] as const,
 };
 
 export const casesMutationsKeys = {

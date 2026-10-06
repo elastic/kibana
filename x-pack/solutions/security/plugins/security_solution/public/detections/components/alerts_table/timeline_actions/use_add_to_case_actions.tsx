@@ -10,19 +10,15 @@ import { useCallback, useMemo } from 'react';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useCanAttachToCase } from '../../../../cases/attachments/hooks/use_can_attach_to_case';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { AlertTableContextMenuItem } from '../types';
 import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
-
-export const ADD_TO_CASE_ACTION_IDS = {
-  addToCase: 'add-to-case-action',
-} as const;
+import { ADD_TO_CASE_ACTION_IDS } from '../../../../common/constants/action_ids';
 
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
-  ariaLabel?: string;
   ecsData: Ecs;
   nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
@@ -32,7 +28,6 @@ export interface UseAddToCaseActions {
 
 export const useAddToCaseActions = ({
   onMenuItemClick,
-  ariaLabel,
   ecsData,
   nonEcsData,
   onSuccess,
@@ -40,7 +35,7 @@ export const useAddToCaseActions = ({
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
-  const userCasesPermissions = casesUi.helpers.canUseCases([APP_ID]);
+  const canAttach = useCanAttachToCase();
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');
@@ -98,25 +93,19 @@ export const useAddToCaseActions = ({
   }, [caseAttachments, onActionClick, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
-    if (!userCasesPermissions.createComment || !userCasesPermissions.read) {
+    if (!canAttach) {
       return [];
     }
 
     return [
       {
-        'aria-label': ariaLabel,
         'data-test-subj': ADD_TO_CASE_ACTION_IDS.addToCase,
         key: ADD_TO_CASE_ACTION_IDS.addToCase,
         onClick: handleAddToCaseClick,
         name: ADD_TO_CASE,
       },
     ];
-  }, [
-    ariaLabel,
-    handleAddToCaseClick,
-    userCasesPermissions.createComment,
-    userCasesPermissions.read,
-  ]);
+  }, [handleAddToCaseClick, canAttach]);
 
   return {
     addToCaseActionItems,

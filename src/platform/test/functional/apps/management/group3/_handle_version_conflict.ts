@@ -30,6 +30,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const toasts = getService('toasts');
 
+  // Migration recommendation: MIGRATE TO SCOUT (stateful only)
+  // Tests version conflict notification when saving a scripted field (test 1) and when saving a
+  // field format change (test 2). Scripted fields are deprecated and disabled by default, but can
+  // be re-enabled via `data_views.scripted_fields_enabled: true` in kibana.yml — the Scout config
+  // should set this flag so both tests can run. The version conflict UX is worth covering until
+  // scripted fields are fully removed (not just deprecated). Once removal lands, delete this file.
+  // Note: test 2 (field format version conflict) does not use scripted fields itself — only the
+  // setup fixture does — so it could survive removal independently if separated into its own test.
+  // Serverless: scripted fields are unconditionally disabled on serverless (confirmed by
+  // x-pack/platform/test/serverless/functional/test_suites/management/data_views/serverless.ts —
+  // "Scripted fields tab is missing"). Do not port this test to the serverless Scout suite.
   describe('FOO index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);

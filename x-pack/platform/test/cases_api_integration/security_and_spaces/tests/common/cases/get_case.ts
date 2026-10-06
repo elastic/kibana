@@ -16,7 +16,8 @@ import {
   getCaseWithoutCommentsResp,
   postCommentUserReq,
   getPostCaseRequest,
-  postCommentAlertReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
 } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
@@ -69,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentAlertReq, postCommentAlertReq],
+        params: [postUnifiedAlertReq, postUnifiedAlertReq],
       });
 
       const theCase = await getCase({ supertest, caseId: postedCase.id });
@@ -83,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentAlertReq, postCommentUserReq],
+        params: [postUnifiedAlertReq, postUnifiedCommentReq],
       });
 
       const theCase = await getCase({ supertest, caseId: postedCase.id });

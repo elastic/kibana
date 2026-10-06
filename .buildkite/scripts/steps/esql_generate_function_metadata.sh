@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VALIDATION_PACKAGE_DIR="src/platform/packages/shared/kbn-esql-language"
+VALIDATION_PACKAGE_DIR="src/platform/packages/shared/esql/kbn-esql-language"
 EDITOR_PACKAGE_DIR="src/platform/packages/private/kbn-language-documentation"
 SCRIPTS_PACKAGE_DIR="src/platform/packages/private/kbn-esql-scripts"
 GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
@@ -82,7 +82,7 @@ main () {
   PR_BODY='This PR updates the function definitions and inline docs based on the latest metadata from Elasticsearch.'
 
   # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
+  pr_search_result=$(gh pr list --search "$PR_TITLE (author:$KIBANA_MACHINE_USERNAME OR author:app/elastic-vault-github-plugin-prod)" --state open --limit 1 --json title -q ".[].title")
 
   if [ "$pr_search_result" == "$PR_TITLE" ]; then
     echo "PR already exists. Exiting."

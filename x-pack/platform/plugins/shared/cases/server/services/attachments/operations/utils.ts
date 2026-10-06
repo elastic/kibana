@@ -10,11 +10,13 @@ import { passThroughTransformer } from '../../../common/attachments/base';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
 import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
+import type { AttachmentV2, UnifiedAttachment } from '../../../../common/types/domain';
 import {
   type AttachmentPatchAttributesV2,
   UnifiedAttachmentAttributesRt,
+  UnifiedAttachmentRt,
 } from '../../../../common/types/domain/attachment/v2';
-import { isMigratedAttachmentType } from '../../../../common/utils/attachments';
+import { isConvertibleToUnified } from '../../../../common/utils/attachments';
 import {
   getAttachmentTypeFromAttributes,
   getAttachmentTypeTransformers,
@@ -26,8 +28,9 @@ export type ModeTransformedAttributes =
   | { isUnified: false; attributes: AttachmentPersistedAttributes };
 
 /**
- * Decides unified vs legacy shape on read. Migrated types (incl. legacy `actions`)
- * fold to their unified shape in-memory; the stored SO is never mutated.
+ * Decides unified vs legacy shape on read.
+ * Does not consult the registry, so rows stay readable when their plugin stops registering
+ * (e.g. ML on a basic license).
  */
 export function toUnifiedAttributes({
   attributes,
@@ -41,7 +44,7 @@ export function toUnifiedAttributes({
   const owner = attributes?.owner ?? '';
   const transformer = getAttachmentTypeTransformers(attachmentType, owner);
 
-  if (isMigratedAttachmentType(attachmentType, owner)) {
+  if (isConvertibleToUnified(attributes)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
     const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(unifiedAttrs);
     return { isUnified: true, attributes: validatedAttributes };
@@ -50,6 +53,16 @@ export function toUnifiedAttributes({
   const legacyAttrs = transformer.toLegacySchema(attributes);
   return { isUnified: false, attributes: legacyAttrs };
 }
+
+export const toUnifiedAttachment = (attachment: AttachmentV2): UnifiedAttachment => {
+  const { id, version, ...attributes } = attachment;
+  const { attributes: folded } = toUnifiedAttributes({ attributes });
+  return decodeOrThrow(UnifiedAttachmentRt)({
+    id,
+    version,
+    ...folded,
+  });
+};
 
 /**
  * Guards the legacy comment-SO write paths (`create`/`bulkCreate`/`update`/

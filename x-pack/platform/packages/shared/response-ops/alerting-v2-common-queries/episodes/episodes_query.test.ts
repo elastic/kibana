@@ -42,13 +42,13 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('WHERE @timestamp == last_timestamp');
   });
 
-  it('computes last_snooze_action and snooze_expiry grouped by group_hash', () => {
+  it('computes last_snooze_action and snoozed_until grouped by group_hash', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
     expect(esql).toMatch(
       /last_snooze_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("snooze",\s*"unsnooze"\)\)/
     );
     expect(esql).toMatch(
-      /snooze_expiry\s*=\s*LAST\(expiry,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"snooze"/
+      /snoozed_until\s*=\s*LAST\(expiry,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"snooze"/
     );
   });
 
@@ -66,16 +66,17 @@ describe('buildEpisodesBaseQuery', () => {
     expect(esql.indexOf('WHERE group_hash ==')).toBeLessThan(esql.indexOf('INLINE STATS'));
   });
 
-  it('unifies episode.id and episode_id before computing per-episode action stats', () => {
+  it('unifies alert.id and alert_id before computing per-episode action stats', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
-    expect(esql).toMatch(/EVAL\s+episode_id\s*=\s*COALESCE\(`episode\.id`,\s*episode_id\)/);
+    expect(esql).toMatch(/EVAL\s+alert_id\s*=\s*COALESCE\(`alert\.id`,\s*alert_id\)/);
     expect(esql).toMatch(
       /last_ack_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("ack",\s*"unack"\)\)/
     );
     expect(esql).toMatch(
       /last_assignee_uid\s*=\s*LAST\(assignee_uid,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"assign"/
     );
-    expect(esql).toMatch(/BY\s*episode_id/);
+    expect(esql).toMatch(/BY\s*alert_id/);
+    expect(esql).not.toContain('episode_id');
   });
 });
 
@@ -168,7 +169,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('severity == "critical", 4');
     expect(queryString).toContain('severity == "info", 0');
     expect(queryString).toContain(', -1)');
-    expect(queryString).toContain('SORT _severity_sort DESC');
+    expect(queryString).toContain('SORT _severity_sort DESC, @timestamp DESC');
   });
 
   it('should filter on episode.status when a single status filter is set', () => {
@@ -379,6 +380,18 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('WHERE (severity IN ("high")) OR severity IS NULL');
   });
 
+  it('should exclude all v2 rows when only v1-only severity values are selected', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['warning'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE FALSE');
+    expect(queryString).not.toContain('severity IN');
+  });
+
   it('should trim queryString before applying', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
@@ -435,11 +448,11 @@ describe('buildEpisodesQuery', () => {
       'action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")'
     );
 
-    expect(queryString).toContain('EVAL episode_id = COALESCE(`episode.id`, episode_id)');
+    expect(queryString).toContain('EVAL alert_id = COALESCE(`alert.id`, alert_id)');
     expect(queryString).toContain(
       'last_assignee_uid = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"'
     );
-    expect(queryString).toContain('BY episode_id');
+    expect(queryString).toContain('BY alert_id');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
   });
 
@@ -454,7 +467,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain(
       'action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")'
     );
-    expect(queryString).toContain('EVAL episode_id = COALESCE(`episode.id`, episode_id)');
+    expect(queryString).toContain('EVAL alert_id = COALESCE(`alert.id`, alert_id)');
     expect(queryString).toContain('last_assignee_uid');
     expect(queryString).not.toContain('WHERE last_assignee_uid');
   });
