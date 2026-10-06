@@ -20,6 +20,7 @@ import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../.
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
+import { buildImpactEntities } from '../../services/watches/hunt/common/build_impact_entities';
 import { resolveScopedModel } from './lib/scoped_model';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
@@ -161,11 +162,14 @@ export const registerHuntCoordinatorRoute = ({
 
           // SSE entries ride the response only on a confirmed hit for a named
           // report; the hunt child fans out over them with ai.attachment.add.
-          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone.
-          const body: HuntCoordinatorResponse =
-            result.has_confirmed_hit && report_id
-              ? { ...result, sse: buildSseData(result, report_id, { spaceId }) }
-              : result;
+          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone. The impact
+          // entities come from those same entries, so a run attaches impact only
+          // for what it confirmed.
+          let body: HuntCoordinatorResponse = result;
+          if (result.has_confirmed_hit && report_id) {
+            const sse = buildSseData(result, report_id, { spaceId });
+            body = { ...result, sse, impacted_entities: buildImpactEntities(sse) };
+          }
           return response.ok({ body });
         } catch (err) {
           if (err instanceof InvalidHuntWindowError) {
