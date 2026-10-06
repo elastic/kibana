@@ -40,6 +40,7 @@ interface UploadDataStream {
   hidden?: boolean;
   dataset_is_prefix?: boolean;
   streams?: Array<{ input?: string }>;
+  use_otel_suffix?: boolean;
   elasticsearch?: {
     privileges?: { cluster?: string[]; indices?: string[] };
     dynamic_dataset?: boolean;
@@ -394,6 +395,7 @@ function isOtelUploadDataStream(
       })),
     },
     {
+      use_otel_suffix: dataStream.use_otel_suffix,
       streams: (dataStream.streams ?? []).map((stream) => ({
         input: stream.input ?? '',
         title: '',

@@ -42,6 +42,12 @@ export type PrimaryMenuChildren = ReactNode | ((ids: PrimaryMenuIds) => ReactNod
 export interface PrimaryMenuProps {
   children: PrimaryMenuChildren;
   isCollapsed: boolean;
+  /**
+   * Whether the responsive overflow split has been measured for the current item set. Exposed as
+   * `data-overflow-measured` so consumers (notably UI tests) can tell a settled menu apart from the
+   * render that publishes a new item set, where every item is still in the primary menu.
+   */
+  isOverflowMeasured: boolean;
 }
 
 interface PrimaryMenuComponent
@@ -50,7 +56,7 @@ interface PrimaryMenuComponent
 }
 
 export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
-  ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
+  ({ children, isCollapsed, isOverflowMeasured }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
     const { euiTheme } = useEuiTheme();
     const mainNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'main-navigation-instructions',
@@ -97,6 +103,7 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
           css={styles}
           id={PRIMARY_NAVIGATION_ID}
           data-test-subj={PRIMARY_NAVIGATION_ID}
+          data-overflow-measured={isOverflowMeasured ? 'true' : 'false'}
           onKeyDown={handleRovingIndex}
           ref={handleRef}
         >

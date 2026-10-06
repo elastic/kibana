@@ -1,0 +1,200 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  hasWorkflowExecutePrivilege,
+  hasWorkflowReadPrivilege,
+  hasWorkflowUpdatePrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { CoreStart } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { z } from '@kbn/zod/v4';
+import dedent from 'dedent';
+import { MAX_AI_INDEX_AUTOMATION_LENGTH } from '@kbn/context-engine-plugin/common/constants';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
+import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
+import { getRunAutomationErrorMessage, runAutomationHandler } from './handler';
+import type { SavedWorkflowSummary } from '../save_automation/handler';
+import { tryResolveSavedWorkflowById } from '../save_automation/handler';
+
+const MAX_PILOT_SIZE = 10;
+
+const runAutomationSchema = z.object({
+  workflowId: z
+    .string()
+    .min(1)
+    .max(MAX_AI_INDEX_AUTOMATION_LENGTH)
+    .describe('Id of the saved workflow automation to run.'),
+  pilotSize: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_PILOT_SIZE)
+    .optional()
+    .describe(
+      'Run a pilot over only this many items (documents, units or sources) instead of the full ' +
+        'corpus, and wait for it to finish so the result reports its duration. Works on ' +
+        'automations installed from the document_orchestration, unit_profile or index_metadata ' +
+        'template. Omit for a full run.'
+    ),
+});
+
+type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
+
+export const createRunAutomationTool = ({
+  getCoreStart,
+  getSecurityStart,
+  getWorkflowsManagement,
+}: {
+  getCoreStart: () => Promise<CoreStart>;
+  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
+}): BuiltinToolDefinition<typeof runAutomationSchema> => ({
+  id: CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID,
+  type: ToolType.builtin,
+  tags: ['context_engine', 'workflows'],
+  annotations: {
+    title: 'Run workflow automation',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
+  description: dedent`
+    Run a saved Context Engine workflow automation over the full corpus, or as a pilot over a few
+    items with pilotSize.
+    A full run starts asynchronously and returns an execution id — the run continues after this
+    call returns. Use platform.core.get_workflow_execution_status to check progress. A pilot waits
+    for the run and returns its status, durationMs and kisWritten, or an execution id to poll if it
+    is slow.
+    A disabled workflow is enabled in order to run, and stays enabled afterwards.
+    Call this with the workflowId that install_automation_template or save_automation returned.
+    Its confirmation dialog is where the user decides whether to run; do not ask in chat first.
+  `,
+  schema: runAutomationSchema,
+  availability: aiIndexToolsAvailability,
+  confirmation: {
+    askUser: 'always',
+    getConfirmation: async ({ toolParams, context }) => {
+      const { request, spaceId } = context;
+      const workflowId =
+        typeof toolParams.workflowId === 'string' ? toolParams.workflowId : undefined;
+      const pilotSize = typeof toolParams.pilotSize === 'number' ? toolParams.pilotSize : undefined;
+      const confirmText = pilotSize !== undefined ? 'Run pilot' : 'Run automation';
+      const describeRun = (label: string): string =>
+        pilotSize !== undefined
+          ? `Run a pilot of ${label} over ${pilotSize} items? It writes up to ${pilotSize} knowledge indicators.`
+          : `Run ${label} over the full corpus?`;
+
+      if (!workflowId) {
+        return {
+          title: 'Run workflow automation',
+          message: describeRun('this automation'),
+          confirm_text: confirmText,
+          cancel_text: 'Cancel',
+        };
+      }
+
+      const resolveSaved = async (id: string): Promise<SavedWorkflowSummary | undefined> => {
+        const security = await getSecurityStart();
+        const canRead = await hasWorkflowReadPrivilege({ security, request, spaceId });
+        return canRead
+          ? tryResolveSavedWorkflowById({
+              workflowsManagement: getWorkflowsManagement(),
+              workflowId: id,
+              spaceId,
+              request,
+            })
+          : undefined;
+      };
+
+      const saved = await resolveSaved(workflowId);
+      const workflowLabel = saved?.name ? `"${saved.name}"` : `workflow "${workflowId}"`;
+
+      const canExecute = await hasWorkflowExecutePrivilege({
+        security: await getSecurityStart(),
+        request,
+        spaceId,
+      });
+
+      if (!canExecute) {
+        return {
+          title: 'Run workflow automation',
+          message: `You do not have permission to run ${workflowLabel}.`,
+          confirm_text: 'OK',
+          cancel_text: 'Cancel',
+        };
+      }
+
+      const canUpdate = await hasWorkflowUpdatePrivilege({
+        security: await getSecurityStart(),
+        request,
+        spaceId,
+      });
+
+      // When the workflow state is unknown (no read privilege), use conditional language rather than
+      // asserting that it is disabled — execute privilege does not imply read privilege, so this is
+      // a supported combination, not a defensive edge case.
+      const enableBlockNotice =
+        saved !== undefined && saved.enabled !== true
+          ? canUpdate
+            ? ' The workflow is currently disabled and will be enabled in order to run, and stays enabled afterwards even if the run fails.'
+            : ' The workflow is disabled and you do not have permission to enable it, so it cannot be run.'
+          : saved === undefined
+          ? ' If the workflow is disabled, it will be enabled in order to run and stays enabled afterwards even if the run fails.'
+          : '';
+
+      return {
+        title: 'Run workflow automation',
+        message: `${describeRun(workflowLabel)}${enableBlockNotice}`,
+        confirm_text: confirmText,
+        cancel_text: 'Cancel',
+      };
+    },
+  },
+  handler: async (params, { request, spaceId, logger }) => {
+    try {
+      const result = await runAutomationHandler({
+        params,
+        request,
+        spaceId,
+        logger,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement,
+      });
+
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: result,
+          },
+        ],
+      };
+    } catch (error) {
+      const message = getRunAutomationErrorMessage(error);
+      logger.error(`Error running ${CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID}: ${message}`, {
+        error,
+      });
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Failed to run workflow automation: ${message}`,
+            },
+          },
+        ],
+      };
+    }
+  },
+});

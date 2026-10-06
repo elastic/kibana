@@ -25,7 +25,6 @@ import {
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
   MAX_AI_INDEX_QUERY_PARAMS,
   MAX_AI_INDEX_SOURCES,
-  MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
@@ -108,6 +107,7 @@ const aiIndexItem: AiIndexHttpItem = {
   id: 'customer_support',
   description: 'Customer support context',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
@@ -130,6 +130,7 @@ describe('ai indices routes', () => {
   let readServiceParams: GetAiIndexDataReadServiceParams[];
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
+  let memoryFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let auditLogger: { log: jest.Mock };
@@ -139,7 +140,6 @@ describe('ai indices routes', () => {
   let esDeleteDataStream: jest.Mock;
   let esDeleteIndex: jest.Mock;
   let esInternalSearch: jest.Mock;
-  let esDeleteView: jest.Mock;
   let spacesStart: ReturnType<typeof spacesMock.createStart>;
   let improvementsClients: unknown[];
   let improvementsSpaceIds: string[];
@@ -170,7 +170,6 @@ describe('ai indices routes', () => {
             },
             asInternalUser: {
               search: esInternalSearch,
-              esql: { deleteView: esDeleteView },
             },
           },
         },
@@ -187,6 +186,7 @@ describe('ai indices routes', () => {
     jest.clearAllMocks();
     routes = {};
     featureFlagEnabled = true;
+    memoryFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
     actionsClient = actionsClientMock.create();
     actions = actionsMock.createStart();
@@ -204,7 +204,6 @@ describe('ai indices routes', () => {
       data_streams: [],
     });
     esInternalSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
-    esDeleteView = jest.fn().mockResolvedValue({ acknowledged: true });
     spacesStart = spacesMock.createStart();
     aiIndexService = {
       create: jest.fn(),
@@ -265,6 +264,7 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
+      isMemoryEnabled: async () => memoryFlagEnabled,
       getActions: async () => actions,
       getAgentBuilder,
       getWorkflowsManagementApi: async () => workflowsManagementApi,
@@ -318,7 +318,9 @@ describe('ai indices routes', () => {
       body: { enabled: true },
     });
 
-    expect(response.notFound).toHaveBeenCalledTimes(10);
+    expect(response.notFound.mock.calls).toEqual(
+      Array(10).fill([{ body: { message: 'Not Found' } }])
+    );
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
@@ -377,6 +379,21 @@ describe('ai indices routes', () => {
     });
   });
 
+  const createEsError = (statusCode: number, message: string) =>
+    new errors.ResponseError({
+      meta: {
+        aborted: false,
+        attempts: 1,
+        connection: null,
+        context: null,
+        name: message,
+        request: {} as unknown as DiagnosticResult['meta']['request'],
+      },
+      warnings: [],
+      body: { error: { type: message, reason: message } },
+      statusCode,
+    });
+
   describe('POST /api/context_engine/ai_index', () => {
     const postBody = {
       id: 'customer_support',
@@ -398,6 +415,31 @@ describe('ai indices routes', () => {
         properties
       );
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
+    });
+
+    it('rejects explicitly enabling memory while the memory feature flag is disabled', async () => {
+      memoryFlagEnabled = false;
+
+      await callRoute('POST', AI_INDEX_PATH, {
+        body: { ...postBody, memory_enabled: true },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('Context Engine memory is disabled') },
+      });
+    });
+
+    it('allows the default or explicit opt-out while the memory feature flag is disabled', async () => {
+      memoryFlagEnabled = false;
+      aiIndexService.create.mockResolvedValue(undefined);
+
+      await callRoute('POST', AI_INDEX_PATH, { body: postBody });
+      await callRoute('POST', AI_INDEX_PATH, {
+        body: { ...postBody, memory_enabled: false },
+      });
+
+      expect(aiIndexService.create).toHaveBeenCalledTimes(2);
     });
 
     it('returns 409 when the id already exists', async () => {
@@ -505,6 +547,20 @@ describe('ai indices routes', () => {
       });
     });
 
+    it('returns 403 without creating when Elasticsearch denies an index trace lookup', async () => {
+      esResolveIndex.mockRejectedValue(createEsError(403, 'security_exception'));
+
+      await callRoute('POST', AI_INDEX_PATH, {
+        body: { ...postBody, traces: [{ type: 'index', value: 'traces-support' }] },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: expect.stringMatching(/^security_exception: /) },
+      });
+    });
+
     it('returns 400 without creating when an agent trace is not found', async () => {
       getAgentBuilder.mockResolvedValue({
         agents: {
@@ -554,6 +610,37 @@ describe('ai indices routes', () => {
 
       await callRoute('PUT', AI_INDEX_BY_ID_PATH, putRequest);
 
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+    });
+
+    it('rejects explicitly enabling memory while the memory feature flag is disabled', async () => {
+      memoryFlagEnabled = false;
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        ...putRequest,
+        body: { ...putRequest.body, memory_enabled: true },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('Context Engine memory is disabled') },
+      });
+    });
+
+    it('allows preserving enabled memory while updating another field with the feature flag disabled', async () => {
+      memoryFlagEnabled = false;
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, memory_enabled: true });
+      aiIndexService.put.mockResolvedValue('updated');
+      const body = {
+        ...putRequest.body,
+        description: 'Updated description',
+        memory_enabled: true,
+      };
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, { ...putRequest, body });
+
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
+      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', defaultSpaceId, body);
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
     });
 
@@ -640,6 +727,21 @@ describe('ai indices routes', () => {
         },
       });
     });
+
+    it('returns 403 without updating when Elasticsearch denies an index trace lookup', async () => {
+      esResolveIndex.mockRejectedValue(createEsError(403, 'security_exception'));
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        ...putRequest,
+        body: { ...putRequest.body, traces: [{ type: 'index', value: 'traces-support' }] },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: expect.stringMatching(/^security_exception: /) },
+      });
+    });
   });
 
   describe('GET /api/context_engine/ai_index/{aiIndexId}', () => {
@@ -702,21 +804,6 @@ describe('ai indices routes', () => {
       });
     });
   });
-
-  const createEsError = (statusCode: number, message: string) =>
-    new errors.ResponseError({
-      meta: {
-        aborted: false,
-        attempts: 1,
-        connection: null,
-        context: null,
-        name: message,
-        request: {} as unknown as DiagnosticResult['meta']['request'],
-      },
-      warnings: [],
-      body: { error: { type: message, reason: message } },
-      statusCode,
-    });
 
   describe('POST /api/context_engine/ai_index/_query', () => {
     const queryBody = { query: 'FROM ai-index-idx-a | LIMIT 10', params: { type: 'faq' } };
@@ -1185,42 +1272,6 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
     });
 
-    it('deletes the retrieval view with the AI index', async () => {
-      aiIndexService.delete.mockResolvedValue(undefined);
-
-      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
-        params: { aiIndexId: 'customer_support' },
-      });
-
-      expect(esDeleteView).toHaveBeenCalledWith(
-        { name: 'v-ai-index-customer_support' },
-        { ignore: [404] }
-      );
-    });
-
-    it('returns a partial-failure error when the view deletion fails', async () => {
-      aiIndexService.delete.mockResolvedValue(undefined);
-      esDeleteView.mockRejectedValue(new Error('security_exception'));
-
-      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
-        params: { aiIndexId: 'customer_support' },
-      });
-
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          acknowledged: true,
-          errors: [expect.stringContaining('security_exception')],
-        },
-      });
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          error: expect.objectContaining({
-            message: expect.stringContaining('security_exception'),
-          }),
-        })
-      );
-    });
-
     it('returns 409 when the AI index is managed and does not delete related resources', async () => {
       aiIndexService.get.mockResolvedValue({ ...aiIndexItem, managed: true });
 
@@ -1499,6 +1550,7 @@ describe('ai indices routes', () => {
           getAiIndexDataReadService: () => readService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
+          isMemoryEnabled: async () => memoryFlagEnabled,
           getActions: async () => actions,
           getAgentBuilder,
           getWorkflowsManagementApi: async () => undefined,
@@ -1988,6 +2040,16 @@ describe('ai indices routes', () => {
       expect(() => validateBody(validBody)).not.toThrow();
     });
 
+    it('leaves memory_enabled unset for the service default', () => {
+      expect(validateBody(validBody)).not.toHaveProperty('memory_enabled');
+    });
+
+    it('accepts memory_enabled', () => {
+      expect(validateBody({ ...validBody, memory_enabled: true })).toMatchObject({
+        memory_enabled: true,
+      });
+    });
+
     it('rejects a missing id', () => {
       const { id, ...bodyWithoutId } = validBody;
       expect(() => validateBody(bodyWithoutId)).toThrow();
@@ -2124,6 +2186,16 @@ describe('ai indices routes', () => {
 
     it('accepts a valid body', () => {
       expect(() => validateBody(validBody)).not.toThrow();
+    });
+
+    it('leaves memory_enabled unset for the service default', () => {
+      expect(validateBody(validBody)).not.toHaveProperty('memory_enabled');
+    });
+
+    it('accepts memory_enabled', () => {
+      expect(validateBody({ ...validBody, memory_enabled: true })).toMatchObject({
+        memory_enabled: true,
+      });
     });
 
     it('accepts empty automations and sources arrays', () => {
@@ -2396,6 +2468,7 @@ describe('ai indices routes', () => {
         aiIndexService.get.mockResolvedValue({
           id: 'customer_support',
           managed: false,
+          memory_enabled: false,
           dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
           automations: [],
           sources: [],
@@ -2504,51 +2577,6 @@ describe('ai indices routes', () => {
 
     it('rejects an empty id', () => {
       expect(() => validateParams({ aiIndexId: '' })).toThrow();
-    });
-  });
-
-  describe('create body validation', () => {
-    const validateBody = (body: unknown) => {
-      const { validate } = getRoute('POST', AI_INDEX_PATH);
-      if (validate === false || !validate.request?.body) {
-        throw new Error('Expected a body schema');
-      }
-      return validate.request.body.validate(body);
-    };
-    const body = (overrides: { id?: string; value?: string } = {}) => ({
-      id: overrides.id ?? 'customer_support',
-      dest: { type: 'index', value: overrides.value ?? 'ai-index-idx-mine' },
-      automations: [],
-      sources: [],
-    });
-
-    const validValues = ['ai-index-idx-mine', 'ai-index-idx-a.b+c'];
-    validValues.forEach((value) => {
-      it(`accepts dest value ${value}`, () => {
-        expect(() => validateBody(body({ value }))).not.toThrow();
-      });
-    });
-
-    const invalidValues = [
-      'ai-index-idx-mine\n| EVAL leaked = 1',
-      'ai-index-idx-Mine',
-      'ai-index-idx-a b',
-      'ai-index-idx-a"b',
-      'ai-index-idx-a*',
-      'ai-index-idx-a,ai-index-idx-b',
-    ];
-    invalidValues.forEach((value) => {
-      it(`rejects dest value ${JSON.stringify(value)}`, () => {
-        expect(() => validateBody(body({ value }))).toThrow(/lowercase letters, numbers, hyphens/);
-      });
-    });
-
-    it('accepts an id at the maximum length', () => {
-      expect(() => validateBody(body({ id: 'a'.repeat(MAX_AI_INDEX_ID_LENGTH) }))).not.toThrow();
-    });
-
-    it('rejects an id over the maximum length', () => {
-      expect(() => validateBody(body({ id: 'a'.repeat(MAX_AI_INDEX_ID_LENGTH + 1) }))).toThrow();
     });
   });
 });

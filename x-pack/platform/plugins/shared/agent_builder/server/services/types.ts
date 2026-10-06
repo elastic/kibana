@@ -18,6 +18,7 @@ import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
@@ -51,6 +52,7 @@ import type {
   ConversationTemplatesServiceSetup,
   ConversationTemplatesServiceStart,
 } from './conversation/templates';
+import type { DeploymentInfo } from '../utils/deployment_info';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -119,6 +121,8 @@ export interface ServicesStartDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  licensing: LicensingPluginStart;
+  deploymentInfo: DeploymentInfo;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
 }

@@ -37,10 +37,9 @@ const makeLogger = (): jest.Mocked<Logger> =>
     debug: jest.fn(),
   } as unknown as jest.Mocked<Logger>);
 
-const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResponse =>
+const createEvent = (eventId: string, ruleIds: string[]): SignificantEventResponse =>
   ({
-    event_uuid: eventUuid,
-    event_id: eventUuid,
+    event_id: eventId,
     signals: ruleIds.map((ruleId) => ({
       type: 'detection',
       metadata: { rule_uuid: ruleId },
@@ -69,14 +68,13 @@ describe('cleanupStaleEvents', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     updateStatusMock.mockResolvedValue({
-      event_uuid: 'next-event',
       updated: 1,
       ignored: 0,
-      status: 'closed',
+      status: 'inactive',
     });
   });
 
-  it('closes only open events with no remaining backing rule', async () => {
+  it('inactivates only active events with no remaining backing rule', async () => {
     const stale = createEvent('stale-event', ['deleted-rule']);
     const mixed = createEvent('mixed-event', ['deleted-rule', 'live-rule']);
     const noRules = createEvent('no-rules-event', []);
@@ -98,8 +96,8 @@ describe('cleanupStaleEvents', () => {
     expect(updateStatusMock).toHaveBeenCalledTimes(1);
     expect(updateStatusMock).toHaveBeenCalledWith({
       eventClient,
-      eventUuid: 'stale-event',
-      status: 'closed',
+      eventId: 'stale-event',
+      status: 'inactive',
       assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
       alertEventsClient,
       logger,
@@ -122,7 +120,7 @@ describe('cleanupStaleEvents', () => {
 
     expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenCalledTimes(2);
     expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenNthCalledWith(2, {
-      status: ['open'],
+      status: ['active'],
       ruleUuids: undefined,
       afterEventId: 'event-0999',
       batchSize: 1000,
@@ -145,7 +143,7 @@ describe('cleanupStaleEvents', () => {
     });
 
     expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenCalledWith({
-      status: ['open'],
+      status: ['active'],
       ruleUuids: ['rule-1'],
       afterEventId: undefined,
       batchSize: 1000,
@@ -191,7 +189,7 @@ describe('cleanupStaleEvents', () => {
     ).rejects.toThrow('later lookup failed');
     expect(updateStatusMock).toHaveBeenCalledTimes(1000);
     expect(updateStatusMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ eventUuid: 'event-1000' })
+      expect.objectContaining({ eventId: 'event-1000' })
     );
   });
 
@@ -202,16 +200,15 @@ describe('cleanupStaleEvents', () => {
     const rulesClient = createRulesClient([]);
     let activeUpdates = 0;
     let maxActiveUpdates = 0;
-    updateStatusMock.mockImplementation(async ({ eventUuid }) => {
+    updateStatusMock.mockImplementation(async ({ eventId }) => {
       activeUpdates += 1;
       maxActiveUpdates = Math.max(maxActiveUpdates, activeUpdates);
       await Promise.resolve();
       activeUpdates -= 1;
       return {
-        event_uuid: eventUuid,
         updated: 1,
         ignored: 0,
-        status: 'closed',
+        status: 'inactive',
       };
     });
 

@@ -101,7 +101,7 @@ describe('workflow service account execution', () => {
     expect(run).not.toHaveBeenCalled();
   });
 
-  it.each(['owner', 'unlisted'])(
+  it.each(['owner', 'unlisted', 'admin'])(
     'checks private workflow access as the original caller %s during service-account execution',
     async (profileId) => {
       const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
@@ -115,6 +115,11 @@ describe('workflow service account execution', () => {
         actual === request ? profileId : null
       );
 
+      core.security.authc.getCurrentUser.mockImplementation((actual) =>
+        securityServiceMock.createMockAuthenticatedUser({
+          roles: actual === scopedRequest || profileId === 'admin' ? ['superuser'] : [],
+        })
+      );
       const allowed = await withWorkflowExecutionIdentity(
         core,
         execution('account-a'),
@@ -123,11 +128,25 @@ describe('workflow service account execution', () => {
           hasWorkflowAccess(
             { owner_id: 'owner', access_control: { access_mode: 'private', entries: [] } },
             actual,
-            core
+            core,
+            { id: 'workflow-id', spaceId: 'space-a' }
           )
       );
 
       expect(allowed).toBe(profileId === 'owner');
+      const audit = core.security.audit.asScoped(request).log;
+      expect(audit).toHaveBeenCalledTimes(profileId === 'owner' ? 0 : 1);
+      if (profileId !== 'owner') {
+        expect(core.security.audit.asScoped).not.toHaveBeenCalledWith(scopedRequest);
+        expect(audit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
+            kibana: { space_id: 'space-a' },
+            message: expect.stringContaining('"entityId":"workflow-id"'),
+          })
+        );
+      }
+      expect(core.security.authc.getCurrentUser).not.toHaveBeenCalledWith(scopedRequest);
       expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
     }
   );
