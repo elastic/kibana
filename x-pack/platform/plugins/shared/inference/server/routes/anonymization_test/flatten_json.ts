@@ -64,11 +64,14 @@ export function applyStringReplacements<T>(value: T, replacements: Record<string
     }
 
     if (node && typeof node === 'object') {
-      const out: Record<string, unknown> = {};
-      Object.entries(node as Record<string, unknown>).forEach(([key, val]) => {
-        out[key] = visit(val, `${path}/${escapePointerToken(key)}`);
-      });
-      return out;
+      // `Object.fromEntries` defines own properties, so a JSON key named `__proto__` is kept
+      // instead of invoking the `Object.prototype.__proto__` setter.
+      return Object.fromEntries(
+        Object.entries(node as Record<string, unknown>).map(([key, val]) => [
+          key,
+          visit(val, `${path}/${escapePointerToken(key)}`),
+        ])
+      );
     }
 
     return node;
