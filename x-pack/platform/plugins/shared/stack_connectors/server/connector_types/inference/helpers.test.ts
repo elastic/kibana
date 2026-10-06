@@ -157,6 +157,9 @@ describe('upstream credential redaction', () => {
     ['{"accessToken":"ZZSECRET9"}', 'ZZSECRET9'],
     ['{"clientSecret":"ZZSECRET9"}', 'ZZSECRET9'],
     ['passwd: ZZSECRET9', 'ZZSECRET9'],
+    ['connect ECONNREFUSED http://admin:ZZSECRET9@10.0.0.5:8000/v1/chat/completions', 'ZZSECRET9'],
+    ['https://user:P%40ssZZSECRET9@gateway.local/v1', 'P%40ssZZSECRET9'],
+    ['{"url":"https://u:ZZSECRET9@h/x"}', 'ZZSECRET9'],
   ])('redacts %s', (input, secret) => {
     expect(truncateUpstreamBody(input)).not.toContain(secret);
   });
@@ -173,6 +176,12 @@ describe('upstream credential redaction', () => {
     'credentials were not provided',
     'Input validation error: inputs tokens + max_new_tokens must be <= 32768',
     '{"object":"error","message":"The input (40000 tokens) is longer than the model\'s context length (32768 tokens).","type":"BadRequestError","param":null,"code":400}',
+    'http://10.0.0.5:8000/v1/chat/completions',
+    'see https://docs.vllm.ai/en/latest/ for details',
+    'ws://host:8080/path',
+    'mailto:a@b.c',
+    'user@example.com',
+    'time 10:30@utc',
   ])('keeps %s', (input) => {
     expect(truncateUpstreamBody(input)).toBe(input);
   });
