@@ -61,13 +61,15 @@ export const runAfterChatEventHooks = ({
 
   return (source$) =>
     source$.pipe(
-      // Queue errors and completion behind events whose hooks are still running.
+      // Turn events, errors and completion into notification values, so all of them queue in order.
       materialize(),
+      // Run hooks on events one at a time; errors and completion wait for the events ahead of them.
       concatMap((notification) =>
         notification.kind === 'N'
           ? runHooks(notification.value).pipe(map((value) => ({ kind: 'N' as const, value })))
           : of(notification)
       ),
+      // Turn notifications back into events, a real error, or completion.
       dematerialize()
     );
 };
