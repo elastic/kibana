@@ -1593,8 +1593,8 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           // A named palette renders from its id and `steps` alone. Its stops are
           // recomputed on every render. Users can't set `steps` directly: any edit to the color
           // ranges (add, remove, recolor, move) turns the palette into `custom`. So a stored
-          // (e.g.`steps` that differs from the chart default was inherited from an older default
-          // gauges saved when it was 3). The API's `distributed_palette` has no band count,
+          // `steps` that differs from the chart default was inherited from an older default
+          // (e.g. gauges saved when it was 3). The API's `distributed_palette` has no band count,
           // so API→SO writes the chart default and that difference is an accepted loss.
           palette.params.steps = defaultBandCount;
           clearUnusedNamedPaletteParams(palette);
