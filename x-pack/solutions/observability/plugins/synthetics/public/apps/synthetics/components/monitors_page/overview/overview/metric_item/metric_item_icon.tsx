@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react';
+import { useEffect, useRef } from 'react';
 import {
   EuiLoadingSpinner,
   EuiToolTip,
@@ -81,6 +82,21 @@ export const MetricItemIcon = ({
   const testTime = formatter(timestamp);
   const metricItemPopoverTitleId = useGeneratedHtmlId();
 
+  const errorIconButtonRef = useRef<HTMLButtonElement | null>(null);
+  const isErrorPopoverForItemOpen = configIdByLocation === isPopoverOpen;
+  const wasErrorPopoverForItemOpen = useRef(isErrorPopoverForItemOpen);
+
+  useEffect(() => {
+    // When this monitor's error popover closes (Escape, close button, or an
+    // outside click), return keyboard focus to the trigger icon so keyboard and
+    // screen reader users aren't dropped at the top of the page (WCAG 2.4.3).
+    // Skip when focus has moved to another monitor's popover.
+    if (wasErrorPopoverForItemOpen.current && !isErrorPopoverForItemOpen && !isPopoverOpen) {
+      errorIconButtonRef.current?.focus();
+    }
+    wasErrorPopoverForItemOpen.current = isErrorPopoverForItemOpen;
+  }, [isErrorPopoverForItemOpen, isPopoverOpen]);
+
   if (inProgress) {
     return (
       <Container>
@@ -134,13 +150,19 @@ export const MetricItemIcon = ({
     return (
       <Container>
         <EuiPopover
-          button={<MetricErrorIcon configIdByLocation={configIdByLocation} />}
-          isOpen={configIdByLocation === isPopoverOpen}
+          button={
+            <MetricErrorIcon
+              configIdByLocation={configIdByLocation}
+              buttonRef={errorIconButtonRef}
+            />
+          }
+          isOpen={isErrorPopoverForItemOpen}
           closePopover={closePopover}
           anchorPosition="upCenter"
           panelStyle={{
             outline: 'none',
           }}
+          focusTrapProps={{ returnFocus: false }}
           aria-labelledby={metricItemPopoverTitleId}
         >
           <EuiPopoverTitle id={metricItemPopoverTitleId}>
