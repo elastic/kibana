@@ -9,26 +9,35 @@ import type { TimeRange } from '../../new_entities_table';
 
 /**
  * Builds an ES|QL query that counts entities whose risk score rose by ≥10 points
- * comparing the current score to the score at the N-period boundary.
+ * since the start of the period: current score minus the score at the period boundary.
  *
- * Approach: label each doc as "current" (after the boundary) or "boundary" (at or before it),
- * then use LAST(score, @timestamp) per (entity, period) to get the score from the most recent
- * scoring run in each half. A second STATS pivots those into two columns for comparison.
- * LAST() is used (not MAX) so we compare actual score snapshots — not the highest score seen
- * within each window. This mirrors the pattern used in reset_to_zero.ts.
+ * Only two points in time matter, so the query reads only what it needs:
+ * - Boundary score: the last score in the two hours before the boundary
+ *   (`[NOW() - period - 2h, NOW() - period]`). Scoring runs hourly, so the window always
+ *   holds at least one run. LAST() takes the actual snapshot, not the highest score seen.
+ * - Current score: `entity.risk.calculated_score_norm` on the entity doc, which the risk
+ *   score maintainer writes in the same step as the risk score docs. It is also the score
+ *   the entities table shows, so the tile and its rows agree.
  *
- * The fetch window is period + 2h buffer to ensure at least one scoring run is captured on
- * each side of the boundary even if the engine ran slightly late.
+ * Reading every risk doc in the period to find the latest one took 34s at 30d on 10M
+ * entities; this reads two hours of docs (about 3.6s, same entities).
+ *
+ * The boundary entities are joined to their entity docs, so the cost grows with the number
+ * of entities scored at the boundary, not with the length of the period.
  *
  * SET unmapped_fields="nullify" prevents errors when only some entity types are
  * present in the index (e.g. only host docs → user.name is not in the mapping).
  */
 
-const TIME_RANGE_TO_ESQL: Record<TimeRange, { fetchWindow: string; period: string }> = {
-  '24h': { fetchWindow: '26h', period: '24h' },
-  '7d': { fetchWindow: '170h', period: '7d' }, // 7*24 + 2 = 170h
-  '30d': { fetchWindow: '722h', period: '30d' }, // 30*24 + 2 = 722h
+/** ES|QL duration of each time range; the boundary is this long before now. */
+const PERIOD: Record<TimeRange, string> = {
+  '24h': '24 hours',
+  '7d': '7 days',
+  '30d': '30 days',
 };
+
+/** Width of the boundary window: covers at least one hourly scoring run. */
+const BOUNDARY_WINDOW_HOURS = 2;
 
 export const buildRiskMoversCountQuery = (
   spaceId: string,
@@ -37,23 +46,21 @@ export const buildRiskMoversCountQuery = (
   entityFilterClauses: string[] = []
 ): string => {
   const index = `risk-score.risk-score-${spaceId}`;
-  const { fetchWindow, period } = TIME_RANGE_TO_ESQL[timeRange];
+  const boundary = `NOW() - ${PERIOD[timeRange]}`;
   return [
     `SET unmapped_fields="nullify";`,
     `FROM ${index}`,
-    `| WHERE @timestamp >= NOW() - ${fetchWindow}`,
+    `| WHERE @timestamp >= ${boundary} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${boundary}`,
     `| EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
     `| EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`,
     `| WHERE entity_euid IS NOT NULL`,
-    `| EVAL period = CASE(@timestamp <= NOW() - ${period}, "boundary", "current")`,
-    `| STATS score = LAST(risk_score, @timestamp) BY entity_euid, period`,
-    `| EVAL current_score  = CASE(period == "current",  score, null)`,
-    `| EVAL boundary_score = CASE(period == "boundary", score, null)`,
-    `| STATS current_score = MAX(current_score), boundary_score = MAX(boundary_score) BY entity_euid`,
-    `| WHERE current_score IS NOT NULL AND boundary_score IS NOT NULL AND current_score - boundary_score >= 10`,
+    `| STATS boundary_score = LAST(risk_score, @timestamp) BY entity_euid`,
     `| RENAME entity_euid AS \`entity.id\``,
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
+    // Drops risk docs whose entity has no entity doc.
     `| WHERE entity.name IS NOT NULL`,
+    // The current score comes from the entity doc (see above).
+    `| WHERE entity.risk.calculated_score_norm - boundary_score >= 10`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
     `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
