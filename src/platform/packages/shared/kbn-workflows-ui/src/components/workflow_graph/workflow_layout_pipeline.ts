@@ -439,6 +439,21 @@ export const computeWorkflowLayout = (
     }
   }
 
+  // Post-dagre pass 4.5: final overlap repair (TB only).
+  // Passes 3b (join re-centre) and 4 (container refit) move nodes on the cross
+  // axis without a collision check. A second separation pass fixes any overlaps
+  // they introduce. Skipped for LR: pass 4 refits containers on the cross (y)
+  // axis only in TB, so the LR baseline is not regressed by this pass.
+  if (crossAxis === 'x') {
+    separatePositionedOverlapsInPlace(
+      repairedNodes,
+      crossAxis,
+      WORKFLOW_NODE_SEP,
+      containerMembers,
+      containerDescendants
+    );
+  }
+
   // Post-dagre pass 5: reconcile edge waypoints.
   // Translate-or-clear based on how much each endpoint moved since dagLayout.
   // NOTE: dagLayout now moves spine nodes on the main axis (spine push for

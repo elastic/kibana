@@ -574,8 +574,9 @@ function transformInternal(
       const firstId = inner.nodes[0]?.id;
       if (firstId) {
         edges.push({ id: `${id}:${firstId}`, source: id, target: firstId });
+        // Flow continues from the body's exits; the merge step is only the entry point.
+        exitIds = inner.leafIds;
       }
-      // Single contained body — exit from the wrapping step.
     }
 
     // ── fallback lane (on-failure.fallback) ──────────────────────────────

@@ -566,9 +566,12 @@ describe('transformWorkflowToGraph', () => {
     );
     // merge node connects to its first inner step
     expect(r.edges).toContainEqual(expect.objectContaining({ source: 'atomic', target: 'm1' }));
-    // the merge node itself (not m2) is the exit point for the next step
+    // the merge node has exactly one out-edge (to the first inner step)
+    const mergeOutEdges = r.edges.filter((e) => e.source === 'atomic');
+    expect(mergeOutEdges).toHaveLength(1);
+    // flow continues from the body's leaves, not from the merge step itself
     const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
-    expect(sourcesIntoAfter).toEqual(['atomic']);
+    expect(sourcesIntoAfter).toEqual(['m2']);
   });
 
   it('emits bypass lane nodes for empty if branches (one per branch)', () => {

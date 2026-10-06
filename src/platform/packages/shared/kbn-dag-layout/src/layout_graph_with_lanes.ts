@@ -398,6 +398,94 @@ export function layoutGraphWithLanes(
     }
   }
 
+  // ── 5.5 Upward compaction of fork-branch bodies ─────────────────────────────
+  //
+  // After the D7 spine push, short fork branches may have long gaps between their
+  // head and the next node. This happens because dagre's tight-tree ranker places
+  // the rank slack at the top of a branch (to tighten the tail→join edge), and D7
+  // then pushes the join and everything after it further down.
+  //
+  // For every alignable fork head (same guards as §3.5: sole predecessor is the
+  // fork source, no shortcut from a sibling), compute the dominated body: the set
+  // of nodes reachable from the head where all spine predecessors are already in
+  // the set. In ascending main-axis order, move each body node up to
+  // max(pred end + rankSep, depth-0 lane subtreeMainEnd + rankSep) when that
+  // position is higher than the current one. Re-level owned depth-0 lanes after
+  // each move. Clear waypoints on touched edges. Moves are upward-only, so
+  // joins and the D7 push are untouched; the slack shifts to the tail→join edge.
+  {
+    // Collect body nodes for alignable fork heads.
+    const compactedNodes = new Set<string>();
+    for (const [forkSource, targets] of spineAdj) {
+      if (targets.length < 2) continue;
+      const targetNodes = targets.flatMap((t) => {
+        const n = spineById.get(t);
+        return n ? [n] : [];
+      });
+      if (targetNodes.length < 2) continue;
+      for (const head of targetNodes) {
+        // Guard 1: no sibling can reach this head (shortcut-edge guard).
+        const reachableFromSibling = targetNodes.some(
+          (o) => o.id !== head.id && getTransitiveSuccessors(o.id).has(head.id)
+        );
+        if (reachableFromSibling) continue;
+        // Guard 2: sole spine predecessor is the fork source.
+        const preds = spineRevAdj.get(head.id) ?? [];
+        if (preds.some((p) => p !== forkSource)) continue;
+
+        // BFS to build the dominated set (excluding the head itself).
+        const dom = new Set<string>([head.id]);
+        const queue = [head.id];
+        while (queue.length > 0) {
+          const cur = queue.shift()!;
+          for (const next of spineAdj.get(cur) ?? []) {
+            if (dom.has(next)) continue;
+            if ((spineRevAdj.get(next) ?? []).every((p) => dom.has(p))) {
+              dom.add(next);
+              queue.push(next);
+            }
+          }
+        }
+
+        // Process body nodes (excluding head) in ascending main-axis order.
+        const bodyIds = [...dom].filter((id) => id !== head.id && spineById.has(id));
+        bodyIds.sort((a, b) => mainOf(spineById.get(a)!, isLR) - mainOf(spineById.get(b)!, isLR));
+
+        for (const id of bodyIds) {
+          const node = spineById.get(id)!;
+          let required = -Infinity;
+          for (const p of spineRevAdj.get(id) ?? []) {
+            const pn = spineById.get(p);
+            if (!pn) continue;
+            required = Math.max(required, mainOf(pn, isLR) + mainSpanOf(pn, isLR) + rankSep);
+            for (const lane of sortedLanes) {
+              if (lane.depth === 0 && lane.ownerId === p) {
+                required = Math.max(required, subtreeMainEnd(lane) + rankSep);
+              }
+            }
+          }
+          if (required === -Infinity || required >= mainOf(node, isLR) - 0.5) continue;
+          spineById.set(id, shiftMain(node, required - mainOf(node, isLR), isLR));
+          compactedNodes.add(id);
+          // Re-level any depth-0 lanes owned by this node.
+          for (const lane of sortedLanes) {
+            if (lane.depth === 0 && lane.ownerId === id) {
+              levelLaneCascade(lane, id);
+            }
+          }
+        }
+      }
+    }
+    // Clear waypoints on edges whose endpoints moved.
+    if (compactedNodes.size > 0) {
+      spineLayout.edges.forEach((e, i) => {
+        if (compactedNodes.has(e.source) || compactedNodes.has(e.target)) {
+          spineLayout.edges[i] = { ...e, points: [] };
+        }
+      });
+    }
+  }
+
   // ── 6. Compute cross origins (shallowest-first, top-down within each depth) ─
   //
   // Placed lanes are accumulated as additional obstacles for later (deeper) lanes.
