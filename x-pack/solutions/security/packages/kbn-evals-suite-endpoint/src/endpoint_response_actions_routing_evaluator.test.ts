@@ -115,6 +115,38 @@ describe('createEndpointResponseActionsRoutingEvaluator', () => {
     expect(result).toEqual({ score: 0, label: 'fail' });
   });
 
+  it('negative row with a read_file of the skill SKILL.md fails', async () => {
+    const result = await evaluateWith({
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'read_file',
+          params: { path: '/skills/security/endpoint/endpoint-response-actions/SKILL.md' },
+          results: [{ type: 'resource' }],
+        },
+      ],
+    });
+
+    expect(result).toEqual({ score: 0, label: 'fail' });
+  });
+
+  it('negative row with a read_file of only the troubleshooting SKILL.md passes', async () => {
+    const result = await evaluateWith({
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'read_file',
+          params: {
+            path: '/skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md',
+          },
+          results: [{ type: 'resource' }],
+        },
+      ],
+    });
+
+    expect(result).toEqual({ score: 1, label: 'pass' });
+  });
+
   it('positive row with get_endpoint_status passes', async () => {
     const result = await evaluateWith({
       routing: 'require',

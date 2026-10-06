@@ -54,11 +54,16 @@ const getToolCallSteps = (output: TaskOutput): ToolCallStep[] => {
 
 /**
  * Skill-activation matching mirrors agent_builder's activation paths: a
- * `load_skill` call whose `skill` argument references the skill, or a legacy
- * `filestore.read` of the skill's folder / SKILL.md path.
+ * `load_skill` call whose `skill` argument references the skill, a
+ * `read_file` of the skill's folder / SKILL.md path, or a legacy
+ * `filestore.read` of the same.
  */
 const isSkillActivation = (step: ToolCallStep, skillId: string): boolean => {
-  if (step.tool_id !== internalTools.loadSkill && step.tool_id !== 'filestore.read') {
+  if (
+    step.tool_id !== internalTools.loadSkill &&
+    step.tool_id !== internalTools.readFile &&
+    step.tool_id !== 'filestore.read'
+  ) {
     return false;
   }
 
@@ -75,6 +80,11 @@ const hasNonErrorResult = (step: ToolCallStep): boolean =>
 const hasSuccessfulToolCall = (steps: ToolCallStep[], toolId: string): boolean =>
   steps.some((step) => step.tool_id === toolId && hasNonErrorResult(step));
 
+/**
+ * Deterministic routing evaluator. In `require` mode a call of the required
+ * tool with a non-error result passes — a "not found" tool result still counts
+ * as correct routing, since this is a routing check, not a data check.
+ */
 export function createEndpointResponseActionsRoutingEvaluator(): Evaluator<
   SecurityDatasetExample,
   TaskOutput

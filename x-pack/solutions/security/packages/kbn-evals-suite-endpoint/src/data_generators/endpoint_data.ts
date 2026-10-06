@@ -175,8 +175,6 @@ interface EndpointScenario {
   extraDocuments?: ExtraDocument[];
   /** Fleet package names written to the `.fleet-agents` doc (`packages` field). */
   agentPackages?: string[];
-  /** Seeded `Endpoint.state.isolation` in the metadata document. */
-  isolationState?: boolean;
   /** Overrides `last_checkin` on the Fleet agent doc (ISO timestamp). */
   lastCheckin?: string;
 }
@@ -194,6 +192,18 @@ const createPolicyResponseDocument = ({
   endpointStatus = 'enrolled',
   agentVersion = DEFAULT_AGENT_VERSION,
   message = 'agent_connectivity: Successfully connected to Agent; workflow: Successfully executed all workflows',
+  actions = [
+    {
+      name: 'agent_connectivity',
+      status: 'success',
+      message: 'Successfully connected to Agent',
+    },
+    {
+      name: 'workflow',
+      status: 'success',
+      message: 'Successfully executed all workflows',
+    },
+  ],
   scenario,
 }: Pick<EndpointScenario, 'agentId' | 'hostName' | 'os'> & {
   policyId: string;
@@ -202,6 +212,8 @@ const createPolicyResponseDocument = ({
   endpointStatus?: string;
   agentVersion?: string;
   message?: string;
+  /** Overrides the applied-policy actions; defaults to fully successful actions. */
+  actions?: Array<{ name: string; status: string; message: string }>;
   scenario: string;
 }): ExtraDocument => ({
   index: 'metrics-endpoint.policy-default',
@@ -240,18 +252,7 @@ const createPolicyResponseDocument = ({
           name: policyName,
           endpoint_policy_version: '1',
           status: policyStatus,
-          actions: [
-            {
-              name: 'agent_connectivity',
-              status: 'success',
-              message: 'Successfully connected to Agent',
-            },
-            {
-              name: 'workflow',
-              status: 'success',
-              message: 'Successfully executed all workflows',
-            },
-          ],
+          actions,
           response: {
             configurations: {
               manual_eval: {
@@ -317,7 +318,7 @@ const createIsolationActionDocument = ({
         parameters: undefined,
       },
     },
-    error: ISOLATION_FAILURE_MESSAGE,
+    error: { message: ISOLATION_FAILURE_MESSAGE },
     user: { id: 'eval' },
   },
 });
@@ -343,7 +344,7 @@ const createIsolationActionResponseDocument = ({
         output: undefined,
       },
     },
-    error: ISOLATION_FAILURE_MESSAGE,
+    error: { message: ISOLATION_FAILURE_MESSAGE },
   },
 });
 
@@ -360,7 +361,6 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     agentVersion = DEFAULT_AGENT_VERSION,
     extraDocuments = [],
     agentPackages,
-    isolationState,
     lastCheckin,
   } = scenario;
 
@@ -384,9 +384,6 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       host: { name: hostName, hostname: hostName, os },
       Endpoint: {
         status: endpointStatus,
-        ...(isolationState === undefined
-          ? {}
-          : { state: { isolation: isolationState } satisfies { isolation: boolean } }),
         policy: { applied: { status: policyStatus, name: policyName, id: policyId } },
       },
       elastic: { agent: { id: agentId } },
@@ -500,7 +497,6 @@ export const SCENARIOS = {
     policyStatus: 'success',
     endpointStatus: 'unhealthy',
     agentPackages: ['endpoint'],
-    isolationState: false,
     // Stale check-in so the seeded data agrees with "offline / missed check-ins"
     // questions asked about this host.
     lastCheckin: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
@@ -513,6 +509,18 @@ export const SCENARIOS = {
         policyName: 'eval-policy-routing-unhealthy',
         endpointStatus: 'unhealthy',
         message: 'agent_connectivity: missed check-ins; endpoint has not checked in with the agent',
+        actions: [
+          {
+            name: 'agent_connectivity',
+            status: 'warning',
+            message: 'Endpoint has not checked in recently',
+          },
+          {
+            name: 'workflow',
+            status: 'success',
+            message: 'Successfully executed all workflows',
+          },
+        ],
         scenario: 'routing_unhealthy_host',
       }),
       createIsolationActionDocument({

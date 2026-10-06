@@ -87,7 +87,7 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
               routing: 'forbid',
             },
             metadata: {
-              golden_id: 'era-011',
+              golden_id: 'era-011b',
               row_type: 'negative_routing',
             },
           },
@@ -130,12 +130,16 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
     });
   });
 
-  evaluate('era-013 isolation status positive control', async ({ evaluateDataset }) => {
+  // era-013 is a routing-only control: it grades that an isolation-status
+  // question routes to the response actions skill (get_endpoint_status) and not
+  // to the troubleshooting skill. Isolation state itself is not graded because
+  // the seeded host is filtered out of the endpoint status lookup.
+  evaluate('era-013 isolation status routing positive control', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'endpoint: era-013 isolation status positive control',
+        name: 'endpoint: era-013 isolation status routing positive control',
         description:
-          'Validates that a direct isolation status question activates the endpoint response actions skill.',
+          'Validates that a direct isolation status question routes to the endpoint response actions skill and not to the troubleshooting skill.',
         examples: [
           {
             input: {
@@ -143,8 +147,8 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
             },
             output: {
               criteria: [
-                `Called the get_endpoint_status tool (${GET_ENDPOINT_STATUS_TOOL_ID}) of the endpoint response actions skill, resolving the hostname eval-routing-unhealthy`,
-                'Reported the host isolation state from the endpoint status, which is seeded as not isolated',
+                `Used the endpoint response actions skill (called the get_endpoint_status tool ${GET_ENDPOINT_STATUS_TOOL_ID}) to look up host eval-routing-unhealthy`,
+                'Did not activate the elastic-defend-configuration-troubleshooting skill',
               ],
               routing: 'require',
               required_tool: GET_ENDPOINT_STATUS_TOOL_ID,
