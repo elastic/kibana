@@ -68,9 +68,11 @@ async function createToolIfMissing({
     });
     log.info(`[persona-matrix] created tool '${body.id}'`);
   } catch (error) {
-    const errText = `${(error as Error)?.message ?? ""} ${(error as { body?: unknown })?.body ? JSON.stringify((error as { body: unknown }).body) : ""}`;
+    const errText = `${(error as Error)?.message ?? ''} ${
+      (error as { body?: unknown })?.body ? JSON.stringify((error as { body: unknown }).body) : ''
+    }`;
     const status = (error as { status?: number })?.status;
-    if (status === 409 || errText.includes("already exists")) {
+    if (status === 409 || errText.includes('already exists')) {
       log.info(`[persona-matrix] tool '${body.id}' already exists, reusing`);
       return;
     }
