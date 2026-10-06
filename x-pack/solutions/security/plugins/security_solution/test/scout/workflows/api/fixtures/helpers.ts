@@ -111,6 +111,8 @@ export const waitForExecutionForRule = async (
   timeoutMs: number = POLL_TIMEOUT_MS
 ): Promise<WorkflowExecutionDto> => {
   const deadline = Date.now() + timeoutMs;
+  // An execution's event never changes, so one that is not for this rule is not looked at again.
+  const notForThisRule = new Set<string>();
   while (Date.now() <= deadline) {
     const list = await apiClient.get(`/api/workflows/workflow/${workflowId}/executions`, {
       headers,
@@ -118,12 +120,15 @@ export const waitForExecutionForRule = async (
     });
     expect(list).toHaveStatusCode(200);
     const { results } = list.body as { results: Array<{ id: string }> };
-    for (const { id } of results) {
-      const execution = await waitForExecution(apiClient, headers, id, timeoutMs);
+    const unchecked = results.filter(({ id }) => !notForThisRule.has(id));
+    for (const { id } of unchecked) {
+      // Read the event before waiting: an unrelated run that is still going must not use up the timeout.
+      const execution = await getExecution(apiClient, headers, id);
       const { ids } = (execution.context?.event ?? {}) as { ids?: string[] };
       if (ids?.includes(ruleId)) {
-        return execution;
+        return waitForExecution(apiClient, headers, id, Math.max(deadline - Date.now(), 0));
       }
+      if (ids) notForThisRule.add(id);
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
