@@ -7,6 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
@@ -46,10 +47,11 @@ describe('EsqlViewsPlugin', () => {
   it('registers and mounts the management application when the UI is enabled', async () => {
     const core = coreMock.createSetup();
     const coreStart = coreMock.createStart();
+    const data = dataPluginMock.createStartContract();
     const management = managementPluginMock.createSetupContract();
     const share = sharePluginMock.createStartContract();
     const getLocator = jest.spyOn(share.url.locators, 'get');
-    core.getStartServices.mockResolvedValue([coreStart, { share }, undefined]);
+    core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
 
     createPlugin(true).setup(core, { management });
 
