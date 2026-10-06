@@ -1176,7 +1176,8 @@ describe('TabsStorageManager', () => {
       urlAppState: DiscoverAppState,
       storedProfileState?: TabState['profileState'],
       timeRestore = true,
-      persistedTabId = mockTab1.id
+      persistedTabId = mockTab1.id,
+      tabLabel?: string
     ) => {
       const { tabsStorageManager, urlStateStorage, services } = create();
 
@@ -1188,7 +1189,7 @@ describe('TabsStorageManager', () => {
         openTabs: [{ ...toStoredTab(mockTab1), profileState: storedProfileState }],
         closedTabs: [],
       });
-      urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id });
+      urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id, tabLabel });
       urlStateStorage.set(APP_STATE_URL_KEY, urlAppState);
       urlStateStorage.set(GLOBAL_STATE_URL_KEY, {
         time: mockTab1.globalState.timeRange,
@@ -1225,6 +1226,21 @@ describe('TabsStorageManager', () => {
       const urlStateStorage = loadWithUrlAppState(mockTab1.appState, undefined, true, 'other-tab');
 
       expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
+    });
+
+    it('should keep the URL time when the stored tab was removed and the URL asks for a new labeled tab', () => {
+      const urlStateStorage = loadWithUrlAppState(
+        mockTab1.appState,
+        undefined,
+        true,
+        'other-tab',
+        'New tab'
+      );
+
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({
+        time: mockTab1.globalState.timeRange,
+        filters: [],
+      });
     });
 
     it('should keep the URL time when the saved tab does not restore time', () => {
