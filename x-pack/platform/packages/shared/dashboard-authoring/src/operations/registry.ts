@@ -52,6 +52,7 @@ interface PrepareOperationExecutionParams {
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
   resolveAttachmentPanel?: OperationExecutionContext['resolveAttachmentPanel'];
   resolveControlFieldCapabilities?: OperationExecutionContext['resolveControlFieldCapabilities'];
+  validatePanelContent?: OperationExecutionContext['validatePanelContent'];
 }
 
 export const prepareOperationExecution = async ({
@@ -62,6 +63,7 @@ export const prepareOperationExecution = async ({
   resolvePanelContent,
   resolveAttachmentPanel,
   resolveControlFieldCapabilities,
+  validatePanelContent,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
   const resolvedPanelCreationRequests = await resolvePanelCreationRequests({
     operations,
@@ -77,6 +79,7 @@ export const prepareOperationExecution = async ({
     resolvePanelContent,
     resolveAttachmentPanel,
     resolveControlFieldCapabilities,
+    validatePanelContent,
   };
 };
 

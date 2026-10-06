@@ -14,6 +14,7 @@ export type {
   InlinePanelOperationType,
   PanelContent,
   PanelContentAttempt,
+  ValidatePanelContent,
 } from './src/resolve_panel';
 
 export { EMBEDDABLE_TYPE_BY_RENDERER } from './src/operations/panels';
