@@ -74,11 +74,13 @@ import {
   nightshiftInvestigationSavedObjectType,
   nightshiftSecretsEncryptionParams,
   nightshiftSecretsSavedObjectType,
+  nightshiftCustomContextSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createSandboxSecretsClient } from './sandbox_secrets';
+import { createCustomContextClient } from './custom_context';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
@@ -163,7 +165,17 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
+    core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
     plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
+
+    const customContextClient = createCustomContextClient({
+      getDeps: () => ({
+        featureFlags: this.featureFlags,
+        savedObjects: this.savedObjects,
+        security: this.security,
+        spaces: this.spaces,
+      }),
+    });
 
     const sandboxSecretsClient = createSandboxSecretsClient({
       getDeps: () => ({
@@ -204,6 +216,9 @@ export class NightshiftInvestigationsPlugin
         memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
         telemetryConnectorId,
+        getCustomContextInstructions: ({ request, spaceId }) =>
+          customContextClient.getInstructions(request, spaceId),
+        logger: this.logger.get('custom_context'),
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
@@ -396,6 +411,7 @@ export class NightshiftInvestigationsPlugin
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
           sandboxSecretsClient,
+          customContextClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
