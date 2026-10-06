@@ -21,6 +21,7 @@ import { composeIngestToken } from './ingress_credential';
 import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { ingestInboundEvent } from './ingest';
+import { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import { mapIngestResultToResponse } from './map_ingest_result_to_response';
 import {
   INBOUND_INGRESS_OUTCOME_DETAIL_MAX_LENGTH,
@@ -184,6 +185,12 @@ describe('ingestInboundEvent', () => {
       getElasticsearchClient,
       getKibanaRequestAccess,
       inMemoryConnectors: overrides?.inMemoryConnectors ?? [],
+      rateLimiter: new InboundEventRateLimiter({
+        enabled: false,
+        maxKeys: 10_000,
+        remoteAddress: { limit: 10, windowMs: 60_000 },
+        connector: { limit: 300, windowMs: 60_000 },
+      }),
     });
     mapIngestResultToResponse(result, response);
     return { response, result };

@@ -18,6 +18,7 @@ export {
 } from './ingress_credential';
 export type { InboundEventsClient, InboundEventsClientArgs } from './factory';
 export { createInboundEventsClient } from './factory';
+export { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 export type {
   ConnectorEventEmitParams,
   ConnectorEventEmitter,

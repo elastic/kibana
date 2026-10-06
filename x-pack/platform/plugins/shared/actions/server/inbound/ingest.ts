@@ -32,6 +32,7 @@ import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './
 import { resolveKibanaInboundRequest } from './resolve_kibana_inbound_request';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 import { loadIngressCredential, parseIngestToken } from './ingress_credential';
+import type { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import { loadInboundConnector } from './load_inbound_connector';
 import { validateSpokeHttpHeaders } from './spoke_http';
 
@@ -69,6 +70,7 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   getElasticsearchClient: () => Promise<IClusterClient>;
   getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
   inMemoryConnectors: InMemoryConnector[];
+  rateLimiter: InboundEventRateLimiter;
 }
 
 const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, unknown> => {
