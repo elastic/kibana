@@ -12,7 +12,6 @@ import {
   MIN_CELL_AREA,
   MIN_EDGE_WEIGHT,
   toKeywordCells,
-  toTagFilterTerms,
   type KeywordEntry,
 } from './keyword_page_rank';
 import { MEMORY_KEYWORD_MAX_REQUESTS, MEMORY_KEYWORD_SIZE } from './use_memory';
@@ -187,19 +186,16 @@ describe('computeKeywordPageRank', () => {
 describe('toKeywordCells', () => {
   const store: KeywordEntry[] = [
     entry({ tags: ['memory', 'agent-builder', 'traces-*'], usefulness: 1, confidence: 1 }),
-    entry({ tags: ['memory', 'agent-builder', 'Cart Cache'], usefulness: 1, confidence: 1 }),
-    entry({ tags: ['memory', 'agent builder', 'redis'], usefulness: 1, confidence: 1 }),
+    entry({ tags: ['memory', 'agent-builder', 'cart-cache'], usefulness: 1, confidence: 1 }),
+    entry({ tags: ['memory', 'cart-cache', 'redis'], usefulness: 1, confidence: 1 }),
     entry({ tags: ['memory', 'redis'], usefulness: 0, confidence: 0 }),
   ];
 
-  it('ranks by PageRank and labels each cell with the commonest spelling', () => {
+  it('ranks by PageRank and keys each cell by its canonical keyword', () => {
     const cells = toKeywordCells(store);
 
     expect(cells[0].keyword).toBe('agent-builder');
-    // `agent-builder` is spelled two ways and `agent builder` once, so the
-    // hyphenated spelling is the one a person wrote most often.
-    expect(cells[0].display).toBe('agent-builder');
-    expect(cells.map((cell) => cell.display)).toContain('Cart Cache');
+    expect(cells.map((cell) => cell.keyword)).toContain('cart-cache');
   });
 
   it('drops selected keywords rather than restyling them', () => {
@@ -236,26 +232,5 @@ describe('toKeywordCells', () => {
   it('has nothing to draw when every keyword is selected or no memory carries one', () => {
     expect(toKeywordCells([])).toEqual([]);
     expect(toKeywordCells(store, ['agent-builder', 'redis', 'cart-cache', 'traces-*'])).toEqual([]);
-  });
-});
-
-describe('toTagFilterTerms', () => {
-  const store: KeywordEntry[] = [
-    entry({ tags: ['memory', 'Cart Cache', 'cart-cache'] }),
-    entry({ tags: ['memory', 'CART_CACHE'] }),
-  ];
-
-  it('sends the canonical key plus every spelling of it', () => {
-    expect(toTagFilterTerms(store, ['cart-cache']).sort()).toEqual([
-      'CART_CACHE',
-      'Cart Cache',
-      'cart-cache',
-    ]);
-  });
-
-  it('sends nothing but the selected keywords and their spellings', () => {
-    expect(toTagFilterTerms(store, [])).toEqual([]);
-    // The marker tag is not a keyword, so it is never in the selection.
-    expect(toTagFilterTerms(store, ['cart-cache'])).not.toContain('memory');
   });
 });

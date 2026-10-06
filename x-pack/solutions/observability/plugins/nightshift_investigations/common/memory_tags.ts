@@ -27,15 +27,6 @@ export const canonicalizeTag = (tag: string): string | null => {
   return folded.length > 0 ? folded.slice(0, MAX_MEMORY_TAG_LENGTH) : null;
 };
 
-export const countDistinctTags = (tags: readonly string[]): number => {
-  const canonical = new Set<string>();
-  for (const tag of tags) {
-    const key = canonicalizeTag(tag);
-    if (key !== null) canonical.add(key);
-  }
-  return canonical.size;
-};
-
 export const canonicalizeTags = (tags: readonly unknown[] | undefined): string[] => {
   const canonical: string[] = [];
   const seen = new Set<string>();

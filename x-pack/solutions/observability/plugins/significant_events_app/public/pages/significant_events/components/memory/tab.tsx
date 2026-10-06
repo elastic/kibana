@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { canonicalizeTag } from '@kbn/nightshift-investigations-plugin/common';
 import { MemoryActivity } from './activity';
 import { MemoryHome } from './home';
 import { MemoryPageView } from './page_view';
@@ -44,10 +43,8 @@ export function MemoryTab() {
     );
   }, []);
   const onClearKeywords = useCallback(() => setKeywords([]), []);
-  // Tags are stored verbatim, so a clicked tag is keyed the same canonical way the chart keys.
   const onSelectKeyword = useCallback((keyword: string) => {
-    const canonical = canonicalizeTag(keyword);
-    setKeywords(canonical === null ? [] : [canonical]);
+    setKeywords([keyword]);
     setSelection({ kind: 'home' });
   }, []);
 

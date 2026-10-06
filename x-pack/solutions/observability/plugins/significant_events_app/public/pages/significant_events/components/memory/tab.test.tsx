@@ -93,8 +93,7 @@ const listResult = (pages: MemoryPageSummary[]): MemoryListResult => ({
 
 // The home view's keyword chart asks for its own wider slice of live memories,
 // so it has to be given one even though the tab's list query drives the rest of
-// the view. Both the unfiltered and the selected-keywords calls read the same
-// mock, which is what a single cached query would do.
+// the view.
 mockUseMemoryKeywordPages.mockReturnValue({
   data: listResult([]),
 } as unknown as ReturnType<typeof useMemoryKeywordPages>);
@@ -202,9 +201,8 @@ describe('MemoryTab', () => {
   });
 
   it('answers a tag clicked on a memory by filtering home, and returns there', async () => {
-    // Tags are stored verbatim and spelled inconsistently, so the tag itself is
-    // not a keyword: `Invoke_Agent` has to select the same key the chart uses.
-    const tagged = summary({ tags: ['memory', 'Invoke_Agent'] });
+    // Stored tags are canonical, so the tag is already the keyword the chart keys.
+    const tagged = summary({ tags: ['memory', 'invoke-agent'] });
     mockUseMemoryPages.mockReturnValue(
       asQueryResult({ rows: [tagged], stats: listResult([tagged]).stats })
     );
@@ -216,7 +214,7 @@ describe('MemoryTab', () => {
     renderTab();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryLink-memory_kafka-lag'));
-    await userEvent.click(screen.getByTestId('nightshiftMemoryTag-Invoke_Agent'));
+    await userEvent.click(screen.getByTestId('nightshiftMemoryTag-invoke-agent'));
 
     // Home, not the detail view: the tag answers a question about other
     // memories, so it leaves the one being read.

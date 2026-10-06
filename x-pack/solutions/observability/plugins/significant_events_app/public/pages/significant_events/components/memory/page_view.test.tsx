@@ -158,8 +158,7 @@ describe('MemoryPageView', () => {
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryTag-checkout'));
 
-    // The tag is handed over verbatim: canonicalizing it is the tab's job,
-    // because it is the component that knows about spellings.
+    // Stored tags are canonical, so the tag is handed over as-is.
     expect(onSelectKeyword).toHaveBeenCalledWith('checkout');
   });
 

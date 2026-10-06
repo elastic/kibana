@@ -7,21 +7,11 @@
 
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { countDistinctTags, MAX_KEYWORD_LENGTH, MEMORY_FILTERS } from '../../common';
-import {
-  MAX_PAGE_SIZE,
-  MAX_TAG_FILTER_KEYWORDS,
-  MAX_TAG_FILTER_TERMS,
-  MAX_TAG_TERM_LENGTH,
-} from '../memory/page_store';
+import { MAX_KEYWORD_LENGTH, MAX_MEMORY_TAG_LENGTH, MEMORY_FILTERS } from '../../common';
+import { MAX_PAGE_SIZE, MAX_TAG_FILTER_KEYWORDS } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
-const tagTerms = z
-  .array(z.string().min(1).max(MAX_TAG_TERM_LENGTH))
-  .max(MAX_TAG_FILTER_TERMS)
-  .refine((tags) => countDistinctTags(tags) <= MAX_TAG_FILTER_KEYWORDS, {
-    message: `at most ${MAX_TAG_FILTER_KEYWORDS} distinct keywords`,
-  });
+const tagTerms = z.array(z.string().min(1).max(MAX_MEMORY_TAG_LENGTH)).max(MAX_TAG_FILTER_KEYWORDS);
 
 export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/memory/pages',
@@ -31,8 +21,8 @@ export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
     description:
       'Returns a cursor-paginated slice of Semantic Memory pages for the current Space, ' +
       'with decayed usefulness and confidence so the UI need not recompute the bandit maths. ' +
-      '`tags` narrows the result to pages carrying every selected keyword, matching a keyword ' +
-      'against each of the spellings sent for it. `search` narrows lexically on title or context.',
+      '`tags` narrows the result to pages carrying every selected keyword, matching a canonical ' +
+      'tag exactly. `search` narrows lexically on title or context.',
   },
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },

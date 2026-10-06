@@ -172,7 +172,7 @@ describe('useMemoryKeywordPages', () => {
     fetchMock.mockResolvedValue(listResult([]));
     const { wrapper } = createWrapper();
 
-    renderHook(() => useMemoryKeywordPages(['invoke-agent', 'invoke_agent', 'cart cache']), {
+    renderHook(() => useMemoryKeywordPages(['invoke-agent', 'cart-cache']), {
       wrapper,
     });
 
@@ -180,9 +180,7 @@ describe('useMemoryKeywordPages', () => {
     expect(listQueries()[0]).toEqual({
       filter: 'active',
       size: MEMORY_KEYWORD_SIZE,
-      // Every spelling of every selected keyword travels, so a document written
-      // before tags were canonicalized still matches.
-      tags: ['invoke-agent', 'invoke_agent', 'cart cache'],
+      tags: ['invoke-agent', 'cart-cache'],
     });
   });
 

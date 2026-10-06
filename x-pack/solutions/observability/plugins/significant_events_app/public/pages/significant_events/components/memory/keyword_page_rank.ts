@@ -23,7 +23,6 @@ export interface KeywordPageRankOptions {
 export interface KeywordCell {
   /** Canonical key: what filtering, selection, and the graph compare. */
   keyword: string;
-  display: string;
   /** Min-max normalized PageRank in [0, 1]. */
   score: number;
   area: number;
@@ -159,32 +158,7 @@ export function computeKeywordPageRank(
   return scores;
 }
 
-const countSpellings = (entries: readonly KeywordEntry[]): Map<string, Map<string, number>> => {
-  const spellings = new Map<string, Map<string, number>>();
-  for (const entry of entries) {
-    for (const original of entry.tags ?? []) {
-      const key = canonicalizeTag(original);
-      if (key === null || key === MEMORY_MARKER_TAG) continue;
-      const bySpelling = spellings.get(key) ?? new Map<string, number>();
-      bySpelling.set(original, (bySpelling.get(original) ?? 0) + 1);
-      spellings.set(key, bySpelling);
-    }
-  }
-  return spellings;
-};
-
-export const toKeywordDisplayNames = (entries: readonly KeywordEntry[]): Map<string, string> =>
-  new Map(
-    [...countSpellings(entries)].map(([key, bySpelling]) => [key, mostFrequentSpelling(bySpelling)])
-  );
-
-export const toKeywordCells = (
-  entries: readonly KeywordEntry[],
-  selectedKeywords: readonly string[] = []
-): KeywordCell[] => {
-  const selected = new Set(selectedKeywords);
-
-  const spellings = countSpellings(entries);
+const countMemories = (entries: readonly KeywordEntry[]): Map<string, number> => {
   const memories = new Map<string, number>();
   for (const entry of entries) {
     const counted = new Set<string>();
@@ -194,6 +168,15 @@ export const toKeywordCells = (
       memories.set(keyword, (memories.get(keyword) ?? 0) + 1);
     }
   }
+  return memories;
+};
+
+export const toKeywordCells = (
+  entries: readonly KeywordEntry[],
+  selectedKeywords: readonly string[] = []
+): KeywordCell[] => {
+  const selected = new Set(selectedKeywords);
+  const memories = countMemories(entries);
 
   const scores = computeKeywordPageRank(entries, { maxKeywords: MAX_RANKED_KEYWORDS });
   const ranked = Object.entries(scores).filter(([keyword]) => !selected.has(keyword));
@@ -207,7 +190,6 @@ export const toKeywordCells = (
   return ranked
     .map(([keyword, score]) => ({
       keyword,
-      display: mostFrequentSpelling(spellings.get(keyword)),
       // A flat score set has no order, so any positive score is drawn at full size.
       score: range === 0 ? (score > 0 ? 1 : 0) : (score - min) / range,
       area: 0,
@@ -219,39 +201,4 @@ export const toKeywordCells = (
     }))
     .sort((a, b) => b.area - a.area || a.keyword.localeCompare(b.keyword))
     .slice(0, MAX_TREEMAP_CELLS);
-};
-
-const mostFrequentSpelling = (bySpelling: Map<string, number> | undefined): string => {
-  if (bySpelling === undefined) return '';
-  let best = '';
-  let bestCount = -1;
-  for (const [spelling, count] of bySpelling) {
-    if (count > bestCount) {
-      best = spelling;
-      bestCount = count;
-    }
-  }
-  return best;
-};
-
-/** Canonical key plus every stored spelling, for pre-canonicalization documents. */
-export const toTagFilterTerms = (
-  entries: readonly KeywordEntry[],
-  keywords: readonly string[]
-): string[] => {
-  const spellings = new Map<string, Set<string>>();
-  for (const entry of entries) {
-    for (const original of entry.tags ?? []) {
-      const key = canonicalizeTag(original);
-      if (key === null || key === MEMORY_MARKER_TAG) continue;
-      const seen = spellings.get(key) ?? new Set<string>();
-      seen.add(original);
-      spellings.set(key, seen);
-    }
-  }
-  return keywords.flatMap((keyword) => {
-    const key = canonicalizeTag(keyword);
-    if (key === null) return [];
-    return [...new Set([key, ...(spellings.get(key) ?? [])])];
-  });
 };

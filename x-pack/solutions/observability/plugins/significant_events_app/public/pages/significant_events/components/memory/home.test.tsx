@@ -11,7 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
-import { canonicalizeTag } from '@kbn/nightshift-investigations-plugin/common';
 import { MemoryHome } from './home';
 import { useMemoryKeywordPages } from './use_memory';
 import type { MemoryStats, MemorySummary } from './types';
@@ -75,25 +74,12 @@ const PAGES = [
 ];
 
 /**
- * Stands in for the server: AND across keywords, matching each keyword against
- * any spelling of it, which is what the route and the store do with the terms.
+ * Stands in for the server: AND across the selected canonical keywords, which
+ * is what the route and the store do with the terms.
  */
-const serverFilter = (pages: MemorySummary[], tags: readonly string[]): MemorySummary[] => {
-  // The terms arrive grouped by the keyword they belong to, so a page matches a
-  // keyword by carrying its canonical form or any of its spellings — and by
-  // nothing else, which is what makes two keywords an AND.
-  const keywords = new Map<string, Set<string>>();
-  for (const tag of tags) {
-    const key = canonicalizeTag(tag);
-    if (key === null) continue;
-    keywords.set(key, (keywords.get(key) ?? new Set<string>()).add(tag));
-  }
-  if (keywords.size === 0) return pages;
-  return pages.filter((page) =>
-    [...keywords].every(([keyword, terms]) =>
-      page.tags.some((tag) => canonicalizeTag(tag) === keyword || terms.has(tag))
-    )
-  );
+const serverFilter = (pages: MemorySummary[], keywords: readonly string[]): MemorySummary[] => {
+  if (keywords.length === 0) return pages;
+  return pages.filter((page) => keywords.every((keyword) => page.tags.includes(keyword)));
 };
 
 const stats = { total: PAGES.length, archived: 0 };
@@ -172,7 +158,7 @@ describe('MemoryHome keyword filtering', () => {
 
     clickCell('kafka');
 
-    // The server is asked for the filtered set, spellings included.
+    // The server is asked for the filtered set.
     expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith(['kafka']);
     const titles = listedTitles().join(' ');
     expect(titles).toContain('Kafka and Redis');

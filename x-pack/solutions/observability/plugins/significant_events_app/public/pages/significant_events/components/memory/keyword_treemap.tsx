@@ -29,12 +29,7 @@ import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { CrossIcon } from './cross_icon';
-import {
-  toKeywordCells,
-  toKeywordDisplayNames,
-  type KeywordCell,
-  type KeywordEntry,
-} from './keyword_page_rank';
+import { toKeywordCells, type KeywordCell, type KeywordEntry } from './keyword_page_rank';
 import type { MemorySummary } from './types';
 
 /** The chart appends its value as another label row; the percentage lives in the tooltip. */
@@ -99,7 +94,6 @@ export function MemoryKeywordTreemap({
     [entries, selectedKeywords]
   );
   const cellsByKeyword = useMemo(() => new Map(cells.map((cell) => [cell.keyword, cell])), [cells]);
-  const displayNames = useMemo(() => toKeywordDisplayNames(entries), [entries]);
   // Re-derived per theme; ten colours repeat across cells, which is fine.
   const palette = useEuiPaletteColorBlindBehindText();
   const chartBaseTheme = useElasticChartsTheme();
@@ -148,7 +142,7 @@ export function MemoryKeywordTreemap({
           data-test-subj="nightshiftMemoryTreemapTooltip"
         >
           <EuiText size="s">
-            <strong>{cell.display}</strong>
+            <strong>{cell.keyword}</strong>
           </EuiText>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -177,7 +171,6 @@ export function MemoryKeywordTreemap({
         <>
           <KeywordFilterRow
             selectedKeywords={selectedKeywords}
-            displayNames={displayNames}
             onToggleKeyword={onToggleKeyword}
             onClearKeywords={onClearKeywords}
           />
@@ -221,7 +214,7 @@ export function MemoryKeywordTreemap({
                   },
                   // Clipping is off: elastic-charts 73.2.2 erases a one-cell chart's label.
                   fillLabel,
-                  nodeLabel: (key) => cellsByKeyword.get(`${key}`)?.display ?? '',
+                  nodeLabel: (key) => cellsByKeyword.get(`${key}`)?.keyword ?? '',
                 },
               ]}
             />
@@ -235,12 +228,10 @@ export function MemoryKeywordTreemap({
 
 function KeywordFilterRow({
   selectedKeywords,
-  displayNames,
   onToggleKeyword,
   onClearKeywords,
 }: {
   selectedKeywords: string[];
-  displayNames: Map<string, string>;
   onToggleKeyword: (keyword: string) => void;
   onClearKeywords: () => void;
 }) {
@@ -272,7 +263,7 @@ function KeywordFilterRow({
             iconOnClickAriaLabel={`Remove the ${keyword} filter`}
             data-test-subj={`nightshiftMemoryKeywordChip-${keyword}`}
           >
-            {displayNames.get(keyword) ?? keyword}
+            {keyword}
           </EuiBadge>
         </EuiFlexItem>
       ))}

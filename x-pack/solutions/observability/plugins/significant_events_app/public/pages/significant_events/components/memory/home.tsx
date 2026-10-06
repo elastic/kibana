@@ -19,7 +19,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MemoryPageRow } from './page_row';
 import { MemoryKeywordTreemap } from './keyword_treemap';
-import { toTagFilterTerms } from './keyword_page_rank';
 import { useMemoryKeywordPages } from './use_memory';
 import type { MemoryStats, MemorySummary } from './types';
 
@@ -44,17 +43,11 @@ export function MemoryHome({
   onToggleKeyword,
   onClearKeywords,
 }: MemoryHomeProps) {
-  const { data: allKeywordResult } = useMemoryKeywordPages();
-  const allKeywordPages = useMemo(() => allKeywordResult?.pages ?? [], [allKeywordResult]);
-  const tagTerms = useMemo(
-    () => toTagFilterTerms(allKeywordPages, selectedKeywords),
-    [allKeywordPages, selectedKeywords]
-  );
   const {
     data: keywordResult,
     isLoading: isKeywordLoading,
     isError: isKeywordError,
-  } = useMemoryKeywordPages(tagTerms);
+  } = useMemoryKeywordPages(selectedKeywords);
   const isFiltering = selectedKeywords.length > 0;
   const keywordStatus = !isFiltering
     ? 'ready'
@@ -63,10 +56,7 @@ export function MemoryHome({
     : isKeywordLoading
     ? 'loading'
     : 'ready';
-  const keywordPages = useMemo(
-    () => (isFiltering ? keywordResult?.pages ?? [] : allKeywordPages),
-    [isFiltering, allKeywordPages, keywordResult]
-  );
+  const keywordPages = useMemo(() => keywordResult?.pages ?? [], [keywordResult]);
 
   const filteredPages = useMemo(
     () => (selectedKeywords.length === 0 ? pages : keywordPages),

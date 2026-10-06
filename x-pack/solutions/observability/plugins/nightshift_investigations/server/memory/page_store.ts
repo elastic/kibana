@@ -50,13 +50,6 @@ export class MemoryVersionConflictError extends Error {
 
 export const MAX_TAG_FILTER_KEYWORDS = MAX_MEMORY_TAGS_PER_PAGE;
 
-export const MAX_TAG_SPELLINGS_PER_KEYWORD = MAX_MEMORY_TAGS_PER_PAGE;
-
-export const MAX_TAG_FILTER_TERMS = MAX_TAG_FILTER_KEYWORDS * MAX_TAG_SPELLINGS_PER_KEYWORD;
-
-/** Bounds a raw spelling from a pre-canonicalization document; canonical tags are smaller. */
-export const MAX_TAG_TERM_LENGTH = 200;
-
 export type MemoryRetrieveMatch = 'context' | 'content';
 
 /** Elasticsearch's optimistic-concurrency pair, as the store hands it out. */
@@ -382,34 +375,18 @@ export const createMemoryPageStore = ({
   ];
 
   const tagFilterClauses = (tags: readonly string[] | undefined): object[] => {
-    const byKeyword = new Map<string, string[]>();
+    const keywords: string[] = [];
     for (const tag of tags ?? []) {
       const keyword = canonicalizeTag(tag);
-      if (keyword === null) continue;
-      let spellings = byKeyword.get(keyword);
-      if (spellings === undefined) {
-        if (byKeyword.size >= MAX_TAG_FILTER_KEYWORDS) {
-          throw badRequest(
-            `A Semantic Memory tag filter may name at most ${MAX_TAG_FILTER_KEYWORDS} keywords`
-          );
-        }
-        spellings = [keyword];
-        byKeyword.set(keyword, spellings);
-      }
-      if (
-        tag !== spellings[0] &&
-        spellings.length < MAX_TAG_SPELLINGS_PER_KEYWORD &&
-        !spellings.includes(tag)
-      ) {
-        spellings.push(tag);
-      }
+      if (keyword === null || keywords.includes(keyword)) continue;
+      keywords.push(keyword);
     }
-    return [...byKeyword.values()].map((spellings) => ({
-      bool: {
-        should: spellings.map((spelling) => ({ term: { tags: spelling } })),
-        minimum_should_match: 1,
-      },
-    }));
+    if (keywords.length > MAX_TAG_FILTER_KEYWORDS) {
+      throw badRequest(
+        `A Semantic Memory tag filter may name at most ${MAX_TAG_FILTER_KEYWORDS} keywords`
+      );
+    }
+    return keywords.map((keyword) => ({ term: { tags: keyword } }));
   };
 
   const filterClause = (

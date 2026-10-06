@@ -5,14 +5,11 @@
  * 2.0.
  */
 import { conflict, notFound } from '@hapi/boom';
-import { MAX_KEYWORD_LENGTH } from '../../common';
+import { MAX_KEYWORD_LENGTH, MAX_MEMORY_TAG_LENGTH } from '../../common';
 import type { MemoryPage } from '../../common/memory';
 import {
   MAX_PAGE_SIZE,
   MAX_TAG_FILTER_KEYWORDS,
-  MAX_TAG_FILTER_TERMS,
-  MAX_TAG_SPELLINGS_PER_KEYWORD,
-  MAX_TAG_TERM_LENGTH,
   MemoryVersionConflictError,
 } from '../memory/page_store';
 import { archiveMemoryPageRoute } from './archive_memory_page';
@@ -149,11 +146,11 @@ describe('listMemoryPagesRoute', () => {
     });
   });
 
-  it('forwards the repeated tag terms so the store can group them by keyword', async () => {
+  it('forwards the selected canonical keywords to the store', async () => {
     const listPaginated = jest.fn().mockResolvedValue({ pages: [] });
     await handler(
       context({ listPaginated }, true, {
-        query: { filter: 'active', tags: ['invoke-agent', 'invoke_agent', 'cart cache'] },
+        query: { filter: 'active', tags: ['invoke-agent', 'cart-cache'] },
       })
     );
 
@@ -161,13 +158,13 @@ describe('listMemoryPagesRoute', () => {
       filter: 'active',
       cursor: undefined,
       size: undefined,
-      tags: ['invoke-agent', 'invoke_agent', 'cart cache'],
+      tags: ['invoke-agent', 'cart-cache'],
       search: undefined,
     });
   });
 
   it('accepts one tag term, which a query string carries as a scalar', async () => {
-    // A keyword written one way is one param, so the parsed query holds a string
+    // A single keyword is one param, so the parsed query holds a string
     // rather than an array. Rejecting it would break the commonest filter there
     // is: exactly one keyword.
     const listPaginated = jest.fn().mockResolvedValue({ pages: [] });
@@ -272,16 +269,10 @@ describe('memory route request bounds', () => {
 
   it.each([
     ['an empty tag term', ['']],
-    ['an over-long tag term', ['t'.repeat(MAX_TAG_TERM_LENGTH + 1)]],
+    ['an over-long tag term', ['t'.repeat(MAX_MEMORY_TAG_LENGTH + 1)]],
     [
       'more terms than the tag bound',
-      Array.from({ length: MAX_TAG_FILTER_TERMS + 1 }, (_, i) => `t${i}`),
-    ],
-    [
-      // The term bound is keywords × spellings, so a request can sit well inside
-      // it and still name more keywords than the store will filter by.
-      'more distinct keywords than the store will filter by',
-      Array.from({ length: MAX_TAG_FILTER_KEYWORDS + 1 }, (_, i) => `keyword ${i}`),
+      Array.from({ length: MAX_TAG_FILTER_KEYWORDS + 1 }, (_, i) => `keyword-${i}`),
     ],
   ])('rejects %s on the list route', (_label, tags) => {
     const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
@@ -290,14 +281,7 @@ describe('memory route request bounds', () => {
 
   it('accepts the full set of tag terms the client can send', () => {
     const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
-    // Every keyword the cap allows, each spelled as many ways as it may be: the
-    // two bounds are independent, so the largest legal request fills both.
-    const tags = Array.from({ length: MAX_TAG_FILTER_KEYWORDS }, (_, keyword) =>
-      Array.from({ length: MAX_TAG_SPELLINGS_PER_KEYWORD }, (_unused, spelling) =>
-        spelling === 0 ? `keyword${keyword}` : `keyword${keyword}${' '.repeat(spelling)}`
-      )
-    ).flat();
-    expect(tags).toHaveLength(MAX_TAG_FILTER_TERMS);
+    const tags = Array.from({ length: MAX_TAG_FILTER_KEYWORDS }, (_, i) => `keyword-${i}`);
     expect(params.safeParse({ query: { tags } }).success).toBe(true);
   });
 

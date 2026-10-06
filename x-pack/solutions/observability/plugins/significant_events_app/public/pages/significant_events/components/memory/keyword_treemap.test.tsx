@@ -62,11 +62,11 @@ const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
     ...overrides,
   } as MemorySummary);
 
-/** Three memories that give the graph a hub, a satellite, and one spelling clash. */
+/** Three memories that give the graph a hub, a satellite, and two satellites. */
 const PAGES = [
   summary({ id: 'memory_a', tags: ['memory', 'agent-builder', 'traces-*'] }),
-  summary({ id: 'memory_b', tags: ['memory', 'agent-builder', 'Cart Cache'] }),
-  summary({ id: 'memory_c', tags: ['memory', 'agent builder', 'redis'] }),
+  summary({ id: 'memory_b', tags: ['memory', 'agent-builder', 'cart-cache'] }),
+  summary({ id: 'memory_c', tags: ['memory', 'agent-builder', 'redis'] }),
 ];
 
 /**
@@ -139,15 +139,13 @@ describe('MemoryKeywordTreemap', () => {
     renderTreemap();
 
     expect(layer().groupByRollup(partition().data[0])).toBe(partition().data[0].keyword);
-    // `Cart Cache` and `agent builder` fold onto the same keywords as their
-    // hyphenated spellings, so the graph has five keywords, not seven.
     expect(
       partition()
         .data.map((cell) => cell.keyword)
         .sort()
     ).toEqual(['agent-builder', 'cart-cache', 'redis', 'traces-*']);
     expect(layer().nodeLabel!('agent-builder')).toBe('agent-builder');
-    expect(layer().nodeLabel!('cart-cache')).toBe('Cart Cache');
+    expect(layer().nodeLabel!('cart-cache')).toBe('cart-cache');
   });
 
   it('labels a cell with the keyword alone and leaves the chart value slot empty', () => {
@@ -187,7 +185,7 @@ describe('MemoryKeywordTreemap', () => {
     );
     expect(container.textContent).toContain('agent-builder');
     expect(container.textContent).toMatch(/Score \d+%/);
-    // Three of the three fixture memories carry it, whichever spelling they used.
+    // Three of the three fixture memories carry it.
     expect(container.textContent).toContain('3 memories');
   });
 
@@ -213,9 +211,8 @@ describe('MemoryKeywordTreemap', () => {
     const { onToggleKeyword } = renderTreemap({ selectedKeywords: ['cart-cache'] });
 
     expect(screen.getByTestId('nightshiftMemoryKeywordFilters')).toBeInTheDocument();
-    // A selected keyword is out of the chart, so the chip carries its spelling.
     const chip = screen.getByTestId('nightshiftMemoryKeywordChip-cart-cache');
-    expect(chip).toHaveTextContent('Cart Cache');
+    expect(chip).toHaveTextContent('cart-cache');
 
     await userEvent.click(chip);
     expect(onToggleKeyword).toHaveBeenCalledWith('cart-cache');

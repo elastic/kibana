@@ -84,30 +84,23 @@ const SEARCH_PHRASE = 'ingest-2 queue backlog';
 /**
  * E13's keyword graph.
  *
- * `invoke_agent`, `invoke-agent` and `Invoke Agent` are one keyword written three
- * ways, which is how a real store accumulates tags: the optimizer spells it
- * differently from one run to the next and nothing rewrites the documents it
- * already wrote. The treemap has to rank them as one cell, and the server-side
- * filter has to match all three spellings against a real index rather than
- * against a mocked one.
- *
  * `invoke-agent` is deliberately the most connected keyword and `checkout` the
  * next, so the two cells E13 clicks are the two largest ones: a treemap draws
  * its biggest cell as the top strip, which is where the test aims.
  */
 const KEYWORD_DOCS: { key: string; tags: string[] }[] = [
-  { key: 'checkout-invoke-agent', tags: ['invoke_agent', 'checkout'] },
+  { key: 'checkout-invoke-agent', tags: ['invoke-agent', 'checkout'] },
   { key: 'dns-invoke-agent', tags: ['invoke-agent', 'dns'] },
-  { key: 'traces-invoke-agent', tags: ['Invoke Agent', 'traces'] },
-  { key: 'cart-cache-invoke-agent', tags: ['invoke_agent', 'cart-cache'] },
-  { key: 'traces-invoke-agent-hub', tags: ['invoke_agent', 'checkout', 'traces'] },
-  { key: 'redis-invoke-agent', tags: ['invoke_agent', 'redis'] },
-  { key: 'checkout-invoke-agent-runbook', tags: ['invoke_agent', 'checkout'] },
+  { key: 'traces-invoke-agent', tags: ['invoke-agent', 'traces'] },
+  { key: 'cart-cache-invoke-agent', tags: ['invoke-agent', 'cart-cache'] },
+  { key: 'traces-invoke-agent-hub', tags: ['invoke-agent', 'checkout', 'traces'] },
+  { key: 'redis-invoke-agent', tags: ['invoke-agent', 'redis'] },
+  { key: 'checkout-invoke-agent-runbook', tags: ['invoke-agent', 'checkout'] },
   // The one memory without the keyword: it is what proves the filter filtered.
   { key: 'checkout-redis-runbook', tags: ['checkout', 'redis'] },
 ];
 
-/** The canonical form all three spellings fold to, and the key the chip carries. */
+/** The canonical keyword E13 filters by, and the key the chip carries. */
 const INVOKE_AGENT_KEYWORD = 'invoke-agent';
 const CHECKOUT_KEYWORD = 'checkout';
 
@@ -118,14 +111,11 @@ const CHECKOUT_KEYWORD = 'checkout';
  */
 const SEEDED_ACTIVE_COUNT = PAGE_SIZE_SLUGS.length + KEYWORD_DOCS.length + 4;
 
-const hasTag = (docTags: string[], keyword: string) =>
-  docTags.some((tag) => tag.toLowerCase().replace(/[\s_]+/g, '-') === keyword);
-
 const KEYWORD_DOCS_WITH_INVOKE_AGENT = KEYWORD_DOCS.filter((doc) =>
-  hasTag(doc.tags, INVOKE_AGENT_KEYWORD)
+  doc.tags.includes(INVOKE_AGENT_KEYWORD)
 ).map((doc) => doc.key);
 const KEYWORD_DOCS_WITH_BOTH = KEYWORD_DOCS.filter(
-  (doc) => hasTag(doc.tags, INVOKE_AGENT_KEYWORD) && hasTag(doc.tags, CHECKOUT_KEYWORD)
+  (doc) => doc.tags.includes(INVOKE_AGENT_KEYWORD) && doc.tags.includes(CHECKOUT_KEYWORD)
 ).map((doc) => doc.key);
 
 test.describe(
@@ -686,7 +676,7 @@ test.describe(
       );
     };
 
-    test('E13 filters the view by a keyword cell, matching every spelling of it', async ({
+    test('E13 filters the view by one keyword cell, then ANDs a second', async ({
       page,
       kbnUrl,
     }, testInfo) => {
@@ -699,15 +689,14 @@ test.describe(
       // fixture archives four: one by a person and three merge sources.
       expect(await headerArchived(page)).toBe(ARCHIVED_SEEDED_COUNT);
 
-      // One cell for three spellings: the chart selects the canonical key.
-      await clickLargestCell(page, 'invoke_agent');
+      // The chart selects the canonical key.
+      await clickLargestCell(page, INVOKE_AGENT_KEYWORD);
       const chip = page.testSubj.locator(`nightshiftMemoryKeywordChip-${INVOKE_AGENT_KEYWORD}`);
       await expect(chip).toBeVisible();
       await expect(page.testSubj.locator('nightshiftMemoryKeywordFilters')).toBeVisible();
 
-      // The header count comes from the server, which had to match all three
-      // spellings against the index: seven of the eight seeded memories carry
-      // one of them.
+      // The header count comes from the server, which matched the canonical tag
+      // against the index: seven of the eight seeded memories carry it.
       await expectHeaderTotal(page, KEYWORD_DOCS_WITH_INVOKE_AGENT.length);
       const oneKeywordRows = await homeRowIds(page);
       for (const key of KEYWORD_DOCS_WITH_INVOKE_AGENT) {
