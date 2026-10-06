@@ -242,13 +242,13 @@ describe('admitInboundEventRequest', () => {
     expect(toolkit.next).toHaveBeenCalledTimes(2);
   });
 
-  it('does not admit a request that has no connector params', () => {
+  it('reads connector ids from the URL when params are empty', () => {
     const admission = new InboundEventAdmission(admissionConfig);
     const tryAdmit = jest.spyOn(admission, 'tryAdmit');
     const { request } = createRequest({ params: {} });
 
     const { result } = admit(admission, request, { next: jest.fn().mockReturnValue('next') });
     expect(result).toBe('next');
-    expect(tryAdmit).not.toHaveBeenCalled();
+    expect(tryAdmit).toHaveBeenCalledWith('default\0.slack\0c1');
   });
 });

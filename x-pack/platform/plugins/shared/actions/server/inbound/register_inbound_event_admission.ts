@@ -14,19 +14,29 @@ import { INBOUND_EVENTS_API_PATH, INBOUND_EVENTS_RATE_LIMITED_MESSAGE } from './
 import type { InboundEventAdmission } from './inbound_event_admission';
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 
-const isInboundEventParams = (
-  params: unknown
-): params is { connector_type_id: string; connector_id: string } => {
-  if (typeof params !== 'object' || params === null) {
-    return false;
+const inboundEventIdsPattern = new RegExp(
+  `^${INBOUND_EVENTS_API_PATH.replace('{connector_type_id}', '([^/]+)').replace(
+    '{connector_id}',
+    '([^/]+)'
+  )}$`
+);
+
+/**
+ * onPreAuth calls CoreKibanaRequest.from without route schemas, so request.params is {}.
+ * The ids are on the URL (`route.path`).
+ */
+const readInboundEventIds = (
+  pathname: string
+): { connectorTypeId: string; connectorId: string } | undefined => {
+  const match = inboundEventIdsPattern.exec(pathname);
+  if (!match) {
+    return undefined;
   }
-  const record = params as { connector_type_id?: unknown; connector_id?: unknown };
-  return (
-    typeof record.connector_type_id === 'string' &&
-    record.connector_type_id.length > 0 &&
-    typeof record.connector_id === 'string' &&
-    record.connector_id.length > 0
-  );
+  const [, connectorTypeId, connectorId] = match;
+  if (!connectorTypeId || !connectorId) {
+    return undefined;
+  }
+  return { connectorTypeId, connectorId };
 };
 
 const isInboundEventsRoute = (request: KibanaRequest): boolean =>
@@ -79,12 +89,13 @@ export const admitInboundEventRequest = ({
   logger: Logger;
   getSpaceId: (request: KibanaRequest) => string;
 }) => {
-  if (!isInboundEventsRoute(request) || !isInboundEventParams(request.params)) {
+  const ids = isInboundEventsRoute(request) ? readInboundEventIds(request.route.path) : undefined;
+  if (!ids) {
     return toolkit.next();
   }
 
-  const connectorTypeId = normalizeConnectorTypeId(request.params.connector_type_id);
-  const connectorId = request.params.connector_id;
+  const connectorTypeId = normalizeConnectorTypeId(ids.connectorTypeId);
+  const connectorId = ids.connectorId;
   const spaceId = getSpaceId(request);
   const decision = admission.tryAdmit(`${spaceId}\0${connectorTypeId}\0${connectorId}`);
   if (!decision.allowed) {
