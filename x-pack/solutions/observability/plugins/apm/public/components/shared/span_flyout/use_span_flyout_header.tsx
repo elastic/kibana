@@ -1,0 +1,342 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { FlyoutTemplate } from '@kbn/flyout-template';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type { ReactElement } from 'react';
+import React from 'react';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getNextEnvironmentUrlParam,
+} from '../../../../common/environment_filter_values';
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { getFailureBadgeDescriptor } from '../badge/failure_badge';
+import { getSyncBadgeDescriptor } from '../badge/sync_badge';
+import { DependencyLink } from '../links/dependency_link';
+import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
+import { ServiceLink } from '../links/apm/service_link';
+import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
+import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
+import {
+  DURATION_LABEL,
+  REQUEST_LABEL,
+  SERVICE_LABEL,
+  TIMESTAMP_LABEL,
+  TRANSACTION_LABEL,
+} from '../waterfall_item_flyout/constants';
+
+const { Badge, MetaBlock } = FlyoutTemplate.Header;
+
+export const SPAN_DETAILS_LABEL = i18n.translate(
+  'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+  {
+    defaultMessage: 'Span details',
+  }
+);
+
+function formatType(type: string) {
+  switch (type) {
+    case 'db':
+      return 'DB';
+    case 'hard-navigation':
+      return i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
+        {
+          defaultMessage: 'Navigation timing',
+        }
+      );
+    default:
+      return type;
+  }
+}
+
+function formatSubtype(subtype: string | undefined) {
+  switch (subtype) {
+    case 'mysql':
+      return 'MySQL';
+    default:
+      return subtype;
+  }
+}
+
+export interface SpanFlyoutHeaderParts {
+  title: string;
+  titleText: string;
+  description?: string;
+  metaBlocks: ReactElement[];
+  badges: ReactElement[];
+}
+
+/**
+ * Resolves the waterfall span flyout header for `FlyoutTemplate.Header`. Until the document loads,
+ * the title is the generic "Span details" label; afterwards the title is the span name and the
+ * generic label becomes the description.
+ */
+export function useSpanFlyoutHeader({
+  span,
+  parentTransaction,
+  totalDuration,
+}: {
+  span?: Span;
+  parentTransaction?: Transaction;
+  totalDuration?: number;
+}): SpanFlyoutHeaderParts {
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/dependencies/operation'
+  );
+  const router = useApmRouter();
+  const trackEvent = useUiTracker();
+  const { euiTheme } = useEuiTheme();
+
+  if (!span) {
+    return {
+      title: SPAN_DETAILS_LABEL,
+      titleText: SPAN_DETAILS_LABEL,
+      metaBlocks: [],
+      badges: [],
+    };
+  }
+
+  const latencyAggregationType =
+    ('latencyAggregationType' in query && query.latencyAggregationType) ||
+    LatencyAggregationType.avg;
+  const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
+
+  const nextEnvironment = getNextEnvironmentUrlParam({
+    requestedEnvironment: parentTransaction?.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
+    currentEnvironmentUrlParam: query.environment,
+  });
+
+  const spanName = span.span?.name ?? NOT_AVAILABLE_LABEL;
+  const dependencyName = span.span?.destination?.service.resource;
+  const transactionServiceName = parentTransaction?.service?.name;
+  const transactionName = parentTransaction?.transaction?.name;
+  const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
+
+  const metaBlocks: ReactElement[] = [];
+
+  if (dependencyName) {
+    metaBlocks.push(
+      <MetaBlock
+        key="dependency"
+        id="dependency"
+        title={i18n.translate('xpack.apm.transactionDetails.spanFlyout.dependencyLabel', {
+          defaultMessage: 'Dependency',
+        })}
+        data-test-subj="spanFlyoutMeta-dependency"
+      >
+        <DependencyLink
+          query={{ ...query, dependencyName }}
+          subtype={span.span?.subtype}
+          type={span.span?.type}
+          onClick={() => {
+            trackEvent({
+              app: 'apm',
+              metricType: METRIC_TYPE.CLICK,
+              metric: 'span_flyout_to_dependency_detail',
+            });
+          }}
+        />
+      </MetaBlock>
+    );
+  }
+
+  if (parentTransaction) {
+    metaBlocks.push(
+      <MetaBlock
+        key="service"
+        id="service"
+        title={SERVICE_LABEL}
+        data-test-subj="spanFlyoutMeta-service"
+      >
+        {transactionServiceName ? (
+          <ServiceLink
+            agentName={parentTransaction.agent?.name}
+            query={{ ...query, serviceGroup, environment: nextEnvironment }}
+            serviceName={transactionServiceName}
+          />
+        ) : (
+          NOT_AVAILABLE_LABEL
+        )}
+      </MetaBlock>,
+      <MetaBlock
+        key="transaction"
+        id="transaction"
+        title={TRANSACTION_LABEL}
+        data-test-subj="spanFlyoutMeta-transaction"
+      >
+        {transactionName && transactionServiceName ? (
+          <TransactionDetailLink
+            transactionName={transactionName}
+            href={router.link('/services/{serviceName}/transactions/view', {
+              path: { serviceName: transactionServiceName },
+              query: {
+                ...query,
+                environment: nextEnvironment,
+                serviceGroup,
+                latencyAggregationType,
+                transactionName,
+              },
+            })}
+          >
+            {transactionName}
+          </TransactionDetailLink>
+        ) : (
+          transactionName ?? NOT_AVAILABLE_LABEL
+        )}
+      </MetaBlock>
+    );
+  }
+
+  metaBlocks.push(
+    <MetaBlock
+      key="timestamp"
+      id="timestamp"
+      title={TIMESTAMP_LABEL}
+      data-test-subj="spanFlyoutMeta-timestamp"
+    >
+      <Timestamp timestamp={getTimestampUs(span) / 1000} renderMode="tooltip" />
+    </MetaBlock>,
+    <MetaBlock
+      key="duration"
+      id="duration"
+      title={DURATION_LABEL}
+      data-test-subj="spanFlyoutMeta-duration"
+    >
+      <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <Duration
+            duration={span.span.duration.us}
+            parent={{ duration: totalDuration, type: 'transaction', loading: false }}
+          />
+        </EuiFlexItem>
+        {span.span.composite && (
+          <EuiFlexItem grow={false}>
+            <CompositeSpanDurationSummaryItem
+              count={span.span.composite.count}
+              durationSum={span.span.composite.sum.us}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </MetaBlock>
+  );
+
+  if (spanHttpUrl) {
+    metaBlocks.push(
+      <MetaBlock
+        key="request"
+        id="request"
+        title={REQUEST_LABEL}
+        data-test-subj="spanFlyoutMeta-request"
+      >
+        <HttpInfoSummaryItem
+          method={span.http?.request?.method || span.span?.http?.method}
+          url={spanHttpUrl}
+          status={span.http?.response?.status_code || span.span?.http?.response?.status_code}
+        />
+      </MetaBlock>
+    );
+  }
+
+  const { type, subtype, action } = span.span;
+  const spanSubtype = formatSubtype(subtype);
+
+  const badges: ReactElement[] = [
+    <Badge
+      key="type"
+      id="type"
+      color="hollow"
+      toolTipContent={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanType', {
+        defaultMessage: 'Type',
+      })}
+      data-test-subj="spanFlyoutBadge-type"
+    >
+      {formatType(type)}
+    </Badge>,
+  ];
+
+  if (spanSubtype) {
+    badges.push(
+      <Badge
+        key="subtype"
+        id="subtype"
+        color="hollow"
+        toolTipContent={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanSubtype', {
+          defaultMessage: 'Subtype',
+        })}
+        data-test-subj="spanFlyoutBadge-subtype"
+      >
+        {spanSubtype}
+      </Badge>
+    );
+  }
+
+  if (action) {
+    badges.push(
+      <Badge
+        key="action"
+        id="action"
+        color="hollow"
+        toolTipContent={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanAction', {
+          defaultMessage: 'Action',
+        })}
+        data-test-subj="spanFlyoutBadge-action"
+      >
+        {action}
+      </Badge>
+    );
+  }
+
+  const failure = getFailureBadgeDescriptor(span.event?.outcome, euiTheme);
+  if (failure) {
+    badges.push(
+      <Badge
+        key="failure"
+        id="failure"
+        color={failure.color}
+        toolTipContent={failure.toolTipContent}
+        data-test-subj="spanFlyoutBadge-failure"
+      >
+        {failure.label}
+      </Badge>
+    );
+  }
+
+  const sync = getSyncBadgeDescriptor({ sync: span.span.sync, agentName: span.agent?.name });
+  if (sync) {
+    badges.push(
+      <Badge
+        key="sync"
+        id="sync"
+        toolTipContent={sync.toolTipContent}
+        data-test-subj="spanFlyoutBadge-sync"
+      >
+        {sync.label}
+      </Badge>
+    );
+  }
+
+  return {
+    title: spanName,
+    titleText: spanName,
+    description: SPAN_DETAILS_LABEL,
+    metaBlocks,
+    badges,
+  };
+}

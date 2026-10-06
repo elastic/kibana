@@ -110,10 +110,9 @@ function ActionMenuSections({
   profilingLocators?: ProfilingLocators;
 }) {
   const { uiActions } = useApmPluginContext();
-  const sections: MenuSection[][] = useTransactionActionMenuSections(
-    transaction,
-    profilingLocators
-  );
+  const sections: MenuSection[][] = [
+    ...useTransactionActionMenuSections(transaction, profilingLocators),
+  ];
 
   const externalMenuItems = useAsync(() => {
     return transaction

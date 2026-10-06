@@ -14,6 +14,7 @@ import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
@@ -60,23 +61,46 @@ export function useTransactionActionMenuSections(
     '/dependencies/operation'
   );
 
-  return getSections({
-    transaction,
-    basePath: core.http.basePath,
-    location,
-    apmRouter,
-    infraLinksAvailable,
-    uptimeLocator,
-    profilingLocators,
-    rangeFrom,
-    rangeTo,
-    environment,
-    logsLocator,
-    dataViewId: dataView?.id,
-    assetDetailsLocator,
-    discoverLocator,
-    metricsIndices,
-  });
+  const basePath = core.http.basePath;
+  const dataViewId = dataView?.id;
+
+  return useMemo(
+    () =>
+      getSections({
+        transaction,
+        basePath,
+        location,
+        apmRouter,
+        infraLinksAvailable,
+        uptimeLocator,
+        profilingLocators,
+        rangeFrom,
+        rangeTo,
+        environment,
+        logsLocator,
+        dataViewId,
+        assetDetailsLocator,
+        discoverLocator,
+        metricsIndices,
+      }),
+    [
+      transaction,
+      basePath,
+      location,
+      apmRouter,
+      infraLinksAvailable,
+      uptimeLocator,
+      profilingLocators,
+      rangeFrom,
+      rangeTo,
+      environment,
+      logsLocator,
+      dataViewId,
+      assetDetailsLocator,
+      discoverLocator,
+      metricsIndices,
+    ]
+  );
 }
 
 export interface ExternalTransactionAction {

@@ -34,8 +34,14 @@ import { CustomLinkList } from './custom_link_list';
 
 const DEFAULT_LINKS_TO_SHOW = 3;
 
-/** Fetches the custom links whose filters match the transaction. */
-export function useCustomLinks(transaction?: Transaction): {
+/**
+ * Fetches the custom links whose filters match the transaction. Pass `isEnabled: false` to skip the
+ * fetch, e.g. without the license that custom links require.
+ */
+export function useCustomLinks(
+  transaction?: Transaction,
+  { isEnabled = true }: { isEnabled?: boolean } = {}
+): {
   customLinks: CustomLink[];
   status: FETCH_STATUS;
 } {
@@ -51,12 +57,16 @@ export function useCustomLinks(transaction?: Transaction): {
   );
 
   const { data, status } = useFetcher(
-    (callApmApi) =>
-      callApmApi('GET /internal/apm/settings/custom_links', {
+    (callApmApi) => {
+      if (!isEnabled) {
+        return;
+      }
+      return callApmApi('GET /internal/apm/settings/custom_links', {
         isCachable: false,
         params: { query: convertFiltersToQuery(filters) },
-      }),
-    [filters]
+      });
+    },
+    [filters, isEnabled]
   );
 
   const customLinks = useMemo(() => data?.customLinks ?? [], [data]);
