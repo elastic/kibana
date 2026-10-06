@@ -33,8 +33,10 @@ const createLanguageService = (schema: z.core.JSONSchema.JSONSchema | null) => {
   return service;
 };
 
+let documentVersion = 0;
+
 const complete = async (schema: z.core.JSONSchema.JSONSchema | null, yaml: string) => {
-  const document = TextDocument.create('file:///workflow.yaml', 'yaml', 1, yaml);
+  const document = TextDocument.create('file:///workflow.yaml', 'yaml', ++documentVersion, yaml);
   const service = createLanguageService(schema);
   return service.doComplete(document, document.positionAt(yaml.length), false);
 };
@@ -94,3 +96,93 @@ describe.each([false, true])('service account schema completions (loose=%s)', (l
     expect(await service.doValidation(document, false)).toEqual([]);
   });
 });
+
+describe.each(['workflow.execute', 'workflow.executeAsync'])(
+  '%s identity completions',
+  (stepType) => {
+    const services = createStartServicesMock();
+    const yaml = `name: Child execution
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: child
+    type: ${stepType}
+    with:
+      workflow-id: child-id
+`;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.mocked(useAvailableConnectors).mockReturnValue(undefined);
+      jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
+    });
+
+    it.each([
+      [false, false],
+      [false, true],
+      [true, false],
+      [true, true],
+    ])('gates identity fields (managed=%s, SA=%s)', async (isManaged, enabled) => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
+      const { result } = renderHook(() => useWorkflowJsonSchema({ isManaged }));
+      const completions = await complete(result.current.jsonSchema, `${yaml}      `);
+      const labels = completions?.items.map(({ label }) => label);
+      expect(labels).toContain('inputs');
+      for (const field of ['runAsMode', 'inheritRunAs']) {
+        if (isManaged && enabled) {
+          expect(labels).toContain(field);
+        } else {
+          expect(labels).not.toContain(field);
+        }
+      }
+    });
+
+    it('defaults to hiding identity fields and updates when managed metadata changes', async () => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      const { result, rerender } = renderHook(
+        ({ isManaged }: { isManaged?: boolean }) => useWorkflowJsonSchema({ isManaged }),
+        { initialProps: {} }
+      );
+      for (const isManaged of [undefined, true, false]) {
+        rerender({ isManaged });
+        const completions = await complete(result.current.jsonSchema, `${yaml}      `);
+        expect(completions?.items.some(({ label }) => label === 'runAsMode')).toBe(
+          isManaged === true
+        );
+      }
+    });
+
+    it.each([false, true])('gates nested step suggestions (managed=%s)', async (isManaged) => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      const { result } = renderHook(() => useWorkflowJsonSchema({ isManaged }));
+      const nestedYaml = yaml
+        .replace(
+          'steps:\n',
+          'steps:\n  - name: loop\n    type: foreach\n    foreach: "{{ inputs.items }}"\n    steps:\n'
+        )
+        .replace(
+          /^(  - name: child|    type: workflow\.execute.*|    with:|      workflow-id:.*)$/gm,
+          '    $1'
+        );
+      const completions = await complete(result.current.jsonSchema, `${nestedYaml}          `);
+      const labels = completions?.items.map(({ label }) => label);
+      expect(labels).toContain('inputs');
+      expect(labels?.includes('runAsMode')).toBe(isManaged);
+      expect(labels?.includes('inheritRunAs')).toBe(isManaged);
+    });
+
+    it('preserves validation of saved identity fields when suggestions are hidden', async () => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(false);
+      const { result } = renderHook(() => useWorkflowJsonSchema());
+      const service = createLanguageService(result.current.jsonSchema);
+      const document = TextDocument.create(
+        'file:///existing.yaml',
+        'yaml',
+        1,
+        `${yaml}      runAsMode: inherit\n`
+      );
+      expect(await service.doValidation(document, false)).toEqual([]);
+    });
+  }
+);

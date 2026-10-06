@@ -29,6 +29,7 @@ interface UseWorkflowJsonSchemaOptions {
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
   loose?: boolean;
+  isManaged?: boolean;
 }
 
 interface UseWorkflowJsonSchemaResult {
@@ -36,8 +37,40 @@ interface UseWorkflowJsonSchemaResult {
   uri: string | null;
 }
 
+const hideChildIdentitySuggestions = (jsonSchema: z.core.JSONSchema.JSONSchema): void => {
+  const workflowSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(jsonSchema, jsonSchema);
+  const stepsSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
+    workflowSchema?.properties?.steps,
+    jsonSchema
+  );
+  const stepSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
+    stepsSchema?.items,
+    jsonSchema
+  );
+  for (const candidate of stepSchema?.oneOf ?? []) {
+    const step = getOrResolveObject<z.core.JSONSchema.JSONSchema>(candidate, jsonSchema);
+    const type = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
+      step?.properties?.type,
+      jsonSchema
+    );
+    if (type?.const === 'workflow.execute' || type?.const === 'workflow.executeAsync') {
+      const inputs = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
+        step?.properties?.with,
+        jsonSchema
+      );
+      for (const field of ['runAsMode', 'inheritRunAs']) {
+        const property = inputs?.properties?.[field];
+        if (property && typeof property === 'object') {
+          property.doNotSuggest = true;
+        }
+      }
+    }
+  }
+};
+
 export const useWorkflowJsonSchema = ({
   loose = false,
+  isManaged = false,
 }: UseWorkflowJsonSchemaOptions = {}): UseWorkflowJsonSchemaResult => {
   const connectorsData = useAvailableConnectors();
   const serviceAccountsEnabled = useKibana().services.security.serviceAccounts.isEnabled();
@@ -76,6 +109,10 @@ export const useWorkflowJsonSchema = ({
         }
       }
 
+      if (jsonSchema && (!isManaged || !serviceAccountsEnabled)) {
+        hideChildIdentitySuggestions(jsonSchema);
+      }
+
       return {
         jsonSchema,
         uri,
@@ -87,5 +124,5 @@ export const useWorkflowJsonSchema = ({
         uri: null,
       };
     }
-  }, [connectorsData, loose, serviceAccountsEnabled]);
+  }, [connectorsData, loose, serviceAccountsEnabled, isManaged]);
 };
