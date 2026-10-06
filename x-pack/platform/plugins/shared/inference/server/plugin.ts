@@ -14,11 +14,7 @@ import {
   parseLegacyAnonymizationRules,
   parseLegacyOnFailureMode,
 } from '@kbn/ai-anonymization-common';
-import type {
-  AnonymizationFailureMode,
-  AnonymizationRule,
-  AnonymizationSettings,
-} from '@kbn/ai-anonymization-common';
+import type { AnonymizationFailureMode, AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -49,7 +45,6 @@ import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
-import { createTestWorkerConfig } from './routes/anonymization_test/test_worker_config';
 
 export const resolveReplacementsEncryptionKey = async ({
   namespace,
@@ -81,7 +76,6 @@ export class InferencePlugin
   private logger: Logger;
   private config: InferenceConfig;
   private regexWorker?: RegexWorkerService;
-  private testRegexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
 
@@ -102,7 +96,6 @@ export class InferencePlugin
       router,
       coreSetup,
       logger: this.logger,
-      getTestRegexWorker: () => this.testRegexWorker,
     });
 
     return {};
@@ -146,10 +139,6 @@ export class InferencePlugin
     this.regexWorker = new RegexWorkerService(
       this.config.workers.anonymization,
       this.logger.get('regex_worker')
-    );
-    this.testRegexWorker = new RegexWorkerService(
-      createTestWorkerConfig(this.config.workers.anonymization),
-      this.logger.get('regex_worker_test')
     );
 
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
@@ -397,6 +386,5 @@ export class InferencePlugin
 
   async stop() {
     await this.regexWorker?.stop();
-    await this.testRegexWorker?.stop();
   }
 }
