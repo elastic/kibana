@@ -194,11 +194,14 @@ export function runRspackCli(options: CliOptions = {}): void {
             result.close?.().catch(() => {});
           });
         }
-        if (!result.success) {
-          await result.close?.();
+        if (result.success) {
+          await result.done;
+        } else if (result.done) {
+          log.error('Shared frontend build failed — waiting for changes to fix errors...');
+          await result.done;
+        } else {
           throw new Error(`Shared frontend build failed: ${result.errors?.join(', ')}`);
         }
-        await result.done;
         return;
       }
 

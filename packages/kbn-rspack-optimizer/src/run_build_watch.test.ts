@@ -14,6 +14,9 @@ jest.mock('./config/create_multi_compile_config', () => ({
   createMultiCompileConfig: jest.fn(),
   KIBANA_COMPILER: 'kibana',
 }));
+jest.mock('./hmr/hmr_server', () => ({
+  HmrServer: jest.fn().mockImplementation(() => mockHmrServer),
+}));
 
 import { rspack } from './rspack_runtime';
 import { createMultiCompileConfig } from './config/create_multi_compile_config';
@@ -21,14 +24,31 @@ import { runBuild } from './run_build';
 
 import type { MultiCompiler } from '@rspack/core';
 
+const mockHmrServer = {
+  start: jest.fn().mockResolvedValue(1234),
+  close: jest.fn().mockResolvedValue(undefined),
+  broadcast: jest.fn(),
+  broadcastBuilding: jest.fn(),
+  broadcastReload: jest.fn(),
+  broadcastErrors: jest.fn(),
+};
+
 const nextTick = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 type WatchCallback = (err: Error | null, stats?: unknown) => void;
 
-const createStats = ({ errors }: { errors: string[] }) => {
+const createStats = ({
+  errors,
+  kibanaHash = `hash-${errors.length}`,
+  sharedHash,
+}: {
+  errors: string[];
+  kibanaHash?: string;
+  sharedHash?: string;
+}) => {
   const child = {
     compilation: { name: 'kibana' },
-    hash: `hash-${errors.length}`,
+    hash: kibanaHash,
     hasErrors: () => errors.length > 0,
     hasWarnings: () => false,
     toString: () => errors.join('\n'),
@@ -39,9 +59,20 @@ const createStats = ({ errors }: { errors: string[] }) => {
       time: 100,
     }),
   };
+  const shared = sharedHash
+    ? [
+        {
+          compilation: { name: 'shared-src' },
+          hash: sharedHash,
+          hasErrors: () => false,
+          hasWarnings: () => false,
+          toJson: () => ({ errors: [] }),
+        },
+      ]
+    : [];
   return {
     hasErrors: () => errors.length > 0,
-    stats: [child],
+    stats: [...shared, child],
   };
 };
 
@@ -55,6 +86,7 @@ describe('runBuild in watch mode', () => {
   beforeEach(() => {
     writer.messages.length = 0;
     close.mockClear();
+    Object.values(mockHmrServer).forEach((fn) => fn.mockClear());
     jest.mocked(createMultiCompileConfig).mockResolvedValue({ configs: [{}], bundleCount: 3 });
     const compiler = {
       compilers: [
@@ -103,6 +135,28 @@ describe('runBuild in watch mode', () => {
     const result = await pending;
     expect(result.success).toBe(true);
     expect(result.bundleCount).toBe(3);
+
+    await result.close!();
+    await result.done;
+  });
+
+  it('reloads the page when a shared compiler rebuilds, and hot-updates otherwise', async () => {
+    const pending = runBuild({ repoRoot: '/repo', watch: true, hmr: true, log });
+    await nextTick();
+    watchCallback(null, createStats({ errors: [], kibanaHash: 'k1', sharedHash: 's1' }));
+    const result = await pending;
+
+    watchCallback(null, createStats({ errors: [], kibanaHash: 'k2', sharedHash: 's1' }));
+    expect(mockHmrServer.broadcast).toHaveBeenLastCalledWith('k2', '0.1', []);
+    expect(mockHmrServer.broadcastReload).not.toHaveBeenCalled();
+
+    watchCallback(null, createStats({ errors: [], kibanaHash: 'k3', sharedHash: 's2' }));
+    expect(mockHmrServer.broadcastReload).toHaveBeenCalledTimes(1);
+    expect(mockHmrServer.broadcast).not.toHaveBeenCalledWith(
+      'k3',
+      expect.anything(),
+      expect.anything()
+    );
 
     await result.close!();
     await result.done;
