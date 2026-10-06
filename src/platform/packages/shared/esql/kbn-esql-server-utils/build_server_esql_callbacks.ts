@@ -10,9 +10,12 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
+import { getSourcesScope } from './sources_scope';
 
 export interface BuildServerESQLCallbacksOptions {
   client: ElasticsearchClient;
+  /** Client used for the node roles lookup; defaults to `client`. */
+  internalClient?: ElasticsearchClient;
 }
 
 /**
@@ -24,16 +27,13 @@ export interface BuildServerESQLCallbacksOptions {
  */
 export const buildServerESQLCallbacks = ({
   client,
+  internalClient = client,
 }: BuildServerESQLCallbacksOptions): ESQLCallbacks => {
   const service = new EsqlService({ client });
 
   return {
     getSources: async () => {
-      try {
-        return await service.getAllIndices('all');
-      } catch {
-        return service.getAllIndices('local');
-      }
+      return service.getAllIndices(await getSourcesScope(internalClient));
     },
 
     getColumnsFor: async ({ query } = { query: '' }) => {

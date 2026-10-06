@@ -10,48 +10,100 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { validateQuery } from '@kbn/esql-language';
 import { buildServerESQLCallbacks } from './build_server_esql_callbacks';
+import { resetSourcesScopeCache } from './sources_scope';
 
-const makeClient = (resolveIndexMock: jest.Mock) =>
-  ({ indices: { resolveIndex: resolveIndexMock } } as unknown as ElasticsearchClient);
+const makeClient = (resolveIndex: jest.Mock, nodesInfo: jest.Mock) =>
+  ({ indices: { resolveIndex }, nodes: { info: nodesInfo } } as unknown as ElasticsearchClient);
+
+const nodesInfoWithRoles = (roles: string[]) =>
+  jest.fn().mockResolvedValue({ nodes: { node1: { roles } } });
+
+const resolveIndexWith = (names: string[]) =>
+  jest.fn().mockResolvedValue({ indices: names.map((name) => ({ name })) });
 
 describe('buildServerESQLCallbacks.getSources', () => {
-  it('includes remote sources', async () => {
-    const resolveIndex = jest
-      .fn()
-      .mockResolvedValue({ indices: [{ name: 'logs-test' }, { name: 'remote:logs' }] });
-    const { getSources } = buildServerESQLCallbacks({ client: makeClient(resolveIndex) });
+  beforeEach(() => {
+    resetSourcesScopeCache();
+  });
+
+  it('includes remote sources when the node has the remote cluster client role', async () => {
+    const resolveIndex = resolveIndexWith(['logs-test', 'remote:logs']);
+    const nodesInfo = nodesInfoWithRoles(['data', 'master', 'remote_cluster_client']);
+    const { getSources } = buildServerESQLCallbacks({
+      client: makeClient(resolveIndex, nodesInfo),
+    });
 
     const sources = await getSources?.();
 
     expect(sources?.map(({ name }) => name)).toEqual(['logs-test', 'remote:logs']);
-    expect(resolveIndex).toHaveBeenCalledTimes(2);
     expect(resolveIndex).toHaveBeenCalledWith(expect.objectContaining({ name: ['*', '*:*'] }), {
       signal: undefined,
     });
   });
 
-  it('falls back to local sources when the remote lookup fails', async () => {
-    const resolveIndex = jest.fn().mockImplementation(async ({ name }) => {
-      if (name.includes('*:*')) {
-        throw new Error('node does not have the remote cluster client role enabled');
-      }
-      return { indices: [{ name: 'logs-test' }] };
+  it('uses local sources when the node lacks the remote cluster client role', async () => {
+    const resolveIndex = resolveIndexWith(['logs-test']);
+    const nodesInfo = nodesInfoWithRoles(['data', 'master', 'ingest']);
+    const { getSources } = buildServerESQLCallbacks({
+      client: makeClient(resolveIndex, nodesInfo),
     });
-    const { getSources } = buildServerESQLCallbacks({ client: makeClient(resolveIndex) });
 
     const sources = await getSources?.();
 
     expect(sources?.map(({ name }) => name)).toEqual(['logs-test']);
+    expect(resolveIndex).toHaveBeenCalledTimes(2);
+    expect(resolveIndex).toHaveBeenCalledWith(expect.objectContaining({ name: ['*'] }), {
+      signal: undefined,
+    });
   });
 
-  it('reports remote sources as unknown after falling back', async () => {
-    const resolveIndex = jest.fn().mockImplementation(async ({ name }) => {
-      if (name.includes('*:*')) {
-        throw new Error('node does not have the remote cluster client role enabled');
-      }
-      return { indices: [{ name: 'logs-test' }] };
+  it('keeps remote sources when the role lookup fails', async () => {
+    const resolveIndex = resolveIndexWith(['logs-test']);
+    const nodesInfo = jest.fn().mockRejectedValue(new Error('unauthorized'));
+    const { getSources } = buildServerESQLCallbacks({
+      client: makeClient(resolveIndex, nodesInfo),
     });
-    const callbacks = buildServerESQLCallbacks({ client: makeClient(resolveIndex) });
+
+    await getSources?.();
+
+    expect(resolveIndex).toHaveBeenCalledWith(expect.objectContaining({ name: ['*', '*:*'] }), {
+      signal: undefined,
+    });
+  });
+
+  it('reads node roles with the internal client', async () => {
+    const currentNodesInfo = jest.fn();
+    const internalNodesInfo = nodesInfoWithRoles(['data']);
+    const { getSources } = buildServerESQLCallbacks({
+      client: makeClient(resolveIndexWith([]), currentNodesInfo),
+      internalClient: makeClient(jest.fn(), internalNodesInfo),
+    });
+
+    await getSources?.();
+
+    expect(internalNodesInfo).toHaveBeenCalledWith({
+      node_id: '_local',
+      filter_path: 'nodes.*.roles',
+    });
+    expect(currentNodesInfo).not.toHaveBeenCalled();
+  });
+
+  it('caches the role lookup', async () => {
+    const nodesInfo = nodesInfoWithRoles(['data']);
+    const { getSources } = buildServerESQLCallbacks({
+      client: makeClient(resolveIndexWith([]), nodesInfo),
+    });
+
+    await getSources?.();
+    await getSources?.();
+
+    expect(nodesInfo).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports remote sources as unknown when the node lacks the role', async () => {
+    const callbacks = buildServerESQLCallbacks({
+      client: makeClient(resolveIndexWith(['logs-test']), nodesInfoWithRoles(['data'])),
+    });
 
     const { errors } = await validateQuery('FROM remote:logs | LIMIT 10', callbacks);
 

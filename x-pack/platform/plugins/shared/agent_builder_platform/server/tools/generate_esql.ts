@@ -115,6 +115,7 @@ export const generateEsqlTool = ({
         includeViews: true,
         modelProvider,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         logger,
         events,
       });
