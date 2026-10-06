@@ -28,15 +28,15 @@ export const AutomationTriggerSection = ({
   dailyDispatchLimit,
   onTriggerChange,
   onDailyDispatchLimitChange,
+  usedToday,
   readOnly = false,
-  onEdit,
 }: {
   trigger?: TriggerFormValues;
   dailyDispatchLimit: string;
   onTriggerChange: (trigger?: TriggerFormValues) => void;
   onDailyDispatchLimitChange: (value: string) => void;
+  usedToday?: number;
   readOnly?: boolean;
-  onEdit?: () => void;
 }) => {
   const [stashedTriggers, setStashedTriggers] = useState<
     Partial<Record<TriggerFormValues['kind'], TriggerFormValues>>
@@ -48,7 +48,7 @@ export const AutomationTriggerSection = ({
 
   return (
     <>
-      <SectionHeader title={triggerLabels.triggers} onEdit={onEdit} />
+      <SectionHeader title={triggerLabels.triggers} />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder hasShadow={false} paddingSize={trigger && !readOnly ? 's' : 'm'}>
         {!trigger && (
@@ -119,6 +119,7 @@ export const AutomationTriggerSection = ({
                 : triggerLabels.dailyLimitHelp
             }
             onChange={onDailyDispatchLimitChange}
+            usedToday={usedToday}
             readOnly={readOnly}
           />
         )}

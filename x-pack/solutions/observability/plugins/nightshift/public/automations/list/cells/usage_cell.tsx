@@ -6,20 +6,30 @@
  */
 
 import React from 'react';
-import { EuiProgress, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiProgress,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { listLabels } from '../translations';
 
 export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: number }) => {
   const { euiTheme } = useEuiTheme();
   if (limit === undefined || used === undefined) return <>—</>;
 
-  const color = used >= limit ? 'danger' : 'success';
+  const isLimitReached = used >= limit;
+  const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
   return (
     <div css={{ width: '100%' }}>
       <EuiToolTip
         display="block"
         content={
-          used >= limit
+          isLimitReached
             ? i18n.translate('xpack.nightshift.automations.usageCellLimitReachedTooltip', {
                 defaultMessage: 'Daily limit reached · no more runs until midnight (UTC)',
               })
@@ -30,20 +40,42 @@ export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: nu
         }
       >
         <div data-test-subj="automationUsage" tabIndex={0}>
-          <EuiProgress
-            label={
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="xs"
+            responsive={false}
+            css={{ marginBlockEnd: euiTheme.size.xs }}
+          >
+            {isLimitReached && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type="hourglass"
+                  size="s"
+                  color={limitColor}
+                  aria-label={listLabels.limitReached}
+                  data-test-subj="automationLimitReached"
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
               <EuiText
                 size="xs"
-                color={color === 'danger' ? 'danger' : undefined}
-                css={{ marginBlockEnd: euiTheme.size.xs }}
+                color={isLimitReached ? limitColor : undefined}
+                css={{
+                  fontWeight: euiTheme.font.weight.semiBold,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
               >
                 {used} / {limit}
               </EuiText>
-            }
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiProgress
             value={Math.min(used, limit)}
             max={limit}
             size="s"
-            color={color}
+            color={isLimitReached ? limitColor : 'success'}
           />
         </div>
       </EuiToolTip>

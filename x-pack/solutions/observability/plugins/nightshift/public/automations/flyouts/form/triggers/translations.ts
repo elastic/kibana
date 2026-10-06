@@ -135,6 +135,26 @@ export const triggerLabels = {
   dailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.dailyLimitHelp', {
     defaultMessage: 'When reached, additional triggers are skipped. Resets daily at 12:00 AM UTC.',
   }),
+  dailyLimitReached: i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReached', {
+    defaultMessage: 'Daily trigger limit reached',
+  }),
+  getDailyLimitReachedBody: (used: number, limit: number) =>
+    used > limit
+      ? i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReachedOverBody', {
+          defaultMessage:
+            'This automation has handled {used} triggers today (limit of {limit}; {over} above the limit {over, plural, one {was} other {were}} not addressed). Additional triggers are throttled until midnight (UTC).',
+          values: { used, limit, over: used - limit },
+        })
+      : i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReachedBody', {
+          defaultMessage:
+            'This automation has handled {used} triggers today (limit of {limit}). Additional triggers are throttled until midnight (UTC).',
+          values: { used, limit },
+        }),
+  getRaiseLimit: (limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.raiseLimit', {
+      defaultMessage: 'Raise limit to {limit}',
+      values: { limit },
+    }),
 };
 
 export const slackTriggerLeads: Record<SlackTriggerKind, string> = {

@@ -6,28 +6,14 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
-export const editLabel = i18n.translate('xpack.nightshift.automations.detail.edit', {
-  defaultMessage: 'Edit',
-});
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 export const SectionHeader = ({
   title,
   titleAppend,
-  onEdit,
 }: {
   title: string;
   titleAppend?: React.ReactNode;
-  onEdit?: () => void;
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ minBlockSize: 32 }}>
     <EuiFlexItem grow={false}>
@@ -36,21 +22,6 @@ export const SectionHeader = ({
       </EuiTitle>
     </EuiFlexItem>
     {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}
-    <EuiFlexItem />
-    {onEdit && (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={editLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="pencil"
-            size="s"
-            color="text"
-            aria-label={editLabel}
-            onClick={onEdit}
-            data-test-subj="automationSectionEdit"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    )}
   </EuiFlexGroup>
 );
 

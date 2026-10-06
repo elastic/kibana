@@ -8,7 +8,6 @@
 import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
 import { useKibana } from '../hooks/use_kibana';
@@ -56,7 +55,7 @@ export const AutomationsPage = (): React.ReactElement => {
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
   const detailAutomation = automations.find((automation) => automation.id === id);
   const navigate = (path: string) => history.push(path);
-  const { runRange, runTotals, usedToday } = useAutomationUsage(automations, range);
+  const { runCounts, usedToday } = useAutomationUsage(automations, range);
   const isRateLimited = (automation: Automation) =>
     isAutomationRateLimited(automation, usedToday.get(automation.id) ?? 0);
   const getFacets = (automation: Automation) =>
@@ -100,15 +99,15 @@ export const AutomationsPage = (): React.ReactElement => {
       <AutomationsTable
         automations={visibleAutomations}
         canManage={canManage}
-        runRange={runRange}
-        runTotals={runTotals}
+        runCounts={runCounts}
         usedToday={usedToday}
         getFacets={getFacets}
-        isRateLimited={isRateLimited}
         onClone={(automation) => createAutomation.mutate(toCloneRequestBody(automation))}
         onDelete={setAutomationToDelete}
         onOpenAutomation={(automation) => navigate(`/automations/${automation.id}`)}
-        onOpenRuns={(automation) => navigate(`/automations/${automation.id}/runs`)}
+        onOpenRuns={(automation, status) =>
+          navigate(`/automations/${automation.id}/runs?status=${status}`)
+        }
         selectedId={id}
         onOrderChange={setOrder}
       />
@@ -163,24 +162,6 @@ export const AutomationsPage = (): React.ReactElement => {
           onClose={() => navigate('/automations')}
           onDelete={setAutomationToDelete}
         />
-      )}
-      {id && !isInitialLoading && !detailAutomation && (
-        <EuiCallOut announceOnMount={false} color="warning" iconType="warning">
-          <p>
-            {i18n.translate('xpack.nightshift.automations.detail.notFound', {
-              defaultMessage: 'Automation not found.',
-            })}
-          </p>
-          <EuiButton
-            data-test-subj="automationUnknownIdBack"
-            size="s"
-            onClick={() => navigate('/automations')}
-          >
-            {i18n.translate('xpack.nightshift.automations.breadcrumb', {
-              defaultMessage: 'Automations',
-            })}
-          </EuiButton>
-        </EuiCallOut>
       )}
       {automationToDelete && (
         <EuiConfirmModal

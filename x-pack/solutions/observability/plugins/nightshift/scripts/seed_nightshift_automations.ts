@@ -19,6 +19,7 @@ const EXECUTIONS_INDEX = '.workflows-executions';
 const RUN_ID_PREFIX = 'seed-nightshift-';
 const SEED_USER_PASSWORD = 'changeme';
 const HOUR_MS = 3_600_000;
+const REMOVED_AUTOMATION_NAMES = ['Managed Slack bot mention'];
 
 type RunStatus = 'completed' | 'failed' | 'running' | 'skipped';
 
@@ -220,7 +221,7 @@ run(
     const kibanaUrl = await resolveKibanaUrl(String(flags['kibana-url']), auth);
     const now = Date.now();
     const midnight = new Date(now).setUTCHours(0, 0, 0, 0);
-    const names = new Set(AUTOMATIONS.map(({ name }) => name));
+    const names = new Set([...AUTOMATIONS.map(({ name }) => name), ...REMOVED_AUTOMATION_NAMES]);
 
     const { automations } = await request<{ automations: Array<{ id: string; name: string }> }>(
       `${kibanaUrl}/internal/nightshift/automations`,

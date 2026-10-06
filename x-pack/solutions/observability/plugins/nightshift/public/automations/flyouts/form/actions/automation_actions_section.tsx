@@ -37,7 +37,7 @@ export const actionLabels = {
     defaultMessage: 'Choose what happens when this automation runs.',
   }),
   noActions: i18n.translate('xpack.nightshift.automations.flyout.noActions', {
-    defaultMessage: 'No actions.',
+    defaultMessage: 'No actions',
   }),
   addAction: i18n.translate('xpack.nightshift.automations.flyout.addAction', {
     defaultMessage: 'Add action',
@@ -164,18 +164,16 @@ export const AutomationActionsSection = ({
   slackAction,
   onSlackActionChange,
   readOnly = false,
-  onEdit,
 }: {
   slackAction?: SlackActionFormValues;
   onSlackActionChange: (action?: SlackActionFormValues) => void;
   readOnly?: boolean;
-  onEdit?: () => void;
 }) => {
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (
     <>
-      <SectionHeader title={actionLabels.actions} onEdit={onEdit} />
+      <SectionHeader title={actionLabels.actions} />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder hasShadow={false} paddingSize={readOnly || !slackAction ? 'm' : 's'}>
         {!slackAction && (

@@ -57,7 +57,10 @@ describe('AutomationsPage', () => {
 
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
-      services: { application: { capabilities: { nightshift: { manage: true } } } },
+      services: {
+        application: { capabilities: { nightshift: { manage: true } } },
+        charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+      },
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
@@ -200,6 +203,13 @@ describe('AutomationsPage', () => {
         ids.map((id) => ({
           data: {
             total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
+            runs:
+              id === 'triage'
+                ? [
+                    ...Array(25).fill({ status: 'succeeded' }),
+                    ...Array(3).fill({ status: 'skipped' }),
+                  ]
+                : [],
           },
         }))
       );
@@ -228,7 +238,11 @@ describe('AutomationsPage', () => {
 
       const triageRow = rowOf('Triage incoming alerts');
       expect(within(triageRow).getByTestId('automationTags')).toHaveTextContent('2');
-      expect(within(triageRow).getByTestId('automationRuns')).toHaveTextContent('28');
+      expect(within(triageRow).getByTestId('automationRuns-succeeded-triage')).toHaveTextContent(
+        '25'
+      );
+      expect(within(triageRow).getByTestId('automationRuns-failed-triage')).toHaveTextContent('–');
+      expect(within(triageRow).getByTestId('automationRuns-skipped-triage')).toHaveTextContent('3');
       expect(within(triageRow).getByTestId('automationUsage')).toHaveTextContent('27 / 20');
       expect(within(triageRow).getByTestId('automationLimitReached')).toBeInTheDocument();
       expect(within(triageRow).getByText('Emily Clarke')).toBeInTheDocument();
@@ -289,6 +303,16 @@ describe('AutomationsPage', () => {
       );
       fireEvent.click(screen.getByTestId('automationCloseButton'));
       expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
+    });
+
+    it('opens run history filtered by the clicked run count', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationRuns-skipped-triage'));
+
+      for (const pill of screen.getAllByTestId('automationRunFilter-skipped')) {
+        expect(pill).toHaveAttribute('aria-pressed', 'true');
+      }
     });
 
     it('steps through automations in the table sort order', () => {

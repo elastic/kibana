@@ -12,6 +12,7 @@
     "@kbn/agent-builder-plugin",
     "@kbn/app-header",
     "@kbn/charts-plugin",
+    "@kbn/date-range-picker",
     "@kbn/core",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-http-browser",

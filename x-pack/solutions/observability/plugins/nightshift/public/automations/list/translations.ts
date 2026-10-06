@@ -32,22 +32,11 @@ export const listLabels = {
   rateLimitBody: i18n.translate('xpack.nightshift.automations.rateLimitBannerBody', {
     defaultMessage: 'Further triggers are skipped until the limit resets at midnight (UTC).',
   }),
-  showThem: i18n.translate('xpack.nightshift.automations.rateLimitBannerShow', {
-    defaultMessage: 'Show them',
-  }),
-  viewRuns: i18n.translate('xpack.nightshift.automations.viewRuns', {
-    defaultMessage: 'View runs',
-  }),
-  runsLoadError: i18n.translate('xpack.nightshift.automations.runsLoadError', {
-    defaultMessage: "Couldn't load runs. Refresh to try again.",
+  showRateLimited: i18n.translate('xpack.nightshift.automations.rateLimitBannerShowRateLimited', {
+    defaultMessage: 'Show rate-limited automations',
   }),
   limitReached: i18n.translate('xpack.nightshift.automations.limitReached', {
     defaultMessage: 'Daily trigger limit reached for today',
-  }),
-  runs: i18n.translate('xpack.nightshift.automations.runsColumn', { defaultMessage: 'Runs' }),
-  runsTooltip: i18n.translate('xpack.nightshift.automations.runsColumnTooltip', {
-    defaultMessage:
-      'Runs started at the selected time range. Triggers skipped by the Daily trigger limit are not counted.',
   }),
   usage: i18n.translate('xpack.nightshift.automations.usageColumn', {
     defaultMessage: "Today's usage",
@@ -109,3 +98,51 @@ export const getRateLimitTitle = (count: number) =>
       '{count, plural, one {# automation} other {# automations}} reached their daily trigger limit',
     values: { count },
   });
+
+export const runCountColumns = [
+  {
+    status: 'succeeded',
+    name: i18n.translate('xpack.nightshift.automations.successfulColumn', {
+      defaultMessage: 'Successful',
+    }),
+    tooltip: i18n.translate('xpack.nightshift.automations.successfulColumnTooltip', {
+      defaultMessage: 'Successful runs in the selected time range.',
+    }),
+    width: '108px',
+    getViewLabel: (count: number) =>
+      i18n.translate('xpack.nightshift.automations.viewSuccessfulRuns', {
+        defaultMessage: 'View {count} successful in run history',
+        values: { count },
+      }),
+  },
+  {
+    status: 'failed',
+    name: i18n.translate('xpack.nightshift.automations.failedColumn', {
+      defaultMessage: 'Failed',
+    }),
+    tooltip: i18n.translate('xpack.nightshift.automations.failedColumnTooltip', {
+      defaultMessage: 'Failed runs in the selected time range.',
+    }),
+    width: '88px',
+    getViewLabel: (count: number) =>
+      i18n.translate('xpack.nightshift.automations.viewFailedRuns', {
+        defaultMessage: 'View {count} failed in run history',
+        values: { count },
+      }),
+  },
+  {
+    status: 'skipped',
+    name: i18n.translate('xpack.nightshift.automations.skippedColumn', {
+      defaultMessage: 'Skipped',
+    }),
+    tooltip: i18n.translate('xpack.nightshift.automations.skippedColumnTooltip', {
+      defaultMessage: 'Triggers skipped by the Daily trigger limit in the selected time range.',
+    }),
+    width: '96px',
+    getViewLabel: (count: number) =>
+      i18n.translate('xpack.nightshift.automations.viewSkippedRuns', {
+        defaultMessage: 'View {count} skipped in run history',
+        values: { count },
+      }),
+  },
+] as const;

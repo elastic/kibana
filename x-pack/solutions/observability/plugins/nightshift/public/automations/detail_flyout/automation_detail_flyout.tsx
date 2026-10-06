@@ -46,7 +46,7 @@ import {
 } from '../flyouts/form/automation_form_values';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../flyouts/form/validation';
 import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
-import { SectionHeader, FormSection, editLabel } from '../flyouts/form/section_header';
+import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
   useAutomationRunsInRange,
   useCreateAutomation,
@@ -56,7 +56,7 @@ import {
 } from '../hooks/use_automations';
 import { toCloneRequestBody } from '../utils/clone_automation';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
-import { RunHistory, RunStatusIndicator, type Run } from './run_history';
+import { RunHistory, RunStatusIndicator, STATUSES, type Run } from './run_history';
 
 const labels = {
   title: i18n.translate('xpack.nightshift.automations.detail.title', {
@@ -86,7 +86,7 @@ const labels = {
   close: i18n.translate('xpack.nightshift.automations.detail.close', {
     defaultMessage: 'Close flyout',
   }),
-  edit: editLabel,
+  edit: i18n.translate('xpack.nightshift.automations.detail.edit', { defaultMessage: 'Edit' }),
   clone: i18n.translate('xpack.nightshift.automations.cloneAction', { defaultMessage: 'Clone' }),
   delete: i18n.translate('xpack.nightshift.automations.deleteAction', { defaultMessage: 'Delete' }),
   save: i18n.translate('xpack.nightshift.automations.flyout.save', { defaultMessage: 'Save' }),
@@ -180,7 +180,9 @@ export const AutomationDetailFlyout = ({
   const titleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const statusParam = new URLSearchParams(search).get('status');
+  const initialRunFilter = STATUSES.find((status) => status === statusParam);
   const [isEditing, setIsEditing] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const [selectedRun, setSelectedRun] = useState<Run>();
@@ -205,6 +207,11 @@ export const AutomationDetailFlyout = ({
     runRange.startedBefore
   );
   const runs = (runsQuery.data?.runs ?? []) as Run[];
+  const skippedRuns = runs.filter(({ status }) => status === 'skipped').length;
+  const startedRuns = (runsQuery.data?.total ?? 0) - skippedRuns;
+  const dailyLimit = automation.runtime.dailyDispatchLimit;
+  const isLimitReached = dailyLimit !== undefined && usedToday >= dailyLimit;
+  const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
   const orderedAutomations = automations;
   const currentIndex = orderedAutomations.findIndex(({ id: rowId }) => rowId === automation.id);
   const previous = orderedAutomations[currentIndex - 1];
@@ -497,31 +504,35 @@ export const AutomationDetailFlyout = ({
                       },
                       {
                         title: labels.runsTitle,
+                        gap: 'xs',
                         value: (
-                          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                            <EuiFlexItem grow={false}>{runsQuery.data?.total ?? 0}</EuiFlexItem>
-                            {Boolean(runsQuery.data?.total) && (
-                              <EuiFlexItem grow={false}>
-                                <RunsSparkline
-                                  runs={runs}
-                                  startedAfter={runRange.startedAfter}
-                                  startedBefore={runRange.startedBefore}
-                                />
-                              </EuiFlexItem>
+                          <div css={{ inlineSize: '100%' }}>
+                            {startedRuns}
+                            {startedRuns > 0 && (
+                              <RunsSparkline
+                                runs={runs}
+                                startedAfter={runRange.startedAfter}
+                                startedBefore={runRange.startedBefore}
+                              />
                             )}
-                          </EuiFlexGroup>
+                          </div>
                         ),
                       },
                       {
                         title: labels.todayUsage,
                         gap: 'xs',
                         value: (
-                          <div css={{ inlineSize: '100%' }}>
+                          <div
+                            css={{
+                              inlineSize: '100%',
+                              color: isLimitReached ? limitColor : undefined,
+                            }}
+                          >
                             {usedToday} / {automation.runtime.dailyDispatchLimit ?? '—'}
                             <EuiSpacer size="xs" />
                             <EuiProgress
                               size="s"
-                              color="success"
+                              color={isLimitReached ? limitColor : 'success'}
                               value={usedToday}
                               max={automation.runtime.dailyDispatchLimit ?? 1}
                             />
@@ -553,6 +564,7 @@ export const AutomationDetailFlyout = ({
               <div css={bodyCss}>
                 {isEditing ? (
                   <AutomationFormBody
+                    usedToday={usedToday}
                     values={values}
                     tagSuggestions={automations.flatMap(({ tags }) => tags ?? [])}
                     isNameInvalid={!values.name.trim()}
@@ -560,6 +572,8 @@ export const AutomationDetailFlyout = ({
                   />
                 ) : isRunsTab ? (
                   <RunHistory
+                    key={initialRunFilter}
+                    initialFilter={initialRunFilter}
                     runs={runs}
                     isLoading={runsQuery.isLoading}
                     startedAfter={runRange.startedAfter}
@@ -578,10 +592,7 @@ export const AutomationDetailFlyout = ({
                     )}
                     {Boolean(automation.tags?.length) && (
                       <FormSection>
-                        <SectionHeader
-                          title={labels.automationTags}
-                          onEdit={canManage ? startEditing : undefined}
-                        />
+                        <SectionHeader title={labels.automationTags} />
                         <EuiSpacer size="s" />
                         <EuiBadgeGroup gutterSize="xs">
                           {automation.tags?.map((tag) => (
@@ -593,13 +604,13 @@ export const AutomationDetailFlyout = ({
                       </FormSection>
                     )}
                     <AutomationFormBody
+                      usedToday={usedToday}
                       values={originalValues}
                       tagSuggestions={[]}
                       isNameInvalid={false}
                       readOnly
                       showIdentityFields={false}
                       onChange={() => {}}
-                      onEdit={canManage ? startEditing : undefined}
                     />
                   </>
                 )}
@@ -726,7 +737,13 @@ export const AutomationDetailFlyout = ({
           }}
           cancelButtonText={labels.keepEditing}
           confirmButtonText={labels.discard}
-        >{`You have unsaved changes to ${automation.name}. If you leave now, your edits will be lost.`}</EuiConfirmModal>
+        >
+          {i18n.translate('xpack.nightshift.automations.detail.discardBody', {
+            defaultMessage:
+              'You have unsaved changes to {name}. If you leave now, your edits will be lost.',
+            values: { name: automation.name },
+          })}
+        </EuiConfirmModal>
       )}
     </EuiFlyout>
   );

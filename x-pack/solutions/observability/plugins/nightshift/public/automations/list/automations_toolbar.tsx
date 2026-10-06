@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -26,6 +25,7 @@ import type { AutomationFilters, FilterOption } from '../utils/filter_automation
 import { getTriggerIcon } from '../utils/trigger_display';
 import { AutomationFilter } from './automation_filter';
 import { listLabels } from './translations';
+import { AutomationsTimeRangePicker } from './time_range_picker';
 
 export interface AutomationFilterOptions {
   statuses: FilterOption[];
@@ -63,6 +63,7 @@ export const AutomationsToolbar = ({
     <EuiFlexGroup gutterSize="s" responsive={false} wrap>
       <EuiFlexItem grow={true} css={css({ minWidth: 240 })}>
         <EuiFieldSearch
+          compressed
           placeholder={listLabels.search}
           value={filters.search}
           onChange={(event) => onFilterChange('search', event.target.value)}
@@ -72,7 +73,7 @@ export const AutomationsToolbar = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           <AutomationFilter
             label={listLabels.status}
             options={options.statuses}
@@ -112,19 +113,9 @@ export const AutomationsToolbar = ({
         </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          start={range.start}
-          end={range.end}
-          showUpdateButton={false}
-          width="auto"
-          commonlyUsedRanges={[
-            { start: 'now-48h', end: 'now', label: listLabels.last48Hours },
-            { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
-            { start: 'now-7d', end: 'now', label: 'Last 7 days' },
-            { start: 'now-30d', end: 'now', label: 'Last 30 days' },
-          ]}
-          onTimeChange={({ start, end }) => onRangeChange({ start, end })}
-          onRefresh={({ start, end }) => onRefresh({ start, end })}
+        <AutomationsTimeRangePicker
+          onRangeChange={onRangeChange}
+          onRefresh={() => onRefresh(range)}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -132,6 +123,7 @@ export const AutomationsToolbar = ({
           <EuiButton
             data-test-subj="nightshiftAutomationsPageButton"
             fill
+            size="s"
             iconType="plus"
             onClick={onCreate}
           >

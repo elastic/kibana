@@ -95,7 +95,7 @@ const labels = {
   runs: i18n.translate('xpack.nightshift.automations.detail.runs', { defaultMessage: 'runs' }),
 };
 
-const STATUSES: RunStatus[] = ['succeeded', 'running', 'failed', 'skipped'];
+export const STATUSES: RunStatus[] = ['succeeded', 'running', 'failed', 'skipped'];
 const STATUS_VIS_COLOR = {
   succeeded: 'euiColorVisSuccess0',
   running: 'euiColorVisNeutral0',
@@ -297,6 +297,7 @@ export const RunHistory = ({
   startedAfter,
   startedBefore,
   automationName,
+  initialFilter,
   onSelect,
 }: {
   runs: Run[];
@@ -304,11 +305,12 @@ export const RunHistory = ({
   startedAfter: string;
   startedBefore: string;
   automationName: string;
+  initialFilter?: RunStatus;
   onSelect: (run: Run) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { baseTheme } = useChartThemes();
-  const [filter, setFilter] = useState<RunStatus>();
+  const [filter, setFilter] = useState(initialFilter);
   if (isLoading) return <EuiLoadingSpinner size="l" />;
   if (!runs.length)
     return (

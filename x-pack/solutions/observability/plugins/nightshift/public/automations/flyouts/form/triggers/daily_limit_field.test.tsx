@@ -33,4 +33,38 @@ describe('DailyLimitField', () => {
 
     expect(screen.getByTestId('automationDailyLimit')).toBeInvalid();
   });
+
+  it('offers to raise the limit once it is reached', () => {
+    const onChange = jest.fn();
+    render(
+      <I18nProvider>
+        <DailyLimitField value="10" helpText="Help text" onChange={onChange} usedToday={10} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('automationDailyLimitReachedCallout')).toHaveTextContent(
+      'This automation has handled 10 triggers today (limit of 10).'
+    );
+    fireEvent.click(screen.getByTestId('automationDailyLimitRaise'));
+    expect(onChange).toHaveBeenCalledWith('15');
+  });
+
+  it('shows the callout without the raise action when read-only', () => {
+    render(
+      <I18nProvider>
+        <DailyLimitField
+          value="20"
+          helpText="Help text"
+          onChange={jest.fn()}
+          usedToday={27}
+          readOnly
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('automationDailyLimitReachedCallout')).toHaveTextContent(
+      '7 above the limit were not addressed'
+    );
+    expect(screen.queryByTestId('automationDailyLimitRaise')).not.toBeInTheDocument();
+  });
 });

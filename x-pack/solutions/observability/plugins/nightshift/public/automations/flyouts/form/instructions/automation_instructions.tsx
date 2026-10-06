@@ -88,14 +88,12 @@ export const AutomationInstructions = ({
   onInstructionsChange,
   onModeChange,
   readOnly = false,
-  onEdit,
 }: {
   instructions: string;
   mode: InstructionMode;
   onInstructionsChange: (instructions: string) => void;
   onModeChange: (mode: InstructionMode) => void;
   readOnly?: boolean;
-  onEdit?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -125,7 +123,6 @@ export const AutomationInstructions = ({
               {current.label}
             </EuiBadge>
           }
-          onEdit={onEdit}
         />
         <EuiSpacer size="s" />
         <EuiPanel hasBorder hasShadow={false} paddingSize="m">

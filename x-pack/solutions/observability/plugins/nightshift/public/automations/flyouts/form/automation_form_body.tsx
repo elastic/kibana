@@ -37,16 +37,16 @@ export const AutomationFormBody = ({
   isNameInvalid,
   readOnly = false,
   showIdentityFields = true,
+  usedToday,
   onChange,
-  onEdit,
 }: {
   values: AutomationFormValues;
   tagSuggestions: string[];
   isNameInvalid: boolean;
   readOnly?: boolean;
   showIdentityFields?: boolean;
+  usedToday?: number;
   onChange: (changes: Partial<AutomationFormValues>) => void;
-  onEdit?: () => void;
 }) => {
   return (
     <>
@@ -116,8 +116,8 @@ export const AutomationFormBody = ({
           dailyDispatchLimit={values.dailyDispatchLimit}
           onTriggerChange={(trigger) => onChange({ trigger })}
           onDailyDispatchLimitChange={(dailyDispatchLimit) => onChange({ dailyDispatchLimit })}
+          usedToday={usedToday}
           readOnly={readOnly}
-          onEdit={onEdit}
         />
       </FormSection>
       <FormSection>
@@ -127,7 +127,6 @@ export const AutomationFormBody = ({
           onInstructionsChange={(instructions) => onChange({ instructions })}
           onModeChange={(mode) => onChange({ mode })}
           readOnly={readOnly}
-          onEdit={onEdit}
         />
       </FormSection>
       <FormSection>
@@ -135,7 +134,6 @@ export const AutomationFormBody = ({
           slackAction={values.slackAction}
           onSlackActionChange={(slackAction) => onChange({ slackAction })}
           readOnly={readOnly}
-          onEdit={onEdit}
         />
       </FormSection>
     </>

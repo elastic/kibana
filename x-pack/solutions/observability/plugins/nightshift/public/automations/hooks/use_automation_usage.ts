@@ -37,6 +37,23 @@ const useRunTotals = (ids: string[], { startedAfter, startedBefore }: RunRange) 
   );
 };
 
+export type RunCountStatus = 'succeeded' | 'failed' | 'skipped';
+export type RunCounts = Record<RunCountStatus, number>;
+
+const useRunCounts = (ids: string[], { startedAfter, startedBefore }: RunRange) => {
+  const queries = useAutomationsRunsInRange(ids, startedAfter, startedBefore);
+  return new Map(
+    ids.flatMap((id, index) => {
+      const runs = queries[index]?.data?.runs;
+      if (!runs) return [];
+      const count = (status: RunCountStatus) => runs.filter((run) => run.status === status).length;
+      return [
+        [id, { succeeded: count('succeeded'), failed: count('failed'), skipped: count('skipped') }],
+      ] as const;
+    })
+  );
+};
+
 export const useAutomationUsage = (automations: Automation[], range: TimeRange) => {
   const ids = automations.map(({ id }) => id);
   const { runRange, today } = useMemo(
@@ -52,7 +69,7 @@ export const useAutomationUsage = (automations: Automation[], range: TimeRange) 
 
   return {
     runRange,
-    runTotals: useRunTotals(ids, runRange),
+    runCounts: useRunCounts(ids, runRange),
     usedToday: useRunTotals(ids, today),
   };
 };
