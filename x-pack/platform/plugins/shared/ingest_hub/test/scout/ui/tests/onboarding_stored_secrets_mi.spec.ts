@@ -27,6 +27,18 @@ import {
   soItem,
 } from '../helpers/stored_secrets';
 
+const DRIFTED_SERVICE_VARS = {
+  elb: {
+    enabledDataStreams: ['elb_logs'],
+    varsByDataStream: {
+      elb_logs: {
+        enabledInputs: ['aws-s3'],
+        varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::drift-bucket' } },
+      },
+    },
+  },
+};
+
 test.describe(
   'Onboarding resume with stored secrets — managed integrations, static keys',
   { tag: tags.stateful.classic },
@@ -71,7 +83,7 @@ test.describe(
     async function resume(
       browserAuth: { loginAsAdmin: () => Promise<void> },
       page: ScoutPage,
-      { serviceVars = {} }: { serviceVars?: Record<string, unknown> } = {}
+      serviceVars: Record<string, unknown> = DRIFTED_SERVICE_VARS
     ) {
       await browserAuth.loginAsAdmin();
       await page.gotoApp('onboarding/aws', {
@@ -113,46 +125,11 @@ test.describe(
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
     }
 
-    /**
-     * A deployed, unchanged section is collapsed, and re-collapses if the deployment status settles
-     * after it was opened, which unmounts the form. Retry opening it until the form is there.
-     */
-    async function openSectionUntilVisible(
-      page: ScoutPage,
-      target: ReturnType<ScoutPage['locator']>
-    ) {
-      await expect(async () => {
-        if (!(await target.isVisible())) {
-          await page.testSubj.locator('managedIntegrationsSection-headerButton').click();
-        }
-        await expect(target).toBeVisible({ timeout: 2000 });
-      }).toPass();
-    }
-
-    /** Replaces the stored secret access key by typing `value`, retrying across a re-collapse. */
-    async function replaceSecretKey(page: ScoutPage, value: string) {
-      const replaceButton = page.testSubj.locator('awsStaticKeysForm-secretAccessKey-replace');
-      const input = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
-      await expect(async () => {
-        if (!(await input.isVisible()) && !(await replaceButton.isVisible())) {
-          await page.testSubj.locator('managedIntegrationsSection-headerButton').click();
-        }
-        if (await replaceButton.isVisible()) {
-          await replaceButton.click();
-        }
-        await input.fill(value, { timeout: 2000 });
-      }).toPass();
-    }
-
     test('shows the stored keys instead of the replace-keys view', async ({
       browserAuth,
       page,
     }) => {
       await resume(browserAuth, page);
-      await openSectionUntilVisible(
-        page,
-        page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')
-      );
 
       await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
       await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeVisible();
@@ -163,20 +140,7 @@ test.describe(
       browserAuth,
       page,
     }) => {
-      // The session carries a bucket the SO does not know about: drift on the deployed service.
-      await resume(browserAuth, page, {
-        serviceVars: {
-          elb: {
-            enabledDataStreams: ['elb_logs'],
-            varsByDataStream: {
-              elb_logs: {
-                enabledInputs: ['aws-s3'],
-                varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::drift-bucket' } },
-              },
-            },
-          },
-        },
-      });
+      await resume(browserAuth, page);
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
       await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeVisible();
 
@@ -214,13 +178,11 @@ test.describe(
     }) => {
       await resume(browserAuth, page);
 
-      await replaceSecretKey(page, 'NEW-SECRET-VALUE');
+      await page.testSubj.locator('awsStaticKeysForm-secretAccessKey-replace').click();
       await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeHidden();
+      await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('NEW-SECRET-VALUE');
       // The stored access key id is untouched.
       await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
-
-      // Typing into a stored field replaces it: the step is marked as changed.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
       const policyPut = page.waitForRequest(
         (req) =>
@@ -247,16 +209,6 @@ test.describe(
       const body = JSON.parse((await policyPut).postData() ?? '{}');
       expect(body.vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
       expect(body.vars.secret_access_key).toBe('NEW-SECRET-VALUE');
-    });
-
-    test('emptying a replaced field clears the changed state', async ({ browserAuth, page }) => {
-      await resume(browserAuth, page);
-
-      await replaceSecretKey(page, 'typed');
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
-
-      await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('');
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
     });
   }
 );

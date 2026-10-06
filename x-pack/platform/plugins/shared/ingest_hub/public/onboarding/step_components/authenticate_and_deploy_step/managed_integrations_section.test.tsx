@@ -758,6 +758,34 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeEnabled();
     });
 
+    it('clears the dirty state when the replaced values are emptied again', () => {
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      MockStaticKeys.mockImplementation(
+        ({ onFieldsChange }: { onFieldsChange?: (f: unknown) => void }) => (
+          <div data-test-subj="static-keys">
+            <button
+              onClick={() => onFieldsChange?.({ access_key_id: '', secret_access_key: 'NEW' })}
+            >
+              type-secret
+            </button>
+            <button onClick={() => onFieldsChange?.({ access_key_id: '', secret_access_key: '' })}>
+              empty-secret
+            </button>
+          </div>
+        )
+      );
+      renderSection({
+        showIdentityFederation: false,
+        storedSecretFields: STORED,
+        onReplaceFormDirtyChange,
+      });
+      fireEvent.click(screen.getByText('type-secret'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
+      fireEvent.click(screen.getByText('empty-secret'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(false);
+    });
+
     it('marks the form dirty when a stored value is replaced', () => {
       const onReplaceFormDirtyChange = jest.fn();
       const setStaticKeys = jest.fn();

@@ -36,18 +36,12 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
   onFieldsChange,
 }) => {
   const [fields, setFields] = useState<AwsTemporaryKeyCredentials>({
-    access_key_id: storedSecretFields?.includes('access_key_id')
-      ? ''
-      : initialValues?.access_key_id ?? '',
-    secret_access_key: storedSecretFields?.includes('secret_access_key')
-      ? ''
-      : initialValues?.secret_access_key ?? '',
-    session_token: storedSecretFields?.includes('session_token')
-      ? ''
-      : initialValues?.session_token ?? '',
+    access_key_id: initialValues?.access_key_id ?? '',
+    secret_access_key: initialValues?.secret_access_key ?? '',
+    session_token: initialValues?.session_token ?? '',
   });
 
-  const { isStored, replace } = useStoredSecretFields(storedSecretFields);
+  const { isStored, replace } = useStoredSecretFields(storedSecretFields, initialValues);
   // A replaced field starts empty: the value kept in memory from an earlier entry is not shown.
   const handleReplace = (field: keyof typeof fields) => {
     replace(field);

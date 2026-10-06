@@ -39,15 +39,11 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
   onFieldsChange,
 }) => {
   const [fields, setFields] = useState<AwsStaticKeyCredentials>({
-    access_key_id: storedSecretFields?.includes('access_key_id')
-      ? ''
-      : initialValues?.access_key_id ?? '',
-    secret_access_key: storedSecretFields?.includes('secret_access_key')
-      ? ''
-      : initialValues?.secret_access_key ?? '',
+    access_key_id: initialValues?.access_key_id ?? '',
+    secret_access_key: initialValues?.secret_access_key ?? '',
   });
 
-  const { isStored, replace } = useStoredSecretFields(storedSecretFields);
+  const { isStored, replace } = useStoredSecretFields(storedSecretFields, initialValues);
   // A replaced field starts empty: the value kept in memory from an earlier entry is not shown.
   const handleReplace = (field: keyof typeof fields) => {
     replace(field);

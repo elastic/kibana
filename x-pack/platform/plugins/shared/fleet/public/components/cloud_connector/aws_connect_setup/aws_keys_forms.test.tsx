@@ -94,43 +94,61 @@ describe('AwsStaticKeysForm stored secrets', () => {
 });
 
 describe('AwsStaticKeysForm stored secrets with values kept in memory', () => {
-  const IN_MEMORY = { access_key_id: 'previous-key', secret_access_key: 'previous-secret' };
+  const STAGED = { access_key_id: 'staged-key', secret_access_key: '' };
 
-  it('does not seed a stored field from the in-memory value', () => {
+  it('starts a stored field that already has a value as replaced and keeps the value', () => {
+    const onReadyChange = jest.fn();
+    renderWithI18n(
+      <AwsStaticKeysForm
+        initialValues={STAGED}
+        storedSecretFields={['access_key_id', 'secret_access_key']}
+        onReadyChange={onReadyChange}
+      />
+    );
+    expect(screen.queryByTestId('awsStaticKeysForm-accessKeyId-stored')).not.toBeInTheDocument();
+    expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('staged-key');
+    expect(screen.getByTestId('awsStaticKeysForm-secretAccessKey-stored')).toBeInTheDocument();
+    expect(onReadyChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('keeps an earlier replacement when another stored field is replaced after a remount', () => {
     const onFieldsChange = jest.fn();
     renderWithI18n(
       <AwsStaticKeysForm
-        initialValues={IN_MEMORY}
+        initialValues={STAGED}
         storedSecretFields={['access_key_id', 'secret_access_key']}
         onFieldsChange={onFieldsChange}
       />
     );
     fireEvent.click(screen.getByTestId('awsStaticKeysForm-secretAccessKey-replace'));
     fireEvent.change(screen.getByTestId('awsStaticKeysForm-secretAccessKey'), {
-      target: { value: 'new' },
+      target: { value: 'new-secret' },
     });
     expect(onFieldsChange).toHaveBeenLastCalledWith({
-      access_key_id: '',
-      secret_access_key: 'new',
+      access_key_id: 'staged-key',
+      secret_access_key: 'new-secret',
     });
   });
 
-  it('shows an empty input after Replace, not the previous value', () => {
+  it('shows an empty input after Replace, not the value kept in memory', () => {
     renderWithI18n(
       <AwsStaticKeysForm
-        initialValues={IN_MEMORY}
+        initialValues={{ access_key_id: '', secret_access_key: 'previous-secret' }}
         storedSecretFields={['access_key_id', 'secret_access_key']}
       />
     );
+    // The secret already has a value (replaced earlier); clicking Replace on the other field
+    // leaves it alone, and a field without a value starts empty.
     fireEvent.click(screen.getByTestId('awsStaticKeysForm-accessKeyId-replace'));
     expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('');
+    expect(screen.getByTestId('awsStaticKeysForm-secretAccessKey')).toHaveValue('previous-secret');
   });
 
   it('still seeds fields that are not stored', () => {
     renderWithI18n(
-      <AwsStaticKeysForm initialValues={IN_MEMORY} storedSecretFields={['secret_access_key']} />
+      <AwsStaticKeysForm initialValues={STAGED} storedSecretFields={['secret_access_key']} />
     );
-    expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('previous-key');
+    expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('staged-key');
   });
 });
 

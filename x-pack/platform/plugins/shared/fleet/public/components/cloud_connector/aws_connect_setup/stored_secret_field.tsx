@@ -14,11 +14,16 @@ const STORED_SECRET_PLACEHOLDER = '••••••••';
 /**
  * Tracks which of the fields that already have a stored secret the user chose to replace.
  * A field is "stored" until Replace is clicked; its value is then entered like any other field.
+ * A stored field that already has a value in `initialValues` was replaced earlier (the form was
+ * unmounted and is mounting again), so it starts as replaced and keeps that value.
  */
 export function useStoredSecretFields<TField extends string>(
-  storedSecretFields: ReadonlyArray<TField> | undefined
+  storedSecretFields: ReadonlyArray<TField> | undefined,
+  initialValues?: Partial<Record<TField, string>>
 ) {
-  const [replaced, setReplaced] = useState<ReadonlySet<TField>>(new Set());
+  const [replaced, setReplaced] = useState<ReadonlySet<TField>>(
+    () => new Set((storedSecretFields ?? []).filter((field) => !!initialValues?.[field]))
+  );
 
   const isStored = useCallback(
     (field: TField) => !!storedSecretFields?.includes(field) && !replaced.has(field),

@@ -248,7 +248,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const clearStagedStaticKeys = useCallback(() => {
     setStaticKeysState(undefined);
-  }, []);
+    // The persisted access key id would seed the keys again after a reload.
+    const next = { ...persistedAuthStepRef.current, accessKeyId: undefined };
+    persistedAuthStepRef.current = next;
+    setPersistedAuthenticateAndDeployStep(next);
+  }, [setPersistedAuthenticateAndDeployStep]);
 
   const setAuthMethod = useCallback(
     (method: CloudOnboardingDeploymentAuthMethod) => {
