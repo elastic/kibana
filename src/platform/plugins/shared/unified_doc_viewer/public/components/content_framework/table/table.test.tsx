@@ -39,6 +39,7 @@ jest.mock('../../../plugin', () => ({
       }),
     },
     fieldFormats: {},
+    uiSettings: { get: (_key: string, defaultValue: unknown) => defaultValue },
   }),
 }));
 

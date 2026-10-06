@@ -116,6 +116,7 @@ export interface UsageStats {
   'doc_table:highlight': boolean;
   'discover:searchOnPageLoad': boolean;
   'doc_table:hideTimeColumn': boolean;
+  'discover:docViewerCopyAsCsv': boolean;
   'data_views:cache_max_age': number;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;

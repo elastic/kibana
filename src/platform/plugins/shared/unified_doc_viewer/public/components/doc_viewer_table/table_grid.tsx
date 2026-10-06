@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DOC_VIEWER_COPY_AS_CSV_SETTING } from '@kbn/discover-utils';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -104,7 +105,8 @@ export function TableGrid({
   hideFilteringOnComputedColumns,
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles);
-  const { toasts } = getUnifiedDocViewerServices();
+  const { toasts, uiSettings } = getUnifiedDocViewerServices();
+  const copyAsCsv = uiSettings.get<boolean>(DOC_VIEWER_COPY_AS_CSV_SETTING, true);
 
   const onToggleColumn = useMemo(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
@@ -139,8 +141,9 @@ export function TableGrid({
         toasts,
         onFilter: filter,
         hideFilteringOnComputedColumns,
+        copyAsCsv,
       }),
-    [rows, isEsqlMode, toasts, filter, hideFilteringOnComputedColumns]
+    [rows, isEsqlMode, toasts, filter, hideFilteringOnComputedColumns, copyAsCsv]
   );
 
   const gridColumns: EuiDataGridProps['columns'] = useMemo(

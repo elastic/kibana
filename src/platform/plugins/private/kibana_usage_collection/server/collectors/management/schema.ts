@@ -253,6 +253,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:docViewerCopyAsCsv': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether "Copy value" in the expanded document view copies CSV-escaped values (quoted, formulas escaped) instead of raw values.',
+    },
+  },
   'discover:sampleSize': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

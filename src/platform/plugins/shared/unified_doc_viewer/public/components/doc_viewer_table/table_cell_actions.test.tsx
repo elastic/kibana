@@ -203,6 +203,52 @@ describe('TableActions', () => {
       });
     });
 
+    describe('when copying a value with special characters', () => {
+      const url = 'https://www.elastic.co/downloads/beats/filebeat';
+
+      const renderCopyAction = (copyAsCsv?: boolean) => {
+        const actions = getFieldValueCellActions({
+          rows: getRows('message', url),
+          toasts: toastsMock,
+          isEsqlMode: false,
+          onFilter: undefined,
+          copyAsCsv,
+        }).map((Action, i) => (
+          <Action
+            key={i}
+            {...EuiCellParams}
+            Component={(props: any) => <div {...props}>{props.children}</div>}
+          />
+        ));
+
+        render(<>{actions}</>);
+      };
+
+      it('should copy the CSV-escaped value by default', async () => {
+        // Given
+        renderCopyAction();
+        const user = userEvent.setup();
+
+        // When
+        await user.click(screen.getByText('Copy value'));
+
+        // Then
+        expect(mockCopyToClipboard).toHaveBeenCalledWith(`"${url}"`);
+      });
+
+      it('should copy the raw value when copyAsCsv is false', async () => {
+        // Given
+        renderCopyAction(false);
+        const user = userEvent.setup();
+
+        // When
+        await user.click(screen.getByText('Copy value'));
+
+        // Then
+        expect(mockCopyToClipboard).toHaveBeenCalledWith(url);
+      });
+    });
+
     it('should allow filtering in ES|QL mode', () => {
       const actions = getFieldValueCellActions({
         rows: getRows('extension'),

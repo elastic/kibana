@@ -189,6 +189,7 @@ Array [
   />,
   <Copy
     Component={[Function]}
+    copyAsCsv={true}
     row={
       FieldRow {
         "columnsMeta": undefined,
@@ -243,6 +244,7 @@ exports[`TableActions getFieldValueCellActions should render correctly for undef
 Array [
   <Copy
     Component={[Function]}
+    copyAsCsv={true}
     row={
       FieldRow {
         "columnsMeta": undefined,
@@ -351,6 +353,7 @@ Array [
   />,
   <Copy
     Component={[Function]}
+    copyAsCsv={true}
     row={
       FieldRow {
         "columnsMeta": undefined,

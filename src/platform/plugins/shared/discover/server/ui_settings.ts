@@ -21,6 +21,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  DOC_VIEWER_COPY_AS_CSV_SETTING,
   FIELDS_LIMIT_SETTING,
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
@@ -166,6 +167,19 @@ export const getUiSettings: (
     description: i18n.translate('discover.advancedSettings.docTableHideTimeColumnText', {
       defaultMessage:
         "Hide the 'Time' column in Discover and in all Discover session panels on Dashboards.",
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+  },
+  [DOC_VIEWER_COPY_AS_CSV_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.docViewerCopyAsCsvTitle', {
+      defaultMessage: 'Copy expanded document values as CSV',
+    }),
+    value: true,
+    type: 'boolean',
+    description: i18n.translate('discover.advancedSettings.docViewerCopyAsCsvText', {
+      defaultMessage:
+        'Controls whether values copied from the expanded document view are formatted for CSV. When on, values are wrapped in quotes and formulas are escaped. When off, values are copied as displayed.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
