@@ -166,17 +166,17 @@ describe('createSignificantEventAttachmentType', () => {
     expect(type.getAgentDescription?.()).toContain('significant event attachment');
   });
 
-  it('does not resolve an event without the Nightshift read privilege', async () => {
+  it('does not read an event without the Nightshift read privilege', async () => {
     const getScopedClients = createGetScopedClients([event]);
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients,
       server: createNightshiftSecurityServer({ hasAllRequested: false }),
     });
+    const context = agentBuilderMocks.attachments.createResolveContextMock();
 
-    await expect(
-      type.resolve?.(event.event_id, agentBuilderMocks.attachments.createResolveContextMock())
-    ).resolves.toBeUndefined();
+    await expect(type.resolve?.(event.event_id, context)).resolves.toBeUndefined();
+    await expect(type.isStale?.(createVersionedAttachment(event), context)).resolves.toBe(true);
     expect(getScopedClients).not.toHaveBeenCalled();
   });
 });
