@@ -9,10 +9,7 @@ import type { IconType } from '@elastic/eui';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 
 /** Shared by the severity tiles, the section headings, and each list row. */
-export const SEVERITY_DOT_COLOR: Record<
-  Severity,
-  'danger' | 'risk' | 'warning' | 'neutral'
-> = {
+export const SEVERITY_DOT_COLOR: Record<Severity, 'danger' | 'risk' | 'warning' | 'neutral'> = {
   critical: 'danger',
   high: 'risk',
   medium: 'warning',
@@ -20,10 +17,7 @@ export const SEVERITY_DOT_COLOR: Record<
 };
 
 /** Glyphs for severity overview tiles. Medium’s double chevron is rotated to point up. */
-export const SEVERITY_TILE_ICON: Record<
-  Severity,
-  { type: IconType; rotateUp?: boolean }
-> = {
+export const SEVERITY_TILE_ICON: Record<Severity, { type: IconType; rotateUp?: boolean }> = {
   critical: { type: 'bolt' },
   high: { type: 'warning' },
   medium: { type: 'chevronDoubleRight', rotateUp: true },

@@ -23,10 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
-import {
-  SEVERITY_TILE_ICON,
-  SEVERITY_TILE_ICON_COLORS,
-} from '../common/severity';
+import { SEVERITY_TILE_ICON, SEVERITY_TILE_ICON_COLORS } from '../common/severity';
 
 /** A muted tier has no section to scroll to, so its tile reads as a figure rather than a control. */
 type SeverityTileState = 'muted' | 'interactive';
@@ -44,7 +41,9 @@ interface SeverityIconBoxStyles {
 }
 
 /** Every visual difference between a muted and an interactive tile, in one place. */
-const getSeverityTileStyles = (euiThemeContext: UseEuiTheme): {
+const getSeverityTileStyles = (
+  euiThemeContext: UseEuiTheme
+): {
   iconBox: Readonly<Record<Severity, SeverityIconBoxStyles>>;
   iconGlyphRotateUp: SerializedStyles;
   label: SerializedStyles;
@@ -176,6 +175,7 @@ export const InvestigationSeverityTiles = ({
                           type={icon.type}
                           size="m"
                           css={icon.rotateUp ? styles.iconGlyphRotateUp : undefined}
+                          aria-hidden={true}
                         />
                       </span>
                     </EuiFlexItem>
