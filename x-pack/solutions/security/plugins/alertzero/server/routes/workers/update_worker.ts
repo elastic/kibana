@@ -18,7 +18,27 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import type { AlertTriageEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import { hasManageSecurity } from './has_manage_security';
+
+const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReason, () => string> = {
+  alertAnalysisWorkflowDisabled: () =>
+    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
+      defaultMessage:
+        'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.',
+    }),
+  alertAnalysisRuntimeDisabled: () =>
+    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisRuntimeDisabledErrorMessage', {
+      defaultMessage:
+        'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
+    }),
+  ruleAttachmentUnavailable: () =>
+    i18n.translate('xpack.alertzero.alertTriageRuleAttachmentUnavailableErrorMessage', {
+      defaultMessage:
+        'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
+    }),
+};
 
 const UpdateWorkerRequestParams = z.object({
   workerId: z.string().min(1).max(128),
@@ -57,8 +77,19 @@ export const registerUpdateWorkerRoute = ({
           },
         },
       },
-      withAlertZeroEnabled(async (_context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
+          if (!(await hasManageSecurity(context))) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.alertzero.workerModifyForbiddenErrorMessage', {
+                  defaultMessage:
+                    'Modifying a worker requires the manage_security cluster privilege',
+                }),
+              },
+            });
+          }
+
           if (request.body.enabled !== undefined && !hasManagedWorkflowUpdatePrivilege(request)) {
             return response.forbidden({
               body: {
@@ -98,6 +129,10 @@ export const registerUpdateWorkerRoute = ({
                     values: { setting: result.what, workerId },
                   }),
                 },
+              });
+            case 'blocked':
+              return response.badRequest({
+                body: { message: ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES[result.reason]() },
               });
             case 'invalid':
               return response.badRequest({

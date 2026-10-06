@@ -24,9 +24,9 @@ const mockRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
+  version: 1,
   metadata: {
     name: 'My CPU Alert',
-    version: 1,
     description: '',
     tags: [],
   },

@@ -100,20 +100,6 @@ export class ProfilingSettingsPage {
     await this.page.testSubj.locator('profilingDisableDataCollection').click();
   }
 
-  // Setup Status methods
-  async getSetupStatus() {
-    return this.page.testSubj.locator('profilingSetupStatus');
-  }
-
-  async getSetupStatusIndicator() {
-    return this.page.testSubj.locator('profilingSetupStatusIndicator');
-  }
-
-  async isSetupComplete() {
-    const status = await this.getSetupStatusIndicator();
-    return (await status.getAttribute('data-status')) === 'complete';
-  }
-
   // Help and Documentation methods
   async clickHelpButton() {
     await this.page.testSubj.locator('profilingSettingsHelp').click();

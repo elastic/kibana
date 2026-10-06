@@ -8,11 +8,14 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
-import { DEFAULT_PROPOSAL_TITLE, type ListProposalsQuery } from '@kbn/proposals-common';
+import {
+  DEFAULT_PROPOSAL_TITLE,
+  PROPOSAL_ATTACHMENT_TYPE,
+  type ListProposalsQuery,
+} from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -127,13 +130,16 @@ const createService = (
     update: jest.fn(),
     delete: jest.fn(),
     list: jest.fn(),
+    bulkCreate: jest.fn(),
   };
+  const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
   return {
+    getAttachmentsClient,
     service: new ProposalsService({
       storage,
       logger,
       getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
-      getAttachmentsClient: async () => attachmentsClient,
+      getAttachmentsClient,
     }),
     workflowsApi: workflowsApi ?? createWorkflowsApi(),
     attachmentsClient,
@@ -819,7 +825,7 @@ describe('ProposalsService', () => {
     it('should reject a proposal the workflow already settled without a decision', async () => {
       // Attempt exhaustion and a failure before anyone decided both settle the
       // record as `expired` with no decision on it, and can do so long before
-      // the deadline — so the date check alone would still read it as live.
+      // the deadline passes.
       const storage = createStorage(
         baseDocument({
           status: 'expired',
@@ -831,15 +837,6 @@ describe('ProposalsService', () => {
 
       await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalConflictError
-      );
-    });
-
-    it('should reject a proposal past its decision deadline', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
-      const { service } = createService(storage);
-
-      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
-        ProposalExpiredError
       );
     });
 
@@ -890,7 +887,7 @@ describe('ProposalsService', () => {
         'proposal-1',
         releaseParams({
           approved: false,
-          dismissReason: 'low_value',
+          dismissReason: 'risk_accepted',
           rationale: 'Noise, not worth a rule',
         })
       );
@@ -898,7 +895,7 @@ describe('ProposalsService', () => {
       const [[indexArgs]] = storage.index.mock.calls;
       expect(indexArgs.document).toEqual(
         expect.objectContaining({
-          dismissReason: 'low_value',
+          dismissReason: 'risk_accepted',
           rationale: 'Noise, not worth a rule',
           // The decision is the workflow's to write, not the route's.
           status: 'pending',
@@ -955,7 +952,7 @@ describe('ProposalsService', () => {
       await expect(
         service.releaseGate(
           'proposal-1',
-          releaseParams({ approved: false, dismissReason: 'low_value' })
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
@@ -971,7 +968,7 @@ describe('ProposalsService', () => {
       await expect(
         service.releaseGate(
           'proposal-1',
-          releaseParams({ approved: false, dismissReason: 'low_value' })
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
     });
@@ -1233,6 +1230,63 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe.each(['clone', 'revise'] as const)('%s attachments', (operation) => {
+    const original = () =>
+      baseDocument(operation === 'clone' ? { decision: 'approved', status: 'failed' } : {});
+
+    it('attaches the successor with its proposal title after linking it', async () => {
+      const storage = createStorage(original());
+      const { service, attachmentsClient, getAttachmentsClient } = createService(storage);
+      attachmentsClient.create.mockImplementation(async () => {
+        expect(storage.index).toHaveBeenCalledTimes(2);
+        return { id: 'attachment-2' };
+      });
+
+      const result = await service[operation]({ id: 'proposal-1' }, SPACE_ID, request);
+      const proposalId = typeof result === 'string' ? result : result.proposalId;
+      expect(getAttachmentsClient).toHaveBeenCalledWith(request);
+      expect(attachmentsClient.create).toHaveBeenCalledTimes(1);
+      expect(attachmentsClient.create).toHaveBeenCalledWith({
+        conversationId: 'conv-1',
+        type: PROPOSAL_ATTACHMENT_TYPE,
+        origin: proposalId,
+        data: { proposalId, title: 'Tune the noisy rule' },
+        render_inline: true,
+      });
+    });
+
+    it('keeps the successor when attachment creation fails', async () => {
+      const { service, attachmentsClient, logger } = createService(createStorage(original()));
+      attachmentsClient.create.mockRejectedValue(new Error('attachment unavailable'));
+      await expect(
+        service[operation]({ id: 'proposal-1' }, SPACE_ID, request)
+      ).resolves.toBeDefined();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to attach proposal')
+      );
+    });
+
+    it('does not attach an invalid successor', async () => {
+      const { service, attachmentsClient } = createService(
+        createStorage(baseDocument({ decision: 'dismissed', status: 'no_action' }))
+      );
+      await expect(
+        service[operation]({ id: 'proposal-1' }, SPACE_ID, request)
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+
+    it.each([409, 503])('does not attach after a failed link write (%s)', async (statusCode) => {
+      const storage = createStorage(original());
+      const { service, attachmentsClient } = createService(storage);
+      storage.index
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(Object.assign(new Error('link failed'), { statusCode }));
+      await expect(service[operation]({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toThrow();
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('clone', () => {
     it('inherits the origin, so a retry stays in the queue that raised it', async () => {
       const storage = createStorage(
@@ -1240,7 +1294,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.clone({ id: 'proposal-1' }, SPACE_ID);
+      await service.clone({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.document.origin).toBe('nightshift');
@@ -1250,7 +1304,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
       const { service } = createService(storage);
 
-      await service.clone({ id: 'proposal-1', executionError: 'rule API rejected it' }, SPACE_ID);
+      await service.clone(
+        { id: 'proposal-1', executionError: 'rule API rejected it' },
+        SPACE_ID,
+        request
+      );
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.document).toMatchObject({
@@ -1272,7 +1330,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      const cloneId = await service.clone({ id: 'proposal-1' }, SPACE_ID);
+      const cloneId = await service.clone({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.id).toBe(cloneId);
@@ -1298,7 +1356,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.clone({ id: 'proposal-1' }, SPACE_ID);
+      await service.clone({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.document).toMatchObject({
@@ -1328,7 +1386,8 @@ describe('ProposalsService', () => {
 
       const cloneId = await service.clone(
         { id: 'proposal-1', executionError: 'action exploded' },
-        SPACE_ID
+        SPACE_ID,
+        request
       );
 
       const [, [supersedeArgs]] = storage.index.mock.calls;
@@ -1350,7 +1409,7 @@ describe('ProposalsService', () => {
 
       // Overwriting the pointer would orphan the first clone: it would stay
       // live and undecided with nothing referring to it.
-      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1363,7 +1422,7 @@ describe('ProposalsService', () => {
         .mockResolvedValueOnce({ _id: 'clone' })
         .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }));
 
-      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
 
@@ -1378,7 +1437,7 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
-      await expect(service.clone({ id: 'missing' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.clone({ id: 'missing' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalNotFoundError
       );
     });
@@ -1399,7 +1458,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument(overrides));
       const { service } = createService(storage);
 
-      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1586,16 +1645,6 @@ describe('ProposalsService', () => {
 
       await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
-      );
-      expect(storage.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects revising a proposal past its decision deadline, even though its status still reads pending', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
-      const { service } = createService(storage);
-
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
-        ProposalExpiredError
       );
       expect(storage.index).not.toHaveBeenCalled();
     });

@@ -268,6 +268,29 @@ describe('index_templates — migrations', () => {
     expect(patchedPaths).toContain(expectedPath);
   });
 
+  // Elasticsearch defaults an omitted `type` on a mapping-update fragment to
+  // `object`, and rejects merging that into an existing `nested` field with
+  // `can't merge a non-nested mapping [extracted.iocs] with a nested mapping`.
+  // That failure fails this whole migration, which fails
+  // `assertMigratedSchemaIsUsable`, which keeps threat-intel bootstrap (and
+  // everything gated on it) permanently unready on every restart.
+  it('declares extracted.iocs nested when the consolidated core migration patches it', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties as Record<string, unknown>).core;
+
+    const { putMappingArgs } = await runMigrations({ reportMappings: mappings });
+
+    const iocsFragment = putMappingArgs
+      .map(
+        (arg) =>
+          (arg.properties as { extracted?: { properties?: Record<string, unknown> } })?.extracted
+            ?.properties?.iocs
+      )
+      .find((iocs): iocs is { type?: string } => iocs !== undefined);
+
+    expect(iocsFragment?.type).toBe('nested');
+  });
+
   it('adds lineage.content_scrubbed_at when absent', async () => {
     const mappings = fullyMigratedReportMappings();
     delete (mappings.properties.lineage.properties as Record<string, unknown>).content_scrubbed_at;

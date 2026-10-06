@@ -75,6 +75,17 @@ export class InventoryPage {
   public readonly alertsFlyoutDetailsStep: Locator;
   public readonly alertsFlyoutLinkedDashboards: Locator;
 
+  public readonly ruleFlyoutForExpressionButton: Locator;
+  public readonly ruleFlyoutSchemaExpressionButton: Locator;
+  public readonly ruleFlyoutNodeTypeSelect: Locator;
+  public readonly ruleFlyoutSchemaSelect: Locator;
+  public readonly ruleFlyoutThresholdButton: Locator;
+  public readonly ruleFlyoutThresholdInput: Locator;
+  public readonly ruleFlyoutThresholdCloseButton: Locator;
+  public readonly ruleFlyoutNameInput: Locator;
+  public readonly ruleFlyoutSaveButton: Locator;
+  public readonly ruleFlyoutConfirmCreateButton: Locator;
+
   constructor(
     private readonly page: ScoutPage,
     private readonly kbnUrl: KibanaUrl,
@@ -147,6 +158,25 @@ export class InventoryPage {
     );
     this.alertsFlyoutDetailsStep = this.alertsFlyout.getByRole('button', { name: 'Details' });
     this.alertsFlyoutLinkedDashboards = this.alertsFlyout.getByTestId('ruleLinkedDashboards');
+
+    // The "For" and "Schema" expression buttons share the `nodeTypeExpression` test subject.
+    this.ruleFlyoutForExpressionButton = this.alertsFlyout
+      .getByTestId('nodeTypeExpression')
+      .filter({ hasText: 'For' });
+    this.ruleFlyoutSchemaExpressionButton = this.alertsFlyout
+      .getByTestId('nodeTypeExpression')
+      .filter({ hasText: 'Schema' });
+    // The expression popovers render in a portal, outside the flyout dialog.
+    this.ruleFlyoutNodeTypeSelect = this.page.getByTestId('forExpressionSelect');
+    this.ruleFlyoutSchemaSelect = this.page.getByTestId('schemaExpressionSelect');
+    this.ruleFlyoutThresholdButton = this.alertsFlyout.getByTestId('thresholdPopover');
+    this.ruleFlyoutThresholdInput = this.page.getByTestId('alertThresholdInput0');
+    this.ruleFlyoutThresholdCloseButton = this.page.getByTestId('closablePopoverTitleButton');
+    this.ruleFlyoutNameInput = this.alertsFlyout.getByTestId('ruleDetailsNameInput');
+    this.ruleFlyoutSaveButton = this.alertsFlyout.getByTestId('ruleFlyoutFooterSaveButton');
+    this.ruleFlyoutConfirmCreateButton = this.page
+      .getByTestId('confirmCreateRuleModal')
+      .getByTestId('confirmModalConfirmButton');
   }
 
   public async waitForNodesToLoad() {
@@ -371,6 +401,54 @@ export class InventoryPage {
     await this.inventoryAlertsMenuOption.click();
     await this.createInventoryRuleButton.click();
     await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
+   * Opens the inventory rule flyout from a waffle pod tile: click the tile, then
+   * "Create inventory rule" in the resulting Kubernetes Pod details context menu.
+   */
+  public async openInventoryRuleFlyoutFromPodWaffleNode(podName: string) {
+    const pod = await this.podWaffleNodeByName(podName);
+    await pod.container.click();
+    await this.k8sPodWaffleContextMenu.waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await this.k8sPodWaffleContextMenu
+      .getByRole('button', { name: 'Create inventory rule' })
+      .click();
+    await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /** Picks a node type in the rule flyout "For" expression; the popover closes on selection. */
+  public async selectRuleNodeType(nodeType: 'host' | 'pod' | 'container') {
+    await this.ruleFlyoutForExpressionButton.click();
+    await this.ruleFlyoutNodeTypeSelect.selectOption(nodeType);
+  }
+
+  /** Picks a schema in the rule flyout "Schema" expression; the popover closes on selection. */
+  public async selectRuleSchema(schema: 'ecs' | 'semconv') {
+    await this.ruleFlyoutSchemaExpressionButton.click();
+    await this.ruleFlyoutSchemaSelect.selectOption(schema);
+  }
+
+  /** Fills the first condition threshold, which the rule form requires before it can be saved. */
+  public async setRuleThreshold(threshold: number) {
+    await this.ruleFlyoutThresholdButton.click();
+    await this.ruleFlyoutThresholdInput.fill(String(threshold));
+    // The expression button only opens the popover, so close it from its own title
+    // to stop it overlaying the flyout steps and footer.
+    await this.ruleFlyoutThresholdCloseButton.click();
+    await this.ruleFlyoutThresholdInput.waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /** Names the rule on the "Details" step and saves it, confirming the no-actions dialog. */
+  public async saveRule(name: string) {
+    await this.alertsFlyoutDetailsStep.click();
+    await this.ruleFlyoutNameInput.fill(name);
+    await this.ruleFlyoutSaveButton.click();
+    await this.ruleFlyoutConfirmCreateButton.click();
+    await this.alertsFlyout.waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
   }
 
   public async openMetricsThresholdRuleFlyout() {

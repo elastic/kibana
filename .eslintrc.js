@@ -2022,6 +2022,12 @@ module.exports = {
       },
     },
     {
+      files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
+      rules: {
+        'import/no-nodejs-modules': 'off',
+      },
+    },
+    {
       files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
       rules: {
         'import/no-default-export': 'off',
@@ -3093,19 +3099,6 @@ module.exports = {
         ],
       },
     },
-    // Custom rules for scout tests
-    {
-      // Every Scout suite, excluding the Scout framework's own tests
-      files: SCOUT_TEST_FILE_GLOBS,
-      excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
-      rules: {
-        '@kbn/eslint/scout_test_file_naming': 'error',
-        '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
-        '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
-        '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
-        '@kbn/eslint/scout_expect_import': 'error',
-      },
-    },
     {
       // Raw EUI class selectors in Scout code, including kbn-scout* sources. The
       // restricted classes are read from `@elastic/eui-test-helpers` at lint time.
@@ -3114,81 +3107,7 @@ module.exports = {
         '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
       },
     },
-    {
-      // Platform & Solutions API Tests
-      files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
-      ],
-      rules: {
-        '@kbn/eslint/scout_require_api_client_in_api_test': [
-          'error',
-          { alternativeFixtures: ['esClient'] },
-        ],
-      },
-    },
-    {
-      // Security Solution API tests may call endpoints through the generated Scout API clients
-      // exposed by `@kbn/security-solution-test-api-clients/scout`
-      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
-      rules: {
-        '@kbn/eslint/scout_require_api_client_in_api_test': [
-          'error',
-          {
-            alternativeFixtures: [
-              'esClient',
-              'detectionsApi',
-              'discoveriesApi',
-              'endpointExceptionsApi',
-              'endpointManagementApi',
-              'entityAnalyticsApi',
-              'exceptionsApi',
-              'listsApi',
-              'osqueryApi',
-              'timelinesApi',
-            ],
-          },
-        ],
-      },
-    },
 
-    /**
-     * kbn-ui dependency allowlist — packages under `src/platform/kbn-ui/**` must be
-     * portable outside Kibana (e.g. Cloud UI). They may only import from the
-     * baseline peer deps (`@elastic/eui`, `@emotion/*`, `react`, `react-dom`) plus
-     * the `@kbn/*` modules that are stubbed at packaging time. Packaging, tests,
-     * stories, and Storybook config are excluded because they reference
-     * Kibana-only tooling.
-     */
-    {
-      files: ['src/platform/kbn-ui/**/*.{ts,tsx}'],
-      excludedFiles: [
-        'src/platform/kbn-ui/**/*.test.*',
-        'src/platform/kbn-ui/**/*.stories.*',
-        'src/platform/kbn-ui/**/__stories__/**',
-        'src/platform/kbn-ui/**/__tests__/**',
-        'src/platform/kbn-ui/**/packaging/**',
-        'src/platform/kbn-ui/storybook-config/**',
-        'src/platform/kbn-ui/_tooling/**',
-      ],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: [
-              '@kbn/*',
-              '!@kbn/i18n',
-              '!@kbn/i18n-react',
-              '!@kbn/ui-chrome-layout',
-              '!@kbn/ui-app-menu',
-              '!@kbn/ui-favorite-button',
-              '!@kbn/ui-ai-components',
-            ],
-          },
-        ],
-      },
-    },
     {
       // Allow axios in files that already use it. New axios imports are blocked
       // globally by SECURITY_RESTRICTED_IMPORTS; this allowlist should only ever

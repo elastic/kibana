@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isSchemaValuedAdditionalProperties } from './schema/common/json_model_shape_schema';
 import { TriggerSchema } from './schema/triggers';
 import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
 import {
@@ -385,7 +386,9 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-}).merge(DynamicTimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -414,7 +417,9 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-}).merge(DynamicTimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
@@ -975,7 +980,7 @@ export const WorkflowExecuteStepInputSchema = z.object({
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: WorkflowExecuteStepInputSchema,
-});
+}).merge(StepWithOnFailureSchema);
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
@@ -1099,6 +1104,16 @@ const WorkflowSchemaBase = z.object({
 function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
   if (!value) return undefined;
   if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
+  if (
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    'additionalProperties' in value &&
+    isSchemaValuedAdditionalProperties(
+      (value as { additionalProperties?: unknown }).additionalProperties
+    )
+  ) {
     return value as z.infer<typeof JsonModelSchema>;
   }
   if (Array.isArray(value)) {
