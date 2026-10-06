@@ -69,6 +69,18 @@ export function detectSecretRefs(policy: object | undefined): ExistingSecretRefs
   return refs.size > 0 ? refs : NO_REFS;
 }
 
+/**
+ * Drops the refs a credential method does not use, so switching method on resume (temporary keys
+ * to static keys) does not carry the old method's `session_token` into the new policy.
+ */
+export function filterSecretRefsForMethod(
+  refs: ExistingSecretRefs,
+  method: 'static_keys' | 'temporary_keys'
+): ExistingSecretRefs {
+  if (method === 'temporary_keys') return refs;
+  return new Map([...refs].filter(([name]) => name !== 'session_token'));
+}
+
 /** Fresh secret refs of one deployed managed-integration (agentless) policy; none when unreadable. */
 export async function fetchAgentlessSecretRefs(policyId: string | undefined) {
   if (!policyId) return NO_REFS;

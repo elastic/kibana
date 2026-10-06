@@ -26,10 +26,11 @@ import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
 import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
-import { fetchPackagePolicySecretRefs } from './secret_refs';
+import { fetchPackagePolicySecretRefs, filterSecretRefsForMethod } from './secret_refs';
 import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
+  pickSecretSourcePolicyId,
   buildCleanedLiveStale,
   buildRemainingPending,
 } from './cleanup_reconciliation';
@@ -46,6 +47,9 @@ export interface UseAgentBasedDeployResult {
   /** Update the in-memory credential values used on the next deploy. Secrets (secret_access_key,
    *  session_token) are kept in a ref — never written to session storage. */
   setAgentCredentials: (creds: AgentCredentialVars | undefined) => void;
+  /** Deployed package policy whose stored secrets the credential forms can offer to keep: the
+   *  first one a pending cleanup does not delete. Undefined when none survives. */
+  secretSourcePolicyId: string | undefined;
 }
 
 export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
@@ -187,18 +191,27 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
       try {
         // New package policies reuse the keys the user kept from an already deployed one. Read
-        // before cleanup runs: it may delete the policy providing the refs.
+        // before cleanup, from a policy cleanup keeps: deleting the policy that holds a secret
+        // deletes the secret, so refs read from it would dangle.
         const typedCreds = agentCredentialsRef.current;
-        const usesKeys =
-          agentCredentialMethod === 'static_keys' || agentCredentialMethod === 'temporary_keys';
+        const keysMethod =
+          agentCredentialMethod === 'static_keys' || agentCredentialMethod === 'temporary_keys'
+            ? agentCredentialMethod
+            : undefined;
         const isTyped =
           !!typedCreds?.access_key_id &&
           !!typedCreds.secret_access_key &&
           (typedCreds.method !== 'temporary_keys' || !!typedCreds.session_token);
         const keptSecretRefs =
-          usesKeys && !isTyped
-            ? await fetchPackagePolicySecretRefs(
-                Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0]
+          keysMethod && !isTyped
+            ? filterSecretRefsForMethod(
+                await fetchPackagePolicySecretRefs(
+                  pickSecretSourcePolicyId(
+                    detectAndReviewStep.policyIdsByInstance ?? {},
+                    effectivePendingCleanup
+                  )
+                ),
+                keysMethod
               )
             : undefined;
 
@@ -692,6 +705,22 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     ]
   );
 
+  const secretSourcePolicyId = useMemo(() => {
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+    const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
+    return pickSecretSourcePolicyId(
+      policyIdsByInstance,
+      buildEffectivePendingCleanup(
+        buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds),
+        detectAndReviewStep.pendingCleanupPolicyIds
+      )
+    );
+  }, [
+    targets,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
+
   return {
     targets,
     isDeploying,
@@ -699,5 +728,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     isAlreadyDeployed,
     handleDeploy,
     setAgentCredentials,
+    secretSourcePolicyId,
   };
 }

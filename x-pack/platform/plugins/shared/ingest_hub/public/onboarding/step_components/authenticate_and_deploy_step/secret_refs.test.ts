@@ -16,6 +16,7 @@ import { sendGetAgentlessPolicy, sendGetOnePackagePolicy } from '@kbn/fleet-plug
 import {
   detectSecretRefs,
   fetchAgentlessSecretRefs,
+  filterSecretRefsForMethod,
   fetchPackagePolicySecretRefs,
   useExistingSecretRefs,
 } from './secret_refs';
@@ -176,5 +177,22 @@ describe('fetching secret refs', () => {
     (sendGetOnePackagePolicy as jest.Mock).mockRejectedValue(new Error('boom'));
     expect((await fetchAgentlessSecretRefs('p1')).size).toBe(0);
     expect((await fetchPackagePolicySecretRefs('p1')).size).toBe(0);
+  });
+});
+
+describe('filterSecretRefsForMethod', () => {
+  const refs: ExistingSecretRefs = new Map([
+    ['secret_access_key', { isSecretRef: true as const, id: 'r1' }],
+    ['session_token', { isSecretRef: true as const, id: 'r2' }],
+  ]);
+
+  it('drops the session token for static keys', () => {
+    expect([...filterSecretRefsForMethod(refs, 'static_keys').keys()]).toEqual([
+      'secret_access_key',
+    ]);
+  });
+
+  it('keeps every ref for temporary keys', () => {
+    expect(filterSecretRefsForMethod(refs, 'temporary_keys')).toBe(refs);
   });
 });

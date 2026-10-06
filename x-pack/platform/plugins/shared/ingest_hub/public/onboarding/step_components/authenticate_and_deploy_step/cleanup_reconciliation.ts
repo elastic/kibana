@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { computePolicyCleanupOps } from './policy_cleanup';
+
 /**
  * Pure helpers for computing cleanup state shared between the MI and agent-based
  * deploy flows. Keeping them separate makes them unit-testable without React rendering.
@@ -67,4 +69,20 @@ export function buildRemainingPending(
       ([, policyId]) => !succeededPolicyIds.has(policyId)
     )
   );
+}
+
+/**
+ * The deployed policy new policies may take their stored secret refs from: the first one that
+ * cleanup will not delete. A deleted policy takes its secrets with it (Fleet drops secrets nothing
+ * else references), so refs read from it would dangle once the new policy is created. Undefined
+ * when every deployed policy is being removed; the credentials must then be entered again.
+ */
+export function pickSecretSourcePolicyId(
+  policyIdsByInstance: Record<string, string>,
+  effectivePendingCleanup: Record<string, string>
+): string | undefined {
+  const doomed = new Set(
+    computePolicyCleanupOps(effectivePendingCleanup, policyIdsByInstance).toDelete
+  );
+  return Object.values(policyIdsByInstance).find((policyId) => !doomed.has(policyId));
 }

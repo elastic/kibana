@@ -57,6 +57,16 @@ interface AgentBasedSectionProps {
   failedInstances: string[];
   /** Per-instance error message from the last deploy attempt, keyed by instanceId. */
   deployErrors?: Record<string, string>;
+  /**
+   * Deployed package policy whose stored secrets the key forms offer to keep. Undefined when none
+   * survives a pending cleanup, in which case the keys must be entered again.
+   */
+  secretSourcePolicyId?: string;
+  /**
+   * Called with true while the user has replaced a stored key, so the parent treats the
+   * deployment as changed and Next redeploys instead of skipping the update.
+   */
+  onStoredCredentialsReplacedChange?: (replaced: boolean) => void;
   /** When false, AWS credential entry is skipped — use for packages that declare no credential vars. Defaults to true. */
   requiresCredentials?: boolean;
 }
@@ -71,14 +81,15 @@ export function AgentBasedSection({
   hasFailed,
   failedInstances,
   deployErrors,
+  secretSourcePolicyId,
+  onStoredCredentialsReplacedChange,
   requiresCredentials = true,
 }: AgentBasedSectionProps) {
   const location = useLocation();
   // True when the wizard was opened via ?deploymentId=<id> (resume / edit mode).
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
 
-  const { agentBasedDeployment, setAgentBasedDeployment, detectAndReviewStep } =
-    useOnboardingFlow();
+  const { agentBasedDeployment, setAgentBasedDeployment } = useOnboardingFlow();
   const {
     agentHostsMode,
     agentPolicyId,
@@ -99,7 +110,7 @@ export function AgentBasedSection({
   const isKeysMethod = credentialMethod === 'static_keys' || credentialMethod === 'temporary_keys';
   const { existingSecretRefs, isLoading: isStoredSecretsLoading } = useExistingSecretRefs(
     // Only the key methods have secrets to keep.
-    isKeysMethod ? Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0] : undefined,
+    isKeysMethod ? secretSourcePolicyId : undefined,
     fetchPackagePolicySecretRefs
   );
   const storedStaticFields = useMemo(
@@ -111,6 +122,15 @@ export function AgentBasedSection({
     [isKeysMethod, existingSecretRefs]
   );
   const hasStoredSecrets = storedStaticFields.length > 0;
+  // Typing into a stored field replaces it; the parent must then redeploy.
+  const notifyStoredCredentialsReplaced = (
+    creds: { access_key_id: string; secret_access_key: string; session_token?: string } | undefined
+  ) => {
+    if (!hasStoredSecrets) return;
+    onStoredCredentialsReplacedChange?.(
+      Boolean(creds?.access_key_id || creds?.secret_access_key || creds?.session_token)
+    );
+  };
   const [isCredentialReady, setIsCredentialReady] = useState(() => {
     if (!requiresCredentials) return true;
     // For methods backed by persisted text fields, initialize ready from stored values.
@@ -458,6 +478,7 @@ export function AgentBasedSection({
                       storedSecretFields={storedStaticFields}
                       onReadyChange={setIsCredentialReady}
                       onFieldsChange={(creds) => {
+                        notifyStoredCredentialsReplaced(creds);
                         setStaticKeyCreds(creds ?? undefined);
                         notifyCredentialChange('static_keys', {
                           staticCreds: creds ?? undefined,
@@ -471,6 +492,7 @@ export function AgentBasedSection({
                       storedSecretFields={storedTemporaryFields}
                       onReadyChange={setIsCredentialReady}
                       onFieldsChange={(creds) => {
+                        notifyStoredCredentialsReplaced(creds);
                         setTemporaryKeyCreds(creds ?? undefined);
                         notifyCredentialChange('temporary_keys', { tempCreds: creds ?? undefined });
                       }}

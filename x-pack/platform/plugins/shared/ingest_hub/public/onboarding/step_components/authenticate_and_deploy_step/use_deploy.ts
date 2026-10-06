@@ -22,7 +22,11 @@ import type { DeployGroup } from './deploy_groups';
 import { buildIacIntegrations } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
 import { useMiDeploy } from './use_mi_deploy';
-import { buildLiveStalePolicyIds, buildEffectivePendingCleanup } from './cleanup_reconciliation';
+import {
+  buildLiveStalePolicyIds,
+  buildEffectivePendingCleanup,
+  pickSecretSourcePolicyId,
+} from './cleanup_reconciliation';
 import { fetchAgentlessSecretRefs, useExistingSecretRefs } from './secret_refs';
 
 const STATIC_KEY_FIELDS = ['access_key_id', 'secret_access_key'] as const;
@@ -169,12 +173,26 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   ]);
 
   // The credentials of a resumed or revisited session are never in memory, but the deployed
-  // policies still hold them as secrets; the form offers to keep them.
-  // No lookup for policies that authenticate through an identity: they have no keys to keep.
+  // policies still hold them as secrets; the form offers to keep them. Read from a policy a
+  // pending cleanup keeps, since deleting a policy deletes its secrets. No lookup for policies
+  // that authenticate through an identity: they have no keys to keep.
+  const secretSourcePolicyId = useMemo(() => {
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+    const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+    return pickSecretSourcePolicyId(
+      policyIdsByInstance,
+      buildEffectivePendingCleanup(
+        buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds),
+        detectAndReviewStep.pendingCleanupPolicyIds
+      )
+    );
+  }, [
+    deployGroups,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
   const { existingSecretRefs, isLoading: isStoredSecretsLoading } = useExistingSecretRefs(
-    authenticateAndDeployStep.connectorId
-      ? undefined
-      : Object.values(detectAndReviewStep.policyIdsByInstance ?? {})[0],
+    authenticateAndDeployStep.connectorId ? undefined : secretSourcePolicyId,
     fetchAgentlessSecretRefs
   );
   const storedSecretFields = useMemo(

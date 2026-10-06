@@ -18,6 +18,7 @@ import { buildInstanceStatuses, collectDeployResults, deployGroup } from './depl
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 import { fetchAgentlessSecretRefs } from './secret_refs';
+import type { ExistingSecretRefs } from './secret_refs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
 import {
   cleanupManagedIntegrationsPolicies,
@@ -29,6 +30,7 @@ import {
   buildEffectivePendingCleanup,
   buildCleanedLiveStale,
   buildRemainingPending,
+  pickSecretSourcePolicyId,
 } from './cleanup_reconciliation';
 
 export interface UseMiDeployParams {
@@ -245,16 +247,19 @@ export function useMiDeploy({
     async (instanceIds?: string[]) => {
       const isInitialDeploy = instanceIds === undefined;
 
-      // New policies reuse the credentials the user kept from an already deployed one. Read before
-      // cleanup runs: the policy providing the refs may be deleted by it. Not needed when the
-      // credentials were typed in full or come from an identity.
+      // New policies reuse the credentials the user kept from an already deployed policy. Not
+      // needed when the credentials were typed in full or come from an identity.
       const { connectorId: deployConnectorId, staticKeys: typedKeys } = authenticateAndDeployStep;
-      const sourcePolicyId = Object.values(policyIdsByInstance ?? {})[0];
-      const hasTypedKeys = Boolean(typedKeys?.access_key_id && typedKeys?.secret_access_key);
-      const keptSecretRefs =
-        deployConnectorId || hasTypedKeys
-          ? undefined
-          : await fetchAgentlessSecretRefs(sourcePolicyId);
+      const needsKeptSecretRefs =
+        !deployConnectorId && !(typedKeys?.access_key_id && typedKeys?.secret_access_key);
+      // Read before cleanup, from a policy cleanup keeps: deleting the policy that holds a secret
+      // deletes the secret, so refs read from it would dangle. Only called once the run has
+      // marked itself as deploying, so the lookup cannot be raced by a second click.
+      const loadKeptSecretRefs = (effectivePendingCleanup: Record<string, string>) =>
+        fetchAgentlessSecretRefs(
+          pickSecretSourcePolicyId(policyIdsByInstance ?? {}, effectivePendingCleanup)
+        );
+      let keptSecretRefs: ExistingSecretRefs | undefined;
 
       let groupsToDeploy: DeployGroup[];
       let cleanupOps: PolicyCleanupOps = { toDelete: [], toUpdate: [] };
@@ -422,6 +427,10 @@ export function useMiDeploy({
         });
         onContinue();
 
+        if (needsKeptSecretRefs && groupsToDeploy.length > 0) {
+          keptSecretRefs = await loadKeptSecretRefs(plan.effectivePendingCleanup);
+        }
+
         let cleanupFailed = false;
         if (plan.hasPendingCleanup) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
@@ -506,6 +515,10 @@ export function useMiDeploy({
         // Mark as deploying before awaiting cleanup so a double-click cannot start a second run.
         setIsDeploying(true);
         updateDetectAndReviewStep({ isDeploying: true });
+
+        if (needsKeptSecretRefs && groupsToDeploy.length > 0) {
+          keptSecretRefs = await loadKeptSecretRefs(plan.retryPending);
+        }
 
         // Hoist cleanup result so it can be merged into a single updateDetectAndReviewStep call.
         // React may batch synchronous state updates, meaning two sequential calls in the same

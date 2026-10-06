@@ -116,6 +116,53 @@ describe('useMiDeploy — kept secret refs', () => {
     );
   });
 
+  it('marks the run as deploying before it awaits the lookup', async () => {
+    const setIsDeploying = jest.fn();
+    await runDeploy(makeParams({ setIsDeploying }));
+
+    expect(setIsDeploying.mock.invocationCallOrder[0]).toBeLessThan(
+      mockFetchRefs.mock.invocationCallOrder[0]
+    );
+    expect(setIsDeploying).toHaveBeenCalledWith(true);
+  });
+
+  it('takes the refs from a policy that cleanup keeps, not one it deletes', async () => {
+    await runDeploy(
+      makeParams({
+        policyIdsByInstance: { removed: 'policy-X', elb: 'policy-A' },
+        pendingCleanupPolicyIds: { removed: 'policy-X' },
+      })
+    );
+
+    expect(mockFetchRefs).toHaveBeenCalledTimes(1);
+    expect(mockFetchRefs).toHaveBeenCalledWith('policy-A');
+  });
+
+  it('has no source for the refs when every deployed policy is being removed', async () => {
+    mockFetchRefs.mockImplementation(async (id?: string) => (id ? KEPT_REFS : new Map()));
+    await runDeploy(
+      makeParams({
+        deployGroups: [makeGroup('s3')],
+        serviceStatuses: {},
+        policyIdsByInstance: { removed: 'policy-X' },
+        pendingCleanupPolicyIds: { removed: 'policy-X' },
+      })
+    );
+
+    expect(mockFetchRefs).not.toHaveBeenCalledWith('policy-X');
+    expect(mockDeployGroup.mock.calls[0][1].authenticateAndDeployStep.existingSecretRefs.size).toBe(
+      0
+    );
+  });
+
+  it('does not look anything up when there is nothing new to create', async () => {
+    mockCleanup.mockResolvedValue({ toDelete: ['policy-X'], toUpdate: [] });
+    await runDeploy(makeParams({ deployGroups: [makeGroup('elb')] }));
+
+    expect(mockFetchRefs).not.toHaveBeenCalled();
+    expect(mockDeployGroup).not.toHaveBeenCalled();
+  });
+
   it('skips the lookup when both keys were typed', async () => {
     await runDeploy(
       makeParams({
