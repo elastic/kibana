@@ -35,6 +35,9 @@ spaceTest.describe(
     let otherDataView = '';
 
     spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
+      // Keep the "Displayed documents may vary" info toast until it is asserted and closed,
+      // instead of racing its default 5s lifetime.
+      await scoutSpace.uiSettings.set({ 'notifications:lifetime:info': 150_000 });
       environment = await setupSearchSourceAlertEnvironment({
         apiServices,
         esClient,
@@ -57,6 +60,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ apiServices, esClient, scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('notifications:lifetime:info');
       if (!environment) {
         return;
       }
@@ -161,10 +165,11 @@ spaceTest.describe(
 
         await spaceTest.step('the previous notification link restores original state', async () => {
           await page.goto(new URL(contextLink, page.url()).toString());
-          // The toast is shown on mount and auto-dismisses, so assert it before waiting on the fetch.
-          await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
           await pageObjects.discover.waitUntilSearchingHasFinished();
           await pageObjects.dataGrid.waitForDocTableRendered();
+
+          await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
+          await pageObjects.toasts.closeAll();
           await expectSearchSourceAlertInitialResults(pageObjects, initialDataViewTitle);
           await expect
             .poll(async () =>
@@ -281,10 +286,11 @@ spaceTest.describe(
 
         await spaceTest.step('the previous notification link still renders results', async () => {
           await page.goto(new URL(contextLink, page.url()).toString());
-          // The toast is shown on mount and auto-dismisses, so assert it before waiting on the fetch.
-          await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
           await pageObjects.discover.waitUntilSearchingHasFinished();
           await pageObjects.dataGrid.waitForDocTableRendered();
+
+          await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
+          await pageObjects.toasts.closeAll();
           await expectSearchSourceAlertInitialResults(pageObjects, dataViewTitle);
           await expect
             .poll(async () =>
