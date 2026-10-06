@@ -68,9 +68,9 @@ describe('getEcfServiceConfigs()', () => {
         enabledDataStreams: ['waf'],
         varsByDataStream: {
           waf: {
-            enabledInputs: ['aws-cloudwatch'],
+            enabledInputs: ['aws-s3'],
             varsByInput: {
-              'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::waf-bucket' },
             },
           },
         },
@@ -83,8 +83,29 @@ describe('getEcfServiceConfigs()', () => {
     expect(vpcConfig?.logGroupArns).toEqual([]);
 
     const wafConfig = result.find((c) => c.serviceId === 'waf');
-    expect(wafConfig?.logGroupArns).toEqual(['arn:aws:logs:us-east-1:123:log-group:waf']);
-    expect(wafConfig?.bucketArns).toEqual([]);
+    expect(wafConfig?.bucketArns).toEqual(['arn:aws:s3:::waf-bucket']);
+    expect(wafConfig?.logGroupArns).toEqual([]);
+  });
+
+  it('never routes a WAF CloudWatch log group through ECF (agent-based only)', () => {
+    const serviceVars: Record<string, ServiceVars> = {
+      waf: {
+        enabledDataStreams: ['waf'],
+        varsByDataStream: {
+          waf: {
+            enabledInputs: ['aws-s3', 'aws-cloudwatch'],
+            varsByInput: {
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::waf-bucket' },
+              'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+            },
+          },
+        },
+      },
+    };
+    const [wafConfig] = getEcfServiceConfigs([inst('waf')], serviceVars);
+
+    expect(wafConfig.bucketArns).toEqual(['arn:aws:s3:::waf-bucket']);
+    expect(wafConfig.logGroupArns).toEqual([]);
   });
 
   it('collects ARNs from duplicate instances into a single config entry', () => {
