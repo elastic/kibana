@@ -197,8 +197,8 @@ export class PolicyArtifactsPage {
     }
   }
 
-  private async fillComboBox(testSubj: string, value: string, custom = false) {
-    const combo = this.page.components.comboBox(testSubj);
+  private async fillComboBox(testSubj: string, value: string, custom = false, scope?: Locator) {
+    const combo = this.page.components.comboBox(testSubj, scope);
     if (custom) {
       await combo.setCustomSelectedOptions([value]);
       return;
@@ -341,6 +341,48 @@ export class PolicyArtifactsPage {
     );
     await this.fillComboBox('fieldAutocompleteComboBox', 'agent.version');
     await this.fillComboBox('valuesAutocompleteMatch', '1234', true);
+    await this.commitEndpointExceptionEntry();
+  }
+
+  /**
+   * Adds one OR group and fills its field and value. `filledFields` are the
+   * fields already present, so the new empty group can be told apart from them.
+   */
+  async addEndpointExceptionOrCondition(
+    field: string,
+    value: string,
+    filledFields: readonly string[]
+  ) {
+    await this.page.testSubj.locator('exceptionsOrButton').click();
+    const entry = this.endpointExceptionEntryWithout(filledFields);
+    await entry.waitFor({ state: 'visible' });
+    await this.fillComboBox('fieldAutocompleteComboBox', field, false, entry);
+    await this.fillComboBox('valuesAutocompleteMatch', value, true, entry);
+    await this.commitEndpointExceptionEntry();
+  }
+
+  async addEndpointExceptionOrConditions(
+    conditions: ReadonlyArray<{ field: string; value: string }>,
+    alreadyFilled: readonly string[]
+  ) {
+    const filled = [...alreadyFilled];
+    for (const condition of conditions) {
+      await this.addEndpointExceptionOrCondition(condition.field, condition.value, filled);
+      filled.push(condition.field);
+    }
+  }
+
+  private endpointExceptionEntryWithout(filledFields: readonly string[]): Locator {
+    let entry = this.page.testSubj
+      .locator('endpointExceptionsListPage-flyout')
+      .getByTestId('exceptionEntriesContainer');
+    for (const field of filledFields) {
+      entry = entry.filter({ hasNotText: field });
+    }
+    return entry;
+  }
+
+  private async commitEndpointExceptionEntry() {
     await this.page.testSubj.locator('endpointExceptions-form-description-input').click();
   }
 }
