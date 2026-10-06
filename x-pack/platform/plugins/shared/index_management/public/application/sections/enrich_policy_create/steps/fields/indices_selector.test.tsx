@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import type { EuiComboBoxProps } from '@elastic/eui';
+import type { FieldHook } from '../../../../../shared_imports';
 import { IndicesSelector } from './indices_selector';
 
 const mockGetMatchingIndices = jest.fn();
@@ -28,24 +28,46 @@ jest.mock('../../../../../shared_imports', () => ({
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
 
+  interface MockComboBoxProps {
+    isLoading?: boolean;
+    onSearchChange: (search: string) => Promise<void>;
+    options?: unknown[];
+  }
+
   return {
     ...actual,
     EuiFormRow: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    EuiComboBox: ({
-      isLoading,
-      onSearchChange,
-      options,
-    }: EuiComboBoxProps<string> & { onSearchChange: (search: string) => Promise<void> }) => (
+    EuiComboBox: ({ isLoading, onSearchChange, options }: MockComboBoxProps) => (
       <div>
         <button
           type="button"
-          onClick={() => void onSearchChange('older-search').catch(() => undefined)}
+          onClick={() => {
+            void onSearchChange('initial-search').catch(() => undefined);
+          }}
+        >
+          initial-search
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            void onSearchChange('pending-search').catch(() => undefined);
+          }}
+        >
+          pending-search
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            void onSearchChange('older-search').catch(() => undefined);
+          }}
         >
           older-search
         </button>
         <button
           type="button"
-          onClick={() => void onSearchChange('newer-search').catch(() => undefined)}
+          onClick={() => {
+            void onSearchChange('newer-search').catch(() => undefined);
+          }}
         >
           newer-search
         </button>
@@ -74,6 +96,13 @@ const flushMicrotasks = async () => {
   await Promise.resolve();
 };
 
+const createField = (): FieldHook =>
+  ({
+    label: 'Source',
+    value: ['existing-index'],
+    setValue: jest.fn(),
+  } as unknown as FieldHook);
+
 describe('IndicesSelector', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -88,16 +117,7 @@ describe('IndicesSelector', () => {
       return pattern === 'older-search' ? olderDataStreams.promise : newerDataStreams.promise;
     });
 
-    render(
-      <IndicesSelector
-        field={{
-          label: 'Source',
-          value: ['existing-index'],
-          setValue: jest.fn(),
-        }}
-        euiFieldProps={{}}
-      />
-    );
+    render(<IndicesSelector field={createField()} euiFieldProps={{}} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'older-search' }));
     fireEvent.click(screen.getByRole('button', { name: 'newer-search' }));
@@ -124,20 +144,54 @@ describe('IndicesSelector', () => {
     expect(screen.getByTestId('comboBoxOptions')).not.toHaveTextContent('older-stream');
   });
 
+  it('clears previously rendered options while the next search is still pending', async () => {
+    const pendingDataStreams = createDeferred<{ data: { dataStreams: string[] } }>();
+
+    mockGetMatchingIndices.mockResolvedValue({ data: { indices: [] } });
+    mockGetMatchingDataStreams.mockImplementation((pattern: string) => {
+      if (pattern === 'initial-search') {
+        return Promise.resolve({ data: { dataStreams: ['initial-stream'] } });
+      }
+
+      if (pattern === 'pending-search') {
+        return pendingDataStreams.promise;
+      }
+
+      return Promise.resolve({ data: { dataStreams: [] } });
+    });
+
+    render(<IndicesSelector field={createField()} euiFieldProps={{}} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'initial-search' }));
+
+    await act(async () => {
+      await flushMicrotasks();
+    });
+
+    expect(screen.getByTestId('comboBoxLoading')).toHaveTextContent('false');
+    expect(screen.getByTestId('comboBoxOptions')).toHaveTextContent('initial-stream');
+
+    fireEvent.click(screen.getByRole('button', { name: 'pending-search' }));
+
+    expect(screen.getByTestId('comboBoxLoading')).toHaveTextContent('true');
+    expect(screen.getByTestId('comboBoxOptions')).toHaveTextContent('[]');
+    expect(screen.getByTestId('comboBoxOptions')).not.toHaveTextContent('initial-stream');
+
+    await act(async () => {
+      pendingDataStreams.resolve({ data: { dataStreams: ['pending-stream'] } });
+      await flushMicrotasks();
+    });
+
+    expect(screen.getByTestId('comboBoxLoading')).toHaveTextContent('false');
+    expect(screen.getByTestId('comboBoxOptions')).toHaveTextContent('pending-stream');
+    expect(screen.getByTestId('comboBoxOptions')).not.toHaveTextContent('initial-stream');
+  });
+
   it('clears the loading state when the latest async search fails', async () => {
     mockGetMatchingIndices.mockResolvedValue({ data: { indices: [] } });
     mockGetMatchingDataStreams.mockRejectedValue(new Error('request failed'));
 
-    render(
-      <IndicesSelector
-        field={{
-          label: 'Source',
-          value: ['existing-index'],
-          setValue: jest.fn(),
-        }}
-        euiFieldProps={{}}
-      />
-    );
+    render(<IndicesSelector field={createField()} euiFieldProps={{}} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'newer-search' }));
 
