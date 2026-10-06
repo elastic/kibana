@@ -62,7 +62,7 @@ Follow existing patterns in the target area first; below are common defaults.
 `node scripts/eslint --fix $(git diff --name-only)`
 - Never suppress linting errors with `eslint-disable`; fix the root cause.
 - Plugin `server/index.ts` files are checked by `@kbn/eslint/no_sync_import_from_plugin` (see plugin server entry note above).
-- Production `.ts`/`.tsx` files are checked by `@kbn/eslint/require_lazy_zod_schema` (see schema validation note below).
+- ESLint checks production `.ts`/`.tsx` files with `@kbn/eslint/require_lazy_zod_schema` (see schema validation note below).
 
 ### Formatting
 - Follow existing formatting in the file; do not reformat unrelated code.

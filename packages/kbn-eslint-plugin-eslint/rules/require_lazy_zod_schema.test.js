@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('../oxlint_plugin').rules.require_lazy_zod_schema;
+const rule = require('..').rules.require_lazy_zod_schema;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
@@ -133,6 +133,37 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const X = z.object({});
       `,
       errors: [EAGER],
+      output: null,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = z.object({});
+      `,
+      errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = lazySchema(() => z.object({}));
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema as deferSchema } from '@kbn/zod';
+        export const X = z.object({});
+      `,
+      errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema as deferSchema } from '@kbn/zod';
+        export const X = deferSchema(() => z.object({}));
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = z.object({}).superRefine(() => {});
+      `,
+      errors: [EAGER],
+      output: null,
     },
     {
       code: dedent`
@@ -204,6 +235,11 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const Ext = Base.extend({ a: z.string() });
       `,
       errors: [DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Base = lazySchema(() => z.object({}));
+        export const Ext = lazySchema(() => Base.extend({ a: z.string() }));
+      `,
     },
     {
       code: dedent`
@@ -220,6 +256,11 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const Arr = Base.array();
       `,
       errors: [DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({}));
+        export const Arr = lazySchema(() => Base.array());
+      `,
     },
     {
       code: dedent`
@@ -253,6 +294,26 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const Connector = { input: Base.extend({ ip: z.string() }) };
       `,
       errors: [DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({}));
+        export const Connector = { input: lazySchema(() => Base.extend({ ip: z.string() })) };
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Connector = {
+          actions: { checkIp: { input: z.object({ ip: z.string() }) } },
+        };
+      `,
+      errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Connector = {
+          actions: { checkIp: { input: lazySchema(() => z.object({ ip: z.string() })) } },
+        };
+      `,
     },
   ],
 });

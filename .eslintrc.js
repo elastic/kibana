@@ -388,6 +388,29 @@ module.exports = {
   extends: ['@kbn/eslint-config'],
 
   overrides: [
+    {
+      files: ['**/*.{ts,tsx}'],
+      excludedFiles: [
+        '**/*.test.{ts,tsx}',
+        '**/*.mock.{ts,tsx}',
+        '**/*.stories.{ts,tsx}',
+        '**/__tests__/**',
+        '**/__mocks__/**',
+        '**/__fixtures__/**',
+        '**/__snapshots__/**',
+        '**/test/**',
+        '**/tests/**',
+        '**/scripts/**',
+        '**/cypress/**',
+        '**/e2e/**',
+        '**/ftr_e2e/**',
+        '**/.storybook/**',
+        'src/platform/packages/shared/kbn-zod/**',
+      ],
+      rules: {
+        '@kbn/eslint/require_lazy_zod_schema': 'warn',
+      },
+    },
     /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */

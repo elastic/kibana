@@ -57,4 +57,6 @@ Caveats:
   materialized schema. Prefer deriving inside the `lazySchema` factory.
 - Call `setLazySchemaDisabled(true)` to disable the proxy and build eagerly
   (debugging).
-- `@kbn/eslint/require_lazy_zod_schema` warns on eager module-scope Zod schemas.
+- ESLint rule `@kbn/eslint/require_lazy_zod_schema` warns on eager module-scope
+  Zod schemas. Its auto-fix wraps known schema calls when `lazySchema` is
+  already imported.

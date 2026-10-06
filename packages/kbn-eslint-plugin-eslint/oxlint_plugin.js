@@ -44,6 +44,5 @@ module.exports = eslintCompatPlugin({
     scout_no_promise_all_with_playwright_apis: require('./rules/scout_no_promise_all_with_playwright_apis'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
-    require_lazy_zod_schema: require('./rules/require_lazy_zod_schema'),
   },
 });

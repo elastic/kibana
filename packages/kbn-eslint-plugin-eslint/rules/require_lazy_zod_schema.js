@@ -19,6 +19,23 @@ const tsEstree = require('@typescript-eslint/typescript-estree');
 const esTypes = tsEstree.AST_NODE_TYPES;
 
 const ZOD_SOURCES = new Set(['@kbn/zod', '@kbn/zod/v4', 'zod', 'zod/v4', 'zod/v3']);
+const AUTO_FIX_SCHEMA_METHODS = new Set([
+  'array',
+  'default',
+  'describe',
+  'enum',
+  'extend',
+  'int',
+  'max',
+  'min',
+  'number',
+  'object',
+  'omit',
+  'optional',
+  'pick',
+  'string',
+  'union',
+]);
 
 const UNWRAP_TYPES = new Set([
   esTypes.TSAsExpression,
@@ -307,10 +324,27 @@ const isModuleScopeProperty = (ancestors, state) => {
   });
 };
 
+/**
+ * @param {Expression} node
+ * @returns {boolean}
+ */
+const canAutoFixSchemaCall = (node) => {
+  if (node.type !== esTypes.CallExpression || node.callee.type !== esTypes.MemberExpression) {
+    return false;
+  }
+  const { callee } = node;
+  return (
+    !callee.computed &&
+    callee.property.type === esTypes.Identifier &&
+    AUTO_FIX_SCHEMA_METHODS.has(callee.property.name)
+  );
+};
+
 /** @type {Rule} */
 module.exports = {
   meta: {
     type: 'problem',
+    fixable: 'code',
     docs: {
       description:
         'Require module-scope Zod schemas to be wrapped in lazySchema so they are not materialized at import.',
@@ -328,6 +362,21 @@ module.exports = {
     /** @type {FileState} */
     let state;
     let sourceCode;
+
+    const reportEagerSchema = (node, messageId) => {
+      const lazySchemaName =
+        state.lazySchemaNames.size === 1 ? state.lazySchemaNames.values().next().value : undefined;
+      context.report({
+        node,
+        messageId,
+        ...(lazySchemaName && canAutoFixSchemaCall(node)
+          ? {
+              fix: (fixer) =>
+                fixer.replaceText(node, `${lazySchemaName}(() => ${sourceCode.getText(node)})`),
+            }
+          : {}),
+      });
+    };
 
     return {
       before() {
@@ -357,9 +406,9 @@ module.exports = {
         }
 
         if (isEagerZodNamespaceChain(declarator.init, state)) {
-          context.report({ node: declarator.init, messageId: 'eagerZodSchema' });
+          reportEagerSchema(declarator.init, 'eagerZodSchema');
         } else if (isEagerDerivedSchemaChain(declarator.init, state)) {
-          context.report({ node: declarator.init, messageId: 'eagerDerivedZodSchema' });
+          reportEagerSchema(declarator.init, 'eagerDerivedZodSchema');
         }
 
         recordSchemaBinding(declarator, state);
@@ -372,9 +421,9 @@ module.exports = {
 
         const value = /** @type {Expression} */ (property.value);
         if (isEagerZodNamespaceChain(value, state)) {
-          context.report({ node: property.value, messageId: 'eagerZodSchema' });
+          reportEagerSchema(value, 'eagerZodSchema');
         } else if (isEagerDerivedSchemaChain(value, state)) {
-          context.report({ node: property.value, messageId: 'eagerDerivedZodSchema' });
+          reportEagerSchema(value, 'eagerDerivedZodSchema');
         }
       },
     };
