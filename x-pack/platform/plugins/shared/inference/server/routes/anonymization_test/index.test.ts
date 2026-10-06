@@ -18,6 +18,8 @@ describe('registerAnonymizationTestRoute', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const regexWorker = new RegexWorkerService(disabledWorkerConfig, logger);
+    // The tester only runs on worker threads; the stubbed `run`/sync execution stands in for them.
+    jest.spyOn(regexWorker, 'isEnabled').mockReturnValue(true);
     const coreSetup = {
       getStartServices: jest.fn().mockResolvedValue([
         {
@@ -115,6 +117,28 @@ describe('registerAnonymizationTestRoute', () => {
     const { body } = (response.ok as jest.Mock).mock.calls[0][0];
     expect(body.maskedInput.contact).toBe('a.mehta@example.com');
     expect(body.stats).toEqual({ valuesMasked: 0, uniqueValues: 0, rulesApplied: 0 });
+  });
+
+  it('refuses to run caller-supplied patterns on the Kibana thread when worker threads are disabled', async () => {
+    const router = httpServiceMock.createRouter();
+    const regexWorker = new RegexWorkerService(disabledWorkerConfig, logger);
+    const runSpy = jest.spyOn(regexWorker, 'run');
+
+    registerAnonymizationTestRoute({
+      router,
+      coreSetup: { getStartServices: jest.fn() } as any,
+      getTestRegexWorker: () => regexWorker,
+      logger,
+    });
+
+    const [, handler] = router.post.mock.calls[0];
+    const response = await callHandler(handler, {
+      input: { note: 'aaaa' },
+      rules: [{ type: 'RegExp', enabled: true, entityClass: 'MISC', pattern: '(a+)+$' }],
+    });
+
+    expect(runSpy).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
   });
 
   it('returns a 503 when the regex worker is not yet available', async () => {
