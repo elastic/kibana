@@ -67691,6 +67691,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                excludedUserNames:
+                  items:
+                    type: string
+                  maxItems: 200
+                  type: array
                 historySnapshot:
                   additionalProperties: false
                   type: object
@@ -76435,6 +76440,11 @@ paths:
                       - service
                       - generic
                     type: string
+                  type: array
+                excludedUserNames:
+                  items:
+                    type: string
+                  maxItems: 200
                   type: array
                 historySnapshot:
                   additionalProperties: false
