@@ -36,7 +36,7 @@ const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, 
  */
 export interface SignificantEventsKIsOnboardingInputs {
   /** Source id. Callers that already hold the slug pass it as `sourceSlug` to skip the lookup. */
-  streamName: string;
+  sourceId: string;
   sourceSlug?: string;
   features: {
     skip: boolean;
@@ -118,9 +118,9 @@ const toWorkflowInputPayload = ({
   inputs: SignificantEventsKIsOnboardingInputs;
   sourceSlug: string;
 }): OnboardingWorkflowInputPayload => {
-  const { streamName, features, queries } = inputs;
+  const { sourceId, features, queries } = inputs;
   return {
-    sourceId: streamName,
+    sourceId,
     sourceSlug,
     skipFeatures: features.skip,
     skipQueries: queries.skip,
@@ -195,7 +195,7 @@ export const parseSourceSlugFromConcurrencyKey = (key: string): string | null =>
   return key.slice(CONCURRENCY_KEY_PREFIX.length);
 };
 
-export const MAX_STREAMS_PER_QUERY = 10000;
+export const MAX_SOURCES_PER_QUERY = 10000;
 /**
  * Client that wraps the workflows management API to provide a stream-centric
  * interface for running, querying, and canceling KI onboarding workflows.
@@ -242,7 +242,7 @@ export class SignificantEventsKIsOnboardingClient {
     request: KibanaRequest;
   }): Promise<{ executionId: string }> {
     const sourceSlug = await this.resolveSourceSlug({
-      sourceId: inputs.streamName,
+      sourceId: inputs.sourceId,
       sourceSlug: inputs.sourceSlug,
       request,
     });
@@ -253,7 +253,7 @@ export class SignificantEventsKIsOnboardingClient {
     });
 
     this.telemetry.trackOnboardingScheduled({
-      source_id: inputs.streamName,
+      source_id: inputs.sourceId,
       execution_id: executionId,
       workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       space_id: request.spaceId,
@@ -272,12 +272,12 @@ export class SignificantEventsKIsOnboardingClient {
    * context so output counts can be included in the result.
    */
   async getStatus({
-    streamName,
+    sourceId,
     sourceSlug,
     queryUpdatedAt,
     request,
   }: {
-    streamName: string;
+    sourceId: string;
     sourceSlug?: string;
     /**
      * The source's `esql_updated_at`, set at creation and moved on every query change. Runs that
@@ -286,7 +286,7 @@ export class SignificantEventsKIsOnboardingClient {
     queryUpdatedAt?: string;
     request: KibanaRequest;
   }): Promise<KIsOnboardingStatusResult> {
-    const slug = await this.resolveSourceSlug({ sourceId: streamName, sourceSlug, request });
+    const slug = await this.resolveSourceSlug({ sourceId, sourceSlug, request });
     const result = await this.workflowExecutionService.getStatus({
       request,
       spaceId: request.spaceId,
@@ -378,15 +378,15 @@ export class SignificantEventsKIsOnboardingClient {
    * @returns The ID of the canceled execution, or `null` if nothing was running.
    */
   async cancel({
-    streamName,
+    sourceId,
     sourceSlug,
     request,
   }: {
-    streamName: string;
+    sourceId: string;
     sourceSlug?: string;
     request: KibanaRequest;
   }): Promise<string | null> {
-    const slug = await this.resolveSourceSlug({ sourceId: streamName, sourceSlug, request });
+    const slug = await this.resolveSourceSlug({ sourceId, sourceSlug, request });
     return this.cancelBySourceSlug({ sourceSlug: slug, request });
   }
 
@@ -416,7 +416,7 @@ export class SignificantEventsKIsOnboardingClient {
     request: KibanaRequest;
   }): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.workflowExecutionService.getExecutions(
-      { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
+      { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
       request.spaceId,
       request
     );
@@ -431,7 +431,7 @@ export class SignificantEventsKIsOnboardingClient {
    */
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
     const { results } = await this.workflowExecutionService.getExecutions(
-      { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
+      { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
       request.spaceId,
       request
     );
@@ -454,19 +454,19 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Returns the latest onboarding execution per stream, collapsed by
-   * concurrency group key. At most {@link MAX_STREAMS_PER_QUERY} streams
+   * Returns the latest onboarding execution per source, collapsed by
+   * concurrency group key. At most {@link MAX_SOURCES_PER_QUERY} sources
    * are returned (one execution each), sorted by createdAt date descending.
    *
    * We sort by createdAt (not finishedAt) so the most recently *started*
-   * execution wins per stream: a currently running execution has no
+   * execution wins per source: a currently running execution has no
    * finishedAt, and sorting by finishedAt would hide it behind an older
    * completed run, breaking the "already running" classification.
    */
   async getRecentExecutions(request: KibanaRequest): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.workflowExecutionService.getExecutions(
       {
-        size: MAX_STREAMS_PER_QUERY,
+        size: MAX_SOURCES_PER_QUERY,
         sortField: 'createdAt',
         sortOrder: 'desc',
         collapse: 'concurrencyGroupKey',

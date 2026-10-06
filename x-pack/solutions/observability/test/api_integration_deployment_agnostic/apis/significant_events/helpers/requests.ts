@@ -174,7 +174,7 @@ const LIST_QUERIES_RANGE = {
 } as const;
 
 function toListedQuery(query: QueryWithOccurrences): StreamQuery {
-  return omit(query, ['occurrences', 'change_points', 'rule_backed', 'rule_uuid', 'stream_name']);
+  return omit(query, ['occurrences', 'change_points', 'rule_backed', 'rule_uuid', 'source_id']);
 }
 
 /**
@@ -191,7 +191,7 @@ export async function getQueries(
       params: {
         query: {
           ...LIST_QUERIES_RANGE,
-          streamNames: [name],
+          sourceIds: [name],
           status: ['active', 'draft'],
           perPage: 1000,
         },
@@ -218,7 +218,7 @@ export async function upsertQuery(
         path: { queryId },
         body: {
           ...body,
-          target_name: streamName,
+          source_id: streamName,
         },
       },
     })
@@ -274,9 +274,9 @@ export async function upsertFeature(
   expectedStatusCode = 200
 ): Promise<{ id: string; uuid: string }> {
   await client
-    .fetch('POST /internal/streams/{name}/features', {
+    .fetch('POST /internal/streams/{sourceId}/features', {
       params: {
-        path: { name: streamName },
+        path: { sourceId: streamName },
         body: feature,
       },
     })
@@ -299,9 +299,9 @@ export async function listFeatures(
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('GET /internal/streams/{name}/features', {
+    .fetch('GET /internal/streams/{sourceId}/features', {
       params: {
-        path: { name: streamName },
+        path: { sourceId: streamName },
         query: opts?.includeExcluded ? { include_excluded: true } : undefined,
       },
     })
@@ -321,9 +321,9 @@ export async function bulkFeatures(
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('POST /internal/streams/{name}/features/_bulk', {
+    .fetch('POST /internal/streams/{sourceId}/features/_bulk', {
       params: {
-        path: { name: streamName },
+        path: { sourceId: streamName },
         body: { operations },
       },
     })
@@ -338,9 +338,9 @@ export async function deleteFeature(
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('DELETE /internal/streams/{name}/features/{id}', {
+    .fetch('DELETE /internal/streams/{sourceId}/features/{id}', {
       params: {
-        path: { name: streamName, id },
+        path: { sourceId: streamName, id },
       },
     })
     .expect(expectedStatusCode)

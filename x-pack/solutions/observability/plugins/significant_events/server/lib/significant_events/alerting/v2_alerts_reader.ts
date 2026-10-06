@@ -206,7 +206,8 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       severity_score: meta?.severityScore ?? 0,
       doc_count: bucket.doc_count,
       rule_name: { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] },
-      // The `stream` bucket shape is read by detection.yaml; it now carries the source id.
+      // detection.yaml reads `source_id` from each bucket.
+      source_id: sourceId,
       stream: { buckets: [{ key: sourceId }] },
       change_points: {
         type: INDETERMINABLE_CHANGE_POINT_TYPE in verdict ? EMPTY_CHANGE_POINT_TYPE : verdict,

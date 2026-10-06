@@ -159,7 +159,7 @@ export const DetectionsTab = () => {
         render: (timestamp: string) => formatTimestamp(timestamp),
       },
       {
-        field: 'stream_name',
+        field: 'source_id',
         name: i18n.translate('xpack.significantEventsApp.sources.detectionsTab.sourceColumn', {
           defaultMessage: 'Source',
         }),

@@ -65,18 +65,14 @@ jest.mock(
 
 const prepareRoute =
   internalIdentifyKIFeaturesRoutes[
-    'POST /internal/streams/{streamName}/features/_identify/inferred/prepare'
+    'POST /internal/streams/{sourceId}/features/_identify/inferred/prepare'
   ];
 const inferredRoute =
-  internalIdentifyKIFeaturesRoutes[
-    'POST /internal/streams/{streamName}/features/_identify/inferred'
-  ];
+  internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/inferred'];
 const computedRoute =
-  internalIdentifyKIFeaturesRoutes[
-    'POST /internal/streams/{streamName}/features/_identify/computed'
-  ];
+  internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/computed'];
 const shouldIdentifyRoute =
-  internalIdentifyKIFeaturesRoutes['GET /internal/streams/{streamName}/features/_should_identify'];
+  internalIdentifyKIFeaturesRoutes['GET /internal/streams/{sourceId}/features/_should_identify'];
 
 type InferredHandlerParams = Parameters<typeof inferredRoute.handler>[0];
 type ComputedHandlerParams = Parameters<typeof computedRoute.handler>[0];
@@ -85,7 +81,7 @@ type ShouldIdentifyHandlerParams = Parameters<typeof shouldIdentifyRoute.handler
 const createInferredParams = (
   documents: Array<{ _id: string; fields: Record<string, unknown> }>
 ) => ({
-  path: { streamName: 'logs.test' },
+  path: { sourceId: 'logs.test' },
   body: {
     documents,
     samplingTelemetry: {
@@ -144,7 +140,7 @@ const makeInferredHandlerParams = ({
 
   const handlerParams = {
     params: {
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: {
         connectorId: 'connector-1',
         runId: 'run-1',
@@ -215,7 +211,7 @@ const makeComputedHandlerParams = () => {
 
   const handlerParams = {
     params: {
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: {
         start: 100,
         end: 200,
@@ -254,7 +250,7 @@ const makeComputedHandlerParams = () => {
 describe('feature identification route schemas', () => {
   it('bounds ratios and timeouts', () => {
     const prepareParams = {
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: {
         entityFilteredRatio: 0,
         diverseRatio: 1,
@@ -283,7 +279,7 @@ describe('feature identification route schemas', () => {
     ).toBe(false);
     expect(
       computedRoute.params.safeParse({
-        path: { streamName: 'logs.test' },
+        path: { sourceId: 'logs.test' },
         body: { computedFeaturesTimeoutMs: 240_001 },
       }).success
     ).toBe(false);
@@ -349,7 +345,7 @@ describe('inferred feature identification route', () => {
   it('rejects _identify/inferred with 409 while paused before touching inference', async () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
-      params: { path: { streamName: 'logs.test' }, body: null },
+      params: { path: { sourceId: 'logs.test' }, body: null },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
@@ -392,7 +388,7 @@ describe('inferred feature identification route', () => {
         agentBuilder,
         request,
         kiClient,
-        streamName: 'logs.test',
+        sourceId: 'logs.test',
         connectorId: 'connector-1',
         runId: 'run-1',
         iteration: 2,
@@ -483,7 +479,7 @@ describe('computed feature identification route', () => {
   it('rejects _identify/computed with 409 while paused', async () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
-      params: { path: { streamName: 'logs.test' }, body: null },
+      params: { path: { sourceId: 'logs.test' }, body: null },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
@@ -552,7 +548,7 @@ describe('should identify features route', () => {
     mockShouldIdentifyFeatures.mockResolvedValue(true);
     const handlerParams = {
       params: {
-        path: { streamName: 'logs.test' },
+        path: { sourceId: 'logs.test' },
         query: { thresholdHours: 24 },
       },
       request: {},
@@ -569,7 +565,7 @@ describe('should identify features route', () => {
     expect(maintenanceService.getState).not.toHaveBeenCalled();
     expect(mockShouldIdentifyFeatures).toHaveBeenCalledWith({
       kiClient,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       thresholdHours: 24,
     });
   });

@@ -29,7 +29,7 @@ const makeQueryLink = (severityScore?: number, title = 'Error logs'): QueryLink 
     esql: { query: 'FROM logs-* | WHERE level == "error"' },
     severity_score: severityScore,
   },
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   rule_backed: true,
   rule_id: 'rule-1',
 });
@@ -59,7 +59,7 @@ const makeRulesClient = (): jest.Mocked<IRulesManagementClient> => ({
   setRulesEnabled: jest.fn().mockResolvedValue(undefined),
   findExistingRuleIds: jest.fn().mockResolvedValue([]),
   findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-  findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+  findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue([]),
   findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
 });
 

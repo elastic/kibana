@@ -758,6 +758,84 @@ describe('SourcesClient', () => {
       expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
     });
 
+    it('looks ids up directly, drops missing sources, and then applies search and paging', async () => {
+      const { client, soClient } = setup();
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          makeSavedObject(makeAttributes({ title: 'zeta' }), 'zeta'),
+          {
+            id: 'missing',
+            type: NIGHTSHIFT_SOURCE_SO_TYPE,
+            error: { statusCode: 404, error: 'Not Found', message: 'missing' },
+          },
+          makeSavedObject(
+            makeAttributes({ title: 'alpha', slug: 'alpha', view_name: NGINX_VIEW_NAME_2 }),
+            'alpha'
+          ),
+          makeSavedObject(
+            makeAttributes({ title: 'alpine', slug: 'alpine', view_name: TITLE_T_VIEW_NAME }),
+            'alpine'
+          ),
+        ],
+      } as never);
+
+      const response = await client.list({
+        page: 2,
+        perPage: 1,
+        search: 'alp',
+        ids: ['zeta', 'missing', 'alpha', 'alpine', 'zeta'],
+      });
+
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'zeta' },
+        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'missing' },
+        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'alpha' },
+        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'alpine' },
+      ]);
+      expect(response.total).toBe(2);
+      expect(response.page).toBe(2);
+      expect(response.per_page).toBe(1);
+      expect(response.sources.map((source) => source.id)).toEqual(['alpine']);
+    });
+
+    it('keeps the enabled filter when looking sources up by id', async () => {
+      const { client, soClient } = setup();
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          makeSavedObject(makeAttributes({ title: 'alpha', enabled: true }), 'alpha'),
+          makeSavedObject(makeAttributes({ title: 'alpine', enabled: false }), 'alpine'),
+        ],
+      } as never);
+
+      const response = await client.list({
+        page: 1,
+        perPage: 10,
+        enabled: false,
+        ids: ['alpha', 'alpine'],
+      });
+
+      expect(response.sources.map((source) => source.id)).toEqual(['alpine']);
+      expect(response.total).toBe(1);
+    });
+
+    it('throws when a bulk get failure is not a missing source', async () => {
+      const { client, soClient } = setup();
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'hidden',
+            type: NIGHTSHIFT_SOURCE_SO_TYPE,
+            error: { statusCode: 403, error: 'Forbidden', message: 'no access' },
+          },
+        ],
+      } as never);
+
+      await expect(client.list({ page: 1, perPage: 10, ids: ['hidden'] })).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+
     it('escapes KQL metacharacters in the title prefix filter', async () => {
       const { client, soClient } = setup();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });

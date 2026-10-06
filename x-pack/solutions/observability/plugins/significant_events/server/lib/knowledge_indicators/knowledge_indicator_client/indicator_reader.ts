@@ -225,7 +225,7 @@ export class IndicatorReader {
     return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
   }
 
-  async getStreamToQueryLinksMap(
+  async getSourceToQueryLinksMap(
     sourceIds: string[],
     options: { includeExpired?: boolean } = {}
   ): Promise<Record<string, QueryLink[]>> {
@@ -238,10 +238,10 @@ export class IndicatorReader {
       result[sourceId] = [];
     }
     for (const link of links) {
-      if (!result[link.stream_name]) {
-        result[link.stream_name] = [];
+      if (!result[link.source_id]) {
+        result[link.source_id] = [];
       }
-      result[link.stream_name].push(link);
+      result[link.source_id].push(link);
     }
     return result;
   }
@@ -298,20 +298,20 @@ export class IndicatorReader {
     return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
   }
 
-  async findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
+  async findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; source_id: string }>> {
     if (ids.length === 0) return [];
     const where = combineWhere(inPredicate(TYPE, [KI_TYPE_FEATURE]), inPredicate(ID, ids));
     const docs = await this.revisionReader.fetchLatestRevisions(where, IS_NOT_DELETED);
     return docs.filter(isStoredFeatureKnowledgeIndicator).map((doc) => ({
       id: doc.id,
-      stream_name: doc['source.id'],
+      source_id: doc['source.id'],
     }));
   }
 
   /**
    * Returns distinct source ids that have at least one active (non-deleted) KI revision.
    */
-  async getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+  async getSourceIdsWithKnowledgeIndicators(): Promise<string[]> {
     const where = inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]);
     return this.revisionReader.fetchDistinctStreamNames(where, IS_NOT_DELETED);
   }

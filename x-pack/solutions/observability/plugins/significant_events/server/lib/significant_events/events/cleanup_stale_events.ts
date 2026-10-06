@@ -29,6 +29,7 @@ export interface CleanupStaleEventsResult {
   closed: number;
   kept: number;
   skipped: number;
+  failed: number;
 }
 
 const getBackingRuleIds = (event: SignificantEventResponse): string[] => [
@@ -93,12 +94,13 @@ export const cleanupStaleEvents = async ({
     : undefined;
 
   if (uniqueCandidateRuleIds?.length === 0) {
-    return { scanned: 0, closed: 0, kept: 0, skipped: 0 };
+    return { scanned: 0, closed: 0, kept: 0, skipped: 0, failed: 0 };
   }
 
   let scanned = 0;
   let closed = 0;
   let skipped = 0;
+  let failed = 0;
   const updateLimit = pLimit(EVENT_STATUS_UPDATE_CONCURRENCY);
 
   for await (const events of iterateActiveEventBatches({
@@ -123,7 +125,8 @@ export const cleanupStaleEvents = async ({
     const staleEvents = eventsWithRuleIds.filter(
       ({ ruleIds }) => ruleIds.length > 0 && ruleIds.every((ruleId) => !existingRuleIds.has(ruleId))
     );
-    const results = await Promise.all(
+    // One event that cannot be closed stays open and must not stop the rest of the cleanup.
+    const results = await Promise.allSettled(
       staleEvents.map(({ event }) =>
         updateLimit(() =>
           updateSignificantEventStatus({
@@ -137,13 +140,24 @@ export const cleanupStaleEvents = async ({
         )
       )
     );
-    closed += results.reduce((total, result) => total + result.updated, 0);
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        closed += result.value.updated;
+        return;
+      }
+      failed += 1;
+      const reason = result.reason instanceof Error ? result.reason.message : result.reason;
+      logger?.warn(
+        `Stale event cleanup could not close event "${staleEvents[index].event.event_id}": ${reason}`
+      );
+    });
   }
 
   return {
     scanned,
     closed,
-    kept: scanned - closed - skipped,
+    kept: scanned - closed - skipped - failed,
     skipped,
+    failed,
   };
 };

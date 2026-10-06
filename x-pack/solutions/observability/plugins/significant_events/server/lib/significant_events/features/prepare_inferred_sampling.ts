@@ -79,7 +79,7 @@ export const compactInferenceDocuments = (
 export const prepareInferredSampling = async ({
   esClient,
   kiClient,
-  streamName,
+  sourceId,
   samplingSource,
   start,
   end,
@@ -94,7 +94,7 @@ export const prepareInferredSampling = async ({
 }: {
   esClient: ElasticsearchClient;
   kiClient: Pick<KnowledgeIndicatorClient, 'getFeatures'>;
-  streamName: string;
+  sourceId: string;
   samplingSource: string;
   start: number;
   end: number;
@@ -107,7 +107,7 @@ export const prepareInferredSampling = async ({
   iteration: number;
   samplingTimeoutMs: number;
 }): Promise<PrepareInferredSamplingResult> => {
-  const { hits: allFeatures } = await kiClient.getFeatures(streamName);
+  const { hits: allFeatures } = await kiClient.getFeatures(sourceId);
   const discoveredFeatures = allFeatures.filter(
     (feature) => !isComputedFeature(feature) && feature.run_id === runId
   );

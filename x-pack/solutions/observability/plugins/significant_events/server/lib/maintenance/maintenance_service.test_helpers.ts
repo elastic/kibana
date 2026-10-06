@@ -238,7 +238,7 @@ export function makeService(params?: {
   const getRuleBackedQueryLinks = jest.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({
       rule_id,
-      stream_name: params?.disabledSourceRuleIds?.includes(rule_id)
+      source_id: params?.disabledSourceRuleIds?.includes(rule_id)
         ? 'disabled-source'
         : 'enabled-source',
     }))
@@ -249,9 +249,9 @@ export function makeService(params?: {
       return { sources, total: sources.length };
     }),
   };
-  const getStreamNamesWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
-  const findStreamNamesWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
-  const getStreamToQueryLinksMap = jest.fn(async (streamNames: string[]) =>
+  const getSourceIdsWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
+  const findSourceIdsWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
+  const getSourceToQueryLinksMap = jest.fn(async (streamNames: string[]) =>
     Object.fromEntries(
       streamNames.map((streamName) => [streamName, params?.queryLinksByStream?.[streamName] ?? []])
     )
@@ -399,10 +399,10 @@ export function makeService(params?: {
   const getScopedClients = jest.fn(async () => ({
     getKnowledgeIndicatorClient: async () => ({
       getRuleBackedQueryLinks,
-      getStreamNamesWithKnowledgeIndicators,
-      findStreamNamesWithOwnedRules,
+      getSourceIdsWithKnowledgeIndicators,
+      findSourceIdsWithOwnedRules,
       countKnowledgeIndicators,
-      getStreamToQueryLinksMap,
+      getSourceToQueryLinksMap,
       findOwnedRuleIds,
     }),
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
@@ -423,10 +423,10 @@ export function makeService(params?: {
     getScopedClients,
     v2RulesClient,
     getRuleBackedQueryLinks,
-    getStreamNamesWithKnowledgeIndicators,
-    findStreamNamesWithOwnedRules,
+    getSourceIdsWithKnowledgeIndicators,
+    findSourceIdsWithOwnedRules,
     countKnowledgeIndicators,
-    getStreamToQueryLinksMap,
+    getSourceToQueryLinksMap,
     findOwnedRuleIds,
     initializeClient,
     internalEsClient,

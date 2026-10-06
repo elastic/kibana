@@ -49,7 +49,7 @@ describe('alertInvestigationContextSchema', () => {
   // An alert investigation carries alert data and nothing else. `event_uuid` in particular is what
   // the workflow's attach steps act on, so accepting it would file an alert's findings against a
   // significant event.
-  it.each([['event_uuid'], ['stream_names'], ['source']])(
+  it.each([['event_uuid'], ['source_ids'], ['source']])(
     'rejects a context that also carries %s',
     (key) => {
       expect(accepts({ alerts: [alert()], [key]: 'whatever' })).toBe(false);

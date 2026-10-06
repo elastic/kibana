@@ -31,12 +31,12 @@ const durabilityExpiresAt = (durable: boolean, ttlDays: number): string | undefi
   durable ? undefined : new Date(Date.now() + ttlDays * DAY_MS).toISOString();
 
 interface UseKnowledgeIndicatorActionsParams {
-  streamName: string;
+  sourceId: string;
   onSuccess?: () => void;
 }
 
 export function useKnowledgeIndicatorActions({
-  streamName,
+  sourceId,
   onSuccess,
 }: UseKnowledgeIndicatorActionsParams) {
   const { core } = useKibana();
@@ -56,17 +56,17 @@ export function useKnowledgeIndicatorActions({
     }
   }, [core]);
   const { excludeFeaturesInBulk, restoreFeaturesInBulk, setFeatureDurability } =
-    useStreamFeaturesApi(streamName);
+    useStreamFeaturesApi(sourceId);
   const { promote, setQueryDurability } = useQueriesApi();
 
   const invalidateData = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
-      queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
+      queryClient.invalidateQueries({ queryKey: ['features', sourceId] }),
       queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
     ]);
-  }, [streamName, queryClient]);
+  }, [sourceId, queryClient]);
 
   const excludeAction = useMutation<void, Error, string>({
     mutationKey: KI_ROW_ACTION_MUTATION_KEY,
@@ -132,7 +132,7 @@ export function useKnowledgeIndicatorActions({
       } else {
         await setQueryDurability({
           query: knowledgeIndicator.query,
-          streamName: knowledgeIndicator.stream_name,
+          sourceId: knowledgeIndicator.source_id,
           expiresAt,
         });
       }

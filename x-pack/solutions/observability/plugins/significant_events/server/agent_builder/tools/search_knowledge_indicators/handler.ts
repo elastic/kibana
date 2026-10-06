@@ -216,19 +216,19 @@ function presentIndicator<T extends KnowledgeIndicator>(catalog: SourceCatalog, 
       ...indicator,
       feature: {
         ...indicator.feature,
-        stream_name: presentSlug(catalog, indicator.feature.stream_name),
+        source_id: presentSlug(catalog, indicator.feature.source_id),
       },
     };
   }
 
   return {
     ...indicator,
-    stream_name: presentSlug(catalog, indicator.stream_name),
+    source_id: presentSlug(catalog, indicator.source_id),
   };
 }
 
 function storedSourceIdOf(indicator: KnowledgeIndicator): string {
-  return indicator.kind === 'feature' ? indicator.feature.stream_name : indicator.stream_name;
+  return indicator.kind === 'feature' ? indicator.feature.source_id : indicator.source_id;
 }
 
 /**
@@ -265,29 +265,28 @@ export async function searchKnowledgeIndicatorsToolHandler({
 }): Promise<KISearchOutput> {
   const output = await searchKnowledgeIndicators({
     params,
-    onFeatureFetchError: (streamName, error) => {
+    onFeatureFetchError: (sourceId, error) => {
       const errorMessage =
         error instanceof Error ? error.stack || error.message : String(error ?? 'Unknown error');
-      logger.warn(
-        `ki_search: failed to fetch features for stream "${streamName}": ${errorMessage}`
-      );
+      logger.warn(`ki_search: failed to fetch features for source "${sourceId}": ${errorMessage}`);
     },
-    getStreamNames: async () => [...catalog.byId.keys()],
-    getFeatures: async (streamName, { searchText, featureTypes, featureIds }) => {
+    getSourceIds: async () => [...catalog.byId.keys()],
+    getSourceSlug: (sourceId) => catalog.byId.get(sourceId)?.slug,
+    getFeatures: async (sourceId, { searchText, featureTypes, featureIds }) => {
       if (searchText) {
-        return (await kiClient.findFeatures(streamName, searchText, { featureTypes, featureIds }))
+        return (await kiClient.findFeatures(sourceId, searchText, { featureTypes, featureIds }))
           .hits;
       }
 
-      return (await kiClient.getFeatures(streamName, { type: featureTypes })).hits;
+      return (await kiClient.getFeatures(sourceId, { type: featureTypes })).hits;
     },
-    getQueries: async (streamNames, { searchText, queryTypes, queryIds, ruleIds, ruleBacked }) => {
+    getQueries: async (sourceIds, { searchText, queryTypes, queryIds, ruleIds, ruleBacked }) => {
       const ruleUnbacked: RuleUnbackedFilter =
         ruleBacked === undefined ? 'include' : ruleBacked ? 'exclude' : 'only';
       const filters = { ruleUnbacked, queryTypes, queryIds, ruleIds };
       const links = searchText
-        ? await kiClient.findQueries(streamNames, searchText, filters)
-        : await kiClient.getQueryLinks(streamNames, filters);
+        ? await kiClient.findQueries(sourceIds, searchText, filters)
+        : await kiClient.getQueryLinks(sourceIds, filters);
       return links;
     },
   });

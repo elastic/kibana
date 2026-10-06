@@ -19,7 +19,7 @@ export const kiQueryGenerationAgentType = {
   id: KI_QUERY_GENERATION_AGENT_TYPE_ID,
   name: 'KI Query Generation',
   description:
-    'Generates feature-grounded ES|QL detection queries for a Streams target and validates them against its data.',
+    'Generates feature-grounded ES|QL detection queries for a source and validates them against its data.',
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions: `${significantEventsAgentPrompt}\n\n${groundingInstructions}`,

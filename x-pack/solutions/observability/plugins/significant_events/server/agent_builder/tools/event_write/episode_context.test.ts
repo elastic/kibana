@@ -25,47 +25,47 @@ const TS_SUBMITTED = '2024-01-02T00:00:00.000Z';
 const TS_LATER = '2024-01-03T00:00:00.000Z';
 
 describe('makeIdentity', () => {
-  it('is stable regardless of stream and rule ordering', () => {
-    const a = makeIdentity({ streamNames: ['logs.b', 'logs.a'], ruleUuids: ['rule-2', 'rule-1'] });
-    const b = makeIdentity({ streamNames: ['logs.a', 'logs.b'], ruleUuids: ['rule-1', 'rule-2'] });
+  it('is stable regardless of source and rule ordering', () => {
+    const a = makeIdentity({ sourceIds: ['logs.b', 'logs.a'], ruleUuids: ['rule-2', 'rule-1'] });
+    const b = makeIdentity({ sourceIds: ['logs.a', 'logs.b'], ruleUuids: ['rule-1', 'rule-2'] });
     expect(a).toBe(b);
   });
 
-  it('produces different identities for different stream sets (exact-set matching)', () => {
-    const single = makeIdentity({ streamNames: ['logs.a'], ruleUuids: ['rule-1'] });
-    const withExtra = makeIdentity({ streamNames: ['logs.a', 'logs.z'], ruleUuids: ['rule-1'] });
+  it('produces different identities for different source sets (exact-set matching)', () => {
+    const single = makeIdentity({ sourceIds: ['logs.a'], ruleUuids: ['rule-1'] });
+    const withExtra = makeIdentity({ sourceIds: ['logs.a', 'logs.z'], ruleUuids: ['rule-1'] });
     expect(single).not.toBe(withExtra);
   });
 
   it('produces different identities for different rule sets', () => {
-    const a = makeIdentity({ streamNames: ['logs.app'], ruleUuids: ['rule-1'] });
-    const b = makeIdentity({ streamNames: ['logs.app'], ruleUuids: ['rule-2'] });
+    const a = makeIdentity({ sourceIds: ['logs.app'], ruleUuids: ['rule-1'] });
+    const b = makeIdentity({ sourceIds: ['logs.app'], ruleUuids: ['rule-2'] });
     expect(a).not.toBe(b);
   });
 
-  it('produces a consistent key for empty stream_names', () => {
-    const a = makeIdentity({ streamNames: [], ruleUuids: ['rule-1'] });
-    const b = makeIdentity({ streamNames: [], ruleUuids: ['rule-1'] });
-    const withStream = makeIdentity({ streamNames: ['logs.app'], ruleUuids: ['rule-1'] });
+  it('produces a consistent key for empty source_ids', () => {
+    const a = makeIdentity({ sourceIds: [], ruleUuids: ['rule-1'] });
+    const b = makeIdentity({ sourceIds: [], ruleUuids: ['rule-1'] });
+    const withSource = makeIdentity({ sourceIds: ['logs.app'], ruleUuids: ['rule-1'] });
     expect(a).toBe(b);
-    expect(a).not.toBe(withStream);
+    expect(a).not.toBe(withSource);
   });
 
-  it('produces distinct keys for zero-rule-uuid events on different streams (zero-rule)', () => {
-    const streamA = makeIdentity({ streamNames: ['stream-a'], ruleUuids: [] });
-    const streamB = makeIdentity({ streamNames: ['stream-b'], ruleUuids: [] });
-    expect(streamA).not.toBe(streamB);
+  it('produces distinct keys for zero-rule-uuid events on different sources (zero-rule)', () => {
+    const sourceA = makeIdentity({ sourceIds: ['source-a'], ruleUuids: [] });
+    const sourceB = makeIdentity({ sourceIds: ['source-b'], ruleUuids: [] });
+    expect(sourceA).not.toBe(sourceB);
   });
 
   it("produces distinct keys for ['A'] vs ['A','B'] (widened-episode regression guard)", () => {
-    const single = makeIdentity({ streamNames: ['A'], ruleUuids: ['rule-1'] });
-    const widened = makeIdentity({ streamNames: ['A', 'B'], ruleUuids: ['rule-1'] });
+    const single = makeIdentity({ sourceIds: ['A'], ruleUuids: ['rule-1'] });
+    const widened = makeIdentity({ sourceIds: ['A', 'B'], ruleUuids: ['rule-1'] });
     expect(single).not.toBe(widened);
   });
 
   it('prevents pipe-join collision between ["a|b"] and ["a", "b"]', () => {
-    const joined = makeIdentity({ streamNames: ['a|b'], ruleUuids: [] });
-    const split = makeIdentity({ streamNames: ['a', 'b'], ruleUuids: [] });
+    const joined = makeIdentity({ sourceIds: ['a|b'], ruleUuids: [] });
+    const split = makeIdentity({ sourceIds: ['a', 'b'], ruleUuids: [] });
     expect(joined).not.toBe(split);
   });
 });
@@ -73,7 +73,7 @@ describe('makeIdentity', () => {
 describe('mergeSignalsLatestPerRule', () => {
   const makeSignal = (ruleUuid: string): SignalEntry => ({
     type: 'detection',
-    stream_name: 'logs.test',
+    source_id: 'logs.test',
     description: 'Test signal',
     verdict: 'confirms',
     metadata: {
@@ -169,16 +169,16 @@ describe('mergeEpisodeContext', () => {
     subtype,
     feature_id: featureId,
     name: featureId,
-    stream_name: 'logs.test',
+    source_id: 'logs.test',
   });
 
-  it('unions stream_names across all docs and sorts them', () => {
-    const { streamNames } = mergeEpisodeContext(
-      [{ '@timestamp': TS_EARLIER, stream_names: ['logs.b'] }],
-      { stream_names: ['logs.a'], causal_features: [], blast_radius: [] },
+  it('unions source_ids across all docs and sorts them', () => {
+    const { sourceIds } = mergeEpisodeContext(
+      [{ '@timestamp': TS_EARLIER, source_ids: ['logs.b'] }],
+      { source_ids: ['logs.a'], causal_features: [], blast_radius: [] },
       TS_SUBMITTED
     );
-    expect(streamNames).toEqual(['logs.a', 'logs.b']);
+    expect(sourceIds).toEqual(['logs.a', 'logs.b']);
   });
 
   it('causal classification beats blast for the same feature_id', () => {
@@ -186,12 +186,12 @@ describe('mergeEpisodeContext', () => {
       [
         {
           '@timestamp': TS_EARLIER,
-          stream_names: ['logs.app'],
+          source_ids: ['logs.app'],
           blast_radius: [makeBlast('feat-1')],
           causal_features: [] as CausalFeature[],
         },
       ],
-      { stream_names: ['logs.app'], causal_features: [makeCausal('feat-1')], blast_radius: [] },
+      { source_ids: ['logs.app'], causal_features: [makeCausal('feat-1')], blast_radius: [] },
       TS_SUBMITTED
     );
     expect(causalFeatures.map((f) => f.feature_id)).toContain('feat-1');
@@ -203,12 +203,12 @@ describe('mergeEpisodeContext', () => {
       [
         {
           '@timestamp': TS_EARLIER,
-          stream_names: ['logs.app'],
+          source_ids: ['logs.app'],
           blast_radius: [makeBlast('feat-1')],
           causal_features: [] as CausalFeature[],
         },
       ],
-      { stream_names: ['logs.app'], causal_features: [], blast_radius: [makeBlast('feat-1')] },
+      { source_ids: ['logs.app'], causal_features: [], blast_radius: [makeBlast('feat-1')] },
       TS_SUBMITTED
     );
     expect(blastRadius).toHaveLength(1);
@@ -223,13 +223,13 @@ describe('mergeEpisodeContext', () => {
       [
         {
           '@timestamp': TS_EARLIER,
-          stream_names: ['logs.app'],
+          source_ids: ['logs.app'],
           blast_radius: [makeBlast('feat-blast', 'database')],
           causal_features: [makeCausal('feat-causal', 'database')],
         },
       ],
       {
-        stream_names: ['logs.app'],
+        source_ids: ['logs.app'],
         causal_features: [makeCausal('feat-causal', 'service')],
         blast_radius: [makeBlast('feat-blast', 'service')],
       },
@@ -243,7 +243,7 @@ describe('mergeEpisodeContext', () => {
 describe('preserveStableNarrative', () => {
   const makeDetection = (ruleUuid: string): SignalEntry => ({
     type: 'detection',
-    stream_name: 'logs.app',
+    source_id: 'logs.app',
     description: `Signal for ${ruleUuid}`,
     verdict: 'confirms',
     metadata: {
@@ -260,7 +260,7 @@ describe('preserveStableNarrative', () => {
       event_id: 'event-id',
       status: 'active',
       severity: 'high',
-      stream_names: ['logs.app'],
+      source_ids: ['logs.app'],
       signals: ruleUuids.map(makeDetection),
       title: 'Stored title',
       symptom_hypothesis: 'Stored hypothesis',
@@ -320,7 +320,7 @@ describe('preserveStableNarrative', () => {
       event_id: 'event-id',
       status: 'active' as const,
       severity: 'high' as const,
-      stream_names: ['logs.app'],
+      source_ids: ['logs.app'],
       signals: [makeDetection('rule-1')],
       title: 'Stored title',
       summary: 'Stored summary',

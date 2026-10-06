@@ -48,19 +48,19 @@ export function useBulkOnboarding({
   const [isScheduling, setIsScheduling] = useState(false);
 
   const bulkScheduleOnboarding = useCallback(
-    async (streamNames: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
+    async (sourceIds: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
       setIsScheduling(true);
       const succeeded: string[] = [];
-      const failures: Array<{ streamName: string; error: unknown }> = [];
+      const failures: Array<{ sourceId: string; error: unknown }> = [];
       try {
         await pMap(
-          streamNames,
-          async (streamName) => {
+          sourceIds,
+          async (sourceId) => {
             try {
-              await scheduleOnboarding(streamName, options);
-              succeeded.push(streamName);
+              await scheduleOnboarding(sourceId, options);
+              succeeded.push(sourceId);
             } catch (error) {
-              failures.push({ streamName, error });
+              failures.push({ sourceId, error });
             }
           },
           { concurrency: 10, stopOnError: false }
@@ -74,8 +74,8 @@ export function useBulkOnboarding({
           new Error(
             failures
               .map(
-                ({ streamName, error }) =>
-                  `${getSourceTitle(streamName)}: ${getFormattedError(error).message}`
+                ({ sourceId, error }) =>
+                  `${getSourceTitle(sourceId)}: ${getFormattedError(error).message}`
               )
               .join('\n')
           ),
@@ -92,8 +92,8 @@ export function useBulkOnboarding({
         );
       }
 
-      succeeded.forEach((streamName) => {
-        onboardingStatusUpdateQueue.add(streamName);
+      succeeded.forEach((sourceId) => {
+        onboardingStatusUpdateQueue.add(sourceId);
       });
       if (succeeded.length > 0) {
         processStatusUpdateQueue();
@@ -111,13 +111,13 @@ export function useBulkOnboarding({
   );
 
   const bulkOnboardAll = useCallback(
-    (streamNames: string[]) => bulkScheduleOnboarding(streamNames, onboardingConfig),
+    (sourceIds: string[]) => bulkScheduleOnboarding(sourceIds, onboardingConfig),
     [bulkScheduleOnboarding, onboardingConfig]
   );
 
   const bulkOnboardFeaturesOnly = useCallback(
-    (streamNames: string[]) =>
-      bulkScheduleOnboarding(streamNames, {
+    (sourceIds: string[]) =>
+      bulkScheduleOnboarding(sourceIds, {
         steps: [KIsOnboardingStep.FeaturesIdentification],
         connectors: onboardingConfig.connectors,
       }),
@@ -125,8 +125,8 @@ export function useBulkOnboarding({
   );
 
   const bulkOnboardQueriesOnly = useCallback(
-    (streamNames: string[]) =>
-      bulkScheduleOnboarding(streamNames, {
+    (sourceIds: string[]) =>
+      bulkScheduleOnboarding(sourceIds, {
         steps: [KIsOnboardingStep.QueriesGeneration],
         connectors: onboardingConfig.connectors,
       }),

@@ -31,7 +31,7 @@ describe('ki_features_get tool', () => {
         {
           id: 'feature-1',
           run_id: 'run-1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
           type: 'entity',
           title: 'Checkout',
           description: 'Checkout service',

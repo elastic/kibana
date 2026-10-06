@@ -110,7 +110,7 @@ export const seedChronicBackground = async ({
       title: config.ki_title,
       description: config.ki_description,
       evidence: [`body.text: "${config.service} | ${config.phrase}"`],
-      'stream.name': streamName,
+      'source.id': streamName,
       query: {
         esql: `FROM ${streamName}, ${streamName}.* | WHERE body.text : "${config.phrase}"`,
         query_type: 'match',

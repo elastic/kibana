@@ -15,21 +15,21 @@ const detection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDetect
   detection_id: 'detection-1',
   rule_name: 'Error spike',
   rule_uuid: 'rule-1',
-  stream_name: 'logs.api',
+  source_id: 'logs.api',
   change_point_type: 'spike',
   '@timestamp': '2026-07-10T12:00:00.000Z',
   ...overrides,
 });
 
 describe('buildDetectionOccurrencesRequest', () => {
-  it('batches rules and streams across the complete detection time range', () => {
+  it('batches rules and sources across the complete detection time range', () => {
     expect(
       buildDetectionOccurrencesRequest([
         detection(),
         detection({
           detection_id: 'detection-2',
           rule_uuid: 'rule-2',
-          stream_name: 'logs.worker',
+          source_id: 'logs.worker',
           '@timestamp': '2026-07-10T13:00:00.000Z',
         }),
       ])
@@ -37,7 +37,7 @@ describe('buildDetectionOccurrencesRequest', () => {
       from: '2026-07-10T11:00:00.000Z',
       to: '2026-07-10T13:15:00.000Z',
       ruleUuids: ['rule-1', 'rule-2'],
-      streamNames: ['logs.api', 'logs.worker'],
+      sourceIds: ['logs.api', 'logs.worker'],
     });
   });
 

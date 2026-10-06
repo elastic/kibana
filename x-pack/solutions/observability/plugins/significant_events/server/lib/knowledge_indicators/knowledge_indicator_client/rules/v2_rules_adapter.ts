@@ -173,7 +173,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     return uniq(perTag.flat());
   }
 
-  async findStreamNamesWithOwnedRules(): Promise<string[]> {
+  async findSourceIdsWithOwnedRules(): Promise<string[]> {
     const perPrefix = await Promise.all(
       RULE_OWNERSHIP_TAG_PREFIXES.map((prefix) => this.findTagsByPrefix(prefix))
     );

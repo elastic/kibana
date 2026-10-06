@@ -74,7 +74,7 @@ export const createFeatureSimilaritySearchTool = ({
 
         const groups = await searchFeaturesForCandidates({
           kiClient,
-          streamName: source.id,
+          sourceId: source.id,
           candidates,
         });
         const sourceRef = toSourceRef(source);

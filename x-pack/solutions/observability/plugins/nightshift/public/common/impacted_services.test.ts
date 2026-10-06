@@ -8,7 +8,7 @@
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   getImpactedServiceKey,
-  getImpactedServiceStreamNames,
+  getImpactedServiceSourceIds,
   getImpactedServices,
   resolveImpactedServices,
 } from './impacted_services';
@@ -17,7 +17,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
   status: 'active',
-  stream_names: ['logs.web-frontend'],
+  source_ids: ['logs.web-frontend'],
   title: 'Test event',
   summary: 'Summary',
   severity: 'high',
@@ -28,7 +28,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 const mockFeature = (overrides: Partial<Feature> = {}): Feature => ({
   uuid: 'feat-checkout',
   id: 'checkout-api',
-  stream_name: 'logs.checkout',
+  source_id: 'logs.checkout',
   type: 'entity',
   subtype: 'service',
   title: 'Checkout API',
@@ -43,7 +43,7 @@ const entityEntry = {
   subtype: 'service',
   feature_id: 'feat-checkout',
   name: 'checkout-api',
-  stream_name: 'logs.checkout',
+  source_id: 'logs.checkout',
 };
 
 describe('getImpactedServices', () => {
@@ -87,7 +87,7 @@ describe('getImpactedServices', () => {
           subtype: 'service',
           feature_id: 'feat-ingress',
           title: 'Ingress controller',
-          stream_name: 'logs.checkout',
+          source_id: 'logs.checkout',
         },
       ],
     });
@@ -105,7 +105,7 @@ describe('getImpactedServices', () => {
           feature_id: 'feat-edge',
           source: 'checkout-api',
           target: 'payments-api',
-          stream_name: 'logs.checkout',
+          source_id: 'logs.checkout',
         },
       ],
     });
@@ -121,7 +121,7 @@ describe('getImpactedServices', () => {
           subtype: 'infrastructure',
           feature_id: 'feat-nodes',
           title: 'Wolfi Linux nodes',
-          stream_name: 'logs.checkout',
+          source_id: 'logs.checkout',
         },
       ],
     });
@@ -159,7 +159,7 @@ describe('getImpactedServices', () => {
           type: 'entity',
           subtype: 'service',
           name: 'Checkout-API',
-          stream_name: 'logs.checkout',
+          source_id: 'logs.checkout',
         },
       ],
     });
@@ -167,7 +167,7 @@ describe('getImpactedServices', () => {
     expect(resolveImpactedServices(event, [feature])[0].feature).toBe(feature);
   });
 
-  it('never falls back to a stream name when there is no blast radius', () => {
+  it('never falls back to a source id when there is no blast radius', () => {
     expect(getImpactedServices(mockEvent())).toEqual([]);
   });
 
@@ -180,7 +180,7 @@ describe('getImpactedServices', () => {
           type: 'entity',
           subtype: 'service',
           name: 'Checkout-API',
-          stream_name: 'logs.other-checkout',
+          source_id: 'logs.other-checkout',
         },
         {
           feature_id: 'payments',
@@ -198,8 +198,8 @@ describe('getImpactedServices', () => {
   });
 });
 
-describe('getImpactedServiceStreamNames', () => {
-  it('collects distinct streams from every entry that can name a service', () => {
+describe('getImpactedServiceSourceIds', () => {
+  it('collects distinct sources from every entry that can name a service', () => {
     const events = [
       mockEvent({ blast_radius: [entityEntry] }),
       mockEvent({
@@ -208,14 +208,14 @@ describe('getImpactedServiceStreamNames', () => {
             ...entityEntry,
             feature_id: 'feat-eis',
             name: 'eis-gateway',
-            stream_name: 'logging-eis',
+            source_id: 'logging-eis',
           },
           {
             type: 'infrastructure',
             subtype: 'service',
             feature_id: 'feat-nodes',
             title: 'Wolfi Linux nodes',
-            stream_name: 'logs.infra',
+            source_id: 'logs.infra',
           },
           {
             type: 'dependency',
@@ -223,7 +223,7 @@ describe('getImpactedServiceStreamNames', () => {
             feature_id: 'feat-edge',
             source: 'checkout-api',
             target: 'payments-api',
-            stream_name: 'logs.edges',
+            source_id: 'logs.edges',
           },
         ],
         causal_features: [
@@ -232,14 +232,14 @@ describe('getImpactedServiceStreamNames', () => {
             type: 'entity',
             subtype: 'service',
             name: 'payments-api',
-            stream_name: 'logs.payments',
+            source_id: 'logs.payments',
           },
         ],
       }),
       mockEvent(),
     ];
 
-    expect(getImpactedServiceStreamNames(events)).toEqual([
+    expect(getImpactedServiceSourceIds(events)).toEqual([
       'logs.checkout',
       'logging-eis',
       'logs.payments',

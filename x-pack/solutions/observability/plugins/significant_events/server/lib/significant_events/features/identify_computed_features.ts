@@ -95,7 +95,6 @@ export async function identifyComputedFeatures({
 
   const reconciledComputedFeatures = reconcileComputedFeatures({
     computedFeatures,
-    streamName: sourceId,
     runId,
   });
 

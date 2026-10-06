@@ -23,7 +23,7 @@ export const seedExistingQueries = async ({
       index: KNOWLEDGE_INDICATORS_DATA_STREAM,
       query: {
         bool: {
-          filter: [{ term: { type: 'query' } }, { term: { 'stream.name': streamName } }],
+          filter: [{ term: { type: 'query' } }, { term: { 'source.id': streamName } }],
         },
       },
       refresh: true,
@@ -49,7 +49,7 @@ export const seedExistingQueries = async ({
         type: 'query',
         title: query.title,
         description: query.description,
-        'stream.name': streamName,
+        'source.id': streamName,
         query: {
           esql: query.esql,
           query_type: query.type,

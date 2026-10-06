@@ -54,8 +54,8 @@ const makeSourcesClient = (sources: NightshiftSource[]): SourcesClient =>
 
 const makeKiClient = (reconcileIds: string[] = [], ownedRuleIds: string[] = reconcileIds) => ({
   setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
-  findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue(ownedRuleIds),
-  getStreamNamesToReconcile: jest.fn().mockResolvedValue(reconcileIds),
+  findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue(ownedRuleIds),
+  getSourceIdsToReconcile: jest.fn().mockResolvedValue(reconcileIds),
   deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
   deleteAllQueries: jest.fn().mockResolvedValue(undefined),
   deleteIndicators: jest.fn().mockResolvedValue(undefined),

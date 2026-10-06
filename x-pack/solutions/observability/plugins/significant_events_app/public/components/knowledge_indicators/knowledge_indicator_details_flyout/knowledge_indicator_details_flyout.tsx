@@ -98,7 +98,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
-  const streamName = getKnowledgeIndicatorSourceId(knowledgeIndicator);
+  const sourceId = getKnowledgeIndicatorSourceId(knowledgeIndicator);
 
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
@@ -112,8 +112,8 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [discoverLocator, featureFilter, source, timeState]);
 
   const streamFeatures = useMemo(
-    () => features.filter((f) => f.stream_name === streamName),
-    [features, streamName]
+    () => features.filter((f) => f.source_id === sourceId),
+    [features, sourceId]
   );
 
   const {
@@ -122,11 +122,11 @@ export function KnowledgeIndicatorDetailsFlyout({
     promoteQuery,
     setDurability,
     isMutating: isActionMutating,
-  } = useKnowledgeIndicatorActions({ streamName, onSuccess: onClose });
+  } = useKnowledgeIndicatorActions({ sourceId, onSuccess: onClose });
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting: isKIDeleting } =
-    useStreamKnowledgeIndicatorsBulkDelete({ streamName, onSuccess: onClose });
+    useStreamKnowledgeIndicatorsBulkDelete({ sourceId, onSuccess: onClose });
 
   const { demoteRules, isPending: isDemoting } = useRulesDemote({ onSuccess: onClose });
 
@@ -402,7 +402,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
                 <EuiBadge color="hollow" iconType="database" iconSide="left">
-                  {source?.title ?? streamName}
+                  {source?.title ?? sourceId}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>

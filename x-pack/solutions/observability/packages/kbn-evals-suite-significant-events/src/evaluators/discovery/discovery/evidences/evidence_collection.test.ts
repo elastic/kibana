@@ -13,7 +13,7 @@ const detection = (ruleUuid: string): Omit<Detection, 'processed'> => ({
   detection_id: `${ruleUuid}-det`,
   rule_uuid: ruleUuid,
   rule_name: ruleUuid,
-  stream_name: 'logs',
+  source_id: 'logs',
   change_point_type: 'spike',
   p_value: 0,
 });
@@ -29,7 +29,7 @@ const detectionSignal = (
       : 'Found: checkout payment timeout to payment API. Impact: checkout requests fail.',
   verdict:
     evidence === 'found' ? 'confirms' : evidence === 'quiet' ? 'not_checked' : 'inconclusive',
-  stream_name: 'logs',
+  source_id: 'logs',
   ...(evidence === 'found'
     ? { evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' as const } }
     : evidence === 'quiet'

@@ -58,7 +58,7 @@ interface QueryDetailsFlyoutProps {
   item: StreamQueryStats;
   isDeleting: boolean;
   onClose: () => void;
-  onDelete: (queryId: string, streamName: string) => Promise<void>;
+  onDelete: (queryId: string, sourceId: string) => Promise<void>;
 }
 
 const DEFAULT_QUERY_PLACEHOLDER = '--';
@@ -184,7 +184,7 @@ export function QueryDetailsFlyout({
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
                 <EuiBadge color="hollow" iconType="database" iconSide="left">
-                  {getSourceTitle(item.stream_name)}
+                  {getSourceTitle(item.source_id)}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
@@ -299,7 +299,7 @@ export function QueryDetailsFlyout({
             setIsDeleteModalVisible(false);
           }}
           onConfirm={async () => {
-            await onDelete(item.query.id, item.stream_name);
+            await onDelete(item.query.id, item.source_id);
             setIsDeleteModalVisible(false);
           }}
           cancelButtonText={CANCEL_BUTTON_LABEL}

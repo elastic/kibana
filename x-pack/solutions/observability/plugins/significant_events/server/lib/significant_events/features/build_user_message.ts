@@ -6,20 +6,20 @@
  */
 
 export function buildFeatureIdentificationUserMessage({
-  streamName,
+  sourceId,
   sampleDocuments,
   previouslyIdentifiedFeatures,
   knownFeatureIds,
   excludedFeatures,
 }: {
-  streamName: string;
+  sourceId: string;
   sampleDocuments: string;
   previouslyIdentifiedFeatures?: string;
   knownFeatureIds?: string;
   excludedFeatures?: string;
 }): string {
   const parts: string[] = [];
-  parts.push(`\`stream_name\`: ${streamName}`);
+  parts.push(`\`source_id\`: ${sourceId}`);
   if (excludedFeatures) {
     parts.push(`\`excluded_features\`:\n${excludedFeatures}`);
   }

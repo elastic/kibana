@@ -10,9 +10,11 @@ import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { StreamQuery } from '@kbn/significant-events-schema';
-import type { SeedContext } from '../types';
+import type { SeedBaseContext } from '../types';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { kibanaRequest } from '../lib/kibana';
+import type { SeedSource } from '../lib/seed_source';
+import { findSeedSource } from '../lib/seed_source';
 import { computeRuleId } from '../../../server/lib/knowledge_indicators/helpers/compute_rule_id';
 
 async function deleteByQuery(
@@ -98,52 +100,70 @@ async function cleanDetectionAndEventHistory(
   );
 }
 
-export async function cleanSeedData(
-  ctx: SeedContext,
+async function cleanSeedSource(
+  ctx: SeedBaseContext,
+  source: SeedSource,
   esClient: Client,
   config: ConnectionConfig,
   log: ToolingLog
 ): Promise<void> {
-  await deleteByMatchAll(esClient, '.kibana_streams_features-*', log);
-
   // Local seed reset only: deleting an Alerting v2 rule leaves its historical `.rule-events`.
-  // Resolve the rule ids before deleting queries so repeated seed runs do not retain stale
+  // Resolve the rule ids before deleting the source so repeated seed runs do not retain stale
   // synthetic events. Discovery list needs a range; one hour keeps occurrence work cheap.
-  const listPath = `/internal/streams/_queries?from=2020-01-01T00:00:00.000Z&to=2020-01-01T01:00:00.000Z&bucketSize=1h&streamNames=${encodeURIComponent(
-    ctx.streamName
+  const listPath = `/internal/streams/_queries?from=2020-01-01T00:00:00.000Z&to=2020-01-01T01:00:00.000Z&bucketSize=1h&sourceIds=${encodeURIComponent(
+    source.id
   )}&status=active&status=draft&perPage=1000`;
   const listRes = await kibanaRequest(config, 'GET', listPath, undefined, ctx.space);
   if (listRes.status >= 300) {
     throw new Error(`clean: failed to list queries (HTTP ${listRes.status})`);
   }
   const allQueries = (listRes.data as { queries: StreamQuery[] }).queries;
-  const queryIds = allQueries.map((q) => q.id);
   const ruleIds = allQueries.map((query) =>
-    computeRuleId(ctx.space, ctx.streamName, query.id, query.esql.query)
+    computeRuleId(ctx.space, source.id, query.id, query.esql.query)
   );
 
-  if (queryIds.length > 0) {
+  if (ruleIds.length > 0) {
     await deleteByQuery(esClient, '.rule-events', { terms: { 'rule.id': ruleIds } }, log);
   }
 
   await cleanDetectionAndEventHistory(esClient, ruleIds, ctx.space, log);
 
-  if (queryIds.length > 0) {
-    const delRes = await kibanaRequest(
-      config,
-      'POST',
-      '/internal/streams/queries/_bulk_delete',
-      { queryIds },
-      ctx.space
+  // The source change listener cancels onboarding, uninstalls the rules and deletes the
+  // queries and features of the source; the delete also drops its ES|QL view.
+  const delRes = await kibanaRequest(
+    config,
+    'DELETE',
+    `/internal/nightshift/sources/${encodeURIComponent(source.id)}`,
+    undefined,
+    ctx.space
+  );
+  if (delRes.status === 404) {
+    log.info(`clean: seed source "${source.slug}" already gone`);
+    return;
+  }
+  if (delRes.status >= 300) {
+    throw new Error(
+      `clean: failed to delete seed source ${source.id} (HTTP ${delRes.status}) ${JSON.stringify(
+        delRes.data
+      )}`
     );
-    const failed =
-      delRes.status >= 300 ? queryIds.length : (delRes.data as { failed?: number }).failed ?? 0;
-    if (failed > 0) {
-      throw new Error(
-        `clean: bulk delete queries failed (HTTP ${delRes.status}) ${JSON.stringify(delRes.data)}`
-      );
-    }
-    log.info(`clean: deleted ${queryIds.length} query/queries from stream "${ctx.streamName}"`);
+  }
+  log.info(`clean: deleted seed source "${source.slug}" with ${allQueries.length} query/queries`);
+}
+
+export async function cleanSeedData(
+  ctx: SeedBaseContext,
+  esClient: Client,
+  config: ConnectionConfig,
+  log: ToolingLog
+): Promise<void> {
+  await deleteByMatchAll(esClient, '.kibana_streams_features-*', log);
+
+  const source = await findSeedSource(config, ctx.space);
+  if (source) {
+    await cleanSeedSource(ctx, source, esClient, config, log);
+  } else {
+    log.info('clean: no seed source found, skipping');
   }
 
   log.info(`clean: deleting data stream "${ctx.streamName}"`);

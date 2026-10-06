@@ -6,7 +6,6 @@
  */
 
 import { Parser, Walker } from '@elastic/esql';
-import { Streams } from '@kbn/streams-schema';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { StatusError } from '../errors/status_error';
 
@@ -56,33 +55,4 @@ function readFromSources(esqlQuery: string): string {
   return Walker.matchAll(fromCmd, { type: 'source', sourceType: 'index' })
     .map((node) => node.name)
     .join(', ');
-}
-
-export function validateEsqlQueryForStreamOrThrow({
-  esqlQuery,
-  stream,
-}: {
-  esqlQuery: string;
-  stream: Streams.all.Definition;
-}): void {
-  const sourcesPattern = readFromSources(esqlQuery);
-  const { name } = stream;
-  const wiredPattern = [name, `${name}.*`].join(', ');
-  const matchesWiredPattern = sourcesPattern === wiredPattern;
-
-  if (Streams.ClassicStream.Definition.is(stream)) {
-    const isNameOnly = sourcesPattern === name;
-    if (!isNameOnly && !matchesWiredPattern) {
-      throw new EsqlQueryValidationError(
-        `ES|QL query must use FROM ${name} or FROM ${wiredPattern}`
-      );
-    }
-  } else if (Streams.QueryStream.Definition.is(stream)) {
-    const viewName = stream.query.view;
-    if (sourcesPattern !== viewName) {
-      throw new EsqlQueryValidationError(`ES|QL query must use FROM ${viewName}`);
-    }
-  } else if (!matchesWiredPattern) {
-    throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern}`);
-  }
 }

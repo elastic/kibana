@@ -318,16 +318,16 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
       description: 'Whether the event creation succeeded',
     },
   },
-  stream_names: {
+  source_ids: {
     type: 'array',
     items: {
       type: 'keyword',
       _meta: {
-        description: 'A stream name',
+        description: 'A Nightshift source id',
       },
     },
     _meta: {
-      description: 'The names of the Streams associated with the event',
+      description: 'The Nightshift source ids associated with the event',
     },
   },
   error_message: {
@@ -392,7 +392,7 @@ const codeAnalysisGroundingSchema: RootSchema<CodeAnalysisGroundingProps> = {
   repository: {
     type: 'keyword',
     _meta: {
-      description: 'The repository/index selected to ground the stream against',
+      description: 'The repository/index selected to ground the source against',
       optional: true,
     },
   },
@@ -607,16 +607,16 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       description: 'Whether a new event version was actually written (false when status unchanged)',
     },
   },
-  stream_names: {
+  source_ids: {
     type: 'array',
     items: {
       type: 'keyword',
       _meta: {
-        description: 'A stream name',
+        description: 'A Nightshift source id',
       },
     },
     _meta: {
-      description: 'The names of the streams associated with the event',
+      description: 'The Nightshift source ids associated with the event',
     },
   },
   error_message: {
@@ -647,10 +647,10 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
       description: 'Whether the search included a query filter',
     },
   },
-  has_stream_filter: {
+  has_source_filter: {
     type: 'boolean',
     _meta: {
-      description: 'Whether the search included a stream_names filter',
+      description: 'Whether the search included a source_ids filter',
     },
   },
   status_filter: {

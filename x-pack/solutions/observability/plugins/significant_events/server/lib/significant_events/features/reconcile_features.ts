@@ -43,11 +43,9 @@ export function createFeatureMetadata({ runId }: { runId: string }) {
 
 export function reconcileComputedFeatures({
   computedFeatures,
-  streamName,
   runId,
 }: {
   computedFeatures: BaseFeature[];
-  streamName: string;
   runId: string;
 }): FeatureUpsert[] {
   const metadata = createFeatureMetadata({ runId });

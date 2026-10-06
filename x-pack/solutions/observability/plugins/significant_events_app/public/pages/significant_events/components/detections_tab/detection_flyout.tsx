@@ -141,11 +141,11 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
               </EuiToolTip>
             </FlyoutMetadataCard>
           </EuiFlexItem>
-          {detection.stream_name && (
+          {detection.source_id && (
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
                 <EuiBadge color="hollow" iconType="database" iconSide="left">
-                  {getSourceTitle(detection.stream_name)}
+                  {getSourceTitle(detection.source_id)}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>

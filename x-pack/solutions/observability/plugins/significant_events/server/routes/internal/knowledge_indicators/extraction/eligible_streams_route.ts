@@ -62,9 +62,9 @@ const eligibleStreamsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_extraction/_eligible',
   options: {
     access: 'internal',
-    summary: 'List streams eligible for KI extraction',
+    summary: 'List sources eligible for KI extraction',
     description:
-      'Classifies streams into eligible candidates, already-running, up-to-date, unsupported, and skipped buckets based on extraction settings and workflow execution state.',
+      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, and skipped buckets based on extraction settings and workflow execution state.',
   },
   security: {
     authz: {

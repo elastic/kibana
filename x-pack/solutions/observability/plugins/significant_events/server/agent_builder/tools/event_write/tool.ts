@@ -56,7 +56,7 @@ export const eventsWriteItemSchema = significantEventSchema
   })
   .extend({
     slugs: nightshiftSourceSlugsField(
-      'This event covers these sources. Nested signal, causal feature, and blast radius `stream_name` values are slugs too. Disabled sources are accepted.'
+      'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
     ),
     event_id: z
       .string()
@@ -195,21 +195,21 @@ const enrichCausalFeatures = async (
     // references and `featureIds` (feature.slug) matches slug-style ones.
     const references = [...causalFeatures, ...blastRadiusEntries];
     const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
-    const streamNames = [
+    const sourceIds = [
       ...new Set([
-        ...items.flatMap(({ stream_names: names }) => names),
-        ...references.flatMap(({ stream_name: streamName }) => streamName ?? []),
+        ...items.flatMap(({ source_ids: ids }) => ids),
+        ...references.flatMap(({ source_id: sourceId }) => sourceId ?? []),
       ]),
     ];
     const kiClient = await getKnowledgeIndicatorClient();
     const hits = (
       await Promise.all([
-        kiClient.getFeatures(streamNames, {
+        kiClient.getFeatures(sourceIds, {
           featureIds,
           includeExcluded: true,
           includeExpired: true,
         }),
-        kiClient.getFeatures(streamNames, {
+        kiClient.getFeatures(sourceIds, {
           id: featureIds,
           includeExcluded: true,
           includeExpired: true,
@@ -220,24 +220,24 @@ const enrichCausalFeatures = async (
     const uniqueHits = [...new Map(hits.map((feature) => [feature.uuid, feature])).values()];
     const featuresByReference = new Map(
       uniqueHits.flatMap((feature) => [
-        [`${feature.stream_name}:${feature.id}`, feature] as const,
-        [`${feature.stream_name}:${feature.uuid}`, feature] as const,
+        [`${feature.source_id}:${feature.id}`, feature] as const,
+        [`${feature.source_id}:${feature.uuid}`, feature] as const,
       ])
     );
 
     const resolveFeature = (
       featureId: string,
-      explicitStream: string | undefined,
-      itemStreamNames: string[]
+      explicitSourceId: string | undefined,
+      itemSourceIds: string[]
     ) => {
-      if (explicitStream !== undefined) {
-        return featuresByReference.get(`${explicitStream}:${featureId}`);
+      if (explicitSourceId !== undefined) {
+        return featuresByReference.get(`${explicitSourceId}:${featureId}`);
       }
-      // Without an explicit stream: an unambiguous match wins; otherwise restrict to the
-      // event's own streams so a shared slug on another stream cannot stamp the wrong
+      // Without an explicit source: an unambiguous match wins; otherwise restrict to the
+      // event's own sources so a shared slug on another source cannot stamp the wrong
       // classification.
       const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
-      const scoped = matches.filter(({ stream_name }) => itemStreamNames.includes(stream_name));
+      const scoped = matches.filter(({ source_id: sourceId }) => itemSourceIds.includes(sourceId));
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
 
@@ -246,8 +246,8 @@ const enrichCausalFeatures = async (
       causal_features: item.causal_features?.map((causalFeature) => {
         const feature = resolveFeature(
           causalFeature.feature_id,
-          causalFeature.stream_name,
-          item.stream_names
+          causalFeature.source_id,
+          item.source_ids
         );
         return feature
           ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
@@ -256,7 +256,7 @@ const enrichCausalFeatures = async (
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
       blast_radius: item.blast_radius?.map((entry) => {
-        const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
+        const feature = resolveFeature(entry.feature_id, entry.source_id, item.source_ids);
         return feature ? { ...entry, subtype: feature.subtype } : entry;
       }),
     }));
@@ -315,10 +315,7 @@ export function createEventsWriteTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
-      let storedItems: EventsWriteInput[] = toolParams.items.map((item) => ({
-        ...item,
-        stream_names: [...item.slugs],
-      }));
+      let storedItems: EventsWriteInput[] | undefined;
       try {
         const {
           getEventClient,
@@ -333,8 +330,13 @@ export function createEventsWriteTool({
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
-        storedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
-        const items = await enrichCausalFeatures(storedItems, getKnowledgeIndicatorClient, logger);
+        const resolvedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
+        storedItems = resolvedItems;
+        const items = await enrichCausalFeatures(
+          resolvedItems,
+          getKnowledgeIndicatorClient,
+          logger
+        );
 
         const data = await eventsWriteBulkHandler({
           eventClient: await getEventClient(),
@@ -346,7 +348,7 @@ export function createEventsWriteTool({
         });
 
         data.forEach((result) => {
-          const input = storedItems[result.index];
+          const input = resolvedItems[result.index];
           if (input === undefined) return;
           const isSkipped = !result.written && 'skipped' in result;
           const isBulkError = !result.written && 'error' in result;
@@ -359,7 +361,7 @@ export function createEventsWriteTool({
                 event_id: result.event_id ?? 'unknown',
                 status: result.status,
                 written: result.written,
-                stream_names: input.stream_names,
+                source_ids: input.source_ids,
                 error_message: isBulkError ? result.error.reason : undefined,
               }),
           });
@@ -371,13 +373,13 @@ export function createEventsWriteTool({
               type: ToolResultType.other,
               data: {
                 results: data.map((result) => {
-                  const input = storedItems[result.index];
+                  const input = resolvedItems[result.index];
                   if (!input) {
                     return result;
                   }
                   return {
                     ...result,
-                    sources: input.stream_names.flatMap((sourceId) => {
+                    sources: input.source_ids.flatMap((sourceId) => {
                       const source = catalog.byId.get(sourceId);
                       return source ? [toSourceRef(source)] : [];
                     }),
@@ -390,7 +392,8 @@ export function createEventsWriteTool({
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running events_write: ${message}`);
-        storedItems.forEach((input) => {
+        // Source ids exist only once the slugs resolved; earlier failures report none.
+        (storedItems ?? toolParams.items).forEach((input) => {
           trackTelemetryBestEffort({
             logger,
             description: 'failed events_write telemetry',
@@ -400,7 +403,7 @@ export function createEventsWriteTool({
                 event_id: input.event_id ?? 'unknown',
                 status: input.status,
                 written: false,
-                stream_names: input.stream_names,
+                source_ids: 'source_ids' in input ? input.source_ids : [],
                 error_message: message,
               }),
           });

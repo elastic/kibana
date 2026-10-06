@@ -21,7 +21,7 @@ const createEvent = (): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'agent-event-1',
   status: 'active',
-  stream_names: ['logs.test'],
+  source_ids: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: 'medium',
@@ -135,7 +135,7 @@ describe('EventClient', () => {
     ] as const)('normalizes %o to %s', (legacyFields, verdict) => {
       const signal = normalizeLegacyVerdict({
         type: 'detection',
-        stream_name: 'logs.test',
+        source_id: 'logs.test',
         description: 'Legacy signal',
         metadata: {
           rule_uuid: 'rule-1',
@@ -164,7 +164,7 @@ describe('EventClient', () => {
         signals: [
           {
             type: 'detection',
-            stream_name: 'logs.test',
+            source_id: 'logs.test',
             description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
             verdict: 'not_checked',
             metadata: {
@@ -261,7 +261,7 @@ describe('EventClient', () => {
         from: '2026-01-02T00:00:00.000Z',
         to: '2026-01-04T00:00:00.000Z',
         status: ['inactive'],
-        stream: ['logs.test'],
+        sourceIds: ['logs.test'],
       });
 
       expect(result).toEqual({
@@ -485,7 +485,7 @@ describe('EventClient', () => {
 
       await client.findLatestActive({
         from: 'now-24h',
-        streamNames: ['logs.checkout'],
+        sourceIds: ['logs.checkout'],
         ruleUuids: ['rule-abc'],
       });
 

@@ -835,7 +835,7 @@ describe('RulesAdapterV2', () => {
     });
   });
 
-  describe('findStreamNamesWithOwnedRules', () => {
+  describe('findSourceIdsWithOwnedRules', () => {
     it('derives distinct source ids from both ownership tags, ignoring unrelated tags', async () => {
       const mock = makeRulesClientMock();
       mock.getTags.mockImplementation(async ({ search }: { search: string }) =>
@@ -850,7 +850,7 @@ describe('RulesAdapterV2', () => {
       );
       const adapter = makeAdapter(mock);
 
-      const sourceIds = await adapter.findStreamNamesWithOwnedRules();
+      const sourceIds = await adapter.findSourceIdsWithOwnedRules();
 
       expect(new Set(sourceIds)).toEqual(new Set(['logs.nginx', 'logs.apache', 'logs.legacy']));
       expect(mock.getTags).toHaveBeenCalledWith({

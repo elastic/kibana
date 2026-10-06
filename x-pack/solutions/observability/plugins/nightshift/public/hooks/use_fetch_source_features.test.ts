@@ -6,12 +6,12 @@
  */
 
 import type { Feature } from '@kbn/significant-events-schema';
-import { collectStreamFeatures } from './use_fetch_stream_features';
+import { collectSourceFeatures } from './use_fetch_source_features';
 
-const mockFeature = (id: string, streamName: string): Feature => ({
+const mockFeature = (id: string, sourceId: string): Feature => ({
   uuid: `uuid-${id}`,
   id,
-  stream_name: streamName,
+  source_id: sourceId,
   type: 'entity',
   subtype: 'service',
   title: id,
@@ -30,43 +30,43 @@ const unreachable = (reason: Error): PromiseSettledResult<Feature[]> => ({
   reason,
 });
 
-describe('collectStreamFeatures', () => {
-  it('reports no failures when every stream resolves', () => {
+describe('collectSourceFeatures', () => {
+  it('reports no failures when every source resolves', () => {
     const checkout = mockFeature('checkout-api', 'logs.checkout');
     const payments = mockFeature('payments-api', 'logs.payments');
 
     expect(
-      collectStreamFeatures(
+      collectSourceFeatures(
         ['logs.checkout', 'logs.payments'],
         [loaded([checkout]), loaded([payments])]
       )
-    ).toEqual({ features: [checkout, payments], failedStreamNames: [] });
+    ).toEqual({ features: [checkout, payments], failedSourceIds: [] });
   });
 
   // The whole point of the partial state: a short list must not pass for a complete one.
-  it('keeps the features that resolved and names the streams that did not', () => {
+  it('keeps the features that resolved and names the sources that did not', () => {
     const checkout = mockFeature('checkout-api', 'logs.checkout');
 
     expect(
-      collectStreamFeatures(
+      collectSourceFeatures(
         ['logs.checkout', 'logs.payments', 'logs.orders'],
         [loaded([checkout]), unreachable(new Error('gateway timeout')), loaded([])]
       )
-    ).toEqual({ features: [checkout], failedStreamNames: ['logs.payments'] });
+    ).toEqual({ features: [checkout], failedSourceIds: ['logs.payments'] });
   });
 
-  it('throws the first reason when every stream fails', () => {
+  it('throws the first reason when every source fails', () => {
     const firstFailure = new Error('gateway timeout');
 
     expect(() =>
-      collectStreamFeatures(
+      collectSourceFeatures(
         ['logs.checkout', 'logs.payments'],
         [unreachable(firstFailure), unreachable(new Error('connection refused'))]
       )
     ).toThrow(firstFailure);
   });
 
-  it('returns nothing rather than throwing when there are no streams to load', () => {
-    expect(collectStreamFeatures([], [])).toEqual({ features: [], failedStreamNames: [] });
+  it('returns nothing rather than throwing when there are no sources to load', () => {
+    expect(collectSourceFeatures([], [])).toEqual({ features: [], failedSourceIds: [] });
   });
 });

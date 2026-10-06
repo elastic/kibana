@@ -21,7 +21,7 @@ import {
   upsertStreamQueryRequestSchema,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import { deriveQueryType, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { deriveQueryType } from '@kbn/streams-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
@@ -44,7 +44,12 @@ import {
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
 import { assertSourceEnabled } from '../../../utils/assert_source_enabled';
-import { resolveSourceIds } from '../../../utils/resolve_source_ids';
+import {
+  MAX_SOURCE_IDS_PER_REQUEST,
+  requestedOrAllSourceIds,
+  sourceIdsArraySchema,
+  sourceIdsQuerySchema,
+} from '../../../utils/resolve_source_ids';
 import { listAllSources } from '../../../utils/list_all_sources';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
@@ -57,9 +62,9 @@ import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cl
 import { QueryNotFoundError } from '../../../../lib/errors/query_not_found_error';
 import { validateEsqlQueryForSourceOrThrow } from '../../../../lib/significant_events/validate_esql_query';
 
-const RECONCILE_STREAM_CONCURRENCY = 3;
+const RECONCILE_SOURCE_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
-const RECONCILE_MAX_STREAMS = 10;
+const RECONCILE_MAX_SOURCES = 10;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
@@ -76,13 +81,9 @@ const baseRequestParamsSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .optional()
     .describe('Query string to filter significant events queries'),
-  streamNames: z
-    .preprocess(
-      (val) => (typeof val === 'string' ? [val] : val),
-      z.array(z.string().max(MAX_ID_LENGTH))
-    )
-    .optional()
-    .describe('Source ids to filter significant events'),
+  sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+    'Source ids to filter queries'
+  ),
 });
 
 const requestParamsSchema = baseRequestParamsSchema.extend({
@@ -101,7 +102,7 @@ const promoteUnbackedQueriesRoute = createServerRoute({
     access: 'internal',
     summary: 'Promote unbacked queries',
     description:
-      'Creates Kibana rules for stored queries across streams that do not yet have a backing rule, then marks them as backed.',
+      'Creates Kibana rules for stored queries across sources that do not yet have a backing rule, then marks them as backed.',
   },
   security: {
     authz: {
@@ -181,27 +182,27 @@ const demoteBackedQueriesRoute = createServerRoute({
       includeExpired: true,
     });
 
-    const byStream = toDemote.reduce<Record<string, string[]>>((acc, link) => {
-      const stream = link.stream_name;
+    const bySource = toDemote.reduce<Record<string, string[]>>((acc, link) => {
+      const sourceId = link.source_id;
 
-      if (!acc[stream]) {
-        acc[stream] = [];
+      if (!acc[sourceId]) {
+        acc[sourceId] = [];
       }
 
-      acc[stream].push(link.query.id);
+      acc[sourceId].push(link.query.id);
       return acc;
     }, {});
 
-    const catalogIds = new Set(await resolveSourceIds(undefined, sourcesClient));
+    const catalogIds = new Set(await requestedOrAllSourceIds(undefined, sourcesClient));
 
     let demoted = 0;
 
-    for (const [streamName, queryIds] of Object.entries(byStream)) {
-      if (!catalogIds.has(streamName)) {
-        logger.warn(`Skipping demotion for missing source ${streamName}`);
+    for (const [sourceId, queryIds] of Object.entries(bySource)) {
+      if (!catalogIds.has(sourceId)) {
+        logger.warn(`Skipping demotion for missing source ${sourceId}`);
         continue;
       }
-      const result = await kiClient.demoteQueries(streamName, queryIds);
+      const result = await kiClient.demoteQueries(sourceId, queryIds);
       demoted += result.demoted;
     }
 
@@ -213,9 +214,9 @@ const bulkDeleteQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_bulk_delete',
   options: {
     access: 'internal',
-    summary: 'Bulk delete queries across streams',
+    summary: 'Bulk delete queries across sources',
     description:
-      'Hard-deletes stored significant-events queries across multiple streams in a single request. Removes backing Kibana rules for any backed queries.',
+      'Hard-deletes stored significant-events queries across multiple sources in a single request. Removes backing Kibana rules for any backed queries.',
   },
   security: {
     authz: {
@@ -258,27 +259,27 @@ const bulkDeleteQueriesRoute = createServerRoute({
     const foundIds = new Set(queryLinks.map((link) => link.query.id));
     const skipped = params.body.queryIds.filter((id) => !foundIds.has(id)).length;
 
-    // Capture backed rule IDs per stream to log on mid-flight failure.
-    const byStream = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
+    // Capture backed rule IDs per source to log on mid-flight failure.
+    const bySource = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
     for (const link of queryLinks) {
-      const bucket = byStream.get(link.stream_name) ?? { queryIds: [], backedRuleIds: [] };
+      const bucket = bySource.get(link.source_id) ?? { queryIds: [], backedRuleIds: [] };
       bucket.queryIds.push(link.query.id);
       if (link.rule_backed && link.rule_id) {
         bucket.backedRuleIds.push(link.rule_id);
       }
-      byStream.set(link.stream_name, bucket);
+      bySource.set(link.source_id, bucket);
     }
 
     // Fetch only the sources we actually need. Rejections (the saved object is
-    // gone) fail that source's batch, same as a missing stream used to.
-    const streamNames = Array.from(byStream.keys());
+    // gone) fail that source's batch.
+    const sourceIds = Array.from(bySource.keys());
     const sourceResults = await Promise.allSettled(
-      streamNames.map((name) => sourcesClient.get(name))
+      sourceIds.map((sourceId) => sourcesClient.get(sourceId))
     );
     const presentSourceIds = new Set<string>();
     sourceResults.forEach((result, i) => {
       if (result.status === 'fulfilled') {
-        presentSourceIds.add(streamNames[i]);
+        presentSourceIds.add(sourceIds[i]);
       }
     });
 
@@ -291,14 +292,14 @@ const bulkDeleteQueriesRoute = createServerRoute({
     let failed = 0;
     const candidateRuleIds = new Set<string>();
 
-    for (const [streamName, { queryIds, backedRuleIds }] of byStream) {
-      if (!presentSourceIds.has(streamName)) {
-        logger.warn(`Skipping bulk delete for missing source ${streamName}`);
+    for (const [sourceId, { queryIds, backedRuleIds }] of bySource) {
+      if (!presentSourceIds.has(sourceId)) {
+        logger.warn(`Skipping bulk delete for missing source ${sourceId}`);
         failed += queryIds.length;
         continue;
       }
       try {
-        await kiClient.deleteQueries(streamName, queryIds);
+        await kiClient.deleteQueries(sourceId, queryIds);
         backedRuleIds.forEach((ruleId) => candidateRuleIds.add(ruleId));
         succeeded += queryIds.length;
       } catch (error) {
@@ -306,7 +307,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
         const orphanContext =
           backedRuleIds.length > 0 ? ` candidateOrphanedRuleIds=[${backedRuleIds.join(',')}]` : '';
         sigEventsLogger.error(
-          `Bulk delete failed for stream ${streamName}: ${errorMessage}. ` +
+          `Bulk delete failed for source ${sourceId}: ${errorMessage}. ` +
             `queryIds=[${queryIds.join(',')}]${orphanContext}`
         );
         failed += queryIds.length;
@@ -350,7 +351,7 @@ const reconcileQueriesRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      streamNames: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(RECONCILE_MAX_STREAMS),
+      sourceIds: sourceIdsArraySchema({ min: 1, max: RECONCILE_MAX_SOURCES }),
     }),
   }),
   handler: async ({
@@ -363,8 +364,8 @@ const reconcileQueriesRoute = createServerRoute({
   }): Promise<{
     reconciled: number;
     failed: number;
-    streams: Array<{
-      streamName: string;
+    sources: Array<{
+      sourceId: string;
       status: 'reconciled' | 'failed';
       queries: number;
       error?: string;
@@ -382,32 +383,32 @@ const reconcileQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const { streamNames } = params.body;
-    const sources = await Promise.allSettled(
-      streamNames.map((streamName) => sourcesClient.get(streamName))
+    const { sourceIds } = params.body;
+    const sourceResults = await Promise.allSettled(
+      sourceIds.map((sourceId) => sourcesClient.get(sourceId))
     );
-    const limiter = pLimit(RECONCILE_STREAM_CONCURRENCY);
+    const limiter = pLimit(RECONCILE_SOURCE_CONCURRENCY);
 
-    const streams = await Promise.all(
-      sources.map((result, index) =>
+    const sources = await Promise.all(
+      sourceResults.map((result, index) =>
         limiter(async () => {
           if (result.status === 'rejected') {
-            const streamName = streamNames[index];
+            const sourceId = sourceIds[index];
             const error =
               result.reason instanceof Error ? result.reason.message : String(result.reason);
-            logger.warn(`Skipping query reconciliation for missing source ${streamName}: ${error}`);
-            return { streamName, status: 'failed' as const, queries: 0, error };
+            logger.warn(`Skipping query reconciliation for missing source ${sourceId}: ${error}`);
+            return { sourceId, status: 'failed' as const, queries: 0, error };
           }
 
           const sourceId = result.value.source.id;
           let reconciledQueries = 0;
           try {
-            await kiClient.replaceStreamQueries(sourceId, (currentLinks) => {
+            await kiClient.replaceSourceQueries(sourceId, (currentLinks) => {
               reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
               return currentLinks.map(queryFromLink);
             });
             return {
-              streamName: sourceId,
+              sourceId,
               status: 'reconciled' as const,
               queries: reconciledQueries,
             };
@@ -415,7 +416,7 @@ const reconcileQueriesRoute = createServerRoute({
             const errorMessage = error instanceof Error ? error.message : String(error);
             logger.warn(`Query reconciliation failed for source ${sourceId}: ${errorMessage}`);
             return {
-              streamName: sourceId,
+              sourceId,
               status: 'failed' as const,
               queries: reconciledQueries,
               error: errorMessage,
@@ -426,9 +427,9 @@ const reconcileQueriesRoute = createServerRoute({
     );
 
     return {
-      reconciled: streams.filter((stream) => stream.status === 'reconciled').length,
-      failed: streams.filter((stream) => stream.status === 'failed').length,
-      streams,
+      reconciled: sources.filter((source) => source.status === 'reconciled').length,
+      failed: sources.filter((source) => source.status === 'failed').length,
+      sources,
     };
   },
 });
@@ -476,7 +477,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       to,
       bucketSize,
       query,
-      streamNames,
+      sourceIds: requestedSourceIds,
       page = 1,
       perPage = 10,
       status,
@@ -484,7 +485,10 @@ const getDiscoveryQueriesRoute = createServerRoute({
     } = params.query;
     assertValidDateRange(from, to);
 
-    const sourceIds = await resolveSourceIds(streamNames, scopedClients.sourcesClient);
+    const sourceIds = await requestedOrAllSourceIds(
+      requestedSourceIds,
+      scopedClients.sourcesClient
+    );
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -492,7 +496,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     ]);
     const queryLinks = await fetchQueryLinks(
       {
-        streamNames: sourceIds,
+        sourceIds,
         query,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
         searchMode,
@@ -557,10 +561,13 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { from, to, bucketSize, query, streamNames } = params.query;
+    const { from, to, bucketSize, query, sourceIds: requestedSourceIds } = params.query;
     assertValidDateRange(from, to);
 
-    const sourceIds = await resolveSourceIds(streamNames, scopedClients.sourcesClient);
+    const sourceIds = await requestedOrAllSourceIds(
+      requestedSourceIds,
+      scopedClients.sourcesClient
+    );
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -576,7 +583,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames: sourceIds,
+        sourceIds,
         alertsReader,
         spaceId: await getSpaceId(request),
       },
@@ -598,10 +605,10 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 });
 
 const generateQueriesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/queries/_generate',
+  endpoint: 'POST /internal/streams/{sourceId}/queries/_generate',
   params: z.object({
     path: z.object({
-      streamName: z.string().max(MAX_ID_LENGTH).describe('The name of the stream'),
+      sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
     }),
     body: z
       .object({
@@ -619,7 +626,7 @@ const generateQueriesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Generate significant events queries',
-    description: 'Runs a single iteration of KI queries generation for the given stream.',
+    description: 'Runs a single iteration of KI queries generation for the given source.',
     timeout: { idleSocket: 600_000 },
   },
   security: {
@@ -642,7 +649,7 @@ const generateQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { streamName } = params.path;
+    const { sourceId } = params.path;
     const { connectorId, runId } = params.body ?? {};
     const resolvedRunId = runId?.trim() || uuidv4();
 
@@ -659,7 +666,7 @@ const generateQueriesRoute = createServerRoute({
     });
 
     const [{ source }, kiClient] = await Promise.all([
-      sourcesClient.get(streamName),
+      sourcesClient.get(sourceId),
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
 
@@ -697,10 +704,10 @@ const generateQueriesRoute = createServerRoute({
 });
 
 const persistQueriesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/queries/_persist',
+  endpoint: 'POST /internal/streams/{sourceId}/queries/_persist',
   params: z.object({
     path: z.object({
-      streamName: z.string().max(MAX_ID_LENGTH).describe('The name of the stream'),
+      sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
     }),
     body: z.object({
       queries: z.array(generatedSignificantEventQuerySchema),
@@ -710,7 +717,7 @@ const persistQueriesRoute = createServerRoute({
     access: 'internal',
     summary: 'Persist generated queries with deduplication',
     description:
-      'Persists generated significant event queries for a stream, deduplicating by ES|QL and handling rule-backed replacements.',
+      'Persists generated significant event queries for a source, deduplicating by ES|QL and handling rule-backed replacements.',
   },
   security: {
     authz: {
@@ -735,10 +742,10 @@ const persistQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { streamName } = params.path;
+    const { sourceId } = params.path;
     const { queries } = params.body;
     const [{ source }, kiClient] = await Promise.all([
-      sourcesClient.get(streamName),
+      sourcesClient.get(sourceId),
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
 
@@ -757,7 +764,7 @@ const upsertQueryRoute = createServerRoute({
     access: 'internal',
     summary: 'Upsert a significant-events query',
     description:
-      'Creates or updates a stored significant-events query. When `target_name` is omitted, the stream is resolved from the existing query link.',
+      'Creates or updates a stored significant-events query. When `source_id` is omitted, the source is resolved from the existing query link.',
   },
   security: {
     authz: {
@@ -769,13 +776,13 @@ const upsertQueryRoute = createServerRoute({
       queryId: z.string().max(MAX_ID_LENGTH).describe('The identifier of the query.'),
     }),
     body: upsertStreamQueryRequestSchema.extend({
-      target_name: z
+      source_id: z
         .string()
         .min(1)
-        .max(MAX_STREAM_NAME_LENGTH)
+        .max(MAX_ID_LENGTH)
         .optional()
         .describe(
-          'Optional analysis target (stream name). Required when creating a query; omitted updates resolve the target from the existing query.'
+          'Source id the query belongs to. Required when creating a query; omitted on update to keep the existing source.'
         ),
     }),
   }),
@@ -795,15 +802,15 @@ const upsertQueryRoute = createServerRoute({
     const { sourcesClient, licensing } = scopedClients;
     const {
       path: { queryId },
-      body: { target_name: targetName, ...queryBody },
+      body: { source_id: requestedSourceId, ...queryBody },
     } = params;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const streamName = targetName ?? (await resolveExistingQueryStreamName(kiClient, queryId));
-    const { source } = await sourcesClient.get(streamName);
+    const sourceId = requestedSourceId ?? (await resolveExistingQueryStreamName(kiClient, queryId));
+    const { source } = await sourcesClient.get(sourceId);
     // Any upsert can install a rule: a new query gets one, and an edit that changes the ES|QL
     // replaces the old one with an enabled rule.
     assertSourceEnabled(source);
@@ -828,8 +835,8 @@ async function resolveExistingQueryStreamName(
   kiClient: KnowledgeIndicatorClient,
   queryId: string
 ): Promise<string> {
-  // Empty stream list means "no stream filter"; include expired and unbacked so
-  // an omitted target_name can still resolve an existing query for update.
+  // Empty source list means "no source filter"; include expired and unbacked so
+  // an omitted source_id can still resolve an existing query for update.
   const [existing] = await kiClient.getQueryLinks([], {
     queryIds: [queryId],
     ruleUnbacked: 'include',
@@ -838,7 +845,7 @@ async function resolveExistingQueryStreamName(
   if (!existing) {
     throw new QueryNotFoundError(`Query [${queryId}] not found`);
   }
-  return existing.stream_name;
+  return existing.source_id;
 }
 
 export const internalKIQueriesRoutes = {

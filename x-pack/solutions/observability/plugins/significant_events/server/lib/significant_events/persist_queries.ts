@@ -57,7 +57,7 @@ export async function persistQueries(
   // onto the view; skipping it would leave the rule on the pre-cutover FROM.
   const dedupKey = (esql: string) => normalizeEsqlSafe(replaceFromSources(esql, [viewName]));
 
-  const { [sourceId]: existingLinks = [] } = await kiClient.getStreamToQueryLinksMap([sourceId]);
+  const { [sourceId]: existingLinks = [] } = await kiClient.getSourceToQueryLinksMap([sourceId]);
   const existingById = new Map(existingLinks.map((link) => [link.query.id, link]));
   const linksByDedupKey = new Map<string, QueryLink[]>();
   for (const link of existingLinks) {
@@ -187,7 +187,7 @@ export async function persistQueries(
 
   if (ruleEligibleQueries.length > 0) {
     const ruleEligibleIds = new Set(ruleEligibleQueries.map((q) => q.id));
-    await kiClient.replaceStreamQueries(sourceId, (currentLinks) => [
+    await kiClient.replaceSourceQueries(sourceId, (currentLinks) => [
       ...currentLinks.filter((l) => !ruleEligibleIds.has(l.query.id)).map(queryFromLink),
       ...ruleEligibleQueries.map(({ replaces: _replaces, ...q }) => ({
         ...q,

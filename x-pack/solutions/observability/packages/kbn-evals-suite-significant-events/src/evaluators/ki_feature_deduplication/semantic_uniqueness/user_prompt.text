@@ -1,6 +1,6 @@
 Evaluate the following feature set for semantic uniqueness:
 
-**Stream name**: {{{stream_name}}}
+**Source id**: {{{source_id}}}
 
 **Totals**:
 {{{totals}}}

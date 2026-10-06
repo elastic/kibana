@@ -117,7 +117,7 @@ jest.mock('../../../../hooks/use_fetch_features', () => ({
           type: 'entity',
           subtype: 'service',
           title: 'checkout',
-          stream_name: 'logs.other',
+          source_id: 'logs.other',
         },
         { id: 'svc-excluded', type: 'entity', subtype: 'service', excluded: true },
         { id: 'dep-redis', type: 'dependency', subtype: 'cache', title: 'redis' },
@@ -171,7 +171,7 @@ const event: SignificantEventResponse = {
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: 'event-1',
   status: 'active',
-  stream_names: ['logs.test'],
+  source_ids: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: 'medium',
@@ -280,7 +280,7 @@ describe('selectedEvent deep link', () => {
     openEventId: event.event_id,
     statusFilter: ['active'],
     severityFilter: ['critical', 'high'],
-    streamFilter: [],
+    sourceFilter: [],
     serviceFilter: [],
     setFilters: jest.fn(),
     resetFilters: jest.fn(),
@@ -427,7 +427,7 @@ describe('selectedEvent deep link', () => {
       {
         status: [event.status],
         severity: [event.severity],
-        stream: event.stream_names,
+        source: event.source_ids,
         service: [],
       },
       { keepSelectedEvent: true }
@@ -441,7 +441,7 @@ describe('selectedEvent deep link', () => {
       openEventId: undefined,
       statusFilter: ['inactive'],
       severityFilter: ['low'],
-      streamFilter: ['logs.test'],
+      sourceFilter: ['logs.test'],
       serviceFilter: ['svc-checkout'],
     });
 
@@ -449,7 +449,7 @@ describe('selectedEvent deep link', () => {
 
     expect(lastFetchArgs().status).toEqual(['inactive']);
     expect(lastFetchArgs().severity).toEqual(['low']);
-    expect(lastFetchArgs().stream).toEqual(['logs.test']);
+    expect(lastFetchArgs().source_id).toEqual(['logs.test']);
     expect(lastFetchArgs().topologyFeatureIds).toEqual(['svc-checkout']);
     expect(screen.getByTestId('significantEventsAppSignificantEventsTabButton')).toBeEnabled();
   });
@@ -555,7 +555,7 @@ describe('selectedEvent deep link', () => {
       openEventId: undefined,
       statusFilter: [event.status],
       severityFilter: [event.severity],
-      streamFilter: event.stream_names,
+      sourceFilter: event.source_ids,
     });
     rerender(<SignificantEventsTab />);
 
@@ -563,7 +563,7 @@ describe('selectedEvent deep link', () => {
     expect(lastFetchArgs().eventId).toBeUndefined();
     expect(lastFetchArgs().status).toEqual([event.status]);
     expect(lastFetchArgs().severity).toEqual([event.severity]);
-    expect(lastFetchArgs().stream).toEqual(event.stream_names);
+    expect(lastFetchArgs().source_id).toEqual(event.source_ids);
   });
 
   describe('openEvent (row click)', () => {

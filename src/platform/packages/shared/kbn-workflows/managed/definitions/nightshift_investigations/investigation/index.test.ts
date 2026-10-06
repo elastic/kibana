@@ -60,13 +60,15 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 describe('Nightshift investigation workflow', () => {
   it('persists the shared investigation output without sig-events write-back', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(2);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(3);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
       'ensure_investigation_agent',
       'persist_investigation_started',
       'emit_investigation_started',
+      'list_investigation_sources',
+      'resolve_investigation_sources',
       'investigate',
       'persist_investigation_completed',
       'persist_investigation_failed',
@@ -122,6 +124,10 @@ describe('Nightshift investigation workflow', () => {
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
+  });
+
+  it('loads every requested source on one page', () => {
+    expect(requireStep('list_investigation_sources').with?.path).toContain('per_page=100&');
   });
 
   it('space-scopes the path of every kibana.request step', () => {

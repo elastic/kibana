@@ -41,7 +41,7 @@ export const createSemanticUniquenessEvaluator = ({
     input,
     output,
   }: {
-    input: { stream_name: string };
+    input: { source_id: string };
     output: DedupLoopOutput;
   }) => {
     const { finalFeatures } = output;
@@ -67,7 +67,7 @@ export const createSemanticUniquenessEvaluator = ({
       prompt: SemanticUniquenessPrompt,
       inferenceClient,
       input: {
-        stream_name: input?.stream_name,
+        source_id: input?.source_id,
         totals: JSON.stringify({
           total_kis: finalFeatures.length,
           unique_by_id: uniqueById,
@@ -195,7 +195,7 @@ export const createMergeCorrectnessEvaluator = ({
     input,
     output,
   }: {
-    input: { stream_name: string };
+    input: { source_id: string };
     output: DedupLoopOutput;
   }) => {
     const { mergeEvents } = output;
@@ -221,7 +221,7 @@ export const createMergeCorrectnessEvaluator = ({
         prompt: MergeCorrectnessPrompt,
         inferenceClient,
         input: {
-          stream_name: input?.stream_name,
+          source_id: input?.source_id,
           merge_events: JSON.stringify(batch),
         },
         finalToolChoice: { function: 'evaluate_merges' as const },

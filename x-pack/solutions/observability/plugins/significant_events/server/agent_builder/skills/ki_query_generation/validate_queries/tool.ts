@@ -20,7 +20,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
-import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import {
   loadSourceCatalog,
   resolveSourcesBySlug,
@@ -147,7 +147,7 @@ export const createValidateQueriesTool = ({
             featureIds,
             excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
           }),
-          kiClient.getStreamToQueryLinksMap([target.id]),
+          kiClient.getSourceToQueryLinksMap([target.id]),
         ]);
         const existingQueries = existingLinks.map(({ query }) => ({
           id: query.id,

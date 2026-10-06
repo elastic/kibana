@@ -11,19 +11,19 @@ import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators
 
 export async function createFeatureKnowledgeIndicatorToolHandler({
   kiClient,
-  streamName,
+  sourceId,
   featureInput,
   expiresAt,
   logger,
 }: {
   kiClient: KnowledgeIndicatorClient;
-  streamName: string;
+  sourceId: string;
   featureInput: BaseFeature;
   expiresAt?: string;
   logger: Logger;
 }): Promise<{ id: string }> {
   logger.debug(
-    `ki_feature_create: creating feature KI for stream "${streamName}" with id "${featureInput.id}"`
+    `ki_feature_create: creating feature KI for source "${sourceId}" with id "${featureInput.id}"`
   );
 
   const feature = {
@@ -31,10 +31,10 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
     expires_at: expiresAt,
   };
 
-  await kiClient.bulk(streamName, [{ index: { feature } }]);
+  await kiClient.bulk(sourceId, [{ index: { feature } }]);
 
   logger.debug(
-    `ki_feature_create: created feature KI for stream "${streamName}" with id "${feature.id}"`
+    `ki_feature_create: created feature KI for source "${sourceId}" with id "${feature.id}"`
   );
 
   return {

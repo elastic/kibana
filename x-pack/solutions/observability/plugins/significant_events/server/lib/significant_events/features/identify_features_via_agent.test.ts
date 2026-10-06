@@ -82,7 +82,7 @@ describe('executeFeatureIdentificationAgent', () => {
         agentBuilder,
         request,
         connectorId: 'connector-1',
-        streamName: 'logs.test',
+        sourceId: 'logs.test',
         sampleDocuments: [{ _id: 'doc-1', fields: { message: 'hello' } }],
         interactionId: 'run-1',
         logger: loggerMock.create(),

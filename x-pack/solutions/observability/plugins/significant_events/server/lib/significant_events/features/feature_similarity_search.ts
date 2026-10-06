@@ -41,16 +41,16 @@ export interface FeatureSimilarityGroup {
 
 export const findSimilarFeatures = async ({
   kiClient,
-  streamName,
+  sourceId,
   args,
 }: {
   kiClient: Pick<KnowledgeIndicatorClient, 'findFeatures'>;
-  streamName: string;
+  sourceId: string;
   args: FeatureCandidate;
 }): Promise<SimilarFeatureHit[]> => {
   // Fetch wide then filter: a 5-hit window shared across types can crowd out same-type hits.
   const { hits } = await kiClient.findFeatures(
-    streamName,
+    sourceId,
     `${args.candidate_id} ${args.title} ${args.description}`.trim(),
     {
       searchMode: 'semantic',
@@ -71,17 +71,17 @@ export const findSimilarFeatures = async ({
 
 export const searchFeaturesForCandidates = async ({
   kiClient,
-  streamName,
+  sourceId,
   candidates,
 }: {
   kiClient: Pick<KnowledgeIndicatorClient, 'findFeatures'>;
-  streamName: string;
+  sourceId: string;
   candidates: FeatureCandidate[];
 }): Promise<FeatureSimilarityGroup[]> =>
   Promise.all(
     candidates.map(async (candidate) => {
       try {
-        const features = await findSimilarFeatures({ kiClient, streamName, args: candidate });
+        const features = await findSimilarFeatures({ kiClient, sourceId, args: candidate });
         return { candidate_id: candidate.candidate_id, features };
       } catch (error) {
         return {

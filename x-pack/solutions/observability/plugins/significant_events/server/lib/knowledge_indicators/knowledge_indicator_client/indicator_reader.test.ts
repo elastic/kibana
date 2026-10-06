@@ -214,12 +214,12 @@ describe('IndicatorReader.getFeatures', () => {
   });
 });
 
-describe('IndicatorReader.getStreamToQueryLinksMap', () => {
+describe('IndicatorReader.getSourceToQueryLinksMap', () => {
   it('omits IS_NOT_EXPIRED when includeExpired is true', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
 
-    await reader.getStreamToQueryLinksMap([SOURCE], { includeExpired: true });
+    await reader.getSourceToQueryLinksMap([SOURCE], { includeExpired: true });
 
     expect(capturedQueryString(runEsql)).not.toContain(IS_NOT_EXPIRED_FRAGMENT);
   });
@@ -229,7 +229,7 @@ describe('IndicatorReader.getStreamToQueryLinksMap', () => {
     const doc = createQueryDoc({ expires_at: '2020-01-01T00:00:00.000Z' });
     runEsql.mockResolvedValueOnce({ hits: [doc] });
 
-    const map = await reader.getStreamToQueryLinksMap([SOURCE], { includeExpired: true });
+    const map = await reader.getSourceToQueryLinksMap([SOURCE], { includeExpired: true });
 
     expect(map[SOURCE]).toHaveLength(1);
     expect(map[SOURCE][0].query.id).toBe('query-1');

@@ -33,7 +33,7 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
   return useMemo(() => {
     // All three methods share the same cross-stream endpoint. Server resolves
     // each feature's owning stream from its UUID — no client-side fan-out and
-    // no per-op streamName needed. signal: null so unmount does not abort a
+    // no per-op sourceId needed. signal: null so unmount does not abort a
     // partially-applied mutation.
     const runBulk = async (features: Feature[], buildOp: BuildOp): Promise<BulkOperationResult> => {
       if (features.length === 0) {

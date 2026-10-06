@@ -53,7 +53,7 @@ export const useFetchDiscoveryQueriesOccurrences = (
             to: bucketParams.to,
             bucketSize: bucketParams.bucketSize,
             query: query?.trim() ?? '',
-            streamNames: name ? [name] : undefined,
+            sourceIds: name ? [name] : undefined,
           },
         },
         signal: signal ?? null,

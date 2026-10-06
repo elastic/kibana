@@ -70,11 +70,11 @@ const makeKIFeature = ({
  * identification regressions.
  */
 export const canonicalKIFeaturesFromExpectedGroundTruth = ({
-  streamName,
+  sourceId,
   scenarioId,
   expectedGroundTruth,
 }: {
-  streamName: string;
+  sourceId: string;
   scenarioId: string;
   expectedGroundTruth: string;
 }): Feature[] => {
@@ -138,10 +138,10 @@ export const canonicalKIFeaturesFromExpectedGroundTruth = ({
     );
   }
 
-  // Canonical features are keyed by the stream they describe, matching what the server stamps.
+  // Canonical features are keyed by the source they describe, matching what the server stamps.
   return features.map((feature) => ({
     ...feature,
-    stream_name: streamName,
-    uuid: computeFeatureUuid({ id: feature.id, stream_name: streamName }),
+    source_id: sourceId,
+    uuid: computeFeatureUuid({ id: feature.id, source_id: sourceId }),
   }));
 };

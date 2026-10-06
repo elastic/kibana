@@ -50,9 +50,9 @@ const SPACE = 'marketing';
 const SOURCE = 'logs-app';
 
 // Mirrors the server-side derivation: the stored document `id` is the
-// deterministic uuid computed from (slug, stream_name).
+// deterministic uuid computed from (slug, source_id).
 function featureUuid(slug: string): string {
-  return computeFeatureUuid({ id: slug, stream_name: SOURCE });
+  return computeFeatureUuid({ id: slug, source_id: SOURCE });
 }
 
 function createFeatureDoc(
@@ -104,7 +104,7 @@ function makeClient(): {
   create: jest.Mock;
   runEsql: jest.Mock;
   logger: Logger;
-  findStreamNamesWithOwnedRules: jest.Mock;
+  findSourceIdsWithOwnedRules: jest.Mock;
 } {
   const create = jest.fn().mockResolvedValue({ errors: false, items: [] });
   const dataStreamClient = {
@@ -118,7 +118,7 @@ function makeClient(): {
     logger,
     space: SPACE,
   };
-  const findStreamNamesWithOwnedRules = jest.fn().mockResolvedValue([]);
+  const findSourceIdsWithOwnedRules = jest.fn().mockResolvedValue([]);
   const rulesManagementClient = {
     createRule: jest.fn().mockResolvedValue(undefined),
     bulkCreateRules: jest
@@ -131,7 +131,7 @@ function makeClient(): {
     setRulesEnabled: jest.fn().mockResolvedValue(undefined),
     findExistingRuleIds: jest.fn().mockResolvedValue([]),
     findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-    findStreamNamesWithOwnedRules,
+    findSourceIdsWithOwnedRules,
     findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
   };
   const client = new KnowledgeIndicatorClient(
@@ -144,7 +144,7 @@ function makeClient(): {
     create,
     runEsql: executeAndDecodeSource as jest.Mock,
     logger,
-    findStreamNamesWithOwnedRules,
+    findSourceIdsWithOwnedRules,
   };
 }
 
@@ -352,7 +352,7 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
   });
 });
 
-describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () => {
+describe('KnowledgeIndicatorClient.getSourceIdsWithKnowledgeIndicators', () => {
   const runEsql = runEsqlQuery as jest.Mock;
 
   // ES|QL is columnar; the enumeration projects a single `sourceId` column.
@@ -365,7 +365,7 @@ describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () =>
     const { client } = makeClient();
     runEsql.mockResolvedValueOnce(sourceIdResponse(['logs.nginx', 'logs.apache']));
 
-    await expect(client.getStreamNamesWithKnowledgeIndicators()).resolves.toEqual([
+    await expect(client.getSourceIdsWithKnowledgeIndicators()).resolves.toEqual([
       'logs.nginx',
       'logs.apache',
     ]);
@@ -375,7 +375,7 @@ describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () =>
     const { client } = makeClient();
     runEsql.mockResolvedValueOnce(sourceIdResponse(['logs.nginx']));
 
-    await client.getStreamNamesWithKnowledgeIndicators();
+    await client.getSourceIdsWithKnowledgeIndicators();
 
     const printed = runEsql.mock.calls[0][1] as string;
     expect(printed).toContain('STATS');
@@ -387,7 +387,7 @@ describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () =>
     const { client } = makeClient();
     runEsql.mockResolvedValueOnce(undefined);
 
-    await expect(client.getStreamNamesWithKnowledgeIndicators()).resolves.toEqual([]);
+    await expect(client.getSourceIdsWithKnowledgeIndicators()).resolves.toEqual([]);
   });
 
   it('warns when the result hits the cap so partial coverage is observable', async () => {
@@ -395,7 +395,7 @@ describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () =>
     const names = Array.from({ length: REVISION_SIZE_LIMIT }, (_, i) => `logs.stream-${i}`);
     runEsql.mockResolvedValueOnce(sourceIdResponse(names));
 
-    await client.getStreamNamesWithKnowledgeIndicators();
+    await client.getSourceIdsWithKnowledgeIndicators();
 
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(`REVISION_SIZE_LIMIT (${REVISION_SIZE_LIMIT})`)
@@ -403,19 +403,19 @@ describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () =>
   });
 });
 
-describe('KnowledgeIndicatorClient.getStreamNamesToReconcile', () => {
+describe('KnowledgeIndicatorClient.getSourceIdsToReconcile', () => {
   const runEsql = runEsqlQuery as jest.Mock;
 
   it('unions KI-bearing sources with owned-rule sources, deduped', async () => {
-    const { client, findStreamNamesWithOwnedRules } = makeClient();
+    const { client, findSourceIdsWithOwnedRules } = makeClient();
     runEsql.mockResolvedValueOnce({
       columns: [{ name: 'sourceId', type: 'keyword' }],
       values: [['logs.nginx'], ['logs.apache']],
     });
     // logs.apache overlaps; logs.orphan has a rule but no active KI.
-    findStreamNamesWithOwnedRules.mockResolvedValueOnce(['logs.apache', 'logs.orphan']);
+    findSourceIdsWithOwnedRules.mockResolvedValueOnce(['logs.apache', 'logs.orphan']);
 
-    const result = await client.getStreamNamesToReconcile();
+    const result = await client.getSourceIdsToReconcile();
 
     expect(new Set(result)).toEqual(new Set(['logs.nginx', 'logs.apache', 'logs.orphan']));
     expect(result).toHaveLength(3);
@@ -695,7 +695,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       setRulesEnabled: jest.fn().mockResolvedValue(undefined),
       findExistingRuleIds: jest.fn().mockResolvedValue([]),
       findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-      findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+      findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue([]),
       findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
     };
     const client = new KnowledgeIndicatorClient(

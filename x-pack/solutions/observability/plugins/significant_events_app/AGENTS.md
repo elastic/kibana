@@ -13,6 +13,6 @@
   `/internal/nightshift/sources*`. Read them through `useFetchSources` /
   `useSourcesById`, write them through `useSourcesApi`.
 - The app does not depend on the `streams` plugin. The KI and onboarding routes keep
-  their `/internal/streams/{name}` paths, but `{name}` is a source id.
+  their `/internal/streams/{sourceId}` paths, and `{sourceId}` is a source id.
 - The default tab is `sources` (`/streams` redirects there). URL state and the locator
   filter knowledge indicators with `source` (source ids).

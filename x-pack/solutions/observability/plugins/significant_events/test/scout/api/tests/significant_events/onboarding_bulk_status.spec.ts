@@ -25,19 +25,19 @@ apiTest.describe(
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-        const streamNames = [uuidv4(), uuidv4()];
+        const sourceIds = [uuidv4(), uuidv4()];
 
         const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body: { streamNames },
+          body: { sourceIds },
           responseType: 'json',
         });
 
         expect(response.statusCode).toBe(200);
         // The response always contains an entry for every requested source id.
-        expect(Object.keys(response.body).sort()).toStrictEqual([...streamNames].sort());
-        for (const streamName of streamNames) {
-          expect(response.body[streamName]).toStrictEqual({
+        expect(Object.keys(response.body).sort()).toStrictEqual([...sourceIds].sort());
+        for (const sourceId of sourceIds) {
+          expect(response.body[sourceId]).toStrictEqual({
             status: 'not_started',
             executionId: null,
           });
@@ -45,12 +45,12 @@ apiTest.describe(
       }
     );
 
-    apiTest('rejects an empty streamNames array', async ({ apiClient, samlAuth }) => {
+    apiTest('rejects an empty sourceIds array', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: { streamNames: [] },
+        body: { sourceIds: [] },
         responseType: 'json',
       });
 
@@ -67,7 +67,7 @@ apiTest.describe(
         try {
           const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-            body: { streamNames: [uuidv4()] },
+            body: { sourceIds: [uuidv4()] },
             responseType: 'json',
           });
 

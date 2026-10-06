@@ -39,8 +39,8 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
   }),
   handler: async ({ params, request, getSourcesClient }): Promise<ListSourcesResponse> => {
     const client = await getSourcesClient({ request });
-    const { page, per_page: perPage, search, enabled } = params.query;
-    return client.list({ page, perPage, search, enabled });
+    const { page, per_page: perPage, search, enabled, ids } = params.query;
+    return client.list({ page, perPage, search, enabled, ids });
   },
 });
 

@@ -426,7 +426,7 @@ steps:
                                 Probable cause: {{ steps.resolve_active_event.output.hits[0].symptom_hypothesis | truncate: 2000, '' }}
                               title: '{{ steps.resolve_active_event.output.hits[0].title }}'
                               summary: '{{ steps.resolve_active_event.output.hits[0].summary }}'
-                              stream_names: '${{ steps.resolve_active_event.output.hits[0].stream_names | default: [] }}'
+                              source_ids: '${{ steps.resolve_active_event.output.hits[0].source_ids | default: [] }}'
                               concurrency_key: '{{ foreach.item.event_id }}'
                               trigger_type: automatic
                               context:

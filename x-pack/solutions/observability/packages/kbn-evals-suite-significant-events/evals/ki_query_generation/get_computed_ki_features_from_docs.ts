@@ -192,10 +192,10 @@ const buildErrorLogs = (flatDocs: Array<Record<string, unknown>>): FeatureUpsert
  * error_logs) from ES search hits for canonical KI features.
  */
 export const getComputedKIFeaturesFromDocs = ({
-  streamName,
+  sourceId,
   docs,
 }: {
-  streamName: string;
+  sourceId: string;
   docs: Array<Record<string, unknown>>;
 }): Feature[] => {
   if (docs.length === 0) return [];
@@ -209,7 +209,7 @@ export const getComputedKIFeaturesFromDocs = ({
     buildErrorLogs(flatDocs),
   ].map((feature) => ({
     ...feature,
-    stream_name: streamName,
-    uuid: computeFeatureUuid({ id: feature.id, stream_name: streamName }),
+    source_id: sourceId,
+    uuid: computeFeatureUuid({ id: feature.id, source_id: sourceId }),
   }));
 };

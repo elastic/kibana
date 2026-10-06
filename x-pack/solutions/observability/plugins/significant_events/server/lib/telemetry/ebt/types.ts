@@ -59,7 +59,7 @@ interface AgentToolKnowledgeIndicatorIdentificationStartedProps {
 
 interface AgentToolEventCreateProps {
   success: boolean;
-  stream_names: string[];
+  source_ids: string[];
   error_message?: string;
 }
 
@@ -150,7 +150,7 @@ interface AgentToolEventWriteProps {
   event_id: string;
   status: SignificantEventStatus;
   written: boolean;
-  stream_names: string[];
+  source_ids: string[];
   error_message?: string;
 }
 
@@ -158,7 +158,7 @@ interface AgentToolEventSearchProps {
   success: boolean;
   result_count: number;
   has_query: boolean;
-  has_stream_filter: boolean;
+  has_source_filter: boolean;
   status_filter?: SignificantEventStatus;
   view: 'compact' | 'full';
   page: number;

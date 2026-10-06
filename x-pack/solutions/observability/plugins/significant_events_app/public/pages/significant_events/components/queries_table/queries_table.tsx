@@ -202,8 +202,8 @@ export function QueriesTable() {
     },
   });
 
-  const deleteQueryMutation = useMutation<void, Error, { queryId: string; streamName: string }>({
-    mutationFn: async ({ queryId, streamName }) => {
+  const deleteQueryMutation = useMutation<void, Error, { queryId: string; sourceId: string }>({
+    mutationFn: async ({ queryId, sourceId }) => {
       await removeQuery({ queryId });
     },
     onSuccess: async (_, { queryId }) => {
@@ -323,11 +323,11 @@ export function QueriesTable() {
         ),
       },
       {
-        field: 'stream_name',
+        field: 'source_id',
         name: STREAM_COLUMN,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">{getSourceTitle(item.stream_name)}</EuiBadge>
+          <EuiBadge color="hollow">{getSourceTitle(item.source_id)}</EuiBadge>
         ),
       },
       {
@@ -557,9 +557,7 @@ export function QueriesTable() {
           key={selectedQuery.query.id}
           item={selectedQuery}
           onClose={closeQueryFlyout}
-          onDelete={(queryId, streamName) =>
-            deleteQueryMutation.mutateAsync({ queryId, streamName })
-          }
+          onDelete={(queryId, sourceId) => deleteQueryMutation.mutateAsync({ queryId, sourceId })}
           isDeleting={deleteQueryMutation.isLoading}
         />
       )}

@@ -35,7 +35,7 @@ const makeDeps = (
   overrides: Partial<GenerateKIQueriesDependencies> = {}
 ): GenerateKIQueriesDependencies => ({
   kiClient: {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
+    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({
       'source-1': [
         {
           query: {

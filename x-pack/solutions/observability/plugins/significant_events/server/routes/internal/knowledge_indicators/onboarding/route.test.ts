@@ -28,7 +28,7 @@ jest.mock('@kbn/nightshift-ai', () => ({
     mockResolveNightshiftModelForRequest(options),
 }));
 
-const route = internalKIOnboardingRoutes['POST /internal/streams/{streamName}/onboarding/_execute'];
+const route = internalKIOnboardingRoutes['POST /internal/streams/{sourceId}/onboarding/_execute'];
 const bulkStatusRoute =
   internalKIOnboardingRoutes['POST /internal/streams/onboarding/_bulk_status'];
 type HandlerParams = Parameters<typeof route.handler>[0];
@@ -54,7 +54,7 @@ const makeHandlerParams = ({
   return {
     handlerParams: {
       params: {
-        path: { streamName: 'logs.test' },
+        path: { sourceId: 'logs.test' },
         body: {
           action: 'schedule',
           from: 1,
@@ -87,7 +87,7 @@ beforeEach(() => {
 it('bounds per-step connector overrides', () => {
   expect(
     route.params.safeParse({
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: {
         action: 'schedule',
         from: '2026-01-01T00:00:00.000Z',
@@ -115,7 +115,7 @@ it('resolves strict overrides and forwards canonical connector IDs', async () =>
   );
   expect(run).toHaveBeenCalledWith({
     inputs: {
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       sourceSlug: 'logs-test',
       features: {
         skip: false,
@@ -173,7 +173,7 @@ describe('onboardingBulkStatusRoute', () => {
       },
     });
     const handlerParams = {
-      params: { body: { streamNames: ['source-a', 'other-space-source'] } },
+      params: { body: { sourceIds: ['source-a', 'other-space-source'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
@@ -217,7 +217,7 @@ describe('onboardingExecuteRoute', () => {
     const run = jest.fn();
     const handlerParams = {
       params: {
-        path: { streamName: 'source-a' },
+        path: { sourceId: 'source-a' },
         body: { action: 'schedule', from: Date.now(), to: Date.now(), steps: [] },
       },
       request: {},

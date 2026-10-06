@@ -59,7 +59,7 @@ export const createKiIdentificationStatusTool = ({
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
       const [source] = resolveSourcesBySlug(catalog, [slug]);
       const status = await getKiIdentificationStatusToolHandler({
-        streamName: source.id,
+        sourceId: source.id,
         sourceSlug: source.slug,
         queryUpdatedAt: source.esql_updated_at,
         request,

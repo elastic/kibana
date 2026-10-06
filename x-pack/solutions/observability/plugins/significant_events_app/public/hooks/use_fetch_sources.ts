@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { MAX_SOURCES_PER_PAGE, type NightshiftSource } from '@kbn/nightshift-shared';
@@ -13,13 +14,16 @@ import { useKibana } from './use_kibana';
 
 export const SOURCES_QUERY_KEY = ['nightshiftSources'] as const;
 
+// React Query would call `onError` once per observer. Several components read this query.
+let reportedSourcesError: unknown;
+
 /** Every source of the current space, sorted by title, in one cache entry. */
 export function useFetchSources<T = NightshiftSource[]>({
   select,
   showErrorToast = true,
 }: {
   select?: (sources: NightshiftSource[]) => T;
-  /** React Query calls `onError` once per observer; read-only lookups opt out to avoid toast stacks. */
+  /** Set false for a caller that reports the failure itself. The toast still fires only once. */
   showErrorToast?: boolean;
 } = {}) {
   const {
@@ -46,10 +50,23 @@ export function useFetchSources<T = NightshiftSource[]>({
     }
   };
 
-  return useQuery<NightshiftSource[], Error, T>({
+  const result = useQuery<NightshiftSource[], Error, T>({
     queryKey: SOURCES_QUERY_KEY,
     queryFn: fetchSources,
-    onError: showErrorToast ? showFetchErrorToast : undefined,
     select,
   });
+
+  useEffect(() => {
+    if (!result.error) {
+      reportedSourcesError = undefined;
+      return;
+    }
+    if (!showErrorToast || reportedSourcesError === result.error) {
+      return;
+    }
+    reportedSourcesError = result.error;
+    showFetchErrorToast(result.error);
+  }, [showErrorToast, result.error, showFetchErrorToast]);
+
+  return result;
 }

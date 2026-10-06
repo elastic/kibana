@@ -42,15 +42,15 @@ const RAW_DATA_STREAM_SEARCH_LIMIT = 1000;
 
 /**
  * Features snapshot mapping. `dynamic: false` with `properties`/`meta` as `enabled: false` keeps
- * the index lean and prevents mapping explosions from those free-form objects; `stream_name` is a
- * keyword for per-stream filtering. Not reused from `knowledgeIndicatorsMappings` because features
+ * the index lean and prevents mapping explosions from those free-form objects; `source_id` is a
+ * keyword for per-source filtering. Not reused from `knowledgeIndicatorsMappings` because features
  * arrive flattened from the features API, not in the raw KI shape that mapping describes.
  */
 const FEATURES_SNAPSHOT_MAPPING: MappingTypeMapping = {
   dynamic: false,
   properties: {
     id: { type: 'keyword' },
-    stream_name: { type: 'keyword' },
+    source_id: { type: 'keyword' },
     type: { type: 'keyword' },
     subtype: { type: 'keyword' },
     title: { type: 'keyword' },
@@ -243,7 +243,7 @@ export async function persistKnowledgeIndicatorsForSnapshot(
     readRawDataStreamDocs(
       sysClient,
       KNOWLEDGE_INDICATORS_DATA_STREAM,
-      { term: { 'stream.name': streamName } },
+      { term: { 'source.id': streamName } },
       'knowledge indicator(s)'
     )
   );

@@ -31,7 +31,7 @@ import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
   platformSignificantEventsTools.createFeatureKnowledgeIndicator;
 
-// `slug` routes the feature to its source; the stored feature key stays `stream_name`.
+// `slug` routes the feature to its source; the stored feature key is `source_id`.
 const createFeatureKISchema = baseFeatureSchema.extend({
   slug: nightshiftSourceSlugField('The feature belongs to this source.'),
   expires_at: z.iso
@@ -136,7 +136,7 @@ export function createFeatureKnowledgeIndicatorTool({
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const { id } = await createFeatureKnowledgeIndicatorToolHandler({
           kiClient,
-          streamName: source.id,
+          sourceId: source.id,
           featureInput,
           expiresAt: expires_at,
           logger,

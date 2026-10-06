@@ -84,7 +84,7 @@ export const createKiIdentificationStartTool = ({
       sourceId = source.id;
 
       const data = await startKiIdentificationToolHandler({
-        streamName: source.id,
+        sourceId: source.id,
         sourceSlug: source.slug,
         steps,
         connectors,

@@ -73,8 +73,8 @@ export function resolveSourcesBySlug(
 }
 
 /**
- * Slug for a stored source id. An id that is not in the catalog is returned
- * unchanged: workflow writes still store stream names until that cutover.
+ * Slug for a stored source id. An id that is not in the catalog (for example a
+ * deleted source) is returned unchanged: stored values are source ids.
  */
 export function presentSlug(catalog: SourceCatalog, storedId: string): string {
   return catalog.byId.get(storedId)?.slug ?? storedId;

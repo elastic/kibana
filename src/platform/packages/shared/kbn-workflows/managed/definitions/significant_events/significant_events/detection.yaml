@@ -284,7 +284,7 @@ steps:
             detection_id: "{{ foreach.item.key }}-{{ execution.id }}"
             rule_uuid: "{{ foreach.item.key }}"
             rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"
-            stream_name: "{{ foreach.item.stream.buckets[0].key }}"
+            source_id: "{{ foreach.item.source_id }}"
             change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
             p_value: "${{ steps.compute_transition.output.detection_p_value }}"
             severity_score: "${{ foreach.item.severity_score }}"

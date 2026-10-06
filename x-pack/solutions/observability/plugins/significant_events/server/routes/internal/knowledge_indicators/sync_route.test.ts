@@ -31,8 +31,8 @@ const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerP
         }),
       },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-        getStreamNamesToReconcile: jest.fn().mockResolvedValue(streamNames),
-        findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue(streamNames),
+        getSourceIdsToReconcile: jest.fn().mockResolvedValue(streamNames),
+        findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue(streamNames),
         setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
         deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
         deleteAllQueries: jest.fn().mockResolvedValue(undefined),
