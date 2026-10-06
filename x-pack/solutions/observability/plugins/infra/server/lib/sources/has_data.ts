@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
 import type { createSearchClient } from '../create_search_client';
@@ -52,6 +53,18 @@ const isInconclusiveResponse = (response: ProbeCompleteness): boolean =>
   (response._clusters != null && (response._clusters.skipped > 0 || response._clusters.failed > 0));
 
 /**
+ * Renders the signals behind an inconclusive response into the log message so
+ * the rate can be aggregated from logs later.
+ */
+const formatIncompleteness = (response: ProbeCompleteness): string =>
+  [
+    `timed_out=${response.timed_out === true}`,
+    `shards_failed=${response._shards.failed}`,
+    `clusters_skipped=${response._clusters?.skipped ?? 0}`,
+    `clusters_failed=${response._clusters?.failed ?? 0}`,
+  ].join(', ');
+
+/**
  * Two-phase "does this index pattern hold any document" probe.
  *
  * Phase 1 restricts to recent data on hot/warm tiers so `can_match` can prune
@@ -65,7 +78,7 @@ const isInconclusiveResponse = (response: ProbeCompleteness): boolean =>
  * `observability:searchExcludedDataTiers` setting. A `range` inside `must` is
  * still resolvable by `can_match`, so phase 1 still prunes.
  */
-export const hasData = async (index: string, client: InfraSearchClient) => {
+export const hasData = async (index: string, client: InfraSearchClient, logger: Logger) => {
   const baseParams = {
     index,
     allow_no_indices: true,
@@ -104,13 +117,20 @@ export const hasData = async (index: string, client: InfraSearchClient) => {
 
   /**
    * Only a zero-hit response is ambiguous: a shard failure or a skipped CCS
-   * remote means the probe may simply not have seen the data, and the caller
-   * renders `hasData: false` as an onboarding screen. A positive hit is
-   * conclusive, so never reject on it.
+   * remote means the probe may simply not have seen the data. A positive hit is
+   * conclusive, so it is not worth reporting.
+   *
+   * Logged rather than thrown — the caller renders `false` as an onboarding
+   * screen, but erroring instead would be a behaviour change, and on clusters
+   * that deliberately run unavailable `skip_unavailable` remotes it would turn
+   * a working page into an error. See issue #292516 for the eventual fix.
    */
   if (phase2Response.hits.total.value === 0 && isInconclusiveResponse(phase2Response)) {
-    throw new Error(
-      'hasData check returned an inconclusive result due to shard failures or unreachable CCS remotes'
+    logger.warn(
+      `hasData probe for GET /api/metrics/source/{sourceId}/hasData returned an empty but ` +
+        `incomplete result for index pattern "${index}" ` +
+        `(${formatIncompleteness(phase2Response)}); reporting hasData: false, which may be a ` +
+        `false negative.`
     );
   }
 

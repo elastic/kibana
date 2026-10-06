@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
 import { existsQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   DATASTREAM_DATASET,
@@ -58,6 +59,20 @@ export const isInconclusiveResponse = (response: ProbeCompleteness): boolean =>
   response._shards.failed > 0 ||
   (response._clusters != null && (response._clusters.skipped > 0 || response._clusters.failed > 0));
 
+/**
+ * Renders the signals behind an inconclusive response into the log message so
+ * the rate can be aggregated from logs later. Takes `ProbeCompleteness` rather
+ * than the search response so `_clusters` — which only CCS responses carry — is
+ * typed at the access site.
+ */
+const formatIncompleteness = (response: ProbeCompleteness): string =>
+  [
+    `timed_out=${response.timed_out === true}`,
+    `shards_failed=${response._shards.failed}`,
+    `clusters_skipped=${response._clusters?.skipped ?? 0}`,
+    `clusters_failed=${response._clusters?.failed ?? 0}`,
+  ].join(', ');
+
 const getEntityClauses = (source: HasDataSource): estypes.QueryDslQueryContainer[] => {
   const hostInventoryModel = findInventoryModel('host');
   const hostIntegration =
@@ -100,15 +115,22 @@ const getEntityClauses = (source: HasDataSource): estypes.QueryDslQueryContainer
  * semantics for dormant clusters and clusters whose data lives entirely in
  * cold/frozen tiers.
  *
- * Throws when phase 2 comes back empty *and* incomplete, so the caller can
- * surface an error instead of an onboarding screen.
+ * When phase 2 comes back empty *and* incomplete, the answer may be a false
+ * negative. That is logged rather than thrown: the caller renders `false` as an
+ * onboarding screen, but erroring instead would be a behaviour change, and on
+ * clusters that deliberately run unavailable `skip_unavailable` remotes it would
+ * turn a working page into an error. Logging keeps the pre-existing behaviour
+ * while making the rate measurable. See issue #292516 for the eventual fix,
+ * which needs a distinct "unknown" status plus UI treatment.
  */
 export const getHasData = async ({
   infraMetricsClient,
   source,
+  logger,
 }: {
   infraMetricsClient: Pick<InfraMetricsClient, 'search'>;
   source: HasDataSource;
+  logger: Logger;
 }): Promise<{ hasData: boolean }> => {
   // The entity-field clauses are identical for both phases; only the filter
   // context (range + tier exclusion) differs between them.
@@ -157,11 +179,13 @@ export const getHasData = async ({
   });
 
   // Only a zero-hit response is ambiguous. A positive hit conclusively proves
-  // data exists, so a skipped remote or a failed shard elsewhere must not turn
-  // that into an error.
+  // data exists, so a skipped remote or a failed shard elsewhere is not worth
+  // reporting.
   if (phase2Response.hits.total.value === 0 && isInconclusiveResponse(phase2Response)) {
-    throw new Error(
-      'hasData check returned an inconclusive result due to shard failures or unreachable CCS remotes'
+    logger.warn(
+      `hasData probe for GET /api/metrics/source/hasData returned an empty but incomplete result ` +
+        `(${formatIncompleteness(phase2Response)}); reporting hasData: false, which may be a ` +
+        `false negative.`
     );
   }
 

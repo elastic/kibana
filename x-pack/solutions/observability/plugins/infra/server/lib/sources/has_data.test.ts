@@ -10,9 +10,11 @@
  * `GET /api/metrics/source/{sourceId}/hasData`.
  *
  * These exercise the production `hasData` directly with a mocked search client,
- * so removing the second phase or the CCS guard fails these tests.
+ * so removing the second phase or the inconclusive-response warning fails
+ * these tests.
  */
 
+import type { Logger } from '@kbn/logging';
 import { hasData } from './has_data';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
 
@@ -59,19 +61,28 @@ const createClient = (...responses: unknown[]) => {
 
 const INDEX = 'metrics-*,metricbeat-*';
 
+/** Minimal logger stub; only `warn` is asserted on. */
+const createLogger = () => ({ warn: jest.fn() } as unknown as Logger & { warn: jest.Mock });
+
 describe('hasData (metrics source probe)', () => {
+  let logger: Logger & { warn: jest.Mock };
+
+  beforeEach(() => {
+    logger = createLogger();
+  });
+
   describe('phase 1 — fast path', () => {
     it('returns true and skips phase 2 entirely when recent data exists', async () => {
       const { client, search } = createClient(makeResponse(1));
 
-      await expect(hasData(INDEX, client)).resolves.toBe(true);
+      await expect(hasData(INDEX, client, logger)).resolves.toBe(true);
       expect(search).toHaveBeenCalledTimes(1);
     });
 
     it('bounds phase 1 by the rounded recent window and excludes cold/frozen tiers', async () => {
       const { client, search } = createClient(makeResponse(1));
 
-      await hasData(INDEX, client);
+      await hasData(INDEX, client, logger);
 
       const params = search.mock.calls[0][0];
       expect(params.body.query.bool.filter).toEqual([
@@ -90,7 +101,7 @@ describe('hasData (metrics source probe)', () => {
     it('runs unbounded and reports data when phase 1 misses old or cold-tier data', async () => {
       const { client, search } = createClient(makeResponse(0), makeResponse(1));
 
-      await expect(hasData(INDEX, client)).resolves.toBe(true);
+      await expect(hasData(INDEX, client, logger)).resolves.toBe(true);
       expect(search).toHaveBeenCalledTimes(2);
     });
 
@@ -99,7 +110,7 @@ describe('hasData (metrics source probe)', () => {
       // so re-applying either filter would defeat it.
       const { client, search } = createClient(makeResponse(0), makeResponse(0));
 
-      await hasData(INDEX, client);
+      await hasData(INDEX, client, logger);
 
       const phase2 = JSON.stringify(search.mock.calls[1][0]);
       expect(phase2).not.toContain(TIMESTAMP_FIELD);
@@ -109,37 +120,55 @@ describe('hasData (metrics source probe)', () => {
     it('returns false when both phases are empty and complete', async () => {
       const { client } = createClient(makeResponse(0), makeResponse(0));
 
-      await expect(hasData(INDEX, client)).resolves.toBe(false);
+      await expect(hasData(INDEX, client, logger)).resolves.toBe(false);
     });
   });
 
-  describe('CCS inconclusive-response guard', () => {
+  describe('CCS inconclusive-response reporting', () => {
     it.each([
       ['timed_out', { timed_out: true }],
       ['shard failures', { shardsFailed: 1 }],
       ['skipped CCS clusters', { clustersSkipped: 1 }],
       ['failed CCS clusters', { clustersFailed: 1 }],
-    ])('throws rather than reporting no data on %s', async (_label, opts) => {
+    ])('still reports no data but warns on %s', async (_label, opts) => {
       const { client } = createClient(makeResponse(0), makeResponse(0, opts));
 
-      await expect(hasData(INDEX, client)).rejects.toThrow(/inconclusive/i);
+      // Returning `false` is deliberate — erroring here would be a behaviour
+      // change. The warning is what makes the false-negative rate measurable.
+      await expect(hasData(INDEX, client, logger)).resolves.toBe(false);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
     });
 
-    it('does not throw when an incomplete phase 2 still found a hit', async () => {
+    it('logs the index pattern, signals and counts so the rate can be aggregated', async () => {
+      const { client } = createClient(
+        makeResponse(0),
+        makeResponse(0, { clustersSkipped: 2, shardsFailed: 3 })
+      );
+
+      await hasData(INDEX, client, logger);
+
+      const [message] = logger.warn.mock.calls[0];
+      expect(message).toContain(INDEX);
+      expect(message).toContain('shards_failed=3');
+      expect(message).toContain('clusters_skipped=2');
+    });
+
+    it('does not warn when an incomplete phase 2 still found a hit', async () => {
       // A positive hit conclusively proves data exists, so a partial CCS outage
-      // must not turn a correct `true` into an error.
+      // is not worth reporting.
       const { client } = createClient(
         makeResponse(0),
         makeResponse(1, { clustersSkipped: 1, shardsFailed: 1 })
       );
 
-      await expect(hasData(INDEX, client)).resolves.toBe(true);
+      await expect(hasData(INDEX, client, logger)).resolves.toBe(true);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('does not throw for a complete zero-hit response', async () => {
       const { client } = createClient(makeResponse(0), makeResponse(0));
 
-      await expect(hasData(INDEX, client)).resolves.toBe(false);
+      await expect(hasData(INDEX, client, logger)).resolves.toBe(false);
     });
   });
 });

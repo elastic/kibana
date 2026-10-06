@@ -212,7 +212,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         const soClient = (await requestContext.core).savedObjects.client;
         const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
-        const results = await hasData(source.configuration.metricAlias, client);
+        const results = await hasData(source.configuration.metricAlias, client, logger);
 
         return response.ok({
           body: { hasData: results, configuration: source.configuration },
@@ -253,7 +253,11 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const { hasData: hasMetricsData } = await getHasData({ infraMetricsClient, source });
+        const { hasData: hasMetricsData } = await getHasData({
+          infraMetricsClient,
+          source,
+          logger,
+        });
 
         return response.ok({
           body: getHasDataResponseRT.encode({ hasData: hasMetricsData }),

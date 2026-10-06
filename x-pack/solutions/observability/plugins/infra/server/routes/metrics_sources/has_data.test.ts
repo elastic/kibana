@@ -10,10 +10,12 @@
  * latency on `GET /api/metrics/source/hasData?source=all`.
  *
  * These exercise the production `getHasData` directly with a mocked metrics
- * client, so removing the second phase or the CCS guard fails these tests.
+ * client, so removing the second phase or the inconclusive-response warning
+ * fails these tests.
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
 import { getHasData, HAS_DATA_RECENT_WINDOW } from './has_data';
 
@@ -61,12 +63,23 @@ const createClient = (...responses: estypes.SearchResponse[]) => {
   return { client: { search } as any, search };
 };
 
+/** Minimal logger stub; only `warn` is asserted on. */
+const createLogger = () => ({ warn: jest.fn() } as unknown as Logger & { warn: jest.Mock });
+
 describe('getHasData', () => {
+  let logger: Logger & { warn: jest.Mock };
+
+  beforeEach(() => {
+    logger = createLogger();
+  });
+
   describe('phase 1 — fast path', () => {
     it('returns hasData and skips phase 2 entirely when recent data exists', async () => {
       const { client, search } = createClient(makeHitsResponse(1));
 
-      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).resolves.toEqual({
+      await expect(
+        getHasData({ infraMetricsClient: client, source: 'all', logger })
+      ).resolves.toEqual({
         hasData: true,
       });
       expect(search).toHaveBeenCalledTimes(1);
@@ -75,7 +88,7 @@ describe('getHasData', () => {
     it('bounds phase 1 by the rounded recent window and excludes cold/frozen tiers', async () => {
       const { client, search } = createClient(makeHitsResponse(1));
 
-      await getHasData({ infraMetricsClient: client, source: 'all' });
+      await getHasData({ infraMetricsClient: client, source: 'all', logger });
 
       const { query, requestTimeout, track_total_hits: trackTotalHits } = search.mock.calls[0][0];
       expect(query.bool.filter).toEqual(
@@ -95,7 +108,9 @@ describe('getHasData', () => {
     it('runs unbounded and reports data when phase 1 misses old or cold-tier data', async () => {
       const { client, search } = createClient(makeHitsResponse(0), makeHitsResponse(1));
 
-      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).resolves.toEqual({
+      await expect(
+        getHasData({ infraMetricsClient: client, source: 'all', logger })
+      ).resolves.toEqual({
         hasData: true,
       });
       expect(search).toHaveBeenCalledTimes(2);
@@ -111,43 +126,69 @@ describe('getHasData', () => {
     it('reports no data when both phases come back empty and complete', async () => {
       const { client } = createClient(makeHitsResponse(0), makeHitsResponse(0));
 
-      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).resolves.toEqual({
+      await expect(
+        getHasData({ infraMetricsClient: client, source: 'all', logger })
+      ).resolves.toEqual({
         hasData: false,
       });
     });
   });
 
-  describe('CCS inconclusive-response guard', () => {
+  describe('CCS inconclusive-response reporting', () => {
     it.each([
       ['timed_out', { timed_out: true }],
       ['shard failures', { shardsFailed: 1 }],
       ['skipped CCS clusters', { clustersSkipped: 1 }],
       ['failed CCS clusters', { clustersFailed: 1 }],
-    ])('throws rather than reporting no data on %s', async (_label, opts) => {
+    ])('still reports no data but warns on %s', async (_label, opts) => {
       const { client } = createClient(makeHitsResponse(0), makeHitsResponse(0, opts));
 
-      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).rejects.toThrow(
-        /inconclusive/i
-      );
+      // Returning `false` is deliberate — erroring here would be a behaviour
+      // change. The warning is what makes the false-negative rate measurable.
+      await expect(
+        getHasData({ infraMetricsClient: client, source: 'all', logger })
+      ).resolves.toEqual({ hasData: false });
+      expect(logger.warn).toHaveBeenCalledTimes(1);
     });
 
-    it('does not throw when an incomplete phase 2 still found a hit', async () => {
+    it('logs the signals and counts so the rate can be aggregated', async () => {
+      const { client } = createClient(
+        makeHitsResponse(0),
+        makeHitsResponse(0, { clustersSkipped: 2, shardsFailed: 3 })
+      );
+
+      await getHasData({ infraMetricsClient: client, source: 'all', logger });
+
+      const [message] = logger.warn.mock.calls[0];
+      expect(message).toContain('shards_failed=3');
+      expect(message).toContain('clusters_skipped=2');
+    });
+
+    it('does not warn when an incomplete phase 2 still found a hit', async () => {
       // A positive hit conclusively proves data exists, so a partial CCS
-      // outage must not turn a correct `true` into an error.
+      // outage is not worth reporting.
       const { client } = createClient(
         makeHitsResponse(0),
         makeHitsResponse(1, { clustersSkipped: 1, shardsFailed: 1 })
       );
 
-      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).resolves.toEqual({
-        hasData: true,
-      });
+      await expect(
+        getHasData({ infraMetricsClient: client, source: 'all', logger })
+      ).resolves.toEqual({ hasData: true });
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('does not throw for a complete zero-hit response', async () => {
+    it('does not warn for a complete zero-hit response', async () => {
       const { client } = createClient(makeHitsResponse(0), makeHitsResponse(0));
-      const hasDataResponse = await getHasData({ infraMetricsClient: client, source: 'all' });
+
+      const hasDataResponse = await getHasData({
+        infraMetricsClient: client,
+        source: 'all',
+        logger,
+      });
+
       expect(hasDataResponse).toEqual({ hasData: false });
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -155,7 +196,7 @@ describe('getHasData', () => {
     it('matches host-specific clauses for source=host', async () => {
       const { client, search } = createClient(makeHitsResponse(1));
 
-      await getHasData({ infraMetricsClient: client, source: 'host' });
+      await getHasData({ infraMetricsClient: client, source: 'host', logger });
 
       const should = search.mock.calls[0][0].query.bool.should;
       expect(should.length).toBeGreaterThan(0);
@@ -165,7 +206,7 @@ describe('getHasData', () => {
     it('matches all entity types for source=all', async () => {
       const { client, search } = createClient(makeHitsResponse(1));
 
-      await getHasData({ infraMetricsClient: client, source: 'all' });
+      await getHasData({ infraMetricsClient: client, source: 'all', logger });
 
       // One exists clause per supported entity type.
       expect(search.mock.calls[0][0].query.bool.should).toHaveLength(7);
@@ -177,7 +218,9 @@ describe('getHasData', () => {
       // so a future change to it is deliberate rather than accidental.
       const { client, search } = createClient(makeHitsResponse(0), makeHitsResponse(0));
 
-      await expect(getHasData({ infraMetricsClient: client, source: undefined })).resolves.toEqual({
+      await expect(
+        getHasData({ infraMetricsClient: client, source: undefined, logger })
+      ).resolves.toEqual({
         hasData: false,
       });
       expect(search.mock.calls[0][0].query.bool.should).toEqual([]);
