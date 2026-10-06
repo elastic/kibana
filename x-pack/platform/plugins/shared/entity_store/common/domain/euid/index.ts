@@ -7,10 +7,17 @@
 
 export {
   getEuidFromObject,
+  getEuidFromObjectFromDefinition,
   getEuidFromObjectForSearch,
+  getEuidFromObjectForSearchFromDefinition,
   getEntityIdentifiersFromDocument,
+  getEntityIdentifiersFromDocumentFromDefinition,
 } from './memory';
-export { getEuidFromTimelineNonEcsData, type NonEcsTimelineDataRow } from './non_ecs_timeline_data';
+export {
+  getEuidFromTimelineNonEcsData,
+  getEuidFromTimelineNonEcsDataFromDefinition,
+  type NonEcsTimelineDataRow,
+} from './non_ecs_timeline_data';
 export {
   getEuidPainlessEvaluation,
   getEuidPainlessEvaluationForSearch,
@@ -36,8 +43,11 @@ export {
 } from './field_evaluations';
 export {
   getEuidSourceFields,
+  getEuidSourceFieldsFromDefinition,
   getEuidNamespaceSourceFields,
+  getEuidNamespaceSourceFieldsFromDefinition,
   getEuidNamespaceSourcePrefix,
+  getEuidNamespaceSourcePrefixFromDefinition,
   type IdentitySourceFields,
   type NamespaceSourceFields,
 } from './identity_fields';

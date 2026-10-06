@@ -149,7 +149,7 @@ export function waiveForAlerts(postAggFilter?: Condition): Condition | undefined
  */
 export function documentPassesCalculatedIdentityPipelineGate(
   doc: any,
-  entityDefinition: EntityDefinitionWithoutId,
+  entityDefinition: Pick<EntityDefinitionWithoutId, 'identityField' | 'postAggFilter'>,
   options?: EuidGateOptions
 ): boolean {
   const { identityField, postAggFilter } = entityDefinition;

@@ -12,7 +12,7 @@ import {
   entitySchema,
   EntityDefinitionManagedBy,
   type EntityDefinitionType,
-  type EntityDefinitionWithoutId,
+  type EntityDefinitionOfAnyType,
 } from '../../../../common/domain/definitions/entity_schema';
 
 /**
@@ -24,8 +24,7 @@ export const ENTITY_DEFINITION_TYPE_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)
 export const ENTITY_DEFINITION_TYPE_MAX_LENGTH = 64;
 
 /** A definition as accepted by the registry: the built-in shape with a wider type name and a required `managedBy`. */
-export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'type' | 'managedBy'> & {
-  type: EntityDefinitionType;
+export type RegistrableEntityDefinition = Omit<EntityDefinitionOfAnyType, 'managedBy'> & {
   managedBy: EntityDefinitionManagedBy;
 };
 

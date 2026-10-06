@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { EntityType } from '../definitions/entity_schema';
+import { ALL_ENTITY_TYPES, EntityType } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
   getEuidSourceFields,
+  getEuidSourceFieldsFromDefinition,
   getEuidNamespaceSourceFields,
+  getEuidNamespaceSourceFieldsFromDefinition,
   getEuidNamespaceSourcePrefix,
+  getEuidNamespaceSourcePrefixFromDefinition,
 } from './identity_fields';
 
 describe('getEuidSourceFields', () => {
@@ -108,5 +112,19 @@ describe('getEuidNamespaceSourcePrefix', () => {
     expect(
       getEuidNamespaceSourcePrefix(EntityType.enum.generic, 'data_stream.dataset', 'okta.system')
     ).toBeUndefined();
+  });
+});
+
+describe('FromDefinition variants', () => {
+  it.each(ALL_ENTITY_TYPES)('match the type-name functions for %s', (type) => {
+    const definition = getEntityDefinitionWithoutId(type);
+
+    expect(getEuidSourceFieldsFromDefinition(definition)).toEqual(getEuidSourceFields(type));
+    expect(getEuidNamespaceSourceFieldsFromDefinition(definition)).toEqual(
+      getEuidNamespaceSourceFields(type)
+    );
+    expect(
+      getEuidNamespaceSourcePrefixFromDefinition(definition, 'data_stream.dataset', 'okta.system')
+    ).toEqual(getEuidNamespaceSourcePrefix(type, 'data_stream.dataset', 'okta.system'));
   });
 });

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import type { EntityType } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import type { NonEcsTimelineDataRow } from './non_ecs_timeline_data';
 import {
   getEuidFromTimelineNonEcsData,
+  getEuidFromTimelineNonEcsDataFromDefinition,
   getEntityIdentifiersFromTimelineNonEcsData,
+  getEntityIdentifiersFromTimelineNonEcsDataFromDefinition,
   nonEcsTimelineDataToDocument,
 } from './non_ecs_timeline_data';
 
@@ -81,5 +86,32 @@ describe('getEntityIdentifiersFromTimelineNonEcsData', () => {
     expect(
       getEntityIdentifiersFromTimelineNonEcsData('host', [{ field: 'host.id', value: ['h-1'] }])
     ).toEqual({ 'host.id': 'h-1' });
+  });
+});
+
+describe('FromDefinition variants', () => {
+  const rowsByType: Array<[EntityType, NonEcsTimelineDataRow[]]> = [
+    [
+      'user',
+      [
+        { field: 'user.email', value: ['alice@example.com'] },
+        { field: 'event.kind', value: ['asset'] },
+        { field: 'event.module', value: ['okta'] },
+      ],
+    ],
+    ['host', [{ field: 'host.id', value: ['h-1'] }]],
+    ['service', [{ field: 'service.name', value: ['api-gateway'] }]],
+    ['generic', [{ field: 'entity.id', value: ['e-123'] }]],
+  ];
+
+  it.each(rowsByType)('match the type-name functions for %s', (type, rows) => {
+    const definition = getEntityDefinitionWithoutId(type);
+
+    expect(getEuidFromTimelineNonEcsDataFromDefinition(definition, rows)).toEqual(
+      getEuidFromTimelineNonEcsData(type, rows)
+    );
+    expect(getEntityIdentifiersFromTimelineNonEcsDataFromDefinition(definition, rows)).toEqual(
+      getEntityIdentifiersFromTimelineNonEcsData(type, rows)
+    );
   });
 });

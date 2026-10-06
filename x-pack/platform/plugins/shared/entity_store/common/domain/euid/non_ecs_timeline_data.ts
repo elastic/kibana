@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { EntityType } from '../definitions/entity_schema';
-import { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
+import type { EntityDefinitionOfAnyType, EntityType } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import {
+  getEuidFromObjectFromDefinition,
+  getEntityIdentifiersFromDocumentFromDefinition,
+} from './memory';
 
 /**
  * Structural match for timeline non-ECS rows (e.g. `TimelineNonEcsData` from
@@ -61,20 +65,42 @@ export function getEuidFromTimelineNonEcsData(
   entityType: EntityType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
 ): string | undefined {
+  return getEuidFromTimelineNonEcsDataFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    rows
+  );
+}
+
+/** Like {@link getEuidFromTimelineNonEcsData}, but takes a definition instead of a type name. */
+export function getEuidFromTimelineNonEcsDataFromDefinition(
+  definition: EntityDefinitionOfAnyType,
+  rows: readonly NonEcsTimelineDataRow[] | undefined
+): string | undefined {
   const doc = nonEcsTimelineDataToDocument(rows ?? []);
   if (Object.keys(doc).length === 0) {
     return undefined;
   }
-  return getEuidFromObject(entityType, doc);
+  return getEuidFromObjectFromDefinition(definition, doc);
 }
 
 export function getEntityIdentifiersFromTimelineNonEcsData(
   entityType: EntityType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
 ): Record<string, string> | undefined {
+  return getEntityIdentifiersFromTimelineNonEcsDataFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    rows
+  );
+}
+
+/** Like {@link getEntityIdentifiersFromTimelineNonEcsData}, but takes a definition instead of a type name. */
+export function getEntityIdentifiersFromTimelineNonEcsDataFromDefinition(
+  definition: EntityDefinitionOfAnyType,
+  rows: readonly NonEcsTimelineDataRow[] | undefined
+): Record<string, string> | undefined {
   const doc = nonEcsTimelineDataToDocument(rows ?? []);
   if (Object.keys(doc).length === 0) {
     return undefined;
   }
-  return getEntityIdentifiersFromDocument(entityType, doc);
+  return getEntityIdentifiersFromDocumentFromDefinition(definition, doc);
 }

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
+import type {
+  EntityDefinitionOfAnyType,
+  EntityType,
+  EuidAttribute,
+} from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import type { EuidGateOptions } from './commons';
@@ -30,7 +34,14 @@ import { applyFieldEvaluations } from './field_evaluations';
  * For single-field identities there is nothing to evaluate, so `doc` is returned unchanged.
  */
 export function buildEvaluatedDoc(entityType: EntityType, doc: any): any {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  return buildEvaluatedDocFromDefinition(getEntityDefinitionWithoutId(entityType), doc);
+}
+
+/** Like {@link buildEvaluatedDoc}, but takes a definition instead of a type name. */
+export function buildEvaluatedDocFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  doc: any
+): any {
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -81,13 +92,21 @@ export function buildEvaluatedDoc(entityType: EntityType, doc: any): any {
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
 export function getEuidFromObject(entityType: EntityType, doc: any, options?: EuidGateOptions) {
+  return getEuidFromObjectFromDefinition(getEntityDefinitionWithoutId(entityType), doc, options);
+}
+
+/** Like {@link getEuidFromObject}, but takes a definition instead of a type name. */
+export function getEuidFromObjectFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  doc: any,
+  options?: EuidGateOptions
+) {
   if (!doc) {
     return undefined;
   }
 
   doc = getDocument(doc);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  const { identityField } = entityDefinition;
+  const { identityField, type: entityType } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
     const value = getFieldValue(doc, identityField.singleField);
@@ -100,7 +119,7 @@ export function getEuidFromObject(entityType: EntityType, doc: any, options?: Eu
     return `${entityType}:${value}`;
   }
 
-  const evaluatedDoc = buildEvaluatedDoc(entityType, doc);
+  const evaluatedDoc = buildEvaluatedDocFromDefinition(entityDefinition, doc);
 
   if (!documentPassesCalculatedIdentityPipelineGate(evaluatedDoc, entityDefinition, options)) {
     return undefined;
@@ -131,7 +150,15 @@ export function getEuidFromObject(entityType: EntityType, doc: any, options?: Eu
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
 export function getEuidFromObjectForSearch(entityType: EntityType, doc: any) {
-  return getEuidFromObject(entityType, doc, { applyPostAggFilter: false });
+  return getEuidFromObjectForSearchFromDefinition(getEntityDefinitionWithoutId(entityType), doc);
+}
+
+/** Like {@link getEuidFromObjectForSearch}, but takes a definition instead of a type name. */
+export function getEuidFromObjectForSearchFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  doc: any
+) {
+  return getEuidFromObjectFromDefinition(entityDefinition, doc, { applyPostAggFilter: false });
 }
 
 /**
@@ -142,12 +169,22 @@ export function getEntityIdentifiersFromDocument(
   entityType: EntityType,
   doc: unknown
 ): Record<string, string> | undefined {
+  return getEntityIdentifiersFromDocumentFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    doc
+  );
+}
+
+/** Like {@link getEntityIdentifiersFromDocument}, but takes a definition instead of a type name. */
+export function getEntityIdentifiersFromDocumentFromDefinition(
+  entityDefinition: EntityDefinitionOfAnyType,
+  doc: unknown
+): Record<string, string> | undefined {
   if (!doc) {
     return undefined;
   }
 
   const workingDoc = getDocument(doc);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -158,7 +195,7 @@ export function getEntityIdentifiersFromDocument(
     return { [identityField.singleField]: value };
   }
 
-  const evaluatedDoc = buildEvaluatedDoc(entityType, workingDoc);
+  const evaluatedDoc = buildEvaluatedDocFromDefinition(entityDefinition, workingDoc);
 
   if (!documentPassesCalculatedIdentityPipelineGate(evaluatedDoc, entityDefinition)) {
     return undefined;

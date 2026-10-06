@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '../definitions/entity_schema';
+import type { EntityDefinitionOfAnyType, EntityType } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, getSourceFieldNames } from './commons';
@@ -45,7 +45,14 @@ export interface NamespaceSourceFields {
  * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidRanking
  */
 export function getEuidSourceFields(entityType: EntityType): IdentitySourceFields {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  return getEuidSourceFieldsFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
+/** Like {@link getEuidSourceFields}, but takes a definition instead of a type name. */
+export function getEuidSourceFieldsFromDefinition(
+  definition: EntityDefinitionOfAnyType
+): IdentitySourceFields {
+  const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
     const field = identityField.singleField;
@@ -92,7 +99,14 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
  * @returns exactMatchFields and prefixMatchFields from the entity's fieldEvaluations sources
  */
 export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceSourceFields {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  return getEuidNamespaceSourceFieldsFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
+/** Like {@link getEuidNamespaceSourceFields}, but takes a definition instead of a type name. */
+export function getEuidNamespaceSourceFieldsFromDefinition(
+  definition: EntityDefinitionOfAnyType
+): NamespaceSourceFields {
+  const { identityField } = definition;
   if (isSingleFieldIdentity(identityField)) {
     return { exactMatchFields: [], prefixMatchFields: [] };
   }
@@ -127,7 +141,20 @@ export function getEuidNamespaceSourcePrefix(
   field: string,
   observedValue: string
 ): string | undefined {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  return getEuidNamespaceSourcePrefixFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    field,
+    observedValue
+  );
+}
+
+/** Like {@link getEuidNamespaceSourcePrefix}, but takes a definition instead of a type name. */
+export function getEuidNamespaceSourcePrefixFromDefinition(
+  definition: EntityDefinitionOfAnyType,
+  field: string,
+  observedValue: string
+): string | undefined {
+  const { identityField } = definition;
   if (isSingleFieldIdentity(identityField)) {
     return undefined;
   }

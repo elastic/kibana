@@ -28,25 +28,47 @@ export const euid = {
    */
   getEuidFromObject: euidModule.getEuidFromObject,
   /**
+   * Like {@link euid.getEuidFromObject}, but takes a definition (for example from the server-side registry) instead of a type name.
+   */
+  getEuidFromObjectFromDefinition: euidModule.getEuidFromObjectFromDefinition,
+  /**
    * Like {@link euid.getEuidFromObject} without the creation gate, so IdP and shared-account
    * documents still resolve to entities that already exist. For risk scoring and enrichment;
    * the caller checks store membership.
    */
   getEuidFromObjectForSearch: euidModule.getEuidFromObjectForSearch,
   /**
+   * Like {@link euid.getEuidFromObjectForSearch}, but takes a definition (for example from the server-side registry) instead of a type name.
+   */
+  getEuidFromObjectForSearchFromDefinition: euidModule.getEuidFromObjectForSearchFromDefinition,
+  /**
    * Flat map of ECS field → scalar value for the winning identity branch (same pipeline as {@link euid.getEuidFromObject}).
    * Use to seed flyouts, filters, and resolution when you need field-level context, not only the composed EUID string.
    */
   getEntityIdentifiersFromDocument: euidModule.getEntityIdentifiersFromDocument,
   /**
+   * Like {@link euid.getEntityIdentifiersFromDocument}, but takes a definition (for example from the server-side registry) instead of a type name.
+   */
+  getEntityIdentifiersFromDocumentFromDefinition:
+    euidModule.getEntityIdentifiersFromDocumentFromDefinition,
+  /**
    * Builds EUID from Timeline “non-ECS” row arrays (field + value[]) without importing timelines types.
    */
   getEuidFromTimelineNonEcsData: euidModule.getEuidFromTimelineNonEcsData,
+  /**
+   * Like {@link euid.getEuidFromTimelineNonEcsData}, but takes a definition (for example from the server-side registry) instead of a type name.
+   */
+  getEuidFromTimelineNonEcsDataFromDefinition:
+    euidModule.getEuidFromTimelineNonEcsDataFromDefinition,
   /**
    * Returns which source fields are read for EUID for an entity type (`requiresOneOf`, full `identitySourceFields` list).
    * Exposed so UIs and CRUD can request minimal `_source` or validate partial documents.
    */
   getEuidSourceFields: euidModule.getEuidSourceFields,
+  /**
+   * Like {@link euid.getEuidSourceFields}, but takes a definition (for example from the server-side registry) instead of a type name.
+   */
+  getEuidSourceFieldsFromDefinition: euidModule.getEuidSourceFieldsFromDefinition,
 
   /**
    * Returns the namespace source fields for an entity type, split by match kind.
@@ -57,6 +79,10 @@ export const euid = {
    * `prefixMatchFields` with exact phrase filters built from the raw observed field values.
    */
   getEuidNamespaceSourceFields: euidModule.getEuidNamespaceSourceFields,
+  /**
+   * Like {@link euid.getEuidNamespaceSourceFields}, but takes a definition (for example from the server-side registry) instead of a type name.
+   */
+  getEuidNamespaceSourceFieldsFromDefinition: euidModule.getEuidNamespaceSourceFieldsFromDefinition,
 
   /**
    * Reduces an observed namespace source value to the prefix the entity definition derives from it
@@ -65,6 +91,10 @@ export const euid = {
    * is not the same as a `startsWith` test — use this instead of reimplementing the split.
    */
   getNamespaceSourcePrefix: euidModule.getEuidNamespaceSourcePrefix,
+  /**
+   * Like {@link euid.getNamespaceSourcePrefix}, but takes a definition (for example from the server-side registry) instead of a type name.
+   */
+  getNamespaceSourcePrefixFromDefinition: euidModule.getEuidNamespaceSourcePrefixFromDefinition,
 
   /**
    * Painless-backed EUID helpers for runtime fields and scripts (same semantics as `getEuidFromObject`).

@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import type { EntityType } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
+  buildEvaluatedDoc,
+  buildEvaluatedDocFromDefinition,
   getEuidFromObject,
+  getEuidFromObjectFromDefinition,
   getEuidFromObjectForSearch,
+  getEuidFromObjectForSearchFromDefinition,
   getEntityIdentifiersFromDocument,
+  getEntityIdentifiersFromDocumentFromDefinition,
 } from './memory';
 
 describe('getEntityIdentifiersFromDocument', () => {
@@ -317,5 +324,41 @@ describe('getEuidFromObject', () => {
     it('resolves without the gate in the search variant', () => {
       expect(getEuidFromObjectForSearch('user', oktaUser)).toBe('user:alice@example.com@okta');
     });
+  });
+});
+
+describe('FromDefinition variants', () => {
+  const documentsByType: Array<[EntityType, object]> = [
+    ['user', { user: { email: 'alice@example.com' }, event: { kind: 'asset', module: 'okta' } }],
+    ['host', { host: { id: 'h1', name: 'server1' } }],
+    ['service', { service: { name: 'api-gateway' } }],
+    ['generic', { _source: { entity: { id: 'e-123' } } }],
+  ];
+
+  it.each(documentsByType)('match the type-name functions for %s', (type, doc) => {
+    const definition = getEntityDefinitionWithoutId(type);
+
+    expect(buildEvaluatedDocFromDefinition(definition, doc)).toEqual(buildEvaluatedDoc(type, doc));
+    expect(getEuidFromObjectFromDefinition(definition, doc)).toEqual(getEuidFromObject(type, doc));
+    expect(getEuidFromObjectForSearchFromDefinition(definition, doc)).toEqual(
+      getEuidFromObjectForSearch(type, doc)
+    );
+    expect(getEntityIdentifiersFromDocumentFromDefinition(definition, doc)).toEqual(
+      getEntityIdentifiersFromDocument(type, doc)
+    );
+  });
+
+  it('takes the id prefix from the definition type', () => {
+    const definition = {
+      ...getEntityDefinitionWithoutId('service'),
+      type: 'k8s.pod',
+      identityField: { singleField: 'k8s.pod.uid' },
+      fields: [],
+    };
+
+    const euid = getEuidFromObjectFromDefinition(definition, { k8s: { pod: { uid: 'pod-1' } } });
+
+    expect(euid?.startsWith('k8s.pod:')).toBe(true);
+    expect(euid).toBe('k8s.pod:pod-1');
   });
 });
