@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ImpactPrivilegesChecker } from './check_impact_privileges';
+import { MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
 import { ImpactForbiddenError } from './errors';
 import { createImpactClient } from './impact_client';
 import type { ImpactService } from './impact_service';
@@ -54,5 +55,50 @@ describe('createImpactClient', () => {
     await expect(client.listByConversationIds(['c1'])).rejects.toBeInstanceOf(ImpactForbiddenError);
     expect(listByConversationIds).not.toHaveBeenCalled();
     expect(getSpaceId).not.toHaveBeenCalled();
+  });
+
+  describe('getEntityIdsByConversationId', () => {
+    const impact = (conversationId: string, ...ids: string[]) => ({
+      conversationId,
+      entities: ids.map((id) => ({ id })),
+    });
+
+    it('should map each conversation to its entity ids and omit conversations without impact', async () => {
+      const { client } = createClient({
+        listByConversationIds: jest.fn().mockResolvedValue([impact('c1', 'host-1', 'user-1')]),
+      });
+
+      const result = await client.getEntityIdsByConversationId(['c1', 'c2']);
+
+      expect(result).toEqual(new Map([['c1', ['host-1', 'user-1']]]));
+    });
+
+    it('should dedupe the ids and read in chunks of the per-read cap', async () => {
+      const ids = Array.from({ length: MAX_IMPACT_CONVERSATION_IDS + 5 }, (_, i) => `c${i}`);
+      const { client, listByConversationIds } = createClient();
+
+      await client.getEntityIdsByConversationId([...ids, ...ids]);
+
+      expect(listByConversationIds).toHaveBeenCalledTimes(2);
+      expect(listByConversationIds.mock.calls[0][0]).toHaveLength(MAX_IMPACT_CONVERSATION_IDS);
+      expect(listByConversationIds.mock.calls[1][0]).toHaveLength(5);
+    });
+
+    it('should not read when there are no ids', async () => {
+      const { client, listByConversationIds } = createClient();
+
+      expect(await client.getEntityIdsByConversationId([])).toEqual(new Map());
+      expect(listByConversationIds).not.toHaveBeenCalled();
+    });
+
+    it('should refuse when the principal cannot manage investigations', async () => {
+      const { client } = createClient({
+        assertCanRead: jest.fn().mockRejectedValue(new ImpactForbiddenError('nope')),
+      });
+
+      await expect(client.getEntityIdsByConversationId(['c1'])).rejects.toBeInstanceOf(
+        ImpactForbiddenError
+      );
+    });
   });
 });
