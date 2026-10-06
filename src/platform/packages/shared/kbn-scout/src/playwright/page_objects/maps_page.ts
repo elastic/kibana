@@ -118,12 +118,21 @@ export class MapsPage {
     return this.page.testSubj.locator(`layerTocActionsPanelToggleButton${escapedName}`);
   }
 
-  async addDocumentsLayer(documentSelector: string) {
+  async openAddLayerFlyout() {
     await this.addLayerButton.click();
     await this.layerAddForm.waitFor({ state: 'visible' });
+  }
+
+  async selectGeoIndexPatternLayer(indexPattern: string) {
+    await this.page.components
+      .comboBox('mapGeoIndexPatternSelect')
+      .setSelectedOptions([indexPattern]);
+  }
+
+  async addDocumentsLayer(indexPattern: string) {
+    await this.openAddLayerFlyout();
     await this.documentsItem.click();
-    const comboBox = this.page.components.comboBox('mapGeoIndexPatternSelect');
-    await comboBox.setSelectedOptions([documentSelector]);
+    await this.selectGeoIndexPatternLayer(indexPattern);
     await this.importFileButton.click();
     await this.waitForRenderComplete();
     await this.saveAndReturnButton.click();
@@ -316,6 +325,40 @@ export class MapsPage {
     await this.queryBar.setQuery(query);
     await this.queryBar.submitQuery();
     await this.waitForLayersToLoad();
+  }
+
+  /**
+   * Opens the inspector, switches to the "Map details" view, reads the Mapbox GL
+   * style JSON from the mapboxStyleContainer, closes the inspector, and returns the
+   * parsed style object.
+   */
+  async getMapboxStyle(): Promise<Record<string, any>> {
+    await this.inspector.open();
+    try {
+      await this.inspector.openInspectorView('Map details');
+      await this.page.testSubj.click('mapboxStyleTab');
+      const container = this.page.testSubj.locator('mapboxStyleContainer');
+      await container.waitFor({ state: 'visible' });
+      // EuiCodeBlock renders a visually-hidden screen reader label (wrapped in ✄𐘗
+      // NO_COPY_BOUND markers) inside the <pre> tag before the <code> element.
+      // Calling innerText() on the container includes that hidden text, producing
+      // invalid JSON. Target the <code> element directly to get only the code content.
+      const json = await container.locator('code').innerText();
+      return JSON.parse(json);
+    } finally {
+      await this.inspector.close();
+    }
+  }
+
+  /**
+   * Opens the layer's TOC actions panel by name, clicks "Fit to data bounds",
+   * and waits for the map to pan/zoom to the new extent.
+   */
+  async clickFitToBounds(layerName: string) {
+    const origView = await this.getView();
+    await this.getLayerToggleButton(layerName).click();
+    await this.page.testSubj.click('fitToBoundsButton');
+    await this.waitForMapPanAndZoom(origView);
   }
 
   /**
