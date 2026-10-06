@@ -521,10 +521,8 @@ describe('Hunt Watch worker chain', () => {
     const render = (template: string, context: Record<string, unknown>) =>
       liquid.parseAndRenderSync(template, context).trim();
 
-    const dismissOutcomeWith = stepIn(packageReportSteps, 'resolve_dismiss_outcome')?.with as Record<
-      string,
-      string
-    >;
+    const dismissOutcomeWith = stepIn(packageReportSteps, 'resolve_dismiss_outcome')
+      ?.with as Record<string, string>;
 
     const dismissCase = (dismissStep: Record<string, unknown> | undefined) => {
       const base = {
