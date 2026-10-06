@@ -279,25 +279,31 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         expect(indexedIds).toEqual(['healthy']);
       });
 
-      it('should fail when the fields metadata cannot be read', async () => {
-        mockGetPackages.mockResolvedValue([createMockPackage()]);
-        mockGetFieldMetadata.mockRejectedValueOnce(new Error('metadata down'));
-        await expect(client.populate()).rejects.toThrow('metadata down');
+      it('should still index the other integrations when the fields metadata of one package cannot be read', async () => {
+        mockGetPackages.mockResolvedValue([
+          createMockPackage({ name: 'broken' }),
+          createMockPackage({ name: 'healthy' }),
+        ]);
+        mockGetFieldMetadata.mockImplementation(async ({ packageName }: { packageName: string }) => {
+          if (packageName === 'broken') {
+            throw new Error('metadata down');
+          }
+          return undefined as never;
+        });
+        await client.populate();
+
+        const indexedIds = (esClientMock.bulk as jest.Mock).mock.calls[0][0].operations
+          .filter((operation: { update?: unknown }) => operation.update)
+          .map((operation: { update: { _id: string } }) => operation.update._id);
+        expect(indexedIds).toEqual(['healthy']);
       });
 
-      it('should not index anything when the fields metadata cannot be read', async () => {
-        mockGetPackages.mockResolvedValue([createMockPackage()]);
-        mockGetFieldMetadata.mockRejectedValueOnce(new Error('metadata down'));
-        await client.populate().catch(() => undefined);
-        expect(esClientMock.bulk).not.toHaveBeenCalled();
-      });
-
-      it('should log which package failed when its fields metadata cannot be read', async () => {
+      it('should log which package was skipped when its fields metadata cannot be read', async () => {
         mockGetPackages.mockResolvedValue([createMockPackage({ name: 'broken' })]);
         mockGetFieldMetadata.mockRejectedValueOnce(new Error('metadata down'));
-        await client.populate().catch(() => undefined);
+        await client.populate();
         expect(logger.error).toHaveBeenCalledWith(
-          'Failed to fetch fields metadata for package broken: metadata down'
+          'Failed to fetch fields metadata for package broken, it is skipped and will be retried on the next start: metadata down'
         );
       });
 
