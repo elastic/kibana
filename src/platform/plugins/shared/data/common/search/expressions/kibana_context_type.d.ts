@@ -1,0 +1,10 @@
+import type { Filter, ExecutionContextSearch } from '@kbn/es-query';
+import type { ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+import type { Query } from '../../query';
+import type { DataViewField } from '../..';
+export type ExpressionValueSearchContext = ExpressionValueBoxed<'kibana_context', ExecutionContextSearch>;
+export type KibanaQueryOutput = ExpressionValueBoxed<'kibana_query', Query>;
+export type KibanaFilter = ExpressionValueBoxed<'kibana_filter', Filter>;
+export type KibanaField = ExpressionValueBoxed<'kibana_field', DataViewField>;
+export type KIBANA_CONTEXT_NAME = 'kibana_context';
+export type KibanaContext = ExpressionValueSearchContext;

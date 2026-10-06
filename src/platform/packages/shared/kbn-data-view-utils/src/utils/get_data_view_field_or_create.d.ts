@@ -1,0 +1,9 @@
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+export declare const getDataViewFieldOrCreateFromColumnMeta: ({ dataView, fieldName, columnMeta, }: {
+    dataView: DataView;
+    fieldName: string;
+    columnMeta?: DatatableColumnMeta & {
+        isComputedColumn?: boolean;
+    };
+}) => import("@kbn/data-views-plugin/common").DataViewField | undefined;

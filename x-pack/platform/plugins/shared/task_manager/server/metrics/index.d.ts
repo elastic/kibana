@@ -1,0 +1,17 @@
+import type { Observable } from 'rxjs';
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerConfig } from '../config';
+import type { Metrics } from './metrics_stream';
+import type { TaskPollingLifecycle } from '../polling_lifecycle';
+import type { TaskManagerMetricsCollector } from './task_metrics_collector';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
+export type { Metrics } from './metrics_stream';
+interface MetricsStreamOpts {
+    config: TaskManagerConfig;
+    logger: Logger;
+    reset$: Observable<boolean>;
+    taskPollingLifecycle?: TaskPollingLifecycle;
+    taskManagerMetricsCollector?: TaskManagerMetricsCollector;
+    definitions: TaskTypeDictionary;
+}
+export declare function metricsStream({ config, reset$, logger, taskPollingLifecycle, taskManagerMetricsCollector, definitions, }: MetricsStreamOpts): Observable<Metrics>;

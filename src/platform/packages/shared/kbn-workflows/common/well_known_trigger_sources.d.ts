@@ -1,0 +1,39 @@
+/**
+ * Values persisted on workflow execution `triggeredBy` for built-in trigger paths.
+ * 'workflow-step' is used for sub-workflows.
+ * Event-driven runs use a registered trigger id (e.g. `cases.caseCreated`) plus
+ * event payload / dispatch metadata from the trigger-event handler. Custom
+ * `triggeredBy` provenance strings (product orchestrators) are not event-driven.
+ */
+export type WellKnownWorkflowTriggerSource = 'manual' | 'scheduled' | 'alert' | 'workflow-step';
+/**
+ * Execution fields used to classify event-driven runs. Callers may pass a full
+ * execution document or a subset (`triggeredBy` + `context`).
+ */
+export interface EventDrivenWorkflowTriggerSourceInput {
+    triggeredBy?: string;
+    dispatchEventId?: string;
+    metadata?: Record<string, unknown>;
+    context?: Record<string, unknown> | null;
+}
+/**
+ * Resolves event-dispatch evidence from an execution document.
+ * Prefers top-level `metadata` / `dispatchEventId`, then `context.metadata`.
+ */
+export declare const getEventDrivenWorkflowTriggerEvidence: (execution: EventDrivenWorkflowTriggerSourceInput) => {
+    triggeredBy?: string;
+    event: unknown;
+    eventTriggerId?: string;
+    eventId?: string;
+};
+/**
+ * Returns true when `triggeredBy` is one of the platform-defined execution sources.
+ * Used to distinguish built-in triggers from event-driven trigger ids in telemetry and APM.
+ */
+export declare const isWellKnownWorkflowTriggerSource: (triggeredBy: string | undefined) => triggeredBy is WellKnownWorkflowTriggerSource;
+/**
+ * Returns true only for true event-driven executions (trigger-event handler path).
+ * A non-well-known `triggeredBy` string is not sufficient; event payload and/or
+ * dispatch metadata (`eventTriggerId` / `eventId`) must also be present.
+ */
+export declare const isEventDrivenWorkflowTriggerSource: (execution: EventDrivenWorkflowTriggerSourceInput) => boolean;

@@ -1,0 +1,11 @@
+import type { Observable } from 'rxjs';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { Logger } from '@kbn/logging';
+import type { MonitoredHealth } from '../routes/health';
+import type { TaskManagerUsage } from './types';
+import type { MonitoredUtilization } from '../routes/background_task_utilization';
+import type { TaskManagerStartContract } from '..';
+type GetTaskManagerStart = () => Promise<TaskManagerStartContract>;
+export declare function createTaskManagerUsageCollector(usageCollection: UsageCollectionSetup, monitoringStats$: Observable<MonitoredHealth>, monitoredUtilization$: Observable<MonitoredUtilization>, excludeTaskTypes: string[], getTaskManagerStart: GetTaskManagerStart, logger: Logger): import("@kbn/usage-collection-plugin/server").Collector<TaskManagerUsage, {}>;
+export declare function registerTaskManagerUsageCollector(usageCollection: UsageCollectionSetup, monitoringStats$: Observable<MonitoredHealth>, monitoredUtilization$: Observable<MonitoredUtilization>, excludeTaskTypes: string[], getTaskManagerStart: GetTaskManagerStart, logger: Logger): void;
+export {};

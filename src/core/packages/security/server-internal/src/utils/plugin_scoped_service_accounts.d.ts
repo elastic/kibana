@@ -1,0 +1,13 @@
+import type { CoreServiceAccountsService, ServiceAccountsServiceContract } from '@kbn/core-security-server';
+import type { WorkloadTypeRegistry } from '../workload_type_registry';
+export interface PluginScopedServiceAccountsOptions {
+    pluginId: string;
+    delegate: ServiceAccountsServiceContract;
+    workloadTypes: WorkloadTypeRegistry;
+}
+/**
+ * Builds the service accounts contract one plugin receives at start. The workload methods refuse
+ * any workload type the plugin did not register and any malformed workload ID, and otherwise call
+ * the delegate with the plugin's id, which the plugin itself never supplies.
+ */
+export declare const createPluginScopedServiceAccounts: ({ pluginId, delegate, workloadTypes, }: PluginScopedServiceAccountsOptions) => CoreServiceAccountsService;

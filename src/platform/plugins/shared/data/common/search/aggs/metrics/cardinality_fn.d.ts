@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { METRIC_TYPES } from '..';
+export declare const aggCardinalityFnName = "aggCardinality";
+type Input = any;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.CARDINALITY>;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggCardinalityFnName, Input, AggArgs, Output>;
+export declare const aggCardinality: () => FunctionDefinition;
+export {};

@@ -1,0 +1,1 @@
+export type { UserProfileServiceStart, UserProfileSuggestParams, UserProfileBulkGetParams, UserProfileRequiredPrivileges, UserProfileGetCurrentParams, UserProfileGetCurrentProfileIdParams, } from '@kbn/core-user-profile-server';

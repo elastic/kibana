@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { METRIC_TYPES } from '..';
+export declare const aggTopHitFnName = "aggTopHit";
+type Input = any;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.TOP_HITS>;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggTopHitFnName, Input, AggArgs, Output>;
+export declare const aggTopHit: () => FunctionDefinition;
+export {};

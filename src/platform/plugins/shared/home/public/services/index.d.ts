@@ -1,0 +1,10 @@
+export { FeatureCatalogueRegistry } from './feature_catalogue';
+export type { FeatureCatalogueCategory, FeatureCatalogueEntry, FeatureCatalogueSolution, FeatureCatalogueRegistrySetup, } from './feature_catalogue';
+export { EnvironmentService } from './environment';
+export type { Environment, EnvironmentServiceSetup } from './environment';
+export { TutorialService } from './tutorials';
+export type { TutorialVariables, TutorialServiceSetup, TutorialDirectoryHeaderLinkComponent, TutorialModuleNoticeComponent, } from './tutorials';
+export { AddDataService } from './add_data';
+export type { AddDataServiceSetup, AddDataTab } from './add_data';
+export { WelcomeService } from './welcome';
+export type { WelcomeServiceSetup, WelcomeRenderTelemetryNotice } from './welcome';

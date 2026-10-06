@@ -1,0 +1,75 @@
+import type { EnsureSubsetOf, GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import type * as api from '@elastic/elasticsearch/lib/api/types';
+import type { BaseSearchRuntimeMappings } from './runtime';
+export type AnyDataStreamDefinition = DataStreamDefinition<any, any, any>;
+export interface DataStreamDefinition<Mappings extends MappingsDefinition, FullMappings extends GetFieldsOf<Mappings> = GetFieldsOf<Mappings>, SearchRuntimeMappings extends BaseSearchRuntimeMappings = never> {
+    /**
+     * @remark Once released this should never change.
+     */
+    name: string;
+    searchRuntimeMappings?: SearchRuntimeMappings;
+    /**
+     * Is this a hidden data stream?
+     * @default true
+     */
+    hidden?: boolean;
+    /**
+     * Whether this is a system data stream.
+     *
+     * When set to `true`, Kibana verifies in dev mode that Elasticsearch recognizes the
+     * stream as a system data stream after creation. If it does not, Kibana throws a clear error
+     * so the misconfiguration is caught early — before it becomes a data-exposure risk in
+     * production. The check never runs in production.
+     *
+     * A `SystemDataStreamDescriptor` must be registered with Elasticsearch before the stream is
+     * initialized; otherwise the check will throw. See the "System data streams" section of the
+     * `@kbn/data-streams` README for guidance on how to register one.
+     *
+     * @remark Only set this to `true` after coordinating with the Elasticsearch team.
+     */
+    system?: boolean;
+    /**
+     * @remark Must be **incremented** in order to release a new version of the template definition.
+     * @remark Must be greater than 0
+     */
+    version: number;
+    /**
+     * The index template definition for the data stream.
+     *
+     * This template definition corresponds to types from ES:
+     *  - api.IndicesPutIndexTemplateRequest
+     *  - api.IndicesIndexTemplate
+     *  - api.IndicesIndexTemplateSummary
+     *
+     * Lifecycle behavior:
+     *  - `template.lifecycle` is optional.
+     *  - If omitted, no lifecycle policy is configured by this definition.
+     *  - If you add, remove, or change `template.lifecycle`, increment `version` so the
+     *    updated template is applied.
+     */
+    template: Pick<api.IndicesIndexTemplateSummary, 'aliases' | 'lifecycle'> & {
+        /** @default 100 */
+        priority?: number;
+        /**
+         * Auto-populated with the following properties:
+         * managed: true;                  // present as a managed index template/data stream
+         * userAgent: string;              // an indication of what code created the resources
+         * version: string;                // the deployed version of the template definition
+         * previousVersions: string[];     // previous data stream definitions
+         */
+        _meta?: {
+            [key: string]: unknown;
+        };
+        mappings?: EnsureSubsetOf<Mappings, FullMappings> extends true ? Mappings : never;
+        /**
+         * @remark "hidden" defaults to true for the data stream and the backing indices
+         */
+        settings?: api.IndicesIndexSettings;
+        /**
+         * @remark Stick to defining and sharing mappings as plain JavaScript objects.
+         * @remark Use component templates if you would like to allow end users to define mappings. You will have to ensure
+         *         that updated mappings are applied to existing indices.
+         */
+        composedOf?: string[];
+    };
+}
