@@ -7,30 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { z } from '@kbn/zod/v4';
+import { cpuSpinStepCommonDefinition } from '../../common/test_steps/cpu_spin_step';
 
-export const CPU_SPIN_STEP_ID = 'test.cpuSpin';
-export const MAX_CPU_SPIN_DURATION_MS = 2_000;
+export { MAX_CPU_SPIN_DURATION_MS } from '../../common/test_steps/cpu_spin_step';
 
 export const cpuSpinStepDefinition = createServerStepDefinition({
-  id: CPU_SPIN_STEP_ID,
-  category: StepCategory.Data,
-  label: i18n.translate('workflowsManagement.testCpuSpinStep.label', {
-    defaultMessage: 'Test CPU spin',
-  }),
-  description: i18n.translate('workflowsManagement.testCpuSpinStep.description', {
-    defaultMessage: 'Synchronously occupies the workflow execution thread for a bounded duration.',
-  }),
-  inputSchema: z.object({
-    durationMs: z.number().int().min(1).max(MAX_CPU_SPIN_DURATION_MS),
-  }),
-  outputSchema: z.object({
-    blockedMs: z.number().int(),
-    iterations: z.number().int().nonnegative(),
-  }),
+  ...cpuSpinStepCommonDefinition,
   handler: async ({ input }) => {
     const startedAt = performance.now();
     const deadline = startedAt + input.durationMs;

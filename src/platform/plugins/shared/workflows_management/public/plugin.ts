@@ -33,6 +33,7 @@ import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
+import { cpuSpinStepDefinition } from './test_steps/cpu_spin_step';
 import { triggerSchemas } from './trigger_schemas';
 import { registerConnectorEventTriggersPublic } from './triggers/register_connector_event_triggers';
 import type {
@@ -95,6 +96,8 @@ export class WorkflowsPlugin
     };
 
     registerConnectorType();
+
+    plugins.workflowsExtensions.registerStepDefinition(cpuSpinStepDefinition);
 
     registerConnectorEventTriggersPublic({
       inboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
