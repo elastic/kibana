@@ -25,7 +25,7 @@ describe('getAnonymizationUiSettings', () => {
     expect(settings.maskingEnabled).toBe(false);
   });
 
-  it('rejects a regex rule whose pattern does not compile, so it cannot be saved and silently skipped', () => {
+  it('accepts a regex rule whose pattern does not compile, so one broken rule cannot make Core discard the whole saved setting on read (the pipeline fails it at run time per onFailure)', () => {
     const settings: AnonymizationSettings = JSON.parse(String(setting.value));
     const brokenRule = {
       type: 'RegExp',
@@ -34,9 +34,9 @@ describe('getAnonymizationUiSettings', () => {
       pattern: '(unclosed',
     };
 
-    expect(() => setting.schema.validate({ ...settings, rules: [brokenRule] })).toThrow(
-      /valid regular expression/
-    );
+    expect(() =>
+      setting.schema.validate({ ...settings, maskingEnabled: true, rules: [brokenRule] })
+    ).not.toThrow();
   });
 });
 
