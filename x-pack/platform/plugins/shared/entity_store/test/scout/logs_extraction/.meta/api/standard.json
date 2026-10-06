@@ -1,5 +1,5 @@
 {
-  "sha1": "8087a7550cdc39f400362f86575e500e004ece89",
+  "sha1": "9d9294722bbdcb2417f0fa8e7520b9faa9965cd9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 310,
-        "column": 7
+        "line": 332,
+        "column": 23
       }
     },
     {
@@ -32,13 +32,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 323,
-        "column": 7
+        "line": 345,
+        "column": 16
       }
     },
     {
-      "id": "c8588d2004a116a-6ed93a113ba0d4d",
-      "title": "Entity Store dual-process union equivalence flag on: non-priority then priority matches single-process output",
+      "id": "c8588d2004a116a-ce4317c5ca9ad92",
+      "title": "Entity Store dual-process union equivalence flag on: non-priority then priority gives the same entities and levels as single-process",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -48,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 338,
+        "line": 361,
         "column": 21
       }
     },
@@ -64,13 +64,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 357,
-        "column": 3
+        "line": 384,
+        "column": 23
       }
     },
     {
-      "id": "c8588d2004a116a-e91fd4f9c2eb91d",
-      "title": "Entity Store dual-process union equivalence known gap: dual-process picks newest and oldest values by run order",
+      "id": "c8588d2004a116a-177173137fbbdf1",
+      "title": "Entity Store dual-process union equivalence dual-process: run order decides newest and oldest values",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 380,
-        "column": 5
+        "line": 401,
+        "column": 14
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 414,
-        "column": 25
+        "line": 441,
+        "column": 17
       }
     },
     {

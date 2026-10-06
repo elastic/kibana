@@ -1,5 +1,5 @@
 {
-  "sha1": "450b18f63445a31f4bc6d80ffb0a38a97b9ec860",
+  "sha1": "a9614a6606dfff20c70bfefd70496ff33ceff582",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -576,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 74,
-        "column": 13
+        "line": 102,
+        "column": 7
       }
     },
     {
@@ -592,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 82,
-        "column": 7
+        "line": 110,
+        "column": 70
       }
     },
     {
@@ -608,8 +608,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 103,
-        "column": 27
+        "line": 131,
+        "column": 18
       }
     },
     {
@@ -624,8 +624,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 118,
-        "column": 17
+        "line": 148,
+        "column": 63
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-d4064322640759e",
+      "title": "Entity Store per entity-type log extraction config a per-type index pattern list replaces the store-wide one and survives store-wide updates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 160,
+        "column": 80
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-eeedf0c28bc96d3",
+      "title": "Entity Store per entity-type log extraction config a store-wide exclusion removes the same pattern added by a per-type override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 206,
+        "column": 16
       }
     },
     {
@@ -672,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 84,
-        "column": 7
+        "line": 105,
+        "column": 39
       }
     },
     {
@@ -688,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 91,
-        "column": 25
+        "line": 111,
+        "column": 7
       }
     },
     {
@@ -704,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 109,
-        "column": 100
+        "line": 141,
+        "column": 18
       }
     },
     {
@@ -720,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 121,
-        "column": 14
+        "line": 156,
+        "column": 32
       }
     },
     {
@@ -736,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 126,
-        "column": 46
+        "line": 160,
+        "column": 89
       }
     },
     {
@@ -752,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 141,
-        "column": 24
+        "line": 176,
+        "column": 13
       }
     },
     {
@@ -768,8 +800,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 167,
-        "column": 7
+        "line": 197,
+        "column": 16
       }
     },
     {
@@ -784,8 +816,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 175,
-        "column": 23
+        "line": 209,
+        "column": 33
       }
     },
     {
@@ -800,8 +832,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 188,
-        "column": 7
+        "line": 219,
+        "column": 16
       }
     },
     {
@@ -816,8 +848,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 202,
-        "column": 25
+        "line": 238,
+        "column": 7
       }
     },
     {
@@ -832,8 +864,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 236,
-        "column": 99
+        "line": 249,
+        "column": 16
       }
     },
     {
@@ -848,8 +880,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 258,
-        "column": 36
+        "line": 273,
+        "column": 7
       }
     },
     {
@@ -864,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 273,
-        "column": 9
+        "line": 295,
+        "column": 5
       }
     },
     {
