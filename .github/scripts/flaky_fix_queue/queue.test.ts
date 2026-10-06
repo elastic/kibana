@@ -184,17 +184,17 @@ test('uses label application time rather than the issue number to choose the nex
   assert.deepEqual(await f.sweep(), [200]);
 });
 
-test('three open fixer PRs stop automatic admission, including PRs linked to old or closed issues', async () => {
+test('five open fixer PRs stop automatic admission, including PRs linked to old or closed issues', async () => {
   const f = fixture();
-  for (let number = 1; number <= 3; number++) {
+  for (let number = 1; number <= 5; number++) {
     const issue = f.addIssue(number);
     issue.state = 'closed';
     f.addPr(100 + number, [number]);
   }
-  f.addIssue(4);
+  f.addIssue(6);
   assert.deepEqual(await f.sweep(), []);
   f.issues.delete(101);
-  assert.deepEqual(await f.sweep(), [4]);
+  assert.deepEqual(await f.sweep(), [6]);
 });
 
 test('counts a PR once even when it closes multiple same-team issues', async () => {
@@ -432,7 +432,7 @@ test('rejects invalid capacity settings before reading or writing GitHub', async
 test('successive batches stay within the outstanding cap as fixers finish and PRs close', async () => {
   const f = fixture();
   for (let number = 1; number <= 13; number++) f.addIssue(number);
-  for (let number = 1; number <= 3; number++) {
+  for (let number = 1; number <= 5; number++) {
     assert.deepEqual(await f.sweep(), [number]);
     for (const run of f.runs.values()) run.status = 'completed';
     f.issues.get(number)?.labels.splice(0, 1);
@@ -440,7 +440,7 @@ test('successive batches stay within the outstanding cap as fixers finish and PR
   }
   assert.deepEqual(await f.sweep(), []);
   f.issues.delete(101);
-  assert.deepEqual(await f.sweep(), [4]);
+  assert.deepEqual(await f.sweep(), [6]);
 });
 
 test('varied bursts respect every team budget and never admit the same request twice', async () => {
@@ -460,7 +460,7 @@ test('a multi-team reservation still blocks its free owner when its other owner 
   f.addIssue(1, ['Team:Core', 'Team:Search']);
   f.receipt(1, 1, 'pending');
   f.addIssue(2, ['Team:Search']);
-  for (let number = 10; number <= 12; number++) {
+  for (let number = 10; number <= 14; number++) {
     f.addIssue(number).state = 'closed';
     f.addPr(100 + number, [number]);
   }
@@ -547,6 +547,6 @@ test('a fixer finishing during the workload read cannot disappear between execut
     }
     return result;
   };
-  assert.deepEqual(await f.sweep(), []);
-  assert.deepEqual(await f.sweep(), []);
+  assert.deepEqual(await f.sweep({ maxOutstanding: 3 }), []);
+  assert.deepEqual(await f.sweep({ maxOutstanding: 3 }), []);
 });

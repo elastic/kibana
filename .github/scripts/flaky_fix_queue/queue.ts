@@ -141,7 +141,7 @@ export const dispatchQueuedFixes = async ({
   client,
   log,
   dryRun = false,
-  maxOutstanding = 3,
+  maxOutstanding = 5,
   maxRunning = 1,
 }: QueueOptions): Promise<number[]> => {
   for (const value of [maxOutstanding, maxRunning]) {

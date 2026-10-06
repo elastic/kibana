@@ -2,7 +2,8 @@ name: Flaky Fix Dispatcher
 
 on:
   schedule:
-    - cron: '7,22,37,52 * * * *'
+    # Every 15 minutes, starting at minute 7.
+    - cron: '7-59/15 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -33,7 +34,7 @@ jobs:
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           DRY_RUN: ${{ inputs.dry_run == true }}
-          MAX_OUTSTANDING: '3'
+          MAX_OUTSTANDING: '5'
           MAX_RUNNING: '1'
         with:
           # GITHUB_TOKEN can explicitly dispatch workflows. The fixer still uses

@@ -229,7 +229,7 @@ Whatever the outcome, always finish by leaving one concise comment on the issue 
 
 ## Admission queue
 
-The Flaky Fix Dispatcher admits labelled issues every 15 minutes, allowing up to three open
+The Flaky Fix Dispatcher admits labelled issues every 15 minutes, allowing up to five open
 fix PRs or admitted fixes per owning team and one active fixer per team. Waiting issues keep
 `ai:fix-flaky`. A direct workflow dispatch without `request_id` is a manual capacity override.
 See [queue operations](../scripts/flaky_fix_queue/README.md) for retries and recovery.
