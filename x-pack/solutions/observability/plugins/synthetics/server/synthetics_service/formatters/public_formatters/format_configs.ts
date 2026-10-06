@@ -6,9 +6,13 @@
  */
 
 import { isEmpty, isNil, omitBy } from 'lodash';
+import type { SavedObject } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { Logger } from '@kbn/logging';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { periodToSeconds } from '../../../routes/overview_status/utils';
+import { normalizeSecrets } from '../../utils/secrets';
 
 import { formatMWs, replaceStringWithParams, resolveHttpAuthParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
@@ -17,6 +21,7 @@ import type {
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
+  SyntheticsMonitorWithSecretsAttributes,
   TLSFields,
 } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
@@ -177,4 +182,67 @@ export const mixParamsWithGlobalParams = (
   }
 
   return { str: paramsString, params };
+};
+
+/** Formats monitors the way their configuration is sent to the service. */
+export const formatMonitorConfigs = ({
+  configs,
+  maintenanceWindows,
+  logger,
+}: {
+  configs: ConfigData[] | ConfigData;
+  maintenanceWindows: MaintenanceWindow[];
+  logger: Logger;
+}) => {
+  const configList = Array.isArray(configs) ? configs : [configs];
+
+  return configList.map((config) => {
+    const { str: paramsString, params } = mixParamsWithGlobalParams(config.params, config.monitor);
+
+    const asHeartbeatConfig = formatHeartbeatRequest(config, paramsString);
+
+    return formatMonitorConfigFields(
+      Object.keys(asHeartbeatConfig) as ConfigKey[],
+      asHeartbeatConfig as Partial<MonitorFields>,
+      logger,
+      params ?? {},
+      maintenanceWindows
+    );
+  });
+};
+
+/**
+ * Formats saved monitors for the service, resolving the params that apply to each one: those of
+ * its own space, overridden by those shared across all spaces.
+ */
+export const formatSavedMonitors = ({
+  monitors,
+  paramsBySpace,
+  maintenanceWindows,
+  kibanaUrl,
+  logger,
+}: {
+  monitors: Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>;
+  paramsBySpace: Record<string, Record<string, string>>;
+  maintenanceWindows: MaintenanceWindow[];
+  kibanaUrl?: string;
+  logger: Logger;
+}) => {
+  const configs = (monitors ?? []).map((monitor) => {
+    const attributes = monitor.attributes as unknown as MonitorFields;
+    const monitorSpace = monitor.namespaces?.[0] ?? DEFAULT_SPACE_ID;
+
+    const params = paramsBySpace[monitorSpace] ?? {};
+
+    return {
+      params: { ...params, ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}) },
+      monitor: normalizeSecrets(monitor).attributes,
+      configId: monitor.id,
+      heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
+      spaceId: monitorSpace,
+      kibanaUrl,
+    };
+  });
+
+  return formatMonitorConfigs({ configs, maintenanceWindows, logger }) as MonitorFields[];
 };

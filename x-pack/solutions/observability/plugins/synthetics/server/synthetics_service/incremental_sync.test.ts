@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SyncFingerprintInputs } from './retain_sync';
+import type { SyncFingerprintInputs } from './incremental_sync';
 import {
   FULL_SYNC_INTERVAL_MS,
   getChangedMonitorsFilter,
@@ -14,8 +14,8 @@ import {
   getParamsVersion,
   getSyncFingerprint,
   getUnchangedMonitorsFilter,
-  shouldSyncAllMonitors,
-} from './retain_sync';
+  needsFullSync,
+} from './incremental_sync';
 
 const inputs: SyncFingerprintInputs = {
   stackVersion: '9.5.0',
@@ -66,7 +66,7 @@ describe('getSyncFingerprint', () => {
   });
 });
 
-describe('shouldSyncAllMonitors', () => {
+describe('needsFullSync', () => {
   const now = Date.parse('2026-10-05T12:00:00.000Z');
   const fingerprint = getSyncFingerprint(inputs);
   const state = {
@@ -76,7 +76,7 @@ describe('shouldSyncAllMonitors', () => {
   };
 
   it('is false when the last sync was recent and nothing else changed', () => {
-    expect(shouldSyncAllMonitors({ state, fingerprint, now })).toBe(false);
+    expect(needsFullSync({ state, fingerprint, now })).toBe(false);
   });
 
   it.each([
@@ -87,7 +87,7 @@ describe('shouldSyncAllMonitors', () => {
     ['the fingerprint was never recorded', { ...state, syncFingerprint: undefined }],
     ['the last full sync is unreadable', { ...state, lastFullSyncAt: 'yesterday-ish' }],
   ])('is true when %s', (_, changedState) => {
-    expect(shouldSyncAllMonitors({ state: changedState, fingerprint, now })).toBe(true);
+    expect(needsFullSync({ state: changedState, fingerprint, now })).toBe(true);
   });
 
   it('is true once the last full sync is a day old', () => {
@@ -95,15 +95,15 @@ describe('shouldSyncAllMonitors', () => {
     const aDay = new Date(now - FULL_SYNC_INTERVAL_MS).toISOString();
 
     expect(
-      shouldSyncAllMonitors({
+      needsFullSync({
         state: { ...state, lastFullSyncAt: justUnderADay },
         fingerprint,
         now,
       })
     ).toBe(false);
-    expect(
-      shouldSyncAllMonitors({ state: { ...state, lastFullSyncAt: aDay }, fingerprint, now })
-    ).toBe(true);
+    expect(needsFullSync({ state: { ...state, lastFullSyncAt: aDay }, fingerprint, now })).toBe(
+      true
+    );
   });
 });
 

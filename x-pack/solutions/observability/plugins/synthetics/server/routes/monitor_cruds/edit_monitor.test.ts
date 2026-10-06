@@ -78,9 +78,9 @@ describe('syncEditedMonitor', () => {
     references: [],
   } as SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
-  const { routeContext, syntheticsService, serverMock } = getRouteContextMock();
-  syntheticsService.editConfig = jest.fn();
-  syntheticsService.getMaintenanceWindows = jest.fn();
+  const { routeContext, serviceManagedLocations, serverMock } = getRouteContextMock();
+  serviceManagedLocations.editMonitors = jest.fn();
+  routeContext.syntheticsMonitorClient.getMaintenanceWindows = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -95,7 +95,7 @@ describe('syncEditedMonitor', () => {
       spaceId: 'test-space',
     });
 
-    expect(syntheticsService.editConfig).toHaveBeenCalledWith(
+    expect(serviceManagedLocations.editMonitors).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           configId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',

@@ -270,7 +270,7 @@ export class AddEditMonitorAPI {
 
       locationsVal = getMonitorLocations({
         monitorLocations,
-        allPublicLocations: syntheticsMonitorClient.syntheticsService.locations,
+        allPublicLocations: syntheticsMonitorClient.serviceManagedLocations.locations,
         allPrivateLocations: this.allPrivateLocations,
       });
     }

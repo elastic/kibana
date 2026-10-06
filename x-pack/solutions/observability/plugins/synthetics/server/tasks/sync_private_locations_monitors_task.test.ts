@@ -35,10 +35,8 @@ const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
     editMonitors: jest.fn().mockResolvedValue({ failedUpdates: [], failedCreates: [] }),
   },
-  syntheticsService: {
-    getSyntheticsParams: jest.fn(),
-    getMaintenanceWindows: jest.fn(),
-  },
+  getSyntheticsParams: jest.fn(),
+  getMaintenanceWindows: jest.fn(),
 };
 const mockLogger = loggerMock.create();
 
@@ -292,7 +290,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest
         .fn()
         .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 
@@ -324,7 +322,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest
         .fn()
         .mockResolvedValue([{ id: 'alerting-mw', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 
@@ -357,9 +355,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       jest
         .spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws')
         .mockResolvedValue(undefined);
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
-        .fn()
-        .mockResolvedValue([]);
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest.fn().mockResolvedValue([]);
 
       const result = await task.runTask({ taskInstance });
 
@@ -505,7 +501,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   describe('hasMWsChanged', () => {
     it('returns true if updated MWs are found', async () => {
       // mock maintenance window client to return an updated MW
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest
         .fn()
         .mockReturnValue([{ id: 'mw-1', updatedAt: '2024-01-02T00:00:00.000Z' }]);
 
@@ -522,9 +518,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('returns true if total number of MWs changed (missing ids)', async () => {
       //  returns no maintenance windows -> missing ids detected
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
-        .fn()
-        .mockReturnValue([]);
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest.fn().mockReturnValue([]);
 
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
@@ -540,7 +534,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('returns false if no changes are detected', async () => {
       // bulkGet returns MWs updated before lastStartedAt and all ids present
 
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest
         .fn()
         .mockReturnValue([{ id: 'mw-1', updatedAt: '2023-01-01T00:00:00.000Z' }]);
 
@@ -558,7 +552,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
   describe('haveMWsUpdatedSince', () => {
     it('returns true when an MW was updated after the given timestamp', async () => {
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest
         .fn()
         .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 
@@ -568,7 +562,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('returns false when MW updates are not after the given timestamp', async () => {
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest
         .fn()
         .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T09:59:59.000Z' }]);
 
@@ -578,7 +572,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('returns false when the updated MW is not referenced by any monitor', async () => {
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.getMaintenanceWindows = jest
         .fn()
         .mockResolvedValue([{ id: 'alerting-mw', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 

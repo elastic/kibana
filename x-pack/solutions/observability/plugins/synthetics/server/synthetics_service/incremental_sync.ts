@@ -33,6 +33,8 @@ const CHANGED_SINCE_MARGIN_MS = 60 * 1000;
 
 /** What the sync task remembers between runs, stored as flat strings in the task state. */
 export interface MonitorSyncState {
+  /** When the sync task last started. */
+  lastRunAt?: string;
   /** When the last run that pushed everything it had to without a failure started. */
   lastSyncedAt?: string;
   /** When the last such run sent every monitor in full. */
@@ -95,7 +97,7 @@ export const getParamsVersion = async (soClient: ISavedObjectsRepository): Promi
   return `${count}:${latestUpdatedAt}`;
 };
 
-export const shouldSyncAllMonitors = ({
+export const needsFullSync = ({
   state,
   fingerprint,
   now,

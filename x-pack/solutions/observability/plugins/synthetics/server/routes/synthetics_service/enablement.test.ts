@@ -35,9 +35,9 @@ const createContext = () => ({
     },
   },
   syntheticsMonitorClient: {
-    syntheticsService: {
+    serviceManagedLocations: {
       isAllowed: true,
-      deleteAllConfigs: jest.fn(),
+      deleteAllMonitors: jest.fn(),
     },
   },
 });

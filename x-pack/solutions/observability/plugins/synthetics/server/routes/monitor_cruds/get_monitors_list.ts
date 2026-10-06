@@ -76,7 +76,7 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
       monitors,
       absoluteTotal,
       perPage: perPageT,
-      syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
+      syncErrors: syntheticsMonitorClient.serviceManagedLocations.syncErrors,
     };
   },
 });

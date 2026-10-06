@@ -8,7 +8,7 @@
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { CoreStart } from '@kbn/core/server';
-import { SyntheticsService } from './synthetics_service';
+import { ServiceManagedLocations } from './service_managed_locations';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
@@ -16,6 +16,8 @@ import times from 'lodash/times';
 import type { HeartbeatConfig } from '../../common/runtime_types';
 import { LocationStatus } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
+import { getSyntheticsParams } from './get_synthetics_params';
+import { getMaintenanceWindows } from './maintenance_windows/get_maintenance_windows';
 import * as apiKeys from './get_api_key';
 import * as monitorUpgradeSender from '../routes/telemetry/monitor_upgrade_sender';
 import type { SyntheticsServerSetup } from '../types';
@@ -23,6 +25,8 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 
 jest.mock('axios', () => jest.fn());
+jest.mock('./get_synthetics_params');
+jest.mock('./maintenance_windows/get_maintenance_windows');
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
@@ -68,7 +72,7 @@ const getFakePayload = (locations: HeartbeatConfig['locations']) => {
   };
 };
 
-describe('SyntheticsService', () => {
+describe('ServiceManagedLocations', () => {
   const mockEsClient = {
     search: jest.fn(),
   };
@@ -149,18 +153,17 @@ describe('SyntheticsService', () => {
         page: 1,
       });
     }
-    const service = new SyntheticsService(serverMock);
+    const service = new ServiceManagedLocations(serverMock);
 
-    service.apiClient.locations = locations;
+    service.httpClient.locations = locations;
     service.locations = locations;
     service.isAllowed = true;
 
     jest.spyOn(service, 'getOutput').mockResolvedValue({
       output: { hosts: ['es'], api_key: 'i:k' },
     });
-    jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
-
-    service.getMaintenanceWindows = jest.fn();
+    (getSyntheticsParams as jest.Mock).mockResolvedValue({});
+    (getMaintenanceWindows as jest.Mock).mockResolvedValue([]);
 
     return { service, locations };
   };
@@ -171,7 +174,7 @@ describe('SyntheticsService', () => {
   });
 
   it('setup properly', async () => {
-    const service = new SyntheticsService(serverMock);
+    const service = new ServiceManagedLocations(serverMock);
 
     expect(service.isAllowed).toEqual(false);
 
@@ -183,7 +186,7 @@ describe('SyntheticsService', () => {
   });
 
   it('setup properly with basic auth', async () => {
-    const service = new SyntheticsService(serverMock);
+    const service = new ServiceManagedLocations(serverMock);
 
     await service.setup(taskManagerSetup);
 
@@ -199,7 +202,7 @@ describe('SyntheticsService', () => {
       },
       enabled: true,
     };
-    const service = new SyntheticsService(serverMock);
+    const service = new ServiceManagedLocations(serverMock);
 
     await service.setup(taskManagerSetup);
 
@@ -240,7 +243,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfigs({ monitor: payload } as any, []);
+      await service.addMonitors({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -273,7 +276,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs(ALL_SPACES_ID);
+      await service.syncAllMonitors(ALL_SPACES_ID);
 
       expect(axios).not.toHaveBeenCalled();
 
@@ -303,7 +306,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs(ALL_SPACES_ID);
+      await service.syncAllMonitors(ALL_SPACES_ID);
 
       expect(serverMock.logger.debug).toHaveBeenCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
@@ -323,7 +326,7 @@ describe('SyntheticsService', () => {
     });
   });
 
-  describe('pushConfigs', () => {
+  describe('syncAllMonitors', () => {
     it('includes the isEdit flag on edit requests', async () => {
       const { service, locations } = getMockedService();
 
@@ -331,7 +334,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any, true, []);
+      await service.editMonitors({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -348,7 +351,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any, true, []);
+      await service.editMonitors({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -365,7 +368,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.addConfigs({ monitor: payload } as any, []);
+      await service.addMonitors({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -388,7 +391,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs(ALL_SPACES_ID);
+      await service.syncAllMonitors(ALL_SPACES_ID);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -438,12 +441,12 @@ describe('SyntheticsService', () => {
 
         (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-        await expect(service.pushConfigs(ALL_SPACES_ID)).rejects.toThrow(errorMessage);
+        await expect(service.syncAllMonitors(ALL_SPACES_ID)).rejects.toThrow(errorMessage);
       }
     );
   });
 
-  describe('pushConfigs with sync state', () => {
+  describe('syncAllMonitors with sync state', () => {
     const MONITOR_TYPE = 'synthetics-monitor-multi-space';
 
     type MonitorSO = ReturnType<typeof monitorSO>;
@@ -561,16 +564,16 @@ describe('SyntheticsService', () => {
 
     const getService = () => {
       const { service } = getMockedService();
-      service.getMaintenanceWindows = jest.fn().mockResolvedValue([]);
+      (getMaintenanceWindows as jest.Mock).mockResolvedValue([]);
       return service;
     };
 
     /** Runs a first sync so the following ones start from the state it leaves behind. */
-    const syncOnce = async (service: SyntheticsService) => {
+    const syncOnce = async (service: ServiceManagedLocations) => {
       const state: Record<string, string> = {};
       mockStores({ changed: [monitorSO('first')] });
       mockServiceResponses();
-      await service.pushConfigs(ALL_SPACES_ID, state);
+      await service.syncAllMonitors(ALL_SPACES_ID, state);
       (axios as jest.MockedFunction<typeof axios>).mockClear();
       return state;
     };
@@ -592,7 +595,7 @@ describe('SyntheticsService', () => {
         const { encryptedClient } = mockStores({ changed: [monitorSO('a'), monitorSO('b')] });
         mockServiceResponses();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         const { retained, synced } = requests();
         expect(retained).toHaveLength(0);
@@ -614,7 +617,7 @@ describe('SyntheticsService', () => {
         mockStores();
         mockServiceResponses();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(axios).not.toHaveBeenCalled();
         expect(service.getOutput).not.toHaveBeenCalled();
@@ -629,7 +632,7 @@ describe('SyntheticsService', () => {
           sync: failure(500, { status: 500, reason: 'failed to sync monitors' }),
         });
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(service.syncErrors).toHaveLength(1);
         expect(state).toEqual({});
@@ -645,9 +648,9 @@ describe('SyntheticsService', () => {
           unchanged: [monitorSO('a'), monitorSO('b', { type: 'browser' })],
         });
         mockServiceResponses();
-        (service.getSyntheticsParams as jest.Mock).mockClear();
+        (getSyntheticsParams as jest.Mock).mockClear();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         const { retained, synced } = requests();
         expect(synced).toHaveLength(0);
@@ -658,7 +661,7 @@ describe('SyntheticsService', () => {
           { id: 'b', type: 'browser' },
         ]);
         expect(encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
-        expect(service.getSyntheticsParams).not.toHaveBeenCalled();
+        expect(getSyntheticsParams).not.toHaveBeenCalled();
 
         const monitorFinder = internalRepository.createPointInTimeFinder.mock.calls
           .map(([options]) => options)
@@ -685,7 +688,7 @@ describe('SyntheticsService', () => {
         mockStores({ unchanged: [monitorSO('a')] });
         mockServiceResponses();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(state.lastSyncedAt).toBe('2026-10-05T12:05:00.000Z');
         expect(state.lastFullSyncAt).toBe('2026-10-05T12:00:00.000Z');
@@ -694,19 +697,19 @@ describe('SyntheticsService', () => {
       it('sends the monitors that were edited in full and retains the rest', async () => {
         const service = getService();
         const state = await syncOnce(service);
-        (service.getSyntheticsParams as jest.Mock).mockClear();
+        (getSyntheticsParams as jest.Mock).mockClear();
         mockStores({
           changed: [monitorSO('edited', { name: 'renamed' })],
           unchanged: [monitorSO('same')],
         });
         mockServiceResponses();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         const { retained, synced } = requests();
         expect(idsOf(retained)).toEqual(['same']);
         expect(idsOf(synced)).toEqual(['edited']);
-        expect(service.getSyntheticsParams).toHaveBeenCalledTimes(1);
+        expect(getSyntheticsParams).toHaveBeenCalledTimes(1);
       });
 
       it('sends monitors the service did not retain in full, and only those', async () => {
@@ -718,7 +721,7 @@ describe('SyntheticsService', () => {
         });
         mockServiceResponses({ retain: notFound(['evicted']) });
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         const { retained, synced } = requests();
         expect(idsOf(retained)).toEqual(['still-cached', 'evicted']);
@@ -738,7 +741,7 @@ describe('SyntheticsService', () => {
         mockStores({ unchanged: [monitorSO('deleted')], byId: {} });
         mockServiceResponses({ retain: notFound(['deleted']) });
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(requests().synced).toHaveLength(0);
         expect(service.syncErrors).toEqual([]);
@@ -754,7 +757,7 @@ describe('SyntheticsService', () => {
         });
         mockServiceResponses({ retain: failure(404, '404 page not found') });
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(requests().retained).toHaveLength(1);
         expect(idsOf(requests().synced)).toEqual(['a', 'b']);
@@ -764,7 +767,7 @@ describe('SyntheticsService', () => {
         const { encryptedClient } = mockStores({ changed: [monitorSO('a'), monitorSO('b')] });
         mockServiceResponses({ retain: failure(404, '404 page not found') });
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(requests().retained).toHaveLength(0);
         expect(idsOf(requests().synced)).toEqual(['a', 'b']);
@@ -784,7 +787,7 @@ describe('SyntheticsService', () => {
         });
         mockServiceResponses();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(idsOf(requests().retained)).toEqual(['listed']);
         expect(requests().synced).toHaveLength(1);
@@ -804,7 +807,7 @@ describe('SyntheticsService', () => {
         });
         mockServiceResponses();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(axios).not.toHaveBeenCalled();
         expect(state.lastSyncedAt).toBe('2026-10-05T12:00:00.000Z');
@@ -812,7 +815,7 @@ describe('SyntheticsService', () => {
 
       it('retains a monitor at each service location it runs at', async () => {
         const { service } = getMockedService(2);
-        service.getMaintenanceWindows = jest.fn().mockResolvedValue([]);
+        (getMaintenanceWindows as jest.Mock).mockResolvedValue([]);
         const state = await syncOnce(service);
         mockStores({
           unchanged: [
@@ -824,7 +827,7 @@ describe('SyntheticsService', () => {
         });
         mockServiceResponses();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(
           requests()
@@ -843,7 +846,7 @@ describe('SyntheticsService', () => {
         mockServiceResponses();
         (service.getOutput as jest.Mock).mockClear();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(axios).not.toHaveBeenCalled();
         expect(service.getOutput).not.toHaveBeenCalled();
@@ -858,7 +861,7 @@ describe('SyntheticsService', () => {
           sync: failure(500, { status: 500, reason: 'failed to sync monitors' }),
         });
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(idsOf(requests().retained)).toEqual(['same']);
         expect(state.lastSyncedAt).toBe('2026-10-05T12:00:00.000Z');
@@ -874,7 +877,7 @@ describe('SyntheticsService', () => {
           invalidDetails: { reason: 'invalid' },
         });
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(axios).not.toHaveBeenCalled();
         expect(state.lastSyncedAt).toBe('2026-10-05T12:00:00.000Z');
@@ -883,14 +886,14 @@ describe('SyntheticsService', () => {
 
     describe('sends every monitor in full when', () => {
       const expectFullSync = async (
-        service: SyntheticsService,
+        service: ServiceManagedLocations,
         state: Record<string, string>,
         stores: Stores
       ) => {
         const { encryptedClient } = mockStores(stores);
         mockServiceResponses();
 
-        await service.pushConfigs(ALL_SPACES_ID, state);
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
 
         expect(requests().retained).toHaveLength(0);
         expect(idsOf(requests().synced)).toEqual(['a', 'b']);
@@ -912,9 +915,9 @@ describe('SyntheticsService', () => {
       it('a maintenance window was edited', async () => {
         const service = getService();
         const state = await syncOnce(service);
-        service.getMaintenanceWindows = jest
-          .fn()
-          .mockResolvedValue([{ id: 'mw', updatedAt: '2026-10-05T12:02:00.000Z' }]);
+        (getMaintenanceWindows as jest.Mock).mockResolvedValue([
+          { id: 'mw', updatedAt: '2026-10-05T12:02:00.000Z' },
+        ]);
 
         await expectFullSync(service, state, { changed: [monitorSO('a'), monitorSO('b')] });
       });
@@ -940,119 +943,8 @@ describe('SyntheticsService', () => {
     });
   });
 
-  describe('getSyntheticsParams', () => {
-    it('returns the params for all spaces', async () => {
-      const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
-
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
-
-      serverMock.encryptedSavedObjects = mockEncryptedSO({
-        params: [
-          {
-            attributes: { key: 'username', value: 'elastic' },
-            namespaces: ['*'],
-          },
-        ],
-      });
-
-      const params = await service.getSyntheticsParams();
-
-      expect(params).toEqual({
-        '*': {
-          username: 'elastic',
-        },
-      });
-    });
-
-    it('returns the params for specific space', async () => {
-      const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
-
-      serverMock.encryptedSavedObjects = mockEncryptedSO({
-        params: [
-          {
-            attributes: { key: 'username', value: 'elastic' },
-            namespaces: ['*'],
-          },
-        ],
-      });
-
-      const params = await service.getSyntheticsParams({ spaceId: 'default' });
-
-      expect(params).toEqual({
-        '*': {
-          username: 'elastic',
-        },
-        default: {
-          username: 'elastic',
-        },
-      });
-    });
-
-    it('returns the space limited params', async () => {
-      const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
-
-      serverMock.encryptedSavedObjects = mockEncryptedSO({
-        params: [
-          {
-            attributes: { key: 'username', value: 'elastic' },
-            namespaces: ['default'],
-          },
-        ],
-      });
-
-      const params = await service.getSyntheticsParams({ spaceId: 'default' });
-
-      expect(params).toEqual({
-        default: {
-          username: 'elastic',
-        },
-      });
-    });
-
-    it('returns the params from mixed spaces', async () => {
-      const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
-
-      serverMock.encryptedSavedObjects = mockEncryptedSO({
-        params: [
-          {
-            attributes: { key: 'username', value: 'elastic' },
-            namespaces: ['default'],
-          },
-          {
-            attributes: { key: 'username-shared', value: 'elastic' },
-            namespaces: ['*'],
-          },
-          {
-            attributes: { key: 'username-test-space', value: 'elastic' },
-            namespaces: ['test'],
-          },
-        ],
-      });
-
-      const params = await service.getSyntheticsParams({ spaceId: 'default' });
-
-      expect(params).toEqual({
-        '*': {
-          'username-shared': 'elastic',
-        },
-        default: {
-          username: 'elastic',
-          'username-shared': 'elastic',
-        },
-        test: {
-          'username-shared': 'elastic',
-          'username-test-space': 'elastic',
-        },
-      });
-    });
-  });
-
   describe('pagination', () => {
-    const service = new SyntheticsService(serverMock);
+    const service = new ServiceManagedLocations(serverMock);
 
     const locations = times(5).map((n) => {
       return {
@@ -1067,21 +959,20 @@ describe('SyntheticsService', () => {
         status: LocationStatus.GA,
       };
     });
-    service.apiClient.locations = locations;
+    service.httpClient.locations = locations;
     service.locations = locations;
     jest.spyOn(service, 'getOutput').mockResolvedValue({
       output: { hosts: ['es'], api_key: 'i:k' },
     });
-    jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
-
-    service.getMaintenanceWindows = jest.fn();
+    (getSyntheticsParams as jest.Mock).mockResolvedValue({});
+    (getMaintenanceWindows as jest.Mock).mockResolvedValue([]);
 
     it('paginates the results', async () => {
       serverMock.config = mockConfig;
 
       mockLicense();
 
-      const syncSpy = jest.spyOn(service.apiClient, 'syncMonitors');
+      const syncSpy = jest.spyOn(service.httpClient, 'syncMonitors');
 
       let num = -1;
       const data = times(10000).map((n) => {
@@ -1103,7 +994,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs(ALL_SPACES_ID);
+      await service.syncAllMonitors(ALL_SPACES_ID);
 
       expect(syncSpy).toHaveBeenCalledTimes(72);
       expect(axios).toHaveBeenCalledTimes(72);
@@ -1155,7 +1046,7 @@ describe('SyntheticsService', () => {
         deploymentId: undefined,
       });
 
-      const service = new SyntheticsService(serverMockWithoutManifest);
+      const service = new ServiceManagedLocations(serverMockWithoutManifest);
       service.start(taskManagerStart);
 
       expect(logger.error).toHaveBeenCalledTimes(1);
@@ -1170,7 +1061,7 @@ describe('SyntheticsService', () => {
         deploymentId: 'test-deployment-id',
       });
 
-      const service = new SyntheticsService(serverMockWithoutManifest);
+      const service = new ServiceManagedLocations(serverMockWithoutManifest);
       service.start(taskManagerStart);
 
       expect(logger.error).toHaveBeenCalledTimes(1);
@@ -1185,7 +1076,7 @@ describe('SyntheticsService', () => {
         deploymentId: undefined,
       });
 
-      const service = new SyntheticsService(serverMockWithoutManifest);
+      const service = new ServiceManagedLocations(serverMockWithoutManifest);
       service.start(taskManagerStart);
 
       expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -1196,7 +1087,7 @@ describe('SyntheticsService', () => {
     it('logs DEBUG for self-managed environment when manifestUrl is missing', () => {
       const serverMockWithoutManifest = createServerMock(undefined);
 
-      const service = new SyntheticsService(serverMockWithoutManifest);
+      const service = new ServiceManagedLocations(serverMockWithoutManifest);
       service.start(taskManagerStart);
 
       expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -1211,7 +1102,7 @@ describe('SyntheticsService', () => {
         deploymentId: undefined,
       });
 
-      const service = new SyntheticsService(serverMockWithoutManifest);
+      const service = new ServiceManagedLocations(serverMockWithoutManifest);
       service.start(taskManagerStart);
 
       expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -1229,7 +1120,7 @@ describe('SyntheticsService', () => {
         'http://localhost:8080/api/manifest'
       );
 
-      const service = new SyntheticsService(serverMockWithManifest);
+      const service = new ServiceManagedLocations(serverMockWithManifest);
       service.start(taskManagerStart);
 
       expect(logger.error).not.toHaveBeenCalled();
