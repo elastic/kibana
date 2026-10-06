@@ -26,6 +26,7 @@ import { EnableRulesByQueryRoute } from '../routes/rules/enable_rules_by_query_r
 import { DisableRulesByQueryRoute } from '../routes/rules/disable_rules_by_query_route';
 import { UpdateApiKeyByQueryRoute } from '../routes/rules/update_api_key_by_query_route';
 import { GetRuleTagsRoute } from '../routes/rules/get_rule_tags_route';
+import { GetRuleRoutingTagsRoute } from '../routes/rules/get_rule_routing_tags_route';
 import { MatchRulesRoute } from '../routes/rules/match_rules_route';
 import { BulkTagEpisodeActionRoute } from '../routes/alert_actions/episodes/bulk_tag_episode_action_route';
 import { BulkSnoozeSeriesActionRoute } from '../routes/alert_actions/series/bulk_snooze_series_action_route';
@@ -93,6 +94,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(DisableRulesByQueryRoute);
   bind(Route).toConstantValue(UpdateApiKeyByQueryRoute);
   bind(Route).toConstantValue(GetRuleTagsRoute);
+  bind(Route).toConstantValue(GetRuleRoutingTagsRoute);
   bind(Route).toConstantValue(MatchRulesRoute);
   bind(Route).toConstantValue(CreateTagEpisodeActionRoute);
   bind(Route).toConstantValue(CreateSnoozeSeriesActionRoute);

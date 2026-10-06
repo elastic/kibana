@@ -10,12 +10,12 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
-import { RuleTagsSelector } from './rule_tags_selector';
+import { RoutingTagsSelector } from './routing_tags_selector';
 
 const mockRefetch = jest.fn();
-const mockUseFetchRuleTags = jest.fn();
-jest.mock('../../../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
+const mockUseFetchRuleRoutingTags = jest.fn();
+jest.mock('../../../../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: (...args: unknown[]) => mockUseFetchRuleRoutingTags(...args),
 }));
 
 jest.mock('@kbn/react-hooks', () => ({
@@ -39,17 +39,17 @@ const USER_EVENT_OPTIONS = {
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 const getComboBoxInput = () => {
-  const combobox = screen.getByTestId('ruleTagsSelector');
+  const combobox = screen.getByTestId('routingTagsSelector');
   return within(combobox).getByRole('combobox');
 };
 
-describe('RuleTagsSelector', () => {
+describe('RoutingTagsSelector', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     user = userEvent.setup(USER_EVENT_OPTIONS);
-    mockUseFetchRuleTags.mockReturnValue({
+    mockUseFetchRuleRoutingTags.mockReturnValue({
       data: MOCK_TAGS,
       isLoading: false,
       isSuccess: true,
@@ -58,20 +58,16 @@ describe('RuleTagsSelector', () => {
     });
   });
 
-  it('fetches rule tags eagerly on mount (enabled: true always)', () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+  it('fetches routing tags eagerly on mount (enabled: true always)', () => {
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
-    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
-  });
-
-  it('fetches only kind: alert tags', () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
-
-    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ kind: 'alert' }));
+    expect(mockUseFetchRuleRoutingTags).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: true })
+    );
   });
 
   it('shows API tags under Recommended group when dropdown is open', async () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
     await user.click(getComboBoxInput());
 
@@ -82,48 +78,48 @@ describe('RuleTagsSelector', () => {
   });
 
   it('shows empty state message when no API tags and no custom tags', () => {
-    mockUseFetchRuleTags.mockReturnValue({
+    mockUseFetchRuleRoutingTags.mockReturnValue({
       data: [],
       isLoading: false,
       isSuccess: true,
       isError: false,
       refetch: mockRefetch,
     });
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
-    expect(screen.getByTestId('ruleTagsSelectorEmptyState')).toBeInTheDocument();
+    expect(screen.getByTestId('routingTagsSelectorEmptyState')).toBeInTheDocument();
     expect(
-      screen.getByText('No rule tags in this space yet. Add a tag to scope this policy.')
+      screen.getByText('No routing tags in this space yet. Add a routing tag to scope this policy.')
     ).toBeInTheDocument();
   });
 
   it('does not show empty state when request failed', () => {
-    mockUseFetchRuleTags.mockReturnValue(ERROR_MOCK);
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    mockUseFetchRuleRoutingTags.mockReturnValue(ERROR_MOCK);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
-    expect(screen.queryByTestId('ruleTagsSelectorEmptyState')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('routingTagsSelectorEmptyState')).not.toBeInTheDocument();
   });
 
   it('shows error message when request failed', () => {
-    mockUseFetchRuleTags.mockReturnValue(ERROR_MOCK);
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    mockUseFetchRuleRoutingTags.mockReturnValue(ERROR_MOCK);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
-    expect(screen.getByTestId('ruleTagsSelectorError')).toBeInTheDocument();
-    expect(screen.getByText('Could not load rule tags.')).toBeInTheDocument();
+    expect(screen.getByTestId('routingTagsSelectorError')).toBeInTheDocument();
+    expect(screen.getByText('Could not load routing tags.')).toBeInTheDocument();
   });
 
   it('calls refetch when retry is clicked after a failed request', async () => {
-    mockUseFetchRuleTags.mockReturnValue(ERROR_MOCK);
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    mockUseFetchRuleRoutingTags.mockReturnValue(ERROR_MOCK);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
-    await user.click(screen.getByTestId('ruleTagsSelectorRetry'));
+    await user.click(screen.getByTestId('routingTagsSelectorRetry'));
 
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 
   it('calls onChange with the selected tag when a tag is selected', async () => {
     const onChange = jest.fn();
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={onChange} />);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={onChange} />);
 
     await user.click(getComboBoxInput());
 
@@ -134,7 +130,7 @@ describe('RuleTagsSelector', () => {
 
   it('calls onChange with null tags when all tags are cleared', async () => {
     const onChange = jest.fn();
-    renderWithI18n(<RuleTagsSelector matcher={{ tags: ['production'] }} onChange={onChange} />);
+    renderWithI18n(<RoutingTagsSelector matcher={{ tags: ['production'] }} onChange={onChange} />);
 
     const clearButton = screen.getByLabelText('Clear input');
     await user.click(clearButton);
@@ -143,15 +139,15 @@ describe('RuleTagsSelector', () => {
   });
 
   it('shows pre-existing orphaned tags from matcher as selected pills', () => {
-    renderWithI18n(<RuleTagsSelector matcher={{ tags: ['legacy-tag'] }} onChange={jest.fn()} />);
+    renderWithI18n(<RoutingTagsSelector matcher={{ tags: ['legacy-tag'] }} onChange={jest.fn()} />);
 
-    const combobox = screen.getByTestId('ruleTagsSelector');
+    const combobox = screen.getByTestId('routingTagsSelector');
     expect(within(combobox).getByText('legacy-tag')).toBeInTheDocument();
   });
 
   it('adds a newly created tag and calls onChange with it', async () => {
     const onChange = jest.fn();
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={onChange} />);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={onChange} />);
 
     await user.type(getComboBoxInput(), 'my-new-tag');
     await user.keyboard('{Enter}');
@@ -163,7 +159,9 @@ describe('RuleTagsSelector', () => {
 
   it('does not add a duplicate tag on onCreateOption', async () => {
     const onChange = jest.fn();
-    renderWithI18n(<RuleTagsSelector matcher={{ tags: ['existing-tag'] }} onChange={onChange} />);
+    renderWithI18n(
+      <RoutingTagsSelector matcher={{ tags: ['existing-tag'] }} onChange={onChange} />
+    );
 
     await user.type(getComboBoxInput(), 'existing-tag');
     await user.keyboard('{Enter}');
@@ -173,7 +171,7 @@ describe('RuleTagsSelector', () => {
 
   it('shows cap guidance text when apiTags length is at limit', () => {
     const cappedTags = Array.from({ length: TAGS_RESPONSE_LIMIT }, (_, i) => `tag-${i}`);
-    mockUseFetchRuleTags.mockReturnValue({
+    mockUseFetchRuleRoutingTags.mockReturnValue({
       data: cappedTags,
       isLoading: false,
       isSuccess: true,
@@ -181,36 +179,38 @@ describe('RuleTagsSelector', () => {
       refetch: mockRefetch,
     });
 
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
     expect(
       screen.getByText(
-        `Showing first ${TAGS_RESPONSE_LIMIT} most-used tags. Type to search for more.`
+        `Showing first ${TAGS_RESPONSE_LIMIT} most-used routing tags. Type to search for more.`
       )
     ).toBeInTheDocument();
   });
 
   it('does not show cap guidance when apiTags length is below limit', () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
     expect(
       screen.queryByText(
-        `Showing first ${TAGS_RESPONSE_LIMIT} most-used tags. Type to search for more.`
+        `Showing first ${TAGS_RESPONSE_LIMIT} most-used routing tags. Type to search for more.`
       )
     ).not.toBeInTheDocument();
   });
 
-  it('passes search text to useFetchRuleTags when user types in the combobox', async () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+  it('passes search text to useFetchRuleRoutingTags when user types in the combobox', async () => {
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
     await user.type(getComboBoxInput(), 'prod');
 
-    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ search: 'prod' }));
+    expect(mockUseFetchRuleRoutingTags).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'prod' })
+    );
   });
 
   it('can discover a tag beyond the initial cap by searching', async () => {
     const cappedTags = Array.from({ length: TAGS_RESPONSE_LIMIT }, (_, i) => `tag-${i}`);
-    mockUseFetchRuleTags.mockImplementation(({ search }: { search?: string }) => ({
+    mockUseFetchRuleRoutingTags.mockImplementation(({ search }: { search?: string }) => ({
       data: search ? ['beyond-cap-tag'] : cappedTags,
       isLoading: false,
       isSuccess: true,
@@ -218,11 +218,11 @@ describe('RuleTagsSelector', () => {
       refetch: mockRefetch,
     }));
 
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RoutingTagsSelector matcher={null} onChange={jest.fn()} />);
 
     await user.type(getComboBoxInput(), 'beyond');
 
-    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
+    expect(mockUseFetchRuleRoutingTags).toHaveBeenCalledWith(
       expect.objectContaining({ search: 'beyond' })
     );
     expect(await screen.findByText('beyond-cap-tag')).toBeInTheDocument();

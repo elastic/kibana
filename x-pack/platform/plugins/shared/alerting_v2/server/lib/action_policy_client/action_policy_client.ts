@@ -388,7 +388,7 @@ export class ActionPolicyClient {
   public async matchActionPolicies(
     params: MatchActionPoliciesParams
   ): Promise<MatchActionPoliciesResponse> {
-    const { ruleTags = [] } = params;
+    const { routingTags = [] } = params;
 
     const items: MatchedActionPolicy[] = [];
 
@@ -402,7 +402,7 @@ export class ActionPolicyClient {
         continue;
       }
 
-      if (policyMatcher.hasTags() && policyMatcher.matchesTags(ruleTags)) {
+      if (policyMatcher.hasTags() && policyMatcher.matchesRoutingTags(routingTags)) {
         items.push({ action_policy: actionPolicy, category: 'tags' });
       }
     }

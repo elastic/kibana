@@ -17,15 +17,15 @@ import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
-import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
+import { useFetchRuleRoutingTags } from '../../../../../hooks/use_fetch_rule_routing_tags';
 import { optionalLabel } from '../optional_label';
 
-interface RuleTagsSelectorProps {
+interface RoutingTagsSelectorProps {
   matcher: PolicyMatcher | null;
   onChange: (matcher: PolicyMatcher | null) => void;
 }
 
-export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) => {
+export const RoutingTagsSelector = ({ matcher, onChange }: RoutingTagsSelectorProps) => {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -35,8 +35,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     isError,
     isSuccess,
     refetch,
-  } = useFetchRuleTags({
-    kind: 'alert',
+  } = useFetchRuleRoutingTags({
     enabled: true,
     search: debouncedSearch || undefined,
   });
@@ -49,7 +48,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     if (apiTags.length > 0) {
       groups.push({
         label: i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.groupRecommended',
+          'xpack.alertingV2.actionPolicy.form.policyScope.routingTags.groupRecommended',
           { defaultMessage: 'Recommended' }
         ),
         options: apiTags.map((tag) => ({ label: tag, value: tag })),
@@ -62,7 +61,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     if (orphaned.length > 0) {
       groups.push({
         label: i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.groupOther',
+          'xpack.alertingV2.actionPolicy.form.policyScope.routingTags.groupOther',
           { defaultMessage: 'Other' }
         ),
         options: orphaned.map((tag) => ({ label: tag, value: tag })),
@@ -79,13 +78,16 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
   if (isError) {
     helpText = (
       <>
-        <span data-test-subj="ruleTagsSelectorError">
-          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.errorMessage', {
-            defaultMessage: 'Could not load rule tags.',
-          })}{' '}
+        <span data-test-subj="routingTagsSelectorError">
+          {i18n.translate(
+            'xpack.alertingV2.actionPolicy.form.policyScope.routingTags.errorMessage',
+            {
+              defaultMessage: 'Could not load routing tags.',
+            }
+          )}{' '}
         </span>
-        <EuiLink onClick={() => refetch()} data-test-subj="ruleTagsSelectorRetry">
-          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.retryLabel', {
+        <EuiLink onClick={() => refetch()} data-test-subj="routingTagsSelectorRetry">
+          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.routingTags.retryLabel', {
             defaultMessage: 'Retry',
           })}
         </EuiLink>
@@ -93,17 +95,18 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     );
   } else if (showEmptyState) {
     helpText = (
-      <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorEmptyState">
-        {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState', {
-          defaultMessage: 'No rule tags in this space yet. Add a tag to scope this policy.',
+      <EuiText size="xs" color="subdued" data-test-subj="routingTagsSelectorEmptyState">
+        {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.routingTags.emptyState', {
+          defaultMessage:
+            'No routing tags in this space yet. Add a routing tag to scope this policy.',
         })}
       </EuiText>
     );
   } else if (showCapGuidance) {
     helpText = (
-      <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorCapGuidance">
-        {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.capGuidance', {
-          defaultMessage: 'Showing first {cap} most-used tags. Type to search for more.',
+      <EuiText size="xs" color="subdued" data-test-subj="routingTagsSelectorCapGuidance">
+        {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.routingTags.capGuidance', {
+          defaultMessage: 'Showing first {cap} most-used routing tags. Type to search for more.',
           values: { cap: TAGS_RESPONSE_LIMIT },
         })}
       </EuiText>
@@ -112,8 +115,8 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.label', {
-        defaultMessage: 'Rule tags',
+      label={i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.routingTags.label', {
+        defaultMessage: 'Routing tags',
       })}
       labelAppend={optionalLabel}
       helpText={helpText}
@@ -124,8 +127,8 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
         async
         isLoading={isLoading}
         placeholder={i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.placeholder',
-          { defaultMessage: 'Search or add tags' }
+          'xpack.alertingV2.actionPolicy.form.policyScope.routingTags.placeholder',
+          { defaultMessage: 'Search or add routing tags' }
         )}
         options={options}
         selectedOptions={selectedTags.map((tag) => ({ label: tag, value: tag }))}
@@ -141,7 +144,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
           onChange({ ...matcher, tags: [...selectedTags, trimmed] });
         }}
         isClearable
-        data-test-subj="ruleTagsSelector"
+        data-test-subj="routingTagsSelector"
       />
     </EuiFormRow>
   );
