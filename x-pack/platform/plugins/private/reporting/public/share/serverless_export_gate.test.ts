@@ -5,16 +5,11 @@
  * 2.0.
  */
 
+import { BehaviorSubject, Subject } from 'rxjs';
+
 import { coreMock } from '@kbn/core/public/mocks';
 
-import { REPORTING_SERVERLESS_EXPORT_ENABLED } from '../../common/feature_flags';
 import { createServerlessExportGate, withAvailabilityGate } from './serverless_export_gate';
-
-const featureFlagsWith = (value: boolean) => {
-  const { featureFlags } = coreMock.createStart();
-  featureFlags.getBooleanValue.mockReturnValue(value);
-  return featureFlags;
-};
 
 const prerequisiteCheckArgs = {
   capabilities: coreMock.createStart().application.capabilities,
@@ -22,64 +17,61 @@ const prerequisiteCheckArgs = {
 };
 
 describe('createServerlessExportGate', () => {
-  it('is available on traditional without consulting the feature flag', () => {
-    const featureFlags = featureFlagsWith(false);
+  it('is available on traditional without subscribing to the feature flag', () => {
+    const flag$ = new BehaviorSubject(false);
+    const subscribe = jest.spyOn(flag$, 'subscribe');
 
     const isAvailable = createServerlessExportGate({
       isServerless: false,
-      getFeatureFlags: () => featureFlags,
+      serverlessExportEnabled$: flag$,
     });
 
     expect(isAvailable()).toBe(true);
-    expect(featureFlags.getBooleanValue).not.toHaveBeenCalled();
+    expect(subscribe).not.toHaveBeenCalled();
   });
 
   it('is available on serverless when the feature flag is on', () => {
-    const featureFlags = featureFlagsWith(true);
-
     const isAvailable = createServerlessExportGate({
       isServerless: true,
-      getFeatureFlags: () => featureFlags,
+      serverlessExportEnabled$: new BehaviorSubject(true),
     });
 
     expect(isAvailable()).toBe(true);
-    expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(
-      REPORTING_SERVERLESS_EXPORT_ENABLED,
-      false
-    );
   });
 
   it('is unavailable on serverless when the feature flag is off', () => {
     const isAvailable = createServerlessExportGate({
       isServerless: true,
-      getFeatureFlags: () => featureFlagsWith(false),
+      serverlessExportEnabled$: new BehaviorSubject(false),
     });
 
     expect(isAvailable()).toBe(false);
   });
 
-  it('is unavailable on serverless before the start lifecycle has run', () => {
+  it('is unavailable on serverless until the flag has emitted', () => {
     const isAvailable = createServerlessExportGate({
       isServerless: true,
-      getFeatureFlags: () => undefined,
+      serverlessExportEnabled$: new Subject<boolean>(),
     });
 
     expect(isAvailable()).toBe(false);
   });
 
-  it('follows the flag as it changes, rather than caching the first evaluation', () => {
-    const featureFlags = featureFlagsWith(false);
+  it('follows the flag as it changes, rather than caching the first value', () => {
+    const flag$ = new BehaviorSubject(false);
 
     const isAvailable = createServerlessExportGate({
       isServerless: true,
-      getFeatureFlags: () => featureFlags,
+      serverlessExportEnabled$: flag$,
     });
 
     expect(isAvailable()).toBe(false);
 
-    featureFlags.getBooleanValue.mockReturnValue(true);
-
+    flag$.next(true);
     expect(isAvailable()).toBe(true);
+
+    flag$.next(false);
+    expect(isAvailable()).toBe(false);
   });
 });
 

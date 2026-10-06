@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { from, map, type Observable, ReplaySubject } from 'rxjs';
+import { from, map, switchMap, takeUntil, type Observable, ReplaySubject } from 'rxjs';
 
-import type {
-  CoreSetup,
-  CoreStart,
-  FeatureFlagsStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -50,6 +44,7 @@ import { APP_DESC, APP_TITLE } from './translations';
 import { APP_PATH } from './constants';
 import { getScheduledReportObjectTypes } from './management/integrations/get_scheduled_report_object_types';
 import { shouldRegisterReportingIntegration } from './management/integrations/should_register_reporting_integration';
+import { REPORTING_SERVERLESS_EXPORT_ENABLED } from '../common/feature_flags';
 import { createServerlessExportGate, withAvailabilityGate } from './share/serverless_export_gate';
 
 export interface ReportingPublicPluginSetupDependencies {
@@ -149,15 +144,14 @@ export class ReportingPublicPlugin
       })
     );
 
-    // Read by `isExportAvailable` below, which only runs once a user opens a share menu.
-    let featureFlags: FeatureFlagsStart | undefined;
-    void getStartServices().then(([coreStart]) => {
-      featureFlags = coreStart.featureFlags;
-    });
-
     const isExportAvailable = createServerlessExportGate({
       isServerless: this.isServerless,
-      getFeatureFlags: () => featureFlags,
+      serverlessExportEnabled$: from(getStartServices()).pipe(
+        switchMap(([coreStart]) =>
+          coreStart.featureFlags.getBooleanValue$(REPORTING_SERVERLESS_EXPORT_ENABLED, false)
+        ),
+        takeUntil(this.stop$)
+      ),
     });
 
     const apiClient = new ReportingAPIClient(core.http, core.uiSettings, this.kibanaVersion);

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FeatureFlagsStart } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
 import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public';
-
-import { REPORTING_SERVERLESS_EXPORT_ENABLED } from '../../common/feature_flags';
 
 type PrerequisiteCheck = NonNullable<
   RegisterShareIntegrationArgs<ExportShare>['prerequisiteCheck']
@@ -17,30 +15,37 @@ type PrerequisiteCheck = NonNullable<
 export interface ServerlessExportGateOpts {
   isServerless: boolean;
   /**
-   * Returns `undefined` until the start lifecycle has run. The gate is only ever called from a
-   * share integration's `prerequisiteCheck`, which the share plugin invokes when a user opens a
-   * share menu — always after start — so in practice the service is available by then. Treating
-   * `undefined` as "off" keeps the unavailable case aligned with the flag's own fallback.
+   * Emits the rollout flag's value, and keeps emitting as it changes. Feature flags are only
+   * exposed as observables, but a share integration's `prerequisiteCheck` is synchronous, so the
+   * gate subscribes once and answers from the latest value. Until the first emission the gate
+   * reports "off", which matches the flag's own fallback. The caller owns the subscription's
+   * lifetime (complete the stream on plugin stop).
    */
-  getFeatureFlags: () => FeatureFlagsStart | undefined;
+  serverlessExportEnabled$: Observable<boolean>;
 }
 
 /**
- * Availability of PDF/PNG export on serverless, re-evaluated on every share menu open so the
- * feature flag can be rolled forward or back without restarting Kibana.
+ * Availability of PDF/PNG export on serverless, following the feature flag live so it can be
+ * rolled forward or back without restarting Kibana.
  *
- * Traditional/ECH short-circuits to `true` and never reads the flag: those exports have shipped
- * there for years, and the serverless rollout must not be able to regress them.
+ * Traditional/ECH short-circuits to `true` and never subscribes to the flag: those exports have
+ * shipped there for years, and the serverless rollout must not be able to regress them.
  */
-export const createServerlessExportGate =
-  ({ isServerless, getFeatureFlags }: ServerlessExportGateOpts) =>
-  (): boolean => {
-    if (!isServerless) {
-      return true;
-    }
+export const createServerlessExportGate = ({
+  isServerless,
+  serverlessExportEnabled$,
+}: ServerlessExportGateOpts): (() => boolean) => {
+  if (!isServerless) {
+    return () => true;
+  }
 
-    return getFeatureFlags()?.getBooleanValue(REPORTING_SERVERLESS_EXPORT_ENABLED, false) ?? false;
-  };
+  let enabled = false;
+  serverlessExportEnabled$.subscribe((value) => {
+    enabled = value;
+  });
+
+  return () => enabled;
+};
 
 /**
  * Hides a share integration's menu entry while `isAvailable()` returns false, leaving the
