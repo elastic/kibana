@@ -112,6 +112,17 @@ export const serviceAccountsManagementApp = Object.freeze({
                       text: warnings.join(' '),
                     });
                   }}
+                  onAlreadyDeleted={({ name }) => {
+                    coreStart.notifications.toasts.addInfo(
+                      i18n.translate(
+                        'xpack.security.management.serviceAccounts.delete.alreadyDeletedTitle',
+                        {
+                          defaultMessage: 'Service account "{name}" was already deleted',
+                          values: { name },
+                        }
+                      )
+                    );
+                  }}
                   onDeleteError={(error, errorTitle) => {
                     coreStart.notifications.toasts.addError(error, { title: errorTitle });
                   }}

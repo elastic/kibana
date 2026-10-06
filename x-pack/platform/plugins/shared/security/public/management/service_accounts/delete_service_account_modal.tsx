@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
+  EuiBasicTable,
+  EuiButton,
+  EuiButtonEmpty,
   EuiConfirmModal,
-  EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiPagination,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import useMountedState from 'react-use/lib/useMountedState';
 
@@ -40,6 +50,8 @@ export interface DeleteServiceAccountModalProps {
   onClose: () => void;
   /** Called once the account is deleted, with anything the delete could not clean up. */
   onDeleted: (warnings: string[]) => void;
+  /** Called instead when the account turns out to be gone already, deleted from somewhere else. */
+  onAlreadyDeleted: () => void;
   onError: (error: Error, title: string) => void;
 }
 
@@ -104,6 +116,7 @@ export const DeleteServiceAccountModal = ({
   serviceAccountsAPIClient,
   onClose,
   onDeleted,
+  onAlreadyDeleted,
   onError,
 }: DeleteServiceAccountModalProps) => {
   const [state, setState] = useState<ModalState>({ status: 'loading' });
@@ -153,6 +166,11 @@ export const DeleteServiceAccountModal = ({
         return;
       }
 
+      if (isHttpFetchError(error) && error.response?.status === 404) {
+        onAlreadyDeleted();
+        return;
+      }
+
       onError(
         error,
         i18n.translate('xpack.security.management.serviceAccounts.delete.deleteErrorTitle', {
@@ -170,59 +188,99 @@ export const DeleteServiceAccountModal = ({
     return null;
   }
 
-  const isBound = state.status === 'bound';
-  return (
-    <EuiConfirmModal
-      aria-labelledby={titleId}
-      titleProps={{ id: titleId }}
-      title={i18n.translate('xpack.security.management.serviceAccounts.delete.confirmTitle', {
-        defaultMessage: 'Delete "{name}"?',
-        values: { name },
-      })}
-      onCancel={() => {
-        if (!isDeleting) onClose();
-      }}
-      onConfirm={() => deleteAccount(isBound)}
-      cancelButtonText={i18n.translate(
-        'xpack.security.management.serviceAccounts.delete.cancelButton',
-        { defaultMessage: 'Cancel' }
-      )}
-      confirmButtonText={
-        isBound
-          ? i18n.translate('xpack.security.management.serviceAccounts.delete.forceDeleteButton', {
-              defaultMessage: 'Force delete account',
-            })
-          : i18n.translate('xpack.security.management.serviceAccounts.delete.confirmButton', {
-              defaultMessage: 'Delete account',
-            })
-      }
-      buttonColor="danger"
-      defaultFocusedButton="cancel"
-      isLoading={isDeleting}
-      data-test-subj={isBound ? 'serviceAccountBoundModal' : 'serviceAccountDeleteConfirmModal'}
-    >
-      {isBound ? (
-        <BoundWorkloads workloads={state.workloads} />
-      ) : (
+  const title = i18n.translate('xpack.security.management.serviceAccounts.delete.confirmTitle', {
+    defaultMessage: 'Delete "{name}"?',
+    values: { name },
+  });
+  const cancelButtonText = i18n.translate(
+    'xpack.security.management.serviceAccounts.delete.cancelButton',
+    { defaultMessage: 'Cancel' }
+  );
+  const cancel = () => {
+    if (!isDeleting) onClose();
+  };
+
+  if (state.status === 'confirm') {
+    return (
+      <EuiConfirmModal
+        aria-labelledby={titleId}
+        titleProps={{ id: titleId }}
+        title={title}
+        onCancel={cancel}
+        onConfirm={() => deleteAccount(false)}
+        cancelButtonText={cancelButtonText}
+        confirmButtonText={i18n.translate(
+          'xpack.security.management.serviceAccounts.delete.confirmButton',
+          { defaultMessage: 'Delete account' }
+        )}
+        buttonColor="danger"
+        defaultFocusedButton="cancel"
+        isLoading={isDeleting}
+        data-test-subj="serviceAccountDeleteConfirmModal"
+      >
         <p>
           {i18n.translate('xpack.security.management.serviceAccounts.delete.confirmDescription', {
             defaultMessage: "You can't recover a deleted service account.",
           })}
         </p>
-      )}
-    </EuiConfirmModal>
+      </EuiConfirmModal>
+    );
+  }
+
+  // Not an `EuiConfirmModal`: it wraps its body in `EuiText`, whose list styles leak into the
+  // table's pagination.
+  return (
+    <EuiModal
+      aria-labelledby={titleId}
+      onClose={cancel}
+      initialFocus="[data-test-subj=serviceAccountBoundModalCancel]"
+      data-test-subj="serviceAccountBoundModal"
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={titleId}>{title}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <BoundWorkloads workloads={state.workloads} />
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={cancel} data-test-subj="serviceAccountBoundModalCancel">
+          {cancelButtonText}
+        </EuiButtonEmpty>
+        <EuiButton
+          color="danger"
+          fill
+          isLoading={isDeleting}
+          onClick={() => deleteAccount(true)}
+          data-test-subj="serviceAccountForceDeleteButton"
+        >
+          {i18n.translate('xpack.security.management.serviceAccounts.delete.forceDeleteButton', {
+            defaultMessage: 'Force delete account',
+          })}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };
 
 /** The warning and the paged list of workloads that stop running when the account is deleted. */
 const BoundWorkloads = ({ workloads }: { workloads: ServiceAccountBoundWorkload[] }) => {
   const [pageIndex, setPageIndex] = useState(0);
-  // The table goes back to its first page whenever it gets new items, so keep them stable across
-  // renders, such as the one that starts the delete.
+  const [minTableHeight, setMinTableHeight] = useState<number>();
+  const tableRef = useRef<HTMLDivElement>(null);
   const rows = useMemo(
     () => workloads.map((workload, rowKey): WorkloadRow => ({ ...workload, rowKey })),
     [workloads]
   );
+  const pageCount = Math.ceil(rows.length / WORKLOADS_PAGE_SIZE);
+  const firstRow = pageIndex * WORKLOADS_PAGE_SIZE;
+  const pageRows = rows.slice(firstRow, firstRow + WORKLOADS_PAGE_SIZE);
+
+  // A short last page would pull the pagination and the modal footer up with it, so the table
+  // keeps the height of the tallest page it has shown.
+  useLayoutEffect(() => {
+    const height = tableRef.current?.offsetHeight;
+    if (height) setMinTableHeight((current) => Math.max(current ?? 0, height));
+  }, [pageIndex]);
 
   return (
     <>
@@ -241,25 +299,42 @@ const BoundWorkloads = ({ workloads }: { workloads: ServiceAccountBoundWorkload[
           id="xpack.security.management.serviceAccounts.delete.workloadsTableSummary"
           defaultMessage="Showing {start}-{end}"
           values={{
-            start: <strong>{pageIndex * WORKLOADS_PAGE_SIZE + 1}</strong>,
-            end: (
-              <strong>{Math.min((pageIndex + 1) * WORKLOADS_PAGE_SIZE, workloads.length)}</strong>
-            ),
+            start: <strong>{firstRow + 1}</strong>,
+            end: <strong>{firstRow + pageRows.length}</strong>,
           }}
         />
       </EuiText>
-      <EuiInMemoryTable
-        itemId="rowKey"
-        items={rows}
-        columns={workloadColumns}
-        pagination={{ pageIndex, pageSize: WORKLOADS_PAGE_SIZE, showPerPageOptions: false }}
-        onTableChange={({ page }: CriteriaWithPagination<WorkloadRow>) => setPageIndex(page.index)}
-        tableCaption={i18n.translate(
-          'xpack.security.management.serviceAccounts.delete.workloadsTableCaption',
-          { defaultMessage: 'Bound workloads' }
-        )}
-        data-test-subj="serviceAccountBoundWorkloadsTable"
-      />
+      <div ref={tableRef} style={minTableHeight ? { minHeight: minTableHeight } : undefined}>
+        <EuiBasicTable
+          itemId="rowKey"
+          items={pageRows}
+          columns={workloadColumns}
+          tableCaption={i18n.translate(
+            'xpack.security.management.serviceAccounts.delete.workloadsTableCaption',
+            { defaultMessage: 'Bound workloads' }
+          )}
+          data-test-subj="serviceAccountBoundWorkloadsTable"
+        />
+      </div>
+      {pageCount > 1 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiPagination
+                aria-label={i18n.translate(
+                  'xpack.security.management.serviceAccounts.delete.workloadsPagination',
+                  { defaultMessage: 'Bound workloads pages' }
+                )}
+                pageCount={pageCount}
+                activePage={pageIndex}
+                onPageClick={setPageIndex}
+                data-test-subj="serviceAccountBoundWorkloadsPagination"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };

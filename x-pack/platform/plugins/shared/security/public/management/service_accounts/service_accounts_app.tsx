@@ -30,6 +30,7 @@ interface Props {
   createRoleUrl?: string;
   onCreated: (account: ServiceAccount) => void;
   onDeleted: (account: ServiceAccountTableItem, warnings: string[]) => void;
+  onAlreadyDeleted: (account: ServiceAccountTableItem) => void;
   onDeleteError: (error: Error, title: string) => void;
 }
 
@@ -41,6 +42,7 @@ export const ServiceAccountsApp = ({
   createRoleUrl,
   onCreated,
   onDeleted,
+  onAlreadyDeleted,
   onDeleteError,
 }: Props) => {
   const history = useHistory();
@@ -82,6 +84,11 @@ export const ServiceAccountsApp = ({
             setAccountToDelete(undefined);
             setRefreshKey((value) => value + 1);
             onDeleted(accountToDelete, warnings);
+          }}
+          onAlreadyDeleted={() => {
+            setAccountToDelete(undefined);
+            setRefreshKey((value) => value + 1);
+            onAlreadyDeleted(accountToDelete);
           }}
           onError={onDeleteError}
         />

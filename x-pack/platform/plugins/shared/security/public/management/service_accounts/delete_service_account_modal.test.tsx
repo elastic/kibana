@@ -39,6 +39,7 @@ describe('DeleteServiceAccountModal', () => {
   }: { listWorkloads?: jest.Mock; deleteAccount?: jest.Mock } = {}) => {
     const onClose = jest.fn();
     const onDeleted = jest.fn();
+    const onAlreadyDeleted = jest.fn();
     const onError = jest.fn();
 
     renderWithI18n(
@@ -48,12 +49,13 @@ describe('DeleteServiceAccountModal', () => {
           serviceAccountsAPIClient={{ listWorkloads, delete: deleteAccount }}
           onClose={onClose}
           onDeleted={onDeleted}
+          onAlreadyDeleted={onAlreadyDeleted}
           onError={onError}
         />
       </EuiProvider>
     );
 
-    return { listWorkloads, deleteAccount, onClose, onDeleted, onError };
+    return { listWorkloads, deleteAccount, onClose, onDeleted, onAlreadyDeleted, onError };
   };
 
   it('asks to confirm an unbound account, then deletes it', async () => {
@@ -93,7 +95,7 @@ describe('DeleteServiceAccountModal', () => {
     expect(modal).toHaveTextContent(
       'This account is bound to the following 7 workloads. Removing it means that workloads will not be executed.'
     );
-    expect(within(modal).getByTestId('confirmModalConfirmButton')).toHaveTextContent(
+    expect(within(modal).getByTestId('serviceAccountForceDeleteButton')).toHaveTextContent(
       'Force delete account'
     );
     expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
@@ -106,7 +108,8 @@ describe('DeleteServiceAccountModal', () => {
     expect(within(table).getAllByText('workflow')).toHaveLength(5);
     expect(within(table).queryByText('Workflow w-5')).not.toBeInTheDocument();
 
-    fireEvent.click(within(table).getByTestId('pagination-button-1'));
+    expect(within(modal).getByTestId('serviceAccountBoundWorkloadsPagination')).toBeVisible();
+    fireEvent.click(within(modal).getByTestId('pagination-button-1'));
 
     expect(within(modal).getByTestId('serviceAccountBoundWorkloadsSummary')).toHaveTextContent(
       'Showing 6-7'
@@ -125,7 +128,7 @@ describe('DeleteServiceAccountModal', () => {
 
     fireEvent.click(
       within(await screen.findByTestId('serviceAccountBoundModal')).getByTestId(
-        'confirmModalConfirmButton'
+        'serviceAccountForceDeleteButton'
       )
     );
 
@@ -140,7 +143,7 @@ describe('DeleteServiceAccountModal', () => {
     });
 
     await screen.findByTestId('serviceAccountBoundModal');
-    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+    fireEvent.click(screen.getByTestId('serviceAccountBoundModalCancel'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(deleteAccount).not.toHaveBeenCalled();
@@ -155,7 +158,7 @@ describe('DeleteServiceAccountModal', () => {
 
     fireEvent.click(
       within(await screen.findByTestId('serviceAccountBoundModal')).getByTestId(
-        'confirmModalConfirmButton'
+        'serviceAccountForceDeleteButton'
       )
     );
 
@@ -163,7 +166,7 @@ describe('DeleteServiceAccountModal', () => {
       expect(onError).toHaveBeenCalledWith(error, 'Unable to delete "workflow-runner"')
     );
     expect(screen.getByTestId('serviceAccountBoundModal')).toBeVisible();
-    expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+    expect(screen.getByTestId('serviceAccountForceDeleteButton')).toBeEnabled();
     expect(onClose).not.toHaveBeenCalled();
   });
 
@@ -188,16 +191,39 @@ describe('DeleteServiceAccountModal', () => {
 
     const modal = await screen.findByTestId('serviceAccountBoundModal');
     expect(modal).toHaveTextContent('This account is bound to the following 1 workload.');
+    // A single page needs no pagination.
+    expect(
+      within(modal).queryByTestId('serviceAccountBoundWorkloadsPagination')
+    ).not.toBeInTheDocument();
     expect(within(modal).getByText('Workflow bound-later')).toBeVisible();
     expect(onDeleted).not.toHaveBeenCalled();
     expect(onError).not.toHaveBeenCalled();
 
-    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    fireEvent.click(within(modal).getByTestId('serviceAccountForceDeleteButton'));
 
     await waitFor(() => expect(onDeleted).toHaveBeenCalledWith([]));
     expect(deleteAccount).toHaveBeenNthCalledWith(1, serviceAccount.id, { force: false });
     expect(deleteAccount).toHaveBeenNthCalledWith(2, serviceAccount.id, { force: true });
   });
+
+  it.each([
+    ['an unbound account', [] as ServiceAccountBoundWorkload[], 'confirmModalConfirmButton'],
+    ['a force delete', [workload('w-1')], 'serviceAccountForceDeleteButton'],
+  ])(
+    'reports an account that was already deleted elsewhere, for %s, instead of an error',
+    async (_, workloads, buttonTestSubj) => {
+      const { onAlreadyDeleted, onDeleted, onError } = renderModal({
+        listWorkloads: jest.fn().mockResolvedValue({ workloads }),
+        deleteAccount: jest.fn().mockRejectedValue(httpError(404, { message: 'Not Found' })),
+      });
+
+      fireEvent.click(await screen.findByTestId(buttonTestSubj));
+
+      await waitFor(() => expect(onAlreadyDeleted).toHaveBeenCalledTimes(1));
+      expect(onDeleted).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+    }
+  );
 
   it('reports any other delete failure and stays open for another try', async () => {
     const error = httpError(500, { message: 'Internal Server Error' });
