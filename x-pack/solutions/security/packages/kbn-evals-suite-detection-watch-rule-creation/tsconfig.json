@@ -15,7 +15,7 @@
     "@kbn/workflows",
     "@kbn/core",
     "@kbn/zod",
-    "@kbn/gen-ai-functional-testing",
-    "@kbn/inbox-common"
+    "@kbn/inbox-common",
+    "@kbn/agent-builder-common"
   ]
 }

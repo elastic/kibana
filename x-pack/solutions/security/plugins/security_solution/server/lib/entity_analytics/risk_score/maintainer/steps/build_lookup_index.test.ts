@@ -38,9 +38,16 @@ describe('build_lookup_index', () => {
     } as unknown as EntityUpdateClient;
   });
 
-  it('writes a self-row for a non-alias entity', async () => {
+  it('filters listEntities to only entities with resolved_to and writes alias rows', async () => {
     (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
-      entities: [{ entity: { id: 'host:1' } }],
+      entities: [
+        {
+          entity: {
+            id: 'host:1',
+            relationships: { resolution: { resolved_to: 'host:target' } },
+          },
+        },
+      ],
       nextSearchAfter: undefined,
     });
 
@@ -63,7 +70,10 @@ describe('build_lookup_index', () => {
     });
     expect(crudClient.listEntities).toHaveBeenCalledWith(
       expect.objectContaining({
-        filter: { terms: { 'entity.EngineMetadata.Type': [EntityType.host] } },
+        filter: [
+          { terms: { 'entity.EngineMetadata.Type': [EntityType.host] } },
+          { exists: { field: 'entity.relationships.resolution.resolved_to' } },
+        ],
       })
     );
     expect(esClient.bulk).toHaveBeenCalledWith({
@@ -71,9 +81,9 @@ describe('build_lookup_index', () => {
         { index: { _index: '.lookup-default', _id: 'host:1' } },
         {
           entity_id: 'host:1',
-          resolution_target_id: 'host:1',
+          resolution_target_id: 'host:target',
           propagation_target_id: null,
-          relationship_type: 'self',
+          relationship_type: 'entity.relationships.resolution.resolved_to',
           calculation_run_id: RUN_ID,
           '@timestamp': NOW,
         },

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { ModelCard } from './model_card';
 import type { GroupedModel } from '../../utils/eis_utils';
 import { EisModelStatus } from '../../types';
@@ -22,17 +22,38 @@ describe('ModelCard', () => {
     endpoints: [],
   };
 
-  it('renders name, test-subj, task types, categories, and avatar for a known creator', () => {
-    const { getByText, getByTestId, container } = render(
+  it('renders the provider beside the icon, the model name, and category badges', () => {
+    const { getByTestId, queryByTestId } = render(
       <ModelCard model={baseModel} onClick={jest.fn()} />
     );
 
-    expect(getByText('my-model', { exact: false })).toBeInTheDocument();
     expect(getByTestId('eisModelCard-my-model')).toBeInTheDocument();
-    expect(getByText('text embedding, chat completion', { exact: false })).toBeInTheDocument();
-    expect(getByText('Embedding')).toBeInTheDocument();
-    expect(getByText('LLM')).toBeInTheDocument();
-    expect(container.querySelector('[data-euiicon-type]')).not.toBeNull();
+    expect(getByTestId('eisModelCardProvider-my-model')).toHaveTextContent('OpenAI');
+    expect(getByTestId('eisModelCardName-my-model')).toHaveTextContent('my-model');
+    expect(getByTestId('eisModelCardCategory-my-model-Embedding')).toBeInTheDocument();
+    expect(getByTestId('eisModelCardCategory-my-model-LLM')).toBeInTheDocument();
+    expect(getByTestId('eisModelCardProviderIcon-my-model')).toBeInTheDocument();
+    expect(queryByTestId('eisModelCardMeta-my-model')).not.toBeInTheDocument();
+  });
+
+  it('omits a leading provider name from the model title', () => {
+    const { getByTestId } = render(
+      <ModelCard
+        model={{
+          ...baseModel,
+          modelName: 'Anthropic Claude Opus 4.6',
+          modelCreator: 'Anthropic',
+        }}
+        onClick={jest.fn()}
+      />
+    );
+
+    expect(getByTestId('eisModelCardProvider-Anthropic Claude Opus 4.6')).toHaveTextContent(
+      'Anthropic'
+    );
+    expect(getByTestId('eisModelCardName-Anthropic Claude Opus 4.6')).toHaveTextContent(
+      'Claude Opus 4.6'
+    );
   });
 
   it('renders fallback icon for an unknown creator', () => {
@@ -40,23 +61,16 @@ describe('ModelCard', () => {
       ...baseModel,
       modelCreator: 'UnknownCorp',
     };
-    const { container } = render(<ModelCard model={unknownModel} onClick={jest.fn()} />);
+    const { getByTestId } = render(<ModelCard model={unknownModel} onClick={jest.fn()} />);
 
-    expect(container.querySelector('[data-euiicon-type="machineLearningApp"]')).not.toBeNull();
-  });
-
-  it('renders unknown task types as-is', () => {
-    const model = {
-      ...baseModel,
-      taskTypes: ['some_future_type'],
-      categories: [],
-    } as unknown as GroupedModel;
-    const { getByText } = render(<ModelCard model={model} onClick={jest.fn()} />);
-    expect(getByText('some_future_type', { exact: false })).toBeInTheDocument();
+    expect(getByTestId('eisModelCardProviderIcon-my-model')).toHaveAttribute(
+      'data-euiicon-type',
+      'machineLearningApp'
+    );
   });
 
   describe('Preview badge', () => {
-    it('renders the preview badge when model status is Preview', () => {
+    it('renders the preview badge when model status is Preview', async () => {
       const model: GroupedModel = {
         ...baseModel,
         modelStatus: EisModelStatus.Preview,
@@ -65,6 +79,13 @@ describe('ModelCard', () => {
         <ModelCard model={model} onClick={jest.fn()} />
       );
       expect(getByTestId('modelPreviewBadge-my-model')).toBeInTheDocument();
+      fireEvent.mouseOver(getByTestId('modelPreviewBadge-my-model'));
+      await waitFor(() => {
+        expect(getByTestId('modelPreviewBadgeTooltip-my-model')).toHaveTextContent('Preview model');
+        expect(getByTestId('modelPreviewBadgeTooltip-my-model')).toHaveTextContent(
+          'This model is still in preview status and not recommended for production applications.'
+        );
+      });
       expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
     });
@@ -75,81 +96,174 @@ describe('ModelCard', () => {
     });
   });
 
-  describe('Deprecated badge', () => {
-    it('renders the deprecated badge when model status is Deprecated and metadata has an EOL date', () => {
+  describe('End of life row', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(2026, 2, 1, 12, 0, 0));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('does not show a date when the model is not nearing or past end of life', () => {
+      const model: GroupedModel = {
+        ...baseModel,
+        modelMetadata: {
+          heuristics: {
+            release_date: '2025-01-10',
+            end_of_life_date: '2026-06-01',
+          },
+        },
+      };
+      const { queryByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      expect(queryByTestId('eisModelCardMeta-my-model')).not.toBeInTheDocument();
+      expect(queryByTestId('eisModelCardReleaseDateTooltip-my-model')).not.toBeInTheDocument();
+      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
+    });
+
+    it('shows nearing end-of-life for a deprecated model', async () => {
       const model: GroupedModel = {
         ...baseModel,
         modelStatus: EisModelStatus.Deprecated,
         modelMetadata: {
           heuristics: {
             status: 'deprecated',
-            end_of_life_date: '2040-12-31',
+            end_of_life_date: '2026-08-01',
           },
         },
       };
       const { getByTestId, queryByTestId } = render(
         <ModelCard model={model} onClick={jest.fn()} />
       );
-      expect(getByTestId('modelDeprecatedBadge-my-model')).toBeInTheDocument();
+      const row = getByTestId('eisModelCardMeta-my-model');
+      expect(row).toHaveTextContent('Nearing end-of-life: 2026-08-01');
+      expect(getByTestId('eisModelCardMetaIcon-my-model')).toHaveAttribute(
+        'data-euiicon-type',
+        'warning'
+      );
+      fireEvent.mouseOver(getByTestId('eisModelCardMetaDate-my-model'));
+      await waitFor(() => {
+        expect(getByTestId('eisModelCardNearingEndOfLifeTooltip-my-model')).toHaveTextContent(
+          'Model soon no longer available'
+        );
+        expect(getByTestId('eisModelCardNearingEndOfLifeTooltip-my-model')).toHaveTextContent(
+          'This model is reaching end of life on 2026-08-01. It will no longer be available after that date. We recommend using a more recent model.'
+        );
+      });
+      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
+    });
+
+    it('shows end-of-life when the date has passed', async () => {
+      const model: GroupedModel = {
+        ...baseModel,
+        modelStatus: EisModelStatus.DeprecatedEOL,
+        modelMetadata: {
+          heuristics: {
+            status: 'deprecated',
+            end_of_life_date: '2026-02-01',
+          },
+        },
+      };
+      const { getByTestId, queryByTestId } = render(
+        <ModelCard model={model} onClick={jest.fn()} />
+      );
+      const row = getByTestId('eisModelCardMeta-my-model');
+      expect(row).toHaveTextContent('End-of-life: 2026-02-01');
+      expect(getByTestId('eisModelCardMetaIcon-my-model')).toHaveAttribute(
+        'data-euiicon-type',
+        'error'
+      );
+      fireEvent.mouseOver(getByTestId('eisModelCardMetaDate-my-model'));
+      await waitFor(() => {
+        expect(getByTestId('eisModelCardEndOfLifeTooltip-my-model')).toHaveTextContent(
+          'Model no longer available'
+        );
+        expect(getByTestId('eisModelCardEndOfLifeTooltip-my-model')).toHaveTextContent(
+          'This model has reached end of life on 2026-02-01. Use a more recent model instead.'
+        );
+      });
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
     });
 
-    it('renders the deprecated badge when model status is Deprecated and metadata has no EOL date', () => {
+    it('does not show an end-of-life row when there is no date', () => {
       const model: GroupedModel = {
         ...baseModel,
-        modelStatus: EisModelStatus.Deprecated,
+        modelStatus: EisModelStatus.DeprecatedEOL,
         modelMetadata: {
           heuristics: {
             status: 'deprecated',
           },
         },
       };
-      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
-      expect(getByTestId('modelDeprecatedBadge-my-model')).toBeInTheDocument();
+      const { queryByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      expect(queryByTestId('eisModelCardMeta-my-model')).not.toBeInTheDocument();
+      expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
     });
 
-    it('does not render the deprecated badge when model status is GA', () => {
+    it('does not show an end-of-life row for a GA model with no date', () => {
       const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
-      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
+      expect(queryByTestId('eisModelCardMeta-my-model')).not.toBeInTheDocument();
     });
   });
 
-  describe('EOL badge', () => {
-    it('renders the EOL badge when model status is DeprecatedEOL and metadata has an EOL date', () => {
+  describe('Blocked badge', () => {
+    it('renders the blocked badge when an endpoint is denied by region policy', async () => {
+      const model: GroupedModel = {
+        ...baseModel,
+        endpoints: [
+          {
+            inference_id: 'blocked',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'my-model' },
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+      };
+      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      expect(getByTestId('modelBlockedBadge-my-model')).toHaveTextContent('Blocked');
+      fireEvent.mouseOver(getByTestId('modelBlockedBadge-my-model'));
+      await waitFor(() => {
+        expect(getByTestId('modelBlockedBadgeTooltip-my-model')).toHaveTextContent(
+          'Blocked by region policy'
+        );
+        expect(getByTestId('modelBlockedBadgeTooltip-my-model')).toHaveTextContent(
+          'This model is not available within your current region preferences.'
+        );
+      });
+    });
+
+    it('renders the blocked badge together with the end-of-life row', () => {
       const model: GroupedModel = {
         ...baseModel,
         modelStatus: EisModelStatus.DeprecatedEOL,
         modelMetadata: {
           heuristics: {
-            status: 'deprecated',
-            end_of_life_date: '2025-06-01',
+            end_of_life_date: '2020-01-01',
           },
         },
+        endpoints: [
+          {
+            inference_id: 'blocked',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'my-model' },
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
       };
       const { getByTestId, queryByTestId } = render(
         <ModelCard model={model} onClick={jest.fn()} />
       );
-      expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
-      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
-    });
-
-    it('renders the EOL badge when model status is DeprecatedEOL and metadata has no EOL date', () => {
-      const model: GroupedModel = {
-        ...baseModel,
-        modelStatus: EisModelStatus.DeprecatedEOL,
-        modelMetadata: {
-          heuristics: {
-            status: 'deprecated',
-          },
-        },
-      };
-      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
-      expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
-    });
-
-    it('does not render the EOL badge when model status is GA', () => {
-      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      expect(getByTestId('modelBlockedBadge-my-model')).toBeInTheDocument();
+      expect(getByTestId('eisModelCardMeta-my-model')).toHaveTextContent('End-of-life:');
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
+    });
+
+    it('does not render the blocked badge when no endpoint is denied by region policy', () => {
+      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      expect(queryByTestId('modelBlockedBadge-my-model')).not.toBeInTheDocument();
     });
   });
 });

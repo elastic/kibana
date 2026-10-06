@@ -24,7 +24,7 @@ export const filterSchema = z
   })
   .strict()
   .meta({
-    id: 'filterSimple',
+    id: 'visFilterSimple',
     title: 'Filter',
     description:
       'A KQL or Lucene query that filters panel data. Applied on top of any dashboard-level filters.',
@@ -45,7 +45,7 @@ export const filterWithLabelSchema = z
   })
   .strict()
   .meta({
-    id: 'filterWithLabel',
+    id: 'visFilterWithLabel',
     title: 'Filter with Label',
     description: 'A KQL or Lucene filter with an optional display label.',
   });

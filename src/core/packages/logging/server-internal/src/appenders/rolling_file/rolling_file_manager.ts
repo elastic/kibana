@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { LogFileWriteErrorHandler } from '@kbn/core-logging-server';
 import type { WriteStream } from 'fs';
 import { createWriteStream, mkdirSync } from 'fs';
 import { dirname } from 'path';
+import { toLogFileWriteError } from '../write_error_handler';
 import type { RollingFileContext } from './rolling_file_context';
 
 /**
@@ -18,9 +20,17 @@ import type { RollingFileContext } from './rolling_file_context';
 export class RollingFileManager {
   private readonly filePath;
   private outputStream?: WriteStream;
+  private readonly reportWriteError?: (error: unknown) => void;
 
-  constructor(private readonly context: RollingFileContext) {
+  constructor(
+    private readonly context: RollingFileContext,
+    onWriteError?: LogFileWriteErrorHandler
+  ) {
     this.filePath = context.filePath;
+    this.reportWriteError =
+      typeof onWriteError === 'function'
+        ? (error) => onWriteError(toLogFileWriteError(error, context.filePath))
+        : undefined;
   }
 
   write(chunk: string) {
@@ -48,6 +58,10 @@ export class RollingFileManager {
         encoding: 'utf8',
         flags: 'a',
       });
+
+      if (this.reportWriteError) {
+        this.outputStream.on('error', this.reportWriteError);
+      }
       // refresh the file meta in case it was not initialized yet.
       this.context.refreshFileInfo();
     }

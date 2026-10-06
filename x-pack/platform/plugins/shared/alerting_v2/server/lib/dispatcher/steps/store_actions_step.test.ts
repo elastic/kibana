@@ -105,10 +105,9 @@ describe('StoreActionsStep', () => {
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
         {
-          '@timestamp': mockDate.toISOString(),
           group_hash: 'hash-1',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'suppress',
           rule_id: 'rule-1',
           source: 'internal',
@@ -150,10 +149,9 @@ describe('StoreActionsStep', () => {
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
         {
-          '@timestamp': mockDate.toISOString(),
           group_hash: 'hash-1',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'suppress',
           rule_id: 'rule-1',
           source: 'internal',
@@ -194,10 +192,9 @@ describe('StoreActionsStep', () => {
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
     expect(callArgs.docs).toHaveLength(2);
     expect(callArgs.docs[0]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-1',
       last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'fire',
       rule_id: 'rule-1',
       source: 'internal',
@@ -205,8 +202,7 @@ describe('StoreActionsStep', () => {
       space_id: 'default',
     });
     expect(callArgs.docs[1]).toEqual({
-      '@timestamp': mockDate.toISOString(),
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'notified',
       rule_id: 'rule-1',
       group_hash: 'hash-1',
@@ -214,12 +210,12 @@ describe('StoreActionsStep', () => {
       action_group_id: 'group-1',
       source: 'internal',
       reason: 'notified by policy policy-1',
-      episode_status: 'active',
+      alert_status: 'active',
       space_id: 'default',
     });
   });
 
-  it('includes episode_status on notified record for per_episode mode', async () => {
+  it('includes alert_status on notified record for per_alert mode', async () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
@@ -257,14 +253,15 @@ describe('StoreActionsStep', () => {
         action_type: 'notified',
         group_hash: 'hash-1',
         action_group_id: 'group-1',
-        episode_status: 'recovering',
+        alert_status: 'recovering',
         reason: 'notified by policy policy-1',
         space_id: 'default',
       })
     );
+    expect(notifiedDoc).not.toHaveProperty('episode_status');
   });
 
-  it('omits episode_status on notified record for all mode', async () => {
+  it('omits alert_status on notified record for all mode', async () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
@@ -303,7 +300,7 @@ describe('StoreActionsStep', () => {
       (d: Record<string, unknown>) => d.action_type === 'notified'
     );
     expect(notifiedDoc).toBeDefined();
-    expect(notifiedDoc?.episode_status).toBeUndefined();
+    expect(notifiedDoc?.alert_status).toBeUndefined();
   });
 
   it('handles combined suppressed, throttled, and dispatch arrays', async () => {
@@ -366,10 +363,9 @@ describe('StoreActionsStep', () => {
     expect(callArgs.docs).toHaveLength(4);
 
     expect(callArgs.docs[0]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-suppressed',
       last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'suppress',
       rule_id: 'rule-suppressed',
       source: 'internal',
@@ -378,10 +374,9 @@ describe('StoreActionsStep', () => {
     });
 
     expect(callArgs.docs[1]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-throttled',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'suppress',
       rule_id: 'rule-throttled',
       source: 'internal',
@@ -390,10 +385,9 @@ describe('StoreActionsStep', () => {
     });
 
     expect(callArgs.docs[2]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-dispatch',
       last_series_event_timestamp: '2026-01-22T07:20:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'fire',
       rule_id: 'rule-dispatch',
       source: 'internal',
@@ -407,7 +401,7 @@ describe('StoreActionsStep', () => {
         rule_id: 'rule-dispatch',
         group_hash: 'hash-dispatch',
         action_group_id: 'dispatch-group',
-        episode_status: 'active',
+        alert_status: 'active',
         reason: 'notified by policy dispatch-policy',
         space_id: 'default',
       })
@@ -441,10 +435,9 @@ describe('StoreActionsStep', () => {
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
         {
-          '@timestamp': mockDate.toISOString(),
           group_hash: 'hash-unmatched',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'unmatched',
           rule_id: 'rule-unmatched',
           source: 'internal',
@@ -553,10 +546,9 @@ describe('StoreActionsStep', () => {
     );
     expect(noActionDocs).toHaveLength(1);
     expect(noActionDocs[0]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-unmatched',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'unmatched',
       rule_id: 'rule-unmatched',
       source: 'internal',
@@ -741,7 +733,7 @@ describe('StoreActionsStep', () => {
           rule_id: null,
           group_hash: 'pd-group-hash',
           space_id: 'space-a',
-          actor: 'system',
+          actor: { type: 'internal' },
         })
       );
     });
@@ -783,7 +775,7 @@ describe('StoreActionsStep', () => {
           rule_id: null,
           group_hash: 'pd-group-hash',
           space_id: 'space-a',
-          actor: 'system',
+          actor: { type: 'internal' },
         })
       );
     });

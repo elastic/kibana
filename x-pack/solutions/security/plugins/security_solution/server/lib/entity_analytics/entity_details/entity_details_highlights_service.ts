@@ -31,6 +31,7 @@ import type {
 import type { MlSummaryJob } from '@kbn/ml-plugin/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { CriteriaField } from '@kbn/ml-anomaly-utils';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { createGetRiskScores } from '../risk_score/get_risk_score';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { EntityDetailsHighlightsRequestBody } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
@@ -145,6 +146,7 @@ interface EntityDetailsHighlightsServiceFactoryOptions {
   entityStoreClient: EntityStoreCRUDClient;
   esClient: ElasticsearchClient;
   experimentalFeatures: EntityAnalyticsRoutesDeps['config']['experimentalFeatures'];
+  mitreDataClient?: MitreAttackDataClient;
   spaceId: string;
   logger: Logger;
   request: KibanaRequest;
@@ -166,6 +168,7 @@ export const entityDetailsHighlightsServiceFactory = ({
   logger,
   entityStoreClient,
   experimentalFeatures,
+  mitreDataClient,
   request,
   spaceId,
   esClient,
@@ -548,6 +551,7 @@ export const entityDetailsHighlightsServiceFactory = ({
       esClient,
       experimentalFeatures,
       logger,
+      mitreDataClient,
       ml,
       request,
       soClient,

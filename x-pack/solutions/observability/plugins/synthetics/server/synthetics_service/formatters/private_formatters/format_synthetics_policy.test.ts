@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { ConfigKey, KerberosAuthType, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
@@ -320,6 +320,12 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'password',
                   value: '"changeme"',
                 },
+                kerberos: {
+                  type: 'text',
+                },
+                ntlm: {
+                  type: 'text',
+                },
                 proxy_url: {
                   type: 'text',
                   value: '"https://proxy.com"',
@@ -457,6 +463,176 @@ describe('formatSyntheticsPolicy', () => {
     // response.include_headers (bool default true) is intentionally still sent.
     expect(vars?.['response.include_headers'].value).toBe(true);
   });
+
+  it('base64-encodes enabled Kerberos/NTLM after resolving params and omits disabled auth', () => {
+    const ntlm = {
+      enabled: true,
+      username: 'ntlm-user',
+      password: '${ntlmPassword}',
+      domain: 'EXAMPLE',
+      workstation: 'WS1',
+    };
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      testNewPolicy,
+      MonitorTypeEnum.HTTP,
+      {
+        ...httpPolicy,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: false,
+          auth_type: KerberosAuthType.PASSWORD,
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '',
+          realm: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: ntlm,
+      },
+      { ...gParams, ntlmPassword: 's3c"ret\nline' },
+      []
+    );
+
+    const vars = formattedPolicy.inputs
+      .find((input) => input.type === 'synthetics/http')
+      ?.streams.find((stream) => stream.data_stream.dataset === 'http')?.vars;
+
+    expect(vars?.kerberos.value).toBeNull();
+    expect(JSON.parse(Buffer.from(vars?.ntlm.value as string, 'base64').toString('utf8'))).toEqual({
+      ...ntlm,
+      password: 's3c"ret\nline',
+    });
+  });
+
+  it('rejects enabled Kerberos when the installed package lacks the kerberos var', () => {
+    const policyWithoutAuthVars = {
+      ...testNewPolicy,
+      inputs: testNewPolicy.inputs.map((input) => {
+        if (input.type !== 'synthetics/http') return input;
+        return {
+          ...input,
+          streams: input.streams.map((stream) => {
+            if (stream.data_stream.dataset !== 'http') return stream;
+            const { kerberos, ntlm, ...vars } = stream.vars as Record<string, unknown>;
+            return { ...stream, vars };
+          }),
+        };
+      }),
+    };
+
+    expect(() =>
+      formatSyntheticsPolicy(
+        policyWithoutAuthVars as any,
+        MonitorTypeEnum.HTTP,
+        {
+          ...httpPolicy,
+          [ConfigKey.USERNAME]: '',
+          [ConfigKey.PASSWORD]: '',
+          [ConfigKey.KERBEROS]: {
+            enabled: true,
+            auth_type: KerberosAuthType.PASSWORD,
+            username: 'svc',
+            password: 'secret',
+            keytab: '',
+            config_path: '/etc/krb5.conf',
+            krb5_conf: '',
+            realm: 'CORP.LOCAL',
+            service_name: '',
+            enable_krb5_fast: false,
+          },
+        },
+        gParams,
+        []
+      )
+    ).toThrow(/Synthetics integration version 1\.12\.0/);
+  });
+
+  // API monitors emit a companion `synthetics.api.network` document per request
+  // via Heartbeat. Without enabling the `api.network` companion stream here,
+  // Fleet generates an agent API key that lacks write privileges on
+  // `synthetics-synthetics.api.network-default`, and ES rejects every network
+  // event with a 403 — silently emptying the data stream while summary docs
+  // continue to land. Mirror the long-standing browser → browser.network /
+  // browser.screenshot wiring so the API key permissions match what
+  // Heartbeat will actually publish.
+  it('enables the api.network companion stream for api monitors', () => {
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      makeApiPolicyV110(),
+      MonitorTypeEnum.API,
+      {
+        type: 'api',
+        enabled: true,
+        name: 'API monitor',
+        schedule: { number: '1', unit: 'm' },
+        config_id: 'abc',
+        location_name: 'Private',
+      } as any,
+      gParams,
+      testMW
+    );
+
+    const apiInput = formattedPolicy.inputs.find((i) => i.type === 'synthetics/api');
+    expect(apiInput?.enabled).toBe(true);
+    const streams = apiInput?.streams ?? [];
+    const apiStream = streams.find((s) => s.data_stream.dataset === 'api');
+    const apiNetworkStream = streams.find((s) => s.data_stream.dataset === 'api.network');
+    expect(apiStream?.enabled).toBe(true);
+    expect(apiNetworkStream?.enabled).toBe(true);
+  });
+
+  it('base64-encodes inline API scripts using the 1.10.0 source.inline.encoding var', () => {
+    const script =
+      'apiJourney("health", async ({ request }) => { await request.get("https://example.com"); });';
+
+    const { formattedPolicy, hasInput } = formatSyntheticsPolicy(
+      makeApiPolicyV110(),
+      MonitorTypeEnum.API,
+      {
+        type: 'api',
+        enabled: true,
+        name: 'API monitor',
+        schedule: { number: '1', unit: 'm' },
+        location_name: 'Private',
+        'source.inline.script': script,
+      } as any,
+      gParams,
+      testMW
+    );
+
+    expect(hasInput).toBe(true);
+    const apiStream = formattedPolicy.inputs
+      .find((i) => i.type === 'synthetics/api')
+      ?.streams.find((s) => s.data_stream.dataset === 'api');
+    expect(apiStream?.vars?.['source.inline.encoding']?.value).toBe('base64');
+    expect(apiStream?.vars?.['source.inline.script']?.value).toBe(
+      Buffer.from(script).toString('base64')
+    );
+  });
+
+  it('reports hasInput false when the installed package has no synthetics/api input', () => {
+    const { hasInput, hasDataStream } = formatSyntheticsPolicy(
+      {
+        ...testNewPolicy,
+        package: { ...testNewPolicy.package, version: '1.9.0' },
+      },
+      MonitorTypeEnum.API,
+      {
+        type: 'api',
+        enabled: true,
+        name: 'API monitor',
+        schedule: { number: '1', unit: 'm' },
+      } as any,
+      gParams,
+      testMW
+    );
+
+    expect(hasInput).toBe(false);
+    expect(hasDataStream).toBe(false);
+  });
 });
 
 const testNewPolicy = {
@@ -493,6 +669,9 @@ const testNewPolicy = {
             tags: { type: 'yaml' },
             username: { type: 'text' },
             password: { type: 'password' },
+            // synthetics package 1.12.0+ (elastic/integrations#21116)
+            kerberos: { type: 'text' },
+            ntlm: { type: 'text' },
             'response.include_headers': { type: 'bool' },
             'response.include_body': { type: 'text' },
             'check.request.method': { type: 'text' },
@@ -747,3 +926,51 @@ const httpPolicy: any = {
   params: '{"proxyUrl":"https://proxy.com"}',
   location_name: 'Test private location 0',
 };
+
+/** Package-policy shape from synthetics 1.10.0 (`synthetics/api` + `api.network`). */
+const makeApiPolicyV110 = () => ({
+  name: 'api-private-default',
+  namespace: 'default',
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.10.0' },
+  enabled: true,
+  policy_ids: ['loc-1'],
+  inputs: [
+    {
+      type: 'synthetics/api',
+      policy_template: 'synthetics',
+      enabled: false,
+      streams: [
+        {
+          enabled: false,
+          data_stream: { type: 'synthetics', dataset: 'api' },
+          vars: {
+            __ui: { type: 'yaml' },
+            enabled: { value: true, type: 'bool' },
+            type: { value: 'api', type: 'text' },
+            name: { type: 'text' },
+            schedule: { value: '"@every 3m"', type: 'text' },
+            'service.name': { type: 'text' },
+            timeout: { type: 'text' },
+            tags: { type: 'yaml' },
+            'source.inline.script': { type: 'yaml' },
+            'source.inline.encoding': { type: 'text' },
+            'source.project.content': { type: 'text' },
+            params: { type: 'yaml' },
+            playwright_options: { type: 'yaml' },
+            ignore_https_errors: { type: 'bool' },
+            'filter_journeys.tags': { type: 'yaml' },
+            'filter_journeys.match': { type: 'text' },
+            location_name: { value: 'Fleet managed', type: 'text' },
+            location_id: { value: 'fleet_managed', type: 'text' },
+            id: { type: 'text' },
+            origin: { type: 'text' },
+            processors: { type: 'yaml' },
+            max_attempts: { type: 'integer' },
+            maintenance_windows: { type: 'yaml' },
+          },
+        },
+        { enabled: false, data_stream: { type: 'synthetics', dataset: 'api.network' } },
+      ],
+    },
+  ],
+});

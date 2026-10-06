@@ -15,7 +15,9 @@ import {
   type EntityDefinition,
   type EntityField,
   type EntityType,
+  type GatedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
+import type { EntityDefinitionOptions } from '../../../common/domain/definitions/registry';
 import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsqlFromDefinition,
@@ -28,7 +30,6 @@ import {
   type PaginationParams,
   type PaginationFields,
   type LogSlicePaginationParams,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   ENGINE_METADATA_UNTYPED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
   MAIN_ENTITY_ID_FIELD,
@@ -47,7 +48,6 @@ import {
 export const HASHED_ID_FIELD = 'entity.hashedId';
 
 export const MAIN_EXTRACTION_PAGINATION_FIELDS: PaginationFields = {
-  timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   finalIdField: ENGINE_METADATA_UNTYPED_ID_FIELD,
   idFieldInQuery: recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
 };
@@ -59,35 +59,43 @@ const FIELDS_TO_KEEP = [
   ENGINE_METADATA_UNTYPED_ID_FIELD,
   HASHED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
 ];
 
 interface LogsExtractionQueryParams {
   indexPatterns: string[];
   latestIndex: string;
-  entityDefinition: EntityDefinition;
+  entityDefinition: GatedEntityDefinition;
+  entityDefinitionOptions?: EntityDefinitionOptions;
   docsLimit: number;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
   pagination?: PaginationParams;
   logsPageCursorStart?: LogSlicePaginationParams;
   logsPageCursorEnd?: LogSlicePaginationParams;
+  samplingRate?: number;
 }
 
 export function buildLogsExtractionEsqlQuery({
   indexPatterns,
   entityDefinition,
+  entityDefinitionOptions,
   fromDateISO,
   toDateISO,
   docsLimit,
   latestIndex,
-  recoveryId,
   pagination,
   logsPageCursorStart,
   logsPageCursorEnd,
+  samplingRate,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback } = entityDefinition;
+
+  if (
+    samplingRate !== undefined &&
+    (!Number.isFinite(samplingRate) || samplingRate <= 0 || samplingRate > 1)
+  ) {
+    throw new Error(`samplingRate must be in (0, 1], got ${samplingRate}`);
+  }
 
   const parts = [];
 
@@ -97,7 +105,7 @@ export function buildLogsExtractionEsqlQuery({
   parts.push(
     buildExtractionSourceClause({
       indexPatterns,
-      type,
+      entityDefinition,
       fromDateISO,
       toDateISO,
       logsPageCursorStart,
@@ -105,11 +113,18 @@ export function buildLogsExtractionEsqlQuery({
     })
   );
 
+  // Right after the source filter and before any computation: the only position where sampling
+  // reduces the rows entering EVAL/STATS/LOOKUP JOIN rather than dropping finished entity rows.
+  if (samplingRate !== undefined && samplingRate < 1) {
+    parts.push(`| SAMPLE ${samplingRate}`);
+  }
+
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
     const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
     const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
       withTypeId: false,
+      options: entityDefinitionOptions,
     });
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
@@ -122,7 +137,6 @@ export function buildLogsExtractionEsqlQuery({
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS
-    ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${aggregationStats(fields)}
     BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}`);
@@ -130,15 +144,7 @@ export function buildLogsExtractionEsqlQuery({
   // If there is no post aggregation filter we can paginate before the lookup join
   // and save some performance
   if (!entityDefinition.postAggFilter) {
-    parts.push(
-      ...buildPaginationSection(
-        fromDateISO,
-        docsLimit,
-        MAIN_EXTRACTION_PAGINATION_FIELDS,
-        pagination,
-        recoveryId
-      )
-    );
+    parts.push(...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
   }
 
   // Builds the main entity id
@@ -161,15 +167,7 @@ export function buildLogsExtractionEsqlQuery({
       )
     );
     // then we can paginate after the post aggregation filter
-    parts.push(
-      ...buildPaginationSection(
-        fromDateISO,
-        docsLimit,
-        MAIN_EXTRACTION_PAGINATION_FIELDS,
-        pagination,
-        recoveryId
-      )
-    );
+    parts.push(...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
   }
 
   if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {

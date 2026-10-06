@@ -1,5 +1,5 @@
 {
-  "sha1": "a4c2116a050e1a22d132dfbbd9818716c5129f1b",
+  "sha1": "ef98cc470f715d3fd1d191fa1f4ee52c182ff496",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,7 +7,7 @@
     {
       "id": "2d983a450230de2-481578a854c377f",
       "title": "Observability alert details context when logs are annotated with service.name returns no service summary and the service + container log categories when no params are specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -16,14 +16,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
-        "line": 97,
-        "column": 13
+        "line": 96,
+        "column": 7
       }
     },
     {
       "id": "2d983a450230de2-5207f806f1a5d66",
       "title": "Observability alert details context when logs are annotated with service.name returns Backend log categories when service.name is specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -33,13 +33,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
         "line": 104,
-        "column": 16
+        "column": 7
       }
     },
     {
       "id": "2d983a450230de2-74e43c3ec43089d",
       "title": "Observability alert details context when logs are annotated with service.name returns Backend log categories when container.id is specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -49,13 +49,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
         "line": 120,
-        "column": 30
+        "column": 32
       }
     },
     {
       "id": "2d983a450230de2-6708b2b7a291eb0",
       "title": "Observability alert details context when logs are annotated with service.name returns an empty service summary and container log categories for a non-existing service.name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -65,13 +65,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
         "line": 133,
-        "column": 16
+        "column": 7
       }
     },
     {
       "id": "5a65f566151c014-6f483bd5ee07fc0",
       "title": "Observability alert details context when logs are not annotated with service.name returns a single log category when no params are specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -87,7 +87,7 @@
     {
       "id": "5a65f566151c014-253b4ddf1bb1572",
       "title": "Observability alert details context when logs are not annotated with service.name returns service summary, downstream dependencies and log categories when service.name is specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -97,13 +97,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
         "line": 79,
-        "column": 14
+        "column": 29
       }
     },
     {
       "id": "5a65f566151c014-ca981ba41f1e032",
       "title": "Observability alert details context when logs are not annotated with service.name returns service summary, downstream dependencies and log categories when container.id is specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -113,13 +113,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
         "line": 125,
-        "column": 11
+        "column": 18
       }
     },
     {
       "id": "5a65f566151c014-8258847c7aa83fa",
       "title": "Observability alert details context when logs are not annotated with service.name returns nothing for a non-existing container id",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -128,14 +128,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
-        "line": 173,
-        "column": 13
+        "line": 172,
+        "column": 6
       }
     },
     {
       "id": "5a65f566151c014-988cc7ef1a98699",
       "title": "Observability alert details context when logs are not annotated with service.name returns an empty service summary and log categories for a non-existing service.name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -145,7 +145,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
         "line": 177,
-        "column": 14
+        "column": 9
       }
     },
     {
@@ -1799,22 +1799,6 @@
       }
     },
     {
-      "id": "c7e4e7d399ecfe6-fa4a805234e221f",
-      "title": "Observability alerts – no privilege cannot check investigation availability",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
-        "line": 90,
-        "column": 14
-      }
-    },
-    {
       "id": "c7e4e7d399ecfe6-42b81244286f3a3",
       "title": "Observability alerts – no privilege cannot read muted alert state via _find_muted_alerts",
       "expectedStatus": "passed",
@@ -1826,8 +1810,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
-        "line": 103,
-        "column": 7
+        "line": 90,
+        "column": 14
       }
     },
     {

@@ -518,7 +518,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
       try {
         const { entityType, entityId, interval, date } = params;
 
-        const [coreStart, { entityStore }] = await core.getStartServices();
+        const [coreStart, { entityStore, mitreAttack }] = await core.getStartServices();
         const client = esClient.asCurrentUser;
         const normalizedEntityId = normalizeEntityId(entityId, entityType);
         const entityStoreClient = entityStore.createCRUDClient(client, spaceId);
@@ -528,6 +528,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           esClient: client,
           experimentalFeatures,
           logger,
+          mitreDataClient: mitreAttack?.getMitreDataClient?.(),
           ml,
           // this is a workaround for a bug in the ML providers where Kibana privileges not read correctly from fake requests
           // (which is what the tool receives from the agent builder context when running as a background task)
@@ -549,12 +550,14 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         const groundingResult = grounding ? [grounding] : [];
 
         if (resolved.status === 'not_found') {
+          const errorMessage = `No entity found for id: ${normalizedEntityId}`;
+          telemetryTracker.recordFailure(errorMessage);
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
-                data: { message: `No entity found for id: ${normalizedEntityId}` },
+                data: { message: errorMessage },
               },
               ...groundingResult,
             ],

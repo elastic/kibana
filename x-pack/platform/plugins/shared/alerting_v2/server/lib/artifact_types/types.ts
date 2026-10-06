@@ -11,7 +11,7 @@ import type { z } from '@kbn/zod/v4';
  * Declarative descriptor: a top-level key in artifact `data` holds a saved-object id.
  */
 export interface ArtifactReferenceDescriptor {
-  /** Top-level key in `data` holding the id, e.g. `dashboardId`. Must not contain `:`. */
+  /** Top-level key in `data` holding the id, e.g. `dashboard_id`. Must be snake_case. */
   field: string;
   /** Saved-object type the id points to, e.g. `dashboard`. */
   savedObjectType: string;

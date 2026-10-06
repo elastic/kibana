@@ -77,7 +77,7 @@ export class ElasticAssistantPublicPlugin
       return services;
     };
 
-    coreStart.chrome.next.aiButton.register({
+    coreStart.chrome.controls.aiButton.register({
       content: (target: HTMLElement) => {
         const startService = startServices();
         return this.mountAIAssistantButton(target, coreStart, startService);

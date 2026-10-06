@@ -18,7 +18,7 @@ mkdir -p "$npm_config_cache"
 if ! node -e "require.resolve('@kbn/setup-node-env')" 2>/dev/null; then
   # If FIPS mode is enabled, there can be issues installing some dependencies
   # due to invalid algorithms.
-  NODE_OPTIONS='' yarn kbn bootstrap
+  NODE_OPTIONS='' pnpm kbn bootstrap
 fi
 
 Xvfb :99 -screen 0 1920x1080x24 &
