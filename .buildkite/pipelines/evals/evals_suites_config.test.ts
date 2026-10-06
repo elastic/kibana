@@ -165,4 +165,13 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
 
     expect(problems).toEqual([]);
   });
+
+  it('matches a suite id in evals.suites.json for every EVAL_SUITE_ID in llm_evals.yml', () => {
+    // The coverage check above only cross-checks suites that define weeklyEisModelGroups, so a
+    // mistyped EVAL_SUITE_ID on any other step would otherwise stay green. Fail on unknown ids.
+    const knownSuiteIds = new Set(suites.map(({ id }) => id));
+    const unknownIds = [...weeklyModelGroupsBySuite.keys()].filter((id) => !knownSuiteIds.has(id));
+
+    expect(unknownIds).toEqual([]);
+  });
 });
