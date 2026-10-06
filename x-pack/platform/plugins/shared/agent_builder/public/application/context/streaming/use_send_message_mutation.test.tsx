@@ -32,10 +32,11 @@ jest.mock('../../hooks/use_agent_builder_service', () => ({
     conversationsService: { get: mockGet },
   }),
 }));
+const mockAddDanger = jest.fn();
 const mockServices = {
   application: { currentAppId$: of(undefined) },
   plugins: {},
-  notifications: {},
+  notifications: { toasts: { addDanger: mockAddDanger } },
 };
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: mockServices }),
@@ -251,5 +252,27 @@ describe('useSendMessageMutation', () => {
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
     expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]);
+    expect(mockAddDanger).not.toHaveBeenCalled();
+  });
+
+  it('shows a toast when the server rejects the request before running anything', async () => {
+    const { bindings, source, result } = setup();
+    mockGet.mockResolvedValue(savedConversation([]));
+    const payloadTooLarge = Object.assign(new Error('Request Entity Too Large'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 413 },
+      body: { statusCode: 413, message: 'Payload content length greater than maximum allowed' },
+    });
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    act(() => source.error(payloadTooLarge));
+
+    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
+    expect(mockAddDanger).toHaveBeenCalledWith({
+      title: expect.stringMatching(/too large to send/),
+    });
+    expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId);
   });
 });

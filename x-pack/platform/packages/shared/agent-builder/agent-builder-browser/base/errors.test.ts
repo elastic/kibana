@@ -75,6 +75,11 @@ describe('AgentBuilder errors', () => {
       expect(formatAgentBuilderErrorMessage(httpError)).toBe('Bad Gateway (HTTP 502)');
     });
 
+    it('should show the status code of HTTP errors with an empty status text', () => {
+      const httpError = Object.assign(new Error(''), { response: { status: 502 } });
+      expect(formatAgentBuilderErrorMessage(httpError)).toBe('Request failed (HTTP 502)');
+    });
+
     it('should prefer the body message over the status code', () => {
       const httpError = Object.assign(new Error('Internal Server Error'), {
         response: { status: 500 },

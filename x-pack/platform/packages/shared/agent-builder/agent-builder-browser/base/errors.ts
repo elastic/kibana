@@ -56,6 +56,14 @@ export function formatAgentBuilderErrorMessage(error: any): string {
         });
   }
 
+  // the status text can be empty (e.g. over HTTP/2), leaving the status as the only thing to show
+  if (httpStatus !== undefined) {
+    return i18n.translate('xpack.agentBuilder.errors.httpStatusOnly', {
+      defaultMessage: 'Request failed (HTTP {status})',
+      values: { status: httpStatus },
+    });
+  }
+
   // everything else can just be serialized using util.inspect()
   return inspect(error);
 }
