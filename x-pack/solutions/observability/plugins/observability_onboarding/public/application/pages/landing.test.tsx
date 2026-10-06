@@ -18,6 +18,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { useSearchParams } from '@kbn/shared-ux-router';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
+import { OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { createCallApi } from '../../services/rest/create_call_api';
 import { ObservabilityOnboardingFlow } from '../observability_onboarding_flow';
 import { LandingPage } from './landing';
@@ -296,7 +297,7 @@ const renderLandingAtPath = (initialPath: string) => {
   );
   createCallApi(coreStart);
   const services = createObservabilityServices(coreStart);
-  return render(
+  render(
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[initialPath]}>
@@ -307,6 +308,7 @@ const renderLandingAtPath = (initialPath: string) => {
       </KibanaContextProvider>
     </I18nProvider>
   );
+  return coreStart;
 };
 
 const renderFlowAtPath = (enabled: boolean, path: string) => {
@@ -527,6 +529,55 @@ describe('LandingPage collection chooser (V2)', () => {
         `returnPath=${encodeURIComponent('?search=docker&collection=docker')}`
       );
     }
+  });
+});
+
+describe('LandingPage tile click telemetry (V2)', () => {
+  const reportedTileClicks = (coreStart: ReturnType<typeof coreMock.createStart>) =>
+    coreStart.analytics.reportEvent.mock.calls
+      .filter(
+        ([eventType]) =>
+          eventType === OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT.eventType
+      )
+      .map(([, fields]) => fields);
+
+  it('reports opening a collection and picking a variant as exactly two events, in order', async () => {
+    const user = userEvent.setup();
+    const coreStart = renderLandingAtPath('/');
+    await waitForCollectionTile('observabilityOnboardingIntegrationTile-docker');
+
+    await user.click(screen.getByTestId('observabilityOnboardingIntegrationTile-docker'));
+    await screen.findByTestId('collectionFlyout');
+    await user.click(screen.getByTestId('collectionVariantRow-epr:docker_otel'));
+
+    expect(reportedTileClicks(coreStart)).toEqual([
+      { tile_id: 'docker', surface: 'tile', collection_id: 'docker', has_search_term: false },
+      {
+        tile_id: 'epr:docker_otel',
+        surface: 'collection_variant',
+        collection_id: 'docker',
+        is_recommended: false,
+        has_search_term: false,
+      },
+    ]);
+  });
+
+  it('flags a tile clicked after a search was typed', async () => {
+    const user = userEvent.setup();
+    const coreStart = renderLandingAtPath('/');
+
+    await user.type(
+      screen.getByTestId('observabilityOnboardingIntegrationsSearchFieldSearch'),
+      'k8s'
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId('locationSearch')).toHaveTextContent('search=k8s')
+    );
+    await user.click(screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes'));
+
+    expect(reportedTileClicks(coreStart)).toEqual([
+      { tile_id: 'kubernetes', surface: 'tile', has_search_term: true },
+    ]);
   });
 });
 
