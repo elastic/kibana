@@ -457,6 +457,54 @@ describe('EvaluatorEditorFlyout', () => {
       expect(updateMutateAsync.mock.calls[1][0].updates.base_version).toBe('1.0.1');
     });
 
+    it('keeps the draft and the way back when loading the latest version fails', async () => {
+      const loaded = {
+        evaluator: {
+          name: 'tone-judge',
+          version: '1.0.0',
+          description: 'Rates tone',
+          judge: JUDGE,
+        },
+      };
+      let reloadError: Error | null = null;
+      const refetch = jest.fn(async () => {
+        // A failed refetch keeps the data it already had, as react-query does.
+        reloadError = new Error('Service unavailable');
+        return { data: loaded, error: reloadError };
+      });
+      mockedUseEvaluator.mockImplementation(
+        () =>
+          ({
+            data: loaded,
+            isLoading: false,
+            error: reloadError,
+            refetch,
+          } as unknown as ReturnType<typeof useEvaluator>)
+      );
+      updateMutateAsync.mockRejectedValueOnce(
+        Object.assign(new Error('Conflict'), {
+          name: 'HttpFetchError',
+          request: {},
+          response: { status: 409 },
+          body: { message: 'Evaluator "tone-judge" changed to version 1.0.1.' },
+        })
+      );
+      render(<EvaluatorEditorFlyout mode="edit" evaluatorName="tone-judge" onClose={onClose} />);
+      setField('evalsEvaluatorDescription', 'Rates tone, strictly');
+      save();
+      await screen.findByTestId('evalsEvaluatorSubmitError');
+
+      fireEvent.click(screen.getByTestId('evalsEvaluatorLoadLatest'));
+
+      expect(await screen.findByTestId('evalsEvaluatorLoadLatestError')).toHaveTextContent(
+        'Could not load the latest version: Service unavailable'
+      );
+      // The unsaved edit is still on screen, and so is the action to try again.
+      expect(screen.getByTestId('evalsEvaluatorDescription')).toHaveValue('Rates tone, strictly');
+      expect(screen.getByTestId('evalsEvaluatorLoadLatest')).toBeInTheDocument();
+      expect(screen.queryByTestId('evalsEvaluatorLoadError')).not.toBeInTheDocument();
+    });
+
     it('does not claim a version was written when nothing changed', async () => {
       updateMutateAsync.mockResolvedValueOnce({
         evaluator: { name: 'tone-judge', version: '1.0.0' },

@@ -130,6 +130,11 @@ export const STALE_EDIT_ERROR_DESCRIPTION = i18n.translate(
 export const LOAD_LATEST_BUTTON = i18n.translate('xpack.evals.evaluators.loadLatestButtonLabel', {
   defaultMessage: 'Load latest version',
 });
+export const LOAD_LATEST_ERROR = (message: string) =>
+  i18n.translate('xpack.evals.evaluators.loadLatestErrorMessage', {
+    defaultMessage: 'Could not load the latest version: {message} Your changes are still here.',
+    values: { message },
+  });
 export const TEST_ERROR_TITLE = i18n.translate('xpack.evals.evaluators.testErrorTitle', {
   defaultMessage: 'Could not run this test',
 });

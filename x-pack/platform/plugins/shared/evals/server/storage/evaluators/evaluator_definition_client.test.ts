@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { getEvaluatorDefinitionId } from '@kbn/evals-common';
+import { getEvaluatorDefinitionId, getEvaluatorSuccessorId } from '@kbn/evals-common';
 import type { LlmJudgeConfig } from '../../evaluators/user_defined/types';
 import { InvalidJudgeConfigError } from '../../evaluators/user_defined/validate_config';
 import { BuiltInEvaluatorNameError } from './built_in_evaluator_name_error';
@@ -727,7 +727,8 @@ describe('EvaluatorDefinitionClient', () => {
       const racingJudge: LlmJudgeConfig = { ...JUDGE, evidence: ['input', 'response'] };
 
       // Two writers from 1.0.0: this one patches the description, the other takes a major for
-      // changing the evidence. Their ids differ, so nothing collides and both writes land.
+      // changing the evidence. The other keys its version by its own number, as a node
+      // predating successor ids would, so nothing collides and both writes land.
       index.mockImplementationOnce(async (params: Record<string, unknown>) => {
         docs.set(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '2.0.0'), {
           ...docs.get(created.id)!,
@@ -748,6 +749,69 @@ describe('EvaluatorDefinitionClient', () => {
       await expect(client.getLatest('tone')).resolves.toEqual(
         expect.objectContaining({ version: '2.0.1', description: 'Sharper' })
       );
+    });
+
+    describe('when two edits of the same version derive different levels', () => {
+      // A description patch (1.0.1) and a prompt change (1.1.0) both start from 1.0.0. Keyed
+      // by their own numbers they would both land, and the later one would publish the old
+      // description over the patch. Keyed by the version they read, they compete for one id.
+      const racePatchInFirst = (
+        storage: ReturnType<typeof createClient>,
+        created: { id: string }
+      ) => {
+        const write = storage.index.getMockImplementation()!;
+        storage.index.mockImplementationOnce(async (params: Record<string, unknown>) => {
+          storage.docs.set(getEvaluatorSuccessorId(DEFAULT_SPACE_ID, 'tone', '1.0.0'), {
+            ...storage.docs.get(created.id)!,
+            version: '1.0.1',
+            description: 'Sharper',
+            created_at: '2126-01-01T00:00:00.000Z',
+          });
+          return write(params);
+        });
+      };
+      const promptEdit = { judge: { ...JUDGE, prompt: 'Rate {{{agent_response}}} hard' } };
+
+      it('refuses the second edit when it says which version it started from', async () => {
+        const storage = createClient();
+        const created = await storage.client.create({
+          name: 'tone',
+          description: 'Tone',
+          judge: JUDGE,
+        });
+        racePatchInFirst(storage, created);
+
+        await expect(
+          storage.client.update('tone', { ...promptEdit, baseVersion: '1.0.0' })
+        ).rejects.toBeInstanceOf(EvaluatorVersionConflictError);
+
+        // The patch is still the head, and the refused edit wrote nothing.
+        await expect(storage.client.getLatest('tone')).resolves.toEqual(
+          expect.objectContaining({ version: '1.0.1', description: 'Sharper' })
+        );
+        await expect(storage.client.listVersions('tone')).resolves.toHaveLength(2);
+      });
+
+      it('reapplies the second edit onto the first when it gives no base version', async () => {
+        const storage = createClient();
+        const created = await storage.client.create({
+          name: 'tone',
+          description: 'Tone',
+          judge: JUDGE,
+        });
+        racePatchInFirst(storage, created);
+
+        const updated = await storage.client.update('tone', promptEdit);
+
+        // Both edits survive in the head instead of the prompt change dropping the patch.
+        expect(updated).toEqual(
+          expect.objectContaining({
+            version: '1.1.0',
+            description: 'Sharper',
+            judge: promptEdit.judge,
+          })
+        );
+      });
     });
 
     describe('with a base version', () => {

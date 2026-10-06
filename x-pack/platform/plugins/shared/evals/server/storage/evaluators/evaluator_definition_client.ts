@@ -16,6 +16,7 @@ import {
   MAX_EVALUATOR_NAME_LENGTH,
   buildSpaceFilter,
   getEvaluatorDefinitionId,
+  getEvaluatorSuccessorId,
   getJudgeScoreDirection,
 } from '@kbn/evals-common';
 import type {
@@ -134,7 +135,7 @@ export interface EvaluatorDefinitionDeleteResult {
 
 const INITIAL_VERSION = '1.0.0';
 
-/** Maximum writes attempted when concurrent updates take the same version. */
+/** Maximum writes attempted when concurrent updates edit the same version. */
 const UPDATE_MAX_ATTEMPTS = 5;
 
 const EVALUATOR_DEFINITIONS_PAGE_SIZE = 500;
@@ -197,8 +198,9 @@ interface LatestByNameAggregation {
  * Versions are immutable: an update writes a new document rather than replacing
  * the one it read, so a score naming `name@version` always resolves to the
  * definition that produced it. That also removes the read-modify-write datasets
- * need optimistic concurrency for — a derived id and `op_type: 'create'` are
- * enough to make two writers competing for one version resolve to one winner.
+ * need optimistic concurrency for — an id derived from the version an edit read,
+ * written with `op_type: 'create'`, is enough to make two writers editing the same
+ * version resolve to one winner.
  */
 export class EvaluatorDefinitionClient {
   private readonly storage: InternalIStorageClient<EvaluatorStorageDocument>;
@@ -338,7 +340,11 @@ export class EvaluatorDefinitionClient {
         ...(createdBy ?? current.created_by ? { created_by: createdBy ?? current.created_by } : {}),
       };
 
-      const id = getEvaluatorDefinitionId(this.spaceId, name, nextVersion);
+      // Keyed by the version this edit read, so any concurrent edit of that version collides
+      // here whatever level it derived. Keying by `nextVersion` would let a patch and a minor
+      // from the same version both land, and whichever wrote last would silently drop the
+      // other's change from the head.
+      const id = getEvaluatorSuccessorId(this.spaceId, name, current.version);
 
       try {
         await this.storage.index({ id, op_type: 'create', document, refresh: true });
@@ -348,15 +354,15 @@ export class EvaluatorDefinitionClient {
         }
 
         this.logger.debug(
-          `Version ${nextVersion} of evaluator "${name}" was taken by a concurrent update; retrying (attempt ${attempt})`
+          `Version ${current.version} of evaluator "${name}" was superseded by a concurrent update; retrying (attempt ${attempt})`
         );
         continue;
       }
 
-      // The id only collides with a writer that derived the same level, so a concurrent edit
-      // bumping a different one lands beside this write rather than against it. Whoever ends
-      // up below the head has to reapply onto it, or their edit is missing from the version
-      // everything else reads.
+      // Successor ids make this write the only one on top of `current`, but a node still
+      // keying versions by their own number (during an upgrade) can land beside it. Whoever
+      // ends up below the head has to reapply onto it, or their edit is missing from the
+      // version everything else reads.
       const latest = await this.getLatest(name);
       if (latest?.version === nextVersion) {
         return toDefinition(id, document);

@@ -164,6 +164,8 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     message: string;
     /** The evaluator moved on after this form loaded, so the edit was refused rather than written. */
     isStale?: boolean;
+    /** Why loading the latest version, offered after a stale edit, did not work. */
+    reloadError?: string;
   } | null>(null);
   // Rendered beside the test controls rather than with `saveError` at the top of the form,
   // because the test section is far enough down that a message up there is off-screen.
@@ -350,9 +352,14 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   };
 
   const onLoadLatest = async () => {
-    setSaveError(null);
     // The refetched definition repopulates the form, which replaces the unsaved edit.
-    await refetchEvaluator();
+    const { error } = await refetchEvaluator();
+    if (error) {
+      // The draft and the way back both stay, so a failed reload can simply be tried again.
+      setSaveError((current) => current && { ...current, reloadError: getErrorMessage(error) });
+      return;
+    }
+    setSaveError(null);
   };
 
   const onTest = async () => {
@@ -462,6 +469,9 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   };
 
   const isSaving = createEvaluator.isLoading || updateEvaluator.isLoading;
+  // Only a definition that never loaded replaces the form. A later refetch that fails (after a
+  // stale edit) keeps the loaded data, and with it the draft the user is still holding.
+  const hasLoadFailedOnOpen = Boolean(loadEvaluatorError) && !evaluatorData;
   const isTesting = isRunningTest || testEvaluator.isLoading || resolveInstrumentation.isLoading;
   const TestResultCallout = testResult?.status === 'ok' ? KbnSuccessCallout : KbnDangerCallout;
 
@@ -477,7 +487,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       <EuiFlyoutBody>
         {mode === 'edit' && isLoadingEvaluator ? (
           <EuiLoadingSpinner size="xl" />
-        ) : loadEvaluatorError ? (
+        ) : hasLoadFailedOnOpen ? (
           <KbnDangerCallout
             announceOnMount
             title={i18n.LOAD_EVALUATOR_ERROR_TITLE}
@@ -493,10 +503,17 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                   title={saveError.title}
                   data-test-subj="evalsEvaluatorSubmitError"
                   text={
-                    <p>
-                      {saveError.message}
-                      {saveError.isStale ? ` ${i18n.STALE_EDIT_ERROR_DESCRIPTION}` : null}
-                    </p>
+                    <>
+                      <p>
+                        {saveError.message}
+                        {saveError.isStale ? ` ${i18n.STALE_EDIT_ERROR_DESCRIPTION}` : null}
+                      </p>
+                      {saveError.reloadError ? (
+                        <p data-test-subj="evalsEvaluatorLoadLatestError">
+                          {i18n.LOAD_LATEST_ERROR(saveError.reloadError)}
+                        </p>
+                      ) : null}
+                    </>
                   }
                   actionProps={
                     saveError.isStale
@@ -855,9 +872,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
               fill
               onClick={onSave}
               isLoading={isSaving}
-              disabled={
-                isTesting || Boolean(loadEvaluatorError) || (mode === 'edit' && isLoadingEvaluator)
-              }
+              disabled={isTesting || hasLoadFailedOnOpen || (mode === 'edit' && isLoadingEvaluator)}
               data-test-subj="evalsEvaluatorSave"
             >
               {i18n.SAVE_BUTTON}
