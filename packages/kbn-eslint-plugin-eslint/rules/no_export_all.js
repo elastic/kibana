@@ -51,20 +51,17 @@ module.exports = {
       const isNamespaceExportWithTypes = esNode.exported && (isTypeExport || exportSet.types.size);
 
       /** @param {Fixer} fixer */
-      const fix = (fixer) => {
-        if (esNode.exported) {
-          return fixer.replaceText(
-            node,
-            getExportNamedNamespaceCode(
-              context.sourceCode.getText(esNode.exported),
-              Array.from(exportSet.values),
-              source
-            )
-          );
-        }
-
-        return fixer.replaceText(node, getExportCode(exportSet, source));
-      };
+      const fix = (fixer) =>
+        fixer.replaceText(
+          node,
+          esNode.exported
+            ? getExportNamedNamespaceCode(
+                context.sourceCode.getText(esNode.exported),
+                Array.from(exportSet.values),
+                source
+              )
+            : getExportCode(exportSet, source)
+        );
 
       context.report({
         message: ERROR_MSG,
