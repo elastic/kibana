@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { z } from '@kbn/zod';
 import { routeId } from '../../zod_query';
+import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
@@ -16,6 +18,8 @@ import {
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import { normalizeSecrets } from '../../../synthetics_service/utils';
 import { parseArrayFilters } from '../../common';
+
+const DECRYPT_CHUNK_SIZE = 500;
 
 export interface ResetPrivateLocationResponse {
   created: number;
@@ -34,6 +38,7 @@ export const resetPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   validate: {
     params: z.strictObject({ id: routeId }),
   },
+  requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
     const {
       request,
@@ -71,18 +76,37 @@ export const resetPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       return { created: 0, failed: [] };
     }
 
-    const decryptedMonitors = await monitorConfigRepository.findDecryptedMonitors({
-      spaceId,
-      filter: parseArrayFilters({ locations: [locationId] }).filtersStr,
-    });
-    const monitors = decryptedMonitors
-      .filter(({ id }) => missingConfigIds.has(id))
-      .map((monitor) => ({
-        id: monitor.id,
-        monitor: normalizeSecrets(monitor).attributes as MonitorFields,
-      }));
+    // Decrypt only the affected monitors, in chunks to keep the filter small.
+    const decryptedMonitors = [];
+    for (const configIds of chunk([...missingConfigIds], DECRYPT_CHUNK_SIZE)) {
+      decryptedMonitors.push(
+        ...(await monitorConfigRepository.findDecryptedMonitors({
+          spaceId,
+          filter: parseArrayFilters({ configIds }).filtersStr,
+        }))
+      );
+    }
 
-    const { created, failed } = await syntheticsMonitorClient.addPrivateLocationPackagePolicies({
+    // A monitor that failed to decrypt has stripped secrets; recreating its policy would
+    // deploy it without credentials and hide it from later resets.
+    const failed: ResetPrivateLocationResponse['failed'] = [];
+    const monitors: Array<{ id: string; monitor: MonitorFields }> = [];
+    for (const decrypted of decryptedMonitors) {
+      if (decrypted.error) {
+        failed.push({ id: decrypted.id, error: decrypted.error.message });
+      } else {
+        monitors.push({
+          id: decrypted.id,
+          monitor: normalizeSecrets(decrypted).attributes as MonitorFields,
+        });
+      }
+    }
+
+    if (monitors.length === 0) {
+      return { created: 0, failed };
+    }
+
+    const result = await syntheticsMonitorClient.addPrivateLocationPackagePolicies({
       monitors,
       locationId,
       allPrivateLocations,
@@ -90,11 +114,14 @@ export const resetPrivateLocationRoute: SyntheticsRestApiRouteFactory<
     });
 
     return {
-      created: created.length,
-      failed: failed.map(({ packagePolicy, error }) => ({
-        id: String(packagePolicy.id ?? ''),
-        error: error?.message ?? 'Unknown error',
-      })),
+      created: result.created.length,
+      failed: [
+        ...failed,
+        ...result.failed.map(({ packagePolicy, error }) => ({
+          id: String(packagePolicy.id ?? ''),
+          error: error?.message ?? 'Unknown error',
+        })),
+      ],
     };
   },
 });

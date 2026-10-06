@@ -6,6 +6,7 @@
  */
 
 import { PrivateLocationHealthStatusValue } from '../../../../common/runtime_types';
+import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { resetPrivateLocationRoute } from './reset_private_location';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
@@ -29,26 +30,27 @@ const healthFor = (configId: string, status: PrivateLocationHealthStatusValue) =
   ],
 });
 
-const decrypted = (id: string) => ({
+const decrypted = (id: string, error?: { message: string }) => ({
   id,
   attributes: { name: id, locations: [{ id: 'loc-1', isServiceManaged: false }], secrets: '{}' },
+  ...(error ? { error } : {}),
 });
 
 const buildContext = ({
   health = [],
   createResult = { created: [], failed: [] },
+  decryptedMonitors = [decrypted('mon-missing')],
 }: {
   health?: Array<ReturnType<typeof healthFor>>;
   createResult?: { created: unknown[]; failed: unknown[] };
+  decryptedMonitors?: Array<ReturnType<typeof decrypted>>;
 } = {}) => {
   const response = { notFound: jest.fn().mockReturnValue('not-found') };
   const monitorIntegrationHealthApi = {
     getHealthForLocations: jest.fn().mockResolvedValue({ monitors: health, errors: [] }),
   };
   const monitorConfigRepository = {
-    findDecryptedMonitors: jest
-      .fn()
-      .mockResolvedValue([decrypted('mon-missing'), decrypted('mon-healthy')]),
+    findDecryptedMonitors: jest.fn().mockResolvedValue(decryptedMonitors),
   };
   const syntheticsMonitorClient = {
     addPrivateLocationPackagePolicies: jest.fn().mockResolvedValue(createResult),
@@ -111,5 +113,58 @@ describe('resetPrivateLocationRoute', () => {
     expect(args.locationId).toBe('loc-1');
     expect(args.spaceId).toBe('default');
     expect(args.monitors.map(({ id }: { id: string }) => id)).toEqual(['mon-missing']);
+  });
+
+  it('only decrypts the monitors with a missing package policy', async () => {
+    const { context, monitorConfigRepository } = buildContext({
+      health: [
+        healthFor('mon-missing', PrivateLocationHealthStatusValue.MissingPackagePolicy),
+        healthFor('mon-healthy', PrivateLocationHealthStatusValue.Healthy),
+      ],
+    });
+
+    await resetPrivateLocationRoute().handler(context);
+
+    const [[{ filter }]] = monitorConfigRepository.findDecryptedMonitors.mock.calls;
+    expect(filter).toContain('mon-missing');
+    expect(filter).not.toContain('mon-healthy');
+  });
+
+  it('does not recreate policies for monitors that failed to decrypt', async () => {
+    const { context, syntheticsMonitorClient } = buildContext({
+      health: [
+        healthFor('mon-ok', PrivateLocationHealthStatusValue.MissingPackagePolicy),
+        healthFor('mon-broken', PrivateLocationHealthStatusValue.MissingPackagePolicy),
+      ],
+      decryptedMonitors: [
+        decrypted('mon-ok'),
+        decrypted('mon-broken', { message: 'Unable to decrypt' }),
+      ],
+      createResult: { created: [{ id: 'mon-ok-loc-1' }], failed: [] },
+    });
+
+    expect(await resetPrivateLocationRoute().handler(context)).toEqual({
+      created: 1,
+      failed: [{ id: 'mon-broken', error: 'Unable to decrypt' }],
+    });
+    const [[args]] = syntheticsMonitorClient.addPrivateLocationPackagePolicies.mock.calls;
+    expect(args.monitors.map(({ id }: { id: string }) => id)).toEqual(['mon-ok']);
+  });
+
+  it('skips Fleet entirely when every monitor failed to decrypt', async () => {
+    const { context, syntheticsMonitorClient } = buildContext({
+      health: [healthFor('mon-broken', PrivateLocationHealthStatusValue.MissingPackagePolicy)],
+      decryptedMonitors: [decrypted('mon-broken', { message: 'Unable to decrypt' })],
+    });
+
+    expect(await resetPrivateLocationRoute().handler(context)).toEqual({
+      created: 0,
+      failed: [{ id: 'mon-broken', error: 'Unable to decrypt' }],
+    });
+    expect(syntheticsMonitorClient.addPrivateLocationPackagePolicies).not.toHaveBeenCalled();
+  });
+
+  it('requires the private location write privilege', () => {
+    expect(resetPrivateLocationRoute().requiredPrivileges).toEqual([PRIVATE_LOCATION_WRITE_API]);
   });
 });

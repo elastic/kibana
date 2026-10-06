@@ -86,10 +86,9 @@ export class MonitorIntegrationHealthApi {
     const allSpaces = await this.getAllSpaces(privateLocationAPI);
 
     const { filtersStr } = parseArrayFilters({ locations: locationIds });
-    const { saved_objects: monitors } =
-      await this.monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
+    const monitors =
+      await this.monitorConfigRepository.getAll<EncryptedSyntheticsMonitorAttributes>({
         filter: filtersStr,
-        perPage: 10_000,
         fields: [
           ConfigKey.NAME,
           ConfigKey.LOCATIONS,

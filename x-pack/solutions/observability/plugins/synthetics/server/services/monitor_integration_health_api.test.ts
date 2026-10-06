@@ -75,7 +75,7 @@ const createPackagePolicy = (policyId: string, agentPolicyIds: string[]): Packag
   } as unknown as PackagePolicy);
 
 interface BuildApiOverrides {
-  monitorConfigRepository?: { getAcrossSpaces?: jest.Mock; find?: jest.Mock };
+  monitorConfigRepository?: { getAcrossSpaces?: jest.Mock; getAll?: jest.Mock };
   /**
    * Mocks the Synthetics PackagePolicyService wrapper that the health API
    * uses to fetch package policies across spaces.
@@ -198,14 +198,14 @@ describe('MonitorIntegrationHealthApi', () => {
     it('checks every monitor on the given locations', async () => {
       const location = createPrivateLocation('loc-1', 'agent-policy-1');
       mockedGetPrivateLocationsForNamespaces.mockResolvedValue([location]);
-      const find = jest.fn().mockResolvedValue({
-        saved_objects: [
+      const getAll = jest
+        .fn()
+        .mockResolvedValue([
           createMonitorSO('mon-1', { locations: [{ id: 'loc-1', isServiceManaged: false }] }),
           createMonitorSO('mon-2', { locations: [{ id: 'loc-1', isServiceManaged: false }] }),
-        ],
-      });
+        ]);
       const api = buildApi({
-        monitorConfigRepository: { find },
+        monitorConfigRepository: { getAll },
         packagePolicyServiceGetByIds: jest
           .fn()
           .mockResolvedValue([createPackagePolicy('mon-1-loc-1', ['agent-policy-1'])]),
@@ -213,13 +213,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealthForLocations(['loc-1']);
 
-      expect(find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: expect.stringContaining('loc-1'),
-          perPage: 10_000,
-        })
+      expect(getAll).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: expect.stringContaining('loc-1') })
       );
-      expect(find.mock.calls[0]).toHaveLength(1);
       expect(result.errors).toEqual([]);
       expect(
         result.monitors.map(({ configId, privateLocations }) => [
@@ -234,7 +230,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
     it('returns no monitors when none use the locations', async () => {
       const api = buildApi({
-        monitorConfigRepository: { find: jest.fn().mockResolvedValue({ saved_objects: [] }) },
+        monitorConfigRepository: { getAll: jest.fn().mockResolvedValue([]) },
       });
 
       expect(await api.getHealthForLocations(['loc-1'])).toEqual({ monitors: [], errors: [] });
