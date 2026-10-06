@@ -7,12 +7,12 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { InferenceConnectorType } from '@kbn/inference-common';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { useInferenceConnectorAccess } from './use_inference_connector_access';
 
 const mockHttpFetch = jest.fn();
 
-jest.mock('../../../../common/lib/kibana', () => ({
+jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       http: {

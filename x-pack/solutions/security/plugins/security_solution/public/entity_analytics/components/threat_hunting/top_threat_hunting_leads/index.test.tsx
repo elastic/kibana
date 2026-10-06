@@ -8,11 +8,17 @@
 import React from 'react';
 import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { AIConnector } from '@kbn/inference-connectors';
 
 import { TopThreatHuntingLeads } from '.';
 import type { HuntingLead, Observation } from './types';
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
+
+const mockUseInferenceConnectorAccess = jest.fn();
+jest.mock('../../../hooks/use_inference_connector_access', () => ({
+  useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
+}));
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -87,7 +93,9 @@ const defaultProps = {
   onHuntInChat: jest.fn(),
   onGenerate: jest.fn(),
   connectorId: 'test-connector-id',
-  hasValidConnector: true,
+  availableConnectors: [
+    { id: 'test-connector-id', name: 'Test Connector', actionTypeId: '.gen-ai' },
+  ] as unknown as AIConnector[],
   isAgentChatExperienceEnabled: true,
   onConnectorIdSelected: jest.fn(),
 };
@@ -95,6 +103,11 @@ const defaultProps = {
 describe('TopThreatHuntingLeads', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: true,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: false,
+    });
   });
 
   it('renders cards with mock leads data (shows card for each lead, max 5)', () => {
@@ -217,7 +230,6 @@ describe('TopThreatHuntingLeads', () => {
         {...defaultProps}
         isAgentChatExperienceEnabled={false}
         connectorId=""
-        hasValidConnector={false}
       />
     );
 
@@ -226,7 +238,7 @@ describe('TopThreatHuntingLeads', () => {
   });
 
   it('shows disabled "Generate" and Options under Agent experience when no connector is available', () => {
-    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" hasValidConnector={false} />);
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" />);
 
     expect(
       screen.getByText(
@@ -239,6 +251,26 @@ describe('TopThreatHuntingLeads', () => {
     expect(generateButton).toBeInTheDocument();
     expect(generateButton).toBeDisabled();
     expect(screen.getByTestId('leadsOptionsButton')).toBeInTheDocument();
+  });
+
+  it('shows disabled "Generate" with a privilege-specific message when the selected connector requires monitor_inference', () => {
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: true,
+    });
+
+    render(<TopThreatHuntingLeads {...defaultProps} />);
+
+    expect(
+      screen.getByText(
+        'Not enough privileges to use the selected connector. Select a different connector to start generating leads'
+      )
+    ).toBeInTheDocument();
+
+    const generateButton = screen.getByTestId('generateLeadsButton');
+    expect(generateButton).toBeInTheDocument();
+    expect(generateButton).toBeDisabled();
   });
 
   it('shows "Generate" button when no leads exist and calls onGenerate', () => {
