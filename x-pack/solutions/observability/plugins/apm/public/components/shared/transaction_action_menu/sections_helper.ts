@@ -6,27 +6,32 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { MouseEvent } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 
-export interface Action {
+export interface Action<TLabel extends ReactNode = ReactNode> {
   key: string;
-  label: React.ReactNode;
+  label: TLabel;
   href?: string;
   onClick?: (event: MouseEvent) => void;
   condition: boolean;
 }
 
-interface Section {
+export interface Section<TLabel extends ReactNode = ReactNode> {
   key: string;
   title?: string;
   subtitle?: string;
-  actions: Action[];
+  actions: Array<Action<TLabel>>;
 }
 
-export type SectionRecord = Record<string, Section[]>;
+export type SectionRecord<TLabel extends ReactNode = ReactNode> = Record<
+  string,
+  Array<Section<TLabel>>
+>;
 
 /** Filter out actions that shouldnt be shown and sections without any actions. */
-export function getNonEmptySections(sectionRecord: SectionRecord) {
+export function getNonEmptySections<TLabel extends ReactNode>(
+  sectionRecord: SectionRecord<TLabel>
+): Array<Array<Section<TLabel>>> {
   return Object.values(sectionRecord)
     .map((sections) =>
       sections

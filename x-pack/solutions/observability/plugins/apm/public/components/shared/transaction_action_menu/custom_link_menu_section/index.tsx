@@ -34,15 +34,11 @@ import { CustomLinkList } from './custom_link_list';
 
 const DEFAULT_LINKS_TO_SHOW = 3;
 
-export function CustomLinkMenuSection({
-  transaction,
-  openCreateCustomLinkFlyout,
-}: {
-  transaction?: Transaction;
-  openCreateCustomLinkFlyout: () => void;
-}) {
-  const [showAllLinks, setShowAllLinks] = useState(false);
-
+/** Fetches the custom links whose filters match the transaction. */
+export function useCustomLinks(transaction?: Transaction): {
+  customLinks: CustomLink[];
+  status: FETCH_STATUS;
+} {
   const filters = useMemo(
     () =>
       [
@@ -63,7 +59,20 @@ export function CustomLinkMenuSection({
     [filters]
   );
 
-  const customLinks = data?.customLinks ?? [];
+  const customLinks = useMemo(() => data?.customLinks ?? [], [data]);
+
+  return { customLinks, status };
+}
+
+export function CustomLinkMenuSection({
+  transaction,
+  openCreateCustomLinkFlyout,
+}: {
+  transaction?: Transaction;
+  openCreateCustomLinkFlyout: () => void;
+}) {
+  const [showAllLinks, setShowAllLinks] = useState(false);
+  const { customLinks, status } = useCustomLinks(transaction);
 
   return (
     <>

@@ -60,15 +60,29 @@ export function getSyncLabel(agentName?: AgentName, sync?: boolean) {
   }
 }
 
-export function SyncBadge({ sync, agentName }: SyncBadgeProps) {
-  const syncLabel = getSyncLabel(agentName, sync);
-  if (!syncLabel) {
+export interface SyncBadgeDescriptor {
+  label: string;
+  toolTipContent: string;
+}
+
+/** Resolves the sync badge presentation so the standalone badge and the span flyout header agree. */
+export function getSyncBadgeDescriptor({
+  sync,
+  agentName,
+}: SyncBadgeProps): SyncBadgeDescriptor | undefined {
+  const label = getSyncLabel(agentName, sync);
+  return label ? { label, toolTipContent: TOOLTIP_CONTENT } : undefined;
+}
+
+export function SyncBadge(props: SyncBadgeProps) {
+  const descriptor = getSyncBadgeDescriptor(props);
+  if (!descriptor) {
     return null;
   }
 
   return (
-    <EuiToolTip content={TOOLTIP_CONTENT}>
-      <EuiBadge tabIndex={0}>{syncLabel}</EuiBadge>
+    <EuiToolTip content={descriptor.toolTipContent}>
+      <EuiBadge tabIndex={0}>{descriptor.label}</EuiBadge>
     </EuiToolTip>
   );
 }

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
@@ -15,24 +16,45 @@ const ResetLineHeight = styled.span`
   line-height: initial;
 `;
 
+export interface FailureBadgeDescriptor {
+  label: string;
+  color: string;
+  toolTipContent: string;
+}
+
+/** Resolves the failure badge presentation so the standalone badge and the span flyout header agree. */
+export function getFailureBadgeDescriptor(
+  outcome: EventOutcome | undefined,
+  euiTheme: EuiThemeComputed
+): FailureBadgeDescriptor | undefined {
+  if (outcome !== 'failure') {
+    return undefined;
+  }
+
+  return {
+    label: i18n.translate('xpack.apm.failure_badge.label', {
+      defaultMessage: 'failure',
+    }),
+    color: euiTheme.colors.danger,
+    toolTipContent: i18n.translate('xpack.apm.failure_badge.tooltip', {
+      defaultMessage: 'event.outcome = failure',
+    }),
+  };
+}
+
 export function FailureBadge({ outcome }: { outcome?: EventOutcome }) {
   const { euiTheme } = useEuiTheme();
+  const descriptor = getFailureBadgeDescriptor(outcome, euiTheme);
 
-  if (outcome !== 'failure') {
+  if (!descriptor) {
     return null;
   }
 
   return (
     <ResetLineHeight>
-      <EuiToolTip
-        content={i18n.translate('xpack.apm.failure_badge.tooltip', {
-          defaultMessage: 'event.outcome = failure',
-        })}
-      >
-        <EuiBadge color={euiTheme.colors.danger} tabIndex={0}>
-          {i18n.translate('xpack.apm.failure_badge.label', {
-            defaultMessage: 'failure',
-          })}
+      <EuiToolTip content={descriptor.toolTipContent}>
+        <EuiBadge color={descriptor.color} tabIndex={0}>
+          {descriptor.label}
         </EuiBadge>
       </EuiToolTip>
     </ResetLineHeight>
