@@ -794,7 +794,16 @@ const upsertQueryRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const sourceId = requestedSourceId ?? (await resolveExistingQueryStreamName(kiClient, queryId));
+    const existingLink = await findExistingQueryLink(kiClient, queryId);
+    const sourceId = requestedSourceId ?? existingLink?.source_id;
+    if (!sourceId) {
+      throw new QueryNotFoundError(`Query [${queryId}] not found`);
+    }
+    // `upsertQuery` only looks at the given source's links, so without this check an id that
+    // belongs to another source would be installed as a second query (and rule) under this one.
+    if (existingLink && existingLink.source_id !== sourceId) {
+      throw new QueryNotFoundError(`Query [${queryId}] does not belong to source [${sourceId}]`);
+    }
     const { source } = await sourcesClient.get(sourceId);
     // Any upsert can install a rule: a new query gets one, and an edit that changes the ES|QL
     // replaces the old one with an enabled rule.
@@ -816,21 +825,18 @@ const upsertQueryRoute = createServerRoute({
   },
 });
 
-async function resolveExistingQueryStreamName(
+async function findExistingQueryLink(
   kiClient: KnowledgeIndicatorClient,
   queryId: string
-): Promise<string> {
-  // Empty source list means "no source filter"; include expired and unbacked so
-  // an omitted source_id can still resolve an existing query for update.
+): Promise<Awaited<ReturnType<KnowledgeIndicatorClient['getQueryLinks']>>[number] | undefined> {
+  // Empty source list means "no source filter"; include expired and unbacked so an existing
+  // query is found whatever its state.
   const [existing] = await kiClient.getQueryLinks([], {
     queryIds: [queryId],
     ruleUnbacked: 'include',
     includeExpired: true,
   });
-  if (!existing) {
-    throw new QueryNotFoundError(`Query [${queryId}] not found`);
-  }
-  return existing.source_id;
+  return existing;
 }
 
 export const internalKIQueriesRoutes = {

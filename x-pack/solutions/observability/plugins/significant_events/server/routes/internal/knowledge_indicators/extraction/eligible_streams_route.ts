@@ -85,6 +85,7 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
     workflowClients,
     maintenanceService,
   }): Promise<EligibleStreamsResponse> => {
@@ -124,6 +125,14 @@ const eligibleStreamsRoute = createServerRoute({
       request,
     });
     const executions = await streamsKIsOnboardingClient.getRecentExecutions(request);
+
+    const disabledSourceIds = sources.filter((source) => !source.enabled).map(({ id }) => id);
+    if (disabledSourceIds.length > 0) {
+      const ids = disabledSourceIds.join(', ');
+      logger.info(
+        `Continuous onboarding skipped ${disabledSourceIds.length} disabled source(s): ${ids}`
+      );
+    }
 
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;

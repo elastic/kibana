@@ -713,7 +713,7 @@ describe('upsertQueryRoute', () => {
 
   it('upserts against the provided source_id', async () => {
     const upsertQuery = jest.fn().mockResolvedValue(undefined);
-    const getQueryLinks = jest.fn();
+    const getQueryLinks = jest.fn().mockResolvedValue([]);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
       request: {},
@@ -727,7 +727,6 @@ describe('upsertQueryRoute', () => {
     } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
 
     await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
-    expect(getQueryLinks).not.toHaveBeenCalled();
     expect(upsertQuery).toHaveBeenCalledWith(
       'logs.test',
       expect.objectContaining({
@@ -739,7 +738,53 @@ describe('upsertQueryRoute', () => {
     );
   });
 
-  it('resolves the stream from an existing query when source_id is omitted', async () => {
+  it('upserts when source_id matches the source that owns the existing query', async () => {
+    const upsertQuery = jest.fn().mockResolvedValue(undefined);
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
+    expect(upsertQuery).toHaveBeenCalledWith('logs.test', expect.objectContaining({ id: 'q1' }));
+  });
+
+  it('throws 404 when the query belongs to a different source than source_id', async () => {
+    const upsertQuery = jest.fn();
+    const sourcesGet = jest.fn();
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.other' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { get: sourcesGet },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 404 },
+    });
+    expect(sourcesGet).not.toHaveBeenCalled();
+    expect(upsertQuery).not.toHaveBeenCalled();
+  });
+
+  it('resolves the source from an existing query when source_id is omitted', async () => {
     const upsertQuery = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: upsertBody },
@@ -817,7 +862,9 @@ describe('upsertQueryRoute', () => {
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery }),
+        getKnowledgeIndicatorClient: jest
+          .fn()
+          .mockResolvedValue({ upsertQuery, getQueryLinks: jest.fn().mockResolvedValue([]) }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),
