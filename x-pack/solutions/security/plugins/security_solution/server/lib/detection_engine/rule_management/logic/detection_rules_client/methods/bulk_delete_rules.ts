@@ -42,30 +42,12 @@ export const bulkDeleteRules = async ({
   const allSkipped: BulkDeleteActionSkipResult[] = [];
 
   for (const idsChunk of chunks) {
-    let result;
     try {
-      result = await rulesClient.bulkDeleteRules({
+      const result = await rulesClient.bulkDeleteRules({
         ids: idsChunk,
         changeTracking: { metadata: { bulkCount: ruleIds.length, ...changeTracking?.metadata } },
       });
-    } catch (error) {
-      if (error instanceof RulesNotFoundError) {
-        // Every rule in the chunk is already gone — treat as skipped.
-        for (const id of idsChunk) {
-          allSkipped.push({
-            id,
-            name: rulesById.get(id)?.name,
-            skip_reason: 'RULE_NOT_FOUND',
-          });
-        }
-      } else {
-        // RulesNotVisibleError (rules exist but hidden by auth) and all
-        // other errors are surfaced to the caller.
-        throw error;
-      }
-    }
 
-    if (result) {
       allRules.push(...(result.rules as RuleAlertType[]));
 
       for (const error of result.errors) {
@@ -94,6 +76,21 @@ export const bulkDeleteRules = async ({
             skip_reason: 'RULE_NOT_FOUND',
           });
         }
+      }
+    } catch (error) {
+      // RulesNotVisibleError (rules exist but hidden by auth) and all
+      // other errors are surfaced to the caller.
+      if (!(error instanceof RulesNotFoundError)) {
+        throw error;
+      }
+
+      // Every rule in the chunk is already gone — treat as skipped.
+      for (const id of idsChunk) {
+        allSkipped.push({
+          id,
+          name: rulesById.get(id)?.name,
+          skip_reason: 'RULE_NOT_FOUND',
+        });
       }
     }
   }
