@@ -731,6 +731,7 @@
     "security.deleteNote",
     "security.disableRule",
     "security.enableRule",
+    "security.getAlertEntities",
     "security.getNotes",
     "security.patchRule",
     "security.renderAlertNarrative",
@@ -1001,11 +1002,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "4896853c9697c10f42dfdd8571be431852327fa9709360ecb936fb165fbd50b5"
+      "sha256": "ca16b4edd07f17e6e58a5e5d6debf326150f65eb63a31df597342be03f973ced"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "922ea376cb063af2dde14cc82c3f1f1526ab26dd6c9793cd72465b09c2e4d943"
+      "sha256": "74cabb981b3507dc0f3ad62c074ad06b2c644a7a2d9097970da6868dd422cc96"
     }
   }
 }
