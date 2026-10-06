@@ -1119,11 +1119,9 @@ describe('buildProposalSummaryBullets', () => {
   const JOURNAL_NOTE_MESSAGE_MAX = 8000;
 
   it('bounds the bullets for a 50-host, 2-action finding and states how many were omitted', () => {
-    const hosts = Array.from({ length: 50 }, (_, i) => ({
-      name: `a-fairly-long-host-name-number-${i}.corp.example.com`,
-      enrolled: true,
-      agentId: `agent-${i}`,
-    }));
+    const hosts = Array.from({ length: 50 }, (_, i) =>
+      enrolledHost(`a-fairly-long-host-name-number-${i}.corp.example.com`, `agent-${i}`)
+    );
     const { proposals } = decidePackageReport({
       conversationId: 'conv-1',
       state: baseHitState({ hosts }),
@@ -1149,11 +1147,9 @@ describe('buildProposalSummaryBullets', () => {
   });
 
   it('stays under the character cap with very long host names and counts what it drops', () => {
-    const hosts = Array.from({ length: 50 }, (_, i) => ({
-      name: `${i}-${'h'.repeat(2000)}`,
-      enrolled: true,
-      agentId: `agent-${i}`,
-    }));
+    const hosts = Array.from({ length: 50 }, (_, i) =>
+      enrolledHost(`${i}-${'h'.repeat(2000)}`, `agent-${i}`)
+    );
     const { proposals } = decidePackageReport({
       conversationId: 'conv-1',
       state: baseHitState({ hosts }),
