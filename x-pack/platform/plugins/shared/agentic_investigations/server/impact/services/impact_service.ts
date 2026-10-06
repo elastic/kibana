@@ -30,7 +30,7 @@ interface ImpactServiceDeps {
 export type WrittenAttach = WrittenInvestigationAttachment<ImpactDocument>;
 
 /**
- * What the agent reports through `investigations.set_impact`. Each field that is present
+ * What the agent reports through `agentic_investigations.set_impact`. Each field that is present
  * replaces the stored one; an absent field keeps what is stored. `null` removes `summary` or
  * `evidence`, and `entities: []` removes the entities.
  */
