@@ -12,14 +12,12 @@ type CallbackFn<TResult> = (chunk: string[], id: number) => Promise<TResult>;
 
 type MergeableRecord = Record<string, unknown>;
 
-// Response JSON keeps `__proto__` keys, so they must never be merged into the result.
-const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
-
 // Copies the array and object spine of `source` into `target` once, so merging every chunk
 // stays linear in the total response size and `target` never aliases a chunk's own arrays.
 const mergeInto = (target: MergeableRecord, source: MergeableRecord): MergeableRecord => {
   for (const [key, sourceValue] of Object.entries(source)) {
-    if (UNSAFE_KEYS.has(key)) {
+    // Response JSON keeps `__proto__` keys, so they must never be merged into the result.
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
       continue;
     }
     const targetValue = target[key];
