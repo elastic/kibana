@@ -24,6 +24,12 @@ const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_BULK_ACTION_URL = '/api/detection_engine/rules/_bulk_action';
 const WORKER_ID = 'system-security-floor-alert-triage';
 const WORKER_URL = `/internal/alertzero/workers/${WORKER_ID}`;
+const WORKERS_URL = '/internal/alertzero/workers';
+// A Worker cannot be enabled without a service account to run as.
+const SERVICE_ACCOUNT_URL = '/internal/security/service_account';
+const SERVICE_ACCOUNT_NAME = 'scout-attach-new-rules';
+const SERVICE_ACCOUNT_ID = `kibana/${SERVICE_ACCOUNT_NAME}`;
+const INTERNAL_API_VERSION = { 'elastic-api-version': '1' };
 const ATTACH_WORKFLOW_ID = 'system-security-floor-alert-triage-attach-new-rules';
 const SETUP_TIMEOUT_MS = 120_000;
 const POLL_TIMEOUT_MS = 30_000;
@@ -110,9 +116,41 @@ apiTest.describe(
 
     const setWorkerEnabled = async (apiClient: ApiClientFixture, enabled: boolean) => {
       const response = await apiClient.patch(WORKER_URL, {
-        headers: { ...adminHeaders, 'elastic-api-version': '1' },
+        headers: { ...adminHeaders, ...INTERNAL_API_VERSION },
         responseType: 'json',
         body: { enabled },
+      });
+      expect(response).toHaveStatusCode(200);
+    };
+
+    // A Worker's settings are saved against the revision they were read at; a Worker that was
+    // never installed has none.
+    const getWorkerSettingsRevision = async (
+      apiClient: ApiClientFixture
+    ): Promise<number | null> => {
+      const response = await apiClient.get(WORKERS_URL, {
+        headers: { ...adminHeaders, ...INTERNAL_API_VERSION },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      const { workers } = response.body as {
+        workers: Array<{ id: string; settingsRevision?: number | null }>;
+      };
+      return workers.find(({ id }) => id === WORKER_ID)?.settingsRevision ?? null;
+    };
+
+    const setWorkerServiceAccount = async (
+      apiClient: ApiClientFixture,
+      serviceAccountId: string | null
+    ) => {
+      const response = await apiClient.patch(WORKER_URL, {
+        headers: { ...adminHeaders, ...INTERNAL_API_VERSION },
+        responseType: 'json',
+        body: {
+          settings: { serviceAccountId },
+          settingsRevision: await getWorkerSettingsRevision(apiClient),
+          ...(serviceAccountId === null ? { enabled: false } : {}),
+        },
       });
       expect(response).toHaveStatusCode(200);
     };
@@ -138,10 +176,24 @@ apiTest.describe(
         body: { changes: SETTINGS },
       });
       expect(settings).toHaveStatusCode(200);
+
+      const serviceAccount = await apiClient.post(SERVICE_ACCOUNT_URL, {
+        headers: { ...adminHeaders, ...INTERNAL_API_VERSION },
+        responseType: 'json',
+        body: { name: SERVICE_ACCOUNT_NAME, roles: ['editor'] },
+      });
+      expect(serviceAccount).toHaveStatusCode(200);
+      // The Worker stays off until a test turns it on.
+      await setWorkerServiceAccount(apiClient, SERVICE_ACCOUNT_ID);
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
-      await setWorkerEnabled(apiClient, false);
+      // The account is bound to the Worker's workflow until the Worker lets go of it.
+      await setWorkerServiceAccount(apiClient, null);
+      await apiClient.delete(`${SERVICE_ACCOUNT_URL}/${encodeURIComponent(SERVICE_ACCOUNT_ID)}`, {
+        headers: { ...adminHeaders, ...INTERNAL_API_VERSION },
+        responseType: 'json',
+      });
       await Promise.all(createdWorkflowIds.map((id) => deleteWorkflow(apiClient, headers, id)));
 
       if (createdRuleIds.length > 0) {

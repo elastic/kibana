@@ -16,6 +16,8 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * The Alert Triage Worker and its attach workflow only exist when `xpack.alertzero.enabled` is
  * set. `agenticInvestigations` and `proposals` are required by alertzero and default off; without
  * them Kibana cascade-disables alertzero and the managed workflows are never installed.
+ * AlertZero also needs service accounts: without them every AlertZero route answers 503 and a
+ * Worker cannot be enabled.
  *
  * Usage:
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alertzero_attach_rules
@@ -29,6 +31,7 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
+      '--xpack.security.serviceAccounts.enabled=true',
     ],
   },
 };
