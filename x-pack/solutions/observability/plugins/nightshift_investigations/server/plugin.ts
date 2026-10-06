@@ -47,10 +47,12 @@ import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
-import { createCortexStore } from './cortex/register_cortex';
+import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerMemoryAiIndex } from './memory/register_memory';
 import { registerCortexTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
+import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
@@ -140,13 +142,20 @@ export class NightshiftInvestigationsPlugin
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     this.memoryEnabled = this.ctx.config.get().memory.enabled;
     if (this.cortexEnabled) {
+      registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
       registerCortexTelemetryEvents(core.analytics);
+    }
+    if (this.memoryEnabled) {
+      registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
     this.decisionTreesEnabled =
       this.ctx.config.get().decision_trees.enabled &&
       this.cortexEnabled &&
       Boolean(plugins.sandbox?.isAvailable);
+    if (this.decisionTreesEnabled) {
+      registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
+    }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);

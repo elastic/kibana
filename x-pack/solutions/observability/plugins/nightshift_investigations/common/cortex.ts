@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-/** Cortex wiki pages; the `ai-index-idx-` prefix gives it the managed AI-index mapping. */
+/** Managed Context Engine AI index that stores Cortex wiki pages as KIs. */
+export const CORTEX_AI_INDEX_ID = 'nightshift-cortex';
+
+/** Backing index for {@link CORTEX_AI_INDEX_ID}. Must use the `ai-index-idx-` prefix. */
 export const CORTEX_AI_INDEX_DEST = 'ai-index-idx-nightshift-cortex';
 
 export const CORTEX_ENTITY_TYPES = [

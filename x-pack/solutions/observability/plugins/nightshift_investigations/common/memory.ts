@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-/** The `ai-index-idx-` prefix gives it the managed AI-index mapping. */
+/** Managed Context Engine AI index that stores Semantic Memory pages as KIs. */
+export const MEMORY_AI_INDEX_ID = 'nightshift-semantic-memory';
+
+/** Backing index for {@link MEMORY_AI_INDEX_ID}; must keep the `ai-index-idx-` prefix. */
 export const MEMORY_INDEX = 'ai-index-idx-nightshift-semantic-memory';
 
 /** `merged`/`harmful` are set by the optimizer, `manual` by the UI archive route. */

@@ -15,7 +15,7 @@ export const listCortexPagesRoute = createNightshiftInvestigationsServerRoute({
   options: {
     access: 'internal',
     summary: 'List Cortex pages',
-    description: 'Returns Cortex wiki pages.',
+    description: 'Returns Cortex wiki pages stored in the Context Engine AI index.',
   },
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },

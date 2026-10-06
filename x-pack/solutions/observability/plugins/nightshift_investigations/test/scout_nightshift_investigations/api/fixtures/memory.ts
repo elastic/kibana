@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 import type { ApiClientFixture, ApiClientResponse, EsClient, KibanaRole } from '@kbn/scout-oblt';
 import { COMMON_HEADERS } from './constants';
 
-/** The plugin's index, under the managed `ai-index-idx-*` prefix. */
+/** The plugin's Context Engine AI index, under the managed `ai-index-idx-*` prefix. */
 export const MEMORY_INDEX = 'ai-index-idx-nightshift-semantic-memory';
 
 const MEMORY_PAGES_PATH = 'internal/nightshift/memory/pages';

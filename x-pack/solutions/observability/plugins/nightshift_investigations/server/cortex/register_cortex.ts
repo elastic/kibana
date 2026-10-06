@@ -14,11 +14,14 @@ import type {
 } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import {
   createInvestigationMemoryTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
+import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { createCortexTelemetry } from '../telemetry';
@@ -37,6 +40,27 @@ export const createCortexStore = ({
   spaceId: string;
   signal?: AbortSignal;
 }): CortexPageStore => createCortexPageStore({ esClient, logger, spaceId, signal });
+
+export const registerCortexAiIndex = (
+  contextEngine: ContextEnginePluginSetup | undefined,
+  logger: Logger
+): void => {
+  if (!contextEngine) {
+    logger.debug('contextEngine is not available — Cortex AI index will not be registered');
+    return;
+  }
+
+  contextEngine.registerAiIndex(CORTEX_AI_INDEX_ID, {
+    description: i18n.translate('xpack.nightshiftInvestigations.cortex.aiIndexDescription', {
+      defaultMessage:
+        'Nightshift Cortex wiki pages — durable, cross-linked knowledge the investigator reads before each run.',
+    }),
+    dest: { type: 'index', value: CORTEX_AI_INDEX_DEST },
+    automations: [],
+    sources: [],
+    traces: [],
+  });
+};
 
 /** Rounds with fewer tool calls rarely establish anything durable, e.g. chat replies or smoke tests. */
 const MIN_OPTIMIZE_TOOL_CALLS = 3;

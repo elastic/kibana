@@ -173,6 +173,7 @@ export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem
 export type SeverityCounts = Record<Severity, number>;
 
 export {
+  CORTEX_AI_INDEX_ID,
   CORTEX_AI_INDEX_DEST,
   CORTEX_ENTITY_TYPES,
   CORTEX_PAGE_STATUSES,
@@ -214,6 +215,7 @@ export {
 } from './sandbox_secrets';
 
 export {
+  DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
   DECISION_TREE_DOC_TYPES,
   type DecisionTreeDocType,

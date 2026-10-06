@@ -65,7 +65,7 @@ export const cortexOptimizeStepDefinition = ({
     category: StepCategory.Ai,
     description:
       'Proposes Cortex wiki edits from a completed investigation round and writes them ' +
-      'to the Cortex index. sandbox_id identifies the workspace this round used; ' +
+      'to the Context Engine AI index. sandbox_id identifies the workspace this round used; ' +
       'the optimizer currently reads the transcript, not the sandbox files.',
     inputSchema: z.object({
       prompt: z
