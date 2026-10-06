@@ -93,7 +93,7 @@ const indexFeatureCandidate = (
   { byExactId, byNormalizedId }: FeatureCandidateIndexes
 ): void => {
   const { feature } = candidate;
-  // Slug-only on purpose: the uuid is v5(stream, slug) with no type, so same-slug features
+  // Slug-only on purpose: the uuid is v5(objectHash([source_id, slug])) with no type, so same-slug features
   // share one storage slot. A type-scoped miss here would write a "new" doc over that slot.
   addFeatureCandidate(byExactId, normalizeFeatureSlug(feature.id), candidate);
   addFeatureCandidate(

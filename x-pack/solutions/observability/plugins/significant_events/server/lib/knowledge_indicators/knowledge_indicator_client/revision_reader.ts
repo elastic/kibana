@@ -32,7 +32,7 @@ export const REVISION_SIZE_LIMIT = 10_000;
 /**
  * Identity of a knowledge indicator revision within a space. The space filter
  * must be applied before this grouping: feature ids are derived from
- * `(source_id, slug)`, so the same stream onboarded from two spaces yields the
+ * `(source_id, slug)`, so the same source id onboarded in two spaces yields the
  * same `id` in both and one space's revision would otherwise shadow the other's.
  */
 const REVISION_GROUP_KEY: LatestSourceGroupBy = [SOURCE_ID, TYPE, ID];
@@ -52,9 +52,11 @@ export class RevisionReader {
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition
   ): Promise<number> {
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']);
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']).where`${inSpace(
+      this.space
+    )}`;
     query = withWhere(query, where);
-    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
     query = withWhere(query, postGroupingWhere);
     query = query.pipe`STATS total = COUNT(*)`.keep('total').limit(1);
 
@@ -93,7 +95,7 @@ export class RevisionReader {
    * `REVISION_SIZE_LIMIT` cap bounds distinct sources rather than distinct KIs;
    * warns if the cap is hit so partial coverage isn't silent.
    */
-  async fetchDistinctStreamNames(
+  async fetchDistinctSourceIds(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition
   ): Promise<string[]> {

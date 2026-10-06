@@ -27,7 +27,7 @@ export const streamsWithIndicatorsRoute = createServerRoute({
     access: 'internal',
     summary: 'List sources to reconcile',
     description:
-      'Returns every source with an active knowledge indicator or a Streams-owned rule, used by the managed KI sync workflow to fan out reconciliation.',
+      'Returns every source with an active knowledge indicator or an owned rule, used by the managed KI sync workflow to fan out reconciliation.',
   },
   security: {
     authz: {

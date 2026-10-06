@@ -73,7 +73,7 @@ export const emptySummary = (
 export const createMaintenanceStateStore = (server: SignificantEventsServer) => {
   // Lazy: this factory runs in plugin setup, before `server.core` is assigned
   // in start(). Route authz is the user gate (Nightshift read for status,
-  // Nightshift manage for pause/resume, Streams manage for reset). This SO is hidden,
+  // Nightshift manage for pause/resume, Nightshift manage and configure for reset). This SO is hidden,
   // agnostic, and not listed on
   // any Nightshift privilege `savedObject` array. A scoped client then checks
   // `saved_object:significant-events-maintenance-state/get` and 403s every

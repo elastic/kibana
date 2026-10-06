@@ -221,9 +221,9 @@ export function makeService(params?: {
   failScheduledSet?: boolean;
   indicatorStreams?: string[];
   ownedRuleStreams?: string[];
-  queryLinksByStream?: Record<string, Array<{ rule_backed: boolean; rule_id?: string }>>;
+  queryLinksBySource?: Record<string, Array<{ rule_backed: boolean; rule_id?: string }>>;
   knowledgeIndicatorCounts?: Partial<Record<KnowledgeIndicatorType, number>>;
-  ownedRuleIdsByStream?: Record<string, string[]>;
+  ownedRuleIdsBySource?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
   /** `null` models the investigations plugin being unavailable. */
   investigations?: {
@@ -251,16 +251,16 @@ export function makeService(params?: {
   };
   const getSourceIdsWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
   const findSourceIdsWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
-  const getSourceToQueryLinksMap = jest.fn(async (streamNames: string[]) =>
+  const getSourceToQueryLinksMap = jest.fn(async (sourceIds: string[]) =>
     Object.fromEntries(
-      streamNames.map((streamName) => [streamName, params?.queryLinksByStream?.[streamName] ?? []])
+      sourceIds.map((sourceId) => [sourceId, params?.queryLinksBySource?.[sourceId] ?? []])
     )
   );
   const countKnowledgeIndicators = jest.fn(
     async (type: KnowledgeIndicatorType) => params?.knowledgeIndicatorCounts?.[type] ?? 0
   );
   const findOwnedRuleIds = jest.fn(
-    async (streamName: string) => params?.ownedRuleIdsByStream?.[streamName] ?? []
+    async (sourceId: string) => params?.ownedRuleIdsBySource?.[sourceId] ?? []
   );
 
   const streamDocuments = new Map<string, number>(

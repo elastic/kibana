@@ -61,7 +61,7 @@ export interface SignificantEventsKIsOnboardingInputs {
 
 /**
  * Flat scalar payload actually passed to the workflow engine's manual trigger,
- * matching the `inputs` keys declared in streams_ki/onboarding.yaml. Nested
+ * matching the `inputs` keys declared in kbn-workflows/managed/definitions/significant_events/knowledge_indicators/onboarding.yaml. Nested
  * {@link SignificantEventsKIsOnboardingInputs} are flattened into this shape in `run()`.
  */
 interface OnboardingWorkflowInputPayload {
@@ -86,7 +86,7 @@ interface OnboardingWorkflowInputPayload {
 
 /**
  * Raw, flat `context.output` emitted by a completed onboarding workflow
- * execution (see the `output_result` step in streams_ki/onboarding.yaml).
+ * execution (see the `output_result` step in kbn-workflows/managed/definitions/significant_events/knowledge_indicators/onboarding.yaml).
  * Mapped into the nested {@link SignificantEventsKIsOnboardingOutput} shape on read.
  */
 interface OnboardingWorkflowOutputContext {
@@ -197,7 +197,7 @@ export const parseSourceSlugFromConcurrencyKey = (key: string): string | null =>
 
 export const MAX_SOURCES_PER_QUERY = 10000;
 /**
- * Client that wraps the workflows management API to provide a stream-centric
+ * Client that wraps the workflows management API to provide a source-centric
  * interface for running, querying, and canceling KI onboarding workflows.
  *
  * Executions live in the space of the request. Each source's onboarding
@@ -228,7 +228,7 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Triggers a new onboarding workflow execution for a stream.
+   * Triggers a new onboarding workflow execution for a source.
    * Fetches the managed workflow definition from the global space and
    * runs it in the space of the request with the provided inputs.
    *
@@ -265,7 +265,7 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Returns the onboarding status for a stream by looking up its most recent
+   * Returns the onboarding status for a source by looking up its most recent
    * workflow execution via the concurrency group key.
    *
    * For completed executions a second fetch retrieves the full execution
@@ -371,7 +371,7 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Cancels the latest non-terminal onboarding execution for a stream.
+   * Cancels the latest non-terminal onboarding execution for a source.
    * No-ops if no active execution exists or the latest execution already reached
    * a terminal state.
    *

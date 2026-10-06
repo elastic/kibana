@@ -421,11 +421,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(result).toMatchObject({ page: 2, per_page: 25, total: 0 });
   });
 
-  it('logs a debug message when feature retrieval fails for a stream', async () => {
+  it('logs a debug message when feature retrieval fails for a source', async () => {
     catalog = catalogFor(['logs.bad', 'logs.good']);
 
-    kiClient.getFeatures = jest.fn().mockImplementation((streamName: string) => {
-      if (streamName === 'logs.bad') {
+    kiClient.getFeatures = jest.fn().mockImplementation((sourceId: string) => {
+      if (sourceId === 'logs.bad') {
         return Promise.reject(new Error('boom'));
       }
       return Promise.resolve({ hits: [makeFeature({ id: 'ok' })], total: 1 });

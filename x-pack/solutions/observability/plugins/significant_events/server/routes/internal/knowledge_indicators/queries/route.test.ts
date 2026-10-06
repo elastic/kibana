@@ -359,7 +359,7 @@ describe('bulkDeleteQueriesRoute', () => {
   });
 });
 
-describe('getDiscoveryQueriesRoute stream resolution', () => {
+describe('getDiscoveryQueriesRoute source resolution', () => {
   const list = jest.fn().mockResolvedValue({
     sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
     total: 2,
@@ -448,7 +448,7 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
   });
 });
 
-describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
+describe('getDiscoveryQueriesOccurrencesRoute source resolution', () => {
   const list = jest.fn().mockResolvedValue({
     sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
     total: 2,

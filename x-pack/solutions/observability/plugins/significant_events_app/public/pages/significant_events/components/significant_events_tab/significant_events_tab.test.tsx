@@ -111,7 +111,7 @@ jest.mock('../../../../hooks/use_fetch_features', () => ({
     data: {
       features: [
         { id: 'svc-checkout', type: 'entity', subtype: 'service', title: 'checkout' },
-        // Same slug seen in another stream: must collapse into one option.
+        // Same slug seen in another source: must collapse into one option.
         {
           id: 'svc-checkout',
           type: 'entity',
@@ -414,7 +414,7 @@ describe('selectedEvent deep link', () => {
   });
 
   it('adapts status/severity/stream filters to the linked event once it resolves', () => {
-    // event is status:active, severity:medium, stream:logs.test
+    // event is status:active, severity:medium, source_ids:logs.test
     mockUseFetchSignificantEvents.mockReturnValue({
       ...emptyListResult,
       data: { hits: [event], total: 1 },

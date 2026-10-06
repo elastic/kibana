@@ -16,7 +16,7 @@ const route = syncRoutes['GET /internal/streams/_knowledge_indicators/_streams_w
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
-const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerParams =>
+const makeHandlerParams = ({ sourceIds }: { sourceIds: string[] }): HandlerParams =>
   ({
     params: {},
     request: {},
@@ -24,15 +24,15 @@ const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerP
       licensing: {},
       sourcesClient: {
         list: jest.fn().mockResolvedValue({
-          sources: streamNames.map((id) => ({ id, enabled: true })),
-          total: streamNames.length,
+          sources: sourceIds.map((id) => ({ id, enabled: true })),
+          total: sourceIds.length,
           page: 1,
           per_page: 100,
         }),
       },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-        getSourceIdsToReconcile: jest.fn().mockResolvedValue(streamNames),
-        findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue(streamNames),
+        getSourceIdsToReconcile: jest.fn().mockResolvedValue(sourceIds),
+        findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue(sourceIds),
         setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
         deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
         deleteAllQueries: jest.fn().mockResolvedValue(undefined),
@@ -51,7 +51,7 @@ describe('streamsWithIndicatorsRoute', () => {
 
   it('maps source ids to the foreach item shape', async () => {
     const result = await route.handler(
-      makeHandlerParams({ streamNames: ['logs.nginx', 'logs.app'] })
+      makeHandlerParams({ sourceIds: ['logs.nginx', 'logs.app'] })
     );
 
     expect(result).toEqual({
@@ -60,13 +60,13 @@ describe('streamsWithIndicatorsRoute', () => {
   });
 
   it('returns an empty list when there is nothing to reconcile', async () => {
-    const result = await route.handler(makeHandlerParams({ streamNames: [] }));
+    const result = await route.handler(makeHandlerParams({ sourceIds: [] }));
 
     expect(result).toEqual({ sources: [] });
   });
 
   it('enforces significant events access', async () => {
-    await route.handler(makeHandlerParams({ streamNames: [] }));
+    await route.handler(makeHandlerParams({ sourceIds: [] }));
 
     expect(assertSignificantEventsAccess).toHaveBeenCalledTimes(1);
   });
