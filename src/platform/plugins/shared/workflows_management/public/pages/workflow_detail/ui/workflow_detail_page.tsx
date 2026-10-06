@@ -295,7 +295,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
-          onOpenExecutionList={showExecutionFlyouts ? onOpenExecutionList : undefined}
+          onOpenExecutionList={showExecutionFlyouts && id ? onOpenExecutionList : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>

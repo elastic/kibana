@@ -156,18 +156,19 @@ export class WorkflowExecutionPage {
       if (flyoutChevrons.length) {
         await flyoutChevrons[0].scrollIntoViewIfNeeded();
         await flyoutChevrons[0].click();
-        continue;
-      }
+      } else {
+        const collapsedLocators = await this.executionPanel
+          .locator('button[aria-expanded="false"]:has(.euiTreeView__expansionArrow)')
+          .all();
 
-      const collapsedLocators = await this.executionPanel
-        .locator('button[aria-expanded="false"]:has(.euiTreeView__expansionArrow)')
-        .all();
-
-      if (!collapsedLocators.length) {
-        break;
+        if (!collapsedLocators.length) {
+          break;
+        }
+        await collapsedLocators[0].scrollIntoViewIfNeeded();
+        await collapsedLocators[0]
+          .locator('.euiTreeView__expansionArrow[role=presentation]')
+          .click();
       }
-      await collapsedLocators[0].scrollIntoViewIfNeeded();
-      await collapsedLocators[0].locator('.euiTreeView__expansionArrow[role=presentation]').click();
     }
   }
 
