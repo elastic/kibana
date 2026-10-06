@@ -310,9 +310,13 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Reads the attached alert, checks the file hash against Security Labs research / entity risk ' +
-        'signal for a verdict, and produces a step-by-step summary ending in an explicit escalate-or-not ' +
-        'recommendation with the IOCs called out.',
+        'Reads and analyzes the attached alert, verifies its file hash using virustotal_lookup (or ' +
+        'vt.hash.lookup on the parity profile), and bases the verdict on the returned result without ' +
+        'inventing a VirusTotal detection count. Checks the on-call owner with on_call_lookup (or ' +
+        'check.on.call.schedule), then creates a Slack incident channel with that analyst via ' +
+        'create.channel where available. Includes the alert verdict, IOCs, and on-call owner in the ' +
+        'channel and walks through each completed step; if channel creation is unavailable, says so ' +
+        'rather than claiming it happened.',
     },
     metadata: {
       expectedSkill: 'alert-analysis',
@@ -320,6 +324,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'attachments.read',
         'security.security_labs_search',
         'security.entity_risk_score',
+        'virustotal_lookup',
+        'on_call_lookup',
+        'create.channel',
       ],
       severity: 'critical',
       tags: ['multi-step', 'orchestration'],
@@ -340,14 +347,25 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Searches Security Labs for research on the side-loading pattern, then calls the cases-management ' +
-        'skill/tool to open a critical-severity case with a summary of the confirmed findings, reporting ' +
-        'each step taken.',
+        'Verifies the loader hash using virustotal_lookup (or vt.hash.lookup on the parity profile) ' +
+        'and reports only the returned VirusTotal verdict. Checks the current on-call responder via ' +
+        'on_call_lookup (or check.on.call.schedule), opens a critical Security case with the confirmed ' +
+        'findings via platform.core.cases.manage, then creates a Slack incident channel with that ' +
+        'responder via create.channel where available and posts the case summary and top IOCs. ' +
+        'Reports the outcome of each step without inventing lookup results or claiming an unavailable ' +
+        'channel was created.',
     },
     metadata: {
       expectedSkill: 'alert-analysis',
       allowSkills: ['cases-management'],
-      expectedTools: ['security.security_labs_search', 'platform.core.cases'],
+      expectedTools: [
+        'security.security_labs_search',
+        'platform.core.cases',
+        'virustotal_lookup',
+        'on_call_lookup',
+        'platform.core.cases.manage',
+        'create.channel',
+      ],
       severity: 'critical',
       tags: ['multi-step', 'incident-response'],
     },
@@ -368,8 +386,11 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     output: {
       reference:
         "Pulls the host's alert queue, hunts for the named IOCs via ES|QL over process/network telemetry " +
-        'to confirm or refute the hypothesis, and conditionally produces an escalation summary only if ' +
-        'the hunt confirms a true positive — explicitly stating when it does not escalate.',
+        'to confirm or refute the hypothesis, and checks the on-call owner with on_call_lookup (or ' +
+        'check.on.call.schedule). If confirmed as a true positive, creates a Slack channel with the ' +
+        'on-call analyst via create.channel where available, sharing confirmed findings and recommended ' +
+        'actions. If benign, does not create a channel or escalate; reports any unavailable channel ' +
+        'operation honestly rather than claiming completion.',
     },
     metadata: {
       expectedSkill: 'alert-analysis',
@@ -379,6 +400,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'platform.core.generate_esql',
         'platform.core.execute_esql',
         'security.entity_risk_score',
+        'on_call_lookup',
+        'create.channel',
       ],
       severity: 'critical',
       tags: ['multi-step', 'conditional-escalation'],
@@ -542,8 +565,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Calls the virustotal_lookup tool with the given hash and reports the verdict from its response, ' +
-        'rather than reasoning about the hash without checking it or fabricating a verdict.',
+        'Calls virustotal_lookup with the given hash and reports its verdict, engine detection count, ' +
+        'and threat name only if the tool returns them; explicitly notes unavailable fields instead ' +
+        'of fabricating VirusTotal results.',
     },
     metadata: {
       // No expectedSkill: `workflow-authoring` documents that it is NOT required
@@ -565,8 +589,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Calls the on_call_lookup tool and reports the current on-call assignee from its response, rather ' +
-        'than guessing or asking the user who is on call.',
+        'Calls on_call_lookup and reports the current primary responder and contact only if returned ' +
+        'by the tool; flags missing contact information rather than guessing it.',
     },
     metadata: {
       // No expectedSkill: see `workflow-execution-a` — direct custom-tool call.
