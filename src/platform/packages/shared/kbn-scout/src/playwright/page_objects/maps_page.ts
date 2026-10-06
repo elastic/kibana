@@ -130,10 +130,19 @@ export class MapsPage {
   }
 
   /** Waits until map layers are loaded. */
-  async waitForLayersToLoad(loadingExpected = false) {
+  async waitForLayersToLoad() {
     await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
 
-    await this.waitForLoadCycleIfNeeded(loadingExpected);
+    // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
+    // visible before that, so gate on this signal before checking loading state.
+    await this.page.waitForFunction(
+      () =>
+        Boolean(document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas')),
+      undefined,
+      { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
+    );
+
+    await this.waitForLoadCycleIfNeeded();
 
     await expect
       .poll(() => this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true'), {
@@ -143,16 +152,12 @@ export class MapsPage {
   }
 
   /**
-   * If the map is not currently loading, waits for a load cycle to begin —
+   * If the map is not currently loading, waits up to 1000 ms for a load cycle to begin —
    * bridging the gap between a triggering action resolving and the new request's loading
    * state reaching the DOM. Falls through if no load starts in that window
    * (e.g. the action required no re-fetch).
-   *
-   * @param loadingExpected - When true, waits up to DEFAULT_MAP_LOADING_TIMEOUT for loading
-   *   to begin (use when a fetch is certain, e.g. after navigation). When false (default),
-   *   waits only 2000 ms before falling through.
    */
-  private async waitForLoadCycleIfNeeded(loadingExpected = false) {
+  private async waitForLoadCycleIfNeeded() {
     const alreadyLoading = (await this.mapContainer.getAttribute('data-map-loading')) === 'true';
     if (!alreadyLoading) {
       await this.page
@@ -162,7 +167,7 @@ export class MapsPage {
               .querySelector('[data-test-subj="mapContainer"]')
               ?.getAttribute('data-map-loading') === 'true',
           undefined,
-          { timeout: loadingExpected ? DEFAULT_MAP_LOADING_TIMEOUT : 2000 }
+          { timeout: 1000 }
         )
         .catch(() => {});
     }
@@ -249,7 +254,7 @@ export class MapsPage {
 
   async openMapWithId(id: string) {
     await this.page.gotoApp(`maps/map/${id}`);
-    await this.waitForLayersToLoad(true);
+    await this.waitForLayersToLoad();
   }
 
   /**
