@@ -20,8 +20,8 @@ describe('searchEventsToolHandler', () => {
     title: 'Checkout — payment failure',
     symptom_hypothesis: 'Payment calls are failing',
     summary: 'Checkout payment calls fail.',
-    status: 'open',
-    severity: '60-high',
+    status: 'active',
+    severity: 'high',
     confidence: 0.8,
     stream_names: ['logs.checkout'],
     signals: [

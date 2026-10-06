@@ -25,7 +25,6 @@ import {
   bulkGetRulesResponseSchema,
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
-  updateRuleBodySchema,
   ruleTagsParamsSchema,
   findRulesRequestSchema,
 } from './rule_data_schema';
@@ -1157,6 +1156,10 @@ describe('updateRuleDataSchema', () => {
     expect(result.metadata?.tags).toEqual(['prod', 'infra']);
   });
 
+  it('rejects schedule set to null (a schedule cannot be cleared)', () => {
+    expect(updateRuleDataSchema.safeParse({ schedule: null }).success).toBe(false);
+  });
+
   it('accepts metadata.tags set to null (clear all tags)', () => {
     const result = updateRuleDataSchema.parse({ metadata: { tags: null } });
     expect(result.metadata?.tags).toBeNull();
@@ -1568,38 +1571,9 @@ describe('getRootEsqlQuery', () => {
   });
 });
 
-describe('updateRuleBodySchema', () => {
-  it('accepts a payload without version', () => {
-    const result = updateRuleBodySchema.parse({});
-    expect(result).toEqual({});
-  });
-
-  it('accepts a payload with version', () => {
-    const result = updateRuleBodySchema.parse({ version: 'WzEsMV0=' });
-    expect(result.version).toBe('WzEsMV0=');
-  });
-
-  it('accepts version alongside data fields', () => {
-    const result = updateRuleBodySchema.parse({
-      version: 'WzEsMV0=',
-      metadata: { name: 'updated name' },
-    });
-    expect(result).toEqual({
-      version: 'WzEsMV0=',
-      metadata: { name: 'updated name' },
-    });
-  });
-
-  it('rejects an empty string version', () => {
-    expect(() => updateRuleBodySchema.parse({ version: '' })).toThrow();
-  });
-
-  it('rejects a version longer than 256 characters', () => {
-    expect(() => updateRuleBodySchema.parse({ version: 'x'.repeat(257) })).toThrow();
-  });
-
+describe('updateRuleDataSchema OpenAPI descriptions', () => {
   it('documents PATCH omission for time_field and the recovery/no_data contracts', () => {
-    const json = z.toJSONSchema(updateRuleBodySchema, {
+    const json = z.toJSONSchema(updateRuleDataSchema, {
       target: 'draft-7',
       unrepresentable: 'any',
     }) as {
@@ -1614,7 +1588,7 @@ describe('updateRuleBodySchema', () => {
     }).toMatchInlineSnapshot(`
       Object {
         "no_data": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. Any strategy other than \`ignore\` requires either \`query.breach\` or \`no_data.query\`, so that a group with no data can be told apart from one that stopped breaching.",
-        "recovery": "When an alert episode recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
+        "recovery": "When an alert recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
         "time_field": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`. If omitted, the existing value is kept.",
       }
     `);
@@ -1804,8 +1778,9 @@ describe('findRulesRequestSchema', () => {
 describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
+    version: 1,
     kind: 'alert' as const,
-    metadata: { name: 'r', version: 1 },
+    metadata: { name: 'r' },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
@@ -1836,44 +1811,44 @@ describe('bulkCreateRulesRequestSchema', () => {
   const validItem = validCreateData;
 
   it('accepts a single item and defaults enabled to true', () => {
-    const result = bulkCreateRulesRequestSchema.parse({ rules: [validItem] });
-    expect(result.rules).toHaveLength(1);
-    expect(result.rules[0].enabled).toBe(true);
-    expect(result.rules[0].id).toBeUndefined();
+    const result = bulkCreateRulesRequestSchema.parse({ items: [validItem] });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].enabled).toBe(true);
+    expect(result.items[0].id).toBeUndefined();
   });
 
   it('accepts client-supplied id and enabled: false', () => {
     const result = bulkCreateRulesRequestSchema.parse({
-      rules: [{ ...validItem, id: 'rule-1', enabled: false }],
+      items: [{ ...validItem, id: 'rule-1', enabled: false }],
     });
-    expect(result.rules[0].id).toBe('rule-1');
-    expect(result.rules[0].enabled).toBe(false);
+    expect(result.items[0].id).toBe('rule-1');
+    expect(result.items[0].enabled).toBe(false);
   });
 
   it('accepts up to MAX_BULK_ITEMS items', () => {
-    const rules = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
+    const items = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
       ...validItem,
       metadata: { name: `rule-${i}` },
     }));
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).not.toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items })).not.toThrow();
   });
 
-  it('rejects an empty rules array', () => {
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [] })).toThrow();
+  it('rejects an empty items array', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ items: [] })).toThrow();
   });
 
   it('rejects more than MAX_BULK_ITEMS items', () => {
-    const rules = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
+    const items = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
       ...validItem,
       metadata: { name: `rule-${i}` },
     }));
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items })).toThrow();
   });
 
   it('rejects duplicate client-supplied ids', () => {
     expect(() =>
       bulkCreateRulesRequestSchema.parse({
-        rules: [
+        items: [
           { ...validItem, id: 'same-id' },
           { ...validItem, metadata: { name: 'other' }, id: 'same-id' },
         ],
@@ -1881,18 +1856,18 @@ describe('bulkCreateRulesRequestSchema', () => {
     ).toThrow();
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkCreateRulesRequestSchema.parse({})).toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items: [validItem], foo: 'bar' })).toThrow();
   });
 
   it('rejects an item that fails create-rule refinements', () => {
     expect(() =>
       bulkCreateRulesRequestSchema.parse({
-        rules: [{ ...validSignalCreateData, recovery: { strategy: 'no_breach' } }],
+        items: [{ ...validSignalCreateData, recovery: { strategy: 'no_breach' } }],
       })
     ).toThrow();
   });
@@ -1901,8 +1876,9 @@ describe('bulkCreateRulesRequestSchema', () => {
 describe('bulkCreateRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
+    version: 1,
     kind: 'alert' as const,
-    metadata: { name: 'r', version: 1 },
+    metadata: { name: 'r' },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
