@@ -21,9 +21,9 @@ export const sourceTypeSchema = z.enum(SOURCE_TYPES);
 /** A type an index name can match. `unknown` is the absence of these, not a pattern. */
 export type KnownSourceType = Exclude<SourceType, 'unknown'>;
 
-const isKnownSourceType = (type: SourceType): type is KnownSourceType => type !== 'unknown';
-
-const KNOWN_SOURCE_TYPES: readonly KnownSourceType[] = SOURCE_TYPES.filter(isKnownSourceType);
+const KNOWN_SOURCE_TYPES = SOURCE_TYPES.filter(
+  (type): type is KnownSourceType => type !== 'unknown'
+);
 
 /**
  * Base names per type. The logs and traces lists mirror Discover's profiles
@@ -57,13 +57,11 @@ const baseNameRegExp = (bases: readonly string[]): RegExp =>
 const segmentRegExp = (type: KnownSourceType): RegExp =>
   new RegExp(`(?:^|[-:])${type}(?=$|-)`, 'i');
 
-const BASE_PATTERN_REGEXP = Object.fromEntries(
-  KNOWN_SOURCE_TYPES.map((type) => [type, baseNameRegExp(BASE_PATTERNS[type])])
-) as Record<KnownSourceType, RegExp>;
-
-const TYPE_SEGMENT_REGEXP = Object.fromEntries(
-  KNOWN_SOURCE_TYPES.map((type) => [type, segmentRegExp(type)])
-) as Record<KnownSourceType, RegExp>;
+const BASE_PATTERN_REGEXP: Record<KnownSourceType, RegExp> = {
+  logs: baseNameRegExp(BASE_PATTERNS.logs),
+  metrics: baseNameRegExp(BASE_PATTERNS.metrics),
+  traces: baseNameRegExp(BASE_PATTERNS.traces),
+};
 
 const DATA_SELECTOR = /::data$/i;
 
@@ -76,7 +74,7 @@ const stripDataSelector = (name: string): string => name.replace(DATA_SELECTOR, 
 
 const typeSegments = (name: string): KnownSourceType[] => {
   const stripped = stripDataSelector(name);
-  return KNOWN_SOURCE_TYPES.filter((type) => TYPE_SEGMENT_REGEXP[type].test(stripped));
+  return KNOWN_SOURCE_TYPES.filter((type) => segmentRegExp(type).test(stripped));
 };
 
 /**

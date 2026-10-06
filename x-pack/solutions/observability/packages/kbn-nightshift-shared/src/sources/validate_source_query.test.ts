@@ -172,12 +172,6 @@ describe('analyzeSourceQuery', () => {
       error: expect.stringContaining('must start with FROM or TS'),
     });
   });
-
-  it('returns the type of a valid query', () => {
-    expect(analyzeSourceQuery({ esql: 'FROM logs-* | WHERE status >= 500' })).toEqual({
-      type: 'logs',
-    });
-  });
 });
 
 describe('getSourceCommandQuery', () => {

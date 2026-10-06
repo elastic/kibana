@@ -113,12 +113,7 @@ export {
   type UpdateSourceRequest,
 } from './src/sources/schema';
 
-export {
-  matchSourceTypes,
-  SOURCE_TYPES,
-  sourceTypeSchema,
-  type SourceType,
-} from './src/sources/source_type';
+export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/source_type';
 
 export {
   analyzeSourceQuery,

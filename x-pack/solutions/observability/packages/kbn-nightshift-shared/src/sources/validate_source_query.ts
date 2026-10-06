@@ -58,9 +58,10 @@ const CLUSTER_PREFIX = /^[^:]+:(?!:)/;
 const BACKTICK_QUOTES = /^`(.*)`$/;
 
 /**
- * Index pattern with the cluster prefix removed. `remote:logs-*` is `logs-*`. A quoted source
- * (`"remote:*"`) reaches us as one index literal with no parsed prefix, so strip it from the
- * text. Backticks are identifier quotes, not part of the name.
+ * Index pattern with the cluster prefix removed. `remote:logs-*` is `logs-*`. A parsed prefix
+ * is already split off the index; a quoted source (`"remote:*"`) is not, so the prefix is
+ * stripped from the text either way. `::data` is a selector, not a cluster. Backticks are
+ * identifier quotes, not part of the name.
  */
 const indexPatternOf = (source: ESQLSource): string | undefined => {
   const raw =
@@ -68,8 +69,7 @@ const indexPatternOf = (source: ESQLSource): string | undefined => {
   if (raw === undefined) {
     return undefined;
   }
-  const unticked = raw.replace(BACKTICK_QUOTES, '$1');
-  return source.prefix ? unticked : unticked.replace(CLUSTER_PREFIX, '');
+  return raw.replace(BACKTICK_QUOTES, '$1').replace(CLUSTER_PREFIX, '');
 };
 
 /**
@@ -155,9 +155,6 @@ export const validateSourceQuery = (esql: string): string | undefined => {
 /** A derived type, or the reason the query cannot be one. */
 export type SourceTypeAnalysis = { type: SourceType } | { error: string };
 
-const describeType = (type: SourceType, names: readonly string[]): string =>
-  `${type} (${names.join(', ')})`;
-
 const joinAnd = (parts: readonly string[]): string => {
   if (parts.length < 2) {
     return parts[0] ?? '';
@@ -194,33 +191,34 @@ const classifySourceQuery = ({ esql }: { esql: string }): SourceTypeAnalysis => 
   if (unscoped) {
     return { error: unscopedWildcardMessage(unscoped.name) };
   }
-  const classified = indices.map(({ name, pattern }) => ({
-    name,
-    matched: matchSourceTypes(pattern),
-  }));
-  const ambiguous = classified.find(({ matched }) => matched.length > 1);
-  if (ambiguous) {
-    return { error: ambiguousIndexMessage(ambiguous.name, ambiguous.matched) };
-  }
 
   const isTimeSeries = firstCommand.name === 'ts';
-  // `matchSourceTypes` never returns `unknown`, so an unmatched name lands here. FROM leaves it
-  // `unknown`; TS only reads time series data, so it is metrics.
-  const unmatchedType: SourceType = isTimeSeries ? 'metrics' : 'unknown';
-  const typed = classified.map(({ name, matched }) => ({
-    name,
-    type: matched[0] ?? unmatchedType,
-  }));
-
-  const namesOf = (type: SourceType): string[] => {
-    const names = typed.filter((entry) => entry.type === type).map((entry) => entry.name);
-    // TS is metrics even when every named index classified as something else.
-    return isTimeSeries && type === 'metrics' && names.length === 0 ? ['TS'] : names;
+  const namesByType: Record<SourceType, string[]> = {
+    logs: [],
+    metrics: [],
+    traces: [],
+    unknown: [],
   };
-  const present = SOURCE_TYPES.filter((type) => namesOf(type).length > 0);
+  for (const { name, pattern } of indices) {
+    const matched = matchSourceTypes(pattern);
+    if (matched.length > 1) {
+      return { error: ambiguousIndexMessage(name, matched) };
+    }
+    // `matchSourceTypes` never returns `unknown`. FROM leaves a miss `unknown`. TS only reads
+    // time series data, so a miss is metrics.
+    namesByType[matched[0] ?? (isTimeSeries ? 'metrics' : 'unknown')].push(name);
+  }
+  // TS is metrics even when every named index classified as something else.
+  if (isTimeSeries && namesByType.metrics.length === 0) {
+    namesByType.metrics.push('TS');
+  }
+
+  const present = SOURCE_TYPES.filter((type) => namesByType[type].length > 0);
   if (present.length > 1) {
     return {
-      error: mixedSourceTypesMessage(present.map((type) => describeType(type, namesOf(type)))),
+      error: mixedSourceTypesMessage(
+        present.map((type) => `${type} (${namesByType[type].join(', ')})`)
+      ),
     };
   }
 

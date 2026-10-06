@@ -34,9 +34,7 @@ on the public start contract through `getClient()`.
 
 `type` (`logs`, `metrics`, `traces` or `unknown`) is stored on the source and returned by
 every read. It is derived from the query on create and when an update changes the query. A
-title-only PUT keeps the stored type. Request bodies cannot set it. Existing sources are
-classified from the index name when the saved object model migrates; a name that is not logs,
-metrics or traces stays `unknown` until the query is edited.
+title-only PUT keeps the stored type. Request bodies cannot set it.
 
 ## Engine access
 
