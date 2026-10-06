@@ -421,7 +421,7 @@ describe('ModelDetailFlyout', () => {
       ]);
 
       expect(screen.getByTestId('modelDetailFlyoutDataRetentionBadge')).toHaveTextContent(
-        'Zero data retention'
+        'Zero Data Retention'
       );
       expect(screen.queryByTestId('modelDetailFlyoutDataRetentionTooltip')).not.toBeInTheDocument();
     });
