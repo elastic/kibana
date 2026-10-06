@@ -315,7 +315,6 @@ export {
   type ExecutionAbortedInterruption,
   type RoundInterruptedEventData,
   type RoundInterruptedEvent,
-  type SlackMarkdownBlock,
   type SlackPayload,
   type OriginProjection,
   type ToolCallProgress,
