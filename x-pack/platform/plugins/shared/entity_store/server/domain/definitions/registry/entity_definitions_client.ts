@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EntityDefinitionType } from '../../../../common/domain/definitions/entity_schema';
 import type {
   EntityDefinitionRegistry,
   RegisteredEntityDefinition,
@@ -17,7 +18,7 @@ import type {
 export interface EntityDefinitionsClient {
   /** The space the client was created for. Not used yet; reserved for per-space definitions. */
   readonly namespace: string;
-  get(type: string): Promise<RegisteredEntityDefinition | undefined>;
+  get(type: EntityDefinitionType): Promise<RegisteredEntityDefinition | undefined>;
   list(): Promise<RegisteredEntityDefinition[]>;
 }
 
