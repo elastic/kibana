@@ -1172,7 +1172,11 @@ describe('TabsStorageManager', () => {
   });
 
   describe('URL state when the persisted discover session was saved again', () => {
-    const loadWithUrlAppState = (urlAppState: DiscoverAppState) => {
+    const loadWithUrlAppState = (
+      urlAppState: DiscoverAppState,
+      storedProfileState?: TabState['profileState'],
+      timeRestore = true
+    ) => {
       const { tabsStorageManager, urlStateStorage, services } = create();
 
       services.storage.set(TABS_LOCAL_STORAGE_KEY, {
@@ -1180,7 +1184,7 @@ describe('TabsStorageManager', () => {
         spaceId: mockSpaceId,
         discoverSessionId: 'session-match',
         discoverSessionVersion: 'version-1',
-        openTabs: [toStoredTab(mockTab1)],
+        openTabs: [{ ...toStoredTab(mockTab1), profileState: storedProfileState }],
         closedTabs: [],
       });
       urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id });
@@ -1199,7 +1203,16 @@ describe('TabsStorageManager', () => {
           title: 'title',
           description: 'description',
           managed: false,
-          tabs: [],
+          tabs: [
+            {
+              ...fromSavedSearchToSavedObjectTab({
+                tab: { id: mockTab1.id, label: mockTab1.label },
+                savedSearch: savedSearchMock,
+                services,
+              }),
+              timeRestore,
+            },
+          ],
         },
         defaultTabState: DEFAULT_TAB_STATE,
       });
@@ -1207,11 +1220,29 @@ describe('TabsStorageManager', () => {
       return urlStateStorage;
     };
 
+    it('should keep the URL time when the saved tab does not restore time', () => {
+      const urlStateStorage = loadWithUrlAppState(mockTab1.appState, undefined, false);
+
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({
+        time: mockTab1.globalState.timeRange,
+        filters: [],
+      });
+    });
+
     it('should clear URL state and time written for the stored tab, keeping global filters', () => {
       const urlStateStorage = loadWithUrlAppState(mockTab1.appState);
 
       expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
       expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
+    });
+
+    it('should clear URL state when the stored tab also keeps state for an inactive profile', () => {
+      const urlStateStorage = loadWithUrlAppState(mockTab1.appState, {
+        [TEST_PROFILE_STATE_DEF.key]: { urlValue: 'inactiveProfileValue' },
+      });
+
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
     });
 
     it('should keep URL state that differs from the stored tab, e.g. from a shared link', () => {

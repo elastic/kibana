@@ -258,16 +258,21 @@ export const createTabsStorageManager = ({
     appState,
     globalState,
     profileState,
-  }: TabStateInLocalStorage) =>
-    isEqual(urlStateStorage.get(APP_STATE_URL_KEY) ?? {}, appState ?? {}) &&
-    isEqual(
-      urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY)?.time,
-      globalState?.timeRange
-    ) &&
-    isEqual(
-      getUrlProfileState(urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY)),
-      getUrlProfileState(profileState)
+  }: TabStateInLocalStorage) => {
+    const urlProfileState = getUrlProfileState(
+      urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY)
     );
+
+    return (
+      isEqual(urlStateStorage.get(APP_STATE_URL_KEY) ?? {}, appState ?? {}) &&
+      isEqual(
+        urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY)?.time,
+        globalState?.timeRange
+      ) &&
+      // The URL only holds the active profile state, while the stored tab keeps every profile.
+      isEqual(urlProfileState, pick(getUrlProfileState(profileState), Object.keys(urlProfileState)))
+    );
+  };
 
   const toTabState = (
     tabStateInStorage: TabStateInLocalStorage,
@@ -512,11 +517,17 @@ export const createTabsStorageManager = ({
       storedSelectedTab &&
       isUrlStateFromStoredTab(storedSelectedTab)
     ) {
-      // Global filters are shared with other apps, so only the time is dropped from _g.
-      const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
-      void urlStateStorage.set(GLOBAL_STATE_URL_KEY, omit(urlGlobalState, 'time'), {
-        replace: true,
-      });
+      // Only a saved time range can replace the URL time. Global filters are shared with other
+      // apps, so they stay in _g.
+      const persistedSelectedTab = persistedDiscoverSession?.tabs.find(
+        (tab) => tab.id === selectedTabId
+      );
+      if (persistedSelectedTab?.timeRestore) {
+        const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+        void urlStateStorage.set(GLOBAL_STATE_URL_KEY, omit(urlGlobalState, 'time'), {
+          replace: true,
+        });
+      }
       void urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true });
       void urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true });
     }
