@@ -18,8 +18,9 @@ import type { ServiceAccountRoleLimits } from './constants';
 export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
 
 /**
- * Also used to validate the name a backend reports back, so `UiamServiceAccounts` refuses a name
- * Kibana cannot round-trip instead of handing it to callers.
+ * Validates the name a caller asks for. Beyond the create parameters it is also what a refused
+ * create checks before naming the account in its audit event, so a rejected name never reaches the
+ * log as received.
  */
 export const serviceAccountNameSchema = z
   .string()

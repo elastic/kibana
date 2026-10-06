@@ -21,6 +21,7 @@ import { ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import { getDetailedErrorMessage } from '../errors';
 import { securityMock } from '../mocks';
 
@@ -68,6 +69,7 @@ const setup = ({ canEncrypt = true, requestLifetimeMs = 600_000 } = {}) => {
     credentialStore,
     canEncrypt,
     checkPrivilegesWithRequest: jest.fn(),
+    audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
     getCurrentUserProfileId: jest.fn(),
   });
