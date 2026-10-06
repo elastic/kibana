@@ -352,7 +352,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       ],
       column_order: [],
       row_height: 1,
-      sample_size: 100,
       rows_per_page: 25,
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
@@ -366,9 +365,7 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       },
       hide_chart: false,
       hide_table: false,
-      hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
-      chart_interval: 'h',
       time_range: {
         from: 'now/d',
         to: 'now/d',

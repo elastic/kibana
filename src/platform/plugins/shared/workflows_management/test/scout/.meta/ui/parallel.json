@@ -1,5 +1,5 @@
 {
-  "sha1": "857f1a38632ca5a3d4167874d2b81c6a0724a8c4",
+  "sha1": "5eab15e7429f91a664fed98ac4b98a82b1532380",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -37,6 +37,20 @@
       }
     },
     {
+      "id": "eb10b95e21481ba-5fe0bd1ead1560b",
+      "title": "Workflow administrator sharing grants execution access through Access control and preserves the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control_admin.spec.ts",
+        "line": 43,
+        "column": 54
+      }
+    },
+    {
       "id": "478a0cfe64d4fb9-8627e04223e9fc9",
       "title": "Workflow access dialog saves private and public access through the shared form",
       "expectedStatus": "passed",
@@ -46,8 +60,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 39,
-        "column": 8
+        "line": 46,
+        "column": 13
       }
     },
     {
@@ -60,8 +74,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 97,
-        "column": 24
+        "line": 109,
+        "column": 18
       }
     },
     {
@@ -74,8 +88,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 97,
-        "column": 24
+        "line": 109,
+        "column": 18
       }
     },
     {

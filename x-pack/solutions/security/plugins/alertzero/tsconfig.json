@@ -58,7 +58,6 @@
     "@kbn/security-solution-distribution-bar",
     "@kbn/test-jest-helpers",
     "@kbn/user-profile-components",
-    "@kbn/shared-ux-error-boundary",
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
     "@kbn/security-mitre-attack-server",

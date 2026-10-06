@@ -18,6 +18,40 @@ import { i18n } from '@kbn/i18n';
 /* Header                                                                     */
 /* -------------------------------------------------------------------------- */
 
+export const SERVICE_ACCOUNT_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountLabel',
+  {
+    defaultMessage: 'Run as',
+  }
+);
+
+export const SERVICE_ACCOUNT_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountHelp',
+  {
+    defaultMessage:
+      'The worker runs as this account. Select one before turning the worker on. A worker that is already on keeps running until you save an account for it.',
+  }
+);
+
+export const SERVICE_ACCOUNT_PLACEHOLDER = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountPlaceholder',
+  { defaultMessage: 'Select a service account' }
+);
+
+export const SERVICE_ACCOUNT_REQUIRED_TO_SAVE = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountRequiredToSave',
+  {
+    defaultMessage:
+      'Select a service account to save while this worker stays on. You can turn it off without one.',
+  }
+);
+
+export const serviceAccountSelectAriaLabel = (workerName: string) =>
+  i18n.translate('xpack.alertzero.watches.settings.serviceAccountAriaLabel', {
+    defaultMessage: 'Run as for {workerName}',
+    values: { workerName },
+  });
+
 export const ENABLED_SWITCH_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.enabledSwitch',
   {

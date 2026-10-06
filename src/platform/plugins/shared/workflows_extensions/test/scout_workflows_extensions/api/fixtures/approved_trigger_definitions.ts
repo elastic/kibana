@@ -55,6 +55,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '3ddfb053989618f32071989376a39b001b3ed1bead0e81bf9f48c20253a53c57',
   },
   {
+    id: 'ai.conversation.updated',
+    schemaHash: '56e3a676eb337ba1384fa50792dfeea9d2c77d23b92b3caded8a3cefc8141ca1',
+  },
+  {
     id: 'alerting.actions.alertAcked',
     schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
   },
@@ -200,11 +204,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'significant-events.eventCreated',
-    schemaHash: '090e3242d2363bc4171d8136809cbf578ca1002e1e2cde81e4f354b4ba9dbb6e',
+    schemaHash: 'b2a0b53f92992ef70e61a58d6b708092a98d85d9478694914bc00692bcb69123',
   },
   {
     id: 'significant-events.eventStatusChanged',
-    schemaHash: 'b0f707c9cd0d9933a57ed7f3503b8cc62bbf36a1e7dc6a57071a07f7a6297ae6',
+    schemaHash: '99541eb32dae94be8bf4b1828f92b756ae7181320a285e5cef76f9391f42f9a6',
   },
   {
     id: 'workflows.failed',
