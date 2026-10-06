@@ -222,16 +222,14 @@ describe('EntityDefinitionRegistry', () => {
     ])('rejects non-object input %p without throwing', (input, type) => {
       const invalid = input as unknown as RegistrableEntityDefinition;
 
-      expect(() => registry.register(invalid)).not.toThrow();
-      expect(registry.register(invalid)).toEqual({
-        ok: false,
-        reason: 'definition is not an object',
-      });
-      expect(registry.rejected()).toEqual([
-        { type, reason: 'definition is not an object' },
-        { type, reason: 'definition is not an object' },
-      ]);
-      expect(logger.error).toHaveBeenCalledTimes(2);
+      let result: RegisterResult | undefined;
+      expect(() => {
+        result = registry.register(invalid);
+      }).not.toThrow();
+
+      expect(result).toEqual({ ok: false, reason: 'definition is not an object' });
+      expect(registry.rejected()).toEqual([{ type, reason: 'definition is not an object' }]);
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
 
     it('rejects unknown keys, including a stale id', () => {
