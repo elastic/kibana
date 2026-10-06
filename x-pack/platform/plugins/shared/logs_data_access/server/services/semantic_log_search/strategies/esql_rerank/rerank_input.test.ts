@@ -13,13 +13,13 @@ import {
 } from '../../constants';
 import { buildRerankInputs } from './rerank_input';
 
-const candidate = (pattern: string, message?: string): LogPattern => ({
+const candidate = (pattern: string, message = ''): LogPattern => ({
   field: 'message',
   pattern,
   count: 1,
   firstSeen: '2024-01-01T00:00:00.000Z',
   lastSeen: '2024-01-01T01:00:00.000Z',
-  sample: message === undefined ? {} : { message },
+  sample: { message },
 });
 
 const totalChars = (inputs: string[]) => inputs.reduce((sum, text) => sum + text.length, 0);
@@ -31,14 +31,8 @@ describe('buildRerankInputs', () => {
     ).toEqual(['connection refused connection refused to host']);
   });
 
-  it('falls back to the pattern when the sample carries no message', () => {
+  it('falls back to the pattern when the sample message is empty', () => {
     expect(buildRerankInputs([candidate('only a pattern')])).toEqual(['only a pattern']);
-  });
-
-  it('ignores a non-string sample message rather than stringifying it', () => {
-    const withNumericMessage: LogPattern = { ...candidate('a pattern'), sample: { message: 42 } };
-
-    expect(buildRerankInputs([withNumericMessage])).toEqual(['a pattern']);
   });
 
   it('returns an empty list for no candidates', () => {

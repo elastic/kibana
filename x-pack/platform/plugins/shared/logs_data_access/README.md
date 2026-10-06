@@ -55,7 +55,7 @@ A probe timeout returns `scope_too_large`; narrowing the scope may help. Rerank 
 | --- | --- | --- |
 | `xpack.logsDataAccess.semanticLogSearch.rerankInferenceId` | `.rerank-v1-elasticsearch` | Inference endpoint used to rank patterns |
 
-The general default uses local inference. Serverless Observability selects `.jina-reranker-v3` in its deployment configuration. Endpoint existence is checked before retrieval, but does not establish readiness: a local model may need to load before serving requests.
+The default uses local inference. Endpoint existence is checked before retrieval, but does not establish readiness: a local model may need to load before serving requests.
 
 The configured endpoint receives the natural-language query and bounded candidate text derived from log patterns and sample messages. Hosted endpoints send that content to their inference provider. A custom endpoint's name alone does not establish its hosting location or data residency. Returned sample messages may also be forwarded by consumers; that data flow belongs to the consumer.
 

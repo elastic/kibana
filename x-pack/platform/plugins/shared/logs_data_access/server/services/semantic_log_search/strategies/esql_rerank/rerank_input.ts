@@ -17,8 +17,8 @@ import { MESSAGE_FIELD } from './columns';
 // The pattern repeats most of the sample's tokens, but dropping it moved rankings on 2 of 5 probe
 // queries, so both are sent until an eval run settles it.
 function toCandidateText({ pattern, sample }: LogPattern): string {
-  const message = sample?.[MESSAGE_FIELD];
-  return typeof message === 'string' && message ? `${pattern} ${message}` : pattern;
+  const { [MESSAGE_FIELD]: message } = sample;
+  return message ? `${pattern} ${message}` : pattern;
 }
 
 /** Builds the rerank input for a candidate set, trimming the longest candidates to fit the character budget. */
