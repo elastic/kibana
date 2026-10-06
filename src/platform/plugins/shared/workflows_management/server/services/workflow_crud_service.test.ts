@@ -14,7 +14,10 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
+import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { loggerMock } from '@kbn/logging-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 import type {
   StepExecutionsDataClient,
@@ -32,12 +35,14 @@ import { disableAllWorkflows as disableAllWorkflowsLib } from '../api/lib/workfl
 import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import type { WorkflowProperties } from '../storage/workflow_storage';
+import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 jest.mock('../lib/log_workflow_changes', () => ({
   logWorkflowChanges: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../api/lib/workflow_disable_all', () => ({
+  ...jest.requireActual('../api/lib/workflow_disable_all'),
   disableAllWorkflows: jest.fn(),
 }));
 
@@ -3020,6 +3025,47 @@ describe('WorkflowCrudService', () => {
     });
   });
 
+  describe('disableWorkflow', () => {
+    it('disables a soft-deleted workflow with OCC and unschedules its triggers', async () => {
+      const taskScheduler = {
+        ...makeTaskScheduler(),
+        bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+      };
+      const { deps, client } = makeDeps(undefined, {
+        getTaskScheduler: () => taskScheduler as any,
+      });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit(
+              'wf-1',
+              { enabled: true, yaml: 'name: Test Workflow\nenabled: true', deleted_at: new Date() },
+              7,
+              2
+            ),
+          ],
+        },
+      });
+      client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
+
+      await new WorkflowCrudService(deps).disableWorkflow('wf-1', 'default');
+
+      expect(JSON.stringify(client.search.mock.calls[0][0])).not.toContain('deleted_at');
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'wf-1',
+          if_seq_no: 7,
+          if_primary_term: 2,
+          document: expect.objectContaining({
+            enabled: false,
+            yaml: expect.stringContaining('enabled: false'),
+          }),
+        })
+      );
+      expect(taskScheduler.bulkUnscheduleWorkflowTasks).toHaveBeenCalledWith(['wf-1']);
+    });
+  });
+
   describe('disableAllWorkflows', () => {
     const request = { auth: { credentials: { username: 'alice' } } } as any;
     const disabledWorkflow = { id: 'wf-1', document: makeSource({ enabled: false }) };
@@ -3148,12 +3194,200 @@ describe('WorkflowCrudService', () => {
   });
 });
 
+describe('WorkflowCrudService administrator writes', () => {
+  it.each([false, true])(
+    'requires an Editor grant before changing a scheduled workflow (editor=%s)',
+    async (isEditor) => {
+      const core = coreMock.createStart();
+      const request = httpServerMock.createKibanaRequest();
+      core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
+      jest
+        .mocked(core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges)
+        .mockResolvedValue({
+          has_all_requested: true,
+          username: 'admin',
+          application: {},
+          cluster: {},
+          index: {},
+        });
+      const taskScheduler = new WorkflowTaskScheduler(
+        loggerMock.create(),
+        taskManagerMock.createStart()
+      );
+      jest.spyOn(taskScheduler, 'updateWorkflowTasks').mockResolvedValue();
+      jest.spyOn(taskScheduler, 'unscheduleWorkflowTasks').mockResolvedValue();
+      const { deps, client } = makeDeps(undefined, {
+        getCoreStart: () => core,
+        getTaskScheduler: () => taskScheduler,
+      });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit('scheduled', {
+              enabled: true,
+              valid: true,
+              owner_id: 'owner',
+              access_control: {
+                access_mode: 'private',
+                entries: isEditor
+                  ? [{ type: 'user', id: 'admin', role: 'editor', added_at: '2026-09-30' }]
+                  : [],
+              },
+              definition: {
+                version: '1',
+                name: 'Scheduled',
+                enabled: true,
+                triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+                steps: [],
+              },
+            }),
+          ],
+        },
+      });
+      const update = new WorkflowCrudService(deps).updateWorkflow(
+        'scheduled',
+        { description: 'Fixed typo' },
+        'default',
+        request
+      );
+      if (isEditor) {
+        await expect(update).resolves.toMatchObject({ id: 'scheduled' });
+        expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'scheduled' }),
+          'default',
+          request
+        );
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({ document: expect.objectContaining({ owner_id: 'owner' }) })
+        );
+      } else {
+        await expect(update).rejects.toThrow();
+        expect(client.index).not.toHaveBeenCalled();
+        expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+        expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+      }
+    }
+  );
+
+  it.each([true, false])(
+    'requires an Editor grant for edits and bulk overwrites (admin=%s)',
+    async (isAdmin) => {
+      const core = coreMock.createStart();
+      const request = httpServerMock.createKibanaRequest();
+      jest
+        .mocked(core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges)
+        .mockResolvedValue({
+          has_all_requested: isAdmin,
+          username: 'user',
+          application: {},
+          cluster: {},
+          index: {},
+        });
+      core.userProfile.getCurrentProfileId.mockResolvedValue('non-owner');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(
+          securityServiceMock.createMockAuthenticatedUser({ roles: isAdmin ? ['superuser'] : [] })
+        );
+      const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit('private-workflow', {
+              owner_id: 'owner',
+              access_control: { access_mode: 'private', entries: [] },
+            }),
+          ],
+        },
+      });
+      const service = new WorkflowCrudService(deps);
+      const update = service.updateWorkflow(
+        'private-workflow',
+        { enabled: false },
+        'default',
+        request
+      );
+      await expect(update).rejects.toThrow();
+      expect(client.index).not.toHaveBeenCalled();
+      const imported = await service.bulkCreateWorkflows(
+        [{ id: 'private-workflow', yaml: lightweightWorkflowYaml }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+      expect(imported.created).toHaveLength(0);
+      expect(imported.failed).toHaveLength(1);
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'workflow_access_control_denied',
+          }),
+          message: expect.stringContaining('"entityId":"private-workflow"'),
+        })
+      );
+    }
+  );
+
+  it.each([true, false])('requires an Editor grant for disable-all (admin=%s)', async (isAdmin) => {
+    const core = coreMock.createStart();
+    const request = httpServerMock.createKibanaRequest();
+    jest
+      .mocked(core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges)
+      .mockResolvedValue({
+        has_all_requested: isAdmin,
+        username: 'user',
+        application: {},
+        cluster: {},
+        index: {},
+      });
+    core.userProfile.getCurrentProfileId.mockResolvedValue('non-owner');
+    jest
+      .spyOn(core.security.authc, 'getCurrentUser')
+      .mockReturnValue(
+        securityServiceMock.createMockAuthenticatedUser({ roles: isAdmin ? ['superuser'] : [] })
+      );
+    const { deps } = makeDeps(undefined, { getCoreStart: () => core });
+    mockedDisableAllWorkflowsLib
+      .mockReset()
+      .mockImplementation(async ({ assertCanEdit, accessControlFilter }) => {
+        expect(accessControlFilter).toEqual(
+          buildEntityReadAccessQuery({
+            profileId: 'non-owner',
+            ownerField: 'owner_id',
+            accessControlField: 'access_control',
+            includeMissing: true,
+          })
+        );
+        const check = () =>
+          assertCanEdit?.(
+            makeSource({
+              owner_id: 'owner',
+              access_control: { access_mode: 'private', entries: [] },
+            }),
+            'private-workflow'
+          );
+        expect(check).toThrow();
+        return { total: 0, disabled: 0, failures: [], disabledWorkflows: [] };
+      });
+    await new WorkflowCrudService(deps).disableAllWorkflows('default', request);
+    expect(mockedDisableAllWorkflowsLib).toHaveBeenCalledTimes(1);
+    expect(
+      core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges
+    ).not.toHaveBeenCalled();
+  });
+});
+
 describe('WorkflowCrudService force deletion access', () => {
   it.each([
     ['legacy', undefined, 'another-user', true],
     ['public non-owner', { access_mode: 'public', entries: [] }, 'another-user', true],
     ['public API key', { access_mode: 'public', entries: [] }, undefined, true],
     ['private owner', { access_mode: 'private', entries: [] }, 'owner', true],
+    ['private administrator', { access_mode: 'private', entries: [] }, 'admin', true],
+    ['private API key', { access_mode: 'private', entries: [] }, 'admin-api-key', false],
     ['private non-owner', { access_mode: 'private', entries: [] }, 'another-user', false],
     [
       'private editor',
@@ -3173,8 +3407,24 @@ describe('WorkflowCrudService force deletion access', () => {
     ],
   ] as const)('%s', async (_, accessControl, profileId, allowed) => {
     const core = coreMock.createStart();
+    const request = httpServerMock.createKibanaRequest();
     core.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
-    const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+    jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
+      securityServiceMock.createMockAuthenticatedUser({
+        roles: profileId?.startsWith('admin') ? ['superuser'] : [],
+        authentication_type: profileId === 'admin-api-key' ? 'api_key' : 'realm',
+      })
+    );
+    const security = securityMock.createStart();
+    security.authz.checkPrivilegesWithRequest.mockReturnValue({
+      globally: jest.fn().mockResolvedValue({ hasAllRequested: profileId?.startsWith('admin') }),
+      atSpace: jest.fn(),
+      atSpaces: jest.fn(),
+    });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      authz: security.authz,
+    });
     client.search.mockResolvedValue({
       hits: {
         hits: [
@@ -3197,9 +3447,17 @@ describe('WorkflowCrudService force deletion access', () => {
         force: true,
         acknowledgeAclLoss: accessControl?.access_mode === 'private',
       },
-      httpServerMock.createKibanaRequest()
+      request
     );
 
+    if (profileId === 'admin') {
+      await result;
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'workflow_access_control_admin_override' }),
+        })
+      );
+    }
     if (allowed) {
       await expect(result).resolves.toMatchObject({ deleted: 1, failures: [] });
       expect(core.elasticsearch.client.asInternalUser.delete).toHaveBeenCalledWith(
