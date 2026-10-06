@@ -1797,7 +1797,13 @@ describe('ConversationClient', () => {
         execution_id: executionId,
         trigger_event_id: 'round-1::user_message',
         data: {
-          model_usage: { connector_id: 'connector-1', model: 'model-1', input_tokens: 1, output_tokens: 1, llm_calls: 1 },
+          model_usage: {
+            connector_id: 'connector-1',
+            model: 'model-1',
+            input_tokens: 1,
+            output_tokens: 1,
+            llm_calls: 1,
+          },
           time_to_first_token: 1,
           time_to_last_token: 1,
           outcome: { type: 'responded', response: { message: 'ok' } },
@@ -1806,7 +1812,10 @@ describe('ConversationClient', () => {
 
     it('stores vote, chips, and comment on the conversation doc via OCC write', async () => {
       mockGetDocumentResponse(
-        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminalEvent()],
+        })
       );
 
       await client.updateRoundFeedback('conversation-1', executionId, {
@@ -1833,7 +1842,10 @@ describe('ConversationClient', () => {
 
     it('throws not found when no terminal event matches the executionId', async () => {
       mockGetDocumentResponse(
-        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminalEvent()],
+        })
       );
 
       await expect(
@@ -1850,7 +1862,12 @@ describe('ConversationClient', () => {
         _source: {
           ...base._source!,
           feedback: {
-            [executionId]: { vote: 'up', chips: [], comment: '', submitted_at: '2025-01-01T00:00:00.000Z' },
+            [executionId]: {
+              vote: 'up',
+              chips: [],
+              comment: '',
+              submitted_at: '2025-01-01T00:00:00.000Z',
+            },
           },
         },
       } as Document);
@@ -1883,12 +1900,21 @@ describe('ConversationClient', () => {
 
     it('retries on a 409 conflict, re-reading the document with the updated sequence', async () => {
       mockGetDocumentResponseOnce(
-        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminalEvent()],
+        })
       );
       mockGetDocumentResponse(
-        createConversationDocument({ seqNo: 2, schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
+        createConversationDocument({
+          seqNo: 2,
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminalEvent()],
+        })
       );
-      mockEsClient.index.mockRejectedValueOnce(createConflictError()).mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+      mockEsClient.index
+        .mockRejectedValueOnce(createConflictError())
+        .mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
       await client.updateRoundFeedback('conversation-1', executionId, { vote: 'down' });
 
@@ -1900,7 +1926,10 @@ describe('ConversationClient', () => {
 
     it('throws a write conflict error once retries are exhausted', async () => {
       mockGetDocumentResponse(
-        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, events: [makeTerminalEvent()] })
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminalEvent()],
+        })
       );
       mockEsClient.index.mockRejectedValue(createConflictError());
 
