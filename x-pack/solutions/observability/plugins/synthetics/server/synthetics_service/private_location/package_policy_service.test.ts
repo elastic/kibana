@@ -347,27 +347,6 @@ describe('PackagePolicyService deferred revision bumps', () => {
 
     expect(bumpRevision).not.toHaveBeenCalled();
   });
-
-  it('attempts every agent policy when one bump fails, then reports the failures together', async () => {
-    const { server, bumpRevision } = makeServer();
-    bumpRevision.mockImplementation(async (_client, _esClient, policyId) => {
-      if (policyId === 'policy-2') {
-        throw new Error('fleet down');
-      }
-    });
-
-    const flush = new PackagePolicyService(server).scheduleRevisionBumps(
-      new Set(['policy-1', 'policy-2', 'policy-3'])
-    );
-    const assertion = expect(flush).rejects.toThrow(
-      'Failed to bump the revision of 1 of 3 agent policies [policy-2]: fleet down'
-    );
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
-    await assertion;
-
-    expect(bumpRevision).toHaveBeenCalledTimes(3);
-    expect(server.logger.error).toHaveBeenCalledWith(expect.stringContaining('policy-2'));
-  });
 });
 
 describe('PackagePolicyService revision batcher sharing', () => {

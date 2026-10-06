@@ -148,31 +148,11 @@ export class PackagePolicyService {
    * methods), once each. Callers that pass `deferredBumps` must call this when
    * done, also on failure: those package policies were written with
    * `bumpRevision: false`, so Fleet does not redeploy them until this runs.
-   *
-   * Every policy is attempted even if another fails; the failures are logged
-   * and reported together.
    */
   async scheduleRevisionBumps(deferredBumps: Set<string>): Promise<void> {
     const policyIds = [...deferredBumps];
     deferredBumps.clear();
-
-    const results = await Promise.allSettled(
-      policyIds.map((policyId) => this.revisionBatcher.schedule([policyId]))
-    );
-    const failed = results.flatMap((result, index) =>
-      result.status === 'rejected' ? [{ policyId: policyIds[index], reason: result.reason }] : []
-    );
-    if (failed.length === 0) {
-      return;
-    }
-
-    const message = `Failed to bump the revision of ${failed.length} of ${
-      policyIds.length
-    } agent policies [${failed.map(({ policyId }) => policyId).join(', ')}]: ${
-      failed[0].reason?.message ?? failed[0].reason
-    }`;
-    this.server.logger.error(message);
-    throw new Error(message);
+    await this.revisionBatcher.schedule(policyIds);
   }
 
   private async scheduleOrDeferRevisionBumps(
