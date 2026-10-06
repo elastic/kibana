@@ -63,7 +63,7 @@ const OUTCOME_LOG_LEVEL: Record<Exclude<InboundIngressOutcome, 'rate_limited'>, 
 
 const ingressLogLevel = (fields: InboundIngressLogFields): IngressLogLevel => {
   if (fields.outcome === 'rate_limited') {
-    return fields.budget === 'connector' || fields.budget === 'inflight' ? 'info' : 'debug';
+    return fields.budget === 'connector' ? 'info' : 'debug';
   }
   return OUTCOME_LOG_LEVEL[fields.outcome];
 };

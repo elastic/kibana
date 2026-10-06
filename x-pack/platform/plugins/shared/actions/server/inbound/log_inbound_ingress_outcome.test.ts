@@ -70,7 +70,7 @@ describe('logInboundIngressOutcome', () => {
     );
   });
 
-  it('logs an address rate limit at debug and a connector rate limit at info', () => {
+  it('logs address and in-flight rate limits at debug and a connector rate limit at info', () => {
     const base = {
       spaceId: 'default',
       connectorId: 'c1',
@@ -86,6 +86,14 @@ describe('logInboundIngressOutcome', () => {
     logInboundIngressOutcome(logger, {
       ...base,
       outcome: 'rate_limited',
+      budget: 'inflight',
+      scope: 'process',
+      retryAfterSeconds: 1,
+      detail: 'budget=inflight scope=process retryAfter=1',
+    });
+    logInboundIngressOutcome(logger, {
+      ...base,
+      outcome: 'rate_limited',
       budget: 'connector',
       detail: 'budget=connector retryAfter=60',
     });
@@ -97,6 +105,16 @@ describe('logInboundIngressOutcome', () => {
           outcome: 'rate_limited',
           budget: 'remoteAddress',
           retryAfterSeconds: 60,
+        }),
+      })
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('detail=budget=inflight scope=process retryAfter=1'),
+      expect.objectContaining({
+        inboundEvents: expect.objectContaining({
+          budget: 'inflight',
+          scope: 'process',
+          retryAfterSeconds: 1,
         }),
       })
     );

@@ -152,7 +152,7 @@ describe('admitInboundEventRequest', () => {
         RateLimit: '"inbound-events";r=0;t=1',
       },
     });
-    expect(logger.info).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('detail=budget=inflight scope=process retryAfter=1'),
       expect.objectContaining({
         inboundEvents: expect.objectContaining({
@@ -180,7 +180,7 @@ describe('admitInboundEventRequest', () => {
     expect(denied.response.customError).toHaveBeenCalledWith(
       expect.objectContaining({ statusCode: 429 })
     );
-    expect(logger.info).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('scope=connector'),
       expect.anything()
     );
