@@ -17,7 +17,6 @@ import type {
   ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-server';
 import type {
-  AuditLogger,
   AuditServiceSetup,
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
@@ -29,6 +28,7 @@ import type { AuthenticatedUser, SecurityLicense } from '../../../common';
 import type { ServiceAccountAuditEventParams } from '../../audit';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../../audit';
 import { getDetailedErrorMessage } from '../../errors';
+import type { EnsureClusterPrivilegeParams } from '../cluster_privilege';
 import { ensureClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountsBackend } from '../types';
 
@@ -139,14 +139,16 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       );
     }
 
-    const workload = { plugin_id: pluginId, type: workloadType, id: workloadId };
-    const auditLogger = this.audit.asScoped(request);
-    await this.ensureCanManage(request, 'bind a service account to a workload', {
-      auditLogger,
-      action: ServiceAccountAuditAction.WORKLOAD_BIND,
-      serviceAccountId,
-      workload,
+    const bindingAudit = this.bindingAudit(request, {
+      plugin_id: pluginId,
+      type: workloadType,
+      id: workloadId,
     });
+    await this.ensureCanManage(
+      request,
+      'bind a service account to a workload',
+      bindingAudit.refused(ServiceAccountAuditAction.WORKLOAD_BIND, serviceAccountId)
+    );
 
     const spaceId = this.getSpaceId(request);
 
@@ -159,26 +161,9 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       spaceId,
     });
     if (previousServiceAccountId !== undefined && previousServiceAccountId !== serviceAccountId) {
-      auditLogger.log(
-        serviceAccountAuditEvent({
-          action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
-          serviceAccount: { id: previousServiceAccountId },
-          workload,
-          outcome: 'unknown',
-        })
-      );
+      bindingAudit.intent(ServiceAccountAuditAction.WORKLOAD_UNBIND, previousServiceAccountId);
     }
-
-    // Logged once authorized and issued before the write. The event is not awaited, so it records
-    // the intent rather than the result: whether the write succeeded is the server log's to tell.
-    auditLogger.log(
-      serviceAccountAuditEvent({
-        action: ServiceAccountAuditAction.WORKLOAD_BIND,
-        serviceAccount: { id: serviceAccountId },
-        workload,
-        outcome: 'unknown',
-      })
-    );
+    bindingAudit.intent(ServiceAccountAuditAction.WORKLOAD_BIND, serviceAccountId);
 
     const binding = await this.store.set({
       pluginId,
@@ -212,13 +197,16 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
     // Same gate as bindWorkload: unbinding a workload silently drops it to no identity at all, which is
     // as much a privileged change as granting one.
-    const workload = { plugin_id: pluginId, type: workloadType, id: workloadId };
-    const auditLogger = this.audit.asScoped(request);
-    await this.ensureCanManage(request, 'unbind a service account from a workload', {
-      auditLogger,
-      action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
-      workload,
+    const bindingAudit = this.bindingAudit(request, {
+      plugin_id: pluginId,
+      type: workloadType,
+      id: workloadId,
     });
+    await this.ensureCanManage(
+      request,
+      'unbind a service account from a workload',
+      bindingAudit.refused(ServiceAccountAuditAction.WORKLOAD_UNBIND)
+    );
 
     const spaceId = this.getSpaceId(request);
     const coordinates = { pluginId, workloadType, workloadId, spaceId };
@@ -226,14 +214,9 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     // The delete addresses the binding by its coordinates, so the account it takes the workload
     // from is read first, verified, for the event. Absent when there is no binding to remove or
     // the stored one cannot be trusted.
-    const serviceAccountId = await this.readBoundServiceAccountId(coordinates);
-    auditLogger.log(
-      serviceAccountAuditEvent({
-        action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
-        ...(serviceAccountId !== undefined ? { serviceAccount: { id: serviceAccountId } } : {}),
-        workload,
-        outcome: 'unknown',
-      })
+    bindingAudit.intent(
+      ServiceAccountAuditAction.WORKLOAD_UNBIND,
+      await this.readBoundServiceAccountId(coordinates)
     );
 
     const deleted = await this.store.delete(coordinates);
@@ -364,19 +347,47 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   }
 
   /**
-   * Refuses with a 403 unless the request may manage bindings. A refusal is audited as a failed
-   * attempt at the given event; other errors from the check (an unavailable cluster, say) are
-   * not, since they say nothing about authorization.
+   * The audit events of a binding change, logged on the request making it. Binding changes follow
+   * the convention for writes: `intent` is logged once the change is authorized and before it is
+   * written, and is not awaited, so it records the attempt rather than the result. `refused` is
+   * the failed attempt when the request may not manage bindings.
+   */
+  private bindingAudit(
+    request: KibanaRequest,
+    workload: NonNullable<ServiceAccountAuditEventParams['workload']>
+  ) {
+    const auditLogger = this.audit.asScoped(request);
+    const log = (
+      action: ServiceAccountAuditAction,
+      serviceAccountId: string | undefined,
+      result: { outcome: 'unknown' } | { error: Error }
+    ) =>
+      auditLogger.log(
+        serviceAccountAuditEvent({
+          action,
+          ...(serviceAccountId !== undefined ? { serviceAccount: { id: serviceAccountId } } : {}),
+          workload,
+          ...result,
+        })
+      );
+
+    return {
+      intent: (action: ServiceAccountAuditAction, serviceAccountId?: string) =>
+        log(action, serviceAccountId, { outcome: 'unknown' }),
+      refused: (action: ServiceAccountAuditAction, serviceAccountId?: string) => (error: Error) =>
+        log(action, serviceAccountId, { error }),
+    };
+  }
+
+  /**
+   * Refuses with a 403 unless the request may manage bindings, calling `onRefused` first. Other
+   * errors from the check (an unavailable cluster, say) say nothing about authorization, and do
+   * not call it.
    */
   private ensureCanManage(
     request: KibanaRequest,
     action: string,
-    audit: {
-      auditLogger: AuditLogger;
-      action: ServiceAccountAuditAction;
-      serviceAccountId?: string;
-      workload: NonNullable<ServiceAccountAuditEventParams['workload']>;
-    }
+    onRefused: EnsureClusterPrivilegeParams['onRefused']
   ): Promise<void> {
     return ensureClusterPrivilege({
       privilege: 'manage_security',
@@ -384,15 +395,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
       action,
-      onRefused: (error) =>
-        audit.auditLogger.log(
-          serviceAccountAuditEvent({
-            action: audit.action,
-            ...(audit.serviceAccountId ? { serviceAccount: { id: audit.serviceAccountId } } : {}),
-            workload: audit.workload,
-            error,
-          })
-        ),
+      onRefused,
     });
   }
 
