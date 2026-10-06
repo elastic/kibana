@@ -53,7 +53,7 @@ export interface InvestigationReport {
   proposals?: Array<Pick<InvestigationProposalSummary, 'title' | 'comment' | 'status'>>;
 }
 
-/** `running` while an agent or driver workflow works on the investigation, `complete` after. */
+/** `running` while the investigation agent runs, `complete` after. */
 export type InvestigationRunState = 'running' | 'complete';
 
 export interface InvestigationTaskOutput {
