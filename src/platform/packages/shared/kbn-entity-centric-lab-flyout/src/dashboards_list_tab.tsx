@@ -270,7 +270,7 @@ const getBasePath = (): string => {
  * so it merges with the dashboard's built-in search-source filters.
  * Time range goes in `_g` (global state).
  */
-const buildDashboardHref = (dashboard: DashboardDescriptor, entityName: string): string => {
+export const buildDashboardHref = (dashboard: DashboardDescriptor, entityName: string): string => {
   const id = dashboard.savedObjectId ?? dashboard.id;
   const basePath = getBasePath();
 

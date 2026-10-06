@@ -54,8 +54,8 @@ import { ServicesTab } from './services_tab';
 import { ProcessesTab } from './processes_tab';
 import { TracesTab } from './traces_tab';
 import { ProfilingTab } from './profiling_tab';
-import { DashboardsTab } from './dashboards_tab';
-import { DashboardsListTab } from './dashboards_list_tab';
+import { DashboardsTab, getOotbDashboards } from './dashboards_tab';
+import { DashboardsListTab, buildDashboardHref } from './dashboards_list_tab';
 import type { DashboardPreviewRequest } from './dashboards_list_tab';
 import { SlosTab } from './slos_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
@@ -252,10 +252,10 @@ type TabId = BuiltInTabId | string;
 const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'overview',
   'dashboards',
-  'logs',
-  'traces',
   'alerts',
   'slos',
+  'logs',
+  'traces',
   'services',
   'processes',
   'relationships',
@@ -277,13 +277,13 @@ const isBuiltInTabId = (id: string): id is BuiltInTabId =>
  */
 const CORE_TAB_IDS: readonly string[] = [
   'overview',
-  'logs',
-  'traces',
+  'dashboards',
   'alerts',
   'slos',
+  'logs',
+  'traces',
   'services',
   'processes',
-  'dashboards',
   'custom',
   'profiling',
 ];
@@ -321,6 +321,46 @@ const KIND_CATEGORY_ICON: Record<EntityKind, string> = {
   cloud: 'storage',
   middleware: 'logstashIf',
   llm: 'sparkles',
+};
+
+const DASHBOARD_PREVIEW_KEY = 'entityCentricLab_dashboardPreviewId';
+
+const persistDashboardPreviewId = (id: string | null): void => {
+  try {
+    if (id) sessionStorage.setItem(DASHBOARD_PREVIEW_KEY, id);
+    else sessionStorage.removeItem(DASHBOARD_PREVIEW_KEY);
+  } catch {
+    // sessionStorage unavailable
+  }
+};
+
+const scopedDashboardPreview = (
+  current: DashboardPreviewRequest | null,
+  entityName: string,
+  entityType?: string
+): DashboardPreviewRequest | null => {
+  const storedId = (() => {
+    try {
+      return sessionStorage.getItem(DASHBOARD_PREVIEW_KEY);
+    } catch {
+      return null;
+    }
+  })();
+  const nextDashboards = getOotbDashboards(entityName, entityType);
+  const preferredId = current?.dashboard.id ?? storedId;
+  const matching = preferredId
+    ? nextDashboards.find((dashboard) => dashboard.id === preferredId)
+    : undefined;
+  const nextDashboard =
+    matching ??
+    (current?.dashboard.savedObjectId ? current.dashboard : undefined) ??
+    (preferredId ? nextDashboards[0] : undefined);
+  if (!nextDashboard) return null;
+  return {
+    title: nextDashboard.title,
+    href: buildDashboardHref(nextDashboard, entityName),
+    dashboard: nextDashboard,
+  };
 };
 
 // ---------------------------------------------------------------------------
@@ -409,14 +449,29 @@ export const EntityFlyout = ({
   timeRange,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
-  // Default tab is the leftmost one in the (possibly reordered) tab list.
-  // `'overview'` is used as a seed only; the entityName-change effect and
-  // the "missing tab" effect below both rebase to whatever `tabs[0]` is
-  // once the override is resolved, so a user who dragged e.g. Metrics to
-  // the first position will land on Metrics.
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  // Restore the last tab immediately so clicking another inventory row
+  // while Dashboards is open does not flash Overview first.
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    try {
+      const preferred = sessionStorage.getItem('entityCentricLab_activeTab');
+      if (preferred) return preferred as TabId;
+    } catch {
+      // sessionStorage unavailable
+    }
+    return 'overview';
+  });
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
-  const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(null);
+  const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(() =>
+    scopedDashboardPreview(null, entityName, entityType)
+  );
+  const updateDashboardPreview = useCallback((preview: DashboardPreviewRequest | null) => {
+    setDashboardPreview(preview);
+    persistDashboardPreviewId(preview?.dashboard.id ?? null);
+  }, []);
+  const handleCloseFlyout = useCallback(() => {
+    persistDashboardPreviewId(null);
+    onClose();
+  }, [onClose]);
   const [dateStart, setDateStart] = useState(timeRange?.from ?? 'now-15m');
   const [dateEnd, setDateEnd] = useState(timeRange?.to ?? 'now');
   const handleTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
@@ -459,7 +514,8 @@ export const EntityFlyout = ({
   // Header badges always lead with the health indicator (see
   // {@link HEALTH_TAG_LABELS}); the remaining tags keep their per-kind order.
   // In Phase 1 (hideHealthBadge), order is: category → type → alerts,
-  // with overflow collapsed behind a clickable "+ N more" badge.
+  // with overflow collapsed behind a clickable "+ N more" badge after
+  // the first four.
   const orderedTags = useMemo(() => {
     if (hideHealthBadge) {
       const withoutHealth = overview.tags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
@@ -476,8 +532,8 @@ export const EntityFlyout = ({
     const rest = overview.tags.filter((_, index) => index !== healthIndex);
     return [overview.tags[healthIndex], ...rest];
   }, [overview.tags, hideHealthBadge, alertsBadge]);
-  // Number of always-visible badges (category + type + alerts) in Phase 1.
-  const VISIBLE_TAG_COUNT = hideHealthBadge && alertsBadge ? 3 : orderedTags.length;
+  // Phase 1: show up to 4 badges inline; the rest collapse into "+N".
+  const VISIBLE_TAG_COUNT = hideHealthBadge ? 4 : orderedTags.length;
   const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
   const visibleTags = orderedTags.slice(0, VISIBLE_TAG_COUNT);
   const overflowTags = orderedTags.slice(VISIBLE_TAG_COUNT);
@@ -772,28 +828,6 @@ export const EntityFlyout = ({
         }),
       },
       {
-        id: 'logs',
-        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.logs', {
-          defaultMessage: 'Logs',
-        }),
-      },
-      // Traces sits between Logs and Alerts in APM-style nav. The row is
-      // only seeded into `defaultTabs` when the per-kind builder has
-      // populated `tabsData.traces` — the override path below still
-      // accepts `'traces'` as a known id so a wizard-driven enable on
-      // a kind without trace data falls through to the empty-prompt
-      // placeholder rather than crashing.
-      ...(tabsData.traces
-        ? [
-            {
-              id: 'traces' as TabId,
-              label: i18n.translate('entityCentricLabFlyout.flyout.tabs.traces', {
-                defaultMessage: 'Traces',
-              }),
-            },
-          ]
-        : []),
-      {
         id: 'alerts',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.alerts', {
           defaultMessage: 'Alerts',
@@ -819,6 +853,27 @@ export const EntityFlyout = ({
           return breaching > 0 ? breaching : undefined;
         })(),
       },
+      {
+        id: 'logs',
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.logs', {
+          defaultMessage: 'Logs',
+        }),
+      },
+      // Traces follows Logs. Only seeded when the per-kind builder has
+      // populated `tabsData.traces` — the override path below still
+      // accepts `'traces'` as a known id so a wizard-driven enable on
+      // a kind without trace data falls through to the empty-prompt
+      // placeholder rather than crashing.
+      ...(tabsData.traces
+        ? [
+            {
+              id: 'traces' as TabId,
+              label: i18n.translate('entityCentricLabFlyout.flyout.tabs.traces', {
+                defaultMessage: 'Traces',
+              }),
+            },
+          ]
+        : []),
       ...(kind === 'host'
         ? [
             {
@@ -898,44 +953,72 @@ export const EntityFlyout = ({
     [tabs, hiddenTabIds]
   );
 
+  // Persist the chosen tab so entity swaps (and remounts after close /
+  // expand) reopen on the same tab. Shared with the full-page detail
+  // expand/back path via the same sessionStorage key.
+  const PREFERRED_TAB_KEY = 'entityCentricLab_activeTab';
+  const rememberTab = useCallback((tab: TabId) => {
+    try {
+      sessionStorage.setItem(PREFERRED_TAB_KEY, tab);
+    } catch {
+      // sessionStorage unavailable
+    }
+  }, []);
+
   // If the active tab disappears (override toggled it off, or the user
   // reordered everything and the previously-selected tab is gone), fall
   // back to the first tab so the body doesn't render an empty switch.
   useEffect(() => {
     if (visibleTabs.length === 0) return;
     if (!visibleTabs.some((tab) => tab.id === activeTab)) {
-      setActiveTab(visibleTabs[0].id);
+      const fallback = visibleTabs[0].id;
+      setActiveTab(fallback);
+      rememberTab(fallback);
     }
-  }, [visibleTabs, activeTab]);
+  }, [visibleTabs, activeTab, rememberTab]);
 
-  // Snap the active tab to whatever the override puts in the first slot.
-  // Fires on initial mount (`prevEntityRef` starts as `null`, so the very
-  // first render rebases off the `'overview'` seed) and on every entity
-  // swap (PayFlow story chain, Dependencies-row click, etc.). Skips the
-  // rebase when `visibleTabs` momentarily resolves to `[]` so we don't
-  // permanently pin the entity to a stale default — the ref only advances
-  // once the rebase actually runs.
+  // On entity swap (or first mount), restore the preferred tab when it's
+  // still available for this resource. Keeps Logs → Logs when the user
+  // clicks another row on the inventory while the flyout is open.
+  // Skips the rebase when `visibleTabs` momentarily resolves to `[]` so
+  // we don't permanently pin the entity to a stale default — the ref
+  // only advances once the rebase actually runs.
   const prevEntityRef = useRef<string | null>(null);
   useEffect(() => {
     if (prevEntityRef.current === entityName) return;
     if (visibleTabs.length === 0) return;
+    const isFirstMount = prevEntityRef.current === null;
     prevEntityRef.current = entityName;
-    setDashboardPreview(null);
-    // When returning from a full-page expand (back-navigation), restore
-    // the tab the user was on instead of resetting to the first tab.
-    const STORED_TAB_KEY = 'entityCentricLab_activeTab';
+    // Keep the dashboard overlay open across inventory clicks: re-scope the
+    // same dashboard when the new resource still has it, otherwise switch to
+    // that kind's first managed dashboard. Only dismiss when there is none.
+    setDashboardPreview((current) => {
+      const next = scopedDashboardPreview(current, entityName, entityType);
+      persistDashboardPreviewId(next?.dashboard.id ?? null);
+      return next;
+    });
+
+    let preferred: string | null = null;
     try {
-      const storedTab = sessionStorage.getItem(STORED_TAB_KEY);
-      sessionStorage.removeItem(STORED_TAB_KEY);
-      if (storedTab && visibleTabs.some((t) => t.id === storedTab)) {
-        setActiveTab(storedTab as TabId);
-        return;
-      }
+      preferred = sessionStorage.getItem(PREFERRED_TAB_KEY);
     } catch {
       // sessionStorage unavailable
     }
-    setActiveTab(visibleTabs[0].id);
-  }, [entityName, visibleTabs]);
+    if (preferred && visibleTabs.some((tab) => tab.id === preferred)) {
+      setActiveTab(preferred as TabId);
+      return;
+    }
+
+    if (isFirstMount) {
+      setActiveTab(visibleTabs[0].id);
+      return;
+    }
+
+    // Prefer keeping the in-memory tab across an in-session entity swap.
+    setActiveTab((current) =>
+      visibleTabs.some((tab) => tab.id === current) ? current : visibleTabs[0].id
+    );
+  }, [entityName, entityType, visibleTabs]);
 
   return (
     <EuiFlyoutResizable
@@ -948,7 +1031,7 @@ export const EntityFlyout = ({
       // `'inherit'` for the child) EUI's flyout manager docks the two
       // side by side. Undefined keeps the classic single-flyout behaviour.
       session={session}
-      onClose={onClose}
+      onClose={handleCloseFlyout}
       hideCloseButton
       size={dashboardPreview ? 'l' : size}
       aria-labelledby={titleId}
@@ -964,7 +1047,7 @@ export const EntityFlyout = ({
                   size="xs"
                   flush="left"
                   color="text"
-                  onClick={() => setDashboardPreview(null)}
+                  onClick={() => updateDashboardPreview(null)}
                   data-test-subj="entityCentricLabFlyoutDashboardPreviewBack"
                 >
                   {i18n.translate('entityCentricLabFlyout.flyout.dashboardPreview.back', {
@@ -982,7 +1065,7 @@ export const EntityFlyout = ({
                   )}
                   color="text"
                   display="empty"
-                  onClick={onClose}
+                  onClick={handleCloseFlyout}
                   data-test-subj="entityCentricLabFlyoutDashboardPreviewClose"
                 />
               </EuiFlexItem>
@@ -1054,7 +1137,7 @@ export const EntityFlyout = ({
               color="text"
               display="empty"
               size="xs"
-              onClick={onClose}
+              onClick={handleCloseFlyout}
               data-test-subj="entityCentricLabFlyoutClose"
             />
           </EuiFlexItem>
@@ -1129,7 +1212,11 @@ export const EntityFlyout = ({
             <EuiTab
               key={tab.id}
               isSelected={tab.id === activeTab}
-              onClick={() => { setActiveTab(tab.id); setDashboardPreview(null); }}
+              onClick={() => {
+                setActiveTab(tab.id);
+                rememberTab(tab.id);
+                updateDashboardPreview(null);
+              }}
               data-test-subj={`entityCentricLabFlyoutTab-${tab.id}`}
               append={
                 tab.appendBadge !== undefined ? (
@@ -1156,6 +1243,15 @@ export const EntityFlyout = ({
                   isAutoRefreshOnly={false}
                   compressed
                   width="auto"
+                  commonlyUsedRanges={[
+                    { start: 'now/d', end: 'now/d', label: 'Today' },
+                    { start: 'now-1m', end: 'now', label: 'Last 1 minute' },
+                    { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+                    { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
+                    { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+                    { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+                    { start: 'now-3d', end: 'now', label: 'Last 3 days' },
+                  ]}
                   updateButtonProps={{ iconOnly: true, fill: false, color: 'text' }}
                 />
               </EuiFlexItem>
@@ -1178,7 +1274,7 @@ export const EntityFlyout = ({
           hideEvents={hideEvents}
           dashboardStyle={dashboardStyle}
           showDashboardThumbnails={showDashboardThumbnails}
-          onPreviewDashboard={dashboardStyle === 'listWithPreview' ? setDashboardPreview : undefined}
+          onPreviewDashboard={dashboardStyle === 'listWithPreview' ? updateDashboardPreview : undefined}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

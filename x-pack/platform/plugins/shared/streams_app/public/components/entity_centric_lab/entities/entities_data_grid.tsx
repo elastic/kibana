@@ -317,15 +317,33 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
   ],
 };
 
-const defaultVisibleIdsFor = (bucketKey: string): string[] => {
+const defaultVisibleIdsFor = (bucketKey: string, isHomogeneous: boolean): string[] => {
+  const base = [...DEFAULT_VISIBLE_IDS];
+  if (!isHomogeneous) {
+    // Mixed-type tables: identity only, plus Type so the mix is readable.
+    const typeId = 'type';
+    const [name, ...rest] = base;
+    return [name, typeId, ...rest.filter((id) => id !== typeId)];
+  }
   const extra = getK8sContextColumnIds(bucketKey).defaultVisible;
   const metricIds = DEFAULT_METRICS_BY_BUCKET[bucketKey] ?? [];
-  const base = [...DEFAULT_VISIBLE_IDS];
   if (extra.length > 0) {
     const [name, health, ...rest] = base;
     return [name, health, ...extra, ...rest, ...metricIds];
   }
   return [...base, ...metricIds];
+};
+
+const rowBucketKey = (category: EntityCategoryId, entity: Entity): BucketKey => {
+  const groupLabel = category === 'kubernetes' ? entity.subType ?? entity.type : entity.type;
+  return bucketKeyFor(category, groupLabel);
+};
+
+/** True when every row shares one metric-catalog identity (Pods table, Clusters table, …). */
+const isHomogeneousTypeGroup = (category: EntityCategoryId, rows: readonly Entity[]): boolean => {
+  if (rows.length <= 1) return true;
+  const first = rowBucketKey(category, rows[0]);
+  return rows.every((entity) => rowBucketKey(category, entity) === first);
 };
 
 /** Pick a sensible default page size based on how many rows the table has. */
@@ -668,33 +686,48 @@ export const EntityDataGridSection = ({
 }: Props) => {
   const phase = useVariation('phase') as PhaseVariation;
   const isPhase1 = phase === 'phase1';
+  const isHomogeneous = useMemo(
+    () => isHomogeneousTypeGroup(category, rows),
+    [category, rows]
+  );
   // Bucket key = entity type identity (Kubernetes groups by sub-type, everyone
   // else by `.type`), matching the hex-map metric catalog so metric columns and
-  // the per-type column config line up.
+  // the per-type column config line up. Mixed tables use a dedicated key so
+  // they don't inherit a Pods/Clusters column layout from the first row.
   const bucketKey = useMemo<BucketKey>(() => {
+    if (!isHomogeneous) return `${category}:mixed`;
     const first = rows[0];
     const groupLabel = category === 'kubernetes' ? first?.subType ?? first?.type : first?.type;
     return bucketKeyFor(category, groupLabel);
-  }, [category, rows]);
+  }, [category, rows, isHomogeneous]);
 
-  // Metric columns for this bucket (minus Health and Alerts which have
-  // dedicated first-class columns already).
+  // Type-specific metrics (API latency, replica counts, …) only belong on a
+  // homogeneous table. A mixed bag would show signals that are meaningless
+  // for most rows.
   const metricColumns = useMemo<CatalogColumn[]>(
     () =>
-      getBucketMetrics(bucketKey)
-        .filter(
-          (metric) =>
-            metric.id !== ENTITY_HEALTH_METRIC_ID && metric.id !== ENTITY_ALERTS_METRIC_ID
-        )
-        .map((metric) => ({ id: `${METRIC_PREFIX}${metric.id}`, label: metric.label })),
-    [bucketKey]
+      isHomogeneous
+        ? getBucketMetrics(bucketKey)
+            .filter(
+              (metric) =>
+                metric.id !== ENTITY_HEALTH_METRIC_ID && metric.id !== ENTITY_ALERTS_METRIC_ID
+            )
+            .map((metric) => ({ id: `${METRIC_PREFIX}${metric.id}`, label: metric.label }))
+        : [],
+    [bucketKey, isHomogeneous]
   );
 
-  const k8sContext = useMemo(() => getK8sContextColumnIds(bucketKey), [bucketKey]);
+  const k8sContext = useMemo(
+    () =>
+      isHomogeneous
+        ? getK8sContextColumnIds(bucketKey)
+        : { defaultVisible: [] as const, hidden: [] as const },
+    [bucketKey, isHomogeneous]
+  );
   const defaultVisibleIds = useMemo(() => {
-    const ids = defaultVisibleIdsFor(bucketKey);
+    const ids = defaultVisibleIdsFor(bucketKey, isHomogeneous);
     return isPhase1 ? ids.filter((id) => !PHASE1_HIDDEN_COLUMN_IDS.has(id)) : ids;
-  }, [bucketKey, isPhase1]);
+  }, [bucketKey, isHomogeneous, isPhase1]);
 
   const catalog = useMemo<CatalogColumn[]>(() => {
     const allColumns = [

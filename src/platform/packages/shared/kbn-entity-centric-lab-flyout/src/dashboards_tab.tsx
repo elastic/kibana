@@ -17,7 +17,7 @@
  * so the shared package stays free of dashboard-plugin dependencies.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -121,6 +121,11 @@ const OOTB_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
       title: '[Kubernetes OTel] Deployment Detail',
       savedObjectTitle: '[Kubernetes OTel] Deployment Detail',
       scopeField: 'k8s.deployment.name',
+      hiddenPanelIds: new Set([
+        'v3-deployment-back-link',
+        'v3-wd-header-name',
+        'v4-wd-logs-card',
+      ]),
     },
   ],
   host: [
@@ -154,6 +159,7 @@ const WORKLOADS_DASHBOARD: DashboardDescriptor = {
   savedObjectTitle: '[Kubernetes OTel] Workloads',
   savedObjectId: 'kubernetes_otel-0b70c6de-4d53-47c4-9844-5f964ba04a6f',
   scopeField: 'k8s.workload.name',
+  hiddenPanelIds: new Set(['v3-workloads-back-link', 'v3-wd-header-name', 'v4-wd-logs-card']),
 };
 
 const TYPE_SPECIFIC_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
@@ -228,14 +234,41 @@ export const DashboardsTab = ({
     return [...ootbDashboards, ...userDashboards];
   }, [ootbDashboards, linkedDashboards]);
 
-  const [selectedId, setSelectedId] = useState<string>(() => dashboards[0]?.id ?? '');
+  const PREFERRED_DASHBOARD_KEY = 'entityCentricLab_dashboardId';
+  const [selectedId, setSelectedId] = useState<string>(() => {
+    try {
+      const preferred = sessionStorage.getItem(PREFERRED_DASHBOARD_KEY);
+      if (preferred) return preferred;
+    } catch {
+      // sessionStorage unavailable
+    }
+    return dashboards[0]?.id ?? '';
+  });
 
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedId(event.target.value);
-    },
-    []
-  );
+  // Keep the last-picked dashboard when the entity changes if that
+  // dashboard still exists for the new kind; otherwise fall back to the
+  // first OOTB dashboard for this resource.
+  useEffect(() => {
+    if (dashboards.length === 0) return;
+    if (dashboards.some((dashboard) => dashboard.id === selectedId)) return;
+    const nextId = dashboards[0].id;
+    setSelectedId(nextId);
+    try {
+      sessionStorage.setItem(PREFERRED_DASHBOARD_KEY, nextId);
+    } catch {
+      // sessionStorage unavailable
+    }
+  }, [dashboards, selectedId]);
+
+  const handleChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextId = event.target.value;
+    setSelectedId(nextId);
+    try {
+      sessionStorage.setItem(PREFERRED_DASHBOARD_KEY, nextId);
+    } catch {
+      // sessionStorage unavailable
+    }
+  }, []);
 
   const selectedDashboard = useMemo(
     () => dashboards.find((d) => d.id === selectedId) ?? dashboards[0],

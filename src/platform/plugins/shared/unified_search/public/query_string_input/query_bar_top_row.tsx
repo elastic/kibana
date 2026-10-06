@@ -31,7 +31,7 @@ import {
   EsqlEditorActionsProvider,
   type ESQLEditorProps,
 } from '@kbn/esql/public';
-import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
+import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme, DurationRange } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -146,6 +146,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  /**
+   * Override the global `timepicker:quickRanges` shortcuts for this picker only.
+   * When omitted, the uiSetting default is used.
+   */
+  commonlyUsedRanges?: DurationRange[];
   disableAutoFocus?: boolean;
   fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
@@ -451,7 +456,10 @@ export const QueryBarTopRow = React.memo(
       timeHistory$,
       toRecentlyUsedRanges(timeHistory?.get() ?? [])
     );
-    const [commonlyUsedRanges] = useState(() => {
+    const commonlyUsedRanges = useMemo(() => {
+      if (props.commonlyUsedRanges && props.commonlyUsedRanges.length > 0) {
+        return props.commonlyUsedRanges;
+      }
       return (
         uiSettings
           ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
@@ -463,7 +471,7 @@ export const QueryBarTopRow = React.memo(
             };
           }) ?? []
       );
-    });
+    }, [props.commonlyUsedRanges, uiSettings]);
 
     const onSubmit = useCallback(
       ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {

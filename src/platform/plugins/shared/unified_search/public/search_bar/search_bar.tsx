@@ -94,6 +94,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   minRefreshInterval?: number;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  /** Override commonly-used shortcuts for this SearchBar's date picker only. */
+  commonlyUsedRanges?: QueryBarTopRowProps['commonlyUsedRanges'];
   // Query bar - should be in SearchBarInjectedDeps
   query?: QT | Query;
   // Show when user has privileges to save. See `canShowSavedQuery(...)` lib.
@@ -755,6 +757,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
+          commonlyUsedRanges={this.props.commonlyUsedRanges}
           isRefreshPaused={this.props.isRefreshPaused}
           refreshInterval={this.props.refreshInterval}
           minRefreshInterval={this.props.minRefreshInterval}

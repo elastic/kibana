@@ -100,7 +100,13 @@ const SeedDemoDataButton = () => {
         indexed: number;
         failed: number;
         hours: number;
-        topology: { nodes: number; namespaces: number; deployments: number; pods: number };
+        topology: {
+          clusters: number;
+          nodes: number;
+          namespaces: number;
+          deployments: number;
+          pods: number;
+        };
       }>('/internal/streams/entity_centric_lab/seed_k8s_data', {
         body: JSON.stringify({ hours: 8, intervalMinutes: 5, deleteExisting: true }),
       });
@@ -108,7 +114,9 @@ const SeedDemoDataButton = () => {
         setStatus('success');
         setResult(
           `${resp.indexed.toLocaleString()} docs over ${resp.hours}h — ` +
-          `${resp.topology.nodes} nodes, ${resp.topology.pods} pods`
+            `${resp.topology.clusters} clusters, ${resp.topology.nodes} nodes, ` +
+            `${resp.topology.namespaces} ns, ${resp.topology.deployments} deploys, ` +
+            `${resp.topology.pods} pods`
         );
       } else {
         setStatus('error');
@@ -131,7 +139,11 @@ const SeedDemoDataButton = () => {
             <EuiText size="xs" color={status === 'error' ? 'danger' : 'success'}>
               <p>{result}</p>
             </EuiText>
-          ) : undefined
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <p>Seeds K8s resources with active alerts, including deployments.</p>
+            </EuiText>
+          )
         }
       >
         <EuiButton

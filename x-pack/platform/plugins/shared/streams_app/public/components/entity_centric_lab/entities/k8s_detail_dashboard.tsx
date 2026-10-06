@@ -17,6 +17,82 @@ import { useKibana } from '../../../hooks/use_kibana';
 type DashboardWidgets = NonNullable<
   ReturnType<DashboardApi['getSerializedState']>['attributes']['panels']
 >;
+type DashboardWidget = DashboardWidgets[number];
+
+const isDashboardSectionWidget = (
+  widget: DashboardWidget
+): widget is DashboardWidget & { panels: DashboardWidgets } =>
+  'panels' in widget && Array.isArray((widget as { panels?: unknown }).panels);
+
+const OVERVIEW_BACK_LINK_PATTERN = /(?:<\s*overview\b|\[overview\])/i;
+
+const collectOverviewCandidates = (value: unknown, acc: string[], depth = 0): void => {
+  if (depth > 4 || value == null) return;
+  if (typeof value === 'string') {
+    acc.push(value);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectOverviewCandidates(item, acc, depth + 1));
+    return;
+  }
+  if (typeof value !== 'object') return;
+  for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+    if (
+      key === 'content' ||
+      key === 'markdown' ||
+      key === 'title' ||
+      key === 'label' ||
+      key === 'description' ||
+      key === 'links' ||
+      key === 'attributes'
+    ) {
+      collectOverviewCandidates(nested, acc, depth + 1);
+    }
+  }
+};
+
+const configLooksLikeOverviewBackLink = (config: unknown): boolean => {
+  const candidates: string[] = [];
+  collectOverviewCandidates(config, candidates);
+  return candidates.some((text) => OVERVIEW_BACK_LINK_PATTERN.test(text) || /^overview$/i.test(text.trim()));
+};
+
+const isMarkdownOrLinksPanel = (widget: DashboardWidget): boolean => {
+  const type = 'type' in widget && typeof widget.type === 'string' ? widget.type : '';
+  return /markdown|links/i.test(type);
+};
+
+const shouldHideWidget = (widget: DashboardWidget, hiddenPanelIds: ReadonlySet<string>): boolean => {
+  const id = 'id' in widget && typeof widget.id === 'string' ? widget.id : '';
+  if (id && (hiddenPanelIds.has(id) || /back-link/i.test(id))) return true;
+  return (
+    isMarkdownOrLinksPanel(widget) &&
+    'config' in widget &&
+    configLooksLikeOverviewBackLink(widget.config)
+  );
+};
+
+const hasHiddenWidget = (
+  widgets: DashboardWidgets,
+  hiddenPanelIds: ReadonlySet<string>
+): boolean =>
+  widgets.some((widget) =>
+    isDashboardSectionWidget(widget)
+      ? hasHiddenWidget(widget.panels, hiddenPanelIds)
+      : shouldHideWidget(widget, hiddenPanelIds)
+  );
+
+const pruneHiddenWidgets = (
+  widgets: DashboardWidgets,
+  hiddenPanelIds: ReadonlySet<string>
+): DashboardWidgets =>
+  widgets.flatMap((widget) => {
+    if (isDashboardSectionWidget(widget)) {
+      return [{ ...widget, panels: pruneHiddenWidgets(widget.panels, hiddenPanelIds) }];
+    }
+    return shouldHideWidget(widget, hiddenPanelIds) ? [] : [widget];
+  });
 
 /**
  * Describes how to embed one of the Fleet-installed OpenTelemetry Kubernetes
@@ -134,6 +210,12 @@ export const K8sDetailDashboard = ({
 
   const { dashboardTitle, scopeField, hiddenPanelIds } = config;
 
+  // Drop the previous embeddable when the resource changes so prune / filter
+  // effects bind to the remounted renderer (keyed on resourceName below).
+  useEffect(() => {
+    setDashboardApi(undefined);
+  }, [resourceName, dashboardId]);
+
   // Resolve the saved-object id by title. `undefined` = resolving, `null` =
   // not found (package not installed in this space). Re-runs if the kind (and
   // thus the title) changes while the flyout is open.
@@ -194,20 +276,25 @@ export const K8sDetailDashboard = ({
     [rangeFrom, rangeTo, scopeFilter]
   );
 
-  // Strip the stock dashboard's navigation cards / header row once it loads —
-  // they make no sense embedded in the flyout. Declared before the filter
-  // effect so the one-off `setState` doesn't clobber the scope filter below.
+  // Strip the stock "< Overview" back-link (and other flyout-useless cards)
+  // after the saved-object layout has actually loaded. `onApiAvailable` fires
+  // before panels exist, so we re-run on `layout$`. Also match versioned
+  // `*-back-link` ids and markdown/links panels whose copy is just Overview,
+  // because Fleet package panel indices drift across versions.
   useEffect(() => {
     if (!dashboardApi) return;
-    const { attributes } = dashboardApi.getSerializedState();
-    const widgets: DashboardWidgets = attributes.panels ?? [];
-    // Hidden entries are all top-level cards, so a flat filter is enough
-    // (sections only ever contain real chart panels). Both panels and sections
-    // carry an optional `id`; only panel ids are in the hidden set.
-    const nextPanels = widgets.filter((widget) => !(widget.id && hiddenPanelIds.has(widget.id)));
-    if (nextPanels.length !== widgets.length) {
-      dashboardApi.setState({ ...attributes, panels: nextPanels });
-    }
+    const applyPrune = () => {
+      const { attributes } = dashboardApi.getSerializedState();
+      const widgets: DashboardWidgets = attributes.panels ?? [];
+      if (widgets.length === 0 || !hasHiddenWidget(widgets, hiddenPanelIds)) return;
+      dashboardApi.setState({
+        ...attributes,
+        panels: pruneHiddenWidgets(widgets, hiddenPanelIds),
+      });
+    };
+    applyPrune();
+    const subscription = dashboardApi.layout$.subscribe(() => applyPrune());
+    return () => subscription.unsubscribe();
   }, [dashboardApi, hiddenPanelIds]);
 
   // Keep the embedded dashboard in sync when the resource or time range
@@ -266,6 +353,7 @@ export const K8sDetailDashboard = ({
       data-test-subj="entityCentricLabK8sDetailDashboard"
     >
       <DashboardRenderer
+        key={`${dashboardId}::${resourceName}`}
         savedObjectId={dashboardId}
         getCreationOptions={getCreationOptions}
         onApiAvailable={setDashboardApi}

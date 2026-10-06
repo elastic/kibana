@@ -225,9 +225,15 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
     enabled: true,
   },
   {
-    id: 'metrics',
-    label: 'Metrics',
-    description: 'Charts for key signals',
+    id: 'alerts',
+    label: 'Alerts',
+    description: 'Active and historical alerts for this entity',
+    enabled: true,
+  },
+  {
+    id: 'slos',
+    label: 'SLOs',
+    description: 'Service level objectives for this entity',
     enabled: true,
   },
   {
@@ -243,9 +249,21 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
     enabled: entityTypeId === 'apm-service',
   },
   {
-    id: 'alerts',
-    label: 'Alerts',
-    description: 'Active and historical alerts for this entity',
+    id: 'services',
+    label: 'Services',
+    description: 'Services running on this host',
+    enabled: entityTypeId === 'host',
+  },
+  {
+    id: 'processes',
+    label: 'Processes',
+    description: 'Processes running on this host',
+    enabled: entityTypeId === 'host',
+  },
+  {
+    id: 'metrics',
+    label: 'Metrics',
+    description: 'Charts for key signals',
     enabled: true,
   },
   {

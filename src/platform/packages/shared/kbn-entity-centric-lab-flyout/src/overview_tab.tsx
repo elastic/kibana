@@ -30,10 +30,34 @@ import type { MetricDatum } from '@elastic/charts';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import { useEntityFlyoutServices } from './services_context';
 import { labThingLabel } from './lab_terminology';
-import type { EntityOverview, GoldenSignal, GoldenSignalLevel } from './fake_entity_overview';
+import type {
+  EntityDetailRow,
+  EntityOverview,
+  GoldenSignal,
+  GoldenSignalLevel,
+} from './fake_entity_overview';
 import { formatGoldenSignalValue } from './fake_entity_overview';
 import type { MetricsTabData, MetricEvent } from './fake_entity_tabs';
 import { MetricChartCard } from './metrics_tab';
+
+/** Identity fields that duplicate the flyout / full-page title. */
+const IDENTITY_DETAIL_IDS: ReadonlySet<string> = new Set([
+  'clusterName',
+  'nodeName',
+  'podName',
+  'serviceName',
+  'hostname',
+  'name',
+  'instanceId',
+  'functionName',
+  'bucketName',
+]);
+
+const withoutRedundantName = (
+  rows: readonly EntityDetailRow[],
+  displayName: string
+): readonly EntityDetailRow[] =>
+  rows.filter((row) => row.value !== displayName && !IDENTITY_DETAIL_IDS.has(row.id));
 
 interface OverviewTabProps {
   readonly overview: EntityOverview;
@@ -101,13 +125,14 @@ export const OverviewTab = ({ overview, metrics, hideAiSummary = false, hideOwne
         data-test-subj="entityCentricLabOverviewEntityDetails"
       >
         <KeyValueGrid
-          rows={
+          rows={withoutRedundantName(
             resourceCopy
               ? overview.details.map((row) =>
                   row.label === 'Entity id' ? { ...row, label: 'Resource id' } : row
                 )
-              : overview.details
-          }
+              : overview.details,
+            overview.displayName
+          )}
           ariaLabel={i18n.translate(
             'entityCentricLabFlyout.flyout.overview.entityDetailsAriaLabel',
             {

@@ -34,6 +34,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiSuperDatePicker,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -87,6 +88,7 @@ import {
 } from './entity_lab_rule_summary_flyout';
 import { StreamsElasticOnAlertsTab } from './streams_elastic_on_alerts_tab';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 import { K8sDetailDashboard } from './k8s_detail_dashboard';
 import { podPhaseBadgeForEntity } from './bucket_metrics';
@@ -135,15 +137,15 @@ type TabId = BuiltInTabId | string;
 
 const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'overview',
-  'metrics',
-  'logs',
-  'traces',
+  'dashboards',
   'alerts',
   'slos',
+  'logs',
+  'traces',
   'services',
   'processes',
   'relationships',
-  'dashboards',
+  'metrics',
   'custom',
   'profiling',
 ];
@@ -152,6 +154,10 @@ const isBuiltInTabId = (id: string): id is BuiltInTabId =>
   (BUILT_IN_TAB_IDS as readonly string[]).includes(id);
 
 const FULL_TAB_IDS: readonly string[] = [...BUILT_IN_TAB_IDS];
+
+/** Matches the flyout: show up to 4 badges inline, collapse the rest into "+N". */
+const VISIBLE_TAG_COUNT_PHASE1 = 4;
+const PREFERRED_TAB_KEY = 'entityCentricLab_activeTab';
 
 // ---------------------------------------------------------------------------
 // Tab content (reuses flyout tab components)
@@ -380,6 +386,12 @@ const EntityDetailPageInner = () => {
     return [overview.tags[healthIndex], ...rest];
   }, [overview.tags, isPhase1, entity]);
 
+  const visibleTagCount = isPhase1 ? VISIBLE_TAG_COUNT_PHASE1 : orderedTags.length;
+  const visibleTags = orderedTags.slice(0, visibleTagCount);
+  const overflowTags = orderedTags.slice(visibleTagCount);
+  const overflowCount = overflowTags.length;
+  const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
+
   const podPhaseBadge = useMemo(() => podPhaseBadgeForEntity(entity), [entity]);
 
   // Tab template override (wizard customisations)
@@ -408,22 +420,6 @@ const EntityDetailPageInner = () => {
         }),
       },
       {
-        id: 'logs',
-        label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.logs', {
-          defaultMessage: 'Logs',
-        }),
-      },
-      ...(tabsData.traces
-        ? [
-            {
-              id: 'traces' as TabId,
-              label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.traces', {
-                defaultMessage: 'Traces',
-              }),
-            },
-          ]
-        : []),
-      {
         id: 'alerts',
         label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.alerts', {
           defaultMessage: 'Alerts',
@@ -443,6 +439,22 @@ const EntityDetailPageInner = () => {
           return breaching > 0 ? breaching : undefined;
         })(),
       },
+      {
+        id: 'logs',
+        label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.logs', {
+          defaultMessage: 'Logs',
+        }),
+      },
+      ...(tabsData.traces
+        ? [
+            {
+              id: 'traces' as TabId,
+              label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.traces', {
+                defaultMessage: 'Traces',
+              }),
+            },
+          ]
+        : []),
       ...(kind === 'host'
         ? [
             {
@@ -513,11 +525,17 @@ const EntityDetailPageInner = () => {
     [tabs, isPhase1]
   );
 
-  const [activeTab, setActiveTab] = useState<TabId>(() => {
-    const STORED_TAB_KEY = 'entityCentricLab_activeTab';
+  const rememberTab = useCallback((tab: TabId) => {
     try {
-      const stored = sessionStorage.getItem(STORED_TAB_KEY);
-      sessionStorage.removeItem(STORED_TAB_KEY);
+      sessionStorage.setItem(PREFERRED_TAB_KEY, tab);
+    } catch {
+      // sessionStorage unavailable
+    }
+  }, []);
+
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    try {
+      const stored = sessionStorage.getItem(PREFERRED_TAB_KEY);
       if (stored) return stored as TabId;
     } catch {
       // sessionStorage unavailable
@@ -525,13 +543,15 @@ const EntityDetailPageInner = () => {
     return 'overview';
   });
 
-  // Fall back when active tab disappears
+  // Fall back when active tab disappears (and remember the fallback).
   useEffect(() => {
     if (visibleTabs.length === 0) return;
     if (!visibleTabs.some((tab) => tab.id === activeTab)) {
-      setActiveTab(visibleTabs[0].id);
+      const fallback = visibleTabs[0].id;
+      setActiveTab(fallback);
+      rememberTab(fallback);
     }
-  }, [visibleTabs, activeTab]);
+  }, [visibleTabs, activeTab, rememberTab]);
 
   // Child entity flyout (opened from Relationships tab)
   const [childEntityName, setChildEntityName] = useState<string | null>(null);
@@ -559,6 +579,22 @@ const EntityDetailPageInner = () => {
   const childEntityRegion = childEntityContext?.region ?? childEntity?.tags.region;
 
   const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+  const handleTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
+    updateTimeRange({ from: start, to: end });
+  }, [updateTimeRange]);
+  const detailCommonlyUsedRanges = useMemo(
+    () => [
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+      { start: 'now-1m', end: 'now', label: 'Last 1 minute' },
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+      { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
+      { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+      { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+      { start: 'now-3d', end: 'now', label: 'Last 3 days' },
+    ],
+    []
+  );
 
   // Dashboards tab: embed a specific dashboard by its saved-object title.
   // User-linked dashboards carry a `savedObjectId` directly so the renderer
@@ -664,18 +700,14 @@ const EntityDetailPageInner = () => {
   // Otherwise navigate to the category page with `?entity=` so the flyout
   // opens on arrival rather than just closing.
   const handleBack = useCallback(() => {
-    try {
-      sessionStorage.setItem('entityCentricLab_activeTab', activeTab);
-    } catch {
-      // ignore
-    }
+    rememberTab(activeTab);
     if (detailVariation === 'flyoutExpandable' && cameFromApp.current) {
       history.goBack();
       return;
     }
     const basePath = entity?.category ? `/entities/${entity.category}` : '/entities';
     history.push(`${basePath}?entity=${encodeURIComponent(entityName)}`);
-  }, [entity, entityName, detailVariation, history, activeTab]);
+  }, [entity, entityName, detailVariation, history, activeTab, rememberTab]);
 
   // "Add to filter" — stashes the entity's K8s context in sessionStorage
   // and navigates back to the inventory so the main page can apply filters.
@@ -1005,7 +1037,11 @@ const EntityDetailPageInner = () => {
           tabs={visibleTabs.map((tab) => ({
             label: tab.label,
             isSelected: tab.id === activeTab,
-            onClick: () => { setActiveTab(tab.id); setDashboardPreview(null); },
+            onClick: () => {
+              setActiveTab(tab.id);
+              rememberTab(tab.id);
+              setDashboardPreview(null);
+            },
             'data-test-subj': `entityDetailPageTab-${tab.id}`,
             append:
               tab.appendBadge !== undefined ? (
@@ -1016,7 +1052,7 @@ const EntityDetailPageInner = () => {
           }))}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
-            {orderedTags.map((tag) => (
+            {visibleTags.map((tag) => (
               <EuiFlexItem grow={false} key={tag.label}>
                 <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
               </EuiFlexItem>
@@ -1028,10 +1064,73 @@ const EntityDetailPageInner = () => {
                 </EuiBadge>
               </EuiFlexItem>
             ) : null}
+            {overflowCount > 0 ? (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  button={
+                    <EuiBadge
+                      color="hollow"
+                      onClick={() => setIsOverflowPopoverOpen((prev) => !prev)}
+                      onClickAriaLabel={i18n.translate(
+                        'xpack.streams.entityCentricLab.detailPage.showMoreTags',
+                        {
+                          defaultMessage: 'Show {count} more tags',
+                          values: { count: overflowCount },
+                        }
+                      )}
+                      data-test-subj="entityDetailPageShowMoreTags"
+                    >
+                      {`+${overflowCount}`}
+                    </EuiBadge>
+                  }
+                  isOpen={isOverflowPopoverOpen}
+                  closePopover={() => setIsOverflowPopoverOpen(false)}
+                  panelPaddingSize="s"
+                  anchorPosition="downLeft"
+                >
+                  <EuiFlexGroup
+                    gutterSize="xs"
+                    wrap
+                    responsive={false}
+                    css={css`
+                      max-width: 300px;
+                    `}
+                  >
+                    {overflowTags.map((tag) => (
+                      <EuiFlexItem grow={false} key={tag.label}>
+                        <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiPopover>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </StreamsAppPageTemplate.Header>
         <StreamsAppPageTemplate.Body>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+            {activeTab === 'dashboards' &&
+            (dashboardStyleVariation === 'list' ||
+              dashboardStyleVariation === 'listWithPreview') ? null : (
+              <>
+                <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiSuperDatePicker
+                      start={rangeFrom}
+                      end={rangeTo}
+                      onTimeChange={handleTimeChange}
+                      isAutoRefreshOnly={false}
+                      compressed
+                      width="auto"
+                      commonlyUsedRanges={detailCommonlyUsedRanges}
+                      updateButtonProps={{ iconOnly: true, fill: false, color: 'text' }}
+                      data-test-subj="entityDetailPageTimePicker"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+              </>
+            )}
             <PageTabContent
               activeTab={activeTab}
               activeTabLabel={visibleTabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}

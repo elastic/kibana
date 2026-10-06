@@ -17,57 +17,156 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 
 // ---------------------------------------------------------------------------
-// Entity topology (matches fake_entities.ts)
-// ---------------------------------------------------------------------------
-const C1 = 'k8s-eu-prod';
-const C2 = 'k8s-us-prod';
+// Entity topology — names match fake_entities.ts. Only resources with
+// active inventory alerts are indexed (same health/alert hash as the list).
+const CLUSTERS = ['k8s-eu-prod', 'k8s-us-prod'] as const;
+const NODE_COUNT = 48;
+const NAMESPACE_COUNT = 8;
+const DEPLOYMENT_COUNT = 96;
+const POD_COUNT = 597;
 
-const ALL_NS = [
-  'payments',
-  'checkout',
-  'fraud',
-  'settlement',
-  'kube-system',
-  'ns-05',
-  'ns-06',
-  'ns-07',
-  'ns-08',
-] as const;
-const NS_CLUSTER: Record<string, string> = {
-  payments: C1,
-  checkout: C1,
-  fraud: C1,
-  settlement: C2,
-  'kube-system': C2,
-  'ns-05': C1,
-  'ns-06': C2,
-  'ns-07': C2,
-  'ns-08': C1,
-};
-
-const buildNodes = () => {
-  const nodes: Array<{ name: string; cluster: string }> = [
-    { name: 'node-prod-eu-04', cluster: C1 },
-  ];
-  for (let i = 1; i <= 24; i++) {
-    const name = `node-${String(i).padStart(3, '0')}`;
-    nodes.push({ name, cluster: i % 2 === 1 ? C1 : C2 });
-  }
-  return nodes;
-};
-
-const SEED_PODS = [
+const NODE_SEED = ['node-prod-eu-04'] as const;
+const NODE_SEED_HEALTH = ['unhealthy'] as const;
+const NAMESPACE_SEED = ['payments', 'checkout', 'fraud', 'settlement'] as const;
+const NAMESPACE_SEED_HEALTH = ['unhealthy', 'unhealthy', 'healthy', 'atRisk'] as const;
+const POD_SEED = [
   'payments-pod-7f9b2',
-  'payments-pod-3ac1f',
   'batch-settlement-job-xk2p',
+  'payments-pod-3ac1f',
   'fraud-pod-9a1c',
-];
-const SEED_POD_NODES = ['node-prod-eu-04', 'node-001', 'node-002', 'node-003'];
-const SEED_POD_NS = ['payments', 'payments', 'settlement', 'fraud'];
-const SEED_POD_DEPLOY = ['payments-api', 'payments-api', 'deployment-001', 'fraud-detector'];
+] as const;
+const POD_SEED_HEALTH = ['unhealthy', 'atRisk', 'healthy', 'healthy'] as const;
+const CLUSTER_SEED_HEALTH = ['atRisk', 'healthy'] as const;
+const SEED_KINDS = new Set(['Clusters', 'Nodes', 'Namespaces', 'Deployments', 'Pods']);
 
-const NAMED_DEPLOYS = ['payments-api', 'checkout-svc', 'fraud-detector'];
-const NAMED_DEPLOY_NS = ['payments', 'checkout', 'fraud'];
+const REGION_VALUES = [
+  'us-east-1',
+  'us-west-2',
+  'eu-west-1',
+  'eu-central-1',
+  'ap-southeast-1',
+  'ap-northeast-1',
+  'sa-east-1',
+  'af-south-1',
+] as const;
+const AILING_REGION = 'sa-east-1';
+const STORY_ACTIVE_ALERTS = new Set(['payments-pod-7f9b2', 'node-prod-eu-04']);
+
+const padIndex = (index: number, width: number): string =>
+  String(index + 1).padStart(width, '0');
+
+const inventoryHash = (input: string): number => {
+  let hash = 5381;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 33 + input.charCodeAt(i)) % 2147483647;
+  }
+  return hash;
+};
+
+const pickFrom = (pool: readonly string[], key: string): string =>
+  pool[inventoryHash(key) % pool.length];
+
+type LabHealth = 'healthy' | 'atRisk' | 'unhealthy';
+
+const seededHealth = (seed: number, index: number): LabHealth => {
+  const value = (seed * 31 + index * 17) % 100;
+  if (value < 25) return 'unhealthy';
+  if (value < 55) return 'atRisk';
+  return 'healthy';
+};
+
+const regionAdjustedHealth = (base: LabHealth, region: string): LabHealth => {
+  if (region === AILING_REGION) return 'unhealthy';
+  return base === 'unhealthy' ? 'atRisk' : base;
+};
+
+const hasActiveAlerts = (name: string, health: LabHealth): boolean => {
+  if (STORY_ACTIVE_ALERTS.has(name)) return true;
+  const h = inventoryHash(`alerts-${name}`) % 100;
+  const activeMax = health === 'unhealthy' ? 70 : health === 'atRisk' ? 30 : 5;
+  const clearMax = health === 'unhealthy' ? 90 : health === 'atRisk' ? 80 : 75;
+  if (h >= clearMax) return false;
+  return h < activeMax;
+};
+
+interface KindSpec {
+  label: string;
+  total: number;
+  seedNames: readonly string[];
+  seedHealth: readonly LabHealth[];
+  fallback: (index: number) => string;
+}
+
+const K8S_SPECS: readonly KindSpec[] = [
+  {
+    label: 'Clusters',
+    total: 2,
+    seedNames: CLUSTERS,
+    seedHealth: CLUSTER_SEED_HEALTH,
+    fallback: (i) => `cluster-${padIndex(i, 2)}`,
+  },
+  {
+    label: 'Nodes',
+    total: NODE_COUNT,
+    seedNames: NODE_SEED,
+    seedHealth: NODE_SEED_HEALTH,
+    fallback: (i) => `node-${padIndex(i, 3)}`,
+  },
+  {
+    label: 'Namespaces',
+    total: NAMESPACE_COUNT,
+    seedNames: NAMESPACE_SEED,
+    seedHealth: NAMESPACE_SEED_HEALTH,
+    fallback: (i) => `ns-${padIndex(i, 2)}`,
+  },
+  {
+    label: 'Pods',
+    total: POD_COUNT,
+    seedNames: POD_SEED,
+    seedHealth: POD_SEED_HEALTH,
+    fallback: (i) => `pod-${padIndex(i, 3)}`,
+  },
+  { label: 'Containers', total: 320, seedNames: [], seedHealth: [], fallback: (i) => `container-${padIndex(i, 3)}` },
+  {
+    label: 'Deployments',
+    total: DEPLOYMENT_COUNT,
+    seedNames: [],
+    seedHealth: [],
+    fallback: (i) => `deployment-${padIndex(i, 3)}`,
+  },
+  { label: 'ReplicaSets', total: 12, seedNames: [], seedHealth: [], fallback: (i) => `replicaset-${padIndex(i, 3)}` },
+  { label: 'StatefulSets', total: 4, seedNames: [], seedHealth: [], fallback: (i) => `statefulset-${padIndex(i, 2)}` },
+  { label: 'DaemonSets', total: 3, seedNames: [], seedHealth: [], fallback: (i) => `daemonset-${padIndex(i, 2)}` },
+  { label: 'CronJobs', total: 5, seedNames: [], seedHealth: [], fallback: (i) => `cronjob-${padIndex(i, 2)}` },
+];
+
+const namesForSpec = (spec: KindSpec): string[] =>
+  Array.from({ length: spec.total }, (_, i) => spec.seedNames[i] ?? spec.fallback(i));
+
+const alertingNamesByKind = (): Record<string, Set<string>> => {
+  const salt = inventoryHash('kubernetes');
+  const byKind: Record<string, Set<string>> = {};
+  for (const label of SEED_KINDS) byKind[label] = new Set();
+  let runningOffset = 0;
+  for (const spec of K8S_SPECS) {
+    for (let i = 0; i < spec.total; i++) {
+      const name = spec.seedNames[i] ?? spec.fallback(i);
+      const globalIndex = runningOffset + i;
+      const region =
+        REGION_VALUES[
+          inventoryHash(`kubernetes-${spec.label}-region-${globalIndex}`) % REGION_VALUES.length
+        ];
+      const baseHealth =
+        spec.seedHealth[i] ?? seededHealth(salt + globalIndex * 3, globalIndex);
+      const health = regionAdjustedHealth(baseHealth, region);
+      if (SEED_KINDS.has(spec.label) && hasActiveAlerts(name, health)) {
+        byKind[spec.label].add(name);
+      }
+    }
+    runningOffset += spec.total;
+  }
+  return byKind;
+};
 
 const CTR_NAMES = [
   'api-server',
@@ -92,6 +191,22 @@ const POD_PHASES = [2, 2, 2, 2, 2, 2, 2, 1, 3, 4];
 // ---------------------------------------------------------------------------
 // Build topology arrays
 // ---------------------------------------------------------------------------
+interface Cluster {
+  name: string;
+}
+interface Node {
+  name: string;
+  cluster: string;
+}
+interface Namespace {
+  name: string;
+  cluster: string;
+}
+interface Deploy {
+  name: string;
+  ns: string;
+  cluster: string;
+}
 interface Pod {
   name: string;
   node: string;
@@ -99,51 +214,98 @@ interface Pod {
   cluster: string;
   deploy: string;
 }
-interface Deploy {
-  name: string;
-  ns: string;
-  cluster: string;
-}
 
 const buildTopology = () => {
-  const nodes = buildNodes();
+  const alerting = alertingNamesByKind();
+  const clusterSpec = K8S_SPECS.find((spec) => spec.label === 'Clusters')!;
+  const nodeSpec = K8S_SPECS.find((spec) => spec.label === 'Nodes')!;
+  const namespaceSpec = K8S_SPECS.find((spec) => spec.label === 'Namespaces')!;
+  const deploySpec = K8S_SPECS.find((spec) => spec.label === 'Deployments')!;
+  const podSpec = K8S_SPECS.find((spec) => spec.label === 'Pods')!;
 
-  const deploys: Deploy[] = NAMED_DEPLOYS.map((name, i) => ({
-    name,
-    ns: NAMED_DEPLOY_NS[i],
-    cluster: C1,
-  }));
-  for (let i = 1; i <= 24; i++) {
-    const nsIdx = (i - 1) % ALL_NS.length;
-    deploys.push({
-      name: `deployment-${String(i).padStart(3, '0')}`,
-      ns: ALL_NS[nsIdx],
-      cluster: NS_CLUSTER[ALL_NS[nsIdx]],
+  const allClusterNames = namesForSpec(clusterSpec);
+  const allNodeNames = namesForSpec(nodeSpec);
+  const allNamespaceNames = namesForSpec(namespaceSpec);
+  const allDeployNames = namesForSpec(deploySpec);
+
+  const clusters: Cluster[] = allClusterNames
+    .filter((name) => alerting.Clusters.has(name))
+    .map((name) => ({ name }));
+
+  const nodes: Node[] = allNodeNames
+    .filter((name) => alerting.Nodes.has(name))
+    .map((name) => ({
+      name,
+      cluster: pickFrom(allClusterNames, `k8s-cluster-${name}`),
+    }));
+
+  const namespaces: Namespace[] = allNamespaceNames
+    .filter((name) => alerting.Namespaces.has(name))
+    .map((name) => ({
+      name,
+      cluster: pickFrom(allClusterNames, `k8s-cluster-${name}`),
+    }));
+
+  const deploys: Deploy[] = allDeployNames
+    .filter((name) => alerting.Deployments.has(name))
+    .map((name) => {
+      const ns = pickFrom(allNamespaceNames, `k8s-ns-${name}`);
+      return {
+        name,
+        ns,
+        cluster: pickFrom(allClusterNames, `k8s-cluster-${name}`),
+      };
     });
-  }
 
-  const pods: Pod[] = SEED_PODS.map((name, i) => ({
-    name,
-    node: SEED_POD_NODES[i],
-    ns: SEED_POD_NS[i],
-    cluster: NS_CLUSTER[SEED_POD_NS[i]],
-    deploy: SEED_POD_DEPLOY[i],
-  }));
-  for (let i = 1; i <= 48; i++) {
-    const nodeIdx = (i - 1) % nodes.length;
-    const nsIdx = (i - 1) % ALL_NS.length;
-    const deployIdx = (i - 1) % deploys.length;
-    const ns = ALL_NS[nsIdx];
-    pods.push({
-      name: `pod-${String(i).padStart(3, '0')}`,
-      node: nodes[nodeIdx].name,
+  const makePod = (name: string, deployOverride?: string): Pod => {
+    const ns = pickFrom(allNamespaceNames, `k8s-ns-${name}`);
+    return {
+      name,
+      node: pickFrom(allNodeNames, `k8s-node-${name}`),
       ns,
-      cluster: NS_CLUSTER[ns],
-      deploy: deploys[deployIdx].name,
-    });
+      cluster: pickFrom(allClusterNames, `k8s-cluster-${name}`),
+      deploy: deployOverride ?? pickFrom(allDeployNames, `k8s-deploy-${name}`),
+    };
+  };
+
+  const podByName = new Map<string, Pod>();
+  const allPodNames = namesForSpec(podSpec);
+  for (const name of allPodNames) {
+    if (alerting.Pods.has(name)) podByName.set(name, makePod(name));
   }
 
-  return { nodes, deploys, pods };
+  // Deployment dashboards filter on k8s.deployment.name and read pod metrics.
+  // Attach a few inventory pods to each alerting deployment so those panels
+  // have series even when the pods themselves are not alerting.
+  for (const deploy of deploys) {
+    let attached = 0;
+    for (const podName of allPodNames) {
+      if (attached >= 3) break;
+      if (pickFrom(allDeployNames, `k8s-deploy-${podName}`) !== deploy.name) continue;
+      if (!podByName.has(podName)) {
+        podByName.set(podName, makePod(podName, deploy.name));
+      } else {
+        podByName.set(podName, { ...podByName.get(podName)!, deploy: deploy.name });
+      }
+      attached++;
+    }
+    if (attached === 0) {
+      for (let replica = 1; replica <= 2; replica++) {
+        const podName = `${deploy.name}-replica-${replica}`;
+        podByName.set(podName, {
+          name: podName,
+          node: allNodeNames[0],
+          ns: deploy.ns,
+          cluster: deploy.cluster,
+          deploy: deploy.name,
+        });
+      }
+    }
+  }
+
+  const pods = [...podByName.values()];
+
+  return { clusters, nodes, namespaces, deploys, pods };
 };
 
 // ---------------------------------------------------------------------------
@@ -224,12 +386,27 @@ interface BulkOp {
 const generateDocsForTimestamp = (
   ts: string,
   elapsedSec: number,
-  nodes: ReturnType<typeof buildNodes>,
+  clusters: Cluster[],
+  namespaces: Namespace[],
+  nodes: Node[],
   deploys: Deploy[],
   pods: Pod[]
 ): BulkOp[] => {
   const ops: BulkOp[] = [];
   const ra = (attrs: Record<string, unknown>) => ({ resource: { attributes: attrs } });
+
+  // Cluster docs so Cluster Detail dashboards have a matching series.
+  for (const { name } of clusters) {
+    ops.push({
+      index: CDS,
+      doc: {
+        '@timestamp': ts,
+        ...ra({
+          'k8s.cluster.name': name,
+        }),
+      },
+    });
+  }
 
   // Node metrics (cluster-receiver)
   for (const { name, cluster } of nodes) {
@@ -256,14 +433,14 @@ const generateDocsForTimestamp = (
   }
 
   // Namespace docs
-  for (const ns of ALL_NS) {
+  for (const { name, cluster } of namespaces) {
     ops.push({
       index: CDS,
       doc: {
         '@timestamp': ts,
         ...ra({
-          'k8s.cluster.name': NS_CLUSTER[ns],
-          'k8s.namespace.name': ns,
+          'k8s.cluster.name': cluster,
+          'k8s.namespace.name': name,
           'k8s.namespace.phase': 1,
         }),
       },
@@ -281,6 +458,7 @@ const generateDocsForTimestamp = (
           'k8s.cluster.name': cluster,
           'k8s.namespace.name': ns,
           'k8s.deployment.name': name,
+          'k8s.workload.name': name,
           'k8s.deployment.desired': desired,
           'k8s.deployment.available': rand(1, desired + 1),
         }),
@@ -475,20 +653,33 @@ const generateDocsForTimestamp = (
     }
   }
 
-  // Kubelet — volume stats
-  for (const { name, ns, cluster } of pods) {
+  // Kubelet — volume stats. Deployment Detail volume panels require
+  // k8s.deployment.name on the same docs as k8s.volume.{available,capacity},
+  // and TS/STATS need those values as gauges (not resource-attribute dimensions).
+  for (const { name, ns, cluster, deploy, node } of pods) {
+    const capacity = 10737418240;
+    const available = ranged(`${name}:vol`, 2e9, 8e9);
     ops.push({
       index: KDS,
+      dynamicTemplates: {
+        'metrics.k8s.volume.available': 'gauge_long',
+        'metrics.k8s.volume.capacity': 'gauge_long',
+      },
       doc: {
         '@timestamp': ts,
+        metrics: {
+          'k8s.volume.available': available,
+          'k8s.volume.capacity': capacity,
+        },
         ...ra({
           'k8s.cluster.name': cluster,
           'k8s.namespace.name': ns,
+          'k8s.deployment.name': deploy,
+          'k8s.workload.name': deploy,
+          'k8s.node.name': node,
           'k8s.pod.name': name,
           'k8s.pod.uid': `uid-${name}`,
           'k8s.volume.name': 'data-vol',
-          'k8s.volume.capacity': 10737418240,
-          'k8s.volume.available': rand(2e9, 8e9),
         }),
       },
     });
@@ -522,7 +713,7 @@ const generateDocsForTimestamp = (
 // ---------------------------------------------------------------------------
 // Bulk index helper (chunks of 500 actions)
 // ---------------------------------------------------------------------------
-const CHUNK_SIZE = 500;
+const CHUNK_SIZE = 2000;
 
 const bulkIndex = async (esClient: ElasticsearchClient, ops: BulkOp[], logger: Logger) => {
   let ok = 0;
@@ -602,22 +793,32 @@ const seedK8sDataRoute = createServerRoute({
       }
     }
 
-    // Build topology
-    const { nodes, deploys, pods } = buildTopology();
+    // Build topology matching the inventory (every cluster/node/ns/deploy/pod).
+    const { clusters, nodes, namespaces, deploys, pods } = buildTopology();
 
     // Oldest sample first so counter values increase with @timestamp.
+    // Index one interval at a time so the full inventory does not sit in RAM.
     const now = Date.now();
-    const allOps: BulkOp[] = [];
+    let ok = 0;
+    let failed = 0;
+    let docsPerInterval = 0;
     for (let i = 0; i < numSamples; i++) {
       const elapsedSec = i * intervalMinutes * 60;
       const epoch = now - (numSamples - 1 - i) * intervalMinutes * 60 * 1000;
-      allOps.push(
-        ...generateDocsForTimestamp(new Date(epoch).toISOString(), elapsedSec, nodes, deploys, pods)
+      const ops = generateDocsForTimestamp(
+        new Date(epoch).toISOString(),
+        elapsedSec,
+        clusters,
+        namespaces,
+        nodes,
+        deploys,
+        pods
       );
+      if (i === 0) docsPerInterval = ops.length;
+      const indexed = await bulkIndex(esClient, ops, logger);
+      ok += indexed.ok;
+      failed += indexed.failed;
     }
-
-    // Bulk index
-    const { ok, failed } = await bulkIndex(esClient, allOps, logger);
 
     // Refresh
     try {
@@ -626,7 +827,6 @@ const seedK8sDataRoute = createServerRoute({
       // Ignore
     }
 
-    const docsPerInterval = Math.round(allOps.length / Math.max(numSamples, 1));
     logger.info(
       `Seeded K8s OTel data: ${ok} docs indexed, ${failed} failed ` +
         `(${numSamples} intervals × ${docsPerInterval} docs/interval over ${hours}h)`
@@ -640,8 +840,9 @@ const seedK8sDataRoute = createServerRoute({
       hours,
       intervalMinutes,
       topology: {
+        clusters: clusters.length,
         nodes: nodes.length,
-        namespaces: ALL_NS.length,
+        namespaces: namespaces.length,
         deployments: deploys.length,
         pods: pods.length,
       },

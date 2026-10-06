@@ -18,12 +18,11 @@ export const isCloudInventoryScope = (categoryScope?: EntityCategoryId): boolean
   categoryScope === 'cloud';
 
 /**
- * Fields offered on every inventory page. Environment / Region are intentionally
- * omitted — those dropdowns were removed; users can still match them via free
- * text, but autocomplete should lead with useful, page-relevant fields.
- * `health` is appended only outside Phase 1 (Phase 1 has no health concept).
+ * Fields offered on every inventory page. Environment / Region have no
+ * dedicated dropdowns; they still appear in KQL autocomplete and "+ Add
+ * filter". `health` is appended only outside Phase 1 (no health concept).
  */
-const BASE_SEARCH_FIELDS = ['name', 'type', 'team'] as const;
+const BASE_SEARCH_FIELDS = ['name', 'type', 'team', 'environment', 'region'] as const;
 
 /** Cross-category "All resources" also offers category as a field. */
 const CROSS_CATEGORY_SEARCH_FIELDS = ['category'] as const;
@@ -51,6 +50,8 @@ export const ENTITY_SEARCH_FIELD_LABELS: Readonly<Record<string, string>> = {
   category: 'Category',
   health: 'Health',
   team: 'Team',
+  environment: 'Environment',
+  region: 'Region',
   provider: 'Cloud provider',
   'cloud.provider': 'Cloud provider',
   cluster: 'Cluster',

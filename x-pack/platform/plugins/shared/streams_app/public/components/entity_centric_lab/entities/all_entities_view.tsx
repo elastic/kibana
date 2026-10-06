@@ -242,19 +242,21 @@ const isViewMode = (value: unknown): value is ViewMode =>
   value === 'grid' || value === 'list' || value === 'geomap';
 
 /**
- * Phase 1 demos always open on the hex map, grouped Category → Type.
- * Applied once per full page load so a stale localStorage choice (list
- * view, a different grouping) does not stick, while changing the view
- * and walking the left nav still persists until the next reload.
+ * Phase 1 inventory landing: list view, grouped by Type.
+ * Applied once per full page load so a stale localStorage choice (hex
+ * map, Category → Type) does not stick, while changing the view and
+ * walking the left nav still persists until the next reload.
  */
+const PHASE1_DEFAULT_GROUP_BY: readonly GroupByFieldId[] = ['type'];
+
 let phase1InventoryDefaultsApplied = false;
 let phase1InventoryDefaultsNeedStateSync = false;
 
 const applyPhase1InventoryDefaultsToStorage = (): void => {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, 'grid');
-    window.localStorage.setItem(GROUP_BY_STORAGE_KEY, JSON.stringify(DEFAULT_GROUP_BY));
+    window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, 'list');
+    window.localStorage.setItem(GROUP_BY_STORAGE_KEY, JSON.stringify(PHASE1_DEFAULT_GROUP_BY));
   } catch {
     // Storage blocked — the in-memory sync below still sets the layout.
   }
@@ -461,18 +463,18 @@ const useEntitiesGroupBy = (): [GroupByFieldId[], (next: GroupByFieldId[]) => vo
 
 const VIEW_MODE_OPTIONS = [
   {
-    id: 'grid' as const,
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.viewMode.grid', {
-      defaultMessage: 'Grouped grid',
-    }),
-    iconType: 'apps',
-  },
-  {
     id: 'list' as const,
     label: i18n.translate('xpack.streams.entityCentricLab.entities.viewMode.list', {
       defaultMessage: 'List',
     }),
     iconType: 'list',
+  },
+  {
+    id: 'grid' as const,
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.viewMode.grid', {
+      defaultMessage: 'Grouped grid',
+    }),
+    iconType: 'apps',
   },
   {
     id: 'geomap' as const,
@@ -818,6 +820,20 @@ const AllEntitiesViewInner = ({
   const { updateTimeRange } = useTimeRangeUpdate();
   const { refresh } = useTimefilter();
   const MAX_RANGE_DAYS = 3;
+  // Local shortcuts only — never write `timepicker:quickRanges`. Cap at 3 days
+  // so the menu matches the inventory limit (Last 7/30/90 days and 1 year omitted).
+  const inventoryCommonlyUsedRanges = useMemo(
+    () => [
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+      { start: 'now-1m', end: 'now', label: 'Last 1 minute' },
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+      { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
+      { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+      { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+      { start: 'now-3d', end: 'now', label: 'Last 3 days' },
+    ],
+    []
+  );
   const handleTimeChange = useCallback(
     ({ start, end }: { start: string; end: string }) => {
       const parsedStart = datemath.parse(start);
@@ -1092,7 +1108,7 @@ const AllEntitiesViewInner = ({
   // entity query is per-view, not a preference.
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   // Runs before the view-mode / group-by hooks hydrate so Phase 1 reads
-  // the demo defaults (hex map, Category → Type) instead of a stale choice.
+  // the demo defaults (list view, Type) instead of a stale choice.
   useState(() => {
     if (!isElasticOn || !isPhase1 || phase1InventoryDefaultsApplied) return 0;
     applyPhase1InventoryDefaultsToStorage();
@@ -1415,7 +1431,7 @@ const AllEntitiesViewInner = ({
   // walking the left nav from Kubernetes → Hosts → Databases doesn't
   // silently drop the user back to Overview each time.
   const [categoryTab, setCategoryTab] = useCategoryTab();
-  // Phase 1 landing: hex map, every category, grouped Category → Type.
+  // Phase 1 landing: list view, every category, grouped by Type.
   // The storage write above covers the first mount; this also catches a
   // phase switch to Phase 1 after the persisted hooks have already hydrated.
   useEffect(() => {
@@ -1427,8 +1443,8 @@ const AllEntitiesViewInner = ({
     applyPhase1InventoryDefaultsToStorage();
     phase1InventoryDefaultsApplied = true;
     phase1InventoryDefaultsNeedStateSync = false;
-    setViewMode('grid');
-    setGroupBy([...DEFAULT_GROUP_BY]);
+    setViewMode('list');
+    setGroupBy([...PHASE1_DEFAULT_GROUP_BY]);
     setCategoryFilter(CATEGORY_FILTER_ALL);
   }, [isElasticOn, isPhase1, setViewMode, setGroupBy, setCategoryFilter]);
   // Overview is the default landing tab on both the per-category pages
@@ -1461,7 +1477,7 @@ const AllEntitiesViewInner = ({
   const appliedLoadViewIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!isLatest || !loadViewId) return;
-    // Phase 1 always opens on All categories + the hex map. A `loadView`
+    // Phase 1 always opens on All categories + the list view. A `loadView`
     // param (including one left over from a default-view redirect) must
     // not replace that landing.
     if (isPhase1) return;
@@ -1529,7 +1545,7 @@ const AllEntitiesViewInner = ({
   const { defaultViewId } = savedViewsApi;
   useEffect(() => {
     if (!isElasticOn) return;
-    // Phase 1 stays on All categories (hex map, Category → Type) instead of
+    // Phase 1 stays on All categories (list view, Type grouping) instead of
     // bouncing to a saved default view.
     if (isPhase1) return;
     // Only the cross-category landing — never a category or cloud sub-page the
@@ -2571,6 +2587,7 @@ const AllEntitiesViewInner = ({
                           }}
                           onFiltersUpdated={setLabFilters}
                           onRefresh={handleLiveRefresh}
+                          commonlyUsedRanges={inventoryCommonlyUsedRanges}
                           placeholder={i18n.translate(
                             'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
                             {
@@ -2970,6 +2987,7 @@ const AllEntitiesViewInner = ({
                       onRefresh={handleTimeRefresh}
                       showUpdateButton="iconOnly"
                       width="auto"
+                      commonlyUsedRanges={inventoryCommonlyUsedRanges}
                       data-test-subj="entityCentricLabEntitiesTimePicker"
                     />
                   </EuiFlexItem>
