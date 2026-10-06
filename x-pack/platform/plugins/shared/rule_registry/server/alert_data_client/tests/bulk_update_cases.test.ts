@@ -316,24 +316,6 @@ describe('bulkUpdateCases', () => {
     );
   });
 
-  it('throws and does not write when a document is missing the authorization fields', async () => {
-    esClientMock.mget.mockResponse({
-      docs: [forgedDoc],
-    });
-
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const forgedAlerts = [{ id: 'forged-id', index: 'alert-index' }];
-
-    await expect(
-      alertsClient.bulkUpdateCases({ caseIds, alerts: forgedAlerts })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid alert found with id of \\"forged-id\\" and operation get"`
-    );
-
-    expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
-    expect(esClientMock.bulk).not.toHaveBeenCalled();
-  });
-
   it('throws when only some documents in a batch are missing the authorization fields', async () => {
     esClientMock.mget.mockResponse({
       docs: [validDoc, forgedDoc],
@@ -385,77 +367,66 @@ describe('bulkUpdateCases', () => {
     );
   });
 
-  it('skips a missing document and still updates the valid sibling', async () => {
-    esClientMock.mget.mockResponse({
-      docs: [
-        validDoc,
-        {
-          found: false,
-          _id: 'missing-id',
-          _index: 'alert-index',
-        },
+  it.each([
+    ['missing', { found: false, _id: 'absent-id', _index: 'alert-index' }],
+    [
+      'error',
+      {
+        _id: 'absent-id',
+        _index: 'alert-index',
+        error: { type: 'index_not_found_exception', reason: 'no such index [alert-index]' },
+      },
+    ],
+  ])('skips a %s sibling and updates/audits only the valid alert', async (_label, absentDoc) => {
+    esClientMock.mget.mockResponse({ docs: [validDoc, absentDoc] });
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    await alertsClient.bulkUpdateCases({
+      caseIds,
+      alerts: [
+        { id: 'alert-id', index: 'alert-index' },
+        { id: 'absent-id', index: 'alert-index' },
       ],
     });
 
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const mixedAlerts = [
-      { id: 'alert-id', index: 'alert-index' },
-      { id: 'missing-id', index: 'alert-index' },
-    ];
-
-    await alertsClient.bulkUpdateCases({ caseIds, alerts: mixedAlerts });
-
     expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
-      consumer: 'apm',
-      entity: 'alert',
-      operation: 'get',
-      ruleTypeId: 'apm.error_rate',
+    expect(esClientMock.bulk).toHaveBeenCalledWith({
+      refresh: 'wait_for',
+      body: [
+        { update: { _index: 'alert-index', _id: 'alert-id' } },
+        { doc: { [ALERT_CASE_IDS]: ['test-case'] } },
+      ],
     });
-    expect(esClientMock.bulk).toHaveBeenCalled();
-    expect(auditLogger.log).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: expect.objectContaining({ outcome: 'failure' }),
-      })
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
     );
   });
 
-  it('skips a document with an mget error and still updates the valid sibling', async () => {
+  it('does not send an empty bulk request when every lookup is absent', async () => {
     esClientMock.mget.mockResponse({
       docs: [
-        validDoc,
+        { found: false, _id: 'missing-id', _index: 'alert-index' },
         {
           _id: 'error-id',
           _index: 'alert-index',
-          error: {
-            type: 'index_not_found_exception',
-            reason: 'no such index [alert-index]',
-          },
+          error: { type: 'index_not_found_exception', reason: 'no such index [alert-index]' },
         },
       ],
     });
 
     const alertsClient = new AlertsClient(alertsClientParams);
-    const mixedAlerts = [
-      { id: 'alert-id', index: 'alert-index' },
-      { id: 'error-id', index: 'alert-index' },
-    ];
-
-    await alertsClient.bulkUpdateCases({ caseIds, alerts: mixedAlerts });
-
-    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
-      consumer: 'apm',
-      entity: 'alert',
-      operation: 'get',
-      ruleTypeId: 'apm.error_rate',
+    await alertsClient.bulkUpdateCases({
+      caseIds,
+      alerts: [
+        { id: 'missing-id', index: 'alert-index' },
+        { id: 'error-id', index: 'alert-index' },
+      ],
     });
-    expect(esClientMock.bulk).toHaveBeenCalled();
-    expect(auditLogger.log).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: expect.objectContaining({ outcome: 'failure' }),
-      })
-    );
+
+    expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
+    expect(auditLogger.log).not.toHaveBeenCalled();
   });
 
   it.each([

@@ -391,88 +391,68 @@ describe('bulkUpdate()', () => {
       });
     });
 
-    test('updates a valid alert when a sibling document is missing', async () => {
-      const indexName = '.alerts-observability.apm.alerts';
-      const alertsClient = new AlertsClient(alertsClientParams);
-      esClientMock.mget.mockResponseOnce({
-        docs: [
-          {
-            found: true,
-            _id: fakeAlertId,
-            _index: indexName,
-            _source: {
-              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-              [ALERT_RULE_CONSUMER]: 'apm',
-              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-              [SPACE_IDS]: [DEFAULT_SPACE],
+    test.each([
+      ['missing', { found: false, _id: 'absent-id', _index: '.alerts-observability.apm.alerts' }],
+      [
+        'error',
+        {
+          _id: 'absent-id',
+          _index: '.alerts-observability.apm.alerts',
+          error: { type: 'index_not_found_exception', reason: 'no such index' },
+        },
+      ],
+    ])(
+      'updates and audits only the valid alert when its sibling lookup is %s',
+      async (_label, absentDoc) => {
+        const indexName = '.alerts-observability.apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.mget.mockResponseOnce({
+          docs: [
+            {
+              found: true,
+              _id: fakeAlertId,
+              _index: indexName,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: [DEFAULT_SPACE],
+              },
             },
-          },
-          {
-            found: false,
-            _id: 'missing-id',
-            _index: indexName,
-          },
-        ],
-      });
-      esClientMock.bulk.mockResponseOnce({
-        errors: false,
-        took: 1,
-        items: [],
-      });
+            absentDoc,
+          ],
+        });
+        esClientMock.bulk.mockResponseOnce({
+          errors: false,
+          took: 1,
+          items: [],
+        });
 
-      await alertsClient.bulkUpdate({
-        ids: [fakeAlertId, 'missing-id'],
-        query: undefined,
-        index: indexName,
-        status: 'closed',
-      });
+        await alertsClient.bulkUpdate({
+          ids: [fakeAlertId, 'absent-id'],
+          query: undefined,
+          index: indexName,
+          status: 'acknowledged',
+        });
 
-      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-      expect(esClientMock.bulk).toHaveBeenCalled();
-    });
-
-    test('updates a valid alert when a sibling lookup returns an error', async () => {
-      const indexName = '.alerts-observability.apm.alerts';
-      const alertsClient = new AlertsClient(alertsClientParams);
-      esClientMock.mget.mockResponseOnce({
-        docs: [
-          {
-            found: true,
-            _id: fakeAlertId,
-            _index: indexName,
-            _source: {
-              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-              [ALERT_RULE_CONSUMER]: 'apm',
-              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-              [SPACE_IDS]: [DEFAULT_SPACE],
-            },
-          },
-          {
-            _id: 'error-id',
-            _index: indexName,
-            error: {
-              type: 'index_not_found_exception',
-              reason: 'no such index',
-            },
-          },
-        ],
-      });
-      esClientMock.bulk.mockResponseOnce({
-        errors: false,
-        took: 1,
-        items: [],
-      });
-
-      await alertsClient.bulkUpdate({
-        ids: [fakeAlertId, 'error-id'],
-        query: undefined,
-        index: indexName,
-        status: 'closed',
-      });
-
-      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-      expect(esClientMock.bulk).toHaveBeenCalled();
-    });
+        expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+        expect(esClientMock.bulk).toHaveBeenCalledWith({
+          refresh: 'wait_for',
+          body: [
+            { update: { _index: indexName, _id: fakeAlertId } },
+            { doc: { [ALERT_WORKFLOW_STATUS]: 'acknowledged' } },
+          ],
+        });
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            message: `User has acknowledged alert [id=${fakeAlertId}]`,
+            event: expect.objectContaining({ action: 'alert_acknowledge', outcome: 'success' }),
+          })
+        );
+      }
+    );
 
     // test('throws an error if ES client fetch fails', async () => {});
     // test('throws an error if ES client bulk update fails', async () => {});

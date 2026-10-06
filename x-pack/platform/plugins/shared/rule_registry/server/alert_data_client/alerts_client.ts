@@ -46,7 +46,7 @@ import {
 import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-import { isEmpty, partition } from 'lodash';
+import { get, isEmpty, partition } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from 'io-ts';
 import {
@@ -108,32 +108,15 @@ const scalarToAuthField = (value: unknown): string | undefined => {
   return undefined;
 };
 
-/**
- * Reads a field from `_source`, accepting both the original dotted key and the nested
- * object form synthetic `_source` reconstructs from the alerts mapping.
- */
-const readAlertSourceField = (source: object, field: string): unknown => {
-  const record = source as Record<string, unknown>;
-  if (Object.prototype.hasOwnProperty.call(record, field)) {
-    return record[field];
-  }
-
-  let current: unknown = source;
-  for (const segment of field.split('.')) {
-    if (current == null || typeof current !== 'object' || Array.isArray(current)) {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[segment];
-  }
-  return current;
-};
+const isAbsentLookup = (item: { found?: boolean; error?: unknown }): boolean =>
+  item.found === false || item.error != null;
 
 const readAlertCaseIds = (source: object | null | undefined): unknown[] => {
   if (source == null) {
     return [];
   }
 
-  const value = readAlertSourceField(source, ALERT_CASE_IDS);
+  const value = get(source, ALERT_CASE_IDS);
   if (Array.isArray(value)) {
     return value;
   }
@@ -142,7 +125,7 @@ const readAlertCaseIds = (source: object | null | undefined): unknown[] => {
 };
 
 const hasAlertWorkflowStatus = (source: object | null | undefined): boolean =>
-  source != null && readAlertSourceField(source, ALERT_WORKFLOW_STATUS) != null;
+  source != null && get(source, ALERT_WORKFLOW_STATUS) != null;
 
 /**
  * Reads an authorization field from an alert hit, preferring the `fields` API (which is
@@ -170,7 +153,7 @@ const getAlertAuthField = (
     return undefined;
   }
 
-  const fromSource = readAlertSourceField(hit._source, field);
+  const fromSource = get(hit._source, field);
   const sourceValue = Array.isArray(fromSource) ? fromSource[0] : fromSource;
   return scalarToAuthField(sourceValue);
 };
@@ -369,10 +352,10 @@ export class AlertsClient {
     // pair, so we only need to call `ensureAuthorized` once per unique pair.
     const ownersAndRuleTypeIds = new Map<string, { ruleTypeId: string; consumer: string }>();
     const invalidAlertIds: string[] = [];
-    const isAbsentLookup = (hit: (typeof items)[number]): boolean =>
-      hit.found === false || hit.error != null;
-
     items.forEach((hit) => {
+      if (isAbsentLookup(hit)) {
+        return;
+      }
       hitIds.push(hit._id);
 
       const ruleTypeId = getAlertAuthField(hit, ALERT_RULE_TYPE_ID);
@@ -380,7 +363,7 @@ export class AlertsClient {
 
       if (ruleTypeId != null && consumer != null) {
         ownersAndRuleTypeIds.set(`${ruleTypeId}|${consumer}`, { ruleTypeId, consumer });
-      } else if (!isAbsentLookup(hit)) {
+      } else {
         invalidAlertIds.push(hit._id);
       }
     });
@@ -528,18 +511,25 @@ export class AlertsClient {
     operation,
     fieldToUpdate,
     validate,
+    onSuccess,
   }: {
     alerts: MgetAndAuditAlert[];
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
     fieldToUpdate: (source: ParsedTechnicalFields | undefined) => Record<string, unknown>;
     validate?: (source: ParsedTechnicalFields | undefined) => void;
+    onSuccess?: (ids: string[]) => void;
   }) {
     try {
       const mgetRes = await this.ensureAllAlertsAuthorized({ alerts, operation });
 
       const updateRequests = [];
+      const updatedIds: string[] = [];
 
       for (const item of mgetRes.docs) {
+        if (isAbsentLookup(item)) {
+          continue;
+        }
+
         if (validate) {
           // @ts-expect-error doesn't handle error branch in MGetResponse
           validate(item?._source);
@@ -559,14 +549,20 @@ export class AlertsClient {
             },
           },
         ]);
+        updatedIds.push(item._id);
       }
 
       const bulkUpdateRequest = updateRequests.flat();
+
+      if (bulkUpdateRequest.length === 0) {
+        return { errors: false, items: [], took: 0 };
+      }
 
       const bulkUpdateResponse = await this.esClient.bulk({
         refresh: 'wait_for',
         body: bulkUpdateRequest,
       });
+      onSuccess?.(updatedIds);
       return bulkUpdateResponse;
     } catch (exc) {
       this.logger.error(`error in mgetAlertsAuditOperate ${exc}`);
@@ -586,10 +582,18 @@ export class AlertsClient {
     status: STATUS_VALUES;
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
   }) {
+    const auditAction = workflowStatusAuditActionMap[status];
     return this.mgetAlertsAuditOperate({
       alerts,
       operation,
       fieldToUpdate: (source) => this.getAlertStatusFieldUpdate(source, status),
+      onSuccess: auditAction
+        ? (ids) => {
+            for (const id of ids) {
+              this.auditLogger?.log(alertAuditEvent({ action: auditAction, id }));
+            }
+          }
+        : undefined,
     });
   }
 
@@ -721,7 +725,7 @@ export class AlertsClient {
       });
 
       await this.ensureAllAuthorized(mgetRes.docs, operation);
-      const ids = mgetRes.docs.map(({ _id }) => _id);
+      const ids = mgetRes.docs.filter((doc) => !isAbsentLookup(doc)).map(({ _id }) => _id);
 
       for (const id of ids) {
         this.auditLogger?.log(
@@ -945,13 +949,6 @@ export class AlertsClient {
         status,
         operation: WriteOperations.Update,
       });
-
-      const auditAction = workflowStatusAuditActionMap[status];
-      if (auditAction) {
-        for (const id of ids) {
-          this.auditLogger?.log(alertAuditEvent({ action: auditAction, id }));
-        }
-      }
 
       return result;
     } else if (query != null) {
