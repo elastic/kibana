@@ -44,6 +44,7 @@ const renderCell = (
     jsonModeSettings,
     selectedColumns,
     onFilter,
+    onFilterAsProp,
     hideFilteringOnComputedColumns,
     columnsMeta,
     isPlainRecord,
@@ -53,6 +54,7 @@ const renderCell = (
     jsonModeSettings?: JsonModeSettings;
     selectedColumns?: string[];
     onFilter?: DocViewFilterFn;
+    onFilterAsProp?: DocViewFilterFn;
     hideFilteringOnComputedColumns?: boolean;
     columnsMeta?: DataTableColumnsMeta;
     isPlainRecord?: boolean;
@@ -67,6 +69,8 @@ const renderCell = (
       fieldFormats={fieldFormats}
       jsonModeSettings={jsonModeSettings}
       selectedColumns={selectedColumns}
+      onFilter={onFilterAsProp}
+      isPlainRecord={onFilterAsProp ? isPlainRecord : undefined}
     />
   );
 
@@ -146,6 +150,13 @@ describe('SourceDocumentJsonMode', () => {
   });
 
   describe('filter for / filter out leaf actions', () => {
+    it('uses filter props when rendered outside the unified table context', async () => {
+      const onFilter = jest.fn();
+      renderCell(hitWithFields, { onFilterAsProp: onFilter });
+
+      await userEvent.click(screen.getByTestId(filterForTestId('bytes')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 100, '+');
+    });
     it('renders filter buttons on a filterable leaf and calls onFilter with the field, value and mode', async () => {
       const onFilter = jest.fn();
       renderCell({ _id: '1', _index: 'test', _source: { bytes: 100 } }, { onFilter });

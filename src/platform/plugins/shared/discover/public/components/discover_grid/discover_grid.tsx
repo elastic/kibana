@@ -251,6 +251,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           onUpdateRowsPerPage={props.onUpdateRowsPerPage}
           onUpdatePageIndex={props.onUpdatePageIndex}
           totalHits={props.totalHits}
+          documentsDisplayModeState={props.documentsDisplayModeState}
+          onUpdateDocumentsDisplayMode={props.onUpdateDocumentsDisplayMode}
+          jsonModeSettingsState={props.jsonModeSettingsState}
+          onUpdateJsonModeSettings={props.onUpdateJsonModeSettings}
           onFetchMoreRecords={props.onFetchMoreRecords}
         />
       );

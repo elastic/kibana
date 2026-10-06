@@ -21,6 +21,7 @@ import type {
 } from '@kbn/discover-utils/types';
 import { formatFieldStringValueWithHighlights, getIgnoredReason } from '@kbn/discover-utils';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_document_tree';
@@ -45,6 +46,8 @@ export interface SourceDocumentJsonModeProps {
   jsonModeSettings?: JsonModeSettings;
   /** When set, the JSON tree is filtered to these fields; empty = whole document. */
   selectedColumns?: string[];
+  onFilter?: DocViewFilterFn;
+  isPlainRecord?: boolean;
 }
 
 export const SourceDocumentJsonMode = ({
@@ -55,11 +58,18 @@ export const SourceDocumentJsonMode = ({
   fieldFormats,
   jsonModeSettings,
   selectedColumns,
+  onFilter: onFilterProp,
+  isPlainRecord: isPlainRecordProp,
 }: SourceDocumentJsonModeProps) => {
   const { inTableSearchTerm, isCounting: isInTableSearchCounting } =
     useContext(InTableSearchCellContext);
-  const { onFilter, hideFilteringOnComputedColumns, isPlainRecord } =
-    useContext(UnifiedDataTableContext);
+  const {
+    onFilter: contextOnFilter,
+    hideFilteringOnComputedColumns,
+    isPlainRecord: contextIsPlainRecord,
+  } = useContext(UnifiedDataTableContext);
+  const onFilter = onFilterProp ?? contextOnFilter;
+  const isPlainRecord = isPlainRecordProp ?? contextIsPlainRecord;
 
   const hideNulls = jsonModeSettings?.hideNulls ?? false;
   const wrapLines = jsonModeSettings?.wrapLines ?? true;

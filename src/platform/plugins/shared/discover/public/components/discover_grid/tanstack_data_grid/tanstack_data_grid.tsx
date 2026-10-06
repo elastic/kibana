@@ -72,6 +72,7 @@ import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/f
 import { i18n } from '@kbn/i18n';
 import {
   SourceDocument,
+  SourceDocumentJsonMode,
   DataLoadingState,
   getDisplayedColumns,
   ROWS_HEIGHT_OPTIONS,
@@ -88,11 +89,9 @@ import {
   getColumnDisplayName,
   getSchemaByKbnType,
   isSortable,
-  CompareDocuments,
   CopyAsTextFormat,
   copyRowsAsJsonToClipboard,
   copyRowsAsTextToClipboard,
-  getSchemaDetectors,
   getRowsPerPageOptions,
   DEFAULT_PAGINATION_MODE,
   DEFAULT_ROWS_PER_PAGE,
@@ -122,6 +121,7 @@ import {
   type TanStackColumnLayout,
 } from './tanstack_column_layout';
 import { TanStackColumnHeaderActions } from './tanstack_column_header_actions';
+import { TanStackCompareDocuments } from './tanstack_compare_documents';
 import type { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 declare module '@tanstack/react-table' {
@@ -190,6 +190,10 @@ export interface TanStackDataGridProps {
   enableComparisonMode?: UnifiedDataTableProps['enableComparisonMode'];
   ariaLabelledBy?: UnifiedDataTableProps['ariaLabelledBy'];
   showFullScreenButton?: UnifiedDataTableProps['showFullScreenButton'];
+  documentsDisplayModeState?: UnifiedDataTableProps['documentsDisplayModeState'];
+  onUpdateDocumentsDisplayMode?: UnifiedDataTableProps['onUpdateDocumentsDisplayMode'];
+  jsonModeSettingsState?: UnifiedDataTableProps['jsonModeSettingsState'];
+  onUpdateJsonModeSettings?: UnifiedDataTableProps['onUpdateJsonModeSettings'];
 
   isPaginationEnabled?: boolean;
   paginationMode?: DataGridPaginationMode;
@@ -767,7 +771,12 @@ const CellActions = React.memo(
     });
 
     return (
-      <div className="tsg-cellActions" css={styles.cellActions} onClick={(e) => e.stopPropagation()}>
+      <div
+        className="tsg-cellActions"
+        css={styles.cellActions}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
         <div css={styles.cellActionsClippable}>
           {onFilter && (
             <>
@@ -812,6 +821,7 @@ const CellActions = React.memo(
         </div>
         <div css={styles.cellActionsExpand}>
           <EuiPopover
+            aria-label={expandLabel}
             anchorPosition="downLeft"
             panelPaddingSize="s"
             repositionOnScroll
@@ -820,16 +830,18 @@ const CellActions = React.memo(
             isOpen={isPopoverOpen}
             closePopover={closePopover}
             button={
-              <EuiButtonIcon
-                css={styles.cellActionButton}
-                iconType="maximize"
-                aria-label={expandLabel}
-                size="xs"
-                iconSize="s"
-                color="text"
-                onClick={handleExpand}
-                data-test-subj="expandCellValue"
-              />
+              <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  css={styles.cellActionButton}
+                  iconType="maximize"
+                  aria-label={expandLabel}
+                  size="xs"
+                  iconSize="s"
+                  color="text"
+                  onClick={handleExpand}
+                  data-test-subj="expandCellValue"
+                />
+              </EuiToolTip>
             }
           >
             <CellPopoverContent
@@ -846,7 +858,6 @@ const CellActions = React.memo(
     );
   }
 );
-
 
 const CONTROL_COLUMN_IDS = [SELECT_COLUMN_ID, EXPAND_COLUMN_ID] as const;
 
@@ -990,6 +1001,11 @@ const VirtualCell = React.memo(
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
     const { meta } = cell.column.columnDef;
+    const value = cell.getValue();
+    const getFormattedValue = useCallback(
+      () => meta?.formatValue?.(value) ?? formatCellValue(value),
+      [meta, value]
+    );
     const isControl = meta?.isControl;
     const isSelect = meta?.isSelect;
     const isSummary = meta?.isSummary;
@@ -1039,19 +1055,20 @@ const VirtualCell = React.memo(
           .map(([k, v]) => `${k}: ${formatCellValue(v)}`)
           .join('\n');
       const expandButton = (
-        <EuiButtonIcon
-          iconType="maximize"
-          aria-label={expandLabel}
-          size="xs"
-          iconSize="s"
-          color="text"
-          tabIndex={-1}
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
-            openPopover();
-          }}
-          data-test-subj="expandCellValue"
-        />
+        <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="maximize"
+            aria-label={expandLabel}
+            size="xs"
+            iconSize="s"
+            color="text"
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation();
+              openPopover();
+            }}
+            data-test-subj="expandCellValue"
+          />
+        </EuiToolTip>
       );
 
       return (
@@ -1079,9 +1096,15 @@ const VirtualCell = React.memo(
           <div css={isAutoHeight ? styles.summaryCellContentAuto : styles.summaryCellContent}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </div>
-          <div className="tsg-compactCellExpand" css={styles.compactCellExpand} onClick={(e) => e.stopPropagation()}>
+          <div
+            className="tsg-compactCellExpand"
+            css={styles.compactCellExpand}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             {popoverMounted ? (
               <EuiPopover
+                aria-label={expandLabel}
                 anchorPosition="downLeft"
                 panelPaddingSize="s"
                 repositionOnScroll
@@ -1109,13 +1132,7 @@ const VirtualCell = React.memo(
     }
 
     const fieldName = meta?.fieldName;
-    const value = cell.getValue();
     const showActions = Boolean(fieldName) && (isHovered || hasFocusWithin);
-    // Stable function reference for lazy formatting — called only by actions/popover, not idle cells.
-    const getFormattedValue = useCallback(
-      () => meta?.formatValue?.(value) ?? formatCellValue(value),
-      [meta, value]
-    );
     // Text formatting is only needed for highlighting and actions; skip it for idle cells.
     const formatted = findTerm || showActions ? getFormattedValue() : undefined;
 
@@ -1147,7 +1164,9 @@ const VirtualCell = React.memo(
             setHasFocusWithin(false);
           }
         }}
-        onClick={() => { if (fieldName) openPopover(); }}
+        onClick={() => {
+          if (fieldName) openPopover();
+        }}
         onKeyDown={(e) => {
           if (e.key === keys.ENTER || e.key === keys.SPACE) {
             e.preventDefault();
@@ -1173,9 +1192,15 @@ const VirtualCell = React.memo(
           )}
         </div>
         {isNarrow && fieldName && (
-          <div className="tsg-compactCellExpand" css={styles.compactCellExpand} onClick={(e) => e.stopPropagation()}>
+          <div
+            className="tsg-compactCellExpand"
+            css={styles.compactCellExpand}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             {popoverMounted ? (
               <EuiPopover
+                aria-label={expandLabel}
                 anchorPosition="downLeft"
                 panelPaddingSize="s"
                 repositionOnScroll
@@ -1184,19 +1209,20 @@ const VirtualCell = React.memo(
                 isOpen={isPopoverOpen}
                 closePopover={closePopover}
                 button={
-                  <EuiButtonIcon
-                    iconType="maximize"
-                    aria-label={expandLabel}
-                    size="xs"
-                    iconSize="s"
-                    color="text"
-                    tabIndex={-1}
-                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                      e.stopPropagation();
-                      openPopover();
-                    }}
-                    data-test-subj="expandCellValue"
-                  />
+                  <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="maximize"
+                      aria-label={expandLabel}
+                      size="xs"
+                      iconSize="s"
+                      color="text"
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                        e.stopPropagation();
+                        openPopover();
+                      }}
+                      data-test-subj="expandCellValue"
+                    />
+                  </EuiToolTip>
                 }
               >
                 <CellPopoverContent
@@ -1209,19 +1235,20 @@ const VirtualCell = React.memo(
                 />
               </EuiPopover>
             ) : (
-              <EuiButtonIcon
-                iconType="maximize"
-                aria-label={expandLabel}
-                size="xs"
-                iconSize="s"
-                color="text"
-                tabIndex={-1}
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.stopPropagation();
-                  openPopover();
-                }}
-                data-test-subj="expandCellValue"
-              />
+              <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="maximize"
+                  aria-label={expandLabel}
+                  size="xs"
+                  iconSize="s"
+                  color="text"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.stopPropagation();
+                    openPopover();
+                  }}
+                  data-test-subj="expandCellValue"
+                />
+              </EuiToolTip>
             )}
           </div>
         )}
@@ -1535,6 +1562,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     enableComparisonMode = false,
     ariaLabelledBy = 'documentsAriaLabel',
     showFullScreenButton = true,
+    documentsDisplayModeState,
+    onUpdateDocumentsDisplayMode,
+    jsonModeSettingsState,
+    onUpdateJsonModeSettings,
     isPaginationEnabled = true,
     paginationMode = DEFAULT_PAGINATION_MODE,
     rowsPerPageState,
@@ -1559,9 +1590,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const [findTerm, setFindTerm] = useState('');
     const [findActiveIndex, setFindActiveIndex] = useState(0);
 
+    const documentsDisplayMode = documentsDisplayModeState ?? 'table';
     const displayedColumns = useMemo(
-      () => getDisplayedColumns(columns, dataView),
-      [columns, dataView]
+      () => getDisplayedColumns(columns, dataView, documentsDisplayMode),
+      [columns, dataView, documentsDisplayMode]
     );
 
     const shouldPrependTimeFieldColumn = useMemo(
@@ -1576,6 +1608,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       [columnsMeta, displayedColumns, isPlainRecord, showTimeCol, timeFieldName]
     );
 
+    const isJsonMode = documentsDisplayMode === 'json';
     const isSummaryMode = displayedColumns.length === 1 && displayedColumns[0] === SOURCE_COLUMN_ID;
     const showSummaryColumn = displayedColumns.includes(SOURCE_COLUMN_ID);
 
@@ -1861,17 +1894,26 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       onUpdateRowHeight: onUpdateHeaderRowHeight,
     });
 
-    const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
-      useRowHeight({
-        type: RowHeightType.row,
-        storage,
-        consumer,
-        key: 'dataGridRowHeight',
-        defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
-        configRowHeight,
-        rowHeightState,
-        onUpdateRowHeight,
-      });
+    const {
+      rowHeight,
+      rowHeightLines: rowHeightLinesSetting,
+      lineCountInput,
+      onChangeRowHeight: onChangeRowHeightSetting,
+      onChangeRowHeightLines: onChangeRowHeightLinesSetting,
+    } = useRowHeight({
+      type: RowHeightType.row,
+      storage,
+      consumer,
+      key: 'dataGridRowHeight',
+      defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
+      configRowHeight,
+      rowHeightState,
+      onUpdateRowHeight,
+    });
+
+    const rowHeightLines = isJsonMode ? ROWS_HEIGHT_OPTIONS.auto : rowHeightLinesSetting;
+    const onChangeRowHeight = isJsonMode ? undefined : onChangeRowHeightSetting;
+    const onChangeRowHeightLines = isJsonMode ? undefined : onChangeRowHeightLinesSetting;
 
     const isAutoRowHeight = rowHeightLines === ROWS_HEIGHT_OPTIONS.auto;
     const isAutoHeaderRowHeight = headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto;
@@ -2186,22 +2228,40 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
       const summaryColumn: ColumnDef<DataTableRecord> = {
         id: SOURCE_COLUMN_ID,
-        header: () => <UnifiedDataTableSourceColumnHeader headerRowHeight={headerRowHeightLines} />,
+        header: () =>
+          isJsonMode ? (
+            getColumnDisplayName(SOURCE_COLUMN_ID, undefined, undefined, 'json')
+          ) : (
+            <UnifiedDataTableSourceColumnHeader headerRowHeight={headerRowHeightLines} />
+          ),
         size: 1,
         minSize: 0,
         enableResizing: false,
         enableSorting: false,
         meta: { isSummary: true },
-        cell: ({ row }) => (
-          <SummaryCellContent
-            row={row.original}
-            dataView={dataView}
-            shouldShowFieldHandler={shouldShowFieldHandler}
-            fieldFormats={fieldFormats}
-            columnsMeta={columnsMeta}
-            isCompressed={dataGridDensity === DataGridDensity.COMPACT}
-          />
-        ),
+        cell: ({ row }) =>
+          isJsonMode ? (
+            <SourceDocumentJsonMode
+              row={row.original}
+              dataView={dataView}
+              columnsMeta={columnsMeta}
+              shouldShowFieldHandler={shouldShowFieldHandler}
+              fieldFormats={fieldFormats}
+              jsonModeSettings={jsonModeSettingsState}
+              selectedColumns={columns}
+              onFilter={onFilter}
+              isPlainRecord={isPlainRecord}
+            />
+          ) : (
+            <SummaryCellContent
+              row={row.original}
+              dataView={dataView}
+              shouldShowFieldHandler={shouldShowFieldHandler}
+              fieldFormats={fieldFormats}
+              columnsMeta={columnsMeta}
+              isCompressed={dataGridDensity === DataGridDensity.COMPACT}
+            />
+          ),
       };
 
       if (isSummaryMode) {
@@ -2299,6 +2359,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       fieldFormats,
       isSortEnabled,
       isSummaryMode,
+      isJsonMode,
+      jsonModeSettingsState,
+      columns,
+      onFilter,
       settings,
       shouldShowFieldHandler,
       showTimeCol,
@@ -2635,7 +2699,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const replaceSelectedDocs = useCallback((docIds: string[]) => {
       setSelectedRows(new Set(docIds));
     }, []);
-    const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
 
     const isLoadingMore = loadingState === DataLoadingState.loadingMore;
     const displayPopoverWidth = mathWithUnits(
@@ -2673,20 +2736,18 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           style={densityVars}
           data-test-subj="tanstackGridWrapper"
         >
-          <CompareDocuments
-            id={dataGridId}
-            wrapper={wrapperRef.current}
+          <TanStackCompareDocuments
             consumer={consumer}
-            ariaDescribedBy={ariaLabelledBy}
             ariaLabelledBy={ariaLabelledBy}
             dataView={dataView}
             columnsMeta={columnsMeta}
             isPlainRecord={Boolean(isPlainRecord)}
             selectedFieldNames={effectiveColumns}
             selectedDocIds={selectedDocIds}
-            schemaDetectors={schemaDetectors}
             forceShowAllFields={isSummaryMode}
             showFullScreenButton={showFullScreenButton}
+            isFullScreen={isFullScreen}
+            onToggleFullScreen={toggleFullScreen}
             fieldFormats={fieldFormats}
             docMap={docMap}
             replaceSelectedDocs={replaceSelectedDocs}
@@ -3180,6 +3241,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                       />
                     }
                     additionalContent={additionalDisplaySettingsContent}
+                    documentsDisplayMode={documentsDisplayMode}
+                    onChangeDocumentsDisplayMode={onUpdateDocumentsDisplayMode}
+                    jsonModeSettings={jsonModeSettingsState}
+                    onChangeJsonModeSettings={onUpdateJsonModeSettings}
                   />
                 </EuiPopover>
               </div>
@@ -3530,7 +3595,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               hasScrolledToBottom={true}
             />
           )}
-
       </div>
     );
   }

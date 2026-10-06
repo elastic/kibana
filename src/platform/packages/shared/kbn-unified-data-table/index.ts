@@ -34,6 +34,7 @@ export {
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
 export { SourceDocument } from './src/components/source_document';
+export { SourceDocumentJsonMode } from './src/components/source_document_json_mode';
 export { UnifiedDataTableFooter } from './src/components/data_table_footer';
 
 export type * from './src/types';
@@ -76,6 +77,15 @@ export { isSortable } from './src/hooks/use_sorting';
 export { getSchemaByKbnType, getSchemaDetectors } from './src/components/data_table_schema';
 export { convertValueToString } from './src/utils/convert_value_to_string';
 export { CompareDocuments } from './src/components/compare_documents';
+export { ComparisonControls } from './src/components/compare_documents/comparison_controls';
+export { useComparisonFields } from './src/components/compare_documents/hooks/use_comparison_fields';
+export { useRestorableLocalStorage } from './src/restorable_state';
+export {
+  calculateDiff,
+  formatDiffValue,
+} from './src/components/compare_documents/hooks/calculate_diff';
+export type { DocumentDiffMode } from './src/components/compare_documents/types';
+export type { CompareDocumentsProps } from './src/components/compare_documents/compare_documents';
 export {
   CopyAsTextFormat,
   copyRowsAsJsonToClipboard,
