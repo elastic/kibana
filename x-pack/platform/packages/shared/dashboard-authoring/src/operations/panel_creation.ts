@@ -6,12 +6,7 @@
  */
 
 import type { OperationFailure } from '../utils';
-import {
-  createPanelFailureResult,
-  type InlinePanelOperationType,
-  type PanelContent,
-  type ValidatePanelContent,
-} from '../resolve_panel';
+import type { InlinePanelOperationType, PanelContent } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
 import type { ResolveAttachmentPanel } from './types';
 import {
@@ -136,8 +131,7 @@ export const resolvePanelCreationRequests = async ({
  * - `source: 'request'`: read from the up-front parallel resolution (keyed by
  *   panel input index).
  *
- * Returns `undefined` and records a failure when a panel didn't resolve or its
- * content fails `validatePanelContent`.
+ * Returns `undefined` and records a failure when a panel didn't resolve.
  */
 export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests,
@@ -145,14 +139,12 @@ export const createPanelInputMaterializer = ({
   operationType,
   failures,
   resolveAttachmentPanel,
-  validatePanelContent,
 }: {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
   operationType: InlinePanelOperationType;
   failures: OperationFailure[];
   resolveAttachmentPanel?: ResolveAttachmentPanel;
-  validatePanelContent?: ValidatePanelContent;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(
     (resolvedPanelCreationRequests.get(operationIndex) ?? []).map((resolvedRequest) => [
@@ -161,10 +153,7 @@ export const createPanelInputMaterializer = ({
     ])
   );
 
-  const materialize = (
-    item: NewPanelInput,
-    panelInputIndex: number
-  ): MaterializedPanelInput | undefined => {
+  return (item, panelInputIndex) => {
     if (item.source === 'config') {
       return { panelContent: buildConfigPanelContent(item.type, item.config) };
     }
@@ -200,28 +189,4 @@ export const createPanelInputMaterializer = ({
         : {}),
     };
   };
-
-  return (item, panelInputIndex) => {
-    const materialized = materialize(item, panelInputIndex);
-    const error = materialized && validatePanelContent?.(materialized.panelContent);
-    if (!error) {
-      return materialized;
-    }
-
-    failures.push(
-      createPanelFailureResult(operationType, getPanelInputIdentifier(item), error).failure
-    );
-    return undefined;
-  };
-};
-
-const getPanelInputIdentifier = (item: NewPanelInput): string => {
-  switch (item.source) {
-    case 'config':
-      return item.type;
-    case 'attachment':
-      return item.attachment_id;
-    default:
-      return item.query;
-  }
 };

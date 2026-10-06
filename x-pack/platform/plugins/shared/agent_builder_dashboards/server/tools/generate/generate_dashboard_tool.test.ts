@@ -54,7 +54,7 @@ const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', 
 
 const callHandler = async (dashboardAttachmentId?: string) => {
   const tool = generateDashboardTool({
-    getPanelSchema: jest.fn().mockResolvedValue({ options: [] }),
+    getDashboardStateSchema: jest.fn().mockResolvedValue({}),
   });
   const sendUiEvent = jest.fn();
   const ctx = {

@@ -34,7 +34,7 @@ import { retrieveLatestVersion } from './attachment_state';
 import { normalizeLegacyVegaPanels } from './legacy_vega_panels';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createPanelResolver } from './resolvers/panel_resolver';
-import { createPanelValidator } from './panel_validator';
+import { createDashboardValidator } from './dashboard_validator';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
@@ -97,7 +97,9 @@ const summarizeDashboard = (
 });
 
 export interface GenerateDashboardToolDeps {
-  getPanelSchema: () => Promise<ReturnType<DashboardPluginStart['getPanelSchema']>>;
+  getDashboardStateSchema: () => Promise<
+    ReturnType<DashboardPluginStart['getDashboardStateSchema']>
+  >;
 }
 
 /**
@@ -113,7 +115,7 @@ export interface GenerateDashboardToolDeps {
  * the attachment id to render it rather than copying it into the next tool call.
  */
 export const generateDashboardTool = ({
-  getPanelSchema,
+  getDashboardStateSchema,
 }: GenerateDashboardToolDeps): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
@@ -160,7 +162,7 @@ Use operations[] to:
           resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
             esClient: esClient.asCurrentUser,
           }),
-          validatePanelContent: createPanelValidator(await getPanelSchema()),
+          validateDashboard: createDashboardValidator(await getDashboardStateSchema()),
         });
 
         // Data-aware default time range computation

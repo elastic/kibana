@@ -30,13 +30,6 @@ export type PanelContentAttempt =
       failure: OperationFailure;
     };
 
-/**
- * Checks new or edited panel content before it is stored and returns an error
- * message when it is invalid. Injected by the host, which owns the panel schemas.
- * Panels the operations leave untouched are never validated.
- */
-export type ValidatePanelContent = (panelContent: PanelContent) => string | undefined;
-
 /** Operations that can trigger inline panel resolution. */
 export type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
 

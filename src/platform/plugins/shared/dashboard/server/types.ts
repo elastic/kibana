@@ -10,7 +10,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
 import type { DashboardReadResponseBody } from './api';
-import type { getDashboardStateSchema, getPanelSchema } from './api/dashboard_state_schemas';
+import type { getDashboardStateSchema } from './api/dashboard_state_schemas';
 
 /**
  * Client interface for dashboard CRUD operations
@@ -38,11 +38,6 @@ export interface DashboardPluginStart {
    * every registered embeddable schema.
    */
   getDashboardStateSchema: () => ReturnType<typeof getDashboardStateSchema>;
-  /**
-   * Returns the as-code panel schema used by the dashboard API, built once from every registered
-   * embeddable schema. Panel types without a registered schema are rejected.
-   */
-  getPanelSchema: () => ReturnType<typeof getPanelSchema>;
   /**
    * Scans dashboards with pagination.
    *

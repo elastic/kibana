@@ -48,9 +48,9 @@ export class AgentBuilderDashboardsPlugin
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.dashboard.client;
     };
-    const getPanelSchema = async () => {
+    const getDashboardStateSchema = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
-      return startDeps.dashboard.getPanelSchema();
+      return startDeps.dashboard.getDashboardStateSchema();
     };
 
     setupDeps.agentBuilder.attachments.registerType(
@@ -61,7 +61,7 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder, { getPanelSchema });
+    registerSkills(setupDeps.agentBuilder, { getDashboardStateSchema });
 
     return {};
   }

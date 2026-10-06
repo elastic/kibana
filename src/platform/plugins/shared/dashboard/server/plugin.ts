@@ -51,7 +51,7 @@ import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
-import { getDashboardStateSchema, getPanelSchema } from './api/dashboard_state_schemas';
+import { getDashboardStateSchema } from './api/dashboard_state_schemas';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
@@ -198,11 +198,9 @@ export class DashboardPlugin
     const getCachedDashboardStateSchema = once(() => {
       return getDashboardStateSchema(false);
     });
-    const getCachedPanelSchema = once(() => getPanelSchema());
 
     return {
       getDashboardStateSchema: getCachedDashboardStateSchema,
-      getPanelSchema: getCachedPanelSchema,
       scanDashboards: (
         savedObjectsClient: SavedObjectsClientContract,
         page: number,
