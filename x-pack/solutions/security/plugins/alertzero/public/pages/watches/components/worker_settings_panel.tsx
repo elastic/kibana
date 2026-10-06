@@ -198,17 +198,18 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             min-width: 0;
           `}
         >
-          <EuiFlexItem grow={false} css={{ minWidth: 0, maxWidth: '100%', flexShrink: 0 }}>
+          <EuiFlexItem grow={false} css={{ maxWidth: '100%' }}>
             <EuiTitle size="s">
               {/*
                 The accordion band gives the trailing actions (View executions + Enabled switch)
-                width precedence over the title, which used to shrink the title to a few pixels and
-                let EUI's `overflow-wrap` stack the name one character per line. The title refuses to
-                shrink and the badge group wraps to its own line instead; an over-long name alone
-                then clips at the band edge.
+                width precedence, which used to squeeze the title until EUI's `overflow-wrap` stacked
+                the name one character per line. `nowrap` keeps it on one line, the group's `wrap`
+                moves the badges to their own line first, and the 100% clamp ellipsizes a name that
+                alone exceeds the band (`title` keeps the full name recoverable).
               */}
               <TitleTag
                 id={titleId}
+                title={name}
                 css={{
                   margin: 0,
                   whiteSpace: 'nowrap',

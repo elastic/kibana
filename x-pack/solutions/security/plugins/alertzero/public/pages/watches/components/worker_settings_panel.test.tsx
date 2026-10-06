@@ -158,13 +158,11 @@ describe('WorkerSettingsPanel header band title', () => {
     expect(title).toHaveStyleRule('white-space', 'nowrap');
     expect(title).toHaveStyleRule('overflow', 'hidden');
     expect(title).toHaveStyleRule('text-overflow', 'ellipsis');
+    // An ellipsized name stays recoverable on hover.
+    expect(title).toHaveAttribute('title', 'Rule Tuning');
 
-    // minWidth 0 is the relief that lets the box shrink below its content width for the ellipsis;
-    // flexShrink 0 is what makes the flex line wrap the badges first instead of crushing the title.
-    const titleItem = title.closest('.euiFlexItem');
-    expect(titleItem).toHaveStyleRule('min-width', '0');
-    expect(titleItem).toHaveStyleRule('max-width', '100%');
-    expect(titleItem).toHaveStyleRule('flex-shrink', '0');
+    // The 100% clamp is what makes an over-long name ellipsize instead of overflowing the band.
+    expect(title.closest('.euiFlexItem')).toHaveStyleRule('max-width', '100%');
 
     // The badge group wraps to its own line before the title gives up any width.
     expect(title.closest('.euiFlexGroup')).toHaveStyleRule('flex-wrap', 'wrap');
