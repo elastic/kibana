@@ -35,6 +35,9 @@ The barrel is imported by hundreds of files that only need `ConfigKey`,
 - Do not chain on an exported schema at module level (`.optional()`, `.extend()`,
   `.and()`). That materializes it and pins it. Do it inside another `lazySchema`.
 - Tiny `z.enum(...)` codecs over an enum may stay eager.
-- Hold a local reference in hot loops (`const codec = HTTPFieldsCodec`), because a GC
-  between calls means the next call rebuilds the schema. `instanceof` checks against
-  these proxies are always `false`.
+- In hot loops, keep a strong reference to what the proxy hands out, not to the proxy
+  itself. The proxy only holds a `WeakRef` to the real schema, so
+  `const codec = HTTPFieldsCodec` does not stop a GC between calls from forcing a
+  rebuild. Hold a bound method (`const { safeParse } = HTTPFieldsCodec`) or a schema
+  derived from it (`const exact = HTTPFieldsCodec.strip()`) for the duration of the
+  loop instead. `instanceof` checks against these proxies are always `false`.
