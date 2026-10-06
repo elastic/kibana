@@ -44,6 +44,7 @@ const renderGroup = (
       investigation={investigation}
       onClickRecommendedAction={withRecommendedAction ? onClickRecommendedAction : undefined}
       onClickAction={onClickAction}
+      onCopyLink={jest.fn()}
       onOpenChat={onOpenChat}
       canManageEscalations={canManageEscalations}
     />
@@ -98,21 +99,18 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('omits the recommended action on a decided investigation', () => {
-      // A decided proposal without canManageEscalations has no available actions at all —
-      // the menu trigger is hidden rather than opening an empty popover.
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      openMenu();
 
-      // Absence of the trigger proves no decision item can be reached.
-      expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
       expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+      expect(screen.getByText('Copy link')).toBeInTheDocument();
     });
 
     it('omits the recommended action when no handler is wired', () => {
-      // With no recommended-action handler and no escalation/close capability, the menu
-      // has nothing left to show, so the trigger itself is hidden.
       renderGroup(makeInvestigation(), { withRecommendedAction: false });
+      openMenu();
 
-      expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
     });
 
     it('no longer duplicates opening the chat, which is on the card', () => {
@@ -123,11 +121,10 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('drops close on a decided investigation', () => {
-      // A decided investigation with canManageEscalations=false has no available actions;
-      // the trigger is hidden and there is nothing to open.
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      openMenu();
 
-      expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
     });
 
     it('shows the menu trigger for a decided investigation when escalations are available', () => {
@@ -164,6 +161,7 @@ describe('ConversationsActionsGroup', () => {
           investigation={makeInvestigation()}
           onClickAction={onClickAction}
           onOpenChat={jest.fn()}
+          onCopyLink={jest.fn()}
           canCloseInvestigation={true}
         />
       );

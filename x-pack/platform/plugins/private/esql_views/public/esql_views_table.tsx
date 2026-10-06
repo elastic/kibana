@@ -227,7 +227,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
             name: translations.openInDiscoverButtonLabel,
             description: translations.openInDiscoverButtonTooltip,
             type: 'icon',
-            icon: 'discoverApp',
+            icon: 'productDiscover',
             color: 'text',
             enabled: () => isDiscoverAvailable,
             onClick: onOpenInDiscover,
