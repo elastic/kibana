@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    describe('create runtime field', function describeIndexTests() {
+    // Failing: See https://github.com/elastic/kibana/issues/294952
+    describe.skip('create runtime field', function describeIndexTests() {
       const fieldName = 'atest';
 
       it('should create runtime field', async function () {
