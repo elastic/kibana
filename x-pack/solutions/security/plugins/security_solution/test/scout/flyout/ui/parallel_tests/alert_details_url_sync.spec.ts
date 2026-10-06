@@ -19,18 +19,24 @@ spaceTest.describe(
     spaceTest.setTimeout(5 * 60_000);
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      // Scope the rule to a single space-owned source document: configs sharing the CI lane leave
+      // data in the default security indices, which would make this rule raise many alerts.
+      const { sourceIndex } = await apiServices.host.createHostFixture(scoutSpace.id);
+
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: [sourceIndex],
       });
       await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 120_000);
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices }) => {
+    spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
+      await apiServices.host.cleanupHostFixture(scoutSpace.id);
     });
 
     spaceTest('should test flyout url sync', async ({ pageObjects, page }) => {
