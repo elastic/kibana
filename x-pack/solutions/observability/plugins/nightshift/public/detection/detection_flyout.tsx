@@ -205,12 +205,16 @@ export function DetectionFlyout({
             isImpactedServicesError ||
             failedSourceIds.length > 0) && (
             <>
-              <FlyoutSectionTitle>
-                {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
-                  defaultMessage: 'Impacted services',
-                })}
-              </FlyoutSectionTitle>
-              <EuiSpacer size="s" />
+              {(isLoadingImpactedServices || associatedEntities.length > 0) && (
+                <>
+                  <FlyoutSectionTitle>
+                    {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
+                      defaultMessage: 'Impacted services',
+                    })}
+                  </FlyoutSectionTitle>
+                  <EuiSpacer size="s" />
+                </>
+              )}
               {isLoadingImpactedServices && (
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
@@ -238,17 +242,15 @@ export function DetectionFlyout({
                             }
                           )}
                     </p>
-                    {isImpactedServicesError && (
-                      <EuiButtonEmpty
-                        size="s"
-                        onClick={() => refetchImpactedServices()}
-                        data-test-subj="nightshiftDetectionFlyoutImpactedServicesRetry"
-                      >
-                        {i18n.translate('xpack.nightshift.detectionFlyout.impactedServicesRetry', {
-                          defaultMessage: 'Retry',
-                        })}
-                      </EuiButtonEmpty>
-                    )}
+                    <EuiButtonEmpty
+                      size="s"
+                      onClick={() => refetchImpactedServices()}
+                      data-test-subj="nightshiftDetectionFlyoutImpactedServicesRetry"
+                    >
+                      {i18n.translate('xpack.nightshift.detectionFlyout.impactedServicesRetry', {
+                        defaultMessage: 'Retry',
+                      })}
+                    </EuiButtonEmpty>
                   </EuiText>
                 )}
               {!isLoadingImpactedServices && associatedEntities.length > 0 && (

@@ -311,7 +311,29 @@ describe('DetectionFlyout', () => {
     expect(
       screen.getByText('Some sources could not be loaded, so this list may be incomplete.')
     ).toBeInTheDocument();
-    expect(screen.queryByText('Retry')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('nightshiftDetectionFlyoutImpactedServicesRetry')
+    ).toBeInTheDocument();
+  });
+
+  it('does not title an empty list when some sources failed to load', () => {
+    const refetch = jest.fn();
+    mockStreamFeatures.mockReturnValue({
+      features: [],
+      failedSourceIds: ['logs.payments'],
+      isInitialLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch,
+    });
+    renderFlyout();
+
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Some sources could not be loaded, so this list may be incomplete.')
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutImpactedServicesRetry'));
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('says when every source failed and offers a retry', () => {
@@ -326,6 +348,7 @@ describe('DetectionFlyout', () => {
     });
     renderFlyout();
 
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
     expect(screen.getByText('Impacted services could not be loaded.')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutImpactedServicesRetry'));
     expect(refetch).toHaveBeenCalledTimes(1);
