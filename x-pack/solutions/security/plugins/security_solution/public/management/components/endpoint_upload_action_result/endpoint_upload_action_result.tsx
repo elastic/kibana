@@ -124,19 +124,6 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
             );
           }
 
-          // if we don't have an agent result (for whatever reason)
-          if (!result) {
-            return (
-              <HostUploadResult
-                name={showHostName ? name : undefined}
-                data-test-subj={getTestId('noResultError')}
-                key={name}
-              >
-                {LABELS.noAgentResponse}
-              </HostUploadResult>
-            );
-          }
-
           // Error result
           if (!state.wasSuccessful) {
             return (
@@ -146,6 +133,19 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
                 key={name}
               >
                 <EndpointActionFailureMessage action={action as ActionDetails} agentId={agentId} />
+              </HostUploadResult>
+            );
+          }
+
+          // if we don't have an agent result (for whatever reason)
+          if (!result) {
+            return (
+              <HostUploadResult
+                name={showHostName ? name : undefined}
+                data-test-subj={getTestId('noResultError')}
+                key={name}
+              >
+                {LABELS.noAgentResponse}
               </HostUploadResult>
             );
           }
