@@ -162,7 +162,7 @@ export class FollowerIndexForm extends PureComponent<Props, State> {
       typeof rawCluster === 'string'
         ? rawCluster
         : Array.isArray(rawCluster)
-        ? rawCluster[0]
+        ? rawCluster[0] ?? undefined
         : undefined;
 
     const followerIndexProp = this.props.followerIndex;

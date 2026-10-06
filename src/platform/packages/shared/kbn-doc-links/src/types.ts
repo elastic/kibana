@@ -408,6 +408,7 @@ export interface DocLinks {
     readonly queryESQLApproximateResults: string;
     readonly queryESQLMultiValueControls: string;
     readonly queryESQLMvIntersects: string;
+    readonly queryESQLViews: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -768,6 +769,7 @@ export interface DocLinks {
   };
   readonly contextEngine: {
     readonly overview: string;
+    readonly aiIndices: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;

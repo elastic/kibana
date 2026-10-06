@@ -36,15 +36,11 @@ const SMOKE_VIEWER_ROLE: KibanaRole = {
 };
 
 /*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- *
  * Setup mirrors `list_execution_history_rule_lookup.spec.ts`: a rule-scoped
  * action policy plus a disabled rule, then a seeded alert event that the
  * dispatcher turns into a fire action and an execution-history event.
  */
-test.describe('Execution history — smoke', { tag: '@local-stateful-classic' }, () => {
+test.describe('Execution history — smoke', { tag: ['@local-stateful-classic'] }, () => {
   let policyId: string;
   let policyName: string;
   let ruleId: string;
@@ -69,7 +65,6 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
         name: policyName,
         description: 'Scout execution history UI smoke policy',
         destinations: [{ type: 'workflow', id: workflowId }],
-        matcher: { expression: `rule.id: "${ruleId}"` },
       })
     );
 
@@ -78,11 +73,8 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
       buildCreateRuleData({
         metadata: { name: ruleName },
         schedule: { every: '1d' },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
-        },
-        state_transition: { pending_count: 0, recovering_count: 0 },
+        query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
       })
     );
     await apiServices.alertingV2.rules.bulkDisable({ ids: [ruleId] });
@@ -91,7 +83,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: `${ruleId}-series`,
-        episode: { id: `${ruleId}-episode`, status: 'active' },
+        alert: { id: `${ruleId}-episode`, status: 'active' },
         status: 'breached',
         source: 'internal',
         '@timestamp': new Date().toISOString(),
@@ -130,7 +122,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
     await executionHistory.goto();
 
     await test.step('URL is the execution_history app path', async () => {
-      expect(page.url()).toContain('/app/management/alertingV2/execution_history');
+      expect(page.url()).toContain('/app/observability/alerting/execution-history');
     });
 
     await test.step('page header and tabs are visible', async () => {

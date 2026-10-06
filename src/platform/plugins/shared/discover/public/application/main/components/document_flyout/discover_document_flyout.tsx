@@ -20,7 +20,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
-import { getDisplayedColumns, getTextBasedColumnsMeta } from '@kbn/unified-data-table';
+import { getDisplayedColumns } from '@kbn/unified-data-table';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import {
   DiscoverGridFlyout,
@@ -31,6 +31,7 @@ import {
   internalStateActions,
   useAppStateSelector,
   useCurrentTabAction,
+  useCurrentDataSource,
   useCurrentTabDataStateContainer,
   useCurrentTabSelector,
   useInternalStateDispatch,
@@ -40,6 +41,7 @@ import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
 import { getExpandedDocLinkability } from '../../utils/expanded_doc';
+import { columnsToColumnsMeta } from '../../../../utils/columns_to_columns_meta';
 
 export interface DiscoverDocumentFlyoutProps {
   dataView: DataView;
@@ -68,6 +70,7 @@ export const DiscoverDocumentFlyout = memo(
     );
     const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
     const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
+    const expandedDocCascadePath = useCurrentTabSelector((state) => state.expandedDocCascadePath);
     const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocumentViewMeta);
     const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
     const cascadedColumnsMeta = useCurrentTabSelector(
@@ -76,6 +79,7 @@ export const DiscoverDocumentFlyout = memo(
 
     const dataStateContainer = useCurrentTabDataStateContainer();
     const documentState = useDataState(dataStateContainer.data$.documents$);
+    const currentDataSource = useCurrentDataSource();
     const rows = useMemo(() => documentState.result ?? [], [documentState.result]);
 
     const { hasExpandedDoc, requestState, notice, expandedDocRef } = useExpandedDocSync({
@@ -83,22 +87,19 @@ export const DiscoverDocumentFlyout = memo(
       rows,
       fetchStatus: documentState.fetchStatus,
     });
-    const copyLink = useCopyExpandedDocLink({ dataView });
+    const { copyLink, shareQuery } = useCopyExpandedDocLink({ dataView });
     const expandedDocLinkability = useMemo(
-      () => getExpandedDocLinkability(query, expandedDoc),
-      [query, expandedDoc]
+      () => getExpandedDocLinkability(shareQuery, expandedDoc),
+      [shareQuery, expandedDoc]
     );
     const shareDirectLinkActions = useShareDirectLinkAction({
       copyLink,
       linkability: expandedDocLinkability,
-      query,
+      query: shareQuery,
     });
     const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(
-      () =>
-        expandedDoc && expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER
-          ? shareDirectLinkActions
-          : undefined,
-      [expandedDoc, expandedDocOwner, shareDirectLinkActions]
+      () => (expandedDoc ? shareDirectLinkActions : undefined),
+      [expandedDoc, shareDirectLinkActions]
     );
 
     const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
@@ -108,10 +109,11 @@ export const DiscoverDocumentFlyout = memo(
           setExpandedDoc({
             expandedDoc: doc,
             expandedDocOwner: doc ? expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER : undefined,
+            expandedDocCascadePath: doc ? expandedDocCascadePath : undefined,
           })
         );
       },
-      [dispatch, expandedDocOwner, setExpandedDoc]
+      [dispatch, expandedDocCascadePath, expandedDocOwner, setExpandedDoc]
     );
 
     const docViewerRef = useRef<DocViewerApi>(null);
@@ -143,10 +145,10 @@ export const DiscoverDocumentFlyout = memo(
 
     const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
       () =>
-        documentState.esqlQueryColumns
-          ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
+        currentDataSource.kind === 'esql'
+          ? columnsToColumnsMeta(currentDataSource.getColumns())
           : undefined,
-      [documentState.esqlQueryColumns]
+      [currentDataSource]
     );
 
     const flyoutColumnsMeta = useMemo(() => {

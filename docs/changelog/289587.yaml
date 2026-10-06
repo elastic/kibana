@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/289587
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Kibana platform
+title: Add configurable string validation with length defaults and reporting mode
+description: Adds built-in string schema helpers with consistent length defaults, optional violation reporting, and helper for intentionally unbounded strings.

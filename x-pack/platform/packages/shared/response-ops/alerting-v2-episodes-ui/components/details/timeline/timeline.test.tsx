@@ -19,7 +19,7 @@ const makeAction = (id: string, ts: string): ActionEntry => ({
     _id: id,
     '@timestamp': ts,
     action_type: 'ack',
-    actor: 'user-1',
+    actor: { type: 'user', profile_uid: 'user-1' },
     episode_id: 'ep-1',
     group_hash: 'hash-1',
     tags: [],

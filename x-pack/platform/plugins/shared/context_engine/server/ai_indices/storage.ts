@@ -13,6 +13,7 @@ import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
   AiIndexSource,
+  AiIndexTrace,
 } from '../../common/http_api/ai_indices';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
@@ -30,6 +31,7 @@ const storageSettings = {
       space: types.keyword({}),
       description: types.text({}),
       managed: types.boolean({}),
+      memory_enabled: types.boolean({}),
       date_created: types.date({}),
       date_modified: types.date({}),
       dest: types.object({
@@ -41,6 +43,7 @@ const storageSettings = {
       sources: types.object({
         properties: { type: types.keyword({}), value: types.keyword({}) },
       }),
+      traces: types.object({ properties: { type: types.keyword({}), value: types.keyword({}) } }),
       feedback_analysis: types.object({
         properties: {
           enabled: types.boolean({}),
@@ -65,6 +68,9 @@ const storageSettings = {
 interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
+  // Optional for backward compatibility with entries written before memory
+  // support existed; absence is treated as enabled (`true`) on read.
+  memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
   managed?: boolean;
@@ -73,6 +79,8 @@ interface AiIndexDocumentFields {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  // Optional for documents written before traces existed; absence is `[]` on read.
+  traces?: AiIndexTrace[];
 }
 
 /** What the index may hold: pre-upgrade documents predate `id` and `space`. */

@@ -22,11 +22,12 @@ import {
 } from '../../../../common/lib/authentication/users';
 import {
   getPostCaseRequest,
-  persistableStateAttachment,
-  postCommentActionsReq,
-  postCommentAlertReq,
   postCommentUserReq,
-  postExternalReferenceESReq,
+  postUnifiedActionsReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -128,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentUserReq],
+          params: [postUnifiedCommentReq, postUnifiedCommentReq],
         });
       });
 
@@ -595,10 +596,10 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            postCommentUserReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
-            postCommentActionsReq,
+            postUnifiedCommentReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
+            postUnifiedActionsReq,
           ],
         });
 
@@ -660,7 +661,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedAlertReq],
         });
 
         const response = await findCaseUserActions({
@@ -687,7 +688,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentActionsReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedActionsReq, postUnifiedAlertReq],
         });
 
         const response = await findCaseUserActions({
@@ -716,13 +717,13 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: theCase.id,
           params: [
             // This one should not show up in the filter for attachments
-            postCommentUserReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
-            // Folds to `security.endpoint`/`externalReference`, so it DOES show up here.
-            postCommentActionsReq,
+            postUnifiedCommentReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
+            // Stored as `security.endpoint`; its user action is projected to `externalReference`, so it shows up here.
+            postUnifiedActionsReq,
             // This one should not show up in the filter for attachments
-            postCommentAlertReq,
+            postUnifiedAlertReq,
           ],
         });
 
