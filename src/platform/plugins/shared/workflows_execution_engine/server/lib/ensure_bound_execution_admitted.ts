@@ -27,7 +27,11 @@ export const ensureBoundExecutionAdmitted = async (
   try {
     // Paired with deletion's disable-then-search order: either deletion sees this
     // already-refreshed execution, or this real-time read sees the disabled/deleted workflow.
-    if (!(await workflows.isWorkflowEnabledRealtime(workflowId, spaceId))) {
+    if (
+      !(await workflows.isWorkflowEnabledRealtime(workflowId, spaceId, {
+        includeGlobal: execution.managed === true && !!execution.effectiveIdentity?.inheritedFrom,
+      }))
+    ) {
       throw new WorkflowDisabledError(workflowId);
     }
   } catch (error) {

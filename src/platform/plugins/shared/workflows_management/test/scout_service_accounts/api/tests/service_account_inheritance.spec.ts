@@ -12,7 +12,9 @@ import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
+import { workflowSystemIndex } from '../../../../server/storage/indices';
 import { authenticationStep, createServiceAccountSuite } from '../fixtures/service_account_suite';
+import { withGlobalManagedWorkflow } from '../fixtures/with_global_managed_workflow';
 
 interface ManagedOptions {
   serviceAccountId?: string;
@@ -194,6 +196,46 @@ apiTest.describe(
             },
           });
           await wait(apiClient, parentExecution.id, 'completed', headers);
+        }
+      );
+    }
+
+    for (const asynchronous of [false, true]) {
+      apiTest(
+        `${
+          asynchronous ? 'async' : 'sync'
+        } global managed child inherits a per-space binding through resume`,
+        async ({ apiClient, esClient }) => {
+          apiTest.setTimeout(150_000);
+          const { readOnlyAccountId, wait } = getContext();
+          const child = await install(apiClient, { waitForInput: true });
+          await withGlobalManagedWorkflow(esClient, workflowId(child), async () => {
+            const parent = await install(apiClient, {
+              serviceAccountId: readOnlyAccountId,
+              childWorkflowId: workflowId(child),
+              runAsMode: 'inherit',
+              asynchronous,
+            });
+            const parentRun = await wait(
+              apiClient,
+              await run(apiClient, parent),
+              asynchronous ? 'completed' : 'waiting_for_child',
+              headers
+            );
+            const childRun = await childExecution(apiClient, parentRun);
+            const paused = await wait(apiClient, childRun.id, 'waiting_for_input', headers);
+            const stored = await esClient.get<{ spaceId: string }>({
+              index: workflowSystemIndex('executions'),
+              id: childRun.id,
+            });
+            expect(stored._source?.spaceId).toBe('default');
+            await new Promise((resolve) => setTimeout(resolve, 16_000));
+            await resume(apiClient, paused);
+            const completed = await wait(apiClient, childRun.id, 'completed', headers);
+            expect(authenticatedAs(completed)).toContain(readOnlyAccountId);
+            expect(completed.effectiveIdentity?.inheritedFrom?.workloadId).toBe(workflowId(parent));
+            await wait(apiClient, parentRun.id, 'completed', headers);
+          });
         }
       );
     }

@@ -1318,7 +1318,11 @@ export class WorkflowsExecutionEnginePlugin
       if (inheritedIdentity?.inheritedFrom) {
         if (!coreStart.security.serviceAccounts.isEnabled())
           throw Boom.forbidden('Service account execution is disabled.');
-        if (!(await workflowRepository.isWorkflowRevisionCurrent(workflow, spaceId))) {
+        if (
+          !(await workflowRepository.isWorkflowRevisionCurrent(workflow, spaceId, {
+            includeGlobal: true,
+          }))
+        ) {
           throw Boom.conflict(
             'The child workflow changed during admission. Retry to use its latest definition.'
           );
