@@ -38,8 +38,8 @@ export const buildRuleSoFilter = createSoFilterBuilder({
 });
 
 /**
- * Builds the API filter for the alert rules with at least one of the given tags,
- * or for every alert rule when no tags are given.
+ * Builds the API filter for the alert rules with at least one of the given routing
+ * tags, or for every alert rule when no tags are given.
  */
 export const buildMatchingRulesFilter = (tags: string[]): string => {
   const alertRules = nodeBuilder.is('kind', 'alert');
@@ -48,7 +48,9 @@ export const buildMatchingRulesFilter = (tags: string[]): string => {
   }
 
   const anyTag = nodeBuilder.or(
-    tags.map((tag) => nodeBuilder.is('metadata.tags', nodeTypes.literal.buildNode(tag, true)))
+    tags.map((tag) =>
+      nodeBuilder.is('metadata.routing_tags', nodeTypes.literal.buildNode(tag, true))
+    )
   );
   return toKqlExpression(nodeBuilder.and([alertRules, anyTag]));
 };

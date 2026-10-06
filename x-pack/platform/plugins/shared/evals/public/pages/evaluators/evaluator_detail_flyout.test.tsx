@@ -125,6 +125,32 @@ describe('EvaluatorDetailFlyout', () => {
     expect(screen.getByText('Categorical: pass=1, fail=0')).toBeInTheDocument();
   });
 
+  it("shows each score's direction, reading a score saved without one as higher is better", () => {
+    renderFlyout({
+      evaluator: {
+        ...USER_DEFINED,
+        judge: {
+          ...JUDGE,
+          output: {
+            scores: [
+              { name: 'tone', type: 'number' },
+              { name: 'hallucination', type: 'number', direction: 'minimize' },
+              { name: 'length', type: 'number', direction: 'neutral' },
+            ],
+          },
+        },
+      },
+    });
+
+    expect(screen.getByTestId('evalsEvaluatorDetailDirection-tone')).toHaveTextContent(
+      'Higher is better'
+    );
+    expect(screen.getByTestId('evalsEvaluatorDetailDirection-hallucination')).toHaveTextContent(
+      'Lower is better'
+    );
+    expect(screen.getByTestId('evalsEvaluatorDetailDirection-length')).toHaveTextContent('Neutral');
+  });
+
   it('marks which version is the one experiments would pick up', () => {
     renderFlyout();
 
