@@ -433,7 +433,6 @@ describe('Color util transforms', () => {
             { color: 'green', stop: 90 },
           ],
           continuity: 'all',
-          maxSteps: 5,
         },
       };
 
@@ -541,7 +540,9 @@ describe('Color util transforms', () => {
       } satisfies ColorByValueType);
     });
 
-    it('should reverse palette stops to API format', () => {
+    it('should keep stored stop colors when reverse is set (reverse is a no-op)', () => {
+      // `reverse` is a historical flag: the stops already carry the color order, so the
+      // transform must not flip them (that would double-reverse migrated panels).
       const palette: PaletteOutput<CustomPaletteParams> = {
         type: 'palette',
         name: 'custom',
@@ -569,9 +570,9 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { color: 'blue', lt: 0 },
+          { color: 'red', lt: 0 },
           { color: 'green', gte: 0, lt: 50 },
-          { color: 'red', gte: 50 },
+          { color: 'blue', gte: 50 },
         ],
       } satisfies ColorByValueType);
     });
@@ -1072,6 +1073,50 @@ describe('Color util transforms', () => {
       const returnedPaletteState = fromColorByValueAPIToLensState(apiColorByValue);
 
       expect(returnedPaletteState).toEqual(palette);
+    });
+
+    it('should keep colors for a migrated reversed custom palette on round-trip', () => {
+      // Older editors/migrations saved the stops already in display order and kept
+      // `reverse: true` only as a historical memo. The transform must not re-apply it,
+      // so the colors survive a round-trip in their stored order (not flipped) and the
+      // flag is normalized back to `false`.
+      const palette: PaletteOutput<CustomPaletteParams> = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          reverse: true,
+          rangeType: 'number',
+          rangeMin: 0,
+          rangeMax: 100,
+          continuity: 'none',
+          stops: [
+            { color: 'red', stop: 33 },
+            { color: 'green', stop: 66 },
+            { color: 'blue', stop: 100 },
+          ],
+          colorStops: [
+            { color: 'red', stop: 0 },
+            { color: 'green', stop: 33 },
+            { color: 'blue', stop: 66 },
+          ],
+        },
+      };
+
+      const api = fromColorByValueLensStateToAPI(palette);
+      expect(api).toEqual({
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', gte: 0, lt: 33 },
+          { color: 'green', gte: 33, lt: 66 },
+          { color: 'blue', gte: 66, lte: 100 },
+        ],
+      } satisfies ColorByValueType);
+
+      const returned = fromColorByValueAPIToLensState(api);
+      expect(returned?.params?.stops?.map(({ color }) => color)).toEqual(['red', 'green', 'blue']);
+      expect(returned?.params?.reverse).toBe(false);
     });
 
     it('should maintain data integrity for categorical color mapping with specific color codes', () => {

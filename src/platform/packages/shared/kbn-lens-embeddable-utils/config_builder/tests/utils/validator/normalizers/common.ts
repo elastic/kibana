@@ -1574,6 +1574,9 @@ export function getPaletteNormalizer<T extends LensAttributes>(
         delete palette.params.maxSteps;
         // `progression` is deprecated and has no reader
         delete palette.params.progression;
+        // Render never applies `reverse` (the stops carry the color order), and the transform
+        // always writes `false`
+        palette.params.reverse = false;
 
         const rangeMin = getRangeValue(palette.params.rangeMin);
         const rangeMax = getRangeValue(palette.params.rangeMax);
@@ -1640,7 +1643,6 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 
       return attributes;
     },
-    ignore: ['reverse'].map((param) => `${palettePath}.params.${param}`),
   };
 }
 
