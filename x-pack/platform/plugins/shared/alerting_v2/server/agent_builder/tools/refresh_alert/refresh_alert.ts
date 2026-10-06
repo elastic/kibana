@@ -57,7 +57,7 @@ export const refreshAlertTool = ({
       privilegeChecker: getPrivilegeChecker({ request: toolContext.request }),
       feature: 'alerts',
       level: 'read',
-      action: 'refresh episode',
+      action: 'refresh alert',
     });
     if (unauthorized) {
       return unauthorized;
@@ -75,7 +75,7 @@ export const refreshAlertTool = ({
             {
               type: ToolResultType.error,
               data: {
-                message: `Episode "${alertId}" not found`,
+                message: `Alert "${alertId}" not found`,
               },
             },
           ],
@@ -119,7 +119,7 @@ export const refreshAlertTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to refresh episode "${alertId}": ${message}`,
+              message: `Failed to refresh alert "${alertId}": ${message}`,
             },
           },
         ],

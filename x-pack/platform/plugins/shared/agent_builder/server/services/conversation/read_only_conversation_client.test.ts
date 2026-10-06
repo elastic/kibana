@@ -35,6 +35,7 @@ describe('createConversationPublicClient', () => {
     publicClient = createConversationPublicClient({
       client: internalClient,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
+      source: 'server_api',
     });
   });
 
@@ -119,7 +120,8 @@ describe('createConversationPublicClient', () => {
           agent_id: agentBuilderDefaultAgentId,
           title: DEFAULT_CONVERSATION_TITLE,
           rounds: [],
-        })
+        }),
+        { source: 'server_api' }
       );
     });
 
@@ -131,13 +133,16 @@ describe('createConversationPublicClient', () => {
         accessControl: { access_mode: ConversationAccessControlMode.Private },
       });
 
-      expect(internalClient.create).toHaveBeenCalledWith({
-        agent_id: 'custom-agent',
-        id: 'conv-1',
-        title: 'My chat',
-        access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
-        rounds: [],
-      });
+      expect(internalClient.create).toHaveBeenCalledWith(
+        {
+          agent_id: 'custom-agent',
+          id: 'conv-1',
+          title: 'My chat',
+          access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
+          rounds: [],
+        },
+        { source: 'server_api' }
+      );
     });
 
     it('passes origin through to the internal client', async () => {
@@ -171,6 +176,38 @@ describe('createConversationPublicClient', () => {
 
       expect(internalClient.exists).not.toHaveBeenCalled();
     });
+  });
+
+  it('binds its source on every write', async () => {
+    internalClient.addCustomEvents.mockResolvedValue([]);
+    internalClient.patchMetadata.mockResolvedValue({
+      conversation: createEmptyConversation({ id: 'conv-1' }),
+      changedFields: ['status'],
+    });
+    internalClient.update.mockResolvedValue(createEmptyConversation({ id: 'conv-1' }));
+    const workflowClient = createConversationPublicClient({
+      client: internalClient,
+      agentRegistry: agentRegistry as unknown as AgentRegistry,
+      source: 'workflow',
+    });
+
+    await workflowClient.addEvents({ conversationId: 'conv-1', events: [] });
+    await workflowClient.patchMetadata('conv-1', { status: 'open' });
+    await workflowClient.update({ id: 'conv-1', title: 'Renamed' });
+
+    expect(internalClient.addCustomEvents).toHaveBeenCalledWith(
+      { id: 'conv-1', events: [] },
+      { source: 'workflow' }
+    );
+    expect(internalClient.patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { status: 'open' },
+      { access: 'owner', source: 'workflow' }
+    );
+    expect(internalClient.update).toHaveBeenCalledWith(
+      { id: 'conv-1', title: 'Renamed' },
+      { access: 'owner', retryOnConflict: true, source: 'workflow' }
+    );
   });
 
   it('does not expose delete, upsertRound, or exists methods', () => {

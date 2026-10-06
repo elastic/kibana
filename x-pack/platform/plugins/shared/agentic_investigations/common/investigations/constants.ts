@@ -59,4 +59,4 @@ export const MAX_INVESTIGATION_FILTER_VALUES = 20;
 export const MAX_INVESTIGATION_ID_FILTER_VALUES = MAX_INVESTIGATIONS_PAGE_SIZE;
 
 /** Builtin agent tool that reads an investigation. */
-export const GET_INVESTIGATION_TOOL_ID = 'investigations.get' as const;
+export const GET_INVESTIGATION_TOOL_ID = 'agentic_investigations.get' as const;

@@ -742,7 +742,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
       {driftCheckError && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -750,27 +750,26 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                 defaultMessage="Could not check for settings changes"
               />
             }
-            color="warning"
-            iconType="warning"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.body"
+                  defaultMessage="Unable to reach the deployment record. Check your connection and try again."
+                />
+              </p>
+            }
+            actionProps={{
+              primary: {
+                children: i18n.translate(
+                  'xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.retryButton',
+                  { defaultMessage: 'Retry' }
+                ),
+                onClick: retryDriftCheck,
+                'data-test-subj': 'authenticateAndDeployStep-driftCheckRetryButton',
+              },
+            }}
             data-test-subj="authenticateAndDeployStep-driftCheckErrorCallout"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.body"
-              defaultMessage="Unable to reach the deployment record. Check your connection and try again."
-            />
-            <EuiSpacer size="s" />
-            <EuiButton
-              size="s"
-              color="warning"
-              onClick={retryDriftCheck}
-              data-test-subj="authenticateAndDeployStep-driftCheckRetryButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.retryButton"
-                defaultMessage="Retry"
-              />
-            </EuiButton>
-          </EuiCallOut>
+          />
           <EuiSpacer size="m" />
         </>
       )}
