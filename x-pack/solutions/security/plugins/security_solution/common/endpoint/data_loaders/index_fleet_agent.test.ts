@@ -82,6 +82,38 @@ describe('deleteIndexedFleetAgents', () => {
     expect(count).toHaveBeenCalled();
   });
 
+  it('marks agents inactive when delete reports success but documents remain', async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({ version_conflicts: 0 });
+    const refresh = jest.fn().mockResolvedValue({});
+    const count = jest
+      .fn()
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValue({ count: 0 });
+    const updateByQuery = jest.fn().mockResolvedValue({});
+
+    const pending = deleteIndexedFleetAgents(
+      createEsClient({ deleteByQuery, refresh, count, updateByQuery }),
+      indexedData
+    );
+    await jest.runAllTimersAsync();
+
+    await expect(pending).resolves.toEqual({ agents: { version_conflicts: 0 } });
+    expect(deleteByQuery).toHaveBeenCalledTimes(5);
+    expect(updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: { filter: [{ terms: { 'local_metadata.elastic.agent.id': ['agent-1'] } }] },
+        },
+        script: { source: 'ctx._source.active = false', lang: 'painless' },
+      })
+    );
+  });
+
   it('throws when agents are still active after the inactive fallback', async () => {
     const deleteByQuery = jest.fn().mockResolvedValue({ version_conflicts: 1 });
     const refresh = jest.fn().mockResolvedValue({});
