@@ -12,12 +12,7 @@ import { MAX_KEYWORD_LENGTH } from '../../common';
 import { MemoryVersionConflictError, toMemoryDisplayTelemetry } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
-/**
- * Archives or restores a memory on a person's behalf.
- *
- * Requires the Nightshift manage privilege, not just read, so a reader of the
- * memory tab cannot retire memories. Mirrors `cortexWritePrivileges`.
- */
+/** Needs manage, not just read, so a reader of the memory tab cannot retire memories. */
 export const memoryWritePrivileges = [NIGHTSHIFT_API_PRIVILEGES.manage, 'agentBuilder:read'];
 export const archiveMemoryPageRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/memory/pages/{id}/archive',
@@ -48,9 +43,6 @@ export const archiveMemoryPageRoute = createNightshiftInvestigationsServerRoute(
         ? await store.archive(params.path.id, 'manual', user)
         : await store.unarchive(params.path.id, user);
     } catch (err) {
-      // The store already retried its optimistic-concurrency guard and lost. A 409
-      // tells the operator the document moved rather than reporting a server fault
-      // for a write that was simply stale.
       if (err instanceof MemoryVersionConflictError) {
         throw conflict('The memory changed while you were reviewing it. Reload and try again.');
       }

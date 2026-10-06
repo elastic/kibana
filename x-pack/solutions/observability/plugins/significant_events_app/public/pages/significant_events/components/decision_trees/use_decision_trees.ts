@@ -30,13 +30,7 @@ const decisionTreeKeys = {
     ['decision_trees', 'version', symptom, version] as const,
 };
 
-/**
- * Reports whether xpack.nightshift_investigations.decision_trees.enabled is on. A failed request
- * means the feature is disabled or absent, which is treated the same as it being off.
- *
- * The loading state is part of the answer: the page cannot tell a hidden tab from an unanswered
- * query, and treats an unknown tab as a bad URL.
- */
+/** A failed request counts as off; loading is distinct from off so the tab is not misread. */
 export const useDecisionTreesEnabled = (): FeatureAvailability => {
   const { core } = useKibana();
 

@@ -23,12 +23,6 @@ interface MergeSource {
   title: string;
 }
 
-/**
- * The memories a page was merged from, in one request.
- *
- * The server reads the page's own `merged_from` and reports the sources that
- * still exist, so the browser never issues a request per source.
- */
 const useMergeSources = (page: MemoryPage): MergeSource[] => {
   const client = useMemoryClient();
   const id = page.id;
@@ -42,8 +36,7 @@ const useMergeSources = (page: MemoryPage): MergeSource[] => {
         params: { path: { id } },
       }) as Promise<{ sources?: MergeSource[] }>,
     enabled: client !== undefined && hasParents,
-    // Provenance is supplementary: a failure must not break the page, and
-    // nothing on it is worth retrying.
+    // Provenance is supplementary: a failure must not break the page.
     retry: false,
   });
 
@@ -55,13 +48,6 @@ interface MemoryMergedFromRowProps {
   onSelectPage: (id: string) => void;
 }
 
-/**
- * The memories this one was merged from, as links to them.
- *
- * Only the direct sources: each is a memory of its own, so the page can point at
- * them and leave the reader to follow the chain, rather than flattening several
- * levels of `merged_from` into one trail that reads as a single line of ancestry.
- */
 export function MemoryMergedFromRow({ page, onSelectPage }: MemoryMergedFromRowProps) {
   const sources = useMergeSources(page);
 
@@ -78,8 +64,6 @@ export function MemoryMergedFromRow({ page, onSelectPage }: MemoryMergedFromRowP
         />
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription data-test-subj="nightshiftMemoryMergedFrom">
-        {/* One source per line: comma-joined titles of differing length read as
-            one run-on sentence, and a merge can name several. */}
         <EuiFlexGroup direction="column" gutterSize="xs" responsive={false} alignItems="flexStart">
           {sources.map((source) => (
             <EuiFlexItem key={source.id} grow={false}>

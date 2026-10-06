@@ -37,19 +37,12 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
       throw notFound(`Semantic Memory page ${params.path.id} was not found`);
     }
 
-    /**
-     * The page's own id is dropped before the read: a memory written by an
-     * in-place rewrite lists itself in `merged_from`, and it is not one of its
-     * own sources.
-     */
+    // An in-place rewrite lists itself in `merged_from`; it is not its own source.
     const ids = [...new Set(root.merged_from ?? [])].filter((id) => id !== root.id);
     if (ids.length === 0) {
       return { sources: [] };
     }
 
-    // One mget rather than a get per source. A source the store no longer holds
-    // is simply absent from the result, so a deleted memory is not reported as a
-    // source with nothing behind it.
     const pages = await store.getMany(ids);
 
     return { sources: pages.map(({ id, title }) => ({ id, title })) };

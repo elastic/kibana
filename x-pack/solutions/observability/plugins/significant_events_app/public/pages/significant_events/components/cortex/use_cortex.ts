@@ -22,7 +22,6 @@ const cortexKeys = {
   page: (id: string) => ['cortex', 'page', id] as const,
 };
 
-/** Fields a user can write on a Cortex page. */
 export type CortexPageInput = Pick<
   CortexPage,
   'entity_type' | 'slug' | 'title' | 'description' | 'content' | 'status'
@@ -30,10 +29,7 @@ export type CortexPageInput = Pick<
 
 type CortexPageVersion = Required<Pick<CortexPage, 'version'>>;
 
-/**
- * Typed client for the Nightshift routes, or undefined when the plugin is not installed. Every
- * query below stays disabled in that case.
- */
+/** Undefined when the plugin is not installed; every query below stays disabled. */
 const useCortexClient = () => {
   const {
     dependencies: {
@@ -44,13 +40,7 @@ const useCortexClient = () => {
   return nightshiftInvestigations?.investigationsClient;
 };
 
-/**
- * Reports whether Cortex is usable: the Nightshift plugin has to be installed, and
- * `xpack.nightshift_investigations.cortex.enabled` has to be on.
- *
- * The loading state is part of the answer: the page cannot tell a hidden tab from
- * an unanswered query, and treats an unknown tab as a bad URL.
- */
+/** The Nightshift plugin must be installed and `cortex.enabled` on; loading is distinct from off. */
 export const useCortexEnabled = (): FeatureAvailability => {
   const client = useCortexClient();
 
@@ -92,7 +82,6 @@ export const useCortexPage = (id: string | undefined) => {
 
 type CortexClient = NonNullable<ReturnType<typeof useCortexClient>>;
 
-/** Runs a Cortex write, toasting failures and refreshing every cached page on success. */
 const useCortexMutation = <TVariables>(
   write: (client: CortexClient, variables: TVariables) => Promise<GetCortexPageResponse>,
   errorTitle: string
@@ -120,7 +109,6 @@ const useCortexMutation = <TVariables>(
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: errorTitle });
-      // A conflict means someone else changed the page, so the list and the page are both stale.
       return refreshCortex();
     },
   });

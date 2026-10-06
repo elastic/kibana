@@ -43,7 +43,6 @@ import { contentWithoutDuplicateTitle, pageMarkdownCss } from '../shared/page_ma
 
 const asPercent = (value: number): number => Math.round(Math.max(0, Math.min(1, value)) * 100);
 
-/** One line with an ellipsis, for the values in the metadata footer. */
 const singleLine = css`
   display: block;
   overflow: hidden;
@@ -54,7 +53,6 @@ const singleLine = css`
 interface MemoryPageViewProps {
   pageId: string;
   onSelectPage: (id: string) => void;
-  /** Filter Memory home by one of this memory's tags. */
   onSelectKeyword: (keyword: string) => void;
   onDeleted: () => void;
 }
@@ -73,18 +71,13 @@ export function MemoryPageView({
       http,
     },
   } = useKibana();
-  // Mirrors the privilege tiers the routes enforce: archiving needs the
-  // Nightshift manage privilege and deleting additionally needs configure. Read
-  // users see the page but not the actions, rather than clicking into a 403.
+  // Mirrors the route privilege tiers: read users see no actions rather than a 403.
   const { canManage, canConfigure } = getNightshiftCapabilities(nightshift);
 
   const { data, isLoading, isError } = useMemoryPage(pageId);
-  // Failures are toasted by the hooks, the way every other Nightshift write is,
-  // rather than by a banner this view would have to keep in step with its buttons.
   const { mutate: setArchived, isLoading: isArchiving } = useSetMemoryArchived();
   const { mutate: deletePage, isLoading: isDeleting } = useDeleteMemoryPage();
-  // Snapshotted when the dialog opens: a refetch while it is open must not swap
-  // in a revision the operator never reviewed.
+  // Snapshotted when the dialog opens so a refetch cannot swap in an unreviewed revision.
   const [deleteTarget, setDeleteTarget] = useState<
     { id: string; version: MemoryDetailResult['version'] } | undefined
   >();
@@ -123,8 +116,6 @@ export function MemoryPageView({
   // `memory` is the store's own type tag, not something the investigator wrote.
   const tags = page.tags.filter((tag) => tag !== 'memory');
   const conversationId = page.conversation_id;
-  // A memory that recorded no conversation is named by its context alone; one
-  // that recorded a conversation but no context still has one to link to.
   const sourceTask =
     page.context && page.context.length > 0
       ? page.context
@@ -134,8 +125,6 @@ export function MemoryPageView({
         })
       : undefined;
   const archiveReason = page.archived ? page.archive_reason : undefined;
-  // The merged-from row fetches its sources, so the section is only opened when
-  // the page claims it has any.
   const hasProvenance = sourceTask !== undefined || (page.merged_from?.length ?? 0) > 0;
 
   return (
@@ -144,14 +133,10 @@ export function MemoryPageView({
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
             <EuiFlexItem grow={false}>
-              {/* Outranks the memory's own markdown headings, which are content
-                  rather than chrome. */}
               <EuiTitle size="m">
                 <h2 data-test-subj="nightshiftMemoryPageTitle">{page.title}</h2>
               </EuiTitle>
             </EuiFlexItem>
-            {/* The state a reader has to know before the provenance row explains
-                it: an archived memory is out of recall. */}
             {page.archived && (
               <EuiFlexItem grow={false}>
                 <EuiBadge data-test-subj="nightshiftMemoryArchivedTitleBadge">
@@ -174,10 +159,6 @@ export function MemoryPageView({
                 />
               }
             >
-              {/* No confirmation here, unlike delete below. Archiving only hides
-                  a memory from recall and this same button restores it, so a
-                  dialog would add a step to a reversible action. Delete is
-                  permanent and asks the operator to type the title. */}
               <EuiButton
                 size="s"
                 iconType={page.archived ? 'refresh' : 'archive'}
@@ -235,11 +216,6 @@ export function MemoryPageView({
         </EuiText>
       )}
 
-      {/* The page's own bookkeeping, rather than part of what the memory says: it
-          sits under the content so a reader gets the memory first and the
-          provenance after it. What is worth trusting comes first, then where it
-          came from, then what it is related to. A row with nothing to say is
-          left out. */}
       <EuiSpacer size="l" />
       <EuiPanel
         color="subdued"
@@ -248,10 +224,6 @@ export function MemoryPageView({
         data-test-subj="nightshiftMemoryMetadata"
       >
         <EuiFlexGroup gutterSize="l" wrap responsive={false}>
-          {/* No colour on the rates: 0% usefulness means "never surfaced", which is
-              the normal state for a new memory, so painting it as a warning would
-              cry wolf on every cold start. The data-test-subj is what a test
-              asserts against. */}
           <EuiStat
             titleSize="s"
             reverse
@@ -299,9 +271,6 @@ export function MemoryPageView({
               />
             }
           />
-          {/* An archived memory is out of recall, so the reason it was retired
-              reads beside the two rates it is trusted on. A pre-`archive_reason`
-              document is archived with nothing to say why. */}
           {archiveReason !== undefined && (
             <EuiStat
               titleSize="s"
@@ -341,8 +310,6 @@ export function MemoryPageView({
                     />
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription data-test-subj="nightshiftMemorySourceTask">
-                    {/* One line, with the full text on hover: a provenance row that
-                        wraps over three lines is louder than it is useful. */}
                     <span className={singleLine} title={sourceTask}>
                       {conversationId ? (
                         <EuiLink
@@ -379,9 +346,6 @@ export function MemoryPageView({
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiBadgeGroup gutterSize="xs">
-              {/* Each tag is a keyword the store already ranks, so clicking one
-                  answers "what else is about this?" rather than describing the
-                  tag back at the reader. */}
               {tags.map((tag) => (
                 <EuiBadge
                   key={tag}
@@ -424,11 +388,6 @@ export function MemoryPageView({
           data-test-subj="nightshiftMemoryDeleteConfirm"
           onConfirm={() => {
             setDeleteTarget(undefined);
-            // Navigating away only on success: the memory may well still be
-            // there, and a failed write must leave the page in place to retry.
-            // The revision travels with the request, so a write that landed
-            // after the dialog opened answers 409 instead of taking the
-            // replacement the operator never saw.
             deletePage(
               { id: deleteTarget.id, version: deleteTarget.version },
               { onSuccess: onDeleted }

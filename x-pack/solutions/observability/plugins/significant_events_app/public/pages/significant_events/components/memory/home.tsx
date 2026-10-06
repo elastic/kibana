@@ -27,13 +27,12 @@ interface MemoryHomeProps {
   pages: MemorySummary[];
   stats: MemoryStats | undefined;
   onSelectPage: (id: string) => void;
-  /** Canonical keywords the view is filtered by, in click order. Two is an AND. */
   selectedKeywords: string[];
   onToggleKeyword: (keyword: string) => void;
   onClearKeywords: () => void;
 }
 
-/** A fixed, readable subset — enough to spot the standouts without a long scroll. */
+/** Enough to spot the standouts without a long scroll. */
 const RECENT_COUNT = 8;
 const MOST_USEFUL_COUNT = 3;
 
@@ -45,10 +44,6 @@ export function MemoryHome({
   onToggleKeyword,
   onClearKeywords,
 }: MemoryHomeProps) {
-  // The tab's own list is one page of the store, so the chart asks for its own
-  // wider slice rather than describing whichever 25 rows happen to be loaded.
-  // The unfiltered slice is also what resolves a keyword's spellings: tags are
-  // stored verbatim, so the server has to be told every one of them.
   const { data: allKeywordResult } = useMemoryKeywordPages();
   const allKeywordPages = useMemo(() => allKeywordResult?.pages ?? [], [allKeywordResult]);
   const tagTerms = useMemo(
@@ -60,7 +55,6 @@ export function MemoryHome({
     isLoading: isKeywordLoading,
     isError: isKeywordError,
   } = useMemoryKeywordPages(tagTerms);
-  // A filtered result that has not arrived, or failed, is not an empty store.
   const isFiltering = selectedKeywords.length > 0;
   const keywordStatus = !isFiltering
     ? 'ready'
@@ -70,17 +64,10 @@ export function MemoryHome({
     ? 'loading'
     : 'ready';
   const keywordPages = useMemo(
-    // With nothing selected both queries are the same one, so the unfiltered
-    // slice is used directly rather than waiting on a second copy of it.
     () => (isFiltering ? keywordResult?.pages ?? [] : allKeywordPages),
     [isFiltering, allKeywordPages, keywordResult]
   );
 
-  // The lists below describe the whole store, so they honour the selection too.
-  // With a keyword selected they read the keyword query's own result rather than
-  // the sidebar's 25-row slice: a keyword drawn from a wider set can belong only
-  // to memories that slice does not hold. Opening one fetches it by id, so a row
-  // the sidebar has not loaded is still readable.
   const filteredPages = useMemo(
     () => (selectedKeywords.length === 0 ? pages : keywordPages),
     [pages, selectedKeywords, keywordPages]
@@ -94,34 +81,23 @@ export function MemoryHome({
     [filteredPages]
   );
 
-  // Confidence is the tie-breaker, not the headline: a memory shown once and
-  // marked useful has a rate of 1.0 and a confidence near zero, so sorting on
-  // usefulness alone would put a fluke at the top.
+  // Confidence is the tie-breaker: a rate of 1.0 shown once has near-zero confidence.
   const mostUseful = useMemo(
     () =>
       [...filteredPages]
-        // A memory with no proven score has nothing to rank it by, so a store of
-        // unsurfaced memories shows no section rather than three arbitrary rows.
         .filter((page) => !page.archived && page.usefulness * page.confidence > 0)
         .sort((a, b) => b.usefulness * b.confidence - a.usefulness * a.confidence)
         .slice(0, MOST_USEFUL_COUNT),
     [filteredPages]
   );
 
-  // The header count follows the keyword selection, because the store-wide
-  // number would describe memories the lists below are not showing. The archived
-  // count does not: the sidebar's Archived list is not filtered by keywords, so a
-  // count that followed the selection would not describe what that list shows.
-  // It is the Space's own count over every list filter, which is why the Active
-  // view does not read "0 archived" — so `stats` is the tab's unfiltered
-  // listing's stats, never the keyword query's.
+  // The header total follows the keyword selection; `archived` does not, because the
+  // sidebar's Archived list is not keyword-filtered, so `stats` is the tab's unfiltered one.
   const total = (selectedKeywords.length > 0 ? keywordResult?.stats?.total : stats?.total) ?? 0;
   const archived = stats?.archived ?? 0;
 
   return (
     <div data-test-subj="nightshiftMemoryHome">
-      {/* One header row: the tab already names the view, so the title and the
-          counts it summarizes read as a pair rather than as two stacked lines. */}
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
@@ -159,9 +135,6 @@ export function MemoryHome({
         onClearKeywords={onClearKeywords}
       />
 
-      {/* Ranking the whole store in one request would be unbounded, so the query
-          follows a bounded number of pages. What it could not reach is said here,
-          rather than the chart quietly describing a prefix. */}
       {keywordResult?.capped && (
         <>
           <EuiSpacer size="s" />
@@ -224,8 +197,6 @@ export function MemoryHome({
 
       <EuiSpacer size="l" />
       {keywordStatus !== 'ready' ? null : recentlyUpdated.length === 0 ? (
-        // With nothing to list, the section heading would be a label with no
-        // section under it, so the empty message stands on its own.
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.significantEventsApp.memory.recentlyUpdatedEmpty"

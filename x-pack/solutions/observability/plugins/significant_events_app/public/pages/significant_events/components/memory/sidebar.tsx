@@ -29,12 +29,9 @@ interface MemorySidebarProps {
   onFilterChange: (filter: MemoryFilter) => void;
   selection: MemorySidebarSelection;
   onSelect: (selection: MemorySidebarSelection) => void;
-  /** The pages the sidebar lists. The tab owns the query, as Cortex does. */
   pages: MemorySummary[];
-  /** The flags below are optional in react-query's result, so accept undefined. */
   isLoading: boolean | undefined;
   isError: boolean | undefined;
-  /** Undefined while the query has not produced a cursor yet. */
   hasNextPage: boolean | undefined;
   isFetchingNextPage: boolean | undefined;
   onLoadMore: () => void;

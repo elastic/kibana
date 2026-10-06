@@ -7,18 +7,12 @@
 
 import type { UseQueryResult } from '@kbn/react-query';
 
-/** A feature gated by a server-side query, with loading kept distinct from off. */
 export interface FeatureAvailability {
-  /** True only once the query has answered "on". False while loading, and when off. */
   isEnabled: boolean;
-  /** True while the first answer is still in flight. */
   isLoading: boolean;
 }
 
-/**
- * A query with `enabled: false` never leaves react-query's loading state, so
- * `fetchStatus` is what distinguishes an unanswered query from a pending one.
- */
+/** An `enabled: false` query stays loading, so `fetchStatus` tells unanswered from pending. */
 export const toFeatureAvailability = <TData extends { enabled?: boolean }>({
   data,
   isLoading,

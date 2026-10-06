@@ -132,7 +132,6 @@ export class NightshiftInvestigationsPlugin
     core: CoreSetup<NightshiftInvestigationsStartDeps, NightshiftInvestigationsServerStart>,
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
-    // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
     const telemetry = setupNightshiftTelemetry({
@@ -150,8 +149,6 @@ export class NightshiftInvestigationsPlugin
       registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
-    // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
-    // feature only works when Cortex and the sandbox are both configured.
     this.decisionTreesEnabled =
       this.ctx.config.get().decision_trees.enabled &&
       this.cortexEnabled &&
@@ -218,7 +215,7 @@ export class NightshiftInvestigationsPlugin
       if (plugins.sandbox?.isAvailable) {
         const sandboxLogger = this.logger.get('sandbox');
 
-        // Start deps are read lazily: tools are registered in setup() but only run after start().
+        // Tools are registered in setup() but only run after start(), so read start deps lazily.
         const getSandboxStart = () => this.sandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
@@ -316,9 +313,8 @@ export class NightshiftInvestigationsPlugin
             logger: this.logger.get('resolve_model'),
           })
         );
-        // Obtain + materialize steps are always registered so the combined workflow
-        // can no-op a disabled writer branch instead of failing on an unknown
-        // step type. Obtain runs first and hands sandbox_id to both writers.
+        // Registered even when disabled: the combined workflow no-ops a writer branch instead
+        // of failing on an unknown step type, and obtain runs first to hand both writers a sandbox.
         plugins.workflowsExtensions.registerStepDefinition(
           obtainSandboxStepDefinition({
             getSandboxStart: () => this.sandboxStart,
@@ -472,9 +468,7 @@ export class NightshiftInvestigationsPlugin
     this.securityStart = plugins.security;
     this.security = coreStart.security;
 
-    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
-    // agent exists wherever an investigation runs. This narrower install exists so the agent is
-    // visible and editable in the Agent Builder UI before the first investigation ever runs.
+    // Installed here so the agent is visible in the Agent Builder UI before the first run.
     if (plugins.agentBuilder) {
       const { agentBuilder } = plugins;
       void installInvestigationAgent({
@@ -522,11 +516,7 @@ export class NightshiftInvestigationsPlugin
     };
   }
 
-  /**
-   * Created once and reused so every `agents.ensure` call for the investigation agent registers the
-   * gate. Dependencies are read lazily because the tool and the workflow step are registered at
-   * setup, while availability is only evaluated once a request arrives.
-   */
+  /** Created once so every `agents.ensure` call registers the same gate; deps read lazily. */
   private getInvestigationAvailability = (): AvailabilityConfig => {
     this.investigationAvailability ??= createInvestigationAvailability({
       getDeps: () => {
@@ -626,10 +616,6 @@ export class NightshiftInvestigationsPlugin
     });
   };
 
-  /**
-   * Installs the static managed workflows this plugin owns and signals readiness so the
-   * platform can reconcile (prune orphans / apply upgrades) for this plugin's workflows.
-   */
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart
   ): Promise<void> {

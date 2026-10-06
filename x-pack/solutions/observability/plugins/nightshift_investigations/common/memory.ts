@@ -8,39 +8,24 @@
 /** Managed Context Engine AI index that stores Semantic Memory pages as KIs. */
 export const MEMORY_AI_INDEX_ID = 'nightshift-semantic-memory';
 
-/** Backing index for {@link MEMORY_AI_INDEX_ID}. Must use the `ai-index-idx-` prefix. */
+/** Backing index for {@link MEMORY_AI_INDEX_ID}; must keep the `ai-index-idx-` prefix. */
 export const MEMORY_INDEX = 'ai-index-idx-nightshift-semantic-memory';
 
-/**
- * A memory is archived or it is not; there is no third state.
- *
- * `merged` and `harmful` are set by the optimizer. `manual` is set when a person
- * retires a memory from the UI (see the archive route).
- */
+/** `merged`/`harmful` are set by the optimizer, `manual` by the UI archive route. */
 export const MEMORY_ARCHIVE_REASONS = ['merged', 'harmful', 'manual'] as const;
 
 export type MemoryArchiveReason = (typeof MEMORY_ARCHIVE_REASONS)[number];
 
-/**
- * How the UI filters the store. `active` is every memory that is not archived.
- *
- * This is a UI concern rather than a stored value: it is derived from whether
- * `archive_reason` is present, so there is only one source of truth.
- */
+/** UI-only: `active` means `archive_reason` is absent, so there is one source of truth. */
 export const MEMORY_FILTERS = ['all', 'active', 'archived'] as const;
 
 export type MemoryFilter = (typeof MEMORY_FILTERS)[number];
 
-/**
- * Semantic Memory document. The task-recall context is stored in `description`,
- * the managed AI-index mapping's field for it; the mapping has no `context`
- * field. `title` / `content` are what the agent reads after recall.
- */
+/** Task-recall context lives in `description`, the managed AI-index mapping's field for it. */
 export interface StoredMemoryPage {
   '@timestamp'?: string;
   type?: string;
   title?: string;
-  /** Task-recall context, stored under the managed `description` field. */
   description?: string;
   content?: string;
   tags?: string[];
@@ -53,9 +38,8 @@ export interface StoredMemoryPage {
     slug?: string;
     /** Space is the Semantic Memory isolation boundary. */
     space_id?: string;
-    /** Agent that produced the memory. Metadata only — never a tenancy boundary. */
+    /** Provenance only — never a tenancy boundary. */
     agent_id?: string;
-    /** Agent Builder conversation that produced the memory, for provenance. */
     conversation_id?: string;
     source?: string;
     merged_from?: string[];
@@ -72,17 +56,13 @@ export interface MemoryPage {
   slug: string;
   title: string;
   content: string;
-  /** User task at extract time — read from the stored `description` field. */
   context?: string;
   tags: string[];
-  /** True when `archive_reason` is set. */
   archived: boolean;
   source?: string;
   merged_from?: string[];
   archive_reason?: MemoryArchiveReason;
-  /** Agent Builder conversation that produced this memory. */
   conversation_id?: string;
-  /** Agent that produced this memory. Metadata only. */
   agent_id?: string;
   categories: string[];
   references: string[];
@@ -103,22 +83,18 @@ export interface MemoryStats {
 }
 
 export interface MemoryPageSummary extends Omit<MemoryPage, 'content'> {
-  /** Read-time usefulness (conversion rate), decayed. What the UI shows. */
   usefulness: number;
-  /** Beta credible-interval confidence in [0, 1]. What the UI shows. */
+  /** Beta credible-interval confidence in [0, 1]. */
   confidence: number;
 }
 
 export interface ListMemoryPagesResponse {
   pages: MemoryPageSummary[];
   stats: MemoryStats;
-  /** Total matching pages across every page, not just this one. */
   total: number;
-  /** Opaque `search_after` token for the next page; absent when exhausted. */
   cursor?: string;
 }
 
-/** Elasticsearch's optimistic-concurrency pair, in the shape the wire uses. */
 export interface MemoryPageRevision {
   seq_no: number;
   primary_term: number;
@@ -126,7 +102,6 @@ export interface MemoryPageRevision {
 
 export interface GetMemoryPageResponse {
   page: MemoryPage;
-  /** Decayed display telemetry, so the UI need not recompute the bandit maths. */
   usefulness: number;
   confidence: number;
   /** The revision this page was read at, which a destructive write must name. */

@@ -29,11 +29,7 @@ import {
 } from './optimize';
 import { createMemoryPageStore, type MemoryPageStore } from './page_store';
 
-/**
- * Registers the Semantic Memory AI index with the Context Engine so it is managed and
- * discoverable, the way Cortex and the decision trees do. The backing index is
- * auto-created on first write from the `ai-index-idx-*` template.
- */
+/** Registers the AI index so Context Engine manages it; the backing index is created on first write. */
 export const registerMemoryAiIndex = (
   contextEngine: ContextEnginePluginSetup | undefined,
   logger: Logger
@@ -95,12 +91,7 @@ export const hydrateMemoryWorkspace = async ({
   return materializeMemory({ session, store, logger, query });
 };
 
-/**
- * Agent Builder fires the after-execution hook before it saves the round, so the workflow can
- * reach this step while the round does not exist yet. Waits briefly for it. Kept short: when the
- * workflow's request cannot read the conversation at all (Agent Builder masks that as not found),
- * a long wait would only delay the fallback.
- */
+/** Agent Builder fires the hook before saving the round, so wait briefly, then fall back. */
 const ROUND_READ_RETRY_DELAYS_MS = [1_000, 2_000];
 
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
@@ -113,12 +104,6 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
     });
   });
 
-/**
- * Reads the completed round's steps (reasoning, tool calls, tool results) through the public
- * Agent Builder conversation client, scoped to the workflow's own user and Space. Returns
- * `undefined` when the round cannot be read; the optimizer then works from tool-call parameters.
- * Never guesses a round: without a round id there is nothing safe to match.
- */
 export const loadRoundSteps = async ({
   agentBuilder,
   request,

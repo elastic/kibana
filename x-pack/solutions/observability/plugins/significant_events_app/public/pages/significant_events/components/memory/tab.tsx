@@ -29,11 +29,9 @@ export function MemoryTab() {
   const [filter, setFilter] = useState<MemoryFilter>('active');
   const [search, setSearch] = useState('');
   const [selection, setSelection] = useState<MemorySidebarSelection>({ kind: 'home' });
-  // The keyword selection lives here rather than in Home, because a memory's own
-  // tags select one too: a tag on the detail view filters Home by that keyword.
+  // Home doesn't own this: a tag clicked on the detail view also selects a keyword.
   const [keywords, setKeywords] = useState<string[]>([]);
 
-  // The sidebar's search narrows only the sidebar; with no search both are one query.
   const { data, rows, stats, isError, isLoading } = useMemoryPages(filter);
   const sidebar = useMemoryPages(filter, search);
   // A filter change reloads the query; unmounting the sidebar then would drop its search.
@@ -46,8 +44,7 @@ export function MemoryTab() {
     );
   }, []);
   const onClearKeywords = useCallback(() => setKeywords([]), []);
-  // Tags are stored verbatim and spelled inconsistently, so a tag clicked on a
-  // memory is answered by the same canonical key the chart selects.
+  // Tags are stored verbatim, so a clicked tag is keyed the same canonical way the chart keys.
   const onSelectKeyword = useCallback((keyword: string) => {
     const canonical = canonicalizeTag(keyword);
     setKeywords(canonical === null ? [] : [canonical]);

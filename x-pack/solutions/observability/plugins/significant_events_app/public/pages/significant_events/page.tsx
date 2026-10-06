@@ -89,20 +89,8 @@ export function SignificantEventsPage() {
   const isDecisionTreesEnabled = decisionTreesAvailability.isEnabled;
   const isMemoryEnabled = memoryAvailability.isEnabled;
 
-  /**
-   * The availability query that decides whether each gated tab is in the header.
-   *
-   * All three read as "off" until their query answers, so on the first render a tab
-   * named in the URL is not in the list. The page reacts to an unknown tab by
-   * redirecting to the first one, which used to bounce a direct link to a working
-   * tab before the query came back — and a refresh never came back to it at all.
-   * The tab's own gate is the thing that has to settle first, so the page waits for
-   * that one rather than for all of them, and redirects only once it has settled and
-   * the tab is still absent.
-   *
-   * The Detections tab is not here: `useDeveloperMode` reads a settings value with a
-   * synchronous default, so it is known on the first render.
-   */
+  // A gated tab reads "off" until its query answers, so wait for the URL tab's own gate
+  // before redirecting; Detections is synchronous and needs no gate.
   const availabilityGateByTab: Partial<Record<SignificantEventsTabId, FeatureAvailability>> = {
     cortex: cortexAvailability,
     memory: memoryAvailability,
@@ -266,13 +254,10 @@ export function SignificantEventsPage() {
     );
   }
 
-  // Legacy alias from an earlier tab name; keep until bookmarks are gone.
   if (tab === 'discoveries') {
     return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
   }
 
-  // The tab the route names may simply not have answered yet. Redirecting now would
-  // send it to the first tab and lose the URL the person asked for, so wait.
   if (availabilityGateByTab[tab as SignificantEventsTabId]?.isLoading) {
     return <SignificantEventsAppLoading />;
   }

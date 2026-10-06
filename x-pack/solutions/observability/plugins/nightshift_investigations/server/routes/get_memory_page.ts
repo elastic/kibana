@@ -32,14 +32,11 @@ export const getMemoryPageRoute = createNightshiftInvestigationsServerRoute({
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 
     const store = getMemoryPageStore(request);
-    // The revision travels with the page: a delete has to be conditional on the
-    // one the operator read, and this response is where they read it.
+    // The revision travels with the page so a delete can be conditional on the reviewed one.
     const versioned = await store.getVersioned(params.path.id);
     if (!versioned) {
       throw notFound(`Semantic Memory page ${params.path.id} was not found`);
     }
-    // Decay here rather than in the browser, so the numbers the UI shows are the
-    // same ones the store computed and the same ones the model is handed.
     const display = toMemoryDisplayTelemetry(versioned.page, Date.now() / 1000);
     return {
       page: versioned.page,

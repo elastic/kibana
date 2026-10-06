@@ -7,12 +7,7 @@
 
 import { canonicalizeTag } from '@kbn/nightshift-investigations-plugin/common';
 
-/**
- * Keyword ranking by PageRank over memory tags: nodes are keywords, an edge joins
- * the tags of one memory, and its usefulness × confidence weights the edge.
- */
-
-/** One memory, reduced to what the graph is built from. */
+/** PageRank over memory tags: nodes are keywords, an edge joins one memory's tags. */
 export interface KeywordEntry {
   tags: readonly string[];
   usefulness: number;
@@ -22,20 +17,16 @@ export interface KeywordEntry {
 export interface KeywordPageRankOptions {
   tolerance?: number;
   maxIterations?: number;
-  /** Keeps only the N most frequent keywords before any edge is built. */
   maxKeywords?: number;
 }
 
 export interface KeywordCell {
   /** Canonical key: what filtering, selection, and the graph compare. */
   keyword: string;
-  /** Most frequent original spelling, which is what a person recognizes. */
   display: string;
-  /** Min-max normalized PageRank in [0, 1]. What the tooltip reports. */
+  /** Min-max normalized PageRank in [0, 1]. */
   score: number;
-  /** What the partition sizes by: the normalized score, floored so it is visible. */
   area: number;
-  /** How many memories carry this keyword. */
   memories: number;
 }
 
@@ -46,13 +37,11 @@ const DEFAULT_MAX_ITERATIONS = 100;
 /** Floor so an unsurfaced memory (0 × 0) still contributes to the graph. */
 export const MIN_EDGE_WEIGHT = 0.5 * 0.05;
 
-/** Keywords kept before edges are built, bounding the node count. */
+/** Caps the node count before edges are built. */
 export const MAX_RANKED_KEYWORDS = 200;
 
-/** Past this the cells stop being readable, and a treemap that big says nothing. */
 export const MAX_TREEMAP_CELLS = 20;
 
-/** Area for a zero-score keyword, so it still has a clickable cell. */
 export const MIN_CELL_AREA = 1e-6;
 
 /** The marker tag every document carries, which says nothing about its content. */
@@ -60,7 +49,6 @@ export const MEMORY_MARKER_TAG = 'memory';
 
 const asUnit = (value: number): number => Math.min(Math.max(value, 0), 1);
 
-/** Canonical keywords of one entry, in order, marker tag dropped. */
 const entryKeywords = (keywords: readonly string[] | undefined): string[] => {
   const canonical: string[] = [];
   for (const keyword of keywords ?? []) {
@@ -71,7 +59,6 @@ const entryKeywords = (keywords: readonly string[] | undefined): string[] => {
   return canonical;
 };
 
-/** Raw PageRank over the co-occurrence graph, keyed by canonical keyword. */
 export function computeKeywordPageRank(
   entries: readonly KeywordEntry[],
   options: KeywordPageRankOptions = {}
@@ -81,7 +68,6 @@ export function computeKeywordPageRank(
   const maxKeywords = options.maxKeywords;
 
   let allowedKeywords: Set<string> | null = null;
-  // Canonicalized once per entry and reused by both passes.
   const keywordsByEntry = entries.map((entry) => entryKeywords(entry.tags));
   if (maxKeywords !== undefined) {
     const counts = new Map<string, number>();
@@ -117,15 +103,9 @@ export function computeKeywordPageRank(
     if (allowed.length === 0) continue;
 
     const weight = Math.max(asUnit(entry.usefulness) * asUnit(entry.confidence), MIN_EDGE_WEIGHT);
-    // Split across the entry's pairs rather than giving each pair the whole
-    // weight: a memory with six keywords would otherwise inject six times the
-    // graph volume of one with two keywords about the same thing.
     const pairs = (allowed.length * (allowed.length - 1)) / 2;
     const share = weight / pairs;
 
-    // Nodes are created before the pair check, so a keyword that only ever
-    // appears on its own is still a node — a dangling one, ranking at its
-    // teleport mass rather than disappearing from the treemap.
     const ids = allowed.map(getId);
     if (ids.length < 2) continue;
 
@@ -147,8 +127,6 @@ export function computeKeywordPageRank(
   if (nodeCount === 0) return {};
 
   const outgoing = new Array<number>(nodeCount).fill(0);
-  // Flattened once: the iteration below runs it up to a hundred times, and
-  // walking the nested map on every pass would cost more than the arithmetic.
   const edges: Array<{ from: number; to: number; weight: number }> = [];
   weights.forEach((targets, from) => {
     targets.forEach((weight, to) => {
@@ -164,9 +142,6 @@ export function computeKeywordPageRank(
     const next = new Array<number>(nodeCount).fill((1 - DEFAULT_DAMPING) * teleport);
     for (const { from, to, weight } of edges) {
       const outWeight = outgoing[from];
-      // A keyword that co-occurs with nothing keeps only its teleport mass, which
-      // is how an isolated keyword settles at (1 - damping) / nodes rather than
-      // pulling rank from keywords that are actually connected.
       if (outWeight <= 0) continue;
       next[to] += (DEFAULT_DAMPING * ranks[from] * weight) / outWeight;
     }
@@ -184,14 +159,6 @@ export function computeKeywordPageRank(
   return scores;
 }
 
-/**
- * Every spelling of every keyword, with how often each was written, keyed first by
- * the canonical keyword.
- *
- * Tags are stored verbatim, so `Cart Cache` and `cart-cache` are one keyword with
- * two spellings. A tie goes to the first seen, which keeps the choice stable
- * across renders.
- */
 const countSpellings = (entries: readonly KeywordEntry[]): Map<string, Map<string, number>> => {
   const spellings = new Map<string, Map<string, number>>();
   for (const entry of entries) {
@@ -206,20 +173,11 @@ const countSpellings = (entries: readonly KeywordEntry[]): Map<string, Map<strin
   return spellings;
 };
 
-/**
- * The spelling to show for each keyword, keyed canonically.
- */
 export const toKeywordDisplayNames = (entries: readonly KeywordEntry[]): Map<string, string> =>
   new Map(
     [...countSpellings(entries)].map(([key, bySpelling]) => [key, mostFrequentSpelling(bySpelling)])
   );
 
-/**
- * The treemap's rows: the top keywords of the whole set, ranked and capped.
- *
- * Selected keywords are dropped rather than restyled, so the chart never shows
- * the filter that produced it; the chip row above it names what is filtered.
- */
 export const toKeywordCells = (
   entries: readonly KeywordEntry[],
   selectedKeywords: readonly string[] = []
@@ -249,11 +207,8 @@ export const toKeywordCells = (
   return ranked
     .map(([keyword, score]) => ({
       keyword,
-      // The commonest spelling is the one a person recognizes, and it is what
-      // the cell is labelled with.
       display: mostFrequentSpelling(spellings.get(keyword)),
-      // A flat set of scores has no meaningful order, so every keyword that has
-      // any score is drawn at full size rather than one of them at 0.
+      // A flat score set has no order, so any positive score is drawn at full size.
       score: range === 0 ? (score > 0 ? 1 : 0) : (score - min) / range,
       area: 0,
       memories: memories.get(keyword) ?? 0,
@@ -266,7 +221,6 @@ export const toKeywordCells = (
     .slice(0, MAX_TREEMAP_CELLS);
 };
 
-/** Most frequent spelling of a keyword; the first seen wins a tie. */
 const mostFrequentSpelling = (bySpelling: Map<string, number> | undefined): string => {
   if (bySpelling === undefined) return '';
   let best = '';
@@ -280,15 +234,7 @@ const mostFrequentSpelling = (bySpelling: Map<string, number> | undefined): stri
   return best;
 };
 
-/**
- * The tag terms to send the server for the selected keywords: each keyword's
- * canonical key plus every original spelling of it.
- *
- * Documents written before the write layer canonicalized their tags hold every
- * spelling, and the server matches a keyword against all of the terms that fold
- * to it. Selected keywords are stored as canonical keys, so the caller only ever
- * passes those.
- */
+/** Canonical key plus every stored spelling, for pre-canonicalization documents. */
 export const toTagFilterTerms = (
   entries: readonly KeywordEntry[],
   keywords: readonly string[]
@@ -306,8 +252,6 @@ export const toTagFilterTerms = (
   return keywords.flatMap((keyword) => {
     const key = canonicalizeTag(keyword);
     if (key === null) return [];
-    // The canonical key is usually one of the spellings, so it is deduped rather
-    // than sent twice: the terms travel in a URL.
     return [...new Set([key, ...(spellings.get(key) ?? [])])];
   });
 };

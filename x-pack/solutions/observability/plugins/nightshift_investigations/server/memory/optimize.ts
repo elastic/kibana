@@ -82,9 +82,7 @@ export interface MemoryLabelProposal {
 export interface MemoryExtractProposal {
   slug: string;
   title: string;
-  /** Keywords for the topic, stored as tags. */
   tags: string[];
-  /** Recalled memory ids this entry supersedes; they are archived once it is written. */
   replaces: string[];
 }
 
@@ -141,11 +139,9 @@ export type SynthesizeMemoryGroup = (input: {
   sources: MemoryPage[];
   extract: MemoryExtractProposal;
   transcript?: string;
-  /** Titles of the other entries proposed this round. */
   otherTopics?: string[];
 }) => Promise<MemoryMergeSynthesis>;
 
-/** Normalize the user-authored task without interpreting literal prompt content. */
 export const unwrapUserTask = (prompt: string | undefined): string => {
   return prompt?.trim() ?? '';
 };
@@ -378,17 +374,13 @@ Investigation transcript:\n${transcript}`,
           const candidate =
             typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
           const title = String(candidate.title ?? '').trim();
-          // Validate before canonicalization: replacing `api_key=` punctuation with hyphens would
-          // otherwise hide the secret pattern while retaining it in the durable ID/path.
+          // Validate before canonicalization, or punctuation replaced by hyphens hides the pattern.
           if (looksLikeSecret(title)) {
             return undefined;
           }
           return {
             slug: canonicalizeSlug(title),
             title,
-            // Canonicalized here rather than at read time: a tag the model spells
-            // `Invoke Agent` and one spelled `invoke_agent` are the same tag, and a
-            // graph that ranked them separately would split the evidence.
             tags: Array.isArray(candidate.keywords)
               ? canonicalizeTags(candidate.keywords).slice(0, MAX_MEMORY_TAGS_PER_PAGE)
               : [],
@@ -471,7 +463,6 @@ export const formatMemoryMergeSources = ({
     maxTokens
   );
 
-// Models miss character targets and overshoot word targets, so compaction aims well below the budget.
 const COMPACT_TARGET_RATIO = 0.6;
 
 const CONTENT_SCHEMA = {
@@ -568,9 +559,7 @@ const unionStrings = (...groups: Array<readonly string[] | undefined>): string[]
 };
 
 /**
- * Writes a fresh memory over an archived one that holds the same id. The archived version's
- * counters are not inherited; its merge history is, minus its own id — a self-reference is
- * not an ancestor of the page being written.
+ * Writes over an archived page of the same id, inheriting its merge history but not its counters.
  */
 const writeOverArchived = async (
   store: MemoryPageStore,
@@ -615,10 +604,8 @@ export const applyMemoryEdits = async ({
   recalledMemories?: MemoryPage[];
   labels: MemoryLabelProposal;
   extractions: MemoryExtractProposal[];
-  /** Current user task — stored on new pages as the recall key. */
   context?: string;
   transcript?: string;
-  /** Provenance stamped on new pages. Metadata only. */
   agentId?: string;
   conversationId?: string;
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
@@ -665,8 +652,6 @@ export const applyMemoryEdits = async ({
   );
 
   const harmful = new Set(harmfulIds);
-  // A harmful memory never reaches the writer, even when an entry replaces or overlaps it; that
-  // entry is written without it.
   for (const id of archiveIds) {
     await store.archive(id, 'harmful');
     summary.harmfulArchiveCount += 1;
@@ -718,8 +703,6 @@ export const applyMemoryEdits = async ({
           `live recalled memories: [${unknownReplaces.join(', ')}]`
       );
     }
-    // The extractor only sees recalled memories, so a live memory already at this entry's id
-    // joins the entry even when it is not named.
     const exactId = toMemoryKiId(extra.slug);
     const exactStored = await store.get(exactId);
     const exactPage = exactStored && !exactStored.archived ? exactStored : undefined;
@@ -765,12 +748,9 @@ export const applyMemoryEdits = async ({
       now,
       logger,
     });
-    // Rewriting a page in place folds in no other memory, so it counts as an upsert
-    // of that page rather than as a merge — the same counter a new page lands in.
     if (result.writtenId && result.mergedFromCount === 0) {
       summary.standaloneUpsertCount += 1;
     } else if (result.writtenId) {
-      // A new entry whose create lost a race was merged into the page that won it.
       summary.mergeAttemptCount += replacing ? 0 : 1;
       summary.mergeSuccessCount += 1;
     }
@@ -788,9 +768,7 @@ export const applyMemoryEdits = async ({
 };
 
 interface MergeMemoryGroupResult {
-  /** The page the entry was written to; unset when nothing was written. */
   writtenId?: string;
-  /** Stored memories the write folded in, the written page itself excluded. */
   mergedFromCount: number;
   archivedSourceCount: number;
   writeFailureCount: number;
@@ -817,7 +795,6 @@ const mergeMemoryGroup = async ({
   task: string;
   transcript?: string;
   otherTopics: string[];
-  /** Provenance stamped on the written page. Metadata only. */
   agentId?: string;
   conversationId?: string;
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
@@ -852,8 +829,6 @@ const mergeMemoryGroup = async ({
         ? versionedSources[requiredSourceIds.indexOf(canonicalId)]
         : undefined;
 
-    // Synthesis is asynchronous and may overlap another optimizer round. The versioned
-    // snapshots above are therefore validated again immediately before any canonical write.
     let synthesis: MemoryMergeSynthesis;
     try {
       synthesis = await synthesizeMemoryGroup({
@@ -869,8 +844,6 @@ const mergeMemoryGroup = async ({
     }
 
     const content = capMergedContent(synthesis.content);
-    // A page's title and slug are set once, together; writing into an existing canonical page
-    // keeps both, and only a newly minted canonical page takes the entry's topic.
     const title = versionedCanonical?.page.title ?? extract.title;
     if (title.length === 0 || content.trim().length === 0) {
       logger.info(`Memory write skipped for "${extract.slug}" — the writer returned no content`);
@@ -919,12 +892,7 @@ const mergeMemoryGroup = async ({
       impressions += display.impressions;
       conversions += display.conversions;
     }
-    // The extract's proposed id names the entry being written, so it rides along with
-    // the merge even when the content landed on another page. The target's own id is
-    // not an ancestor of itself: naming it would make the page its own source, and the
-    // lineage walk skips an id it has already visited, which would hide the real
-    // ancestors behind it. What survives that filter is also what decides whether
-    // this write merged anything at all.
+    // `canonicalId` is filtered out: a page named as its own ancestor hides the real lineage.
     const mergedFrom = unionStrings(
       currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
       [toMemoryKiId(extract.slug)]
@@ -933,11 +901,7 @@ const mergeMemoryGroup = async ({
       slug,
       title,
       content,
-      // Recall matches the next round's task against this key, so it is this round's task.
       context: task || (versionedCanonical?.page.context ?? ''),
-      // Merges union every source page's tags, so the list grows with each merge
-      // and the same tag arrives spelled differently each time. Canonicalizing
-      // after the union is what collapses those into one tag again.
       tags: canonicalizeTags([...currentSources.flatMap((page) => page.tags), ...extract.tags])
         .filter((tag) => tag !== 'memory')
         .slice(0, MAX_MEMORY_TAGS_PER_PAGE),
@@ -948,9 +912,6 @@ const mergeMemoryGroup = async ({
       user: 'nightshift-optimizer',
       ...(currentSources.length > 0
         ? {
-            // An in-place rewrite folds in nothing, so it carries no merge lineage
-            // and no "Merged from" provenance; its counters still ride along from
-            // the page it overwrites.
             ...(mergedFrom.length > 0
               ? {
                   source: `Merged from memories: ${mergedFrom.join(', ')}`,
@@ -1033,8 +994,6 @@ const mergeMemoryGroup = async ({
       continue;
     }
     try {
-      // A merge may only consume the source snapshot incorporated into the committed canonical.
-      // Chasing a conflict here could archive a newer source that the canonical does not contain.
       await store.archiveVersioned(source, 'merged');
       archivedSourceCount += 1;
     } catch (err) {
@@ -1043,8 +1002,6 @@ const mergeMemoryGroup = async ({
       logger.debug(`Memory merge archive failed source=${page.id}: ${String(err)}`);
     }
   }
-  // The canonical page is a source of itself whenever the write landed on a page
-  // that already existed, so it is counted apart from what was really folded in.
   const mergedFromCount = committedSources.filter(
     ({ page }) => page.id !== writtenCanonicalId
   ).length;
@@ -1084,15 +1041,11 @@ export const optimizeMemory = async ({
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   userMessage: string;
   assistantMessage: string;
-  /** Parameters-only fallback for when the round's steps could not be read. */
   toolCalls: InvestigationToolCall[];
-  /** The round's steps in order with tool results, when the persisted round could be read. */
   investigation?: TranscriptStep[];
-  /** Provenance stamped on pages this run writes. Metadata only. */
   agentId?: string;
   conversationId?: string;
   logger: Logger;
-  /** Aborted on step timeout or workflow cancellation; no later LLM call or write starts. */
   signal?: AbortSignal;
 }): Promise<MemoryOptimizeSummary> => {
   logger.debug(
@@ -1150,7 +1103,6 @@ export const optimizeMemory = async ({
     );
   }
 
-  // Cold-start rounds have an empty recalled set; still extract or the store never fills.
   signal?.throwIfAborted();
   let extractions: MemoryExtractProposal[] = [];
   if (assistantMessage.trim().length === 0) {

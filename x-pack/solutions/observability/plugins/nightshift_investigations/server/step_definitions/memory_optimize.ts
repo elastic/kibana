@@ -22,10 +22,7 @@ import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
 
-/**
- * Bounds the post-round optimizer. It runs non-blocking, so a stall does not hold up an
- * investigation, but it should not leave a task hanging on a stuck inference call either.
- */
+/** Bounds the non-blocking post-round optimizer so a stuck inference call cannot hang a task. */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const memoryOptimizeStepDefinition = ({
@@ -123,8 +120,7 @@ export const memoryOptimizeStepDefinition = ({
       }
 
       const workflowContext = context.contextManager.getContext();
-      // Workflow execution authorization is the capability boundary. Storage tenancy always comes
-      // from the trusted execution context; no workflow input can select another Space.
+      // Storage tenancy comes from the trusted execution context; no input can select another Space.
       const { spaceId } = workflowContext.workflow;
       const workflowExecutionId = workflowContext.execution.id;
       const sandboxId = context.input.sandbox_id?.trim() ? context.input.sandbox_id : undefined;
