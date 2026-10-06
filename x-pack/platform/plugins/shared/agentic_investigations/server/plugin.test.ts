@@ -48,7 +48,10 @@ const setupPlugin = () => {
   const features = { registerKibanaFeature: jest.fn() };
 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
-  const agentBuilder = { attachments: { registerType: jest.fn() } };
+  const agentBuilder = {
+    attachments: { registerType: jest.fn() },
+    conversationEvents: { register: jest.fn() },
+  };
 
   plugin.setup(
     coreSetup as never,
@@ -194,6 +197,14 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(
         JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
       ).not.toMatch(/proposals/i);
+    });
+
+    it('registers the escalation timeline event types', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(
+        agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
+      ).toEqual(['escalation_created_from_investigation', 'escalation_investigation_linked']);
     });
 
     it('registers the HTTP routes for every entity', () => {

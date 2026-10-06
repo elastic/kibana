@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
@@ -39,11 +40,15 @@ export class AgenticInvestigationsPublicPlugin
   }
 
   start(
-    _core: CoreStart,
+    core: CoreStart,
     { agentBuilder }: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder);
+      registerEscalationConversationEventUiDefinitions({
+        conversationEvents: agentBuilder.conversationEvents,
+        application: core.application,
+      });
     }
     return {};
   }

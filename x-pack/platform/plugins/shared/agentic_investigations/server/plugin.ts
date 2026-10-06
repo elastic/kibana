@@ -24,6 +24,7 @@ import { registerImpactStepDefinitions } from './impact/step_types';
 import { registerInvestigationStepDefinitions } from './investigations/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { EscalationsService } from './escalations/services/escalations_service';
+import { registerEscalationConversationEvents } from './escalations/conversation_events';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
@@ -64,6 +65,8 @@ export class AgenticInvestigationsPlugin
     { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features });
+
+    registerEscalationConversationEvents(agentBuilder);
 
     registerImpactAttachment(agentBuilder, {
       getImpactService: () => this.requireImpactService(),
