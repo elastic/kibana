@@ -101,7 +101,7 @@ const setup = ({
   return { storage, attachments, tool, call };
 };
 
-describe('investigations.set_impact', () => {
+describe('agentic_investigations.set_impact', () => {
   it('is the allow-listed builtin tool id', () => {
     expect(setup().tool.id).toBe(SET_IMPACT_TOOL_ID);
   });

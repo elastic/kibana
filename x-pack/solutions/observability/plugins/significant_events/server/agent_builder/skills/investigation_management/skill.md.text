@@ -25,7 +25,7 @@ inputs:
 waitForCompletion: true
 ```
 
-**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. The investigation is recorded as its own conversation whose id is the returned `executionId`; its findings are read with `investigations.get` (see **Presenting results**). Since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available.
+**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. The investigation is recorded as its own conversation whose id is the returned `executionId`; its findings are read with `agentic_investigations.get` (see **Presenting results**). Since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available.
 
 - Before triggering, briefly tell the user you're starting the investigation and that it may take a few minutes — the agent gathers and correlates logs, traces, and metrics before reaching a conclusion.
 - Stay on the tool call until it returns; do not ask the user to come back later, and do not start polling in a loop — call `get_workflow_execution_status` once if needed.
@@ -123,9 +123,9 @@ Use this when `execute_workflow` returned before the investigation reached a ter
 
 Use `platform.core.get_workflow_execution_status` with the `executionId` from the returned execution.
 
-- Status `running` — investigation is still in progress; let the user know it's still running and share the `executionId` so they can ask for an update later. `investigations.get` with the `executionId` as `id` already shows what it has recorded so far.
-- Status `completed` — read the findings with `investigations.get` (see **Presenting results**).
-- Status `failed` — the output contains error details; `investigations.get` still shows whatever was recorded before the failure.
+- Status `running` — investigation is still in progress; let the user know it's still running and share the `executionId` so they can ask for an update later. `agentic_investigations.get` with the `executionId` as `id` already shows what it has recorded so far.
+- Status `completed` — read the findings with `agentic_investigations.get` (see **Presenting results**).
+- Status `failed` — the output contains error details; `agentic_investigations.get` still shows whatever was recorded before the failure.
 
 ### Recording the investigation on a Significant Event
 
@@ -149,7 +149,7 @@ Only call this tool when a Significant Event was the context for the investigati
 
 ### Presenting results
 
-Read the investigation with `investigations.get`, passing the `executionId` as `id`. It returns what the investigation agent recorded:
+Read the investigation with `agentic_investigations.get`, passing the `executionId` as `id`. It returns what the investigation agent recorded:
 
 | Field | Description |
 |---|---|

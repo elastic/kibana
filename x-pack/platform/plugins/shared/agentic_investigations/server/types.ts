@@ -31,8 +31,8 @@ export interface AgenticInvestigationsSetupDependencies {
   agentBuilderPlatform: AgentBuilderPlatformPluginSetup;
   /**
    * Registers the readonly investigation_impact, investigation_subject, and
-   * investigation_hypotheses attachment types and the `investigations.set_impact`,
-   * `investigations.set_hypotheses`, and `investigations.get` tools.
+   * investigation_hypotheses attachment types and the `agentic_investigations.set_impact`,
+   * `agentic_investigations.set_hypotheses`, and `agentic_investigations.get` tools.
    */
   agentBuilder: AgentBuilderPluginSetup;
   /** Registers Impact workflow steps. */

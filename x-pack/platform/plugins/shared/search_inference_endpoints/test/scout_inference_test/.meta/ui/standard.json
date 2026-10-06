@@ -1,5 +1,5 @@
 {
-  "sha1": "9de419bf82511e702a4d5146c382249e0d6dca92",
+  "sha1": "fd39f75b6e9df1c43fea62edbd12e5b3959193c7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -61,8 +61,8 @@
       }
     },
     {
-      "id": "42293a2b206815f-92c0688ca2cd666",
-      "title": "EIS Models Page model family filter filters cards by provider",
+      "id": "42293a2b206815f-777cf3e3a5fd0de",
+      "title": "EIS Models Page region filter is on the models toolbar",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -75,6 +75,20 @@
       }
     },
     {
+      "id": "42293a2b206815f-92c0688ca2cd666",
+      "title": "EIS Models Page model family filter filters cards by provider",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 50,
+        "column": 38
+      }
+    },
+    {
       "id": "42293a2b206815f-dad678cd80df6dc",
       "title": "EIS Models Page renders status badges on deprecated and EOL model cards",
       "expectedStatus": "passed",
@@ -84,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 66,
-        "column": 5
+        "line": 68,
+        "column": 77
       }
     },
     {
@@ -98,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 86,
-        "column": 94
+        "line": 90,
+        "column": 8
       }
     },
     {
@@ -112,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 98,
-        "column": 11
+        "line": 99,
+        "column": 13
       }
     },
     {
@@ -126,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 123,
-        "column": 7
+        "line": 125,
+        "column": 11
       }
     },
     {

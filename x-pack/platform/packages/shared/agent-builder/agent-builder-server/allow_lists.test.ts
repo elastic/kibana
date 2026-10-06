@@ -19,9 +19,9 @@ describe('isAllowedBuiltinTool', () => {
   });
 
   it('allows the agentic investigations tools', () => {
-    expect(isAllowedBuiltinTool('investigations.set_impact')).toBe(true);
-    expect(isAllowedBuiltinTool('investigations.set_hypotheses')).toBe(true);
-    expect(isAllowedBuiltinTool('investigations.get')).toBe(true);
+    expect(isAllowedBuiltinTool('agentic_investigations.set_impact')).toBe(true);
+    expect(isAllowedBuiltinTool('agentic_investigations.set_hypotheses')).toBe(true);
+    expect(isAllowedBuiltinTool('agentic_investigations.get')).toBe(true);
   });
 
   it('allows the proposals tools', () => {
@@ -29,7 +29,7 @@ describe('isAllowedBuiltinTool', () => {
   });
 
   it('rejects unlisted tool ids', () => {
-    expect(isAllowedBuiltinTool('investigations.not_a_tool')).toBe(false);
+    expect(isAllowedBuiltinTool('agentic_investigations.not_a_tool')).toBe(false);
   });
 });
 

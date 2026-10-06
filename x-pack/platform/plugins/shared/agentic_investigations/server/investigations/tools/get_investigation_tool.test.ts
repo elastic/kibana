@@ -76,7 +76,7 @@ const setup = (privileges: Partial<InvestigationsPrivilegesChecker> = {}) => {
   return { tool, get, run };
 };
 
-describe('investigations.get tool', () => {
+describe('agentic_investigations.get tool', () => {
   it('is a read-only builtin tool', () => {
     const { tool } = setup();
     expect(tool.id).toBe(GET_INVESTIGATION_TOOL_ID);

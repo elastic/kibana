@@ -20,4 +20,4 @@ export const MAX_HYPOTHESIS_EVIDENCE = 3;
 export const HYPOTHESIS_STATUSES = ['investigating', 'dismissed', 'confirmed'] as const;
 
 /** Agent Builder builtin tool that records an investigation's hypotheses. */
-export const SET_HYPOTHESES_TOOL_ID = 'investigations.set_hypotheses' as const;
+export const SET_HYPOTHESES_TOOL_ID = 'agentic_investigations.set_hypotheses' as const;

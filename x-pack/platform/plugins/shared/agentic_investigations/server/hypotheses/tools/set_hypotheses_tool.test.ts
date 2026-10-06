@@ -107,7 +107,7 @@ const setup = ({
   return { storage, attachments, tool, call, definition };
 };
 
-describe('investigations.set_hypotheses', () => {
+describe('agentic_investigations.set_hypotheses', () => {
   it('is the allow-listed builtin tool id', () => {
     expect(setup().tool.id).toBe(SET_HYPOTHESES_TOOL_ID);
   });
