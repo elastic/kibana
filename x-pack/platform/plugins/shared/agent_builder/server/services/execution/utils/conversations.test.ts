@@ -28,6 +28,8 @@ import {
   ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
+  agentBuilderDefaultAgentId,
+  createAgentNotFoundError,
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
   createRequestAbortedError,
@@ -37,6 +39,7 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
+  createMockedAgentRegistry,
   createRound,
   createConversationClientMock,
 } from '../../../test_utils';
@@ -71,12 +74,19 @@ const attachmentAddedEvent = (id = 'att-evt-1'): AttachmentTimelineEvent => ({
 
 describe('conversations utils', () => {
   describe('getConversation', () => {
+    let agentRegistry: ReturnType<typeof createMockedAgentRegistry>;
+
+    beforeEach(() => {
+      agentRegistry = createMockedAgentRegistry();
+    });
+
     describe('operation determination', () => {
       it('returns CREATE operation when no conversationId is provided', async () => {
         const conversationClient = createConversationClientMock();
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: undefined,
           conversationClient,
         });
@@ -97,6 +107,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: undefined,
           conversationClient,
           origin,
@@ -112,6 +123,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: undefined,
           conversationClient,
         });
@@ -127,6 +139,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: undefined,
           conversationClient,
           accessControl: {
@@ -145,6 +158,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: undefined,
           conversationClient,
         });
@@ -157,6 +171,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: undefined,
           conversationClient,
           readOnly: true,
@@ -172,6 +187,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: 'existing-conversation',
           autoCreateConversationWithId: true,
           conversationClient,
@@ -188,6 +204,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: 'test-conversation',
           conversationClient,
         });
@@ -202,6 +219,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: 'new-conversation',
           autoCreateConversationWithId: true,
           conversationClient,
@@ -218,6 +236,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: 'existing-conversation',
           autoCreateConversationWithId: true,
           conversationClient,
@@ -238,6 +257,7 @@ describe('conversations utils', () => {
         await expect(
           getConversation({
             agentId: 'test-agent',
+            agentRegistry,
             conversationId: 'existing-conversation',
             autoCreateConversationWithId: true,
             conversationClient,
@@ -262,6 +282,7 @@ describe('conversations utils', () => {
 
         const result = await getConversation({
           agentId: 'test-agent',
+          agentRegistry,
           conversationId: 'existing-conversation',
           autoCreateConversationWithId: true,
           conversationClient,
@@ -275,6 +296,115 @@ describe('conversations utils', () => {
           access_mode: ConversationAccessControlMode.Private,
           entries: [],
         });
+      });
+    });
+
+    describe('agent validation', () => {
+      it('creates a placeholder for the default agent when none is requested', async () => {
+        const conversationClient = createConversationClientMock();
+
+        const result = await getConversation({
+          agentRegistry,
+          conversationId: undefined,
+          conversationClient,
+        });
+
+        expect(result.operation).toBe('CREATE');
+        expect(result.agent_id).toBe(agentBuilderDefaultAgentId);
+        expect(agentRegistry.get).toHaveBeenCalledWith(agentBuilderDefaultAgentId, {
+          access: 'use',
+        });
+      });
+
+      it('validates the requested agent for a new conversation', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.exists.mockResolvedValue(false);
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          agentRegistry,
+          conversationId: 'new-conversation',
+          autoCreateConversationWithId: true,
+          conversationClient,
+        });
+
+        expect(result.operation).toBe('CREATE');
+        expect(result.agent_id).toBe('test-agent');
+        expect(agentRegistry.get).toHaveBeenCalledWith('test-agent', { access: 'use' });
+      });
+
+      it('rejects a new conversation for an unknown agent without creating it', async () => {
+        const conversationClient = createConversationClientMock();
+        const error = createAgentNotFoundError({ agentId: 'unknown-agent' });
+        agentRegistry.get.mockRejectedValue(error);
+
+        await expect(
+          getConversation({
+            agentId: 'unknown-agent',
+            agentRegistry,
+            conversationId: undefined,
+            conversationClient,
+          })
+        ).rejects.toBe(error);
+
+        expect(conversationClient.create).not.toHaveBeenCalled();
+      });
+
+      it('keeps the stored agent and skips validation for a conversation looked up by id', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.get.mockResolvedValue(
+          createEmptyConversation({ id: 'existing-conversation', agent_id: 'stored-agent' })
+        );
+
+        const result = await getConversation({
+          agentRegistry,
+          conversationId: 'existing-conversation',
+          conversationClient,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.agent_id).toBe('stored-agent');
+        expect(agentRegistry.get).not.toHaveBeenCalled();
+      });
+
+      it('keeps the stored agent and skips validation for a conversation looked up by origin', async () => {
+        const conversationClient = createConversationClientMock();
+        const origin = { external_conversation_id: 'team:T123/channel:C123/thread:1' };
+        conversationClient.getByOrigin.mockResolvedValue(
+          createEmptyConversation({ id: 'existing-conversation', agent_id: 'stored-agent', origin })
+        );
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          agentRegistry,
+          conversationId: undefined,
+          conversationClient,
+          origin,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.agent_id).toBe('stored-agent');
+        expect(agentRegistry.get).not.toHaveBeenCalled();
+      });
+
+      it('keeps the stored agent and skips validation when an auto-created conversation already exists', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.exists.mockResolvedValue(true);
+        conversationClient.get.mockResolvedValue(
+          createEmptyConversation({ id: 'existing-conversation', agent_id: 'stored-agent' })
+        );
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          agentRegistry,
+          conversationId: 'existing-conversation',
+          autoCreateConversationWithId: true,
+          conversationClient,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.agent_id).toBe('stored-agent');
+        expect(agentRegistry.get).not.toHaveBeenCalled();
       });
     });
   });

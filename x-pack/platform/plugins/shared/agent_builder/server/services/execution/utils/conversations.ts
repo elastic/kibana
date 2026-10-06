@@ -31,6 +31,7 @@ import type {
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import {
+  agentBuilderDefaultAgentId,
   ConversationParentRelation,
   ConversationRoundStatus,
   isConversationAlreadyExistsError,
@@ -46,6 +47,7 @@ import {
   resumeExecutionId,
   roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
+import type { AgentRegistry } from '../../agents/agent_registry';
 import type { ConversationClient } from '../../conversation';
 import {
   roundToEvents,
@@ -630,17 +632,7 @@ export const persistExecutionInterruption = async (
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 
-export const getConversation = async ({
-  agentId,
-  conversationId,
-  autoCreateConversationWithId = false,
-  conversationClient,
-  accessControl,
-  origin,
-  subagentCreation,
-  readOnly,
-}: {
-  agentId: string;
+interface ResolveConversationParams {
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
@@ -651,7 +643,18 @@ export const getConversation = async ({
     subagentName: string;
   };
   readOnly?: boolean;
-}): Promise<ConversationWithOperation> => {
+}
+
+const resolveConversation = async ({
+  agentId,
+  conversationId,
+  autoCreateConversationWithId = false,
+  conversationClient,
+  accessControl,
+  origin,
+  subagentCreation,
+  readOnly,
+}: ResolveConversationParams & { agentId: string }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
     const conversation = origin ? await conversationClient.getByOrigin(origin) : undefined;
@@ -727,6 +730,32 @@ export const getConversation = async ({
     ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
     operation: 'CREATE',
   };
+};
+
+/**
+ * Resolves the conversation a request addresses. A new conversation is a placeholder for
+ * `agentId` (the default agent when none is given), and its agent is checked here so a placeholder
+ * is never persisted for an agent that does not exist or cannot be used. An existing conversation
+ * keeps its stored agent, which the client's converse read has already validated.
+ */
+export const getConversation = async ({
+  agentId,
+  agentRegistry,
+  ...params
+}: ResolveConversationParams & {
+  agentId?: string;
+  agentRegistry: AgentRegistry;
+}): Promise<ConversationWithOperation> => {
+  const conversation = await resolveConversation({
+    ...params,
+    agentId: agentId ?? agentBuilderDefaultAgentId,
+  });
+
+  if (conversation.operation === 'CREATE') {
+    await agentRegistry.get(conversation.agent_id, { access: 'use' });
+  }
+
+  return conversation;
 };
 
 /**

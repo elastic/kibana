@@ -32,6 +32,7 @@ import {
   type RoundInterruptedEvent,
   type RoundStartedEvent,
   ConversationRoundStatus,
+  createAgentNotFoundError,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserAttributes } from '@kbn/inference-tracing';
@@ -722,6 +723,45 @@ describe('handleAgentExecution', () => {
       // The placeholder owner is nobody, and no write will ever resolve one.
       expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'unknown');
       expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserName, 'unknown');
+    });
+  });
+
+  describe('conversation that is never stored', () => {
+    it('rejects an unknown agent before any stream or write', async () => {
+      const conversationClient = createConversationClientMock();
+      stubResolveServices(conversationClient);
+      const error = createAgentNotFoundError({ agentId: 'unknown-agent' });
+      const deps = createDeps({ conversationClient }) as {
+        agentService: { getRegistry: jest.Mock };
+      };
+      deps.agentService.getRegistry.mockResolvedValue({ get: jest.fn().mockRejectedValue(error) });
+
+      await expect(
+        handleAgentExecution({
+          execution: {
+            executionId: 'execution-1',
+            executionMode: AgentExecutionMode.conversation,
+            owner: { id: 'owner-1', username: 'owner' },
+            agentParams: {
+              agentId: 'unknown-agent',
+              conversationId: 'conversation-1',
+              roundId: 'round-1',
+              conversationOperation: 'CREATE',
+              receivedAt: '2024-01-01T00:00:00.000Z',
+              nextInput: { message: 'Hello' },
+              storeConversation: false,
+            },
+          } as never,
+          deps: deps as never,
+          request: { headers: {} } as never,
+          abortSignal: new AbortController().signal,
+        })
+      ).rejects.toBe(error);
+
+      expect(executeAgentMock).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
     });
   });
 

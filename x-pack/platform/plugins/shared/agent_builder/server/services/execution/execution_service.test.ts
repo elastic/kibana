@@ -22,6 +22,7 @@ import {
   TimelineEventType,
   createRequestAbortedError,
   createAgentNotFoundError,
+  createConversationNotFoundError,
   isBadRequestError,
 } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
@@ -1028,12 +1029,13 @@ describe('AgentExecutionService', () => {
       { useTaskManager: false, triggerMode: ChatTriggerMode.Never },
     ].flatMap((options) => ['unknown-agent', ''].map((agentId) => ({ ...options, agentId })))
   )('invalid agent with %j', ({ useTaskManager, triggerMode, agentId }) => {
-    it.each([undefined, 'new-conversation', 'existing-conversation'])(
+    it.each([undefined, 'new-conversation'])(
       'rejects before persisting conversation %s',
       async (conversationId) => {
         const request = httpServerMock.createKibanaRequest();
         const error = createAgentNotFoundError({ agentId });
         agentRegistry.get.mockRejectedValueOnce(error);
+        conversationClient.exists.mockResolvedValue(false);
 
         await expect(
           service.maybeExecuteAgent({
@@ -1059,6 +1061,38 @@ describe('AgentExecutionService', () => {
         expect(mockHandleAgentExecution).not.toHaveBeenCalled();
       }
     );
+  });
+
+  describe.each([
+    { useTaskManager: false, triggerMode: undefined },
+    { useTaskManager: true, triggerMode: undefined },
+    { useTaskManager: false, triggerMode: ChatTriggerMode.Never },
+  ])('existing conversation the client refuses with %j', ({ useTaskManager, triggerMode }) => {
+    it('propagates the rejection without validating an agent or persisting anything', async () => {
+      const error = createConversationNotFoundError({ conversationId: 'conversation-1' });
+      conversationClient.get.mockRejectedValueOnce(error);
+
+      await expect(
+        service.maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          useTaskManager,
+          params: {
+            conversationId: 'conversation-1',
+            triggerMode,
+            nextInput: { message: 'Hello' },
+          },
+        })
+      ).rejects.toBe(error);
+
+      expect(conversationClient.get).toHaveBeenCalledWith('conversation-1');
+      expect(agentRegistry.get).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockHandleAgentExecution).not.toHaveBeenCalled();
+    });
   });
 
   describe('user message persistence', () => {

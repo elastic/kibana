@@ -218,6 +218,7 @@ const handleConversationExecution = async ({
     ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
     : await getConversation({
         agentId,
+        agentRegistry: await agentService.getRegistry({ request }),
         conversationId,
         autoCreateConversationWithId: true,
         conversationClient,

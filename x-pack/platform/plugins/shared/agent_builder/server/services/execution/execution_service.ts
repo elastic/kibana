@@ -690,15 +690,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     conversation: ConversationWithOperation;
     receivedAt: Date;
   }> {
-    const agentId = params.agentId ?? agentBuilderDefaultAgentId;
-    const agentRegistry = await this.deps.agentService.getRegistry({ request });
-    await agentRegistry.get(agentId, { access: 'use' });
-
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
 
     const conversation = await getConversation({
-      agentId,
+      agentId: validatedParams.agentId,
+      agentRegistry: await this.deps.agentService.getRegistry({ request }),
       conversationId: validatedParams.conversationId,
       autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
       conversationClient,
