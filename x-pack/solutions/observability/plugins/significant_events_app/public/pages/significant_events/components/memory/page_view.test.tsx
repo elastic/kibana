@@ -46,8 +46,10 @@ const mockSetArchived = jest.fn(
     options?.onSuccess?.()
 );
 const mockDelete = jest.fn(
-  (_variables: { id: string; version: { seq_no: number; primary_term: number } }, options?: { onSuccess?: () => void }) =>
-    options?.onSuccess?.()
+  (
+    _variables: { id: string; version: { seq_no: number; primary_term: number } },
+    options?: { onSuccess?: () => void }
+  ) => options?.onSuccess?.()
 );
 const mockUseSetArchived = useSetMemoryArchived as jest.MockedFunction<typeof useSetMemoryArchived>;
 const mockUseDelete = useDeleteMemoryPage as jest.MockedFunction<typeof useDeleteMemoryPage>;

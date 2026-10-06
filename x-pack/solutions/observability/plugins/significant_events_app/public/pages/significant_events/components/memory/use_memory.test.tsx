@@ -384,9 +384,9 @@ describe('useDeleteMemoryPage', () => {
 
     const { result } = renderHook(() => useDeleteMemoryPage(), { wrapper });
     await act(async () => {
-      await expect(
-        result.current.mutateAsync({ id: 'memory_a', version })
-      ).rejects.toThrow('version conflict');
+      await expect(result.current.mutateAsync({ id: 'memory_a', version })).rejects.toThrow(
+        'version conflict'
+      );
     });
 
     await waitFor(() => expect(result.current.status).toBe('error'));

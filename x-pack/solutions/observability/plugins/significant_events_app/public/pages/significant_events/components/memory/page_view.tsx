@@ -207,9 +207,7 @@ export function MemoryPageView({
               color="danger"
               iconType="trash"
               isDisabled={isDeleting}
-              onClick={() =>
-                setDeleteTarget({ id: page.id, version: data.version })
-              }
+              onClick={() => setDeleteTarget({ id: page.id, version: data.version })}
               data-test-subj="nightshiftMemoryDeleteButton"
             >
               <FormattedMessage

@@ -111,9 +111,9 @@ describe('listMemoryPagesRoute', () => {
 
   it('rejects an over-long search', () => {
     const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
-    expect(params.safeParse({ query: { search: 's'.repeat(MAX_KEYWORD_LENGTH + 1) } }).success).toBe(
-      false
-    );
+    expect(
+      params.safeParse({ query: { search: 's'.repeat(MAX_KEYWORD_LENGTH + 1) } }).success
+    ).toBe(false);
   });
 
   it('reports disabled as not found rather than an empty list', async () => {
