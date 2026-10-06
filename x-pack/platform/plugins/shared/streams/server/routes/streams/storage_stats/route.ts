@@ -43,25 +43,30 @@ const bulkStorageStatsRoute = createServerRoute({
     const dataStreamNames = dataStreams.map((ds) => ds.name);
     const sizeByStream: Record<string, number> = {};
 
+    // Both stats APIs report sizes per backing index, so sum them up per stream.
+    const backingIndexToStream = new Map<string, string>();
+    for (const ds of dataStreams) {
+      for (const idx of ds.indices) {
+        backingIndexToStream.set(idx.index_name, ds.name);
+      }
+    }
+    const addIndexSize = (indexName: string, sizeBytes: number) => {
+      const stream = backingIndexToStream.get(indexName) ?? indexName;
+      sizeByStream[stream] = (sizeByStream[stream] ?? 0) + sizeBytes;
+    };
+
     if (server.isServerless) {
       const meteringClient = isSecurityEnabled ? scopedClusterClient.asSecondaryAuthUser : esClient;
 
-      const statsByStream = await getDataStreamsMeteringStats({
+      const statsByIndex = await getDataStreamsMeteringStats({
         esClient: meteringClient,
         dataStreams: dataStreamNames,
       });
 
-      for (const [stream, stats] of Object.entries(statsByStream)) {
-        sizeByStream[stream] = stats.sizeBytes;
+      for (const [indexName, { sizeBytes }] of Object.entries(statsByIndex)) {
+        addIndexSize(indexName, sizeBytes);
       }
     } else {
-      const backingIndexToStream = new Map<string, string>();
-      for (const ds of dataStreams) {
-        for (const idx of ds.indices) {
-          backingIndexToStream.set(idx.index_name, ds.name);
-        }
-      }
-
       const statsResponses = await processAsyncInChunks<
         string,
         { indices?: Record<string, IndicesStatsIndicesStats> }
@@ -80,9 +85,7 @@ const bulkStorageStatsRoute = createServerRoute({
       for (const statsResponse of statsResponses) {
         if (!statsResponse.indices) continue;
         for (const [indexName, stats] of Object.entries(statsResponse.indices)) {
-          const sizeBytes = stats.total?.store?.total_data_set_size_in_bytes ?? 0;
-          const stream = backingIndexToStream.get(indexName) ?? indexName;
-          sizeByStream[stream] = (sizeByStream[stream] ?? 0) + sizeBytes;
+          addIndexSize(indexName, stats.total?.store?.total_data_set_size_in_bytes ?? 0);
         }
       }
     }
