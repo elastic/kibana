@@ -10,8 +10,7 @@
 import { loadOperations } from './load_operations';
 import type { ContractOperation, OpenApiDocument } from './types';
 
-/** Loads a spec into operations ready for validation. */
 export const loadContractOperations = (document: OpenApiDocument): ContractOperation[] =>
   loadOperations(document);
 
-export type { ContractOperation, OpenApiDocument, SchemaBundle } from './types';
+export type { ContractOperation, ContractSpec, OpenApiDocument, SpecSchema } from './types';
