@@ -110,6 +110,7 @@ export const registerInternalTools = async ({
     todoStateManager,
     selfClient,
     parentExecutionId,
+    storeConversation,
   } = context;
 
   // Sub-agent spawning is reserved for top-level, non-standalone runs
@@ -167,20 +168,24 @@ export const registerInternalTools = async ({
           parentConversationId,
           subagentTracker,
           conversationExists,
+          transientOnly: !storeConversation,
         })
       );
-      tools.push(
-        createSendMessageTool({
-          agentId: ownerAgentId,
-          executionId: executionId ?? '',
-          subAgentExecutor,
-          abortSignal,
-          backgroundExecutionService,
-          subagentTracker,
-          allowedIds,
-        })
-      );
-      tools.push(createSleepTool());
+      // send_message and sleep only serve persistent and background sub-agents.
+      if (storeConversation) {
+        tools.push(
+          createSendMessageTool({
+            agentId: ownerAgentId,
+            executionId: executionId ?? '',
+            subAgentExecutor,
+            abortSignal,
+            backgroundExecutionService,
+            subagentTracker,
+            allowedIds,
+          })
+        );
+        tools.push(createSleepTool());
+      }
     }
   }
 
