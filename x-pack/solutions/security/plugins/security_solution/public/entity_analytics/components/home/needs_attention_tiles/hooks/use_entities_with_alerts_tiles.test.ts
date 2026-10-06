@@ -21,10 +21,12 @@ describe('parseAlertBasedTilesResponse', () => {
       severeAlertsEntityIds: [],
       watchlistedCount: 0,
       watchlistedEntityIds: [],
+      newAlertingCount: 0,
+      newAlertingEntityIds: [],
     });
   });
 
-  it('parses all four columns from a single-row response', () => {
+  it('parses all columns from a single-row response', () => {
     const result = parseAlertBasedTilesResponse(
       makeResponse(
         [
@@ -32,8 +34,10 @@ describe('parseAlertBasedTilesResponse', () => {
           { name: 'severe_alerts_entity_ids', type: 'keyword' },
           { name: 'watchlisted_count', type: 'long' },
           { name: 'watchlisted_entity_ids', type: 'keyword' },
+          { name: 'new_alerting_count', type: 'long' },
+          { name: 'new_alerting_entity_ids', type: 'keyword' },
         ],
-        [[42, ['host:web01', 'user:alice@okta'], 3, ['user:alice@okta']]]
+        [[42, ['host:web01', 'user:alice@okta'], 3, ['user:alice@okta'], 1, ['host:web01']]]
       )
     );
     expect(result).toEqual({
@@ -41,6 +45,8 @@ describe('parseAlertBasedTilesResponse', () => {
       severeAlertsEntityIds: ['host:web01', 'user:alice@okta'],
       watchlistedCount: 3,
       watchlistedEntityIds: ['user:alice@okta'],
+      newAlertingCount: 1,
+      newAlertingEntityIds: ['host:web01'],
     });
   });
 

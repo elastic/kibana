@@ -76,7 +76,6 @@ import { isDefined } from '../../../common/utils/nullable';
 import {
   useAlertBasedTiles,
   useEntitiesWithAnomaliesCount,
-  useNewEntityCount,
   useRiskMoversCount,
   useNewlyHighCriticalCount,
 } from '../components/home/needs_attention_tiles/hooks';
@@ -387,6 +386,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     severeAlertsEntityIds,
     watchlistedCount,
     watchlistedEntityIds,
+    newAlertingCount,
+    newAlertingEntityIds,
     isLoading: alertBasedLoading,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
@@ -399,16 +400,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
   } = useEntitiesWithAnomaliesCount({
-    spaceId: resolvedSpaceId,
-    timeRange,
-    entityFilters,
-    skip: skipTileQueries,
-  });
-  const {
-    count: newEntityCount,
-    entityIds: newEntityEntityIds,
-    isLoading: newEntityLoading,
-  } = useNewEntityCount({
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
@@ -460,7 +451,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       case 'watchlisted':
         return watchlistedEntityIds;
       case 'newEntity':
-        return newEntityEntityIds;
+        return newAlertingEntityIds;
       default:
         return EMPTY_ENTITY_IDS;
     }
@@ -471,7 +462,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     riskMoversEntityIds,
     newlyHCEntityIds,
     watchlistedEntityIds,
-    newEntityEntityIds,
+    newAlertingEntityIds,
   ]);
 
   const cappedTileEntityIds = useMemo(() => {
@@ -723,13 +714,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newEntity.title', {
           defaultMessage: 'New entity',
         }),
-        value: newEntityCount,
-        isLoading: newEntityLoading,
+        value: newAlertingCount,
+        isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
-            defaultMessage:
-              'Entities first seen in the last {timeRange} with a risk score above zero',
+            defaultMessage: 'Entities first seen in the last {timeRange} with at least one alert',
             values: { timeRange },
           }
         ),
@@ -753,8 +743,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       newlyHCLoading,
       newlyHCMissingIndex,
       watchlistedCount,
-      newEntityCount,
-      newEntityLoading,
+      newAlertingCount,
       riskMoversMissingIndex,
       timeRange,
     ]

@@ -30,17 +30,22 @@ interface AlertBasedTilesResult {
   severeAlertsEntityIds: string[];
   watchlistedCount: number;
   watchlistedEntityIds: string[];
+  newAlertingCount: number;
+  newAlertingEntityIds: string[];
 }
+
+const EMPTY_RESULT: AlertBasedTilesResult = {
+  severeAlertsCount: 0,
+  severeAlertsEntityIds: [],
+  watchlistedCount: 0,
+  watchlistedEntityIds: [],
+  newAlertingCount: 0,
+  newAlertingEntityIds: [],
+};
 
 export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
   const row = raw.values?.[0];
-  if (!row)
-    return {
-      severeAlertsCount: 0,
-      severeAlertsEntityIds: [],
-      watchlistedCount: 0,
-      watchlistedEntityIds: [],
-    };
+  if (!row) return EMPTY_RESULT;
 
   const col = (name: string) => raw.columns?.findIndex((c) => c.name === name) ?? -1;
   const toIds = (idx: number): string[] => {
@@ -50,27 +55,27 @@ export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBase
     if (typeof v === 'string' && v) return [v];
     return [];
   };
+  const toCount = (idx: number): number => {
+    const v = idx < 0 ? undefined : row[idx];
+    return typeof v === 'number' ? v : 0;
+  };
 
   return {
-    severeAlertsCount:
-      typeof row[col('severe_alerts_count')] === 'number'
-        ? (row[col('severe_alerts_count')] as number)
-        : 0,
+    severeAlertsCount: toCount(col('severe_alerts_count')),
     severeAlertsEntityIds: toIds(col('severe_alerts_entity_ids')),
-    watchlistedCount:
-      typeof row[col('watchlisted_count')] === 'number'
-        ? (row[col('watchlisted_count')] as number)
-        : 0,
+    watchlistedCount: toCount(col('watchlisted_count')),
     watchlistedEntityIds: toIds(col('watchlisted_entity_ids')),
+    newAlertingCount: toCount(col('new_alerting_count')),
+    newAlertingEntityIds: toIds(col('new_alerting_entity_ids')),
   };
 };
 
 /**
- * Runs a single alerts query that produces counts and entity ID lists for both the
- * "entities with alerts" tile and the "watchlisted entities with alerts" tile.
+ * Runs a single alerts query that produces counts and entity ID lists for the severely
+ * alerting, watchlisted & alerting, and new & alerting tiles.
  *
- * Running one query rather than two avoids executing the EUID pipeline twice, which
- * is expensive at high alert volumes. See buildAlertBasedTilesQuery for query details.
+ * Running one query rather than one per tile avoids executing the EUID pipeline several
+ * times, which is expensive at high alert volumes. See buildAlertBasedTilesQuery for details.
  */
 export const useAlertBasedTiles = ({
   spaceId,
@@ -113,13 +118,7 @@ export const useAlertBasedTiles = ({
   } = useQuery<AlertBasedTilesResult, SecurityAppError>(
     ['alertBasedTiles', query],
     async ({ signal }) => {
-      if (!query)
-        return {
-          severeAlertsCount: 0,
-          severeAlertsEntityIds: [],
-          watchlistedCount: 0,
-          watchlistedEntityIds: [],
-        };
+      if (!query) return EMPTY_RESULT;
       const raw = await lastValueFrom(
         data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
       );
@@ -154,6 +153,10 @@ export const useAlertBasedTiles = ({
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
       : queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+    newAlertingCount: queryResult?.newAlertingCount ?? 0,
+    newAlertingEntityIds: isFetching
+      ? EMPTY_ENTITY_IDS
+      : queryResult?.newAlertingEntityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading || isFetching,
     error: filteredError ?? indexError,
   };

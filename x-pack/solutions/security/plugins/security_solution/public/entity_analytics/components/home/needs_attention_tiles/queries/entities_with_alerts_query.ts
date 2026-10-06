@@ -12,12 +12,13 @@ import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
 
 /**
- * Builds a single ES|QL query that computes both the severely-alerting count (entities
- * with at least one high- or critical-severity alert) and the watchlisted-entities-with-
- * alerts count (any severity) in one pass over the alerts index.
+ * Builds a single ES|QL query that computes three tiles in one pass over the alerts index:
+ * - severely alerting: entities with at least one high- or critical-severity alert,
+ * - watchlisted & alerting: watchlisted entities with an alert of any severity,
+ * - new & alerting: entities first seen in the window with an alert of any severity.
  *
- * This avoids running the EUID pipeline twice (once per tile). Both tile 1 and tile 5
- * consume their respective columns from the single STATS result.
+ * This avoids running the EUID pipeline once per tile. Each tile reads its own columns
+ * from the single STATS result.
  *
  * Performance: a STATS BY entity.id deduplication step runs before the LOOKUP JOIN,
  * reducing join cardinality from O(alerts) to O(distinct entities). The @timestamp
@@ -54,17 +55,30 @@ export const buildAlertBasedTilesQuery = (
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );
 
-  // Per-tile ids — null for rows outside the tile so COUNT_DISTINCT/VALUES ignore them.
-  parts.push(`| EVAL severe_effective_id = CASE(has_severe_alert, effective_id, null)`);
+  // One row per resolved entity: whether any of its alerting records has a severe alert or
+  // is watchlisted.
   parts.push(`| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL`);
-  parts.push(`| EVAL watchlisted_effective_id = CASE(is_watchlisted, effective_id, null)`);
-  parts.push(`| EVAL watchlisted_entity_id    = CASE(is_watchlisted, entity.id, null)`);
+  parts.push(
+    `| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id`
+  );
+
+  // The resolved entity's own doc, for its first_seen: an alias record carries its own.
+  parts.push(`| RENAME effective_id AS \`entity.id\``);
+  parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
+  parts.push(`| EVAL is_new = entity.lifecycle.first_seen >= NOW() - ${timeRange}`);
+
+  // Per-tile ids — null for entities outside the tile so COUNT_DISTINCT/VALUES ignore them.
+  parts.push(`| EVAL severe_id = CASE(has_severe_alert, entity.id, null)`);
+  parts.push(`| EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)`);
+  parts.push(`| EVAL new_alerting_id = CASE(is_new, entity.id, null)`);
 
   parts.push(`| STATS`);
-  parts.push(`    severe_alerts_count      = COUNT_DISTINCT(severe_effective_id),`);
-  parts.push(`    severe_alerts_entity_ids = VALUES(severe_effective_id),`);
-  parts.push(`    watchlisted_count        = COUNT_DISTINCT(watchlisted_effective_id),`);
-  parts.push(`    watchlisted_entity_ids   = VALUES(watchlisted_effective_id)`);
+  parts.push(`    severe_alerts_count      = COUNT_DISTINCT(severe_id),`);
+  parts.push(`    severe_alerts_entity_ids = VALUES(severe_id),`);
+  parts.push(`    watchlisted_count        = COUNT_DISTINCT(watchlisted_id),`);
+  parts.push(`    watchlisted_entity_ids   = VALUES(watchlisted_id),`);
+  parts.push(`    new_alerting_count       = COUNT_DISTINCT(new_alerting_id),`);
+  parts.push(`    new_alerting_entity_ids  = VALUES(new_alerting_id)`);
 
   return parts.join('\n');
 };

@@ -33,31 +33,45 @@ describe('buildAlertBasedTilesQuery', () => {
     expect(joinIdx).toBeGreaterThan(renameIdx);
   });
 
-  it('outputs all four STATS columns for tile 1 and tile 5', () => {
+  it('outputs the count and id columns of the three alert-based tiles', () => {
     const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default');
     expect(query).toContain('severe_alerts_count');
     expect(query).toContain('severe_alerts_entity_ids');
     expect(query).toContain('watchlisted_count');
     expect(query).toContain('watchlisted_entity_ids');
+    expect(query).toContain('new_alerting_count');
+    expect(query).toContain('new_alerting_entity_ids');
   });
 
   it('counts only entities with a high or critical alert as severely alerting', () => {
     const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default');
     expect(query).toContain('is_severe_alert = `kibana.alert.severity` IN ("high", "critical")');
-    expect(query).toContain('severe_effective_id = CASE(has_severe_alert, effective_id, null)');
-    expect(query).toContain('severe_alerts_count      = COUNT_DISTINCT(severe_effective_id)');
+    expect(query).toContain('severe_id = CASE(has_severe_alert, entity.id, null)');
+    expect(query).toContain('severe_alerts_count      = COUNT_DISTINCT(severe_id)');
   });
 
   it('keeps counting watchlisted entities with an alert of any severity', () => {
     const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default');
-    expect(query).toContain('watchlisted_effective_id = CASE(is_watchlisted, effective_id, null)');
+    expect(query).toContain('watchlisted_id = CASE(is_watchlisted, entity.id, null)');
     expect(query).not.toContain('CASE(is_watchlisted AND has_severe_alert');
   });
 
-  it('uses null-masking so COUNT_DISTINCT/VALUES ignore non-watchlisted rows', () => {
+  it('aggregates the alerting records per resolved entity before the tile counts', () => {
     const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default');
-    expect(query).toContain('CASE(is_watchlisted, effective_id, null)');
-    expect(query).toContain('CASE(is_watchlisted, entity.id, null)');
+    expect(query).toContain(
+      '| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id'
+    );
+    expect(query).toContain('| RENAME effective_id AS `entity.id`');
+  });
+
+  it("counts new & alerting entities by the resolved entity's own first_seen", () => {
+    const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default', '7d');
+    const renameIdx = query.indexOf('| RENAME effective_id AS `entity.id`');
+    const secondJoinIdx = query.indexOf('| LOOKUP JOIN .entities-v1', renameIdx);
+    const newIdx = query.indexOf('| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 7d');
+    expect(secondJoinIdx).toBeGreaterThan(renameIdx);
+    expect(newIdx).toBeGreaterThan(secondJoinIdx);
+    expect(query).toContain('new_alerting_id = CASE(is_new, entity.id, null)');
   });
 
   it('applies entity filter clauses after the LOOKUP JOIN', () => {
