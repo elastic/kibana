@@ -571,6 +571,16 @@
                       "templates": {
                         "$ref": "#/components/schemas/templates"
                       },
+                      "workflowTags": {
+                        "type": "array",
+                        "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                        "maxItems": 100,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1024
+                        }
+                      },
                       "updated_at": {
                         "type": "string",
                         "format": "date-time",
@@ -836,6 +846,16 @@
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -1106,6 +1126,16 @@
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -5629,6 +5659,16 @@
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
           }
         }
       },
@@ -5730,6 +5770,16 @@
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
           },
           "version": {
             "description": "The version of the connector. To retrieve the version value, use the get configuration API.\n",
@@ -7759,6 +7809,9 @@
             ],
             "observableTypes": [],
             "extractObservables": true,
+            "workflowTags": [
+              "soc-triage"
+            ],
             "owner": "cases",
             "created_at": "2024-07-01T17:07:17.767Z",
             "created_by": {
@@ -7830,6 +7883,9 @@
             "fields": null
           },
           "closure_type": "close-by-user",
+          "workflowTags": [
+            "soc-triage"
+          ],
           "customFields": [
             {
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
@@ -7915,6 +7971,9 @@
             }
           ],
           "extractObservables": true,
+          "workflowTags": [
+            "soc-triage"
+          ],
           "owner": "cases",
           "created_at": "2024-07-01T17:07:17.767Z",
           "created_by": {
@@ -7969,6 +8028,10 @@
             "fields": null
           },
           "closure_type": "close-by-user",
+          "workflowTags": [
+            "soc-triage",
+            "enrichment"
+          ],
           "customFields": [
             {
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
@@ -8006,6 +8069,10 @@
             }
           ],
           "extractObservables": true,
+          "workflowTags": [
+            "soc-triage",
+            "enrichment"
+          ],
           "owner": "cases",
           "created_at": "2024-07-01T17:07:17.767Z",
           "created_by": {
