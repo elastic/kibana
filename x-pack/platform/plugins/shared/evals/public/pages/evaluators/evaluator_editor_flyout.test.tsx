@@ -388,20 +388,37 @@ describe('EvaluatorEditorFlyout', () => {
     });
 
     it('offers to load the latest version when another edit got there first', async () => {
-      const refetch = jest.fn().mockResolvedValue({});
-      mockedUseEvaluator.mockReturnValue({
-        data: {
-          evaluator: {
-            name: 'tone-judge',
-            version: '1.0.0',
-            description: 'Rates tone',
-            judge: JUDGE,
-          },
+      const loaded = {
+        evaluator: {
+          name: 'tone-judge',
+          version: '1.0.0',
+          description: 'Rates tone',
+          judge: JUDGE,
         },
-        isLoading: false,
-        error: null,
-        refetch,
-      } as unknown as ReturnType<typeof useEvaluator>);
+      };
+      const latest = {
+        evaluator: {
+          name: 'tone-judge',
+          version: '1.0.1',
+          description: 'Rates tone, as edited in another tab',
+          judge: JUDGE,
+        },
+      };
+      let current = loaded;
+      // Refetching swaps in the version the other edit wrote, as react-query would.
+      const refetch = jest.fn(async () => {
+        current = latest;
+        return { data: latest };
+      });
+      mockedUseEvaluator.mockImplementation(
+        () =>
+          ({
+            data: current,
+            isLoading: false,
+            error: null,
+            refetch,
+          } as unknown as ReturnType<typeof useEvaluator>)
+      );
       const conflict = Object.assign(new Error('Conflict'), {
         name: 'HttpFetchError',
         request: {},
@@ -419,13 +436,25 @@ describe('EvaluatorEditorFlyout', () => {
 
       const callout = await screen.findByTestId('evalsEvaluatorSubmitError');
       expect(callout).toHaveTextContent('This evaluator changed while you were editing it');
-      expect(callout).toHaveTextContent('Nothing was saved.');
+      expect(callout).toHaveTextContent('Your changes were not saved as the latest version.');
       expect(onClose).not.toHaveBeenCalled();
 
       fireEvent.click(screen.getByTestId('evalsEvaluatorLoadLatest'));
 
-      await waitFor(() => expect(refetch).toHaveBeenCalled());
+      // The unsaved edit is replaced by what the other tab wrote.
+      await waitFor(() =>
+        expect(screen.getByTestId('evalsEvaluatorDescription')).toHaveValue(
+          'Rates tone, as edited in another tab'
+        )
+      );
+      expect(refetch).toHaveBeenCalledTimes(1);
       expect(screen.queryByTestId('evalsEvaluatorSubmitError')).not.toBeInTheDocument();
+
+      // Saving now starts from the version that was just loaded.
+      setField('evalsEvaluatorDescription', 'Rates tone, merged');
+      save();
+      await waitFor(() => expect(updateMutateAsync).toHaveBeenCalledTimes(2));
+      expect(updateMutateAsync.mock.calls[1][0].updates.base_version).toBe('1.0.1');
     });
 
     it('does not claim a version was written when nothing changed', async () => {

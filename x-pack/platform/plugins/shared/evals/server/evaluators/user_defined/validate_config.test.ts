@@ -162,13 +162,32 @@ describe('validateJudgeConfig', () => {
       );
     });
 
-    it.each(['{{{.}}}', '{{.}}', '{{& .}}', '{{#agent_response}}{{{.}}}{{/agent_response}}'])(
-      'explains that %s has no list to read, rather than naming an empty variable',
+    it.each(['{{{.}}}', '{{.}}', '{{& .}}', '{{#.}}x{{/.}}', '{{^.}}x{{/.}}'])(
+      'explains that %s outside a section refers to nothing, rather than naming an empty variable',
       (prompt) => {
-        expectRejection(config({ prompt }), 'The prompt uses {{.}}, which reads the current item');
+        expectRejection(config({ prompt }), 'The prompt uses {{.}} outside a section');
         expect(() => validateJudgeConfig(config({ prompt }))).not.toThrow('references ""');
       }
     );
+
+    it('accepts {{.}} inside a section, where it is that section value', () => {
+      // Renders the tool calls only when there are any.
+      expect(() =>
+        validateJudgeConfig(
+          config({
+            prompt: '{{{agent_response}}}{{#tool_calls}} Calls: {{{.}}}{{/tool_calls}}',
+            evidence: ['response', 'steps'],
+          })
+        )
+      ).not.toThrow();
+    });
+
+    it('still rejects an escaped {{.}} inside a section, which would HTML-escape evidence', () => {
+      expectRejection(
+        config({ prompt: '{{#agent_response}}{{.}}{{/agent_response}}' }),
+        'HTML-escaped Mustache interpolation for "."'
+      );
+    });
 
     it('rejects a template that does not parse', () => {
       expectRejection(config({ prompt: 'Rate {{{agent_response}}' }), 'is not a valid template');

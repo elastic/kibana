@@ -53,32 +53,41 @@ const getTemplateVariables = (template: string): TemplateVariables => {
   let usesImplicitIterator = false;
   const writer = new Mustache.Writer();
 
-  const collect = (tokens: unknown[]): void => {
+  const collect = (tokens: unknown[], insideSection: boolean): void => {
     for (const token of tokens) {
       if (!Array.isArray(token)) {
         continue;
       }
 
       const [type, value, , , children] = token as [string, string, ...unknown[]];
-      if (value === IMPLICIT_ITERATOR && (type === 'name' || type === '&')) {
-        // Splitting it on "." would otherwise report it as a variable with an empty name.
-        usesImplicitIterator = true;
-        continue;
-      }
-      if (type === 'name' || type === '&' || type === '#' || type === '^') {
-        all.add(value.split('.')[0]);
-      }
-      if (type === 'name') {
-        escaped.add(value.split('.')[0]);
+      const isTag = type === 'name' || type === '&' || type === '#' || type === '^';
+
+      if (isTag && value === IMPLICIT_ITERATOR) {
+        // Inside a section, `.` is that section's own value, so
+        // `{{#tool_calls}}{{{.}}}{{/tool_calls}}` renders the calls only when there are any.
+        // Outside one there is nothing for it to be. Either way it is not a variable name,
+        // which splitting on "." would otherwise report as an empty one.
+        if (!insideSection) {
+          usesImplicitIterator = true;
+        } else if (type === 'name') {
+          escaped.add(IMPLICIT_ITERATOR);
+        }
+      } else {
+        if (isTag) {
+          all.add(value.split('.')[0]);
+        }
+        if (type === 'name') {
+          escaped.add(value.split('.')[0]);
+        }
       }
 
       if (Array.isArray(children)) {
-        collect(children);
+        collect(children, insideSection || type === '#' || type === '^');
       }
     }
   };
 
-  collect(writer.parse(template));
+  collect(writer.parse(template), false);
   return { all: [...all], escaped: [...escaped], usesImplicitIterator };
 };
 
@@ -185,9 +194,8 @@ export const validateJudgeConfig = (judge: LlmJudgeConfig): void => {
     }
 
     if (variables.usesImplicitIterator) {
-      // Every input is a single string, so there is no list for "the current item" to walk.
       throw new InvalidJudgeConfigError(
-        `The ${label} uses {{.}}, which reads the current item of a list, but every input the evaluator is given is a single value. Reference the input by name instead, for example {{{agent_response}}}.`
+        `The ${label} uses {{.}} outside a section, where it refers to nothing. Reference an input by name, for example {{{agent_response}}}, or use {{.}} inside that input's section, for example {{#tool_calls}}{{{.}}}{{/tool_calls}}.`
       );
     }
 

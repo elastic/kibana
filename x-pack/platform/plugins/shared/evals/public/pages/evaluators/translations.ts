@@ -124,7 +124,7 @@ export const STALE_EDIT_ERROR_DESCRIPTION = i18n.translate(
   'xpack.evals.evaluators.staleEditErrorDescription',
   {
     defaultMessage:
-      'Nothing was saved. Loading the latest version replaces the changes in this form, so copy anything you want to keep first.',
+      'Your changes were not saved as the latest version. Loading the latest version replaces the changes in this form, so copy anything you want to keep first.',
   }
 );
 export const LOAD_LATEST_BUTTON = i18n.translate('xpack.evals.evaluators.loadLatestButtonLabel', {
