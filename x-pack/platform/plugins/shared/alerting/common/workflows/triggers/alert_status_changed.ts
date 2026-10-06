@@ -138,7 +138,9 @@ export const alertStatusChangedV1TriggerDefinition: CommonTriggerDefinition<
           'Ongoing (unchanged) alerts produce no events. ' +
           'Only fires for lifecycle rule types (autoRecoverAlerts: true). ' +
           'Events are only published in spaces where the "Alert status workflow trigger" ' +
-          'advanced setting ({settingId}) is on. It is off by default.',
+          'advanced setting ({settingId}) is on. It is off by default. ' +
+          'Workflows started by this trigger run with the API key of the rule that raised the alert, ' +
+          'not the workflow author. Anyone who can create workflows in the space can subscribe to it.',
         values: { settingId: ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID },
       }
     ),
