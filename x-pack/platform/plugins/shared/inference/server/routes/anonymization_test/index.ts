@@ -77,6 +77,18 @@ export function registerAnonymizationTestRoute({
         });
       }
 
+      // With workers disabled `run` executes synchronously on the Kibana thread, where the task
+      // timeout cannot interrupt a pathological caller-supplied pattern.
+      if (!regexWorker.isEnabled()) {
+        return response.customError({
+          statusCode: 503,
+          body: {
+            message:
+              'The pattern tester requires anonymization worker threads, which are disabled (xpack.inference.workers.anonymization.enabled)',
+          },
+        });
+      }
+
       const { input, rules } = request.body;
       const enabledRules = (rules as RegexAnonymizationRule[]).filter((rule) => rule.enabled);
       const flattened = flattenJsonStrings(input);
