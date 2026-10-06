@@ -135,6 +135,14 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const accordionButtonStyles = useMemo(
     () => css`
       width: auto;
+      /*
+       * EuiAccordion's trigger is itself a flex item with min-width: auto, whose automatic minimum
+       * size is the band's min-content width. With white-space: nowrap on the title the whole name
+       * is atomic, so that floor is the full name: without this relief the button cannot shrink
+       * below it, neither the badge wrap nor the title ellipsis fires, and a long name pushes the
+       * header past its panel.
+       */
+      min-width: 0;
 
       &,
       &:hover,
@@ -192,12 +200,18 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         >
           <EuiFlexItem grow={false} css={{ minWidth: 0, maxWidth: '100%', flexShrink: 0 }}>
             <EuiTitle size="s">
+              {/*
+                The accordion band gives the trailing actions (View executions + Enabled switch)
+                width precedence over the title, which used to shrink the title to a few pixels and
+                let EUI's `overflow-wrap` stack the name one character per line. The title refuses to
+                shrink and the badge group wraps to its own line instead; an over-long name alone
+                then clips at the band edge.
+              */}
               <TitleTag
                 id={titleId}
                 css={{
                   margin: 0,
                   whiteSpace: 'nowrap',
-                  overflowWrap: 'normal',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}
