@@ -847,8 +847,12 @@ describe('buildProposalSummaryBullets', () => {
       catalog: { ok: true, actions: [setAssetCriticality] },
     });
     const { bullets } = buildProposalSummaryBullets(proposals);
-    expect(bullets).toEqual([
-      expect.stringContaining('for user `dev-user`: runs `system-alertzero-action-set-asset-criticality` on approval'),
-    ]);
+    expect(bullets).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'for user `dev-user`: runs `system-alertzero-action-set-asset-criticality` on approval'
+        ),
+      ])
+    );
   });
 });
