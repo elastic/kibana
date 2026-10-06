@@ -187,3 +187,46 @@ describe('WorkerSettingsPanel service account', () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe('WorkerSettingsPanel header band title', () => {
+  /*
+   * Style contract, not layout: jsdom has no flexbox engine, so these assertions pin the CSS that
+   * keeps the worker name on one line instead of stacking it (the accordion band hands width to the
+   * trailing actions before the title). Reverting any one of them re-creates that regression.
+   */
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])('keeps the title on one line and lets the badge group wrap (%s)', (_layout, isAccordion) => {
+    renderPanel(WORKFLOW_ID, isAccordion);
+
+    const title = screen.getByText('Rule Tuning');
+    // `white-space: nowrap` is the whole one-line guarantee: EuiTitle pins
+    // `overflow-wrap: break-word !important`, so a `overflowWrap: normal` override here would be
+    // dead CSS - only the nowrap declaration stops EUI from stacking the name.
+    expect(title).toHaveStyleRule('white-space', 'nowrap');
+    expect(title).toHaveStyleRule('overflow', 'hidden');
+    expect(title).toHaveStyleRule('text-overflow', 'ellipsis');
+    // An ellipsized name stays recoverable on hover.
+    expect(title).toHaveAttribute('title', 'Rule Tuning');
+
+    // The 100% clamp is what makes an over-long name ellipsize instead of overflowing the band.
+    expect(title.closest('.euiFlexItem')).toHaveStyleRule('max-width', '100%');
+
+    // The badge group wraps to its own line before the title gives up any width.
+    expect(title.closest('.euiFlexGroup')).toHaveStyleRule('flex-wrap', 'wrap');
+  });
+
+  it('gives the accordion trigger min-width relief so the nowrap title cannot set its floor', () => {
+    // EuiAccordion's trigger is a flex item left at `min-width: auto`, so the nowrap title's
+    // min-content becomes its minimum size: without this relief the band cannot shrink and a long
+    // name pushes the header past its panel instead of clipping.
+    renderPanel(WORKFLOW_ID, true);
+
+    const accordionButton = screen
+      .getByTestId(`alertZeroWatchWorkerAccordion-${WORKER_ID}`)
+      .querySelector('.euiAccordion__button');
+
+    expect(accordionButton).toHaveStyleRule('min-width', '0');
+  });
+});
