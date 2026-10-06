@@ -17,6 +17,7 @@ import type {
   AgentExecutionMode,
   AutoApprovedApi,
   ChatEvent,
+  ConversationWriteSource,
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
@@ -61,7 +62,8 @@ export interface ConversationClient {
   /** Validates, serializes, and merges `updates` into the conversation metadata. */
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options: { source: ConversationWriteSource }
   ): Promise<{ changedFields: string[] }>;
 }
 

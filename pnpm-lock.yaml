@@ -3304,6 +3304,9 @@ importers:
       '@kbn/search-response-warnings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-search-response-warnings
+      '@kbn/search-sessions-management-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/shared/search_sessions_management
       '@kbn/search-shared-ui':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/shared-ui
@@ -8683,6 +8686,8 @@ importers:
   src/platform/plugins/shared/saved_search: {}
 
   src/platform/plugins/shared/screenshot_mode: {}
+
+  src/platform/plugins/shared/search_sessions_management: {}
 
   src/platform/plugins/shared/share: {}
 

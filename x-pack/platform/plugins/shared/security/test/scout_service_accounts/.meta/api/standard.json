@@ -1,5 +1,5 @@
 {
-  "sha1": "85134ca656632b14653fc1e530a14e4ddd138b34",
+  "sha1": "202fe99445eebb44c1db6161333973d65fe57f00",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -209,6 +209,136 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
         "line": 70,
+        "column": 16
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-313c2fa6cc12914",
+      "title": "Delete Elasticsearch service accounts deletes an unbound account along with the credential Kibana stored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 119,
+        "column": 25
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-4768e64f045b5e6",
+      "title": "Delete Elasticsearch service accounts deletes tokens Kibana did not mint, so the name can be used again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 151,
+        "column": 47
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-0ee0925c13ee04a",
+      "title": "Delete Elasticsearch service accounts refuses to delete a bound account unless forced, and lists what is bound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 180,
+        "column": 16
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-16994f72b8a29a1",
+      "title": "Delete Elasticsearch service accounts answers 404 for an account that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 239,
+        "column": 20
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-bdf81e1593290fa",
+      "title": "Delete Elasticsearch service accounts refuses a caller without `manage_security`, and leaves the account in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 245,
+        "column": 28
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-3b374fe665f990c",
+      "title": "Delete Elasticsearch service accounts does not let an account created again under the same name run the old one’s workloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 267,
+        "column": 14
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-9b80c5738fc56d3",
+      "title": "Delete Elasticsearch service accounts deletes the tokens a forced delete left behind, so the name can be used again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 295,
+        "column": 28
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-fd0c5c8cf8c6fcf",
+      "title": "Delete Elasticsearch service accounts stops access tokens issued before the delete from authenticating",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 349,
+        "column": 1
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-c5a2bfc6a2f1a52",
+      "title": "Delete Elasticsearch service accounts invalidates the access tokens of an account deleted straight through Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 362,
+        "column": 97
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-e826d0dd66c01d8",
+      "title": "Delete Elasticsearch service accounts refuses to create an account while tokens are left over from one with the same name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 383,
         "column": 16
       }
     },

@@ -1128,6 +1128,7 @@
     "@kbn/search-queries": "workspace:*",
     "@kbn/search-query-rules": "workspace:*",
     "@kbn/search-response-warnings": "workspace:*",
+    "@kbn/search-sessions-management-plugin": "workspace:*",
     "@kbn/search-shared-ui": "workspace:*",
     "@kbn/search-synonyms": "workspace:*",
     "@kbn/search-types": "workspace:*",
