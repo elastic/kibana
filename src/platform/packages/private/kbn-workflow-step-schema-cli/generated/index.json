@@ -650,20 +650,27 @@
     "pagerduty",
     "pagerduty_mcp.acknowledgeIncident",
     "pagerduty_mcp.addResponders",
+    "pagerduty_mcp.browseActivity",
+    "pagerduty_mcp.browseAlertGrouping",
+    "pagerduty_mcp.browseChangeEvents",
+    "pagerduty_mcp.browseEscalationPolicies",
+    "pagerduty_mcp.browseEventOrchestrations",
+    "pagerduty_mcp.browseIncidents",
+    "pagerduty_mcp.browseSchedules",
+    "pagerduty_mcp.browseServices",
+    "pagerduty_mcp.browseStatusPages",
+    "pagerduty_mcp.browseTeams",
+    "pagerduty_mcp.browseUsers",
     "pagerduty_mcp.callTool",
-    "pagerduty_mcp.getEscalationPolicy",
-    "pagerduty_mcp.getIncident",
-    "pagerduty_mcp.getSchedule",
-    "pagerduty_mcp.getTeam",
-    "pagerduty_mcp.getUserData",
-    "pagerduty_mcp.listEscalationPolicies",
-    "pagerduty_mcp.listIncidents",
-    "pagerduty_mcp.listOncalls",
-    "pagerduty_mcp.listSchedules",
     "pagerduty_mcp.listServices",
-    "pagerduty_mcp.listTeams",
     "pagerduty_mcp.listTools",
-    "pagerduty_mcp.listUsers",
+    "pagerduty_mcp.manageAlertGrouping",
+    "pagerduty_mcp.manageEventOrchestrations",
+    "pagerduty_mcp.manageIncidents",
+    "pagerduty_mcp.manageSchedules",
+    "pagerduty_mcp.manageServices",
+    "pagerduty_mcp.manageStatusPages",
+    "pagerduty_mcp.manageTeams",
     "pagerduty_mcp.resolveIncident",
     "pagerduty_mcp.runResponsePlay",
     "pagerduty_mcp.triggerIncident",
@@ -989,11 +996,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "848b08242faedd069aec9d52d8d6f8508f22bd314a3520bc2cfc38f8d9980205"
+      "sha256": "1d3bf1c7f3b77d4037b6af414d7cf9b4fa3bae402383c196c889ad066b40820a"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "76c451e82518bfc3912bc3f90b0f67c46f6e3624e2a9a8c815ca60598c6ac601"
+      "sha256": "395c25eb51e7d6ebb188b8149797832a8061c4081b270d99c5008e7a6a5c16cc"
     }
   }
 }
