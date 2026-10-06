@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import type { QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
-  MutationObserver,
   useInfiniteQuery,
   useIsMutating,
   useMutation,
@@ -293,12 +292,23 @@ export const useSettleDeclinedProposal = () => {
   const contextClient = useQueryClient();
 
   return useCallback(
-    (id: string, queryClient: QueryClient = contextClient): Promise<void> =>
-      new MutationObserver(queryClient, {
+    async (id: string, queryClient: QueryClient = contextClient): Promise<void> => {
+      // Built on the cache rather than through a `MutationObserver`: an observer stays attached
+      // to the mutation it started, which keeps it out of garbage collection for the life of a
+      // long-lived shared client. Nothing observes this one, so it is removed once settled.
+      const mutationCache = queryClient.getMutationCache();
+      const mutation = mutationCache.build(queryClient, {
         mutationKey: mutationKeys.proposals.decline,
         mutationFn: ({ id: proposalId }: { id: string }): Promise<void> =>
           waitForDecision(services.http!, proposalId),
-      }).mutate({ id }),
+        variables: { id },
+      });
+      try {
+        await mutation.execute();
+      } finally {
+        mutationCache.remove(mutation);
+      }
+    },
     [contextClient, services.http]
   );
 };

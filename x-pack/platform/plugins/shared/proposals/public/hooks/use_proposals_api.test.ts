@@ -670,4 +670,21 @@ describe('useSettleDeclinedProposal', () => {
     await waitFor(() => expect(result.current.isDecliningP1).toBe(false));
     expect(http.get).toHaveBeenCalledTimes(2);
   });
+
+  it('leaves nothing behind in the mutation cache once it settles', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValue({ decision: 'dismissed' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const { result } = renderHook(() => useSettleDeclinedProposal(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current('p-1');
+    });
+
+    expect(queryClient.getMutationCache().getAll()).toHaveLength(0);
+  });
 });
