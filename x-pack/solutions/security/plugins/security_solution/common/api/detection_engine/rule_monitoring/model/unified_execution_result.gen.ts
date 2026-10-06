@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /**
  * Final execution outcome as reported by the Alerting Framework (event.outcome).
@@ -37,12 +37,9 @@ export const UnifiedExecutionResult = lazySchema(() =>
     /**
      * Start time of the execution (event.start from the Alerting Framework execute event).
      */
-    execution_start: z
-      .string()
-      .datetime()
-      .describe(
-        'Start time of the execution (event.start from the Alerting Framework execute event).'
-      ),
+    execution_start: isoDateTime().describe(
+      'Start time of the execution (event.start from the Alerting Framework execute event).'
+    ),
     /**
      * Total execution duration in milliseconds (converted from event.duration nanoseconds).
      */
@@ -68,8 +65,8 @@ export const UnifiedExecutionResult = lazySchema(() =>
      */
     backfill: z
       .object({
-        from: z.string().datetime(),
-        to: z.string().datetime(),
+        from: isoDateTime(),
+        to: isoDateTime(),
       })
       .nullable()
       .describe(

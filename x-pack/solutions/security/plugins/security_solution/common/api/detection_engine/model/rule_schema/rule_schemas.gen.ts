@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import {
   RuleName,
@@ -189,7 +189,7 @@ export const ResponseFields = lazySchema(() =>
     rule_id: RuleSignatureId,
     immutable: IsRuleImmutable,
     rule_source: RuleSource,
-    updated_at: z.string().datetime(),
+    updated_at: isoDateTime(),
     updated_by: z.string(),
     /**
      * The user profile UID of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
@@ -200,7 +200,7 @@ export const ResponseFields = lazySchema(() =>
       .describe(
         'The user profile UID of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.'
       ),
-    created_at: z.string().datetime(),
+    created_at: isoDateTime(),
     created_by: z.string(),
     /**
      * The user profile UID of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, isoDateTime } from '@kbn/zod';
 import { notificationIdSchema } from '../../common/notification_schema';
 import type { NotificationUnreadStatus } from '../../common/types';
 import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
@@ -14,7 +14,7 @@ import { isReadAt, type NotificationReadState } from './read_state';
 
 const unreadStatusSourceSchema = z.object({
   notification_id: notificationIdSchema,
-  '@timestamp': z.iso.datetime(),
+  '@timestamp': isoDateTime(),
 });
 
 /**

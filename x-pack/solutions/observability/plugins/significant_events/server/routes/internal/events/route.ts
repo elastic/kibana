@@ -22,7 +22,7 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
@@ -97,8 +97,8 @@ const eventsSearchRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
+      from: isoDateTime().optional(),
+      to: isoDateTime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       status: z

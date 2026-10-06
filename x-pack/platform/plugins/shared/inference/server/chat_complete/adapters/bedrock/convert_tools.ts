@@ -6,6 +6,7 @@
  */
 
 import type { Message, ToolSchemaType } from '@kbn/inference-common';
+import { inlineRootJsonSchemaRef, normalizeJsonSchemaTypeArrays } from '@kbn/zod/v4';
 import { MessageRole, ToolChoiceType, type ToolOptions } from '@kbn/inference-common';
 import type { ToolChoice as ConverseBedRockToolChoice } from '@aws-sdk/client-bedrock-runtime';
 
@@ -104,6 +105,12 @@ function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T)
  * (e.g. `propertyNames`, `additionalProperties`).
  */
 export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T): T {
+  return fixSchemaArrayPropertiesPart(
+    normalizeJsonSchemaTypeArrays(inlineRootJsonSchemaRef(schemaPart)) as T
+  );
+}
+
+function fixSchemaArrayPropertiesPart<T extends ToolSchemaType>(schemaPart: T): T {
   const cleaned = stripUnsupportedSchemaKeywords(schemaPart);
 
   if (cleaned.type === 'object' && cleaned.properties) {
@@ -111,7 +118,7 @@ export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T
       ...cleaned,
       properties: Object.fromEntries(
         Object.entries(cleaned.properties).map(([key, childSchemaPart]) => {
-          return [key, fixSchemaArrayProperties(childSchemaPart)];
+          return [key, fixSchemaArrayPropertiesPart(childSchemaPart)];
         })
       ),
     };
@@ -124,7 +131,7 @@ export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T
       description: cleaned.description
         ? `${cleaned.description}. Must be provided as a JSON array`
         : 'Must be provided as a JSON array',
-      items: cleaned.items ? fixSchemaArrayProperties(cleaned.items) : {},
+      items: cleaned.items ? fixSchemaArrayPropertiesPart(cleaned.items) : {},
     };
   }
 

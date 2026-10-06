@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH } from '../constants';
 
@@ -36,7 +36,7 @@ export type ChangePointType = (typeof CHANGE_POINT_TYPES)[number];
  * and is never stored on the detection.
  */
 export const detectionSchema = z.object({
-  '@timestamp': z.iso.datetime({ offset: true }),
+  '@timestamp': isoDateTime({ offset: true }),
   detection_id: z
     .string()
     .max(MAX_ID_LENGTH)

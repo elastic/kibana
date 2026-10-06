@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
 import { notificationIdSchema } from '../../common/notification_schema';
 
@@ -32,7 +32,7 @@ export const READ_ALL_BEFORE_DEFAULT = '1970-01-01T00:00:00.000Z';
 /** Ceiling for the number of per-id read overrides. */
 export const MAX_OVERRIDES = 500;
 
-export const readAllBeforeSchema = z.iso.datetime();
+export const readAllBeforeSchema = isoDateTime();
 
 /**
  * An override for one notification ID.
@@ -40,9 +40,7 @@ export const readAllBeforeSchema = z.iso.datetime();
  * `read` allows the client to mark the notification as read or unread explicitly.
  * `markedAt` records when the override was written.
  */
-export const readOverrideSchema = z
-  .object({ read: z.boolean(), markedAt: z.iso.datetime() })
-  .strict();
+export const readOverrideSchema = z.object({ read: z.boolean(), markedAt: isoDateTime() }).strict();
 
 export const overridesSchema = z
   .record(notificationIdSchema, readOverrideSchema)

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { isEqual, uniq } from 'lodash';
 import objectHash from 'object-hash';
 import { v5 } from 'uuid';
@@ -81,8 +81,8 @@ export const featureUpsertSchema = baseFeatureSchema.and(
   z.object({
     run_id: z.string().max(MAX_ID_LENGTH).optional(),
     excluded: z.boolean().optional(),
-    updated_at: z.iso.datetime().optional(),
-    expires_at: z.iso.datetime().optional(),
+    updated_at: isoDateTime().optional(),
+    expires_at: isoDateTime().optional(),
   })
 );
 

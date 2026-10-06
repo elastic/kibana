@@ -268,6 +268,25 @@ describe('DeepStrict', () => {
       });
   });
 
+  it('rejects excess keys on union branches after zod 4.5 pipe changes', () => {
+    wrap(
+      z.union([
+        z.object({ field: z.string(), eq: z.string().optional() }),
+        z.object({ and: z.array(z.object({})) }),
+      ])
+    )
+      .passes({ field: 'user.name', eq: 'user1' })
+      .fails({ field: 'user.name', eq: 'user1', sdfsd: 'sdf' });
+  });
+
+  it('wraps the inner schema in a pipe for OAS conversion', () => {
+    const innerSchema = z.object({ foo: z.string() });
+    const wrapped = DeepStrict(innerSchema);
+
+    expect(wrapped._zod.def.type).toBe('pipe');
+    expect(wrapped._zod.def.out).toBe(innerSchema);
+  });
+
   it('matches union types', () => {
     const type = z.intersection(
       z.object({

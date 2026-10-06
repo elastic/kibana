@@ -11,7 +11,7 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { isoDateTime, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -49,7 +49,7 @@ const eventInvestigationAttachSchema = z.object({
         }
       )
     ),
-  started_at: z.iso.datetime({ offset: true }).describe(
+  started_at: isoDateTime({ offset: true }).describe(
     i18n.translate(
       'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
       {
@@ -58,8 +58,7 @@ const eventInvestigationAttachSchema = z.object({
       }
     )
   ),
-  completed_at: z.iso
-    .datetime({ offset: true })
+  completed_at: isoDateTime({ offset: true })
     .optional()
     .describe(
       i18n.translate(

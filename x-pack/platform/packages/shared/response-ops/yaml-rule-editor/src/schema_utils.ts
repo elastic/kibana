@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import { createRuleDataSchema, toAlertingV2JsonSchema } from '@kbn/alerting-v2-schemas';
 import type { JsonSchema, SchemaPropertyInfo } from './types';
 
 /**
@@ -19,7 +18,7 @@ let cachedJsonSchema: JsonSchema | null = null;
  */
 export const getJsonSchema = (): JsonSchema => {
   if (!cachedJsonSchema) {
-    cachedJsonSchema = z.toJSONSchema(createRuleDataSchema) as JsonSchema;
+    cachedJsonSchema = toAlertingV2JsonSchema(createRuleDataSchema) as JsonSchema;
   }
   return cachedJsonSchema;
 };

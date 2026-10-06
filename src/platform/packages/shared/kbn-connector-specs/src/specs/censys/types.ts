@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 // =============================================================================
 // Shared primitives
@@ -57,10 +57,10 @@ export const TRANSPORT_PROTOCOL_SCHEMA = lazySchema(() =>
 );
 
 const RFC3339_TIMESTAMP_SCHEMA = lazySchema(() =>
-  z.string().max(64).datetime({
+  isoDateTime({
     offset: true,
     message: 'Must be an RFC 3339 timestamp (e.g., "2025-01-01T00:00:00Z")',
-  })
+  }).max(64)
 );
 
 // =============================================================================

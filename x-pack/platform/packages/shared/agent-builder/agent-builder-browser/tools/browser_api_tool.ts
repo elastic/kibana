@@ -6,7 +6,7 @@
  */
 
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { z, type ZodType } from '@kbn/zod/v4';
+import { z, inlineRootJsonSchemaRef, type ZodType } from '@kbn/zod/v4';
 
 /**
  * Definition of a browser API tool that can be provided by consumers
@@ -51,11 +51,11 @@ export function toToolMetadata<TParams>(
     id: tool.id,
     description: tool.description,
     schema: (() => {
-      const { $schema, ...jsonSchema } = z.toJSONSchema(tool.schema, {
+      const { $schema: _$schema, ...rest } = z.toJSONSchema(tool.schema, {
         io: 'input',
         unrepresentable: 'any',
-      });
-      return jsonSchema;
+      }) as Record<string, unknown>;
+      return inlineRootJsonSchemaRef(rest);
     })(),
   };
 }

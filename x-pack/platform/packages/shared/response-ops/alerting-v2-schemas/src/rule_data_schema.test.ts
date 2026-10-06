@@ -7,7 +7,6 @@
 
 import { Parser } from '@elastic/esql';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
@@ -30,6 +29,7 @@ import {
   ruleTagsParamsSchema,
   findRulesRequestSchema,
 } from './rule_data_schema';
+import { toAlertingV2JsonSchema } from './json_schema';
 import { tagsResponseSchema } from './common';
 import {
   FIND_MAX_RESULT_WINDOW,
@@ -1646,10 +1646,7 @@ describe('getRootEsqlQuery', () => {
 
 describe('updateRuleDataSchema OpenAPI descriptions', () => {
   it('documents PATCH omission for time_field and the recovery/no_data contracts', () => {
-    const json = z.toJSONSchema(updateRuleDataSchema, {
-      target: 'draft-7',
-      unrepresentable: 'any',
-    }) as {
+    const json = toAlertingV2JsonSchema(updateRuleDataSchema) as {
       properties?: Record<string, { description?: string }>;
       definitions?: Record<string, { description?: string }>;
     };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
 
@@ -85,8 +85,8 @@ export const alertSnapshotSchema = z.object({
   /** `kibana.alert.status` */
   status: z.string().min(1).max(100),
   /** `kibana.alert.start` */
-  start: z.string().max(100).datetime({ offset: true }),
-  timestamp: z.string().max(100).datetime({ offset: true }).optional(),
+  start: isoDateTime({ offset: true }).max(100),
+  timestamp: isoDateTime({ offset: true }).max(100).optional(),
   /** `kibana.alert.flapping` — written by the alerting framework for every alert. */
   flapping: z.boolean().optional(),
   /**

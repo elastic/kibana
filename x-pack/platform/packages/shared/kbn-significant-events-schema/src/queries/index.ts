@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
@@ -83,7 +83,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   severity_score: z.number().optional(),
   evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
   description: z.string().max(MAX_TEXT_LENGTH).default(''),
-  expires_at: z.iso.datetime().optional(),
+  expires_at: isoDateTime().optional(),
 });
 
 /**
