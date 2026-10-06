@@ -8,48 +8,19 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { expectOnboardingStepVisible, useOnboardingFeatureFlag } from '../helpers/onboarding';
 
 // Services are grouped by category; only the active category's rows are rendered in the DOM.
 // Default active category: security_identity_compliance (first in CATEGORY_ORDER).
 // No services are selected by default — the user must pick them.
 
 test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ apiServices, config }) => {
-    // The /internal/core/_settings route is only registered when
-    // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
-    // ECH deployments don't carry that override, so the PUT 404s. Skip on Cloud.
-    // eslint-disable-next-line playwright/no-skipped-test
-    test.skip(
-      config.isCloud === true,
-      `Core API returns 404 for 'ingestHub.onboardingEnabled' on ECH`
-    );
-    // skip() in beforeAll only skips the tests, not the hook body itself.
-    if (config.isCloud) {
-      return;
-    }
-
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'true',
-      },
-    });
-  });
-
-  test.afterAll(async ({ apiServices, config }) => {
-    if (config.isCloud) {
-      return;
-    }
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'false',
-      },
-    });
-  });
+  useOnboardingFeatureFlag();
 
   test('renders step header and default category view', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     await expect(page.getByText('Which AWS services do you want to monitor?')).toBeVisible();
 
@@ -65,7 +36,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   test('select and deselect a service', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // guardduty starts unchecked; click to select
     await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).not.toBeChecked();
@@ -80,7 +51,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   test('per-category select all and deselect all', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // nothing selected → "Select all" is shown for Security
     await expect(page.testSubj.locator('servicesStep-selectAllButton')).toBeVisible();
@@ -103,7 +74,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   test('Continue is disabled when no services are selected', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // no services selected on first load — Continue is disabled
     await expect(page.testSubj.locator('servicesStep-continueButton')).toBeDisabled();
@@ -119,7 +90,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // Databases is visible in "All" mode (dynamodb, rds are metrics-only)
     await expect(page.testSubj.locator('servicesStep-category-databases')).toBeVisible();

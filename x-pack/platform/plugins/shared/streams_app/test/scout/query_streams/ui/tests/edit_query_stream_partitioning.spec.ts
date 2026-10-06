@@ -63,15 +63,15 @@ test.describe(
 
       await test.step('enter inline edit mode and verify current query', async () => {
         await pageObjects.streams.clickQueryStreamEditButton(QUERY_STREAM_NAME);
-        await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
-        const editorValue = await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
+        await pageObjects.esqlEditor.waitReady();
+        const editorValue = await pageObjects.esqlEditor.getQuery();
         expect(editorValue).toBe(INITIAL_ESQL_QUERY);
       });
 
       const UPDATED_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-2"';
 
       await test.step('update the query and save', async () => {
-        await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(UPDATED_ESQL_QUERY);
+        await pageObjects.esqlEditor.setQuery(UPDATED_ESQL_QUERY);
         await pageObjects.streams.saveInlineQueryStreamEdit();
       });
 

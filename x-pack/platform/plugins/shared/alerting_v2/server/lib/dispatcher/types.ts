@@ -41,7 +41,8 @@ export interface AlertEpisode {
   data?: AlertEpisodeData;
 }
 
-export interface AlertEpisodeSuppression {
+/** Suppression fact read from `.alert-actions`; a null `episode_id` means series-scoped. */
+export interface SuppressionRow {
   rule_id: RuleId | null;
   source: string | null;
   space_id: string | null;
@@ -52,6 +53,17 @@ export interface AlertEpisodeSuppression {
   last_deactivate_action?: string | null;
   last_snooze_action?: string | null;
 }
+
+/** Row of the episode suppressions query: ack and deactivate state of one episode. */
+export type EpisodeSuppressionRow = Omit<SuppressionRow, 'episode_id' | 'last_snooze_action'> & {
+  episode_id: string;
+};
+
+/** Row of the series suppressions query: snooze state of a series, so it carries no `episode_id`. */
+export type SeriesSuppressionRow = Omit<
+  SuppressionRow,
+  'episode_id' | 'last_ack_action' | 'last_deactivate_action'
+>;
 
 export interface DispatcherExecutionParams {
   eventWatermark?: Date;
@@ -103,7 +115,7 @@ export interface ActionPolicy {
   /** data.* fields used to group episodes into a single action group */
   groupBy: string[];
   /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
-  groupingMode: 'per_episode' | 'all' | 'per_field';
+  groupingMode: 'per_alert' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
@@ -133,11 +145,19 @@ export interface ActionGroup {
 
 export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
+export type ActionPolicyWorkflowPayloadAlert = Omit<
+  AlertEpisode,
+  'episode_id' | 'episode_status'
+> & {
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
+};
+
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
   policyId: ActionPolicyId;
   groupKey: Record<string, unknown>;
-  episodes: AlertEpisode[];
+  alerts: ActionPolicyWorkflowPayloadAlert[];
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 

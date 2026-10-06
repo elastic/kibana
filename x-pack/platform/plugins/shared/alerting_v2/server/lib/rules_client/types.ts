@@ -16,6 +16,7 @@ import type {
   DryRunResponse,
   FindRulesResponse,
   FindRulesSortField,
+  PolicyMatcher,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -63,8 +64,13 @@ export interface FindRulesArgs {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface FindMatchingRulesArgs {
+  matcher?: PolicyMatcher | null;
+  page?: number;
+  perPage?: number;
+}
+
 export interface UpdateRuleParams {
   id: string;
   data: UpdateRuleData;
-  options?: { version?: string };
 }

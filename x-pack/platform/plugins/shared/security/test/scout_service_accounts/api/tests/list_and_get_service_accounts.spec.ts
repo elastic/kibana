@@ -55,6 +55,7 @@ interface DirectoryEntry {
   roles: string[];
   enabled: boolean;
   assumable: boolean;
+  description?: string;
 }
 
 interface ListResponse {
@@ -233,6 +234,52 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       assumable: false,
     });
   });
+
+  apiTest(
+    'reports the description of an account, whether Kibana or Elasticsearch wrote it',
+    async ({ apiClient, esClient }) => {
+      const viaKibana = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name: uniqueName('described') };
+      created.push(viaKibana);
+      const createResponse = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
+        headers: adminHeaders,
+        responseType: 'json',
+        body: {
+          name: viaKibana.name,
+          roles: ['viewer'],
+          description: 'Relays the nightshift alerts.',
+        },
+      });
+      expect(createResponse.statusCode).toBe(200);
+
+      const viaElasticsearch = { namespace: FOREIGN_NAMESPACE, name: uniqueName('described') };
+      created.push(viaElasticsearch);
+      await esClient.transport.request({
+        method: 'PUT',
+        path: `/_security/service/${viaElasticsearch.namespace}/${viaElasticsearch.name}`,
+        body: { roles: ['monitoring_user'], description: 'Written straight to Elasticsearch.' },
+        querystring: { refresh: 'wait_for' },
+      });
+
+      const expected = [
+        [idOf(viaKibana), 'Relays the nightshift alerts.'],
+        [idOf(viaElasticsearch), 'Written straight to Elasticsearch.'],
+      ] as const;
+
+      for (const [id, description] of expected) {
+        const response = await apiClient.get(getPath(id), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(response.statusCode).toBe(200);
+        expect((response.body as DirectoryEntry).description).toBe(description);
+      }
+
+      const accounts = await listAllServiceAccounts(apiClient, adminHeaders);
+      for (const [id, description] of expected) {
+        expect(accounts.find((account) => account.id === id)?.description).toBe(description);
+      }
+    }
+  );
 
   apiTest(
     'stops reporting the account assumable once it is recreated outside Kibana',

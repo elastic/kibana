@@ -21,6 +21,7 @@ export interface FindRuleTemplatesArgs {
   sortField?: FindRuleTemplatesSortField;
   sortOrder?: 'asc' | 'desc';
   tags?: string[];
+  excludedTags?: string[];
 }
 
 export interface GetRuleTemplateArgs {
