@@ -11,6 +11,7 @@ describe('getJudgeScoreDirection', () => {
   it('returns the direction a score declares', () => {
     expect(getJudgeScoreDirection({ direction: 'minimize' })).toBe('minimize');
     expect(getJudgeScoreDirection({ direction: 'neutral' })).toBe('neutral');
+    expect(getJudgeScoreDirection({ direction: 'maximize' })).toBe('maximize');
   });
 
   it('reads a score without a direction as higher-is-better', () => {
