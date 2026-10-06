@@ -10,7 +10,6 @@ import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 
 export class PackagePolicyService {
@@ -218,8 +217,9 @@ export class PackagePolicyService {
     ).flat();
 
     const agentPolicyById = new Map(agentPolicies.map((ap) => [ap.id, ap]));
-    const defaultSpacePackagePolicies: T[] = [];
-    const spacePackagePolicies: T[] = [];
+    // Dedupe by reference, not id: Test Now policies have no id until Fleet assigns one.
+    const defaultSpacePackagePolicies = new Set<T>();
+    const spacePackagePolicies = new Set<T>();
 
     for (const pkgPolicy of policies) {
       if (pkgPolicy.policy_ids) {
@@ -229,13 +229,13 @@ export class PackagePolicyService {
             agentPolicy?.space_ids?.includes(spaceId) ||
             agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
           ) {
-            spacePackagePolicies.push(pkgPolicy);
+            spacePackagePolicies.add(pkgPolicy);
           } else {
-            defaultSpacePackagePolicies.push(pkgPolicy);
+            defaultSpacePackagePolicies.add(pkgPolicy);
           }
         });
       } else {
-        defaultSpacePackagePolicies.push(pkgPolicy);
+        defaultSpacePackagePolicies.add(pkgPolicy);
       }
     }
 
@@ -244,14 +244,11 @@ export class PackagePolicyService {
       policies: T[];
     }[] = [];
 
-    if (defaultSpacePackagePolicies.length > 0) {
-      res.push({
-        client: defaultSpaceSoClient,
-        policies: uniqBy(defaultSpacePackagePolicies, 'id'),
-      });
+    if (defaultSpacePackagePolicies.size > 0) {
+      res.push({ client: defaultSpaceSoClient, policies: [...defaultSpacePackagePolicies] });
     }
-    if (spacePackagePolicies.length > 0) {
-      res.push({ client: spaceSoClient, policies: uniqBy(spacePackagePolicies, 'id') });
+    if (spacePackagePolicies.size > 0) {
+      res.push({ client: spaceSoClient, policies: [...spacePackagePolicies] });
     }
 
     return res;
