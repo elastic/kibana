@@ -233,7 +233,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           storedQueries: 1,
           rules: 2,
           investigations: 0,
-          dataStreams: 2,
+          dataStreams: 3,
         });
         expect(
           await getMaintenanceStatus(apiClient).then((status) => status.featureSettings)
