@@ -364,7 +364,7 @@ Use `> [!TIP]` only when the callout suggests the reader add a label; use `> [!N
 
 ```markdown
 > [!NOTE]
-> Marked "AI-fixable": fix request queued. It will start automatically when the team has fewer fixes in progress.
+> AI-fixable. An automatic fix has been requested.
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the note instead of the automatic-request sentence.

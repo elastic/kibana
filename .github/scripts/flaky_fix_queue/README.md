@@ -59,8 +59,12 @@ During rollout, active fixer runs with the old, unidentifiable title temporarily
 pause admission until they finish.
 
 The dispatcher supports a read-only `dry_run` input (the default for manual
-dispatcher runs). Schedules perform real admission. Its logs show admitted and
-capacity-deferred requests; it does not repeatedly comment on waiting issues.
+dispatcher runs). Schedules perform real admission. A deferred automatic request gets
+one comment showing the blocking team's current open-fix count and how to start it
+manually. For multiple owners, the count is for the first owner whose limit is reached.
+Later sweeps update that comment only if the count changes; admission replaces it with
+the starting message and then the run link. Waiting comments do not reserve a slot
+or mark a request as attempted.
 
 ## Validation
 

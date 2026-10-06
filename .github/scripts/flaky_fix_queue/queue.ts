@@ -144,6 +144,17 @@ const receiptBody = (request: FixRequest, runId?: number): string =>
     `<!-- flaky-fix-queue request:${request.event} run:${runId ?? 'pending'} -->`,
   ].join('\n\n');
 
+const waitingMarker = (request: FixRequest): string =>
+  `<!-- flaky-fix-queue waiting:${request.event} -->`;
+
+const waitingBody = (request: FixRequest, openFixes: number): string =>
+  [
+    `AI-fixable. Automatic fix queued: this team already has ${openFixes} open ${
+      openFixes === 1 ? 'fix' : 'fixes'
+    }. Remove and reapply \`ai:fix-flaky\` to start it now.`,
+    waitingMarker(request),
+  ].join('\n\n');
+
 /** Admit labelled issues within each team's review budget; callers must serialize dispatcher runs. */
 export const dispatchQueuedFixes = async ({
   client,
@@ -246,11 +257,6 @@ export const dispatchQueuedFixes = async ({
   const queue: Snapshot[] = [];
   for (const issue of labelled) {
     if (issue.pull_request) continue;
-    // Skip history only when every owner is full; a receipt may reserve another owner's free slot.
-    if (!owningTeams(issue).some((team) => hasCapacity([team]))) {
-      log(`Deferred #${issue.number}: owning team has no capacity.`);
-      continue;
-    }
     queue.push(await getSnapshot(issue.number));
   }
 
@@ -308,12 +314,11 @@ export const dispatchQueuedFixes = async ({
     ) {
       continue;
     }
-    if (!hasCapacity(teams)) {
-      log(`Deferred #${issue.number}: ${teams.join(', ')} has no capacity.`);
-      continue;
-    }
+    const waitingComment = snapshot.comments.find(
+      (comment) => trustedComment(comment) && comment.body?.includes(waitingMarker(request))
+    );
 
-    // Recheck cancellation, re-labelling, and ownership changes immediately before admission.
+    // Recheck cancellation, re-labelling, and ownership before commenting or dispatching.
     const currentIssue = await client.getIssue(issue.number);
     const currentRequest = latestRequest(currentIssue, await client.listEvents(issue.number));
     if (
@@ -325,12 +330,30 @@ export const dispatchQueuedFixes = async ({
       continue;
     }
 
+    const blockedTeam = teams.find((team) => !hasCapacity([team]));
+    if (blockedTeam) {
+      log(`Deferred #${issue.number}: ${blockedTeam} has no capacity.`);
+      if (!dryRun) {
+        const body = waitingBody(request, outstanding.get(blockedTeam)?.size ?? 0);
+        if (!waitingComment) {
+          await client.createComment(issue.number, body);
+        } else if (waitingComment.body !== body) {
+          await client.updateComment(waitingComment.id, body);
+        }
+      }
+      continue;
+    }
+
     chargeRun(issue.number, teams);
     admitted.push(issue.number);
     log(`${dryRun ? 'Would dispatch' : 'Dispatching'} #${issue.number} (${teams.join(', ')}).`);
     if (dryRun) continue;
 
-    const commentId = await client.createComment(issue.number, receiptBody(request));
+    // Reuse the waiting comment, persisting the reservation before dispatch in either case.
+    const commentId = waitingComment
+      ? waitingComment.id
+      : await client.createComment(issue.number, receiptBody(request));
+    if (waitingComment) await client.updateComment(commentId, receiptBody(request));
     const runId = await client.dispatch(request);
     if (!Number.isSafeInteger(runId) || runId < 1) {
       throw new Error(
