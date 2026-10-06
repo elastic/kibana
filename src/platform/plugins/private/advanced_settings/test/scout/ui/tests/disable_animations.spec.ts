@@ -9,6 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { ACCESSIBILITY_DISABLE_ANIMATIONS_ID as SETTING } from '@kbn/management-settings-ids';
 import { test } from '../fixtures';
 import {
   addAnimationProbes,
@@ -16,8 +17,6 @@ import {
   startAnimationProbe,
 } from '../fixtures/animation_probes';
 import { getGlobalAdvancedSettingsAllRole } from '../fixtures/services/privileges';
-
-const SETTING = 'accessibility:disableAnimations';
 
 test.describe('Advanced settings - disable animations', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient }) => {
