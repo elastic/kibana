@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Linter = require('eslint').Linter;
-
-const coreRule = new Linter().getRules().get('no-restricted-imports');
-
-/**
- * This rule is used to prevent the use of deprecated imports in Kibana code.
- * It is a wrapper around the core ESLint rule `no-restricted-imports` with
- * a different id to avoid conflicts with the core rule.
- */
-module.exports = coreRule;
+// oxlint resolves `files`, `ignorePatterns`, and `jsPlugins` paths relative to this file, so
+// the entry must stay at the repo root. The typed config lives in `.oxlint/`, which has its
+// own tsconfig.json; this entry is JS so the root TS project does not have to include it.
+export { default } from './.oxlint/index.mts';

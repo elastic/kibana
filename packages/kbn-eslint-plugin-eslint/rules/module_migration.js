@@ -11,6 +11,12 @@ const path = require('path');
 const findKibanaRoot = require('../helpers/find_kibana_root');
 const KIBANA_ROOT = findKibanaRoot();
 
+function deserializePatterns(patterns) {
+  return patterns?.map((pattern) =>
+    pattern instanceof RegExp ? pattern : new RegExp(pattern.source, pattern.flags)
+  );
+}
+
 function checkModuleNameNode(context, mappings, node, desc = 'Imported') {
   const mapping = mappings.find(
     (mapping) =>
@@ -108,12 +114,23 @@ module.exports = {
     ],
   },
   createOnce: (context) => {
+    let configuredMappings = [];
+    let options;
     let mappings = [];
 
     return {
       before() {
+        if (options !== context.options) {
+          options = context.options;
+          configuredMappings = (options?.[0] || []).map((mapping) => ({
+            ...mapping,
+            exclude: deserializePatterns(mapping.exclude),
+            include: deserializePatterns(mapping.include),
+          }));
+        }
+
         const filename = path.relative(KIBANA_ROOT, context.filename);
-        mappings = (context.options[0] || []).filter((mapping) => {
+        mappings = configuredMappings.filter((mapping) => {
           if (mapping.exclude && mapping.exclude.some((p) => p.test(filename))) {
             return false;
           }
