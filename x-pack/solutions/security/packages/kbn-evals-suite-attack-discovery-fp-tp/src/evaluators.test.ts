@@ -8,6 +8,7 @@
 import type { Evaluator } from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
+  claimGrounding,
   createFpTpTrajectoryEvaluator,
   outcomeAccuracy,
   payloadConformance,
@@ -182,5 +183,240 @@ describe('skipFailedRuns', () => {
 
   it('returns the inner score for a completed run', async () => {
     expect(await score(wrapped, completed, 'false_positive')).toBe(0.5);
+  });
+});
+
+describe('ClaimGrounding', () => {
+  const groundedRun = (overrides: Partial<FpTpTaskOutput> = {}): FpTpTaskOutput => ({
+    ...completed,
+    outcome: 'false_positive',
+    payload: { verdict: 'false_positive', summary_markdown: 'A summary' },
+    raw: {
+      coverage: {
+        alerts: { seen: 1, cap: 10, truncated: false },
+        entities: { seen: 2, cap: 10, truncated: false },
+        events: { seen: 3, cap: 10, truncated: false },
+      },
+      checks: [
+        { name: 'entity_role', status: 'completed', result: 'contradicts', details: 'd' },
+        { name: 'process_parent', status: 'completed', result: 'contradicts', details: 'd' },
+        { name: 'network_destination', status: 'completed', result: 'contradicts', details: 'd' },
+      ],
+      claims: {
+        world: [
+          { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+          { check: 'process_parent', result: 'contradicts', source: 'raw_event', id: 'ev-1' },
+        ],
+      },
+    },
+    seededEvidence: {
+      alerts: [
+        { id: 'alert-1', source: { host: { name: 'web-01' } } },
+        { id: 'alert-2', source: { 'host.name': 'web-01' } },
+      ],
+      entities: [{ id: 'ent-1', source: { entity: { id: 'ent-1' } } }],
+      events: [{ id: 'ev-1', source: { message: 'm' } }],
+    },
+    ...overrides,
+  });
+
+  it('scores 1 when every world claim is grounded', async () => {
+    expect(await score(claimGrounding, groundedRun(), 'false_positive')).toBe(1);
+  });
+
+  it('scores 0 when an entity_store claim cites an unseeded id', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'nope' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('not in the seeded entity_store');
+  });
+
+  it('scores 0 when a raw_event claim cites an unseeded id', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'process_parent', result: 'contradicts', source: 'raw_event', id: 'nope' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('not in the seeded raw_event');
+  });
+
+  it('scores 0 when a claim result contradicts raw.checks', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'supports', source: 'entity_store', id: 'ent-1' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('contradicts raw.checks');
+  });
+
+  it('scores 1 when the alert link pivots both alerts, nested and flattened', async () => {
+    const run = groundedRun({
+      raw: {
+        ...groundedRun().raw!,
+        claims: {
+          alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-2'] },
+        },
+      },
+    });
+    expect(await score(claimGrounding, run, 'false_positive')).toBe(1);
+  });
+
+  it('scores 0 when an alert link cites an unseeded alert', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'ghost'] },
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('"ghost" not seeded');
+  });
+
+  it('scores 0 when an alert does not carry the pivot field value', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            alert_link: {
+              field: 'host.name',
+              value: 'other-01',
+              alert_ids: ['alert-1', 'alert-2'],
+            },
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('does not carry host.name');
+  });
+
+  it('scores 0 when an alert link lists fewer than 2 alerts', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: { alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1'] } },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('fewer than 2 alert_ids');
+  });
+
+  it('scores 1 with label no-claims for an inconclusive verdict', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        outcome: 'inconclusive',
+        payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+        raw: { coverage: { entities: { seen: 2, cap: 10, truncated: false } }, claims: {} },
+      }),
+      expected: { outcome: 'inconclusive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('no-claims');
+  });
+
+  it('scores 1 for a truncation downgrade that omits claims', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        outcome: 'inconclusive',
+        payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+        raw: {
+          coverage: { entities: { seen: 2, cap: 10, truncated: true } },
+          claims: undefined,
+        },
+      }),
+      expected: { outcome: 'inconclusive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('no-claims');
+  });
+
+  it('scores 0 with label missing-claims for a TP with empty claims.world', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        outcome: 'true_positive',
+        payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+        raw: { coverage: {}, claims: {} },
+      }),
+      expected: { outcome: 'true_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('missing-claims');
+  });
+
+  it('scores partial when some claims are grounded', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'nope' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0.5);
   });
 });

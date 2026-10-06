@@ -6,7 +6,7 @@ Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](http
 
 The suite runs the managed analysis workflow (`system-security-attack-discovery-fp-tp-analysis`, shipped as `attack_discovery_fp_tp_analysis.yaml`) in place — it is not installed or modified by the suite. There is no sample copy: a second YAML would drift from the managed one (a stranded-reader bug on PR #294309 came from exactly that), so the managed workflow is the single source of truth.
 
-Caveat: the claim-grounding evaluator is still a follow-up, and parts of the managed analysis body are placeholders while security-team#19282 iterates — until both land, scores measure the shipped prompt, not the finished product. The numbers in the acceptance criteria below carry the same caveat: they are the managed-path baseline measured on the commit in this PR, not a claim about the finished product.
+Caveat: scores measure the shipped prompt, not the finished product — the baseline is the managed-path measurement, not a claim about the finished product.
 
 The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
 
@@ -74,10 +74,11 @@ src/
 - `OutcomeAccuracy` (primary): the outcome matches the gold; a `failed` gold also needs an explicit `FAILED` execution, so a timeout or cancellation does not pass. The label is the predicted outcome, so the report reads as a confusion matrix.
 - `UnsafeClose`: 0 when the run predicts `false_positive` and the gold is anything else. A false positive closes the attack.
 - `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
+- `ClaimGrounding`: every `claims.world` entry cites a seeded document (`entity_store` ids resolve to a seeded entity's `entity.id`, `raw_event` ids to a seeded event `_id`) and its `result` matches the same check in `raw.checks`; an `alert_link` cites only seeded alerts, at least two, and every listed alert's source carries the pivot `field` with the claimed `value`. Score is grounded claims / total claims; `no-claims` (score 1) for an `inconclusive` verdict or a truncation downgrade, `missing-claims` (score 0) for a TP/FP verdict with empty `claims.world`.
 - `trajectory`: the agent called no tools. N/A when traces are unavailable.
 - LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the discovery's and alerts' story is stated as fact only where the entities or raw events show it, the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
 
-A grader for whether `claims` are grounded in the seeded data waits for the verification gate; the raw `coverage`, `checks`, and `claims` are already captured in the task output.
+The raw `coverage`, `checks`, and `claims` are captured in the task output and graded by `ClaimGrounding` against the seeded documents.
 
 ## Running locally
 
@@ -111,8 +112,7 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 
 ## Follow-ups (sample-workflow removal done)
 
-1. Add the claim-grounding evaluator.
-2. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-3. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
+1. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
+2. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.

@@ -174,3 +174,164 @@ export const skipFailedRuns = (evaluator: Evaluator): Evaluator => ({
     return evaluator.evaluate(args);
   },
 });
+
+interface WorldClaim {
+  check?: string;
+  result?: string;
+  source?: string;
+  id?: string;
+}
+
+interface RawCheck {
+  name?: string;
+  status?: string;
+  result?: string;
+}
+
+interface AlertLinkClaim {
+  field?: string;
+  value?: string;
+  alert_ids?: string[];
+}
+
+interface RawClaims {
+  world?: WorldClaim[];
+  alert_link?: AlertLinkClaim;
+}
+
+/** Dotted-path lookup that tolerates flattened (`host.name`) and nested (`host: {name}`) sources. */
+const dottedValue = (source: Record<string, unknown>, path: string): unknown => {
+  if (path in source) {
+    return source[path];
+  }
+  let value: unknown = source;
+  for (const segment of path.split('.')) {
+    if (typeof value !== 'object' || value === null) {
+      return undefined;
+    }
+    value = (value as Record<string, unknown>)[segment];
+  }
+  return value;
+};
+
+const valuesEqual = (a: unknown, b: unknown): boolean => {
+  const asStrings = (v: unknown): string[] | undefined =>
+    v === undefined
+      ? undefined
+      : Array.isArray(v)
+      ? v.every((item) => typeof item === 'string' || typeof item === 'number')
+        ? v.map(String)
+        : undefined
+      : [String(v)];
+  const left = asStrings(a);
+  const right = asStrings(b);
+  return left !== undefined && right !== undefined && left.join('\u0000') === right.join('\u0000');
+};
+
+/**
+ * Grounds the model's `claims` against the seeded documents without an LLM: every
+ * cited id must exist in the seed, every claimed result must match the run's own
+ * `raw.checks`, and an alert link must pivot every listed alert through a field the
+ * alerts actually carry. Score = grounded claims / total claims.
+ */
+export const claimGrounding: Evaluator = {
+  name: 'ClaimGrounding',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output }) => {
+    const task = asOutput(output);
+    const { payload, raw, seededEvidence } = task;
+    const problems: string[] = [];
+
+    const downgraded =
+      payload?.verdict === 'inconclusive' &&
+      ((raw?.coverage?.entities as { truncated?: boolean } | undefined)?.truncated === true ||
+        (raw?.coverage?.events as { truncated?: boolean } | undefined)?.truncated === true);
+    const claims = (raw?.claims ?? {}) as RawClaims;
+    const worldClaims = claims.world ?? [];
+
+    if (worldClaims.length === 0 && !claims.alert_link) {
+      if (downgraded || payload?.verdict === 'inconclusive') {
+        return { score: 1, label: 'no-claims', explanation: null };
+      }
+      return {
+        score: 0,
+        label: 'missing-claims',
+        explanation: 'claims.world is empty but the verdict is not inconclusive',
+      };
+    }
+
+    let grounded = 0;
+    let total = 0;
+
+    const checkResults = new Map(
+      ((raw?.checks ?? []) as RawCheck[]).map((check) => [check.name, check.result])
+    );
+    const seededEntityIds = new Set(
+      seededEvidence.entities.map(
+        ({ id, source }) => (source.entity as { id?: string } | undefined)?.id ?? id
+      )
+    );
+    const seededEventIds = new Set(seededEvidence.events.map(({ id }) => id));
+
+    for (const claim of worldClaims) {
+      total++;
+      const claimProblems: string[] = [];
+      const seeded =
+        claim.source === 'entity_store'
+          ? seededEntityIds.has(claim.id ?? '')
+          : claim.source === 'raw_event'
+          ? seededEventIds.has(claim.id ?? '')
+          : false;
+      if (!claim.id) {
+        claimProblems.push('no id');
+      } else if (!seeded) {
+        claimProblems.push(`id "${claim.id}" not in the seeded ${claim.source ?? 'unknown'}`);
+      }
+      const checkResult = checkResults.get(claim.check ?? '');
+      if (checkResult === undefined) {
+        claimProblems.push(`check "${claim.check ?? ''}" missing from raw.checks`);
+      } else if (checkResult !== claim.result) {
+        claimProblems.push(
+          `result "${claim.result}" contradicts raw.checks "${checkResult}" for "${claim.check}"`
+        );
+      }
+      if (claimProblems.length === 0) {
+        grounded++;
+      } else {
+        problems.push(`world claim ${JSON.stringify(claim)}: ${claimProblems.join(', ')}`);
+      }
+    }
+
+    const alertLink = claims.alert_link;
+    if (alertLink) {
+      total++;
+      const linkProblems: string[] = [];
+      const seededAlerts = new Map(seededEvidence.alerts.map(({ id, source }) => [id, source]));
+      if ((alertLink.alert_ids ?? []).length < 2) {
+        linkProblems.push('fewer than 2 alert_ids');
+      }
+      for (const alertId of alertLink.alert_ids ?? []) {
+        const source = seededAlerts.get(alertId);
+        if (source === undefined) {
+          linkProblems.push(`alert "${alertId}" not seeded`);
+        } else if (!valuesEqual(dottedValue(source, alertLink.field ?? ''), alertLink.value)) {
+          linkProblems.push(
+            `alert "${alertId}" does not carry ${alertLink.field}="${alertLink.value}"`
+          );
+        }
+      }
+      if (linkProblems.length === 0) {
+        grounded++;
+      } else {
+        problems.push(`alert_link claim: ${linkProblems.join(', ')}`);
+      }
+    }
+
+    return {
+      score: total === 0 ? 1 : grounded / total,
+      label: grounded === total ? 'grounded' : 'ungrounded',
+      explanation: problems.length === 0 ? null : problems.join('; '),
+    };
+  },
+};
