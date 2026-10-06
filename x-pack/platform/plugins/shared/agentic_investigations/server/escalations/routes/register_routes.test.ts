@@ -76,6 +76,7 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
     getAssignmentsService: jest.fn() as unknown as () => AssignmentsService,
     getSpaceId: () => 'default',
     getSecurity: jest.fn().mockResolvedValue(undefined),
+    escalationsEnabled: true,
   } as unknown as EscalationRouteDependencies);
 
   const byPath = (routes: RegisteredRoute[], path: string) =>
@@ -329,6 +330,7 @@ describe('escalation routes', () => {
         getAssignmentsService: () => buildAssignService(assign),
         getSpaceId: () => 'default',
         getSecurity: jest.fn(),
+        escalationsEnabled: true,
       } as unknown as EscalationRouteDependencies);
 
       const response = httpServerMock.createResponseFactory();
@@ -367,6 +369,7 @@ describe('escalation routes', () => {
         getAssignmentsService: () => buildAssignService(assign),
         getSpaceId: () => 'default',
         getSecurity: jest.fn(),
+        escalationsEnabled: true,
       } as unknown as EscalationRouteDependencies);
 
       const response = httpServerMock.createResponseFactory();
@@ -403,6 +406,7 @@ describe('escalation routes', () => {
         getAssignmentsService: () => buildAssignService(assign),
         getSpaceId: () => 'default',
         getSecurity: jest.fn(),
+        escalationsEnabled: true,
       } as unknown as EscalationRouteDependencies);
 
       const response = httpServerMock.createResponseFactory();
@@ -569,6 +573,28 @@ describe('escalation routes', () => {
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 409 })
       );
+    });
+  });
+
+  describe('with escalations disabled', () => {
+    it('registers only the shared suggest-users route', () => {
+      const router = httpServiceMock.createRouter();
+
+      registerEscalationRoutes({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        getEscalationsService: jest.fn(),
+        getAssignmentsService: jest.fn(),
+        getSpaceId: () => 'default',
+        getSecurity: jest.fn(),
+        escalationsEnabled: false,
+      } as unknown as EscalationRouteDependencies);
+
+      expect(router.post).toHaveBeenCalledTimes(1);
+      expect((router.post as jest.Mock).mock.calls[0][0].path).toBe(SUGGEST_USER_PROFILES_URL);
+      for (const method of ['get', 'post', 'patch', 'put'] as const) {
+        expect(router.versioned[method]).not.toHaveBeenCalled();
+      }
     });
   });
 });
