@@ -165,9 +165,7 @@ export class GraphPage {
     await this.datasourceButton.click();
     await this.page.getByTestId(`savedObjectTitle${indexPattern}`).click();
     // "Add fields" stays `aria-disabled` until the fields finish loading.
-    await this.addFieldButton
-      .and(this.page.getByRole('button', { disabled: false }))
-      .waitFor({ state: 'visible' });
+    await expect(this.addFieldButton).toBeEnabled();
   }
 
   async pickIndexPatternByName(dataViewName: string) {
@@ -176,9 +174,7 @@ export class GraphPage {
       .getByRole('dialog', { name: 'Select a data source' })
       .getByRole('button', { name: dataViewName, exact: true })
       .click();
-    await this.addFieldButton
-      .and(this.page.getByRole('button', { disabled: false }))
-      .waitFor({ state: 'visible' });
+    await expect(this.addFieldButton).toBeEnabled();
   }
 
   async changeIndexPatternByName(dataViewName: string) {
@@ -188,9 +184,7 @@ export class GraphPage {
       .getByRole('dialog', { name: 'Select a data source' })
       .getByRole('button', { name: dataViewName, exact: true })
       .click();
-    await this.addFieldButton
-      .and(this.page.getByRole('button', { disabled: false }))
-      .waitFor({ state: 'visible' });
+    await expect(this.addFieldButton).toBeEnabled();
   }
 
   async addFields(fields: string[]) {
