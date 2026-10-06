@@ -224,18 +224,15 @@ Example reply: "You can check that on the [Entity Store status page](<url from b
  */
 export const WATCHLISTS_UI_NAVIGATION_CONTENT = `## UI-only operations — redirect, do not call a tool
 
-Two watchlist operations are intentionally **not** performed in chat because they live in the watchlist **edit flyout** and this skill's tools don't cover them: **configuring the entity source** and **uploading a CSV** of members. (Editing the name, description, or risk modifier is **not** UI-only — \`security.update_watchlist\` handles those.)
+Exactly one watchlist operation is intentionally **not** performed in chat: **uploading a CSV** of members. (Editing the name, description, or risk modifier is **not** UI-only — \`security.update_watchlist\` handles those. Configuring the entity source is **not** UI-only either — \`security.set_watchlist_rule_based_data_source\` / \`security.remove_watchlist_rule_based_data_source\` handle that in chat; do not redirect for it.)
 
-For these intents, **decline the action** and point the user to the right place in the UI. Three things in one short reply: what you can't do in chat, why (one short clause — "the CSV upload lives in the editor", "entity-source configuration lives in the flyout"), and where to go — a clickable markdown link.
+For this intent, **decline the action** and point the user to the right place in the UI. Three things in one short reply: what you can't do in chat, why ("the CSV upload lives in the editor"), and where to go — a clickable markdown link.
 
-**How to produce the link.** Call \`security.build_redirect_url\` with the \`path\` below (and, for the edit flyout, the \`flyout\` object) and render the \`url\` it returns as \`[title](url)\`. The tool applies the deployment base path and current space for you — pass the \`path\` exactly as written (app-relative, starting with \`/\`) and **never** hand-write, guess, or edit the URL. \`security.build_redirect_url\` is **not** a mutation, so calling it for a redirect is expected; do **not** call the mutating tools (\`create\` / \`update\` / \`delete\` / \`add_entities\` / \`remove_entities\`). Do **not** prompt for confirmation, and do **not** claim the operation succeeded.
+**How to produce the link.** Call \`security.build_redirect_url\` with the \`path\` below and the \`flyout\` object, and render the \`url\` it returns as \`[title](url)\`. The tool applies the deployment base path and current space for you — pass the \`path\` exactly as written (app-relative, starting with \`/\`) and **never** hand-write, guess, or edit the URL. \`security.build_redirect_url\` is **not** a mutation, so calling it for a redirect is expected; do **not** call the mutating tools (\`create\` / \`update\` / \`delete\` / \`add_entities\` / \`remove_entities\`). Do **not** prompt for confirmation, and do **not** claim the operation succeeded.
 
-### Redirect intents
+### Redirect intent
 
-Both of these open the watchlist's **edit flyout**:
-
-- **Configure the entity source** for a watchlist — the persistent source that keeps members in sync from a query, index, or rule. The tools here only do **one-time** add/remove; a source that stays in sync is UI-only.
-- **Upload a CSV** of watchlist members — the flyout's "CSV Data Source" adds members in bulk from a file. The tools here take an explicit id list only; a file upload is UI-only.
+**Upload a CSV** of watchlist members — the edit flyout's "CSV Data Source" adds members in bulk from a file. The tools here take an explicit id list only (\`security.add_entities_to_watchlist\`); a file upload is UI-only.
 
 ### Destination
 
@@ -262,11 +259,6 @@ User: "Upload a CSV of members to the Privileged Users watchlist."
 }'\` and \`flyout: { right: { id: '${WATCHLISTS_FLYOUT_KEY}', params: { mode: 'edit', watchlistId: '<id from step 1>' } } }\`.
 3. Render the returned \`url\` in a decline-and-redirect reply:
    > "I can't upload a CSV to a watchlist from chat — that runs through the watchlist editor. Open the editor: [Edit Privileged Users](<url from build_redirect_url>)."
-
-User: "Configure the entity source for the High Risk Hosts watchlist."
-
-1. Resolve the id via \`security.get_watchlist_id\` (\`{ identifier: 'High Risk Hosts' }\`), then call \`security.build_redirect_url\` with the watchlists path and the edit \`flyout\` for that id, and explain the tools do one-time membership only:
-   > "I can't configure a watchlist's entity source from chat — my tools only do one-time add/remove. Open the editor to set up a persistent source: [Edit High Risk Hosts](<url from build_redirect_url>)."
 
 User: "Open the watchlists page so I can pick one to edit."
 

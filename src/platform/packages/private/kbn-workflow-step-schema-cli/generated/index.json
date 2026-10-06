@@ -723,6 +723,7 @@
     "security.attack-discovery.persistDiscoveries",
     "security.attack-discovery.run",
     "security.buildAlertEntityGraph",
+    "security.buildExceptionEntriesFilter",
     "security.createExceptionListItem",
     "security.createNote",
     "security.createRule",
@@ -821,6 +822,7 @@
     "slack2.resolveChannelId",
     "slack2.searchMessages",
     "slack2.sendMessage",
+    "slack2.updateMessage",
     "slack2.whoAmI",
     "slack_api.postBlockkit",
     "slack_api.postMessage",
@@ -1001,11 +1003,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "218217a1e66cc06bc401fcf5a85f3be4ccc96b773f9488c792de851db037d97c"
+      "sha256": "66f376df0f8b3d15aff54c21ebc88bdda0f8a7954b61b6629adba46060dd5214"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "f5f89f788cc9d3aab297beddd2fbec8c64f130323a3e227930c281a09ba2ff16"
+      "sha256": "5c5dbcdd8abaca6aa301b4451e348c3ba80da58cc1b2878550be390a31855b86"
     }
   }
 }

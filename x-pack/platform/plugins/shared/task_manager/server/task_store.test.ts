@@ -1444,6 +1444,44 @@ describe('TaskStore', () => {
       });
     });
 
+    test('passes refresh:true through to the saved objects client when requested', async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: 'myTraceparent',
+        partition: 99,
+      };
+
+      savedObjectsClient.update.mockImplementation(
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+          return {
+            id,
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          };
+        }
+      );
+
+      await store.update(task, { validate: true, refresh: true });
+
+      expect(savedObjectsClient.update).toHaveBeenCalledWith('task', task.id, expect.anything(), {
+        version: '123',
+        refresh: true,
+      });
+    });
+
     test('does not send the credential fields', async () => {
       const task = {
         runAt: mockedDate,
