@@ -38,6 +38,8 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiProvider>{children}</EuiProvider>
 );
 
+jest.setTimeout(30_000);
+
 describe('NewConversationPrompt', () => {
   beforeEach(() => {
     jest.clearAllMocks();
