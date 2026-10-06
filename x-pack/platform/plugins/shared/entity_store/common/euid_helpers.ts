@@ -11,11 +11,11 @@
  * Do not import this file from plugin public (browser) code synchronously — it pulls in @kbn/streamlang.
  * For browser bundles, load the same {@link euid} object via dynamic import (`euid_browser` / `loadEuidApi()`).
  *
- * Every helper comes in two forms. The `...FromDefinition` form is the compiler: it takes an
- * entity definition and nothing else, so it works for any definition, including those other
- * plugins register in the entity definition registry. The form that takes a type name is a
- * shortcut for the Entity Store's own built-in definitions (`user`, `host`, `service`, `generic`):
- * it resolves the definition by name and calls the compiler. It cannot know any other type.
+ * Every helper comes in two forms. The `...FromDefinition` form takes an entity definition, so it
+ * works for any definition, including those other plugins register in the entity definition
+ * registry. The form that takes a type name is a shortcut for the Entity Store's own built-in
+ * definitions (`user`, `host`, `service`, `generic`): it resolves the definition by name and
+ * calls the `...FromDefinition` form. It cannot know any other type.
  *
  * @example
  * import { euid } from '@kbn/entity-store/common/euid_helpers';

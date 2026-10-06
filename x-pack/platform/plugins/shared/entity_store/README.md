@@ -149,7 +149,7 @@ Only `plugin` can be registered today. The four built-ins are managed by the `en
 
 ### Compiling entity ids for a registered definition
 
-The `euid` helper (`@kbn/entity-store/common/euid_helpers`) has two forms of every function. The `...FromDefinition` form is the compiler and takes a definition, so it works for any registered type. The form that takes a type name only resolves the Entity Store's four built-ins and is a shortcut over the same compiler. A plugin that registered `k8s.pod` reads the definition back and passes it in:
+The `euid` helper (`@kbn/entity-store/common/euid_helpers`) has two forms of every function. The `...FromDefinition` form takes a definition, so it works for any registered type. The form that takes a type name only resolves the Entity Store's four built-ins and is a shortcut over the `...FromDefinition` form. A plugin that registered `k8s.pod` reads the definition back and passes it in:
 
 ```ts
 const definitions = entityStore.getEntityDefinitionsClientForSpace(spaceId);
