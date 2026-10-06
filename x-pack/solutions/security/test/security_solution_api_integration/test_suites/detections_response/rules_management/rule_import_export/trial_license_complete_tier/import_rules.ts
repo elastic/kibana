@@ -62,6 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toEqual({
         success: true,
         success_count: 1,
+        rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 1,
         errors: [],
         exceptions_success: true,
@@ -353,7 +354,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        await importRulesWithSuccess({
+        const createResponse = await importRules({
           getService,
           rules: [
             getCustomQueryRuleParams({
@@ -366,7 +367,14 @@ export default ({ getService }: FtrProviderContext): void => {
           spaceId,
         });
 
-        await importRulesWithSuccess({
+        expect(createResponse).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+          rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 0 },
+        });
+
+        const overwriteResponse = await importRules({
           getService,
           rules: [
             getCustomQueryRuleParams({
@@ -377,6 +385,13 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           overwrite: true,
           spaceId,
+        });
+
+        expect(overwriteResponse).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+          rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
         });
 
         const { body: defaultRule } = await detectionsApi

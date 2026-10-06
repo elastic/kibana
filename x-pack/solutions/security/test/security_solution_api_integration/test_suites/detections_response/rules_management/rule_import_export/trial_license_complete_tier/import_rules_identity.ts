@@ -345,6 +345,23 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(exportedRules).toHaveLength(1);
       expect(exportedRules[0].id).toBe(existing.id);
 
+      const untouched = await importRules({
+        getService,
+        rules: exportedRules,
+        overwrite: true,
+      });
+      expect(untouched).toMatchObject({
+        success: true,
+        success_count: 1,
+        rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+      });
+
+      const { body: afterUntouched } = await detectionsApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
+      expect(afterUntouched.revision).toBe(existing.revision);
+      expect(afterUntouched.updated_at).toBe(existing.updated_at);
+
       await importRulesWithSuccess({
         getService,
         rules: [{ ...exportedRules[0], name: 'Roundtrip overwritten' }],

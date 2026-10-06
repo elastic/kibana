@@ -23,11 +23,13 @@ import { WarningSchema } from '../../model/warning_schema.gen';
 export const ImportRulesRequestQuery = lazySchema(() =>
   z.object({
     /**
-     * Determines whether existing rules with the same `rule_id` are overwritten.
+     * Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.unchanged`.
      */
     overwrite: BooleanFromString.optional()
       .default(false)
-      .describe('Determines whether existing rules with the same `rule_id` are overwritten.'),
+      .describe(
+        'Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.unchanged`.'
+      ),
     /**
      * Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
      */
@@ -64,6 +66,42 @@ export const ImportRulesResponse = lazySchema(() =>
       rules_count: z.number().int().min(0),
       success: z.boolean(),
       success_count: z.number().int().min(0),
+      /**
+       * Counts of imported rules by outcome. `created`, `updated`, and `unchanged` are included in `success_count`. `failed` did not import successfully.
+       */
+      rules_summary: z
+        .object({
+          /**
+           * Rules created by this import.
+           */
+          created: z.number().int().min(0).describe('Rules created by this import.'),
+          /**
+           * Existing rules overwritten because the payload changed.
+           */
+          updated: z
+            .number()
+            .int()
+            .min(0)
+            .describe('Existing rules overwritten because the payload changed.'),
+          /**
+           * Existing rules skipped because nothing changed. Included in `success_count`.
+           */
+          unchanged: z
+            .number()
+            .int()
+            .min(0)
+            .describe(
+              'Existing rules skipped because nothing changed. Included in `success_count`.'
+            ),
+          /**
+           * Rules that did not import successfully.
+           */
+          failed: z.number().int().min(0).describe('Rules that did not import successfully.'),
+        })
+        .strict()
+        .describe(
+          'Counts of imported rules by outcome. `created`, `updated`, and `unchanged` are included in `success_count`. `failed` did not import successfully.'
+        ),
       errors: z.array(ErrorSchema),
       action_connectors_errors: z.array(ErrorSchema),
       action_connectors_warnings: z.array(WarningSchema),

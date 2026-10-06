@@ -20,6 +20,7 @@ import {
   clearChangeHistory,
   combineToNdJson,
   getCustomQueryRuleParams,
+  getRuleSOById,
   getRuleTaskId,
   fetchRule,
   importRules,
@@ -58,6 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
         errors: [],
         success: true,
         success_count: 1,
+        rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 1 },
         rules_count: 2,
       });
 
@@ -93,6 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
         errors: [],
         success: true,
         success_count: 1,
+        rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
         rules_count: 1,
       });
     });
@@ -125,6 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
         errors: [],
         success: true,
         success_count: 1,
+        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
         rules_count: 1,
       });
 
@@ -187,6 +191,7 @@ export default ({ getService }: FtrProviderContext): void => {
         errors: [],
         success: true,
         success_count: 1,
+        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
         rules_count: 1,
       });
 
@@ -372,6 +377,41 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    it('rotates the API key when overwriting an enabled rule, but not on an identical re-import', async () => {
+      const existing = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-api-key-rule',
+          name: 'Before API key overwrite',
+          enabled: true,
+        })
+      );
+      const getApiKey = async () =>
+        (await getRuleSOById(es, existing.id)).hits.hits[0]?._source?.alert.apiKey;
+      const keyBefore = await getApiKey();
+      const ruleToImport = getCustomQueryRuleParams({
+        rule_id: 'overwrite-api-key-rule',
+        name: 'After API key overwrite',
+        enabled: true,
+      });
+
+      await importRulesWithSuccess({ getService, rules: [ruleToImport], overwrite: true });
+
+      const keyAfter = await getApiKey();
+      expect(keyAfter).toBeDefined();
+      expect(keyAfter).not.toBe(keyBefore);
+
+      const reimport = await importRules({ getService, rules: [ruleToImport], overwrite: true });
+
+      expect(reimport).toMatchObject({
+        success: true,
+        success_count: 1,
+        rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+      });
+      expect(await getApiKey()).toBe(keyAfter);
+    });
+
     it('attaches an exceptions list when overwriting an existing rule', async () => {
       const existing = await createRule(
         supertest,
@@ -416,6 +456,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toMatchObject({
         success: true,
         success_count: 1,
+        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
         rules_count: 1,
         errors: [],
         exceptions_success: true,
@@ -474,6 +515,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createResponse).toMatchObject({
         success: true,
         success_count: 1,
+        rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 1,
         errors: [],
         exceptions_success: true,
@@ -492,7 +534,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       ]);
 
-      await importRulesWithSuccess({
+      const overwriteResponse = await importRules({
         getService,
         rules: [
           getCustomQueryRuleParams({
@@ -502,6 +544,14 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ],
         overwrite: true,
+      });
+
+      expect(overwriteResponse).toMatchObject({
+        rules_count: 1,
+        success: true,
+        success_count: 1,
+        errors: [],
+        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
       });
 
       const { body } = await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(200);
@@ -580,6 +630,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toMatchObject({
         success: true,
         success_count: 1,
+        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
         rules_count: 1,
         errors: [],
         exceptions_success: true,
@@ -666,6 +717,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toMatchObject({
         success: false,
         success_count: 2,
+        rules_summary: { created: 0, updated: 2, unchanged: 0, failed: 1 },
         rules_count: 3,
         errors: [
           {
@@ -762,6 +814,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toMatchObject({
         success: false,
         success_count: 2,
+        rules_summary: { created: 0, updated: 2, unchanged: 0, failed: 1 },
         rules_count: 3,
         errors: [
           {
@@ -802,7 +855,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await clearChangeHistory(es);
       });
 
-      it('records rule_import when overwriting an existing rule', async () => {
+      it('records rule_import when overwriting an existing rule and nothing on an identical re-import', async () => {
         const { body: rule } = await detectionsApi
           .createRule({
             body: getCustomQueryRuleParams({
@@ -812,16 +865,15 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           })
           .expect(200);
+        const ruleToImport = getCustomQueryRuleParams({
+          rule_id: 'overwrite-history-rule',
+          name: 'After import overwrite',
+          enabled: false,
+        });
 
         await importRulesWithSuccess({
           getService,
-          rules: [
-            getCustomQueryRuleParams({
-              rule_id: 'overwrite-history-rule',
-              name: 'After import overwrite',
-              enabled: false,
-            }),
-          ],
+          rules: [ruleToImport],
           overwrite: true,
         });
 
@@ -849,6 +901,31 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(created.rule.revision).toBe(0);
         expect(created.rule.name).toBe('Before import overwrite');
         expect(created.old_values).toBeNull();
+
+        const overwritten = await fetchRule(supertest, { ruleId: 'overwrite-history-rule' });
+        const reimport = await importRules({
+          getService,
+          rules: [ruleToImport],
+          overwrite: true,
+        });
+
+        expect(reimport).toMatchObject({
+          success: true,
+          success_count: 1,
+          rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+        });
+
+        const unchanged = await fetchRule(supertest, { ruleId: 'overwrite-history-rule' });
+        expect(unchanged.revision).toBe(1);
+        expect(unchanged.updated_at).toBe(overwritten.updated_at);
+
+        await refreshChangeHistory(es);
+
+        const { body: history } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        expect(history.items).toHaveLength(2);
       });
     });
   });

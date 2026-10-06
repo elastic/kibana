@@ -15,6 +15,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -34,6 +35,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [{ error: { status_code: 400, message: 'some message' } }],
         exceptions_errors: [],
@@ -53,6 +55,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [{ error: { status_code: 400, message: 'some message' } }],
@@ -72,6 +75,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -94,6 +98,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [
@@ -116,6 +121,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: -1,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -137,6 +143,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -158,6 +165,7 @@ describe('Import rules schema', () => {
       const payload: Omit<ImportRulesResponse, 'success'> & { success: string } = {
         success: 'hello',
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -181,6 +189,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -202,6 +211,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse & { invalid_field: string } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         invalid_field: 'invalid_data',
@@ -225,6 +235,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -247,6 +258,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -266,6 +278,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -290,6 +303,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -311,6 +325,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -331,6 +346,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -354,6 +370,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -369,6 +386,26 @@ describe('Import rules schema', () => {
       expect(stringifyZodError(result.error)).toEqual(
         'action_connectors_warnings: Invalid input: expected array, received string'
       );
+    });
+
+    test('it should validate a mixed rules_summary', () => {
+      const payload: ImportRulesResponse = {
+        success: false,
+        success_count: 3,
+        rules_summary: { created: 1, updated: 1, unchanged: 1, failed: 1 },
+        rules_count: 4,
+        errors: [{ error: { status_code: 400, message: 'some message' } }],
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
+      };
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
   });
 });

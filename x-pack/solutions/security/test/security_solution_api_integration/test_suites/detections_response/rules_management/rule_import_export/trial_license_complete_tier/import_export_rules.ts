@@ -120,12 +120,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        await supertest
+        const { body: imported } = await supertest
           .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_exceptions=true`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(body), 'rules.ndjson')
           .expect(200);
+
+        expect(imported).toMatchObject({
+          success_count: 1,
+          rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+        });
 
         const { body: exceptionItemFind2 } = await supertest
           .get(`${EXCEPTION_LIST_ITEM_URL}?item_id=${exceptionItemBody.item_id}`)
@@ -202,12 +207,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        await supertest
+        const { body: imported } = await supertest
           .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_exceptions=true`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(body), 'rules.ndjson')
           .expect(200);
+
+        expect(imported).toMatchObject({
+          success_count: 1,
+          rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+        });
 
         const { body: exceptionItemFind2 } = await supertest
           .get(`${EXCEPTION_LIST_ITEM_URL}?item_id=${exceptionItemBody.item_id}`)
