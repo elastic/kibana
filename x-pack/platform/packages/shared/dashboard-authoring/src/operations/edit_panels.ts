@@ -100,7 +100,7 @@ export const editPanelsOperation = defineOperation({
       'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega panels and custom content panels (source: "request" with the panel\'s renderer), and by-value panels (source: "config" with the panel\'s type: "markdown", "ml_anomaly_charts", "ml_anomaly_swimlane", or "ml_single_metric_viewer"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing. Report this limitation and only replace them when the user explicitly approves.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
-    const { resolvePanelContent } = context;
+    const { resolvePanelContent, validatePanelContent } = context;
 
     const recordFailure = (panelId: string, error: string): void => {
       context.failures.push(
@@ -190,6 +190,12 @@ export const editPanelsOperation = defineOperation({
         }
 
         ({ panelContent, authoringNote } = attempt);
+      }
+
+      const validationError = validatePanelContent?.(panelContent);
+      if (validationError) {
+        recordFailure(panelId, validationError);
+        continue;
       }
 
       const updateResult = updatePanelInDashboard({

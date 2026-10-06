@@ -7,8 +7,10 @@
 
 import { internalTools, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardsSkill as skill } from './dashboards_skill';
+import { createDashboardsSkill } from './dashboards_skill';
 import { registerSkills } from './register_skills';
+
+const skill = createDashboardsSkill({ getPanelSchema: jest.fn() });
 
 describe('registerSkills', () => {
   it('registers the dashboards skill', async () => {
@@ -17,7 +19,7 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder);
+    registerSkills(agentBuilder, { getPanelSchema: jest.fn() });
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));

@@ -53,7 +53,9 @@ const mockHasValidCreateMetadataOperations =
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
 const callHandler = async (dashboardAttachmentId?: string) => {
-  const tool = generateDashboardTool();
+  const tool = generateDashboardTool({
+    getPanelSchema: jest.fn().mockResolvedValue({ options: [] }),
+  });
   const sendUiEvent = jest.fn();
   const ctx = {
     logger: { info: jest.fn(), error: jest.fn() },

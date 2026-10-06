@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ResolvePanelContent } from './operations/panels';
 import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from './operations/types';
 import type { OperationFailure } from './utils';
-import type { PanelAuthoringNote } from './resolve_panel';
+import type { PanelAuthoringNote, ValidatePanelContent } from './resolve_panel';
 import {
   dashboardOperationSchema,
   executeOperationHandler,
@@ -28,6 +28,7 @@ interface ExecuteDashboardOperationsParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+  validatePanelContent?: ValidatePanelContent;
 }
 
 /**
@@ -36,7 +37,8 @@ interface ExecuteDashboardOperationsParams {
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
  * reads any store. Control fields are validated against index mappings when
- * the host provides `resolveControlFieldCapabilities`.
+ * the host provides `resolveControlFieldCapabilities`. New and edited panel
+ * content is checked with `validatePanelContent` when the host provides it.
  */
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -45,6 +47,7 @@ export const executeDashboardOperations = async ({
   resolvePanelContent,
   resolveAttachmentPanel,
   resolveControlFieldCapabilities,
+  validatePanelContent,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
@@ -66,6 +69,7 @@ export const executeDashboardOperations = async ({
     resolvePanelContent,
     resolveAttachmentPanel,
     resolveControlFieldCapabilities,
+    validatePanelContent,
     failures,
     panelAuthoringNotes,
   });
