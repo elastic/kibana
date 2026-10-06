@@ -86,9 +86,7 @@ describe('ActionPolicyInlineContent', () => {
   it('renders the info bar with dispatch mode, frequency and destination count', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
     expect(screen.getByTestId('actionPolicyInlineDispatchPer')).toHaveTextContent('Alert');
-    expect(screen.getByTestId('actionPolicyInlineFrequency')).toHaveTextContent(
-      'On status change'
-    );
+    expect(screen.getByTestId('actionPolicyInlineFrequency')).toHaveTextContent('On status change');
     expect(screen.getByTestId('actionPolicyInlineDestination')).toHaveTextContent('1 workflow');
   });
 

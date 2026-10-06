@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { formatDuration } from '@kbn/alerting-plugin/common';

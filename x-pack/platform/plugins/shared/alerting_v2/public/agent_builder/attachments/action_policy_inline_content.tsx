@@ -59,9 +59,7 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxs">
-                  <h5>
-                    {POLICY_SCOPE_LABEL}
-                  </h5>
+                  <h5>{POLICY_SCOPE_LABEL}</h5>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
