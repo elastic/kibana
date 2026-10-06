@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../../../common/constants';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
 /**
