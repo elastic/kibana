@@ -11,9 +11,11 @@ import {
   canFillRespondAction,
   decidePackageReport,
   buildProposalSummaryBullets,
+} from './decide_package_report';
+import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
-} from './decide_package_report';
+} from '../../../../../common/step_types/package_report';
 import type { CurrentRunState } from './types';
 
 const isolateHost: ActionCatalogEntry = {
@@ -503,7 +505,11 @@ describe('buildProposalSummaryBullets', () => {
 
     const { bullets, omittedCount } = buildProposalSummaryBullets(proposals);
 
-    expect(bullets.length).toBeGreaterThan(0);
+    // Each host segment is cut to 253 characters and marked as cut. Without that cut a 2,000-char
+    // host fits only ~2 bullets in the budget, so the floor below only holds when it is applied.
+    const hostSegments = bullets.map((bullet) => /on `([^`]*)`/.exec(bullet)![1]);
+    expect(hostSegments.every((host) => host.length <= 253 && host.endsWith('…'))).toBe(true);
+    expect(bullets.length).toBeGreaterThanOrEqual(5);
     expect(bullets.length).toBeLessThan(MAX_SUMMARY_PROPOSAL_BULLETS);
     expect(bullets.join('\n').length).toBeLessThanOrEqual(MAX_SUMMARY_BULLETS_CHARS);
     expect(bullets.join('\n').length).toBeLessThan(JOURNAL_NOTE_MESSAGE_MAX);

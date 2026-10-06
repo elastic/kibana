@@ -8,6 +8,10 @@
 import { v5 as uuidv5 } from 'uuid';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { JsonSchema } from '@kbn/workflows';
+import {
+  MAX_SUMMARY_BULLETS_CHARS,
+  MAX_SUMMARY_PROPOSAL_BULLETS,
+} from '../../../../../common/step_types/package_report';
 import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
 import {
   buildProposalComment,
@@ -157,20 +161,6 @@ export const buildActionInput = ({
   }
   return actionInput;
 };
-
-/**
- * Upper bound on per-proposal bullets embedded in the run conclusion. The conclusion lands in a
- * journal note whose `message` is capped at 8,000 characters (`journal_note.yaml`); uncapped,
- * 50 hosts x 2 actions overflowed it and failed the note's input validation.
- */
-export const MAX_SUMMARY_PROPOSAL_BULLETS = 20;
-
-/**
- * Character budget for the bullets, as well as the count cap above: titles (256) and host names
- * (schema allows far more than a DNS name) are variable-length, so a count alone does not bound
- * the note. Sits well under the 8,000 limit to leave room for the rest of the conclusion.
- */
-export const MAX_SUMMARY_BULLETS_CHARS = 5000;
 
 const MAX_SUMMARY_HOST_NAME_CHARS = 253;
 
