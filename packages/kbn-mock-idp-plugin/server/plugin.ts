@@ -16,9 +16,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Plugin, PluginInitializer } from '@kbn/core-plugins-server';
-// TEMP (response-ops-team#681 manual testing): only for minting the internal-caller
-// attestation alongside granted keys below. Revert with the pageAuth block.
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import {
   readRolesFromResource,
   SERVERLESS_ROLES_ROOT_PATH,
@@ -303,24 +300,8 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               });
             }
 
-            // TEMP (response-ops-team#681 manual testing): also return the internal-caller
-            // attestation for the granted key, plus a ready-to-paste `pageAuth.headers`
-            // block for the snapshot-service render payload. Same mechanism the #682
-            // plugin will use (getInternalCallerAttestationHeaders). Revert after #681/#682.
-            const grantedCredential = new HTTPAuthorizationHeader('ApiKey', result.api_key);
-            const attestationHeaders =
-              authc.apiKeys.uiam?.getInternalCallerAttestationHeaders(grantedCredential) ?? {};
-
             return response.ok({
-              body: {
-                ...result,
-                pageAuth: {
-                  headers: {
-                    authorization: grantedCredential.toString(),
-                    ...attestationHeaders,
-                  },
-                },
-              },
+              body: result,
             });
           } catch (err) {
             logger.error(`Failed to grant API key: ${err}`, err);
