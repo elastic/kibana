@@ -25,10 +25,15 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { RowActionsMenu } from '../row_actions_menu';
 import type { SourceViewModel } from './types';
-import { SourceGridCell, SourceRowActions } from './source_grid_cell';
+import { SourceGridCell } from './source_grid_cell';
 
 export type SourcesGridStatus = 'loading' | 'ready' | 'unavailable';
+
+const SOURCE_ACTIONS_LABEL = i18n.translate('xpack.streams.sources.table.rowActionsTitle', {
+  defaultMessage: 'Source actions',
+});
 
 export const SOURCE_GRID_COLUMNS: EuiDataGridColumn[] = [
   {
@@ -84,6 +89,7 @@ interface SourcesGridProps {
   onSortingChange: (columns: EuiDataGridSorting['columns']) => void;
   onSelectionChange: (sources: SourceViewModel[]) => void;
   onOpenSource: (sourceId: string) => void;
+  onShowOnCanvas: (source: SourceViewModel) => void;
   onRequestDelete: (sources: SourceViewModel[]) => void;
 }
 
@@ -100,6 +106,7 @@ export const SourcesGrid = ({
   onSortingChange,
   onSelectionChange,
   onOpenSource,
+  onShowOnCanvas,
   onRequestDelete,
 }: SourcesGridProps) => {
   const selectedSourceIds = React.useMemo(
@@ -158,25 +165,25 @@ export const SourcesGrid = ({
         width: 40,
         headerCellRender: () => (
           <EuiScreenReaderOnly>
-            <span>
-              {i18n.translate('xpack.streams.sources.table.rowActionsTitle', {
-                defaultMessage: 'Source actions',
-              })}
-            </span>
+            <span>{SOURCE_ACTIONS_LABEL}</span>
           </EuiScreenReaderOnly>
         ),
         rowCellRender: ({ rowIndex }) => {
           const source = sources[rowIndex];
           return source ? (
-            <SourceRowActions
-              source={source}
-              onRequestDelete={(sourceToDelete) => onRequestDelete([sourceToDelete])}
+            <RowActionsMenu
+              entityName={source.name ?? source.id}
+              tooltip={SOURCE_ACTIONS_LABEL}
+              buttonTestSubj="streamsSourceRowActionsButton"
+              deleteTestSubj="streamsSourceDeleteAction"
+              onShowOnCanvas={() => onShowOnCanvas(source)}
+              onDelete={() => onRequestDelete([source])}
             />
           ) : null;
         },
       },
     ],
-    [onRequestDelete, sources]
+    [onRequestDelete, onShowOnCanvas, sources]
   );
   const renderCellValue = React.useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
     ({ rowIndex, columnId }) => {

@@ -8,6 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useNavigateToCanvasSearch } from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
 import { useSourcesTable } from './sources_context';
 import type { SourceStatus, SourceViewModel } from './types';
 import { SOURCE_TYPE_CONFIG_BY_TYPE } from './source_type_config';
@@ -51,6 +52,11 @@ export const SourcesTab = () => {
   } = sourcesController;
 
   const [sourcesPendingDeletion, setSourcesPendingDeletion] = React.useState<SourceViewModel[]>([]);
+  const navigateToCanvasSearch = useNavigateToCanvasSearch();
+  const showOnCanvas = React.useCallback(
+    (source: SourceViewModel) => navigateToCanvasSearch(source.name ?? source.id),
+    [navigateToCanvasSearch]
+  );
 
   const typeFilterOptions = React.useMemo(
     () =>
@@ -150,6 +156,7 @@ export const SourcesTab = () => {
             onSortingChange={setSortingColumns}
             onSelectionChange={setSelectedSources}
             onOpenSource={openSourceFlyout}
+            onShowOnCanvas={showOnCanvas}
             onRequestDelete={setSourcesPendingDeletion}
           />
         </EuiFlexItem>

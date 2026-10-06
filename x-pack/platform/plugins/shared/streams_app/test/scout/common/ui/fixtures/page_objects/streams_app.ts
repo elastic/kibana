@@ -73,6 +73,8 @@ export class StreamsApp {
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
   public readonly canvasEmptyState;
+  public readonly canvasSearch;
+  public readonly canvasSearchNoMatches;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
@@ -141,6 +143,8 @@ export class StreamsApp {
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
     this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
+    this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
+    this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
@@ -202,6 +206,36 @@ export class StreamsApp {
 
   async clickStreamsLayoutTab(tabName: string) {
     await this.getStreamsLayoutTab(tabName).click();
+  }
+
+  /** Opens the canvas with its search pre-filled from the URL. */
+  async gotoCanvasSearch(query: string) {
+    await this.page.gotoApp('streams/new-experience/canvas', {
+      params: { canvasState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
+    });
+  }
+
+  /** Opens the row actions menu of the destinations table row labelled `destinationName`. */
+  async openDestinationRowActions(destinationName: string) {
+    await this.streamsDestinationsTable
+      .getByRole('row')
+      .filter({ hasText: destinationName })
+      .getByTestId('streamsDestinationRowActionsButton')
+      .click();
+  }
+
+  /** Opens the row actions menu of the sources table row labelled `sourceName`. */
+  async openSourceRowActions(sourceName: string) {
+    await this.streamsSourcesTable
+      .getByRole('row')
+      .filter({ hasText: sourceName })
+      .getByTestId('streamsSourceRowActionsButton')
+      .click();
+  }
+
+  /** "Show on canvas" item of the currently open row actions menu. */
+  getShowOnCanvasAction() {
+    return this.page.testSubj.locator('streamsShowOnCanvasAction');
   }
 
   // Canvas utility methods
