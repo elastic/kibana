@@ -13,6 +13,7 @@ import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -75,6 +76,7 @@ import {
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
+
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
@@ -113,6 +115,8 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
+import { applyManagedOtlpDefaults } from './utils/managed_otlp';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -696,6 +700,7 @@ class OutputService {
       ...omit(output, ['ssl', 'secrets']),
       ...(options?.id ? { output_id: options.id } : {}),
     } as OutputSOAttributes;
+    this._validateCanBeDefault(data, isPreconfigured);
 
     if (outputTypeSupportPresets(output)) {
       if (
@@ -841,6 +846,10 @@ class OutputService {
       }
       // Kafka does not support proxies — clear any proxy_id silently (#267281)
       data.proxy_id = null;
+    }
+
+    if (output.type === outputType.Otlp && data.type === outputType.Otlp) {
+      data.otlp_exporter = applyManagedOtlpDefaults(data.otlp_exporter);
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1055,9 +1064,10 @@ class OutputService {
 
   public async delete(
     id: string,
-    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
-      fromPreconfiguration: false,
-    }
+    {
+      fromPreconfiguration = false,
+      request,
+    }: { fromPreconfiguration?: boolean; request?: KibanaRequest } = {}
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting output ${id}`);
@@ -1076,6 +1086,41 @@ class OutputService {
 
     if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
+    }
+
+    if (request) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(request)) {
+        // Collect agent-policy and package-policy spaces before any mutation.
+        // Fail closed if SO_SEARCH_LIMIT is hit.
+        const [agentPolicySpaces, packagePolicySpaces] = await Promise.all([
+          agentPolicyService.getSpacesForPoliciesUsingOutput(id),
+          packagePolicyService.getSpacesForPoliciesUsingOutput(id),
+        ]);
+        if (agentPolicySpaces.truncated || packagePolicySpaces.truncated) {
+          throw new OutputUnauthorizedError(
+            `Unable to verify delete authorization for output ${id}: too many agent policies to enumerate`
+          );
+        }
+        const errorMessage = `Insufficient privileges to delete output ${id}: it is used by agent policies in spaces you are not authorized to access`;
+        // Agent-policy spaces only need fleet-agent-policies-all.
+        // Package-policy spaces also need integrations-all because removeOutputFromAll
+        // rewrites package policies too. Check them separately so a user with
+        // integrations-all only in the spaces that actually have package policies
+        // is not incorrectly blocked in agent-only spaces.
+        await assertPrivilegesInSpaces({
+          request,
+          spaceIds: agentPolicySpaces.spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage,
+        });
+        await assertPrivilegesInSpaces({
+          request,
+          spaceIds: packagePolicySpaces.spaceIds,
+          apiPrivileges: ['integrations-all', 'fleet-agent-policies-all'],
+          errorMessage,
+        });
+      }
     }
 
     await packagePolicyService.removeOutputFromAll(
@@ -1137,6 +1182,8 @@ class OutputService {
 
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+    const mergedIsDefaultMonitoring =
+      data.is_default_monitoring ?? originalOutput.is_default_monitoring;
     const isTypeChanged = mergedType !== originalOutput.type;
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
@@ -1154,6 +1201,12 @@ class OutputService {
     } as Nullable<Partial<OutputSOAttributes>> & {
       type: ValueOf<OutputType>;
     };
+    // Pre-populate is_default / is_default_monitoring in updateData with the merged values
+    // when they are truthy so _validateCanBeDefault can detect and sanitize them in-place.
+    // Falsy merged values need no correction and would unnecessarily pollute the SO update.
+    if (mergedIsDefault) updateData.is_default = mergedIsDefault;
+    if (mergedIsDefaultMonitoring) updateData.is_default_monitoring = mergedIsDefaultMonitoring;
+    this._validateCanBeDefault(updateData, isPreconfigured);
 
     if (outputTypeSupportPresets(updateData)) {
       if (
@@ -1389,6 +1442,10 @@ class OutputService {
       }
     }
 
+    if (isOtlpOutput(updateData) && updateData.otlp_exporter) {
+      updateData.otlp_exporter = applyManagedOtlpDefaults(updateData.otlp_exporter);
+    }
+
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
       // ssl is omitted from updateSoData so must be read from the incoming domain payload
       const ssl = typedFullUpdateData?.ssl;
@@ -1415,8 +1472,8 @@ class OutputService {
       }
     }
 
-    // ensure only default output exists
-    if (data.is_default) {
+    // ensure only default output exists; use updateData (not data) so sanitized OTLP flags are seen
+    if (updateData.is_default) {
       if (defaultDataOutputId && defaultDataOutputId !== id) {
         await this._updateDefaultOutput(
           defaultDataOutputId,
@@ -1425,7 +1482,7 @@ class OutputService {
         );
       }
     }
-    if (data.is_default_monitoring) {
+    if (updateData.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId();
 
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
@@ -1714,6 +1771,33 @@ class OutputService {
       } else {
         throw e;
       }
+    }
+  }
+
+  private _validateCanBeDefault(
+    output: {
+      type: ValueOf<OutputType>;
+      is_default?: boolean | null;
+      is_default_monitoring?: boolean | null;
+    },
+    isPreconfigured: boolean
+  ): void {
+    if (output.type !== outputType.Otlp) return;
+
+    const invalidDefaults = [
+      ['is_default_monitoring', 'An OTLP output cannot be the default monitoring output.'],
+      ['is_default', 'An OTLP output cannot be the default data output.'],
+    ] as const;
+
+    for (const [flag, message] of invalidDefaults) {
+      if (!output[flag]) continue;
+      if (!isPreconfigured) {
+        throw new OutputInvalidError(message);
+      }
+      // Preconfigured outputs must not abort Fleet setup, so clear the invalid flag and leave the
+      // existing valid default in place rather than persisting a misconfigured output as default.
+      appContextService.getLogger().warn(`Preconfigured output failed validation: ${message}`);
+      output[flag] = false;
     }
   }
 

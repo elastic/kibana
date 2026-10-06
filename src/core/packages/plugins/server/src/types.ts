@@ -203,7 +203,7 @@ export interface PluginManifest {
    *
    * @remarks
    * The plugins listed here will be loaded in the browser, even if the plugin is
-   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * disabled. Required by `@kbn/rspack-optimizer` to support cross-plugin imports.
    * "core" and plugins already listed in `requiredPlugins` do not need to be
    * duplicated here.
    */
@@ -235,7 +235,7 @@ export interface PluginManifest {
 
   /**
    * Specifies directory names that can be imported by other ui-plugins built
-   * using the same instance of the @kbn/optimizer. A temporary measure we plan
+   * using the same instance of the @kbn/rspack-optimizer. A temporary measure we plan
    * to replace with better mechanisms for sharing static code between plugins
    * @deprecated To be deleted when https://github.com/elastic/kibana/issues/101948 is done.
    */
@@ -318,8 +318,10 @@ export interface Plugin<
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
   /**
-   * Not invoked for a lazy plugin whose deferred `start()` never ran on this instance: there is
-   * nothing start-time to tear down, and `setup()`-time registrations need no cleanup.
+   * Always invoked once `setup()` has run, including for a lazy plugin whose deferred `start()`
+   * never ran on this instance, so `setup()`-time resources can be torn down. A lazy plugin's
+   * `stop()` must therefore not assume start-time state exists: guard each start-time resource
+   * (for example `this.subscription?.unsubscribe()`).
    */
   stop?(): MaybePromise<void>;
 

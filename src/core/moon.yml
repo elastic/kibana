@@ -183,6 +183,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-user-storage-server-internal'
   - '@kbn/core-user-storage-common'
+  - '@kbn/core-http-server-utils'
 tags:
   - core
   - package

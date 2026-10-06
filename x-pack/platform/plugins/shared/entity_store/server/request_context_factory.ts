@@ -14,7 +14,11 @@ import type {
 } from './types';
 import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
-import { FeatureFlags, isLegacySecurityAssetsMigrationEnabled } from './infra/feature_flags';
+import {
+  FeatureFlags,
+  getLegacySecurityAssetsMigrationFlag,
+  isDualProcessEnabled,
+} from './infra/feature_flags';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
 import { HistorySnapshotClient } from './domain/history_snapshot';
@@ -123,7 +127,8 @@ export async function createRequestHandlerContext({
       analytics,
       savedObjectsClient: core.savedObjects.client,
       isLegacySecurityAssetsMigrationEnabled: () =>
-        isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
+        getLegacySecurityAssetsMigrationFlag(coreStart.featureFlags),
+      isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,

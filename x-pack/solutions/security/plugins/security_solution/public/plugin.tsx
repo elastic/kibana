@@ -161,7 +161,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions);
       registerSecurityWorkflowTriggers(workflowsExtensions);
-      if (this.experimentalFeatures.threatIntelSupplyEnabled) {
+      if (plugins.alertzero?.enabled) {
         registerThreatIntelWorkflowSteps(workflowsExtensions);
       }
     }
@@ -364,9 +364,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         throw new Error('Security Solution setup contract is required to register attachments');
       }
 
-      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAttachmentUiDefinitions({
+        attachments: plugins.agentBuilder.attachments,
+        resolveSecurityCanvasContext: () =>
+          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
+        getSpaceId: () => plugins.spaces.getActiveSpace().then((s) => s.id),
+        data: plugins.data,
+      });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
+        getUrlForApp: core.application.getUrlForApp,
       });
       registerAttackDiscoveryVerdictAttachment({
         attachments: plugins.agentBuilder.attachments,

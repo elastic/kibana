@@ -11,8 +11,10 @@ import type { AutoApprovedApi } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
+import { NON_INTERACTIVE_DECLINED_REASON } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { agentBuilderMocks } from '../../../../../mocks';
 import { createExecuteApiTool } from './execute';
 import type { ApiExecuteResultData } from './execute';
@@ -133,6 +135,7 @@ describe('createExecuteApiTool', () => {
       method: 'GET',
       query: { v8format: true },
       body: undefined,
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
       access: 'public',
     });
     const data = result.results[0].data as ApiExecuteResultData;
@@ -570,6 +573,7 @@ describe('createExecuteApiTool', () => {
       method: 'POST',
       query: undefined,
       body: { title: 'Investigation' },
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
       access: 'public',
     });
   });
@@ -945,6 +949,14 @@ describe('createExecuteApiTool', () => {
       expect(result.results[0].type).toBe(ToolResultType.error);
       const data = result.results[0].data as ErrorResultData;
       expect(data.message).toContain('non-interactive');
+      // Tagged as an auto-declined prompt, keeping the API details for the caller.
+      expect(data.metadata).toEqual(
+        expect.objectContaining({
+          declined_reason: NON_INTERACTIVE_DECLINED_REASON,
+          target: 'elasticsearch',
+          api: 'indices.delete',
+        })
+      );
     });
 
     it('records that the user confirmed the call', async () => {
@@ -1084,6 +1096,9 @@ describe('createExecuteApiTool', () => {
           const data = result.results[0].data as ErrorResultData;
           expect(data.message).toContain('pre-approve');
           expect(data.message).toContain('indices.delete');
+          expect(data.metadata).toEqual(
+            expect.objectContaining({ declined_reason: NON_INTERACTIVE_DECLINED_REASON })
+          );
         }
       );
 

@@ -45,6 +45,13 @@ interface ResumeExecutionButtonProps {
   autoOpen?: boolean;
   /** Step execution document id for the active waitForInput pause; when it changes, re-enable after a prior submit */
   waitingStepExecutionId?: string;
+  /** Shared across header and step-detail instances so one submit disables both. */
+  submitState?: {
+    isSubmitting: boolean;
+    isSubmitted: boolean;
+    setSubmitting: (value: boolean) => void;
+    setSubmitted: (value: boolean) => void;
+  };
 }
 
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
@@ -56,6 +63,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   approvalLabels,
   autoOpen = false,
   waitingStepExecutionId,
+  submitState,
 }) => {
   const { notifications } = useKibana().services;
   const queryClient = useQueryClient();
@@ -64,9 +72,18 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const { clearResumeParam } = useWorkflowUrlState();
   const telemetry = useTelemetry();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen && !approvalLabels);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [localSubmitting, setLocalSubmitting] = useState(false);
+  const [localSubmitted, setLocalSubmitted] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState<boolean | null>(null);
+  const isSubmitting = submitState?.isSubmitting ?? localSubmitting;
+  const isSubmitted = submitState?.isSubmitted ?? localSubmitted;
+  const setIsSubmitting = submitState?.setSubmitting ?? setLocalSubmitting;
+  const setIsSubmitted = submitState?.setSubmitted ?? setLocalSubmitted;
   const modalOpenedAtRef = useRef<number | null>(null);
+  // Submit state can be shared across runs, so a late resume must not write back
+  // into the run the user opened in the meantime.
+  const executionIdRef = useRef(executionId);
+  executionIdRef.current = executionId;
   const isApprovalMode = Boolean(approvalLabels);
 
   useEffect(() => {
@@ -77,8 +94,17 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   }, [autoOpen, approvalLabels]);
 
   useEffect(() => {
-    setIsSubmitted(false);
-  }, [waitingStepExecutionId]);
+    if (submitState) {
+      return;
+    }
+    setLocalSubmitted(false);
+  }, [submitState, waitingStepExecutionId]);
+
+  useEffect(() => {
+    if (!isSubmitting) {
+      setPendingApproval(null);
+    }
+  }, [isSubmitting]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
     if (!resumeSchema || isApprovalMode) return undefined;
@@ -109,6 +135,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const handleSubmit = useCallback(
     async (stepInputs: Record<string, unknown>) => {
       setIsSubmitting(true);
+      const isSameRun = () => executionIdRef.current === executionId;
       const submittedAt = Date.now();
       const timeInModalMs =
         modalOpenedAtRef.current != null ? submittedAt - modalOpenedAtRef.current : undefined;
@@ -134,8 +161,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
           timeInModalMs,
           timeSinceStepStartedMs,
         });
-        setIsSubmitted(true);
-        closeModal();
+        if (isSameRun()) {
+          setIsSubmitted(true);
+          closeModal();
+        }
       } catch (error) {
         const errorObj = error instanceof Error ? error : new Error(String(error));
         notifications?.toasts.addError?.(errorObj, {
@@ -152,7 +181,9 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
           error: errorObj,
         });
       } finally {
-        setIsSubmitting(false);
+        if (isSameRun()) {
+          setIsSubmitting(false);
+        }
       }
     },
     [
@@ -165,6 +196,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       telemetry,
       closeModal,
       waitingStepExecutionId,
+      setIsSubmitted,
+      setIsSubmitting,
     ]
   );
 
@@ -180,6 +213,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       if (modalOpenedAtRef.current == null) {
         modalOpenedAtRef.current = Date.now();
       }
+      setPendingApproval(approved);
       void handleSubmit({ approved });
     },
     [handleSubmit]
@@ -209,7 +243,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
                   iconType="check"
                   onClick={() => handleApprovalChoice(true)}
                   disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
-                  isLoading={isSubmitting}
+                  isLoading={isSubmitting && pendingApproval === true}
                   data-test-subj="approveActionButton"
                 >
                   {approvalLabels.approveLabel}
@@ -222,7 +256,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
                   iconType="cross"
                   onClick={() => handleApprovalChoice(false)}
                   disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
-                  isLoading={isSubmitting}
+                  isLoading={isSubmitting && pendingApproval === false}
                   data-test-subj="rejectActionButton"
                 >
                   {approvalLabels.rejectLabel}

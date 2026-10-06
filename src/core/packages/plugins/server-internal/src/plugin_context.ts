@@ -295,6 +295,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
+      setSelfClientUnauthorizedErrorHandler: deps.http.setSelfClientUnauthorizedErrorHandler,
     },
     i18n: deps.i18n,
     logging: {
@@ -418,9 +419,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     executionContext: deps.executionContext,
     featureFlags: {
       appendContext: deps.featureFlags.appendContext,
-      getBooleanValue: deps.featureFlags.getBooleanValue,
-      getStringValue: deps.featureFlags.getStringValue,
-      getNumberValue: deps.featureFlags.getNumberValue,
       getBooleanValue$: deps.featureFlags.getBooleanValue$,
       getStringValue$: deps.featureFlags.getStringValue$,
       getNumberValue$: deps.featureFlags.getNumberValue$,

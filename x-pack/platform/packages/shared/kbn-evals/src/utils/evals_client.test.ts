@@ -830,6 +830,75 @@ describe('EvalsClient', () => {
     });
   });
 
+  describe('getExperimentDatasetExamples', () => {
+    it.each([
+      { spaceIds: undefined, prefix: '' },
+      { spaceIds: ['default', 'marketing'], prefix: '' },
+      { spaceIds: ['marketing', 'sales'], prefix: '/s/marketing' },
+    ])(
+      'reads full score evidence from the first Space: $spaceIds',
+      async ({ spaceIds, prefix }) => {
+        const kbnClient = createMockKbnClient();
+        kbnClient.request.mockResolvedValue(asKbnResponse({ examples: [] }));
+        const client = new EvalsClient(kbnClient, createLog(), { spaceIds });
+
+        await expect(
+          client.getExperimentDatasetExamples('experiment/1', 'dataset/1')
+        ).resolves.toEqual({ examples: [] });
+        expect(kbnClient.request).toHaveBeenCalledWith({
+          path: `${prefix}/internal/evals/experiments/experiment%2F1/datasets/dataset%2F1/examples`,
+          method: 'GET',
+          headers: { 'elastic-api-version': '1' },
+        });
+      }
+    );
+
+    it('rejects an invalid detailed-score response', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse({}));
+      const client = new EvalsClient(kbnClient, createLog());
+      await expect(client.getExperimentDatasetExamples('experiment', 'dataset')).rejects.toThrow();
+    });
+  });
+
+  describe('getExperimentExampleDetails', () => {
+    const details = {
+      example: { input: { question: 'q' } },
+      task: { output: { answer: 'a', nested: { rounds: [1, 2] } } },
+    };
+
+    it.each([
+      { spaceIds: undefined, prefix: '' },
+      { spaceIds: ['default', 'marketing'], prefix: '' },
+      { spaceIds: ['marketing', 'sales'], prefix: '/s/marketing' },
+    ])(
+      'reads one repetition with encoded ids from the first Space: $spaceIds',
+      async ({ spaceIds, prefix }) => {
+        const kbnClient = createMockKbnClient();
+        kbnClient.request.mockResolvedValue(asKbnResponse(details));
+        const client = new EvalsClient(kbnClient, createLog(), { spaceIds });
+
+        await expect(
+          client.getExperimentExampleDetails('experiment/1', 'dataset/1', 'example 1', 2)
+        ).resolves.toEqual(details);
+        expect(kbnClient.request).toHaveBeenCalledWith({
+          path: `${prefix}/internal/evals/experiments/experiment%2F1/datasets/dataset%2F1/examples/example%201/repetitions/2`,
+          method: 'GET',
+          headers: { 'elastic-api-version': '1' },
+        });
+      }
+    );
+
+    it('rejects an invalid details response', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ example: {} }));
+      const client = new EvalsClient(kbnClient, createLog());
+      await expect(
+        client.getExperimentExampleDetails('experiment', 'dataset', 'example', 0)
+      ).rejects.toThrow();
+    });
+  });
+
   describe('deleteDataset', () => {
     it('deletes by id and reports that the dataset is gone', async () => {
       const kbnClient = createMockKbnClient();
@@ -924,13 +993,15 @@ describe('EvalsClient', () => {
         client.deleteDataset('ds-1'),
         client.getExperimentStats('experiment-1'),
         client.getExperimentScores('experiment-1'),
+        client.getExperimentDatasetExamples('experiment-1', 'dataset-1'),
+        client.getExperimentExampleDetails('experiment-1', 'dataset-1', 'example-1', 0),
         client.findLatestBaselineExperiment({ suiteId: 'suite-a', branch: 'main' }),
         client.findLatestExperimentForBuild({ suiteId: 'suite-a', baseExecutionId: 'bk-1' }),
       ]);
 
       const paths = kbnClient.request.mock.calls.map(([{ path }]) => path as string);
 
-      expect(paths.length).toBeGreaterThan(8);
+      expect(paths.length).toBeGreaterThan(9);
       expect(paths.filter((path) => !path.startsWith('/s/marketing/'))).toEqual([]);
     });
   });

@@ -40,7 +40,11 @@ describe('enableLazyInitialize manifest parse', () => {
       enableLazyInitialize: true,
     });
 
-    expect(readPackageManifest(REPO_ROOT, path).plugin.enableLazyInitialize).toBe(true);
+    const manifest = readPackageManifest(REPO_ROOT, path);
+    if (manifest.type !== 'plugin') {
+      throw new Error(`expected a plugin manifest, got "${manifest.type}"`);
+    }
+    expect(manifest.plugin.enableLazyInitialize).toBe(true);
   });
 
   it('rejects the flag when the plugin has no server entry', () => {
