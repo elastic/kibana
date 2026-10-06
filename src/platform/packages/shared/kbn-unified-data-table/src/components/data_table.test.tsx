@@ -791,7 +791,7 @@ describe('UnifiedDataTable', () => {
         ...getProps(),
         columns: ['message'],
         sort: [['message', 'desc']],
-        viewMode: 'print',
+        renderMode: 'print',
       });
 
       expect(screen.getByTestId('dataGridHeaderCellSortingIcon-message')).toBeInTheDocument();
@@ -802,7 +802,7 @@ describe('UnifiedDataTable', () => {
         ...getProps(),
         columns: ['message'],
         sort: [['message', 'desc']],
-        viewMode: 'print',
+        renderMode: 'print',
       });
 
       expect(getLastEuiDataGridProps().sorting).toEqual({
@@ -1022,7 +1022,7 @@ describe('UnifiedDataTable', () => {
     it('should hide toolbar controls in print mode', async () => {
       await renderComponent({
         ...getProps(),
-        viewMode: 'print',
+        renderMode: 'print',
         onUpdateRowHeight: jest.fn(),
         onUpdateSampleSize: jest.fn(),
       });
@@ -1039,7 +1039,7 @@ describe('UnifiedDataTable', () => {
     it('should hide additional controls in print mode', async () => {
       await renderComponent({
         ...getProps(),
-        viewMode: 'print',
+        renderMode: 'print',
         externalAdditionalControls: <div data-test-subj="externalControl" />,
       });
 
@@ -1933,11 +1933,11 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
 
-    it('should hide column actions and resize when interactive controls are disabled', async () => {
+    it('should hide column actions and resize when in print mode', async () => {
       await renderComponent({
         ...getProps(),
         columns: ['message'],
-        viewMode: 'print',
+        renderMode: 'print',
       });
 
       expect(getLastEuiDataGridProps().onColumnResize).toBeUndefined();
@@ -2035,7 +2035,7 @@ describe('UnifiedDataTable', () => {
         ...getProps(),
         rowsPerPageOptions: [1, 5],
         rowsPerPageState: 1,
-        viewMode: 'print',
+        renderMode: 'print',
       });
 
       expect(getLastEuiDataGridProps().pagination).toBeUndefined();
