@@ -294,6 +294,11 @@ export const performBulkActionRoute = (
           let deleted: RuleAlertType[] = [];
           let skipped: BulkActionSkipResult[] = [];
 
+          // Delete handles fetch errors itself, rules that were not found are reported as skipped
+          if (body.action !== BulkActionTypeEnum.delete) {
+            errors.push(...fetchErrors);
+          }
+
           switch (body.action) {
             case BulkActionTypeEnum.enable: {
               const { updatedRules, errors: bulkActionErrors } = await bulkEnableDisableRules({
@@ -304,7 +309,7 @@ export const performBulkActionRoute = (
                 mlAuthz,
                 rulesAuthz,
               });
-              errors.push(...fetchErrors, ...bulkActionErrors);
+              errors.push(...bulkActionErrors);
               updated = updatedRules;
               break;
             }
@@ -317,7 +322,7 @@ export const performBulkActionRoute = (
                 mlAuthz,
                 rulesAuthz,
               });
-              errors.push(...fetchErrors, ...bulkActionErrors);
+              errors.push(...bulkActionErrors);
               updated = updatedRules;
               break;
             }
@@ -431,7 +436,7 @@ export const performBulkActionRoute = (
                 },
                 abortSignal: abortController.signal,
               });
-              errors.push(...fetchErrors, ...bulkActionOutcome.errors);
+              errors.push(...bulkActionOutcome.errors);
               created = bulkActionOutcome.results
                 .map(({ result }) => result)
                 .filter((rule): rule is RuleAlertType => rule !== null);
@@ -486,7 +491,7 @@ export const performBulkActionRoute = (
                   },
                   abortSignal: abortController.signal,
                 });
-                errors.push(...fetchErrors, ...bulkActionOutcome.errors);
+                errors.push(...bulkActionOutcome.errors);
                 updated = bulkActionOutcome.results
                   .map(({ result }) => result)
                   .filter((rule): rule is RuleAlertType => rule !== null);
@@ -503,7 +508,7 @@ export const performBulkActionRoute = (
                 });
                 updated = bulkEditResult.rules;
                 skipped = bulkEditResult.skipped;
-                errors.push(...fetchErrors, ...bulkEditResult.errors);
+                errors.push(...bulkEditResult.errors);
               }
               break;
             }
@@ -517,7 +522,7 @@ export const performBulkActionRoute = (
                 rulesAuthz,
                 runPayload: body.run,
               });
-              errors.push(...fetchErrors, ...bulkActionErrors);
+              errors.push(...bulkActionErrors);
               updated = backfilled.filter((rule): rule is RuleAlertType => rule !== null);
               break;
             }
@@ -541,7 +546,7 @@ export const performBulkActionRoute = (
                 fillGapsPayload: body.fill_gaps,
                 excludedReasons,
               });
-              errors.push(...fetchErrors, ...bulkActionErrors);
+              errors.push(...bulkActionErrors);
               updated = backfilled;
               skipped = skippedRules.map((rule) => {
                 return {
