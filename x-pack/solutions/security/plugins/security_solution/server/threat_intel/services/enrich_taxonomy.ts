@@ -104,9 +104,6 @@ export const enrichTaxonomy = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so the categories/regions closed
-  // sets actually run instead of letting unbounded model output through.
   const invokeTaxonomy = async (
     promptText: string
   ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: TaxonomyOutput }> => {
@@ -114,9 +111,12 @@ export const enrichTaxonomy = async (
       buildTaxonomyPrompt({ ...params, text: promptText })
     )) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
+      parsed: TaxonomyOutput | null;
     };
-    return { raw: invoked.raw, parsed: taxonomyOutputSchema.parse(invoked.parsed) };
+    if (invoked.parsed === null) {
+      throw new Error(`enrich_taxonomy returned no parsed output report_id=${params.report_id}`);
+    }
+    return { raw: invoked.raw, parsed: invoked.parsed };
   };
 
   let text = params.text;

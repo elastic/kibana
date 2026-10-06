@@ -115,10 +115,6 @@ export const classifySeverity = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so boundedText truncation actually
-  // runs. `parsed` stays nullable: a failed tool call falls back to null/undefined
-  // here, which the caller already treats as "no severity verdict."
   const invokeSeverity = async (
     promptText: string
   ): Promise<{
@@ -129,12 +125,11 @@ export const classifySeverity = async (
       buildSeverityPrompt({ ...params, text: promptText })
     )) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
+      parsed: ClassifySeverityLlmOutput | null;
     };
     return {
       raw: invoked.raw,
-      parsed:
-        invoked.parsed == null ? undefined : classifySeverityLlmOutputSchema.parse(invoked.parsed),
+      parsed: invoked.parsed ?? undefined,
     };
   };
 
@@ -166,9 +161,6 @@ export const classifySeverity = async (
     result.raw.response_metadata ?? {}
   );
 
-  // classifySeverityLlmOutputSchema.parse (above) already guarantees `level` is
-  // a valid SeverityLevel whenever parsed is present; the only remaining
-  // failure is the model producing no usable tool call at all.
   if (!result.parsed) {
     throw new Error(`classify_severity returned no parsed output report_id=${params.report_id}`);
   }

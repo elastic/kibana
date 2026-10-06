@@ -130,17 +130,17 @@ export const assessRelevance = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so boundedText/link truncation
-  // actually runs instead of letting unbounded model output through.
   const invokeRelevance = async (
     text: string
   ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: RelevanceOutput }> => {
     const invoked = (await structured.invoke(buildRelevancePrompt(params, text))) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
+      parsed: RelevanceOutput | null;
     };
-    return { raw: invoked.raw, parsed: relevanceOutputSchema.parse(invoked.parsed) };
+    if (invoked.parsed === null) {
+      throw new Error('assess_relevance returned no parsed output');
+    }
+    return { raw: invoked.raw, parsed: invoked.parsed };
   };
 
   let context = fullArticleContext(params.text);

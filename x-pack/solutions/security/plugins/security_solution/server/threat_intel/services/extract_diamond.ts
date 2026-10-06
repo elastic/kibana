@@ -307,15 +307,14 @@ export const extractDiamond = async (
   });
   let context = fullArticleContext(text);
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so boundedText truncation actually
-  // runs. A parse failure here is caught below and triggers the per-vertex
-  // fallback, same as any other single-call failure.
   const invokeSingleCall = async (promptText: string): Promise<RawResult<DiamondLlmOutput>> => {
     const invoked = (await structured.invoke(
       buildSingleCallPrompt(promptText)
-    )) as RawResult<unknown>;
-    return { raw: invoked.raw, parsed: extractDiamondLlmOutputSchema.parse(invoked.parsed) };
+    )) as RawResult<DiamondLlmOutput | null>;
+    if (invoked.parsed === null) {
+      throw new Error('extract_diamond single call returned no parsed output');
+    }
+    return { raw: invoked.raw, parsed: invoked.parsed };
   };
 
   // Single heavy call — first with the complete source. Only a confirmed context
@@ -397,8 +396,11 @@ export const extractDiamond = async (
   ): Promise<RawResult<DiamondVertexResult>> => {
     const invoked = (await vertexStructured.invoke(
       buildVertexPrompt(vertex, promptText)
-    )) as RawResult<unknown>;
-    return { raw: invoked.raw, parsed: diamondVertexSchema.parse(invoked.parsed) };
+    )) as RawResult<DiamondVertexResult | null>;
+    if (invoked.parsed === null) {
+      throw new Error(`extract_diamond ${vertex} returned no parsed output`);
+    }
+    return { raw: invoked.raw, parsed: invoked.parsed };
   };
   const vertices: Record<DiamondVertex, DiamondVertexResult> = {
     adversary: NONE_VERTEX,
