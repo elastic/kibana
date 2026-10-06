@@ -21,6 +21,16 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const retry = getService('retry');
+
+  const getLifecycleDateMillis = async (index: string) =>
+    retry.try(async () => {
+      const { indices } = await es.ilm.explainLifecycle({ index });
+      const explain = indices[index];
+      const lifecycleDate = explain.managed ? explain.lifecycle_date_millis : undefined;
+      expect(lifecycleDate).to.be.a('number');
+      return lifecycleDate;
+    });
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName: string) => {
@@ -212,6 +222,37 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.delete({
         index: lastState.newIndexName,
       });
+    });
+
+    it('should preserve the ILM lifecycle date of the original index', async () => {
+      const indexName = 'ilm-managed-data';
+      const policyName = 'ua-reindex-ilm-policy';
+
+      await es.ilm.putLifecycle({
+        name: policyName,
+        policy: { phases: { hot: { actions: {} } } },
+      });
+      await es.indices.create({
+        index: indexName,
+        settings: { 'index.lifecycle.name': policyName },
+      });
+      const originalLifecycleDate = await getLifecycleDateMillis(indexName);
+
+      await supertest
+        .post(`/api/upgrade_assistant/reindex/${indexName}`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const lastState = await waitForReindexToComplete(indexName);
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+
+      const { newIndexName } = lastState;
+      expect(await getLifecycleDateMillis(newIndexName)).to.equal(originalLifecycleDate);
+
+      // Cleanup
+      await es.indices.delete({ index: newIndexName });
+      await es.ilm.deleteLifecycle({ name: policyName });
     });
 
     it('shows reindex and read-only warnings', async () => {

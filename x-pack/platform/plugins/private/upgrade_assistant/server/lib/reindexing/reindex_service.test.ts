@@ -451,6 +451,12 @@ describe('reindexService', () => {
         attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.readonly },
       } as ReindexSavedObject;
 
+      beforeEach(() => {
+        clusterClient.asCurrentUser.ilm.explainLifecycle.mockResponse({
+          indices: { myIndex: { index: 'myIndex', managed: false } },
+        });
+      });
+
       // The more intricate details of how the settings are chosen are test separately.
       it('creates new index with settings and mappings and updates lastCompletedStep', async () => {
         actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
@@ -464,6 +470,36 @@ describe('reindexService', () => {
             settings_override: {
               'index.number_of_replicas': 0,
               'index.refresh_interval': -1,
+            },
+          },
+        });
+      });
+
+      it('preserves the ILM lifecycle date of the source index', async () => {
+        actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
+        clusterClient.asCurrentUser.ilm.explainLifecycle.mockResponse({
+          indices: {
+            myIndex: {
+              index: 'myIndex',
+              managed: true,
+              lifecycle_date_millis: 1700000000000,
+              skip: false,
+            },
+          },
+        });
+        clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({ acknowledged: true });
+        await service.processNextStep(reindexOp);
+        expect(clusterClient.asCurrentUser.ilm.explainLifecycle).toHaveBeenCalledWith({
+          index: 'myIndex',
+        });
+        expect(clusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: `_create_from/myIndex/myIndex-reindex-0`,
+          body: {
+            settings_override: {
+              'index.number_of_replicas': 0,
+              'index.refresh_interval': -1,
+              'index.lifecycle.origination_date': 1700000000000,
             },
           },
         });

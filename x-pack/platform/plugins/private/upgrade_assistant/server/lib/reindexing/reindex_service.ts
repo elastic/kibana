@@ -189,6 +189,15 @@ export const reindexServiceFactory = (
   };
 
   /**
+   * Returns the ILM lifecycle date of the index, or undefined if it is not managed by ILM.
+   */
+  const getIlmLifecycleDate = async (indexName: string): Promise<number | undefined> => {
+    const { indices } = await esClient.ilm.explainLifecycle({ index: indexName });
+    const ilmExplain = indices[indexName];
+    return ilmExplain?.managed ? ilmExplain.lifecycle_date_millis : undefined;
+  };
+
+  /**
    * Creates a new index with the same mappings and settings as the original index.
    * @param reindexOp
    */
@@ -209,6 +218,9 @@ export const reindexServiceFactory = (
       'index.refresh_interval': settings['index.refresh_interval'],
     };
 
+    // Preserve the ILM age of the source index, otherwise it is computed from the new index creation date
+    const lifecycleDate = await getIlmLifecycleDate(indexName);
+
     let createIndex;
     try {
       createIndex = await esClient.transport.request<{ acknowledged: boolean }>({
@@ -219,6 +231,9 @@ export const reindexServiceFactory = (
             // Reindexing optimizations
             'index.number_of_replicas': 0,
             'index.refresh_interval': -1,
+            ...(lifecycleDate !== undefined && {
+              'index.lifecycle.origination_date': lifecycleDate,
+            }),
           },
         },
       });
