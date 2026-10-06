@@ -55,7 +55,7 @@ export const createImpactClient =
           for (const impact of impacts) {
             entityIds.set(
               impact.conversationId,
-              impact.entities.map((entity) => entity.id)
+              (impact.entities ?? []).map((entity) => entity.id)
             );
           }
         }
