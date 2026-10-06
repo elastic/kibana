@@ -74,8 +74,12 @@ export function StreamRemoveProcessingConfirmationModal({
       onConfirm={() => {
         // Hackiest thing, but it allows me to reset the state right down to nothing, and
         // have that change committed to state, so that it can be wiped in one go.
-        setLoading(true);
-        if (value) {
+        if (
+          value &&
+          'processors' in value.definition.stream.ingest.processing &&
+          value.definition.stream.ingest.processing.processors.length > 0
+        ) {
+          setLoading(true);
           void value.processingPersistenceAdapter
             .saveProcessing({
               definition: value.definition,
@@ -99,6 +103,9 @@ export function StreamRemoveProcessingConfirmationModal({
               refreshProcessing();
               refresh();
             });
+        } else {
+          onConfirm();
+          onClose();
         }
       }}
     >
