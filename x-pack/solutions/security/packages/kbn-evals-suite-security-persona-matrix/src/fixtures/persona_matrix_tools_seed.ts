@@ -54,6 +54,12 @@ interface SeedToolsOptions {
   log: ToolingLog;
 }
 
+/**
+ * Ids of tools this process actually created. Tools that already existed (409) are
+ * not recorded, so cleanup never deletes a tool the suite does not own.
+ */
+const createdToolIds = new Set<string>();
+
 async function createToolIfMissing({
   kbnClient,
   log,
@@ -66,11 +72,12 @@ async function createToolIfMissing({
       headers: AGENT_BUILDER_TOOLS_HEADERS,
       body,
     });
+    createdToolIds.add(body.id as string);
     log.info(`[persona-matrix] created tool '${body.id}'`);
   } catch (error) {
     const status = (error as { status?: number })?.status;
     if (status === 409) {
-      log.info(`[persona-matrix] tool '${body.id}' already exists, reusing`);
+      log.info(`[persona-matrix] tool '${body.id}' already exists, reusing (not owned)`);
       return;
     }
     throw error;
@@ -134,7 +141,8 @@ export async function seedPersonaMatrixTools({
         'domain has been flagged by security vendors.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.reason | LIMIT 10`,
+        query:
+          'FROM logs-chrysalis-sim.alerts-default | WHERE labels.simulation == "chrysalis-sim" | KEEP @timestamp, kibana.alert.rule.name, kibana.alert.reason | LIMIT 10',
         params: {},
       },
     },
@@ -151,7 +159,8 @@ export async function seedPersonaMatrixTools({
         'on-call responder to own or escalate a security incident.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.severity | LIMIT 10`,
+        query:
+          'FROM on-call-schedule | WHERE rotation == "soc-tier-2-primary" | KEEP responder.name, responder.email, responder.slack_handle, shift_start, shift_end | LIMIT 10',
         params: {},
       },
     },
@@ -194,16 +203,23 @@ export async function cleanupPersonaMatrixTools({
   kbnClient,
   log,
 }: SeedToolsOptions): Promise<void> {
-  for (const id of [...PERSONA_MATRIX_TOOL_IDS, ...PERSONA_MATRIX_PARITY_TOOL_IDS]) {
+  const owned = [...createdToolIds];
+  for (const id of owned) {
     await kbnClient
       .request({
         method: 'DELETE',
         path: `/api/agent_builder/tools/${encodeURIComponent(id)}`,
         headers: AGENT_BUILDER_TOOLS_HEADERS,
       })
+      .then(() => {
+        createdToolIds.delete(id);
+        log.info(`[persona-matrix] deleted tool '${id}'`);
+      })
       .catch((error) => {
         const status = (error as { status?: number })?.status;
-        if (status !== 404) {
+        if (status === 404) {
+          createdToolIds.delete(id);
+        } else {
           log.warning(`[persona-matrix] failed to delete tool '${id}': ${error}`);
         }
       });

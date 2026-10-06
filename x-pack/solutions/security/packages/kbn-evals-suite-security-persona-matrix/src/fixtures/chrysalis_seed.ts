@@ -56,9 +56,19 @@ const baseAlert: AlertDoc = {
   'event.category': ['malware', 'process'],
   'event.type': ['start'],
   'kibana.alert.workflow_status': 'open',
+  'labels.simulation': 'persona-matrix-minimal',
 };
 
-const RESTAMP_KEYS = new Set(['@timestamp', 'shift_start', 'shift_end', 'intended_timestamp']);
+const RESTAMP_KEYS = new Set([
+  '@timestamp',
+  'shift_start',
+  'shift_end',
+  'intended_timestamp',
+  'original_time',
+  'workflow_status_updated_at',
+  'first_seen',
+  'last_seen',
+]);
 
 function loadParityDocs(): { docs: ParityDoc[]; anchor: number } {
   const docs = PARITY_DOCS;
@@ -144,33 +154,39 @@ export async function cleanupChrysalisAlerts({
   esClient: EsClient;
   log: ToolingLog;
 }): Promise<void> {
+  // Each profile owns only its tagged fixture documents, never the whole alert index.
+  if (seedProfile === 'parity') {
+    const indices = [...new Set(loadParityDocs().docs.map(({ index }) => index))];
+    for (const index of indices) {
+      try {
+        const result = await esClient.deleteByQuery({
+          index,
+          query: {
+            term: {
+              [index === 'on-call-schedule' ? 'labels.simulation.keyword' : 'labels.simulation']:
+                'chrysalis-sim',
+            },
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+        log.info(`Cleaned up ${result.deleted ?? 0} Chrysalis parity docs from ${index}`);
+      } catch (err) {
+        log.warning(`Cleanup warning for ${index}: ${err}`);
+      }
+    }
+    return;
+  }
+
   try {
-    await esClient.deleteByQuery({
+    const result = await esClient.deleteByQuery({
       index: ALERT_INDEX,
-      query: { match_all: {} },
+      query: { term: { 'labels.simulation': 'persona-matrix-minimal' } },
       refresh: true,
       conflicts: 'proceed',
     });
-    log.info(`Cleaned up alerts from ${ALERT_INDEX}`);
-    if (seedProfile === 'parity') {
-      const { docs } = loadParityDocs();
-      const indices = [...new Set(docs.map((d) => d.index))];
-      for (const index of indices) {
-        try {
-          if (index.startsWith('logs-')) {
-            // logs-* names are data streams; index delete 404s on them
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (esClient as any).indices.deleteDataStream({ name: index });
-          } else {
-            await esClient.indices.delete({ index });
-          }
-          log.info(`Deleted parity index ${index}`);
-        } catch (err) {
-          log.warning(`Cleanup warning for ${index}: ${err}`);
-        }
-      }
-    }
+    log.info(`Cleaned up ${result.deleted ?? 0} Chrysalis alerts from ${ALERT_INDEX}`);
   } catch (err) {
-    log.warning(`Cleanup warning: ${err}`);
+    log.warning(`Cleanup warning for ${ALERT_INDEX}: ${err}`);
   }
 }
