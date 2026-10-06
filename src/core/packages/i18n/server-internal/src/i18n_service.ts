@@ -38,6 +38,24 @@ export interface SetupDeps {
   pluginPaths: string[];
 }
 
+/** @internal */
+export interface InternalI18nServiceSetup extends I18nServiceSetup {
+  /**
+   * When `true`, Kibana writes a `KBN_LOCALE` cookie on every rendered
+   * response so the browser remembers the resolved locale across page loads,
+   * anonymous pages, and post-logout browsing. Controlled by
+   * `i18n.allowLocaleCookie` in `kibana.yml`. Defaults to `true`.
+   */
+  allowLocaleCookie: boolean;
+
+  /**
+   * When `true`, Kibana falls back to the browser's `Accept-Language` header
+   * when neither the user profile nor the `KBN_LOCALE` cookie selects a locale.
+   * Controlled by `i18n.detectBrowserLocale` in `kibana.yml`. Defaults to `true`.
+   */
+  detectBrowserLocale: boolean;
+}
+
 export interface InternalI18nServicePreboot {
   getTranslationHash(): string;
   getTranslationHashes(): Record<string, string>;
@@ -85,7 +103,7 @@ export class I18nService {
     };
   }
 
-  public async setup({ pluginPaths, http }: SetupDeps): Promise<I18nServiceSetup> {
+  public async setup({ pluginPaths, http }: SetupDeps): Promise<InternalI18nServiceSetup> {
     const {
       defaultLocale,
       locales,
