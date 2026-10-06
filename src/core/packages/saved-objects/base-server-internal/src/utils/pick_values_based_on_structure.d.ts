@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export declare function getFlattenedKeys(obj: object): string[];
 /**
  * Given two objects, use the first object as a structural map to extract values
@@ -15,4 +24,7 @@ export declare function getFlattenedKeys(obj: object): string[];
  *       compatibility schemas when loading a saved object from the database,
  *       downgrading it and keeping only the known, validated subset of values.
  */
-export declare function pickValuesBasedOnStructure(structuralSource: object, target: object): object;
+export declare function pickValuesBasedOnStructure(
+  structuralSource: object,
+  target: object
+): object;

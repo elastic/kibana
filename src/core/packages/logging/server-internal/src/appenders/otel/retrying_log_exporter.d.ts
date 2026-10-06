@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { LogRecordExporter } from '@opentelemetry/sdk-logs';
 type ReadableLogRecords = Parameters<LogRecordExporter['export']>[0];
 type ExportResultCallback = Parameters<LogRecordExporter['export']>[1];
@@ -19,13 +28,13 @@ export declare const isRetryableExportError: (error: Error | undefined) => boole
  * @internal
  */
 export declare class RetryingLogRecordExporter implements LogRecordExporter {
-    private readonly delegate;
-    private readonly maxElapsedTimeMs;
-    private isShutdown;
-    private readonly pendingRetries;
-    constructor(delegate: LogRecordExporter, maxElapsedTimeMs: number);
-    export(logs: ReadableLogRecords, resultCallback: ExportResultCallback): void;
-    forceFlush(): Promise<void>;
-    shutdown(): Promise<void>;
+  private readonly delegate;
+  private readonly maxElapsedTimeMs;
+  private isShutdown;
+  private readonly pendingRetries;
+  constructor(delegate: LogRecordExporter, maxElapsedTimeMs: number);
+  export(logs: ReadableLogRecords, resultCallback: ExportResultCallback): void;
+  forceFlush(): Promise<void>;
+  shutdown(): Promise<void>;
 }
 export {};

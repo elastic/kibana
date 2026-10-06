@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { estypes } from '@elastic/elasticsearch';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Filter, ProjectRouting, Query } from '@kbn/es-query';
@@ -17,168 +26,174 @@ export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
  * high level search service
  * @public
  */
-export interface ISearchStartSearchSource extends PersistableStateService<SerializedSearchSourceFields> {
-    /**
-     * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
-     * @param fields
-     */
-    create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
-    createLazy: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
-    /**
-     * creates empty {@link SearchSource}
-     */
-    createEmpty: () => ISearchSource;
+export interface ISearchStartSearchSource
+  extends PersistableStateService<SerializedSearchSourceFields> {
+  /**
+   * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
+   * @param fields
+   */
+  create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
+  createLazy: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
+  /**
+   * creates empty {@link SearchSource}
+   */
+  createEmpty: () => ISearchSource;
 }
 export declare enum SortDirection {
-    asc = "asc",
-    desc = "desc"
+  asc = 'asc',
+  desc = 'desc',
 }
-export type SortDirectionFormat = {
-    order: SortDirection;
-    format?: string;
-};
-export type SortDirectionNumeric = {
-    order: SortDirection;
-    numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
-};
-export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric | SortDirectionFormat>;
+export interface SortDirectionFormat {
+  order: SortDirection;
+  format?: string;
+}
+export interface SortDirectionNumeric {
+  order: SortDirection;
+  numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
+}
+export type EsQuerySortValue = Record<
+  string,
+  SortDirection | SortDirectionNumeric | SortDirectionFormat
+>;
 export type SearchFieldValue = SearchField & Serializable;
 /**
  * search source fields
  */
 export interface SearchSourceFields {
-    type?: string;
-    /**
-     * {@link Query}
-     */
-    query?: Query | AggregateQuery;
-    /**
-     * {@link Filter}
-     */
-    filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
-    /**
-     * Filters that should not trigger highlighting.
-     * These filters will be included in the search query for document retrieval,
-     * but excluded from the highlight_query parameter in Elasticsearch.
-     * {@link Filter}
-     */
-    nonHighlightingFilters?: Filter[];
-    /**
-     * {@link EsQuerySortValue}
-     */
-    sort?: EsQuerySortValue | EsQuerySortValue[];
-    highlight?: any;
-    highlightAll?: boolean;
-    trackTotalHits?: boolean | number;
-    /**
-     * {@link AggConfigs}
-     */
-    aggs?: object | IAggConfigs | (() => object);
-    from?: number;
-    size?: number;
-    source?: boolean | estypes.Fields;
-    version?: boolean;
-    /**
-     * Retrieve fields via the search Fields API
-     */
-    fields?: SearchFieldValue[];
-    /**
-     * Retreive fields directly from _source (legacy behavior)
-     *
-     * @deprecated It is recommended to use `fields` wherever possible.
-     */
-    fieldsFromSource?: estypes.Fields;
-    /**
-     * {@link IndexPatternService}
-     */
-    index?: DataView;
-    timeout?: string;
-    terminate_after?: number;
-    searchAfter?: estypes.SortResults;
-    /**
-     * Allow querying to use a point-in-time ID for paging results
-     */
-    pit?: estypes.SearchPointInTimeReference;
-    /**
-     * {@link ProjectRouting}
-     */
-    projectRouting?: ProjectRouting;
-    timezone?: string;
-    parent?: SearchSourceFields;
+  type?: string;
+  /**
+   * {@link Query}
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * {@link Filter}
+   */
+  filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
+  /**
+   * Filters that should not trigger highlighting.
+   * These filters will be included in the search query for document retrieval,
+   * but excluded from the highlight_query parameter in Elasticsearch.
+   * {@link Filter}
+   */
+  nonHighlightingFilters?: Filter[];
+  /**
+   * {@link EsQuerySortValue}
+   */
+  sort?: EsQuerySortValue | EsQuerySortValue[];
+  highlight?: any;
+  highlightAll?: boolean;
+  trackTotalHits?: boolean | number;
+  /**
+   * {@link AggConfigs}
+   */
+  aggs?: object | IAggConfigs | (() => object);
+  from?: number;
+  size?: number;
+  source?: boolean | estypes.Fields;
+  version?: boolean;
+  /**
+   * Retrieve fields via the search Fields API
+   */
+  fields?: SearchFieldValue[];
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
+   */
+  fieldsFromSource?: estypes.Fields;
+  /**
+   * {@link IndexPatternService}
+   */
+  index?: DataView;
+  timeout?: string;
+  terminate_after?: number;
+  searchAfter?: estypes.SortResults;
+  /**
+   * Allow querying to use a point-in-time ID for paging results
+   */
+  pit?: estypes.SearchPointInTimeReference;
+  /**
+   * {@link ProjectRouting}
+   */
+  projectRouting?: ProjectRouting;
+  timezone?: string;
+  parent?: SearchSourceFields;
 }
-export type SerializedSearchSourceFields = {
-    type?: string;
-    /**
-     * {@link Query}
-     */
-    query?: Query | AggregateQuery;
-    /**
-     * {@link Filter}
-     */
-    filter?: Filter[];
-    /**
-     * Filters that should not trigger highlighting.
-     * These filters will be included in the search query for document retrieval,
-     * but excluded from the highlight_query parameter in Elasticsearch.
-     * {@link Filter}
-     */
-    nonHighlightingFilters?: Filter[];
-    /**
-     * {@link EsQuerySortValue}
-     */
-    sort?: EsQuerySortValue[];
-    highlight?: SerializableRecord;
-    highlightAll?: boolean;
-    trackTotalHits?: boolean | number;
-    /**
-     * {@link AggConfigs}
-     */
-    aggs?: AggConfigSerialized[];
-    from?: number;
-    size?: number;
-    source?: boolean | estypes.Fields;
-    version?: boolean;
-    /**
-     * Retrieve fields via the search Fields API
-     */
-    fields?: SearchFieldValue[];
-    /**
-     * Retreive fields directly from _source (legacy behavior)
-     *
-     * @deprecated It is recommended to use `fields` wherever possible.
-     */
-    fieldsFromSource?: estypes.Fields;
-    /**
-     * {@link IndexPatternService}
-     */
-    index?: string | DataViewSpec;
-    searchAfter?: estypes.SortResults;
-    timeout?: string;
-    terminate_after?: number;
-    /**
-     * {@link ProjectRouting}
-     */
-    projectRouting?: ProjectRouting;
-    timezone?: string;
-    parent?: SerializedSearchSourceFields;
-};
+export interface SerializedSearchSourceFields {
+  type?: string;
+  /**
+   * {@link Query}
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * {@link Filter}
+   */
+  filter?: Filter[];
+  /**
+   * Filters that should not trigger highlighting.
+   * These filters will be included in the search query for document retrieval,
+   * but excluded from the highlight_query parameter in Elasticsearch.
+   * {@link Filter}
+   */
+  nonHighlightingFilters?: Filter[];
+  /**
+   * {@link EsQuerySortValue}
+   */
+  sort?: EsQuerySortValue[];
+  highlight?: SerializableRecord;
+  highlightAll?: boolean;
+  trackTotalHits?: boolean | number;
+  /**
+   * {@link AggConfigs}
+   */
+  aggs?: AggConfigSerialized[];
+  from?: number;
+  size?: number;
+  source?: boolean | estypes.Fields;
+  version?: boolean;
+  /**
+   * Retrieve fields via the search Fields API
+   */
+  fields?: SearchFieldValue[];
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
+   */
+  fieldsFromSource?: estypes.Fields;
+  /**
+   * {@link IndexPatternService}
+   */
+  index?: string | DataViewSpec;
+  searchAfter?: estypes.SortResults;
+  timeout?: string;
+  terminate_after?: number;
+  /**
+   * {@link ProjectRouting}
+   */
+  projectRouting?: ProjectRouting;
+  timezone?: string;
+  parent?: SerializedSearchSourceFields;
+}
 export interface SearchSourceOptions {
-    callParentStartHandlers?: boolean;
+  callParentStartHandlers?: boolean;
 }
-export declare function isSerializedSearchSource(maybeSerializedSearchSource: unknown): maybeSerializedSearchSource is SerializedSearchSourceFields;
+export declare function isSerializedSearchSource(
+  maybeSerializedSearchSource: unknown
+): maybeSerializedSearchSource is SerializedSearchSourceFields;
 export interface IInspectorInfo {
-    adapter?: RequestAdapter;
-    title: string;
-    id?: string;
-    description?: string;
+  adapter?: RequestAdapter;
+  title: string;
+  id?: string;
+  description?: string;
 }
 export interface SearchSourceSearchOptions extends ISearchOptions {
-    /**
-     * Inspector integration options
-     */
-    inspector?: IInspectorInfo;
-    /**
-     * Set to true to disable warning toasts and customize warning display
-     */
-    disableWarningToasts?: boolean;
+  /**
+   * Inspector integration options
+   */
+  inspector?: IInspectorInfo;
+  /**
+   * Set to true to disable warning toasts and customize warning display
+   */
+  disableWarningToasts?: boolean;
 }

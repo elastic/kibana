@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-saved-objects-base-server-mocks'
   - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core'
 tags:
   - shared-server
   - package

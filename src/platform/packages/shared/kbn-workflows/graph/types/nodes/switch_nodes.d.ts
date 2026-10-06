@@ -1,72 +1,105 @@
-import { z } from '@kbn/zod/v4';
-export declare const EnterSwitchNodeConfigurationSchema: z.ZodObject<{
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { z } from '@kbn/zod/v4';
+export declare const EnterSwitchNodeConfigurationSchema: z.ZodObject<
+  {
     name: z.ZodString;
     'max-step-size': z.ZodOptional<z.ZodString>;
     if: z.ZodOptional<z.ZodString>;
     timeout: z.ZodOptional<z.ZodString>;
     expression: z.ZodString;
-    type: z.ZodLiteral<"switch">;
-}, z.core.$strip>;
+    type: z.ZodLiteral<'switch'>;
+  },
+  z.core.$strip
+>;
 export type EnterSwitchNodeConfiguration = z.infer<typeof EnterSwitchNodeConfigurationSchema>;
-export declare const EnterSwitchNodeSchema: z.ZodObject<{
+export declare const EnterSwitchNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"enter-switch">;
+    type: z.ZodLiteral<'enter-switch'>;
     exitNodeId: z.ZodString;
-    configuration: z.ZodObject<{
+    configuration: z.ZodObject<
+      {
         name: z.ZodString;
         'max-step-size': z.ZodOptional<z.ZodString>;
         if: z.ZodOptional<z.ZodString>;
         timeout: z.ZodOptional<z.ZodString>;
         expression: z.ZodString;
-        type: z.ZodLiteral<"switch">;
-    }, z.core.$strip>;
-}, z.core.$strip>;
+        type: z.ZodLiteral<'switch'>;
+      },
+      z.core.$strip
+    >;
+  },
+  z.core.$strip
+>;
 export type EnterSwitchNode = z.infer<typeof EnterSwitchNodeSchema>;
-export declare const EnterCaseBranchNodeSchema: z.ZodObject<{
+export declare const EnterCaseBranchNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"enter-case-branch">;
+    type: z.ZodLiteral<'enter-case-branch'>;
     match: z.ZodUnion<readonly [z.ZodString, z.ZodNumber, z.ZodBoolean]>;
     index: z.ZodNumber;
-}, z.core.$strip>;
+  },
+  z.core.$strip
+>;
 export type EnterCaseBranchNode = z.infer<typeof EnterCaseBranchNodeSchema>;
-export declare const ExitCaseBranchNodeSchema: z.ZodObject<{
+export declare const ExitCaseBranchNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"exit-case-branch">;
+    type: z.ZodLiteral<'exit-case-branch'>;
     startNodeId: z.ZodString;
-}, z.core.$strip>;
+  },
+  z.core.$strip
+>;
 export type ExitCaseBranchNode = z.infer<typeof ExitCaseBranchNodeSchema>;
-export declare const EnterDefaultBranchNodeSchema: z.ZodObject<{
+export declare const EnterDefaultBranchNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"enter-default-branch">;
-}, z.core.$strip>;
+    type: z.ZodLiteral<'enter-default-branch'>;
+  },
+  z.core.$strip
+>;
 export type EnterDefaultBranchNode = z.infer<typeof EnterDefaultBranchNodeSchema>;
-export declare const ExitDefaultBranchNodeSchema: z.ZodObject<{
+export declare const ExitDefaultBranchNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"exit-default-branch">;
+    type: z.ZodLiteral<'exit-default-branch'>;
     startNodeId: z.ZodString;
-}, z.core.$strip>;
+  },
+  z.core.$strip
+>;
 export type ExitDefaultBranchNode = z.infer<typeof ExitDefaultBranchNodeSchema>;
-export declare const ExitSwitchNodeSchema: z.ZodObject<{
+export declare const ExitSwitchNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"exit-switch">;
+    type: z.ZodLiteral<'exit-switch'>;
     startNodeId: z.ZodString;
-}, z.core.$strip>;
+  },
+  z.core.$strip
+>;
 export type ExitSwitchNode = z.infer<typeof ExitSwitchNodeSchema>;

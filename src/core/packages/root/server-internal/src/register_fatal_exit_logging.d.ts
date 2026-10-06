@@ -1,15 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Logger } from '@kbn/logging';
 /** @internal */
 export interface FatalExitLogging {
-    /**
-     * Flags that the reason for terminating has already been reported, so that the
-     * `exit` guard stays silent for shutdowns going through `Root.shutdown()`.
-     */
-    markShutdownReasonReported: () => void;
-    unregister: () => void;
+  /**
+   * Flags that the reason for terminating has already been reported, so that the
+   * `exit` guard stays silent for shutdowns going through `Root.shutdown()`.
+   */
+  markShutdownReasonReported: () => void;
+  unregister: () => void;
 }
 interface RegisterFatalExitLoggingDeps {
-    logger: Logger;
+  logger: Logger;
 }
 /**
  * Logs terminations that don't go through `Root.shutdown()`, such as an exception thrown from a
@@ -20,5 +29,7 @@ interface RegisterFatalExitLoggingDeps {
  *
  * @internal
  */
-export declare const registerFatalExitLogging: ({ logger, }: RegisterFatalExitLoggingDeps) => FatalExitLogging;
+export declare const registerFatalExitLogging: ({
+  logger,
+}: RegisterFatalExitLoggingDeps) => FatalExitLogging;
 export {};

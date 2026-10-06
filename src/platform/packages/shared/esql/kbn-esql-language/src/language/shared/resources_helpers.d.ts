@@ -1,17 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLCallbacks } from '@kbn/esql-types';
 export declare function getPolicyHelper(resourceRetriever?: ESQLCallbacks): {
-    getPolicies: () => Promise<{
+  getPolicies: () => Promise<
+    {
+      name: string;
+      sourceIndices: string[];
+      matchField: string;
+      enrichFields: string[];
+    }[]
+  >;
+  getPolicyMetadata: (policyName: string) => Promise<
+    | {
         name: string;
         sourceIndices: string[];
         matchField: string;
         enrichFields: string[];
-    }[]>;
-    getPolicyMetadata: (policyName: string) => Promise<{
-        name: string;
-        sourceIndices: string[];
-        matchField: string;
-        enrichFields: string[];
-    } | undefined>;
+      }
+    | undefined
+  >;
 };
-export declare function getSourcesHelper(resourceRetriever?: ESQLCallbacks): () => Promise<import("@kbn/esql-types").ESQLSourceResult[]>;
+export declare function getSourcesHelper(
+  resourceRetriever?: ESQLCallbacks
+): () => Promise<import('@kbn/esql-types').ESQLSourceResult[]>;
 export declare function getFromCommandHelper(resourceRetriever?: ESQLCallbacks): Promise<string>;

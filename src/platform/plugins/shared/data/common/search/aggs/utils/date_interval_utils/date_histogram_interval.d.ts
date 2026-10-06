@@ -1,8 +1,19 @@
-type Interval = {
-    fixed_interval: string;
-} | {
-    calendar_interval: string;
-};
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+type Interval =
+  | {
+      fixed_interval: string;
+    }
+  | {
+      calendar_interval: string;
+    };
 /**
  * Checks whether a given Elasticsearch interval is a calendar or fixed interval
  * and returns an object containing the appropriate date_histogram property for that
@@ -21,5 +32,8 @@ type Interval = {
  *
  * @param interval The interval string to return the appropriate date_histogram key for.
  */
-export declare function dateHistogramInterval(interval: string, shouldForceFixed?: boolean): Interval;
+export declare function dateHistogramInterval(
+  interval: string,
+  shouldForceFixed?: boolean
+): Interval;
 export {};

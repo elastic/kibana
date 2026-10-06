@@ -53,6 +53,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/logging",
     "@kbn/repo-info",
+    "@kbn/core",
   ],
   "exclude": [
     "target/**/*",

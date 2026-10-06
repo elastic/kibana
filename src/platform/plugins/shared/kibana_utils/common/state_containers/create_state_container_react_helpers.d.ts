@@ -1,4 +1,13 @@
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
 import type { Comparator, Connect, StateContainer, UnboxState } from './types';
 /**
  * React hooks that returns the latest state of a {@link StateContainer}.
@@ -7,7 +16,9 @@ import type { Comparator, Connect, StateContainer, UnboxState } from './types';
  * @returns - latest {@link StateContainer} state
  * @public
  */
-export declare const useContainerState: <Container extends StateContainer<any, any>>(container: Container) => UnboxState<Container>;
+export declare const useContainerState: <Container extends StateContainer<any, any>>(
+  container: Container
+) => UnboxState<Container>;
 /**
  * React hook to apply selector to state container to extract only needed information. Will
  * re-render your component only when the section changes.
@@ -20,19 +31,28 @@ export declare const useContainerState: <Container extends StateContainer<any, a
  * @returns - result of a selector(state)
  * @public
  */
-export declare const useContainerSelector: <Container extends StateContainer<any, any>, Result>(container: Container, selector: (state: UnboxState<Container>) => Result, comparator?: Comparator<Result>) => Result;
+export declare const useContainerSelector: <Container extends StateContainer<any, any>, Result>(
+  container: Container,
+  selector: (state: UnboxState<Container>) => Result,
+  comparator?: Comparator<Result>
+) => Result;
 /**
  * Creates helpers for using {@link StateContainer | State Containers} with react
  * Refer to {@link https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_containers/react.md | guide} for details
  * @public
  */
-export declare const createStateContainerReactHelpers: <Container extends StateContainer<any, any>>() => {
-    Provider: React.Provider<Container>;
-    Consumer: React.Consumer<Container>;
-    context: React.Context<Container>;
-    useContainer: () => Container;
-    useState: () => UnboxState<Container>;
-    useTransitions: () => Container['transitions'];
-    useSelector: <Result>(selector: (state: UnboxState<Container>) => Result, comparator?: Comparator<Result>) => Result;
-    connect: Connect<UnboxState<Container>>;
+export declare const createStateContainerReactHelpers: <
+  Container extends StateContainer<any, any>
+>() => {
+  Provider: React.Provider<Container>;
+  Consumer: React.Consumer<Container>;
+  context: React.Context<Container>;
+  useContainer: () => Container;
+  useState: () => UnboxState<Container>;
+  useTransitions: () => Container['transitions'];
+  useSelector: <Result>(
+    selector: (state: UnboxState<Container>) => Result,
+    comparator?: Comparator<Result>
+  ) => Result;
+  connect: Connect<UnboxState<Container>>;
 };

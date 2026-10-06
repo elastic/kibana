@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
@@ -7,61 +16,61 @@ import type { FeatureFlagsSetup, FeatureFlagsStart } from '@kbn/core-feature-fla
  * @internal
  */
 export interface FeatureFlagsSetupDeps {
-    /**
-     * Used to hit the counter endpoint.
-     */
-    http: InternalHttpSetup;
-    /**
-     * Used to read the flag overrides set up in the configuration file.
-     */
-    injectedMetadata: InternalInjectedMetadataSetup;
+  /**
+   * Used to hit the counter endpoint.
+   */
+  http: InternalHttpSetup;
+  /**
+   * Used to read the flag overrides set up in the configuration file.
+   */
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 export declare class FeatureFlagsService {
-    private readonly featureFlagsClient;
-    private readonly logger;
-    private readonly contextChanged$;
-    private readonly lastReportedValues;
-    private isProviderReadyPromise?;
-    private context;
-    private overrides;
-    private http?;
-    /**
-     * The core service's constructor
-     * @param core {@link CoreContext}
-     */
-    constructor(core: CoreContext);
-    /**
-     * Setup lifecycle method
-     * @param deps {@link FeatureFlagsSetup} including the {@link InternalInjectedMetadataSetup} used to retrieve the feature flags.
-     */
-    setup(deps: FeatureFlagsSetupDeps): FeatureFlagsSetup;
-    /**
-     * Start lifecycle method
-     */
-    start(): Promise<FeatureFlagsStart>;
-    /**
-     * Stop lifecycle method
-     */
-    stop(): Promise<void>;
-    /**
-     * Waits for the provider initialization with a timeout to avoid holding the page load for too long
-     * @internal
-     */
-    private waitForProviderInitialization;
-    /**
-     * Wrapper to evaluate flags with the common config overrides interceptions + APM and counters reporting
-     * @param evaluationFn The actual evaluation API
-     * @param flagName The name of the flag to evaluate
-     * @param fallbackValue The fallback value
-     * @internal
-     */
-    private evaluateFlag;
-    private reportValueIfChanged;
-    private shouldReportValue;
-    /**
-     * Formats the provided context to fulfill the expected multi-context structure.
-     * @param contextToAppend The {@link EvaluationContext} to append.
-     * @internal
-     */
-    private appendContext;
+  private readonly featureFlagsClient;
+  private readonly logger;
+  private readonly contextChanged$;
+  private readonly lastReportedValues;
+  private isProviderReadyPromise?;
+  private context;
+  private overrides;
+  private http?;
+  /**
+   * The core service's constructor
+   * @param core {@link CoreContext}
+   */
+  constructor(core: CoreContext);
+  /**
+   * Setup lifecycle method
+   * @param deps {@link FeatureFlagsSetup} including the {@link InternalInjectedMetadataSetup} used to retrieve the feature flags.
+   */
+  setup(deps: FeatureFlagsSetupDeps): FeatureFlagsSetup;
+  /**
+   * Start lifecycle method
+   */
+  start(): Promise<FeatureFlagsStart>;
+  /**
+   * Stop lifecycle method
+   */
+  stop(): Promise<void>;
+  /**
+   * Waits for the provider initialization with a timeout to avoid holding the page load for too long
+   * @internal
+   */
+  private waitForProviderInitialization;
+  /**
+   * Wrapper to evaluate flags with the common config overrides interceptions + APM and counters reporting
+   * @param evaluationFn The actual evaluation API
+   * @param flagName The name of the flag to evaluate
+   * @param fallbackValue The fallback value
+   * @internal
+   */
+  private evaluateFlag;
+  private reportValueIfChanged;
+  private shouldReportValue;
+  /**
+   * Formats the provided context to fulfill the expected multi-context structure.
+   * @param contextToAppend The {@link EvaluationContext} to append.
+   * @internal
+   */
+  private appendContext;
 }

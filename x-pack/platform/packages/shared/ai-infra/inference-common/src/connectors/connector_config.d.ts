@@ -1,13 +1,22 @@
-import { ModelFamily, ModelPlatform, ModelProvider } from '../model_provider';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ModelFamily, ModelPlatform, ModelProvider } from '../model_provider';
 import { type InferenceConnector } from './connectors';
-export declare const DEFAULT_OPENAI_MODEL = "gpt-4.1";
+export declare const DEFAULT_OPENAI_MODEL = 'gpt-4.1';
 /**
  * Returns the default model as defined in the connector's config, if available.
  *
  * Note: preconfigured connectors only expose their config if their `exposeConfig` flag
  * is set to true.
  */
-export declare const getConnectorDefaultModel: (connector: InferenceConnector) => string | undefined;
+export declare const getConnectorDefaultModel: (
+  connector: InferenceConnector
+) => string | undefined;
 /**
  * Returns the provider used for the given connector
  *
@@ -19,4 +28,7 @@ export declare const getConnectorProvider: (connector: InferenceConnector) => Mo
  * Returns the platform for the given connector
  */
 export declare const getConnectorPlatform: (connector: InferenceConnector) => ModelPlatform;
-export declare const getConnectorFamily: (connector: InferenceConnector, _modelName?: string) => ModelFamily;
+export declare const getConnectorFamily: (
+  connector: InferenceConnector,
+  _modelName?: string
+) => ModelFamily;

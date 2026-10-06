@@ -1,10 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Request } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest, RouteConfig, RouteMethod, RequestHandlerContextBase, RouterRoute, IRouter, RequestHandler, VersionedRouter, RouteRegistrar, PostValidationMetadata, IKibanaResponse } from '@kbn/core-http-server';
+import type {
+  KibanaRequest,
+  RouteConfig,
+  RouteMethod,
+  RequestHandlerContextBase,
+  RouterRoute,
+  IRouter,
+  RequestHandler,
+  VersionedRouter,
+  RouteRegistrar,
+  PostValidationMetadata,
+  IKibanaResponse,
+} from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { Env } from '@kbn/config';
 import type { CoreKibanaRequest } from './request';
-export type ContextEnhancer<P, Q, B, Method extends RouteMethod, Context extends RequestHandlerContextBase> = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
+export type ContextEnhancer<
+  P,
+  Q,
+  B,
+  Method extends RouteMethod,
+  Context extends RequestHandlerContextBase
+> = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 /** @internal */
 export type InternalRouteHandler = (request: Request) => Promise<IKibanaResponse>;
 /**
@@ -24,63 +51,79 @@ export type InternalRouteHandler = (request: Request) => Promise<IKibanaResponse
  * @internal
  */
 export type InternalRouterRoute = Omit<RouterRoute, 'handler'> & {
-    handler: InternalRouteHandler;
+  handler: InternalRouteHandler;
 };
 /** @internal */
 export interface RouterOptions {
-    env: Env;
-    /** Plugin for which this router was registered */
-    pluginId?: symbol;
-    versionedRouterOptions?: {
-        /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
-        defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
-        /** {@inheritdoc VersionedRouterArgs['useVersionResolutionStrategyForInternalPaths'] }*/
-        useVersionResolutionStrategyForInternalPaths?: string[];
-    };
+  env: Env;
+  /** Plugin for which this router was registered */
+  pluginId?: symbol;
+  versionedRouterOptions?: {
+    /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
+    defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
+    /** {@inheritdoc VersionedRouterArgs['useVersionResolutionStrategyForInternalPaths'] }*/
+    useVersionResolutionStrategyForInternalPaths?: string[];
+  };
 }
 /** @internal */
-export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<RouteConfig<P, Q, B, M>, 'security'> & {
-    security?: RouteSecurityGetter;
+export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
+  RouteConfig<P, Q, B, M>,
+  'security'
+> & {
+  security?: RouteSecurityGetter;
 };
 /** @internal */
-type RouterEvents = 
-/** Called after route validation, regardless of success or failure */
-'onPostValidate';
+type RouterEvents =
+  /** Called after route validation, regardless of success or failure */
+  'onPostValidate';
 /**
  * @internal
  */
-export declare class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase> implements IRouter<Context> {
-    readonly routerPath: string;
-    private readonly log;
-    readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>;
-    private readonly options;
-    /**
-     * Used for global request events at the router level, similar to what we get from Hapi's request lifecycle events.
-     *
-     * See {@link RouterEvents}.
-     */
-    private static events;
-    routes: Array<Readonly<RouterRoute>>;
-    pluginId?: symbol;
-    get: RouteRegistrar<'get', Context>;
-    post: RouteRegistrar<'post', Context>;
-    delete: RouteRegistrar<'delete', Context>;
-    put: RouteRegistrar<'put', Context>;
-    patch: RouteRegistrar<'patch', Context>;
-    constructor(routerPath: string, log: Logger, enhanceWithContext: ContextEnhancer<any, any, any, any, any>, options: RouterOptions);
-    static on(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void): void;
-    static off(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void): void;
-    getRoutes({ excludeVersionedRoutes }?: {
-        excludeVersionedRoutes?: boolean;
-    }): Readonly<RouterRoute>[];
-    handleLegacyErrors: import("@kbn/core-http-server").RequestHandlerWrapper;
-    emitPostValidate: (request: KibanaRequest, postValidateConext?: PostValidationMetadata) => void;
-    /** @internal */
-    registerRoute(route: InternalRouterRoute): void;
-    private handle;
-    private versionedRouter;
-    get versioned(): VersionedRouter<Context>;
+export declare class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
+  implements IRouter<Context>
+{
+  readonly routerPath: string;
+  private readonly log;
+  readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>;
+  private readonly options;
+  /**
+   * Used for global request events at the router level, similar to what we get from Hapi's request lifecycle events.
+   *
+   * See {@link RouterEvents}.
+   */
+  private static events;
+  routes: Array<Readonly<RouterRoute>>;
+  pluginId?: symbol;
+  get: RouteRegistrar<'get', Context>;
+  post: RouteRegistrar<'post', Context>;
+  delete: RouteRegistrar<'delete', Context>;
+  put: RouteRegistrar<'put', Context>;
+  patch: RouteRegistrar<'patch', Context>;
+  constructor(
+    routerPath: string,
+    log: Logger,
+    enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
+    options: RouterOptions
+  );
+  static on(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void): void;
+  static off(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void): void;
+  getRoutes({
+    excludeVersionedRoutes,
+  }?: {
+    excludeVersionedRoutes?: boolean;
+  }): Readonly<RouterRoute>[];
+  handleLegacyErrors: import('@kbn/core-http-server').RequestHandlerWrapper;
+  emitPostValidate: (request: KibanaRequest, postValidateConext?: PostValidationMetadata) => void;
+  /** @internal */
+  registerRoute(route: InternalRouterRoute): void;
+  private handle;
+  private versionedRouter;
+  get versioned(): VersionedRouter<Context>;
 }
-type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => infer Return ? (...rest: Params) => Return : never;
-export type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<RequestHandler<P, Q, B, RequestHandlerContextBase, Method>>;
+type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => infer Return
+  ? (...rest: Params) => Return
+  : never;
+export type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<
+  RequestHandler<P, Q, B, RequestHandlerContextBase, Method>
+>;
 export {};

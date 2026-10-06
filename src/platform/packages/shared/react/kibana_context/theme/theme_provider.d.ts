@@ -1,19 +1,28 @@
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
 import type { EuiThemeProviderProps } from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { type ThemeServiceStart } from '@kbn/react-kibana-context-common';
 type EuiTheme<T = {}> = EuiThemeProviderProps<T>['theme'];
 interface EuiProps<T = {}> extends Omit<EuiThemeProviderProps<T>, 'theme' | 'colorMode'> {
-    euiTheme?: EuiTheme<T>;
+  euiTheme?: EuiTheme<T>;
 }
 /**
  * Props for the `KibanaThemeProvider`.
  */
 export interface KibanaThemeProviderProps extends EuiProps {
-    /** The `ThemeServiceStart` API. */
-    theme: ThemeServiceStart;
-    /** The `UserProfileService` start API. */
-    userProfile?: Pick<UserProfileService, 'getUserProfile$'>;
+  /** The `ThemeServiceStart` API. */
+  theme: ThemeServiceStart;
+  /** The `UserProfileService` start API. */
+  userProfile?: Pick<UserProfileService, 'getUserProfile$'>;
 }
 /**
  * Unfortunately, a lot of plugins are using `KibanaThemeProvider` without a parent
@@ -25,7 +34,12 @@ export interface KibanaThemeProviderProps extends EuiProps {
  * TODO: clintandrewhall - We can remove this and revert to only exporting the above component
  * once all out-of-band renders are using `KibanaRenderContextProvider`.
  */
-declare const KibanaThemeProviderCheck: ({ theme, userProfile, children, ...props }: KibanaThemeProviderProps) => React.JSX.Element;
+declare const KibanaThemeProviderCheck: ({
+  theme,
+  userProfile,
+  children,
+  ...props
+}: KibanaThemeProviderProps) => React.JSX.Element;
 /**
  * A Kibana-specific theme provider that uses the Kibana theme service to customize the EUI theme.
  *

@@ -1,16 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { TimeState } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
 import type { Timefilter } from './timefilter';
 import type { NowProviderInternalContract } from '../../now_provider';
 type TimeStateChange = 'initial' | 'shift' | 'override';
 export interface TimeStateUpdate {
-    timeState: TimeState;
-    kind: TimeStateChange;
+  timeState: TimeState;
+  kind: TimeStateChange;
 }
 export interface TimefilterHook {
-    timeState: TimeState;
-    refresh: () => void;
-    timeState$: Observable<TimeStateUpdate>;
+  timeState: TimeState;
+  refresh: () => void;
+  timeState$: Observable<TimeStateUpdate>;
 }
 /**
  * Creates a useTimefilter hook that can be used in applications. Here's
@@ -34,5 +43,8 @@ export interface TimefilterHook {
  * check for `kind == 'override'` to determine whether a manual refresh
  * is needed.
  */
-export declare function createUseTimefilterHook(timefilter: Timefilter, nowProvider: NowProviderInternalContract): () => TimefilterHook;
+export declare function createUseTimefilterHook(
+  timefilter: Timefilter,
+  nowProvider: NowProviderInternalContract
+): () => TimefilterHook;
 export {};

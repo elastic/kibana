@@ -95,6 +95,7 @@ dependsOn:
   - '@kbn/core-user-activity-server-internal'
   - '@kbn/core-user-storage-server-internal'
   - '@kbn/zod'
+  - '@kbn/core'
 tags:
   - shared-server
   - package

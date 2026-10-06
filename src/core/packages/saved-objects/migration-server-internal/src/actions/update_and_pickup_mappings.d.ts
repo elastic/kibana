@@ -1,22 +1,40 @@
-import * as TaskEither from 'fp-ts/TaskEither';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type * as TaskEither from 'fp-ts/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type RetryableEsClientError } from './catch_retryable_es_client_errors';
 /** @internal */
 export interface UpdateAndPickupMappingsResponse {
-    taskId: string;
+  taskId: string;
 }
 /** @internal */
 export interface UpdateAndPickupMappingsParams {
-    client: ElasticsearchClient;
-    index: string;
-    mappings: IndexMapping;
-    batchSize: number;
-    query?: QueryDslQueryContainer;
+  client: ElasticsearchClient;
+  index: string;
+  mappings: IndexMapping;
+  batchSize: number;
+  query?: QueryDslQueryContainer;
 }
 /**
  * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
  * changes are "picked up". Returns a taskId to track progress.
  */
-export declare const updateAndPickupMappings: ({ client, index, mappings, batchSize, query, }: UpdateAndPickupMappingsParams) => TaskEither.TaskEither<RetryableEsClientError, UpdateAndPickupMappingsResponse>;
+export declare const updateAndPickupMappings: ({
+  client,
+  index,
+  mappings,
+  batchSize,
+  query,
+}: UpdateAndPickupMappingsParams) => TaskEither.TaskEither<
+  RetryableEsClientError,
+  UpdateAndPickupMappingsResponse
+>;

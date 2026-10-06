@@ -1,4 +1,11 @@
-import { z } from '@kbn/zod/v4';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { z } from '@kbn/zod/v4';
 /** Attachment type identifier registered with Agent Builder. */
 export declare const PROPOSAL_ATTACHMENT_TYPE: 'platform.proposal';
 /**
@@ -6,8 +13,11 @@ export declare const PROPOSAL_ATTACHMENT_TYPE: 'platform.proposal';
  * card and the agent read it at display time — anything snapshotted here would
  * still say "pending" after the analyst had decided.
  */
-export declare const proposalAttachmentDataSchema: z.ZodObject<{
+export declare const proposalAttachmentDataSchema: z.ZodObject<
+  {
     proposalId: z.ZodString;
     title: z.ZodString;
-}, z.core.$strip>;
+  },
+  z.core.$strip
+>;
 export type ProposalAttachmentData = z.infer<typeof proposalAttachmentDataSchema>;

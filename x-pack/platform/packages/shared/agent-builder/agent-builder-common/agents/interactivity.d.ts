@@ -1,24 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { WithRequiredProperty } from '@kbn/utility-types';
 import type { ApiTarget } from '../apis';
-import { AgentExecutionMode } from './execution_mode';
+import type { AgentExecutionMode } from './execution_mode';
 export interface AutoApprovedApi {
-    target: ApiTarget;
-    api: string;
+  target: ApiTarget;
+  api: string;
 }
 /**
  * Interactivity configuration - defines behavior for features that require a live user.
  */
 export interface InteractivityConfigInput {
-    /**
-     * When false, features that require a live user (HITL prompts,
-     * `ask_user_question`) are disabled — either via auto-decline (tools that
-     * emit prompts) or via tool-registration gating.
-     */
-    enabled?: boolean;
-    /**
-     * Destructive APIs pre-approved for this execution.
-     */
-    auto_approved_apis?: AutoApprovedApi[];
+  /**
+   * When false, features that require a live user (HITL prompts,
+   * `ask_user_question`) are disabled — either via auto-decline (tools that
+   * emit prompts) or via tool-registration gating.
+   */
+  enabled?: boolean;
+  /**
+   * Destructive APIs pre-approved for this execution.
+   */
+  auto_approved_apis?: AutoApprovedApi[];
 }
 /**
  * Interactivity configuration once a run has resolved it. Every consumer downstream of
@@ -32,7 +39,10 @@ export type InteractivityConfig = WithRequiredProperty<InteractivityConfigInput,
  * @param executionMode - Mode the run executes in, which determines the `enabled` default.
  * @returns A config whose `enabled` is always set.
  */
-export declare const normalizeInteractive: (input: InteractivityConfigInput | undefined, executionMode: AgentExecutionMode) => InteractivityConfig;
+export declare const normalizeInteractive: (
+  input: InteractivityConfigInput | undefined,
+  executionMode: AgentExecutionMode
+) => InteractivityConfig;
 /**
  * Determines whether a destructive API call is covered by the run's pre-approvals.
  *
@@ -41,10 +51,14 @@ export declare const normalizeInteractive: (input: InteractivityConfigInput | un
  * @param api - Exact API identifier, as passed to `execute_api`.
  * @returns True when a grant on the same target covers that API, whether exactly or by wildcard.
  */
-export declare const isApiAutoApproved: ({ interactivity, target, api, }: {
-    interactivity: InteractivityConfigInput;
-    target: ApiTarget;
-    api: string;
+export declare const isApiAutoApproved: ({
+  interactivity,
+  target,
+  api,
+}: {
+  interactivity: InteractivityConfigInput;
+  target: ApiTarget;
+  api: string;
 }) => boolean;
 /**
  * Transforms the per-target API map into flat {@link AutoApprovedApi} pairs.
@@ -52,11 +66,15 @@ export declare const isApiAutoApproved: ({ interactivity, target, api, }: {
  * @param apisByTarget - Granted selectors keyed by backend.
  * @returns One entry per granted selector, grouped by target in {@link apiTargets} order.
  */
-export declare const toAutoApprovedApis: (apisByTarget: Partial<Record<ApiTarget, readonly string[]>>) => AutoApprovedApi[];
+export declare const toAutoApprovedApis: (
+  apisByTarget: Partial<Record<ApiTarget, readonly string[]>>
+) => AutoApprovedApi[];
 /**
  * Builds the interactivity config for runs with no live user, carrying over pre-approved APIs.
  *
  * @param autoApprovedApis - Destructive APIs pre-approved for the run.
  * @returns A disabled interactivity config.
  */
-export declare const createNonInteractiveConfig: (autoApprovedApis?: AutoApprovedApi[]) => InteractivityConfig;
+export declare const createNonInteractiveConfig: (
+  autoApprovedApis?: AutoApprovedApi[]
+) => InteractivityConfig;

@@ -1,16 +1,23 @@
-import { ModelFamily, ModelProvider } from '../model_provider';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ModelFamily, ModelProvider } from '../model_provider';
 export interface ModelDefinition {
-    /** Canonical id, used to match the model against a full model name string. */
-    id: string;
-    /**
-     * Additional id spellings this definition should match. Useful when a provider ships the same
-     * model under multiple naming conventions — e.g. Claude 4+ is `claude-sonnet-4-5` on Bedrock /
-     * Anthropic direct / Vertex but `claude-4.5-sonnet` on Elastic Inference Service.
-     */
-    aliases?: string[];
-    provider: ModelProvider;
-    family: ModelFamily;
-    contextWindow: number;
+  /** Canonical id, used to match the model against a full model name string. */
+  id: string;
+  /**
+   * Additional id spellings this definition should match. Useful when a provider ships the same
+   * model under multiple naming conventions — e.g. Claude 4+ is `claude-sonnet-4-5` on Bedrock /
+   * Anthropic direct / Vertex but `claude-4.5-sonnet` on Elastic Inference Service.
+   */
+  aliases?: string[];
+  provider: ModelProvider;
+  family: ModelFamily;
+  contextWindow: number;
 }
 /**
  * Retrieve a model definition from the given full model name, if available.

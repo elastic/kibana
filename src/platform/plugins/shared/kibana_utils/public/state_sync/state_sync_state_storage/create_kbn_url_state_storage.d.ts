@@ -1,4 +1,13 @@
-import { Observable } from 'rxjs';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Observable } from 'rxjs';
 import type { History } from 'history';
 import type { IStateStorage } from './types';
 import type { IKbnUrlControls } from '../../state_management/url';
@@ -16,29 +25,39 @@ import type { IKbnUrlControls } from '../../state_management/url';
  * @public
  */
 export interface IKbnUrlStateStorage extends IStateStorage {
-    set: <State>(key: string, state: State, opts?: {
-        replace: boolean;
-    }) => Promise<string | undefined>;
-    get: <State = unknown>(key: string) => State | null;
-    change$: <State = unknown>(key: string) => Observable<State | null>;
-    /**
-     * Cancels any pending url updates
-     */
-    cancel: () => void;
-    /**
-     * Lower level wrapper around history library that handles batching multiple URL updates into one history change
-     */
-    kbnUrlControls: IKbnUrlControls;
+  set: <State>(
+    key: string,
+    state: State,
+    opts?: {
+      replace: boolean;
+    }
+  ) => Promise<string | undefined>;
+  get: <State = unknown>(key: string) => State | null;
+  change$: <State = unknown>(key: string) => Observable<State | null>;
+  /**
+   * Cancels any pending url updates
+   */
+  cancel: () => void;
+  /**
+   * Lower level wrapper around history library that handles batching multiple URL updates into one history change
+   */
+  kbnUrlControls: IKbnUrlControls;
 }
 /**
  * Creates {@link IKbnUrlStateStorage} state storage
  * @returns - {@link IKbnUrlStateStorage}
  * @public
  */
-export declare const createKbnUrlStateStorage: ({ useHash, useHashQuery, history, onGetError, onSetError, }?: {
-    useHash: boolean;
-    useHashQuery?: boolean;
-    history?: History;
-    onGetError?: (error: Error) => void;
-    onSetError?: (error: Error) => void;
+export declare const createKbnUrlStateStorage: ({
+  useHash,
+  useHashQuery,
+  history,
+  onGetError,
+  onSetError,
+}?: {
+  useHash: boolean;
+  useHashQuery?: boolean;
+  history?: History;
+  onGetError?: (error: Error) => void;
+  onSetError?: (error: Error) => void;
 }) => IKbnUrlStateStorage;

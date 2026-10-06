@@ -1,4 +1,13 @@
-import { Walker } from '@elastic/esql';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Walker } from '@elastic/esql';
 import type { ESQLAstBaseItem, ESQLFunction } from '@elastic/esql/types';
 /**
  * Extracts the parameter list from a formatted function signature.
@@ -19,38 +28,55 @@ export declare function getParameterList(formattedSignature: string): string[];
  * - `COUNT_DISTINCT(field, |` -> 1 (cursor after comma with space)
  * - `COUNT_DISTINCT(field, 10|` -> 1 (cursor within second arg)
  */
-export declare function getArgumentToHighlightIndex(innerText: string, fnNode: ESQLFunction | {
-    args: Array<Pick<ESQLAstBaseItem, 'location'>>;
-}, offset: number): number;
-export declare function getPromqlSignatureHelp(root: Parameters<typeof Walker.walk>[0], fullText: string, offset: number): {
-    signatures: {
+export declare function getArgumentToHighlightIndex(
+  innerText: string,
+  fnNode:
+    | ESQLFunction
+    | {
+        args: Array<Pick<ESQLAstBaseItem, 'location'>>;
+      },
+  offset: number
+): number;
+export declare function getPromqlSignatureHelp(
+  root: Parameters<typeof Walker.walk>[0],
+  fullText: string,
+  offset: number
+):
+  | {
+      signatures: {
         label: string;
         documentation: string | undefined;
         parameters: {
-            label: string;
-            documentation: string;
+          label: string;
+          documentation: string;
         }[];
-    }[];
-    activeSignature: number;
-    activeParameter: number;
-} | undefined;
-export declare function buildSignatureHelpItem(formattedSignature: string, fnDefinition: {
+      }[];
+      activeSignature: number;
+      activeParameter: number;
+    }
+  | undefined;
+export declare function buildSignatureHelpItem(
+  formattedSignature: string,
+  fnDefinition: {
     description?: string;
     signatures?: Array<{
-        params: Array<{
-            name: string;
-            description?: string;
-        }>;
+      params: Array<{
+        name: string;
+        description?: string;
+      }>;
     }>;
-}, parameters: string[], currentArgIndex: number): {
-    signatures: {
-        label: string;
-        documentation: string | undefined;
-        parameters: {
-            label: string;
-            documentation: string;
-        }[];
+  },
+  parameters: string[],
+  currentArgIndex: number
+): {
+  signatures: {
+    label: string;
+    documentation: string | undefined;
+    parameters: {
+      label: string;
+      documentation: string;
     }[];
-    activeSignature: number;
-    activeParameter: number;
+  }[];
+  activeSignature: number;
+  activeParameter: number;
 };

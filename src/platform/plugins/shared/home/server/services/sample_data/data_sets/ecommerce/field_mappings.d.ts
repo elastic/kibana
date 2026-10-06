@@ -1,202 +1,211 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export declare const fieldMappings: {
-    category: {
+  category: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+      };
+    };
+  };
+  currency: {
+    type: string;
+  };
+  customer_birth_date: {
+    type: string;
+  };
+  customer_first_name: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+        ignore_above: number;
+      };
+    };
+  };
+  customer_full_name: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+        ignore_above: number;
+      };
+    };
+  };
+  customer_gender: {
+    type: string;
+  };
+  customer_id: {
+    type: string;
+  };
+  customer_last_name: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+        ignore_above: number;
+      };
+    };
+  };
+  customer_phone: {
+    type: string;
+  };
+  day_of_week: {
+    type: string;
+  };
+  day_of_week_i: {
+    type: string;
+  };
+  email: {
+    type: string;
+  };
+  manufacturer: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+      };
+    };
+  };
+  order_date: {
+    type: string;
+  };
+  order_id: {
+    type: string;
+  };
+  products: {
+    properties: {
+      base_price: {
+        type: string;
+      };
+      discount_percentage: {
+        type: string;
+      };
+      quantity: {
+        type: string;
+      };
+      manufacturer: {
         type: string;
         fields: {
-            keyword: {
-                type: string;
-            };
+          keyword: {
+            type: string;
+          };
         };
-    };
-    currency: {
+      };
+      tax_amount: {
         type: string;
-    };
-    customer_birth_date: {
+      };
+      product_id: {
         type: string;
-    };
-    customer_first_name: {
+      };
+      category: {
         type: string;
         fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
+          keyword: {
+            type: string;
+          };
         };
-    };
-    customer_full_name: {
+      };
+      sku: {
+        type: string;
+      };
+      taxless_price: {
+        type: string;
+      };
+      unit_discount_amount: {
+        type: string;
+      };
+      min_price: {
+        type: string;
+      };
+      _id: {
         type: string;
         fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
+          keyword: {
+            type: string;
+            ignore_above: number;
+          };
         };
-    };
-    customer_gender: {
+      };
+      discount_amount: {
         type: string;
-    };
-    customer_id: {
+      };
+      created_on: {
         type: string;
-    };
-    customer_last_name: {
+      };
+      product_name: {
         type: string;
+        analyzer: string;
         fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
+          keyword: {
+            type: string;
+          };
         };
-    };
-    customer_phone: {
+      };
+      price: {
         type: string;
-    };
-    day_of_week: {
+      };
+      taxful_price: {
         type: string;
-    };
-    day_of_week_i: {
+      };
+      base_unit_price: {
         type: string;
+      };
     };
-    email: {
+  };
+  sku: {
+    type: string;
+  };
+  taxful_total_price: {
+    type: string;
+  };
+  taxless_total_price: {
+    type: string;
+  };
+  total_quantity: {
+    type: string;
+  };
+  total_unique_products: {
+    type: string;
+  };
+  type: {
+    type: string;
+  };
+  user: {
+    type: string;
+  };
+  geoip: {
+    properties: {
+      country_iso_code: {
         type: string;
-    };
-    manufacturer: {
+      };
+      location: {
         type: string;
-        fields: {
-            keyword: {
-                type: string;
-            };
-        };
-    };
-    order_date: {
+      };
+      region_name: {
         type: string;
-    };
-    order_id: {
+      };
+      continent_name: {
         type: string;
-    };
-    products: {
-        properties: {
-            base_price: {
-                type: string;
-            };
-            discount_percentage: {
-                type: string;
-            };
-            quantity: {
-                type: string;
-            };
-            manufacturer: {
-                type: string;
-                fields: {
-                    keyword: {
-                        type: string;
-                    };
-                };
-            };
-            tax_amount: {
-                type: string;
-            };
-            product_id: {
-                type: string;
-            };
-            category: {
-                type: string;
-                fields: {
-                    keyword: {
-                        type: string;
-                    };
-                };
-            };
-            sku: {
-                type: string;
-            };
-            taxless_price: {
-                type: string;
-            };
-            unit_discount_amount: {
-                type: string;
-            };
-            min_price: {
-                type: string;
-            };
-            _id: {
-                type: string;
-                fields: {
-                    keyword: {
-                        type: string;
-                        ignore_above: number;
-                    };
-                };
-            };
-            discount_amount: {
-                type: string;
-            };
-            created_on: {
-                type: string;
-            };
-            product_name: {
-                type: string;
-                analyzer: string;
-                fields: {
-                    keyword: {
-                        type: string;
-                    };
-                };
-            };
-            price: {
-                type: string;
-            };
-            taxful_price: {
-                type: string;
-            };
-            base_unit_price: {
-                type: string;
-            };
-        };
-    };
-    sku: {
+      };
+      city_name: {
         type: string;
+      };
     };
-    taxful_total_price: {
+  };
+  event: {
+    properties: {
+      dataset: {
         type: string;
+      };
     };
-    taxless_total_price: {
-        type: string;
-    };
-    total_quantity: {
-        type: string;
-    };
-    total_unique_products: {
-        type: string;
-    };
-    type: {
-        type: string;
-    };
-    user: {
-        type: string;
-    };
-    geoip: {
-        properties: {
-            country_iso_code: {
-                type: string;
-            };
-            location: {
-                type: string;
-            };
-            region_name: {
-                type: string;
-            };
-            continent_name: {
-                type: string;
-            };
-            city_name: {
-                type: string;
-            };
-        };
-    };
-    event: {
-        properties: {
-            dataset: {
-                type: string;
-            };
-        };
-    };
+  };
 };

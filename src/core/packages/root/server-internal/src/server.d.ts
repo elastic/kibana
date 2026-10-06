@@ -1,60 +1,73 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Env, RawConfigurationProvider } from '@kbn/config';
-import { ConfigService } from '@kbn/config';
+import type { ConfigService } from '@kbn/config';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
-import type { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '@kbn/core-lifecycle-server-internal';
 /** @internal */
 export declare class Server {
-    #private;
-    readonly env: Env;
-    private readonly loggingSystem;
-    readonly configService: ConfigService;
-    private readonly analytics;
-    private readonly capabilities;
-    private readonly context;
-    private readonly elasticsearch;
-    private readonly featureFlags;
-    private readonly http;
-    private readonly rendering;
-    private readonly log;
-    private readonly plugins;
-    private readonly savedObjects;
-    private readonly uiSettings;
-    private readonly environment;
-    private readonly node;
-    private readonly metrics;
-    private readonly httpRateLimiter;
-    private readonly httpResources;
-    private readonly status;
-    private readonly logging;
-    private readonly coreApp;
-    private readonly coreUsageData;
-    private readonly i18n;
-    private readonly deprecations;
-    private readonly userActivity;
-    private readonly executionContext;
-    private readonly prebootService;
-    private readonly pricing;
-    private readonly docLinks;
-    private readonly customBranding;
-    private readonly userSettingsService;
-    private readonly security;
-    private readonly userProfile;
-    private readonly injection;
-    private readonly dataStreams;
-    private readonly userStorage;
-    private readonly savedObjectsStartPromise;
-    private resolveSavedObjectsStartPromise?;
-    private coreStart?;
-    private discoveredPlugins?;
-    private readonly logger;
-    private nodeRoles?;
-    private readonly uptimePerStep;
-    constructor(rawConfigProvider: RawConfigurationProvider, env: Env, loggingSystem: ILoggingSystem);
-    preboot(): Promise<InternalCorePreboot | undefined>;
-    setup(): Promise<InternalCoreSetup>;
-    start(): Promise<InternalCoreStart>;
-    stop(): Promise<void>;
-    private ensureValidConfiguration;
-    private registerCoreContext;
-    setupCoreConfig(): void;
+  #private;
+  readonly env: Env;
+  private readonly loggingSystem;
+  readonly configService: ConfigService;
+  private readonly analytics;
+  private readonly capabilities;
+  private readonly context;
+  private readonly elasticsearch;
+  private readonly featureFlags;
+  private readonly http;
+  private readonly rendering;
+  private readonly log;
+  private readonly plugins;
+  private readonly savedObjects;
+  private readonly uiSettings;
+  private readonly environment;
+  private readonly node;
+  private readonly metrics;
+  private readonly httpRateLimiter;
+  private readonly httpResources;
+  private readonly status;
+  private readonly logging;
+  private readonly coreApp;
+  private readonly coreUsageData;
+  private readonly i18n;
+  private readonly deprecations;
+  private readonly userActivity;
+  private readonly executionContext;
+  private readonly prebootService;
+  private readonly pricing;
+  private readonly docLinks;
+  private readonly customBranding;
+  private readonly userSettingsService;
+  private readonly security;
+  private readonly userProfile;
+  private readonly injection;
+  private readonly dataStreams;
+  private readonly userStorage;
+  private readonly savedObjectsStartPromise;
+  private resolveSavedObjectsStartPromise?;
+  private coreStart?;
+  private discoveredPlugins?;
+  private readonly logger;
+  private nodeRoles?;
+  private readonly uptimePerStep;
+  constructor(rawConfigProvider: RawConfigurationProvider, env: Env, loggingSystem: ILoggingSystem);
+  preboot(): Promise<InternalCorePreboot | undefined>;
+  setup(): Promise<InternalCoreSetup>;
+  start(): Promise<InternalCoreStart>;
+  stop(): Promise<void>;
+  private ensureValidConfiguration;
+  private registerCoreContext;
+  setupCoreConfig(): void;
 }

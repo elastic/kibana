@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthenticatedPrincipal, AuthenticatedUser } from '@kbn/core-security-common';
 import type { APIKeysType } from './authentication';
@@ -7,35 +16,35 @@ import type { APIKeysType } from './authentication';
  * @public
  */
 export interface CoreAuthenticationService {
-    /**
-     * Retrieve the user bound to the provided request, or null if
-     * no user is authenticated.
-     *
-     * @param request The request to retrieve the authenticated user for.
-     */
-    getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
-    /**
-     * Classify the principal bound to the provided request: a user, an anonymous user, an API key
-     * or a service account, each Elasticsearch-issued (`stack`) or UIAM-issued (`uiam`) where that
-     * applies. Performs no I/O. Anonymous access resolves to `anonymous` even when the anonymous
-     * provider authenticates with an API key.
-     *
-     * `null` means no authenticated principal is known: unauthenticated requests, and fake requests
-     * that were not minted for a service account (or when service accounts are disabled). That
-     * includes Task Manager requests. Use {@link getCurrentUser} for the user such a request acts for.
-     *
-     * @param request The request to classify the authenticated principal for.
-     */
-    getPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null;
-    /**
-     * Retrieve the redacted session ID for the provided request.
-     * Returns a redacted form of the session ID (e.g. last N characters).
-     * Returns undefined if no session exists for the request.
-     *
-     * @param request The request to retrieve the session ID for.
-     */
-    getRedactedSessionId(request: KibanaRequest): Promise<string | undefined>;
-    apiKeys: APIKeysType;
+  /**
+   * Retrieve the user bound to the provided request, or null if
+   * no user is authenticated.
+   *
+   * @param request The request to retrieve the authenticated user for.
+   */
+  getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
+  /**
+   * Classify the principal bound to the provided request: a user, an anonymous user, an API key
+   * or a service account, each Elasticsearch-issued (`stack`) or UIAM-issued (`uiam`) where that
+   * applies. Performs no I/O. Anonymous access resolves to `anonymous` even when the anonymous
+   * provider authenticates with an API key.
+   *
+   * `null` means no authenticated principal is known: unauthenticated requests, and fake requests
+   * that were not minted for a service account (or when service accounts are disabled). That
+   * includes Task Manager requests. Use {@link getCurrentUser} for the user such a request acts for.
+   *
+   * @param request The request to classify the authenticated principal for.
+   */
+  getPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null;
+  /**
+   * Retrieve the redacted session ID for the provided request.
+   * Returns a redacted form of the session ID (e.g. last N characters).
+   * Returns undefined if no session exists for the request.
+   *
+   * @param request The request to retrieve the session ID for.
+   */
+  getRedactedSessionId(request: KibanaRequest): Promise<string | undefined>;
+  apiKeys: APIKeysType;
 }
 /**
  * Identity fields that can be bound to a fake request by a
@@ -44,10 +53,10 @@ export interface CoreAuthenticationService {
  * @internal
  */
 export interface FakeRequestUserFields {
-    /** The originating user's profile ID, exposed as `profile_uid`. */
-    profileId?: string;
-    /** The originating user's username, exposed as `username`. */
-    username?: string;
+  /** The originating user's profile ID, exposed as `profile_uid`. */
+  profileId?: string;
+  /** The originating user's username, exposed as `username`. */
+  username?: string;
 }
 /**
  * Binds originating-user identity fields to a fake request so

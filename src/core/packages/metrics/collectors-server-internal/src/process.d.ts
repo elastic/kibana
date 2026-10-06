@@ -1,10 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { OpsProcessMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 export declare class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics[]> {
-    static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics;
-    private readonly eventLoopDelayMonitor;
-    private readonly eventLoopUtilizationMonitor;
-    private getCurrentPidMetrics;
-    collect(): OpsProcessMetrics[];
-    registerMetrics(): void;
-    reset(): void;
+  static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics;
+  private readonly eventLoopDelayMonitor;
+  private readonly eventLoopUtilizationMonitor;
+  private getCurrentPidMetrics;
+  collect(): OpsProcessMetrics[];
+  registerMetrics(): void;
+  reset(): void;
 }

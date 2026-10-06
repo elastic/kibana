@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-pricing-server'
+  - '@kbn/core'
 tags:
   - shared-server
   - package

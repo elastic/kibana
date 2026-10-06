@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLFunction } from '@elastic/esql/types';
 import type { UnmappedFieldsStrategy } from '../../../registry/types';
 import { type ESQLColumnData } from '../../../registry/types';
@@ -18,5 +27,13 @@ import type { FunctionDefinition, PromQLFunctionDefinition } from '../../types';
  *  ): long
  * ```
  */
-export declare function getFormattedFunctionSignature(functionDef: FunctionDefinition, fnNode?: ESQLFunction, columns?: Map<string, ESQLColumnData>, unmappedFieldsStrategy?: UnmappedFieldsStrategy, maxTypesToShow?: number): string;
-export declare function getFormattedPromqlFunctionSignature(fnDef: PromQLFunctionDefinition): string;
+export declare function getFormattedFunctionSignature(
+  functionDef: FunctionDefinition,
+  fnNode?: ESQLFunction,
+  columns?: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy,
+  maxTypesToShow?: number
+): string;
+export declare function getFormattedPromqlFunctionSignature(
+  fnDef: PromQLFunctionDefinition
+): string;

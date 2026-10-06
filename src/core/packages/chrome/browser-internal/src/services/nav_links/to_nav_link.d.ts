@@ -1,7 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IBasePath } from '@kbn/core-http-browser';
 import { type PublicAppInfo, type PublicAppDeepLinkInfo } from '@kbn/core-application-browser';
-import { NavLinkWrapper } from './nav_link';
-export declare function toNavLink(app: PublicAppInfo, basePath: IBasePath, deepLink?: PublicAppDeepLinkInfo): NavLinkWrapper | null;
+import type { NavLinkWrapper } from './nav_link';
+export declare function toNavLink(
+  app: PublicAppInfo,
+  basePath: IBasePath,
+  deepLink?: PublicAppDeepLinkInfo
+): NavLinkWrapper | null;
 /**
  * @param {string} url - a relative or root relative url.  If a relative path is given then the
  * absolute url returned will depend on the current page where this function is called from. For example

@@ -1,6 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { SearchSourceDependencies } from './search_source';
-import { SearchSource } from './search_source';
+import type { SearchSource } from './search_source';
 import type { SerializedSearchSourceFields } from '../..';
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.
@@ -19,4 +28,10 @@ import type { SerializedSearchSourceFields } from '../..';
  *
  *
  * @public */
-export declare const createSearchSource: (indexPatterns: DataViewsContract, searchSourceDependencies: SearchSourceDependencies) => (searchSourceFields?: SerializedSearchSourceFields, useDataViewLazy?: boolean) => Promise<SearchSource>;
+export declare const createSearchSource: (
+  indexPatterns: DataViewsContract,
+  searchSourceDependencies: SearchSourceDependencies
+) => (
+  searchSourceFields?: SerializedSearchSourceFields,
+  useDataViewLazy?: boolean
+) => Promise<SearchSource>;

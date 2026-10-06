@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IntervalHistogram, IEventLoopDelaysMonitor } from '@kbn/core-metrics-server';
 /**
  * Nanosecond to milisecond conversion unit
@@ -8,14 +17,14 @@ export declare const ONE_MILLISECOND_AS_NANOSECONDS = 1000000;
  **/
 export declare function nsToMs(metric: number): number;
 export declare class EventLoopDelaysMonitor implements IEventLoopDelaysMonitor {
-    private readonly loopMonitor;
-    private fromTimestamp;
-    /**
-     * Creating a new instance from EventLoopDelaysMonitor will
-     * automatically start tracking event loop delays.
-     */
-    constructor();
-    /**
+  private readonly loopMonitor;
+  private fromTimestamp;
+  /**
+   * Creating a new instance from EventLoopDelaysMonitor will
+   * automatically start tracking event loop delays.
+   */
+  constructor();
+  /**
      * Collect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay
      * the histogram calculations start from the last time `reset` was called or this
      * EventLoopDelaysMonitor instance was created.
@@ -24,13 +33,13 @@ export declare class EventLoopDelaysMonitor implements IEventLoopDelaysMonitor {
   
      * @returns {IntervalHistogram}
      */
-    collect(): IntervalHistogram;
-    /**
-     * Resets the collected histogram data.
-     */
-    reset(): void;
-    /**
-     * Disables updating the interval timer for collecting new data points.
-     */
-    stop(): void;
+  collect(): IntervalHistogram;
+  /**
+   * Resets the collected histogram data.
+   */
+  reset(): void;
+  /**
+   * Disables updating the interval timer for collecting new data points.
+   */
+  stop(): void;
 }

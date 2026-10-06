@@ -1,8 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export type SetStateToKbnUrlHashOptions = {
-    useHash: boolean;
-    storeInHashQuery?: boolean;
+  useHash: boolean;
+  storeInHashQuery?: boolean;
 };
-export declare function createSetStateToKbnUrl(createHash: <State>(rawState: State) => string): <State>(key: string, state: State, { useHash, storeInHashQuery }: SetStateToKbnUrlHashOptions | undefined, rawUrl: string) => string;
+export declare function createSetStateToKbnUrl(
+  createHash: <State>(rawState: State) => string
+): <State>(
+  key: string,
+  state: State,
+  { useHash, storeInHashQuery }: SetStateToKbnUrlHashOptions | undefined,
+  rawUrl: string
+) => string;
 /**
  * Common version of setStateToKbnUrl which doesn't use session storage.
  *
@@ -24,4 +40,9 @@ export declare function createSetStateToKbnUrl(createHash: <State>(rawState: Sta
  * { storeInHashQuery: true } option should be used in you want to store you state in a main query (not in a hash):
  * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
  */
-export declare function setStateToKbnUrl<State>(key: string, state: State, hashOptions: SetStateToKbnUrlHashOptions, rawUrl: string): string;
+export declare function setStateToKbnUrl<State>(
+  key: string,
+  state: State,
+  hashOptions: SetStateToKbnUrlHashOptions,
+  rawUrl: string
+): string;

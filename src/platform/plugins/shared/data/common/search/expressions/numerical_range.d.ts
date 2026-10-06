@@ -1,9 +1,26 @@
-import type { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
+} from '@kbn/expressions-plugin/common';
 export interface NumericalRange {
-    from?: number;
-    to?: number;
-    label?: string;
+  from?: number;
+  to?: number;
+  label?: string;
 }
 export type NumericalRangeOutput = ExpressionValueBoxed<'numerical_range', NumericalRange>;
-export type ExpressionFunctionNumericalRange = ExpressionFunctionDefinition<'numericalRange', null, NumericalRange, NumericalRangeOutput>;
+export type ExpressionFunctionNumericalRange = ExpressionFunctionDefinition<
+  'numericalRange',
+  null,
+  NumericalRange,
+  NumericalRangeOutput
+>;
 export declare const numericalRangeFunction: ExpressionFunctionNumericalRange;

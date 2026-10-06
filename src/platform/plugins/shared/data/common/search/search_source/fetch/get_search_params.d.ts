@@ -1,8 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { GetConfigFn } from '../../../types';
 import type { SearchRequest } from './types';
-export declare function getEsPreference(getConfigFn: GetConfigFn, sessionId?: string): SearchRequest['preference'];
+export declare function getEsPreference(
+  getConfigFn: GetConfigFn,
+  sessionId?: string
+): SearchRequest['preference'];
 /** @public */
-export declare function getSearchParamsFromRequest(searchRequest: SearchRequest, dependencies: {
+export declare function getSearchParamsFromRequest(
+  searchRequest: SearchRequest,
+  dependencies: {
     getConfig: GetConfigFn;
-}): ISearchRequestParams;
+  }
+): ISearchRequestParams;

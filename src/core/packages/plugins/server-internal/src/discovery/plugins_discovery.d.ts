@@ -1,6 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
-import { PluginWrapper } from '../plugin';
+import type { PluginWrapper } from '../plugin';
 import type { InstanceInfo } from '../plugin_context';
 import type { PluginsConfig } from '../plugins_config';
 import type { PluginDiscoveryError } from './plugin_discovery_error';
@@ -14,12 +23,17 @@ import type { PluginDiscoveryError } from './plugin_discovery_error';
  * @param coreContext Kibana core values.
  * @internal
  */
-export declare function discover({ config, coreContext, instanceInfo, nodeInfo, }: {
-    config: PluginsConfig;
-    coreContext: CoreContext;
-    instanceInfo: InstanceInfo;
-    nodeInfo: NodeInfo;
+export declare function discover({
+  config,
+  coreContext,
+  instanceInfo,
+  nodeInfo,
+}: {
+  config: PluginsConfig;
+  coreContext: CoreContext;
+  instanceInfo: InstanceInfo;
+  nodeInfo: NodeInfo;
 }): {
-    plugin$: import("rxjs").Observable<PluginWrapper<unknown, unknown, object, object>>;
-    error$: import("rxjs").Observable<PluginDiscoveryError>;
+  plugin$: import('rxjs').Observable<PluginWrapper<unknown, unknown, object, object>>;
+  error$: import('rxjs').Observable<PluginDiscoveryError>;
 };

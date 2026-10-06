@@ -1,6 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export interface ESQLIndexPatterns {
-    indexPattern: string;
-    indexPatternWithoutRemoteClusterPrefix: string;
+  indexPattern: string;
+  indexPatternWithoutRemoteClusterPrefix: string;
 }
 export declare function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns;
 /**
@@ -18,7 +27,10 @@ export declare function splitIndexPatternSources(indexPattern: string): string[]
  * @param supportedSourceCommands - Source command set to match, defaults to FROM and TS
  * @returns The source command name, or an empty string if not found
  */
-export declare function getSourceCommandFromESQLQuery(esql: string | undefined, supportedSourceCommands?: Set<string>): string;
+export declare function getSourceCommandFromESQLQuery(
+  esql: string | undefined,
+  supportedSourceCommands?: Set<string>
+): string;
 /**
  * Returns the FROM or TS command alone (with METADATA, and each subquery reduced to its source
  * command), whose columns are the schema of the queried dataset; for PROMQL, `FROM <index>` of

@@ -1,11 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * DataSetStatusType for an installed data set.
  * @see src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types
  */
-export declare const INSTALLED_STATUS = "installed";
+export declare const INSTALLED_STATUS = 'installed';
 /**
  * DataSetStatusType for a data set that is not installed yet.
  * @see src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types
  */
-export declare const UNINSTALLED_STATUS = "not_installed";
-export declare const SAMPLE_DATA_API = "/api/sample_data";
+export declare const UNINSTALLED_STATUS = 'not_installed';
+export declare const SAMPLE_DATA_API = '/api/sample_data';

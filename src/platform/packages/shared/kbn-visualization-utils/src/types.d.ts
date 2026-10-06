@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 /**
@@ -9,45 +18,51 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
  * * `reorder` means the table columns have changed order, which change the data as well
  * * `layers` means the change is a change to the layer structure, not to the table
  */
-export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended' | 'reorder' | 'layers';
+export type TableChangeType =
+  | 'initial'
+  | 'unchanged'
+  | 'reduced'
+  | 'extended'
+  | 'reorder'
+  | 'layers';
 export interface Suggestion<T = unknown, V = unknown> {
-    visualizationId: string;
-    datasourceState?: V;
-    datasourceId?: string;
-    columns: number;
-    score: number;
-    title: string;
-    visualizationState: T;
-    previewExpression?: Ast | string;
-    previewIcon: IconType;
-    hide?: boolean;
-    incomplete?: boolean;
-    changeType: TableChangeType;
-    keptLayerIds: string[];
+  visualizationId: string;
+  datasourceState?: V;
+  datasourceId?: string;
+  columns: number;
+  score: number;
+  title: string;
+  visualizationState: T;
+  previewExpression?: Ast | string;
+  previewIcon: IconType;
+  hide?: boolean;
+  incomplete?: boolean;
+  changeType: TableChangeType;
+  keptLayerIds: string[];
 }
 export declare enum ChartType {
-    XY = "XY",
-    Gauge = "Gauge",
-    Bar = "Bar",
-    Line = "Line",
-    Area = "Area",
-    Donut = "Donut",
-    Heatmap = "Heatmap",
-    Metric = "Metric",
-    Treemap = "Treemap",
-    Tagcloud = "Tagcloud",
-    Waffle = "Waffle",
-    Pie = "Pie",
-    Mosaic = "Mosaic",
-    Table = "Table"
+  XY = 'XY',
+  Gauge = 'Gauge',
+  Bar = 'Bar',
+  Line = 'Line',
+  Area = 'Area',
+  Donut = 'Donut',
+  Heatmap = 'Heatmap',
+  Metric = 'Metric',
+  Treemap = 'Treemap',
+  Tagcloud = 'Tagcloud',
+  Waffle = 'Waffle',
+  Pie = 'Pie',
+  Mosaic = 'Mosaic',
+  Table = 'Table',
 }
 export declare enum LensVisualizationType {
-    XY = "lnsXY",
-    Metric = "lnsMetric",
-    Pie = "lnsPie",
-    Heatmap = "lnsHeatmap",
-    Gauge = "lnsGauge",
-    Datatable = "lnsDatatable",
-    LegacyMetric = "lnsLegacyMetric",
-    Tagcloud = "lnsTagcloud"
+  XY = 'lnsXY',
+  Metric = 'lnsMetric',
+  Pie = 'lnsPie',
+  Heatmap = 'lnsHeatmap',
+  Gauge = 'lnsGauge',
+  Datatable = 'lnsDatatable',
+  LegacyMetric = 'lnsLegacyMetric',
+  Tagcloud = 'lnsTagcloud',
 }

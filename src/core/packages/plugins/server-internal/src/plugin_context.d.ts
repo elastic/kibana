@@ -1,15 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { PluginWrapper } from './plugin';
-import type { PluginsServicePrebootSetupDeps, PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import type {
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
 import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
 /** @internal */
 export interface InstanceInfo {
-    uuid: string;
-    airgapped: boolean;
+  uuid: string;
+  airgapped: boolean;
 }
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -28,12 +41,18 @@ export interface InstanceInfo {
  *
  * @internal
  */
-export declare function createPluginInitializerContext({ coreContext, opaqueId, manifest, instanceInfo, nodeInfo, }: {
-    coreContext: CoreContext;
-    opaqueId: PluginOpaqueId;
-    manifest: PluginManifest;
-    instanceInfo: InstanceInfo;
-    nodeInfo: NodeInfo;
+export declare function createPluginInitializerContext({
+  coreContext,
+  opaqueId,
+  manifest,
+  instanceInfo,
+  nodeInfo,
+}: {
+  coreContext: CoreContext;
+  opaqueId: PluginOpaqueId;
+  manifest: PluginManifest;
+  instanceInfo: InstanceInfo;
+  nodeInfo: NodeInfo;
 }): PluginInitializerContext;
 /**
  * Provides `CorePreboot` contract that will be exposed to the `preboot` plugin `setup` method.
@@ -49,9 +68,12 @@ export declare function createPluginInitializerContext({ coreContext, opaqueId, 
  * @param plugin The plugin we're building these values for.
  * @internal
  */
-export declare function createPluginPrebootSetupContext({ deps, plugin, }: {
-    deps: PluginsServicePrebootSetupDeps;
-    plugin: PluginWrapper;
+export declare function createPluginPrebootSetupContext({
+  deps,
+  plugin,
+}: {
+  deps: PluginsServicePrebootSetupDeps;
+  plugin: PluginWrapper;
 }): CorePreboot;
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
@@ -67,10 +89,14 @@ export declare function createPluginPrebootSetupContext({ deps, plugin, }: {
  * @param deps Dependencies that Plugins services gets during setup.
  * @internal
  */
-export declare function createPluginSetupContext<TPlugin, TPluginDependencies>({ deps, plugin, runtimeResolver, }: {
-    deps: PluginsServiceSetupDeps;
-    plugin: PluginWrapper<TPlugin, TPluginDependencies>;
-    runtimeResolver: IRuntimePluginContractResolver;
+export declare function createPluginSetupContext<TPlugin, TPluginDependencies>({
+  deps,
+  plugin,
+  runtimeResolver,
+}: {
+  deps: PluginsServiceSetupDeps;
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>;
+  runtimeResolver: IRuntimePluginContractResolver;
 }): CoreSetup;
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin `start` method.
@@ -83,8 +109,12 @@ export declare function createPluginSetupContext<TPlugin, TPluginDependencies>({
  * @param plugin The plugin we're building these values for.
  * @param deps Dependencies that Plugins services gets during start.
  * @internal
- */ export declare function createPluginStartContext<TPlugin, TPluginDependencies>({ plugin, deps, runtimeResolver, }: {
-    deps: PluginsServiceStartDeps;
-    plugin: PluginWrapper<TPlugin, TPluginDependencies>;
-    runtimeResolver: IRuntimePluginContractResolver;
+ */ export declare function createPluginStartContext<TPlugin, TPluginDependencies>({
+  plugin,
+  deps,
+  runtimeResolver,
+}: {
+  deps: PluginsServiceStartDeps;
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>;
+  runtimeResolver: IRuntimePluginContractResolver;
 }): CoreStart;

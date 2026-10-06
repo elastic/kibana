@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { BehaviorSubject } from 'rxjs';
 /**
  * A publishing subject is a RxJS subject that can be used to listen to value changes, but does not allow pushing values via the Next method.
@@ -5,9 +14,17 @@ import type { BehaviorSubject } from 'rxjs';
 export type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 type AnyValue = any;
 export type AnyPublishingSubject = PublishingSubject<AnyValue> | undefined;
-export type ValueFromPublishingSubject<T extends PublishingSubject<AnyValue> | undefined = PublishingSubject<AnyValue> | undefined> = T extends PublishingSubject<infer ValueType> ? ValueType : T extends undefined ? undefined : never;
+export type ValueFromPublishingSubject<
+  T extends PublishingSubject<AnyValue> | undefined = PublishingSubject<AnyValue> | undefined
+> = T extends PublishingSubject<infer ValueType>
+  ? ValueType
+  : T extends undefined
+  ? undefined
+  : never;
 export type UnwrapPublishingSubjectTuple<T extends [...any[]]> = T extends [
-    infer Head extends AnyPublishingSubject,
-    ...infer Tail extends AnyPublishingSubject[]
-] ? [ValueFromPublishingSubject<Head>, ...UnwrapPublishingSubjectTuple<Tail>] : [];
+  infer Head extends AnyPublishingSubject,
+  ...infer Tail extends AnyPublishingSubject[]
+]
+  ? [ValueFromPublishingSubject<Head>, ...UnwrapPublishingSubjectTuple<Tail>]
+  : [];
 export {};

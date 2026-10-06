@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
@@ -10,26 +17,33 @@ import type { TaskBackpressureMetric } from './task_backpressure_metrics_aggrega
 import type { TaskManagerMetricsCollector } from './task_metrics_collector';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 export interface Metrics {
-    last_update: string;
-    metrics: {
-        task_claim?: Metric<TaskClaimMetric>;
-        task_run?: Metric<TaskRunMetric>;
-        task_overdue?: Metric<TaskOverdueMetric>;
-        task_backpressure?: Metric<TaskBackpressureMetric>;
-    };
+  last_update: string;
+  metrics: {
+    task_claim?: Metric<TaskClaimMetric>;
+    task_run?: Metric<TaskRunMetric>;
+    task_overdue?: Metric<TaskOverdueMetric>;
+    task_backpressure?: Metric<TaskBackpressureMetric>;
+  };
 }
 export interface Metric<T> {
-    timestamp: string;
-    value: T;
+  timestamp: string;
+  value: T;
 }
 interface CreateMetricsAggregatorsOpts {
-    config: TaskManagerConfig;
-    logger: Logger;
-    reset$: Observable<boolean>;
-    taskPollingLifecycle?: TaskPollingLifecycle;
-    taskManagerMetricsCollector?: TaskManagerMetricsCollector;
-    definitions: TaskTypeDictionary;
+  config: TaskManagerConfig;
+  logger: Logger;
+  reset$: Observable<boolean>;
+  taskPollingLifecycle?: TaskPollingLifecycle;
+  taskManagerMetricsCollector?: TaskManagerMetricsCollector;
+  definitions: TaskTypeDictionary;
 }
-export declare function createMetricsAggregators({ config, reset$, logger, taskPollingLifecycle, taskManagerMetricsCollector, definitions, }: CreateMetricsAggregatorsOpts): AggregatedStatProvider;
+export declare function createMetricsAggregators({
+  config,
+  reset$,
+  logger,
+  taskPollingLifecycle,
+  taskManagerMetricsCollector,
+  definitions,
+}: CreateMetricsAggregatorsOpts): AggregatedStatProvider;
 export declare function createMetricsStream(provider$: AggregatedStatProvider): Observable<Metrics>;
 export {};

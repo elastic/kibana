@@ -1,8 +1,23 @@
-import { monaco } from './monaco_imports';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { monaco } from './monaco_imports';
 import type { LangModuleType, CustomLangModuleType } from './types';
-export declare function registerLanguage(language: LangModuleType | CustomLangModuleType, force?: boolean): void;
+export declare function registerLanguage(
+  language: LangModuleType | CustomLangModuleType,
+  force?: boolean
+): void;
 /**
  *
  * @deprecated avoid using this function, use `monaco.editor.registerLanguageThemeDefinition` instead
  */
-export declare function registerTheme(id: string, themeData: monaco.editor.IStandaloneThemeData): void;
+export declare function registerTheme(
+  id: string,
+  themeData: monaco.editor.IStandaloneThemeData
+): void;

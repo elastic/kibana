@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SerializedRangeKey } from './search';
 import type { SerializedMultiFieldKey } from './search/aggs/buckets/multi_field_key';
 import type { RawValue } from './serializable_field';
@@ -20,8 +29,8 @@ export type SerializedField = SerializedMultiFieldKey | SerializedRangeKey;
  */
 export type SerializedValue = number | string | SerializedField | unknown;
 export declare const SerializableType: {
-    MultiFieldKey: 'multiFieldKey';
-    RangeKey: 'rangeKey';
+  MultiFieldKey: 'multiFieldKey';
+  RangeKey: 'rangeKey';
 };
 export declare function deserializeField(field: SerializedValue): unknown;
 export declare function serializeField(field: RawValue): SerializedValue;

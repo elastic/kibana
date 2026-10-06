@@ -1,4 +1,13 @@
-import { z } from '@kbn/zod/v4';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { z } from '@kbn/zod/v4';
 import type { JsonSchema } from './schema/common/json_model_shape_schema';
 /**
  * Prefix for built-in workflow input JSON Schemas resolved by {@link resolveRef}
@@ -39,12 +48,21 @@ export declare const builtinWorkflowInputDefinitionRefValuesForZod: [string, ...
 /**
  * Zod schema for `$ref` under workflow inputs: suggests known built-in refs
  */
-export declare const builtinWorkflowInputDefinitionRefSchema: z.ZodString | z.ZodUnion<readonly [z.ZodEnum<{
-    [x: string]: string;
-}>, z.ZodString]>;
+export declare const builtinWorkflowInputDefinitionRefSchema:
+  | z.ZodString
+  | z.ZodUnion<
+      readonly [
+        z.ZodEnum<{
+          [x: string]: string;
+        }>,
+        z.ZodString
+      ]
+    >;
 /**
  * Merges {@link builtinWorkflowInputDefinitions} under `kibana.definitions` on the workflow
  * root JSON Schema document so `#/kibana/definitions/<id>` resolves for Monaco YAML and other
  * schema consumers that walk the document root.
  */
-export declare function mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema<T extends object>(root: T | null): T | null;
+export declare function mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema<T extends object>(
+  root: T | null
+): T | null;

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { EuiFlyoutProps } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 /**
@@ -6,11 +15,11 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
  * @public
  */
 export interface TracksOverlaysOptions {
-    /**
-     * If present, the panel with this ID will be focused when the overlay is opened. This can be used in tandem with a push
-     * flyout to edit a panel's settings in context
-     */
-    focusedPanelId?: string;
+  /**
+   * If present, the panel with this ID will be focused when the overlay is opened. This can be used in tandem with a push
+   * flyout to edit a panel's settings in context
+   */
+  focusedPanelId?: string;
 }
 /**
  * API for tracking overlays.
@@ -20,23 +29,23 @@ export interface TracksOverlaysOptions {
  * @public
  */
 export interface TracksOverlays {
-    /**
-     * Preferred flyout type for panel flyouts opened from this host (`push` pushes app content, `overlay` opens above layout).
-     */
-    panelFlyoutType?: EuiFlyoutProps['type'];
-    /**
-     * Registers an overlay.
-     *
-     * @param ref - The overlay reference to track.
-     * @param options - Optional options such as `focusedPanelId` for context.
-     */
-    openOverlay: (ref: OverlayRef, options?: TracksOverlaysOptions) => void;
-    /**
-     * Clears all tracked overlays.
-     *
-     * Typically called when the container is destroyed or when overlays should be force-closed.
-     */
-    clearOverlays: () => void;
+  /**
+   * Preferred flyout type for panel flyouts opened from this host (`push` pushes app content, `overlay` opens above layout).
+   */
+  panelFlyoutType?: EuiFlyoutProps['type'];
+  /**
+   * Registers an overlay.
+   *
+   * @param ref - The overlay reference to track.
+   * @param options - Optional options such as `focusedPanelId` for context.
+   */
+  openOverlay: (ref: OverlayRef, options?: TracksOverlaysOptions) => void;
+  /**
+   * Clears all tracked overlays.
+   *
+   * Typically called when the container is destroyed or when overlays should be force-closed.
+   */
+  clearOverlays: () => void;
 }
 /**
  * Type guard to check if an object implements {@link TracksOverlays}.

@@ -1,11 +1,44 @@
-import type { ESQLAstAllCommands, ESQLColumn, ESQLCommand, ESQLFunction, ESQLIdentifier, ESQLLocation, ESQLSource } from '@elastic/esql/types';
-import type { ErrorTypes, ErrorValues, ESQLMessage, FunctionDefinition, Signature, SupportedDataType } from '../types';
-export declare function getMessageFromId<K extends ErrorTypes>({ locations, ...payload }: {
-    messageId: K;
-    values: ErrorValues<K>;
-    locations: ESQLLocation;
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ESQLAstAllCommands,
+  ESQLColumn,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLIdentifier,
+  ESQLLocation,
+  ESQLSource,
+} from '@elastic/esql/types';
+import type {
+  ErrorTypes,
+  ErrorValues,
+  ESQLMessage,
+  FunctionDefinition,
+  Signature,
+  SupportedDataType,
+} from '../types';
+export declare function getMessageFromId<K extends ErrorTypes>({
+  locations,
+  ...payload
+}: {
+  messageId: K;
+  values: ErrorValues<K>;
+  locations: ESQLLocation;
 }): ESQLMessage;
-export declare function createMessage(type: ESQLMessage['type'], message: string, location: ESQLMessage['location'], messageId: string, underlinedWarning?: ESQLMessage['underlinedWarning']): ESQLMessage;
+export declare function createMessage(
+  type: ESQLMessage['type'],
+  message: string,
+  location: ESQLMessage['location'],
+  messageId: string,
+  underlinedWarning?: ESQLMessage['underlinedWarning']
+): ESQLMessage;
 /**
  * Tags an error as semantic, indicating it requires runtime data to validate.
  *
@@ -33,32 +66,52 @@ export declare function createMessage(type: ESQLMessage['type'], message: string
  */
 export declare function tagSemanticError(error: ESQLMessage, requiresCallback: string): ESQLMessage;
 export declare const errors: {
-    unexpected: (location: ESQLLocation, message?: string) => ESQLMessage;
-    byId: <K extends ErrorTypes>(id: K, location: ESQLLocation, values: ErrorValues<K>) => ESQLMessage;
-    unknownFunction: (fn: ESQLFunction) => ESQLMessage;
-    unknownColumn: (column: ESQLColumn | ESQLIdentifier) => ESQLMessage;
-    unmappedColumnWarning: (column: ESQLColumn | ESQLIdentifier) => ESQLMessage;
-    unknownIndex: (source: ESQLSource) => ESQLMessage;
-    unknownDataSource: (source: ESQLSource) => ESQLMessage;
-    unknownPolicy: (policyName: string, location: ESQLLocation) => ESQLMessage;
-    unknownCastingType: (castType: string, location: ESQLLocation) => ESQLMessage;
-    invalidInlineCast: (castType: string, valueType: string, location: ESQLLocation) => ESQLMessage;
-    tooManyForks: (command: ESQLCommand) => ESQLMessage;
-    nestedAggFunction: (fn: ESQLFunction, parentName: string) => ESQLMessage;
-    expectedAggregationArgument: (parentFn: ESQLFunction, location?: ESQLLocation) => ESQLMessage;
-    unknownAggFunction: (node: ESQLColumn | ESQLIdentifier, type?: string) => ESQLMessage;
-    invalidJoinIndex: (identifier: ESQLSource) => ESQLMessage;
-    joinOnSingleExpression: (location: ESQLLocation) => ESQLMessage;
-    noMatchingCallSignature: (fn: ESQLFunction, definition: FunctionDefinition, argTypes: string[]) => ESQLMessage;
-    licenseRequired: (fn: ESQLFunction, license: string) => ESQLMessage;
-    licenseRequiredForSignature: (fn: ESQLFunction, signature: Signature) => ESQLMessage;
-    functionNotAllowedHere: (fn: ESQLFunction, locationName: string) => ESQLMessage;
-    tsdbIncompatibleFunction: (fn: ESQLFunction) => ESQLMessage;
-    wrongNumberArgs: (fn: ESQLFunction, definition: FunctionDefinition) => ESQLMessage;
-    changePointWrongFieldType: ({ location, name }: ESQLColumn, type: SupportedDataType | 'unknown') => ESQLMessage;
-    unsupportedFieldType: (column: ESQLColumn | ESQLIdentifier, field: string, shouldWarn?: boolean) => ESQLMessage;
-    columnTypeConflict: (column: ESQLColumn | ESQLIdentifier, columnName: string, types: string[], shouldWarn?: boolean) => ESQLMessage;
-    dropTimestampWarning: ({ location }: ESQLColumn) => ESQLMessage;
-    forkTooManyBranches: (command: ESQLAstAllCommands) => ESQLMessage;
+  unexpected: (location: ESQLLocation, message?: string) => ESQLMessage;
+  byId: <K extends ErrorTypes>(
+    id: K,
+    location: ESQLLocation,
+    values: ErrorValues<K>
+  ) => ESQLMessage;
+  unknownFunction: (fn: ESQLFunction) => ESQLMessage;
+  unknownColumn: (column: ESQLColumn | ESQLIdentifier) => ESQLMessage;
+  unmappedColumnWarning: (column: ESQLColumn | ESQLIdentifier) => ESQLMessage;
+  unknownIndex: (source: ESQLSource) => ESQLMessage;
+  unknownDataSource: (source: ESQLSource) => ESQLMessage;
+  unknownPolicy: (policyName: string, location: ESQLLocation) => ESQLMessage;
+  unknownCastingType: (castType: string, location: ESQLLocation) => ESQLMessage;
+  invalidInlineCast: (castType: string, valueType: string, location: ESQLLocation) => ESQLMessage;
+  tooManyForks: (command: ESQLCommand) => ESQLMessage;
+  nestedAggFunction: (fn: ESQLFunction, parentName: string) => ESQLMessage;
+  expectedAggregationArgument: (parentFn: ESQLFunction, location?: ESQLLocation) => ESQLMessage;
+  unknownAggFunction: (node: ESQLColumn | ESQLIdentifier, type?: string) => ESQLMessage;
+  invalidJoinIndex: (identifier: ESQLSource) => ESQLMessage;
+  joinOnSingleExpression: (location: ESQLLocation) => ESQLMessage;
+  noMatchingCallSignature: (
+    fn: ESQLFunction,
+    definition: FunctionDefinition,
+    argTypes: string[]
+  ) => ESQLMessage;
+  licenseRequired: (fn: ESQLFunction, license: string) => ESQLMessage;
+  licenseRequiredForSignature: (fn: ESQLFunction, signature: Signature) => ESQLMessage;
+  functionNotAllowedHere: (fn: ESQLFunction, locationName: string) => ESQLMessage;
+  tsdbIncompatibleFunction: (fn: ESQLFunction) => ESQLMessage;
+  wrongNumberArgs: (fn: ESQLFunction, definition: FunctionDefinition) => ESQLMessage;
+  changePointWrongFieldType: (
+    { location, name }: ESQLColumn,
+    type: SupportedDataType | 'unknown'
+  ) => ESQLMessage;
+  unsupportedFieldType: (
+    column: ESQLColumn | ESQLIdentifier,
+    field: string,
+    shouldWarn?: boolean
+  ) => ESQLMessage;
+  columnTypeConflict: (
+    column: ESQLColumn | ESQLIdentifier,
+    columnName: string,
+    types: string[],
+    shouldWarn?: boolean
+  ) => ESQLMessage;
+  dropTimestampWarning: ({ location }: ESQLColumn) => ESQLMessage;
+  forkTooManyBranches: (command: ESQLAstAllCommands) => ESQLMessage;
 };
 export declare const buildSignatureTypes: (sig: Signature) => string;

@@ -1,17 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { z } from '@kbn/zod/v4';
-export type ValidateKqlAgainstSchemaResult = {
-    valid: true;
-} | {
-    valid: false;
-    error: string;
-};
+export type ValidateKqlAgainstSchemaResult =
+  | {
+      valid: true;
+    }
+  | {
+      valid: false;
+      error: string;
+    };
 export interface ValidateKqlAgainstSchemaOptions {
-    /**
-     * Prefix for schema-derived field paths (e.g. "event" for trigger conditions using event.severity).
-     * When set, allowed paths are prefix, prefix.path1, prefix.path2, ...
-     * When omitted, allowed paths are the schema paths as-is.
-     */
-    fieldPrefix?: string;
+  /**
+   * Prefix for schema-derived field paths (e.g. "event" for trigger conditions using event.severity).
+   * When set, allowed paths are prefix, prefix.path1, prefix.path2, ...
+   * When omitted, allowed paths are the schema paths as-is.
+   */
+  fieldPrefix?: string;
 }
 /**
  * Validates a KQL string in two ways:
@@ -36,4 +47,8 @@ export interface ValidateKqlAgainstSchemaOptions {
  * // { valid: false, error: "<parse error message>" }
  * ```
  */
-export declare function validateKqlAgainstSchema(kql: string, schema: z.ZodType, options?: ValidateKqlAgainstSchemaOptions): ValidateKqlAgainstSchemaResult;
+export declare function validateKqlAgainstSchema(
+  kql: string,
+  schema: z.ZodType,
+  options?: ValidateKqlAgainstSchemaOptions
+): ValidateKqlAgainstSchemaResult;

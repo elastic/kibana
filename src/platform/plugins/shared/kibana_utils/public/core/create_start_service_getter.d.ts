@@ -1,10 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 interface StartServices<Plugins = unknown, OwnContract = unknown, Core = CoreStart> {
-    plugins: Plugins;
-    self: OwnContract;
-    core: Core;
+  plugins: Plugins;
+  self: OwnContract;
+  core: Core;
 }
-export type StartServicesGetter<Plugins = unknown, OwnContract = unknown, Core = CoreStart> = () => StartServices<Plugins, OwnContract>;
+export type StartServicesGetter<
+  Plugins = unknown,
+  OwnContract = unknown,
+  Core = CoreStart
+> = () => StartServices<Plugins, OwnContract>;
 /**
  * Use this utility to create a synchronous *start* service getter in *setup*
  * life-cycle of your plugin.
@@ -47,5 +60,7 @@ export type StartServicesGetter<Plugins = unknown, OwnContract = unknown, Core =
  * and plugin contracts. If you call this function before the *start* life-cycle
  * has started it will throw.
  */
-export declare const createStartServicesGetter: <TPluginsStart extends object, TStart>(accessor: StartServicesAccessor<TPluginsStart, TStart>) => StartServicesGetter<TPluginsStart, TStart>;
+export declare const createStartServicesGetter: <TPluginsStart extends object, TStart>(
+  accessor: StartServicesAccessor<TPluginsStart, TStart>
+) => StartServicesGetter<TPluginsStart, TStart>;
 export {};

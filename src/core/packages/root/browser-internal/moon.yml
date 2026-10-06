@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/core-di-mocks'
   - '@kbn/core-notifications-browser'
   - '@kbn/core-user-storage-browser-internal'
+  - '@kbn/core'
 tags:
   - shared-browser
   - package

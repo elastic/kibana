@@ -1,9 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
 /**
  * Identifier of the pricing feature that gates cross-project search (CPS)
  * configuration UI such as the space-default project routing section.
  */
-export declare const CPS_TIER_ELIGIBLE_FEATURE_ID = "cps:tierEligible";
+export declare const CPS_TIER_ELIGIBLE_FEATURE_ID = 'cps:tierEligible';
 /**
  * Pricing feature that marks a project as eligible for cross-project search
  * (CPS) configuration. When this feature is available for the active product

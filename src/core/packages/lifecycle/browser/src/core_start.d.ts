@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -30,51 +39,51 @@ import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreStart {
-    /** {@link AnalyticsServiceStart} */
-    analytics: AnalyticsServiceStart;
-    /** {@link ApplicationStart} */
-    application: ApplicationStart;
-    /** {@link ChromeStart} */
-    chrome: ChromeStart;
-    /** {@link CustomBrandingStart} */
-    customBranding: CustomBrandingStart;
-    /** {@link DocLinksStart} */
-    docLinks: DocLinksStart;
-    /** {@link ExecutionContextStart} */
-    executionContext: ExecutionContextStart;
-    /** {@link FeatureFlagsStart} */
-    featureFlags: FeatureFlagsStart;
-    /** {@link HttpStart} */
-    http: HttpStart;
-    /** {@link CoreDiServiceStart} */
-    injection: CoreDiServiceStart;
-    /** {@link I18nStart} */
-    i18n: I18nStart;
-    /** {@link NotificationsStart} */
-    notifications: NotificationsStart;
-    /** {@link OverlayStart} */
-    overlays: OverlayStart;
-    /** {@link IUiSettingsClient} */
-    /** @Deprecated Use {@link CoreStart.settings} instead */
-    uiSettings: IUiSettingsClient;
-    /** {@link SettingsStart} */
-    settings: SettingsStart;
-    /** {@link FatalErrorsStart} */
-    fatalErrors: FatalErrorsStart;
-    /** {@link DeprecationsServiceStart} */
-    deprecations: DeprecationsServiceStart;
-    /** {@link ThemeServiceStart} */
-    theme: ThemeServiceStart;
-    /** {@link PluginsServiceStart} */
-    plugins: PluginsServiceStart;
-    /** {@link PricingServiceStart} */
-    pricing: PricingServiceStart;
-    /** {@link SecurityServiceStart} */
-    security: SecurityServiceStart;
-    /** {@link UserProfileServiceStart} */
-    userProfile: UserProfileServiceStart;
-    /** {@link IUserStorageClient} */
-    userStorage: IUserStorageClient;
-    /** {@link RenderingService} */
-    rendering: RenderingService;
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
+  /** {@link ApplicationStart} */
+  application: ApplicationStart;
+  /** {@link ChromeStart} */
+  chrome: ChromeStart;
+  /** {@link CustomBrandingStart} */
+  customBranding: CustomBrandingStart;
+  /** {@link DocLinksStart} */
+  docLinks: DocLinksStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
+  /** {@link FeatureFlagsStart} */
+  featureFlags: FeatureFlagsStart;
+  /** {@link HttpStart} */
+  http: HttpStart;
+  /** {@link CoreDiServiceStart} */
+  injection: CoreDiServiceStart;
+  /** {@link I18nStart} */
+  i18n: I18nStart;
+  /** {@link NotificationsStart} */
+  notifications: NotificationsStart;
+  /** {@link OverlayStart} */
+  overlays: OverlayStart;
+  /** {@link IUiSettingsClient} */
+  /** @Deprecated Use {@link CoreStart.settings} instead */
+  uiSettings: IUiSettingsClient;
+  /** {@link SettingsStart} */
+  settings: SettingsStart;
+  /** {@link FatalErrorsStart} */
+  fatalErrors: FatalErrorsStart;
+  /** {@link DeprecationsServiceStart} */
+  deprecations: DeprecationsServiceStart;
+  /** {@link ThemeServiceStart} */
+  theme: ThemeServiceStart;
+  /** {@link PluginsServiceStart} */
+  plugins: PluginsServiceStart;
+  /** {@link PricingServiceStart} */
+  pricing: PricingServiceStart;
+  /** {@link SecurityServiceStart} */
+  security: SecurityServiceStart;
+  /** {@link UserProfileServiceStart} */
+  userProfile: UserProfileServiceStart;
+  /** {@link IUserStorageClient} */
+  userStorage: IUserStorageClient;
+  /** {@link RenderingService} */
+  rendering: RenderingService;
 }

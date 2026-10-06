@@ -1,2 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ModelStage } from '../types';
-export declare const outdatedDocumentsSearchClosePit: ModelStage<'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT', 'OUTDATED_DOCUMENTS_SEARCH_REFRESH' | 'UPDATE_DOCUMENT_MODEL_VERSIONS'>;
+export declare const outdatedDocumentsSearchClosePit: ModelStage<
+  'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+  'OUTDATED_DOCUMENTS_SEARCH_REFRESH' | 'UPDATE_DOCUMENT_MODEL_VERSIONS'
+>;

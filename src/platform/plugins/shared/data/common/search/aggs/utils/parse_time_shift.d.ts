@@ -1,7 +1,16 @@
-import moment from 'moment';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type moment from 'moment';
 import type { TimeRange } from '../../../types';
-declare const INVALID_DATE = "invalid";
-declare const PREVIOUS_DATE = "previous";
+declare const INVALID_DATE = 'invalid';
+declare const PREVIOUS_DATE = 'previous';
 type PreviousDateType = typeof PREVIOUS_DATE;
 type InvalidDateType = typeof INVALID_DATE;
 /**
@@ -9,7 +18,9 @@ type InvalidDateType = typeof INVALID_DATE;
  * If parsing fails, 'invalid' is returned.
  * Allowed values are the string 'previous' and an integer followed by the units s,m,h,d,w,M,y
  *  */
-export declare const parseTimeShift: (val: string) => moment.Duration | PreviousDateType | InvalidDateType;
+export declare const parseTimeShift: (
+  val: string
+) => moment.Duration | PreviousDateType | InvalidDateType;
 /**
  * Check function to detect an absolute time shift.
  * The check is performed only on the string format and the timestamp is not validated:
@@ -19,10 +30,10 @@ export declare const parseTimeShift: (val: string) => moment.Duration | Previous
  */
 export declare const isAbsoluteTimeShift: (val?: string) => boolean;
 export declare const REASON_IDS: {
-    readonly missingTimerange: 'missingTimerange';
-    readonly notAbsoluteTimeShift: 'notAbsoluteTimeShift';
-    readonly invalidDate: 'invalidDate';
-    readonly shiftAfterTimeRange: 'shiftAfterTimeRange';
+  readonly missingTimerange: 'missingTimerange';
+  readonly notAbsoluteTimeShift: 'notAbsoluteTimeShift';
+  readonly invalidDate: 'invalidDate';
+  readonly shiftAfterTimeRange: 'shiftAfterTimeRange';
 };
 export type REASON_ID_TYPES = keyof typeof REASON_IDS;
 /**
@@ -31,13 +42,18 @@ export type REASON_ID_TYPES = keyof typeof REASON_IDS;
  * @param timeRange the current date histogram interval
  * @returns
  */
-export declare const parseAbsoluteTimeShift: (val: string, timeRange: TimeRange | undefined) => {
-    value: moment.Duration;
-    reason: null;
-} | {
-    value: InvalidDateType;
-    reason: REASON_ID_TYPES;
-};
+export declare const parseAbsoluteTimeShift: (
+  val: string,
+  timeRange: TimeRange | undefined
+) =>
+  | {
+      value: moment.Duration;
+      reason: null;
+    }
+  | {
+      value: InvalidDateType;
+      reason: REASON_ID_TYPES;
+    };
 /**
  * Relaxed version of the parsing validation
  * This version of the validation applies the timeRange validation only when passed
@@ -45,5 +61,8 @@ export declare const parseAbsoluteTimeShift: (val: string, timeRange: TimeRange 
  * @param timeRange
  * @returns the reason id if the absolute shift is not valid, undefined otherwise
  */
-export declare function validateAbsoluteTimeShift(val: string, timeRange?: TimeRange): REASON_ID_TYPES | undefined;
+export declare function validateAbsoluteTimeShift(
+  val: string,
+  timeRange?: TimeRange
+): REASON_ID_TYPES | undefined;
 export {};

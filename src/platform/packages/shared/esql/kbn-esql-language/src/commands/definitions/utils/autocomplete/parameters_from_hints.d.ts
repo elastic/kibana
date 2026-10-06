@@ -1,8 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ParameterHint, ParameterHintEntityType } from '../../..';
 import type { ICommandContext, ISuggestionItem } from '../../../registry/types';
 type SuggestionResolver = (hint: ParameterHint, ctx?: ICommandContext) => ISuggestionItem[];
-type ContextResolver = (hint: ParameterHint, ctx: Partial<ICommandContext>, callbacks: ESQLCallbacks) => Promise<Record<string, unknown>>;
+type ContextResolver = (
+  hint: ParameterHint,
+  ctx: Partial<ICommandContext>,
+  callbacks: ESQLCallbacks
+) => Promise<Record<string, unknown>>;
 /**
  * For some parameters, ES gives us hints about the nature of it, that we use to provide
  * custom autocompletion handlers.
@@ -15,8 +28,13 @@ type ContextResolver = (hint: ParameterHint, ctx: Partial<ICommandContext>, call
  * Be mindful while implementing context resolvers, context is shared by the command and all functions used within it.
  * If the data you need is already present, don't overwrite it, prefer merging it.
  */
-export declare const parametersFromHintsResolvers: Partial<Record<ParameterHintEntityType, {
-    suggestionResolver: SuggestionResolver;
-    contextResolver?: ContextResolver;
-}>>;
+export declare const parametersFromHintsResolvers: Partial<
+  Record<
+    ParameterHintEntityType,
+    {
+      suggestionResolver: SuggestionResolver;
+      contextResolver?: ContextResolver;
+    }
+  >
+>;
 export {};

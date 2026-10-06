@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { InferenceConnector } from './connectors';
 import type { ChatCompletionReasoningEffort } from '../chat_complete/reasoning';
 /**
@@ -9,7 +16,9 @@ export declare const getContextWindowSize: (connector: InferenceConnector) => nu
  *
  * @returns The advertised levels, or `undefined` when support is unknown.
  */
-export declare const getSupportedReasoningEffortLevels: (connector: InferenceConnector) => string[] | undefined;
+export declare const getSupportedReasoningEffortLevels: (
+  connector: InferenceConnector
+) => string[] | undefined;
 /**
  * Checks that the connector's model supports the reasoning effort level, as advertised by EIS.
  * Every level is accepted when support is unknown.
@@ -17,5 +26,8 @@ export declare const getSupportedReasoningEffortLevels: (connector: InferenceCon
  * @throws {InferenceTaskRequestError} with status 400 when the model does not support
  * `reasoningEffort`.
  */
-export declare const validateReasoningEffort: (connector: InferenceConnector, reasoningEffort: ChatCompletionReasoningEffort) => void;
+export declare const validateReasoningEffort: (
+  connector: InferenceConnector,
+  reasoningEffort: ChatCompletionReasoningEffort
+) => void;
 export declare const contextWindowFromModelName: (modelName: string) => number | undefined;

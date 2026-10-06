@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ObjectMigrationDefinition, Version } from './types';
 /**
  * Initiate a transform for a specific request version. After we initiate the transforms
@@ -19,24 +28,47 @@ import type { ObjectMigrationDefinition, Version } from './types';
  * @param requestVersion The starting version before up/down transforming
  * @returns A handler to pass an object migration definition
  */
-export declare const initTransform: <UpIn = unknown, UpOut = unknown, DownIn = unknown, DownOut = unknown>(requestVersion: Version) => (migrationDefinition: ObjectMigrationDefinition) => {
-    up: <I = UpIn, O = UpOut>(obj: I, to?: number | 'latest', { validate }?: {
-        validate?: boolean;
-    }) => {
+export declare const initTransform: <
+  UpIn = unknown,
+  UpOut = unknown,
+  DownIn = unknown,
+  DownOut = unknown
+>(
+  requestVersion: Version
+) => (migrationDefinition: ObjectMigrationDefinition) => {
+  up: <I = UpIn, O = UpOut>(
+    obj: I,
+    to?: number | 'latest',
+    {
+      validate,
+    }?: {
+      validate?: boolean;
+    }
+  ) =>
+    | {
         error: Error;
         value: null;
-    } | {
+      }
+    | {
         value: O;
         error: null;
-    };
-    down: <I = DownIn, O = DownOut>(obj: I, from?: number | 'latest', { validate }?: {
-        validate?: boolean;
-    }) => {
+      };
+  down: <I = DownIn, O = DownOut>(
+    obj: I,
+    from?: number | 'latest',
+    {
+      validate,
+    }?: {
+      validate?: boolean;
+    }
+  ) =>
+    | {
         error: Error;
         value: null;
-    } | {
+      }
+    | {
         value: any;
         error: null;
-    };
-    validate: (value: unknown, version?: number) => Error | null;
+      };
+  validate: (value: unknown, version?: number) => Error | null;
 };

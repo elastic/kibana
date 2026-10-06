@@ -11,6 +11,7 @@
     "@kbn/esql-language",
     "@kbn/esql-types",
     "@kbn/std",
+    "@kbn/code-editor",
   ],
   "exclude": ["target/**/*"]
 }

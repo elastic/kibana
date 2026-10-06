@@ -1,8 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type { ICommandContext } from '../../commands/registry/types';
-export declare const getCommandContext: (command: ESQLAstAllCommands, queryString: string, callbacks?: ESQLCallbacks) => Promise<Partial<ICommandContext>>;
+export declare const getCommandContext: (
+  command: ESQLAstAllCommands,
+  queryString: string,
+  callbacks?: ESQLCallbacks
+) => Promise<Partial<ICommandContext>>;
 /**
  *  Returns the context needed by the functions used within a command.
  */
-export declare const enhanceWithFunctionsContext: (command: ESQLAstAllCommands, context: Partial<ICommandContext>, callbacks?: ESQLCallbacks) => Promise<Partial<ICommandContext>>;
+export declare const enhanceWithFunctionsContext: (
+  command: ESQLAstAllCommands,
+  context: Partial<ICommandContext>,
+  callbacks?: ESQLCallbacks
+) => Promise<Partial<ICommandContext>>;

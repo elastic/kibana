@@ -1,64 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DependencyList } from 'react';
-import type { MigrateFunction, PersistableState, PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
+import type {
+  MigrateFunction,
+  PersistableState,
+  PersistableStateService,
+  VersionedState,
+} from '@kbn/kibana-utils-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { GetRedirectUrlOptions } from './redirect';
 /**
  * URL locator registry.
  */
 export interface ILocatorClient extends PersistableStateService<LocatorData> {
-    /**
-     * Create and register a new locator.
-     *
-     * @param locatorDefinition Definition of the new locator.
-     */
-    create<P extends SerializableRecord>(locatorDefinition: LocatorDefinition<P>): LocatorPublic<P>;
-    /**
-     * Retrieve a previously registered locator.
-     *
-     * @param id Unique ID of the locator.
-     */
-    get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P>;
+  /**
+   * Create and register a new locator.
+   *
+   * @param locatorDefinition Definition of the new locator.
+   */
+  create<P extends SerializableRecord>(locatorDefinition: LocatorDefinition<P>): LocatorPublic<P>;
+  /**
+   * Retrieve a previously registered locator.
+   *
+   * @param id Unique ID of the locator.
+   */
+  get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P>;
 }
 /**
  * A convenience interface used to define and register a locator.
  */
-export interface LocatorDefinition<P extends SerializableRecord> extends Partial<PersistableState<P>> {
-    /**
-     * Unique ID of the locator. Should be constant and unique across Kibana.
-     */
-    id: string;
-    /**
-     * Returns a deep link, including location state, which can be used for
-     * navigation in Kibana.
-     *
-     * @param params Parameters from which to generate a Kibana location.
-     */
-    getLocation(params: P): Promise<KibanaLocation>;
-    /**
-     * Extracts the time range from the locator's parameters.
-     *
-     * Implement this alongside `setTimeRange` when the
-     * locator params support time-range.
-     *
-     * @param params URL locator parameters.
-     */
-    getTimeRange?: (params: P) => TimeRange | undefined;
-    /**
-     * Returns a new copy of `params` with the supplied `timeRange` applied.
-     *
-     * Implement this alongside `getTimeRange` when the
-     * locator params support time-range.
-     *
-     * @param params URL locator parameters.
-     * @param timeRange The time range to apply, or `undefined` to clear it.
-     */
-    setTimeRange?: (params: P, timeRange?: TimeRange) => P;
+export interface LocatorDefinition<P extends SerializableRecord>
+  extends Partial<PersistableState<P>> {
+  /**
+   * Unique ID of the locator. Should be constant and unique across Kibana.
+   */
+  id: string;
+  /**
+   * Returns a deep link, including location state, which can be used for
+   * navigation in Kibana.
+   *
+   * @param params Parameters from which to generate a Kibana location.
+   */
+  getLocation(params: P): Promise<KibanaLocation>;
+  /**
+   * Extracts the time range from the locator's parameters.
+   *
+   * Implement this alongside `setTimeRange` when the
+   * locator params support time-range.
+   *
+   * @param params URL locator parameters.
+   */
+  getTimeRange?: (params: P) => TimeRange | undefined;
+  /**
+   * Returns a new copy of `params` with the supplied `timeRange` applied.
+   *
+   * Implement this alongside `getTimeRange` when the
+   * locator params support time-range.
+   *
+   * @param params URL locator parameters.
+   * @param timeRange The time range to apply, or `undefined` to clear it.
+   */
+  setTimeRange?: (params: P, timeRange?: TimeRange) => P;
 }
 /**
  * Public interface of a registered locator.
  */
-export type LocatorPublic<P extends SerializableRecord> = LocatorDefinition<P> & PersistableState<P> & {
+export type LocatorPublic<P extends SerializableRecord> = LocatorDefinition<P> &
+  PersistableState<P> & {
     readonly id: string;
     /**
      * Returns a URL as a string.
@@ -103,55 +119,57 @@ export type LocatorPublic<P extends SerializableRecord> = LocatorDefinition<P> &
      * empty string if URL is being loaded or an error happened.
      */
     useUrl: (params: P, getUrlParams?: LocatorGetUrlParams, deps?: DependencyList) => string;
-};
+  };
 /**
  * Parameters used when navigating on client-side using browser history object.
  */
 export interface LocatorNavigationParams {
-    /**
-     * Whether to replace a navigation entry in history queue or push a new entry.
-     */
-    replace?: boolean;
+  /**
+   * Whether to replace a navigation entry in history queue or push a new entry.
+   */
+  replace?: boolean;
 }
 /**
  * Parameters used when constructing a string URL.
  */
 export interface LocatorGetUrlParams {
-    /**
-     * Whether to return an absolute long URL or relative short URL.
-     */
-    absolute?: boolean;
+  /**
+   * Whether to return an absolute long URL or relative short URL.
+   */
+  absolute?: boolean;
 }
 /**
  * This interface represents a location in Kibana to which one can navigate
  * using the `core.application.navigateToApp()` method.
  */
 export interface KibanaLocation<S = object> {
-    /**
-     * Kibana application ID.
-     */
-    app: string;
-    /**
-     * A relative URL path within a Kibana application.
-     */
-    path: string;
-    /**
-     * A serializable location state object, which the app can use to determine
-     * what should be displayed on the screen.
-     */
-    state: S;
+  /**
+   * Kibana application ID.
+   */
+  app: string;
+  /**
+   * A relative URL path within a Kibana application.
+   */
+  path: string;
+  /**
+   * A serializable location state object, which the app can use to determine
+   * what should be displayed on the screen.
+   */
+  state: S;
 }
 /**
  * Represents a serializable state of a locator. Includes locator ID, version
  * and its params.
  */
-export interface LocatorData<LocatorParams extends SerializableRecord = SerializableRecord> extends VersionedState<LocatorParams>, SerializableRecord {
-    /**
-     * Locator ID.
-     */
-    id: string;
+export interface LocatorData<LocatorParams extends SerializableRecord = SerializableRecord>
+  extends VersionedState<LocatorParams>,
+    SerializableRecord {
+  /**
+   * Locator ID.
+   */
+  id: string;
 }
 export interface LocatorsMigrationMap {
-    [semver: string]: LocatorMigrationFunction;
+  [semver: string]: LocatorMigrationFunction;
 }
 export type LocatorMigrationFunction = MigrateFunction<LocatorData, LocatorData>;

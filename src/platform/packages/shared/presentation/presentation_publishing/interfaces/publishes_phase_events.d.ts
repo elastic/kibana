@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import type { PublishingSubject } from '../publishing_subject';
 /** ------------------------------------------------------------------------------------------
@@ -5,12 +14,14 @@ import type { PublishingSubject } from '../publishing_subject';
  * ------------------------------------------------------------------------------------------ */
 export type PhaseEventType = 'loading' | 'loaded' | 'rendered' | 'error' | 'paused';
 export interface PhaseEvent {
-    id: string;
-    status: PhaseEventType;
-    error?: ErrorLike;
-    timeToEvent: number;
+  id: string;
+  status: PhaseEventType;
+  error?: ErrorLike;
+  timeToEvent: number;
 }
 export interface PublishesPhaseEvents {
-    phase$: PublishingSubject<PhaseEvent | undefined>;
+  phase$: PublishingSubject<PhaseEvent | undefined>;
 }
-export declare const apiPublishesPhaseEvents: (unknownApi: null | unknown) => unknownApi is PublishesPhaseEvents;
+export declare const apiPublishesPhaseEvents: (
+  unknownApi: null | unknown
+) => unknownApi is PublishesPhaseEvents;

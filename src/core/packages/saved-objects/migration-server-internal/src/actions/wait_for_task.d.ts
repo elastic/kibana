@@ -1,22 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { estypes } from '@elastic/elasticsearch';
 import type * as TaskEither from 'fp-ts/TaskEither';
-import * as Option from 'fp-ts/Option';
+import type * as Option from 'fp-ts/Option';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { type RetryableEsClientError } from './catch_retryable_es_client_errors';
 /** @internal */
 export interface WaitForTaskResponseError {
-    type: string;
-    reason?: string | null;
-    index?: string;
-    caused_by?: WaitForTaskResponseError;
+  type: string;
+  reason?: string | null;
+  index?: string;
+  caused_by?: WaitForTaskResponseError;
 }
 /** @internal */
 export interface WaitForTaskResponse {
-    error: Option.Option<WaitForTaskResponseError>;
-    completed: boolean;
-    failures: Option.Option<any[]>;
-    description?: string;
-    response?: estypes.TasksGetResponse['response'];
+  error: Option.Option<WaitForTaskResponseError>;
+  completed: boolean;
+  failures: Option.Option<any[]>;
+  description?: string;
+  response?: estypes.TasksGetResponse['response'];
 }
 /**
  * After waiting for the specified timeout, the task has not yet completed.
@@ -27,10 +36,10 @@ export interface WaitForTaskResponse {
  * has reached a timeout, Elasticsearch will continue to run the task.
  */
 export interface WaitForTaskCompletionTimeout {
-    /** After waiting for the specified timeout, the task has not yet completed. */
-    readonly type: 'wait_for_task_completion_timeout';
-    readonly message: string;
-    readonly error?: Error;
+  /** After waiting for the specified timeout, the task has not yet completed. */
+  readonly type: 'wait_for_task_completion_timeout';
+  readonly message: string;
+  readonly error?: Error;
 }
 /**
  * When we use `wait_for_completion=false`, we won't get the errors right away, we'll get a
@@ -39,20 +48,27 @@ export interface WaitForTaskCompletionTimeout {
  * want to retry the original task.
  */
 export interface TaskCompletedWithRetriableError {
-    /** While waiting, the original task encountered an error. It might need to be retried. */
-    readonly type: 'task_completed_with_retriable_error';
-    readonly message: string;
-    readonly error?: Error;
+  /** While waiting, the original task encountered an error. It might need to be retried. */
+  readonly type: 'task_completed_with_retriable_error';
+  readonly message: string;
+  readonly error?: Error;
 }
 /** @internal */
 export interface WaitForTaskParams {
-    client: ElasticsearchClient;
-    taskId: string;
-    timeout: string;
+  client: ElasticsearchClient;
+  taskId: string;
+  timeout: string;
 }
 /**
  * Blocks for up to 60s or until a task completes.
  *
  * TODO: delete completed tasks
  */
-export declare const waitForTask: ({ client, taskId, timeout, }: WaitForTaskParams) => TaskEither.TaskEither<RetryableEsClientError | WaitForTaskCompletionTimeout, WaitForTaskResponse>;
+export declare const waitForTask: ({
+  client,
+  taskId,
+  timeout,
+}: WaitForTaskParams) => TaskEither.TaskEither<
+  RetryableEsClientError | WaitForTaskCompletionTimeout,
+  WaitForTaskResponse
+>;

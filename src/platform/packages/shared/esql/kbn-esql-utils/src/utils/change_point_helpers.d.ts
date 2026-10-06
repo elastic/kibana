@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Detects top-level CHANGE_POINT commands so the Discover profile only activates for direct
  * change-point queries.
@@ -11,19 +20,23 @@ export declare const hasChangePointCommand: (esql?: string) => boolean;
  * @param esql - The ES|QL query string
  * @returns Object with typeColumn and pvalueColumn names, or undefined if no CHANGE_POINT command
  */
-export declare const getChangePointOutputColumnNames: (esql?: string) => {
-    typeColumn: string;
-    pvalueColumn: string;
-} | undefined;
+export declare const getChangePointOutputColumnNames: (esql?: string) =>
+  | {
+      typeColumn: string;
+      pvalueColumn: string;
+    }
+  | undefined;
 /**
  * Metric (value) and time column names from the first CHANGE_POINT in the query (same rule as
  * {@link getChangePointOutputColumnNames}).
  * These names are needed to build the supporting line-chart query and pick timestamps from rows.
  */
-export declare const getChangePointSeriesColumns: (esql?: string) => {
-    valueColumn: string;
-    timeColumn: string;
-} | undefined;
+export declare const getChangePointSeriesColumns: (esql?: string) =>
+  | {
+      valueColumn: string;
+      timeColumn: string;
+    }
+  | undefined;
 /**
  * Column names from `CHANGE_POINT ... BY col[, col]` on the first top-level CHANGE_POINT command.
  */
@@ -35,7 +48,11 @@ export declare const formatEsqlEntityPredicate: (columnId: string, value: unknow
 /**
  * Narrows the line-chart ES|QL to a specific entity row by appending a {@code | WHERE} clause.
  */
-export declare const appendEntityFiltersToChangePointLineEsql: (lineEsql: string, row: Readonly<Record<string, unknown>>, entityColumnIds: readonly string[]) => string;
+export declare const appendEntityFiltersToChangePointLineEsql: (
+  lineEsql: string,
+  row: Readonly<Record<string, unknown>>,
+  entityColumnIds: readonly string[]
+) => string;
 /**
  * Builds the ES|QL used as the Lens line-chart dataset: pipeline before CHANGE_POINT (trailing SORT
  * removed).

@@ -1,26 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { RepositoryEsClient } from '../../repository_es_client';
 /** @internal */
 export interface DeleteLegacyUrlAliasesParams {
-    mappings: IndexMapping;
-    registry: ISavedObjectTypeRegistry;
-    client: RepositoryEsClient;
-    getIndexForType: (type: string) => string;
-    /** The object type. */
-    type: string;
-    /** The object ID. */
-    id: string;
-    /**
-     * The namespaces to include or exclude when searching for legacy URL alias targets (depends on the `deleteBehavior` parameter).
-     * Note that using `namespaces: [], deleteBehavior: 'exclusive'` will delete all aliases for this object in all spaces.
-     */
-    namespaces: string[];
-    /**
-     * If this is equal to 'inclusive', all aliases with a `targetNamespace` in the `namespaces` array will be deleted.
-     * If this is equal to 'exclusive', all aliases with a `targetNamespace` _not_ in the `namespaces` array will be deleted.
-     */
-    deleteBehavior: 'inclusive' | 'exclusive';
+  mappings: IndexMapping;
+  registry: ISavedObjectTypeRegistry;
+  client: RepositoryEsClient;
+  getIndexForType: (type: string) => string;
+  /** The object type. */
+  type: string;
+  /** The object ID. */
+  id: string;
+  /**
+   * The namespaces to include or exclude when searching for legacy URL alias targets (depends on the `deleteBehavior` parameter).
+   * Note that using `namespaces: [], deleteBehavior: 'exclusive'` will delete all aliases for this object in all spaces.
+   */
+  namespaces: string[];
+  /**
+   * If this is equal to 'inclusive', all aliases with a `targetNamespace` in the `namespaces` array will be deleted.
+   * If this is equal to 'exclusive', all aliases with a `targetNamespace` _not_ in the `namespaces` array will be deleted.
+   */
+  deleteBehavior: 'inclusive' | 'exclusive';
 }
 /**
  * Deletes legacy URL aliases that point to a given object.
@@ -34,4 +43,7 @@ export interface DeleteLegacyUrlAliasesParams {
  * @internal
  */
 export declare function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParams): Promise<void>;
-export declare function createKueryNode(type: string, id: string): import("@kbn/es-query/src/kuery/node_types").KqlFunctionNode;
+export declare function createKueryNode(
+  type: string,
+  id: string
+): import('@kbn/es-query/src/kuery/node_types').KqlFunctionNode;

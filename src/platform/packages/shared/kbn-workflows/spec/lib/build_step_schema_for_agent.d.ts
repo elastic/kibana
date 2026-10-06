@@ -1,4 +1,13 @@
-import { z } from '@kbn/zod/v4';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { z } from '@kbn/zod/v4';
 import type { ConnectorContractUnion } from '../../types/v1';
 import type { BaseStepDefinition } from '../step_definition_types';
 /**
@@ -26,10 +35,10 @@ export declare function buildBuiltInStepSchema(step: BaseStepDefinition): z.ZodT
  * Compact representation of a single step parameter for the AI agent.
  */
 export interface StepParamSummary {
-    name: string;
-    type: string;
-    required: boolean;
-    description?: string;
+  name: string;
+  type: string;
+  required: boolean;
+  description?: string;
 }
 /**
  * Build a compact list of top-level parameters from a Zod object schema.

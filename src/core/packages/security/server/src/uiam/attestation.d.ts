@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { HTTPAuthorizationHeader } from '../authentication';
 /**
  * Header a trusted loopback caller stamps on a real HTTP request that carries an internal UIAM
@@ -7,8 +16,9 @@ import type { HTTPAuthorizationHeader } from '../authentication';
  * {@link deriveInternalCallerAttestation}), so it cannot be forged without the secret.
  * It is never forwarded to Elasticsearch.
  */
-export declare const UIAM_INTERNAL_CALLER_ATTESTATION_HEADER = "x-kbn-uiam-internal-caller-attestation";
-export declare const ES_CLIENT_AUTHENTICATION_HEADER = "x-client-authentication";
+export declare const UIAM_INTERNAL_CALLER_ATTESTATION_HEADER =
+  'x-kbn-uiam-internal-caller-attestation';
+export declare const ES_CLIENT_AUTHENTICATION_HEADER = 'x-client-authentication';
 /**
  * Derives the internal-caller attestation from the UIAM shared secret, bound to the credential it
  * will travel with. The result is a non-reversible HMAC (an attacker cannot recover the secret from
@@ -25,4 +35,7 @@ export declare const ES_CLIENT_AUTHENTICATION_HEADER = "x-client-authentication"
  * validating side (`CoreUiamService`, which the ES cluster client delegates to) call this single
  * helper, so the two can never drift.
  */
-export declare function deriveInternalCallerAttestation(sharedSecret: string, credential: HTTPAuthorizationHeader): string;
+export declare function deriveInternalCallerAttestation(
+  sharedSecret: string,
+  credential: HTTPAuthorizationHeader
+): string;

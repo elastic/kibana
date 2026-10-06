@@ -1,10 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Any value that can be represented in RISON — a superset of JSON primitives
  * that also supports nested objects and arrays.
  */
-export type RisonValue = boolean | string | number | RisonValue[] | {
-    [key: string]: RisonValue;
-} | null;
+export type RisonValue =
+  | boolean
+  | string
+  | number
+  | RisonValue[]
+  | {
+      [key: string]: RisonValue;
+    }
+  | null;
 /**
  * RISON-encode a JavaScript value, returning `undefined` when the value cannot
  * be represented in RISON (e.g. functions, symbols, or circular references).

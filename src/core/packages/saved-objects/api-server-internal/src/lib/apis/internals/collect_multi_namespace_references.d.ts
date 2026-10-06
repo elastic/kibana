@@ -1,5 +1,22 @@
-import type { SavedObjectsCollectMultiNamespaceReferencesObject, SavedObjectsCollectMultiNamespaceReferencesOptions, SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';
-import { type ISavedObjectsSecurityExtension, type ISavedObjectTypeRegistry, type ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from '@kbn/core-saved-objects-api-server';
+import {
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
+  type ISavedObjectsSerializer,
+} from '@kbn/core-saved-objects-server';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
 /**
@@ -16,15 +33,15 @@ export declare const ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE = 100;
  * @internal
  */
 export interface CollectMultiNamespaceReferencesParams {
-    registry: ISavedObjectTypeRegistry;
-    allowedTypes: string[];
-    client: RepositoryEsClient;
-    serializer: ISavedObjectsSerializer;
-    getIndexForType: (type: string) => string;
-    createPointInTimeFinder: CreatePointInTimeFinderFn;
-    securityExtension: ISavedObjectsSecurityExtension | undefined;
-    objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
-    options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
+  registry: ISavedObjectTypeRegistry;
+  allowedTypes: string[];
+  client: RepositoryEsClient;
+  serializer: ISavedObjectsSerializer;
+  getIndexForType: (type: string) => string;
+  createPointInTimeFinder: CreatePointInTimeFinderFn;
+  securityExtension: ISavedObjectsSecurityExtension | undefined;
+  objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
+  options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
 }
 /**
  * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
@@ -32,4 +49,6 @@ export interface CollectMultiNamespaceReferencesParams {
  *
  * @internal
  */
-export declare function collectMultiNamespaceReferences(params: CollectMultiNamespaceReferencesParams): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse>;
+export declare function collectMultiNamespaceReferences(
+  params: CollectMultiNamespaceReferencesParams
+): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse>;

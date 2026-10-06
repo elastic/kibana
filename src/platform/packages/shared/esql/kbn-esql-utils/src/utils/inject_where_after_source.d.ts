@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Injects a WHERE clause immediately after the source command (FROM/TS/etc.) of an ES|QL query.
  *
@@ -12,4 +21,7 @@
  * @param esql - The base ES|QL query
  * @param whereExpression - The WHERE expression body (without the leading `WHERE`)
  */
-export declare function injectWhereClauseAfterSourceCommand(esql: string, whereExpression: string): string;
+export declare function injectWhereClauseAfterSourceCommand(
+  esql: string,
+  whereExpression: string
+): string;

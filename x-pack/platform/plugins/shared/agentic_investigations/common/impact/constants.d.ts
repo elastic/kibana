@@ -1,10 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * The `.kibana-` prefix is deliberate: `.kibana*` is already granted to the
  * `kibana_system` role, so this index needs no Elasticsearch-side system index
  * registration. Each entity this plugin owns gets its own index.
  */
 export declare const IMPACT_INDEX_NAME: '.kibana-investigation-impact';
-export declare const IMPACT_INTERNAL_URL: "/internal/investigations/impact";
+export declare const IMPACT_INTERNAL_URL: '/internal/investigations/impact';
 /** Ceiling on `listByConversationIds` so a caller cannot ask for an unbounded terms query. */
 export declare const MAX_IMPACT_CONVERSATION_IDS = 1000;
 /**

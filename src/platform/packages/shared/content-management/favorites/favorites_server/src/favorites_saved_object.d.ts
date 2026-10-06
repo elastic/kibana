@@ -1,9 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SavedObjectsType } from '@kbn/core/server';
 export interface FavoritesSavedObjectAttributes {
-    userId: string;
-    type: string;
-    favoriteIds: string[];
-    favoriteMetadata?: Record<string, object>;
+  userId: string;
+  type: string;
+  favoriteIds: string[];
+  favoriteMetadata?: Record<string, object>;
 }
-export declare const favoritesSavedObjectName = "favorites";
+export declare const favoritesSavedObjectName = 'favorites';
 export declare const favoritesSavedObjectType: SavedObjectsType;

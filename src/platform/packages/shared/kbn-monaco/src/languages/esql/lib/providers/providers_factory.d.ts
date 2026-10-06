@@ -1,17 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '../../../../monaco_imports';
 export interface CreateProviderParams<T> {
-    model: monaco.editor.ITextModel;
-    run: (safeModel: monaco.editor.ITextModel) => T | Promise<T>;
-    emptyResult: T;
+  model: monaco.editor.ITextModel;
+  run: (safeModel: monaco.editor.ITextModel) => T | Promise<T>;
+  emptyResult: T;
 }
 /**
  * Throwing ProviderEmptyResultError will cause the provider to stop execution and return the emptyResult.
  */
-export type ProviderEmptyResultErrorCode = 'DisposedModelAccessError' | 'AbortedDueToCancellationError';
+export type ProviderEmptyResultErrorCode =
+  | 'DisposedModelAccessError'
+  | 'AbortedDueToCancellationError';
 export declare class ProviderEmptyResultError extends Error {
-    readonly code: ProviderEmptyResultErrorCode;
-    constructor(code: ProviderEmptyResultErrorCode);
+  readonly code: ProviderEmptyResultErrorCode;
+  constructor(code: ProviderEmptyResultErrorCode);
 }
 /**
  * Creates a generic Provider for Monaco.
@@ -22,11 +33,17 @@ export declare class ProviderEmptyResultError extends Error {
  * - Use safeModel for accessing any property or function of the model.
  * - Use the original model if you need to compare instances.
  */
-export declare function createMonacoProvider<T>({ model, run, emptyResult, }: CreateProviderParams<T>): Promise<T>;
+export declare function createMonacoProvider<T>({
+  model,
+  run,
+  emptyResult,
+}: CreateProviderParams<T>): Promise<T>;
 /**
  * Wraps a Monaco text model so that any property access or method call after disposal throws a controlled error.
  */
-export declare function createDisposedSafeModel(model: monaco.editor.ITextModel): monaco.editor.ITextModel;
+export declare function createDisposedSafeModel(
+  model: monaco.editor.ITextModel
+): monaco.editor.ITextModel;
 /**
  * Wraps every callback in a function that throws an error if the cancellation token is triggered by Monaco.
  * The token is checked before and after the callback is executed.
@@ -38,4 +55,7 @@ export declare function createDisposedSafeModel(model: monaco.editor.ITextModel)
  * @param token
  * @returns
  */
-export declare function createCancellableCallbacks<TCallbacks extends ESQLCallbacks | undefined>(callbacks: TCallbacks, token?: monaco.CancellationToken): TCallbacks;
+export declare function createCancellableCallbacks<TCallbacks extends ESQLCallbacks | undefined>(
+  callbacks: TCallbacks,
+  token?: monaco.CancellationToken
+): TCallbacks;

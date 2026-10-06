@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Why a task run fell back to the Elasticsearch API key instead of a UIAM key.
  * These are orthogonal reasons for the same event, so they live as an attribute
@@ -21,14 +28,19 @@ export type CredentialType = 'uiam_api_key' | 'es_api_key' | 'none';
  * `kibana.alerting.rule_run.count` counter so both metrics can be charted with
  * the same queries.
  */
-export type CredentialReason = 'provisioned' | 'config' | 'user_created_key' | 'fallback_unexpected' | 'not_set';
+export type CredentialReason =
+  | 'provisioned'
+  | 'config'
+  | 'user_created_key'
+  | 'fallback_unexpected'
+  | 'not_set';
 declare class TaskManagerUiamTelemetry {
-    private readonly meter;
-    private readonly uiamApiKeyFallbackCounter;
-    private readonly taskRunCounter;
-    constructor();
-    recordUiamApiKeyFallback: (reason: UiamApiKeyFallbackReason) => void;
-    recordTaskRun: (credentialType: CredentialType, credentialReason: CredentialReason) => void;
+  private readonly meter;
+  private readonly uiamApiKeyFallbackCounter;
+  private readonly taskRunCounter;
+  constructor();
+  recordUiamApiKeyFallback: (reason: UiamApiKeyFallbackReason) => void;
+  recordTaskRun: (credentialType: CredentialType, credentialReason: CredentialReason) => void;
 }
 export declare const taskManagerUiamTelemetry: TaskManagerUiamTelemetry;
 export {};

@@ -1,9 +1,16 @@
-export declare const ESCALATIONS_INTERNAL_URL: "/internal/investigations/escalations";
-export declare const ESCALATION_BY_ID_URL: "/internal/investigations/escalations/{id}";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export declare const ESCALATIONS_INTERNAL_URL: '/internal/investigations/escalations';
+export declare const ESCALATION_BY_ID_URL: '/internal/investigations/escalations/{id}';
 /** URL for the per-escalation assignment route. */
-export declare const ESCALATION_ASSIGN_URL: "/internal/investigations/escalations/{id}/assignees";
+export declare const ESCALATION_ASSIGN_URL: '/internal/investigations/escalations/{id}/assignees';
 /** URL for fetching the linked investigations of a single escalation. */
-export declare const ESCALATION_LINKED_INVESTIGATIONS_URL: "/internal/investigations/escalations/{id}/linked_investigations";
+export declare const ESCALATION_LINKED_INVESTIGATIONS_URL: '/internal/investigations/escalations/{id}/linked_investigations';
 /** Template ids. Owned by agent_builder_platform; referenced here for guard checks. */
 export declare const ESCALATION_TEMPLATE_ID: 'escalation';
 export declare const INVESTIGATION_TEMPLATE_ID: 'investigation';
@@ -41,7 +48,7 @@ export declare const ESCALATIONS_UI_CAPABILITY_MANAGE: 'manageEscalations';
  */
 export declare const MAX_ESCALATIONS_PAGE_SIZE = 50;
 export declare const MAX_ESCALATIONS_RESULT_WINDOW = 10000;
-export declare const ESCALATION_STATUS_URL: "/internal/investigations/escalations/{id}/status";
-export declare const ESCALATION_CLOSE_PREVIEW_URL: "/internal/investigations/escalations/{id}/_close_preview";
+export declare const ESCALATION_STATUS_URL: '/internal/investigations/escalations/{id}/status';
+export declare const ESCALATION_CLOSE_PREVIEW_URL: '/internal/investigations/escalations/{id}/_close_preview';
 /** URL for linking an investigation to an existing escalation (append-only). */
-export declare const ESCALATION_LINK_URL: "/internal/investigations/escalations/{id}/_link";
+export declare const ESCALATION_LINK_URL: '/internal/investigations/escalations/{id}/_link';

@@ -1,26 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
-import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
+import type { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 export interface EditorExtensions {
-    recommendedQueries: RecommendedQuery[];
-    recommendedFields: RecommendedField[];
+  recommendedQueries: RecommendedQuery[];
+  recommendedFields: RecommendedField[];
 }
 interface QueryTemplate {
-    label: string;
-    description: string;
-    queryString: string;
-    category?: SuggestionCategory;
+  label: string;
+  description: string;
+  queryString: string;
+  category?: SuggestionCategory;
 }
-export declare const getRecommendedQueriesTemplates: ({ fromCommand, timeField, categorizationField, }: {
-    fromCommand: string;
-    timeField?: string;
-    categorizationField?: string;
+export declare const getRecommendedQueriesTemplates: ({
+  fromCommand,
+  timeField,
+  categorizationField,
+}: {
+  fromCommand: string;
+  timeField?: string;
+  categorizationField?: string;
 }) => QueryTemplate[];
-export declare function getTimeAndCategorizationFields(getColumnsByType: GetColumnsByTypeFn): Promise<{
-    timeField: string;
-    categorizationField: string | undefined;
+export declare function getTimeAndCategorizationFields(
+  getColumnsByType: GetColumnsByTypeFn
+): Promise<{
+  timeField: string;
+  categorizationField: string | undefined;
 }>;
-export declare const getRecommendedQueriesSuggestionsFromStaticTemplates: (getFieldsByType: GetColumnsByTypeFn, fromCommand?: string) => Promise<ISuggestionItem[]>;
+export declare const getRecommendedQueriesSuggestionsFromStaticTemplates: (
+  getFieldsByType: GetColumnsByTypeFn,
+  fromCommand?: string
+) => Promise<ISuggestionItem[]>;
 /**
  * This function extracts the templates from the recommended queries extensions.
  * The templates are the recommended queries without the source command (FROM).
@@ -28,8 +46,14 @@ export declare const getRecommendedQueriesSuggestionsFromStaticTemplates: (getFi
  * @param recommendedQueriesExtensions, the recommended queries extensions to extract the templates from
  * @returns ISuggestionItem[], the templates extracted from the recommended queries extensions
  */
-export declare const getRecommendedQueriesTemplatesFromExtensions: (recommendedQueriesExtensions: RecommendedQuery[]) => ISuggestionItem[];
-export declare const getRecommendedQueriesSuggestions: (editorExtensions: EditorExtensions, getColumnsByType?: GetColumnsByTypeFn, prefix?: string) => Promise<ISuggestionItem[]>;
+export declare const getRecommendedQueriesTemplatesFromExtensions: (
+  recommendedQueriesExtensions: RecommendedQuery[]
+) => ISuggestionItem[];
+export declare const getRecommendedQueriesSuggestions: (
+  editorExtensions: EditorExtensions,
+  getColumnsByType?: GetColumnsByTypeFn,
+  prefix?: string
+) => Promise<ISuggestionItem[]>;
 /**
  * This function returns the categorization field from the list of fields.
  * It checks for the presence of 'message', 'error.message', or 'event.original' in that order.

@@ -1,17 +1,26 @@
-import { MetricAggType } from './metric_agg_type';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { MetricAggType } from './metric_agg_type';
 import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
 import type { BaseAggParams } from '../types';
 export interface AggParamsStdDeviation extends BaseAggParams {
-    field: string;
-    showBounds?: boolean;
+  field: string;
+  showBounds?: boolean;
 }
 interface ValProp {
-    valProp: string[];
-    title: string;
+  valProp: string[];
+  title: string;
 }
 export interface IStdDevAggConfig extends IResponseAggConfig {
-    keyedDetails: (customLabel: string, fieldDisplayName?: string) => Record<string, ValProp>;
-    valProp: () => string[];
+  keyedDetails: (customLabel: string, fieldDisplayName?: string) => Record<string, ValProp>;
+  valProp: () => string[];
 }
 export declare const getStdDeviationMetricAgg: () => MetricAggType<IStdDevAggConfig>;
 export {};

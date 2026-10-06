@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Observable } from 'rxjs';
 import type { ServiceStatus, CoreStatus } from '@kbn/core-status-common';
 /**
@@ -59,51 +68,51 @@ import type { ServiceStatus, CoreStatus } from '@kbn/core-status-common';
  * @public
  */
 export interface StatusServiceSetup {
-    /**
-     * Current status for all Core services.
-     */
-    core$: Observable<CoreStatus>;
-    /**
-     * Overall system status for all of Kibana.
-     *
-     * @remarks
-     * The level of the overall status will reflect the most severe status of any core service or plugin.
-     *
-     * Exposed only for reporting purposes to outside systems and should not be used by plugins. Instead, plugins should
-     * only depend on the statuses of {@link StatusServiceSetup.core$ | Core} or their dependencies.
-     */
-    overall$: Observable<ServiceStatus>;
-    /**
-     * Allows a plugin to specify a custom status dependent on its own criteria.
-     * Completely overrides the default inherited status.
-     *
-     * @remarks
-     * The first emission from this Observable should occur within 30s, else this plugin's status will fallback to
-     * `unavailable` until the first emission.
-     *
-     * See the {@link StatusServiceSetup.derivedStatus$} API for leveraging the default status
-     * calculation that is provided by Core.
-     */
-    set(status$: Observable<ServiceStatus>): void;
-    /**
-     * Current status for all plugins this plugin depends on.
-     * Each key of the `Record` is a plugin id.
-     */
-    dependencies$: Observable<Record<string, ServiceStatus>>;
-    /**
-     * The status of this plugin as derived from its dependencies.
-     *
-     * @remarks
-     * By default, plugins inherit this derived status from their dependencies.
-     * Calling {@link StatusSetup.set} overrides this default status.
-     *
-     * This may emit multiple times for a single status change event as propagates
-     * through the dependency tree
-     */
-    derivedStatus$: Observable<ServiceStatus>;
-    /**
-     * Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is
-     * present.
-     */
-    isStatusPageAnonymous: () => boolean;
+  /**
+   * Current status for all Core services.
+   */
+  core$: Observable<CoreStatus>;
+  /**
+   * Overall system status for all of Kibana.
+   *
+   * @remarks
+   * The level of the overall status will reflect the most severe status of any core service or plugin.
+   *
+   * Exposed only for reporting purposes to outside systems and should not be used by plugins. Instead, plugins should
+   * only depend on the statuses of {@link StatusServiceSetup.core$ | Core} or their dependencies.
+   */
+  overall$: Observable<ServiceStatus>;
+  /**
+   * Allows a plugin to specify a custom status dependent on its own criteria.
+   * Completely overrides the default inherited status.
+   *
+   * @remarks
+   * The first emission from this Observable should occur within 30s, else this plugin's status will fallback to
+   * `unavailable` until the first emission.
+   *
+   * See the {@link StatusServiceSetup.derivedStatus$} API for leveraging the default status
+   * calculation that is provided by Core.
+   */
+  set(status$: Observable<ServiceStatus>): void;
+  /**
+   * Current status for all plugins this plugin depends on.
+   * Each key of the `Record` is a plugin id.
+   */
+  dependencies$: Observable<Record<string, ServiceStatus>>;
+  /**
+   * The status of this plugin as derived from its dependencies.
+   *
+   * @remarks
+   * By default, plugins inherit this derived status from their dependencies.
+   * Calling {@link StatusSetup.set} overrides this default status.
+   *
+   * This may emit multiple times for a single status change event as propagates
+   * through the dependency tree
+   */
+  derivedStatus$: Observable<ServiceStatus>;
+  /**
+   * Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is
+   * present.
+   */
+  isStatusPageAnonymous: () => boolean;
 }

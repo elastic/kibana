@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ReduxLikeStateContainer, BaseState } from './types';
 export declare const defaultFreeze: <T>(value: T) => T;
 /**
@@ -5,20 +14,20 @@ export declare const defaultFreeze: <T>(value: T) => T;
  * @public
  */
 export interface CreateStateContainerOptions {
-    /**
-     * Function to use when freezing state. Supply identity function.
-     * If not provided, default `deepFreeze` is used.
-     *
-     * @example
-     * If you expect that your state will be mutated externally an you cannot
-     * prevent that
-     * ```ts
-     * {
-     *   freeze: state => state,
-     * }
-     * ```
-     */
-    freeze?: <T>(state: T) => T;
+  /**
+   * Function to use when freezing state. Supply identity function.
+   * If not provided, default `deepFreeze` is used.
+   *
+   * @example
+   * If you expect that your state will be mutated externally an you cannot
+   * prevent that
+   * ```ts
+   * {
+   *   freeze: state => state,
+   * }
+   * ```
+   */
+  freeze?: <T>(state: T) => T;
 }
 /**
  * Creates a state container without transitions and without selectors.
@@ -26,7 +35,9 @@ export interface CreateStateContainerOptions {
  * @typeParam State - shape of state
  * @public
  */
-export declare function createStateContainer<State extends BaseState>(defaultState: State): ReduxLikeStateContainer<State>;
+export declare function createStateContainer<State extends BaseState>(
+  defaultState: State
+): ReduxLikeStateContainer<State>;
 /**
  * Creates a state container with transitions, but without selectors.
  * @param defaultState - initial state
@@ -34,7 +45,13 @@ export declare function createStateContainer<State extends BaseState>(defaultSta
  * @typeParam State - shape of state
  * @public
  */
-export declare function createStateContainer<State extends BaseState, PureTransitions extends object>(defaultState: State, pureTransitions: PureTransitions): ReduxLikeStateContainer<State, PureTransitions>;
+export declare function createStateContainer<
+  State extends BaseState,
+  PureTransitions extends object
+>(
+  defaultState: State,
+  pureTransitions: PureTransitions
+): ReduxLikeStateContainer<State, PureTransitions>;
 /**
  * Creates a state container with transitions and selectors.
  * @param defaultState - initial state
@@ -44,4 +61,13 @@ export declare function createStateContainer<State extends BaseState, PureTransi
  * @typeParam State - shape of state
  * @public
  */
-export declare function createStateContainer<State extends BaseState, PureTransitions extends object, PureSelectors extends object>(defaultState: State, pureTransitions: PureTransitions, pureSelectors: PureSelectors, options?: CreateStateContainerOptions): ReduxLikeStateContainer<State, PureTransitions, PureSelectors>;
+export declare function createStateContainer<
+  State extends BaseState,
+  PureTransitions extends object,
+  PureSelectors extends object
+>(
+  defaultState: State,
+  pureTransitions: PureTransitions,
+  pureSelectors: PureSelectors,
+  options?: CreateStateContainerOptions
+): ReduxLikeStateContainer<State, PureTransitions, PureSelectors>;

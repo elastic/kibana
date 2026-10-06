@@ -1,25 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AgentOptions as HttpsAgentOptions } from 'https';
 import { type PeerCertificate } from 'tls';
 import type { OtelAppenderTlsConfig } from '@kbn/core-logging-server';
 /** Compatible with `@grpc/grpc-js` `VerifyOptions` passed to `credentials.createSsl`. */
 export interface OtelGrpcVerifyOptions {
-    rejectUnauthorized?: boolean;
-    checkServerIdentity?: (hostname: string, cert: PeerCertificate) => Error | undefined;
+  rejectUnauthorized?: boolean;
+  checkServerIdentity?: (hostname: string, cert: PeerCertificate) => Error | undefined;
 }
 export interface ResolvedOtelTls {
-    /** PEM-encoded CA bundle(s) for verifying the remote endpoint (may be multiple concat sources). */
-    ca?: Buffer | Buffer[];
-    cert?: Buffer;
-    key?: Buffer;
-    passphrase?: string;
-    verificationMode: 'full' | 'certificate' | 'none';
-    allowPartialTrustChain?: boolean;
+  /** PEM-encoded CA bundle(s) for verifying the remote endpoint (may be multiple concat sources). */
+  ca?: Buffer | Buffer[];
+  cert?: Buffer;
+  key?: Buffer;
+  passphrase?: string;
+  verificationMode: 'full' | 'certificate' | 'none';
+  allowPartialTrustChain?: boolean;
 }
 /**
  * Reads certificate material from disk or accepts inline PEM strings.
  * Returns `undefined` when there is nothing to apply (no `ssl` block or empty block).
  */
-export declare const resolveTlsMaterial: (config?: OtelAppenderTlsConfig) => ResolvedOtelTls | undefined;
+export declare const resolveTlsMaterial: (
+  config?: OtelAppenderTlsConfig
+) => ResolvedOtelTls | undefined;
 export declare const buildHttpsAgentTlsOptions: (resolved: ResolvedOtelTls) => HttpsAgentOptions;
 export declare const toGrpcRootCerts: (resolved: ResolvedOtelTls) => Buffer;
 export declare const buildGrpcVerifyOptions: (resolved: ResolvedOtelTls) => OtelGrpcVerifyOptions;

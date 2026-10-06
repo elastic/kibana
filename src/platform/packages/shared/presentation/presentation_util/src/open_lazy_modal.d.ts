@@ -1,13 +1,22 @@
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 interface LoadContentArgs {
-    closeModal: () => void;
+  closeModal: () => void;
 }
 interface OpenLazyModalParams {
-    core: CoreStart;
-    loadContent: (args: LoadContentArgs) => Promise<React.JSX.Element | null | void>;
-    onClose?: () => void;
-    ariaLabelledBy: string;
+  core: CoreStart;
+  loadContent: (args: LoadContentArgs) => Promise<React.JSX.Element | null | void>;
+  onClose?: () => void;
+  ariaLabelledBy: string;
 }
 /**
  * Opens a modal with lazily loaded content.
@@ -26,5 +35,10 @@ interface OpenLazyModalParams {
  *                                `aria-labelledby` prop. Should reference the modal's visible title element
  *                                so screen readers can announce the modal name correctly.
  */
-export declare const openLazyModal: ({ core, loadContent, onClose: onCloseCallback, ariaLabelledBy, }: OpenLazyModalParams) => void;
+export declare const openLazyModal: ({
+  core,
+  loadContent,
+  onClose: onCloseCallback,
+  ariaLabelledBy,
+}: OpenLazyModalParams) => void;
 export {};

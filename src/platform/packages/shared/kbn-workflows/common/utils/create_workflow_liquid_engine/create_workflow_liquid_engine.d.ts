@@ -1,5 +1,13 @@
-import type { LiquidOptions } from 'liquidjs';
-import { Liquid } from 'liquidjs';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Liquid, LiquidOptions } from 'liquidjs';
 /**
  * LiquidJS tags supported in workflow templates.
  * Tags not in this set are removed from the engine.

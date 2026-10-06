@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 export declare const toolIdRegexp: RegExp;
 export declare const toolIdMaxLength = 64;
 /**
@@ -13,7 +20,10 @@ export declare const isReservedToolId: (id: string) => boolean;
  * @param toolId: the toolId to validate
  * @param builtIn: set to true if we're validating a built-in (internal) tool id.
  */
-export declare const validateToolId: ({ toolId, builtIn, }: {
-    toolId: string;
-    builtIn: boolean;
+export declare const validateToolId: ({
+  toolId,
+  builtIn,
+}: {
+  toolId: string;
+  builtIn: boolean;
 }) => string | undefined;

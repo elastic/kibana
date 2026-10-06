@@ -1,4 +1,29 @@
-import type { ISearchMethods, IDslSearchParams, IDslSearchOptions, IDslSearchResult, IDslPaginatedSearchResult, IEsqlSearchParams, IEsqlSearchOptions, IEsqlSearchResult, IEqlSearchParams, IEqlSearchOptions, IEqlSearchResult, ISqlSearchParams, ISqlSearchOptions, ISqlSearchResult, ISearchGeneric } from '@kbn/search-types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ISearchMethods,
+  IDslSearchParams,
+  IDslSearchOptions,
+  IDslSearchResult,
+  IDslPaginatedSearchResult,
+  IEsqlSearchParams,
+  IEsqlSearchOptions,
+  IEsqlSearchResult,
+  IEqlSearchParams,
+  IEqlSearchOptions,
+  IEqlSearchResult,
+  ISqlSearchParams,
+  ISqlSearchOptions,
+  ISqlSearchResult,
+  ISearchGeneric,
+} from '@kbn/search-types';
 /**
  * SearchMethodsService provides strategy-specific search methods with type-safe
  * parameters, invisible polling, and built-in pagination support.
@@ -8,40 +33,43 @@ import type { ISearchMethods, IDslSearchParams, IDslSearchOptions, IDslSearchRes
  * searches and adds pagination helpers for DSL searches using search_after.
  */
 export declare class SearchMethodsService implements ISearchMethods {
-    private readonly search;
-    constructor(search: ISearchGeneric);
-    /**
-     * Execute an ES|QL search
-     */
-    esql(params: IEsqlSearchParams, options?: IEsqlSearchOptions): Promise<IEsqlSearchResult>;
-    /**
-     * Execute a DSL (Elasticsearch Query DSL) search
-     */
-    dsl(params: IDslSearchParams, options?: IDslSearchOptions): Promise<IDslSearchResult>;
-    /**
-     * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
-     */
-    dslPaginated(params: IDslSearchParams, _options?: Omit<IDslSearchOptions, 'trackTotalHits'>): Promise<IDslPaginatedSearchResult>;
-    /**
-     * Execute an EQL (Event Query Language) search
-     */
-    eql(params: IEqlSearchParams, options?: IEqlSearchOptions): Promise<IEqlSearchResult>;
-    /**
-     * Execute a SQL search
-     */
-    sql(params: ISqlSearchParams, options?: ISqlSearchOptions): Promise<ISqlSearchResult>;
-    /**
-     * Execute a search request using the search function and convert Observable to Promise
-     */
-    private executeSearch;
-    private buildDSLRequest;
-    private mapDSLOptions;
-    private buildDSLPagination;
-    private buildESQLRequest;
-    private mapESQLOptions;
-    private buildEQLRequest;
-    private mapEQLOptions;
-    private buildSQLRequest;
-    private mapSQLOptions;
-    private mapBaseOptions;
+  private readonly search;
+  constructor(search: ISearchGeneric);
+  /**
+   * Execute an ES|QL search
+   */
+  esql(params: IEsqlSearchParams, options?: IEsqlSearchOptions): Promise<IEsqlSearchResult>;
+  /**
+   * Execute a DSL (Elasticsearch Query DSL) search
+   */
+  dsl(params: IDslSearchParams, options?: IDslSearchOptions): Promise<IDslSearchResult>;
+  /**
+   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
+   */
+  dslPaginated(
+    params: IDslSearchParams,
+    _options?: Omit<IDslSearchOptions, 'trackTotalHits'>
+  ): Promise<IDslPaginatedSearchResult>;
+  /**
+   * Execute an EQL (Event Query Language) search
+   */
+  eql(params: IEqlSearchParams, options?: IEqlSearchOptions): Promise<IEqlSearchResult>;
+  /**
+   * Execute a SQL search
+   */
+  sql(params: ISqlSearchParams, options?: ISqlSearchOptions): Promise<ISqlSearchResult>;
+  /**
+   * Execute a search request using the search function and convert Observable to Promise
+   */
+  private executeSearch;
+  private buildDSLRequest;
+  private mapDSLOptions;
+  private buildDSLPagination;
+  private buildESQLRequest;
+  private mapESQLOptions;
+  private buildEQLRequest;
+  private mapEQLOptions;
+  private buildSQLRequest;
+  private mapSQLOptions;
+  private mapBaseOptions;
 }

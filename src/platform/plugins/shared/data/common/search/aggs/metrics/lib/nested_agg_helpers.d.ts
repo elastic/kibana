@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IMetricAggConfig } from '../metric_agg_type';
 /**
  * Forwards modifyAggConfigOnSearchRequestStart calls to a nested AggConfig.
@@ -15,4 +24,6 @@ import type { IMetricAggConfig } from '../metric_agg_type';
  *      calls to. That should match the name of the parameter the function is called on.
  * @returns {function} A function, that forwards the calls.
  */
-export declare const forwardModifyAggConfigOnSearchRequestStart: (paramName: string) => (aggConfig: IMetricAggConfig, searchSource?: any, request?: any) => void;
+export declare const forwardModifyAggConfigOnSearchRequestStart: (
+  paramName: string
+) => (aggConfig: IMetricAggConfig, searchSource?: any, request?: any) => void;

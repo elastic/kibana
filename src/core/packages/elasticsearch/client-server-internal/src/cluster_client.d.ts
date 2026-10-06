@@ -1,22 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { IAuthHeadersStorage } from '@kbn/core-http-server';
-import type { ScopeableRequest, UnauthorizedErrorHandler, ICustomClusterClient, IScopedClusterClient, ElasticsearchClientConfig, AsScopedOptions } from '@kbn/core-elasticsearch-server';
+import type {
+  ScopeableRequest,
+  UnauthorizedErrorHandler,
+  ICustomClusterClient,
+  IScopedClusterClient,
+  ElasticsearchClientConfig,
+  AsScopedOptions,
+} from '@kbn/core-elasticsearch-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 export type { OnRequestHandler };
 interface CommonFactoryRoutingOpts {
-    logger: Logger;
-    request?: ScopeableRequest;
+  logger: Logger;
+  request?: ScopeableRequest;
 }
 interface SpaceFactoryRoutingOpts extends CommonFactoryRoutingOpts {
-    projectRouting: 'space';
-    request: ScopeableRequest;
+  projectRouting: 'space';
+  request: ScopeableRequest;
 }
 interface ExpressionFactoryRoutingOpts extends CommonFactoryRoutingOpts {
-    projectRouting: 'expression';
-    value: string;
+  projectRouting: 'expression';
+  value: string;
 }
 /**
  * Union of routing options passed to {@link OnRequestHandlerFactory}.
@@ -25,7 +41,10 @@ interface ExpressionFactoryRoutingOpts extends CommonFactoryRoutingOpts {
  * injected verbatim.
  * @internal
  */
-export type FactoryRoutingOpts = CommonFactoryRoutingOpts | SpaceFactoryRoutingOpts | ExpressionFactoryRoutingOpts;
+export type FactoryRoutingOpts =
+  | CommonFactoryRoutingOpts
+  | SpaceFactoryRoutingOpts
+  | ExpressionFactoryRoutingOpts;
 /**
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
@@ -33,32 +52,43 @@ export type FactoryRoutingOpts = CommonFactoryRoutingOpts | SpaceFactoryRoutingO
 export type OnRequestHandlerFactory = (opts: FactoryRoutingOpts) => OnRequestHandler;
 /** @internal **/
 export declare class ClusterClient implements ICustomClusterClient {
-    private readonly config;
-    private readonly authHeaders?;
-    private readonly security?;
-    private readonly rootScopedClient;
-    private readonly kibanaVersion;
-    private readonly logger;
-    private readonly getUnauthorizedErrorHandler;
-    private readonly getExecutionContext;
-    private readonly onRequestHandlerFactory;
-    private isClosed;
-    readonly asInternalUser: Client;
-    constructor({ config, logger, type, authHeaders, security, getExecutionContext, getUnauthorizedErrorHandler, agentFactoryProvider, kibanaVersion, onRequestHandlerFactory, }: {
-        config: ElasticsearchClientConfig;
-        logger: Logger;
-        type: string;
-        authHeaders?: IAuthHeadersStorage;
-        security?: InternalSecurityServiceSetup;
-        getExecutionContext?: () => string | undefined;
-        getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
-        agentFactoryProvider: AgentFactoryProvider;
-        kibanaVersion: string;
-        onRequestHandlerFactory: OnRequestHandlerFactory;
-    });
-    asScoped(request: ScopeableRequest, opts?: AsScopedOptions): IScopedClusterClient;
-    close(): Promise<void>;
-    private createInternalErrorHandlerAccessor;
-    private getScopedHeaders;
-    private getSecondaryAuthHeaders;
+  private readonly config;
+  private readonly authHeaders?;
+  private readonly security?;
+  private readonly rootScopedClient;
+  private readonly kibanaVersion;
+  private readonly logger;
+  private readonly getUnauthorizedErrorHandler;
+  private readonly getExecutionContext;
+  private readonly onRequestHandlerFactory;
+  private isClosed;
+  readonly asInternalUser: Client;
+  constructor({
+    config,
+    logger,
+    type,
+    authHeaders,
+    security,
+    getExecutionContext,
+    getUnauthorizedErrorHandler,
+    agentFactoryProvider,
+    kibanaVersion,
+    onRequestHandlerFactory,
+  }: {
+    config: ElasticsearchClientConfig;
+    logger: Logger;
+    type: string;
+    authHeaders?: IAuthHeadersStorage;
+    security?: InternalSecurityServiceSetup;
+    getExecutionContext?: () => string | undefined;
+    getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
+    agentFactoryProvider: AgentFactoryProvider;
+    kibanaVersion: string;
+    onRequestHandlerFactory: OnRequestHandlerFactory;
+  });
+  asScoped(request: ScopeableRequest, opts?: AsScopedOptions): IScopedClusterClient;
+  close(): Promise<void>;
+  private createInternalErrorHandlerAccessor;
+  private getScopedHeaders;
+  private getSecondaryAuthHeaders;
 }

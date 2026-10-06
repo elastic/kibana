@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
@@ -24,44 +33,44 @@ import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
  * @public
  */
 export interface CoreStart {
-    /** {@link AnalyticsServiceStart} */
-    analytics: AnalyticsServiceStart;
-    /** {@link CapabilitiesStart} */
-    capabilities: CapabilitiesStart;
-    /** {@link CustomBrandingStart} */
-    customBranding: CustomBrandingStart;
-    /** {@link DocLinksServiceStart} */
-    docLinks: DocLinksServiceStart;
-    /** {@link ElasticsearchServiceStart} */
-    elasticsearch: ElasticsearchServiceStart;
-    /** {@link ExecutionContextStart} */
-    executionContext: ExecutionContextStart;
-    /** {@link FeatureFlagsStart} */
-    featureFlags: FeatureFlagsStart;
-    /** {@link HttpServiceStart} */
-    http: HttpServiceStart;
-    /** {@link MetricsServiceStart} */
-    metrics: MetricsServiceStart;
-    /** {@link SavedObjectsServiceStart} */
-    savedObjects: SavedObjectsServiceStart;
-    /** {@link UiSettingsServiceStart} */
-    uiSettings: UiSettingsServiceStart;
-    /** @internal {@link CoreUsageDataStart} */
-    coreUsageData: CoreUsageDataStart;
-    /** {@link UserActivityServiceStart} */
-    userActivity: UserActivityServiceStart;
-    /** {@link PluginsServiceStart} */
-    plugins: PluginsServiceStart;
-    /** {@link PricingServiceStart} */
-    pricing: PricingServiceStart;
-    /** {@link SecurityServiceStart} */
-    security: SecurityServiceStart;
-    /** {@link UserProfileServiceStart} */
-    userProfile: UserProfileServiceStart;
-    /** {@link CoreDiServiceStart} */
-    injection: CoreDiServiceStart;
-    /** {@link DataStreamsStart} */
-    dataStreams: DataStreamsStart;
-    /** {@link UserStorageServiceStart} */
-    userStorage: UserStorageServiceStart;
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
+  /** {@link CapabilitiesStart} */
+  capabilities: CapabilitiesStart;
+  /** {@link CustomBrandingStart} */
+  customBranding: CustomBrandingStart;
+  /** {@link DocLinksServiceStart} */
+  docLinks: DocLinksServiceStart;
+  /** {@link ElasticsearchServiceStart} */
+  elasticsearch: ElasticsearchServiceStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
+  /** {@link FeatureFlagsStart} */
+  featureFlags: FeatureFlagsStart;
+  /** {@link HttpServiceStart} */
+  http: HttpServiceStart;
+  /** {@link MetricsServiceStart} */
+  metrics: MetricsServiceStart;
+  /** {@link SavedObjectsServiceStart} */
+  savedObjects: SavedObjectsServiceStart;
+  /** {@link UiSettingsServiceStart} */
+  uiSettings: UiSettingsServiceStart;
+  /** @internal {@link CoreUsageDataStart} */
+  coreUsageData: CoreUsageDataStart;
+  /** {@link UserActivityServiceStart} */
+  userActivity: UserActivityServiceStart;
+  /** {@link PluginsServiceStart} */
+  plugins: PluginsServiceStart;
+  /** {@link PricingServiceStart} */
+  pricing: PricingServiceStart;
+  /** {@link SecurityServiceStart} */
+  security: SecurityServiceStart;
+  /** {@link UserProfileServiceStart} */
+  userProfile: UserProfileServiceStart;
+  /** {@link CoreDiServiceStart} */
+  injection: CoreDiServiceStart;
+  /** {@link DataStreamsStart} */
+  dataStreams: DataStreamsStart;
+  /** {@link UserStorageServiceStart} */
+  userStorage: UserStorageServiceStart;
 }

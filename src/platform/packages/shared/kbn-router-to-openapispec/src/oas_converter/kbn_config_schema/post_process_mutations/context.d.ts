@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { OpenAPIV3 } from 'openapi-types';
 import type { Env } from '../../../generate_oas';
 /**
@@ -12,32 +21,32 @@ import type { Env } from '../../../generate_oas';
  */
 export type OnCollision = 'throw' | 'warn' | 'ignore';
 export interface IContext {
-    addSharedSchema: (id: string, schema: OpenAPIV3.SchemaObject) => void;
-    derefSharedSchema: (id: string) => OpenAPIV3.SchemaObject | undefined;
-    getSharedSchemas: () => {
-        [id: string]: OpenAPIV3.SchemaObject;
-    };
-    getEnv: () => Env;
+  addSharedSchema: (id: string, schema: OpenAPIV3.SchemaObject) => void;
+  derefSharedSchema: (id: string) => OpenAPIV3.SchemaObject | undefined;
+  getSharedSchemas: () => {
+    [id: string]: OpenAPIV3.SchemaObject;
+  };
+  getEnv: () => Env;
 }
 interface Options {
-    sharedSchemas?: Map<string, OpenAPIV3.SchemaObject>;
-    env?: Env;
-    onCollision?: OnCollision;
+  sharedSchemas?: Map<string, OpenAPIV3.SchemaObject>;
+  env?: Env;
+  onCollision?: OnCollision;
 }
 declare class Context implements IContext {
-    private readonly sharedSchemas;
-    private readonly namespace?;
-    private readonly env;
-    private readonly onCollision;
-    constructor(opts: Options);
-    addSharedSchema(id: string, schema: OpenAPIV3.SchemaObject): void;
-    /** Assumes id is in the form of "#/components/schemas/my-schema-my-team" */
-    derefSharedSchema(id: string): OpenAPIV3.SchemaObject | undefined;
-    getSharedSchemas(): {
-        [k: string]: OpenAPIV3.SchemaObject;
-    };
-    getEnv(): Env;
-    getNamespace(): string | undefined;
+  private readonly sharedSchemas;
+  private readonly namespace?;
+  private readonly env;
+  private readonly onCollision;
+  constructor(opts: Options);
+  addSharedSchema(id: string, schema: OpenAPIV3.SchemaObject): void;
+  /** Assumes id is in the form of "#/components/schemas/my-schema-my-team" */
+  derefSharedSchema(id: string): OpenAPIV3.SchemaObject | undefined;
+  getSharedSchemas(): {
+    [k: string]: OpenAPIV3.SchemaObject;
+  };
+  getEnv(): Env;
+  getNamespace(): string | undefined;
 }
 export declare const createCtx: (opts?: Options) => Context;
 export { OasSchemaCollisionError } from './schema_collision';

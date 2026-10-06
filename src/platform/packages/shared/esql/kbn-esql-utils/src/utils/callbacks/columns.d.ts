@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { TimeRange } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { HttpStart } from '@kbn/core/public';
@@ -11,22 +20,35 @@ import type { ESQLControlVariable, ESQLFieldWithMetadata } from '@kbn/esql-types
  * @param timeRange Optional time range for the query
  * @returns A promise that resolves to an array of ESQLFieldWithMetadata
  */
-export declare const getEsqlColumns: ({ esqlQuery, search, variables, signal, timeRange, }: {
-    search: ISearchGeneric;
-    esqlQuery?: string;
-    variables?: ESQLControlVariable[];
-    signal?: AbortSignal;
-    timeRange?: TimeRange;
+export declare const getEsqlColumns: ({
+  esqlQuery,
+  search,
+  variables,
+  signal,
+  timeRange,
+}: {
+  search: ISearchGeneric;
+  esqlQuery?: string;
+  variables?: ESQLControlVariable[];
+  signal?: AbortSignal;
+  timeRange?: TimeRange;
 }) => Promise<ESQLFieldWithMetadata[]>;
 /**
  * Same result as {@link getEsqlColumns}, fetched through the source info route whose cache
  * `EsqlSource` shares, so a `FROM x | LIMIT 0` is requested once per page.
  */
-export declare const getEsqlSourceColumns: ({ esqlQuery, http, projectRouting, variables, timeRange, signal, }: {
-    esqlQuery?: string;
-    http: HttpStart;
-    projectRouting?: string;
-    variables?: ESQLControlVariable[];
-    timeRange?: TimeRange;
-    signal?: AbortSignal;
+export declare const getEsqlSourceColumns: ({
+  esqlQuery,
+  http,
+  projectRouting,
+  variables,
+  timeRange,
+  signal,
+}: {
+  esqlQuery?: string;
+  http: HttpStart;
+  projectRouting?: string;
+  variables?: ESQLControlVariable[];
+  timeRange?: TimeRange;
+  signal?: AbortSignal;
 }) => Promise<ESQLFieldWithMetadata[]>;

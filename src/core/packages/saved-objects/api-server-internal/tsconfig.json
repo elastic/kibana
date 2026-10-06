@@ -34,6 +34,7 @@
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/utility-types",
     "@kbn/core-security-common",
+    "@kbn/core",
   ],
   "exclude": [
     "target/**/*",

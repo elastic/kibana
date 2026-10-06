@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Subscription } from 'rxjs';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
@@ -13,17 +22,21 @@ import type { NowProviderInternalContract } from '../../now_provider';
  *
  * @internal
  */
-export declare function createGetConfig(uiSettings: IUiSettingsClient, requiredSettings: string[], subscriptions: Subscription[]): AggsCommonStartDependencies['getConfig'];
+export declare function createGetConfig(
+  uiSettings: IUiSettingsClient,
+  requiredSettings: string[],
+  subscriptions: Subscription[]
+): AggsCommonStartDependencies['getConfig'];
 /** @internal */
 export interface AggsSetupDependencies {
-    uiSettings: IUiSettingsClient;
-    registerFunction: ExpressionsServiceSetup['registerFunction'];
-    nowProvider: NowProviderInternalContract;
+  uiSettings: IUiSettingsClient;
+  registerFunction: ExpressionsServiceSetup['registerFunction'];
+  nowProvider: NowProviderInternalContract;
 }
 /** @internal */
 export interface AggsStartDependencies {
-    fieldFormats: FieldFormatsStart;
-    dataViews: DataViewsContract;
+  fieldFormats: FieldFormatsStart;
+  dataViews: DataViewsContract;
 }
 /**
  * The aggs service provides a means of modeling and manipulating the various
@@ -31,16 +44,16 @@ export interface AggsStartDependencies {
  * output the correct DSL when you are ready to send your request to ES.
  */
 export declare class AggsService {
-    private readonly aggsCommonService;
-    private getConfig?;
-    private subscriptions;
-    private nowProvider;
-    /**
-     * NowGetter uses window.location, so we must have a separate implementation
-     * of calculateBounds on the client and the server.
-     */
-    private calculateBounds;
-    setup({ registerFunction, uiSettings, nowProvider }: AggsSetupDependencies): AggsSetup;
-    start({ dataViews, fieldFormats }: AggsStartDependencies): AggsStart;
-    stop(): void;
+  private readonly aggsCommonService;
+  private getConfig?;
+  private subscriptions;
+  private nowProvider;
+  /**
+   * NowGetter uses window.location, so we must have a separate implementation
+   * of calculateBounds on the client and the server.
+   */
+  private calculateBounds;
+  setup({ registerFunction, uiSettings, nowProvider }: AggsSetupDependencies): AggsSetup;
+  start({ dataViews, fieldFormats }: AggsStartDependencies): AggsStart;
+  stop(): void;
 }

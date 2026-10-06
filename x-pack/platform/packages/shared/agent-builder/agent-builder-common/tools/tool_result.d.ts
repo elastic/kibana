@@ -1,157 +1,175 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRange } from '../attachments/attachment_types';
 export declare enum ToolResultType {
-    resource = "resource",
-    resourceList = "resource_list",
-    esqlResults = "esql_results",
-    dashboard = "dashboard",
-    query = "query",
-    visualization = "visualization",
-    other = "other",
-    error = "error",
-    fileReference = "file_reference",
-    image = "image"
+  resource = 'resource',
+  resourceList = 'resource_list',
+  esqlResults = 'esql_results',
+  dashboard = 'dashboard',
+  query = 'query',
+  visualization = 'visualization',
+  other = 'other',
+  error = 'error',
+  fileReference = 'file_reference',
+  image = 'image',
 }
 interface ToolResultTypeDataMap {
-    [ToolResultType.resource]: ResourceResultData;
-    [ToolResultType.resourceList]: ResourceListData;
-    [ToolResultType.esqlResults]: EsqlResultsData;
-    [ToolResultType.dashboard]: DashboardResultData;
-    [ToolResultType.query]: QueryResultData;
-    [ToolResultType.visualization]: VisualizationResultData;
-    [ToolResultType.error]: ErrorResultData;
-    [ToolResultType.fileReference]: FileReferenceResultData;
-    [ToolResultType.other]: OtherResultData;
-    [ToolResultType.image]: ImageResultData;
+  [ToolResultType.resource]: ResourceResultData;
+  [ToolResultType.resourceList]: ResourceListData;
+  [ToolResultType.esqlResults]: EsqlResultsData;
+  [ToolResultType.dashboard]: DashboardResultData;
+  [ToolResultType.query]: QueryResultData;
+  [ToolResultType.visualization]: VisualizationResultData;
+  [ToolResultType.error]: ErrorResultData;
+  [ToolResultType.fileReference]: FileReferenceResultData;
+  [ToolResultType.other]: OtherResultData;
+  [ToolResultType.image]: ImageResultData;
 }
 export type ToolResultDataOf<Type extends ToolResultType> = ToolResultTypeDataMap[Type];
 export interface ToolResultMixin<TType extends string = string, TData extends Object = Object> {
-    tool_result_id: string;
-    type: TType;
-    data: TType extends ToolResultType.other ? TData : TType extends ToolResultType ? ToolResultDataOf<TType> : TData;
+  tool_result_id: string;
+  type: TType;
+  data: TType extends ToolResultType.other
+    ? TData
+    : TType extends ToolResultType
+    ? ToolResultDataOf<TType>
+    : TData;
 }
 type UnknownToolType<T extends string> = T extends ToolResultType ? never : T;
 export type KnownToolResult = {
-    [K in ToolResultType]: ToolResultMixin<K>;
+  [K in ToolResultType]: ToolResultMixin<K>;
 }[ToolResultType];
 export type UnknownToolResult = ToolResultMixin<UnknownToolType<string>>;
 export type ToolResult = KnownToolResult | UnknownToolResult;
 export interface Resource {
-    reference: {
-        id: string;
-        index: string;
-    };
-    title?: string;
-    partial?: boolean;
-    content: Record<string, unknown>;
+  reference: {
+    id: string;
+    index: string;
+  };
+  title?: string;
+  partial?: boolean;
+  content: Record<string, unknown>;
 }
 export type ResourceResultData = Resource;
 export type ResourceResult = ToolResultMixin<ToolResultType.resource>;
 export interface ResourceListData {
-    resources: Resource[];
+  resources: Resource[];
 }
 export type ResourceListResult = ToolResultMixin<ToolResultType.resourceList>;
 export interface EsqlResultsData {
-    query: string;
-    columns: EsqlEsqlColumnInfo[];
-    values: FieldValue[][];
-    /** Optional time range used for named parameters ?_tstart and ?_tend */
-    time_range?: TimeRange;
+  query: string;
+  columns: EsqlEsqlColumnInfo[];
+  values: FieldValue[][];
+  /** Optional time range used for named parameters ?_tstart and ?_tend */
+  time_range?: TimeRange;
 }
 export type EsqlResults = ToolResultMixin<ToolResultType.esqlResults>;
 export interface DashboardResultData {
-    id: string;
-    title?: string;
-    content: Record<string, unknown>;
+  id: string;
+  title?: string;
+  content: Record<string, unknown>;
 }
 export type DashboardResult = ToolResultMixin<ToolResultType.dashboard>;
 export interface QueryResultData {
-    esql: string;
+  esql: string;
 }
 export type QueryResult = ToolResultMixin<ToolResultType.query>;
 export declare enum SupportedChartType {
-    Metric = "metric",
-    Gauge = "gauge",
-    Tagcloud = "tag_cloud",
-    XY = "xy",
-    RegionMap = "region_map",
-    Heatmap = "heatmap",
-    Datatable = "data_table",
-    Pie = "pie",
-    Treemap = "treemap",
-    Waffle = "waffle",
-    Mosaic = "mosaic"
+  Metric = 'metric',
+  Gauge = 'gauge',
+  Tagcloud = 'tag_cloud',
+  XY = 'xy',
+  RegionMap = 'region_map',
+  Heatmap = 'heatmap',
+  Datatable = 'data_table',
+  Pie = 'pie',
+  Treemap = 'treemap',
+  Waffle = 'waffle',
+  Mosaic = 'mosaic',
 }
 interface VisualizationResultDataBase {
-    time_range?: TimeRange;
-    /**
-     * ID of the persisted visualization attachment. Present when persistence
-     * succeeded; the agent renders the visualization inline via
-     * `<render_attachment id version>` and reuses it for follow-up updates.
-     */
-    attachment_id?: string;
-    /** Version of the persisted attachment backing this result. */
-    version?: number;
+  time_range?: TimeRange;
+  /**
+   * ID of the persisted visualization attachment. Present when persistence
+   * succeeded; the agent renders the visualization inline via
+   * `<render_attachment id version>` and reuses it for follow-up updates.
+   */
+  attachment_id?: string;
+  /** Version of the persisted attachment backing this result. */
+  version?: number;
 }
 /** A Lens or Vega result. `renderer` is omitted on results predating the discriminator. */
 export interface ChartVisualizationResultData extends VisualizationResultDataBase {
-    esql: string;
-    renderer?: 'lens' | 'vega';
-    /** Shared visualization payload. Vega stores spec at visualization.spec. */
-    visualization: Record<string, unknown> & {
-        spec?: string;
-    };
-    /** Optional chart type identifier (primarily Lens). */
-    chart_type?: SupportedChartType;
+  esql: string;
+  renderer?: 'lens' | 'vega';
+  /** Shared visualization payload. Vega stores spec at visualization.spec. */
+  visualization: Record<string, unknown> & {
+    spec?: string;
+  };
+  /** Optional chart type identifier (primarily Lens). */
+  chart_type?: SupportedChartType;
 }
 /**
  * A custom content result. The HTML template is deliberately absent — it lives in the
  * attachment, and round-tripping KBs of markup through the model invites corruption.
  */
 export interface CustomContentVisualizationResultData extends VisualizationResultDataBase {
-    renderer: 'custom_content';
-    esql?: string;
-    /** The prompt the template was generated from. */
-    visualization: {
-        prompt: string;
-    };
+  renderer: 'custom_content';
+  esql?: string;
+  /** The prompt the template was generated from. */
+  visualization: {
+    prompt: string;
+  };
 }
-export type VisualizationResultData = ChartVisualizationResultData | CustomContentVisualizationResultData;
+export type VisualizationResultData =
+  | ChartVisualizationResultData
+  | CustomContentVisualizationResultData;
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;
 export type OtherResultData<T extends Object = Object> = T;
-export type OtherResult<T extends Object = Record<string, unknown>> = ToolResultMixin<ToolResultType.other, T>;
+export type OtherResult<T extends Object = Record<string, unknown>> = ToolResultMixin<
+  ToolResultType.other,
+  T
+>;
 export interface ErrorResultData {
-    message: string;
-    stack?: unknown;
-    metadata?: Record<string, unknown>;
+  message: string;
+  stack?: unknown;
+  metadata?: Record<string, unknown>;
 }
 export type ErrorResult = ToolResultMixin<ToolResultType.error>;
 export interface FileReferenceResultData {
-    filepath: string;
-    comment: string;
+  filepath: string;
+  comment: string;
 }
 export type FileReferenceResult = ToolResultMixin<ToolResultType.fileReference>;
 export declare const isResourceResult: (result: ToolResult) => result is ResourceResult;
 export declare const isResourceListResult: (result: ToolResult) => result is ResourceListResult;
 export declare const isEsqlResultsResult: (result: ToolResult) => result is EsqlResults;
 export declare const isQueryResult: (result: ToolResult) => result is QueryResult;
-export declare const isOtherResult: <T extends Object = Record<string, unknown>>(result: ToolResult) => result is OtherResult<T>;
+export declare const isOtherResult: <T extends Object = Record<string, unknown>>(
+  result: ToolResult
+) => result is OtherResult<T>;
 export declare const isErrorResult: (result: ToolResult) => result is ErrorResult;
 /**
  * `metadata.declined_reason` of the error result a non-interactive run returns in place of a HITL
  * prompt (tool confirmation, on-demand prompt, destructive API approval): with no user to answer,
  * the call is declined and the agent is told why.
  */
-export declare const NON_INTERACTIVE_DECLINED_REASON = "non_interactive";
+export declare const NON_INTERACTIVE_DECLINED_REASON = 'non_interactive';
 /** True for the error result that stands in for a HITL prompt auto-declined in a non-interactive run. */
 export declare const isNonInteractiveDeclinedResult: (result: ToolResult) => result is ErrorResult;
 export declare const isFileReferenceResult: (result: ToolResult) => result is FileReferenceResult;
 export declare const isVisualizationResult: (result: ToolResult) => result is VisualizationResult;
 export interface ImageResultData {
-    attachment_id: string;
-    mime_type: string;
-    name?: string;
-    description: string;
+  attachment_id: string;
+  mime_type: string;
+  name?: string;
+  description: string;
 }
 export type ImageResult = ToolResultMixin<ToolResultType.image>;
 export declare const isImageResult: (result: ToolResult) => result is ImageResult;

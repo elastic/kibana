@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { BehaviorSubject } from 'rxjs';
 import type { PackageInfo } from '@kbn/config';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
@@ -8,22 +17,22 @@ import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-s
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
 interface FactoryOptions {
-    /** Can be a URL, in the case of a CDN, or a base path if serving from Kibana */
-    baseHref: string;
-    packageInfo: PackageInfo;
-    uiPlugins: UiPlugins;
-    auth: HttpAuth;
-    userSettingsService?: InternalUserSettingsServiceSetup;
-    themeName$: BehaviorSubject<ThemeName>;
+  /** Can be a URL, in the case of a CDN, or a base path if serving from Kibana */
+  baseHref: string;
+  packageInfo: PackageInfo;
+  uiPlugins: UiPlugins;
+  auth: HttpAuth;
+  userSettingsService?: InternalUserSettingsServiceSetup;
+  themeName$: BehaviorSubject<ThemeName>;
 }
 interface RenderedOptions {
-    request: KibanaRequest;
-    uiSettingsClient: IUiSettingsClient;
-    isAnonymousPage?: boolean;
+  request: KibanaRequest;
+  uiSettingsClient: IUiSettingsClient;
+  isAnonymousPage?: boolean;
 }
 interface RendererResult {
-    body: string;
-    etag: string;
+  body: string;
+  etag: string;
 }
 export declare const bootstrapRendererFactory: BootstrapRendererFactory;
 export {};

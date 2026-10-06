@@ -1,7 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
-import { type ICommandCallbacks, type ICommandContext, type ISuggestionItem, type Location } from '../../../registry/types';
+import {
+  type ICommandCallbacks,
+  type ICommandContext,
+  type ISuggestionItem,
+  type Location,
+} from '../../../registry/types';
 import type { ExpressionContextOptions } from './expressions/types';
-export declare function suggestFieldsList(query: string, command: ESQLAstAllCommands, fieldList: ESQLAstField[], location: Location, callbacks?: ICommandCallbacks, context?: ICommandContext, cursorPosition?: number, options?: {
+export declare function suggestFieldsList(
+  query: string,
+  command: ESQLAstAllCommands,
+  fieldList: ESQLAstField[],
+  location: Location,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext,
+  cursorPosition?: number,
+  options?: {
     /** Listed functions will not be suggested in expressions */
     getFunctionsToIgnore?: ExpressionContextOptions['getFunctionsToIgnore'];
     /** Suggestions to show after a complete field expression */
@@ -18,4 +40,5 @@ export declare function suggestFieldsList(query: string, command: ESQLAstAllComm
     disableNewColumnSuggestion?: boolean;
     /** Whether this expression context can suggest subquery operands after IN / NOT IN */
     allowSubquery?: ExpressionContextOptions['allowSubquery'];
-}): Promise<ISuggestionItem[]>;
+  }
+): Promise<ISuggestionItem[]>;

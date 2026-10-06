@@ -1,29 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import type { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '@kbn/core-lifecycle-server-internal';
 /** @internal */
 export declare class CoreAppsService {
-    private readonly logger;
-    private readonly env;
-    private readonly configService;
-    private readonly config$;
-    private readonly savedObjectsStart$;
-    private readonly stop$;
-    constructor(core: CoreContext);
-    preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins): Promise<void>;
-    setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins): Promise<void>;
-    start(coreStart: InternalCoreStart): void;
-    stop(): void;
-    private registerPrebootDefaultRoutes;
-    private registerDefaultRoutes;
-    private maybeRegisterDynamicConfigurationFeature;
-    /**
-     * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
-     * @param router {@link IRouter}
-     * @param savedObjectClient$ An observable of a {@link SavedObjectsClientContract | savedObjects client} that will be used to update the document
-     * @internal
-     */
-    private registerInternalCoreSettingsRoute;
-    private registerCommonDefaultRoutes;
-    private registerStaticDirs;
+  private readonly logger;
+  private readonly env;
+  private readonly configService;
+  private readonly config$;
+  private readonly savedObjectsStart$;
+  private readonly stop$;
+  constructor(core: CoreContext);
+  preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins): Promise<void>;
+  setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins): Promise<void>;
+  start(coreStart: InternalCoreStart): void;
+  stop(): void;
+  private registerPrebootDefaultRoutes;
+  private registerDefaultRoutes;
+  private maybeRegisterDynamicConfigurationFeature;
+  /**
+   * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
+   * @param router {@link IRouter}
+   * @param savedObjectClient$ An observable of a {@link SavedObjectsClientContract | savedObjects client} that will be used to update the document
+   * @internal
+   */
+  private registerInternalCoreSettingsRoute;
+  private registerCommonDefaultRoutes;
+  private registerStaticDirs;
 }

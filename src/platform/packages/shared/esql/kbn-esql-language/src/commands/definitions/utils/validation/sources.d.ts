@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLSource } from '@elastic/esql/types';
 import type { ICommandContext } from '../../../registry/types';
 import type { ESQLMessage } from '../../types';
@@ -8,7 +17,11 @@ import type { ESQLMessage } from '../../types';
  */
 export declare function isDotPrefixedSource(sourceName: string): boolean;
 export interface ValidateSourcesOptions {
-    /** When true, use "Unknown data source" error (e.g. for FROM). When false, use "Unknown index" (e.g. for TS). */
-    useGenericDataSourceError?: boolean;
+  /** When true, use "Unknown data source" error (e.g. for FROM). When false, use "Unknown index" (e.g. for TS). */
+  useGenericDataSourceError?: boolean;
 }
-export declare function validateSources(sources: ESQLSource[], context?: ICommandContext, options?: ValidateSourcesOptions): ESQLMessage[];
+export declare function validateSources(
+  sources: ESQLSource[],
+  context?: ICommandContext,
+  options?: ValidateSourcesOptions
+): ESQLMessage[];

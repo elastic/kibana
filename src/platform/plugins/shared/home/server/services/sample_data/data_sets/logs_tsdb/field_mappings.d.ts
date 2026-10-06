@@ -1,141 +1,150 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export declare const fieldMappings: {
-    request: {
+  request: {
+    type: string;
+  };
+  geo: {
+    properties: {
+      srcdest: {
         type: string;
-    };
-    geo: {
-        properties: {
-            srcdest: {
-                type: string;
-            };
-            src: {
-                type: string;
-            };
-            dest: {
-                type: string;
-            };
-            coordinates: {
-                type: string;
-            };
-        };
-    };
-    utc_time: {
+      };
+      src: {
         type: string;
-    };
-    url: {
+      };
+      dest: {
         type: string;
-    };
-    message: {
+      };
+      coordinates: {
         type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
+      };
     };
-    host: {
+  };
+  utc_time: {
+    type: string;
+  };
+  url: {
+    type: string;
+  };
+  message: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
+        ignore_above: number;
+      };
     };
-    clientip: {
+  };
+  host: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
+        ignore_above: number;
+      };
     };
-    response: {
+  };
+  clientip: {
+    type: string;
+  };
+  response: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
+        ignore_above: number;
+      };
     };
-    machine: {
-        properties: {
-            ram: {
-                type: string;
-            };
-            os: {
-                type: string;
-                fields: {
-                    keyword: {
-                        type: string;
-                        ignore_above: number;
-                    };
-                };
-            };
-        };
-    };
-    agent: {
+  };
+  machine: {
+    properties: {
+      ram: {
+        type: string;
+      };
+      os: {
         type: string;
         fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
+          keyword: {
+            type: string;
+            ignore_above: number;
+          };
         };
+      };
     };
-    bytes: {
+  };
+  agent: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
+        ignore_above: number;
+      };
     };
-    tags: {
+  };
+  bytes: {
+    type: string;
+  };
+  tags: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
+        ignore_above: number;
+      };
     };
-    referer: {
+  };
+  referer: {
+    type: string;
+  };
+  ip: {
+    type: string;
+  };
+  '@timestamp': {
+    type: string;
+  };
+  timestamp: {
+    type: string;
+    path: string;
+  };
+  phpmemory: {
+    type: string;
+  };
+  bytes_counter: {
+    type: string;
+    time_series_metric: string;
+  };
+  bytes_normal_counter: {
+    type: string;
+  };
+  bytes_gauge: {
+    type: string;
+    time_series_metric: string;
+  };
+  memory: {
+    type: string;
+  };
+  extension: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
+        ignore_above: number;
+      };
     };
-    ip: {
+  };
+  event: {
+    properties: {
+      dataset: {
         type: string;
+        time_series_dimension: boolean;
+      };
     };
-    '@timestamp': {
-        type: string;
-    };
-    timestamp: {
-        type: string;
-        path: string;
-    };
-    phpmemory: {
-        type: string;
-    };
-    bytes_counter: {
-        type: string;
-        time_series_metric: string;
-    };
-    bytes_normal_counter: {
-        type: string;
-    };
-    bytes_gauge: {
-        type: string;
-        time_series_metric: string;
-    };
-    memory: {
-        type: string;
-    };
-    extension: {
-        type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
-    };
-    event: {
-        properties: {
-            dataset: {
-                type: string;
-                time_series_dimension: boolean;
-            };
-        };
-    };
+  };
 };

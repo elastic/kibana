@@ -1,10 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { NumericRollingStrategyConfig } from '@kbn/core-logging-server';
 import type { RollingStrategy } from '../strategy';
 import type { RollingFileContext } from '../../rolling_file_context';
-export declare const numericRollingStrategyConfigSchema: import("@kbn/config-schema").ObjectType<{
-    type: import("@kbn/config-schema").Type<"numeric">;
-    pattern: import("@kbn/config-schema").Type<string>;
-    max: import("@kbn/config-schema").Type<number>;
+export declare const numericRollingStrategyConfigSchema: import('@kbn/config-schema').ObjectType<{
+  type: import('@kbn/config-schema').Type<'numeric'>;
+  pattern: import('@kbn/config-schema').Type<string>;
+  max: import('@kbn/config-schema').Type<number>;
 }>;
 /**
  * A rolling strategy that will suffix the file with a given pattern when rolling,
@@ -33,12 +42,12 @@ export declare const numericRollingStrategyConfigSchema: import("@kbn/config-sch
  * See {@link NumericRollingStrategyConfig} for more details.
  */
 export declare class NumericRollingStrategy implements RollingStrategy {
-    private readonly config;
-    private readonly context;
-    private readonly logFilePath;
-    private readonly logFileBaseName;
-    private readonly logFileFolder;
-    constructor(config: NumericRollingStrategyConfig, context: RollingFileContext);
-    private getOrderedRolledFiles;
-    rollout(): Promise<void>;
+  private readonly config;
+  private readonly context;
+  private readonly logFilePath;
+  private readonly logFileBaseName;
+  private readonly logFileFolder;
+  constructor(config: NumericRollingStrategyConfig, context: RollingFileContext);
+  private getOrderedRolledFiles;
+  rollout(): Promise<void>;
 }

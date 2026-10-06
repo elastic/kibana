@@ -1,9 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient, ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { IndexMapping, SavedObjectsMigrationConfigType, MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  IndexMapping,
+  SavedObjectsMigrationConfigType,
+  MigrationResult,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { TransformRawDocs } from './types';
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we
@@ -18,25 +34,41 @@ import type { TransformRawDocs } from './types';
  * actions.
  */
 export interface RunResilientMigratorParams {
-    client: ElasticsearchClient;
-    kibanaVersion: string;
-    waitForMigrationCompletion: boolean;
-    indexTypes: string[];
-    targetIndexMappings: IndexMapping;
-    hashToVersionMap: Record<string, string>;
-    logger: Logger;
-    transformRawDocs: TransformRawDocs;
-    coreMigrationVersionPerType: SavedObjectsMigrationVersion;
-    migrationVersionPerType: SavedObjectsMigrationVersion;
-    indexPrefix: string;
-    migrationsConfig: SavedObjectsMigrationConfigType;
-    typeRegistry: ISavedObjectTypeRegistry;
-    docLinks: DocLinksServiceStart;
-    esCapabilities: ElasticsearchCapabilities;
+  client: ElasticsearchClient;
+  kibanaVersion: string;
+  waitForMigrationCompletion: boolean;
+  indexTypes: string[];
+  targetIndexMappings: IndexMapping;
+  hashToVersionMap: Record<string, string>;
+  logger: Logger;
+  transformRawDocs: TransformRawDocs;
+  coreMigrationVersionPerType: SavedObjectsMigrationVersion;
+  migrationVersionPerType: SavedObjectsMigrationVersion;
+  indexPrefix: string;
+  migrationsConfig: SavedObjectsMigrationConfigType;
+  typeRegistry: ISavedObjectTypeRegistry;
+  docLinks: DocLinksServiceStart;
+  esCapabilities: ElasticsearchCapabilities;
 }
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is
  * completely lock-free so that any failure can always be retried by
  * restarting Kibana.
  */
-export declare function runResilientMigrator({ client, kibanaVersion, waitForMigrationCompletion, indexTypes, targetIndexMappings, hashToVersionMap, logger, transformRawDocs, coreMigrationVersionPerType, migrationVersionPerType, indexPrefix, migrationsConfig, typeRegistry, docLinks, esCapabilities, }: RunResilientMigratorParams): Promise<MigrationResult>;
+export declare function runResilientMigrator({
+  client,
+  kibanaVersion,
+  waitForMigrationCompletion,
+  indexTypes,
+  targetIndexMappings,
+  hashToVersionMap,
+  logger,
+  transformRawDocs,
+  coreMigrationVersionPerType,
+  migrationVersionPerType,
+  indexPrefix,
+  migrationsConfig,
+  typeRegistry,
+  docLinks,
+  esCapabilities,
+}: RunResilientMigratorParams): Promise<MigrationResult>;

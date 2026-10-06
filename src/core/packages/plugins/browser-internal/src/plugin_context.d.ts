@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
@@ -15,9 +24,14 @@ import type { IRuntimePluginContractResolver } from './plugin_contract_resolver'
  * @param pluginConfig
  * @internal
  */
-export declare function createPluginInitializerContext(coreContext: CoreContext, opaqueId: PluginOpaqueId, pluginManifest: DiscoveredPlugin, pluginConfig: {
+export declare function createPluginInitializerContext(
+  coreContext: CoreContext,
+  opaqueId: PluginOpaqueId,
+  pluginManifest: DiscoveredPlugin,
+  pluginConfig: {
     [key: string]: unknown;
-}): PluginInitializerContext;
+  }
+): PluginInitializerContext;
 /**
  * Provides a plugin-specific context passed to the plugin's `setup` lifecycle event. Currently
  * this returns a shallow copy the service setup contracts, but in the future could provide
@@ -28,10 +42,19 @@ export declare function createPluginInitializerContext(coreContext: CoreContext,
  * @param plugin
  * @internal
  */
-export declare function createPluginSetupContext<TSetup, TStart, TPluginsSetup extends object, TPluginsStart extends object>({ deps, plugin, runtimeResolver, }: {
-    deps: PluginsServiceSetupDeps;
-    plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
-    runtimeResolver: IRuntimePluginContractResolver;
+export declare function createPluginSetupContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends object,
+  TPluginsStart extends object
+>({
+  deps,
+  plugin,
+  runtimeResolver,
+}: {
+  deps: PluginsServiceSetupDeps;
+  plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  runtimeResolver: IRuntimePluginContractResolver;
 }): CoreSetup;
 /**
  * Provides a plugin-specific context passed to the plugin's `start` lifecycle event. Currently
@@ -43,8 +66,17 @@ export declare function createPluginSetupContext<TSetup, TStart, TPluginsSetup e
  * @param plugin
  * @internal
  */
-export declare function createPluginStartContext<TSetup, TStart, TPluginsSetup extends object, TPluginsStart extends object>({ deps, plugin, runtimeResolver, }: {
-    deps: PluginsServiceStartDeps;
-    plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
-    runtimeResolver: IRuntimePluginContractResolver;
+export declare function createPluginStartContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends object,
+  TPluginsStart extends object
+>({
+  deps,
+  plugin,
+  runtimeResolver,
+}: {
+  deps: PluginsServiceStartDeps;
+  plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  runtimeResolver: IRuntimePluginContractResolver;
 }): CoreStart;

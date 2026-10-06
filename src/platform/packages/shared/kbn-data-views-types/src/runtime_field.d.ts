@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { RUNTIME_FIELD_TYPES } from '@kbn/as-code-data-views-schema';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 /**
@@ -12,53 +21,56 @@ export type RuntimePrimitiveTypes = Exclude<RuntimeType, 'composite'>;
  * Runtime field definition
  * @public
  */
-export type RuntimeFieldBase = {
+export interface RuntimeFieldBase {
+  /**
+   * Type of runtime field
+   */
+  type: RuntimeType;
+  /**
+   * Runtime field script
+   */
+  script?: {
     /**
-     * Type of runtime field
+     * Script source
      */
-    type: RuntimeType;
-    /**
-     * Runtime field script
-     */
-    script?: {
-        /**
-         * Script source
-         */
-        source: string;
-    };
-};
+    source: string;
+  };
+}
 /**
  * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
  */
 export type RuntimeFieldSpec = RuntimeFieldBase & {
-    /**
-     * Composite subfields
-     */
-    fields?: Record<string, {
-        type: RuntimePrimitiveTypes;
-    }>;
+  /**
+   * Composite subfields
+   */
+  fields?: Record<
+    string,
+    {
+      type: RuntimePrimitiveTypes;
+    }
+  >;
 };
 /**
  * Field attributes that are user configurable
  * @public
  */
 export interface FieldConfiguration {
-    /**
-     * Field format in serialized form
-     */
-    format?: SerializedFieldFormat | null;
-    /**
-     * Custom label
-     */
-    customLabel?: string;
-    /**
-     * Custom description
-     */
-    customDescription?: string;
-    /**
-     * Popularity - used for discover
-     */
-    popularity?: number;
+  /**
+   * Field format in serialized form
+   */
+  format?: SerializedFieldFormat | null;
+  /**
+   * Custom label
+   */
+  customLabel?: string;
+  /**
+   * Custom description
+   */
+  customDescription?: string;
+  /**
+   * Popularity - used for discover
+   */
+  popularity?: number;
 }
 /**
  * This is the RuntimeField interface enhanced with Data view field
@@ -66,10 +78,10 @@ export interface FieldConfiguration {
  * @public
  */
 export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
-    /**
-     * Subfields of composite field
-     */
-    fields?: RuntimeFieldSubFields;
+  /**
+   * Subfields of composite field
+   */
+  fields?: RuntimeFieldSubFields;
 }
 export type RuntimeFieldSubFields = Record<string, RuntimeFieldSubField>;
 /**
@@ -77,5 +89,5 @@ export type RuntimeFieldSubFields = Record<string, RuntimeFieldSubField>;
  * @public
  */
 export interface RuntimeFieldSubField extends FieldConfiguration {
-    type: RuntimePrimitiveTypes;
+  type: RuntimePrimitiveTypes;
 }

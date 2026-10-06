@@ -1,4 +1,20 @@
-import type { ChromeNavLink, ChromeProjectNavigationNode, NavigationTreeDefinition, NavigationTreeDefinitionUI, CloudLinks, SolutionId } from '@kbn/core-chrome-browser/src';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+  NavigationTreeDefinition,
+  NavigationTreeDefinitionUI,
+  CloudLinks,
+  SolutionId,
+} from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 /**
  * Flatten the navigation tree into a record of path => node
@@ -8,7 +24,11 @@ import type { Location } from 'history';
  * @param prefix Array of path prefix (used in the recursion)
  * @returns The flattened navigation tree
  */
-export declare const flattenNav: (navTree: ChromeProjectNavigationNode[], prefix?: string[], acc?: Record<string, ChromeProjectNavigationNode>) => Record<string, ChromeProjectNavigationNode>;
+export declare const flattenNav: (
+  navTree: ChromeProjectNavigationNode[],
+  prefix?: string[],
+  acc?: Record<string, ChromeProjectNavigationNode>
+) => Record<string, ChromeProjectNavigationNode>;
 export declare const stripQueryParams: (url: string) => string;
 /**
  * Find the active nodes in the navigation tree based on the current Location.pathname
@@ -19,7 +39,12 @@ export declare const stripQueryParams: (url: string) => string;
  * @param navTree The flattened navigation tree
  * @returns The active nodes
  */
-export declare const findActiveNodes: (currentPathname: string, navTree: Record<string, ChromeProjectNavigationNode>, location?: Location, prepend?: (path: string) => string) => ChromeProjectNavigationNode[][];
+export declare const findActiveNodes: (
+  currentPathname: string,
+  navTree: Record<string, ChromeProjectNavigationNode>,
+  location?: Location,
+  prepend?: (path: string) => string
+) => ChromeProjectNavigationNode[][];
 /**
  * Returns the top-level body nodes that the sidebar will actually render, in
  * order. Specifically it prunes:
@@ -37,11 +62,20 @@ export declare const findActiveNodes: (currentPathname: string, navTree: Record<
  *
  * Icon resolution for the same nodes lives in `@kbn/core-chrome-browser-navigation-utils`.
  */
-export declare const getRenderableNodes: (nodes: ChromeProjectNavigationNode[]) => ChromeProjectNavigationNode[];
-export declare const parseNavigationTree: (id: SolutionId, navigationTreeDef: NavigationTreeDefinition, { deepLinks, cloudLinks, }: {
+export declare const getRenderableNodes: (
+  nodes: ChromeProjectNavigationNode[]
+) => ChromeProjectNavigationNode[];
+export declare const parseNavigationTree: (
+  id: SolutionId,
+  navigationTreeDef: NavigationTreeDefinition,
+  {
+    deepLinks,
+    cloudLinks,
+  }: {
     deepLinks: Record<string, ChromeNavLink>;
     cloudLinks: CloudLinks;
-}) => {
-    navigationTree: ChromeProjectNavigationNode[];
-    navigationTreeUI: NavigationTreeDefinitionUI;
+  }
+) => {
+  navigationTree: ChromeProjectNavigationNode[];
+  navigationTreeUI: NavigationTreeDefinitionUI;
 };

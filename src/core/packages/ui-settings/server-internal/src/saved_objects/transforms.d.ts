@@ -1,11 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_config';
 /**
  * The params needed to execute each transform function.
  */
 interface TransformParams {
-    savedObjectsClient: SavedObjectsClientContract;
-    configAttributes: UpgradeableConfigAttributes | undefined;
+  savedObjectsClient: SavedObjectsClientContract;
+  configAttributes: UpgradeableConfigAttributes | undefined;
 }
 /**
  * The resulting attributes that should be used when upgrading the config object.
@@ -19,8 +28,8 @@ type TransformReturnType = TransformDefaultIndexReturnType;
  * depending on the outcome.
  */
 type TransformDefaultIndexReturnType = {
-    isDefaultIndexMigrated: boolean;
-    defaultIndex?: string;
+  isDefaultIndexMigrated: boolean;
+  defaultIndex?: string;
 } | null;
 export type TransformConfigFn = (params: TransformParams) => Promise<TransformReturnType>;
 /**
@@ -41,5 +50,7 @@ export declare const transforms: TransformConfigFn[];
  * Note also that this function is only exported for unit testing. It is also included in the `transforms` export above, which is how it is
  * applied during `createOrUpgradeSavedConfig`.
  */
-export declare function transformDefaultIndex(params: TransformParams): Promise<TransformDefaultIndexReturnType>;
+export declare function transformDefaultIndex(
+  params: TransformParams
+): Promise<TransformDefaultIndexReturnType>;
 export {};

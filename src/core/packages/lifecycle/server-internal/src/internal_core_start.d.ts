@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { InternalDeprecationsServiceStart } from '@kbn/core-deprecations-server-internal';
@@ -22,24 +31,24 @@ import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
  * @internal
  */
 export interface InternalCoreStart {
-    analytics: AnalyticsServiceStart;
-    capabilities: CapabilitiesStart;
-    elasticsearch: InternalElasticsearchServiceStart;
-    featureFlags: InternalFeatureFlagsStart;
-    docLinks: DocLinksServiceStart;
-    http: InternalHttpServiceStart;
-    metrics: InternalMetricsServiceStart;
-    savedObjects: InternalSavedObjectsServiceStart;
-    uiSettings: InternalUiSettingsServiceStart;
-    coreUsageData: CoreUsageDataStart;
-    executionContext: InternalExecutionContextStart;
-    deprecations: InternalDeprecationsServiceStart;
-    userActivity: InternalUserActivityServiceStart;
-    customBranding: CustomBrandingStart;
-    security: InternalSecurityServiceStart;
-    userProfile: InternalUserProfileServiceStart;
-    pricing: PricingServiceStart;
-    injection: InternalCoreDiServiceStart;
-    dataStreams: DataStreamsStart;
-    userStorage: UserStorageServiceStart;
+  analytics: AnalyticsServiceStart;
+  capabilities: CapabilitiesStart;
+  elasticsearch: InternalElasticsearchServiceStart;
+  featureFlags: InternalFeatureFlagsStart;
+  docLinks: DocLinksServiceStart;
+  http: InternalHttpServiceStart;
+  metrics: InternalMetricsServiceStart;
+  savedObjects: InternalSavedObjectsServiceStart;
+  uiSettings: InternalUiSettingsServiceStart;
+  coreUsageData: CoreUsageDataStart;
+  executionContext: InternalExecutionContextStart;
+  deprecations: InternalDeprecationsServiceStart;
+  userActivity: InternalUserActivityServiceStart;
+  customBranding: CustomBrandingStart;
+  security: InternalSecurityServiceStart;
+  userProfile: InternalUserProfileServiceStart;
+  pricing: PricingServiceStart;
+  injection: InternalCoreDiServiceStart;
+  dataStreams: DataStreamsStart;
+  userStorage: UserStorageServiceStart;
 }

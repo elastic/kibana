@@ -1,24 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { UserActivityActionId } from './user_activity_actions';
 /**
  * Information about the object being acted upon.
  * @public
  */
 export interface UserActivityObject {
-    /** Unique object identifier. */
-    id: string;
-    /** Object name. */
-    name: string;
-    /** Object type (for example, 'dashboard', 'case', 'rule'). */
-    type: string;
-    /** List of tags assigned to the object. */
-    tags: string[];
+  /** Unique object identifier. */
+  id: string;
+  /** Object name. */
+  name: string;
+  /** Object type (for example, 'dashboard', 'case', 'rule'). */
+  type: string;
+  /** List of tags assigned to the object. */
+  tags: string[];
 }
 /**
  * Event type following ECS (Elastic Common Schema) allowed values.
  * @see https://www.elastic.co/guide/en/ecs/1.12/ecs-allowed-values-event-type.html
  * @public
  */
-export type UserActivityEventType = 'access' | 'admin' | 'allowed' | 'change' | 'connection' | 'creation' | 'deletion' | 'denied' | 'end' | 'error' | 'group' | 'indicator' | 'info' | 'installation' | 'protocol' | 'start' | 'user';
+export type UserActivityEventType =
+  | 'access'
+  | 'admin'
+  | 'allowed'
+  | 'change'
+  | 'connection'
+  | 'creation'
+  | 'deletion'
+  | 'denied'
+  | 'end'
+  | 'error'
+  | 'group'
+  | 'indicator'
+  | 'info'
+  | 'installation'
+  | 'protocol'
+  | 'start'
+  | 'user';
 /**
  * ECS `event.outcome` allowed values for user activity events.
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-outcome
@@ -31,32 +57,32 @@ export type UserActivityEventOutcome = 'success' | 'failure' | 'unknown';
  * @public
  */
 export interface UserActivityError {
-    /** The kind of error (for example, exception class name). */
-    type?: string;
-    /** Error message. */
-    message?: string;
-    /** Stack trace as a string. */
-    stack_trace?: string;
-    /** Optional error code. */
-    code?: string;
+  /** The kind of error (for example, exception class name). */
+  type?: string;
+  /** Error message. */
+  message?: string;
+  /** Stack trace as a string. */
+  stack_trace?: string;
+  /** Optional error code. */
+  code?: string;
 }
 /**
  * Information about the event being performed by the user.
  * @public
  */
 export interface UserActivityEvent {
-    /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
-    action: UserActivityActionId;
-    /** Event types {@link UserActivityEventType}. ECS defines `event.type` as an array. */
-    type: readonly UserActivityEventType[];
-    /** ECS event outcome; use with {@link UserActivityEventOutcome}. Defaults to `'unknown'` when omitted. */
-    outcome?: UserActivityEventOutcome;
-    /** ISO8601 timestamp of the event start time. */
-    start?: string;
-    /** ISO8601 timestamp of the event end time. */
-    end?: string;
-    /** Duration (in ns) between the event start and end timestamps. */
-    duration?: number;
+  /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
+  action: UserActivityActionId;
+  /** Event types {@link UserActivityEventType}. ECS defines `event.type` as an array. */
+  type: readonly UserActivityEventType[];
+  /** ECS event outcome; use with {@link UserActivityEventOutcome}. Defaults to `'unknown'` when omitted. */
+  outcome?: UserActivityEventOutcome;
+  /** ISO8601 timestamp of the event start time. */
+  start?: string;
+  /** ISO8601 timestamp of the event end time. */
+  end?: string;
+  /** Duration (in ns) between the event start and end timestamps. */
+  duration?: number;
 }
 /**
  * Additional bucket of non-standard metadata specific to the user activity log.
@@ -69,21 +95,21 @@ export type UserActivityMetadata = Record<string, unknown>;
  * @public
  */
 export interface UserActivityKibanaMetadata {
-    dashboard?: UserActivityMetadata;
-    security?: UserActivityMetadata;
+  dashboard?: UserActivityMetadata;
+  security?: UserActivityMetadata;
 }
 /** @public */
 export interface TrackUserActionParams {
-    /** Custom log message. If omitted, a default message is generated. */
-    message?: string;
-    /** Event attributes written to the log entry. */
-    event: UserActivityEvent;
-    /** Object attributes written to the log entry. */
-    object: UserActivityObject;
-    /** ECS error fields written at the top level of the log entry when provided. */
-    error?: UserActivityError;
-    /** Metadata buckets merged into the log entry's `kibana.*` fields; see {@link UserActivityKibanaMetadata}. */
-    kibana?: UserActivityKibanaMetadata;
+  /** Custom log message. If omitted, a default message is generated. */
+  message?: string;
+  /** Event attributes written to the log entry. */
+  event: UserActivityEvent;
+  /** Object attributes written to the log entry. */
+  object: UserActivityObject;
+  /** ECS error fields written at the top level of the log entry when provided. */
+  error?: UserActivityError;
+  /** Metadata buckets merged into the log entry's `kibana.*` fields; see {@link UserActivityKibanaMetadata}. */
+  kibana?: UserActivityKibanaMetadata;
 }
 /**
  * Allows plugins to record user actions.
@@ -99,11 +125,11 @@ export interface TrackUserActionParams {
  * @public
  */
 export interface UserActivityServiceSetup {
-    /**
-     * Records a user action, automatically enriched with user/session/space context.
-     * @param params {@link TrackUserActionParams}
-     */
-    trackUserAction(params: TrackUserActionParams): void;
+  /**
+   * Records a user action, automatically enriched with user/session/space context.
+   * @param params {@link TrackUserActionParams}
+   */
+  trackUserAction(params: TrackUserActionParams): void;
 }
 /**
  * Allows plugins to record user actions.
@@ -111,9 +137,9 @@ export interface UserActivityServiceSetup {
  * @public
  */
 export interface UserActivityServiceStart {
-    /**
-     * Records a user action, automatically enriched with user/session/space context.
-     * @param params {@link TrackUserActionParams}
-     */
-    trackUserAction(params: TrackUserActionParams): void;
+  /**
+   * Records a user action, automatically enriched with user/session/space context.
+   * @param params {@link TrackUserActionParams}
+   */
+  trackUserAction(params: TrackUserActionParams): void;
 }

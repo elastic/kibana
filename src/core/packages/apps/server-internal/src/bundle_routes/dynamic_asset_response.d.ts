@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { RequestHandler } from '@kbn/core-http-server';
 import type { IFileHashCache } from './file_hash_cache';
 /**
@@ -17,11 +26,20 @@ import type { IFileHashCache } from './file_hash_cache';
  *     by the public path so that individual public paths have
  *     different etags, but can share a cache
  */
-export declare const createDynamicAssetHandler: ({ bundlesPath, fileHashCache, isDist, publicPath, }: {
-    bundlesPath: string;
-    publicPath: string;
-    fileHashCache: IFileHashCache;
-    isDist: boolean;
-}) => RequestHandler<{
+export declare const createDynamicAssetHandler: ({
+  bundlesPath,
+  fileHashCache,
+  isDist,
+  publicPath,
+}: {
+  bundlesPath: string;
+  publicPath: string;
+  fileHashCache: IFileHashCache;
+  isDist: boolean;
+}) => RequestHandler<
+  {
     path: string;
-}, {}, {}>;
+  },
+  {},
+  {}
+>;

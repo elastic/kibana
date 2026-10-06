@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import type { OTLPExporterNodeConfigBase } from '@opentelemetry/otlp-exporter-base';
 /**
@@ -5,5 +12,5 @@ import type { OTLPExporterNodeConfigBase } from '@opentelemetry/otlp-exporter-ba
  * which is not spec-compliant. It will cause a warning to be logged.
  */
 export declare class PhoenixProtoExporter extends OTLPTraceExporter {
-    constructor(config?: OTLPExporterNodeConfigBase);
+  constructor(config?: OTLPExporterNodeConfigBase);
 }

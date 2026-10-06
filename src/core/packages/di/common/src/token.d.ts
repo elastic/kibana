@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ServiceIdentifier } from 'inversify';
 /**
  * A DI token that carries its resolved value type, allowing consumers to infer
@@ -10,7 +19,7 @@ import type { ServiceIdentifier } from 'inversify';
  * @public
  */
 export type ServiceToken<T = unknown> = ServiceIdentifier<T> & {
-    _type?: T;
+  _type?: T;
 };
 /**
  * Infers the service type carried by a {@link ServiceToken}.

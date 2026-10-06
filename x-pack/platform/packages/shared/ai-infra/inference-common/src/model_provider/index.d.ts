@@ -1,29 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 export declare enum ModelPlatform {
-    OpenAI = "OpenAI",
-    AzureOpenAI = "AzureOpenAI",
-    AmazonBedrock = "AmazonBedrock",
-    GoogleVertex = "GoogleVertex",
-    Elastic = "Elastic",
-    Other = "other"
+  OpenAI = 'OpenAI',
+  AzureOpenAI = 'AzureOpenAI',
+  AmazonBedrock = 'AmazonBedrock',
+  GoogleVertex = 'GoogleVertex',
+  Elastic = 'Elastic',
+  Other = 'other',
 }
 export declare enum ModelProvider {
-    OpenAI = "OpenAI",
-    Anthropic = "Anthropic",
-    Google = "Google",
-    Other = "Other",
-    Elastic = "Elastic"
+  OpenAI = 'OpenAI',
+  Anthropic = 'Anthropic',
+  Google = 'Google',
+  Other = 'Other',
+  Elastic = 'Elastic',
 }
 export declare enum ModelFamily {
-    GPT = "GPT",
-    Claude = "Claude",
-    Gemini = "Gemini",
-    Unknown = "Unknown"
+  GPT = 'GPT',
+  Claude = 'Claude',
+  Gemini = 'Gemini',
+  Unknown = 'Unknown',
 }
 export interface Model {
-    provider: ModelProvider;
-    family: ModelFamily;
-    id?: string;
-    creator?: string;
-    name?: string;
-    platform?: ModelPlatform;
+  provider: ModelProvider;
+  family: ModelFamily;
+  id?: string;
+  creator?: string;
+  name?: string;
+  platform?: ModelPlatform;
 }

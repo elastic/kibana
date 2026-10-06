@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { InferenceConnector } from './connectors/connectors';
 /**
  * Internal HTTP path for the inference connectors list API (search_inference_endpoints plugin).
@@ -10,12 +17,12 @@ export declare const INFERENCE_CONNECTORS_INTERNAL_API_PATH: '/internal/search_i
  * saved-object override is configured.
  */
 export interface ApiInferenceConnector extends InferenceConnector {
-    isRecommended?: boolean;
+  isRecommended?: boolean;
 }
 /**
  * Response body shape for {@link INFERENCE_CONNECTORS_INTERNAL_API_PATH}.
  */
 export interface InferenceConnectorsApiResponseBody {
-    connectors: ApiInferenceConnector[];
-    soEntryFound: boolean;
+  connectors: ApiInferenceConnector[];
+  soEntryFound: boolean;
 }

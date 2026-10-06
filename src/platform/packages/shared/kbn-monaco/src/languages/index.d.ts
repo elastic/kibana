@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { XJsonLang, XJSON_LANG_ID } from './xjson';
 import { PainlessLang, PAINLESS_LANG_ID } from './painless';
 import { SQLLang, SQL_LANG_ID } from './sql';
@@ -10,12 +19,52 @@ import { HandlebarsLang, HANDLEBARS_LANG_ID } from './handlebars';
 import { CssLang, CSS_LANG_ID } from './css';
 import { HJsonLang, HJSON_LANG_ID } from './hjson';
 import { PromQLLang, PROMQL_LANG_ID } from './promql';
-export { XJSON_LANG_ID, SQL_LANG_ID, ESQL_LANG_ID, YAML_LANG_ID, CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID, MARKDOWN_LANG_ID, GROK_LANG_ID, HANDLEBARS_LANG_ID, CSS_LANG_ID, HJSON_LANG_ID, PAINLESS_LANG_ID, PROMQL_LANG_ID, };
-export { XJsonLang, PainlessLang, SQLLang, ESQLLang, YamlLang, ConsoleLang, ConsoleOutputLang, MarkdownLang, GrokLang, HandlebarsLang, CssLang, HJsonLang, PromQLLang, };
+export {
+  XJSON_LANG_ID,
+  SQL_LANG_ID,
+  ESQL_LANG_ID,
+  YAML_LANG_ID,
+  CONSOLE_LANG_ID,
+  CONSOLE_OUTPUT_LANG_ID,
+  MARKDOWN_LANG_ID,
+  GROK_LANG_ID,
+  HANDLEBARS_LANG_ID,
+  CSS_LANG_ID,
+  HJSON_LANG_ID,
+  PAINLESS_LANG_ID,
+  PROMQL_LANG_ID,
+};
+export {
+  XJsonLang,
+  PainlessLang,
+  SQLLang,
+  ESQLLang,
+  YamlLang,
+  ConsoleLang,
+  ConsoleOutputLang,
+  MarkdownLang,
+  GrokLang,
+  HandlebarsLang,
+  CssLang,
+  HJsonLang,
+  PromQLLang,
+};
 export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from './esql';
 export type { ESQLDependencies, MonacoMessage } from './esql/language';
-export { CONSOLE_THEME_ID, CONSOLE_OUTPUT_THEME_ID, getParsedRequestsProvider, ConsoleParsedRequestsProvider, ConsoleWorkerProxyService, createOutputParser, } from './console';
-export type { ConsoleOutputParser, ConsoleParserResult, ErrorAnnotation, ParsedRequest, } from './console';
+export {
+  CONSOLE_THEME_ID,
+  CONSOLE_OUTPUT_THEME_ID,
+  getParsedRequestsProvider,
+  ConsoleParsedRequestsProvider,
+  ConsoleWorkerProxyService,
+  createOutputParser,
+} from './console';
+export type {
+  ConsoleOutputParser,
+  ConsoleParserResult,
+  ErrorAnnotation,
+  ParsedRequest,
+} from './console';
 export * from './painless';
 export { configureMonacoYamlSchema } from './yaml';
 export declare const initializeSupportedLanguages: () => void;

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 /**
  * Represents the virtual version of a given SO type.
@@ -40,16 +49,22 @@ export declare const getModelVersionMapForTypes: (types: SavedObjectsType[]) => 
  *   - the initialModelVersion aka 10.0.0 (if useModelVersionsOnly is set to true)
  *   - the latest migration version for the type (if useModelVersionsOnly is set to false)
  */
-export declare const getCurrentVirtualVersion: (type: SavedObjectsType, useModelVersionsOnly: boolean) => string;
+export declare const getCurrentVirtualVersion: (
+  type: SavedObjectsType,
+  useModelVersionsOnly: boolean
+) => string;
 export interface GetVirtualVersionMapParams {
-    types: SavedObjectsType[];
-    useModelVersionsOnly: boolean;
+  types: SavedObjectsType[];
+  useModelVersionsOnly: boolean;
 }
 /**
  * Returns a map of virtual model version for the given types.
  * See {@link getCurrentVirtualVersion}
  */
-export declare const getVirtualVersionMap: ({ types, useModelVersionsOnly, }: GetVirtualVersionMapParams) => VirtualVersionMap;
+export declare const getVirtualVersionMap: ({
+  types,
+  useModelVersionsOnly,
+}: GetVirtualVersionMapParams) => VirtualVersionMap;
 /**
  * Returns the latest version number that includes changes in the mappings, for the given type.
  * If none of the versions are updating the mappings, it will return 0
@@ -65,4 +80,6 @@ export declare const getLatestMappingsModelVersion: (type: SavedObjectsType) => 
  * Returns a map of virtual model version for the given types.
  * See {@link getLatestMappingsModelVersion}
  */
-export declare const getLatestMappingsVirtualVersionMap: (types: SavedObjectsType[]) => VirtualVersionMap;
+export declare const getLatestMappingsVirtualVersionMap: (
+  types: SavedObjectsType[]
+) => VirtualVersionMap;

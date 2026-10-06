@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/response-ops'
   sourceRoot: src/platform/packages/shared/kbn-rrule
-dependsOn: []
+dependsOn:
+  - '@kbn/task-manager-plugin'
 tags:
   - shared-common
   - package

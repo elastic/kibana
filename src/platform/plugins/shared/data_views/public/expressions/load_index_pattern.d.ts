@@ -1,5 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { StartServicesAccessor } from '@kbn/core/public';
-import type { IndexPatternLoadExpressionFunctionDefinition, IndexPatternLoadStartDependencies } from '../../common/expressions';
+import type {
+  IndexPatternLoadExpressionFunctionDefinition,
+  IndexPatternLoadStartDependencies,
+} from '../../common/expressions';
 import type { DataViewsPublicPluginStart, DataViewsPublicStartDependencies } from '../types';
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed
@@ -13,8 +25,10 @@ import type { DataViewsPublicPluginStart, DataViewsPublicStartDependencies } fro
  *
  * @internal
  */
-export declare function getFunctionDefinition({ getStartDependencies, }: {
-    getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
+export declare function getFunctionDefinition({
+  getStartDependencies,
+}: {
+  getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
 }): () => IndexPatternLoadExpressionFunctionDefinition;
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -30,6 +44,11 @@ export declare function getFunctionDefinition({ getStartDependencies, }: {
  *
  * @internal
  */
-export declare function getIndexPatternLoad({ getStartServices, }: {
-    getStartServices: StartServicesAccessor<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>;
+export declare function getIndexPatternLoad({
+  getStartServices,
+}: {
+  getStartServices: StartServicesAccessor<
+    DataViewsPublicStartDependencies,
+    DataViewsPublicPluginStart
+  >;
 }): () => IndexPatternLoadExpressionFunctionDefinition;

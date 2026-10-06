@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/shared-ux-card-no-data'
   - '@kbn/shared-ux-card-no-data-mocks'
+  - '@kbn/shared-ux-page-no-data-config-types'
 tags:
   - shared-browser
   - package

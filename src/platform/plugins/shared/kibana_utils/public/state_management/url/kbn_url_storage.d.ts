@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { History } from 'history';
 import type { SetStateToKbnUrlHashOptions } from '../../../common/state_management/set_state_to_kbn_url';
 export declare const getCurrentUrl: (history: History) => string;
@@ -19,9 +28,15 @@ export declare const getCurrentUrl: (history: History) => string;
  * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
  *
  */
-export declare function getStatesFromKbnUrl<State extends object = Record<string, unknown>>(url?: string, keys?: Array<keyof State>, { getFromHashQuery }?: {
+export declare function getStatesFromKbnUrl<State extends object = Record<string, unknown>>(
+  url?: string,
+  keys?: Array<keyof State>,
+  {
+    getFromHashQuery,
+  }?: {
     getFromHashQuery: boolean;
-}): State;
+  }
+): State;
 /**
  * Retrieves specific state from url by key
  * e.g.:
@@ -39,9 +54,15 @@ export declare function getStatesFromKbnUrl<State extends object = Record<string
  * { getFromHashQuery: false } option should be used in case state is stored in a main query (not in a hash):
  * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
  */
-export declare function getStateFromKbnUrl<State>(key: string, url?: string, { getFromHashQuery }?: {
+export declare function getStateFromKbnUrl<State>(
+  key: string,
+  url?: string,
+  {
+    getFromHashQuery,
+  }?: {
     getFromHashQuery: boolean;
-}): State | null;
+  }
+): State | null;
 /**
  * Sets state to the url by key and returns a new url string.
  * Doesn't actually updates history
@@ -60,47 +81,52 @@ export declare function getStateFromKbnUrl<State>(key: string, url?: string, { g
  * { storeInHashQuery: false } option should be used in you want to store your state in a main query (not in a hash):
  * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
  */
-export declare function setStateToKbnUrl<State>(key: string, state: State, { useHash, storeInHashQuery }?: SetStateToKbnUrlHashOptions, rawUrl?: string): string;
+export declare function setStateToKbnUrl<State>(
+  key: string,
+  state: State,
+  { useHash, storeInHashQuery }?: SetStateToKbnUrlHashOptions,
+  rawUrl?: string
+): string;
 /**
  * A tiny wrapper around history library to listen for url changes and update url
  * History library handles a bunch of cross browser edge cases
  */
 export interface IKbnUrlControls {
-    /**
-     * Listen for url changes
-     * @param cb - called when url has been changed
-     */
-    listen: (cb: () => void) => () => void;
-    /**
-     * Updates url synchronously, if needed
-     * skips the update and returns undefined in case when trying to update to current url
-     * otherwise returns new url
-     *
-     * @param url - url to update to
-     * @param replace - use replace instead of push
-     */
-    update: (url: string, replace: boolean) => string | undefined;
-    /**
-     * Schedules url update to next microtask,
-     * Useful to batch sync changes to url to cause only one browser history update
-     * @param updater - fn which receives current url and should return next url to update to
-     * @param replace - use replace instead of push
-     *
-     */
-    updateAsync: (updater: UrlUpdaterFnType, replace?: boolean) => Promise<string | undefined>;
-    /**
-     * If there is a pending url update - returns url that is scheduled for update
-     */
-    getPendingUrl: () => string | undefined;
-    /**
-     * Synchronously flushes scheduled url updates. Returns new flushed url, if there was an update. Otherwise - undefined.
-     * @param replace - if replace passed in, then uses it instead of push. Otherwise push or replace is picked depending on updateQueue
-     */
-    flush: (replace?: boolean) => string | undefined;
-    /**
-     * Cancels any pending url updates
-     */
-    cancel: () => void;
+  /**
+   * Listen for url changes
+   * @param cb - called when url has been changed
+   */
+  listen: (cb: () => void) => () => void;
+  /**
+   * Updates url synchronously, if needed
+   * skips the update and returns undefined in case when trying to update to current url
+   * otherwise returns new url
+   *
+   * @param url - url to update to
+   * @param replace - use replace instead of push
+   */
+  update: (url: string, replace: boolean) => string | undefined;
+  /**
+   * Schedules url update to next microtask,
+   * Useful to batch sync changes to url to cause only one browser history update
+   * @param updater - fn which receives current url and should return next url to update to
+   * @param replace - use replace instead of push
+   *
+   */
+  updateAsync: (updater: UrlUpdaterFnType, replace?: boolean) => Promise<string | undefined>;
+  /**
+   * If there is a pending url update - returns url that is scheduled for update
+   */
+  getPendingUrl: () => string | undefined;
+  /**
+   * Synchronously flushes scheduled url updates. Returns new flushed url, if there was an update. Otherwise - undefined.
+   * @param replace - if replace passed in, then uses it instead of push. Otherwise push or replace is picked depending on updateQueue
+   */
+  flush: (replace?: boolean) => string | undefined;
+  /**
+   * Cancels any pending url updates
+   */
+  cancel: () => void;
 }
 export type UrlUpdaterFnType = (currentUrl: string) => string | undefined;
 export declare const createKbnUrlControls: (history?: History) => IKbnUrlControls;
@@ -112,4 +138,7 @@ export declare const createKbnUrlControls: (history?: History) => IKbnUrlControl
  * 3. Hash history with empty base path
  * 4. Hash history with base path
  */
-export declare function getRelativeToHistoryPath(absoluteUrl: string, history: History): History.Path;
+export declare function getRelativeToHistoryPath(
+  absoluteUrl: string,
+  history: History
+): History.Path;

@@ -1,4 +1,11 @@
-import { z } from '@kbn/zod/v4';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { z } from '@kbn/zod/v4';
 export { maxReferencedContentItems } from './referenced_content_shared';
 /** Maximum allowed length for a skill ID. */
 export declare const skillIdMaxLength = 64;
@@ -10,47 +17,77 @@ export declare const skillIdRegexp: RegExp;
 export declare const skillNameRegexp: RegExp;
 /** Maximum number of tools a skill can reference. */
 export declare const maxToolsPerSkill = 5;
-export declare const skillCreateRequestObjectSchema: z.ZodObject<{
+export declare const skillCreateRequestObjectSchema: z.ZodObject<
+  {
     id: z.ZodString;
     name: z.ZodString;
     description: z.ZodString;
     content: z.ZodString;
-    referenced_content: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        name: z.ZodString;
-        relativePath: z.ZodString;
-        content: z.ZodString;
-    }, z.core.$strip>>>;
+    referenced_content: z.ZodOptional<
+      z.ZodArray<
+        z.ZodObject<
+          {
+            name: z.ZodString;
+            relativePath: z.ZodString;
+            content: z.ZodString;
+          },
+          z.core.$strip
+        >
+      >
+    >;
     tool_ids: z.ZodArray<z.ZodString>;
-}, z.core.$strip>;
+  },
+  z.core.$strip
+>;
 /**
  * Zod schema for validating skill create request bodies.
  */
-export declare const skillCreateRequestSchema: z.ZodObject<{
+export declare const skillCreateRequestSchema: z.ZodObject<
+  {
     id: z.ZodString;
     name: z.ZodString;
     description: z.ZodString;
     content: z.ZodString;
-    referenced_content: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        name: z.ZodString;
-        relativePath: z.ZodString;
-        content: z.ZodString;
-    }, z.core.$strip>>>;
+    referenced_content: z.ZodOptional<
+      z.ZodArray<
+        z.ZodObject<
+          {
+            name: z.ZodString;
+            relativePath: z.ZodString;
+            content: z.ZodString;
+          },
+          z.core.$strip
+        >
+      >
+    >;
     tool_ids: z.ZodArray<z.ZodString>;
-}, z.core.$strip>;
+  },
+  z.core.$strip
+>;
 /**
  * Zod schema for validating skill update request bodies.
  */
-export declare const skillUpdateRequestSchema: z.ZodObject<{
+export declare const skillUpdateRequestSchema: z.ZodObject<
+  {
     name: z.ZodOptional<z.ZodString>;
     description: z.ZodOptional<z.ZodString>;
     content: z.ZodOptional<z.ZodString>;
-    referenced_content: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        name: z.ZodString;
-        relativePath: z.ZodString;
-        content: z.ZodString;
-    }, z.core.$strip>>>;
+    referenced_content: z.ZodOptional<
+      z.ZodArray<
+        z.ZodObject<
+          {
+            name: z.ZodString;
+            relativePath: z.ZodString;
+            content: z.ZodString;
+          },
+          z.core.$strip
+        >
+      >
+    >;
     tool_ids: z.ZodOptional<z.ZodArray<z.ZodString>>;
-}, z.core.$strip>;
+  },
+  z.core.$strip
+>;
 /**
  * Validates a skill ID has the right format.
  * Returns an error message if it fails, undefined otherwise.

@@ -1,18 +1,32 @@
-import type { SavedObjectsImportFailure, SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  SavedObjectsImportFailure,
+  SavedObjectsImportRetry,
+} from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry, SavedObject } from '@kbn/core-saved-objects-server';
 import type { ImportStateMap } from './types';
 interface CheckOriginConflictsParams {
-    objects: Array<SavedObject<{
-        title?: string;
-    }>>;
-    savedObjectsClient: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
-    namespace?: string;
-    ignoreRegularConflicts?: boolean;
-    importStateMap: ImportStateMap;
-    pendingOverwrites: Set<string>;
-    retries?: SavedObjectsImportRetry[];
+  objects: Array<
+    SavedObject<{
+      title?: string;
+    }>
+  >;
+  savedObjectsClient: SavedObjectsClientContract;
+  typeRegistry: ISavedObjectTypeRegistry;
+  namespace?: string;
+  ignoreRegularConflicts?: boolean;
+  importStateMap: ImportStateMap;
+  pendingOverwrites: Set<string>;
+  retries?: SavedObjectsImportRetry[];
 }
 /**
  * This function takes all objects to import, and checks "multi-namespace" types for potential conflicts. An object with a multi-namespace
@@ -32,9 +46,13 @@ interface CheckOriginConflictsParams {
  *        will allow `createSavedObjects` to modify the ID before creating the object (thus ensuring a conflict during).
  *     B. Otherwise, this is an "ambiguous conflict" result; return an error.
  */
-export declare function checkOriginConflicts({ objects, retries, ...params }: CheckOriginConflictsParams): Promise<{
-    errors: SavedObjectsImportFailure[];
-    importStateMap: ImportStateMap;
-    pendingOverwrites: Set<string>;
+export declare function checkOriginConflicts({
+  objects,
+  retries,
+  ...params
+}: CheckOriginConflictsParams): Promise<{
+  errors: SavedObjectsImportFailure[];
+  importStateMap: ImportStateMap;
+  pendingOverwrites: Set<string>;
 }>;
 export {};

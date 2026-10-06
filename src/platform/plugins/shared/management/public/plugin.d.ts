@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -5,38 +14,51 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ConfigSchema, ManagementSetup, ManagementStart, AutoOpsStatusHook } from './types';
 interface ManagementSetupDependencies {
-    home?: HomePublicPluginSetup;
-    share: SharePluginSetup;
-    cloud?: {
-        isCloudEnabled: boolean;
-        baseUrl?: string;
-    };
+  home?: HomePublicPluginSetup;
+  share: SharePluginSetup;
+  cloud?: {
+    isCloudEnabled: boolean;
+    baseUrl?: string;
+  };
 }
 interface ManagementStartDependencies {
-    share: SharePluginStart;
-    serverless?: ServerlessPluginStart;
-    cloud?: {
-        isCloudEnabled: boolean;
-        baseUrl?: string;
-    };
-    cps?: CPSPluginStart;
+  share: SharePluginStart;
+  serverless?: ServerlessPluginStart;
+  cloud?: {
+    isCloudEnabled: boolean;
+    baseUrl?: string;
+  };
+  cps?: CPSPluginStart;
 }
-export declare class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart, ManagementSetupDependencies, ManagementStartDependencies> {
-    private initializerContext;
-    private readonly managementSections;
-    private readonly appUpdater;
-    private hasAnyEnabledApps;
-    private isSidebarEnabled$;
-    private cardsNavigationConfig$;
-    private autoOpsStatusHook?;
-    constructor(initializerContext: PluginInitializerContext<ConfigSchema>);
-    private registerAutoOpsStatusHook;
-    private getAutoOpsStatusHook;
-    setup(core: CoreSetup<ManagementStartDependencies>, { home, share, cloud }: ManagementSetupDependencies): {
-        sections: import("./types").SectionsServiceSetup;
-        locator: import("@kbn/share-plugin/common").LocatorPublic<import("../common/locator").ManagementAppLocatorParams>;
-        registerAutoOpsStatusHook: (hook: AutoOpsStatusHook) => void;
-    };
-    start(core: CoreStart, plugins: ManagementStartDependencies): ManagementStart;
+export declare class ManagementPlugin
+  implements
+    Plugin<
+      ManagementSetup,
+      ManagementStart,
+      ManagementSetupDependencies,
+      ManagementStartDependencies
+    >
+{
+  private initializerContext;
+  private readonly managementSections;
+  private readonly appUpdater;
+  private hasAnyEnabledApps;
+  private isSidebarEnabled$;
+  private cardsNavigationConfig$;
+  private autoOpsStatusHook?;
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>);
+  private registerAutoOpsStatusHook;
+  private getAutoOpsStatusHook;
+  setup(
+    core: CoreSetup<ManagementStartDependencies>,
+    { home, share, cloud }: ManagementSetupDependencies
+  ): {
+    sections: import('./types').SectionsServiceSetup;
+    locator: import('@kbn/share-plugin/common').LocatorPublic<
+      import('../common/locator').ManagementAppLocatorParams
+    >;
+    registerAutoOpsStatusHook: (hook: AutoOpsStatusHook) => void;
+  };
+  start(core: CoreStart, plugins: ManagementStartDependencies): ManagementStart;
 }
 export {};

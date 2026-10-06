@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { metrics } from '@elastic/opentelemetry-node/sdk';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
 /**
@@ -8,37 +17,39 @@ import type { KibanaResponseFactory } from '@kbn/core-http-server';
  * @privateRemarks x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/prometheus/get_metrics.ts
  */
 export declare class PrometheusExporter extends metrics.MetricReader {
-    #private;
-    /**
-     * Gets the singleton PrometheusExporter instance.
-     */
-    static get(): PrometheusExporter;
-    /**
-     * Destroys the singleton PrometheusExporter instance.
-     * @privateRemarks Mostly used for testing purposes because the same exporter cannot be reassigned to new MetricsProvider.
-     */
-    static destroy(): void;
-    private readonly prefix;
-    private readonly appendTimestamp;
-    private serializer;
-    private constructor();
-    /**
-     * Forces the AggregationTemporality to be CUMULATIVE (as required by the Prometheus format).
-     */
-    selectAggregationTemporality(): metrics.AggregationTemporality;
-    /**
-     * Implementation of the MetricReader interface onForceFlush (noop).
-     * @protected
-     */
-    protected onForceFlush(): Promise<void>;
-    /**
-     * Implementation of the MetricReader interface onShutdown (noop).
-     * @protected
-     */
-    protected onShutdown(): Promise<void>;
-    /**
-     * Responds to incoming message with current state of all metrics.
-     * @param res {@link KibanaResponseFactory}
-     */
-    exportMetrics(res: KibanaResponseFactory): Promise<import("@kbn/core-http-server").IKibanaResponse<any>>;
+  #private;
+  /**
+   * Gets the singleton PrometheusExporter instance.
+   */
+  static get(): PrometheusExporter;
+  /**
+   * Destroys the singleton PrometheusExporter instance.
+   * @privateRemarks Mostly used for testing purposes because the same exporter cannot be reassigned to new MetricsProvider.
+   */
+  static destroy(): void;
+  private readonly prefix;
+  private readonly appendTimestamp;
+  private serializer;
+  private constructor();
+  /**
+   * Forces the AggregationTemporality to be CUMULATIVE (as required by the Prometheus format).
+   */
+  selectAggregationTemporality(): metrics.AggregationTemporality;
+  /**
+   * Implementation of the MetricReader interface onForceFlush (noop).
+   * @protected
+   */
+  protected onForceFlush(): Promise<void>;
+  /**
+   * Implementation of the MetricReader interface onShutdown (noop).
+   * @protected
+   */
+  protected onShutdown(): Promise<void>;
+  /**
+   * Responds to incoming message with current state of all metrics.
+   * @param res {@link KibanaResponseFactory}
+   */
+  exportMetrics(
+    res: KibanaResponseFactory
+  ): Promise<import('@kbn/core-http-server').IKibanaResponse<any>>;
 }

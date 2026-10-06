@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/std'
+  - '@kbn/code-editor'
 tags:
   - shared-common
   - package

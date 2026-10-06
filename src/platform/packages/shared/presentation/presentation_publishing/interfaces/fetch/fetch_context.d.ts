@@ -1,22 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 export interface FetchContext {
-    isReload: boolean;
-    filters: Filter[] | undefined;
-    query: Query | AggregateQuery | undefined;
-    searchSessionId: string | undefined;
-    timeRange: TimeRange | undefined;
-    timeslice: [number, number] | undefined;
-    esqlVariables: ESQLControlVariable[] | undefined;
-    projectRouting: ProjectRouting | undefined;
-    isApproximate: boolean;
+  isReload: boolean;
+  filters: Filter[] | undefined;
+  query: Query | AggregateQuery | undefined;
+  searchSessionId: string | undefined;
+  timeRange: TimeRange | undefined;
+  timeslice: [number, number] | undefined;
+  esqlVariables: ESQLControlVariable[] | undefined;
+  projectRouting: ProjectRouting | undefined;
+  isApproximate: boolean;
 }
 export interface ReloadTimeFetchContext extends Omit<FetchContext, 'isReload'> {
-    reloadTimestamp?: number;
+  reloadTimestamp?: number;
 }
-export declare function isReloadTimeFetchContextEqual(previousContext: ReloadTimeFetchContext, currentContext: ReloadTimeFetchContext): boolean;
-export declare const areFiltersEqualForFetch: (currentFilters?: Filter[], lastFilters?: Filter[]) => boolean;
-export declare const isReloadTimestampEqualForFetch: (previousReloadTimestamp?: number, currentReloadTimestamp?: number) => boolean;
-export declare const isQueryEqualForFetch: (currentQuery: Query | AggregateQuery | undefined, lastQuery: Query | AggregateQuery | undefined) => boolean;
-export declare const isTimeRangeEqualForFetch: (currentTimeRange: TimeRange | undefined, lastTimeRange: TimeRange | undefined) => boolean;
-export declare const isTimeSliceEqualForFetch: (currentTimeslice: [number, number] | undefined, lastTimeslice: [number, number] | undefined) => boolean;
+export declare function isReloadTimeFetchContextEqual(
+  previousContext: ReloadTimeFetchContext,
+  currentContext: ReloadTimeFetchContext
+): boolean;
+export declare const areFiltersEqualForFetch: (
+  currentFilters?: Filter[],
+  lastFilters?: Filter[]
+) => boolean;
+export declare const isReloadTimestampEqualForFetch: (
+  previousReloadTimestamp?: number,
+  currentReloadTimestamp?: number
+) => boolean;
+export declare const isQueryEqualForFetch: (
+  currentQuery: Query | AggregateQuery | undefined,
+  lastQuery: Query | AggregateQuery | undefined
+) => boolean;
+export declare const isTimeRangeEqualForFetch: (
+  currentTimeRange: TimeRange | undefined,
+  lastTimeRange: TimeRange | undefined
+) => boolean;
+export declare const isTimeSliceEqualForFetch: (
+  currentTimeslice: [number, number] | undefined,
+  lastTimeslice: [number, number] | undefined
+) => boolean;

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * If the active typing contains dot notation, we assume we need to access the object's properties
  * Currently only supporting one-level deep nesting
@@ -37,4 +46,8 @@ export declare const isDeclaringField: (activeTyping: string) => boolean;
  * 3. If the user is defining a variable with a boolean type, e.g., "boolean myBoolean ="
  * 4. If the user is defining a string
  */
-export declare const showStaticSuggestions: (activeTyping: string, activeLineWords: string[], primitives: string[]) => boolean;
+export declare const showStaticSuggestions: (
+  activeTyping: string,
+  activeLineWords: string[],
+  primitives: string[]
+) => boolean;

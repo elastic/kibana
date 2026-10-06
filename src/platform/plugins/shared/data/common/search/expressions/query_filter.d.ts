@@ -1,15 +1,32 @@
-import type { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
+} from '@kbn/expressions-plugin/common';
 import type { Query } from '../../query';
 import type { KibanaQueryOutput } from './kibana_context_type';
 export interface QueryFilter {
-    input: Query;
-    label?: string;
+  input: Query;
+  label?: string;
 }
 export type QueryFilterOutput = ExpressionValueBoxed<'kibana_query_filter', QueryFilter>;
 interface QueryFilterArguments {
-    input: KibanaQueryOutput;
-    label?: string;
+  input: KibanaQueryOutput;
+  label?: string;
 }
-export type ExpressionFunctionQueryFilter = ExpressionFunctionDefinition<'queryFilter', null, QueryFilterArguments, QueryFilterOutput>;
+export type ExpressionFunctionQueryFilter = ExpressionFunctionDefinition<
+  'queryFilter',
+  null,
+  QueryFilterArguments,
+  QueryFilterOutput
+>;
 export declare const queryFilterFunction: ExpressionFunctionQueryFilter;
 export {};

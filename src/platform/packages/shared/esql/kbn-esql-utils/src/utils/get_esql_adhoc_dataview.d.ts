@@ -1,11 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 /** Id of the ES|QL ad-hoc DataView of a dataset (index pattern, time field, project routing). */
-export declare function getESQLAdHocDataviewId({ indexPattern, timeFieldName, projectRouting, idPrefix, }: {
-    indexPattern: string;
-    timeFieldName: string | undefined;
-    projectRouting: string | undefined;
-    idPrefix?: string;
+export declare function getESQLAdHocDataviewId({
+  indexPattern,
+  timeFieldName,
+  projectRouting,
+  idPrefix,
+}: {
+  indexPattern: string;
+  timeFieldName: string | undefined;
+  projectRouting: string | undefined;
+  idPrefix?: string;
 }): Promise<string>;
 /**
  * Creates an ad-hoc DataView for ES|QL queries.
@@ -35,19 +49,25 @@ export declare function getESQLAdHocDataviewId({ indexPattern, timeFieldName, pr
  * @returns Promise that resolves to the created DataView with the detected time field (if any)
  *
  */
-export declare function getESQLAdHocDataview({ dataViewsService, query, options, http, projectRouting, }: {
-    dataViewsService: DataViewsPublicPluginStart;
-    query: string;
-    options?: {
-        allowNoIndex?: boolean;
-        createNewInstanceEvenIfCachedOneAvailable?: boolean;
-        skipFetchFields?: boolean;
-        id?: string;
-        idPrefix?: string;
-    };
-    http?: HttpStart;
-    projectRouting?: string;
-}): Promise<import("@kbn/data-views-plugin/common").DataView>;
+export declare function getESQLAdHocDataview({
+  dataViewsService,
+  query,
+  options,
+  http,
+  projectRouting,
+}: {
+  dataViewsService: DataViewsPublicPluginStart;
+  query: string;
+  options?: {
+    allowNoIndex?: boolean;
+    createNewInstanceEvenIfCachedOneAvailable?: boolean;
+    skipFetchFields?: boolean;
+    id?: string;
+    idPrefix?: string;
+  };
+  http?: HttpStart;
+  projectRouting?: string;
+}): Promise<import('@kbn/data-views-plugin/common').DataView>;
 /**
  * Gets an initial index for a default ES|QL query by querying local indices, remote (CCS)
  * indices, and FDS datasets in parallel.
@@ -57,6 +77,4 @@ export declare function getESQLAdHocDataview({ dataViewsService, query, options,
  * Priority: local `logs*` > first local index > first remote index > first FDS dataset.
  * Returns null if nothing is found.
  */
-export declare function getIndexForESQLQuery(deps: {
-    http: HttpStart;
-}): Promise<string | null>;
+export declare function getIndexForESQLQuery(deps: { http: HttpStart }): Promise<string | null>;

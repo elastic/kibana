@@ -1,12 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export declare class KbnError extends Error {
-    constructor(message: string);
+  constructor(message: string);
 }
 /**
  * when a mapping already exists for a field the user is attempting to add
  * @param {String} name - the field name
  */
 export declare class DuplicateField extends KbnError {
-    constructor(name: string);
+  constructor(name: string);
 }
 /**
  * when a user is attempting to create a field with disallowed character in the name, like *
@@ -14,34 +23,40 @@ export declare class DuplicateField extends KbnError {
  * @param {String} name - the field name
  */
 export declare class CharacterNotAllowedInField extends KbnError {
-    constructor(character: string, name: string);
+  constructor(character: string, name: string);
 }
 /**
  * A saved object was not found
  */
 export declare class SavedObjectNotFound extends KbnError {
-    savedObjectType: string;
-    savedObjectTypeDisplayName: string;
-    savedObjectId?: string;
-    constructor({ type, typeDisplayName, id, link, customMessage, }: {
-        type: string;
-        typeDisplayName?: string;
-        id?: string;
-        link?: string;
-        customMessage?: string;
-    });
+  savedObjectType: string;
+  savedObjectTypeDisplayName: string;
+  savedObjectId?: string;
+  constructor({
+    type,
+    typeDisplayName,
+    id,
+    link,
+    customMessage,
+  }: {
+    type: string;
+    typeDisplayName?: string;
+    id?: string;
+    link?: string;
+    customMessage?: string;
+  });
 }
 /**
  * A saved field doesn't exist anymore
  */
 export declare class SavedFieldNotFound extends KbnError {
-    constructor(message: string);
+  constructor(message: string);
 }
 /**
  * A saved field type isn't compatible with aggregation
  */
 export declare class SavedFieldTypeInvalidForAgg extends KbnError {
-    constructor(message: string);
+  constructor(message: string);
 }
 /**
  * This error is for scenarios where a saved object is detected that has invalid JSON properties.
@@ -49,5 +64,5 @@ export declare class SavedFieldTypeInvalidForAgg extends KbnError {
  * was silently failing. This error is now thrown in those scenarios.
  */
 export declare class InvalidJSONProperty extends KbnError {
-    constructor(message: string);
+  constructor(message: string);
 }

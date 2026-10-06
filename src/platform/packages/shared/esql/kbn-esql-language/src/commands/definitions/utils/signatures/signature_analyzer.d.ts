@@ -1,12 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SupportedDataType, FunctionParameterType, FunctionParameter } from '../../types';
 import type { Signature } from '../../types';
 interface SignatureInput {
-    signatures: Signature[];
-    paramDefinitions?: FunctionParameter[];
-    firstArgumentType?: SupportedDataType | 'unknown';
-    firstValueType?: SupportedDataType | 'unknown';
-    currentParameterIndex: number;
-    hasMoreMandatoryArgs?: boolean;
+  signatures: Signature[];
+  paramDefinitions?: FunctionParameter[];
+  firstArgumentType?: SupportedDataType | 'unknown';
+  firstValueType?: SupportedDataType | 'unknown';
+  currentParameterIndex: number;
+  hasMoreMandatoryArgs?: boolean;
 }
 /** Detects when the cursor is on a value param position of a repeating signature such as `CASE`. */
 export declare function isAtRepeatingValuePosition(state: SignatureInput): boolean;
@@ -20,7 +29,11 @@ export declare function isAmbiguousPosition(state: SignatureInput): boolean;
 /** Tells callers whether another argument can still be added. */
 export declare function canAcceptMoreArgs(state: SignatureInput): boolean;
 /** Checks a candidate expression against the current param position. */
-export declare function doesParamAcceptType(state: SignatureInput, expressionType: SupportedDataType | 'unknown', expressionIsLiteral: boolean): boolean;
+export declare function doesParamAcceptType(
+  state: SignatureInput,
+  expressionType: SupportedDataType | 'unknown',
+  expressionIsLiteral: boolean
+): boolean;
 /**
  * Builds the effective parameter choices for the current param position.
  *
@@ -36,11 +49,17 @@ export declare function getCompatibleParamDefs(state: SignatureInput): FunctionP
  */
 export declare function getAcceptedParamTypes(state: SignatureInput): FunctionParameterType[];
 /** Checks a type at the current param position using the same rules as autocomplete. */
-export declare function isTypeAcceptedAtPosition(state: SignatureInput, expressionType: SupportedDataType | 'unknown', expressionIsLiteral: boolean): boolean;
+export declare function isTypeAcceptedAtPosition(
+  state: SignatureInput,
+  expressionType: SupportedDataType | 'unknown',
+  expressionIsLiteral: boolean
+): boolean;
 /** Reads the `mapParams` hint from function signatures. */
-export declare function extractSignatureMapParams(signatures: Array<{
+export declare function extractSignatureMapParams(
+  signatures: Array<{
     params: Array<{
-        mapParams?: string;
+      mapParams?: string;
     }>;
-}>): string | undefined;
+  }>
+): string | undefined;
 export {};

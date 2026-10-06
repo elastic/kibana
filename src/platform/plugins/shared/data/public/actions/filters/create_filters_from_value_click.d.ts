@@ -1,16 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { type AggregateQuery } from '@kbn/es-query';
 export interface ValueClickDataContext {
-    data: Array<{
-        table: Pick<Datatable, 'rows' | 'columns' | 'meta'>;
-        column: number;
-        row: number;
-        value: any;
-    }>;
-    timeFieldName?: string;
-    negate?: boolean;
-    query?: AggregateQuery;
+  data: Array<{
+    table: Pick<Datatable, 'rows' | 'columns' | 'meta'>;
+    column: number;
+    row: number;
+    value: any;
+  }>;
+  timeFieldName?: string;
+  negate?: boolean;
+  query?: AggregateQuery;
 }
 /**
  * Assembles the filters needed to apply filtering against a specific cell value, while accounting
@@ -22,13 +31,28 @@ export interface ValueClickDataContext {
  * @param  {string} cellValue - value of the current cell
  * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
-export declare const createFilter: (table: Pick<Datatable, 'rows' | 'columns'>, columnIndex: number, rowIndex: number) => Promise<Filter[] | undefined>;
+export declare const createFilter: (
+  table: Pick<Datatable, 'rows' | 'columns'>,
+  columnIndex: number,
+  rowIndex: number
+) => Promise<Filter[] | undefined>;
 /** Clears the session cache of ES|QL view sources. Test-only. */
 export declare const clearKnownEsqlViewSources: () => void;
 /** Clears fields injected onto view data views. Test-only. */
 export declare const clearInjectedEsqlViewFields: () => void;
-export declare const createFilterESQL: (table: Pick<Datatable, 'rows' | 'columns'>, columnIndex: number, rowIndex: number) => Promise<Filter[]>;
+export declare const createFilterESQL: (
+  table: Pick<Datatable, 'rows' | 'columns'>,
+  columnIndex: number,
+  rowIndex: number
+) => Promise<Filter[]>;
 /** @public */
-export declare const createFiltersFromValueClickAction: ({ data, negate, }: ValueClickDataContext) => Promise<Filter[]>;
+export declare const createFiltersFromValueClickAction: ({
+  data,
+  negate,
+}: ValueClickDataContext) => Promise<Filter[]>;
 /** @public */
-export declare const appendFilterToESQLQueryFromValueClickAction: ({ data, query, negate, }: ValueClickDataContext) => string | undefined;
+export declare const appendFilterToESQLQueryFromValueClickAction: ({
+  data,
+  query,
+  negate,
+}: ValueClickDataContext) => string | undefined;

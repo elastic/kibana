@@ -1,10 +1,57 @@
-import type { AtomicGraphNode, DataSetGraphNode, ElasticsearchGraphNode, KibanaGraphNode, SyntheticGraphNode, WaitForApprovalGraphNode, WaitForInputGraphNode, WaitGraphNode, WorkflowOutputGraphNode } from './nodes/base';
-import type { EnterConditionBranchNode, EnterIfNode, ExitConditionBranchNode, ExitIfNode } from './nodes/branching_nodes';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  AtomicGraphNode,
+  DataSetGraphNode,
+  ElasticsearchGraphNode,
+  KibanaGraphNode,
+  SyntheticGraphNode,
+  WaitForApprovalGraphNode,
+  WaitForInputGraphNode,
+  WaitGraphNode,
+  WorkflowOutputGraphNode,
+} from './nodes/base';
+import type {
+  EnterConditionBranchNode,
+  EnterIfNode,
+  ExitConditionBranchNode,
+  ExitIfNode,
+} from './nodes/branching_nodes';
 import type { LoopBreakNode, LoopContinueNode } from './nodes/flow_control_nodes';
-import type { EnterForeachNode, EnterWhileNode, ExitForeachNode, ExitWhileNode } from './nodes/loop_nodes';
-import type { EnterContinueNode, EnterNormalPathNode, EnterRetryNode, EnterTimeoutZoneNode, EnterTryBlockNode, ExitContinueNode, ExitNormalPathNode, ExitRetryNode, ExitTimeoutZoneNode, ExitTryBlockNode } from './nodes/on_failure_nodes';
+import type {
+  EnterForeachNode,
+  EnterWhileNode,
+  ExitForeachNode,
+  ExitWhileNode,
+} from './nodes/loop_nodes';
+import type {
+  EnterContinueNode,
+  EnterNormalPathNode,
+  EnterRetryNode,
+  EnterTimeoutZoneNode,
+  EnterTryBlockNode,
+  ExitContinueNode,
+  ExitNormalPathNode,
+  ExitRetryNode,
+  ExitTimeoutZoneNode,
+  ExitTryBlockNode,
+} from './nodes/on_failure_nodes';
 import type { EnterParallelNode, ExitParallelNode } from './nodes/parallel_nodes';
-import type { EnterCaseBranchNode, EnterDefaultBranchNode, EnterSwitchNode, ExitCaseBranchNode, ExitDefaultBranchNode, ExitSwitchNode } from './nodes/switch_nodes';
+import type {
+  EnterCaseBranchNode,
+  EnterDefaultBranchNode,
+  EnterSwitchNode,
+  ExitCaseBranchNode,
+  ExitDefaultBranchNode,
+  ExitSwitchNode,
+} from './nodes/switch_nodes';
 import type { GraphNodeUnion } from './nodes/union';
 import type { LoopStepType } from '../../spec/schema';
 export declare const isSynthetic: (node: GraphNodeUnion) => node is SyntheticGraphNode;
@@ -18,14 +65,21 @@ export declare const isDataSet: (node: GraphNodeUnion) => node is DataSetGraphNo
 export declare const isWorkflowOutput: (node: GraphNodeUnion) => node is WorkflowOutputGraphNode;
 export declare const isEnterIf: (node: GraphNodeUnion) => node is EnterIfNode;
 export declare const isExitIf: (node: GraphNodeUnion) => node is ExitIfNode;
-export declare const isEnterConditionBranch: (node: GraphNodeUnion) => node is EnterConditionBranchNode;
-export declare const isExitConditionBranch: (node: GraphNodeUnion) => node is ExitConditionBranchNode;
+export declare const isEnterConditionBranch: (
+  node: GraphNodeUnion
+) => node is EnterConditionBranchNode;
+export declare const isExitConditionBranch: (
+  node: GraphNodeUnion
+) => node is ExitConditionBranchNode;
 export declare const isEnterForeach: (node: GraphNodeUnion) => node is EnterForeachNode;
 export declare const isExitForeach: (node: GraphNodeUnion) => node is ExitForeachNode;
 export declare const isEnterWhile: (node: GraphNodeUnion) => node is EnterWhileNode;
-export type LoopEnterNode = Extract<GraphNodeUnion, {
+export type LoopEnterNode = Extract<
+  GraphNodeUnion,
+  {
     type: `enter-${LoopStepType}`;
-}>;
+  }
+>;
 export declare const isLoopEnterNode: (node: GraphNodeUnion) => node is LoopEnterNode;
 export declare const isExitWhile: (node: GraphNodeUnion) => node is ExitWhileNode;
 export declare const isEnterParallel: (node: GraphNodeUnion) => node is EnterParallelNode;
@@ -38,8 +92,12 @@ export declare const isEnterTryBlock: (node: GraphNodeUnion) => node is EnterTry
 export declare const isExitTryBlock: (node: GraphNodeUnion) => node is ExitTryBlockNode;
 export declare const isEnterNormalPath: (node: GraphNodeUnion) => node is EnterNormalPathNode;
 export declare const isExitNormalPath: (node: GraphNodeUnion) => node is ExitNormalPathNode;
-export declare const isEnterWorkflowTimeoutZone: (node: GraphNodeUnion) => node is EnterTimeoutZoneNode;
-export declare const isExitWorkflowTimeoutZone: (node: GraphNodeUnion) => node is ExitTimeoutZoneNode;
+export declare const isEnterWorkflowTimeoutZone: (
+  node: GraphNodeUnion
+) => node is EnterTimeoutZoneNode;
+export declare const isExitWorkflowTimeoutZone: (
+  node: GraphNodeUnion
+) => node is ExitTimeoutZoneNode;
 export declare const isEnterStepTimeoutZone: (node: GraphNodeUnion) => node is EnterTimeoutZoneNode;
 export declare const isExitStepTimeoutZone: (node: GraphNodeUnion) => node is ExitTimeoutZoneNode;
 export declare const isEnterSwitch: (node: GraphNodeUnion) => node is EnterSwitchNode;

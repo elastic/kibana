@@ -1,12 +1,22 @@
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Moment } from 'moment';
-import { FieldFormat, FIELD_FORMAT_IDS } from '..';
+import type { FIELD_FORMAT_IDS } from '..';
+import { FieldFormat } from '..';
 import type { TextContextTypeConvert } from '../types';
 interface FractPatternObject {
-    length: number;
-    patternNanos: string;
-    pattern: string;
-    patternEscaped: string;
+  length: number;
+  patternNanos: string;
+  pattern: string;
+  patternEscaped: string;
 }
 /**
  * Analyse the given moment.js format pattern for the fractional sec part (S,SS,SSS...)
@@ -19,20 +29,24 @@ export declare function analysePatternForFract(pattern: string): FractPatternObj
  * Since momentjs would loose the exact value for fractional seconds with a higher resolution than
  * milliseconds, the fractional pattern is replaced by the fractional value of the raw timestamp
  */
-export declare function formatWithNanos(dateMomentObj: Moment, valRaw: string, fracPatternObj: FractPatternObject): string;
+export declare function formatWithNanos(
+  dateMomentObj: Moment,
+  valRaw: string,
+  fracPatternObj: FractPatternObject
+): string;
 export declare class DateNanosFormat extends FieldFormat {
-    static id: FIELD_FORMAT_IDS;
-    static title: string;
-    static fieldType: KBN_FIELD_TYPES;
-    protected memoizedConverter: Function;
-    protected memoizedPattern: string;
-    protected memoizedFallbackPattern: string;
-    protected timeZone: string;
-    getParamDefaults(): {
-        pattern: import("@kbn/utility-types").Serializable;
-        fallbackPattern: import("@kbn/utility-types").Serializable;
-        timezone: import("@kbn/utility-types").Serializable;
-    };
-    textConvert: TextContextTypeConvert;
+  static id: FIELD_FORMAT_IDS;
+  static title: string;
+  static fieldType: KBN_FIELD_TYPES;
+  protected memoizedConverter: Function;
+  protected memoizedPattern: string;
+  protected memoizedFallbackPattern: string;
+  protected timeZone: string;
+  getParamDefaults(): {
+    pattern: import('@kbn/utility-types').Serializable;
+    fallbackPattern: import('@kbn/utility-types').Serializable;
+    timezone: import('@kbn/utility-types').Serializable;
+  };
+  textConvert: TextContextTypeConvert;
 }
 export {};

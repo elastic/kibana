@@ -1,24 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Feature ID for the workflows management feature
  */
-export declare const WORKFLOWS_MANAGEMENT_FEATURE_ID = "workflowsManagement";
+export declare const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
 /**
  * UI Setting ID for enabling / disabling the workflows management UI
  */
-export declare const WORKFLOWS_UI_SETTING_ID = "workflows:ui:enabled";
-export declare const WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID = "workflows:experimentalFeatures";
-export declare const WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID = "workflows:ui:executionGraph:enabled";
-export declare const WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID = "workflows:ui:showExecutor:enabled";
-export declare const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = "workflows:ui:showManagedWorkflows";
+export declare const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
+export declare const WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID = 'workflows:experimentalFeatures';
+export declare const WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID =
+  'workflows:ui:executionGraph:enabled';
+export declare const WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID = 'workflows:ui:showExecutor:enabled';
+export declare const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID =
+  'workflows:ui:showManagedWorkflows';
 /**
  * Feature flag ID for enabling / disabling the workflow execution stats bar UI
  */
-export declare const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = "workflows:executionStatsBar:enabled";
+export declare const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID =
+  'workflows:executionStatsBar:enabled';
 /**
  * When true, all `kibana.*` steps use Core `http.selfClient`.
  * When false, all `kibana.*` steps use the global `fetch` client, including YAML `fetcher`.
  */
-export declare const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG = "workflows.kibanaRequest.coreSelfClientEnabled";
+export declare const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
+  'workflows.kibanaRequest.coreSelfClientEnabled';
 /**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
@@ -27,7 +40,7 @@ export declare const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG = "workflows.kibana
  * any browser plugin that consumes `@kbn/workflows-library` without taking a
  * runtime dep on `workflows_management`.
  */
-export declare const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = "workflowsManagement:library:enabled";
+export declare const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
 /**
  * Global Advanced Setting gating the global Workflow Executions view
  * (`/app/workflows/executions`) and the execution flyout on workflow detail.
@@ -36,12 +49,14 @@ export declare const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = "workflowsManagement
  * readable from any browser plugin that consumes the workflows UI without
  * taking a runtime dep on `workflows_management`.
  */
-export declare const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID = "workflowsManagement:globalExecutionsView:enabled";
+export declare const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
+  'workflowsManagement:globalExecutionsView:enabled';
 /**
  * Gates the failed-step error panel "Diagnose with AI Agent" handoff.
  * Package assembly and CTA wiring ship regardless; default off until rollout.
  */
-export declare const WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID = "workflows:executionFlyout:aiDiagnose:enabled";
+export declare const WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID =
+  'workflows:executionFlyout:aiDiagnose:enabled';
 /**
  * Max length for YAML `connector-id` (triggers, steps, HITL channels) and reported
  * connector ids. Covers Actions saved-object ids, user-friendly aliases, and HITL
@@ -52,7 +67,7 @@ export declare const CONNECTOR_ID_MAX_LENGTH = 512;
  * Explicit trigger binding for every connector instance of the same connector event type.
  * Must be quoted in YAML (`"*"`); unquoted `*` is YAML alias syntax.
  */
-export declare const ALL_CONNECTOR_IDS = "*";
+export declare const ALL_CONNECTOR_IDS = '*';
 /**
  * Upper bound on a KQL condition (step `if` and trigger `on.condition`).
  * The parser recurses, so nesting depth has to stay well inside the stack limit.
@@ -70,15 +85,15 @@ export declare const SystemConnectorsMap: Map<string, string>;
  * Workflow attachment types used by the agent builder integration.
  * The matching KI type id is `WORKFLOW_KI_TYPE` in `@kbn/agent-builder-elastic-ai-index-ki-types`.
  */
-export declare const WORKFLOW_YAML_ATTACHMENT_TYPE = "workflow.yaml";
-export declare const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = "workflow.yaml.diff";
+export declare const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
+export declare const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
 /**
  * UI event broadcast on the agent builder events bus when a workflow YAML
  * attachment is created or modified by an agent tool.
  */
-export declare const WORKFLOW_YAML_CHANGED_EVENT = "workflow:yaml_changed";
+export declare const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
 /**
  * Sentinel `focusStepId` for {@link WorkflowGraphCanvas}: centre on the first
  * trigger node. Matches `HIGHLIGHTED_STEP_TRIGGER` in workflows_management.
  */
-export declare const WORKFLOW_GRAPH_FOCUS_TRIGGER = "__trigger";
+export declare const WORKFLOW_GRAPH_FOCUS_TRIGGER = '__trigger';

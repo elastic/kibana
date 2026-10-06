@@ -1,12 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { ApiTarget } from './targets';
 /**
  * An API operation, addressed by the backend it belongs to and its identifier.
  */
 export interface ApiReference {
-    target: ApiTarget;
-    api: string;
+  target: ApiTarget;
+  api: string;
 }
-export declare const allApisSelector = "*";
+export declare const allApisSelector = '*';
 /**
  * Every Elasticsearch operation the API tools can reach.
  */

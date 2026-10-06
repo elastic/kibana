@@ -1,5 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export interface ControlState {
-    controlState: string;
+  controlState: string;
 }
 /**
  * A state-action machine next function that returns the next action thunk
@@ -43,4 +52,8 @@ export type Model<S> = (state: S, res: any) => S;
  * @param onStepComplete A callback functions which is called after every
  * completed step
  */
-export declare function stateActionMachine<S extends ControlState>(initialState: S, next: Next<S>, model: Model<S>): Promise<S>;
+export declare function stateActionMachine<S extends ControlState>(
+  initialState: S,
+  next: Next<S>,
+  model: Model<S>
+): Promise<S>;

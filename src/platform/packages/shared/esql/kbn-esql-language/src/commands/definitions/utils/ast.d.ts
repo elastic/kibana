@@ -1,18 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { PromQLAstNode } from '@elastic/esql';
-import type { ESQLFunction, ESQLSingleAstItem, ESQLAstItem, ESQLCommandOption, ESQLAstHeaderCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
+import type {
+  ESQLFunction,
+  ESQLSingleAstItem,
+  ESQLAstItem,
+  ESQLCommandOption,
+  ESQLAstHeaderCommand,
+  ESQLAstQueryExpression,
+} from '@elastic/esql/types';
 export declare function isMarkerNode(node: ESQLAstItem | PromQLAstNode | undefined): boolean;
 export declare function removeAutocompleteMarkers<T>(value: T): T;
-export declare function findAstPosition(ast: ESQLAstQueryExpression, offset: number): {
-    command: undefined;
-    node: undefined;
-    containingFunction?: undefined;
-    option?: undefined;
-} | {
-    command: ESQLAstHeaderCommand<string, ESQLSingleAstItem> | import("@elastic/esql-types").ESQLCommand<string>;
-    containingFunction: ESQLFunction<import("@elastic/esql-types").FunctionSubtype, string> | undefined;
-    option: ESQLCommandOption | undefined;
-    node: ESQLSingleAstItem | undefined;
-};
+export declare function findAstPosition(
+  ast: ESQLAstQueryExpression,
+  offset: number
+):
+  | {
+      command: undefined;
+      node: undefined;
+      containingFunction?: undefined;
+      option?: undefined;
+    }
+  | {
+      command:
+        | ESQLAstHeaderCommand<string, ESQLSingleAstItem>
+        | import('@elastic/esql-types').ESQLCommand<string>;
+      containingFunction:
+        | ESQLFunction<import('@elastic/esql-types').FunctionSubtype, string>
+        | undefined;
+      option: ESQLCommandOption | undefined;
+      node: ESQLSingleAstItem | undefined;
+    };
 /**
  * This function returns a list of closing brackets that can be appended to
  * a partial query to make it valid.

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { RequestHandlerContextBase } from '@kbn/core-http-server';
 import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
@@ -21,34 +30,34 @@ import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-
  * @public
  */
 export interface CoreRequestHandlerContext {
-    /**
-     * {@link SavedObjectsRequestHandlerContext}
-     */
-    savedObjects: SavedObjectsRequestHandlerContext;
-    /**
-     * {@link ElasticsearchRequestHandlerContext}
-     */
-    elasticsearch: ElasticsearchRequestHandlerContext;
-    /**
-     * {@link FeatureFlagsRequestHandlerContext}
-     */
-    featureFlags: FeatureFlagsRequestHandlerContext;
-    /**
-     * {@link UiSettingsRequestHandlerContext}
-     */
-    uiSettings: UiSettingsRequestHandlerContext;
-    /**
-     * {@link DeprecationsRequestHandlerContext}
-     */
-    deprecations: DeprecationsRequestHandlerContext;
-    /**
-     * {@link SecurityRequestHandlerContext}
-     */
-    security: SecurityRequestHandlerContext;
-    /**
-     * {@link UserProfileRequestHandlerContext}
-     */
-    userProfile: UserProfileRequestHandlerContext;
+  /**
+   * {@link SavedObjectsRequestHandlerContext}
+   */
+  savedObjects: SavedObjectsRequestHandlerContext;
+  /**
+   * {@link ElasticsearchRequestHandlerContext}
+   */
+  elasticsearch: ElasticsearchRequestHandlerContext;
+  /**
+   * {@link FeatureFlagsRequestHandlerContext}
+   */
+  featureFlags: FeatureFlagsRequestHandlerContext;
+  /**
+   * {@link UiSettingsRequestHandlerContext}
+   */
+  uiSettings: UiSettingsRequestHandlerContext;
+  /**
+   * {@link DeprecationsRequestHandlerContext}
+   */
+  deprecations: DeprecationsRequestHandlerContext;
+  /**
+   * {@link SecurityRequestHandlerContext}
+   */
+  security: SecurityRequestHandlerContext;
+  /**
+   * {@link UserProfileRequestHandlerContext}
+   */
+  userProfile: UserProfileRequestHandlerContext;
 }
 /**
  * Base context passed to a route handler, containing the `core` context part.
@@ -56,10 +65,10 @@ export interface CoreRequestHandlerContext {
  * @public
  */
 export interface RequestHandlerContext extends RequestHandlerContextBase {
-    /**
-     * Promise that resolves the {@link CoreRequestHandlerContext}
-     */
-    core: Promise<CoreRequestHandlerContext>;
+  /**
+   * Promise that resolves the {@link CoreRequestHandlerContext}
+   */
+  core: Promise<CoreRequestHandlerContext>;
 }
 /**
  * Mixin allowing plugins to define their own request handler contexts.
@@ -67,5 +76,5 @@ export interface RequestHandlerContext extends RequestHandlerContextBase {
  * @public
  */
 export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
-    [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };

@@ -1,13 +1,27 @@
-import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc, SavedObjectsModelVersionMap, SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectsModelVersionMap,
+  SavedObjectModelUnsafeTransformFn,
+} from '@kbn/core-saved-objects-server';
 /**
  * @note Since all `uiSettings` migrations are added to the same migration function,
  * while not required, grouping settings by team, using a consistent naming prefix,
  * is good practice. For example: `ml:<setting-name>`.
  */
 interface QuickRange {
-    from: string;
-    to: string;
-    display: string;
+  from: string;
+  to: string;
+  display: string;
 }
 /**
  * Presets appended to `timepicker:quickRanges` in model version 3.
@@ -30,13 +44,13 @@ export declare const modelVersions: SavedObjectsModelVersionMap;
  * Future migrations should live in modelVersions map.
  */
 export declare const migrations: {
-    '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
-    '7.12.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
-    '7.13.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
-    '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
-    '8.1.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
-    '8.5.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
-    '8.7.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
-    '8.9.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
+  '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
+  '7.12.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
+  '7.13.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
+  '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
+  '8.1.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
+  '8.5.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
+  '8.7.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
+  '8.9.0': (doc: SavedObjectUnsanitizedDoc<any>) => SavedObjectSanitizedDoc<any>;
 };
 export {};

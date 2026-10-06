@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { AiIndexActions } from './ai_index';
 import type { AlertingActions } from './alerting';
 import type { AlertsActions } from './alerts';
@@ -12,14 +19,14 @@ import type { UIActions } from './ui';
  * by the various `checkPrivilegesWithRequest` derivatives.
  */
 export interface Actions {
-    readonly aiIndex: AiIndexActions;
-    readonly alerts: AlertsActions;
-    readonly api: ApiActions;
-    readonly app: AppActions;
-    readonly cases: CasesActions;
-    readonly login: string;
-    readonly savedObject: SavedObjectActions;
-    readonly alerting: AlertingActions;
-    readonly space: SpaceActions;
-    readonly ui: UIActions;
+  readonly aiIndex: AiIndexActions;
+  readonly alerts: AlertsActions;
+  readonly api: ApiActions;
+  readonly app: AppActions;
+  readonly cases: CasesActions;
+  readonly login: string;
+  readonly savedObject: SavedObjectActions;
+  readonly alerting: AlertingActions;
+  readonly space: SpaceActions;
+  readonly ui: UIActions;
 }

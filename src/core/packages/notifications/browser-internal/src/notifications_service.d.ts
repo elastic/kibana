@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
@@ -5,28 +14,28 @@ import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notificat
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 export interface SetupDeps {
-    analytics: AnalyticsServiceSetup;
-    uiSettings: IUiSettingsClient;
+  analytics: AnalyticsServiceSetup;
+  uiSettings: IUiSettingsClient;
 }
 export interface StartDeps {
-    overlays: OverlayStart;
-    rendering: RenderingService;
-    analytics: AnalyticsServiceStart;
-    targetDomElement: HTMLElement;
-    settings: SettingsStart;
+  overlays: OverlayStart;
+  rendering: RenderingService;
+  analytics: AnalyticsServiceStart;
+  targetDomElement: HTMLElement;
+  settings: SettingsStart;
 }
 /** @public */
 export declare class NotificationsService {
-    private readonly toasts;
-    private readonly feedback;
-    private readonly tours;
-    private uiSettingsErrorSubscription?;
-    private targetDomElement?;
-    private readonly coordinator;
-    constructor();
-    setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup;
-    start({ overlays, targetDomElement, settings, ...startDeps }: StartDeps): NotificationsStart;
-    stop(): void;
+  private readonly toasts;
+  private readonly feedback;
+  private readonly tours;
+  private uiSettingsErrorSubscription?;
+  private targetDomElement?;
+  private readonly coordinator;
+  constructor();
+  setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup;
+  start({ overlays, targetDomElement, settings, ...startDeps }: StartDeps): NotificationsStart;
+  stop(): void;
 }
 /**
  * @public {@link NotificationsService}

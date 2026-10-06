@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
@@ -7,13 +16,13 @@ import type { AggsCommonSetup, AggsCommonStart } from './types';
 /** @internal */
 export declare const aggsRequiredUiSettings: string[];
 export interface AggsCommonSetupDependencies {
-    registerFunction: ExpressionsServiceSetup['registerFunction'];
+  registerFunction: ExpressionsServiceSetup['registerFunction'];
 }
 export interface AggsCommonStartDependencies {
-    getIndexPattern(id: string): Promise<DataView>;
-    getConfig: GetConfigFn;
-    fieldFormats: FieldFormatsStartCommon;
-    calculateBounds: AggTypesDependencies['calculateBounds'];
+  getIndexPattern(id: string): Promise<DataView>;
+  getConfig: GetConfigFn;
+  fieldFormats: FieldFormatsStartCommon;
+  calculateBounds: AggTypesDependencies['calculateBounds'];
 }
 /**
  * The aggs service provides a means of modeling and manipulating the various
@@ -21,9 +30,9 @@ export interface AggsCommonStartDependencies {
  * output the correct DSL when you are ready to send your request to ES.
  */
 export declare class AggsCommonService {
-    private aggExecutionContext?;
-    private readonly aggTypesRegistry;
-    constructor(aggExecutionContext?: AggTypesDependencies['aggExecutionContext']);
-    setup({ registerFunction }: AggsCommonSetupDependencies): AggsCommonSetup;
-    start({ getConfig, fieldFormats, calculateBounds, }: AggsCommonStartDependencies): AggsCommonStart;
+  private aggExecutionContext?;
+  private readonly aggTypesRegistry;
+  constructor(aggExecutionContext?: AggTypesDependencies['aggExecutionContext']);
+  setup({ registerFunction }: AggsCommonSetupDependencies): AggsCommonSetup;
+  start({ getConfig, fieldFormats, calculateBounds }: AggsCommonStartDependencies): AggsCommonStart;
 }

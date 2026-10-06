@@ -1,36 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Logger } from '@kbn/logging';
-import type { GetUiSettingsContext, UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type {
+  GetUiSettingsContext,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 export interface BaseUiSettingsDefaultsClientOptions {
-    overrides?: Record<string, any>;
-    defaults?: Record<string, UiSettingsParams>;
-    log: Logger;
+  overrides?: Record<string, any>;
+  defaults?: Record<string, UiSettingsParams>;
+  log: Logger;
 }
 /**
  * Base implementation of the {@link IUiSettingsClient}.
  */
 export declare abstract class BaseUiSettingsClient implements IUiSettingsClient {
-    protected readonly defaults: Record<string, UiSettingsParams>;
-    protected readonly overrides: Record<string, any>;
-    protected readonly log: Logger;
-    protected constructor(options: BaseUiSettingsDefaultsClientOptions);
-    getRegistered(): Record<string, Omit<UiSettingsParams<unknown>, "schema">>;
-    get<T = any>(key: string, context?: GetUiSettingsContext): Promise<T>;
-    getAll<T = any>(context?: GetUiSettingsContext): Promise<Record<string, T>>;
-    isOverridden(key: string): boolean;
-    isSensitive(key: string): boolean;
-    validate(key: string, value: unknown): Promise<{
+  protected readonly defaults: Record<string, UiSettingsParams>;
+  protected readonly overrides: Record<string, any>;
+  protected readonly log: Logger;
+  protected constructor(options: BaseUiSettingsDefaultsClientOptions);
+  getRegistered(): Record<string, Omit<UiSettingsParams<unknown>, 'schema'>>;
+  get<T = any>(key: string, context?: GetUiSettingsContext): Promise<T>;
+  getAll<T = any>(context?: GetUiSettingsContext): Promise<Record<string, T>>;
+  isOverridden(key: string): boolean;
+  isSensitive(key: string): boolean;
+  validate(
+    key: string,
+    value: unknown
+  ): Promise<
+    | {
         valid: boolean;
         errorMessage: any;
-    } | {
+      }
+    | {
         errorMessage?: undefined;
         valid: boolean;
-    }>;
-    protected validateKey(key: string, value: unknown): void;
-    private getDefaultValues;
-    abstract getUserProvided<T = any>(): Promise<Record<string, UserProvidedValues<T>>>;
-    abstract setMany(changes: Record<string, any>): Promise<void>;
-    abstract set(key: string, value: any): Promise<void>;
-    abstract remove(key: string): Promise<void>;
-    abstract removeMany(keys: string[]): Promise<void>;
+      }
+  >;
+  protected validateKey(key: string, value: unknown): void;
+  private getDefaultValues;
+  abstract getUserProvided<T = any>(): Promise<Record<string, UserProvidedValues<T>>>;
+  abstract setMany(changes: Record<string, any>): Promise<void>;
+  abstract set(key: string, value: any): Promise<void>;
+  abstract remove(key: string): Promise<void>;
+  abstract removeMany(keys: string[]): Promise<void>;
 }

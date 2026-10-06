@@ -1,13 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Readable } from 'stream';
 import type { KibanaRequest, RequestHandlerWrapper } from '@kbn/core-http-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
-export declare function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable): Promise<Readable>;
-export declare function validateTypes(types: string[], supportedTypes: string[]): string | undefined;
-export declare function validateObjects(objects: Array<{
+export declare function createSavedObjectsStreamFromNdJson(
+  ndJsonStream: Readable
+): Promise<Readable>;
+export declare function validateTypes(
+  types: string[],
+  supportedTypes: string[]
+): string | undefined;
+export declare function validateObjects(
+  objects: Array<{
     id: string;
     type: string;
-}>, supportedTypes: string[]): string | undefined;
+  }>,
+  supportedTypes: string[]
+): string | undefined;
 /**
  * Catches errors thrown by saved object route handlers and returns an error
  * with the payload and statusCode of the boom error.
@@ -24,7 +41,10 @@ export declare const catchAndReturnBoomErrors: RequestHandlerWrapper;
  * @param {string[]} exposedVisibleTypes all registered types with hidden:false and hiddenFromHttpApis:false|undefined
  * @param {string[]} typesToCheck saved object types provided to the httpApi request
  */
-export declare function throwOnGloballyHiddenTypes(allHttpApisVisibleTypes: string[], typesToCheck: string[]): void;
+export declare function throwOnGloballyHiddenTypes(
+  allHttpApisVisibleTypes: string[],
+  typesToCheck: string[]
+): void;
 /**
  * @param {string[]} unsupportedTypes saved object types registered with hidden=false and hiddenFromHttpApis=true
  */
@@ -33,20 +53,26 @@ export declare function throwOnHttpHiddenTypes(unsupportedTypes: string[]): void
  * @param {string[]} type saved object type
  * @param {ISavedObjectTypeRegistry} registry the saved object type registry
  */
-export declare function throwIfTypeNotVisibleByAPI(type: string, registry: ISavedObjectTypeRegistry): void;
-export declare function throwIfAnyTypeNotVisibleByAPI(typesToCheck: string[], registry: ISavedObjectTypeRegistry): void;
+export declare function throwIfTypeNotVisibleByAPI(
+  type: string,
+  registry: ISavedObjectTypeRegistry
+): void;
+export declare function throwIfAnyTypeNotVisibleByAPI(
+  typesToCheck: string[],
+  registry: ISavedObjectTypeRegistry
+): void;
 export interface BulkGetItem {
-    type: string;
-    id: string;
-    fields?: string[];
-    namespaces?: string[];
+  type: string;
+  id: string;
+  fields?: string[];
+  namespaces?: string[];
 }
 export declare function isKibanaRequest({ headers }: KibanaRequest): string | string[] | undefined;
 export interface LogWarnOnExternalRequest {
-    method: string;
-    path: string;
-    request: KibanaRequest;
-    logger: Logger;
+  method: string;
+  path: string;
+  request: KibanaRequest;
+  logger: Logger;
 }
 /**
  * Only log a warning when the request is internal

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export declare const NAMESPACED_CACHE_TTL = 10000;
 /**
  * Shared process-wide cache for namespace-keyed data with configurable TTL.
@@ -9,37 +18,37 @@ export declare const NAMESPACED_CACHE_TTL = 10000;
  * @internal
  */
 export declare class NamespacedCache<T = unknown> {
-    private readonly entries;
-    private readonly inflightReads;
-    /**
-     * Get cached value for a specific namespace
-     */
-    get(namespace: string): T | null;
-    /**
-     * Set cached value with TTL
-     */
-    set(namespace: string, value: T, ttl?: number): void;
-    /**
-     * Delete cached value and clear any in-flight promises.
-     * This ensures cache invalidation also prevents stale in-flight requests.
-     */
-    del(namespace: string): void;
-    /**
-     * Clear all cached values and in-flight promises
-     */
-    clear(): void;
-    /**
-     * Get in-flight read promise for a specific namespace.
-     * Used for request deduplication - caller receives the actual result.
-     */
-    getInflightRead(namespace: string): Promise<T> | null;
-    /**
-     * Set in-flight promise for a specific namespace.
-     * The promise is automatically removed when it resolves or rejects.
-     */
-    setInflightRead(namespace: string, promise: Promise<T>): void;
-    /**
-     * Check if a namespace has a cached value
-     */
-    has(namespace: string): boolean;
+  private readonly entries;
+  private readonly inflightReads;
+  /**
+   * Get cached value for a specific namespace
+   */
+  get(namespace: string): T | null;
+  /**
+   * Set cached value with TTL
+   */
+  set(namespace: string, value: T, ttl?: number): void;
+  /**
+   * Delete cached value and clear any in-flight promises.
+   * This ensures cache invalidation also prevents stale in-flight requests.
+   */
+  del(namespace: string): void;
+  /**
+   * Clear all cached values and in-flight promises
+   */
+  clear(): void;
+  /**
+   * Get in-flight read promise for a specific namespace.
+   * Used for request deduplication - caller receives the actual result.
+   */
+  getInflightRead(namespace: string): Promise<T> | null;
+  /**
+   * Set in-flight promise for a specific namespace.
+   * The promise is automatically removed when it resolves or rejects.
+   */
+  setInflightRead(namespace: string, promise: Promise<T>): void;
+  /**
+   * Check if a namespace has a cached value
+   */
+  has(namespace: string): boolean;
 }

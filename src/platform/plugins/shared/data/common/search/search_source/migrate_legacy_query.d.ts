@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Query, AggregateQuery } from '@kbn/es-query';
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL
@@ -5,6 +14,12 @@ import type { Query, AggregateQuery } from '@kbn/es-query';
  * @param query - a legacy query, what used to be stored in SearchSource's query property
  * @return Object
  */
-export declare function migrateLegacyQuery(query: Query | {
-    [key: string]: any;
-} | string | AggregateQuery): Query | AggregateQuery;
+export declare function migrateLegacyQuery(
+  query:
+    | Query
+    | {
+        [key: string]: any;
+      }
+    | string
+    | AggregateQuery
+): Query | AggregateQuery;

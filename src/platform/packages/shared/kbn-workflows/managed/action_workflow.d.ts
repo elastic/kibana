@@ -1,4 +1,13 @@
-import { z } from '@kbn/zod/v4';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { z } from '@kbn/zod/v4';
 /**
  * The contract an **action workflow** satisfies. Lives here rather than in a
  * consuming plugin because the action YAML files live here, so the definitions
@@ -30,10 +39,10 @@ export declare const actionCategorySchema: z.ZodString;
 export type ActionCategory = z.infer<typeof actionCategorySchema>;
 /** How consequential running the action is. Intrinsic to the action, not the situation. */
 export declare const actionImpactSchema: z.ZodEnum<{
-    critical: "critical";
-    high: "high";
-    low: "low";
-    medium: "medium";
+  critical: 'critical';
+  high: 'high';
+  low: 'low';
+  medium: 'medium';
 }>;
 export type ActionImpact = z.infer<typeof actionImpactSchema>;
 /**
@@ -41,25 +50,32 @@ export type ActionImpact = z.infer<typeof actionImpactSchema>;
  * autonomy policy resolves to.
  */
 export declare const actionApprovalPolicySchema: z.ZodEnum<{
-    "always-gate": "always-gate";
-    "autonomy-dependent": "autonomy-dependent";
+  'always-gate': 'always-gate';
+  'autonomy-dependent': 'autonomy-dependent';
 }>;
 export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
 /** Self-description an action workflow declares under `consts.actionMetadata`. */
-export declare const actionMetadataSchema: z.ZodObject<{
+export declare const actionMetadataSchema: z.ZodObject<
+  {
     name: z.ZodString;
     description: z.ZodOptional<z.ZodString>;
     category: z.ZodOptional<z.ZodString>;
-    impact: z.ZodOptional<z.ZodEnum<{
-        critical: "critical";
-        high: "high";
-        low: "low";
-        medium: "medium";
-    }>>;
+    impact: z.ZodOptional<
+      z.ZodEnum<{
+        critical: 'critical';
+        high: 'high';
+        low: 'low';
+        medium: 'medium';
+      }>
+    >;
     reversible: z.ZodOptional<z.ZodBoolean>;
-    approvalPolicy: z.ZodOptional<z.ZodEnum<{
-        "always-gate": "always-gate";
-        "autonomy-dependent": "autonomy-dependent";
-    }>>;
-}, z.core.$strip>;
+    approvalPolicy: z.ZodOptional<
+      z.ZodEnum<{
+        'always-gate': 'always-gate';
+        'autonomy-dependent': 'autonomy-dependent';
+      }>
+    >;
+  },
+  z.core.$strip
+>;
 export type ActionMetadata = z.infer<typeof actionMetadataSchema>;

@@ -1,32 +1,72 @@
-import type { ESQLControlVariable, InferenceEndpointAutocompleteItem, ControlTriggerSource } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ESQLControlVariable,
+  InferenceEndpointAutocompleteItem,
+  ControlTriggerSource,
+} from '@kbn/esql-types';
+import type { ESQLVariableType } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../../../registry/types';
 import type { SupportedDataType } from '../../types';
-export declare const shouldBeQuotedText: (text: string, { dashSupported }?: {
+export declare const shouldBeQuotedText: (
+  text: string,
+  {
+    dashSupported,
+  }?: {
     dashSupported?: boolean;
-}) => boolean;
-export declare const getSafeInsertText: (text: string, options?: {
+  }
+) => boolean;
+export declare const getSafeInsertText: (
+  text: string,
+  options?: {
     dashSupported?: boolean;
     asExpression?: boolean;
-}) => string;
-export declare const buildUserDefinedColumnsDefinitions: (userDefinedColumns: string[]) => ISuggestionItem[];
+  }
+) => string;
+export declare const buildUserDefinedColumnsDefinitions: (
+  userDefinedColumns: string[]
+) => ISuggestionItem[];
 export declare const findFinalWord: (text: string) => string;
 export declare function findPreviousWord(text: string): string;
 export declare function withinQuotes(text: string): boolean;
 interface FieldSuggestionsOptions {
-    ignoreColumns?: string[];
-    values?: boolean;
-    addSpaceAfterField?: boolean;
-    openSuggestions?: boolean;
-    addComma?: boolean;
-    canBeMultiValue?: boolean;
+  ignoreColumns?: string[];
+  values?: boolean;
+  addSpaceAfterField?: boolean;
+  openSuggestions?: boolean;
+  addComma?: boolean;
+  canBeMultiValue?: boolean;
 }
-export declare function getFieldsSuggestions(types: (SupportedDataType | 'unknown' | 'any')[], getFieldsByType: GetColumnsByTypeFn, options?: FieldSuggestionsOptions): Promise<ISuggestionItem[]>;
+export declare function getFieldsSuggestions(
+  types: (SupportedDataType | 'unknown' | 'any')[],
+  getFieldsByType: GetColumnsByTypeFn,
+  options?: FieldSuggestionsOptions
+): Promise<ISuggestionItem[]>;
 export declare const columnExists: (col: string, context?: ICommandContext) => boolean;
-export declare function getControlSuggestion(type: ESQLVariableType, triggerSource: ControlTriggerSource, variables?: string[], suggestCreation?: boolean): ISuggestionItem[];
-export declare const getVariablePrefix: (variableType: ESQLVariableType) => "?" | "??";
-export declare function getControlSuggestionIfSupported(supportsControls: boolean, type: ESQLVariableType, triggerSource: ControlTriggerSource, variables?: ESQLControlVariable[], shouldBePrefixed?: boolean): ISuggestionItem[];
-export declare function createInferenceEndpointToCompletionItem(inferenceEndpoint: InferenceEndpointAutocompleteItem): ISuggestionItem;
+export declare function getControlSuggestion(
+  type: ESQLVariableType,
+  triggerSource: ControlTriggerSource,
+  variables?: string[],
+  suggestCreation?: boolean
+): ISuggestionItem[];
+export declare const getVariablePrefix: (variableType: ESQLVariableType) => '?' | '??';
+export declare function getControlSuggestionIfSupported(
+  supportsControls: boolean,
+  type: ESQLVariableType,
+  triggerSource: ControlTriggerSource,
+  variables?: ESQLControlVariable[],
+  shouldBePrefixed?: boolean
+): ISuggestionItem[];
+export declare function createInferenceEndpointToCompletionItem(
+  inferenceEndpoint: InferenceEndpointAutocompleteItem
+): ISuggestionItem;
 /**
  * Given a suggestion item, decorates it with editor.action.triggerSuggest
  * that triggers the autocomplete dialog again after accepting the suggestion.
@@ -41,6 +81,9 @@ export declare function withAutoSuggest(suggestionItem: ISuggestionItem): ISugge
  * @param commandToAppend
  * @returns
  */
-export declare function appendCommandToSuggestionItem(suggestionItem: ISuggestionItem, commandToAppend: ISuggestionItem['command']): ISuggestionItem;
+export declare function appendCommandToSuggestionItem(
+  suggestionItem: ISuggestionItem,
+  commandToAppend: ISuggestionItem['command']
+): ISuggestionItem;
 export declare function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem;
 export {};

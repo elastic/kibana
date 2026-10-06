@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { EdgeLabel } from '@dagrejs/dagre';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import type { GraphNodeUnion, WorkflowGraphType } from '../types';
@@ -16,39 +25,39 @@ import type { GraphNodeUnion, WorkflowGraphType } from '../types';
  * ```
  */
 export declare class WorkflowGraph {
-    private graph;
-    private __topologicalOrder;
-    private stepIdsSet;
-    private innerStepIdsCache;
-    constructor(graph: WorkflowGraphType);
-    static fromWorkflowDefinition(workflowDefinition: WorkflowYaml, defaultSettings?: WorkflowSettings): WorkflowGraph;
-    get topologicalOrder(): string[];
-    getNode(nodeId: string): GraphNodeUnion;
-    /**
-     * Retrieves a step node by its step ID, accounting for control flow node prefixes.
-     * This method tries to find the node with the given step ID, checking for common
-     * control flow node prefixes (enterForeach_, enterCondition_, enterIf_, etc.)
-     *
-     * @param stepId - The step ID to search for
-     * @returns The graph node if found, undefined otherwise
-     */
-    getStepNode(stepId: string): GraphNodeUnion | undefined;
-    getNodeStack(nodeId: string, precomputedPredecessors?: readonly GraphNodeUnion[]): string[];
-    getAllNodes(): GraphNodeUnion[];
-    getEdges(): Array<{
-        v: string;
-        w: string;
-    }>;
-    getEdge(edgeMetadata: {
-        v: string;
-        w: string;
-    }): EdgeLabel | undefined;
-    hasStep(stepId: string): boolean;
-    getStepGraph(stepId: string): WorkflowGraph;
-    getDirectSuccessors(nodeId: string): GraphNodeUnion[];
-    /** Workflow settings timeout from the workflow-level enter-timeout-zone node, if present. */
-    getWorkflowLevelTimeout(): string | undefined;
-    getAllPredecessors(nodeId: string): GraphNodeUnion[];
-    /** Inner stepIds for a compound step (excluding that step). Cached. */
-    getInnerStepIds(compoundStepId: string): Set<string>;
+  private graph;
+  private __topologicalOrder;
+  private stepIdsSet;
+  private innerStepIdsCache;
+  constructor(graph: WorkflowGraphType);
+  static fromWorkflowDefinition(
+    workflowDefinition: WorkflowYaml,
+    defaultSettings?: WorkflowSettings
+  ): WorkflowGraph;
+  get topologicalOrder(): string[];
+  getNode(nodeId: string): GraphNodeUnion;
+  /**
+   * Retrieves a step node by its step ID, accounting for control flow node prefixes.
+   * This method tries to find the node with the given step ID, checking for common
+   * control flow node prefixes (enterForeach_, enterCondition_, enterIf_, etc.)
+   *
+   * @param stepId - The step ID to search for
+   * @returns The graph node if found, undefined otherwise
+   */
+  getStepNode(stepId: string): GraphNodeUnion | undefined;
+  getNodeStack(nodeId: string, precomputedPredecessors?: readonly GraphNodeUnion[]): string[];
+  getAllNodes(): GraphNodeUnion[];
+  getEdges(): Array<{
+    v: string;
+    w: string;
+  }>;
+  getEdge(edgeMetadata: { v: string; w: string }): EdgeLabel | undefined;
+  hasStep(stepId: string): boolean;
+  getStepGraph(stepId: string): WorkflowGraph;
+  getDirectSuccessors(nodeId: string): GraphNodeUnion[];
+  /** Workflow settings timeout from the workflow-level enter-timeout-zone node, if present. */
+  getWorkflowLevelTimeout(): string | undefined;
+  getAllPredecessors(nodeId: string): GraphNodeUnion[];
+  /** Inner stepIds for a compound step (excluding that step). Cached. */
+  getInnerStepIds(compoundStepId: string): Set<string>;
 }

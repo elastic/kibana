@@ -1,20 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ReactNode } from 'react';
-import React from 'react';
+import type React from 'react';
 import type { Toast } from '@kbn/core-notifications-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 /**
  * We can introduce this type within this domain, to allow for react-managed titles
  */
 export type ToastWithRichTitle = Omit<Toast, 'title'> & {
-    title?: MountPoint | ReactNode;
+  title?: MountPoint | ReactNode;
 };
 export interface DeduplicateResult {
-    toasts: ToastWithRichTitle[];
-    idToToasts: Record<string, Toast[]>;
+  toasts: ToastWithRichTitle[];
+  idToToasts: Record<string, Toast[]>;
 }
 interface TitleWithBadgeProps {
-    title: string | undefined;
-    counter: number;
+  title: string | undefined;
+  counter: number;
 }
 /**
  * Collects toast messages to groups based on the `getKeyOf` function,

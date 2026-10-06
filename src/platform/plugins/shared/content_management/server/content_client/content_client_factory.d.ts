@@ -1,28 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { Version } from '@kbn/object-versioning';
 import type { MSearchIn, MSearchOut } from '../../common';
 import type { ContentRegistry } from '../core';
 import type { MSearchService } from '../core/msearch';
-export declare const getContentClientFactory: ({ contentRegistry }: {
-    contentRegistry: ContentRegistry;
+export declare const getContentClientFactory: ({
+  contentRegistry,
+}: {
+  contentRegistry: ContentRegistry;
 }) => (contentTypeId: string) => {
-    /**
-     * Client getter to interact with the registered content type.
-     */
-    getForRequest: <T = unknown>({ request, requestHandlerContext, version, }: {
-        request: KibanaRequest;
-        requestHandlerContext: RequestHandlerContext;
-        version?: Version;
-    }) => import("./types").IContentClient<T>;
-};
-export declare const getMSearchClientFactory: ({ contentRegistry, mSearchService, logger, }: {
-    contentRegistry: ContentRegistry;
-    mSearchService: MSearchService;
-    logger: Logger;
-}) => ({ requestHandlerContext, request, }: {
-    requestHandlerContext: RequestHandlerContext;
+  /**
+   * Client getter to interact with the registered content type.
+   */
+  getForRequest: <T = unknown>({
+    request,
+    requestHandlerContext,
+    version,
+  }: {
     request: KibanaRequest;
+    requestHandlerContext: RequestHandlerContext;
+    version?: Version;
+  }) => import('./types').IContentClient<T>;
+};
+export declare const getMSearchClientFactory: ({
+  contentRegistry,
+  mSearchService,
+  logger,
+}: {
+  contentRegistry: ContentRegistry;
+  mSearchService: MSearchService;
+  logger: Logger;
+}) => ({
+  requestHandlerContext,
+  request,
+}: {
+  requestHandlerContext: RequestHandlerContext;
+  request: KibanaRequest;
 }) => {
-    msearch: ({ contentTypes, query }: MSearchIn) => Promise<MSearchOut>;
+  msearch: ({ contentTypes, query }: MSearchIn) => Promise<MSearchOut>;
 };

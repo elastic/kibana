@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Observable } from 'rxjs';
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 /**
@@ -9,4 +18,6 @@ import type { NodesVersionCompatibility } from './version_check/ensure_es_versio
  * @remarks: Ideally, this will be called during the start lifecycle to figure
  * out any configuration issue as soon as possible.
  */
-export declare function isValidConnection(esNodesCompatibility$: Observable<NodesVersionCompatibility>): Promise<NodesVersionCompatibility>;
+export declare function isValidConnection(
+  esNodesCompatibility$: Observable<NodesVersionCompatibility>
+): Promise<NodesVersionCompatibility>;

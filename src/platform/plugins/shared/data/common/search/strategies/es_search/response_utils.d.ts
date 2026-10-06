@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/search-types';
 /**
@@ -6,8 +15,8 @@ import type { ISearchOptions } from '@kbn/search-types';
  * @internal
  */
 export declare function getTotalLoaded(response: estypes.SearchResponse<unknown>): {
-    total: number;
-    loaded: number;
+  total: number;
+  loaded: number;
 };
 /**
  * Temporary workaround until https://github.com/elastic/kibana/issues/26356 is addressed.
@@ -16,23 +25,28 @@ export declare function getTotalLoaded(response: estypes.SearchResponse<unknown>
  *
  * @internal
  */
-export declare function shimHitsTotal(response: estypes.SearchResponse<unknown>, { legacyHitsTotal }?: ISearchOptions): estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>> | {
-    took: estypes.long;
-    timed_out: boolean;
-    _shards: estypes.ShardStatistics;
-    aggregations?: Record<string, estypes.AggregationsAggregate> | undefined;
-    _clusters?: estypes.ClusterStatistics;
-    fields?: Record<string, any>;
-    max_score?: estypes.double;
-    num_reduce_phases?: estypes.long;
-    profile?: estypes.SearchProfile;
-    pit_id?: estypes.Id;
-    _scroll_id?: estypes.ScrollId;
-    suggest?: Record<string, estypes.SearchSuggest<unknown>[]> | undefined;
-    terminated_early?: boolean;
-    hits: {
+export declare function shimHitsTotal(
+  response: estypes.SearchResponse<unknown>,
+  { legacyHitsTotal }?: ISearchOptions
+):
+  | estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>
+  | {
+      took: estypes.long;
+      timed_out: boolean;
+      _shards: estypes.ShardStatistics;
+      aggregations?: Record<string, estypes.AggregationsAggregate> | undefined;
+      _clusters?: estypes.ClusterStatistics;
+      fields?: Record<string, any>;
+      max_score?: estypes.double;
+      num_reduce_phases?: estypes.long;
+      profile?: estypes.SearchProfile;
+      pit_id?: estypes.Id;
+      _scroll_id?: estypes.ScrollId;
+      suggest?: Record<string, estypes.SearchSuggest<unknown>[]> | undefined;
+      terminated_early?: boolean;
+      hits: {
         hits: estypes.SearchHit<unknown>[];
         max_score?: estypes.double | null;
         total: any;
+      };
     };
-};

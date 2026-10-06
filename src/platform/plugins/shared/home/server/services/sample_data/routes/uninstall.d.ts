@@ -1,5 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import type { SampleDataUsageTracker } from '../usage/usage';
-export declare function createUninstallRoute(router: IRouter, sampleDatasets: SampleDatasetSchema[], logger: Logger, usageTracker: SampleDataUsageTracker, analytics: AnalyticsServiceSetup): void;
+export declare function createUninstallRoute(
+  router: IRouter,
+  sampleDatasets: SampleDatasetSchema[],
+  logger: Logger,
+  usageTracker: SampleDataUsageTracker,
+  analytics: AnalyticsServiceSetup
+): void;

@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { Overwrite } from 'utility-types';
 import type { Observable } from 'rxjs';
 import type { ToolChoiceType, ToolOptions } from './tools';
@@ -52,14 +59,20 @@ import type { ChatCompletionReasoning } from './reasoning';
  * ```
  */
 export interface DefaultChatCompleteOptions {
-    stream: false;
-    tools: {};
-    toolChoice: ToolChoiceType.auto;
+  stream: false;
+  tools: {};
+  toolChoice: ToolChoiceType.auto;
 }
-type ChatCompleteCompositeResponseOptions = Pick<ChatCompleteOptions, 'stream' | 'tools' | 'toolChoice'>;
+type ChatCompleteCompositeResponseOptions = Pick<
+  ChatCompleteOptions,
+  'stream' | 'tools' | 'toolChoice'
+>;
 type ChatCompleteResponseOptions = Pick<ChatCompleteOptions, 'tools' | 'toolChoice'>;
-export type ChatCompleteAPIResponse<TOptions extends ChatCompleteOptions = ChatCompleteOptions> = ChatCompleteCompositeResponse<Overwrite<DefaultChatCompleteOptions, TOptions>>;
-export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(options: TOptions) => ChatCompleteAPIResponse<TOptions>;
+export type ChatCompleteAPIResponse<TOptions extends ChatCompleteOptions = ChatCompleteOptions> =
+  ChatCompleteCompositeResponse<Overwrite<DefaultChatCompleteOptions, TOptions>>;
+export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
+  options: TOptions
+) => ChatCompleteAPIResponse<TOptions>;
 /**
  * Options used to call the {@link ChatCompleteAPI}.
  *
@@ -68,168 +81,176 @@ export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(options: TO
  * pipeline to use based on the provided identifier.
  */
 export type ChatCompleteOptions = {
-    /**
-     * The ID of the connector or inference endpoint to use.
-     * Accepts both Kibana stack connector IDs and Elasticsearch inference endpoint IDs.
-     */
-    connectorId: string;
-    /**
-     * Optional system message for the LLM.
-     */
-    system?: string;
-    /**
-     * The list of messages for the current conversation
-     */
-    messages: Message[];
-    /**
-     * LLM temperature. All models support the 0-1 range (some supports more).
-     * Defaults to 0;
-     */
-    temperature?: number;
-    /**
-     * Optional reasoning configuration for the Elasticsearch unified chat completion API.
-     *
-     * When native function tools are present and this is omitted, the Inference adapter
-     * defaults to `{ effort: 'none' }` so OpenAI Chat Completions accepts tool-calling
-     * requests on newer reasoning models.
-     */
-    reasoning?: ChatCompletionReasoning;
-    /**
-     * The model name identifier to use. Can be defined to use another model than the
-     * default one, when using connectors / providers exposing multiple models.
-     *
-     * Defaults to the default model as defined by the used connector.
-     */
-    modelName?: string;
-    /**
-     * Function calling mode, defaults to "auto".
-     */
-    functionCalling?: FunctionCallingMode;
-    /**
-     * Optional signal that can be used to forcefully abort the request.
-     */
-    abortSignal?: AbortSignal;
-    /**
-     * Optional metadata related to call execution.
-     */
-    metadata?: ChatCompleteMetadata;
-    /**
-     * The maximum amount of times to retry in case of error returned from the provider.
-     *
-     * Defaults to 3.
-     */
-    maxRetries?: number;
-    /**
-     * Optional configuration for the retry mechanism.
-     *
-     * Note that defaults are very fine, so only use this if you really have a reason to do so.
-     */
-    retryConfiguration?: ChatCompleteRetryConfiguration;
-    /**
-     * Set to true to enable streaming, which will change the API response type from
-     * a single {@link ChatCompleteResponse} promise
-     * to a {@link ChatCompleteStreamResponse} event observable.
-     *
-     * Defaults to false.
-     */
-    stream?: boolean;
-    /**
-     * The timeout for the chat completion request.
-     */
-    timeout?: number;
-    /**
-     * Optional response content length override for connectors that support it.
-     */
-    maxContentLength?: number;
-    /**
-     * Optional prompt-cache directive. Only honored by Elastic-managed (EIS) inference
-     * endpoints;
-     */
-    cacheControl?: ChatCompleteCacheControl;
-    /**
-     * Optional session identifier used by EIS to scope prompt caching across calls.
-     */
-    sessionId?: string;
+  /**
+   * The ID of the connector or inference endpoint to use.
+   * Accepts both Kibana stack connector IDs and Elasticsearch inference endpoint IDs.
+   */
+  connectorId: string;
+  /**
+   * Optional system message for the LLM.
+   */
+  system?: string;
+  /**
+   * The list of messages for the current conversation
+   */
+  messages: Message[];
+  /**
+   * LLM temperature. All models support the 0-1 range (some supports more).
+   * Defaults to 0;
+   */
+  temperature?: number;
+  /**
+   * Optional reasoning configuration for the Elasticsearch unified chat completion API.
+   *
+   * When native function tools are present and this is omitted, the Inference adapter
+   * defaults to `{ effort: 'none' }` so OpenAI Chat Completions accepts tool-calling
+   * requests on newer reasoning models.
+   */
+  reasoning?: ChatCompletionReasoning;
+  /**
+   * The model name identifier to use. Can be defined to use another model than the
+   * default one, when using connectors / providers exposing multiple models.
+   *
+   * Defaults to the default model as defined by the used connector.
+   */
+  modelName?: string;
+  /**
+   * Function calling mode, defaults to "auto".
+   */
+  functionCalling?: FunctionCallingMode;
+  /**
+   * Optional signal that can be used to forcefully abort the request.
+   */
+  abortSignal?: AbortSignal;
+  /**
+   * Optional metadata related to call execution.
+   */
+  metadata?: ChatCompleteMetadata;
+  /**
+   * The maximum amount of times to retry in case of error returned from the provider.
+   *
+   * Defaults to 3.
+   */
+  maxRetries?: number;
+  /**
+   * Optional configuration for the retry mechanism.
+   *
+   * Note that defaults are very fine, so only use this if you really have a reason to do so.
+   */
+  retryConfiguration?: ChatCompleteRetryConfiguration;
+  /**
+   * Set to true to enable streaming, which will change the API response type from
+   * a single {@link ChatCompleteResponse} promise
+   * to a {@link ChatCompleteStreamResponse} event observable.
+   *
+   * Defaults to false.
+   */
+  stream?: boolean;
+  /**
+   * The timeout for the chat completion request.
+   */
+  timeout?: number;
+  /**
+   * Optional response content length override for connectors that support it.
+   */
+  maxContentLength?: number;
+  /**
+   * Optional prompt-cache directive. Only honored by Elastic-managed (EIS) inference
+   * endpoints;
+   */
+  cacheControl?: ChatCompleteCacheControl;
+  /**
+   * Optional session identifier used by EIS to scope prompt caching across calls.
+   */
+  sessionId?: string;
 } & ToolOptions;
 /**
  * Cache-control directive for EIS prompt caching.
  */
 export interface ChatCompleteCacheControl {
-    /**
-     * Cache entry type. Currently only `'ephemeral'` is supported.
-     */
-    type: 'ephemeral';
-    /**
-     * Optional time-to-live as an Elasticsearch TimeValue string.
-     * EIS currently supports `'5m'` and `'1h'`.
-     */
-    ttl?: '5m' | '1h';
+  /**
+   * Cache entry type. Currently only `'ephemeral'` is supported.
+   */
+  type: 'ephemeral';
+  /**
+   * Optional time-to-live as an Elasticsearch TimeValue string.
+   * EIS currently supports `'5m'` and `'1h'`.
+   */
+  ttl?: '5m' | '1h';
 }
 export interface ChatCompleteRetryConfiguration {
-    /**
-     * Defines the strategy for error retry
-     *
-     * Either one of
-     * - all: will retry all errors
-     * - auto: will only retry errors that could be recoverable (e.g rate limit, connectivity)
-     * Of a custom function to manually handle filtering
-     *
-     * Defaults to "auto"
-     */
-    retryOn?: 'all' | 'auto' | ((err: Error) => boolean);
-    /**
-     * The initial delay for incremental backoff, in ms.
-     *
-     * Defaults to 1000.
-     */
-    initialDelay?: number;
-    /**
-     * The backoff exponential multiplier.
-     *
-     * Defaults to 2.
-     */
-    backoffMultiplier?: number;
+  /**
+   * Defines the strategy for error retry
+   *
+   * Either one of
+   * - all: will retry all errors
+   * - auto: will only retry errors that could be recoverable (e.g rate limit, connectivity)
+   * Of a custom function to manually handle filtering
+   *
+   * Defaults to "auto"
+   */
+  retryOn?: 'all' | 'auto' | ((err: Error) => boolean);
+  /**
+   * The initial delay for incremental backoff, in ms.
+   *
+   * Defaults to 1000.
+   */
+  initialDelay?: number;
+  /**
+   * The backoff exponential multiplier.
+   *
+   * Defaults to 2.
+   */
+  backoffMultiplier?: number;
 }
 /**
  * Composite response type from the {@link ChatCompleteAPI},
  * which can be either an observable or a promise depending on
  * whether API was called with stream mode enabled or not.
  */
-export type ChatCompleteCompositeResponse<TOptions extends ChatCompleteCompositeResponseOptions = ChatCompleteCompositeResponseOptions> = (true extends TOptions['stream'] ? ChatCompleteStreamResponse<TOptions> : never) | (false extends TOptions['stream'] ? Promise<ChatCompleteResponse<TOptions>> : never);
+export type ChatCompleteCompositeResponse<
+  TOptions extends ChatCompleteCompositeResponseOptions = ChatCompleteCompositeResponseOptions
+> =
+  | (true extends TOptions['stream'] ? ChatCompleteStreamResponse<TOptions> : never)
+  | (false extends TOptions['stream'] ? Promise<ChatCompleteResponse<TOptions>> : never);
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is enabled.
  *
  * Observable of {@link ChatCompletionEvent}
  */
-export type ChatCompleteStreamResponse<TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions> = Observable<ChatCompletionEvent<TOptions>>;
+export type ChatCompleteStreamResponse<
+  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions
+> = Observable<ChatCompletionEvent<TOptions>>;
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is not enabled.
  */
-export interface ChatCompleteResponse<TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions> {
-    /**
-     * The text content of the LLM response.
-     */
-    content: string;
-    /**
-     * Optional refusal reason returned by the model when content is filtered.
-     */
-    refusal?: string;
-    /**
-     * The eventual tool calls performed by the LLM.
-     */
-    toolCalls: ToolCallOfToolOptions<TOptions>[];
-    /**
-     * Token counts
-     */
-    tokens?: ChatCompletionTokenCount;
-    /**
-     * Model effectively used, as specified by the response
-     */
-    model?: string;
-    /**
-     * Optional metadata attached by inference runtime.
-     */
-    metadata?: AnonymizationResponseMetadata;
+export interface ChatCompleteResponse<
+  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions
+> {
+  /**
+   * The text content of the LLM response.
+   */
+  content: string;
+  /**
+   * Optional refusal reason returned by the model when content is filtered.
+   */
+  refusal?: string;
+  /**
+   * The eventual tool calls performed by the LLM.
+   */
+  toolCalls: ToolCallOfToolOptions<TOptions>[];
+  /**
+   * Token counts
+   */
+  tokens?: ChatCompletionTokenCount;
+  /**
+   * Model effectively used, as specified by the response
+   */
+  model?: string;
+  /**
+   * Optional metadata attached by inference runtime.
+   */
+  metadata?: AnonymizationResponseMetadata;
 }
 /**
  * Define the function calling mode when using inference APIs.

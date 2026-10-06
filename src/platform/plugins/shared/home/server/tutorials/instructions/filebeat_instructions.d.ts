@@ -1,282 +1,315 @@
-import type { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  Platform,
+  TutorialContext,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 export declare const createFilebeatInstructions: (context: TutorialContext) => {
-    INSTALL: {
-        OSX: {
-            title: string;
-            textPre: string;
-            commands: string[];
-        };
-        DEB: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        RPM: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        WINDOWS: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-    };
-    START: {
-        OSX: {
-            title: string;
-            textPre: string;
-            commands: string[];
-        };
-        DEB: {
-            title: string;
-            textPre: string;
-            commands: string[];
-        };
-        RPM: {
-            title: string;
-            textPre: string;
-            commands: string[];
-        };
-        WINDOWS: {
-            title: string;
-            textPre: string;
-            commands: string[];
-        };
-    };
-    CONFIG: {
-        OSX: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        DEB: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        RPM: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        WINDOWS: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-    };
-};
-export declare const createFilebeatCloudInstructions: () => {
-    CONFIG: {
-        OSX: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        DEB: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        RPM: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        WINDOWS: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-    };
-};
-export declare const createFilebeatCloudInstructionsServerless: () => {
-    CONFIG: {
-        OSX: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        DEB: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        RPM: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-        WINDOWS: {
-            title: string;
-            textPre: string;
-            commands: string[];
-            textPost: string;
-        };
-    };
-};
-export declare function filebeatEnableInstructions(moduleName: string): {
+  INSTALL: {
     OSX: {
-        title: string;
-        textPre: string;
-        commands: string[];
-        textPost: string;
+      title: string;
+      textPre: string;
+      commands: string[];
     };
     DEB: {
-        title: string;
-        commands: string[];
-        textPost: string;
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
     };
     RPM: {
-        title: string;
-        commands: string[];
-        textPost: string;
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
     };
     WINDOWS: {
-        title: string;
-        textPre: string;
-        commands: string[];
-        textPost: string;
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
     };
+  };
+  START: {
+    OSX: {
+      title: string;
+      textPre: string;
+      commands: string[];
+    };
+    DEB: {
+      title: string;
+      textPre: string;
+      commands: string[];
+    };
+    RPM: {
+      title: string;
+      textPre: string;
+      commands: string[];
+    };
+    WINDOWS: {
+      title: string;
+      textPre: string;
+      commands: string[];
+    };
+  };
+  CONFIG: {
+    OSX: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    DEB: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    RPM: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    WINDOWS: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+  };
+};
+export declare const createFilebeatCloudInstructions: () => {
+  CONFIG: {
+    OSX: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    DEB: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    RPM: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    WINDOWS: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+  };
+};
+export declare const createFilebeatCloudInstructionsServerless: () => {
+  CONFIG: {
+    OSX: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    DEB: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    RPM: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+    WINDOWS: {
+      title: string;
+      textPre: string;
+      commands: string[];
+      textPost: string;
+    };
+  };
+};
+export declare function filebeatEnableInstructions(moduleName: string): {
+  OSX: {
+    title: string;
+    textPre: string;
+    commands: string[];
+    textPost: string;
+  };
+  DEB: {
+    title: string;
+    commands: string[];
+    textPost: string;
+  };
+  RPM: {
+    title: string;
+    commands: string[];
+    textPost: string;
+  };
+  WINDOWS: {
+    title: string;
+    textPre: string;
+    commands: string[];
+    textPost: string;
+  };
 };
 export declare function filebeatStatusCheck(moduleName: string): {
+  title: string;
+  text: string;
+  btnLabel: string;
+  success: string;
+  error: string;
+  esHitsCheck: {
+    index: string;
+    query: {
+      bool: {
+        filter: {
+          term: {
+            'event.module': string;
+          };
+        };
+      };
+    };
+  };
+};
+export declare function onPremInstructions(
+  moduleName: string,
+  platforms: readonly Platform[] | undefined,
+  context: TutorialContext
+): {
+  instructionSets: {
     title: string;
-    text: string;
-    btnLabel: string;
-    success: string;
-    error: string;
-    esHitsCheck: {
+    instructionVariants: {
+      id: string;
+      instructions: (
+        | {
+            title: string;
+            textPre: string;
+            commands: string[];
+          }
+        | {
+            title: string;
+            commands: string[];
+            textPost: string;
+          }
+      )[];
+    }[];
+    statusCheck: {
+      title: string;
+      text: string;
+      btnLabel: string;
+      success: string;
+      error: string;
+      esHitsCheck: {
         index: string;
         query: {
-            bool: {
-                filter: {
-                    term: {
-                        'event.module': string;
-                    };
-                };
+          bool: {
+            filter: {
+              term: {
+                'event.module': string;
+              };
             };
+          };
         };
+      };
     };
+  }[];
 };
-export declare function onPremInstructions(moduleName: string, platforms: readonly Platform[] | undefined, context: TutorialContext): {
-    instructionSets: {
-        title: string;
-        instructionVariants: {
-            id: string;
-            instructions: ({
-                title: string;
-                textPre: string;
-                commands: string[];
-            } | {
-                title: string;
-                commands: string[];
-                textPost: string;
-            })[];
-        }[];
-        statusCheck: {
+export declare function onPremCloudInstructions(
+  moduleName: string,
+  platforms: readonly Platform[] | undefined,
+  context: TutorialContext
+): {
+  instructionSets: {
+    title: string;
+    instructionVariants: {
+      id: string;
+      instructions: (
+        | {
             title: string;
-            text: string;
-            btnLabel: string;
-            success: string;
-            error: string;
-            esHitsCheck: {
-                index: string;
-                query: {
-                    bool: {
-                        filter: {
-                            term: {
-                                'event.module': string;
-                            };
-                        };
-                    };
-                };
-            };
-        };
+            textPre: string;
+          }
+        | {
+            title: string;
+            commands: string[];
+            textPost: string;
+          }
+      )[];
     }[];
+    statusCheck: {
+      title: string;
+      text: string;
+      btnLabel: string;
+      success: string;
+      error: string;
+      esHitsCheck: {
+        index: string;
+        query: {
+          bool: {
+            filter: {
+              term: {
+                'event.module': string;
+              };
+            };
+          };
+        };
+      };
+    };
+  }[];
 };
-export declare function onPremCloudInstructions(moduleName: string, platforms: readonly Platform[] | undefined, context: TutorialContext): {
-    instructionSets: {
-        title: string;
-        instructionVariants: {
-            id: string;
-            instructions: ({
-                title: string;
-                textPre: string;
-            } | {
-                title: string;
-                commands: string[];
-                textPost: string;
-            })[];
-        }[];
-        statusCheck: {
+export declare function cloudInstructions(
+  moduleName: string,
+  platforms: readonly Platform[] | undefined,
+  context: TutorialContext
+): {
+  instructionSets: {
+    title: string;
+    instructionVariants: {
+      id: string;
+      instructions: (
+        | {
             title: string;
-            text: string;
-            btnLabel: string;
-            success: string;
-            error: string;
-            esHitsCheck: {
-                index: string;
-                query: {
-                    bool: {
-                        filter: {
-                            term: {
-                                'event.module': string;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-    }[];
-};
-export declare function cloudInstructions(moduleName: string, platforms: readonly Platform[] | undefined, context: TutorialContext): {
-    instructionSets: {
-        title: string;
-        instructionVariants: {
-            id: string;
-            instructions: ({
-                title: string;
-                textPre: string;
-                commands: string[];
-            } | {
-                title: string;
-                commands: string[];
-                textPost: string;
-            })[];
-        }[];
-        statusCheck: {
+            textPre: string;
+            commands: string[];
+          }
+        | {
             title: string;
-            text: string;
-            btnLabel: string;
-            success: string;
-            error: string;
-            esHitsCheck: {
-                index: string;
-                query: {
-                    bool: {
-                        filter: {
-                            term: {
-                                'event.module': string;
-                            };
-                        };
-                    };
-                };
-            };
-        };
+            commands: string[];
+            textPost: string;
+          }
+      )[];
     }[];
+    statusCheck: {
+      title: string;
+      text: string;
+      btnLabel: string;
+      success: string;
+      error: string;
+      esHitsCheck: {
+        index: string;
+        query: {
+          bool: {
+            filter: {
+              term: {
+                'event.module': string;
+              };
+            };
+          };
+        };
+      };
+    };
+  }[];
 };

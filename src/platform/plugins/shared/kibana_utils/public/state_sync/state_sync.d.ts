@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IStateSyncConfig } from './types';
 import type { IStateStorage } from './state_sync_state_storage';
 import type { BaseState } from '../../common/state_containers';
@@ -13,14 +22,14 @@ export type StartSyncStateFnType = () => void;
  * @public
  */
 export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorage> {
-    /**
-     * stop state syncing
-     */
-    stop: StopSyncStateFnType;
-    /**
-     * start state syncing
-     */
-    start: StartSyncStateFnType;
+  /**
+   * stop state syncing
+   */
+  stop: StopSyncStateFnType;
+  /**
+   * start state syncing
+   */
+  start: StartSyncStateFnType;
 }
 /**
  * Utility for syncing application state wrapped in state container
@@ -88,7 +97,14 @@ export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorag
  * @returns - {@link ISyncStateRef}
  * @public
  */
-export declare function syncState<State extends BaseState, StateStorage extends IStateStorage = IStateStorage>({ storageKey, stateStorage, stateContainer, }: IStateSyncConfig<State, IStateStorage>): ISyncStateRef;
+export declare function syncState<
+  State extends BaseState,
+  StateStorage extends IStateStorage = IStateStorage
+>({
+  storageKey,
+  stateStorage,
+  stateContainer,
+}: IStateSyncConfig<State, IStateStorage>): ISyncStateRef;
 /**
  * @example
  * sync multiple different sync configs

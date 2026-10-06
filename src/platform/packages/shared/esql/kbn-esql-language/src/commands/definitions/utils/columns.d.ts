@@ -1,9 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
 import type { ICommandContext, ESQLColumnData } from '../../registry/types';
 import type { Commands } from '../keywords';
-import type { ElasticsearchCommandOutputDefinition, ElasticsearchCommandOutputVariant } from '../types';
-export declare function getColumnExists(node: ESQLColumn | ESQLIdentifier, { columns }: Pick<ICommandContext, 'columns'>, excludeFields?: boolean): boolean;
-export declare function columnIsPresent(node: ESQLColumn | ESQLIdentifier, columns: Set<string>): boolean;
+import type {
+  ElasticsearchCommandOutputDefinition,
+  ElasticsearchCommandOutputVariant,
+} from '../types';
+export declare function getColumnExists(
+  node: ESQLColumn | ESQLIdentifier,
+  { columns }: Pick<ICommandContext, 'columns'>,
+  excludeFields?: boolean
+): boolean;
+export declare function columnIsPresent(
+  node: ESQLColumn | ESQLIdentifier,
+  columns: Set<string>
+): boolean;
 export declare function getColumnName(node: ESQLColumn | ESQLIdentifier): string;
 /**
  * Escapes a field name into a valid ES|QL column reference, backtick-quoting the segments
@@ -13,12 +32,25 @@ export declare function getColumnName(node: ESQLColumn | ESQLIdentifier): string
  * implicit EVAL output like `host.cpu.pct > 0.5`): those are quoted as a single identifier,
  * valid column paths still escape per segment.
  */
-export declare const escapeEsqlColumnName: (columnName: string, { asExpression }?: {
+export declare const escapeEsqlColumnName: (
+  columnName: string,
+  {
+    asExpression,
+  }?: {
     asExpression?: boolean;
-}) => string;
+  }
+) => string;
 /** Reads the generated output schema for a command from the command definitions. */
-export declare const getCommandOutput: (command: Commands) => ElasticsearchCommandOutputDefinition | undefined;
+export declare const getCommandOutput: (
+  command: Commands
+) => ElasticsearchCommandOutputDefinition | undefined;
 /** Reads the generated output columns for a command variant (defaults to the single `all` variant). */
-export declare const getCommandOutputColumns: (command: Commands, variant?: string) => ElasticsearchCommandOutputVariant | undefined;
+export declare const getCommandOutputColumns: (
+  command: Commands,
+  variant?: string
+) => ElasticsearchCommandOutputVariant | undefined;
 /** Builds columns by prefixing each generated output column with the target field name. */
-export declare const buildPrefixedColumns: (prefix: string, columns: ElasticsearchCommandOutputVariant) => ESQLColumnData[];
+export declare const buildPrefixedColumns: (
+  prefix: string,
+  columns: ElasticsearchCommandOutputVariant
+) => ESQLColumnData[];

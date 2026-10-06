@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/core-security-server'
   - '@kbn/tracing-utils'
+  - '@kbn/core'
 tags:
   - shared-server
   - package

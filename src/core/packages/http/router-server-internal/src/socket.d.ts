@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IncomingMessage } from 'http';
 import type { Http2ServerRequest } from 'http2';
 import type { Socket } from 'net';
@@ -20,18 +29,15 @@ import type { IKibanaSocket } from '@kbn/core-http-server';
  */
 export declare const resolveRawSocket: (req: IncomingMessage | Http2ServerRequest) => Socket;
 export declare class KibanaSocket implements IKibanaSocket {
-    private readonly socket;
-    static getFakeSocket(): IKibanaSocket;
-    constructor(socket: Socket);
-    get authorized(): boolean | undefined;
-    get authorizationError(): Error | undefined;
-    get remoteAddress(): string | undefined;
-    getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
-    getPeerCertificate(detailed: false): PeerCertificate | null;
-    getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
-    getProtocol(): string | null;
-    renegotiate(options: {
-        rejectUnauthorized?: boolean;
-        requestCert?: boolean;
-    }): Promise<void>;
+  private readonly socket;
+  static getFakeSocket(): IKibanaSocket;
+  constructor(socket: Socket);
+  get authorized(): boolean | undefined;
+  get authorizationError(): Error | undefined;
+  get remoteAddress(): string | undefined;
+  getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
+  getPeerCertificate(detailed: false): PeerCertificate | null;
+  getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
+  getProtocol(): string | null;
+  renegotiate(options: { rejectUnauthorized?: boolean; requestCert?: boolean }): Promise<void>;
 }

@@ -1,7 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { PromptRequest, PromptResponse } from '../agents/prompts';
 import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
-import type { AssistantResponse, ConversationRoundStep, ConversationRoundOrigin, RoundInput, RoundModelUsageStats } from './conversation';
+import type {
+  AssistantResponse,
+  ConversationRoundStep,
+  ConversationRoundOrigin,
+  RoundInput,
+  RoundModelUsageStats,
+} from './conversation';
 import type { RoundState } from './round_state';
 import type { ExecutionInterruption } from './events';
 /**
@@ -15,153 +28,177 @@ export declare const MIN_EVENTS_NATIVE_SCHEMA_VERSION = 1;
 export declare const isEventsNativeVersion: (version: number | undefined) => version is number;
 /** The kind of participant that produced a timeline event. */
 export declare enum EventActorType {
-    /** An authenticated Kibana user. */
-    user = "user",
-    /** An agent run. */
-    agent = "agent",
-    /** An external system (e.g. Slack, GitHub). */
-    external = "external",
-    /** Kibana itself (lifecycle/audit bookkeeping). */
-    system = "system"
+  /** An authenticated Kibana user. */
+  user = 'user',
+  /** An agent run. */
+  agent = 'agent',
+  /** An external system (e.g. Slack, GitHub). */
+  external = 'external',
+  /** Kibana itself (lifecycle/audit bookkeeping). */
+  system = 'system',
 }
 /**
  * Records who produced a timeline event.
  */
 export interface EventActor {
-    /** The kind of participant. */
-    type: EventActorType;
-    /**
-     * Stable participant identifier. For an `external` actor this is the external system's own
-     * user id, stored raw (e.g. the Slack user id, not prefixed); `origin.type` says which system
-     * it belongs to. The external thread/conversation id lives on the conversation, at
-     * `conversation.origin.external_conversation_id`, not here.
-     */
-    id: string;
-    /** Optional username / handle. */
-    username?: string;
-    /** Optional display name. */
-    full_name?: string;
-    /** For external actors, the origin the event came from (which system). */
-    origin?: ConversationRoundOrigin;
+  /** The kind of participant. */
+  type: EventActorType;
+  /**
+   * Stable participant identifier. For an `external` actor this is the external system's own
+   * user id, stored raw (e.g. the Slack user id, not prefixed); `origin.type` says which system
+   * it belongs to. The external thread/conversation id lives on the conversation, at
+   * `conversation.origin.external_conversation_id`, not here.
+   */
+  id: string;
+  /** Optional username / handle. */
+  username?: string;
+  /** Optional display name. */
+  full_name?: string;
+  /** For external actors, the origin the event came from (which system). */
+  origin?: ConversationRoundOrigin;
 }
 /**
  * Whether a chat request executes the agent. `never` appends the user message to the conversation
  * and returns, leaving the execution options unused.
  */
 export declare enum ChatTriggerMode {
-    Always = "always",
-    Never = "never"
+  Always = 'always',
+  Never = 'never',
 }
 /**
  * What caused an agent run to start.
  */
 export declare enum TimelineTriggerType {
-    /** A user message. */
-    userMessage = "user_message",
-    /** A human answering a prompt (HITL resume). */
-    promptResponse = "prompt_response",
-    /** A scheduled task, no user present. */
-    schedule = "schedule",
-    /** An external system. */
-    external = "external",
-    /** A user mentioning the agent (`@agent`) in a shared conversation. */
-    agentMention = "agent_mention"
+  /** A user message. */
+  userMessage = 'user_message',
+  /** A human answering a prompt (HITL resume). */
+  promptResponse = 'prompt_response',
+  /** A scheduled task, no user present. */
+  schedule = 'schedule',
+  /** An external system. */
+  external = 'external',
+  /** A user mentioning the agent (`@agent`) in a shared conversation. */
+  agentMention = 'agent_mention',
 }
 /** The set of timeline event types supported in the MVP. */
 export declare enum TimelineEventType {
-    userMessage = "user_message",
-    promptResponse = "prompt_response",
-    executionStarted = "execution_started",
-    executionStep = "execution_step",
-    executionTerminated = "execution_terminated",
-    executionFailed = "execution_failed",
-    executionAborted = "execution_aborted",
-    attachmentAdded = "attachment_added",
-    attachmentUpdated = "attachment_updated",
-    attachmentDeleted = "attachment_deleted"
+  userMessage = 'user_message',
+  promptResponse = 'prompt_response',
+  executionStarted = 'execution_started',
+  executionStep = 'execution_step',
+  executionTerminated = 'execution_terminated',
+  executionFailed = 'execution_failed',
+  executionAborted = 'execution_aborted',
+  attachmentAdded = 'attachment_added',
+  attachmentUpdated = 'attachment_updated',
+  attachmentDeleted = 'attachment_deleted',
 }
 /** Fields the server fills in when an event is accepted; absent on producer input. */
 export interface ServerAssignedEventFields {
-    id: string;
-    created_at: string;
-    actor: EventActor;
+  id: string;
+  created_at: string;
+  actor: EventActor;
 }
 /**
  * Unconstrained event envelope — works for both built-in and custom event types.
  * `TType` is open here; `BaseTimelineEventInput` re-adds the `TimelineEventType` constraint so
  * the closed `TimelineEvent` union and all existing narrowing remain unaffected.
  */
-export interface ConversationEventInput<TType extends string = string, TData = object> extends Partial<ServerAssignedEventFields> {
-    /** The event type discriminator. */
-    type: TType;
-    /** The type-specific payload. */
-    data: TData;
-    /** The run this event belongs to, for lifecycle events. */
-    execution_id?: string;
-    /** The content event that triggered the run this event belongs to. */
-    trigger_event_id?: string;
+export interface ConversationEventInput<TType extends string = string, TData = object>
+  extends Partial<ServerAssignedEventFields> {
+  /** The event type discriminator. */
+  type: TType;
+  /** The type-specific payload. */
+  data: TData;
+  /** The run this event belongs to, for lifecycle events. */
+  execution_id?: string;
+  /** The content event that triggered the run this event belongs to. */
+  trigger_event_id?: string;
 }
 /** A stored conversation event: producer fields plus server-assigned fields made required. */
-export type ConversationEvent<TType extends string = string, TData = object> = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
+export type ConversationEvent<
+  TType extends string = string,
+  TData = object
+> = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
 /** The fields a producer supplies for a timeline event. */
-export type BaseTimelineEventInput<TType extends TimelineEventType, TData> = ConversationEventInput<TType, TData>;
+export type BaseTimelineEventInput<TType extends TimelineEventType, TData> = ConversationEventInput<
+  TType,
+  TData
+>;
 /**
  * A stored timeline event: the producer fields, plus the server-assigned `id`, `created_at`, and
  * `actor` made required.
  */
-export type BaseTimelineEvent<TType extends TimelineEventType, TData> = ConversationEvent<TType, TData>;
+export type BaseTimelineEvent<TType extends TimelineEventType, TData> = ConversationEvent<
+  TType,
+  TData
+>;
 /** A message from a user, stored the moment it arrives, apart from any run. */
 export type UserMessageEventData = RoundInput;
-export type UserMessageEvent = BaseTimelineEvent<TimelineEventType.userMessage, UserMessageEventData>;
+export type UserMessageEvent = BaseTimelineEvent<
+  TimelineEventType.userMessage,
+  UserMessageEventData
+>;
 /** A human's answer to a `prompt_requested` event. Resumes a specific run; does not start one. */
 export interface PromptResponseEventData {
-    /** The `prompt_requested` event this answers. */
-    prompt_requested_event_id: string;
-    /** The responses, keyed by prompt id. */
-    responses: Record<string, PromptResponse>;
-    /** Resume input lives here because a resume has no user_message event. */
-    input?: RoundInput;
+  /** The `prompt_requested` event this answers. */
+  prompt_requested_event_id: string;
+  /** The responses, keyed by prompt id. */
+  responses: Record<string, PromptResponse>;
+  /** Resume input lives here because a resume has no user_message event. */
+  input?: RoundInput;
 }
-export type PromptResponseEvent = BaseTimelineEvent<TimelineEventType.promptResponse, PromptResponseEventData>;
+export type PromptResponseEvent = BaseTimelineEvent<
+  TimelineEventType.promptResponse,
+  PromptResponseEventData
+>;
 /** Marks the start of an agent run. */
 export interface ExecutionStartedEventData {
-    /** What caused the run to start. */
-    trigger_type: TimelineTriggerType;
+  /** What caused the run to start. */
+  trigger_type: TimelineTriggerType;
 }
-export type ExecutionStartedEvent = BaseTimelineEvent<TimelineEventType.executionStarted, ExecutionStartedEventData>;
+export type ExecutionStartedEvent = BaseTimelineEvent<
+  TimelineEventType.executionStarted,
+  ExecutionStartedEventData
+>;
 /** A single completed step of an agent run. */
 export interface ExecutionStepEventData {
-    step: ConversationRoundStep;
-    sequence: number;
+  step: ConversationRoundStep;
+  sequence: number;
 }
-export type ExecutionStepEvent = BaseTimelineEvent<TimelineEventType.executionStep, ExecutionStepEventData>;
+export type ExecutionStepEvent = BaseTimelineEvent<
+  TimelineEventType.executionStep,
+  ExecutionStepEventData
+>;
 /**
  * The run summary: everything describing the execution itself, independent of how it ended.
  */
 export interface ExecutionRunSummary {
-    /** The intermediate steps (tool calls, reasoning, etc.). */
-    steps?: ConversationRoundStep[];
-    /** Model usage statistics for the run. */
-    model_usage: RoundModelUsageStats;
-    /** Time to first token, in ms. */
-    time_to_first_token: number;
-    /** Time to last token, in ms. */
-    time_to_last_token: number;
-    /** When tracing is enabled, the trace id(s) for the run. */
-    trace_id?: string | string[];
-    /** Round-level persisted resume state, when present. Carried so rounds round-trip losslessly. */
-    state?: RoundState;
-    /** Runtime configuration overrides applied to the run, when present. */
-    configuration_overrides?: RuntimeAgentConfigurationOverrides;
+  /** The intermediate steps (tool calls, reasoning, etc.). */
+  steps?: ConversationRoundStep[];
+  /** Model usage statistics for the run. */
+  model_usage: RoundModelUsageStats;
+  /** Time to first token, in ms. */
+  time_to_first_token: number;
+  /** Time to last token, in ms. */
+  time_to_last_token: number;
+  /** When tracing is enabled, the trace id(s) for the run. */
+  trace_id?: string | string[];
+  /** Round-level persisted resume state, when present. Carried so rounds round-trip losslessly. */
+  state?: RoundState;
+  /** Runtime configuration overrides applied to the run, when present. */
+  configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 /** How an execution ended: a final response, or a pause to ask the human (HITL). */
-export type ExecutionOutcome = {
-    type: 'responded';
-    response: AssistantResponse;
-} | {
-    type: 'prompt_requested';
-    prompts: PromptRequest[];
-};
+export type ExecutionOutcome =
+  | {
+      type: 'responded';
+      response: AssistantResponse;
+    }
+  | {
+      type: 'prompt_requested';
+      prompts: PromptRequest[];
+    };
 /**
  * The terminal event of a run and the source of truth for it: the run summary plus the outcome.
  * Unifies what were previously `execution_completed` (responded) and `prompt_requested` (paused) —
@@ -169,9 +206,12 @@ export type ExecutionOutcome = {
  * the outcome.
  */
 export interface ExecutionTerminatedEventData extends ExecutionRunSummary {
-    outcome: ExecutionOutcome;
+  outcome: ExecutionOutcome;
 }
-export type ExecutionTerminatedEvent = BaseTimelineEvent<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>;
+export type ExecutionTerminatedEvent = BaseTimelineEvent<
+  TimelineEventType.executionTerminated,
+  ExecutionTerminatedEventData
+>;
 /**
  * The run summary of an execution that did not complete. Same fields as `ExecutionRunSummary`
  * minus `steps` (stored as separate `execution_step` events) and `state` (an interrupted
@@ -183,92 +223,149 @@ export type ExecutionTerminatedEvent = BaseTimelineEvent<TimelineEventType.execu
  * `execution_failed` or `execution_aborted`), and exactly one whenever the conversation store
  * accepted the terminal write. An execution with no terminal never forms a round.
  */
-export type ExecutionPartialRunSummary = Pick<ExecutionRunSummary, 'time_to_last_token' | 'trace_id' | 'configuration_overrides'> & {
-    /** Model usage; absent when the run failed before the model provider was resolved. */
-    model_usage?: RoundModelUsageStats;
-    /** Time to first token, in ms, when known. */
-    time_to_first_token?: number;
+export type ExecutionPartialRunSummary = Pick<
+  ExecutionRunSummary,
+  'time_to_last_token' | 'trace_id' | 'configuration_overrides'
+> & {
+  /** Model usage; absent when the run failed before the model provider was resolved. */
+  model_usage?: RoundModelUsageStats;
+  /** Time to first token, in ms, when known. */
+  time_to_first_token?: number;
 };
 /** A run that ended in an error. */
 export interface ExecutionFailedEventData extends ExecutionPartialRunSummary {
-    /** The serialized error, identical to what the client received. */
-    error: SerializedExecutionError;
+  /** The serialized error, identical to what the client received. */
+  error: SerializedExecutionError;
 }
-export type ExecutionFailedEvent = BaseTimelineEvent<TimelineEventType.executionFailed, ExecutionFailedEventData>;
+export type ExecutionFailedEvent = BaseTimelineEvent<
+  TimelineEventType.executionFailed,
+  ExecutionFailedEventData
+>;
 /** A run that was stopped before it completed. */
 export type ExecutionAbortedEventData = ExecutionPartialRunSummary & {
-    /** Where the abort came from and who asked for it, when known. */
-    aborted_by?: ExecutionAbortReason;
+  /** Where the abort came from and who asked for it, when known. */
+  aborted_by?: ExecutionAbortReason;
 };
-export type ExecutionAbortedEvent = BaseTimelineEvent<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
+export type ExecutionAbortedEvent = BaseTimelineEvent<
+  TimelineEventType.executionAborted,
+  ExecutionAbortedEventData
+>;
 /** What triggered an attachment mutation. */
-export type AttachmentEventSource = 'workflow' | 'http_api' | 'server_api' | 'chat_input' | 'execution';
+export type AttachmentEventSource =
+  | 'workflow'
+  | 'http_api'
+  | 'server_api'
+  | 'chat_input'
+  | 'execution';
 /** An attachment was created in the conversation. */
 export interface AttachmentAddedEventData {
-    attachment_id: string;
-    attachment_type: string;
-    /** Always 1 today; kept so consumers never special-case the first version. */
-    current_version: number;
-    /** When true, the UI should render the attachment automatically on open. */
-    render_inline: boolean;
-    source: AttachmentEventSource;
+  attachment_id: string;
+  attachment_type: string;
+  /** Always 1 today; kept so consumers never special-case the first version. */
+  current_version: number;
+  /** When true, the UI should render the attachment automatically on open. */
+  render_inline: boolean;
+  source: AttachmentEventSource;
 }
-export type AttachmentAddedEvent = BaseTimelineEvent<TimelineEventType.attachmentAdded, AttachmentAddedEventData>;
+export type AttachmentAddedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentAdded,
+  AttachmentAddedEventData
+>;
 /** An attachment received a new content version. */
 export interface AttachmentUpdatedEventData {
-    attachment_id: string;
-    attachment_type: string;
-    previous_version: number;
-    current_version: number;
-    render_inline: boolean;
-    source: AttachmentEventSource;
+  attachment_id: string;
+  attachment_type: string;
+  previous_version: number;
+  current_version: number;
+  render_inline: boolean;
+  source: AttachmentEventSource;
 }
-export type AttachmentUpdatedEvent = BaseTimelineEvent<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData>;
+export type AttachmentUpdatedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentUpdated,
+  AttachmentUpdatedEventData
+>;
 /** An attachment was soft- or hard-deleted. */
 export interface AttachmentDeletedEventData {
-    attachment_id: string;
-    attachment_type: string;
-    hard_delete: boolean;
-    source: AttachmentEventSource;
+  attachment_id: string;
+  attachment_type: string;
+  hard_delete: boolean;
+  source: AttachmentEventSource;
 }
-export type AttachmentDeletedEvent = BaseTimelineEvent<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
-export type AttachmentTimelineEvent = AttachmentAddedEvent | AttachmentUpdatedEvent | AttachmentDeletedEvent;
+export type AttachmentDeletedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentDeleted,
+  AttachmentDeletedEventData
+>;
+export type AttachmentTimelineEvent =
+  | AttachmentAddedEvent
+  | AttachmentUpdatedEvent
+  | AttachmentDeletedEvent;
 export declare const isAttachmentEvent: (event: {
-    type: string;
+  type: string;
 }) => event is AttachmentTimelineEvent;
 /** The three events that end an execution: with an outcome, with an error, or by cancellation. */
-export type ExecutionTerminalEvent = ExecutionTerminatedEvent | ExecutionFailedEvent | ExecutionAbortedEvent;
+export type ExecutionTerminalEvent =
+  | ExecutionTerminatedEvent
+  | ExecutionFailedEvent
+  | ExecutionAbortedEvent;
 /** True for any of the three events that end an execution. */
 export declare const isExecutionTerminalEvent: (event: {
-    type: string;
+  type: string;
 }) => event is ExecutionTerminalEvent;
 /**
  * Ids of the `execution_terminated` (`prompt_requested`) events some `prompt_response` answers.
  * Raw events only: the folded context timeline carries no `prompt_response`.
  */
-export declare const answeredPromptRequestIds: (events: ReadonlyArray<ConversationEvent>) => Set<string>;
+export declare const answeredPromptRequestIds: (
+  events: ReadonlyArray<ConversationEvent>
+) => Set<string>;
 /** The last terminal event of any kind, by array position. */
-export declare const lastExecutionTerminal: (events: ReadonlyArray<ConversationEvent>) => ExecutionTerminalEvent | undefined;
+export declare const lastExecutionTerminal: (
+  events: ReadonlyArray<ConversationEvent>
+) => ExecutionTerminalEvent | undefined;
 /**
  * The pause the next input must answer, or undefined. The single definition of "paused": the
  * last terminal is an `execution_terminated` with a `prompt_requested` outcome that no
  * `prompt_response` answers. On the folded context timeline the join is always empty, so this
  * reduces to "the last terminal is a pause".
  */
-export declare const pendingPromptRequest: (events: ReadonlyArray<ConversationEvent>) => ExecutionTerminatedEvent | undefined;
+export declare const pendingPromptRequest: (
+  events: ReadonlyArray<ConversationEvent>
+) => ExecutionTerminatedEvent | undefined;
 /** How an interrupted execution ended, from its terminal event. */
-export declare const interruptionOfTerminal: (terminal: ExecutionFailedEvent | ExecutionAbortedEvent) => ExecutionInterruption;
+export declare const interruptionOfTerminal: (
+  terminal: ExecutionFailedEvent | ExecutionAbortedEvent
+) => ExecutionInterruption;
 /** The discriminated union of all stored timeline events. */
-export type TimelineEvent = UserMessageEvent | PromptResponseEvent | ExecutionStartedEvent | ExecutionStepEvent | ExecutionTerminatedEvent | ExecutionFailedEvent | ExecutionAbortedEvent | AttachmentAddedEvent | AttachmentUpdatedEvent | AttachmentDeletedEvent;
+export type TimelineEvent =
+  | UserMessageEvent
+  | PromptResponseEvent
+  | ExecutionStartedEvent
+  | ExecutionStepEvent
+  | ExecutionTerminatedEvent
+  | ExecutionFailedEvent
+  | ExecutionAbortedEvent
+  | AttachmentAddedEvent
+  | AttachmentUpdatedEvent
+  | AttachmentDeletedEvent;
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
-export type TimelineEventInput = BaseTimelineEventInput<TimelineEventType.userMessage, UserMessageEventData> | BaseTimelineEventInput<TimelineEventType.promptResponse, PromptResponseEventData> | BaseTimelineEventInput<TimelineEventType.executionStarted, ExecutionStartedEventData> | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData> | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData> | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData> | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData> | BaseTimelineEventInput<TimelineEventType.attachmentAdded, AttachmentAddedEventData> | BaseTimelineEventInput<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData> | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
+export type TimelineEventInput =
+  | BaseTimelineEventInput<TimelineEventType.userMessage, UserMessageEventData>
+  | BaseTimelineEventInput<TimelineEventType.promptResponse, PromptResponseEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionStarted, ExecutionStartedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentAdded, AttachmentAddedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
 /**
  * The run lock held on a conversation while an execution is active.
  */
 export interface ActiveExecution {
-    execution_id: string;
-    trigger_event_id: string;
-    started_at: string;
+  execution_id: string;
+  trigger_event_id: string;
+  started_at: string;
 }
 /**
  * The delimiter used in round-derived event ids (e.g. `${roundId}::user_message`).
@@ -280,14 +377,14 @@ export declare const CONVERSATION_EVENT_ID_DELIMITER: '::';
  * Suffixes used to build the ids of every round-derived timeline event.
  */
 export declare const ROUND_DERIVED_EVENT_ID_SUFFIXES: {
-    readonly userMessage: '::user_message';
-    readonly executionStarted: '::execution_started';
-    readonly executionTerminated: '::execution_terminated';
-    readonly executionFailed: '::execution_failed';
-    readonly executionAborted: '::execution_aborted';
-    readonly execution: '::execution';
-    readonly stepPrefix: '::step::';
-    readonly promptResponse: '::prompt_response';
+  readonly userMessage: '::user_message';
+  readonly executionStarted: '::execution_started';
+  readonly executionTerminated: '::execution_terminated';
+  readonly executionFailed: '::execution_failed';
+  readonly executionAborted: '::execution_aborted';
+  readonly execution: '::execution';
+  readonly stepPrefix: '::step::';
+  readonly promptResponse: '::prompt_response';
 };
 /** ID of the `user_message` event derived from a round. */
 export declare const roundUserMessageEventId: (roundId: string) => string;
@@ -296,17 +393,26 @@ export declare const roundStepEventId: (roundId: string, sequence: number) => st
 /** Builds an execution id for a resume appended to a round without rewriting its initial run. */
 export declare const resumeExecutionId: (roundId: string, executionIndex: number) => string;
 /** Parses initial and resume execution ids, returning undefined for unrelated ids. */
-export declare const parseExecutionId: (id: string) => {
-    roundId: string;
-    index: number;
-} | undefined;
+export declare const parseExecutionId: (id: string) =>
+  | {
+      roundId: string;
+      index: number;
+    }
+  | undefined;
 /** The `execution_terminated` event id for an execution index (0 = the initial run). */
-export declare const executionTerminatedEventId: (roundId: string, executionIndex: number) => string;
+export declare const executionTerminatedEventId: (
+  roundId: string,
+  executionIndex: number
+) => string;
 /**
  * ID for a step event of any execution. Step ids are not uniform: the initial run numbers steps
  * off the round id, a resume numbers them off its own execution id.
  */
-export declare const executionStepEventId: (roundId: string, executionIndex: number, sequence: number) => string;
+export declare const executionStepEventId: (
+  roundId: string,
+  executionIndex: number,
+  sequence: number
+) => string;
 /**
  * Type names that are not covered by a `TimelineEventType` member but would still
  * produce ids colliding with round-derived ones.
@@ -337,7 +443,14 @@ type BuiltInConversationEventTypeValue = `${TimelineEventType}`;
  * Only effective when `T` is inferred as a literal — a `string`-typed variable slips through.
  * Always pair with the runtime checks in the registry.
  */
-export type ValidConversationEventType<T extends string> = T extends `${string}${typeof CONVERSATION_EVENT_ID_DELIMITER}${string}` ? never : T extends ReservedConversationEventType ? never : T extends BuiltInConversationEventTypeValue ? never : T;
+export type ValidConversationEventType<T extends string> =
+  T extends `${string}${typeof CONVERSATION_EVENT_ID_DELIMITER}${string}`
+    ? never
+    : T extends ReservedConversationEventType
+    ? never
+    : T extends BuiltInConversationEventTypeValue
+    ? never
+    : T;
 /**
  * Validates a conversation event type name at runtime, throwing a descriptive error if invalid.
  * Enforces the same three naming rules as the server-side registry:
@@ -350,7 +463,7 @@ export type ValidConversationEventType<T extends string> = T extends `${string}$
 export declare const assertValidConversationEventType: (type: string) => void;
 /** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
 export interface ConversationAddEventInput {
-    type: string;
-    data: Record<string, unknown>;
+  type: string;
+  data: Record<string, unknown>;
 }
 export {};

@@ -1,118 +1,133 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Usage data from Core services
  * @public
  */
 export interface CoreServicesUsageData {
-    savedObjects: {
-        indices: {
-            alias: string;
-            docsCount: number;
-            docsDeleted: number;
-            storeSizeBytes: number;
-            primaryStoreSizeBytes: number;
-            savedObjectsDocsCount: number;
-        }[];
-        legacyUrlAliases: {
-            activeCount: number;
-            inactiveCount: number;
-            disabledCount: number;
-            totalCount: number;
-        };
+  savedObjects: {
+    indices: {
+      alias: string;
+      docsCount: number;
+      docsDeleted: number;
+      storeSizeBytes: number;
+      primaryStoreSizeBytes: number;
+      savedObjectsDocsCount: number;
+    }[];
+    legacyUrlAliases: {
+      activeCount: number;
+      inactiveCount: number;
+      disabledCount: number;
+      totalCount: number;
     };
+  };
 }
 /**
  * Usage data on this Kibana node's runtime environment.
  * @public
  */
 export interface CoreEnvironmentUsageData {
-    memory: {
-        arrayBuffersBytes: number;
-        residentSetSizeBytes: number;
-        externalBytes: number;
-        heapTotalBytes: number;
-        heapUsedBytes: number;
-        /** V8 heap size limit */
-        heapSizeLimit: number;
-    };
+  memory: {
+    arrayBuffersBytes: number;
+    residentSetSizeBytes: number;
+    externalBytes: number;
+    heapTotalBytes: number;
+    heapUsedBytes: number;
+    /** V8 heap size limit */
+    heapSizeLimit: number;
+  };
 }
 /**
  * Usage data on this cluster's configuration of Core features
  * @public
  */
 export interface CoreConfigUsageData {
-    elasticsearch: {
-        sniffOnStart: boolean;
-        sniffIntervalMs?: number;
-        sniffOnConnectionFault: boolean;
-        numberOfHostsConfigured: number;
-        requestHeadersWhitelistConfigured: boolean;
-        customHeadersConfigured: boolean;
-        shardTimeoutMs: number;
-        requestTimeoutMs: number;
-        logQueries: boolean;
-        ssl: {
-            verificationMode: 'none' | 'certificate' | 'full';
-            certificateAuthoritiesConfigured: boolean;
-            certificateConfigured: boolean;
-            keyConfigured: boolean;
-            keystoreConfigured: boolean;
-            truststoreConfigured: boolean;
-            alwaysPresentCertificate: boolean;
-        };
-        apiVersion: string;
-        healthCheckDelayMs: number;
-        principal: 'elastic_user' | 'kibana_user' | 'kibana_system_user' | 'other_user' | 'kibana_service_account' | 'unknown';
+  elasticsearch: {
+    sniffOnStart: boolean;
+    sniffIntervalMs?: number;
+    sniffOnConnectionFault: boolean;
+    numberOfHostsConfigured: number;
+    requestHeadersWhitelistConfigured: boolean;
+    customHeadersConfigured: boolean;
+    shardTimeoutMs: number;
+    requestTimeoutMs: number;
+    logQueries: boolean;
+    ssl: {
+      verificationMode: 'none' | 'certificate' | 'full';
+      certificateAuthoritiesConfigured: boolean;
+      certificateConfigured: boolean;
+      keyConfigured: boolean;
+      keystoreConfigured: boolean;
+      truststoreConfigured: boolean;
+      alwaysPresentCertificate: boolean;
     };
-    http: {
-        basePathConfigured: boolean;
-        maxPayloadInBytes: number;
-        rewriteBasePath: boolean;
-        keepaliveTimeout: number;
-        socketTimeout: number;
-        protocol: 'http1' | 'http2';
-        compression: {
-            enabled: boolean;
-            referrerWhitelistConfigured: boolean;
-        };
-        xsrf: {
-            disableProtection: boolean;
-            allowlistConfigured: boolean;
-        };
-        requestId: {
-            allowFromAnyIp: boolean;
-            ipAllowlistConfigured: boolean;
-        };
-        ssl: {
-            certificateAuthoritiesConfigured: boolean;
-            certificateConfigured: boolean;
-            cipherSuites: string[];
-            keyConfigured: boolean;
-            keystoreConfigured: boolean;
-            truststoreConfigured: boolean;
-            redirectHttpFromPortConfigured: boolean;
-            supportedProtocols: string[];
-            clientAuthentication: 'none' | 'optional' | 'required';
-        };
-        securityResponseHeaders: {
-            strictTransportSecurity: string;
-            xContentTypeOptions: string;
-            referrerPolicy: string;
-            permissionsPolicyConfigured: boolean;
-            disableEmbedding: boolean;
-            crossOriginOpenerPolicy: string;
-        };
+    apiVersion: string;
+    healthCheckDelayMs: number;
+    principal:
+      | 'elastic_user'
+      | 'kibana_user'
+      | 'kibana_system_user'
+      | 'other_user'
+      | 'kibana_service_account'
+      | 'unknown';
+  };
+  http: {
+    basePathConfigured: boolean;
+    maxPayloadInBytes: number;
+    rewriteBasePath: boolean;
+    keepaliveTimeout: number;
+    socketTimeout: number;
+    protocol: 'http1' | 'http2';
+    compression: {
+      enabled: boolean;
+      referrerWhitelistConfigured: boolean;
     };
-    logging: {
-        appendersTypesUsed: string[];
-        loggersConfiguredCount: number;
+    xsrf: {
+      disableProtection: boolean;
+      allowlistConfigured: boolean;
     };
-    savedObjects: {
-        customIndex: boolean;
-        maxImportPayloadBytes: number;
-        maxImportExportSize: number;
+    requestId: {
+      allowFromAnyIp: boolean;
+      ipAllowlistConfigured: boolean;
     };
-    deprecatedKeys: {
-        set: string[];
-        unset: string[];
+    ssl: {
+      certificateAuthoritiesConfigured: boolean;
+      certificateConfigured: boolean;
+      cipherSuites: string[];
+      keyConfigured: boolean;
+      keystoreConfigured: boolean;
+      truststoreConfigured: boolean;
+      redirectHttpFromPortConfigured: boolean;
+      supportedProtocols: string[];
+      clientAuthentication: 'none' | 'optional' | 'required';
     };
+    securityResponseHeaders: {
+      strictTransportSecurity: string;
+      xContentTypeOptions: string;
+      referrerPolicy: string;
+      permissionsPolicyConfigured: boolean;
+      disableEmbedding: boolean;
+      crossOriginOpenerPolicy: string;
+    };
+  };
+  logging: {
+    appendersTypesUsed: string[];
+    loggersConfiguredCount: number;
+  };
+  savedObjects: {
+    customIndex: boolean;
+    maxImportPayloadBytes: number;
+    maxImportExportSize: number;
+  };
+  deprecatedKeys: {
+    set: string[];
+    unset: string[];
+  };
 }

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { type EsqlFieldType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -26,11 +35,11 @@ declare const arrayTypes: readonly string[];
 export type ArrayType = (typeof arrayTypes)[number];
 export declare function isArrayType(type: string): type is ArrayType;
 export declare enum FunctionDefinitionTypes {
-    AGG = "agg",
-    SCALAR = "scalar",
-    OPERATOR = "operator",
-    GROUPING = "grouping",
-    TIME_SERIES_AGG = "time_series_agg"
+  AGG = 'agg',
+  SCALAR = 'scalar',
+  OPERATOR = 'operator',
+  GROUPING = 'grouping',
+  TIME_SERIES_AGG = 'time_series_agg',
 }
 export declare const grokSupportedDataTypes: readonly ['int', 'long', 'double', 'float', 'boolean'];
 export type GrokDataType = (typeof grokSupportedDataTypes)[number];
@@ -41,64 +50,69 @@ export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFun
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 export declare const isFieldType: (str: string | undefined) => str is EsqlFieldType;
 export declare const isParameterType: (str: string | undefined) => str is FunctionParameterType;
-export declare const isReturnType: (str: string | FunctionParameterType) => str is FunctionReturnType;
+export declare const isReturnType: (
+  str: string | FunctionParameterType
+) => str is FunctionReturnType;
 export declare const parameterHintEntityTypes: readonly ['inference_endpoint'];
 export type ParameterHintEntityType = (typeof parameterHintEntityTypes)[number];
 export declare const parameterHintKinds: readonly ['entity', 'aggregation', 'constant'];
 export type ParameterHintKind = (typeof parameterHintKinds)[number];
 export interface ParameterHint {
-    entityType?: ParameterHintEntityType;
-    constraints?: Record<string, string>;
-    kind?: ParameterHintKind;
-    allowedValues?: string[];
+  entityType?: ParameterHintEntityType;
+  constraints?: Record<string, string>;
+  kind?: ParameterHintKind;
+  allowedValues?: string[];
 }
 export interface FunctionParameter {
-    name: string;
-    type: FunctionParameterType;
-    description?: string;
-    optional?: boolean;
-    supportsWildcard?: boolean;
-    /**
-     * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-     */
-    fieldsOnly?: boolean;
-    mapParams?: string;
-    /** If true, this parameter supports multiple values (arrays). Default is false.
-     * This indicates that the parameter can accept multiple values, which will be passed as an array.
-     */
-    supportsMultiValues?: boolean;
-    /**
-     * Describes how this parameter's value should be sourced. It can constrain the
-     * parameter to constants (`kind: 'constant'`, optionally with `allowedValues`),
-     * mark it as expecting an aggregation, or point to an external source such as an
-     * inference endpoint.
-     */
-    hint?: ParameterHint;
+  name: string;
+  type: FunctionParameterType;
+  description?: string;
+  optional?: boolean;
+  supportsWildcard?: boolean;
+  /**
+   * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+   */
+  fieldsOnly?: boolean;
+  mapParams?: string;
+  /** If true, this parameter supports multiple values (arrays). Default is false.
+   * This indicates that the parameter can accept multiple values, which will be passed as an array.
+   */
+  supportsMultiValues?: boolean;
+  /**
+   * Describes how this parameter's value should be sourced. It can constrain the
+   * parameter to constants (`kind: 'constant'`, optionally with `allowedValues`),
+   * mark it as expecting an aggregation, or point to an external source such as an
+   * inference endpoint.
+   */
+  hint?: ParameterHint;
 }
 export interface ElasticsearchCommandDefinition {
-    type: string;
-    name: string;
-    license?: LicenseType;
-    observability_tier?: string;
-    output?: ElasticsearchCommandOutputDefinition;
+  type: string;
+  name: string;
+  license?: LicenseType;
+  observability_tier?: string;
+  output?: ElasticsearchCommandOutputDefinition;
 }
 export interface ElasticsearchCommandOutputDefinition {
-    vary_by: string;
-    selected_by?: string;
-    variants: Record<string, ElasticsearchCommandOutputVariant>;
+  vary_by: string;
+  selected_by?: string;
+  variants: Record<string, ElasticsearchCommandOutputVariant>;
 }
-export type ElasticsearchCommandOutputVariant = Record<string, {
+export type ElasticsearchCommandOutputVariant = Record<
+  string,
+  {
     type: SupportedDataType;
     default?: boolean;
-}>;
+  }
+>;
 export interface ElasticsearchSettingsDefinition {
-    name: string;
-    type: string;
-    serverlessOnly: boolean;
-    preview: boolean;
-    snapshotOnly: boolean;
-    description: string;
-    ignoreAsSuggestion?: boolean;
+  name: string;
+  type: string;
+  serverlessOnly: boolean;
+  preview: boolean;
+  snapshotOnly: boolean;
+  description: string;
+  ignoreAsSuggestion?: boolean;
 }
 /**
  * This is the return type of a function definition.
@@ -107,485 +121,496 @@ export interface ElasticsearchSettingsDefinition {
  */
 export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'unknown' | 'any';
 export interface Signature {
-    params: FunctionParameter[];
-    minParams?: number;
-    returnType: FunctionReturnType;
-    license?: LicenseType;
-    isSignatureRepeating?: boolean;
+  params: FunctionParameter[];
+  minParams?: number;
+  returnType: FunctionReturnType;
+  license?: LicenseType;
+  isSignatureRepeating?: boolean;
 }
 export interface FunctionDefinition {
-    type: FunctionDefinitionTypes;
-    preview?: boolean;
-    ignoreAsSuggestion?: boolean;
-    tsdbCompatible?: boolean;
-    name: string;
-    alias?: string[];
-    description: string;
-    locationsAvailable: Location[];
-    signatures: Signature[];
-    examples?: string[];
-    operator?: string;
-    customParametersSnippet?: string;
-    license?: LicenseType;
-    observabilityTier?: Uppercase<Extract<PricingProduct, {
+  type: FunctionDefinitionTypes;
+  preview?: boolean;
+  ignoreAsSuggestion?: boolean;
+  tsdbCompatible?: boolean;
+  name: string;
+  alias?: string[];
+  description: string;
+  locationsAvailable: Location[];
+  signatures: Signature[];
+  examples?: string[];
+  operator?: string;
+  customParametersSnippet?: string;
+  license?: LicenseType;
+  observabilityTier?: Uppercase<
+    Extract<
+      PricingProduct,
+      {
         type: 'observability';
-    }>['tier']>;
+      }
+    >['tier']
+  >;
 }
 export interface FunctionFilterPredicates {
-    location: Location;
-    returnTypes?: string[];
-    ignored?: string[];
-    allowed?: string[];
-    isTimeseriesSource?: boolean;
+  location: Location;
+  returnTypes?: string[];
+  ignored?: string[];
+  allowed?: string[];
+  isTimeseriesSource?: boolean;
 }
 export declare enum PromQLFunctionDefinitionTypes {
-    WITHIN_SERIES = "within_series",
-    ACROSS_SERIES = "across_series",
-    ACROSS_SERIES_REDUCTION = "across_series_reduction",
-    VALUE_TRANSFORMATION = "value_transformation",
-    VECTOR_CONVERSION = "vector_conversion",
-    SCALAR = "scalar",
-    OPERATOR = "operator",
-    LABEL_MATCHING_OPERATOR = "label_matching_operator",
-    SCALAR_CONVERSION = "scalar_conversion",
-    TIME = "time",
-    HISTOGRAM = "histogram",
-    METADATA = "metadata"
+  WITHIN_SERIES = 'within_series',
+  ACROSS_SERIES = 'across_series',
+  ACROSS_SERIES_REDUCTION = 'across_series_reduction',
+  VALUE_TRANSFORMATION = 'value_transformation',
+  VECTOR_CONVERSION = 'vector_conversion',
+  SCALAR = 'scalar',
+  OPERATOR = 'operator',
+  LABEL_MATCHING_OPERATOR = 'label_matching_operator',
+  SCALAR_CONVERSION = 'scalar_conversion',
+  TIME = 'time',
+  HISTOGRAM = 'histogram',
+  METADATA = 'metadata',
 }
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
 export interface PromQLFunctionParameter {
-    name: string;
-    type: PromQLFunctionParamType;
-    optional: boolean;
-    description?: string;
+  name: string;
+  type: PromQLFunctionParamType;
+  optional: boolean;
+  description?: string;
 }
 export interface PromQLSignature {
-    params: PromQLFunctionParameter[];
-    returnType: PromQLFunctionParamType;
-    minParams?: number;
+  params: PromQLFunctionParameter[];
+  returnType: PromQLFunctionParamType;
+  minParams?: number;
 }
 export interface PromQLFunctionDefinition {
-    type: PromQLFunctionDefinitionTypes;
-    name: string;
-    operator?: string;
-    description: string;
-    preview?: boolean;
-    ignoreAsSuggestion?: boolean;
-    signatures: PromQLSignature[];
-    locationsAvailable: Location[];
-    examples?: string[];
+  type: PromQLFunctionDefinitionTypes;
+  name: string;
+  operator?: string;
+  description: string;
+  preview?: boolean;
+  ignoreAsSuggestion?: boolean;
+  signatures: PromQLSignature[];
+  locationsAvailable: Location[];
+  examples?: string[];
 }
 export interface PromQLESFunctionDefinition {
-    type: string;
-    name: string;
-    operator?: string;
-    description: string;
-    signatures: Array<{
-        params: PromQLFunctionParameter[];
-        variadic: boolean;
-        returnType: PromQLFunctionParamType;
-    }>;
-    examples: string[];
-    preview: boolean;
-    snapshot_only: boolean;
+  type: string;
+  name: string;
+  operator?: string;
+  description: string;
+  signatures: Array<{
+    params: PromQLFunctionParameter[];
+    variadic: boolean;
+    returnType: PromQLFunctionParamType;
+  }>;
+  examples: string[];
+  preview: boolean;
+  snapshot_only: boolean;
 }
 export interface Literals {
-    name: string;
-    description: string;
+  name: string;
+  description: string;
 }
 export interface ValidationErrors {
-    wrongNumberArgsExact: {
-        message: string;
-        type: {
-            fn: string;
-            expected: number;
-            actual: number;
-        };
+  wrongNumberArgsExact: {
+    message: string;
+    type: {
+      fn: string;
+      expected: number;
+      actual: number;
     };
-    wrongNumberArgsVariadic: {
-        message: string;
-        type: {
-            fn: string;
-            validArgCounts: number[];
-            actual: number;
-        };
+  };
+  wrongNumberArgsVariadic: {
+    message: string;
+    type: {
+      fn: string;
+      validArgCounts: number[];
+      actual: number;
     };
-    wrongNumberArgsAtLeast: {
-        message: string;
-        type: {
-            fn: string;
-            minArgs: number;
-            actual: number;
-        };
+  };
+  wrongNumberArgsAtLeast: {
+    message: string;
+    type: {
+      fn: string;
+      minArgs: number;
+      actual: number;
     };
-    noMatchingCallSignature: {
-        message: string;
-        type: {
-            functionName: string;
-            argTypes: string;
-            validSignatures: string[];
-        };
+  };
+  noMatchingCallSignature: {
+    message: string;
+    type: {
+      functionName: string;
+      argTypes: string;
+      validSignatures: string[];
     };
-    unknownColumn: {
-        message: string;
-        type: {
-            name: string | number;
-        };
+  };
+  unknownColumn: {
+    message: string;
+    type: {
+      name: string | number;
     };
-    unmappedColumnWarning: {
-        message: string;
-        type: {
-            name: string | number;
-        };
+  };
+  unmappedColumnWarning: {
+    message: string;
+    type: {
+      name: string | number;
     };
-    unknownFunction: {
-        message: string;
-        type: {
-            name: string;
-        };
+  };
+  unknownFunction: {
+    message: string;
+    type: {
+      name: string;
     };
-    unknownIndex: {
-        message: string;
-        type: {
-            name: string;
-        };
+  };
+  unknownIndex: {
+    message: string;
+    type: {
+      name: string;
     };
-    unknownDataSource: {
-        message: string;
-        type: {
-            name: string;
-        };
+  };
+  unknownDataSource: {
+    message: string;
+    type: {
+      name: string;
     };
-    unknownSetting: {
-        message: string;
-        type: {
-            name: string;
-        };
+  };
+  unknownSetting: {
+    message: string;
+    type: {
+      name: string;
     };
-    unknownCastingType: {
-        message: string;
-        type: {
-            castType: string;
-        };
+  };
+  unknownCastingType: {
+    message: string;
+    type: {
+      castType: string;
     };
-    invalidInlineCast: {
-        message: string;
-        type: {
-            castType: string;
-            valueType: string;
-        };
+  };
+  invalidInlineCast: {
+    message: string;
+    type: {
+      castType: string;
+      valueType: string;
     };
-    functionNotAllowedHere: {
-        message: string;
-        type: {
-            name: string;
-            locationName: string;
-        };
+  };
+  functionNotAllowedHere: {
+    message: string;
+    type: {
+      name: string;
+      locationName: string;
     };
-    unsupportedColumnTypeForCommand: {
-        message: string;
-        type: {
-            command: string;
-            type: string;
-            givenType: string;
-            column: string;
-        };
+  };
+  unsupportedColumnTypeForCommand: {
+    message: string;
+    type: {
+      command: string;
+      type: string;
+      givenType: string;
+      column: string;
     };
-    unknownDissectKeyword: {
-        message: string;
-        type: {
-            keyword: string;
-        };
+  };
+  unknownDissectKeyword: {
+    message: string;
+    type: {
+      keyword: string;
     };
-    wrongOptionArgumentType: {
-        message: string;
-        type: {
-            command: string;
-            option: string;
-            type: string;
-            givenValue: string;
-        };
+  };
+  wrongOptionArgumentType: {
+    message: string;
+    type: {
+      command: string;
+      option: string;
+      type: string;
+      givenValue: string;
     };
-    unknownInterval: {
-        message: string;
-        type: {
-            value: string;
-        };
+  };
+  unknownInterval: {
+    message: string;
+    type: {
+      value: string;
     };
-    unknownPolicy: {
-        message: string;
-        type: {
-            name: string;
-        };
+  };
+  unknownPolicy: {
+    message: string;
+    type: {
+      name: string;
     };
-    nestedAggFunction: {
-        message: string;
-        type: {
-            parentName: string;
-            name: string;
-        };
+  };
+  nestedAggFunction: {
+    message: string;
+    type: {
+      parentName: string;
+      name: string;
     };
-    expectedAggregationArgument: {
-        message: string;
-        type: {
-            parentName: string;
-        };
+  };
+  expectedAggregationArgument: {
+    message: string;
+    type: {
+      parentName: string;
     };
-    unknownAggregateFunction: {
-        message: string;
-        type: {
-            type: string;
-            value: string;
-        };
+  };
+  unknownAggregateFunction: {
+    message: string;
+    type: {
+      type: string;
+      value: string;
     };
-    unsupportedFieldType: {
-        message: string;
-        type: {
-            field: string;
-        };
+  };
+  unsupportedFieldType: {
+    message: string;
+    type: {
+      field: string;
     };
-    columnTypeConflict: {
-        message: string;
-        type: {
-            columnName: string;
-            types?: string;
-        };
+  };
+  columnTypeConflict: {
+    message: string;
+    type: {
+      columnName: string;
+      types?: string;
     };
-    inSubqueryTypeMismatch: {
-        message: string;
-        type: {
-            leftField: string;
-            leftType: string;
-            rightField: string;
-            rightType: string;
-        };
+  };
+  inSubqueryTypeMismatch: {
+    message: string;
+    type: {
+      leftField: string;
+      leftType: string;
+      rightField: string;
+      rightType: string;
     };
-    inSubqueryColumnCountMismatch: {
-        message: string;
-        type: {
-            expected: number;
-            actual: number;
-        };
+  };
+  inSubqueryColumnCountMismatch: {
+    message: string;
+    type: {
+      expected: number;
+      actual: number;
     };
-    unsupportedMode: {
-        message: string;
-        type: {
-            command: string;
-            value: string;
-            expected: string;
-        };
+  };
+  unsupportedMode: {
+    message: string;
+    type: {
+      command: string;
+      value: string;
+      expected: string;
     };
-    metadataBracketsDeprecation: {
-        message: string;
-        type: {};
+  };
+  metadataBracketsDeprecation: {
+    message: string;
+    type: {};
+  };
+  unknownMetadataField: {
+    message: string;
+    type: {
+      value: string;
+      availableFields: string;
     };
-    unknownMetadataField: {
-        message: string;
-        type: {
-            value: string;
-            availableFields: string;
-        };
+  };
+  promqlInvalidParam: {
+    message: string;
+    type: {
+      reason: string;
     };
-    promqlInvalidParam: {
-        message: string;
-        type: {
-            reason: string;
-        };
+  };
+  promqlMutuallyExclusiveParams: {
+    message: string;
+    type: {
+      param1: string;
+      param2: string;
     };
-    promqlMutuallyExclusiveParams: {
-        message: string;
-        type: {
-            param1: string;
-            param2: string;
-        };
+  };
+  promqlMissingQuery: {
+    message: string;
+    type: {};
+  };
+  promqlUnknownFunction: {
+    message: string;
+    type: {
+      fn: string;
     };
-    promqlMissingQuery: {
-        message: string;
-        type: {};
+  };
+  promqlWrongNumberArgs: {
+    message: string;
+    type: {
+      fn: string;
+      expected: string;
+      actual: number;
     };
-    promqlUnknownFunction: {
-        message: string;
-        type: {
-            fn: string;
-        };
+  };
+  promqlGroupingNotAllowed: {
+    message: string;
+    type: {
+      fn: string;
     };
-    promqlWrongNumberArgs: {
-        message: string;
-        type: {
-            fn: string;
-            expected: string;
-            actual: number;
-        };
+  };
+  promqlNoMatchingSignature: {
+    message: string;
+    type: {
+      fn: string;
+      required: string;
     };
-    promqlGroupingNotAllowed: {
-        message: string;
-        type: {
-            fn: string;
-        };
+  };
+  wrongDissectOptionArgumentType: {
+    message: string;
+    type: {
+      value: string | number;
     };
-    promqlNoMatchingSignature: {
-        message: string;
-        type: {
-            fn: string;
-            required: string;
-        };
+  };
+  invalidJoinIndex: {
+    message: string;
+    type: {
+      identifier: string;
     };
-    wrongDissectOptionArgumentType: {
-        message: string;
-        type: {
-            value: string | number;
-        };
+  };
+  tooManyForks: {
+    message: string;
+    type: {};
+  };
+  licenseRequired: {
+    message: string;
+    type: {
+      name: string;
+      requiredLicense: string;
     };
-    invalidJoinIndex: {
-        message: string;
-        type: {
-            identifier: string;
-        };
+  };
+  licenseRequiredForSignature: {
+    message: string;
+    type: {
+      name: string;
+      signatureDescription: string;
+      requiredLicense: string;
     };
-    tooManyForks: {
-        message: string;
-        type: {};
+  };
+  changePointWrongFieldType: {
+    message: string;
+    type: {
+      columnName: string;
+      givenType: string;
     };
-    licenseRequired: {
-        message: string;
-        type: {
-            name: string;
-            requiredLicense: string;
-        };
+  };
+  dropTimestampWarning: {
+    message: string;
+    type: {};
+  };
+  inferenceIdRequired: {
+    message: string;
+    type: {};
+  };
+  unsupportedQueryType: {
+    message: string;
+    type: {};
+  };
+  forkTooManyBranches: {
+    message: string;
+    type: {};
+  };
+  joinOnSingleExpression: {
+    message: string;
+    type: {};
+  };
+  invalidSettingValue: {
+    message: string;
+    type: {
+      value: string;
+      setting: string;
     };
-    licenseRequiredForSignature: {
-        message: string;
-        type: {
-            name: string;
-            signatureDescription: string;
-            requiredLicense: string;
-        };
+  };
+  unknownMapParameterName: {
+    message: string;
+    type: {
+      paramName: string;
     };
-    changePointWrongFieldType: {
-        message: string;
-        type: {
-            columnName: string;
-            givenType: string;
-        };
+  };
+  invalidMapParameterValueType: {
+    message: string;
+    type: {
+      paramName: string;
+      expectedType: string;
+      actualType: string;
     };
-    dropTimestampWarning: {
-        message: string;
-        type: {};
+  };
+  mmrQueryVectorWrongType: {
+    message: string;
+    type: {
+      type: string;
     };
-    inferenceIdRequired: {
-        message: string;
-        type: {};
+  };
+  mmrOnFieldWrongType: {
+    message: string;
+    type: {
+      type: string;
     };
-    unsupportedQueryType: {
-        message: string;
-        type: {};
+  };
+  invalidMapParameterValue: {
+    message: string;
+    type: {
+      paramName: string;
+      value: string;
+      allowedValues: string;
     };
-    forkTooManyBranches: {
-        message: string;
-        type: {};
+  };
+  highlightMissingOnClause: {
+    message: string;
+    type: {};
+  };
+  highlightInvalidPrefixModifier: {
+    message: string;
+    type: {
+      keyword: string;
     };
-    joinOnSingleExpression: {
-        message: string;
-        type: {};
+  };
+  highlightInvalidQueryExpression: {
+    message: string;
+    type: {
+      expression: string;
     };
-    invalidSettingValue: {
-        message: string;
-        type: {
-            value: string;
-            setting: string;
-        };
+  };
+  denseVectorInvalidSuffixModifier: {
+    message: string;
+    type: {
+      keyword: string;
     };
-    unknownMapParameterName: {
-        message: string;
-        type: {
-            paramName: string;
-        };
+  };
+  denseVectorMultipleFieldsWithTarget: {
+    message: string;
+    type: {
+      target: string;
     };
-    invalidMapParameterValueType: {
-        message: string;
-        type: {
-            paramName: string;
-            expectedType: string;
-            actualType: string;
-        };
+  };
+  tsdbIncompatibleFunction: {
+    message: string;
+    type: {
+      fnName: string;
     };
-    mmrQueryVectorWrongType: {
-        message: string;
-        type: {
-            type: string;
-        };
-    };
-    mmrOnFieldWrongType: {
-        message: string;
-        type: {
-            type: string;
-        };
-    };
-    invalidMapParameterValue: {
-        message: string;
-        type: {
-            paramName: string;
-            value: string;
-            allowedValues: string;
-        };
-    };
-    highlightMissingOnClause: {
-        message: string;
-        type: {};
-    };
-    highlightInvalidPrefixModifier: {
-        message: string;
-        type: {
-            keyword: string;
-        };
-    };
-    highlightInvalidQueryExpression: {
-        message: string;
-        type: {
-            expression: string;
-        };
-    };
-    denseVectorInvalidSuffixModifier: {
-        message: string;
-        type: {
-            keyword: string;
-        };
-    };
-    denseVectorMultipleFieldsWithTarget: {
-        message: string;
-        type: {
-            target: string;
-        };
-    };
-    tsdbIncompatibleFunction: {
-        message: string;
-        type: {
-            fnName: string;
-        };
-    };
+  };
 }
 export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 export type ESQLDiagnosticData = ColumnTypeConflictDiagnosticData;
 interface ColumnTypeConflictDiagnosticData {
-    columnName: string;
-    types: string[];
+  columnName: string;
+  types: string[];
 }
 export interface ESQLMessage {
-    type: 'error' | 'warning';
-    text: string;
-    location: ESQLLocation;
-    code: string;
-    data?: ESQLDiagnosticData;
-    errorType?: 'semantic';
-    requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
-    underlinedWarning?: boolean;
+  type: 'error' | 'warning';
+  text: string;
+  location: ESQLLocation;
+  code: string;
+  data?: ESQLDiagnosticData;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
+  underlinedWarning?: boolean;
 }
 /**
  * Handles numeric types in ES|QL.
  */
 export declare const ESQL_COMMON_NUMERIC_TYPES: readonly ['double', 'long', 'integer'];
-export declare const ESQL_NUMERIC_DECIMAL_TYPES: readonly ['double', 'unsigned_long', 'long', 'counter_long', 'counter_double'];
+export declare const ESQL_NUMERIC_DECIMAL_TYPES: readonly [
+  'double',
+  'unsigned_long',
+  'long',
+  'counter_long',
+  'counter_double'
+];
 export declare const ESQL_NUMBER_TYPES: readonly SupportedDataType[];
 export declare const ESQL_ARITHMETIC_TYPES: readonly string[];
 export declare function isNumericType(type: unknown): type is ESQLNumericLiteralType;

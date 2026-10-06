@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/logging'
   - '@kbn/repo-info'
+  - '@kbn/core'
 tags:
   - shared-server
   - package

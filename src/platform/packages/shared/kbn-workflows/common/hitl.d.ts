@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export declare const DEFAULT_WAIT_FOR_INPUT_TIMEOUT: '72h';
 /** Max length for external resume tokens in HITL URLs. */
 export declare const MAX_HITL_EXTERNAL_RESUME_TOKEN_LENGTH: 128;
@@ -38,11 +47,13 @@ export declare const HITL_EXTERNAL_CHANNELS_DESCRIPTION: 'Optional external noti
 /** Returns false only when config explicitly sets `enabled: false`. */
 export declare const isHitlExternalResumeEnabled: (enabled: boolean | undefined) => boolean;
 export type HitlWaitStepType = 'waitForInput' | 'waitForApproval';
-export declare const isHitlWaitStepType: (stepType: string | undefined) => stepType is HitlWaitStepType;
+export declare const isHitlWaitStepType: (
+  stepType: string | undefined
+) => stepType is HitlWaitStepType;
 /** Maps `with.channels` keys to Kibana connector action types for connector-id autocomplete/validation. */
 export declare const HITL_CHANNEL_CONNECTOR_TYPES: {
-    readonly slack: 'slack';
-    readonly slack_api: 'slack_api';
+  readonly slack: 'slack';
+  readonly slack_api: 'slack_api';
 };
 export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;
 /**
@@ -50,4 +61,6 @@ export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;
  * path. Shared by YAML validation and editor autocomplete so waitForInput and
  * waitForApproval stay in lockstep.
  */
-export declare function getHitlChannelConnectorTypeFromPath(path: readonly unknown[] | undefined): string | null;
+export declare function getHitlChannelConnectorTypeFromPath(
+  path: readonly unknown[] | undefined
+): string | null;

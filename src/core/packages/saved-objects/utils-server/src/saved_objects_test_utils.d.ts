@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Determines if a given Set is equal to another given Set. Set types must be the same, and comparable.
  *
@@ -14,7 +23,10 @@ export declare function setsAreEqual<T>(setA: Set<T>, setB: Set<T>): boolean;
  * @param mapB The second map to compare
  * @returns {boolean} True if map A is equal to map B
  */
-export declare function arrayMapsAreEqual<T>(mapA: Map<T, T[] | undefined>, mapB: Map<T, T[] | undefined>): boolean;
+export declare function arrayMapsAreEqual<T>(
+  mapA: Map<T, T[] | undefined>,
+  mapB: Map<T, T[] | undefined>
+): boolean;
 /**
  * Determines if a given Map of Sets is equal to another given Map of Sets.
  * Used for comparing typeMaps and enforceMaps in saved object repo/security extension tests.
@@ -23,4 +35,7 @@ export declare function arrayMapsAreEqual<T>(mapA: Map<T, T[] | undefined>, mapB
  * @param mapB The second map to compare
  * @returns {boolean} True if map A is equal to map B
  */
-export declare function setMapsAreEqual<T>(mapA: Map<T, Set<T>> | undefined, mapB: Map<T, Set<T>> | undefined): boolean;
+export declare function setMapsAreEqual<T>(
+  mapA: Map<T, Set<T>> | undefined,
+  mapB: Map<T, Set<T>> | undefined
+): boolean;

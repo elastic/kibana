@@ -1,8 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 export declare enum IntervalCadence {
-    Minute = "m",
-    Second = "s",
-    Hour = "h",
-    Day = "d"
+  Minute = 'm',
+  Second = 's',
+  Hour = 'h',
+  Day = 'd',
 }
 export type Interval = string;
 export declare function isInterval(interval: Interval | string): interval is Interval;
@@ -22,7 +29,10 @@ export declare function intervalFromNow(interval?: Interval): Date | undefined;
  * @param {Interval} interval - An interval of the form `Nm` such as `5m`
  */
 export declare function intervalFromDate(date: Date, interval?: Interval): Date | undefined;
-export declare function maxIntervalFromDate(date: Date, ...intervals: Array<Interval | undefined>): Date | undefined;
+export declare function maxIntervalFromDate(
+  date: Date,
+  ...intervals: Array<Interval | undefined>
+): Date | undefined;
 /**
  * Returns a date that is secs seconds from now.
  *
@@ -42,6 +52,8 @@ export declare function secondsFromDate(date: Date, secs: number): Date;
  * @param {Interval} interval - An interval such as `5m` or `10s`
  * @returns {number} The interval as seconds
  */
-export declare const parseIntervalAsSecond: ((interval: Interval) => number) & import("lodash").MemoizedFunction;
-export declare const parseIntervalAsMillisecond: ((interval: Interval) => number) & import("lodash").MemoizedFunction;
+export declare const parseIntervalAsSecond: ((interval: Interval) => number) &
+  import('lodash').MemoizedFunction;
+export declare const parseIntervalAsMillisecond: ((interval: Interval) => number) &
+  import('lodash').MemoizedFunction;
 export declare const timePeriodBeforeDate: (date: Date, timePeriod: string) => Date;

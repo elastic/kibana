@@ -1,25 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * List of internally used namespaces
  * Note: those are not necessarily all protected.
  */
 export declare const internalNamespaces: {
-    readonly platformCore: 'platform.core';
-    readonly platformAlerting: 'platform.alerting';
-    readonly platformDashboard: 'platform.dashboard';
-    readonly platformStreams: 'platform.streams';
-    readonly platformSignificantEvents: 'platform.sig_events';
-    readonly platformNightshift: 'platform.nightshift';
-    readonly platformContextEngine: 'platform.context_engine';
-    readonly agenticInvestigations: 'agentic_investigations';
-    readonly proposals: 'proposals';
-    readonly filestore: 'filestore';
-    readonly attachments: 'attachments';
-    readonly observability: 'observability';
-    readonly ml: 'ml';
-    readonly search: 'search';
-    readonly security: 'security';
-    readonly streams: 'platform.streams';
-    readonly workflows: 'platform.workflows';
+  readonly platformCore: 'platform.core';
+  readonly platformAlerting: 'platform.alerting';
+  readonly platformDashboard: 'platform.dashboard';
+  readonly platformStreams: 'platform.streams';
+  readonly platformSignificantEvents: 'platform.sig_events';
+  readonly platformNightshift: 'platform.nightshift';
+  readonly platformContextEngine: 'platform.context_engine';
+  readonly agenticInvestigations: 'agentic_investigations';
+  readonly proposals: 'proposals';
+  readonly filestore: 'filestore';
+  readonly attachments: 'attachments';
+  readonly observability: 'observability';
+  readonly ml: 'ml';
+  readonly search: 'search';
+  readonly security: 'security';
+  readonly streams: 'platform.streams';
+  readonly workflows: 'platform.workflows';
 };
 /**
  * List of protected namespaces which can only be used by internal tools.

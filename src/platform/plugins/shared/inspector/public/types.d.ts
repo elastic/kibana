@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { OverlayFlyoutOpenOptions, OverlayRef } from '@kbn/core/public';
 import type { Adapters } from '../common';
 /**
@@ -5,18 +14,18 @@ import type { Adapters } from '../common';
  * to {@link InspectorViewDescription#component}, must use.
  */
 export interface InspectorViewProps<TAdapters extends Adapters = Adapters> {
-    /**
-     * Adapters used to open the inspector.
-     */
-    adapters: TAdapters;
-    /**
-     * The title that the inspector is currently using e.g. a visualization name.
-     */
-    title: string;
-    /**
-     * A set of specific options for each view.
-     */
-    options?: unknown;
+  /**
+   * Adapters used to open the inspector.
+   */
+  adapters: TAdapters;
+  /**
+   * The title that the inspector is currently using e.g. a visualization name.
+   */
+  title: string;
+  /**
+   * A set of specific options for each view.
+   */
+  options?: unknown;
 }
 /**
  * An object describing an inspector view.
@@ -33,11 +42,11 @@ export interface InspectorViewProps<TAdapters extends Adapters = Adapters> {
  *    the view will always be visible.
  */
 export interface InspectorViewDescription {
-    component: React.ComponentType<InspectorViewProps>;
-    help?: string;
-    order?: number;
-    shouldShow?: (adapters: Adapters) => boolean;
-    title: string;
+  component: React.ComponentType<InspectorViewProps>;
+  help?: string;
+  order?: number;
+  shouldShow?: (adapters: Adapters) => boolean;
+  title: string;
 }
 /**
  * Options that can be specified when opening the inspector.
@@ -47,10 +56,10 @@ export interface InspectorViewDescription {
  * @property {object} flyoutProps - Optional props passed to `openLazyFlyout` (e.g. size, className, etc).
  */
 export interface InspectorOptions {
-    title?: string;
-    options?: unknown;
-    flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
-        focusedPanelId?: string;
-    };
+  title?: string;
+  options?: unknown;
+  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
+    focusedPanelId?: string;
+  };
 }
 export type InspectorSession = OverlayRef;

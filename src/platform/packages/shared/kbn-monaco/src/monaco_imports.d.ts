@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { type MenuItem } from 'monaco-editor/esm/vs/platform/actions/common/actions.js';
 import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
@@ -32,23 +41,42 @@ import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution';
 import 'monaco-editor/esm/vs/basic-languages/liquid/liquid.contribution.js';
-export { conf as cssConf, language as cssLanguage, } from 'monaco-editor/esm/vs/basic-languages/css/css';
-export { conf as markdownConf, language as markdownLanguage, } from 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-export { conf as yamlConf, language as yamlLanguage, } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+export {
+  conf as cssConf,
+  language as cssLanguage,
+} from 'monaco-editor/esm/vs/basic-languages/css/css';
+export {
+  conf as markdownConf,
+  language as markdownLanguage,
+} from 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
+export {
+  conf as yamlConf,
+  language as yamlLanguage,
+} from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
 import type { CustomLangModuleType } from './types';
 /** Returns Monaco's native clipboard actions for the editor context menu. */
 export declare const getClipboardMenuActions: () => MenuItem[];
 export interface ClipboardContextMenuLabels {
-    cut: string;
-    copy: string;
-    paste: string;
+  cut: string;
+  copy: string;
+  paste: string;
 }
 /** Applies translated labels to Monaco's native clipboard context menu actions. */
-export declare const setClipboardContextMenuLabels: ({ cut, copy, paste, }: ClipboardContextMenuLabels) => void;
+export declare const setClipboardContextMenuLabels: ({
+  cut,
+  copy,
+  paste,
+}: ClipboardContextMenuLabels) => void;
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
-    namespace editor {
-        function registerLanguageThemeResolver(langId: string, languageThemeResolver: CustomLangModuleType['languageThemeResolver'], forceOverride?: boolean): void;
-        function getLanguageThemeResolver(langId: string): CustomLangModuleType['languageThemeResolver'];
-    }
+  namespace editor {
+    function registerLanguageThemeResolver(
+      langId: string,
+      languageThemeResolver: CustomLangModuleType['languageThemeResolver'],
+      forceOverride?: boolean
+    ): void;
+    function getLanguageThemeResolver(
+      langId: string
+    ): CustomLangModuleType['languageThemeResolver'];
+  }
 }
 export { monaco };

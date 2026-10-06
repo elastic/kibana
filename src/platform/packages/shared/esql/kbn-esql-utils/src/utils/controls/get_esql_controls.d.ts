@@ -1,15 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { type PresentationContainer } from '@kbn/presentation-publishing';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { ESQL_CONTROL } from '@kbn/controls-constants';
 type EsqlControlState = OptionsListESQLControlState & {
-    type: typeof ESQL_CONTROL;
+  type: typeof ESQL_CONTROL;
 };
 interface EsqlControlsState {
-    [uuid: string]: EsqlControlState;
+  [uuid: string]: EsqlControlState;
 }
-export declare function getAllEsqlControls(presentationContainer: PresentationContainer): EsqlControlsState;
-export declare function getEsqlControls(presentationContainer: PresentationContainer, query: AggregateQuery | Query | undefined): {
-    [k: string]: EsqlControlState;
-} | undefined;
+export declare function getAllEsqlControls(
+  presentationContainer: PresentationContainer
+): EsqlControlsState;
+export declare function getEsqlControls(
+  presentationContainer: PresentationContainer,
+  query: AggregateQuery | Query | undefined
+):
+  | {
+      [k: string]: EsqlControlState;
+    }
+  | undefined;
 export {};

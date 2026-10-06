@@ -1,21 +1,33 @@
-import * as TaskEither from 'fp-ts/TaskEither';
-import type { ElasticsearchClient, ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type * as TaskEither from 'fp-ts/TaskEither';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { type RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { type IndexNotGreenTimeout } from './wait_for_index_status';
 /** @internal */
 export interface ClusterShardLimitExceeded {
-    type: 'cluster_shard_limit_exceeded';
+  type: 'cluster_shard_limit_exceeded';
 }
 /** @internal */
 export interface CreateIndexParams {
-    client: ElasticsearchClient;
-    indexName: string;
-    mappings: IndexMapping;
-    esCapabilities: ElasticsearchCapabilities;
-    aliases?: string[];
-    timeout?: string;
-    waitForIndexStatusTimeout?: string;
+  client: ElasticsearchClient;
+  indexName: string;
+  mappings: IndexMapping;
+  esCapabilities: ElasticsearchCapabilities;
+  aliases?: string[];
+  timeout?: string;
+  waitForIndexStatusTimeout?: string;
 }
 export type CreateIndexSuccessResponse = 'create_index_succeeded' | 'index_already_exists';
 /**
@@ -28,4 +40,15 @@ export type CreateIndexSuccessResponse = 'create_index_succeeded' | 'index_alrea
  *  - the first call will wait up to 120s for the cluster state and all shards
  *    to be updated.
  */
-export declare const createIndex: ({ client, indexName, mappings, esCapabilities, aliases, timeout, waitForIndexStatusTimeout, }: CreateIndexParams) => TaskEither.TaskEither<RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded, CreateIndexSuccessResponse>;
+export declare const createIndex: ({
+  client,
+  indexName,
+  mappings,
+  esCapabilities,
+  aliases,
+  timeout,
+  waitForIndexStatusTimeout,
+}: CreateIndexParams) => TaskEither.TaskEither<
+  RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
+  CreateIndexSuccessResponse
+>;

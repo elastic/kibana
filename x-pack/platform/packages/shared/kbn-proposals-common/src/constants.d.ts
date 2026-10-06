@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * The `.kibana-` prefix is deliberate and permanent: `.kibana*` is already
  * granted to the `kibana_system` role, so this index needs no Elasticsearch-side
@@ -10,11 +17,11 @@ export declare const PROPOSALS_API_VERSION: '1';
 /** Agent Builder tool that appends a revision to a proposal chain. */
 export declare const PROPOSALS_REVISE_TOOL_ID: 'platform.proposals.revise';
 export declare const PROPOSALS_INTERNAL_URL: '/internal/proposals';
-export declare const PROPOSAL_BY_ID_URL: "/internal/proposals/{id}";
-export declare const PROPOSAL_APPROVE_URL: "/internal/proposals/{id}/approve";
-export declare const PROPOSAL_DISMISS_URL: "/internal/proposals/{id}/dismiss";
-export declare const PROPOSAL_REVISIONS_URL: "/internal/proposals/{proposalId}/revisions";
-export declare const PROPOSAL_CHARTS_SUMMARY_URL: "/internal/proposals/charts-summary";
+export declare const PROPOSAL_BY_ID_URL: '/internal/proposals/{id}';
+export declare const PROPOSAL_APPROVE_URL: '/internal/proposals/{id}/approve';
+export declare const PROPOSAL_DISMISS_URL: '/internal/proposals/{id}/dismiss';
+export declare const PROPOSAL_REVISIONS_URL: '/internal/proposals/{proposalId}/revisions';
+export declare const PROPOSAL_CHARTS_SUMMARY_URL: '/internal/proposals/charts-summary';
 /** Agent Builder builtin tool through which an agent proposes an action in its conversation. */
 export declare const PROPOSALS_CREATE_TOOL_ID: 'proposals.create';
 /**

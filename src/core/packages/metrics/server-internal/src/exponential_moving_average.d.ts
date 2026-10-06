@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { type OperatorFunction } from 'rxjs';
 /**
  * An RxJS operator implementing the exponential moving average function.
@@ -11,4 +20,7 @@ import { type OperatorFunction } from 'rxjs';
  * then switches to exponential smoothing for subsequent values. The switch happens when the number of values emitted reaches `period / interval`.
  * This ensures the initial output isn't biased by insufficient data, and provides a smooth transition to exponential smoothing.
  */
-export declare function exponentialMovingAverage(period: number, interval: number): OperatorFunction<number, number>;
+export declare function exponentialMovingAverage(
+  period: number,
+  interval: number
+): OperatorFunction<number, number>;

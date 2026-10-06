@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { PackageInfo } from '@kbn/core/server';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -16,82 +25,82 @@ export type { ISearchStartSearchSource, SearchUsageCollector };
  * point.
  */
 export interface ISearchSetup {
-    aggs: AggsSetup;
-    usageCollector: SearchUsageCollector;
-    /**
-     * Current session management
-     * {@link ISessionService}
-     */
-    session: ISessionService;
-    /**
-     * Search sessions SO CRUD
-     * {@link ISessionsClient}
-     */
-    sessionsClient: ISessionsClient;
-    /**
-     * Search sessions (background search) config, i.e. `data.search.sessions.*`
-     */
-    sessionsConfig: SearchSessionsConfigSchema;
-    /**
-     * Search sessions telemetry
-     */
-    ebtManager: ISearchSessionEBTManager;
+  aggs: AggsSetup;
+  usageCollector: SearchUsageCollector;
+  /**
+   * Current session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
+  /**
+   * Search sessions SO CRUD
+   * {@link ISessionsClient}
+   */
+  sessionsClient: ISessionsClient;
+  /**
+   * Search sessions (background search) config, i.e. `data.search.sessions.*`
+   */
+  sessionsConfig: SearchSessionsConfigSchema;
+  /**
+   * Search sessions telemetry
+   */
+  ebtManager: ISearchSessionEBTManager;
 }
 /**
  * search service
  * @public
  */
 export interface ISearchStart extends ISearchMethods {
-    /**
-     * agg config sub service
-     * {@link AggsStart}
-     *
-     */
-    aggs: AggsStart;
-    /**
-     * low level search
-     * {@link ISearchGeneric}
-     */
-    search: ISearchGeneric;
-    /**
-     * Show toast for caught error
-     * @param e Error
-     */
-    showError: (e: Error) => void;
-    /**
-     * Show warnings, or customize how they're shown
-     * @param inspector IInspectorInfo - an inspector object with requests internally collected
-     * @param cb WarningHandlerCallback - optional callback to intercept warnings
-     */
-    showWarnings: (adapter: RequestAdapter, cb?: WarningHandlerCallback) => void;
-    /**
-     * Feature flag value to make it easier to use in different plugins
-     */
-    isBackgroundSearchEnabled: boolean;
-    /**
-     * high level search
-     * {@link ISearchStartSearchSource}
-     */
-    searchSource: ISearchStartSearchSource;
-    /**
-     * Current session management
-     * {@link ISessionService}
-     */
-    session: ISessionService;
-    /**
-     * Search sessions SO CRUD
-     * {@link ISessionsClient}
-     */
-    sessionsClient: ISessionsClient;
+  /**
+   * agg config sub service
+   * {@link AggsStart}
+   *
+   */
+  aggs: AggsStart;
+  /**
+   * low level search
+   * {@link ISearchGeneric}
+   */
+  search: ISearchGeneric;
+  /**
+   * Show toast for caught error
+   * @param e Error
+   */
+  showError: (e: Error) => void;
+  /**
+   * Show warnings, or customize how they're shown
+   * @param inspector IInspectorInfo - an inspector object with requests internally collected
+   * @param cb WarningHandlerCallback - optional callback to intercept warnings
+   */
+  showWarnings: (adapter: RequestAdapter, cb?: WarningHandlerCallback) => void;
+  /**
+   * Feature flag value to make it easier to use in different plugins
+   */
+  isBackgroundSearchEnabled: boolean;
+  /**
+   * high level search
+   * {@link ISearchStartSearchSource}
+   */
+  searchSource: ISearchStartSearchSource;
+  /**
+   * Current session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
+  /**
+   * Search sessions SO CRUD
+   * {@link ISessionsClient}
+   */
+  sessionsClient: ISessionsClient;
 }
 /** @internal */
 export interface SearchServiceSetupDependencies {
-    packageInfo: PackageInfo;
-    registerFunction: AggsSetupDependencies['registerFunction'];
-    usageCollection?: UsageCollectionSetup;
+  packageInfo: PackageInfo;
+  registerFunction: AggsSetupDependencies['registerFunction'];
+  usageCollection?: UsageCollectionSetup;
 }
 /** @internal */
 export interface SearchServiceStartDependencies {
-    fieldFormats: AggsStartDependencies['fieldFormats'];
-    indexPatterns: DataViewsContract;
+  fieldFormats: AggsStartDependencies['fieldFormats'];
+  indexPatterns: DataViewsContract;
 }

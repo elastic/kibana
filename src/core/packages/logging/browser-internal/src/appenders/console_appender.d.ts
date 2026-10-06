@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
 /**
  *
@@ -5,19 +14,19 @@ import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
  * @internal
  */
 export declare class ConsoleAppender implements DisposableAppender {
-    private readonly layout;
-    /**
-     * Creates ConsoleAppender instance.
-     * @param layout Instance of `Layout` sub-class responsible for `LogRecord` formatting.
-     */
-    constructor(layout: Layout);
-    /**
-     * Formats specified `record` and logs it via built-in `console`.
-     * @param record `LogRecord` instance to be logged.
-     */
-    append(record: LogRecord): void;
-    /**
-     * Disposes `ConsoleAppender`.
-     */
-    dispose(): void;
+  private readonly layout;
+  /**
+   * Creates ConsoleAppender instance.
+   * @param layout Instance of `Layout` sub-class responsible for `LogRecord` formatting.
+   */
+  constructor(layout: Layout);
+  /**
+   * Formats specified `record` and logs it via built-in `console`.
+   * @param record `LogRecord` instance to be logged.
+   */
+  append(record: LogRecord): void;
+  /**
+   * Disposes `ConsoleAppender`.
+   */
+  dispose(): void;
 }

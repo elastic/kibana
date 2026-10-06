@@ -1,16 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 interface LoadContentArgs {
-    closeFlyout: () => void;
-    ariaLabelledBy: string;
+  closeFlyout: () => void;
+  ariaLabelledBy: string;
 }
 interface OpenLazyFlyoutParams {
-    core: CoreStart;
-    parentApi?: unknown;
-    returnFocus?: () => void;
-    loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
-    flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
-        focusedPanelId?: string;
-    };
+  core: CoreStart;
+  parentApi?: unknown;
+  returnFocus?: () => void;
+  loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
+  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
+    focusedPanelId?: string;
+  };
 }
 /**
  * Opens a flyout panel with lazily loaded content.
@@ -31,5 +40,7 @@ interface OpenLazyFlyoutParams {
  *
  * @returns A handle to the opened flyout (`OverlayRef`).
  */
-export declare const openLazyFlyout: (params: OpenLazyFlyoutParams) => import("@kbn/core/public").OverlayRef;
+export declare const openLazyFlyout: (
+  params: OpenLazyFlyoutParams
+) => import('@kbn/core/public').OverlayRef;
 export {};

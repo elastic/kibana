@@ -1,27 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLColumn, ESQLIdentifier, ESQLSingleAstItem } from '@elastic/esql/types';
 import { type ICommandContext } from '../../../registry/types';
 import type { ESQLMessage } from '../../types';
 interface ColumnValidationOptions {
-    skipUnsupportedOrConflictingColumnValidation?: boolean;
+  skipUnsupportedOrConflictingColumnValidation?: boolean;
 }
-export declare function validateColumnForCommand(column: ESQLColumn | ESQLIdentifier, commandName: string, context: ICommandContext, options?: ColumnValidationOptions): ESQLMessage[];
+export declare function validateColumnForCommand(
+  column: ESQLColumn | ESQLIdentifier,
+  commandName: string,
+  context: ICommandContext,
+  options?: ColumnValidationOptions
+): ESQLMessage[];
 export declare class ColumnValidator {
-    private readonly column;
-    private readonly context;
-    private readonly commandName;
-    private readonly options;
-    constructor(column: ESQLColumn | ESQLIdentifier, context: ICommandContext, commandName: string, options?: ColumnValidationOptions);
-    validate(): ESQLMessage[];
-    private get exists();
-    private get isUnmappedColumnAllowed();
-    private get isPreviouslyUsedUnmappedColumn();
-    private get shouldWarnForUnsupportedOrConflictingColumn();
+  private readonly column;
+  private readonly context;
+  private readonly commandName;
+  private readonly options;
+  constructor(
+    column: ESQLColumn | ESQLIdentifier,
+    context: ICommandContext,
+    commandName: string,
+    options?: ColumnValidationOptions
+  );
+  validate(): ESQLMessage[];
+  private get exists();
+  private get isUnmappedColumnAllowed();
+  private get isPreviouslyUsedUnmappedColumn();
+  private get shouldWarnForUnsupportedOrConflictingColumn();
 }
-export declare const validatePrefixAssignmentExpression: ({ expression, commandName, acceptedTypes, typeLabel, context, }: {
-    expression: ESQLSingleAstItem | undefined;
-    commandName: string;
-    acceptedTypes: readonly string[];
-    typeLabel: string;
-    context?: ICommandContext;
+export declare const validatePrefixAssignmentExpression: ({
+  expression,
+  commandName,
+  acceptedTypes,
+  typeLabel,
+  context,
+}: {
+  expression: ESQLSingleAstItem | undefined;
+  commandName: string;
+  acceptedTypes: readonly string[];
+  typeLabel: string;
+  context?: ICommandContext;
 }) => ESQLMessage[];
 export {};

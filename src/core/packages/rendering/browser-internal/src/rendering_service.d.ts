@@ -1,4 +1,13 @@
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
@@ -14,25 +23,28 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
 export interface RenderingServiceContextDeps {
-    analytics: AnalyticsServiceStart;
-    executionContext: ExecutionContextStart;
-    i18n: I18nStart;
-    theme: ThemeServiceStart;
-    userProfile: UserProfileService;
-    authc: CoreAuthenticationService;
-    chrome: InternalChromeStart;
-    coreEnv: CoreEnv;
+  analytics: AnalyticsServiceStart;
+  executionContext: ExecutionContextStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
+  authc: CoreAuthenticationService;
+  chrome: InternalChromeStart;
+  coreEnv: CoreEnv;
 }
 export interface RenderingServiceRenderCoreDeps {
-    application: InternalApplicationStart;
-    chrome: InternalChromeStart;
-    overlays: OverlayStart;
-    http: InternalHttpStart;
-    docLinks: DocLinksStart;
-    customBranding: CustomBrandingStart;
+  application: InternalApplicationStart;
+  chrome: InternalChromeStart;
+  overlays: OverlayStart;
+  http: InternalHttpStart;
+  docLinks: DocLinksStart;
+  customBranding: CustomBrandingStart;
 }
 export interface RenderingServiceInternalStart extends IRenderingService {
-    renderCore: (renderCoreDeps: RenderingServiceRenderCoreDeps, targetDomElement: HTMLDivElement) => void;
+  renderCore: (
+    renderCoreDeps: RenderingServiceRenderCoreDeps,
+    targetDomElement: HTMLDivElement
+  ) => void;
 }
 /**
  * Renders all Core UI in a single React tree.
@@ -43,18 +55,21 @@ export interface RenderingServiceInternalStart extends IRenderingService {
  * @internal
  */
 export declare class RenderingService implements IRenderingService {
-    private contextDeps;
-    /**
-     * @internal
-     */
-    start(deps: RenderingServiceContextDeps): RenderingServiceInternalStart;
-    /**
-     * @internal
-     */
-    renderCore(renderCoreDeps: RenderingServiceRenderCoreDeps, targetDomElement: HTMLDivElement): void;
-    private readonly ContextWrapper;
-    /**
-     * @public
-     */
-    addContext(element: React.ReactNode): React.ReactElement<string>;
+  private contextDeps;
+  /**
+   * @internal
+   */
+  start(deps: RenderingServiceContextDeps): RenderingServiceInternalStart;
+  /**
+   * @internal
+   */
+  renderCore(
+    renderCoreDeps: RenderingServiceRenderCoreDeps,
+    targetDomElement: HTMLDivElement
+  ): void;
+  private readonly ContextWrapper;
+  /**
+   * @public
+   */
+  addContext(element: React.ReactNode): React.ReactElement<string>;
 }

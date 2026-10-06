@@ -1,28 +1,38 @@
-import { Agent as HttpAgent, type AgentOptions } from 'http';
-import { Agent as HttpsAgent } from 'https';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Agent as HttpAgent } from 'http';
+import { type AgentOptions } from 'http';
+import type { Agent as HttpsAgent } from 'https';
 import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 export type NetworkAgent = HttpAgent | HttpsAgent;
 export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
 export interface AgentFactoryProvider {
-    getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory;
+  getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory;
 }
 export interface AgentManagerOptions {
-    /**
-     * The maximum number of seconds to retain the DNS lookup resolutions.
-     * Set to 0 to disable the cache (default Node.js behavior)
-     */
-    dnsCacheTtlInSeconds: number;
+  /**
+   * The maximum number of seconds to retain the DNS lookup resolutions.
+   * Set to 0 to disable the cache (default Node.js behavior)
+   */
+  dnsCacheTtlInSeconds: number;
 }
 /**
  * Exposes the APIs to fetch stats of the existing agents.
  */
 export interface AgentStatsProvider {
-    /**
-     * Returns the {@link ElasticsearchClientsMetrics}, to understand the load on the Elasticsearch HTTP agents.
-     */
-    getAgentsStats(): ElasticsearchClientsMetrics;
+  /**
+   * Returns the {@link ElasticsearchClientsMetrics}, to understand the load on the Elasticsearch HTTP agents.
+   */
+  getAgentsStats(): ElasticsearchClientsMetrics;
 }
 /**
  * Allows obtaining Agent factories, which can then be fed into elasticsearch-js's Client class.
@@ -36,11 +46,11 @@ export interface AgentStatsProvider {
  * @internal
  **/
 export declare class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
-    private readonly logger;
-    private readonly agents;
-    private readonly cacheableLookup?;
-    constructor(logger: Logger, options: AgentManagerOptions);
-    getAgentFactory(agentOptions?: AgentOptions): AgentFactory;
-    getAgentsStats(): ElasticsearchClientsMetrics;
-    private registerMetrics;
+  private readonly logger;
+  private readonly agents;
+  private readonly cacheableLookup?;
+  constructor(logger: Logger, options: AgentManagerOptions);
+  getAgentFactory(agentOptions?: AgentOptions): AgentFactory;
+  getAgentsStats(): ElasticsearchClientsMetrics;
+  private registerMetrics;
 }

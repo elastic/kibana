@@ -1,4 +1,18 @@
-import type { ESQLFunction, ESQLColumn, ESQLCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ESQLFunction,
+  ESQLColumn,
+  ESQLCommand,
+  ESQLAstQueryExpression,
+} from '@elastic/esql/types';
 import type { VariableNamePrefix } from '@kbn/esql-types';
 import { type ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -67,8 +81,15 @@ export declare const getESQLQueryVariables: (esql: string, prefix?: VariableName
  * @param columns:DatatableColumn[]
  * @returns DatatableColumn[]
  */
-export declare const mapVariableToColumn: (esql: string, variables: ESQLControlVariable[], columns: DatatableColumn[]) => DatatableColumn[];
-export declare const getQueryUpToCursor: (queryString: string, cursorPosition?: monaco.Position) => string;
+export declare const mapVariableToColumn: (
+  esql: string,
+  variables: ESQLControlVariable[],
+  columns: DatatableColumn[]
+) => DatatableColumn[];
+export declare const getQueryUpToCursor: (
+  queryString: string,
+  cursorPosition?: monaco.Position
+) => string;
 /**
  * Finds the node closest to the given cursor position within an array of located nodes.
  * Works for any node exposing a `location` range (ES|QL columns, PromQL labels, ...).
@@ -77,20 +98,28 @@ export declare const getQueryUpToCursor: (queryString: string, cursorPosition?: 
  * @param cursorPosition The current cursor position.
  * @returns The node closest to the cursor, or undefined if the array is empty.
  */
-export declare function findClosestField<T extends {
+export declare function findClosestField<
+  T extends {
     location: {
-        min: number;
-        max: number;
+      min: number;
+      max: number;
     };
-}>(columns: T[], cursorPosition?: monaco.Position): T | undefined;
-export declare const getValuesFromQueryField: (queryString: string, cursorPosition?: monaco.Position) => string | undefined;
+  }
+>(columns: T[], cursorPosition?: monaco.Position): T | undefined;
+export declare const getValuesFromQueryField: (
+  queryString: string,
+  cursorPosition?: monaco.Position
+) => string | undefined;
 /**
  * Rewrites `?varName` → `??varName` for FIELDS/FUNCTIONS variables.
  *
  * **Backward compat only** — unnecessary for new integrations, which have no saved queries
  * predating the `??` syntax (https://github.com/elastic/elasticsearch/pull/122459).
  */
-export declare const fixESQLQueryWithVariables: (queryString: string, esqlVariables?: ESQLControlVariable[]) => string;
+export declare const fixESQLQueryWithVariables: (
+  queryString: string,
+  esqlVariables?: ESQLControlVariable[]
+) => string;
 export declare const getCategorizeColumns: (esql: string) => string[];
 export declare const getSparklineColumns: (esql: string) => string[];
 /**
@@ -99,8 +128,8 @@ export declare const getSparklineColumns: (esql: string) => string[];
  * @param renameFunction
  */
 export declare const getArgsFromRenameFunction: (renameFunction: ESQLFunction) => {
-    original: ESQLColumn;
-    renamed: ESQLColumn;
+  original: ESQLColumn;
+  renamed: ESQLColumn;
 };
 /**
  * Extracts the fields used in the CATEGORIZE function from an ESQL query.
@@ -127,4 +156,7 @@ export declare const hasTimeseriesInfoCommand: (esql?: string) => boolean;
  * Given an array of column names, it returns a new array with corrected column names
  * if any of the columns is renamed in the query.
  */
-export declare const replaceColumnNamesIfRenamed: (root: ESQLAstQueryExpression, columnNames: string[]) => string[];
+export declare const replaceColumnNamesIfRenamed: (
+  root: ESQLAstQueryExpression,
+  columnNames: string[]
+) => string[];

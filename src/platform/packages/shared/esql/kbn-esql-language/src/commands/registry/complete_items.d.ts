@@ -1,19 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ISuggestionItem } from './types';
 export declare const pipeCompleteItem: ISuggestionItem;
 export declare const newLineCompleteItem: ISuggestionItem;
 export declare const newLineAndPipeCompleteItems: ISuggestionItem[];
 export declare const allStarConstant: ISuggestionItem;
-export declare function buildMapKeySuggestion(paramName: string, valueType?: MapValueType, description?: string, options?: MapKeySuggestionOptions): ISuggestionItem;
+export declare function buildMapKeySuggestion(
+  paramName: string,
+  valueType?: MapValueType,
+  description?: string,
+  options?: MapKeySuggestionOptions
+): ISuggestionItem;
 export type ConstantPlaceholderType = 'value' | 'number' | 'config' | 'default';
-export declare const PLACEHOLDER_CONFIG: Record<ConstantPlaceholderType, {
+export declare const PLACEHOLDER_CONFIG: Record<
+  ConstantPlaceholderType,
+  {
     snippet: string;
     matchTypes: readonly string[];
-}>;
+  }
+>;
 export declare const valuePlaceholderConstant: ISuggestionItem;
 export declare const defaultValuePlaceholderConstant: ISuggestionItem;
-export declare function buildAddValuePlaceholder(placeholderType: ConstantPlaceholderType, options?: MapKeySuggestionOptions): ISuggestionItem;
+export declare function buildAddValuePlaceholder(
+  placeholderType: ConstantPlaceholderType,
+  options?: MapKeySuggestionOptions
+): ISuggestionItem;
 /** Finds the placeholder type that matches the given ES|QL types, preferring the one matching `preferredType` when accepted */
-export declare function findConstantPlaceholderType(types: readonly string[], preferredType?: string): ConstantPlaceholderType | undefined;
+export declare function findConstantPlaceholderType(
+  types: readonly string[],
+  preferredType?: string
+): ConstantPlaceholderType | undefined;
 export declare function buildMapValueCompleteItem(value: string, label?: string): ISuggestionItem;
 export declare function getPromqlParamKeySuggestions(): ISuggestionItem[];
 export declare const commaCompleteItem: ISuggestionItem;
@@ -36,11 +59,11 @@ export declare const mmrLambdaValueSuggestion: ISuggestionItem;
 export type MapValueType = 'string' | 'number' | 'boolean' | 'map' | 'array';
 export declare const MAP_VALUE_SNIPPETS: Record<MapValueType, string>;
 export interface MapKeySuggestionOptions {
-    filterText?: string;
-    replacementRangeStrategy?: ISuggestionItem['replacementRangeStrategy'];
+  filterText?: string;
+  replacementRangeStrategy?: ISuggestionItem['replacementRangeStrategy'];
 }
 export declare function buildSubqueryCompleteItems(options?: {
-    previewCommands?: readonly string[];
+  previewCommands?: readonly string[];
 }): ISuggestionItem[];
 export declare const minMaxValueCompleteItem: ISuggestionItem;
 export declare const noneValueCompleteItem: ISuggestionItem;
@@ -55,13 +78,21 @@ export declare const rlikePatternItems: ISuggestionItem[];
 export declare const confidenceLevelValueItems: ISuggestionItem[];
 export declare const numOfRowsValueItems: ISuggestionItem[];
 export declare const getCommandAutocompleteDefinitions: (commands: string[]) => ISuggestionItem[];
-export declare const getDateHistogramCompletionItem: (histogramBarTarget?: number) => ISuggestionItem;
-export declare const getTimeseriesDateHistogramCompletionItem: (histogramBarTarget?: number) => ISuggestionItem;
+export declare const getDateHistogramCompletionItem: (
+  histogramBarTarget?: number
+) => ISuggestionItem;
+export declare const getTimeseriesDateHistogramCompletionItem: (
+  histogramBarTarget?: number
+) => ISuggestionItem;
 export declare function createResourceBrowserSuggestion(options: {
-    label: string;
-    description: string;
-    commandId: string;
-    commandArgs?: Record<string, string>;
+  label: string;
+  description: string;
+  commandId: string;
+  commandArgs?: Record<string, string>;
 }): ISuggestionItem;
-export declare function createIndicesBrowserSuggestion(commandArgs?: Record<string, string>): ISuggestionItem;
-export declare function createFieldsBrowserSuggestion(commandArgs?: Record<string, string>): ISuggestionItem;
+export declare function createIndicesBrowserSuggestion(
+  commandArgs?: Record<string, string>
+): ISuggestionItem;
+export declare function createFieldsBrowserSuggestion(
+  commandArgs?: Record<string, string>
+): ISuggestionItem;

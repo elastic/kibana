@@ -1,4 +1,17 @@
-import type { IndexMappingMeta, VirtualVersionMap, IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  IndexMappingMeta,
+  VirtualVersionMap,
+  IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 /**
  * Compare the current mappings for root fields Vs those stored in the SO index.
  * Relies on getBaseMappings to determine the current mappings.
@@ -7,10 +20,10 @@ import type { IndexMappingMeta, VirtualVersionMap, IndexMapping } from '@kbn/cor
  */
 export declare const getUpdatedRootFields: (indexMappings: IndexMapping) => string[];
 interface GetUpdatedTypesParams {
-    indexMeta?: IndexMappingMeta;
-    indexTypes: string[];
-    latestMappingsVersions: VirtualVersionMap;
-    hashToVersionMap?: Record<string, string>;
+  indexMeta?: IndexMappingMeta;
+  indexTypes: string[];
+  latestMappingsVersions: VirtualVersionMap;
+  hashToVersionMap?: Record<string, string>;
 }
 /**
  * Compares the current vs stored mappings' hashes or modelVersions.
@@ -21,8 +34,13 @@ interface GetUpdatedTypesParams {
  * @param hashToVersionMap A map holding information about [md5 => modelVersion] equivalence
  * @returns the lists of new types and updated types
  */
-export declare const getNewAndUpdatedTypes: ({ indexMeta, indexTypes, latestMappingsVersions, hashToVersionMap, }: GetUpdatedTypesParams) => {
-    newTypes: string[];
-    updatedTypes: string[];
+export declare const getNewAndUpdatedTypes: ({
+  indexMeta,
+  indexTypes,
+  latestMappingsVersions,
+  hashToVersionMap,
+}: GetUpdatedTypesParams) => {
+  newTypes: string[];
+  updatedTypes: string[];
 };
 export {};

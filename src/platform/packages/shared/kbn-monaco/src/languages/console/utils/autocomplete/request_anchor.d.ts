@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { monaco } from '../../../../monaco_imports';
 import type { ParsedRequest } from '../../types';
 /**
@@ -6,4 +15,9 @@ import type { ParsedRequest } from '../../types';
  * later "request" is really text inside its triple-quoted JSON value, that earlier request wins,
  * so parser recovery artifacts inside strings never become anchors. All model reads are capped.
  */
-export declare const getFallbackRequestStartPosition: (parsedRequests: ParsedRequest[], model: monaco.editor.ITextModel, positionLineNumber: number, positionColumn?: number) => monaco.IPosition | undefined;
+export declare const getFallbackRequestStartPosition: (
+  parsedRequests: ParsedRequest[],
+  model: monaco.editor.ITextModel,
+  positionLineNumber: number,
+  positionColumn?: number
+) => monaco.IPosition | undefined;

@@ -1,20 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type * as TaskEither from 'fp-ts/TaskEither';
 import type { SavedObjectsRawDoc, ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
-import { TransformSavedObjectDocumentError } from '.';
+import type { TransformSavedObjectDocumentError } from '.';
 type MigrateAndConvertFn = IDocumentMigrator['migrateAndConvert'];
 export interface DocumentsTransformFailed {
-    readonly type: string;
-    readonly corruptDocumentIds: string[];
-    readonly transformErrors: TransformErrorObjects[];
-    readonly processedDocs: SavedObjectsRawDoc[];
+  readonly type: string;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly processedDocs: SavedObjectsRawDoc[];
 }
 export interface DocumentsTransformSuccess {
-    readonly processedDocs: SavedObjectsRawDoc[];
+  readonly processedDocs: SavedObjectsRawDoc[];
 }
 export interface TransformErrorObjects {
-    readonly rawId: string;
-    readonly err: TransformSavedObjectDocumentError | Error;
+  readonly rawId: string;
+  readonly err: TransformSavedObjectDocumentError | Error;
 }
 /**
  * Error thrown when saved object migrations encounter a corrupt saved object.
@@ -24,8 +33,8 @@ export interface TransformErrorObjects {
  *    properties
  */
 export declare class CorruptSavedObjectError extends Error {
-    readonly rawId: string;
-    constructor(rawId: string);
+  readonly rawId: string;
+  constructor(rawId: string);
 }
 /**
  * Applies the specified migration function to every saved object document in the list
@@ -34,11 +43,15 @@ export declare class CorruptSavedObjectError extends Error {
  * @param {SavedObjectsRawDoc[]} rawDocs
  * @returns {SavedObjectsRawDoc[]}
  */
-export declare function migrateRawDocs(serializer: ISavedObjectsSerializer, migrateDoc: MigrateAndConvertFn, rawDocs: SavedObjectsRawDoc[]): Promise<SavedObjectsRawDoc[]>;
+export declare function migrateRawDocs(
+  serializer: ISavedObjectsSerializer,
+  migrateDoc: MigrateAndConvertFn,
+  rawDocs: SavedObjectsRawDoc[]
+): Promise<SavedObjectsRawDoc[]>;
 interface MigrateRawDocsSafelyDeps {
-    serializer: ISavedObjectsSerializer;
-    migrateDoc: MigrateAndConvertFn;
-    rawDocs: SavedObjectsRawDoc[];
+  serializer: ISavedObjectsSerializer;
+  migrateDoc: MigrateAndConvertFn;
+  rawDocs: SavedObjectsRawDoc[];
 }
 /**
  * Applies the specified migration function to every saved object document provided
@@ -47,5 +60,12 @@ interface MigrateRawDocsSafelyDeps {
  * for which the transformation function failed.
  * @returns {TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>}
  */
-export declare function migrateRawDocsSafely({ serializer, migrateDoc, rawDocs, }: MigrateRawDocsSafelyDeps): TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;
+export declare function migrateRawDocsSafely({
+  serializer,
+  migrateDoc,
+  rawDocs,
+}: MigrateRawDocsSafelyDeps): TaskEither.TaskEither<
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess
+>;
 export {};

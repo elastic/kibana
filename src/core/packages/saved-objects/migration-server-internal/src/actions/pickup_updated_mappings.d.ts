@@ -1,9 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type * as TaskEither from 'fp-ts/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type RetryableEsClientError } from './catch_retryable_es_client_errors';
 export interface UpdateByQueryResponse {
-    taskId: string;
+  taskId: string;
 }
 /**
  * Pickup updated mappings by performing an update by query operation on all
@@ -18,4 +27,9 @@ export interface UpdateByQueryResponse {
  * This action uses `conflicts: 'proceed'` allowing several Kibana instances
  * to run this in parallel.
  */
-export declare const pickupUpdatedMappings: (client: ElasticsearchClient, index: string, batchSize: number, query?: QueryDslQueryContainer) => TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse>;
+export declare const pickupUpdatedMappings: (
+  client: ElasticsearchClient,
+  index: string,
+  batchSize: number,
+  query?: QueryDslQueryContainer
+) => TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse>;

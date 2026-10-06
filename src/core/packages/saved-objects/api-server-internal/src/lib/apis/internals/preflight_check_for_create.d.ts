@@ -1,4 +1,17 @@
-import { type ISavedObjectTypeRegistry, type ISavedObjectsSerializer, type SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  type ISavedObjectTypeRegistry,
+  type ISavedObjectsSerializer,
+  type SavedObjectsRawDoc,
+} from '@kbn/core-saved-objects-server';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
 /**
@@ -9,38 +22,38 @@ import type { RepositoryEsClient } from '../../repository_es_client';
  */
 export declare const ALIAS_SEARCH_PER_PAGE = 1000;
 export interface PreflightCheckForCreateObject {
-    /** The type of the object. */
-    type: string;
-    /** The ID of the object. */
-    id: string;
-    /** The namespaces that the consumer intends to create this object in. */
-    namespaces: string[];
-    /** Whether or not the object should be overwritten if it would encounter a regular conflict. */
-    overwrite?: boolean;
+  /** The type of the object. */
+  type: string;
+  /** The ID of the object. */
+  id: string;
+  /** The namespaces that the consumer intends to create this object in. */
+  namespaces: string[];
+  /** Whether or not the object should be overwritten if it would encounter a regular conflict. */
+  overwrite?: boolean;
 }
 export interface PreflightCheckForCreateParams {
-    registry: ISavedObjectTypeRegistry;
-    client: RepositoryEsClient;
-    serializer: ISavedObjectsSerializer;
-    getIndexForType: (type: string) => string;
-    createPointInTimeFinder: CreatePointInTimeFinderFn;
-    objects: PreflightCheckForCreateObject[];
+  registry: ISavedObjectTypeRegistry;
+  client: RepositoryEsClient;
+  serializer: ISavedObjectsSerializer;
+  getIndexForType: (type: string) => string;
+  createPointInTimeFinder: CreatePointInTimeFinderFn;
+  objects: PreflightCheckForCreateObject[];
 }
 export interface PreflightCheckForCreateResult {
-    /** The type of the object. */
-    type: string;
-    /** The ID of the object. */
-    id: string;
-    /** Only included if we did not encounter an error _and_ the object was found. */
-    existingDocument?: SavedObjectsRawDoc;
-    /** Only included if we encountered an error. */
-    error?: {
-        type: 'aliasConflict' | 'unresolvableConflict' | 'conflict';
-        metadata?: {
-            spacesWithConflictingAliases?: string[];
-            isNotOverwritable?: boolean;
-        };
+  /** The type of the object. */
+  type: string;
+  /** The ID of the object. */
+  id: string;
+  /** Only included if we did not encounter an error _and_ the object was found. */
+  existingDocument?: SavedObjectsRawDoc;
+  /** Only included if we encountered an error. */
+  error?: {
+    type: 'aliasConflict' | 'unresolvableConflict' | 'conflict';
+    metadata?: {
+      spacesWithConflictingAliases?: string[];
+      isNotOverwritable?: boolean;
     };
+  };
 }
 /**
  * Conducts pre-flight checks before object creation. Consumers should only check eligible objects (multi-namespace types).
@@ -59,4 +72,6 @@ export interface PreflightCheckForCreateResult {
  *
  * @internal
  */
-export declare function preflightCheckForCreate(params: PreflightCheckForCreateParams): Promise<PreflightCheckForCreateResult[]>;
+export declare function preflightCheckForCreate(
+  params: PreflightCheckForCreateParams
+): Promise<PreflightCheckForCreateResult[]>;

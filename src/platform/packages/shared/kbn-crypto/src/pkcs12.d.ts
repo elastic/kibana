@@ -1,8 +1,17 @@
-import { pkcs12 } from 'node-forge';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { pkcs12 } from 'node-forge';
 export interface Pkcs12ReadResult {
-    ca?: string[];
-    cert?: string;
-    key?: string;
+  ca?: string[];
+  cert?: string;
+  key?: string;
 }
 /**
  * Reads a private key and certificate chain from a PKCS12 key store.
@@ -47,20 +56,25 @@ export declare const readPkcs12Keystore: (path: string, password?: string) => Pk
  * how the trust store was generated.
  * @returns the parsed certificate(s) in PEM format
  */
-export declare const readPkcs12Truststore: (path: string, password?: string) => string[] | undefined;
+export declare const readPkcs12Truststore: (
+  path: string,
+  password?: string
+) => string[] | undefined;
 interface BigInteger {
-    data: number[];
-    t: number;
-    s: number;
-    toString(): string;
-    compareTo(bn: BigInteger): number;
+  data: number[];
+  t: number;
+  s: number;
+  toString(): string;
+  compareTo(bn: BigInteger): number;
 }
 interface PublicKeyData {
-    n: BigInteger;
-    e: BigInteger;
+  n: BigInteger;
+  e: BigInteger;
 }
-export declare const convertCert: (bag: pkcs12.Bag) => {
-    cert: string;
-    publicKeyData: PublicKeyData;
-} | undefined;
+export declare const convertCert: (bag: pkcs12.Bag) =>
+  | {
+      cert: string;
+      publicKeyData: PublicKeyData;
+    }
+  | undefined;
 export {};

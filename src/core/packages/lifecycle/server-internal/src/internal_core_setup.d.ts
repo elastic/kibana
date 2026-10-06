@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
@@ -28,33 +37,33 @@ import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
 import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
 /** @internal */
 export interface InternalCoreSetup {
-    analytics: AnalyticsServiceSetup;
-    capabilities: CapabilitiesSetup;
-    context: InternalContextSetup;
-    docLinks: DocLinksServiceSetup;
-    http: InternalHttpServiceSetup;
-    elasticsearch: InternalElasticsearchServiceSetup;
-    executionContext: InternalExecutionContextSetup;
-    featureFlags: InternalFeatureFlagsSetup;
-    i18n: I18nServiceSetup;
-    savedObjects: InternalSavedObjectsServiceSetup;
-    status: InternalStatusServiceSetup;
-    uiSettings: InternalUiSettingsServiceSetup;
-    environment: InternalEnvironmentServiceSetup;
-    rendering: InternalRenderingServiceSetup;
-    httpResources: InternalHttpResourcesSetup;
-    logging: InternalLoggingServiceSetup;
-    metrics: InternalMetricsServiceSetup;
-    deprecations: InternalDeprecationsServiceSetup;
-    userActivity: InternalUserActivityServiceSetup;
-    coreUsageData: InternalCoreUsageDataSetup;
-    customBranding: InternalCustomBrandingSetup;
-    userSettings: InternalUserSettingsServiceSetup;
-    security: InternalSecurityServiceSetup;
-    userProfile: InternalUserProfileServiceSetup;
-    pricing: PricingServiceSetup;
-    injection: InternalCoreDiServiceSetup;
-    dataStreams: DataStreamsSetup;
-    userStorage: UserStorageServiceSetup;
-    _plugins?: Map<string, any>;
+  analytics: AnalyticsServiceSetup;
+  capabilities: CapabilitiesSetup;
+  context: InternalContextSetup;
+  docLinks: DocLinksServiceSetup;
+  http: InternalHttpServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
+  executionContext: InternalExecutionContextSetup;
+  featureFlags: InternalFeatureFlagsSetup;
+  i18n: I18nServiceSetup;
+  savedObjects: InternalSavedObjectsServiceSetup;
+  status: InternalStatusServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
+  environment: InternalEnvironmentServiceSetup;
+  rendering: InternalRenderingServiceSetup;
+  httpResources: InternalHttpResourcesSetup;
+  logging: InternalLoggingServiceSetup;
+  metrics: InternalMetricsServiceSetup;
+  deprecations: InternalDeprecationsServiceSetup;
+  userActivity: InternalUserActivityServiceSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
+  customBranding: InternalCustomBrandingSetup;
+  userSettings: InternalUserSettingsServiceSetup;
+  security: InternalSecurityServiceSetup;
+  userProfile: InternalUserProfileServiceSetup;
+  pricing: PricingServiceSetup;
+  injection: InternalCoreDiServiceSetup;
+  dataStreams: DataStreamsSetup;
+  userStorage: UserStorageServiceSetup;
+  _plugins?: Map<string, any>;
 }

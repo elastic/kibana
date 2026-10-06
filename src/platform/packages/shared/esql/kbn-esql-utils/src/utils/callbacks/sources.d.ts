@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreStart } from '@kbn/core/public';
 import { type ESQLSourceResult } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
@@ -11,7 +20,12 @@ import type { ILicense } from '@kbn/licensing-types';
  *   pre-statement. `SET project_routing` takes precedence over the picker value.
  * @returns A promise that resolves to an array of ESQLSourceResult objects.
  */
-export declare const getIndicesList: (core: Pick<CoreStart, 'http'>, areRemoteIndicesAvailable: boolean, signal?: AbortSignal, projectRouting?: string) => Promise<ESQLSourceResult[]>;
+export declare const getIndicesList: (
+  core: Pick<CoreStart, 'http'>,
+  areRemoteIndicesAvailable: boolean,
+  signal?: AbortSignal,
+  projectRouting?: string
+) => Promise<ESQLSourceResult[]>;
 /** Fetches ESQL sources including indices, aliases, data streams, and integrations.
  * @param core The core start contract to make HTTP requests and access application capabilities.
  * @param getLicense An optional function to retrieve the current license information.
@@ -23,4 +37,10 @@ export declare const getIndicesList: (core: Pick<CoreStart, 'http'>, areRemoteIn
  *   pre-statement. `SET project_routing` takes precedence over the picker value.
  * @returns A promise that resolves to an array of ESQLSourceResult objects.
  */
-export declare const getESQLSources: (core: Pick<CoreStart, 'application' | 'http'>, getLicense: (() => Promise<ILicense | undefined>) | undefined, enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>, signal?: AbortSignal, projectRouting?: string) => Promise<ESQLSourceResult[]>;
+export declare const getESQLSources: (
+  core: Pick<CoreStart, 'application' | 'http'>,
+  getLicense: (() => Promise<ILicense | undefined>) | undefined,
+  enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>,
+  signal?: AbortSignal,
+  projectRouting?: string
+) => Promise<ESQLSourceResult[]>;

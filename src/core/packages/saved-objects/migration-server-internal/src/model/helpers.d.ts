@@ -1,10 +1,27 @@
-import type { BulkOperationContainer, QueryDslBoolQuery, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import * as Either from 'fp-ts/Either';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  BulkOperationContainer,
+  QueryDslBoolQuery,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import type * as Either from 'fp-ts/Either';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
-import type { CleanupUnknownAndExcluded, CleanupUnknownAndExcludedWaitForTaskState, OutdatedDocumentsSearchRead } from '../state';
+import type {
+  CleanupUnknownAndExcluded,
+  CleanupUnknownAndExcludedWaitForTaskState,
+  OutdatedDocumentsSearchRead,
+} from '../state';
 /** @internal */
 export type Aliases = Partial<Record<string, string>>;
 /**
@@ -14,28 +31,33 @@ export declare function throwBadControlState(p: never): never;
 /**
  * A helper function/type for ensuring that all response types are handled.
  */
-export declare function throwBadResponse(state: {
+export declare function throwBadResponse(
+  state: {
     controlState: string;
-}, p: never): never;
+  },
+  p: never
+): never;
 /**
  * A helper function used by CLEANUP_UNKNOWN_AND_EXCLUDED and CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
  * to pass some needed properties to PREPARE_COMPATIBLE_MIGRATION
  */
-export declare function getPrepareCompatibleMigrationStateProperties(state: CleanupUnknownAndExcluded | CleanupUnknownAndExcludedWaitForTaskState): {
-    targetIndexMappings: {
-        dynamic?: false | 'false' | 'strict';
-        properties: import("@kbn/core-saved-objects-server").SavedObjectsMappingProperties;
-        _meta: {
-            mappingVersions?: import("@kbn/core-saved-objects-base-server-internal").VirtualVersionMap;
-            migrationMappingPropertyHashes?: {
-                [k: string]: string;
-            };
-            indexTypesMap?: import("@kbn/core-saved-objects-base-server-internal").IndexTypesMap;
-            docVersions?: import("@kbn/core-saved-objects-base-server-internal").VirtualVersionMap;
-            migrationState?: import("@kbn/core-saved-objects-base-server-internal").IndexMappingMigrationStateMeta;
-        };
+export declare function getPrepareCompatibleMigrationStateProperties(
+  state: CleanupUnknownAndExcluded | CleanupUnknownAndExcludedWaitForTaskState
+): {
+  targetIndexMappings: {
+    dynamic?: false | 'false' | 'strict';
+    properties: import('@kbn/core-saved-objects-server').SavedObjectsMappingProperties;
+    _meta: {
+      mappingVersions?: import('@kbn/core-saved-objects-base-server-internal').VirtualVersionMap;
+      migrationMappingPropertyHashes?: {
+        [k: string]: string;
+      };
+      indexTypesMap?: import('@kbn/core-saved-objects-base-server-internal').IndexTypesMap;
+      docVersions?: import('@kbn/core-saved-objects-base-server-internal').VirtualVersionMap;
+      migrationState?: import('@kbn/core-saved-objects-base-server-internal').IndexMappingMigrationStateMeta;
     };
-    preTransformDocsActions: AliasAction[];
+  };
+  preTransformDocsActions: AliasAction[];
 };
 /**
  * Merge the mappings._meta information of an index with the given target mappings.
@@ -50,27 +72,40 @@ export declare function getPrepareCompatibleMigrationStateProperties(state: Clea
  * @param targetMappings
  * @param indexMappings
  */
-export declare function mergeMappingMeta(targetMappings: IndexMapping, indexMappings: IndexMapping): {
-    dynamic?: false | 'false' | 'strict';
-    properties: import("@kbn/core-saved-objects-server").SavedObjectsMappingProperties;
-    _meta: {
-        mappingVersions?: import("@kbn/core-saved-objects-base-server-internal").VirtualVersionMap;
-        migrationMappingPropertyHashes?: {
-            [k: string]: string;
-        };
-        indexTypesMap?: import("@kbn/core-saved-objects-base-server-internal").IndexTypesMap;
-        docVersions?: import("@kbn/core-saved-objects-base-server-internal").VirtualVersionMap;
-        migrationState?: import("@kbn/core-saved-objects-base-server-internal").IndexMappingMigrationStateMeta;
+export declare function mergeMappingMeta(
+  targetMappings: IndexMapping,
+  indexMappings: IndexMapping
+): {
+  dynamic?: false | 'false' | 'strict';
+  properties: import('@kbn/core-saved-objects-server').SavedObjectsMappingProperties;
+  _meta: {
+    mappingVersions?: import('@kbn/core-saved-objects-base-server-internal').VirtualVersionMap;
+    migrationMappingPropertyHashes?: {
+      [k: string]: string;
     };
+    indexTypesMap?: import('@kbn/core-saved-objects-base-server-internal').IndexTypesMap;
+    docVersions?: import('@kbn/core-saved-objects-base-server-internal').VirtualVersionMap;
+    migrationState?: import('@kbn/core-saved-objects-base-server-internal').IndexMappingMigrationStateMeta;
+  };
 };
 /**
  * If `.kibana` and the version specific aliases both exists and
  * are pointing to the same index. This version's migration has already
  * been completed.
  */
-export declare function versionMigrationCompleted(currentAlias: string, versionAlias: string, aliases: Aliases): boolean;
-export declare function indexBelongsToLaterVersion(kibanaVersion: string, indexName?: string): boolean;
-export declare function hasLaterVersionAlias(kibanaVersion: string, aliases?: Partial<Record<string, string>>): string | undefined;
+export declare function versionMigrationCompleted(
+  currentAlias: string,
+  versionAlias: string,
+  aliases: Aliases
+): boolean;
+export declare function indexBelongsToLaterVersion(
+  kibanaVersion: string,
+  indexName?: string
+): boolean;
+export declare function hasLaterVersionAlias(
+  kibanaVersion: string,
+  aliases?: Partial<Record<string, string>>
+): string | undefined;
 /**
  * Add new must_not clauses to the given query
  * in order to filter out the specified types
@@ -78,21 +113,30 @@ export declare function hasLaterVersionAlias(kibanaVersion: string, aliases?: Pa
  * @param types the types to be filtered out
  * @returns a new query container with the enriched query
  */
-export declare function addExcludedTypesToBoolQuery(types: string[], boolQuery?: QueryDslBoolQuery): QueryDslQueryContainer;
+export declare function addExcludedTypesToBoolQuery(
+  types: string[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer;
 /**
  * Add the given clauses to the 'must' of the given query
  * @param filterClauses the clauses to be added to a 'must'
  * @param boolQuery the bool query to be enriched
  * @returns a new query container with the enriched query
  */
-export declare function addMustClausesToBoolQuery(filterClauses: QueryDslQueryContainer[], boolQuery?: QueryDslBoolQuery): QueryDslQueryContainer;
+export declare function addMustClausesToBoolQuery(
+  filterClauses: QueryDslQueryContainer[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer;
 /**
  * Add the given clauses to the 'must_not' of the given query
  * @param filterClauses the clauses to be added to a 'must_not'
  * @param boolQuery the bool query to be enriched
  * @returns a new query container with the enriched query
  */
-export declare function addMustNotClausesToBoolQuery(filterClauses: QueryDslQueryContainer[], boolQuery?: QueryDslBoolQuery): QueryDslQueryContainer;
+export declare function addMustNotClausesToBoolQuery(
+  filterClauses: QueryDslQueryContainer[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer;
 /**
  * Extracts the version number from a >= 7.11 index
  * @param indexName A >= v7.11 index name
@@ -105,38 +149,49 @@ export declare function indexVersion(indexName?: string): string | undefined;
 export declare function aliasVersion(alias?: string): string | undefined;
 /** @internal */
 export interface MultipleIndicesPerAlias {
-    type: 'multiple_indices_per_alias';
-    alias: string;
-    indices: string[];
+  type: 'multiple_indices_per_alias';
+  alias: string;
+  indices: string[];
 }
 /**
  * Creates a record of alias -> index name pairs
  */
-export declare function getAliases(indices: FetchIndexResponse): Either.Either<MultipleIndicesPerAlias, Aliases>;
+export declare function getAliases(
+  indices: FetchIndexResponse
+): Either.Either<MultipleIndicesPerAlias, Aliases>;
 /**
  * Build a list of alias actions to remove the provided aliases from the given index.
  */
-export declare function buildRemoveAliasActions(index: string, aliases: string[], exclude: string[]): AliasAction[];
+export declare function buildRemoveAliasActions(
+  index: string,
+  aliases: string[],
+  exclude: string[]
+): AliasAction[];
 /**
  * Given a document, creates a valid body to index the document using the Bulk API.
  */
-export declare const createBulkIndexOperationTuple: (doc: SavedObjectsRawDoc) => BulkIndexOperationTuple;
+export declare const createBulkIndexOperationTuple: (
+  doc: SavedObjectsRawDoc
+) => BulkIndexOperationTuple;
 /**
  * Given a document id, creates a valid body to delete the document using the Bulk API.
  */
 export declare const createBulkDeleteOperationBody: (_id: string) => BulkOperationContainer;
 /** @internal */
 export declare enum MigrationType {
-    Compatible = "compatible",
-    Incompatible = "incompatible",
-    Unnecessary = "unnecessary",
-    Invalid = "invalid"
+  Compatible = 'compatible',
+  Incompatible = 'incompatible',
+  Unnecessary = 'unnecessary',
+  Invalid = 'invalid',
 }
 interface MigrationTypeParams {
-    isMappingsCompatible: boolean;
-    isVersionMigrationCompleted: boolean;
+  isMappingsCompatible: boolean;
+  isVersionMigrationCompleted: boolean;
 }
-export declare function getMigrationType({ isMappingsCompatible, isVersionMigrationCompleted, }: MigrationTypeParams): MigrationType;
+export declare function getMigrationType({
+  isMappingsCompatible,
+  isVersionMigrationCompleted,
+}: MigrationTypeParams): MigrationType;
 /** Increase batchSize by 20% until a maximum of maxBatchSize */
 export declare const increaseBatchSize: (stateP: OutdatedDocumentsSearchRead) => number;
 export {};

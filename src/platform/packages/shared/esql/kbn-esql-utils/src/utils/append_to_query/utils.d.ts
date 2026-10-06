@@ -1,13 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { BinaryExpressionComparisonOperator, ESQLFunction } from '@elastic/esql/types';
 export type SupportedOperation = '+' | '-' | 'is_not_null' | 'is_null';
-export type SupportedOperators = Extract<BinaryExpressionComparisonOperator, '==' | '!='> | 'is not null' | 'is null';
+export type SupportedOperators =
+  | Extract<BinaryExpressionComparisonOperator, '==' | '!='>
+  | 'is not null'
+  | 'is null';
 export declare const PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING: string[];
 /**
  * Gets the operator and expression type for the given operation
  */
 export declare const getOperator: (operation: '+' | '-' | 'is_not_null' | 'is_null') => {
-    operator: SupportedOperators;
-    expressionType: 'postfix-unary' | 'binary';
+  operator: SupportedOperators;
+  expressionType: 'postfix-unary' | 'binary';
 };
 /**
  * Get the list of supported operators dynamically by mapping all possible operation inputs
@@ -26,19 +38,23 @@ export declare function appendToESQLQuery(baseESQLQuery: string, appendedText: s
  * Maps each field to a clause and joins them with the given separator.
  * Returns '' when there are no fields so callers can guard with a simple truthy check.
  */
-export declare function buildJoinedFilter(fields: string[] | undefined, buildClause: (field: string) => string, separator?: 'AND' | 'OR'): string;
+export declare function buildJoinedFilter(
+  fields: string[] | undefined,
+  buildClause: (field: string) => string,
+  separator?: 'AND' | 'OR'
+): string;
 /**
  * Extracts field name and value from a MATCH function AST node
  */
 export declare function extractMatchFunctionDetails(matchFunction: ESQLFunction): {
-    columnName: string;
-    literalValue: string;
+  columnName: string;
+  literalValue: string;
 } | null;
 /**
  * Extracts field name and values from an MV_CONTAINS function AST node,
  * supporting both casted and uncast scalar or list values
  */
 export declare function extractMvContainsFunctionDetails(mvContainsFunction: ESQLFunction): {
-    columnName: string;
-    literalValues: Array<string | number>;
+  columnName: string;
+  literalValues: Array<string | number>;
 } | null;

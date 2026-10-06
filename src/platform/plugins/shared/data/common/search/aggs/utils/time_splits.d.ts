@@ -1,4 +1,13 @@
-import moment from 'moment-timezone';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type moment from 'moment-timezone';
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggConfigs, AggConfig } from '../../..';
 /**
@@ -143,7 +152,10 @@ import type { AggConfigs, AggConfig } from '../../..';
  * @param aggConfigs The agg configs instance
  * @param aggCursor The root aggregations object from the response which will be mutated in place
  */
-export declare function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string, estypes.AggregationsAggregate>): void;
+export declare function mergeTimeShifts(
+  aggConfigs: AggConfigs,
+  aggCursor: Record<string, estypes.AggregationsAggregate>
+): void;
 /**
  * Inserts a filters aggregation into the aggregation tree which splits buckets to fetch data for all time ranges
  * configured in metric aggregations.
@@ -248,4 +260,10 @@ export declare function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Recor
       }
  * ```
  */
-export declare function insertTimeShiftSplit(aggConfigs: AggConfigs, config: AggConfig, timeShifts: Record<string, moment.Duration>, dslLvlCursor: Record<string, any>, defaultTimeZone: string): any;
+export declare function insertTimeShiftSplit(
+  aggConfigs: AggConfigs,
+  config: AggConfig,
+  timeShifts: Record<string, moment.Duration>,
+  dslLvlCursor: Record<string, any>,
+  defaultTimeZone: string
+): any;

@@ -1,10 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { KibanaContext } from './kibana_context_type';
 interface Arguments {
-    group: string[];
-    from?: string;
-    ungrouped?: boolean;
+  group: string[];
+  from?: string;
+  ungrouped?: boolean;
 }
-export type ExpressionFunctionSelectFilter = ExpressionFunctionDefinition<'selectFilter', KibanaContext, Arguments, KibanaContext>;
+export type ExpressionFunctionSelectFilter = ExpressionFunctionDefinition<
+  'selectFilter',
+  KibanaContext,
+  Arguments,
+  KibanaContext
+>;
 export declare const selectFilterFunction: ExpressionFunctionSelectFilter;
 export {};

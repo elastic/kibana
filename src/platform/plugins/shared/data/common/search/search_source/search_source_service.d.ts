@@ -1,30 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { SearchSourceDependencies, SerializedSearchSourceFields } from '.';
-import { injectReferences, SearchSource } from '.';
+import type { injectReferences, SearchSource } from '.';
 declare const getAllMigrations: () => MigrateFunctionsObject;
 export declare class SearchSourceService {
-    setup(): {
-        getAllMigrations: typeof getAllMigrations;
+  setup(): {
+    getAllMigrations: typeof getAllMigrations;
+  };
+  start(
+    indexPatterns: DataViewsContract,
+    dependencies: SearchSourceDependencies
+  ): {
+    /**
+     * creates searchsource based on serialized search source fields
+     */
+    create: (
+      searchSourceFields?: SerializedSearchSourceFields,
+      useDataViewLazy?: boolean
+    ) => Promise<SearchSource>;
+    createLazy: (searchSourceFields?: SerializedSearchSourceFields) => Promise<SearchSource>;
+    /**
+     * creates an enpty search source
+     */
+    createEmpty: () => SearchSource;
+    extract: (state: SerializedSearchSourceFields) => {
+      state: SerializedSearchSourceFields;
+      references: import('@kbn/core/server').SavedObjectReference[];
     };
-    start(indexPatterns: DataViewsContract, dependencies: SearchSourceDependencies): {
-        /**
-         * creates searchsource based on serialized search source fields
-         */
-        create: (searchSourceFields?: SerializedSearchSourceFields, useDataViewLazy?: boolean) => Promise<SearchSource>;
-        createLazy: (searchSourceFields?: SerializedSearchSourceFields) => Promise<SearchSource>;
-        /**
-         * creates an enpty search source
-         */
-        createEmpty: () => SearchSource;
-        extract: (state: SerializedSearchSourceFields) => {
-            state: SerializedSearchSourceFields;
-            references: import("@kbn/core/server").SavedObjectReference[];
-        };
-        inject: typeof injectReferences;
-        getAllMigrations: typeof getAllMigrations;
-        telemetry: () => {};
-    };
-    stop(): void;
+    inject: typeof injectReferences;
+    getAllMigrations: typeof getAllMigrations;
+    telemetry: () => {};
+  };
+  stop(): void;
 }
 export {};

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * State syncing utilities are a set of helpers for syncing your application state
  * with browser URL or browser storage.
@@ -17,8 +26,15 @@
  * Refer {@link https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_sync | here} for a complete guide and examples.
  * @packageDocumentation
  */
-export type { IKbnUrlStateStorage, ISessionStorageStateStorage, IStateStorage, } from './state_sync_state_storage';
-export { createSessionStorageStateStorage, createKbnUrlStateStorage, } from './state_sync_state_storage';
+export type {
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
+  IStateStorage,
+} from './state_sync_state_storage';
+export {
+  createSessionStorageStateStorage,
+  createKbnUrlStateStorage,
+} from './state_sync_state_storage';
 export type { IStateSyncConfig, INullableBaseStateContainer } from './types';
 export type { StopSyncStateFnType, StartSyncStateFnType, ISyncStateRef } from './state_sync';
 export { syncState, syncStates } from './state_sync';

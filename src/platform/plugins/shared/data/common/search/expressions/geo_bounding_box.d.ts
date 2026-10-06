@@ -1,21 +1,35 @@
-import type { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
+} from '@kbn/expressions-plugin/common';
 import type { GeoPoint, GeoPointOutput } from './geo_point';
-type GeoBox = {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-};
-type GeoPoints = {
-    top_left: GeoPoint;
-    bottom_right: GeoPoint;
-} | {
-    top_right: GeoPoint;
-    bottom_left: GeoPoint;
-};
-type WellKnownText = {
-    wkt: string;
-};
+interface GeoBox {
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
+}
+type GeoPoints =
+  | {
+      top_left: GeoPoint;
+      bottom_right: GeoPoint;
+    }
+  | {
+      top_right: GeoPoint;
+      bottom_left: GeoPoint;
+    };
+interface WellKnownText {
+  wkt: string;
+}
 /** GeoBoundingBox Accepted Formats:
  *  Lat Lon As Properties:
  *  "top_left" : {
@@ -59,14 +73,21 @@ type WellKnownText = {
  * **/
 export type GeoBoundingBox = GeoBox | GeoPoints | WellKnownText;
 export type GeoBoundingBoxOutput = ExpressionValueBoxed<'geo_bounding_box', GeoBoundingBox>;
-type GeoPointsArguments = {
-    topLeft: GeoPointOutput;
-    bottomRight: GeoPointOutput;
-} | {
-    topRight: GeoPointOutput;
-    bottomLeft: GeoPointOutput;
-};
+type GeoPointsArguments =
+  | {
+      topLeft: GeoPointOutput;
+      bottomRight: GeoPointOutput;
+    }
+  | {
+      topRight: GeoPointOutput;
+      bottomLeft: GeoPointOutput;
+    };
 type GeoBoundingBoxArguments = GeoBox | GeoPointsArguments | WellKnownText;
-export type ExpressionFunctionGeoBoundingBox = ExpressionFunctionDefinition<'geoBoundingBox', null, GeoBoundingBoxArguments, GeoBoundingBoxOutput>;
+export type ExpressionFunctionGeoBoundingBox = ExpressionFunctionDefinition<
+  'geoBoundingBox',
+  null,
+  GeoBoundingBoxArguments,
+  GeoBoundingBoxOutput
+>;
 export declare const geoBoundingBoxFunction: ExpressionFunctionGeoBoundingBox;
 export {};

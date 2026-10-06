@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EventEmitter } from 'events';
 /**
@@ -5,10 +14,10 @@ import { EventEmitter } from 'events';
  * Returned position is relative to document
  */
 export declare function createInteractionPositionTracker(): {
-    resolveLastPosition: () => {
-        x: number;
-        y: number;
-    };
+  resolveLastPosition: () => {
+    x: number;
+    y: number;
+  };
 };
 /**
  * A FlyoutSession describes the session of one opened flyout panel. It offers
@@ -21,13 +30,13 @@ export declare function createInteractionPositionTracker(): {
  * @extends EventEmitter
  */
 declare class ContextMenuSession extends EventEmitter {
-    /**
-     * Closes the opened flyout as long as it's still the open one.
-     * If this is not the active session, this method will do nothing.
-     * If this session was still active and a flyout was closed, the 'closed'
-     * event will be emitted on this FlyoutSession instance.
-     */
-    close(): void;
+  /**
+   * Closes the opened flyout as long as it's still the open one.
+   * If this is not the active session, this method will do nothing.
+   * If this session was still active and a flyout was closed, the 'closed'
+   * event will be emitted on this FlyoutSession instance.
+   */
+  close(): void;
 }
 /**
  * Opens a flyout panel with the given component inside. You can use
@@ -36,9 +45,12 @@ declare class ContextMenuSession extends EventEmitter {
  * @param flyoutChildren - Mounts the children inside a fly out panel
  * @return {FlyoutSession} The session instance for the opened flyout panel.
  */
-export declare function openContextMenu(panels: EuiContextMenuPanelDescriptor[], props?: {
+export declare function openContextMenu(
+  panels: EuiContextMenuPanelDescriptor[],
+  props?: {
     closeButtonAriaLabel?: string;
     onClose?: () => void;
     'data-test-subj'?: string;
-}): ContextMenuSession;
+  }
+): ContextMenuSession;
 export { ContextMenuSession };

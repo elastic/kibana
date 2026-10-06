@@ -1,9 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Response headers check to determine if the response is from Elasticsearch
  * @param headers Response headers
  * @returns boolean
  */
-export declare const isSupportedEsServer: (headers: Record<string, string | string[] | undefined> | null | undefined) => boolean;
+export declare const isSupportedEsServer: (
+  headers: Record<string, string | string[] | undefined> | null | undefined
+) => boolean;
 /**
  * Check to ensure that a 404 response does not come from Elasticsearch
  *
@@ -14,6 +25,6 @@ export declare const isSupportedEsServer: (headers: Record<string, string | stri
  * @returns boolean 'true' if the status code is 404 and the Elasticsearch product header is missing/unexpected value
  */
 export declare const isNotFoundFromUnsupportedServer: (args: {
-    statusCode: number | null;
-    headers: Record<string, string | string[] | undefined> | null;
+  statusCode: number | null;
+  headers: Record<string, string | string[] | undefined> | null;
 }) => boolean;

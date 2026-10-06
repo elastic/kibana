@@ -1,13 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { estypes } from '@elastic/elasticsearch';
 import type { Payload } from '@hapi/boom';
-import { type ISavedObjectTypeRegistry, type SavedObjectsRawDoc, type SavedObjectsRawDocSource, type SavedObject, type SavedObjectsRawDocParseOptions, type SavedObjectAccessControl } from '@kbn/core-saved-objects-server';
+import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type SavedObject,
+  type SavedObjectsRawDocParseOptions,
+  type SavedObjectAccessControl,
+} from '@kbn/core-saved-objects-server';
 export interface GetBulkOperationErrorRawResponse {
-    status: number;
-    error: {
-        type: string;
-        reason?: string | null;
-        index: string;
-    };
+  status: number;
+  error: {
+    type: string;
+    reason?: string | null;
+    index: string;
+  };
 }
 /**
  * Checks the raw response of a bulk operation and returns an error if necessary.
@@ -18,7 +34,11 @@ export interface GetBulkOperationErrorRawResponse {
  *
  * @internal
  */
-export declare function getBulkOperationError(type: string, id: string, rawResponse: GetBulkOperationErrorRawResponse): Payload | undefined;
+export declare function getBulkOperationError(
+  type: string,
+  id: string,
+  rawResponse: GetBulkOperationErrorRawResponse
+): Payload | undefined;
 /**
  * Returns an object with the expected version properties. This facilitates Elasticsearch's Optimistic Concurrency Control.
  *
@@ -27,19 +47,24 @@ export declare function getBulkOperationError(type: string, id: string, rawRespo
  *
  * @internal
  */
-export declare function getExpectedVersionProperties(version?: string, document?: SavedObjectsRawDoc): {
-    if_seq_no: number | undefined;
-    if_primary_term: number | undefined;
-} | {
-    if_seq_no?: undefined;
-    if_primary_term?: undefined;
-};
+export declare function getExpectedVersionProperties(
+  version?: string,
+  document?: SavedObjectsRawDoc
+):
+  | {
+      if_seq_no: number | undefined;
+      if_primary_term: number | undefined;
+    }
+  | {
+      if_seq_no?: undefined;
+      if_primary_term?: undefined;
+    };
 /**
  * @internal
  */
 export interface GetSavedObjectFromSourceOptions {
-    /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
-    migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
 }
 /**
  * Gets a saved object from a raw ES document.
@@ -51,11 +76,17 @@ export interface GetSavedObjectFromSourceOptions {
  *
  * @internal
  */
-export declare function getSavedObjectFromSource<T>(registry: ISavedObjectTypeRegistry, type: string, id: string, doc: {
+export declare function getSavedObjectFromSource<T>(
+  registry: ISavedObjectTypeRegistry,
+  type: string,
+  id: string,
+  doc: {
     _seq_no?: number;
     _primary_term?: number;
     _source: SavedObjectsRawDocSource;
-}, { migrationVersionCompatibility }?: GetSavedObjectFromSourceOptions): SavedObject<T>;
+  },
+  { migrationVersionCompatibility }?: GetSavedObjectFromSourceOptions
+): SavedObject<T>;
 /**
  * Check to ensure that a raw document exists in a namespace. If the document is not a multi-namespace type, then this returns `true` as
  * we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to ensure that the
@@ -70,7 +101,11 @@ export declare function getSavedObjectFromSource<T>(registry: ISavedObjectTypeRe
  *
  * @internal
  */
-export declare function rawDocExistsInNamespace(registry: ISavedObjectTypeRegistry, raw: SavedObjectsRawDoc, namespace: string | undefined): boolean;
+export declare function rawDocExistsInNamespace(
+  registry: ISavedObjectTypeRegistry,
+  raw: SavedObjectsRawDoc,
+  namespace: string | undefined
+): boolean;
 /**
  * Check to ensure that a raw document exists in at least one of the given namespaces. If the document is not a multi-namespace type, then
  * this returns `true` as we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to
@@ -85,7 +120,11 @@ export declare function rawDocExistsInNamespace(registry: ISavedObjectTypeRegist
  *
  * @internal
  */
-export declare function rawDocExistsInNamespaces(registry: ISavedObjectTypeRegistry, raw: SavedObjectsRawDoc, namespaces: string[]): boolean;
+export declare function rawDocExistsInNamespaces(
+  registry: ISavedObjectTypeRegistry,
+  raw: SavedObjectsRawDoc,
+  namespaces: string[]
+): boolean;
 /**
  * Ensure that a namespace is always in its namespace ID representation.
  * This allows `'default'` to be used interchangeably with `undefined`.
@@ -111,9 +150,12 @@ export declare function getCurrentTime(): string;
  *
  * @internal
  */
-export declare function setManaged({ optionsManaged, objectManaged, }: {
-    optionsManaged?: boolean;
-    objectManaged?: boolean;
+export declare function setManaged({
+  optionsManaged,
+  objectManaged,
+}: {
+  optionsManaged?: boolean;
+  objectManaged?: boolean;
 }): boolean;
 /**
  * Returns a string array of namespaces for a given saved object. If the saved object is undefined, the result is an array that contains the
@@ -123,14 +165,27 @@ export declare function setManaged({ optionsManaged, objectManaged, }: {
  * @param namespace The current namespace.
  * @param document Optional existing saved object that was obtained in a preflight operation.
  */
-export declare function getSavedObjectNamespaces(namespace?: string, document?: SavedObjectsRawDoc): string[] | undefined;
-export declare function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult;
-export declare function isMgetError(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.MgetMultiGetError;
-export declare function setAccessControl({ typeSupportsAccessControl, createdBy, accessMode, }: {
-    typeSupportsAccessControl: boolean;
-    createdBy?: string;
-    accessMode?: SavedObjectAccessControl['accessMode'];
-}): {
-    owner: string;
-    accessMode: "default" | "write_restricted";
-} | undefined;
+export declare function getSavedObjectNamespaces(
+  namespace?: string,
+  document?: SavedObjectsRawDoc
+): string[] | undefined;
+export declare function isMgetDoc(
+  doc?: estypes.MgetResponseItem<unknown>
+): doc is estypes.GetGetResult;
+export declare function isMgetError(
+  doc?: estypes.MgetResponseItem<unknown>
+): doc is estypes.MgetMultiGetError;
+export declare function setAccessControl({
+  typeSupportsAccessControl,
+  createdBy,
+  accessMode,
+}: {
+  typeSupportsAccessControl: boolean;
+  createdBy?: string;
+  accessMode?: SavedObjectAccessControl['accessMode'];
+}):
+  | {
+      owner: string;
+      accessMode: 'default' | 'write_restricted';
+    }
+  | undefined;

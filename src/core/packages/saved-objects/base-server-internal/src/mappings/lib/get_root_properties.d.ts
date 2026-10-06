@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IndexMapping } from '../types';
 /**
  *  Get the property mappings for the root type in the EsMappingsDsl
@@ -14,4 +23,6 @@ import type { IndexMapping } from '../types';
  *  This data can be found at `{indexName}.mappings.{typeName}.properties`
  *  in the es indices.get() response.
  */
-export declare function getRootProperties(mapping: IndexMapping): import("@kbn/core/server").SavedObjectsMappingProperties;
+export declare function getRootProperties(
+  mapping: IndexMapping
+): import('@kbn/core/server').SavedObjectsMappingProperties;

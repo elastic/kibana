@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SavedObjectMigration, SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
 /**
  * Composes two migrations into a single migration.
@@ -13,7 +22,11 @@ import type { SavedObjectMigration, SavedObjectMigrationMap } from '@kbn/core-sa
  * @param rest Additional wrapped migrations to compose.
  * @returns The composed migration can be either a function or an object depending on the input migrations.
  */
-export declare function mergeSavedObjectMigrations(outer: SavedObjectMigration, inner: SavedObjectMigration, ...rest: SavedObjectMigration[]): SavedObjectMigration;
+export declare function mergeSavedObjectMigrations(
+  outer: SavedObjectMigration,
+  inner: SavedObjectMigration,
+  ...rest: SavedObjectMigration[]
+): SavedObjectMigration;
 /**
  * Merges two saved object migration maps.
  *
@@ -32,4 +45,7 @@ export declare function mergeSavedObjectMigrations(outer: SavedObjectMigration, 
  * @param map2 - The second map to merge
  * @returns The merged map {@link SavedObjectMigrationMap}
  */
-export declare function mergeSavedObjectMigrationMaps(map1: SavedObjectMigrationMap, map2: SavedObjectMigrationMap): SavedObjectMigrationMap;
+export declare function mergeSavedObjectMigrationMaps(
+  map1: SavedObjectMigrationMap,
+  map2: SavedObjectMigrationMap
+): SavedObjectMigrationMap;

@@ -1,9 +1,34 @@
-import type { SavedObjectsUpdateObjectsSpacesObject, SavedObjectsUpdateObjectsSpacesOptions, SavedObjectsUpdateObjectsSpacesResponse } from '@kbn/core-saved-objects-api-server';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { ApiExecutionContext } from './types';
 export interface PerformCreateParams<T = unknown> {
-    objects: SavedObjectsUpdateObjectsSpacesObject[];
-    spacesToAdd: string[];
-    spacesToRemove: string[];
-    options: SavedObjectsUpdateObjectsSpacesOptions;
+  objects: SavedObjectsUpdateObjectsSpacesObject[];
+  spacesToAdd: string[];
+  spacesToRemove: string[];
+  options: SavedObjectsUpdateObjectsSpacesOptions;
 }
-export declare const performUpdateObjectsSpaces: <T>({ objects, spacesToAdd, spacesToRemove, options }: PerformCreateParams<T>, { registry, helpers, allowedTypes, client, serializer, logger, mappings, extensions, }: ApiExecutionContext) => Promise<SavedObjectsUpdateObjectsSpacesResponse>;
+export declare const performUpdateObjectsSpaces: <T>(
+  { objects, spacesToAdd, spacesToRemove, options }: PerformCreateParams<T>,
+  {
+    registry,
+    helpers,
+    allowedTypes,
+    client,
+    serializer,
+    logger,
+    mappings,
+    extensions,
+  }: ApiExecutionContext
+) => Promise<SavedObjectsUpdateObjectsSpacesResponse>;

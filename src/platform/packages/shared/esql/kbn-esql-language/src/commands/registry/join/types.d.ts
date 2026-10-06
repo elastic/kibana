@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ESQLAstExpression } from '@elastic/esql/types';
 /**
  * Position of the caret in the JOIN command, which can be easily matched with
@@ -21,7 +30,19 @@ import type { ESQLAstExpression } from '@elastic/esql/types';
  * type
  * ```
  */
-export type JoinStaticPosition = 'none' | 'type' | 'after_type' | 'mnemonic' | 'after_mnemonic' | 'index' | 'after_index' | 'as' | 'after_as' | 'alias' | 'after_alias' | 'on';
+export type JoinStaticPosition =
+  | 'none'
+  | 'type'
+  | 'after_type'
+  | 'mnemonic'
+  | 'after_mnemonic'
+  | 'index'
+  | 'after_index'
+  | 'as'
+  | 'after_as'
+  | 'alias'
+  | 'after_alias'
+  | 'on';
 /**
  * Position of the caret in the JOIN command. Includes the `on_expression` position,
  * which needs to involve the main parser to be determined correctly.
@@ -50,15 +71,15 @@ export type JoinPosition = JoinStaticPosition | 'on_expression';
  * Details about the position of the caret in the JOIN command.
  */
 export interface JoinCommandPosition {
-    pos: JoinPosition;
-    /**
-     * If position is `expression`, this property holds the
-     * expression AST node inside of which the caret is located.
-     */
-    expression?: ESQLAstExpression;
-    /**
-     * Whether the expression is complete (not incomplete).
-     * Used to determine if we should suggest comma/pipe.
-     */
-    isExpressionComplete?: boolean;
+  pos: JoinPosition;
+  /**
+   * If position is `expression`, this property holds the
+   * expression AST node inside of which the caret is located.
+   */
+  expression?: ESQLAstExpression;
+  /**
+   * Whether the expression is complete (not incomplete).
+   * Used to determine if we should suggest comma/pipe.
+   */
+  isExpressionComplete?: boolean;
 }

@@ -1,155 +1,164 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export declare const fieldMappings: {
-    request: {
+  request: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+        time_series_dimension: boolean;
+      };
+    };
+  };
+  geo: {
+    properties: {
+      srcdest: {
+        type: string;
+      };
+      src: {
+        type: string;
+      };
+      dest: {
+        type: string;
+      };
+      coordinates: {
+        type: string;
+      };
+    };
+  };
+  utc_time: {
+    type: string;
+  };
+  url: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+        ignore_above: number;
+      };
+    };
+  };
+  message: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+        ignore_above: number;
+      };
+    };
+  };
+  host: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+        ignore_above: number;
+      };
+    };
+  };
+  clientip: {
+    type: string;
+  };
+  response: {
+    type: string;
+    fields: {
+      keyword: {
+        type: string;
+        ignore_above: number;
+      };
+    };
+  };
+  machine: {
+    properties: {
+      ram: {
+        type: string;
+      };
+      os: {
         type: string;
         fields: {
-            keyword: {
-                type: string;
-                time_series_dimension: boolean;
-            };
+          keyword: {
+            type: string;
+            ignore_above: number;
+          };
         };
+      };
     };
-    geo: {
-        properties: {
-            srcdest: {
-                type: string;
-            };
-            src: {
-                type: string;
-            };
-            dest: {
-                type: string;
-            };
-            coordinates: {
-                type: string;
-            };
-        };
-    };
-    utc_time: {
+  };
+  agent: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
+        ignore_above: number;
+      };
     };
-    url: {
+  };
+  bytes: {
+    type: string;
+  };
+  tags: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
+        ignore_above: number;
+      };
     };
-    message: {
+  };
+  referer: {
+    type: string;
+  };
+  ip: {
+    type: string;
+  };
+  ip_range: {
+    type: string;
+  };
+  '@timestamp': {
+    type: string;
+  };
+  timestamp: {
+    type: string;
+    path: string;
+  };
+  timestamp_range: {
+    type: string;
+  };
+  phpmemory: {
+    type: string;
+  };
+  bytes_counter: {
+    type: string;
+    time_series_metric: string;
+  };
+  bytes_gauge: {
+    type: string;
+    time_series_metric: string;
+  };
+  memory: {
+    type: string;
+  };
+  extension: {
+    type: string;
+    fields: {
+      keyword: {
         type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
+        ignore_above: number;
+      };
     };
-    host: {
+  };
+  event: {
+    properties: {
+      dataset: {
         type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
+      };
     };
-    clientip: {
-        type: string;
-    };
-    response: {
-        type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
-    };
-    machine: {
-        properties: {
-            ram: {
-                type: string;
-            };
-            os: {
-                type: string;
-                fields: {
-                    keyword: {
-                        type: string;
-                        ignore_above: number;
-                    };
-                };
-            };
-        };
-    };
-    agent: {
-        type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
-    };
-    bytes: {
-        type: string;
-    };
-    tags: {
-        type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
-    };
-    referer: {
-        type: string;
-    };
-    ip: {
-        type: string;
-    };
-    ip_range: {
-        type: string;
-    };
-    '@timestamp': {
-        type: string;
-    };
-    timestamp: {
-        type: string;
-        path: string;
-    };
-    timestamp_range: {
-        type: string;
-    };
-    phpmemory: {
-        type: string;
-    };
-    bytes_counter: {
-        type: string;
-        time_series_metric: string;
-    };
-    bytes_gauge: {
-        type: string;
-        time_series_metric: string;
-    };
-    memory: {
-        type: string;
-    };
-    extension: {
-        type: string;
-        fields: {
-            keyword: {
-                type: string;
-                ignore_above: number;
-            };
-        };
-    };
-    event: {
-        properties: {
-            dataset: {
-                type: string;
-            };
-        };
-    };
+  };
 };

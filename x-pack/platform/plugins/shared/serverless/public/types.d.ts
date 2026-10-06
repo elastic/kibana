@@ -1,21 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { ChromeBreadcrumb, ChromeSetProjectBreadcrumbsParams } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
-export interface ServerlessPluginSetup {
-}
+export interface ServerlessPluginSetup {}
 export interface ServerlessPluginStart {
-    /**
-     * @deprecated Project breadcrumb overrides remain only for compatibility fallback back
-     * navigation. Declare hierarchy in the project navigation tree and pass explicit `back`
-     * configuration to `AppHeader` from `@kbn/app-header`.
-     */
-    setBreadcrumbs: (breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[], params?: Partial<ChromeSetProjectBreadcrumbsParams>) => void;
-    getNavigationCards$(roleManagementEnabled?: boolean, extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>): Observable<Record<string, CardNavExtensionDefinition> | undefined>;
+  /**
+   * @deprecated Project breadcrumb overrides remain only for compatibility fallback back
+   * navigation. Declare hierarchy in the project navigation tree and pass explicit `back`
+   * configuration to `AppHeader` from `@kbn/app-header`.
+   */
+  setBreadcrumbs: (
+    breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
+    params?: Partial<ChromeSetProjectBreadcrumbsParams>
+  ) => void;
+  getNavigationCards$(
+    roleManagementEnabled?: boolean,
+    extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>
+  ): Observable<Record<string, CardNavExtensionDefinition> | undefined>;
 }
 export interface ServerlessPluginSetupDependencies {
-    cloud: CloudSetup;
+  cloud: CloudSetup;
 }
 export interface ServerlessPluginStartDependencies {
-    cloud: CloudStart;
+  cloud: CloudStart;
 }
