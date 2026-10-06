@@ -160,9 +160,19 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
+    const getImpactClient = createImpactClient({
+      getImpactService: () => this.requireImpactService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: createImpactPrivilegesChecker({
+        getSecurity: async () => plugins.security,
+        logger: this.logger,
+      }),
+    });
+
     if (this.escalationsEnabled) {
       this.escalationsService = new EscalationsService({
         logger: this.logger,
+        getImpactClient,
         getConversationClient: (request) =>
           plugins.agentBuilder.conversations.getScopedClient({ request }),
         getAttachmentsClient: (request) =>
@@ -175,15 +185,6 @@ export class AgenticInvestigationsPlugin
     this.assignmentsService = new AssignmentsService({
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
-    });
-
-    const getImpactClient = createImpactClient({
-      getImpactService: () => this.requireImpactService(),
-      getSpaceId: (request) => this.getSpaceId(request),
-      privileges: createImpactPrivilegesChecker({
-        getSecurity: async () => plugins.security,
-        logger: this.logger,
-      }),
     });
 
     return {
