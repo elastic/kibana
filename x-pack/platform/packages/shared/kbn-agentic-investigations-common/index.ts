@@ -119,6 +119,8 @@ export {
   impactPills,
   investigationEntityIds,
   matchesEntityFilter,
+  useEntityFilter,
+  type ImpactFilterable,
   type ImpactPill,
 } from './src/components/filters/impact';
 
