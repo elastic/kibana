@@ -718,7 +718,7 @@ describe('Discover session conversion and UI preparation', () => {
     const data = toDiscoverSessionApiData(session);
 
     expect(data.tabs[0]).toHaveProperty('chart_interval', 'auto');
-    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+    expect(discoverSessionApiDataSchema.safeParse(data).success).toBe(true);
     expect(session.tabs[0].chartInterval).toBe('5m');
   });
 
@@ -733,7 +733,7 @@ describe('Discover session conversion and UI preparation', () => {
     expect(data.tabs[2]).not.toHaveProperty('sample_size');
     expect(data.tabs[2]).not.toHaveProperty('hide_aggregated_preview');
     expect(data.tabs[2]).not.toHaveProperty('chart_interval');
-    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+    expect(discoverSessionApiDataSchema.safeParse(data).success).toBe(true);
   });
 
   it('normalizes the legacy ES|QL control type and camelCase config before saving', () => {

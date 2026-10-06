@@ -629,6 +629,31 @@ describe('useDiscoverHistogram', () => {
       );
     });
 
+    it('should not pass the saved visContext to the histogram in classic mode', async () => {
+      const { toolkit } = await setup();
+      const visContext = {
+        attributes: {},
+        requestData: {},
+        suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
+      } as UnifiedHistogramVisContext;
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { language: 'kuery', query: '' } },
+        })
+      );
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.updateAttributes)({
+          attributes: { visContext },
+        })
+      );
+
+      const { api } = await setupFetching({ toolkit });
+
+      expect(api.fetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({ externalVisContext: undefined })
+      );
+    });
+
     it('should call fetch when only breakdownField changes', async () => {
       const { toolkit } = await setup();
       toolkit.internalState.dispatch(

@@ -30,6 +30,7 @@ import {
 } from '../../common/session/search_and_table_mapping';
 import { toStoredTabTypeState } from '../../common/session/tab_type_state';
 import { getVisContextRequestData } from '../../common/session/get_vis_context_request_data';
+import { isDiscoverSessionEsqlTab } from '../../common/session/type_guards';
 import type { DiscoverSessionApiResponse } from '../../server/api/schema';
 import type {
   DiscoverSessionClientRequestData,

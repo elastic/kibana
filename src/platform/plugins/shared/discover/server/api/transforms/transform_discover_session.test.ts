@@ -448,30 +448,24 @@ describe('discover session API transforms', () => {
       expect(sessionState.tabs[0]).not.toHaveProperty('esql_approximation');
     });
 
-    it.each([
-      { name: 'public', transform: transformDiscoverSessionOut },
-      { name: 'internal', transform: transformInternalDiscoverSessionOut },
-    ])(
-      'omits unused ES|QL fields from the $name session response and preserves the panel sample size',
-      ({ transform }) => {
-        const [, esqlTab] = discoverSessionAttributes.tabs;
-        const { sessionState } = transform({
-          ...discoverSessionAttributes,
-          tabs: [esqlTab],
-        });
-        const panel = fromStoredSearchEmbeddableByValue(toByValuePanelState(esqlTab.attributes));
+    it('omits unused ES|QL fields from the public session response and preserves the panel sample size', () => {
+      const [, esqlTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [esqlTab],
+      });
+      const panel = fromStoredSearchEmbeddableByValue(toByValuePanelState(esqlTab.attributes));
 
-        expect(esqlTab.attributes).toMatchObject({
-          sampleSize: 100,
-          hideAggregatedPreview: false,
-          chartInterval: 'h',
-        });
-        expect(sessionState.tabs[0]).not.toHaveProperty('sample_size');
-        expect(sessionState.tabs[0]).not.toHaveProperty('hide_aggregated_preview');
-        expect(sessionState.tabs[0]).not.toHaveProperty('chart_interval');
-        expect(panel.tabs[0]).toHaveProperty('sample_size', 100);
-      }
-    );
+      expect(esqlTab.attributes).toMatchObject({
+        sampleSize: 100,
+        hideAggregatedPreview: false,
+        chartInterval: 'h',
+      });
+      expect(sessionState.tabs[0]).not.toHaveProperty('sample_size');
+      expect(sessionState.tabs[0]).not.toHaveProperty('hide_aggregated_preview');
+      expect(sessionState.tabs[0]).not.toHaveProperty('chart_interval');
+      expect(panel.tabs[0]).toHaveProperty('sample_size', 100);
+    });
 
     it('converts legacy flat tab sort to API sort objects', () => {
       const attributes = {
