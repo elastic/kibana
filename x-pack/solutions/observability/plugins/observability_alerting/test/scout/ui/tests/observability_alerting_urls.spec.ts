@@ -22,8 +22,7 @@ import {
   MANAGEMENT_ALERTING_V2_URL_RE,
   MANAGEMENT_CLASSIC_RULES_URL_RE,
   OBSERVABILITY_ALERTING_SURFACES,
-  OBSERVABILITY_ALERTING_RULES_V1_URL_RE,
-  OBSERVABILITY_ALERTING_RULES_V2_URL_RE,
+  OBSERVABILITY_ALERTING_RULES_URL_RE,
   OBS_V1_CREATE_URL_RE,
   OBS_V1_DETAILS_URL_RE,
   OBS_V1_EDIT_URL_RE,
@@ -146,62 +145,19 @@ test.describe(
       });
     }
 
-    test('switches between v1 and v2 rules tabs without leaving observability', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('legacy list URLs redirect to the mixed Rules page', async ({ page, pageObjects }) => {
       const alerting = pageObjects.observabilityAlerting;
 
-      await test.step('start on v2 and switch to v1', async () => {
+      await test.step('/rules/v2 redirects to /rules', async () => {
         await alerting.goto(OBSERVABILITY_ALERTING_RULES_V2_PATH);
         await expect(alerting.pageTitle).toHaveText('Rules', { timeout: 30_000 });
-        await expect(alerting.v2RulesTab).toBeVisible();
-        await expect(alerting.v1RulesTab).toBeVisible();
-
-        await alerting.clickV1RulesTab();
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V1_URL_RE);
-        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'true');
-        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'false');
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_URL_RE);
       });
 
-      await test.step('from v1, switch back to v2', async () => {
-        await alerting.clickV2RulesTab();
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V2_URL_RE);
-        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'true');
-        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'false');
-      });
-
-      await test.step('from v2, switch to v1 again', async () => {
-        await alerting.clickV1RulesTab();
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V1_URL_RE);
-        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'true');
-        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'false');
-      });
-    });
-
-    test('starts on v1 and keeps host-aware tabs after switching to v2 and back', async ({
-      page,
-      pageObjects,
-    }) => {
-      const alerting = pageObjects.observabilityAlerting;
-
-      await test.step('start on v1 and switch to v2', async () => {
+      await test.step('/rules/v1 redirects to /rules', async () => {
         await alerting.goto(OBSERVABILITY_ALERTING_RULES_V1_PATH);
         await expect(alerting.pageTitle).toHaveText('Rules', { timeout: 30_000 });
-        await expect(alerting.v1RulesTab).toBeVisible();
-        await expect(alerting.v2RulesTab).toBeVisible();
-
-        await alerting.clickV2RulesTab();
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V2_URL_RE);
-        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'true');
-        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'false');
-      });
-
-      await test.step('from v2, switch back to v1', async () => {
-        await alerting.clickV1RulesTab();
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V1_URL_RE);
-        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'true');
-        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'false');
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_URL_RE);
       });
     });
 

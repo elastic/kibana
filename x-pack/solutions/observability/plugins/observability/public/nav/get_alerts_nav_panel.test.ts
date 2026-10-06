@@ -131,8 +131,7 @@ describe('getAlertsNavPanel', () => {
       expect.objectContaining({
         title: 'Rule Management',
         children: [
-          { link: 'observabilityAlerting:rules-v2' },
-          { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+          { link: 'observabilityAlerting:rules', title: 'Rules' },
         ],
       }),
       expect.objectContaining({
@@ -264,12 +263,11 @@ describe('getAlertsNavPanel', () => {
       enableV2(core);
     });
 
-    it('shows the v2 Rules link without the library when the user has v2 rules read', () => {
+    it('shows a single Rules link when the user has v2 rules read', () => {
       setCapabilities(core, { alerting_v2_rules: { read: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
-        { link: 'observabilityAlerting:rules-v2' },
-        { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+        { link: 'observabilityAlerting:rules', title: 'Rules' },
       ]);
     });
 
@@ -277,30 +275,36 @@ describe('getAlertsNavPanel', () => {
       setCapabilities(core, { alerting_v2_rules: { all: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
-        { link: 'observabilityAlerting:rules-v2' },
-        { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+        { link: 'observabilityAlerting:rules', title: 'Rules' },
       ]);
     });
 
-    it('shows a visible v1 Rules link when the user only has v1 rules read', () => {
+    it('shows a Rules link when the user has logs read', () => {
+      setCapabilities(core, { logs: { show: true } });
+
+      expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
+        { link: 'observabilityAlerting:rules', title: 'Rules' },
+      ]);
+    });
+
+    it('shows a Rules link when the user only has v1 rules read', () => {
       setCapabilities(core, {
         management: { insightsAndAlerting: { triggersActionsRules: true } },
       });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
-        { link: 'observabilityAlerting:rules-v1', title: 'Rules' },
+        { link: 'observabilityAlerting:rules', title: 'Rules' },
       ]);
     });
 
-    it('prefers the v2 Rules link when the user has both v1 and v2 rules read', () => {
+    it('shows a single Rules link when the user has both v1 and v2 rules read', () => {
       setCapabilities(core, {
         alerting_v2_rules: { read: true },
         management: { insightsAndAlerting: { triggersActionsRules: true } },
       });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
-        { link: 'observabilityAlerting:rules-v2' },
-        { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+        { link: 'observabilityAlerting:rules', title: 'Rules' },
       ]);
     });
   });

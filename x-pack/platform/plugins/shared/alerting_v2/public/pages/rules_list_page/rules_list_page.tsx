@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
@@ -26,7 +26,6 @@ import {
   StatusFilter,
   TagsFilter,
 } from './rules_list_filters';
-import { useAlertingLocators } from '../../application/locator_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
@@ -53,10 +52,6 @@ export const RulesListPage = () => {
 
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
-  const { rulesLocators } = useAlertingLocators();
-  const navigateToSequenceBuilder = useCallback(() => {
-    rulesLocators.navigateSync({ page: 'sequence_create' });
-  }, [rulesLocators]);
   const onCreateEsqlRuleFromOptionsFlyout = () => {
     closeCreateOptionsFlyout();
     openCreateFlyout();
@@ -148,13 +143,7 @@ export const RulesListPage = () => {
           fields: RULES_LIST_FEATURES_FIELDS,
         }}
       >
-        <RulesListHeader
-          canWrite={canWrite}
-          onCreateRule={openCreateOptionsFlyout}
-          onCreateEsqlRule={openCreateFlyout}
-          onCreateWithAgent={navigateToAgentBuilder}
-          onBuildSequence={navigateToSequenceBuilder}
-        />
+        <RulesListHeader canWrite={canWrite} onCreateRule={openCreateOptionsFlyout} />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>

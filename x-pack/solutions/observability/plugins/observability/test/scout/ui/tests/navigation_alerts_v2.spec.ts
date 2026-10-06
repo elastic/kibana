@@ -43,8 +43,7 @@ const V1_ALERTS_NAV_TITLE = 'Alerts (V1)';
 
 const PANEL_LINKS = {
   alerts: 'observabilityAlerting:alerts',
-  rulesV2: 'observabilityAlerting:rules-v2',
-  rulesV1: 'observabilityAlerting:rules-v1',
+  rules: 'observabilityAlerting:rules',
   ruleLibrary: 'observabilityAlerting:rule-library',
   actionPolicies: 'observabilityAlerting:action-policies',
   maintenanceWindows: 'management:maintenanceWindows',
@@ -68,8 +67,7 @@ const expectPlainAlertsLink = async (nav: ObservabilityNavigation) => {
 const ALL_PANEL_LINKS = [
   PANEL_LINKS.alerts,
   ALERTS_DEEP_LINK,
-  PANEL_LINKS.rulesV2,
-  PANEL_LINKS.rulesV1,
+  PANEL_LINKS.rules,
   PANEL_LINKS.ruleLibrary,
   PANEL_LINKS.actionPolicies,
   PANEL_LINKS.maintenanceWindows,
@@ -266,7 +264,7 @@ test.describe(
 
       await test.step('panel contains Rule Management, Notifications, and Operations', async () => {
         await expect(
-          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.rulesV2)
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.rules)
         ).toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.ruleLibrary)
@@ -280,9 +278,6 @@ test.describe(
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.executionHistory)
         ).toBeVisible();
-        await expect(
-          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.rulesV1)
-        ).not.toBeVisible();
       });
     });
 
@@ -311,7 +306,7 @@ test.describe(
 
       await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
         ALERTS_PANEL_ID,
-        PANEL_LINKS.rulesV2
+        PANEL_LINKS.rules
       );
       await expectPageTitle(pageObjects.chrome.pageTitle, 'Rules');
     });
@@ -451,7 +446,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ alerting_v2_rules: ['read'] }),
-        [PANEL_LINKS.rulesV2]
+        [PANEL_LINKS.rules]
       );
     });
 
@@ -464,7 +459,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ alerting_v2_rules: ['all'] }),
-        [PANEL_LINKS.rulesV2]
+        [PANEL_LINKS.rules]
       );
     });
 
@@ -516,7 +511,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ logs: ['read'] }),
-        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+        [PANEL_LINKS.alerts, PANEL_LINKS.rules]
       );
     });
 
@@ -529,7 +524,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ uptime: ['all'] }),
-        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+        [PANEL_LINKS.alerts, PANEL_LINKS.rules]
       );
     });
 

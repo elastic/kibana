@@ -19,6 +19,7 @@ import { ObservabilityAlertingPlugin } from './plugin';
 import {
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_RULES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
@@ -75,6 +76,8 @@ describe('ObservabilityAlertingPlugin', () => {
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
           CreateRuleOptionsFlyout: () => null,
+          ClassicRuleSummaryFlyout: () => null,
+          RuleSummaryFlyout: () => null,
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(
               Object.entries(paths).map(([k, v]) => [k, { app: appId, pathPrefix: v }])
@@ -118,14 +121,19 @@ describe('ObservabilityAlertingPlugin', () => {
             visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
+            id: 'rules',
+            path: '/rules',
+            visibleIn: ['globalSearch', 'projectSideNav'],
+          }),
+          expect.objectContaining({
             id: 'rules-v1',
             path: '/rules/v1',
-            visibleIn: ['globalSearch', 'projectSideNav'],
+            visibleIn: ['globalSearch'],
           }),
           expect.objectContaining({
             id: 'rules-v2',
             path: '/rules/v2',
-            visibleIn: ['globalSearch', 'projectSideNav'],
+            visibleIn: ['globalSearch'],
           }),
           expect.objectContaining({
             id: 'rule-library',
@@ -169,6 +177,7 @@ describe('ObservabilityAlertingPlugin', () => {
 
     expect(visibilityById).toEqual({
       [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ['globalSearch', 'projectSideNav'],
+      [OBSERVABILITY_ALERTING_RULES_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],

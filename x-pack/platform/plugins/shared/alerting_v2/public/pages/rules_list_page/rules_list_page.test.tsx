@@ -237,30 +237,6 @@ describe('RulesListPage', () => {
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
-  it('marks the sequence builder entry point as experimental', async () => {
-    renderPage();
-    await waitForRules();
-
-    const overflowButton = screen.queryByTestId('app-menu-overflow-button');
-    if (overflowButton) {
-      fireEvent.click(overflowButton);
-    }
-
-    await waitFor(() =>
-      expect(screen.getByTestId('createSequenceRuleButton')).toHaveTextContent(
-        'Build a sequence (Experimental)'
-      )
-    );
-  });
-
-  it('hides the sequence builder entry point when Alerting V2 experimental features are disabled', async () => {
-    mockAlertingV2ExperimentalFeaturesEnabled = false;
-    renderPage();
-    await waitForRules();
-
-    expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
-  });
-
   it('renders loading state', async () => {
     mockFindItems.mockReturnValue(new Promise(() => {}));
     renderPage();
@@ -341,7 +317,6 @@ describe('RulesListPage', () => {
       expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('createRuleButton-secondary-button')).not.toBeInTheDocument();
   });
 
   it('keeps the header create controls when filters are active even with zero matching rules', async () => {
@@ -604,42 +579,13 @@ describe('RulesListPage', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('opens the rule creation flow from the split button dropdown', async () => {
+  it('opens agent chat when "Create with agent" is clicked in the create options flyout', async () => {
     renderPage();
-    await waitFor(() =>
-      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByTestId('createEsqlRuleButton'));
-
-    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
-  });
-
-  it('opens agent chat when "Create with agent" is clicked in the split button dropdown', async () => {
-    renderPage();
-    await waitFor(() =>
-      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
-    );
-
-    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
-    });
-    expect(
-      screen.getByTestId('createWithAgentButton').querySelector('[data-euiicon-type="sparkles"]')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent(
-      'Create with agent (Experimental)'
-    );
-
-    fireEvent.click(screen.getByTestId('createWithAgentButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    await waitFor(() => expect(screen.getByTestId('createWithAgentCard')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createWithAgentCard'));
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
       path: '/agents/elastic-ai-agent/conversations/new',
@@ -656,42 +602,6 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
     expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
     expect(screen.queryByTestId('createWithAgentExperimentalBadge')).not.toBeInTheDocument();
-  });
-
-  it('hides the populated-list Create with AI Agent menu option when Alerting V2 experimental features are disabled', async () => {
-    mockAlertingV2ExperimentalFeaturesEnabled = false;
-    renderPage();
-
-    await waitFor(() =>
-      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
-    );
-    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
-
-    await waitFor(() => expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument());
-    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
-  });
-
-  it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {
-    mockAgentBuilderShow = false;
-    mockExperimentalFeaturesEnabled = false;
-
-    renderPage();
-    await waitFor(() =>
-      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
-    );
-
-    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
-    });
-
-    const agentButton = screen.getByTestId('createWithAgentButton');
-    expect(agentButton).toBeInTheDocument();
-    expect(agentButton).toBeDisabled();
-
-    fireEvent.click(agentButton);
-    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 
   it('disables the empty state agent card (does not hide it) when agent builder is not available', async () => {

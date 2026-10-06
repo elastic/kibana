@@ -13,14 +13,16 @@ import {
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../../../../../public/constants';
 
 export const OBSERVABILITY_ALERTING_SURFACES = [
   { name: 'Alerts', path: OBSERVABILITY_ALERTING_ALERTS_PATH, title: 'Alert episodes' },
-  { name: 'Rules (V1)', path: OBSERVABILITY_ALERTING_RULES_V1_PATH, title: 'Rules' },
-  { name: 'Rules', path: OBSERVABILITY_ALERTING_RULES_V2_PATH, title: 'Rules' },
+  { name: 'Rules', path: OBSERVABILITY_ALERTING_RULES_PATH, title: 'Rules' },
+  { name: 'Rules (legacy v1 list)', path: OBSERVABILITY_ALERTING_RULES_V1_PATH, title: 'Rules' },
+  { name: 'Rules (legacy v2 list)', path: OBSERVABILITY_ALERTING_RULES_V2_PATH, title: 'Rules' },
   { name: 'Rule library', path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, title: 'Rule library' },
   {
     name: 'Action Policies',
@@ -34,6 +36,8 @@ export const OBSERVABILITY_ALERTING_SURFACES = [
   },
 ] as const;
 
+export const OBSERVABILITY_ALERTING_RULES_URL_RE =
+  /\/app\/observability\/alerting\/rules(?:\?|#|$)/;
 export const OBSERVABILITY_ALERTING_RULES_V1_URL_RE =
   /\/app\/observability\/alerting\/rules\/v1(\/|$|\?|#)/;
 export const OBSERVABILITY_ALERTING_RULES_V2_URL_RE =

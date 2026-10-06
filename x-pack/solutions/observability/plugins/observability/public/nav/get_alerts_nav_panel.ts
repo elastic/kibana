@@ -55,8 +55,13 @@ const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean
 const canReadV1Alerts = (core: CoreStart): boolean =>
   hasObservabilityCapabilities(core.application.capabilities);
 
-const canReadV1Rules = (core: CoreStart): boolean =>
-  hasManagementCapability(core, V1_RULES_MANAGEMENT_ID);
+const canReadV1Rules = (core: CoreStart): boolean => {
+  const { apm, metrics, uptime, synthetics, slo } = core.application.capabilities.navLinks;
+  const logs = core.application.capabilities.logs?.show;
+  const stackRules = hasManagementCapability(core, V1_RULES_MANAGEMENT_ID);
+
+  return Boolean(apm || logs || metrics || uptime || synthetics || slo || stackRules);
+};
 
 const maybeSection = (
   children: PanelOpenerChildDefinition[],
@@ -100,17 +105,12 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
     return [];
   }
 
-  const rulesChildren: PanelOpenerChildDefinition[] = [];
-
-  if (canReadV2Rules) {
-    rulesChildren.push({ link: obsAlertingLink('rules-v2') });
-    rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
-  } else {
-    rulesChildren.push({
-      link: obsAlertingLink('rules-v1'),
-      title: i18n.translate('xpack.observability.nav.rulesV1', { defaultMessage: 'Rules' }),
-    });
-  }
+  const rulesChildren: PanelOpenerChildDefinition[] = [
+    {
+      link: obsAlertingLink('rules'),
+      title: i18n.translate('xpack.observability.nav.rules', { defaultMessage: 'Rules' }),
+    },
+  ];
 
   return maybeSection(rulesChildren, {
     title: i18n.translate('xpack.observability.nav.ruleManagement', {

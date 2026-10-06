@@ -32,6 +32,8 @@ describe('mountObservabilityAlertingApp', () => {
       ActionPoliciesPage: () => null,
       ExecutionHistoryPage: () => null,
       CreateRuleOptionsFlyout: () => null,
+      ClassicRuleSummaryFlyout: () => null,
+      RuleSummaryFlyout: () => null,
       createAlertingV2HostApp: mockCreateAlertingV2HostApp,
     };
     const triggersActionsUi = {

@@ -355,6 +355,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     alertingVTwo: {
       CreateRuleOptionsFlyout: jest.fn(() => null),
+      ClassicRuleSummaryFlyout: jest.fn(() => null),
+      RuleSummaryFlyout: jest.fn(() => null),
       RulesPage: jest.fn(() => null),
       RuleLibraryPage: jest.fn(() => null),
       EpisodesPage: jest.fn(() => null),

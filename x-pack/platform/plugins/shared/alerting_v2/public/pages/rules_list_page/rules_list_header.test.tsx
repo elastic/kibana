@@ -16,12 +16,6 @@ import { RulesListHeader } from './rules_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
 let mockCanReadV1Rules = true;
-let mockExperimentalFeaturesEnabled = true;
-let mockAreAgentBuilderSkillsAvailable = true;
-let mockAgentBuilderSkillsRequirements = {
-  hasAgentBuilderCapability: true,
-  isExperimentalFeaturesEnabled: true,
-};
 
 /** Non-empty so the assertions below prove each href is run through `basePath.prepend`. */
 const MOCK_BASE_PATH = '/mock-base';
@@ -58,31 +52,12 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
-  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-}));
-
-jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
-  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
-  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
-}));
-
 const onCreateRule = jest.fn();
-const onCreateEsqlRule = jest.fn();
-const onCreateWithAgent = jest.fn();
-const onBuildSequence = jest.fn();
 
 const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeader>>) =>
   render(
     <ListPageTestProviders>
-      <RulesListHeader
-        canWrite={true}
-        onCreateRule={onCreateRule}
-        onCreateEsqlRule={onCreateEsqlRule}
-        onCreateWithAgent={onCreateWithAgent}
-        onBuildSequence={onBuildSequence}
-        {...props}
-      />
+      <RulesListHeader canWrite={true} onCreateRule={onCreateRule} {...props} />
     </ListPageTestProviders>
   );
 
@@ -91,12 +66,6 @@ describe('RulesListHeader', () => {
     jest.clearAllMocks();
     mockPhase = 'populated';
     mockCanReadV1Rules = true;
-    mockExperimentalFeaturesEnabled = true;
-    mockAreAgentBuilderSkillsAvailable = true;
-    mockAgentBuilderSkillsRequirements = {
-      hasAgentBuilderCapability: true,
-      isExperimentalFeaturesEnabled: true,
-    };
   });
 
   it('renders the page title and experimental badge', () => {
@@ -180,13 +149,7 @@ describe('RulesListHeader', () => {
     render(
       <ListPageTestProviders>
         <TabsProvider tabs={hostTabs}>
-          <RulesListHeader
-            canWrite={true}
-            onCreateRule={onCreateRule}
-            onCreateEsqlRule={onCreateEsqlRule}
-            onCreateWithAgent={onCreateWithAgent}
-            onBuildSequence={onBuildSequence}
-          />
+          <RulesListHeader canWrite={true} onCreateRule={onCreateRule} />
         </TabsProvider>
       </ListPageTestProviders>
     );

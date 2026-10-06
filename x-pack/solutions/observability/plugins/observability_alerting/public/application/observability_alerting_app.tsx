@@ -28,18 +28,20 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
+import { MixedCreateRuleSession } from './combined_rules/mixed_create_rule_session';
 
 const createObservabilityEpisodeActions = () => [createInvestigateEpisodeAction()];
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
-  triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
@@ -64,12 +66,12 @@ const useObservabilityRulesTabs = (
       tabs.push({
         id: 'v2Rules',
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v2RulesTabTitle', {
-          defaultMessage: 'V2 rules',
+          defaultMessage: 'Universal',
         }),
         isSelected: selected === 'v2',
         href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`),
         badge: {
-          iconType: 'sparkles',
+          iconType: 'dot',
           tooltip: i18n.translate(
             'xpack.observabilityAlerting.rulesPage.v2RulesTabNewBadgeTooltip',
             { defaultMessage: 'New' }
@@ -83,7 +85,7 @@ const useObservabilityRulesTabs = (
       tabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v1RulesTabTitle', {
-          defaultMessage: 'V1 rules',
+          defaultMessage: 'Classic',
         }),
         isSelected: selected === 'v1',
         href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`),
@@ -148,13 +150,14 @@ export const ObservabilityAlertingApp = ({
     'rules'
   );
   const rulesTabVisibility = { showV1: hasV1Rules, showV2: hasV2Rules };
+  const defaultRulesPath = hasV2Rules
+    ? OBSERVABILITY_ALERTING_RULES_V2_PATH
+    : OBSERVABILITY_ALERTING_RULES_V1_PATH;
 
-  const manageRulesHref = useMemo(() => {
-    const rulesPath = hasV2Rules
-      ? OBSERVABILITY_ALERTING_RULES_V2_PATH
-      : OBSERVABILITY_ALERTING_RULES_V1_PATH;
-    return prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${rulesPath}`);
-  }, [hasV2Rules, prepend]);
+  const manageRulesHref = useMemo(
+    () => prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${defaultRulesPath}`),
+    [defaultRulesPath, prepend]
+  );
   const rulesV1Tabs = useObservabilityRulesTabs(prepend, 'v1', rulesTabVisibility);
   const rulesV2Tabs = useObservabilityRulesTabs(prepend, 'v2', rulesTabVisibility);
 
@@ -169,15 +172,26 @@ export const ObservabilityAlertingApp = ({
     [coreStart]
   );
 
+  const mixedCreate = (
+    <MixedCreateRuleSession
+      coreStart={coreStart}
+      alertingVTwo={alertingVTwo}
+      triggersActionsUi={triggersActionsUi}
+      includeClassic={hasV1Rules}
+      includeEsql={hasV2Rules}
+    />
+  );
+
   return (
     <Routes>
       <Route exact path="/">
         <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />
       </Route>
-      {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
+      <Route exact path={OBSERVABILITY_ALERTING_RULES_PATH}>
+        <Redirect to={defaultRulesPath} />
+      </Route>
       <Route path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
         <EuiPageSection paddingSize="m">
-          {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
           <EpisodesPage
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
@@ -197,6 +211,7 @@ export const ObservabilityAlertingApp = ({
             setBreadcrumbs={setBreadcrumbs}
             tabs={rulesV1Tabs}
           />
+          {mixedCreate}
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>
@@ -207,12 +222,11 @@ export const ObservabilityAlertingApp = ({
             hostApp={hostApp}
             tabs={rulesV2Tabs}
           />
+          {mixedCreate}
         </EuiPageSection>
       </Route>
-      {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
         <EuiPageSection paddingSize="m">
-          {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
           <RuleLibraryPage
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}

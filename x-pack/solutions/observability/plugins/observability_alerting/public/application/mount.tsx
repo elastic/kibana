@@ -23,7 +23,7 @@ export const mountObservabilityAlertingApp = ({
 }: {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
-  triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   params: AppMountParameters;
 }): AppUnmount => {
   const { element, history } = params;

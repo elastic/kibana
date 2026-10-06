@@ -11,6 +11,20 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { SourceRuleSummaryFlyout } from './source_rule_summary_flyout';
 
+const mockEuiFlyout = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: Record<string, unknown>) => {
+      mockEuiFlyout(props);
+      return react.createElement(actual.EuiFlyout, props);
+    },
+  };
+});
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: () => ({
     get: () => 'YYYY-MM-DD',
@@ -72,6 +86,19 @@ const renderFlyout = (overrides: Partial<typeof defaultProps> = {}) =>
 describe('SourceRuleSummaryFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('opens as a medium resizable overlay matching the universal rule summary flyout', () => {
+    renderFlyout();
+
+    expect(mockEuiFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'overlay',
+        size: 'm',
+        resizable: true,
+        ownFocus: false,
+      })
+    );
   });
 
   it('renders the rule name in the title', () => {
