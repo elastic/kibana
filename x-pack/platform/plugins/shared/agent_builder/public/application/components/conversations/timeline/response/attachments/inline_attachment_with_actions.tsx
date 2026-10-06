@@ -161,6 +161,8 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       grow
       hasShadow={false}
       hasBorder={true}
+      data-attachment-id={attachment.id}
+      data-attachment-version={attachment.versionData?.version}
       css={css`
         overflow: visible; // allow vis actions to overflow
         border-radius: ${AB_PANEL_RADIUS}px;

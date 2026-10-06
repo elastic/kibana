@@ -13,4 +13,6 @@ export const searchParamNames = {
   pluginId: 'pluginId',
   connectorId: 'connectorId',
   openConversationDetails: 'openConversationDetails',
+  scrollToAttachmentId: 'scrollToAttachmentId',
+  scrollToAttachmentVersion: 'scrollToAttachmentVersion',
 } as const;
