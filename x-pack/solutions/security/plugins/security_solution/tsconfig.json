@@ -328,5 +328,6 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/test-es-server",
+    "@kbn/core-security-server",
   ]
 }

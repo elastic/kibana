@@ -13,7 +13,6 @@ import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agen
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
 import type { SubjectsClient } from './subjects/services/subjects_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
@@ -31,17 +30,12 @@ export interface AgenticInvestigationsSetupDependencies {
   agentBuilderPlatform: AgentBuilderPlatformPluginSetup;
   /**
    * Registers the readonly investigation_impact, investigation_subject, and
-   * investigation_hypotheses attachment types and the `agentic_investigations.set_impact`,
-   * `agentic_investigations.set_hypotheses`, and `agentic_investigations.get` tools.
+   * investigation_hypotheses attachment types and the `agentic_investigations.set_impact` and
+   * `agentic_investigations.set_hypotheses` tools.
    */
   agentBuilder: AgentBuilderPluginSetup;
   /** Registers Impact workflow steps. */
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  /**
-   * Reads executions of registered driver workflows for the in-progress state. Optional: without
-   * it only Agent Builder runs count as in progress.
-   */
-  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
@@ -91,10 +85,4 @@ export interface AgenticInvestigationsPluginStart {
   getEscalationsService: () => EscalationsService;
 }
 
-export interface AgenticInvestigationsPluginSetup {
-  /**
-   * Registers a workflow that drives investigations. While an execution of it is not terminal,
-   * the investigation named by its concurrency group key (`investigation:<id>`) is in progress.
-   */
-  registerInvestigationWorkflow: (workflowId: string) => void;
-}
+export type AgenticInvestigationsPluginSetup = Record<string, never>;
