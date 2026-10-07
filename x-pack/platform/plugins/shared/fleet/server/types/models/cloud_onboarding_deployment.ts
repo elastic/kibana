@@ -43,6 +43,8 @@ const EcfStackSchema = schema.object({
   stackName: schema.string({ minLength: 1, maxLength: 128 }),
   /** ECF semantic version resolved at launch time, e.g. "1.10.0". */
   templateVersion: schema.string({ minLength: 1, maxLength: 32 }),
+  /** CloudFormation stack ARN pasted by the user post-launch. Used to deep-link to the update flow. */
+  stackArn: schema.maybe(schema.string({ minLength: 1, maxLength: 2048 })),
 });
 
 const SharedFields = {

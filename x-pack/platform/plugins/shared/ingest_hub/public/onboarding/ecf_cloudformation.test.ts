@@ -632,6 +632,12 @@ describe('isEcfStackArnValid()', () => {
       isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:changeSet/cs/abc')
     ).toBe(false);
   });
+
+  it('rejects a bare stack/ prefix with no stack name', () => {
+    expect(
+      isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:stack/')
+    ).toBe(false);
+  });
 });
 
 // ── buildEcfStackConsoleUrl ────────────────────────────────────────────────────
@@ -664,10 +670,26 @@ describe('buildEcfStackConsoleUrl()', () => {
     expect(buildEcfStackConsoleUrl('')).toBeUndefined();
   });
 
-  it('extracts region correctly for a GovCloud ARN', () => {
+  it('uses the GovCloud console hostname for aws-us-gov ARNs', () => {
     const govArn = 'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/my-stack/abc123';
     const url = buildEcfStackConsoleUrl(govArn);
+    expect(url).toContain('console.amazonaws-us-gov.com');
     expect(url).toContain('region=us-gov-west-1');
+    expect(url).not.toContain('console.aws.amazon.com');
+  });
+
+  it('uses the China console hostname for aws-cn ARNs', () => {
+    const cnArn = 'arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/my-stack/abc123';
+    const url = buildEcfStackConsoleUrl(cnArn);
+    expect(url).toContain('console.amazonaws.cn');
+    expect(url).toContain('region=cn-north-1');
+    expect(url).not.toContain('console.aws.amazon.com');
+  });
+
+  it('returns undefined for a bare stack/ prefix with no stack name', () => {
+    expect(
+      buildEcfStackConsoleUrl('arn:aws:cloudformation:us-east-1:123456789012:stack/')
+    ).toBeUndefined();
   });
 
   it('trims surrounding whitespace from the input ARN', () => {

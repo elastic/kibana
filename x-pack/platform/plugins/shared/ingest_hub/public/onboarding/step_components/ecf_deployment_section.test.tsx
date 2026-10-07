@@ -906,4 +906,27 @@ describe('useEcfDeployment staleness', () => {
     const persisted = setter.mock.calls[0][0];
     expect(persisted.stackArns?.unified).toBe(arn);
   });
+
+  it('isStaleByFamily is false when all services of a launched family are removed', () => {
+    // Family was launched with cloudtrail; all services were subsequently deselected.
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+      launchedServiceIds: { unified: ['cloudtrail'] },
+    });
+    // No unified configs — the family has no active services
+    mockGetEcfServiceConfigs.mockReturnValue([]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    // Family is no longer active — should not be considered stale (no panel to interact with)
+    expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    // isDone should also not be blocked by this case
+    expect(result.current.isDone).toBe(true);
+  });
 });

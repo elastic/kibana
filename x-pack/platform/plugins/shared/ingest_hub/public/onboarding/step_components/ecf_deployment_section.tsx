@@ -126,10 +126,18 @@ export const useEcfDeployment = ({
     { launchedFamilies: [] }
   );
 
-  const launchedFamilies: EcfTemplateFamily[] = persistedLaunchStep?.launchedFamilies ?? [];
+  const launchedFamilies: EcfTemplateFamily[] = useMemo(
+    () => persistedLaunchStep?.launchedFamilies ?? [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [persistedLaunchStep?.launchedFamilies]
+  );
   const stackNames = persistedLaunchStep?.stackNames ?? {};
   const stackVersions = persistedLaunchStep?.stackVersions ?? {};
-  const launchedServiceIds = persistedLaunchStep?.launchedServiceIds ?? {};
+  const launchedServiceIds = useMemo(
+    () => persistedLaunchStep?.launchedServiceIds ?? {},
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [persistedLaunchStep?.launchedServiceIds]
+  );
   const stackArns = persistedLaunchStep?.stackArns ?? {};
 
   const { version: templateVersion } = useEcfTemplateVersion();
@@ -183,9 +191,12 @@ export const useEcfDeployment = ({
 
   // A family is stale when it was launched AND a service-ID snapshot exists AND the current
   // set differs from the snapshot. Old sessions without a snapshot are never considered stale.
+  // A family with no currently-selected services is not stale — it is simply no longer active,
+  // so there is no visible panel for the user to interact with.
   const isStaleByFamily = useMemo(() => {
     const check = (family: EcfTemplateFamily): boolean => {
       if (!launchedFamilies.includes(family)) return false;
+      if (currentServiceIdsByFamily[family].length === 0) return false;
       const snapshot = launchedServiceIds[family];
       if (snapshot === undefined) return false;
       return JSON.stringify(snapshot) !== JSON.stringify(currentServiceIdsByFamily[family]);

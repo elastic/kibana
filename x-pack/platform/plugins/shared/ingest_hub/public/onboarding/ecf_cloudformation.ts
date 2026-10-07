@@ -78,23 +78,33 @@ export interface EcfServiceConfig {
 // ── Stack ARN utilities ───────────────────────────────────────────────────────
 
 /**
- * Matches a CloudFormation stack ARN and captures the region.
+ * Matches a complete CloudFormation stack ARN and captures the partition and region.
+ * Format: arn:PARTITION:cloudformation:REGION:ACCOUNT:stack/STACK_NAME/UNIQUE_ID
+ * The `[^/]+/` after `stack/` ensures the stack name is present (rejects bare `stack/`).
  * Supports standard (aws), GovCloud (aws-us-gov), and China (aws-cn) partitions.
  */
-const CFN_STACK_ARN_REGEX = /^arn:aws(?:-us-gov|-cn)?:cloudformation:([a-z0-9-]+):\d+:stack\//;
+const CFN_STACK_ARN_REGEX =
+  /^arn:(aws(?:-us-gov|-cn)?):cloudformation:([a-z0-9-]+):\d+:stack\/[^/]+\//;
 
 /** Returns true when the trimmed value is a well-formed CloudFormation stack ARN. */
 export const isEcfStackArnValid = (arn: string): boolean => CFN_STACK_ARN_REGEX.test(arn.trim());
 
+const CFN_CONSOLE_HOSTS: Record<string, string> = {
+  'aws-us-gov': 'console.amazonaws-us-gov.com',
+  'aws-cn': 'console.amazonaws.cn',
+};
+
 /**
  * Builds the AWS Console URL for viewing an existing CloudFormation stack.
+ * Uses the partition-appropriate console hostname (GovCloud / China have different domains).
  * Returns undefined when `stackArn` is not a valid CFN stack ARN.
  */
 export const buildEcfStackConsoleUrl = (stackArn: string): string | undefined => {
   const match = CFN_STACK_ARN_REGEX.exec(stackArn.trim());
   if (!match) return undefined;
-  const region = match[1];
-  const url = new URL('https://console.aws.amazon.com/cloudformation/home');
+  const [, partition, region] = match;
+  const host = CFN_CONSOLE_HOSTS[partition] ?? 'console.aws.amazon.com';
+  const url = new URL(`https://${host}/cloudformation/home`);
   url.searchParams.set('region', region);
   url.hash = `/stacks/stackinfo?stackId=${encodeURIComponent(stackArn.trim())}`;
   return url.toString();
