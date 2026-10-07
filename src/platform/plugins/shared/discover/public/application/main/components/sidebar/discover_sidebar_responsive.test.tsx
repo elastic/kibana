@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, within, waitFor, act } from '@testing-library/react';
+import { render, screen, within, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import React from 'react';
 import type { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
@@ -263,7 +264,9 @@ async function renderComponent(
   });
   const result = render(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
-      <DiscoverSidebarResponsive {...props} />
+      <RootDragDropProvider>
+        <DiscoverSidebarResponsive {...props} />
+      </RootDragDropProvider>
     </DiscoverToolkitTestProvider>
   );
 
@@ -448,6 +451,50 @@ describe('discover responsive sidebar', function () {
     await user.click(screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields'));
     expect(props.onRemoveFields).toHaveBeenCalledWith(['extension']);
     expect(props.onRemoveField).not.toHaveBeenCalled();
+  });
+  it('should allow reordering selected fields', async function () {
+    const onMoveField = jest.fn();
+    await renderComponent({ ...props, columns: ['extension', 'bytes'], onMoveField });
+    const selectedFields = screen.getByTestId('fieldListGroupedSelectedFields');
+    const getSelectedFieldItem = (fieldName: string) => {
+      const item = selectedFields.querySelector(`li[data-attr-field="${fieldName}"]`);
+      if (!(item instanceof HTMLElement)) {
+        throw new Error(`Selected field "${fieldName}" was not found`);
+      }
+      return item;
+    };
+
+    fireEvent.dragStart(
+      within(getSelectedFieldItem('extension')).getByTestId('dscFieldListPanelField-extension'),
+      {
+        // DataTransfer is not implemented in jsdom
+        dataTransfer: { setData: jest.fn(), getData: jest.fn() },
+      }
+    );
+    // the drop targets are rendered once the drag state has been set
+    fireEvent.drop(
+      await within(getSelectedFieldItem('bytes')).findByTestId('domDragDrop-reorderableDropLayer')
+    );
+
+    await waitFor(() => {
+      expect(onMoveField).toHaveBeenCalledWith('extension', 1);
+    });
+  });
+  it('should not allow reordering selected fields without a handler', async function () {
+    await renderComponent({ ...props, columns: ['extension', 'bytes'] });
+    const selectedFields = screen.getByTestId('fieldListGroupedSelectedFields');
+    const draggable = within(selectedFields).getByTestId('dscFieldListPanelField-extension');
+
+    fireEvent.dragStart(draggable, {
+      dataTransfer: { setData: jest.fn(), getData: jest.fn() },
+    });
+
+    await waitFor(() => {
+      expect(draggable).toHaveClass('domDraggable_active--copy');
+    });
+    expect(
+      within(selectedFields).queryByTestId('domDragDrop-reorderableDropLayer')
+    ).not.toBeInTheDocument();
   });
   it('should allow adding filters', async function () {
     const { user } = await renderComponent(props);

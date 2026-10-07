@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EuiButtonProps, EuiPageSidebarProps } from '@elastic/eui';
@@ -32,14 +33,32 @@ import { FieldsGroupNames } from '../../types';
 import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
 import type { GroupedFieldsParams } from '../../hooks/use_grouped_fields';
 import { useGroupedFields } from '../../hooks/use_grouped_fields';
-import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
+import { runAfterNextPaint } from '../../utils/run_after_next_paint';
+import {
+  UnifiedFieldListItem,
+  type UnifiedFieldListItemProps,
+  type UnifiedFieldListItemReorderGroup,
+} from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
 import {
   getSelectedFields,
+  reorderSelectedFields,
   shouldShowField,
   type SelectedFieldsResult,
-  INITIAL_SELECTED_FIELDS_RESULT,
 } from './group_fields';
+
+const REORDERABLE_FIELD_GROUP_NAMES = [FieldsGroupNames.SelectedFields];
+
+interface OptimisticSelectedFieldNames {
+  /**
+   * The workspace state the optimistic order was derived from
+   */
+  workspaceSelectedFieldNames: string[] | undefined;
+  /**
+   * The selected field names in their new order
+   */
+  fieldNames: string[];
+}
 
 export type UnifiedFieldListSidebarCustomizableProps = Pick<
   UnifiedFieldListItemProps,
@@ -86,6 +105,13 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Remove multiple selected fields from the workspace in a single update
    */
   onRemoveFieldsFromWorkspace?: (fields: DataViewField[]) => void;
+  /**
+   * Move a selected field to another position in the workspace (e.g. table columns).
+   * When provided, the "Selected fields" section becomes reorderable via drag and drop.
+   * `targetIndex` refers to the position within `workspaceSelectedFieldNames` and is meant
+   * to be applied as "remove the field, then insert it at `targetIndex`".
+   */
+  onMoveFieldInWorkspace?: (field: DataViewField, targetIndex: number) => void;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -178,35 +204,59 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   additionalFilters,
   additionalFieldGroups,
   streamNames,
+  onMoveFieldInWorkspace,
 }) => {
   const styles = useMemoCss(componentStyles);
 
   const { dataViews, core } = services;
 
-  const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
-    INITIAL_SELECTED_FIELDS_RESULT
-  );
   const [multiFieldsMap, setMultiFieldsMap] = useState<
     Map<string, Array<{ field: DataViewField; isSelected: boolean }>> | undefined
   >(undefined);
   const [isFieldNameSearchFocused, setIsFieldNameSearchFocused] = useState(false);
 
+  // Reordering the selected fields via drag and drop applies the new order to this state right away,
+  // so it's visible in the same frame as the drop, while the workspace (which can be expensive to
+  // re-render) is updated after the next paint. The optimistic order is discarded as soon as the
+  // workspace state changes, which normally means that it caught up with the new order.
+  const [optimisticSelectedFieldNames, setOptimisticSelectedFieldNames] =
+    useState<OptimisticSelectedFieldNames | null>(null);
+  const pendingWorkspaceUpdatesRef = useRef(new Set<() => void>());
+
+  const currentWorkspaceSelectedFieldNames =
+    optimisticSelectedFieldNames &&
+    isEqual(optimisticSelectedFieldNames.workspaceSelectedFieldNames, workspaceSelectedFieldNames)
+      ? optimisticSelectedFieldNames.fieldNames
+      : workspaceSelectedFieldNames;
+
   useEffect(() => {
-    const result = getSelectedFields({
-      dataView,
-      workspaceSelectedFieldNames: onSelectedFieldFilter ? [] : workspaceSelectedFieldNames,
-      allFields,
-      searchMode,
-    });
-    setSelectedFieldsState(result);
-  }, [
-    dataView,
-    workspaceSelectedFieldNames,
-    setSelectedFieldsState,
-    allFields,
-    searchMode,
-    onSelectedFieldFilter,
-  ]);
+    setOptimisticSelectedFieldNames((prevState) =>
+      prevState && !isEqual(prevState.workspaceSelectedFieldNames, workspaceSelectedFieldNames)
+        ? null
+        : prevState
+    );
+  }, [workspaceSelectedFieldNames]);
+
+  useEffect(() => {
+    const pendingWorkspaceUpdates = pendingWorkspaceUpdatesRef.current;
+    return () => {
+      pendingWorkspaceUpdates.forEach((cancel) => cancel());
+      pendingWorkspaceUpdates.clear();
+    };
+  }, []);
+
+  const selectedFieldsState = useMemo(
+    () =>
+      getSelectedFields({
+        dataView,
+        workspaceSelectedFieldNames: onSelectedFieldFilter
+          ? []
+          : currentWorkspaceSelectedFieldNames,
+        allFields,
+        searchMode,
+      }),
+    [dataView, currentWorkspaceSelectedFieldNames, allFields, searchMode, onSelectedFieldFilter]
+  );
 
   const popularFieldsLimit = useMemo(
     () => core.uiSettings.get(FIELDS_LIMIT_SETTING),
@@ -246,6 +296,65 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       additionalFieldGroups,
     });
 
+  const selectedFieldsGroup = fieldListGroupedProps.fieldGroups[FieldsGroupNames.SelectedFields];
+  const isSelectedFieldsReorderingEnabled = Boolean(
+    onMoveFieldInWorkspace &&
+      !onSelectedFieldFilter &&
+      !alwaysShowActionButton &&
+      !stateService.creationOptions.disableFieldListItemDragAndDrop
+  );
+  // Reordering is only possible while all selected fields are visible, i.e. the list is not narrowed
+  // down by a field name search or a type filter. Otherwise, the visible position of a field
+  // would not match its position in the workspace.
+  const canReorderSelectedFields =
+    isSelectedFieldsReorderingEnabled &&
+    !!selectedFieldsGroup &&
+    selectedFieldsGroup.fields.length > 1 &&
+    selectedFieldsGroup.fields.length === selectedFieldsGroup.fieldCount;
+
+  const onReorderSelectedField = useCallback(
+    (sourceFieldName: string, targetFieldName: string) => {
+      const { selectedFields } = selectedFieldsState;
+      const sourceField = selectedFields.find((field) => field.name === sourceFieldName);
+      const result = reorderSelectedFields({
+        selectedFieldNames: selectedFields.map((field) => field.name),
+        sourceFieldName,
+        targetFieldName,
+      });
+
+      if (!onMoveFieldInWorkspace || !sourceField || !result) {
+        return;
+      }
+
+      // show the new order right away...
+      setOptimisticSelectedFieldNames({
+        workspaceSelectedFieldNames,
+        fieldNames: result.reorderedFieldNames,
+      });
+
+      // ...and update the workspace once the sidebar has been painted
+      const pendingWorkspaceUpdates = pendingWorkspaceUpdatesRef.current;
+      const cancel = runAfterNextPaint(() => {
+        pendingWorkspaceUpdates.delete(cancel);
+        onMoveFieldInWorkspace(sourceField, result.targetIndex);
+      });
+      pendingWorkspaceUpdates.add(cancel);
+    },
+    [onMoveFieldInWorkspace, selectedFieldsState, workspaceSelectedFieldNames]
+  );
+
+  const selectedFieldsReorderGroup: UnifiedFieldListItemReorderGroup | undefined = useMemo(
+    () =>
+      canReorderSelectedFields && selectedFieldsGroup
+        ? {
+            items: selectedFieldsGroup.fields.map((field) => ({ id: field.name })),
+            label: selectedFieldsGroup.title,
+            onReorder: onReorderSelectedField,
+          }
+        : undefined,
+    [canReorderSelectedFields, selectedFieldsGroup, onReorderSelectedField]
+  );
+
   useEffect(() => {
     if (
       searchMode !== 'documents' ||
@@ -267,7 +376,15 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
-      <li key={`field${field.name}`} data-attr-field={field.name}>
+      <li
+        key={`field${field.name}`}
+        data-attr-field={field.name}
+        css={
+          groupName === FieldsGroupNames.SelectedFields && selectedFieldsReorderGroup
+            ? styles.reorderableFieldItem
+            : undefined
+        }
+      >
         <UnifiedFieldListItem
           additionalFilters={additionalFilters}
           alwaysShowActionButton={alwaysShowActionButton}
@@ -295,6 +412,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           trackUiMetric={trackUiMetric}
           workspaceSelectedFieldNames={workspaceSelectedFieldNames}
           streamNames={streamNames}
+          reorderGroup={
+            groupName === FieldsGroupNames.SelectedFields ? selectedFieldsReorderGroup : undefined
+          }
         />
       </li>
     ),
@@ -317,6 +437,8 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       selectedFieldsState.selectedFieldsMap,
       additionalFilters,
       streamNames,
+      selectedFieldsReorderGroup,
+      styles.reorderableFieldItem,
     ]
   );
 
@@ -442,6 +564,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 muteScreenReader={!isFieldNameSearchFocused}
                 onDeselectSelectedFields={
                   canDeselectSelectedFields ? onDeselectSelectedFields : undefined
+                }
+                reorderableGroupNames={
+                  isSelectedFieldsReorderingEnabled ? REORDERABLE_FIELD_GROUP_NAMES : undefined
                 }
               />
             ) : (
@@ -576,6 +701,10 @@ const componentStyles = {
   },
   sidebarGroup: css({
     height: '100%',
+  }),
+  // to contain the absolutely positioned drop layer of a reorderable item
+  reorderableFieldItem: css({
+    position: 'relative',
   }),
   sidebarPrependedItem: ({ euiTheme }: UseEuiTheme) =>
     css({

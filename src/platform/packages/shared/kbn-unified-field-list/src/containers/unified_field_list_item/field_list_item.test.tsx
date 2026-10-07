@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UnifiedFieldListItemProps } from './field_list_item';
+import type {
+  UnifiedFieldListItemProps,
+  UnifiedFieldListItemReorderGroup,
+} from './field_list_item';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { createStateService } from '../services/state_service';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { EuiThemeProvider } from '@elastic/eui';
+import { ReorderProvider, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { getServicesMock } from '../../../__mocks__/services.mock';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { UnifiedFieldListSidebarContainerCreationOptions } from '../../types';
 import { UnifiedFieldListItem } from './field_list_item';
 
 jest.mock('../../services/field_stats', () => ({
@@ -100,6 +105,94 @@ const renderComponent = async ({
   );
 
   return { field: finalField, props, user };
+};
+
+// DataTransfer is not implemented in jsdom
+const dataTransfer = {
+  setData: jest.fn(),
+  getData: jest.fn(),
+};
+
+const createKeywordField = (name: string) =>
+  new DataViewField({
+    aggregatable: true,
+    esTypes: ['keyword'],
+    name,
+    searchable: true,
+    type: 'string',
+  });
+
+const renderReorderableItems = ({
+  withReorderGroup = true,
+  creationOptions = {},
+}: {
+  withReorderGroup?: boolean;
+  creationOptions?: Partial<UnifiedFieldListSidebarContainerCreationOptions>;
+} = {}) => {
+  const fields = [createKeywordField('extension'), createKeywordField('machine.os')];
+  const onReorder = jest.fn();
+  const reorderGroup: UnifiedFieldListItemReorderGroup = {
+    items: fields.map((field) => ({ id: field.name })),
+    label: 'Selected fields',
+    onReorder,
+  };
+
+  const dataView = stubDataView;
+  dataView.toSpec = () => ({});
+
+  const stateService = createStateService({
+    options: {
+      originatingApp: 'test',
+      ...creationOptions,
+    },
+  });
+
+  const user = userEvent.setup();
+
+  renderWithKibanaRenderContext(
+    <EuiThemeProvider>
+      <RootDragDropProvider>
+        <ReorderProvider>
+          <ul>
+            {fields.map((field, itemIndex) => (
+              <li key={field.name}>
+                <UnifiedFieldListItem
+                  dataView={dataView}
+                  field={field}
+                  groupIndex={1}
+                  isEmpty={false}
+                  isSelected
+                  itemIndex={itemIndex}
+                  onAddFieldToWorkspace={jest.fn()}
+                  onAddFilter={jest.fn()}
+                  onEditField={jest.fn()}
+                  onRemoveFieldFromWorkspace={jest.fn()}
+                  searchMode="documents"
+                  services={getServicesMock()}
+                  size="xs"
+                  stateService={stateService}
+                  workspaceSelectedFieldNames={fields.map((item) => item.name)}
+                  reorderGroup={withReorderGroup ? reorderGroup : undefined}
+                />
+              </li>
+            ))}
+          </ul>
+        </ReorderProvider>
+      </RootDragDropProvider>
+    </EuiThemeProvider>
+  );
+
+  const startDragging = async (fieldName: string, expectedDragType: 'move' | 'copy') => {
+    const draggable = screen.getByTestId(`unifiedFieldListItemDnD-${fieldName}`);
+    fireEvent.dragStart(draggable, { dataTransfer });
+    // the drag state is set asynchronously
+    await waitFor(() => {
+      expect(draggable).toHaveClass(`domDraggable_active--${expectedDragType}`);
+    });
+    return draggable;
+  };
+
+  return { fields, onReorder, startDragging, user };
 };
 
 describe('UnifiedFieldListItem', () => {
@@ -278,5 +371,65 @@ describe('UnifiedFieldListItem', () => {
     expect(
       screen.queryByRole('button', { name: 'Add "extension.keyword" field' })
     ).not.toBeInTheDocument();
+  });
+
+  describe('reordering', () => {
+    it('should be moved onto another field of the reorder group', async () => {
+      const { onReorder, startDragging } = renderReorderableItems();
+
+      await startDragging('extension', 'move');
+
+      // only the other fields of the group become drop targets
+      expect(
+        screen.getByTestId('unifiedFieldListItemDnD-reorderTarget-machine.os')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedFieldListItemDnD-reorderTarget-extension')
+      ).not.toBeInTheDocument();
+
+      fireEvent.drop(screen.getByTestId('domDragDrop-reorderableDropLayer'));
+
+      expect(onReorder).toHaveBeenCalledTimes(1);
+      expect(onReorder).toHaveBeenCalledWith('extension', 'machine.os');
+
+      // the drop targets are gone once the drag has ended
+      await waitFor(() => {
+        expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should be dragged as a copy and not provide drop targets without a reorder group', async () => {
+      const { onReorder, startDragging } = renderReorderableItems({ withReorderGroup: false });
+
+      await startDragging('extension', 'copy');
+
+      expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedFieldListItemDnD-reorderTarget-machine.os')
+      ).not.toBeInTheDocument();
+      expect(onReorder).not.toHaveBeenCalled();
+    });
+
+    it('should close the popover when the field starts being dragged', async () => {
+      const { startDragging, user } = renderReorderableItems();
+
+      await user.click(screen.getByText('extension'));
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: 'extension' })).toBeVisible();
+      });
+
+      await startDragging('extension', 'move');
+
+      await waitFor(() => {
+        expect(screen.queryByRole('heading', { name: 'extension' })).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not be draggable at all when drag and drop is disabled', () => {
+      renderReorderableItems({ creationOptions: { disableFieldListItemDragAndDrop: true } });
+
+      expect(screen.queryByTestId('unifiedFieldListItemDnD-extension')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('domDragDrop-keyboardHandler')).not.toBeInTheDocument();
+    });
   });
 });

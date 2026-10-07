@@ -55,6 +55,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
   muteScreenReader?: boolean; // Changes aria-live from "polite" to "off" - it's useful when the numbers change due to something not directly related to the field list and we want to avoid announcing it.
+  reorderableGroupNames?: FieldsGroupNames[]; // Groups whose items can be reordered via drag and drop
   'data-test-subj'?: string;
   onDeselectSelectedFields?: () => void;
 }
@@ -68,6 +69,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   screenReaderDescriptionId,
   muteScreenReader,
   localStorageKeyPrefix,
+  reorderableGroupNames,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
   onDeselectSelectedFields,
 }: FieldListGroupedProps<T>) {
@@ -323,6 +325,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                   paginatedFields={paginatedFields[key]}
                   groupIndex={index + 1}
                   groupName={key as FieldsGroupNames}
+                  isReorderable={reorderableGroupNames?.includes(key as FieldsGroupNames)}
                   onToggle={(open) => {
                     setAccordionState((s) => ({
                       ...s,

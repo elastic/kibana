@@ -46,6 +46,48 @@ export interface SelectedFieldsResult {
   selectedFieldsMap: Record<string, boolean>;
 }
 
+export interface ReorderSelectedFieldsResult {
+  /**
+   * Index of the target field in the current (pre-move) order. Applying it with a
+   * "remove the source, then insert it at this index" move action (like `onMoveColumn`
+   * of the unified data table) places the source field into the visual slot of the target field.
+   */
+  targetIndex: number;
+  /**
+   * Selected field names in the resulting order
+   */
+  reorderedFieldNames: string[];
+}
+
+/**
+ * Resolves the result of moving `sourceFieldName` to the position of `targetFieldName` when
+ * reordering the selected fields via drag and drop. The source field takes over the visual slot
+ * of the target field: right after it when moving down, right before it when moving up, which
+ * matches the drop preview of `@kbn/dom-drag-drop`. Returns `undefined` if nothing can be moved.
+ */
+export function reorderSelectedFields({
+  selectedFieldNames,
+  sourceFieldName,
+  targetFieldName,
+}: {
+  selectedFieldNames: string[];
+  sourceFieldName: string;
+  targetFieldName: string;
+}): ReorderSelectedFieldsResult | undefined {
+  const sourceIndex = selectedFieldNames.indexOf(sourceFieldName);
+  const targetIndex = selectedFieldNames.indexOf(targetFieldName);
+
+  if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) {
+    return undefined;
+  }
+
+  const reorderedFieldNames = [...selectedFieldNames];
+  reorderedFieldNames.splice(sourceIndex, 1);
+  reorderedFieldNames.splice(targetIndex, 0, sourceFieldName);
+
+  return { targetIndex, reorderedFieldNames };
+}
+
 export function getSelectedFields({
   dataView,
   workspaceSelectedFieldNames,
