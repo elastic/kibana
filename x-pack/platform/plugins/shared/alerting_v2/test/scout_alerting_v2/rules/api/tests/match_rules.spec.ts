@@ -17,11 +17,11 @@ import {
 
 const MATCH_RULES_URL = testData.INTERNAL_RULE_MATCH_API_PATH;
 
-const ALERT_RULES: ReadonlyArray<{ name: string; tags?: string[] }> = [
-  { name: 'rule-cpu', tags: ['cpu'] },
-  { name: 'rule-cpu-production', tags: ['cpu', 'production'] },
-  { name: 'rule-memory', tags: ['memory'] },
-  { name: 'rule-untagged' },
+const ALERT_RULES: ReadonlyArray<{ name: string; tags?: string[]; routing_tags?: string[] }> = [
+  { name: 'rule-cpu', routing_tags: ['cpu'] },
+  { name: 'rule-cpu-production', routing_tags: ['cpu', 'production'] },
+  { name: 'rule-memory', routing_tags: ['memory'] },
+  { name: 'rule-tags-only', tags: ['cpu', 'production', 'memory', 'rule-tag-only'] },
 ];
 
 const SIGNAL_RULE = {
@@ -65,7 +65,7 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'tags: should return the alert rules with any of the matcher tags, sorted by name',
+    'tags: should return the alert rules with any of the matcher tags as routing tags, sorted by name',
     async ({ apiClient }) => {
       const response = await apiClient.post(MATCH_RULES_URL, {
         headers: readerHeaders,
@@ -97,6 +97,20 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.post(MATCH_RULES_URL, {
         headers: readerHeaders,
         body: { matcher: { tags: ['unknown-tag'] } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toStrictEqual([]);
+      expect(response.body.total).toBe(0);
+    }
+  );
+
+  apiTest(
+    'tags: should not match rules that only have the matcher tags as rule tags',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(MATCH_RULES_URL, {
+        headers: readerHeaders,
+        body: { matcher: { tags: ['rule-tag-only'] } },
       });
 
       expect(response).toHaveStatusCode(200);

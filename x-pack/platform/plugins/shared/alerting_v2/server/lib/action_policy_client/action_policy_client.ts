@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import type {
   ActionPolicyResponse,
+  ActionPolicyRoutingTagsResponse,
   BulkResponse,
   MatchActionPoliciesResponse,
   MatchedActionPolicy,
@@ -19,6 +20,7 @@ import {
   putActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
@@ -51,6 +53,7 @@ import {
 import { buildSoSearch } from '../build_so_search';
 import { applyPatch } from '../apply_patch';
 import { buildActionPolicySoFilter } from './build_action_policy_filter';
+import { groupRoutingTags } from './group_routing_tags';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -60,6 +63,7 @@ import type {
   CreateActionPolicyParams,
   FindActionPoliciesArgs,
   FindActionPoliciesResponse,
+  GetRoutingTagsParams,
   MatchActionPoliciesParams,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
@@ -76,6 +80,9 @@ import {
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
+
+/** Most policies read to build the routing tag suggestions. */
+const ROUTING_TAGS_MAX_POLICIES = 10_000;
 
 const getActionPolicyApiKeyName = (policyName: string): string =>
   `Action Policy: ${policyName.trim()}`;
@@ -420,7 +427,7 @@ export class ActionPolicyClient {
   public async matchActionPolicies(
     params: MatchActionPoliciesParams
   ): Promise<MatchActionPoliciesResponse> {
-    const { ruleTags = [] } = params;
+    const { routingTags = [] } = params;
 
     const items: MatchedActionPolicy[] = [];
 
@@ -434,7 +441,7 @@ export class ActionPolicyClient {
         continue;
       }
 
-      if (policyMatcher.hasTags() && policyMatcher.matchesTags(ruleTags)) {
+      if (policyMatcher.hasTags() && policyMatcher.matchesRoutingTags(routingTags)) {
         items.push({ action_policy: actionPolicy, category: 'tags' });
       }
     }
@@ -445,6 +452,24 @@ export class ActionPolicyClient {
       evaluated_count: evaluatedCount,
       is_truncated: allPolicies.total > evaluatedCount,
     };
+  }
+
+  public async getRoutingTags({
+    search,
+    policiesPerTag,
+  }: GetRoutingTagsParams): Promise<ActionPolicyRoutingTagsResponse> {
+    const { policies, isTruncated } =
+      await this.actionPolicySavedObjectService.findRoutingTagSources({
+        maxPolicies: ROUTING_TAGS_MAX_POLICIES,
+      });
+    const { items, totalTags } = groupRoutingTags({
+      policies,
+      search,
+      policiesPerTag,
+      tagsLimit: TAGS_RESPONSE_LIMIT,
+    });
+
+    return { items, total_tags: totalTags, is_truncated: isTruncated };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {

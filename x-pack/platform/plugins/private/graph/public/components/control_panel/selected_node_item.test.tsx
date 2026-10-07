@@ -73,9 +73,6 @@ describe('SelectedNodeItem', () => {
 
     expect(onDeselectNode).toHaveBeenCalledTimes(1);
     expect(onDeselectNode).toHaveBeenCalledWith(node);
-    // The circle's click bubbles to the parent button. We document the
-    // current behavior: `onSelectedFieldClick` also fires, which is benign
-    // because `onDeselectNode` removes the node from the workspace.
-    expect(onSelectedFieldClick).toHaveBeenCalledTimes(1);
+    expect(onSelectedFieldClick).not.toHaveBeenCalled();
   });
 });

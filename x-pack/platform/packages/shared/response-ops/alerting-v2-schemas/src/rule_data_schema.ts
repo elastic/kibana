@@ -83,12 +83,15 @@ const METADATA_DESCRIPTION = 'Rule metadata.';
 const METADATA_NAME_DESCRIPTION = 'Rule name (must be unique within the space).';
 const METADATA_DESCRIPTION_DESCRIPTION = 'Human-readable description of the rule.';
 const METADATA_TAGS_DESCRIPTION = 'Tags for categorization, e.g. ["production", "infra"].';
+const METADATA_ROUTING_TAGS_DESCRIPTION =
+  'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".';
 const METADATA_BUILDER_TYPE_DESCRIPTION =
   'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.';
 
 const metadataNameSchema = z.string().min(1).max(MAX_NAME_LENGTH);
 const metadataDescriptionSchema = z.string().max(MAX_DESCRIPTION_LENGTH);
 const metadataTagsSchema = tagsSchema.min(1);
+const metadataRoutingTagsSchema = tagsSchema.min(1);
 const metadataBuilderTypeSchema = z.string().max(64);
 
 export const metadataSchema = z
@@ -96,6 +99,7 @@ export const metadataSchema = z
     name: metadataNameSchema.describe(METADATA_NAME_DESCRIPTION),
     description: metadataDescriptionSchema.optional().describe(METADATA_DESCRIPTION_DESCRIPTION),
     tags: metadataTagsSchema.optional().describe(METADATA_TAGS_DESCRIPTION),
+    routing_tags: metadataRoutingTagsSchema.optional().describe(METADATA_ROUTING_TAGS_DESCRIPTION),
     builder_type: metadataBuilderTypeSchema.optional().describe(METADATA_BUILDER_TYPE_DESCRIPTION),
   })
   .strict()
@@ -111,6 +115,10 @@ const metadataPatchSchema = z
       .optional()
       .describe(METADATA_DESCRIPTION_DESCRIPTION),
     tags: metadataTagsSchema.nullable().optional().describe(METADATA_TAGS_DESCRIPTION),
+    routing_tags: metadataRoutingTagsSchema
+      .nullable()
+      .optional()
+      .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
     builder_type: metadataBuilderTypeSchema
       .nullable()
       .optional()
@@ -690,6 +698,15 @@ export const isStateTransitionAllowed = (data: {
   state_transition?: unknown;
 }): boolean => data.kind === 'alert' || data.state_transition == null;
 
+/** Signal rules never create alerts, so no action policy can be routed to them. */
+export const isRoutingTagsAllowedForKind = (data: {
+  kind?: string;
+  metadata?: { routing_tags?: unknown } | null;
+}): boolean => data.kind !== 'signal' || data.metadata?.routing_tags == null;
+
+export const ROUTING_TAGS_SIGNAL_RULE_MESSAGE =
+  'metadata.routing_tags is only allowed when kind is "alert".';
+
 /** The two objects that describe an alert rule's episode lifecycle. */
 const LIFECYCLE_FIELDS = ['recovery', 'no_data'] as const;
 
@@ -761,7 +778,7 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'query' | 'recovery' | 'no_data' | 'state_transition'
+  'kind' | 'metadata' | 'query' | 'recovery' | 'no_data' | 'state_transition'
 >;
 
 /**
@@ -778,6 +795,10 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
     .refine(isStateTransitionAllowed, {
       message: 'state_transition is only allowed when kind is "alert".',
       path: ['state_transition'],
+    })
+    .refine(isRoutingTagsAllowedForKind, {
+      message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+      path: ['metadata', 'routing_tags'],
     })
     .check((ctx) => {
       const allowed = isLifecycleConfigAllowedForKind(ctx.value);
@@ -985,6 +1006,28 @@ export const ruleTagsResponseSchema = tagsResponseSchema
   .meta({ id: 'alerting_rule_tags_response' });
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
+
+/** Query parameters for the rule routing tags API. */
+export const ruleRoutingTagsParamsSchema = z
+  .object({
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Prefix to filter routing tags by. Returns all most-used routing tags when omitted.'
+      ),
+  })
+  .strict();
+
+export type RuleRoutingTagsParams = z.infer<typeof ruleRoutingTagsParamsSchema>;
+
+/** Rule routing tags response schema. */
+export const ruleRoutingTagsResponseSchema = tagsResponseSchema
+  .describe('All unique routing tags across rules.')
+  .meta({ id: 'alerting_rule_routing_tags_response' });
+
+export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
 
 export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 
