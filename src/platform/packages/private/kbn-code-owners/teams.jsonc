@@ -14,12 +14,12 @@
   {
     "id": "actionable-obs",
     "name": "Obs UX: Actionable Obs",
+    "description": "Deprecated: elastic/actionable-obs-team no longer exists.",
     "areas": [
       "observability"
     ],
     "github": {
-      "team": "elastic/actionable-obs-team",
-      "label": "Team:actionable-obs"
+      "team": "elastic/actionable-obs-team"
     },
     "responsibilities": [
       "Observability Alerts",
@@ -677,12 +677,12 @@
   {
     "id": "obs-ux-management-team",
     "name": "Obs Ux Management Team",
+    "description": "Deprecated: elastic/obs-ux-management-team no longer exists.",
     "areas": [
       "observability"
     ],
     "github": {
-      "team": "elastic/obs-ux-management-team",
-      "label": "Team:obs-ux-management"
+      "team": "elastic/obs-ux-management-team"
     }
   },
   {
