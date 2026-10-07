@@ -6,6 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  CONVERSATION_ID_MAX_LENGTH,
+  CONVERSATION_TITLE_MAX_LENGTH,
+  agentIdMaxLength,
+} from '@kbn/agent-builder-common';
 
 /** Written once, when an escalation is created from an investigation. */
 export const ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE =
@@ -20,9 +25,10 @@ export const ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE =
  * when the event is written, so rendering needs no extra fetch and survives later changes.
  */
 export const escalationInvestigationEventSchema = z.object({
-  investigation_id: z.string().min(1),
-  title: z.string(),
-  agent_id: z.string().optional(),
+  investigation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH),
+  // Bounded by the conversation title limit, since it is a snapshot of an investigation's title.
+  title: z.string().max(CONVERSATION_TITLE_MAX_LENGTH),
+  agent_id: z.string().min(1).max(agentIdMaxLength).optional(),
 });
 
 export type EscalationInvestigationEventData = z.infer<typeof escalationInvestigationEventSchema>;
