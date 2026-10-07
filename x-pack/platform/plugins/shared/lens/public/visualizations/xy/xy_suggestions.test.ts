@@ -1689,6 +1689,54 @@ describe('xy_suggestions', () => {
     });
   });
 
+  describe('areaFill', () => {
+    const bytesOverTimeTable: TableSuggestion = {
+      isMultiRow: true,
+      columns: [numCol('bytes'), dateCol('date')],
+      layerId: 'first',
+      changeType: 'unchanged',
+    };
+
+    test('leaves areaFill undefined when suggesting area from a chart without area layers', () => {
+      const suggestions = getSuggestions({
+        table: bytesOverTimeTable,
+        keptLayerIds: ['first'],
+        subVisualizationId: 'area',
+        state: {
+          legend: { isVisible: true, position: 'bottom' },
+          valueLabels: 'hide',
+          preferredSeriesType: 'bar',
+          layers: [
+            {
+              layerId: 'first',
+              layerType: LayerTypes.DATA,
+              seriesType: 'bar',
+              xAccessor: 'date',
+              accessors: ['bytes'],
+            },
+          ],
+        },
+      });
+
+      const areaSuggestion = suggestions.find(
+        ({ state }) => getVisualizationSubtypeId(state) === 'area'
+      );
+      expect(areaSuggestion).toBeDefined();
+      expect(areaSuggestion?.state.areaFill).toBeUndefined();
+    });
+
+    test('leaves areaFill undefined for non-area suggestions without a current state', () => {
+      const suggestions = getSuggestions({
+        table: bytesOverTimeTable,
+        keptLayerIds: [],
+      });
+
+      const [suggestion] = suggestions;
+      expect(getVisualizationSubtypeId(suggestion.state)).toBe('bar_stacked');
+      expect(suggestion.state.areaFill).toBeUndefined();
+    });
+  });
+
   describe('preserves chart-level config when columns change', () => {
     test('preserves legend, axis titles, fitting function, and other chart-level settings', () => {
       const currentState: XYVisualizationState = {
