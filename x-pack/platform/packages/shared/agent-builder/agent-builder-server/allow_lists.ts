@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineMemoryTools,
   contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
@@ -123,6 +124,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   contextEngineAutomationTools.saveAutomation,
   contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
+  ...Object.values(contextEngineMemoryTools),
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',
@@ -135,6 +137,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_record_system_learning',
   'nightshift_record_tool_learning',
   'nightshift_record_remediation',
+
+  // Platform – Agentic Investigations
+  `${internalNamespaces.agenticInvestigations}.set_impact`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,

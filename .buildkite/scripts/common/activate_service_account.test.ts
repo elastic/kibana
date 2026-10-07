@@ -271,6 +271,14 @@ describe('GCS service account activation', () => {
     expect(result.stderr).toContain('Mock token request failure');
   });
 
+  it('refuses an unknown bucket before contacting gcloud', () => {
+    const result = sandbox.run(['not-a-real-bucket']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("No service account is configured for 'not-a-real-bucket'.");
+    expect(result.calls).toEqual([]);
+  });
+
   it('clears the gcloud auth config, revokes the proxy account and removes credentials on logout', () => {
     const { credentialsDir, run } = sandbox;
     expect(run().status).toBe(0);
