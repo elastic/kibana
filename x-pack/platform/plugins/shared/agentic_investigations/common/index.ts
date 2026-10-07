@@ -175,3 +175,10 @@ export type {
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
 } from './escalations';
+
+export {
+  AppendWorkflowExecutionIdStepId,
+  appendWorkflowExecutionIdStepCommonDefinition,
+  appendWorkflowExecutionIdStepInputSchema,
+  appendWorkflowExecutionIdStepOutputSchema,
+} from './workflow_execution/step_types';
