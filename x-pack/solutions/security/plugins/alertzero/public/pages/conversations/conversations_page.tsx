@@ -259,10 +259,14 @@ const ConversationsPageContent: React.FC = () => {
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
       <EscalationModalBoundary>
-        <LazyConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
+        <LazyConnectedCloseInvestigationModal
+          investigation={investigation}
+          onClose={onClose}
+          dropDecidedProposal={dropDecided}
+        />
       </EscalationModalBoundary>
     ),
-    []
+    [dropDecided]
   );
 
   const renderDismissModal = useCallback(

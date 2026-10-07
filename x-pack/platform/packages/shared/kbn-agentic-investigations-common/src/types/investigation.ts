@@ -27,8 +27,7 @@ export interface Investigation {
   createdAt: string;
   /** ISO 8601 timestamp */
   updatedAt: string;
-  watch_id: string;
-  watch_execution_id: string;
+  worker_execution_ids: string[];
   watch_tier?: string;
   severity?: string;
   assignee?: string | null;

@@ -13,7 +13,7 @@ import type {
 } from '../../../../../common/step_types/package_report';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import { decidePackageReport } from './decide_package_report';
+import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
@@ -170,6 +170,8 @@ export const runPackageReport = async ({
         status: 'packaged',
         coverage,
         proposals: [],
+        proposalBullets: [],
+        omittedProposalCount: 0,
         dismiss: true,
         closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
         expectedProposalCount: 0,
@@ -239,10 +241,15 @@ export const runPackageReport = async ({
     newProposalCount: proposals.length,
   });
 
+  const { bullets: proposalBullets, omittedCount: omittedProposalCount } =
+    buildProposalSummaryBullets(proposals);
+
   return {
     status: 'packaged',
     coverage,
     proposals,
+    proposalBullets,
+    omittedProposalCount,
     // Not forced to `true`: a confirmed hit the guard suppressed is not benign. Accepted
     // consequence, not an oversight: `decidePackageReport` could not previously return
     // `dismiss: false` with an empty `proposals` (it always filled at least the
