@@ -12,7 +12,7 @@ import axios from 'axios';
 import type { ContractMock, ContractMockOptions } from '@kbn/connector-contract-mock';
 import { createContractMockFetch } from '@kbn/connector-contract-mock';
 import type { Logger } from '@kbn/logging';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { authTypeSpecs } from '../../server';
 import type {
   ActionContext,
@@ -52,32 +52,36 @@ const findAuthType = (id: string): NormalizedAuthType => {
   return authType as NormalizedAuthType;
 };
 
-let serviceAccountJson: string | undefined;
+let privateKey: string | undefined;
 
 // A key auth types can sign with, generated once, as the mock accepts any signature.
-const sampleServiceAccountJson = (): string => {
-  serviceAccountJson ??= JSON.stringify({
+const samplePrivateKey = (): string => {
+  privateKey ??= generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+  }).privateKey;
+  return privateKey;
+};
+
+const sampleServiceAccountJson = (): string =>
+  JSON.stringify({
     type: 'service_account',
     project_id: 'contract-mock',
     private_key_id: 'contract-mock',
-    private_key: generateKeyPairSync('rsa', {
-      modulusLength: 2048,
-      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
-      publicKeyEncoding: { type: 'spki', format: 'pem' },
-    }).privateKey,
+    private_key: samplePrivateKey(),
     client_email: 'contract-mock@contract-mock.iam.gserviceaccount.com',
     client_id: 'contract-mock',
     auth_uri: 'https://accounts.google.com/o/oauth2/auth',
     token_uri: 'https://oauth2.googleapis.com/token',
   });
-  return serviceAccountJson;
-};
 
 const placeholdersFor = (key: string): readonly string[] => [
   ...(key === 'serviceAccountJson' ? [sampleServiceAccountJson()] : []),
   `contract-mock-${key}`,
   'https://contract-mock.invalid/',
   'contract-mock@example.com',
+  samplePrivateKey(),
 ];
 
 const toSecrets = (
@@ -94,7 +98,10 @@ const toSecrets = (
       secrets[key] = fallback.data;
       continue;
     }
-    const placeholder = placeholdersFor(key).find((value) => field.safeParse(value).success);
+    const options = field instanceof z.ZodEnum ? field.options : [];
+    const placeholder = [...options, ...placeholdersFor(key)].find(
+      (value) => field.safeParse(value).success
+    );
     if (placeholder !== undefined) {
       secrets[key] = placeholder;
     }
@@ -191,7 +198,7 @@ export const createContractContext = async ({
 
   const ctx: ActionContext = {
     client,
-    config: { ...config },
+    config: connector.schema ? await connector.schema.parseAsync(config) : { ...config },
     secrets: authSecrets,
     log: silentLogger,
     getClient: async (clientType) => {

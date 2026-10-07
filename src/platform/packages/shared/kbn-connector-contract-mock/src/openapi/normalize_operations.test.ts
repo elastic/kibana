@@ -47,6 +47,13 @@ describe('toUnicodePattern', () => {
     expect(toUnicodePattern('^a\\-b$')).toBe('^a-b$');
   });
 
+  it('scopes leading inline flags over the rest of the pattern', () => {
+    const pattern = toUnicodePattern('(?i)^[0-9a-f]{2}\\_$');
+
+    expect(pattern).toBe('(?i:^[0-9a-f]{2}_$)');
+    expect(new RegExp(pattern, 'u').test('AB_')).toBe(true);
+  });
+
   it('leaves valid patterns untouched', () => {
     expect(toUnicodePattern('^\\d{3}\\.\\w+$')).toBe('^\\d{3}\\.\\w+$');
   });
@@ -101,7 +108,7 @@ describe('normalizeOperations', () => {
     expect(Item.example).toEqual({ nullable: true, enum: [1, 1] });
   });
 
-  it('converts boolean exclusive bounds in OpenAPI 3.0 only', () => {
+  it.each(['3.0.3', '3.1.0'])('converts boolean exclusive bounds in OpenAPI %s', (version) => {
     const bounds = {
       type: 'integer',
       minimum: 0,
@@ -110,11 +117,16 @@ describe('normalizeOperations', () => {
       exclusiveMaximum: false,
     };
 
-    expect(loadNormalizedSchemas({ Item: { ...bounds } }).Item).toEqual({
+    expect(loadNormalizedSchemas({ Item: { ...bounds } }, version).Item).toEqual({
       type: 'integer',
       exclusiveMinimum: 0,
       maximum: 9,
     });
+  });
+
+  it('keeps numeric exclusive bounds', () => {
+    const bounds = { type: 'integer', exclusiveMinimum: 0, exclusiveMaximum: 9 };
+
     expect(loadNormalizedSchemas({ Item: { ...bounds } }, '3.1.0').Item).toEqual(bounds);
   });
 });

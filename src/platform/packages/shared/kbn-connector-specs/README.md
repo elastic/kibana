@@ -587,7 +587,7 @@ Auth types and handlers that send requests themselves rather than through the ax
 Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema, and records the vendor operations each one calls. The inputs are:
 
 - one without optional properties, and one with them;
-- one at the schema's upper bounds: longest strings (`max`, or 1024 characters when unbounded), largest numbers, fullest arrays and the last enum value;
+- one at the schema's upper bounds: longest strings (`max` up to 65,536 characters, or 1024 characters when unbounded), largest numbers, fullest arrays and the last enum value;
 - one per enum value, so every value the schema allows is sent once.
 
 The vendor spec rejecting any of them fails recording, so the action's schema has to be at least as strict as the vendor's: a limit the vendor doesn't have is fine, a looser one isn't.
@@ -601,6 +601,8 @@ node scripts/connector_vendor_api --connector datadog
 node scripts/connector_vendor_api --connector datadog --refresh
 # CI: write nothing, fail if anything would change
 node scripts/connector_vendor_api --connector datadog --check
+# Specs of tens of megabytes, such as Microsoft Graph's, need a larger heap to fetch
+NODE_OPTIONS=--max-old-space-size=8192 node scripts/connector_vendor_api --connector microsoft-teams --refresh
 ```
 
 The folder holds:

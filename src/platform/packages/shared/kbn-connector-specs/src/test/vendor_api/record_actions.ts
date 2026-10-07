@@ -131,6 +131,10 @@ export const recordActions = async ({
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
   const connectorConfig = config ?? (await sampleConfig(connector));
+  const configResult = await connector.schema?.safeParseAsync(connectorConfig);
+  if (configResult?.success === false) {
+    throw new Error(`The connector config is invalid: ${configResult.error.message}`);
+  }
   const authTypes = authType === undefined ? authTypeIdsOf(connector) : [authType];
   const operations: ActionsRecording['operations'] = {};
   const unmatched: ActionsRecording['unmatched'] = {};

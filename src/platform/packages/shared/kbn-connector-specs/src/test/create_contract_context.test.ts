@@ -188,6 +188,36 @@ describe('createContractContext', () => {
     expect(mock.calls).toEqual([]);
   });
 
+  it('parses the config with the connector schema, applying its defaults', async () => {
+    const { ctx } = await createContractContext({
+      connector: {
+        ...FigmaConnector,
+        schema: z.object({ apiUrl: z.string().default('https://api.figma.com'), team: z.string() }),
+      },
+      config: { team: 'design' },
+      specs: [figmaSpec],
+    });
+
+    expect(ctx.config).toEqual({ apiUrl: 'https://api.figma.com', team: 'design' });
+  });
+
+  it('fills enum secrets and secrets that must be PEM private keys', async () => {
+    const { ctx } = await createContractContext({
+      connector: {
+        ...FigmaConnector,
+        auth: { types: ['oauth_client_credentials_private_key_jwt'] },
+      },
+      specs: [figmaSpec],
+    });
+
+    expect(ctx.secrets).toMatchObject({
+      clientId: 'contract-mock-clientId',
+      algorithm: 'PS256',
+      certificateBinding: 'x5t#S256',
+      privateKey: expect.stringContaining('-----BEGIN PRIVATE KEY-----'),
+    });
+  });
+
   it('rejects auth types the connector does not declare', async () => {
     await expect(
       createContractContext({

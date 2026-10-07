@@ -54,6 +54,22 @@ const sectionFor = (trail: readonly string[]): string => {
     : 'schemas';
 };
 
+// Swagger 2.0 keeps reusable parts in root sections, and has no section for the others.
+const SWAGGER2_SECTIONS: Readonly<Record<string, string>> = {
+  parameters: 'parameters',
+  responses: 'responses',
+  schemas: 'definitions',
+  securitySchemes: 'securityDefinitions',
+};
+
+const containerOf = (swagger2: boolean, section: string): string[] | undefined => {
+  if (!swagger2) {
+    return ['components', section];
+  }
+  const container = SWAGGER2_SECTIONS[section];
+  return container === undefined ? undefined : [container];
+};
+
 // Path items can't be components in OpenAPI 3.0, so refs to them are inlined where they stand.
 const isPathItem = (trail: readonly string[]): boolean =>
   trail.length === 2 && (trail[0] === 'paths' || trail[0] === 'webhooks');
@@ -88,13 +104,18 @@ export const bundleSpec = async (
   { url, load }: BundleOptions
 ): Promise<OpenApiDocument> => {
   const rootUrl = toTarget('', url).url;
+  const swagger2 = document.swagger === '2.0';
   const loaded = new Map<string, Promise<unknown>>([[rootUrl, Promise.resolve(document)]]);
   const refs = new Map<string, string>();
-  const rootComponents = isJsonObject(document.components) ? document.components : {};
+  const sections = swagger2
+    ? Object.keys(SWAGGER2_SECTIONS)
+    : Object.keys(isJsonObject(document.components) ? document.components : {});
   const taken = new Set(
-    Object.entries(rootComponents).flatMap(([section, entries]) =>
-      Object.keys(isJsonObject(entries) ? entries : {}).map((name) => `${section}/${name}`)
-    )
+    sections.flatMap((section) => {
+      const container = containerOf(swagger2, section);
+      const entries = container && getAtTokens(document, container);
+      return Object.keys(isJsonObject(entries) ? entries : {}).map((name) => `${section}/${name}`);
+    })
   );
   // Inlined components, by section; merged into the result once the walk is done.
   const added: JsonObject = {};
@@ -131,33 +152,47 @@ export const bundleSpec = async (
     return candidates.find((name) => !taken.has(`${section}/${name}`)) ?? fallback;
   };
 
-  const componentRefFor = async (target: RefTarget, ref: string, trail: readonly string[]) => {
+  const sectionAndToken = ({ tokens }: RefTarget, trail: readonly string[]) => {
+    if (tokens[0] === 'components' && tokens.length === 3) {
+      return [tokens[1], tokens[2]];
+    }
+    if (tokens.length === 2) {
+      const section = Object.keys(SWAGGER2_SECTIONS).find(
+        (candidate) => SWAGGER2_SECTIONS[candidate] === tokens[0]
+      );
+      if (section !== undefined) {
+        return [section, tokens[1]];
+      }
+    }
+    return [sectionFor(trail), tokens[tokens.length - 1]];
+  };
+
+  /** The local ref the target is inlined at, or undefined when it has no section to go into. */
+  const componentRefFor = async (
+    target: RefTarget,
+    ref: string,
+    trail: readonly string[]
+  ): Promise<string | undefined> => {
     const key = `${target.url}#${toPointer(target.tokens)}`;
     const existing = refs.get(key);
     if (existing) {
       return existing;
     }
-    const { tokens } = target;
-    const [section, token] =
-      tokens[0] === 'components' && tokens.length === 3
-        ? [tokens[1], tokens[2]]
-        : tokens[0] === 'definitions' && tokens.length === 2
-        ? ['schemas', tokens[1]]
-        : [sectionFor(trail), tokens[tokens.length - 1]];
+    const [section, token] = sectionAndToken(target, trail);
+    const container = containerOf(swagger2, section);
+    if (container === undefined) {
+      return undefined;
+    }
     const directory = fileStem(target.url, true);
     const name =
       token === undefined
         ? uniqueName(section, toName(fileStem(target.url)), toName(directory))
         : uniqueName(section, toName(token), toName(`${directory}_${token}`));
-    const componentRef = `#${toPointer(['components', section, name])}`;
+    const componentRef = `#${toPointer([...container, name])}`;
     taken.add(`${section}/${name}`);
     refs.set(key, componentRef);
     const value = await resolve(target, ref, trail);
-    setAtTokens(
-      added,
-      [section, name],
-      await bundle(value, target.url, ['components', section, name])
-    );
+    setAtTokens(added, [section, name], await bundle(value, target.url, [...container, name]));
     return componentRef;
   };
 
@@ -182,10 +217,12 @@ export const bundleSpec = async (
       if (target.url === rootUrl) {
         return base === rootUrl ? { ...node } : { ...node, $ref: `#${toPointer(target.tokens)}` };
       }
-      if (isPathItem(trail)) {
-        return bundle(await resolve(target, ref, trail), target.url, trail);
-      }
-      return { ...node, $ref: await componentRefFor(target, ref, trail) };
+      const componentRef = isPathItem(trail)
+        ? undefined
+        : await componentRefFor(target, ref, trail);
+      return componentRef === undefined
+        ? bundle(await resolve(target, ref, trail), target.url, trail)
+        : { ...node, $ref: componentRef };
     }
     const result: JsonObject = {};
     for (const [key, child] of Object.entries(node)) {
@@ -198,10 +235,13 @@ export const bundleSpec = async (
   if (Object.keys(added).length === 0) {
     return result;
   }
-  const components = isJsonObject(result.components) ? { ...result.components } : {};
   for (const [section, entries] of Object.entries(added)) {
-    const current = components[section];
-    components[section] = { ...(isJsonObject(current) ? current : {}), ...(entries as JsonObject) };
+    const container = containerOf(swagger2, section) ?? [];
+    const current = getAtTokens(result, container);
+    setAtTokens(result, container, {
+      ...(isJsonObject(current) ? current : {}),
+      ...(entries as JsonObject),
+    });
   }
-  return { ...result, components };
+  return result;
 };

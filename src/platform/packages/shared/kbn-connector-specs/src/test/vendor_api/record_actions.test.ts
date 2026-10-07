@@ -188,21 +188,29 @@ describe('recordActions', () => {
   it('runs actions with a config sampled from the connector schema, unless one is given', async () => {
     const configured: ConnectorSpec = {
       ...connector,
-      schema: z.object({ region: z.enum(['us', 'eu']), debug: z.boolean().optional() }),
+      schema: z.object({
+        region: z.enum(['us', 'eu']),
+        debug: z.boolean().optional(),
+        apiUrl: z.string().default(V1),
+      }),
       actions: {
         getItem: action(z.object({}), async ({ client, config }) => {
           if (config?.region === undefined || 'debug' in config) {
             throw new Error(`Unexpected config ${JSON.stringify(config)}`);
           }
-          return (await client.get(`${V1}/items/${config.region}`)).data;
+          return (await client.get(`${config.apiUrl}/items/${config.region}`)).data;
         }),
       },
     };
 
     expect((await recordActions({ connector: configured, specs })).findings).toEqual([]);
     expect(
-      (await recordActions({ connector: configured, specs, config: { debug: true } })).findings
+      (await recordActions({ connector: configured, specs, config: { region: 'eu', debug: true } }))
+        .findings
     ).toEqual([expect.objectContaining({ kind: 'no-auth-type', action: 'getItem' })]);
+    await expect(
+      recordActions({ connector: configured, specs, config: { debug: true } })
+    ).rejects.toThrow(/^The connector config is invalid: .*region/s);
   });
 
   it('serves response overrides and reports those the spec contradicts', async () => {
