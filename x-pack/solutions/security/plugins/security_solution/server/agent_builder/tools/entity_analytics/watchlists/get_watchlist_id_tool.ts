@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -18,14 +18,16 @@ import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 
-const schema = z.object({
-  identifier: z
-    .string()
-    .min(1)
-    .describe(
-      'A watchlist reference — its id OR its name. Pass whatever the user gave you (usually the name); the tool figures out which it is.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    identifier: z
+      .string()
+      .min(1)
+      .describe(
+        'A watchlist reference — its id OR its name. Pass whatever the user gave you (usually the name); the tool figures out which it is.'
+      ),
+  })
+);
 
 export const SECURITY_GET_WATCHLIST_ID_TOOL_ID = securityTool('get_watchlist_id');
 

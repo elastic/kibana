@@ -14,7 +14,10 @@ import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platfor
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
+import type { SubjectsClient } from './subjects/services/subjects_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
+import type { DeleteInvestigationDataAcrossSpacesResult } from './investigations/services/delete_investigation_data_across_spaces';
+import type { InvestigationsClient } from './investigations/services/investigations_client';
 
 export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
@@ -25,7 +28,11 @@ export interface AgenticInvestigationsSetupDependencies {
    * them.
    */
   agentBuilderPlatform: AgentBuilderPlatformPluginSetup;
-  /** Registers the readonly investigation_impact attachment type and the `agentic_investigations.set_impact` tool. */
+  /**
+   * Registers the readonly investigation_impact, investigation_subject, and
+   * investigation_hypotheses attachment types and the `agentic_investigations.set_impact` and
+   * `agentic_investigations.set_hypotheses` tools.
+   */
   agentBuilder: AgentBuilderPluginSetup;
   /** Registers Impact workflow steps. */
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -50,11 +57,31 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   /**
-   * Request-scoped impact reads. Checks the investigations manage privilege and
-   * derives the space from the request, because in-process callers bypass
-   * route `security.authz`.
+   * Request-scoped impact reads. Reads accept the investigations read or manage
+   * privilege, and the space comes from the request, because in-process callers
+   * bypass route `security.authz`.
    */
   getImpactClient: (request: KibanaRequest) => ImpactReadClient;
+  /**
+   * Request-scoped investigation subjects: record them when starting or following up on an
+   * investigation, find investigations by subject, and claim subjects for a race-safe start.
+   * Reads accept the investigations read or manage privilege; writes and claims need manage.
+   * Space and user come from the request.
+   */
+  getSubjectsClient: (request: KibanaRequest) => SubjectsClient;
+  /**
+   * Request-scoped investigation reads (get, list, severity counts, open investigations by
+   * subject) and the maintenance delete. Reads check the investigations read or manage
+   * privilege; space comes from the request.
+   */
+  getInvestigationsClient: (request: KibanaRequest) => InvestigationsClient;
+  /**
+   * Maintenance, in every space: removes the subjects, subject claims, impact, and hypotheses of
+   * every investigation that has subjects. Runs as the internal user with no request, so the
+   * caller must authorize this destructive operation. Agent Builder conversations are not
+   * deleted.
+   */
+  deleteSubjectInvestigationDataAcrossSpaces: () => Promise<DeleteInvestigationDataAcrossSpacesResult>;
   getEscalationsService: () => EscalationsService;
 }
 

@@ -489,6 +489,13 @@ components:
         description:
           type: string
           maxLength: 2048
+        direction:
+          $ref: '#/components/schemas/Direction'
+          description: >-
+            How comparisons read this score: `maximize` when a higher value is
+            better, `minimize` when a lower value is better, and `neutral` when
+            it is informational only. Applies to numeric values and to the
+            values assigned to labels. Absent means `maximize`.
       required:
         - name
         - type
