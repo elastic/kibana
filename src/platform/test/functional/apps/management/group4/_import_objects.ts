@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Override the visualization.
         await PageObjects.common.clickConfirmOnModal();
 
-        const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
+        const isSuccessful = await testSubjects.waitForExists('importSavedObjectsSuccess');
         expect(isSuccessful).to.be(true);
       });
 
