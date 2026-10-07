@@ -117,7 +117,7 @@ describe('EvaluatorEditorFlyout', () => {
     testMutateAsync.mockResolvedValue({
       result: {
         status: 'ok',
-        evaluator: { name: 'tone-judge', kind: 'llm' },
+        evaluator: { name: 'tone-judge', kind: 'llm', direction: 'maximize' },
         scores: [{ name: 'tone', score: 0.8, explanation: 'Polite and direct.' }],
       },
     });
@@ -250,6 +250,28 @@ describe('EvaluatorEditorFlyout', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
+    it('sends a direction for every score, defaulting to higher is better', async () => {
+      renderCreate();
+      fillValidDraft();
+      fireEvent.click(screen.getByTestId('evalsEvaluatorAddScore'));
+      setField('evalsEvaluatorScoreName-1', 'hallucination');
+      setField('evalsEvaluatorScoreDirection-1', 'minimize');
+
+      expect(screen.getByTestId('evalsEvaluatorScoreDirection-0')).toHaveValue('maximize');
+
+      save();
+
+      await waitFor(() => expect(createMutateAsync).toHaveBeenCalled());
+      expect(
+        createMutateAsync.mock.calls[0][0].judge.output.scores.map(
+          ({ name, direction }: { name: string; direction: string }) => ({ name, direction })
+        )
+      ).toEqual([
+        { name: 'tone', direction: 'maximize' },
+        { name: 'hallucination', direction: 'minimize' },
+      ]);
+    });
+
     it('adds and removes score rows', () => {
       renderCreate();
 
@@ -287,6 +309,33 @@ describe('EvaluatorEditorFlyout', () => {
       expect(screen.getByTestId('evalsEvaluatorName')).toBeDisabled();
       expect(screen.getByTestId('evalsEvaluatorName')).toHaveValue('tone-judge');
       expect(screen.getByTestId('evalsEvaluatorPrompt')).toHaveValue('Rate {{{agent_response}}}.');
+    });
+
+    it("pre-fills each score's direction, reading a score saved without one as higher is better", () => {
+      mockedUseEvaluator.mockReturnValue({
+        data: {
+          evaluator: {
+            name: 'tone-judge',
+            version: '1.0.0',
+            description: 'Rates tone',
+            judge: {
+              ...JUDGE,
+              output: {
+                scores: [
+                  { name: 'tone', type: 'number' },
+                  { name: 'hallucination', type: 'number', direction: 'minimize' },
+                ],
+              },
+            },
+          },
+        },
+        isLoading: false,
+        error: null,
+      } as unknown as ReturnType<typeof useEvaluator>);
+      render(<EvaluatorEditorFlyout mode="edit" evaluatorName="tone-judge" onClose={onClose} />);
+
+      expect(screen.getByTestId('evalsEvaluatorScoreDirection-0')).toHaveValue('maximize');
+      expect(screen.getByTestId('evalsEvaluatorScoreDirection-1')).toHaveValue('minimize');
     });
 
     it('reports the version it saved', async () => {
@@ -390,6 +439,32 @@ describe('EvaluatorEditorFlyout', () => {
       );
       expect(createMutateAsync).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("labels each tested score with its direction, falling back to the evaluator's", async () => {
+      testMutateAsync.mockResolvedValueOnce({
+        result: {
+          status: 'ok',
+          evaluator: { name: 'tone-judge', kind: 'llm', direction: 'maximize' },
+          scores: [
+            { name: 'tone', score: 0.8, explanation: 'Polite.' },
+            { name: 'hallucination', score: 0.1, explanation: 'Grounded.', direction: 'minimize' },
+          ],
+        },
+      });
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+
+      expect(await screen.findByTestId('evalsEvaluatorTestScore-tone')).toHaveTextContent(
+        'Higher is better'
+      );
+      expect(screen.getByTestId('evalsEvaluatorTestScore-hallucination')).toHaveTextContent(
+        'Lower is better'
+      );
     });
 
     it('ignores a recommendation that cannot supply the declared evidence', async () => {
@@ -683,13 +758,15 @@ describe('EvaluatorEditorFlyout', () => {
       await waitFor(() => expect(resolveMutateAsync).toHaveBeenCalled());
 
       setField('evalsEvaluatorPrompt', 'Rate {{{agent_response}}} strictly.');
-      resolveProbe({
-        recommended_instrumentation: { profile: 'elastic-inference' },
-        profiles: [],
+      await act(async () => {
+        resolveProbe({
+          recommended_instrumentation: { profile: 'elastic-inference' },
+          profiles: [],
+        });
       });
 
       // No judge is invoked for a draft that is no longer on screen.
-      await waitFor(() => expect(resolveMutateAsync).toHaveBeenCalledTimes(1));
+      expect(resolveMutateAsync).toHaveBeenCalledTimes(1);
       expect(testMutateAsync).not.toHaveBeenCalled();
     });
 

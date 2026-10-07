@@ -1,5 +1,5 @@
 {
-  "sha1": "760a9639ecc6438009558192d5cfa7368642be19",
+  "sha1": "50ecc047cafbcd64c839c0c76b8babd9e2612947",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -518,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 42,
-        "column": 29
+        "line": 53,
+        "column": 15
       }
     },
     {
@@ -531,8 +531,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 63,
-        "column": 31
+        "line": 67,
+        "column": 50
       }
     },
     {
@@ -544,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 81,
-        "column": 96
+        "line": 87,
+        "column": 15
       }
     },
     {
@@ -882,7 +882,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
-        "line": 37,
+        "line": 31,
         "column": 13
       }
     },
@@ -895,8 +895,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
-        "line": 86,
-        "column": 31
+        "line": 78,
+        "column": 9
       }
     },
     {
@@ -908,7 +908,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 116,
+        "line": 115,
         "column": 9
       }
     },
@@ -921,7 +921,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 162,
+        "line": 160,
         "column": 11
       }
     },
@@ -934,7 +934,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_legacy_slot_self_heal.spec.ts",
-        "line": 137,
+        "line": 136,
         "column": 33
       }
     },
@@ -1454,7 +1454,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 50
       }
     },
@@ -1467,7 +1467,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 106,
+        "line": 105,
         "column": 72
       }
     },

@@ -173,8 +173,8 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../hooks/use_fetch_workflows', () => ({
@@ -315,7 +315,7 @@ describe('ActionPolicyFormPage', () => {
         expect(mockCreateMutateAsync).toHaveBeenCalledWith({
           name: 'Policy from test',
           description: 'Description from test',
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           throttle: { strategy: 'on_status_change', interval: null },
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
         })

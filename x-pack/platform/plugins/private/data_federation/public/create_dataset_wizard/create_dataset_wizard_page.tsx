@@ -264,7 +264,6 @@ export function CreateDatasetWizardPage({
                 }))}
               />
               <EuiSpacer size="l" />
-              {apiError}
               <WizardStepProvider value={setStepContent}>
                 <div
                   data-test-subj="createDatasetWizardContent"
@@ -289,6 +288,7 @@ export function CreateDatasetWizardPage({
                 </div>
               </WizardStepProvider>
               <EuiSpacer size="l" />
+              {apiError}
               <EuiFlexGroup gutterSize="m" responsive={false}>
                 {activeStepIndex > 0 ? (
                   <EuiFlexItem grow={false}>

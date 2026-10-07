@@ -188,8 +188,8 @@ export default ({ getService }: FtrProviderContext): void => {
         to: 'now',
       });
 
-      // 90-day range at the default barTarget → daily buckets
-      expect(body.interval).to.eql('1d');
+      // 90-day range at the default barTarget → 12-hour buckets
+      expect(body.interval).to.eql('12h');
     });
 
     it('uses a calendar-unit interval for a multi-year range', async () => {
