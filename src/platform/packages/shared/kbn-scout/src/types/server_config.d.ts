@@ -45,6 +45,12 @@ export interface ScoutServerConfig {
     /** ISO-8601 lifetime of UIAM ephemeral tokens, from PT1M to PT5M (UIAM defaults to PT5M). */
     uiamEphemeralTokenExpiration?: string;
     cps?: boolean;
+    cps?: boolean;
+    /**
+     * Extra host IP to publish the serverless ES port on. Docker otherwise
+     * binds loopback only, which an Endpoint VM cannot reach.
+     */
+    host?: string;
   };
   kbnTestServer: {
     env: any;

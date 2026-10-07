@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { POLICY_SCOPE_SUMMARIES } from '../../components/action_policy/details_flyout/policy_scope_summary';
 import { ActionPolicyInlineContent } from './action_policy_inline_content';
 
 const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
@@ -20,8 +21,8 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     name: 'My Policy',
     description: 'A test policy',
     destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
-    matcher: { expression: 'episode_status: "active"' },
-    groupingMode: 'per_alert' as const,
+    matcher: { tags: ['production', 'sre'], expression: 'alert_status: "active"' },
+    grouping_mode: 'per_alert' as const,
     throttle: { strategy: 'on_status_change' as const },
     enabled: overrides.enabled,
   } as any,
@@ -30,7 +31,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
 describe('ActionPolicyInlineContent', () => {
   it('shows draft status when no origin', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText('draft')).toBeDefined();
+    expect(screen.getByText('Draft')).toBeDefined();
   });
 
   it('shows enabled status when origin is set and enabled is undefined', () => {
@@ -40,7 +41,7 @@ describe('ActionPolicyInlineContent', () => {
         isSidebar={false}
       />
     );
-    expect(screen.getByText('enabled')).toBeDefined();
+    expect(screen.getByText('Enabled')).toBeDefined();
   });
 
   it('shows disabled status when origin is set and enabled is false', () => {
@@ -50,35 +51,29 @@ describe('ActionPolicyInlineContent', () => {
         isSidebar={false}
       />
     );
-    expect(screen.getByText('disabled')).toBeDefined();
+    expect(screen.getByText('Disabled')).toBeDefined();
   });
 
-  it('renders the matcher summary', () => {
+  it('renders the policy scope section', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText(/expr:\s*episode_status:\s*"active"/)).toBeDefined();
+    expect(screen.getByText('Policy scope')).toBeDefined();
+    expect(screen.getByText(POLICY_SCOPE_SUMMARIES.tagsAndExpression)).toBeDefined();
   });
 
-  it('renders "matches all" when matcher is null', () => {
+  it('renders the info bar with dispatch mode, frequency and destination count', () => {
+    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
+    expect(screen.getByTestId('actionPolicyInlineDispatchPer')).toHaveTextContent('Alert');
+    expect(screen.getByTestId('actionPolicyInlineFrequency')).toHaveTextContent('On status change');
+    expect(screen.getByTestId('actionPolicyInlineDestination')).toHaveTextContent('1 workflow');
+  });
+
+  it('pluralizes the destination count', () => {
     const attachment = createAttachment();
-    attachment.data.matcher = null;
+    attachment.data.destinations = [
+      { type: 'workflow', id: 'wf-1' },
+      { type: 'workflow', id: 'wf-2' },
+    ];
     render(<ActionPolicyInlineContent attachment={attachment} isSidebar={false} />);
-    expect(screen.getByText(/matches all/)).toBeDefined();
-  });
-
-  it('renders the destination count', () => {
-    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText('1 destination')).toBeDefined();
-  });
-
-  it('renders the throttle strategy badge', () => {
-    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText('on_status_change')).toBeDefined();
-  });
-
-  it('does not render throttle badge when strategy is absent', () => {
-    const attachment = createAttachment();
-    attachment.data.throttle = {};
-    render(<ActionPolicyInlineContent attachment={attachment} isSidebar={false} />);
-    expect(screen.queryByText('on_status_change')).toBeNull();
+    expect(screen.getByTestId('actionPolicyInlineDestination')).toHaveTextContent('2 workflows');
   });
 });

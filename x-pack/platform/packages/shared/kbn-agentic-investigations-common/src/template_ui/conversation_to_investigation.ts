@@ -129,7 +129,7 @@ export const conversationToEscalationHeader = (
  * Projects an Agent Builder conversation into the `Investigation` shape the flyout components read.
  *
  * Fields with no conversation equivalent are deliberately left out rather than invented:
- * - `watch_id` / `watch_tier`   no metadata field declares them.
+ * - `watch_tier`               no metadata field declares it.
  * - `affectedSurface`           nothing on the conversation or its template carries it.
  * - `recommendedAction`, `priorityScore`, `recordId`, `primaryActionLabel`
  *                               proposal-queue concepts; a conversation has 0..N proposals.
@@ -146,8 +146,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
     title: conversation.title,
     createdAt: conversation.created_at,
     updatedAt: conversation.updated_at,
-    watch_id: '',
-    watch_execution_id: readString(metadata.workflow_execution_id) ?? '',
+    worker_execution_ids: readStringArray(metadata.workflow_execution_ids),
     status: readString(metadata.status),
     severity: readString(metadata.severity),
     assignee: readFirstAssignee(metadata.assignees),

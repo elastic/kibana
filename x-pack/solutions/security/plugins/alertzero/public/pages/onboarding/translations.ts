@@ -77,6 +77,20 @@ export const workersSelectedCount = (selected: number, total: number) =>
     values: { selected, total },
   });
 
+export const SERVICE_ACCOUNT_SETUP_FAILED_TITLE = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountSetupFailedTitle',
+  {
+    defaultMessage: "Some Workers weren't turned on",
+  }
+);
+
+export const serviceAccountSetupFailedText = (failures: string) =>
+  i18n.translate('xpack.alertzero.onboarding.serviceAccountSetupFailedText', {
+    defaultMessage:
+      "AlertZero couldn't set up their service accounts. {failures}. Select Enable and run to try again.",
+    values: { failures },
+  });
+
 export const BACK = i18n.translate('xpack.alertzero.onboarding.back', {
   defaultMessage: 'Back',
 });

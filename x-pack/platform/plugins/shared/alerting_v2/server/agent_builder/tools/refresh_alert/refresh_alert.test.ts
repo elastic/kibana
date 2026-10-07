@@ -222,7 +222,7 @@ describe('refreshAlertTool', () => {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: 'Episode "ep-1" not found' },
+            data: { message: 'Alert "ep-1" not found' },
           },
         ],
       });
@@ -237,7 +237,7 @@ describe('refreshAlertTool', () => {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: 'Failed to refresh episode "ep-1": boom' },
+            data: { message: 'Failed to refresh alert "ep-1": boom' },
           },
         ],
       });
@@ -245,7 +245,7 @@ describe('refreshAlertTool', () => {
         'Failed to refresh episode',
         expect.objectContaining({
           labels: {
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_REFRESH_FAILED,
           },

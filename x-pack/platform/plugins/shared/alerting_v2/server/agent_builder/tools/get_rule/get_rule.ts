@@ -55,7 +55,7 @@ export const getRuleTool = ({
       privilegeChecker: getPrivilegeChecker({ request: toolContext.request }),
       feature: 'rules',
       level: 'read',
-      action: 'fetch rule for episode',
+      action: 'fetch rule for alert',
     });
     if (unauthorized) {
       return unauthorized;
@@ -86,7 +86,7 @@ export const getRuleTool = ({
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
           labels: {
             rule_id: ruleId,
-            episode_id: alertId,
+            alert_id: alertId,
             space_id: toolContext.spaceId,
           },
           error,
@@ -97,7 +97,7 @@ export const getRuleTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to fetch rule "${ruleId}" for episode "${alertId}": ${message}`,
+              message: `Failed to fetch rule "${ruleId}" for alert "${alertId}": ${message}`,
             },
           },
         ],
