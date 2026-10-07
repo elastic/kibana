@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { buildEpisodeStartsQuery } from './episode_starts_query';
+import { buildAlertStartsQuery } from './alert_starts_query';
 
 const RULE_ID = 'rule-abc';
 
-describe('buildEpisodeStartsQuery', () => {
-  const queryString = buildEpisodeStartsQuery({
+describe('buildAlertStartsQuery', () => {
+  const queryString = buildAlertStartsQuery({
     ruleId: RULE_ID,
-    episodeIds: ['ep-1', 'ep-2'],
+    alertIds: ['ep-1', 'ep-2'],
   }).print('basic');
 
   it('scopes to alert type, rule and the given episodes', () => {

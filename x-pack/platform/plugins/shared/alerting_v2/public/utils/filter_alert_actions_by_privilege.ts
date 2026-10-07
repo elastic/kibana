@@ -11,27 +11,27 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/actions';
 
 /**
- * Privilege level applied when filtering episode actions: `all` keeps every
+ * Privilege level applied when filtering alert actions: `all` keeps every
  * action, `read` keeps only the read-safe allowlist.
  */
-export const EPISODE_ACTIONS_PRIVILEGE = {
+export const ALERT_ACTIONS_PRIVILEGE = {
   all: 'all',
   read: 'read',
 } as const;
 
-export type EpisodeActionsPrivilege =
-  (typeof EPISODE_ACTIONS_PRIVILEGE)[keyof typeof EPISODE_ACTIONS_PRIVILEGE];
+export type AlertActionsPrivilege =
+  (typeof ALERT_ACTIONS_PRIVILEGE)[keyof typeof ALERT_ACTIONS_PRIVILEGE];
 
 /**
- * Removes mutating (write) episode actions when the user only has read
+ * Removes mutating (write) alert actions when the user only has read
  * privilege. With `all` every action is kept; with `read` only actions in the
  * read-safe allowlist survive, so any action that is not explicitly read-safe
  * stays hidden by default.
  */
-export const filterEpisodeActionsByPrivilege = (
+export const filterAlertActionsByPrivilege = (
   actions: EpisodeAction[],
-  capability: EpisodeActionsPrivilege
+  capability: AlertActionsPrivilege
 ): EpisodeAction[] =>
-  capability === EPISODE_ACTIONS_PRIVILEGE.all
+  capability === ALERT_ACTIONS_PRIVILEGE.all
     ? actions
     : actions.filter((action) => READ_SAFE_EPISODE_ACTION_IDS.has(action.id));

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { buildEpisodeSelectionQuery, MAX_EPISODES_PER_LANE } from './episode_selection_query';
+import { buildAlertSelectionQuery, MAX_ALERTS_PER_LANE } from './alert_selection_query';
 
 const RULE_ID = 'rule-abc';
 const WINDOW_START_MS = Date.parse('2026-04-01T00:00:00Z');
 const WINDOW_END_MS = Date.parse('2026-04-08T00:00:00Z');
 
-describe('buildEpisodeSelectionQuery', () => {
-  const queryString = buildEpisodeSelectionQuery({
+describe('buildAlertSelectionQuery', () => {
+  const queryString = buildAlertSelectionQuery({
     ruleId: RULE_ID,
     windowStartMs: WINDOW_START_MS,
     windowEndMs: WINDOW_END_MS,
@@ -36,15 +36,15 @@ describe('buildEpisodeSelectionQuery', () => {
   });
 
   it('caps episodes per lane before the global ceiling', () => {
-    expect(queryString).toContain(`LIMIT ${MAX_EPISODES_PER_LANE} BY group_hash`);
+    expect(queryString).toContain(`LIMIT ${MAX_ALERTS_PER_LANE} BY group_hash`);
     // Per-lane cap precedes the global limit.
-    expect(queryString.indexOf(`LIMIT ${MAX_EPISODES_PER_LANE} BY group_hash`)).toBeLessThan(
+    expect(queryString.indexOf(`LIMIT ${MAX_ALERTS_PER_LANE} BY group_hash`)).toBeLessThan(
       queryString.lastIndexOf('LIMIT')
     );
   });
 
   it('honours an explicit per-lane limit', () => {
-    const q = buildEpisodeSelectionQuery({
+    const q = buildAlertSelectionQuery({
       ruleId: RULE_ID,
       windowStartMs: WINDOW_START_MS,
       windowEndMs: WINDOW_END_MS,

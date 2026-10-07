@@ -9,39 +9,39 @@ import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 
 /**
- * Selects the episodes the alert timeline draws, scoped to the chosen top-N
- * series. One row per episode (its series + most-recent activity in the window).
- * `LIMIT ... BY group_hash` gives each series its own episode budget, so a busy
- * series can't crowd out quieter ones. Start/phases come from {@link buildEpisodePhasesQuery}.
+ * Selects the alerts the alert timeline draws, scoped to the chosen top-N
+ * series. One row per alert (its series + most-recent activity in the window).
+ * `LIMIT ... BY group_hash` gives each series its own alert budget, so a busy
+ * series can't crowd out quieter ones. Start/phases come from {@link buildAlertPhasesQuery}.
  */
-export interface EpisodeSelectionRow {
+export interface AlertSelectionRow {
   'episode.id': string;
   group_hash: string;
   last_ts: string;
 }
 
-/** Per-series cap on episodes drawn. A render-density limit (each episode is ~4 phase rows), so it can be generous. */
-export const MAX_EPISODES_PER_LANE = 50;
+/** Per-series cap on alerts drawn. A render-density limit (each alert is ~4 phase rows), so it can be generous. */
+export const MAX_ALERTS_PER_LANE = 50;
 
-export interface BuildEpisodeSelectionQueryOptions {
+export interface BuildAlertSelectionQueryOptions {
   ruleId: string;
   windowStartMs: number;
   windowEndMs: number;
   /** Series (lanes) to restrict selection to — the chosen top-N `group_hash`es. */
   groupHashes: string[];
-  /** Max episodes kept per series. Defaults to {@link MAX_EPISODES_PER_LANE}. */
+  /** Max alerts kept per series. Defaults to {@link MAX_ALERTS_PER_LANE}. */
   perLaneLimit?: number;
 }
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
-export const buildEpisodeSelectionQuery = ({
+export const buildAlertSelectionQuery = ({
   ruleId,
   windowStartMs,
   windowEndMs,
   groupHashes,
-  perLaneLimit = MAX_EPISODES_PER_LANE,
-}: BuildEpisodeSelectionQueryOptions) => {
+  perLaneLimit = MAX_ALERTS_PER_LANE,
+}: BuildAlertSelectionQueryOptions) => {
   const fromIso = toIsoUtc(windowStartMs);
   const toIso = toIsoUtc(windowEndMs);
   const hashLiterals = groupHashes.map((h) => esql.str(h));
