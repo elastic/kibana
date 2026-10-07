@@ -10,6 +10,7 @@ import type { InvestigationAttachmentStorage } from './attachment_doc_service';
 import {
   isIndexNotFoundError,
   isShardUnavailableError,
+  retryWhileShardUnavailable,
   TRANSIENT_SEARCH_RETRY_DELAYS_MS,
   withTransientSearchRetry,
 } from './search_with_transient_retry';
@@ -156,5 +157,36 @@ describe('withTransientSearchRetry', () => {
 
     await expect(retrying(request)).rejects.toBe(badRequest);
     expect(search).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('retryWhileShardUnavailable', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('retries a read no shard could answer and returns its result', async () => {
+    const read = jest
+      .fn<Promise<string>, []>()
+      .mockRejectedValueOnce(esError(503, { type: 'no_shard_available_action_exception' }))
+      .mockResolvedValueOnce('conversation');
+
+    const result = retryWhileShardUnavailable(read);
+    await jest.advanceTimersByTimeAsync(TRANSIENT_SEARCH_RETRY_DELAYS_MS[0]);
+
+    await expect(result).resolves.toBe('conversation');
+    expect(read).toHaveBeenCalledTimes(2);
+  });
+
+  it('rethrows a missing index and other errors at once', async () => {
+    const missing = indexNotFound();
+    const read = jest.fn<Promise<string>, []>().mockRejectedValueOnce(missing);
+
+    await expect(retryWhileShardUnavailable(read)).rejects.toBe(missing);
+    expect(read).toHaveBeenCalledTimes(1);
   });
 });

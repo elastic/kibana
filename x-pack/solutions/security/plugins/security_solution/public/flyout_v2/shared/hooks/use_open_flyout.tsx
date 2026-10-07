@@ -47,16 +47,16 @@ export const useOpenFlyout = (): OpenFlyout => {
   const { overlays, storage } = services;
   const store = useStore();
   const history = useHistory();
-  const { session: mainSession, historyKey } = useFlyoutSessionContext();
+  const { session: mainSession, historyKey, type: ambientType } = useFlyoutSessionContext();
 
   return useCallback(
     (children, properties, meta, sessionOverride) => {
       const session = sessionOverride ?? mainSession;
       // Seed the flyout's push/overlay mode from the persisted preference (read
-      // fresh at open time), unless the caller pinned an explicit `type`. The
+      // fresh at open time), unless the caller or the ambient session pinned a `type`. The
       // core system flyout keeps this reactive, so the settings menu can switch
       // it live afterwards.
-      const type = properties.type ?? getStoredFlyoutType(storage);
+      const type = properties.type ?? ambientType ?? getStoredFlyoutType(storage);
 
       // Persist/restore the user-resized width for main flyouts (document/entity/…) only.
       // Tool flyouts (surface === TOOL) are skipped: they can open side-by-side with a document,
@@ -102,6 +102,6 @@ export const useOpenFlyout = (): OpenFlyout => {
 
       return ref;
     },
-    [overlays, storage, services, store, history, mainSession, historyKey]
+    [overlays, storage, services, store, history, mainSession, historyKey, ambientType]
   );
 };

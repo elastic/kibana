@@ -52,6 +52,15 @@ steps:
             stage: find_or_create
             reason: "{{ steps.find_or_create.error.message }}"
 
+  - name: append_workflow_execution
+    type: investigations.appendWorkflowExecutionId
+    if: "${{ steps.find_or_create.output.investigationConversationId != blank and inputs.runId != blank }}"
+    with:
+      conversationId: "{{ steps.find_or_create.output.investigationConversationId }}"
+      workflowExecutionId: "{{ inputs.runId }}"
+    on-failure:
+      continue: true
+
   # By reference (security.threat's own contract: report_id plus optional
   # captured-fallback fields; the live report document is resolved
   # space-projected at render time, so no fallback fields are required here).

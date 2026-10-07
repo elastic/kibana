@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -17,35 +17,41 @@ import {
 
 export const AssignAttackStepId = 'security.assignAttack' as const;
 
-const assigneesArraySchema = z.array(z.string().min(1).max(MAX_USER_ID_LENGTH));
+const assigneesArraySchema = lazySchema(() => z.array(z.string().min(1).max(MAX_USER_ID_LENGTH)));
 
-const attackIdsBase = z.object({
-  ids: z
-    .union([
-      z.string().min(1).max(MAX_ATTACK_ID_LENGTH),
-      z.array(z.string().min(1).max(MAX_ATTACK_ID_LENGTH)).min(1),
-    ])
-    .describe('A single attack ID or a list of IDs to support bulk updates'),
-  update_related_alerts: z.boolean().optional().default(false),
-});
+const attackIdsBase = lazySchema(() =>
+  z.object({
+    ids: z
+      .union([
+        z.string().min(1).max(MAX_ATTACK_ID_LENGTH),
+        z.array(z.string().min(1).max(MAX_ATTACK_ID_LENGTH)).min(1),
+      ])
+      .describe('A single attack ID or a list of IDs to support bulk updates'),
+    update_related_alerts: z.boolean().optional().default(false),
+  })
+);
 
-export const assignAttackInputSchema = z.union([
-  attackIdsBase.extend({
-    assignees_to_add: assigneesArraySchema.min(1).describe('A list of user IDs to assign'),
-    assignees_to_remove: assigneesArraySchema
-      .default([])
-      .describe('A list of user IDs to unassign'),
-  }),
-  attackIdsBase.extend({
-    assignees_to_add: assigneesArraySchema.default([]).describe('A list of user IDs to assign'),
-    assignees_to_remove: assigneesArraySchema.min(1).describe('A list of user IDs to unassign'),
-  }),
-]);
+export const assignAttackInputSchema = lazySchema(() =>
+  z.union([
+    attackIdsBase.extend({
+      assignees_to_add: assigneesArraySchema.min(1).describe('A list of user IDs to assign'),
+      assignees_to_remove: assigneesArraySchema
+        .default([])
+        .describe('A list of user IDs to unassign'),
+    }),
+    attackIdsBase.extend({
+      assignees_to_add: assigneesArraySchema.default([]).describe('A list of user IDs to assign'),
+      assignees_to_remove: assigneesArraySchema.min(1).describe('A list of user IDs to unassign'),
+    }),
+  ])
+);
 
-export const assignAttackOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
+export const assignAttackOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
 
 export const assignAttackStepCommonDefinition: BaseStepDefinition<
   typeof assignAttackInputSchema,

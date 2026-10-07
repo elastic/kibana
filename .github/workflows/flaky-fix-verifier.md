@@ -443,7 +443,7 @@ The fixer deliberately leaves every created PR with only the `flaky-test-fixer` 
    - **`release_note:fix`** — a user-facing bug fix for an issue in an already released version.
 
    Do not choose `release_note:fix` merely because application code changed; confirm the affected behavior was released.
-3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!NOTE]` block (or at the end when that block is absent):
+3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!IMPORTANT]` block (or `> [!NOTE]` on older PRs, or at the end when neither is present):
 
    ```markdown
    ## Release note
