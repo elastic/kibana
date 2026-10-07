@@ -10,6 +10,8 @@ import {
   buildEcfUnifiedCloudFormationUrl,
   buildEcfOtelCloudFormationUrl,
   buildEcfCrowdstrikeCloudFormationUrl,
+  isEcfStackArnValid,
+  buildEcfStackConsoleUrl,
   ECF_UNIFIED_TEMPLATE_FILE,
   ECF_OTEL_TEMPLATE_FILE,
   ECF_CROWDSTRIKE_TEMPLATE_FILE,
@@ -484,5 +486,104 @@ describe('buildEcfCrowdstrikeCloudFormationUrl()', () => {
     });
     expect(url).toContain('console.aws.amazon.com/cloudformation/home');
     expect(url).toContain('/stacks/quickcreate');
+  });
+});
+
+// ── isEcfStackArnValid ─────────────────────────────────────────────────────────
+
+describe('isEcfStackArnValid()', () => {
+  it('accepts a standard aws partition ARN', () => {
+    expect(
+      isEcfStackArnValid(
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123'
+      )
+    ).toBe(true);
+  });
+
+  it('accepts a GovCloud (aws-us-gov) partition ARN', () => {
+    expect(
+      isEcfStackArnValid(
+        'arn:aws-us-gov:cloudformation:us-gov-east-1:123456789012:stack/my-stack/abc123'
+      )
+    ).toBe(true);
+  });
+
+  it('accepts a China (aws-cn) partition ARN', () => {
+    expect(
+      isEcfStackArnValid(
+        'arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/my-stack/abc123'
+      )
+    ).toBe(true);
+  });
+
+  it('trims surrounding whitespace before validating', () => {
+    expect(
+      isEcfStackArnValid(
+        '  arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123  '
+      )
+    ).toBe(true);
+  });
+
+  it('rejects an empty string', () => {
+    expect(isEcfStackArnValid('')).toBe(false);
+  });
+
+  it('rejects a plain stack name (no ARN prefix)', () => {
+    expect(isEcfStackArnValid('my-stack')).toBe(false);
+  });
+
+  it('rejects an ARN for a different service (IAM)', () => {
+    expect(isEcfStackArnValid('arn:aws:iam::123456789012:role/my-role')).toBe(false);
+  });
+
+  it('rejects a CloudFormation ARN that is missing the stack path segment', () => {
+    expect(
+      isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:changeSet/cs/abc')
+    ).toBe(false);
+  });
+});
+
+// ── buildEcfStackConsoleUrl ────────────────────────────────────────────────────
+
+describe('buildEcfStackConsoleUrl()', () => {
+  const VALID_ARN =
+    'arn:aws:cloudformation:us-west-2:123456789012:stack/my-stack/abc123-def456';
+
+  it('returns a URL pointing at the CloudFormation console stack info page', () => {
+    const url = buildEcfStackConsoleUrl(VALID_ARN);
+    expect(url).toBeDefined();
+    expect(url).toContain('console.aws.amazon.com/cloudformation/home');
+    expect(url).toContain('/stacks/stackinfo');
+  });
+
+  it('includes the region extracted from the ARN as a query param', () => {
+    const url = buildEcfStackConsoleUrl(VALID_ARN);
+    expect(url).toContain('region=us-west-2');
+  });
+
+  it('URL-encodes the stack ARN in the hash', () => {
+    const url = buildEcfStackConsoleUrl(VALID_ARN);
+    expect(url).toContain(encodeURIComponent(VALID_ARN));
+  });
+
+  it('returns undefined for an invalid ARN', () => {
+    expect(buildEcfStackConsoleUrl('not-an-arn')).toBeUndefined();
+  });
+
+  it('returns undefined for an empty string', () => {
+    expect(buildEcfStackConsoleUrl('')).toBeUndefined();
+  });
+
+  it('extracts region correctly for a GovCloud ARN', () => {
+    const govArn =
+      'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/my-stack/abc123';
+    const url = buildEcfStackConsoleUrl(govArn);
+    expect(url).toContain('region=us-gov-west-1');
+  });
+
+  it('trims surrounding whitespace from the input ARN', () => {
+    const url = buildEcfStackConsoleUrl(`  ${VALID_ARN}  `);
+    expect(url).toBeDefined();
+    expect(url).toContain('region=us-west-2');
   });
 });

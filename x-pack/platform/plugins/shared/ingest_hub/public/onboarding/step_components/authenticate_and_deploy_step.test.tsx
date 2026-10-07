@@ -150,7 +150,15 @@ function makeDeployReturn(
 }
 
 function makeEcfReturn(
-  overrides: { hasAnyEcf?: boolean; isDone?: boolean } = {}
+  overrides: {
+    hasAnyEcf?: boolean;
+    isDone?: boolean;
+    launchedFamilies?: string[];
+    stackNames?: Record<string, string>;
+    stackVersions?: Record<string, string>;
+    stackArns?: Record<string, string>;
+    isStaleByFamily?: Record<string, boolean>;
+  } = {}
 ): ReturnType<typeof useEcfDeployment> {
   return {
     hasAnyEcf: overrides.hasAnyEcf ?? false,
@@ -164,11 +172,19 @@ function makeEcfReturn(
       otelLaunchUrl: undefined,
       crowdstrikeLaunchUrl: undefined,
       globalRegion: 'us-east-1',
-      launchedFamilies: [],
-      stackNames: {},
-      stackVersions: {},
+      launchedFamilies: (overrides.launchedFamilies as any[]) ?? [],
+      stackNames: overrides.stackNames ?? {},
+      stackVersions: overrides.stackVersions ?? {},
+      stackArns: overrides.stackArns ?? {},
+      isStaleByFamily: overrides.isStaleByFamily ?? {
+        unified: false,
+        otel: false,
+        crowdstrike: false,
+      },
       onLaunch: jest.fn(),
       onStackNameChange: jest.fn(),
+      onStackArnChange: jest.fn(),
+      onUpdateStack: jest.fn(),
     },
   };
 }
@@ -953,6 +969,91 @@ describe('AuthenticateAndDeployStep', () => {
       // persistDeploymentId must not fire again (URL/context already set).
       expect(mockPersist).not.toHaveBeenCalled();
       expect(onContinue).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('ECF stackArn persisted to SO on Next-click', () => {
+    it('includes stackArn in ecfStacks when a valid ARN is stored for a launched family', async () => {
+      const mockCreate = jest.fn().mockResolvedValue('new-dep-id');
+      const mockUpdate = jest.fn().mockResolvedValue(true);
+      const mockPersist = jest.fn();
+      mockUseOnboardingSO.mockReturnValue({
+        createDeployment: mockCreate,
+        updateDeployment: mockUpdate,
+        persistDeploymentId: mockPersist,
+      });
+
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+
+      const SAMPLE_ARN =
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/edot-cloud-forwarder/abc123';
+      mockUseEcfDeployment.mockReturnValue(
+        makeEcfReturn({
+          hasAnyEcf: true,
+          isDone: true,
+          launchedFamilies: ['unified'],
+          stackVersions: { unified: '1.2.3' },
+          stackArns: { unified: SAMPLE_ARN },
+        })
+      );
+
+      const onContinue = jest.fn();
+      renderStep(onContinue);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'existing-dep-id',
+        expect.objectContaining({
+          ecfStacks: expect.arrayContaining([
+            expect.objectContaining({ family: 'unified', stackArn: SAMPLE_ARN }),
+          ]),
+        })
+      );
+    });
+
+    it('omits stackArn from ecfStacks when no ARN is stored for a family', async () => {
+      const mockCreate = jest.fn().mockResolvedValue('new-dep-id');
+      const mockUpdate = jest.fn().mockResolvedValue(true);
+      mockUseOnboardingSO.mockReturnValue({
+        createDeployment: mockCreate,
+        updateDeployment: mockUpdate,
+        persistDeploymentId: jest.fn(),
+      });
+
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+
+      mockUseEcfDeployment.mockReturnValue(
+        makeEcfReturn({
+          hasAnyEcf: true,
+          isDone: true,
+          launchedFamilies: ['unified'],
+          stackVersions: { unified: '1.2.3' },
+          stackArns: {},
+        })
+      );
+
+      const onContinue = jest.fn();
+      renderStep(onContinue);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+
+      const updateCall = mockUpdate.mock.calls[0];
+      const ecfStacks = updateCall[1].ecfStacks as Array<{ stackArn?: string }>;
+      expect(ecfStacks).toHaveLength(1);
+      expect(ecfStacks[0]).not.toHaveProperty('stackArn');
     });
   });
 
