@@ -1367,7 +1367,7 @@ x-pack/solutions/observability/packages/kbn-nightshift-decision-trees @elastic/n
 x-pack/solutions/observability/packages/kbn-nightshift-shared @elastic/nightshift
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
-x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/observability-ui
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/synthetics-test-data @elastic/obs-signals-logs-team
@@ -1974,7 +1974,7 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/ @elastic/nightshift
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.significant_events.feature_flag.* @elastic/nightshift
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.significant_events.feature_flag.* @elastic/nightshift
-/x-pack/solutions/observability/test/ensemble @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/ensemble @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/functional/page_objects/alert_controls.ts @elastic/nightshift-sre-agent-team
 /x-pack/platform/test/serverless/functional/page_objects/svl_custom_roles_page.ts @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api.ts @elastic/nightshift-sre-agent-team @elastic/appex-qa

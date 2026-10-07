@@ -12,26 +12,6 @@
 // "areas" entries must each be one of @kbn/code-owners CODE_OWNER_AREAS.
 [
   {
-    "id": "actionable-obs",
-    "name": "Obs UX: Actionable Obs",
-    "description": "Deprecated: elastic/actionable-obs-team no longer exists.",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/actionable-obs-team"
-    },
-    "responsibilities": [
-      "Observability Alerts",
-      "SLOs",
-      "Observability Cases",
-      "Exploratory view",
-      "Synthetics",
-      "Uptime",
-      "User Experience Dashboard"
-    ]
-  },
-  {
     "id": "apm-ui",
     "name": "Apm Ui",
     "github": {
@@ -673,17 +653,6 @@
       "Service maps",
       "APM data access"
     ]
-  },
-  {
-    "id": "obs-ux-management-team",
-    "name": "Obs Ux Management Team",
-    "description": "Deprecated: elastic/obs-ux-management-team no longer exists.",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-ux-management-team"
-    }
   },
   {
     "id": "observability-bi",
