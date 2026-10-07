@@ -608,6 +608,8 @@ export const getFeatureIds = async ({
   return KibanaServices.get().http.post<FeatureIdsResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
     method: 'POST',
     body: JSON.stringify({
+      _source: false,
+      size: 0,
       aggs: {
         consumer: {
           terms: {
