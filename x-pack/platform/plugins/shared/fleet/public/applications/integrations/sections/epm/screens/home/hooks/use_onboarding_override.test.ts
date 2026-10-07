@@ -137,7 +137,13 @@ describe('useOnboardingOverride', () => {
 
       expect(tile.searchableContent).toContain('guardduty');
       expect(tile.searchableContent).toContain('Collect GuardDuty findings.');
-      expect(tile.searchMembers).toEqual([{ name: 'guardduty', title: 'Amazon GuardDuty' }]);
+      expect(tile.searchMembers).toEqual([
+        {
+          name: 'guardduty',
+          title: 'Amazon GuardDuty',
+          description: 'Collect GuardDuty findings.',
+        },
+      ]);
       expect(tile.categories).toEqual(['aws', 'security', 'observability']);
     });
 
@@ -152,7 +158,9 @@ describe('useOnboardingOverride', () => {
       const { result } = renderHook(() => useOnboardingOverride());
       const [tile] = result.current.applyOnboardingOverride([otel, content, real]);
 
-      expect(tile.searchMembers).toEqual([{ name: 'aws', title: 'AWS CloudTrail' }]);
+      expect(tile.searchMembers).toEqual([
+        { name: 'aws', title: 'AWS CloudTrail', description: '' },
+      ]);
       // Still searchable by their text.
       expect(tile.searchableContent).toContain('AWS WAF OpenTelemetry Assets');
     });

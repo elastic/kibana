@@ -53,13 +53,17 @@ export const SearchMemberMatchDescription = ({
   memberTitles: string[];
   collectionTitle: string;
 }) => (
-  <FormattedMessage
-    id="xpack.fleet.packageCard.searchMemberMatch"
-    defaultMessage="{members} {count, plural, one {is} other {are}} part of the {collection} collection."
-    values={{
-      members: renderMemberList(memberTitles),
-      count: memberTitles.length,
-      collection: collectionTitle,
-    }}
-  />
+  // A single wrapper keeps the sentence one inline child: the card clamps its description with
+  // `display: -webkit-box`, which would lay out each bold name and text piece as a separate box.
+  <span>
+    <FormattedMessage
+      id="xpack.fleet.packageCard.searchMemberMatch"
+      defaultMessage="{members} {count, plural, one {is} other {are}} part of the {collection} collection."
+      values={{
+        members: renderMemberList(memberTitles),
+        count: memberTitles.length,
+        collection: collectionTitle,
+      }}
+    />
+  </span>
 );

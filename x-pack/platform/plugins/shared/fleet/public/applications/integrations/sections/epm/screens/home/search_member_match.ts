@@ -7,6 +7,8 @@
 
 import type { IntegrationCardItem } from './card_utils';
 
+const MAX_DESCRIPTION_MATCHES = 3;
+
 const tokenize = (text: string): string[] =>
   text
     .toLowerCase()
@@ -38,10 +40,26 @@ export const withSearchMemberMatch = (
     return card;
   }
 
-  const matches = card.searchMembers.filter(
+  // Services are named by title or name. When none match that way, the term may come from a
+  // service's description (e.g. "flow logs" for "Amazon VPC"), so fall back to that.
+  const byTitleOrName = card.searchMembers.filter(
     (member) =>
       matchesAllTokens(queryTokens, member.title) || matchesAllTokens(queryTokens, member.name)
   );
+  const byDescription =
+    byTitleOrName.length > 0
+      ? []
+      : card.searchMembers.filter(
+          (member) => member.description && matchesAllTokens(queryTokens, member.description)
+        );
+  // Descriptions share generic words ("collect", "agent", "logs"). A term that matches most of
+  // them isn't about a particular service, so don't claim one.
+  const matches =
+    byTitleOrName.length > 0
+      ? byTitleOrName
+      : byDescription.length <= MAX_DESCRIPTION_MATCHES
+      ? byDescription
+      : [];
   if (matches.length === 0) {
     return card;
   }
