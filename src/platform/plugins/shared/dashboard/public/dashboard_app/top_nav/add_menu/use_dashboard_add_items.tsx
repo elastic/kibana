@@ -46,6 +46,14 @@ export const useDashboardAddItems = ({ dashboardApi }: Props): AppMenuPopoverIte
     };
   }, [children, dashboardApi]);
 
+  // TEMP VERIFY: confirm memoization fix prevents crash under rapid re-renders
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCanCreateTimeSlider((v) => !v);
+    }, 10);
+    return () => clearInterval(interval);
+  }, []);
+
   const openAddPanelFlyout = useCallback(() => {
     openLazyFlyout({
       core: coreServices,
