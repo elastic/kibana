@@ -8,7 +8,13 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import { TransactionDetailFlyout, TRANSACTION_DETAIL_FLYOUT_HISTORY_KEY } from '.';
+
+const mockUseResolvedApmIndices = jest.fn((_args: unknown): APMIndices | null | undefined => null);
+jest.mock('../../../hooks/use_apm_indices', () => ({
+  useResolvedApmIndices: (args: unknown) => mockUseResolvedApmIndices(args),
+}));
 
 const mockFlyoutTemplateProps = jest.fn();
 
@@ -106,8 +112,11 @@ jest.mock('../../app/transaction_details/waterfall_with_summary/trace_waterfall_
   TraceWaterfallFlyout: (props: unknown) => mockTraceWaterfallFlyout(props),
 }));
 
+const http = { fetch: jest.fn() };
+
 const DEPS = {
   core: {
+    http,
     application: {
       capabilities: {
         apm: {},
@@ -133,9 +142,19 @@ const BASE_PROPS = {
   onClose: jest.fn(),
 };
 
+const PARENT_INDICES = {
+  transaction: 'traces-parent*',
+  span: 'traces-parent*',
+  error: 'logs-parent*',
+  metric: 'metrics-parent*',
+  onboarding: 'apm-*',
+  sourcemap: 'apm-*',
+} as APMIndices;
+
 describe('TransactionDetailFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseResolvedApmIndices.mockReturnValue(null);
   });
 
   it('renders the transaction name in the header and flyout content', () => {
@@ -215,6 +234,53 @@ describe('TransactionDetailFlyout', () => {
         start: '2026-08-20T10:00:00.000Z',
         end: '2026-08-21T10:43:35.610Z',
         contextSpanIds: ['span-1'],
+        indicesSource: { indices: null },
+      })
+    );
+  });
+
+  it('fetches indices when opened without a parent source', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} />);
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http,
+      indicesSource: undefined,
+    });
+  });
+
+  it('reuses parent indices and passes that same source into the full-trace flyout', () => {
+    mockUseResolvedApmIndices.mockReturnValue(PARENT_INDICES);
+
+    render(<TransactionDetailFlyout {...BASE_PROPS} indicesSource={{ indices: PARENT_INDICES }} />);
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http,
+      indicesSource: { indices: PARENT_INDICES },
+    });
+
+    fireEvent.click(screen.getByTestId('openFullTraceMock'));
+
+    expect(mockTraceWaterfallFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indicesSource: { indices: PARENT_INDICES },
+      })
+    );
+  });
+
+  it('keeps the full-trace flyout on the parent source while those indices are still loading', () => {
+    mockUseResolvedApmIndices.mockReturnValue(undefined);
+
+    render(<TransactionDetailFlyout {...BASE_PROPS} indicesSource={{ indices: undefined }} />);
+
+    fireEvent.click(screen.getByTestId('openFullTraceMock'));
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http,
+      indicesSource: { indices: undefined },
+    });
+    expect(mockTraceWaterfallFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indicesSource: { indices: undefined },
       })
     );
   });

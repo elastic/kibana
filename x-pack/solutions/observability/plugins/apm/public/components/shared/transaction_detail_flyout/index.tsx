@@ -11,6 +11,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { TraceWaterfallFlyout } from '../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout';
+import { useResolvedApmIndices } from '../../../hooks/use_apm_indices';
 import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import { useTransactionDetailFlyoutHeader } from './header';
 import { useTransactionDetailFlyoutFooterMenu } from './footer';
@@ -125,11 +126,12 @@ export function TransactionDetailFlyout({
   refreshToken = 0,
   preferDocumentBasedCharts,
   schema,
-  indices,
+  indicesSource,
   alertsCount,
 }: TransactionDetailFlyoutComponentProps) {
   const { transactionName, rangeFrom, rangeTo, start, end } = filters;
   const [fullTraceFlyout, setFullTraceFlyout] = useState<FullTraceFlyoutState | null>(null);
+  const indices = useResolvedApmIndices({ http: deps.core.http, indicesSource });
 
   const openFullTraceFlyout = useCallback((state: FullTraceFlyoutState) => {
     setFullTraceFlyout(state);
@@ -185,6 +187,7 @@ export function TransactionDetailFlyout({
           contextSpanIds={fullTraceFlyout.contextSpanIds}
           historyKey={historyKey}
           deps={deps}
+          indicesSource={{ indices }}
         />
       ) : null}
     </TransactionDetailFlyoutContextProvider>

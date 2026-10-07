@@ -8,6 +8,7 @@
 import type { HttpResponsePayload, KibanaResponseFactory } from '@kbn/core/server';
 import { isJsonSerializableSpokeBody } from '@kbn/connector-specs';
 
+import { INBOUND_EVENTS_RATE_LIMITED_MESSAGE } from './constants';
 import type { IngestInboundEventResult } from './ingest';
 
 const spokeHttpBody = (body: unknown): HttpResponsePayload | undefined => {
@@ -47,5 +48,14 @@ export const mapIngestResultToResponse = (
     }
     case 'accepted':
       return response.accepted({ body: result.body });
+    case 'rate_limited':
+      return response.customError({
+        statusCode: 429,
+        body: INBOUND_EVENTS_RATE_LIMITED_MESSAGE,
+        headers: {
+          'Retry-After': `${result.retryAfterSeconds}`,
+          RateLimit: `"inbound-events";r=0;t=${result.retryAfterSeconds}`,
+        },
+      });
   }
 };
