@@ -42,7 +42,10 @@ describe('createGuardedRouter', () => {
 
     const { response, result } = await invokeWrapped(wrapped, engine);
 
-    expect(engine.ensureInitialized).toHaveBeenCalledWith(PLUGIN_ID);
+    expect(engine.ensureInitialized).toHaveBeenCalledWith(
+      PLUGIN_ID,
+      expect.objectContaining({ type: 'http_route' })
+    );
     expect(handler).not.toHaveBeenCalled();
     expect(response.custom).toHaveBeenCalledWith({
       statusCode: 503,
@@ -89,7 +92,10 @@ describe('createGuardedRouter', () => {
 
     const { response } = await invokeWrapped(wrapped, engine);
 
-    expect(engine.ensureInitialized).toHaveBeenCalledWith(PLUGIN_ID);
+    expect(engine.ensureInitialized).toHaveBeenCalledWith(
+      PLUGIN_ID,
+      expect.objectContaining({ type: 'http_route' })
+    );
     expect(handler).not.toHaveBeenCalled();
     expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({

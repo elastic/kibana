@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/core-deferred-init-common'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/core-security-server-mocks'
+  - '@kbn/tracing-utils'
 tags:
   - shared-server
   - package

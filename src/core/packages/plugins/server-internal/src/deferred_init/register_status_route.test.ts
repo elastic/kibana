@@ -50,7 +50,10 @@ describe('registerDeferredInitStatusRoute', () => {
       response
     );
 
-    expect(engine.ensureInitialized).toHaveBeenCalledWith(PLUGIN_ID);
+    expect(engine.ensureInitialized).toHaveBeenCalledWith(
+      PLUGIN_ID,
+      expect.objectContaining({ type: 'http_route' })
+    );
     expect(engine.getFailureDetails).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalledWith({
       body: { pluginId: PLUGIN_ID, status: 'initializing' },
