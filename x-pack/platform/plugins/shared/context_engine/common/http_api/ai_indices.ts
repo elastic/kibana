@@ -8,10 +8,7 @@
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ImprovementAction } from './improvement_actions';
 
-/**
- * The type of backing store an AI index is attached to. `index` covers a
- * concrete index name or an index pattern (e.g. `foo`, `foo,bar`, `foo*`).
- */
+/** The type of backing store an AI index is attached to. */
 export type AiIndexType = 'data_stream' | 'index';
 
 export interface AiIndexDest {
@@ -89,6 +86,7 @@ export interface AiIndexFeedbackAnalysis {
 
 export interface AiIndexProperties {
   description?: string;
+  memory_enabled?: boolean;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
@@ -99,6 +97,7 @@ export interface AiIndexProperties {
 export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
   id: string;
   managed: boolean;
+  memory_enabled: boolean;
   date_created: string;
   date_modified: string;
   traces: AiIndexTraceWithQuery[];

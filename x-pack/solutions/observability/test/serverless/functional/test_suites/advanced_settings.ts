@@ -58,7 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'management-settings-editField-' + settingId;
-          expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
+          await testSubjects.existOrFail(fieldTestSubj, { timeout: 5000 });
         });
       }
     });

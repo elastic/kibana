@@ -23,11 +23,12 @@ import {
   take,
 } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
@@ -36,7 +37,6 @@ import {
   isRoundCompleteEvent,
   isRoundStartedEvent,
   isRoundInterruptedEvent,
-  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentExecutionMode,
   createInternalError,
@@ -61,23 +61,23 @@ import {
   handleCancellation,
   createAbortedError,
   executeAgent$,
-  getConversation,
-  persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,
   executionStartedEvents$,
+  getConversation,
   resolveServices,
   convertErrors,
   toClientError,
   isPendingResumeConversation,
+  isPlaceholderUser,
   resolveTelemetryOrigin,
   persistExecutionInterruption,
   trackExecutionInterruption,
   type ConversationWithOperation,
 } from './utils';
-import { createConversationIdSetEvent } from './utils/events';
+import { reportRoundTelemetry } from './utils/report_round_telemetry';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
+import { getCurrentTraceId, loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -97,6 +97,8 @@ export interface AgentExecutionDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   spaces?: SpacesPluginStart;
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
@@ -180,7 +182,8 @@ const handleConversationExecution = async ({
     structuredOutput,
     outputSchema,
     storeConversation = true,
-    autoCreateConversationWithId = false,
+    accessControl,
+    readOnly,
     origin,
     nextInput,
     browserApiTools,
@@ -188,69 +191,76 @@ const handleConversationExecution = async ({
     telemetryMetadata,
     maxContentLength,
     reasoningLevel,
-    accessControl,
     subagentCreation,
-    readOnly,
     projectRouting,
+    roundId,
+    conversationOperation,
+    receivedAt: receivedAtIso,
   } = execution.agentParams;
+
+  const { owner } = execution;
+
+  // A record written before the execution service resolved all of these cannot be run.
+  if (!conversationId || !roundId || !conversationOperation || !owner || !receivedAtIso) {
+    throw createInternalError('Execution is missing required conversation parameters');
+  }
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
     deps;
 
-  // Resolve scoped services
-  const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
-    agentId,
-    connectorId,
-    telemetryMetadata,
+  const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
-    ...deps,
+    user: { ...owner, isAdmin: false },
   });
 
-  // Get conversation — only the conversation-level part of the origin is persisted on it
-  const conversation = await getConversation({
-    agentId,
-    conversationId,
-    autoCreateConversationWithId,
-    conversationClient,
-    accessControl,
-    readOnly,
-    origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-    subagentCreation,
-  });
+  const author = conversationClient.getAuthor(origin?.author);
 
-  const author = await deps.conversationService.getConversationRoundAuthor({
-    request,
-    origin,
-  });
+  // The execution service resolved the conversation, created it when it was new and wrote the
+  // opening user message before this run was dispatched: the run reads the stored document and is
+  // told how the request resolved it, since its own read only ever sees an update. A run that does
+  // not store its conversation wrote nothing to read, so it resolves the placeholder here.
+  const conversation: ConversationWithOperation = storeConversation
+    ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
+    : await getConversation({
+        agentId,
+        conversationId,
+        autoCreateConversationWithId: true,
+        conversationClient,
+        accessControl,
+        readOnly,
+        origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+        subagentCreation,
+      });
 
-  const roundId = uuidv4();
-  const receivedAt = new Date();
-
-  const useTwoPhase = !isPendingResumeConversation(conversation);
-  if (storeConversation && useTwoPhase) {
-    await persistRoundInput({
-      conversation,
-      conversationClient,
-      roundId,
-      receivedAt,
-      input: nextInput,
-      author,
-      origin: origin ? { type: origin.type } : undefined,
-    });
-  }
+  // Matches the receipt-time write's timestamp, so a rebuilt interruption event lands with the
+  // same created_at rather than moving to when this run picked the record up.
+  const receivedAt = new Date(receivedAtIso);
 
   const roundOrigin = origin ? { type: origin.type } : undefined;
   const telemetryOrigin = resolveTelemetryOrigin({ conversation, requestOrigin: origin?.type });
 
   // From here on the receipt-time `user_message` is stored (fresh round) or a pending round is
   // being resumed: any rejection before the stream exists would leave it dangling, so the setup
-  // window is guarded and its failure recorded as an interrupted execution.
+  // window is guarded and its failure recorded as an interrupted execution. Service/connector
+  // resolution moved inside this guard too, so a run that fails to resolve one still gets a
+  // terminal recorded next to the message that was already persisted.
   try {
-    // Emit conversation ID for new conversations (only when persisting)
-    const conversationIdEvent$ =
-      storeConversation && conversation.operation === 'CREATE'
-        ? of(createConversationIdSetEvent(conversation.id))
-        : EMPTY;
+    // Captured once, before the first model call, so every EIS call in this round (including
+    // the title-generation and default-connector lookups below, which run ahead of the
+    // `invoke_agent` span) reports the same trace id rather than whichever span happened to be
+    // active when the model-provider's (memoized) telemetry metadata was first resolved.
+    const roundTraceId = getCurrentTraceId();
+    const roundTelemetryMetadata = roundTraceId
+      ? { ...telemetryMetadata, traceId: roundTraceId }
+      : telemetryMetadata;
+
+    const { modelProvider, selectedConnectorId } = await resolveServices({
+      agentId,
+      connectorId,
+      telemetryMetadata: roundTelemetryMetadata,
+      request,
+      ...deps,
+    });
 
     // Execute agent
     const agentEvents$ = executeAgent$({
@@ -265,7 +275,7 @@ const handleConversationExecution = async ({
       abortSignal,
       conversation,
       defaultConnectorId: selectedConnectorId,
-      telemetryMetadata,
+      telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
       reasoningLevel,
       runAgent,
@@ -279,16 +289,29 @@ const handleConversationExecution = async ({
 
     // Generate title when creating a new conversation
     // OR when the conversation still carries the default placeholder title
-    const needsTitle =
-      (conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)) &&
-      !subagentCreation;
+    const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
+    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+    const [titleChatModel, { chatModel }, { name: agentName }, privacySettings] = await Promise.all(
+      [
+        needsTitle
+          ? modelProvider.selectModel({ effortLevel: 'low' }).then((model) => model.chatModel)
+          : undefined,
+        modelProvider.getDefaultModel(),
+        agentService.getRegistry({ request }).then((registry) => registry.get(agentId)),
+        loadTracingPrivacySettings({
+          uiSettingsClient: deps.uiSettings.asScopedToClient(
+            deps.savedObjects.getScopedClient(request)
+          ),
+          logger,
+          spaceId,
+        }),
+      ]
+    );
+    const connectorProvider = getConnectorProvider(chatModel.getConnector());
+
     const title$ = (
-      needsTitle
-        ? generateTitle({
-            chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
-            conversation,
-            nextInput,
-          })
+      titleChatModel
+        ? generateTitle({ chatModel: titleChatModel, conversation, nextInput })
         : of(conversation.title)
     ).pipe(shareReplay(1));
 
@@ -308,12 +331,6 @@ const handleConversationExecution = async ({
       ? executionStartedEvents$({ conversation, agentEvents$ })
       : EMPTY;
 
-    const chatModel = (await modelProvider.getDefaultModel()).chatModel;
-    const connectorProvider = getConnectorProvider(chatModel.getConnector());
-
-    const agentRegistry = await agentService.getRegistry({ request });
-    const { name: agentName } = await agentRegistry.get(agentId);
-
     const { headers } = request;
     const opikTraceId = headers.opik_trace_id as string | undefined;
     const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
@@ -321,15 +338,6 @@ const handleConversationExecution = async ({
       opikTraceId && opikParentSpanId
         ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
         : undefined;
-
-    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
-    const privacySettings = await loadTracingPrivacySettings({
-      uiSettingsClient: deps.uiSettings.asScopedToClient(
-        deps.savedObjects.getScopedClient(request)
-      ),
-      logger,
-      spaceId,
-    });
 
     return withConverseSpan(
       {
@@ -342,7 +350,9 @@ const handleConversationExecution = async ({
         opikHeaders,
       },
       (span) => {
-        if (author || conversation.operation !== 'CREATE') {
+        // The conversation is stored by now, so its owner is known — except for a run that does
+        // not store one, whose placeholder owner is nobody and stays unreported.
+        if (author || !isPlaceholderUser(conversation.user)) {
           setUserAttributes(span, {
             id: author?.id ?? conversation.user.id,
             username: author?.username ?? conversation.user.username,
@@ -358,13 +368,7 @@ const handleConversationExecution = async ({
             )
           : EMPTY;
 
-        return merge(
-          conversationIdEvent$,
-          agentEvents$,
-          startedEvents$,
-          persistenceEvents$,
-          titleAttr$
-        ).pipe(
+        return merge(agentEvents$, startedEvents$, persistenceEvents$, titleAttr$).pipe(
           // Graceful cancellation first, so an abort is normalised to RequestAbortedError before the
           // interruption tracker classifies the error.
           handleCancellation(abortSignal),
@@ -388,56 +392,25 @@ const handleConversationExecution = async ({
             : identity,
           // `round_started` / `round_interrupted` are internal plumbing for the persistence layer.
           filter((event) => !isRoundStartedEvent(event) && !isRoundInterruptedEvent(event)),
-          // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
-          // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
-          map(stripResumeExecution),
           tap((event) => {
-            if (isConversationCreatedEvent(event) && !author) {
-              setUserAttributes(span, {
-                id: event.data.user.id,
-                username: event.data.user.username,
+            if (isRoundCompleteEvent(event)) {
+              reportRoundTelemetry({
+                event,
+                conversation,
+                nextInput,
+                agentId,
+                executionId: execution.executionId,
+                modelProvider: connectorProvider,
+                meteringService,
+                trackingService,
+                analyticsService,
+                logger,
               });
             }
-
-            try {
-              if (isRoundCompleteEvent(event)) {
-                const isReplacingRound = event.data?.resumed === true;
-                const currentRoundCount = isReplacingRound
-                  ? conversation.rounds.length
-                  : (conversation.rounds?.length ?? 0) + 1;
-
-                // metering
-                meteringService
-                  .reportExecution({
-                    conversationId: conversation.id,
-                    executionId: execution.executionId,
-                    roundCount: currentRoundCount,
-                    agentId,
-                    round: event.data.round,
-                    modelProvider: connectorProvider,
-                  })
-                  .catch((err) => {
-                    logger.warn(`Failed to report execution metering: ${err}`);
-                  });
-
-                // snapshot telemetry tracking
-                trackingService?.trackConversationRound(conversation.id, currentRoundCount);
-
-                // EBT tracking
-                analyticsService?.reportRoundComplete({
-                  conversationId: conversation.id,
-                  executionId: execution.executionId,
-                  roundCount: currentRoundCount,
-                  agentId,
-                  round: event.data.round,
-                  modelProvider: connectorProvider,
-                  conversationAttachments: event.data.attachments ?? conversation.attachments ?? [],
-                });
-              }
-            } catch (error) {
-              logger.error(`Failed to report round complete telemetry: ${error}`);
-            }
           }),
+          // Must stay below the telemetry tap: `resume_execution` carries the unmerged per-execution
+          // round that telemetry needs, and is only stripped so it doesn't reach the client.
+          map(stripResumeExecution),
           convertErrors({
             agentId,
             logger,
@@ -511,16 +484,22 @@ export const collectAndWriteEvents = ({
       await executionClient.appendEvents(execution.executionId, batch);
     };
 
+    let lastFlushAt = 0;
+
+    // Leading edge: the first event after an idle period is written on the next tick, while
+    // flushes still start at most once per batch interval.
     const scheduleFlush = () => {
       if (flushTimer === undefined) {
+        const delay = Math.max(0, lastFlushAt + EVENT_BATCH_INTERVAL_MS - Date.now());
         flushTimer = setTimeout(() => {
           flushTimer = undefined;
+          lastFlushAt = Date.now();
           flushInProgress = flush().catch((err) => {
             logger.error(
               `Failed to flush events for execution ${execution.executionId}: ${err.message}`
             );
           });
-        }, EVENT_BATCH_INTERVAL_MS);
+        }, delay);
       }
     };
 
@@ -596,10 +575,7 @@ const buildPersistenceEvents = ({
 
   if (useTwoPhase) {
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
-    const endTitle$ =
-      conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
-        ? title$
-        : undefined;
+    const endTitle$ = conversationNeedsTitle(conversation) ? title$ : undefined;
 
     return roundStartedEvents$.pipe(
       concatMap((startEvent) =>
@@ -651,10 +627,17 @@ const handleStandaloneExecution = async ({
   const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
     execution.agentParams;
 
+  // See the matching comment in handleConversationExecution: captured once, ahead of the first
+  // model call, so every EIS call in this execution reports the same trace id.
+  const roundTraceId = getCurrentTraceId();
+  const roundTelemetryMetadata = roundTraceId
+    ? { ...telemetryMetadata, traceId: roundTraceId }
+    : telemetryMetadata;
+
   const { selectedConnectorId } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     request,
     ...deps,
   });
@@ -667,7 +650,7 @@ const handleStandaloneExecution = async ({
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
     reasoningLevel,
     runAgent,

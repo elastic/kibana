@@ -66,6 +66,17 @@ export const WorkerSettings = lazySchema(() =>
         'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
       ),
       /**
+       * Service account this worker runs as. Omitted until one is selected. Already installed workers stay readable without it. Enabling the worker requires a non-empty id.
+       */
+      serviceAccountId: z
+        .string()
+        .min(1)
+        .max(1024)
+        .optional()
+        .describe(
+          'Service account this worker runs as. Omitted until one is selected. Already installed workers stay readable without it. Enabling the worker requires a non-empty id.'
+        ),
+      /**
        * Omitted for Workers that declare no Worker-specific settings.
        */
       extras: WorkerSettingsExtras.optional().describe(
@@ -84,6 +95,18 @@ export const WorkerSettingsWrite = lazySchema(() =>
     .object({
       autonomy: WatchAutonomyLevel.optional(),
       scheduleInterval: WorkerScheduleInterval.optional(),
+      /**
+       * Omitted keeps the stored account. A non-empty id sets it. Null clears it. Enabling a worker requires a non-empty id, including a save that leaves an already enabled worker on.
+       */
+      serviceAccountId: z
+        .string()
+        .min(1)
+        .max(1024)
+        .nullable()
+        .optional()
+        .describe(
+          'Omitted keeps the stored account. A non-empty id sets it. Null clears it. Enabling a worker requires a non-empty id, including a save that leaves an already enabled worker on.'
+        ),
       extras: WorkerSettingsExtras.optional(),
     })
     .strict()
@@ -119,6 +142,15 @@ export const Worker = lazySchema(() =>
       .nullable()
       .describe(
         'Logical workflow version for best-effort stale settings detection. Null when the per-space managed Worker has not been installed yet.'
+      ),
+    /**
+     * Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id.
+     */
+    workflowId: z
+      .string()
+      .nullable()
+      .describe(
+        "Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id."
       ),
     skills: z.array(WatchCallableRef).optional(),
   })

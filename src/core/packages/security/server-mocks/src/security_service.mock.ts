@@ -55,6 +55,7 @@ const createStartMock = (): SecurityStartMock => {
   const mock = lazyObject({
     authc: lazyObject({
       getCurrentUser: jest.fn(),
+      getPrincipal: jest.fn(),
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
@@ -94,6 +95,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
   const mock = lazyObject({
     authc: lazyObject({
       getCurrentUser: jest.fn(),
+      getPrincipal: jest.fn(),
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
@@ -120,6 +122,7 @@ const createRequestHandlerContextMock = () => {
   const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = lazyObject({
     authc: lazyObject({
       getCurrentUser: jest.fn(),
+      getPrincipal: jest.fn(),
       apiKeys: lazyObject({
         areAPIKeysEnabled: jest.fn(),
         create: jest.fn(),

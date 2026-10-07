@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
@@ -65,6 +65,88 @@ describe('FlyoutTemplate header title icon and description', () => {
 
     const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
     expect(title.id).toMatch(/^flyoutTemplateTitle/);
+  });
+
+  it('renders a link title inside the H3 heading', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#details">Alert details</a>} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    expect(within(title).getByRole('link', { name: 'Alert details' })).toHaveAttribute(
+      'href',
+      '#details'
+    );
+    expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / a$/ });
+    expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / button$/ });
+  });
+
+  it('reveals a string title from the truncated collapsed heading', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" collapsed={true} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute('title', 'Alert details');
+  });
+
+  it('leaves a node title untitled when collapsed even with titleText, so its own tooltip is not covered', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title={<a href="#details">Alert details</a>}
+          titleText="Alert details"
+          collapsed={true}
+        />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 3 })).not.toHaveAttribute('title');
+  });
+
+  it('leaves the collapsed heading untitled when a node title has no titleText', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#details">Alert details</a>} collapsed={true} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 3 })).not.toHaveAttribute('title');
+  });
+
+  it('prefers titleText over a string title for the collapsed reveal', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title="Alert details"
+          titleText="Full alert details"
+          collapsed={true}
+        />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute(
+      'title',
+      'Full alert details'
+    );
   });
 
   const body = (
@@ -184,6 +266,18 @@ describe('FlyoutTemplate header blocks', () => {
       <FlyoutTemplate.Header.Badge key={index}>{`Badge ${index + 1}`}</FlyoutTemplate.Header.Badge>
     ));
 
+  it('derives the meta and info block test subjects from the header test subject', () => {
+    renderHeader(
+      <>
+        <FlyoutTemplate.Header.MetaBlock title="Owner">Platform</FlyoutTemplate.Header.MetaBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Risk score">90</FlyoutTemplate.Header.InfoBlock>
+      </>
+    );
+
+    expect(screen.getByTestId('myFlyoutHeaderMetaBlocks')).toHaveTextContent('Platform');
+    expect(screen.getByTestId('myFlyoutHeaderInfoBlocks')).toHaveTextContent('90');
+  });
+
   it('renders a MetaBlock as a title/value pair', () => {
     renderHeader(
       <FlyoutTemplate.Header.MetaBlock title="Last updated" data-test-subj="metaUpdated">
@@ -278,6 +372,100 @@ describe('FlyoutTemplate header blocks', () => {
     expect(region).toHaveTextContent('Owner');
     expect(region).toHaveTextContent('Urgent');
     expect(region).toHaveTextContent('Risk');
+  });
+
+  it('forwards a custom data attribute and an EuiBadge prop through the Badge part', () => {
+    renderHeader(
+      <FlyoutTemplate.Header.Badge
+        data-foo="badgeFoo"
+        data-test-subj="badgeUrgent"
+        title="Needs attention"
+      >
+        Urgent
+      </FlyoutTemplate.Header.Badge>
+    );
+
+    const badge = screen.getByTestId('badgeUrgent');
+    expect(badge).toHaveAttribute('data-foo', 'badgeFoo');
+    expect(badge).toHaveAttribute('title', 'Needs attention');
+  });
+
+  it('gives a tooltipped, non-interactive badge a tab stop and shows the tooltip on focus', async () => {
+    renderHeader(
+      <FlyoutTemplate.Header.Badge toolTipContent="More context" data-test-subj="badgeInfo">
+        Info
+      </FlyoutTemplate.Header.Badge>
+    );
+
+    const badge = screen.getByTestId('badgeInfo');
+    expect(badge).toHaveAttribute('tabindex', '0');
+
+    act(() => badge.focus());
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('More context');
+  });
+
+  it('adds no tab stop to a badge without a tooltip or to a tooltipped link badge', () => {
+    renderHeader(
+      <>
+        <FlyoutTemplate.Header.Badge data-test-subj="badgePlain">Plain</FlyoutTemplate.Header.Badge>
+        <FlyoutTemplate.Header.Badge
+          href="#details"
+          toolTipContent="Go to details"
+          data-test-subj="badgeLink"
+        >
+          Link
+        </FlyoutTemplate.Header.Badge>
+      </>
+    );
+
+    expect(screen.getByTestId('badgePlain')).not.toHaveAttribute('tabindex');
+    expect(screen.getByTestId('badgeLink')).not.toHaveAttribute('tabindex');
+  });
+
+  it('renders an onClick badge as a button and calls onClick when clicked', async () => {
+    const onClick = jest.fn();
+    renderHeader(
+      <FlyoutTemplate.Header.Badge onClick={onClick} onClickAriaLabel="Open details">
+        Details
+      </FlyoutTemplate.Header.Badge>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open details' }));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards a custom data attribute through the MetaBlock part', () => {
+    renderHeader(
+      <FlyoutTemplate.Header.MetaBlock
+        title="Last updated"
+        data-foo="metaFoo"
+        data-test-subj="metaUpdated"
+      >
+        Dec 3, 2025
+      </FlyoutTemplate.Header.MetaBlock>
+    );
+
+    const block = screen.getByTestId('metaUpdated');
+    expect(block).toHaveAttribute('data-foo', 'metaFoo');
+    expect(block).toHaveTextContent('Last updated');
+  });
+
+  it('forwards a custom data attribute through the InfoBlock part', () => {
+    renderHeader(
+      <FlyoutTemplate.Header.InfoBlock
+        title="Risk score"
+        data-foo="infoFoo"
+        data-test-subj="infoRisk"
+      >
+        90
+      </FlyoutTemplate.Header.InfoBlock>
+    );
+
+    const block = screen.getByTestId('infoRisk');
+    expect(block).toHaveAttribute('data-foo', 'infoFoo');
+    expect(block).toHaveTextContent('Risk score');
   });
 
   it('hides the blocks from assistive tech when the header is collapsed', () => {

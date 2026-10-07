@@ -1,5 +1,5 @@
 {
-  "sha1": "2a88fea05a24234100f1ed1c0166a2b483f79cb0",
+  "sha1": "c0ac16c7304e5b44d581c895a3774ca946453655",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -50,8 +50,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 74,
-        "column": 20
+        "line": 72,
+        "column": 22
       }
     },
     {
@@ -63,8 +63,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 101,
-        "column": 13
+        "line": 100,
+        "column": 44
       }
     },
     {
@@ -76,8 +76,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 121,
-        "column": 22
+        "line": 120,
+        "column": 20
       }
     },
     {
@@ -285,7 +285,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
         "line": 100,
-        "column": 50
+        "column": 36
       }
     },
     {
@@ -583,8 +583,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 115,
-        "column": 22
+        "line": 114,
+        "column": 25
       }
     },
     {
@@ -596,8 +596,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 145,
-        "column": 13
+        "line": 144,
+        "column": 22
       }
     },
     {
@@ -830,8 +830,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
-        "line": 79,
-        "column": 24
+        "line": 77,
+        "column": 22
       }
     },
     {
@@ -843,8 +843,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
-        "line": 93,
-        "column": 42
+        "line": 91,
+        "column": 30
       }
     },
     {

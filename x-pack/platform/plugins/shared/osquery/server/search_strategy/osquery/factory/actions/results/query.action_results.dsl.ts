@@ -32,7 +32,13 @@ export const buildActionResultsQuery = ({
   useNewDataStream,
   integrationNamespaces,
   spaceId,
-}: ActionResultsRequestOptions): ISearchRequestParams => {
+  matchMissingSpaceId,
+  matchActionDataSpaceId,
+  skipSpaceFilter,
+}: ActionResultsRequestOptions & {
+  matchActionDataSpaceId?: boolean;
+  skipSpaceFilter?: boolean;
+}): ISearchRequestParams => {
   const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
   const timeRangeFilter: estypes.QueryDslQueryContainer[] =
@@ -64,7 +70,29 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const spaceIdFilter = buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer;
+  // Hit-level scoping is enforced centrally in the search strategy
+  // (enforceSpaceScope). The aggregation below is a separate filter context that
+  // the top-level query does not constrain, so it is scoped explicitly here.
+  //
+  // This read is bound to a single `action_id`, which the caller can only have
+  // learned from a space-stamped, Kibana-written action document. That binding is
+  // the authorization gate that makes honouring the agent-carried
+  // `action_data.space_id` safe here — see buildSpaceIdFilter. The strategy
+  // passes `matchActionDataSpaceId` from ID_BOUND_FACTORY_QUERY_TYPES so this
+  // aggregation cannot drift from the hit filter. Default off: omitting the
+  // flag must not enable the less-trusted field in aggregations only.
+  //
+  // `skipSpaceFilter` means the strategy already found this `action_id` on the
+  // Kibana-written action document in the active space and omitted the hit-level
+  // filter, so the aggregation omits it too and counts match the hits.
+  const spaceIdFilters: estypes.QueryDslQueryContainer[] = skipSpaceFilter
+    ? []
+    : [
+        buildSpaceIdFilter(spaceId, {
+          matchMissingSpaceId: matchMissingSpaceId ?? true,
+          matchActionDataSpaceId: matchActionDataSpaceId ?? false,
+        }),
+      ];
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
@@ -104,7 +132,7 @@ export const buildActionResultsQuery = ({
                       action_id: actionId,
                     },
                   },
-                  spaceIdFilter,
+                  ...spaceIdFilters,
                 ],
               },
             },

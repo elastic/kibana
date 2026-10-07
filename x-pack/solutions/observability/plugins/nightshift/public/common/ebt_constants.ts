@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+
 export const NIGHTSHIFT_EBT_ACTIONS = {
   CLEAR_IMPACTED_SERVICES_FILTER: 'clearImpactedServicesFilter',
   CLOSE_FLYOUT: 'closeFlyout',
@@ -15,12 +17,15 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   EXPAND_DETECTIONS: 'expandDetections',
   FILTER_BY_IMPACTED_SERVICES: 'filterByImpactedServices',
   OPEN_IN_CHAT: 'openInChat',
+  OPEN_START_INVESTIGATION: 'openStartInvestigation',
   RETRY_INVESTIGATIONS: 'retryInvestigations',
   SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
+  START_INVESTIGATION: EBT_CLICK_ACTIONS.START_INVESTIGATION,
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_DETECTION: 'viewDetection',
   VIEW_ENTITY: 'viewEntity',
-  VIEW_INVESTIGATION: 'viewInvestigation',
+  VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
+  VIEW_MANAGEMENT: 'viewManagement',
   VIEW_SETTINGS: 'viewSettings',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
@@ -40,6 +45,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   INVESTIGATION_SUMMARY: 'nightshiftInvestigationSummary',
   PAGE_HEADER: 'nightshiftPageHeader',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
+  START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
   STATUS_SUMMARY: 'nightshiftStatusSummary',
 } as const;
 

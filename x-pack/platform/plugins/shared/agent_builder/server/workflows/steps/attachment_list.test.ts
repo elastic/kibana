@@ -11,15 +11,11 @@ import {
   createWorkflowStepAttachmentClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
-
 describe('listAttachmentsStepDefinition', () => {
   it('creates the expected step definition structure', () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock();
     const definition = listAttachmentsStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     expect(definition.id).toBe('ai.attachment.list');
@@ -48,7 +44,6 @@ describe('listAttachmentsStepDefinition', () => {
 
     const definition = listAttachmentsStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     const result = await definition.handler(
@@ -79,7 +74,6 @@ describe('listAttachmentsStepDefinition', () => {
 
     const definition = listAttachmentsStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     await definition.handler(
@@ -91,24 +85,6 @@ describe('listAttachmentsStepDefinition', () => {
     expect(list).toHaveBeenCalledWith({ conversationId: 'conv-1', includeDeleted: true });
   });
 
-  it('returns an error when experimental is disabled', async () => {
-    const { getAttachmentClient } = createWorkflowStepAttachmentClientMock();
-    const definition = listAttachmentsStepDefinition({
-      getAttachmentClient,
-      isExperimentalEnabled: experimentalDisabled,
-    });
-
-    const result = await definition.handler(
-      createStepHandlerContext({ input: { conversation_id: 'conv-1' } })
-    );
-
-    expect(result).toEqual({
-      error: expect.objectContaining({
-        message: expect.stringContaining('experimental features'),
-      }),
-    });
-  });
-
   it('returns an error when the client throws', async () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock({
       list: jest.fn().mockRejectedValue(new Error('boom')),
@@ -116,7 +92,6 @@ describe('listAttachmentsStepDefinition', () => {
 
     const definition = listAttachmentsStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     const result = await definition.handler(

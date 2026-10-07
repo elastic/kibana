@@ -9,20 +9,30 @@ export * from './rule_data_schema';
 export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';
-export { durationSchema, tagsResponseSchema, tagsSchema } from './common';
-export type { TagsResponse } from './common';
+export {
+  actorSchema,
+  durationSchema,
+  entityIdSchema,
+  ENTITY_ID_NOTE,
+  groupHashSchema,
+  tagsResponseSchema,
+  tagsSchema,
+} from './common';
+export type { Actor, TagsResponse } from './common';
 export {
   validateDuration,
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  validateComposedEsqlQuery,
+  composeEsqlQuery,
   parseDurationToMs,
 } from './validation';
 export * from './policy_matcher_schema';
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';
-export * from './episode_attachment_schema';
+export * from './alert_attachment_schema';
 export * from './alert_episode_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';
@@ -31,6 +41,8 @@ export * from './rule_execution_history_schema';
 export * from './rule_change_history_schema';
 export * from './rule_event_fields_schema';
 export * from './match_action_policies_schema';
+export * from './action_policy_routing_tags_schema';
+export * from './match_rules_schema';
 export * from './severity';
 export * from './create_alert_event_data_schema';
 export * from './rule_template_schema';

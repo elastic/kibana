@@ -11,14 +11,17 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Config set for the AlertZero API suites (`alertzero/test/scout_alertzero/`).
+ * Scout server config for tests that need `alertzero` and the plugins it depends on.
  *
- * `xpack.alertzero.enabled` defaults to false, so the plugin — and every route it
- * registers — is absent on the default set. `agenticInvestigations` is a *required*
- * plugin of alertzero, and it also defaults to false: without it Kibana
- * cascade-disables alertzero entirely, so `initialize_managed_workflows.ts` never
- * runs and the action catalog the suite reads is never installed. Both flags are
- * load-bearing; neither can be toggled at runtime.
+ * `alertzero` gates threat-intel supply. `agenticInvestigations` and `proposals` are required
+ * by alertzero and default off; without them Kibana cascade-disables alertzero and the TI
+ * routes never register. The API tests of all three live under `test/scout_alertzero`
+ * (security_solution, agentic_investigations, proposals).
+ * `agentBuilder` and `workflowsManagement` are additionally required by the alertzero
+ * action-catalog API tests, whose expected catalog is derived from managed workflow sources.
+ *
+ * Usage:
+ *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alertzero
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -28,6 +31,9 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
+      '--xpack.proposals.enabled=true',
+      '--xpack.agentBuilder.enabled=true',
+      '--workflowsManagement.enabled=true',
     ],
   },
 };
