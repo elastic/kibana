@@ -10,7 +10,6 @@ Array [
   <div
     class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger eui-textLeft emotion-euiPanel-none-danger-euiCallOut-danger"
     data-size="m"
-    style="--euiCallOutTypeColor:#C61E25"
   >
     <div
       class="css-1slkmya-wrapper"

@@ -264,9 +264,12 @@ steps:
         This run found something mint-worthy, but the Investigation already has a Proposal from an earlier run, so no new one was created. Review the existing Proposal{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; also recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% else -%}
         Packaging prepared {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review and launched an approval gate for each; the gate is what creates the Proposal.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} The Investigation stays open until every gate is decided.{% endif %}
-        {% for p in packaged.proposals -%}
-          - **{{ p.title | default: p.category }}**{% if p.hostName != nil and p.hostName != empty %} on `{{ p.hostName }}`{% endif %}{% if p.actionWorkflowId != nil and p.actionWorkflowId != empty %}: runs `{{ p.actionWorkflowId }}` on approval{% else %}: recommendation only{% endif %}
+        {% for bullet in packaged.proposalBullets -%}
+          {{ bullet }}
         {% endfor -%}
+        {% if packaged.omittedProposalCount > 0 -%}
+          - ...and {{ packaged.omittedProposalCount }} more proposal{% if packaged.omittedProposalCount != 1 %}s{% endif %} not listed here.
+        {% endif -%}
         {% if packaged.coverage.written != nil and packaged.coverage.written != empty -%}
           - Recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch.
         {% endif -%}

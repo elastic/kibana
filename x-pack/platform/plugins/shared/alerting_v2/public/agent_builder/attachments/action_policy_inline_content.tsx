@@ -6,80 +6,109 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
-import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
+import {
+  POLICY_SCOPE_LABEL,
+  PolicyScopeSummary,
+} from '../../components/action_policy/details_flyout/policy_scope_summary';
+import {
+  DISPATCH_PER_LABEL,
+  FREQUENCY_LABEL,
+  getFrequencyLabel,
+  getGroupingModeLabel,
+} from '../../components/action_policy/labels';
+import { AttachmentInfoBar } from './attachment_info_bar';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPolicyAttachment>> = ({
   attachment,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { data, origin } = attachment;
   const isDraft = !origin;
   const isEnabled = data.enabled ?? true;
   const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
 
-  const matcherSummary = formatMatcherSummary(data.matcher);
-
   const destinationCount = data.destinations?.length ?? 0;
 
+  const containerCss = css`
+    padding: ${euiTheme.size.m};
+  `;
+
   return (
-    <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={statusColor}>{status}</EuiBadge>
-            </EuiFlexItem>
-            {data.throttle?.strategy && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{data.throttle.strategy}</EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={containerCss}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h5>{POLICY_SCOPE_LABEL}</h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <PolicyScopeSummary matcher={data.matcher} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.alertingV2.actionPolicyAttachment.matcherSummary', {
-              defaultMessage: 'Matcher: {matcher}',
-              values: { matcher: matcherSummary },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.alertingV2.actionPolicyAttachment.destinationCount', {
-              defaultMessage: '{count, plural, one {# destination} other {# destinations}}',
-              values: { count: destinationCount },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+      <EuiFlexItem grow={false}>
+        <AttachmentInfoBar
+          items={[
+            {
+              title: i18n.translate('xpack.alertingV2.actionPolicyAttachment.status', {
+                defaultMessage: 'Status',
+              }),
+              content: <EuiBadge color={statusColor}>{status}</EuiBadge>,
+              'data-test-subj': 'actionPolicyInlineStatus',
+            },
+            {
+              title: DISPATCH_PER_LABEL,
+              content: (
+                <EuiText size="xs">
+                  <strong>{getGroupingModeLabel(data.grouping_mode)}</strong>
+                </EuiText>
+              ),
+              'data-test-subj': 'actionPolicyInlineDispatchPer',
+            },
+            {
+              title: FREQUENCY_LABEL,
+              content: (
+                <EuiText size="xs">
+                  <strong>{getFrequencyLabel(data.throttle, data.grouping_mode)}</strong>
+                </EuiText>
+              ),
+              'data-test-subj': 'actionPolicyInlineFrequency',
+            },
+            {
+              title: i18n.translate('xpack.alertingV2.actionPolicyAttachment.destination', {
+                defaultMessage: 'Destination',
+              }),
+              content: (
+                <EuiText size="xs">
+                  <strong>
+                    {i18n.translate('xpack.alertingV2.actionPolicyAttachment.workflowCount', {
+                      defaultMessage: '{count, plural, one {# workflow} other {# workflows}}',
+                      values: { count: destinationCount },
+                    })}
+                  </strong>
+                </EuiText>
+              ),
+              'data-test-subj': 'actionPolicyInlineDestination',
+            },
+          ]}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
-};
-
-const formatMatcherSummary = (matcher: PolicyMatcher | null | undefined): string => {
-  const matchesAll = i18n.translate('xpack.alertingV2.actionPolicyAttachment.matchesAll', {
-    defaultMessage: 'matches all',
-  });
-  if (!matcher) return matchesAll;
-
-  const parts: string[] = [];
-  if (matcher.tags?.length) parts.push(`routing tags: ${matcher.tags.join(', ')}`);
-  if (matcher.expression?.trim()) parts.push(`expr: ${matcher.expression.trim()}`);
-
-  return parts.length > 0 ? parts.join(' | ') : matchesAll;
 };
 
 const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
   if (isDraft)
     return {
       label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.statusDraft', {
-        defaultMessage: 'draft',
+        defaultMessage: 'Draft',
       }),
       color: 'default',
     };
@@ -87,14 +116,14 @@ const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
   if (isEnabled)
     return {
       label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.statusEnabled', {
-        defaultMessage: 'enabled',
+        defaultMessage: 'Enabled',
       }),
       color: 'success',
     };
 
   return {
     label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.statusDisabled', {
-      defaultMessage: 'disabled',
+      defaultMessage: 'Disabled',
     }),
     color: 'warning',
   };
