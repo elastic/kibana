@@ -28,6 +28,7 @@ import {
   createEmptyConversation,
   createRound,
 } from '../../test_utils';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { executeAgent$, resolveServices } from './utils';
 
 jest.mock('./utils', () => {
@@ -40,12 +41,144 @@ jest.mock('./utils', () => {
   };
 });
 
+jest.mock('../../tracing', () => {
+  const actual = jest.requireActual('../../tracing');
+
+  return {
+    ...actual,
+    withConverseSpan: jest.fn((_opts: unknown, cb: () => unknown) => cb()),
+    loadTracingPrivacySettings: jest.fn().mockResolvedValue({
+      enabled: true,
+      includeUserPrompts: true,
+      includeLlmResponses: true,
+      includeToolDetails: true,
+      includeSystemPrompt: true,
+      includeRealNames: true,
+      includeRealIds: true,
+    }),
+  };
+});
+
 const executeAgentMock = executeAgent$ as jest.MockedFunction<typeof executeAgent$>;
 const resolveServicesMock = resolveServices as jest.MockedFunction<typeof resolveServices>;
+const withConverseSpanMock = withConverseSpan as jest.MockedFunction<typeof withConverseSpan>;
+const loadTracingPrivacySettingsMock = loadTracingPrivacySettings as jest.MockedFunction<
+  typeof loadTracingPrivacySettings
+>;
+
+const tracingServiceDeps = {
+  uiSettings: {
+    asScopedToClient: jest.fn().mockReturnValue({}),
+  },
+  savedObjects: {
+    getScopedClient: jest.fn().mockReturnValue({}),
+  },
+};
 
 describe('handleAgentExecution', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      agent_id: 'test-agent',
+      user: { id: 'owner-id', username: 'owner' },
+    });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.update.mockResolvedValue(conversation);
+    conversationClient.upsertRound.mockResolvedValue(conversation);
+    resolveServicesMock.mockResolvedValue({
+      conversationClient,
+      selectedConnectorId: 'connector-1',
+      modelProvider: {
+        getDefaultModel: jest.fn().mockResolvedValue({
+          chatModel: {
+            getConnector: () => ({ type: '.gen-ai' }),
+          },
+        }),
+      },
+    } as never);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.roundComplete,
+        data: { round: createRound({}) },
+      } as RoundCompleteEvent)
+    );
+
+    const request = { headers: {} } as never;
+    const soClient = { id: 'so-marketing' };
+    const uiSettingsClient = { id: 'ui-marketing' };
+    const privacySettings = {
+      enabled: true,
+      includeUserPrompts: false,
+      includeLlmResponses: false,
+      includeToolDetails: false,
+      includeSystemPrompt: false,
+      includeRealNames: false,
+      includeRealIds: false,
+    };
+    loadTracingPrivacySettingsMock.mockResolvedValue(privacySettings);
+
+    const logger = loggingSystemMock.createLogger();
+    const getScopedClient = jest.fn().mockReturnValue(soClient);
+    const asScopedToClient = jest.fn().mockReturnValue(uiSettingsClient);
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: {
+        logger,
+        runAgent: jest.fn(),
+        agentService: {
+          getRegistry: jest
+            .fn()
+            .mockResolvedValue({ get: jest.fn().mockResolvedValue({ name: 'Test agent' }) }),
+        },
+        meteringService: {
+          reportExecution: jest.fn().mockResolvedValue(undefined),
+        },
+        conversationService: {
+          getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+        },
+        uiSettings: {
+          asScopedToClient,
+        },
+        savedObjects: {
+          getScopedClient,
+        },
+        spaces: {
+          spacesService: { getSpaceId: jest.fn().mockReturnValue('marketing') },
+        },
+      } as never,
+      request,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(getScopedClient).toHaveBeenCalledWith(request);
+    expect(asScopedToClient).toHaveBeenCalledWith(soClient);
+    expect(loadTracingPrivacySettingsMock).toHaveBeenCalledWith({
+      uiSettingsClient,
+      logger,
+      spaceId: 'marketing',
+    });
+    expect(withConverseSpanMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'marketing',
+        privacySettings,
+      }),
+      expect.any(Function)
+    );
   });
 
   it('reports metering with the resolved conversation id when continuing by origin', async () => {
@@ -113,6 +246,7 @@ describe('handleAgentExecution', () => {
         conversationService: {
           getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
         },
+        ...tracingServiceDeps,
       } as never,
       request: { headers: {} } as never,
       abortSignal: new AbortController().signal,
@@ -174,6 +308,7 @@ describe('handleAgentExecution', () => {
         conversationService: {
           getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
         },
+        ...tracingServiceDeps,
       } as never;
 
       return { conversationClient, deps };
@@ -265,6 +400,7 @@ describe('handleAgentExecution', () => {
         conversationService: {
           getConversationRoundAuthor,
         },
+        ...tracingServiceDeps,
       } as never;
 
       const events$ = await handleAgentExecution({

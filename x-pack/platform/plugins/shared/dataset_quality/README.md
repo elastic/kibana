@@ -9,13 +9,13 @@ In order to make ongoing maintenance of log collection easy we want to introduce
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Data Set Quality unit tests:
 
 ```
-yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
+pnpm exec jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
 ```
-yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js x-pack/platform/plugins/shared/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
+pnpm exec jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js x-pack/platform/plugins/shared/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
 ```
 
 ### Deployment-agnostic API tests

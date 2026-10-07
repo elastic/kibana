@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
-const BASE_URL = 'https://api.1password.com/v1beta1';
+const BASE_URL = 'https://api.1password.com/v1';
 
 // So we get something like: 1Password API error (403): {"code":7,"message":"no_owner_remain","details":[]}
 const throwWithApiError = (error: unknown): never => {
@@ -45,7 +45,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       {
         type: 'oauth_client_credentials',
         defaults: {
-          tokenUrl: `${BASE_URL}/users/oauth2/token`,
+          tokenUrl: `${BASE_URL}/oauth/token`,
           scope: 'openid',
           tokenEndpointAuthMethod: 'client_secret_basic',
         },

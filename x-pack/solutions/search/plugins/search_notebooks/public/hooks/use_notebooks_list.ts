@@ -6,13 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import { parse } from 'query-string';
+import qs from 'query-string';
 import { useKibanaServices } from './use_kibana';
 
 export const readNotebookListFromParam = () => {
   const [, queryString] = (window.location.search || window.location.hash || '').split('?');
 
-  const queryParams = parse(queryString || '', { sort: false });
+  const queryParams = qs.parse(queryString || '', { sort: false });
   if (queryParams && queryParams.nblist && typeof queryParams.nblist === 'string') {
     return queryParams.nblist;
   }

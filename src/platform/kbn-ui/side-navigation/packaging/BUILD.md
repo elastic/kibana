@@ -4,7 +4,7 @@
 
 - Node.js (version from Kibana's `.nvmrc`)
 - Yarn
-- Kibana repository bootstrapped (`yarn kbn bootstrap`)
+- Kibana repository bootstrapped (`pnpm kbn bootstrap`)
 
 ## Build
 

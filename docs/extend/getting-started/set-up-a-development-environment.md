@@ -26,16 +26,17 @@ Install the version of Node.js listed in the `.node-version` file. This can be a
 nvm use
 ```
 
-Then, install the latest version of yarn using:
+Then enable pnpm via corepack (bundled with Node.js) and activate the version pinned in `package.json` `engines.pnpm`:
 
 ```sh
-npm install -g yarn
+corepack enable
+corepack prepare pnpm@11.27.0 --activate
 ```
 
 Finally, bootstrap Kibana and install all of the remaining dependencies:
 
 ```sh
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 ## Run Elasticsearch
@@ -43,7 +44,7 @@ yarn kbn bootstrap
 In order to start Kibana you need to run a local version of Elasticsearch. You can startup and initialize the latest Elasticsearch snapshot of the correct version for Kibana by running the following in a new terminal tab/window:
 
 ```sh
-yarn es snapshot [--license trial]
+pnpm es snapshot [--license trial]
 ```
 
 You can pass `--license trial` to start Elasticsearch with a trial license, or use the Kibana UI to switch the local version to a trial version which includes all features.
@@ -55,7 +56,7 @@ Read about more options for [Running Elasticsearch during development](https://w
 In another terminal tab/window you can start Kibana.
 
 ```sh
-yarn start
+pnpm start
 ```
 
 Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. You will find the development server running on (http://localhost:5601) - and you can log in with the `elastic:changeme` credential pair.
@@ -64,18 +65,18 @@ Include developer [examples](https://github.com/elastic/kibana/tree/main/example
 
 The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the {{kib}} CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](/reference/configuration-reference/general-settings.md).
 
-To run Kibana with an alternate yml file entirely, use the `--config` option: `yarn start --config=config/my_config.yml`
+To run Kibana with an alternate yml file entirely, use the `--config` option: `pnpm start --config=config/my_config.yml`
 
 ### SSL
 
-{{kib}} includes self-signed certificates that can be used for development purposes in the browser and for communicating with {{es}}: `yarn start --ssl` & `yarn es snapshot --ssl`.
+{{kib}} includes self-signed certificates that can be used for development purposes in the browser and for communicating with {{es}}: `pnpm start --ssl` & `pnpm es snapshot --ssl`.
 
 ### Base path
 
 In dev mode, {{kib}} by default runs behind a proxy which adds a random path component to its URL. To disable this, start {{kib}} with the `--no-base-path` flag:
 
 ```bash
-yarn start --no-base-path
+pnpm start --no-base-path
 ```
 
 You can also set it explicitly via [`server.basePath`](/reference/configuration-reference/general-settings.md#server-basePath) and [`server.rewriteBasePath`](/reference/configuration-reference/general-settings.md#server-rewriteBasePath) in `config/kibana.dev.yml`.
@@ -87,43 +88,43 @@ The following combinations cover the most common local development scenarios.
 **Default** — both SAML and basic login are supported; SAML is the default:
 
 ```sh
-yarn es snapshot
-yarn start
+pnpm es snapshot
+pnpm start
 ```
 
 **Without SAML login** — only basic login:
 
 ```sh
-yarn es snapshot
-yarn start --mockIdpPlugin.enabled=false
+pnpm es snapshot
+pnpm start --mockIdpPlugin.enabled=false
 ```
 
 **Basic license** — only basic login is supported:
 
 ```sh
-yarn es snapshot --license basic
-yarn start --mockIdpPlugin.enabled=false
+pnpm es snapshot --license basic
+pnpm start --mockIdpPlugin.enabled=false
 ```
 
 **No base path** — basic license, basic login, no random dev basepath:
 
 ```sh
-yarn es snapshot --license basic
-yarn start --mockIdpPlugin.enabled=false --no-base-path
+pnpm es snapshot --license basic
+pnpm start --mockIdpPlugin.enabled=false --no-base-path
 ```
 
 **Custom base path** — both SAML and basic login are supported; SAML is the default.
 
 ```sh
-yarn es snapshot --kibanaUrl http://localhost:5601/your_path
-yarn start --server.basePath=/your_path
+pnpm es snapshot --kibanaUrl http://localhost:5601/your_path
+pnpm start --server.basePath=/your_path
 ```
 
 **No base path with SAML** — both SAML and basic login are supported; SAML is the default:
 
 ```sh
-yarn es snapshot --kibanaUrl http://localhost:5601
-yarn start --no-base-path
+pnpm es snapshot --kibanaUrl http://localhost:5601
+pnpm start --no-base-path
 ```
 
 ## Elasticians: Run in serverless mode
@@ -134,19 +135,19 @@ To develop against serverless projects, you need to start both Elasticsearch and
 
 ```sh
 # Pick the project type that matches your work
-yarn es serverless --projectType=oblt          
-yarn es serverless --projectType=security 
-yarn es serverless --projectType=es            
-yarn es serverless --projectType=workplaceai  
+pnpm es serverless --projectType=oblt          
+pnpm es serverless --projectType=security 
+pnpm es serverless --projectType=es            
+pnpm es serverless --projectType=workplaceai  
 ```
 
 **Step 2:** Start Kibana in the matching serverless mode:
 
 ```sh
-yarn serverless-oblt         
-yarn serverless-security     
-yarn serverless-es           
-yarn serverless-workplace-ai 
+pnpm serverless-oblt         
+pnpm serverless-security     
+pnpm serverless-es           
+pnpm serverless-workplace-ai 
 ```
 
 **Important:** The Kibana serverless mode must match the ES `--projectType` value. Mismatched modes will cause errors.
@@ -180,8 +181,8 @@ Kibana also supports using a [dev container](https://containers.dev/) which can 
     - **Docker Repo Volume**: Use the `Dev Containers: Clone Repository in Named Container Volume...` command from the Command Palette (`F1`). This clones the repo into a Docker volume, isolating it from your local filesystem. You will need to configure your git credentials manually in this isolated environment.
     - **Docker PR Volume**: Use the `Dev Containers: Clone GitHub Pull Request in Named Container Volume...` command from the Command Palette (`F1`). This is the same as the previous option, but can be useful for testing a PR in insolation of your local filesystem.
 1. VS Code will then build the container, this will take a few minutes the first time, but subsequent builds will utilize Docker caching and be much faster.
-1. Once the container is built and started, it will automatically run `yarn kbn bootstrap`.
-1. You should see the Kibana repo and your terminal will be inside the container. You can develop as normal now, including running `yarn es` from inside the container.
+1. Once the container is built and started, it will automatically run `pnpm kbn bootstrap`.
+1. You should see the Kibana repo and your terminal will be inside the container. You can develop as normal now, including running `pnpm es` from inside the container.
 
 ### Customizing the Dev Container
 

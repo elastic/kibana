@@ -4,7 +4,7 @@
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "scripts": {
-    "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.test.ts"
+    "test:validation": "cd ../../../../.. && pnpm test:jest ./src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.test.ts"
   },
   "sideEffects": false
 }

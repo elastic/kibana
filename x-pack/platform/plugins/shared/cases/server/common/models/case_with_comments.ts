@@ -20,10 +20,8 @@ import {
   isEventAttachmentType,
 } from '../../../common/utils/attachments';
 import type {
-  AlertAttachmentPayload,
   AttachmentAttributes,
   Case,
-  EventAttachmentPayload,
   UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
@@ -489,13 +487,6 @@ export class CaseCommentModel {
     return dedupedAttachments;
   }
 
-  private getAttachmentsByType<
-    T extends AttachmentType,
-    R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[]
-  >(attachments: AttachmentRequestV2[], attachmentType: T): R {
-    return attachments.filter((attachment) => attachment.type === attachmentType) as R;
-  }
-
   private async validateCreateCommentRequest(req: Array<AttachmentRequestV2>) {
     if (this.caseInfo.attributes.status === CaseStatuses.closed) {
       const hasAlertsInRequest = req.some((a) => isAlertAttachmentType(a.type));
@@ -504,8 +495,9 @@ export class CaseCommentModel {
         throw Boom.badRequest('Alert cannot be attached to a closed case');
       }
 
-      const eventAttachments = this.getAttachmentsByType(req, AttachmentType.event);
-      const hasEventsInRequest = eventAttachments.length > 0;
+      // `isEventAttachmentType` matches both the legacy `event` type and the unified
+      // `security.event` type — a type-only match here would miss unified events.
+      const hasEventsInRequest = req.some((a) => isEventAttachmentType(a.type));
 
       if (hasEventsInRequest) {
         throw Boom.badRequest('Event cannot be attached to a closed case');

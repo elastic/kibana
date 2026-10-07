@@ -44,7 +44,7 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
   };
   ```
 
-- Launch Storybook with `yarn storybook <plugin>`, or build a static site with `yarn storybook --site <plugin>`.
+- Launch Storybook with `pnpm storybook <plugin>`, or build a static site with `pnpm storybook --site <plugin>`.
 
 ## Customizing configuration
 

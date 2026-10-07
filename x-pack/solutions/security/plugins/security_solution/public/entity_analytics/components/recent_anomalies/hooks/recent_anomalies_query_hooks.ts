@@ -18,7 +18,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
-import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
+import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type { AnomalyBand } from '../anomaly_bands';
 import {
   useRecentAnomaliesDataEsqlSource,
@@ -135,13 +135,13 @@ interface SecurityJobIds {
 }
 
 /**
- * Resolves the ML jobs in the `security`/`siem` ML group, matching the
- * server's `getSecurityMlJobIds` (all module-defined security jobs, whether
- * installed or not) so this panel is constrained to the same job set as the
- * anomaly overview/summary APIs.
+ * Resolves the security ML jobs actually installed in the current space,
+ * matching the space-aware job set the anomaly overview/summary APIs search
+ * (server/lib/entity_analytics/anomaly_summary) so this panel does not
+ * surface anomaly records from jobs installed in other spaces.
  */
 const useSecurityJobIds = (): SecurityJobIds => {
-  const { jobIds, loading } = useSecurityMlModuleJobIds();
+  const { jobIds, loading } = useInstalledSecurityJobsIds();
   return { jobIds: loading ? undefined : jobIds, isLoading: loading };
 };
 

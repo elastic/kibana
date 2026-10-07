@@ -86,6 +86,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateEmptyDirsAndFiles);
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
+    await globalRun(Tasks.AssertPackageEntryPoints);
     await globalRun(Tasks.ReplaceFavicon);
     // [rspack-transition] Use rspack or legacy webpack optimizer based on env var.
     // When legacy is removed, keep only Tasks.BuildRspackBundles.
