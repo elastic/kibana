@@ -387,7 +387,7 @@ export class GisPageObject extends FtrService {
     const escapedDisplayName = escapeLayerName(layerName);
     await this.retry.try(async () => {
       await this.testSubjects.moveMouseTo(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
-      const isOpen = await this.testSubjects.exists(`layerTocTooltip`);
+      const isOpen = await this.testSubjects.waitForExists(`layerTocTooltip`);
       if (!isOpen) {
         throw new Error('layer TOC tooltip not open');
       }
