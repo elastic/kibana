@@ -10,7 +10,7 @@
 import axios from 'axios';
 import type { ContractMock, ContractMockOptions } from '@kbn/connector-contract-mock';
 import { createContractMockFetch } from '@kbn/connector-contract-mock';
-import { loggerMock } from '@kbn/logging-mocks';
+import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 import { authTypeSpecs } from '../../server';
 import type {
@@ -78,10 +78,23 @@ const toSecrets = (
   return schema.parse(secrets);
 };
 
+// Not a jest mock, so the vendor API recorder can run outside jest.
+const silentLogger: Logger = {
+  trace: () => {},
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+  fatal: () => {},
+  log: () => {},
+  isLevelEnabled: () => false,
+  get: () => silentLogger,
+};
+
 const authContext: AuthContext = {
   getCustomHostSettings: () => undefined,
   getToken: async () => ACCESS_TOKEN,
-  logger: loggerMock.create(),
+  logger: silentLogger,
   sslSettings: {},
 };
 
@@ -121,7 +134,7 @@ export const createContractContext = async ({
     client,
     config: { ...config },
     secrets: authSecrets,
-    log: loggerMock.create(),
+    log: silentLogger,
     getClient: async (clientType) => {
       throw new Error(`Client ${String(clientType)} is not available in contract tests`);
     },

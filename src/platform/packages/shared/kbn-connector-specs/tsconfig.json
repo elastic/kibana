@@ -27,5 +27,7 @@
     "@kbn/logging-mocks",
     "@kbn/repo-info",
     "@kbn/connector-contract-mock",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
   ]
 }
