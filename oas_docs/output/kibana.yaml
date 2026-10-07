@@ -38973,6 +38973,13 @@ paths:
           required: false
           schema:
             type: string
+        - description: When false, exclude agentless policies from the results. Agentless policies are managed with the managed integrations APIs.
+          in: query
+          name: showAgentless
+          required: false
+          schema:
+            default: true
+            type: boolean
         - description: use withAgentCount instead
           in: query
           name: noAgentCount
