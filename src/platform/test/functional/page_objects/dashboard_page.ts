@@ -499,7 +499,9 @@ export class DashboardPageObject extends FtrService {
 
   public async openSettingsFlyout() {
     this.log.debug('openSettingsFlyout');
-    const isOpen = await this.isSettingsOpen();
+    const isOpen = await this.testSubjects.waitForExists('dashboardSettingsFlyout', {
+      timeout: 500,
+    });
     if (!isOpen) {
       await this.appMenu.clickMenuItem('dashboardSettingsButton');
     }

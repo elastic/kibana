@@ -151,9 +151,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            expect(
-              await testSubjects.exists(`lns-indexPatternDimension-average incompatible`)
-            ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
+            const hasTsdbIndex = indexes.some(({ mode }) => mode === 'tsdb');
+            const incompatibleSelector = 'lns-indexPatternDimension-average incompatible';
+            const isIncompatible = hasTsdbIndex
+              ? await testSubjects.waitForExists(incompatibleSelector)
+              : await testSubjects.exists(incompatibleSelector);
+            expect(isIncompatible).to.eql(hasTsdbIndex);
             await lens.closeDimensionEditor();
           });
 
