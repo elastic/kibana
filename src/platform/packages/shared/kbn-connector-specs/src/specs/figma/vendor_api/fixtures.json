@@ -1,7 +1,7 @@
 {
-  "getFile": { "readOnly": true },
-  "listProjectFiles": { "readOnly": true },
-  "listTeamProjects": { "input": { "teamId": "1234567890" }, "readOnly": true },
-  "renderNodes": { "readOnly": true },
-  "whoAmI": { "readOnly": true }
+  "listTeamProjects": {
+    "input": {
+      "teamId": "1234567890"
+    }
+  }
 }

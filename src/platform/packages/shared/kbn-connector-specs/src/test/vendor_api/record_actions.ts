@@ -11,7 +11,7 @@ import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-co
 import type { ConnectorSpec } from '../../connector_spec';
 import type { ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
-import type { VendorApiFixtures } from './fixtures';
+import type { QueryOperation, VendorApiFixtures } from './fixtures';
 import { toResponseFixtures } from './fixtures';
 import type { RejectedInput } from './generate_action_inputs';
 import { generateActionInputs } from './generate_action_inputs';
@@ -46,7 +46,10 @@ export type RecordingFinding =
       readonly request: string;
       readonly violations: readonly Violation[];
     }
-  | { readonly kind: 'read-only'; readonly action: string; readonly request: string }
+  /** A `read` scoped action sent a request that may change state and isn't a listed query. */
+  | { readonly kind: 'read-scope'; readonly action: string; readonly request: string }
+  /** A fixture query the action never called, or listed for an action that isn't `read`. */
+  | { readonly kind: 'unused-query'; readonly action: string; readonly operation: string }
   | {
       readonly kind: 'rejected-response';
       readonly action: string;
@@ -71,6 +74,15 @@ const uniqueSorted = <T>(items: readonly T[], keyOf: (item: T) => string): T[] =
   [...new Map(items.map((item) => [keyOf(item), item])).entries()]
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([, item]) => item);
+
+const isOperation = (
+  { source, method, path }: QueryOperation,
+  matched: ContractCall['matched']
+): boolean =>
+  matched !== undefined &&
+  (source === undefined || source === matched.source) &&
+  method.toLowerCase() === matched.method &&
+  path === matched.path;
 
 const isUnmatched = ({ matched, operation, status }: ContractCall): boolean =>
   matched === undefined && operation === undefined && (status === 404 || status === 405);
@@ -134,8 +146,19 @@ export const recordActions = async ({
       }
     }
 
+    const isRead = connector.actions[action].scope === 'read';
+    const queries = fixture.queries ?? [];
+    const usedQueries = new Set<QueryOperation>();
     for (const call of calls) {
       const { request, requestViolations, responseViolations, matched } = call;
+      if (isRead && !SAFE_METHODS.has(toRequestedPath(call).method)) {
+        const query = queries.find((candidate) => isOperation(candidate, matched));
+        if (query) {
+          usedQueries.add(query);
+        } else {
+          findings.push({ kind: 'read-scope', action, request });
+        }
+      }
       if (requestViolations.length > 0) {
         findings.push({
           kind: 'request-violation',
@@ -144,16 +167,7 @@ export const recordActions = async ({
           violations: requestViolations,
         });
       }
-      if (fixture.readOnly && !SAFE_METHODS.has(toRequestedPath(call).method)) {
-        findings.push({ kind: 'read-only', action, request });
-      }
-      const overridden = fixture.responses?.some(
-        ({ source, method, path }) =>
-          matched !== undefined &&
-          (source === undefined || source === matched.source) &&
-          method.toLowerCase() === matched.method &&
-          path === matched.path
-      );
+      const overridden = fixture.responses?.some((response) => isOperation(response, matched));
       if (overridden && responseViolations.length > 0) {
         const operation = `${matched?.method.toUpperCase()} ${matched?.path}`;
         findings.push({
@@ -163,6 +177,10 @@ export const recordActions = async ({
           violations: responseViolations,
         });
       }
+    }
+    for (const query of queries.filter((candidate) => !usedQueries.has(candidate))) {
+      const operation = `${query.method.toUpperCase()} ${query.path}`;
+      findings.push({ kind: 'unused-query', action, operation });
     }
     operations[action] = uniqueSorted(
       calls.flatMap(({ matched }) =>
