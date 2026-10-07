@@ -48,7 +48,10 @@ jest.mock('../../../flyout_v2/shared/components/flyout_provider', () => ({
 }));
 
 const resolveSecurityCanvasContext = jest.fn().mockResolvedValue({ store: {}, kibanaServices: {} });
-const openFlyout = jest.fn(() => ({ close: jest.fn(), onClose: Promise.resolve() }));
+const openFlyout = jest.fn((_content: React.ReactNode, _options?: object) => ({
+  close: jest.fn(),
+  onClose: Promise.resolve(),
+}));
 
 const categories = [
   {
