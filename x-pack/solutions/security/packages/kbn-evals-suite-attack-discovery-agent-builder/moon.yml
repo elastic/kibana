@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/core'
+  - '@kbn/dev-cli-runner'
   - '@kbn/evals'
   - '@kbn/scout'
   - '@kbn/tooling-log'

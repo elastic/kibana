@@ -1,0 +1,56 @@
+[
+  {
+    "index": ".entities.v2.latest.default",
+    "id": "host:ad-scenario-host-wks-alice-01",
+    "source": {
+      "@timestamp": "2026-07-13T12:00:00.000Z",
+      "labels": {
+        "ad_fp_tp_twin": "encoded-powershell.tp",
+        "ad_portable_seed": "ad-fp-tp-twins-2026-09"
+      },
+      "host": {
+        "name": "wks-alice-01",
+        "hostname": "wks-alice-01",
+        "id": "ad-scenario-host-wks-alice-01",
+        "os": { "type": "windows", "name": "Windows", "version": "test" }
+      },
+      "asset": {
+        "name": "Alice Chen laptop",
+        "owner": "alice.chen",
+        "model": "ThinkPad T14",
+        "environment": "corporate_workstation",
+        "criticality": "medium_impact"
+      },
+      "entity": {
+        "id": "host:ad-scenario-host-wks-alice-01",
+        "name": "wks-alice-01",
+        "type": "host",
+        "sub_type": "employee_workstation",
+        "EngineMetadata": { "Type": "host" },
+        "risk": { "calculated_level": "Low", "calculated_score_norm": 18 }
+      }
+    }
+  },
+  {
+    "index": ".entities.v2.latest.default",
+    "id": "user:alice.chen@ad-scenario-host-wks-alice-01@local",
+    "source": {
+      "@timestamp": "2026-07-13T12:00:00.000Z",
+      "labels": {
+        "ad_fp_tp_twin": "encoded-powershell.tp",
+        "ad_portable_seed": "ad-fp-tp-twins-2026-09"
+      },
+      "user": { "name": "alice.chen", "domain": "CONTOSO" },
+      "host": { "name": "wks-alice-01", "id": "ad-scenario-host-wks-alice-01" },
+      "asset": { "criticality": "medium_impact" },
+      "entity": {
+        "id": "user:alice.chen@ad-scenario-host-wks-alice-01@local",
+        "name": "alice.chen@wks-alice-01",
+        "type": "user",
+        "sub_type": "employee",
+        "EngineMetadata": { "Type": "user" },
+        "risk": { "calculated_level": "Low", "calculated_score_norm": 12 }
+      }
+    }
+  }
+]
