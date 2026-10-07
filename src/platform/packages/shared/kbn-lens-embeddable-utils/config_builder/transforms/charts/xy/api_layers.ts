@@ -47,7 +47,7 @@ import {
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
 } from '../../coloring';
-import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING } from './defaults';
+import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING, DEFAULT_REFERENCE_LINE_AXIS } from './defaults';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { toApiFilterLanguage } from '../../columns/filter';
 import {
@@ -280,7 +280,7 @@ function convertReferenceLinesDecorationsToAPIFormat(
   'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis' | 'text'
 > {
   const resolvedOnAxis = (): ReferenceLineDef['axis'] => {
-    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return undefined;
+    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return DEFAULT_REFERENCE_LINE_AXIS;
     if (yConfig.axisMode === 'bottom') return 'x';
     return resolveAxisId(yConfig.axisMode);
   };
