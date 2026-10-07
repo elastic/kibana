@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   THREAT_CATEGORIES,
   THREAT_REGIONS,
@@ -52,14 +52,16 @@ const normalizeAttackTechniqueId = (value: string): string => {
   return ATTACK_TECHNIQUE_ID_PATTERN.test(normalized) ? normalized : '';
 };
 
-const behaviorSchema = z.object({
-  technique_id: z.string().transform(normalizeAttackTechniqueId),
-  description: z.string().transform((value) => value.slice(0, 2_000)),
-  telemetry_targets: z
-    .array(z.string())
-    .transform((values) => [...new Set(values.map((value) => value.slice(0, 256)))].slice(0, 20)),
-  confidence: z.number().min(0).max(1),
-});
+const behaviorSchema = lazySchema(() =>
+  z.object({
+    technique_id: z.string().transform(normalizeAttackTechniqueId),
+    description: z.string().transform((value) => value.slice(0, 2_000)),
+    telemetry_targets: z
+      .array(z.string())
+      .transform((values) => [...new Set(values.map((value) => value.slice(0, 256)))].slice(0, 20)),
+    confidence: z.number().min(0).max(1),
+  })
+);
 
 const ARTIFACT_TYPES = [
   'campaign_id',
@@ -85,32 +87,38 @@ const ARTIFACT_TYPES = [
   'other',
 ] as const;
 
-const artifactSchema = z.object({
-  type: z.enum(ARTIFACT_TYPES),
-  value: z.string().transform((value) => value.slice(0, 2_048)),
-  context: z.string().transform((value) => value.slice(0, 1_000)),
-});
+const artifactSchema = lazySchema(() =>
+  z.object({
+    type: z.enum(ARTIFACT_TYPES),
+    value: z.string().transform((value) => value.slice(0, 2_048)),
+    context: z.string().transform((value) => value.slice(0, 1_000)),
+  })
+);
 
-export const reportCoreModelOutputSchema = z.object({
-  categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
-  regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
-  relevance: z.number().min(0).max(1),
-  diamond_suitable: z.boolean(),
-  severity: z.object({
-    level: z.enum(['low', 'medium', 'high', 'critical']),
-    rationale: z
-      .string()
-      .transform((value) => value.slice(0, 2_000))
-      .optional(),
-  }),
-  approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
-  behaviors: z.array(behaviorSchema).max(100),
-  artifacts: z.array(artifactSchema).max(200),
-});
+export const reportCoreModelOutputSchema = lazySchema(() =>
+  z.object({
+    categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
+    regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
+    relevance: z.number().min(0).max(1),
+    diamond_suitable: z.boolean(),
+    severity: z.object({
+      level: z.enum(['low', 'medium', 'high', 'critical']),
+      rationale: z
+        .string()
+        .transform((value) => value.slice(0, 2_000))
+        .optional(),
+    }),
+    approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
+    behaviors: z.array(behaviorSchema).max(100),
+    artifacts: z.array(artifactSchema).max(200),
+  })
+);
 
-const iocAdjudicationOnlySchema = z.object({
-  approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
-});
+const iocAdjudicationOnlySchema = lazySchema(() =>
+  z.object({
+    approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
+  })
+);
 
 export type ReportCoreModelOutput = z.infer<typeof reportCoreModelOutputSchema>;
 

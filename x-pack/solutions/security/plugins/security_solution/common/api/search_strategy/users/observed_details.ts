@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { inspect } from '../model/inspect';
 import { timerange } from '../model/timerange';
 import { UsersQueries } from '../model/factory_query_type';
 
-export const observedUserDetailsSchema = requestBasicOptionsSchema.extend({
-  userName: z.string(),
-  skip: z.boolean().optional(),
-  timerange,
-  inspect,
-  factoryQueryType: z.literal(UsersQueries.observedDetails),
-  entityStoreV2: z.boolean().optional(),
-});
+export const observedUserDetailsSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    userName: z.string(),
+    skip: z.boolean().optional(),
+    timerange,
+    inspect,
+    factoryQueryType: z.literal(UsersQueries.observedDetails),
+    entityStoreV2: z.boolean().optional(),
+  })
+);
 
 export type ObservedUserDetailsRequestOptionsInput = z.input<typeof observedUserDetailsSchema>;
 
