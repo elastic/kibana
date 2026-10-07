@@ -10,7 +10,12 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-contract-mock';
-import { applyOverlay, convertSwagger2 } from '@kbn/connector-contract-mock';
+import {
+  applyOverlay,
+  convertDiscovery,
+  convertSwagger2,
+  isDiscoveryDocument,
+} from '@kbn/connector-contract-mock';
 import type { ConnectorSpec } from '../../connector_spec';
 import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from './json_pointer';
@@ -168,10 +173,13 @@ export const updateVendorApi = async ({
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name));
     if (snapshot === undefined) {
       log.info(`Fetching ${name} from ${url}`);
-      const document = parseSpecText(await fetchText(url)) as OpenApiDocument;
+      const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
+      // Discovery `$ref`s are schema names, which bundling would take for relative URLs.
+      const discovery = isDiscoveryDocument(parsed);
+      const document = discovery ? convertDiscovery(parsed) : parsed;
       const load = async (documentUrl: string) => parseSpecText(await fetchText(documentUrl));
       const bundled = await bundleSpec(document, { url, load });
-      formats[name] = formatOf(bundled);
+      formats[name] = discovery ? 'discovery' : formatOf(bundled);
       raw[name] = formats[name] === 'swagger' ? convertSwagger2(bundled) : bundled;
     } else {
       raw[name] = JSON.parse(snapshot);

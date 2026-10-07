@@ -44,7 +44,13 @@ export type {
 } from './src/contract/types';
 export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';
 export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
-export { convertSwagger2, InvalidSchemaError, loadContractOperations } from './src/openapi';
+export {
+  convertDiscovery,
+  convertSwagger2,
+  InvalidSchemaError,
+  isDiscoveryDocument,
+  loadContractOperations,
+} from './src/openapi';
 export type {
   ContractOperation,
   ContractSpec,

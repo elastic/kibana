@@ -27,6 +27,7 @@ export const loadContractOperations = (
 };
 
 export { InvalidSchemaError } from './assert_schemas_valid';
+export { convertDiscovery, isDiscoveryDocument } from './convert_discovery';
 export { convertSwagger2 } from './convert_swagger2';
 export type { InvalidSchemaFailure } from './assert_schemas_valid';
 export type { ContractOperation, ContractSpec, OpenApiDocument, SpecSchema } from './types';
