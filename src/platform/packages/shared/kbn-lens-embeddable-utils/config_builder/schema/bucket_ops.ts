@@ -116,7 +116,7 @@ const bucketTermsRankByCustomLastValueOperationSchema = bucketTermsRankByCustomS
      * Time field used to determine document recency for the last-value ranking. Mirrors the
      * `time_field` of the `last_value` metric operation.
      */
-    time_field: z.string().optional().meta({
+    time_field: z.string().min(1).optional().meta({
       description: 'Time field used to determine document recency for the last-value ranking.',
     }),
   })
