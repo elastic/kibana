@@ -20,6 +20,8 @@
     "@kbn/tooling-log",
     "@kbn/test",
     "@kbn/security-solution-plugin",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/es-query",
+    "@kbn/osquery-plugin"
   ]
 }
