@@ -13,15 +13,19 @@ import {
   alertEventSeveritySchema,
   alertEpisodeStatusSchema,
   ruleKindSchema,
-  recoveryStrategySchema,
+  recoverySchema,
   recoveryStrategy,
-  noDataStrategySchema,
+  noDataSchema,
+  noDataStrategy,
   groupingModeSchema,
   throttleStrategySchema,
   MATCHER_CONTEXT_FIELDS,
-  PER_EPISODE_STRATEGIES,
+  PER_ALERT_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
+  POLICY_MATCHER_TAGS_MAX,
+  POLICY_MATCHER_TAG_MAX_LENGTH,
+  MAX_KQL_LENGTH,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
@@ -321,6 +325,28 @@ function formatFieldTable(fields: FieldInfo[]): string {
   return ['| Field | Type | Required | Description |', '|---|---|---|---|', ...rows].join('\n');
 }
 
+/**
+ * Renders an object's field table followed by one table per nested object
+ * property, so fields a single table would flatten to `object` — `pending.count`,
+ * `query.base` — stay visible to the agent.
+ */
+function formatObjectTables(node: JsonSchemaNode, nestedHeading: string): string {
+  const fields = jsonSchemaToFieldTable(node);
+  if (fields.length === 0) return '';
+
+  const properties = (node.properties ?? {}) as JsonSchemaNode;
+  const nestedTables = fields.flatMap(({ name }) => {
+    const child = properties[name] as JsonSchemaNode | undefined;
+    if (child?.type !== 'object') return [];
+    const childFields = jsonSchemaToFieldTable(child);
+    return childFields.length > 0
+      ? [`${nestedHeading} \`${name}\`\n\n${formatFieldTable(childFields)}`]
+      : [];
+  });
+
+  return [formatFieldTable(fields), ...nestedTables].join('\n\n');
+}
+
 function formatVariantSchemas(jsonSchema: unknown): string {
   if (!jsonSchema || typeof jsonSchema !== 'object') return '';
   const schema = jsonSchema as JsonSchemaNode;
@@ -346,13 +372,13 @@ function formatVariantSchemas(jsonSchema: unknown): string {
         ? `\`${discriminatorKey}: "${discriminatorValue}"\``
         : variant.description ?? 'Variant';
 
-    const fields = jsonSchemaToFieldTable(variant);
-    if (fields.length > 0) {
+    const tables = formatObjectTables(variant, '#####');
+    if (tables) {
       const description =
         typeof variant.description === 'string' && variant.description.trim().length > 0
           ? `${variant.description}\n\n`
           : '';
-      sections.push(`#### ${label}\n\n${description}${formatFieldTable(fields)}`);
+      sections.push(`#### ${label}\n\n${description}${tables}`);
     }
   }
   return sections.join('\n\n');
@@ -404,11 +430,23 @@ export const generateRuleSchemaDoc = (): string =>
     schema: createRuleDataBaseSchema,
     extraSections: (jsonSchema) => {
       const props = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
-      if (!props?.query) {
+      if (!props) {
         return undefined;
       }
-      const queryVariants = formatVariantSchemas(props.query as JsonSchemaNode);
-      return queryVariants ? [{ heading: 'Query Formats', content: queryVariants }] : undefined;
+      return [
+        {
+          heading: 'Query',
+          content: formatObjectTables(props.query as JsonSchemaNode, '####'),
+        },
+        {
+          heading: 'Recovery Strategies',
+          content: formatVariantSchemas(props.recovery as JsonSchemaNode),
+        },
+        {
+          heading: 'No-Data Strategies',
+          content: formatVariantSchemas(props.no_data as JsonSchemaNode),
+        },
+      ];
     },
   });
 
@@ -492,46 +530,78 @@ export const getDescribedEnumValues = (
   return values;
 };
 
+/**
+ * Reads per-variant `.describe()` copy from a discriminated union, keyed by the
+ * discriminator literal. The enum counterpart of {@link getDescribedEnumValues}
+ * for unions whose members carry a payload alongside the discriminator.
+ */
+export const getDescribedVariants = (
+  schema: z.ZodType,
+  discriminator: string,
+  schemaName: string
+): DescribedEnumValue[] => {
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
+  const variants = (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined;
+  if (!variants) {
+    throw new SchemaTranslationError(
+      `${schemaName} is not a discriminated union. Use z.discriminatedUnion('${discriminator}', ...) with .describe(...) on each member.`
+    );
+  }
+
+  const missing: string[] = [];
+  const values: DescribedEnumValue[] = [];
+  for (const variant of variants) {
+    const properties = variant.properties as JsonSchemaNode | undefined;
+    const discriminatorNode = properties?.[discriminator] as JsonSchemaNode | undefined;
+    const value =
+      (discriminatorNode?.const as string | undefined) ??
+      (discriminatorNode?.enum as string[] | undefined)?.[0];
+    if (typeof value !== 'string') {
+      missing.push(`(variant with no "${discriminator}" literal)`);
+      continue;
+    }
+    const description = (variant.description as string | undefined)?.trim() ?? '';
+    if (!description) {
+      missing.push(value);
+      continue;
+    }
+    values.push({ value, description });
+  }
+
+  throwIfMissingDescribes(missing, `${schemaName} variant(s)`);
+  return values;
+};
+
 export const getEpisodeStatusValues = (): string[] =>
   getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema').map(
     ({ value }) => value
   );
 
-/** Returns the user-facing state transition field names from the operation schema (excludes internal operator fields and `operation`). */
+/** Returns the state transition phase names from the operation schema. */
 const getStateTransitionFields = (): string[] =>
   Object.keys(setStateTransitionOperationSchema.shape).filter((k) => k !== 'operation');
 
 /**
- * Builds a markdown table from a schema's described literal values.
+ * Builds a markdown table from described enum values or union variants.
  */
 const generateEnumTable = ({
   header,
-  schema,
-  schemaName,
+  values,
 }: {
   header: [string, string];
-  schema: z.ZodType;
-  schemaName: string;
+  values: DescribedEnumValue[];
 }): string => {
-  const rows = getDescribedEnumValues(schema, schemaName).map(
+  const rows = values.map(
     ({ value, description }) => `| \`${value}\` | ${escapeTableCell(description)} |`
   );
   return [`| ${header[0]} | ${header[1]} |`, '|---|---|', ...rows].join('\n');
 };
 
 /**
- * Builds a markdown bullet list from a schema's described literal values.
+ * Builds a markdown bullet list from described enum values or union variants.
  */
-const generateEnumList = ({
-  schema,
-  schemaName,
-}: {
-  schema: z.ZodType;
-  schemaName: string;
-}): string =>
-  getDescribedEnumValues(schema, schemaName)
-    .map(({ value, description }) => `- \`${value}\`: ${description}`)
-    .join('\n');
+const generateEnumList = (values: DescribedEnumValue[]): string =>
+  values.map(({ value, description }) => `- \`${value}\`: ${description}`).join('\n');
 
 /** Formats enum values as an inline comma-separated backtick list. */
 export const formatEnumValuesList = (values: readonly string[]): string =>
@@ -543,32 +613,29 @@ const formatStrategySet = (strategies: Set<string>): string =>
 
 /**
  * Generates standalone markdown for throttle / grouping compatibility from
- * `groupingModeSchema`, `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
+ * `groupingModeSchema`, `PER_ALERT_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
  * `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
-  const groupingModesList = generateEnumList({
-    schema: groupingModeSchema,
-    schemaName: 'groupingModeSchema',
-  });
+  const groupingModesList = generateEnumList(
+    getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema')
+  );
 
-  const perEpisodeOnlyStrategies = [...PER_EPISODE_STRATEGIES].filter(
+  const perAlertOnlyStrategies = [...PER_ALERT_STRATEGIES].filter(
     (strategy) => !AGGREGATE_STRATEGIES.has(strategy)
   );
-  const notPerEpisodeStrategies = [...AGGREGATE_STRATEGIES].filter(
-    (strategy) => !PER_EPISODE_STRATEGIES.has(strategy)
+  const notPerAlertStrategies = [...AGGREGATE_STRATEGIES].filter(
+    (strategy) => !PER_ALERT_STRATEGIES.has(strategy)
   );
 
   const caveats: string[] = [];
-  if (perEpisodeOnlyStrategies.length > 0) {
+  if (perAlertOnlyStrategies.length > 0) {
     caveats.push(
-      `- Only valid with \`per_episode\`: ${formatEnumValuesList(perEpisodeOnlyStrategies)}.`
+      `- Only valid with \`per_alert\`: ${formatEnumValuesList(perAlertOnlyStrategies)}.`
     );
   }
-  if (notPerEpisodeStrategies.length > 0) {
-    caveats.push(
-      `- Not valid with \`per_episode\`: ${formatEnumValuesList(notPerEpisodeStrategies)}.`
-    );
+  if (notPerAlertStrategies.length > 0) {
+    caveats.push(`- Not valid with \`per_alert\`: ${formatEnumValuesList(notPerAlertStrategies)}.`);
   }
   caveats.push(
     `- Require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`): ${formatStrategySet(
@@ -612,7 +679,7 @@ export const generateRuleKindDoc = (): string => {
     const heading = `### ${getRuleKindProductLabel(value)} (\`kind: ${value}\`)`;
     const lines = [heading, description];
     if (value === 'alert') {
-      lines.push(`Episode statuses: ${episodeStatuses}.`);
+      lines.push(`Alert statuses: ${episodeStatuses}.`);
       lines.push(`State transition fields: ${transitionFields}.`);
     }
     return i > 0 ? ['', ...lines] : lines;
@@ -644,17 +711,17 @@ export const generateNotificationsOverviewDoc = (): string => {
   return [
     '# Notifications via Action Policies',
     '',
-    'Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.',
+    'Notifications are not configured on the rule itself. Alerts are matched and dispatched by **action policies** — space-scoped saved objects that send matched alerts to workflow destinations.',
     '',
     `When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
     '',
     '## Notifications Require Alert Kind',
     '',
-    `Action policies only process ${alertLabel} (\`kind: alert\`). ${signalLabel} (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./rule-kind.md) and [episode-lifecycle reference](./episode-lifecycle.md).`,
+    `Action policies only process ${alertLabel} (\`kind: alert\`). ${signalLabel} (\`kind: signal\`) do not participate in alert lifecycle or notification dispatch. See the [rule-kind reference](./rule-kind.md) and [alert-lifecycle reference](./alert-lifecycle.md).`,
     '',
     'When a user asks for notifications on a rule that is currently `kind: signal` (or when composing a new rule where the user wants notifications):',
     '',
-    `1. **Explain the difference**: ${signalLabel} (\`kind: signal\`) rules are observation-only and do not trigger notifications. ${alertLabel} (\`kind: alert\`) track episode lifecycle and can dispatch to action policies.`,
+    `1. **Explain the difference**: ${signalLabel} (\`kind: signal\`) rules are observation-only and do not trigger notifications. ${alertLabel} (\`kind: alert\`) track alert lifecycle and can dispatch to action policies.`,
     `2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
     `3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing ${signalLabel} (\`kind: signal\`) rule cannot be converted. Offer to create a new ${alertLabel} (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.`,
     `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
@@ -663,19 +730,29 @@ export const generateNotificationsOverviewDoc = (): string => {
 
 /** Generates the State Transition section with heading, field list from schema, and constraints. */
 export const generateStateTransitionDoc = (): string => {
-  const fields = getStateTransitionFields();
   const jsonSchema = zodToJsonSchema(setStateTransitionOperationSchema) as JsonSchemaNode;
   const properties = (jsonSchema.properties ?? {}) as JsonSchemaNode;
 
-  const bullets = fields.map((f) => {
-    const prop = properties[f] as JsonSchemaNode | undefined;
-    const description = prop?.description as string | undefined;
+  const describeField = (path: string, node: JsonSchemaNode | undefined): string => {
+    const description = node?.description as string | undefined;
     if (!description) {
       throw new SchemaTranslationError(
-        `Missing .describe() on set_state_transition field "${f}". Add .describe() to that field on setStateTransitionOperationSchema.`
+        `Missing .describe() on set_state_transition field "${path}". Add .describe() to that field on setStateTransitionOperationSchema.`
       );
     }
-    return `- \`${f}\` — ${description}`;
+    return description;
+  };
+
+  const bullets = getStateTransitionFields().flatMap((phase) => {
+    const phaseNode = properties[phase] as JsonSchemaNode | undefined;
+    const phaseProperties = (phaseNode?.properties ?? {}) as JsonSchemaNode;
+    return [
+      `- \`${phase}\` — ${describeField(phase, phaseNode)}`,
+      ...Object.entries(phaseProperties).map(
+        ([name, node]) =>
+          `  - \`${phase}.${name}\` — ${describeField(`${phase}.${name}`, node as JsonSchemaNode)}`
+      ),
+    ];
   });
 
   return [
@@ -689,22 +766,21 @@ export const generateStateTransitionDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the Episode Lifecycle section with heading, prose, and status table. */
-export const generateEpisodeLifecycleDoc = (): string => {
+/** Generates the Alert Lifecycle section with heading, prose, and status table. */
+export const generateAlertLifecycleDoc = (): string => {
   const table = generateEnumTable({
     header: ['Status', 'Meaning'],
-    schema: alertEpisodeStatusSchema,
-    schemaName: 'alertEpisodeStatusSchema',
+    values: getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema'),
   });
 
   return [
-    '# Episode Lifecycle',
+    '# Alert Lifecycle',
     '',
-    'Episodes are the unit of alert state. Each unique group (by `group_hash`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:',
+    'Alerts are the unit of problem state. Each unique group (by `group_hash`) has its own alert. Each alert has a status that reflects where it is in the lifecycle:',
     '',
     table,
     '',
-    'Only `kind: alert` rules produce episodes. `kind: signal` rules write raw signal events with no episode tracking.',
+    'Only `kind: alert` rules produce alerts. `kind: signal` rules write raw signal events with no alert tracking.',
   ].join('\n');
 };
 
@@ -715,12 +791,12 @@ export const generateSeverityDoc = (): string => {
   return [
     '# Alert Event Severity',
     '',
-    'Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named `severity` in the ES|QL breach query output.',
+    'Severity is a per-event property on alert events, not a rule-level field. It is extracted at execution time from a column named `severity` in the ES|QL breach query output.',
     '',
     `- **Valid values**: ${values} (case-insensitive).`,
     '- If the breach query does not produce a `severity` column, alert events have no severity.',
     '- Different groups can produce different severities in the same rule execution (the value comes from each row).',
-    '- Action policies can match on `severity` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).',
+    '- Action policies can match on `severity` to route high-severity alerts differently (e.g. PagerDuty for critical, email for low).',
     '',
     '### Setting Severity in ES|QL',
     '',
@@ -736,55 +812,54 @@ export const generateSeverityDoc = (): string => {
 /** Generates standalone markdown for no-data strategy: values, wiring, and kind constraints. */
 export const generateNoDataStrategyDoc = (): string => {
   const table = generateEnumTable({
-    header: ['Value', 'Behaviour'],
-    schema: noDataStrategySchema,
-    schemaName: 'noDataStrategySchema',
+    header: ['Strategy', 'Behaviour'],
+    values: getDescribedVariants(noDataSchema, 'strategy', 'noDataSchema'),
   });
 
   return [
     '# No-Data Strategy',
     '',
-    '`no_data_strategy` is a **top-level rule field** that controls behaviour when no data is present.',
+    `\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set via the \`set_no_data\` operation as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: '${noDataStrategy.ignore}' }\`.`,
     '',
     table,
     '',
-    "When setting `no_data_strategy` to anything other than `'none'`, add a `no_data` block to the standalone query:",
-    "`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }`. For composed query format, the `base` query is used as the data query.",
+    `Every strategy except \`${noDataStrategy.ignore}\` may carry its own presence query:`,
+    `\`no_data: { strategy: '${noDataStrategy.keep_last}', query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`.`,
+    'Omit `query` to use `query.base` to decide whether a group has data.',
     '',
-    'Signal rules cannot set `no_data_strategy` ([rule-kind reference](./rule-kind.md)).',
+    'Signal rules cannot set `no_data` ([rule-kind reference](./rule-kind.md)).',
   ].join('\n');
 };
 
 /** Generates standalone markdown for recovery strategy: values, wiring, and kind constraints. */
 export const generateRecoveryStrategyDoc = (): string => {
-  const list = generateEnumList({
-    schema: recoveryStrategySchema,
-    schemaName: 'recoveryStrategySchema',
-  });
+  const list = generateEnumList(getDescribedVariants(recoverySchema, 'strategy', 'recoverySchema'));
 
   return [
     '# Recovery Strategy',
     '',
-    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Signal rules (`kind: signal`) cannot set `recovery_strategy` ([rule-kind reference](./rule-kind.md)).',
+    `\`recovery\` is a **top-level rule field** (not inside the query). It is set via the \`set_recovery\` operation as an object whose \`strategy\` selects the behaviour, and it controls how alerts transition from active to recovering/inactive (see [alert-lifecycle reference](./alert-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: '${recoveryStrategy.no_breach}' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).`,
     '',
     list,
     '',
-    `When using \`recovery_strategy: '${recoveryStrategy.query}'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
-    "- **Composed**: `recovery: { segment: 'WHERE cpu < 0.5' }`",
-    "- **Standalone**: `recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }`",
+    'The two query-backed strategies carry their own ES|QL:',
+    `- \`recovery: { strategy: '${recoveryStrategy.condition}', segment: 'WHERE avg_cpu < 0.6' }\` — the segment is appended to \`query.base\`. This requires \`query.breach\`: without a breach segment every row of \`base\` already breaches, so the recovery condition could only return groups that are breaching and the rule would never recover.`,
+    `- \`recovery: { strategy: '${recoveryStrategy.query}', query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu < 0.6' }\` — an independent full query, usable with or without \`query.breach\`.`,
   ].join('\n');
 };
 
 /**
- * Generates markdown for KQL matcher context fields from `MATCHER_CONTEXT_FIELDS`,
- * enriching enum fields from `alertEpisodeStatusSchema` / `alertEventSeveritySchema`.
+ * Generates markdown for the action-policy matcher shape — both the `tags` and
+ * `expression` fields — including the KQL context field table from
+ * `MATCHER_CONTEXT_FIELDS`, enriching enum fields from `alertEpisodeStatusSchema`
+ * / `alertEventSeveritySchema`.
  */
 export const generateMatcherContextDoc = (): string => {
   const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
   const severities = formatEnumValuesList(getSeverityValues());
 
   const formatMatcherFieldType = (path: string, type: string): string => {
-    if (path === 'episode_status') return episodeStatuses;
+    if (path === 'alert_status') return episodeStatuses;
     if (path === 'severity') return severities;
     if (path === 'data') return '`data.*` object';
     return type;
@@ -796,24 +871,78 @@ export const generateMatcherContextDoc = (): string => {
   });
 
   return [
-    '# Matcher Context Fields',
+    '# Action Policy Matchers',
     '',
-    "When the dispatcher evaluates a policy's KQL matcher, these fields are available:",
+    'A matcher selects which **alerts** a policy applies to.',
+    'Policies are space-scoped; they are not bound to a rule object.',
+    '',
+    '```',
+    'matcher: { tags?: string[] | null, expression?: string | null }',
+    '```',
+    '',
+    '## `tags` — match by rule routing tag',
+    '',
+    `Matches if the alert's rule has **at least one** of the listed tags in its \`metadata.routing_tags\` (OR / any-of).`,
+    'Exact string match: case-sensitive, no wildcards, no prefix matching.',
+    `Max ${POLICY_MATCHER_TAGS_MAX} tags, up to ${POLICY_MATCHER_TAG_MAX_LENGTH} characters each.`,
+    '',
+    "> **Important**: `matcher.tags` is matched against the **rule**'s routing tags",
+    "> (`metadata.routing_tags`), not the rule's `metadata.tags` or the policy's own name",
+    '> or metadata.',
+    '',
+    '## `expression` — match by alert content (KQL)',
+    '',
+    `Max ${MAX_KQL_LENGTH} characters. Only the following fields are available in the KQL expression:`,
     '',
     '| Field | Type | Description |',
     '|---|---|---|',
     ...rows,
     '',
-    'An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use `rule.id: "<ruleId>"`.',
+    '> **Note**: `rule.id`, `rule.name`, `rule.tags`, and `rule.routing_tags` are **not** available in the',
+    '> KQL expression. Use `matcher.tags` to scope a policy by rule.',
+    '',
+    '## How `tags` and `expression` combine',
+    '',
+    '| `tags` | `expression` | Result |',
+    '|---|---|---|',
+    '| set | set | **AND** — rule must have a matching routing tag and KQL must pass |',
+    '| set | absent/null | tag constraint only |',
+    "| absent/null | set | no tag constraint; any rule's alerts may match if KQL passes |",
+    '| absent/null | absent/null | **catch-all** — matches every alert in the space |',
+    '',
+    'If `matcher` itself is `null`, or both fields are empty, the policy is a **catch-all**.',
+    'A rule with no routing tags never matches a policy that has `matcher.tags` set.',
+    '',
+    '## `set_matcher` replaces the whole matcher',
+    '',
+    'The `set_matcher` operation replaces the matcher object entirely.',
+    'To add tags while keeping an existing KQL filter, resend the current `expression`:',
+    '',
+    '```json',
+    `{ "operation": "set_matcher", "matcher": { "tags": ["team-sre"], "expression": "severity: \\"critical\\"" } }`,
+    '```',
+    '',
+    '## Examples',
+    '',
+    '```json',
+    `// one rule (via shared routing tag):`,
+    `{ "tags": ["notify-high-cpu"] }`,
+    '',
+    `// a family of rules by routing tag:`,
+    `{ "tags": ["production", "payments"] }`,
+    '',
+    `// severity filter across all rules:`,
+    `{ "expression": "severity: \\"critical\\"" }`,
+    '',
+    `// both (rule family AND severity):`,
+    `{ "tags": ["production"], "expression": "severity: \\"critical\\"" }`,
+    '```',
   ].join('\n');
 };
 
 /** Generates standalone markdown for action-policy grouping modes. */
 export const generateGroupingModesDoc = (): string => {
-  const list = generateEnumList({
-    schema: groupingModeSchema,
-    schemaName: 'groupingModeSchema',
-  });
+  const list = generateEnumList(getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema'));
 
   return [
     '# Grouping Modes',
@@ -826,10 +955,9 @@ export const generateGroupingModesDoc = (): string => {
 
 /** Generates standalone markdown for action-policy throttle strategies. */
 export const generateThrottleStrategiesDoc = (): string => {
-  const list = generateEnumList({
-    schema: throttleStrategySchema,
-    schemaName: 'throttleStrategySchema',
-  });
+  const list = generateEnumList(
+    getDescribedEnumValues(throttleStrategySchema, 'throttleStrategySchema')
+  );
 
   return [
     '# Throttle Strategies',
@@ -860,11 +988,11 @@ export const generateDispatchFlowDoc = (): string =>
     '',
     'The end-to-end notification path:',
     '',
-    '1. **Rule** (`kind: alert`) evaluates its ES|QL query and writes alert episodes to `.rule-events`.',
-    '2. **Dispatcher** (runs on its own Task Manager schedule) reads episodes from `.rule-events`.',
+    '1. **Rule** (`kind: alert`) evaluates its ES|QL query and writes alerts to `.rule-events`.',
+    '2. **Dispatcher** (runs on its own Task Manager schedule) reads alerts from `.rule-events`.',
     '3. Dispatcher loads **enabled action policies** for the relevant space.',
-    "4. **Matcher evaluation**: each policy's KQL matcher is tested against each episode's context.",
-    "5. **Grouping**: matched episodes are grouped according to the policy's `groupingMode` / `groupBy`.",
+    "4. **Matcher evaluation**: each policy's KQL matcher is tested against each alert's context.",
+    "5. **Grouping**: matched alerts are grouped according to the policy's `groupingMode` / `groupBy`.",
     "6. **Throttling**: groups are filtered based on the policy's throttle strategy and notification history.",
     "7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via `scheduleWorkflow`.",
     '8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).',
@@ -879,23 +1007,51 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '',
     'Use this path when the user wants notifications for **one specific rule**.',
     '',
-    'Action policies only process alert episodes. If the rule is `kind: signal`, do not',
+    'Action policies only process alerts. If the rule is `kind: signal`, do not',
     'proceed: ask the user (or the rule-management skill) to convert or recreate the',
     'rule as `kind: alert` first.',
     '',
-    'Create the policy with these operations in order:',
+    '## Scoping a policy to one rule',
+    '',
+    'A policy matches **alerts**, not a rule object. The only way to scope one policy',
+    'to one rule is a **shared routing tag on both sides**:',
+    '',
+    "- The rule's `metadata.routing_tags` must contain a tag that uniquely identifies it.",
+    "- The policy's `matcher.tags` must contain that same tag.",
+    '',
+    'Use the convention `notify-<rule-slug>` (lowercase kebab of the rule name,',
+    'for example `notify-high-cpu-prod`).',
+    '',
+    '## Steps',
+    '',
+    '### 1. Add the routing tag to the rule',
+    '',
+    'Call `manage_rule` → `set_metadata` with `routing_tags: [<all existing routing tags>, "notify-<rule-slug>"]`.',
+    '',
+    '> **Routing tags are replaced wholesale.** Read the current routing tags off the rule',
+    '> attachment first and re-send them alongside the new one. The routing tag cap is 20.',
+    '> If the rule is already at the cap, ask the user which existing routing tag to drop.',
+    '> Do not put the routing tag in `tags`; rule tags do not link policies.',
+    '',
+    '> **Save reminder**: `manage_rule` only updates the in-memory rule attachment.',
+    '> The routing tag only takes effect once the user saves the rule',
+    '> (Rule → Workflow → Action Policy save order).',
+    '',
+    '### 2. Create the action policy',
+    '',
+    'Call `manage_action_policy` with these operations in order:',
     '',
     '1. `set_metadata`: name = `"Notify on <rule-name>"`, description = `"Default notification for <rule-name>"`',
     '2. `set_destinations`: `[{ type: "workflow", id: "<workflowId>" }]`',
     '   - Use the `workflowId` passed to `generate_workflow`, **not** the workflow `attachmentId`.',
-    '3. `set_matcher`: `rule.id: "<ruleId>"`',
-    '   - `ruleId` comes from the `manage_rule` tool result. It is pre-assigned when the',
-    '     rule attachment is created and becomes the saved-object ID when the user clicks',
-    '     "Create rule".',
-    '   - It is available even for unsaved/proposed rules — do not ask the user to save',
-    '     the rule first.',
-    '4. `set_grouping`: `per_episode`',
+    '3. `set_matcher`: `{ tags: ["notify-<rule-slug>"] }` — **do not omit**.',
+    '   An omitted or empty matcher is a space-wide catch-all, not "this rule".',
+    '4. `set_grouping`: `per_alert`',
     '5. `set_throttle`: `{ strategy: "on_status_change" }`',
+    '6. `validate`',
+    '',
+    'If the rule already has a routing tag that uniquely identifies it, you may reuse it',
+    'instead of adding `notify-<rule-slug>` — but confirm it is not shared with other rules.',
     '',
     'If the user explicitly requests a cross-rule or shared policy, consult the',
     '[multi-rule action policies reference](./action-policy-multi-rule.md).',
@@ -907,34 +1063,33 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '# Multi-rule Action Policies',
     '',
     'Use this path when the user wants **one policy across several rules**, a space-wide',
-    'catch-all, or routing by tag/severity — not a policy tied to a single `rule.id`.',
+    'catch-all, or routing by tag/severity.',
     '',
     'Create the policy with `set_metadata` (name by intent, not by one rule),',
     '`set_destinations` (same `workflowId` rule as the single-rule path), a matcher from',
     'the options below, then `set_grouping` / `set_throttle`.',
     '',
-    'A policy matches **episodes**, not a rule object. Policies are space-scoped and are',
-    'not bound to a single rule. The matcher is optional KQL over',
+    'A policy matches **alerts**, not a rule object. Policies are space-scoped and are',
+    'not bound to a single rule. The matcher supports a `tags` array (matched against the',
+    "rule's `metadata.routing_tags`) and an optional KQL `expression` over",
     '[matcher context fields](./action-policy-matchers.md).',
     '',
     '- **Catch-all**: omit `set_matcher` or set matcher to empty/`null`. Confirm with the',
-    '  user first — this notifies on every `kind: alert` episode in the space, including',
+    '  user first — this notifies on every `kind: alert` alert in the space, including',
     '  rules created later.',
-    '- **Several specific rules**: `rule.id: "<id1>" or rule.id: "<id2>"`. Collect each',
-    '  `ruleId` from `manage_rule` / `sml_search` (pre-assigned IDs work for unsaved drafts).',
-    '- **A family of rules**: `rule.tags: "production"` or `rule.name: "CPU*"`. Prefer tags',
-    '  when the set will grow.',
-    '- **Route by severity across rules**: `severity: "critical"` (or combine with tags).',
+    '- **A family of rules by routing tag**: `matcher: { tags: ["production"] }`. Matched against the rule\'s `metadata.routing_tags`.',
+    '  Prefer this when the set of rules will grow.',
+    '- **Route by severity across rules**: `matcher: { expression: "severity: \\"critical\\"" }` (or combine with tags).',
     '  Useful for a PagerDuty policy vs an email policy.',
     '- **Reuse destinations**: one workflow can serve many rules. Keep Liquid generic —',
-    '  `inputs.payload.rules[ep.rule_id].name`, `ep.episode_status`, and guarded',
-    '  `ep.data.*` — because query columns often differ across rules. If two rules need',
+    '  `inputs.payload.rules[alert.rule_id].name`, `alert.alert_status`, and guarded',
+    '  `alert.data.*` — because query columns often differ across rules. If two rules need',
     '  different message shapes, use two policies (or two workflows) rather than one',
     '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
     '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
     '  another catch-all or overlapping tag matcher.',
-    '- **Grouping**: `per_episode` is still a safe default. `all` batches mixed-rule',
-    '  episodes into a single notification; only use it when the user wants one combined',
+    '- **Grouping**: `per_alert` is still a safe default. `all` batches mixed-rule',
+    '  alerts into a single notification; only use it when the user wants one combined',
     '  message.',
     '',
     'Name shared policies by intent (`"Notify production alerts"`, `"Page on critical"`),',
@@ -964,7 +1119,7 @@ export const generateActionPolicyOperationsDoc = (): string =>
 /**
  * Generates concise markdown documentation for the action-policy → workflow dispatch payload.
  * Sourced from the `alertingV2NotificationGroup` built-in workflow input definition, which
- * mirrors `ActionPolicyWorkflowPayload` / `AlertEpisode` in `server/lib/dispatcher/types.ts`.
+ * mirrors `ActionPolicyWorkflowPayload` / `ActionPolicyWorkflowPayloadAlert` in `server/lib/dispatcher/types.ts`.
  *
  * At workflow render time the dispatcher schedules with `{ payload }`, so Liquid templates
  * access these fields as `{{ inputs.payload.<field> }}`.
@@ -982,25 +1137,25 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
   const topLevelTable = formatFieldTable(topLevelFields);
 
   const properties = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
-  const episodesProp = properties?.episodes as JsonSchemaNode | undefined;
-  const episodeItems = episodesProp?.items as JsonSchemaNode | undefined;
-  const episodeFields = episodeItems ? jsonSchemaToFieldTable(episodeItems) : [];
-  const episodeTable = formatFieldTable(episodeFields);
+  const alertsProp = properties?.alerts as JsonSchemaNode | undefined;
+  const alertItems = alertsProp?.items as JsonSchemaNode | undefined;
+  const alertFields = alertItems ? jsonSchemaToFieldTable(alertItems) : [];
+  const alertTable = formatFieldTable(alertFields);
 
   const sections = [
     '# Action Policy Workflow Dispatch Payload',
     '',
     'Catalog of fields the dispatcher passes as `inputs.payload`. In Liquid:',
     '`{{ inputs.payload.<field> }}`, and inside',
-    '`{% for ep in inputs.payload.episodes %}` use `{{ ep.<field> }}`.',
+    '`{% for alert in inputs.payload.alerts %}` use `{{ alert.<field> }}`.',
     '',
     '## Top-Level Fields (`inputs.payload`)',
     '',
     topLevelTable,
   ];
 
-  if (episodeTable) {
-    sections.push('', '## Episode Fields (`inputs.payload.episodes[]`)', '', episodeTable);
+  if (alertTable) {
+    sections.push('', '## Alert Fields (`inputs.payload.alerts[]`)', '', alertTable);
   }
 
   sections.push(
@@ -1010,9 +1165,9 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     "`data` is the rule's ES|QL result row (each query row is written as `data: rowDoc`",
     'on the alert event). Columns depend on the rule query, so they are not listed above.',
     '',
-    '- Nested dotted names: `ep.data.host.name`, not `ep.data["host.name"]`.',
+    '- Nested dotted names: `alert.data.host.name`, not `alert.data["host.name"]`.',
     '- Discover columns with `| LIMIT 0` if they are unclear.',
-    '- Guard empty `data` on recovering/inactive: `| default` or `{% if ep.data %}`.',
+    '- Guard empty `data` on recovering/inactive: `| default` or `{% if alert.data %}`.',
     '',
     '## Example',
     '',
@@ -1031,13 +1186,13 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '    with:',
     '      to:',
     '        - <user-provided-email>',
-    '      subject: "Alert: {{ inputs.payload.episodes | size }} episode(s)"',
+    '      subject: "Alert: {{ inputs.payload.alerts | size }} alert(s)"',
     '      message: >',
-    '        {% for ep in inputs.payload.episodes %}',
-    '        - Rule: {{ inputs.payload.rules[ep.rule_id].name | default: "unknown" }}',
-    '          Host: {{ ep.data.host.name | default: "unknown" }}',
-    '          Errors: {{ ep.data.error_count | default: "n/a" }}',
-    '          Status: {{ ep.episode_status }}',
+    '        {% for alert in inputs.payload.alerts %}',
+    '        - Rule: {{ inputs.payload.rules[alert.rule_id].name | default: "unknown" }}',
+    '          Host: {{ alert.data.host.name | default: "unknown" }}',
+    '          Errors: {{ alert.data.error_count | default: "n/a" }}',
+    '          Status: {{ alert.alert_status }}',
     '        {% endfor %}',
     '',
     '        View execution: {{ execution.url }}',

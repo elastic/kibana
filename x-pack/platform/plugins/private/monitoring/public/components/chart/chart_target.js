@@ -6,7 +6,7 @@
  */
 
 import { get, isEqual, filter } from 'lodash';
-import $ from 'jquery';
+import $ from '@kbn/flot-charts';
 import React from 'react';
 import { eventBus } from './event_bus';
 import { getChartOptions } from './get_chart_options';

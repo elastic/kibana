@@ -8,6 +8,8 @@
 import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+export const RULE_TEMPLATE_SO_TYPE = 'alerting_rule_template';
+
 /**
  * Fills the mandatory fields of the .index-threshold rule form so the rule can
  * be saved without validation errors.
@@ -180,6 +182,19 @@ export const makeEsQueryRule = (namePrefix: string) => ({
   schedule: { interval: '1m' },
   tags: [namePrefix],
 });
+
+export const makeV1EsQueryRuleTemplateAttributes = (name: string) => {
+  const { ruleTypeId, params, schedule } = makeEsQueryRule(name);
+  return {
+    engine: 'v1' as const,
+    name,
+    tags: ['scout'],
+    description: 'Scout host-aware create-from-template',
+    ruleTypeId,
+    schedule,
+    params,
+  };
+};
 
 export const makeIndexThresholdRule = (namePrefix: string) => ({
   name: `${namePrefix}-rule-${Date.now()}`,

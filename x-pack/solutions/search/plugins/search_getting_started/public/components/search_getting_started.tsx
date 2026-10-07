@@ -39,7 +39,12 @@ export const SearchGettingStartedPage: React.FC = () => {
         <EuiSpacer size="xl" />
         <EuiPanel color="subdued" paddingSize="none">
           <AgentInstallSection />
-          <EuiPanel color="transparent" paddingSize="none" css={SampleDataPanelStyle}>
+          <EuiPanel
+            color="transparent"
+            paddingSize="none"
+            css={SampleDataPanelStyle}
+            hasBorder={false}
+          >
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">

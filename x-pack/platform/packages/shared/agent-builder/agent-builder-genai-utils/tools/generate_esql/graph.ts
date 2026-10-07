@@ -23,6 +23,7 @@ import {
   executeEsql,
   validateEsqlQuery,
   buildTimeRangeParams,
+  buildTimeSeriesTimeRangeFilter,
 } from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
@@ -39,14 +40,27 @@ import {
   isAutocorrectQueryAction,
   isExecuteQueryAction,
   isValidateQueryAction,
+  isRequestDocumentationAction,
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
+import { hasRejectedJoinTarget } from './join_errors';
+import { withPromqlKeyword } from './promql_keyword';
+
+export const requestDocumentationSchema = z
+  .object({
+    commands: z
+      .array(z.string())
+      .optional()
+      .describe('ES|QL source and processing commands to get documentation for.'),
+    functions: z.array(z.string()).optional().describe('ES|QL functions to get documentation for.'),
+  })
+  .describe('Tool to use to request ES|QL documentation');
 
 const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   target: Annotation<string>(),
-  executeQuery: Annotation<boolean>(),
+  execute: Annotation<'none' | 'schema' | 'data'>(),
   maxRetries: Annotation<number>(),
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
@@ -76,6 +90,8 @@ export const createNlToEsqlGraph = ({
   documentation,
   esqlCallbacks,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
   sessionId,
   cacheControl,
 }: {
@@ -85,6 +101,8 @@ export const createNlToEsqlGraph = ({
   documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
   includeDatasets?: boolean;
+  includeViews?: boolean;
+  includeFrozen?: boolean;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
 }) => {
@@ -93,43 +111,43 @@ export const createNlToEsqlGraph = ({
       resourceName: state.target,
       samplingSize: 100,
       includeDatasets,
+      includeViews,
+      includeFrozen,
       esClient,
     });
 
     return { resource: resolvedResource };
   };
 
-  const modelCallConfig: Partial<InferenceChatModelCallOptions> = { sessionId, cacheControl };
+  const requestDocCallConfig: Partial<InferenceChatModelCallOptions> = {
+    sessionId: sessionId ? `${sessionId}:request-doc` : undefined,
+    cacheControl,
+  };
 
   // request doc step - retrieve the list of relevant commands and functions that may be useful to generate the query
   const requestDocumentation = async (state: StateType) => {
+    if (state.actions.some(isRequestDocumentationAction)) {
+      return {}; // pre-computed by caller
+    }
+
     const requestDocModel = model.chatModel
-      .withStructuredOutput(
-        z
-          .object({
-            commands: z
-              .array(z.string())
-              .optional()
-              .describe('ES|QL source and processing commands to get documentation for.'),
-            functions: z
-              .array(z.string())
-              .optional()
-              .describe('ES|QL functions to get documentation for.'),
-          })
-          .describe('Tool to use to request ES|QL documentation'),
-        { name: 'request_documentation' }
-      )
-      .withConfig(modelCallConfig);
+      .withStructuredOutput(requestDocumentationSchema, { name: 'request_documentation' })
+      .withConfig(requestDocCallConfig);
 
     const { commands = [], functions = [] } = await requestDocModel.invoke(
       createRequestDocumentationPrompt({
         nlQuery: state.nlQuery,
         documentation,
         resource: state.resource,
+        additionalContext: state.additionalContext,
       })
     );
 
-    const requestedKeywords = [...commands, ...functions];
+    const requestedKeywords = withPromqlKeyword(
+      [...commands, ...functions],
+      state.nlQuery,
+      state.additionalContext
+    );
     const fetchedDoc = docBase.getDocumentation(requestedKeywords);
 
     const action: RequestDocumentationAction = {
@@ -144,8 +162,12 @@ export const createNlToEsqlGraph = ({
   };
 
   // generate esql step - generate the esql query based on the doc and the user's input
+  const generateCallConfig: Partial<InferenceChatModelCallOptions> = {
+    sessionId: sessionId ? `${sessionId}:generate` : undefined,
+    cacheControl,
+  };
   const generateEsql = async (state: StateType) => {
-    const generateModel = model.chatModel.withConfig(modelCallConfig);
+    const generateModel = model.chatModel.withConfig(generateCallConfig);
 
     const response = await generateModel.invoke(
       createGenerateEsqlPrompt({
@@ -175,6 +197,17 @@ export const createNlToEsqlGraph = ({
       currentTry: state.currentTry + 1,
     };
   };
+
+  /**
+   * Regenerating after a rejected join target cannot produce the answer: this tool returns a
+   * single query, and the question needed more than one index. Further attempts would each cost a
+   * full generation over the accumulated history, and the best they could yield is a query over
+   * the primary index alone — valid, but silently missing the other half. So the call ends and the
+   * caller gets a fast, truthful failure to act on.
+   *
+   * Decided from the errors already in state; no cluster lookup is involved.
+   */
+  const joinTargetRejected = (state: StateType): boolean => hasRejectedJoinTarget(state.actions);
 
   const branchAfterGenerate = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
@@ -212,7 +245,7 @@ export const createNlToEsqlGraph = ({
   };
 
   const branchAfterAutocorrect = async (state: StateType) => {
-    if (state.executeQuery) {
+    if (state.execute !== 'none') {
       return 'execute_query';
     } else {
       return 'validate_query';
@@ -248,11 +281,10 @@ export const createNlToEsqlGraph = ({
     if (!isValidateQueryAction(lastAction)) {
       throw new Error(`Last action is not a validate_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries) {
+    if (lastAction.success || state.currentTry >= state.maxRetries || joinTargetRejected(state)) {
       return 'finalize';
-    } else {
-      return 'generate_esql';
     }
+    return 'generate_esql';
   };
 
   // execute query step - validate first (ANTLR), then execute only if valid
@@ -282,10 +314,21 @@ export const createNlToEsqlGraph = ({
     }
 
     let action: ExecuteQueryAction;
+    const schemaOnly = state.execute === 'schema';
     try {
       const results = await executeEsql({
         query,
         params: buildTimeRangeParams(state.timeRange),
+        // The schema probe only collects columns, so bounding it to the time range is safe and
+        // keeps TS and PROMQL queries from aggregating all data.
+        ...(schemaOnly
+          ? {
+              limit: 1,
+              dropNullColumns: false,
+              filter: buildTimeSeriesTimeRangeFilter(query, state.timeRange),
+            }
+          : {}),
+        includeFrozen,
         esClient,
       });
       action = {
@@ -313,11 +356,10 @@ export const createNlToEsqlGraph = ({
     if (!isExecuteQueryAction(lastAction)) {
       throw new Error(`Last action is not an execute_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries) {
+    if (lastAction.success || state.currentTry >= state.maxRetries || joinTargetRejected(state)) {
       return 'finalize';
-    } else {
-      return 'generate_esql';
     }
+    return 'generate_esql';
   };
 
   // finalize step - process / generate the outputs
@@ -334,7 +376,7 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // ended via AST validation when executeQuery=false - success or failure hitting max retries
+    // ended via AST validation when execute is 'none' - success or failure hitting max retries
     if (isValidateQueryAction(lastAction)) {
       return {
         answer: generateActions[generateActions.length - 1].response,
@@ -342,7 +384,7 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // ended via autocorrect - when executeQuery=false and validation was skipped (should not happen after adding validate_query)
+    // ended via autocorrect - when execute is 'none' and validation was skipped (should not happen after adding validate_query)
     if (isAutocorrectQueryAction(lastAction)) {
       return {
         answer: generateActions[generateActions.length - 1].response,

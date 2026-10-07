@@ -9,10 +9,16 @@ import type {
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
-import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type { AttachmentRequest, AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../../common/lib/mock';
-import { createCase, deleteAllCaseItems, bulkCreateAttachments } from '../../../../common/lib/api';
+import {
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  bulkCreateAttachments,
+} from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -79,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // Legacy `externalReference` / `persistableState` wire shapes are only accepted
-    // for migrated type ids (EXTERNAL_REFERENCE_TYPE_MAP / PERSISTABLE_STATE_TYPE_MAP),
+    // for mapped type ids (EXTERNAL_REFERENCE_TYPE_MAP / PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP),
     // which route through the transformer to a registered unified type. An unmapped id
     // has no unified target and must be rejected — this replaces the removed
     // custom-ER/PS-type registration coverage.
@@ -197,6 +203,26 @@ export default ({ getService }: FtrProviderContext): void => {
               data: { content: 'no owner' },
             } as unknown as UnifiedValueAttachmentPayload,
           ],
+          expectedHttpCode: 400,
+        });
+      });
+    });
+
+    // The v1 alert id/index length check moved into toUnifiedAttachmentPayload so it
+    // still fires before the client during unified conversion. Lock the 400.
+    describe('legacy alert id/index pairing', () => {
+      it('400s for a v1 alert with mismatched alertId and index array lengths', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: AttachmentType.alert,
+            alertId: ['alert-1', 'alert-2'],
+            index: ['index-1'],
+            rule: { id: 'rule-1', name: 'rule-name' },
+            owner: 'securitySolutionFixture',
+          } as unknown as AttachmentRequestV2,
           expectedHttpCode: 400,
         });
       });

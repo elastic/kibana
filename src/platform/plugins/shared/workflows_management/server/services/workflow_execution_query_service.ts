@@ -8,12 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  ExecutionType,
-  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-  HITL_TOKEN_HASH_INPUT_FIELD,
-  TerminalExecutionStatuses,
-} from '@kbn/workflows';
+import { ExecutionType } from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
@@ -22,11 +17,16 @@ import type {
 } from '@kbn/workflows';
 import type { ChildWorkflowExecutionItem } from '@kbn/workflows/types/v1';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server';
+import { bulkUpdaterItem, getBulkUpdaterWriteResult } from '@kbn/workflows-execution-engine/server';
 import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 
+import {
+  createMarkStepAsRespondedUpdater,
+  MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+} from './mark_step_as_responded_updater';
 import type { WorkflowExecutionQueryDeps } from './types';
 import { WORKFLOWS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
@@ -36,6 +36,10 @@ import {
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
+import {
+  getExecutionStepExecutions,
+  type GetExecutionStepExecutionsResult,
+} from '../api/lib/get_execution_step_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
 import {
   searchStepExecutions,
@@ -43,6 +47,7 @@ import {
 } from '../api/lib/search_step_executions';
 import { searchWorkflowExecutions } from '../api/lib/search_workflow_executions';
 import type {
+  GetExecutionStepExecutionsParams,
   GetStepExecutionParams,
   SearchStepExecutionsParams,
 } from '../api/workflows_management_api';
@@ -55,8 +60,6 @@ const DEFAULT_PAGE_SIZE = 100;
 
 /** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
-
-const SETTLED_STEP_STATUSES: readonly string[] = TerminalExecutionStatuses;
 
 const PROCESSED_WAIT_FOR_INPUT_SHOULD: estypes.QueryDslQueryContainer[] = [
   { exists: { field: 'finishedAt' } },
@@ -85,6 +88,7 @@ export interface ProcessedWaitForInputFilters {
 }
 
 interface WaitForInputListOptions {
+  accessControlFilter?: estypes.QueryDslQueryContainer;
   page?: number;
   perPage?: number;
   includeReasoning?: boolean;
@@ -126,7 +130,7 @@ export class WorkflowExecutionQueryService {
   async getWorkflowExecution(
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -136,6 +140,7 @@ export class WorkflowExecutionQueryService {
       spaceId,
       includeInput: options?.includeInput,
       includeOutput: options?.includeOutput,
+      omitStepExecutions: options?.omitStepExecutions,
     });
   }
 
@@ -151,6 +156,21 @@ export class WorkflowExecutionQueryService {
     });
   }
 
+  async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string
+  ): Promise<GetExecutionStepExecutionsResult> {
+    return getExecutionStepExecutions({
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+      logger: this.deps.logger,
+      workflowExecutionId: params.executionId,
+      spaceId,
+      page: params.page,
+      size: params.size,
+    });
+  }
+
   async getWorkflowExecutions(
     params: SearchWorkflowExecutionsParams,
     spaceId: string
@@ -158,6 +178,7 @@ export class WorkflowExecutionQueryService {
     const must: estypes.QueryDslQueryContainer[] = [
       ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
       buildWorkflowExecutionsSpaceFilter(spaceId),
+      ...(params.accessControlFilter ? [params.accessControlFilter] : []),
     ];
 
     if (params.statuses) {
@@ -212,9 +233,12 @@ export class WorkflowExecutionQueryService {
 
     const page = params.page ?? 1;
     const size = params.size ?? DEFAULT_PAGE_SIZE;
-    const from = (page - 1) * size;
+    const from = params.searchAfter?.length ? undefined : (page - 1) * size;
     const sort = params.sortField
-      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      ? ([
+          { [params.sortField]: { order: params.sortOrder ?? 'desc' } },
+          { id: 'desc' },
+        ] as estypes.Sort)
       : undefined;
 
     return searchWorkflowExecutions({
@@ -225,6 +249,7 @@ export class WorkflowExecutionQueryService {
       from,
       page,
       sort,
+      searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
     });
   }
@@ -233,7 +258,10 @@ export class WorkflowExecutionQueryService {
     params: SearchExecutionsViewParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    const must: estypes.QueryDslQueryContainer[] = [buildWorkflowExecutionsSpaceFilter(spaceId)];
+    const must: estypes.QueryDslQueryContainer[] = [
+      buildWorkflowExecutionsSpaceFilter(spaceId),
+      ...(params.accessControlFilter ? [params.accessControlFilter] : []),
+    ];
 
     if (params.query) {
       must.push(params.query);
@@ -359,13 +387,22 @@ export class WorkflowExecutionQueryService {
     if (!params.includeInput) sourceExcludes.push('input');
     if (!params.includeOutput) sourceExcludes.push('output');
 
+    // An explicitly empty array means "no runs", so the clause is built whenever the caller
+    // supplied one at all — an empty `terms` matches nothing, which is what was asked for.
+    const workflowRunFilter = params.workflowExecutionIds && {
+      terms: { workflowRunId: params.workflowExecutionIds },
+    };
+
     return searchStepExecutions({
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
       workflowId: params.workflowId,
       stepId: params.stepId,
+      stepType: params.stepType,
+      additionalQuery: workflowRunFilter || undefined,
       spaceId,
       sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
+      sourceIncludes: params.sourceIncludes,
       page: params.page,
       size: params.size,
       startedAfter: params.startedAfter,
@@ -397,7 +434,12 @@ export class WorkflowExecutionQueryService {
    */
   async listWaitingForInputSteps(
     spaceId: string,
-    { page = 1, perPage = 100, includeReasoning = false }: WaitForInputListOptions = {}
+    {
+      page = 1,
+      perPage = 100,
+      includeReasoning = false,
+      accessControlFilter,
+    }: WaitForInputListOptions = {}
   ): Promise<WaitForInputListResult> {
     const from = Math.max(0, (page - 1) * perPage);
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
@@ -405,7 +447,11 @@ export class WorkflowExecutionQueryService {
       response = await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {
-            must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
+            must: [
+              { term: { spaceId } },
+              { term: { status: 'waiting_for_input' } },
+              ...(accessControlFilter ? [accessControlFilter] : []),
+            ],
             // `hitl.respondedAt` marks a claimed response that Task Manager
             // may not have resumed yet; it belongs to the processed listing.
             must_not: [
@@ -511,10 +557,12 @@ export class WorkflowExecutionQueryService {
       workflowId,
       respondedBy,
       sortOrder = 'desc',
+      accessControlFilter,
     }: WaitForInputListOptions & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     const from = Math.max(0, (page - 1) * perPage);
     const filterMust = buildHistoryFilterClauses({ channel, workflowId, respondedBy, q });
+    if (accessControlFilter) filterMust.push(accessControlFilter);
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
       response = await this.deps.stepExecutionsDataClient.search({
@@ -610,7 +658,10 @@ export class WorkflowExecutionQueryService {
    */
   async listProcessedWaitForInputFacets(
     spaceId: string,
-    { maxBuckets = 50 }: { maxBuckets?: number } = {}
+    {
+      maxBuckets = 50,
+      accessControlFilter,
+    }: { maxBuckets?: number; accessControlFilter?: estypes.QueryDslQueryContainer } = {}
   ): Promise<ProcessedWaitForInputFacets> {
     let response: estypes.SearchResponse<EsWorkflowStepExecution, ProcessedWaitForInputFacetAggs>;
     try {
@@ -619,7 +670,11 @@ export class WorkflowExecutionQueryService {
         size: 0,
         query: {
           bool: {
-            must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }],
+            must: [
+              { term: { spaceId } },
+              { term: { stepType: 'waitForInput' } },
+              ...(accessControlFilter ? [accessControlFilter] : []),
+            ],
             should: PROCESSED_WAIT_FOR_INPUT_SHOULD,
             minimum_should_match: 1,
           },
@@ -783,22 +838,46 @@ export class WorkflowExecutionQueryService {
     }
   }
 
-  /** Returns the claimable `waitForInput` step currently blocking the run. */
+  /**
+   * Returns the HITL wait step currently blocking the run, whether or not it
+   * has already been claimed, so the atomic `markStepAsResponded` write stays
+   * the single first-writer-wins arbiter for concurrent resumes. Callers that
+   * already know the step id (inbox, Kibana UI, Scout) should pass it and skip
+   * this lookup.
+   */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
+      const { items } = await this.deps.workflowExecutionsDataClient.getByIds([executionId], {
+        sourceIncludes: ['spaceId', 'stepExecutionIds'],
+      });
+      const execution = items[0]?.document;
+      if (!execution || execution.spaceId !== spaceId) return null;
+      if (execution.stepExecutionIds?.length) {
+        const { items: steps } = await this.deps.stepExecutionsDataClient.getByIds(
+          execution.stepExecutionIds,
+          { sourceIncludes: ['id', 'spaceId', 'workflowRunId', 'stepType', 'status', 'finishedAt'] }
+        );
+        return (
+          steps.findLast(
+            ({ document: step }) =>
+              step.spaceId === spaceId &&
+              step.workflowRunId === executionId &&
+              (step.stepType === 'waitForInput' || step.stepType === 'waitForApproval') &&
+              step.status === 'waiting_for_input' &&
+              !step.finishedAt
+          )?.document.id ?? null
+        );
+      }
       const response = (await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {
             must: [
               { term: { workflowRunId: executionId } },
               { term: { spaceId } },
-              { term: { stepType: 'waitForInput' } },
+              { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
               { term: { status: 'waiting_for_input' } },
             ],
-            must_not: [
-              { exists: { field: 'finishedAt' } },
-              { exists: { field: 'hitl.respondedAt' } },
-            ],
+            must_not: [{ exists: { field: 'finishedAt' } }],
           },
         },
         _source: ['id'],
@@ -813,9 +892,9 @@ export class WorkflowExecutionQueryService {
         return null;
       }
       this.deps.logger.warn(
-        `Failed to resolve the waiting step execution for ${executionId}: ${error}`
+        `Failed to resolve the waiting step execution for ${executionId} in space ${spaceId}: ${error}`
       );
-      return null;
+      throw error;
     }
   }
 
@@ -851,40 +930,32 @@ export class WorkflowExecutionQueryService {
    */
   async markStepAsResponded(
     stepExecutionId: string,
-    audit: { respondedBy: string; respondedAt: string; channel: string },
+    audit: { respondedBy: string; respondedAt: string; channel?: string },
     spaceId: string
   ): Promise<boolean> {
     try {
-      const response = await this.deps.stepExecutionsDataClient.scriptUpdate({
-        id: stepExecutionId,
-        // `respondedAt` is the first-writer-wins guard. Retrying conflicts
-        // lets simultaneous updates re-run the script against the winner's
-        // write and return `noop` instead of leaking a version conflict.
-        retryOnConflict: 3,
-        script:
-          'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; return; }' +
-          'if (ctx._source.finishedAt != null) { ctx.op = "noop"; return; }' +
-          'if (ctx._source.status != null && params.settledStatuses.contains(ctx._source.status)) { ctx.op = "noop"; return; }' +
-          'if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; return; }' +
-          'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
-          'ctx._source.hitl.respondedBy = params.respondedBy;' +
-          'ctx._source.hitl.respondedAt = params.respondedAt;' +
-          'ctx._source.hitl.channel = params.channel;' +
-          'if (ctx._source.input != null) { ctx._source.input.remove(params.tokenHashField); ctx._source.input.remove(params.tokenExpiresAtField); }',
-        params: {
-          spaceId,
-          respondedBy: audit.respondedBy,
-          respondedAt: audit.respondedAt,
-          channel: audit.channel,
-          settledStatuses: SETTLED_STEP_STATUSES,
-          tokenHashField: HITL_TOKEN_HASH_INPUT_FIELD,
-          tokenExpiresAtField: HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-        },
+      const { items } = await this.deps.stepExecutionsDataClient.bulk({
         refresh: 'wait_for',
+        items: [
+          bulkUpdaterItem<
+            EsWorkflowStepExecution,
+            (typeof MARK_STEP_AS_RESPONDED_SOURCE_FIELDS)[number]
+          >({
+            operation: 'update',
+            documentId: stepExecutionId,
+            sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+            retryOnConflict: 3,
+            updater: createMarkStepAsRespondedUpdater(audit, spaceId),
+          }),
+        ],
       });
-      // not_found means the doc was concurrently deleted; treat as a lost claim.
-      return response.result === 'updated';
-      // scriptUpdate absorbs 404 as { result: 'not_found' }; this catch handles all other ES errors.
+
+      const writeResult = getBulkUpdaterWriteResult(items[0]);
+      if (writeResult === 'conflict') {
+        // Retries were exhausted without a write; this is not a lost claim, so surface it.
+        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+      }
+      return writeResult === 'updated';
     } catch (error) {
       this.deps.logger.error(
         `Failed to mark step execution ${stepExecutionId} as responded: ${error}`

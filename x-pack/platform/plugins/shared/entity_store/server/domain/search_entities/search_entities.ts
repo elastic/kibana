@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MsearchRequestItem,
+  QueryDslQueryContainer,
+  SortOrder,
+} from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
 import { type Entity, type EntityType } from '../../../common';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
@@ -67,6 +71,54 @@ export interface SearchEntitiesV2Result {
   inspect: SearchEntitiesV2Inspect;
 }
 
+export type SearchEntitiesV2BatchItemResult = SearchEntitiesV2Result | { readonly error: string };
+
+const parseFilterQuery = (filterQuery: string | undefined): QueryDslQueryContainer | undefined => {
+  if (!filterQuery) return;
+  try {
+    return JSON.parse(filterQuery) as QueryDslQueryContainer;
+  } catch {
+    throw new Error('Invalid filterQuery: must be valid JSON');
+  }
+};
+
+const buildEntityQuery = (
+  entityTypes: EntityType[],
+  parsedQuery: QueryDslQueryContainer | undefined
+): QueryDslQueryContainer | undefined => {
+  const entityTypeFilter =
+    entityTypes.length > 0 ? { terms: { 'entity.EngineMetadata.Type': entityTypes } } : undefined;
+  return entityTypeFilter && parsedQuery
+    ? { bool: { must: [entityTypeFilter, parsedQuery] } }
+    : entityTypeFilter ?? parsedQuery;
+};
+
+const normalizeEntityHit = (raw: Record<string, unknown>): Entity => {
+  const source = normalizeFlatDottedKeysToNested(raw);
+  const asset = source.asset as { criticality?: string } | undefined;
+
+  const assetOverwrite: Partial<Record<string, unknown>> =
+    asset && asset.criticality !== ASSET_CRITICALITY_DELETED
+      ? { asset: { criticality: asset.criticality } }
+      : {};
+
+  const merged = {
+    ...source,
+    ...assetOverwrite,
+  } as Entity;
+
+  const entityField = merged.entity as Record<string, unknown> | undefined;
+  if (entityField && typeof entityField === 'object') {
+    const normalized = buildNormalizedFields(entityField, ['behaviors', 'lifecycle', 'attributes']);
+    return {
+      ...merged,
+      entity: { ...entityField, ...normalized },
+    } as Entity;
+  }
+
+  return merged;
+};
+
 /**
  * Searches the Entity Store v2 unified latest index (same semantics as
  * Security Solution EntityStoreDataClient.searchEntities when v2 is enabled).
@@ -80,25 +132,11 @@ export async function searchEntitiesV2(
   const { esClient, namespace, entityTypes, filterQuery, page, perPage, sortField, sortOrder } =
     options;
 
-  let parsedQuery: object | undefined;
-  if (filterQuery) {
-    try {
-      parsedQuery = JSON.parse(filterQuery) as object;
-    } catch {
-      throw new Error('Invalid filterQuery: must be valid JSON');
-    }
-  }
-
+  const parsedQuery = parseFilterQuery(filterQuery);
   const index = [await resolveLatestEntitiesIndexName(esClient, namespace)];
   const from = (page - 1) * perPage;
   const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
-
-  const entityTypeFilter =
-    entityTypes.length > 0 ? { terms: { 'entity.EngineMetadata.Type': entityTypes } } : undefined;
-  const query =
-    entityTypeFilter && parsedQuery
-      ? { bool: { must: [entityTypeFilter, parsedQuery] } }
-      : entityTypeFilter ?? parsedQuery;
+  const query = buildEntityQuery(entityTypes, parsedQuery);
 
   const response = await esClient.search({
     index,
@@ -111,37 +149,9 @@ export async function searchEntitiesV2(
 
   const { hits } = response;
   const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
-
-  const records = hits.hits.map((hit) => {
-    const raw = (hit._source ?? {}) as Record<string, unknown>;
-    const source = normalizeFlatDottedKeysToNested(raw);
-    const asset = source.asset as { criticality?: string } | undefined;
-
-    const assetOverwrite: Partial<Record<string, unknown>> =
-      asset && asset.criticality !== ASSET_CRITICALITY_DELETED
-        ? { asset: { criticality: asset.criticality } }
-        : {};
-
-    const merged = {
-      ...source,
-      ...assetOverwrite,
-    } as Entity;
-
-    const entityField = merged.entity as Record<string, unknown> | undefined;
-    if (entityField && typeof entityField === 'object') {
-      const normalized = buildNormalizedFields(entityField, [
-        'behaviors',
-        'lifecycle',
-        'attributes',
-      ]);
-      return {
-        ...merged,
-        entity: { ...entityField, ...normalized },
-      } as Entity;
-    }
-
-    return merged;
-  });
+  const records = hits.hits.map((hit) =>
+    normalizeEntityHit((hit._source ?? {}) as Record<string, unknown>)
+  );
 
   const inspect: SearchEntitiesV2Inspect = {
     dsl: [JSON.stringify({ index, body: query }, null, 2)],
@@ -149,4 +159,66 @@ export async function searchEntitiesV2(
   };
 
   return { records, total, inspect };
+}
+
+export async function searchEntitiesV2Batch(options: {
+  esClient: ElasticsearchClient;
+  namespace: string;
+  queries: readonly SearchEntitiesV2Params[];
+}): Promise<SearchEntitiesV2BatchItemResult[]> {
+  const { esClient, namespace, queries } = options;
+  if (queries.length === 0) return [];
+
+  const index = [await resolveLatestEntitiesIndexName(esClient, namespace)];
+
+  const built = queries.map((q) => {
+    try {
+      const query = buildEntityQuery(q.entityTypes, parseFilterQuery(q.filterQuery));
+      return {
+        ok: true as const,
+        query,
+        from: (q.page - 1) * q.perPage,
+        size: Math.min(q.perPage, MAX_SEARCH_RESPONSE_SIZE),
+        sort: q.sortField ? [{ [q.sortField]: q.sortOrder }] : undefined,
+      };
+    } catch (error) {
+      return { ok: false as const, error: error instanceof Error ? error.message : String(error) };
+    }
+  });
+
+  const searches: MsearchRequestItem[] = built.flatMap((b) =>
+    b.ok
+      ? [
+          { index, ignore_unavailable: true },
+          { query: b.query, size: b.size, from: b.from, sort: b.sort },
+        ]
+      : []
+  );
+
+  const responses = searches.length > 0 ? (await esClient.msearch({ searches })).responses : [];
+
+  let responseIndex = 0;
+  return built.map((b): SearchEntitiesV2BatchItemResult => {
+    if (!b.ok) return { error: b.error };
+
+    const response = responses[responseIndex++];
+    if (response == null) {
+      return { error: 'Missing msearch response for query' };
+    }
+    if ('error' in response) {
+      return { error: response.error.reason ?? response.error.type };
+    }
+
+    const { hits } = response;
+    const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+    const records = hits.hits.map((hit) =>
+      normalizeEntityHit((hit._source ?? {}) as Record<string, unknown>)
+    );
+    const inspect: SearchEntitiesV2Inspect = {
+      dsl: [JSON.stringify({ index, body: b.query }, null, 2)],
+      response: [JSON.stringify(response, null, 2)],
+    };
+
+    return { records, total, inspect };
+  });
 }

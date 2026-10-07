@@ -55,11 +55,10 @@ const casesTool = <TName extends string>(
  */
 export const platformCoreCasesTools = {
   manage: casesTool('manage'),
-  /** @deprecated Use `getAttachments` (read) and `manageAttachments` (write) instead. */
-  attachments: casesTool('attachments'),
   getAttachments: casesTool('get_attachments'),
   manageAttachments: casesTool('manage_attachments'),
   observables: casesTool('observables'),
+  findTemplates: casesTool('find_templates'),
 } as const;
 
 /**
@@ -72,15 +71,35 @@ export const platformCoreCasesTools = {
  */
 export const platformSignificantEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformSignificantEvents}.ki_search`,
+  searchSimilarFeatures: `${internalNamespaces.platformSignificantEvents}.ki_feature_similarity_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
-
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
+} as const;
+
+/** AI-index tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAiIndexTools = {
+  listAiIndices: `${internalNamespaces.platformContextEngine}.list_ai_indices`,
+  describeAiIndex: `${internalNamespaces.platformContextEngine}.describe_ai_index`,
+  queryAiIndices: `${internalNamespaces.platformContextEngine}.query_ai_indices`,
+} as const;
+
+/** AI-index memory tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineMemoryTools = {
+  remember: `${internalNamespaces.platformContextEngine}.remember`,
+  forget: `${internalNamespaces.platformContextEngine}.forget`,
+} as const;
+
+/** AI-index automation tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAutomationTools = {
+  installAutomationTemplate: `${internalNamespaces.platformContextEngine}.install_automation_template`,
+  saveAutomation: `${internalNamespaces.platformContextEngine}.save_automation`,
+  runAutomation: `${internalNamespaces.platformContextEngine}.run_automation`,
 } as const;
 
 export const attachmentTools = {
@@ -166,6 +185,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  platformCoreTools.productDocumentation,
 ];
 
 /**

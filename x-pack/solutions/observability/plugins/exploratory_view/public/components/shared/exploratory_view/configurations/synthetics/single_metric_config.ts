@@ -17,6 +17,11 @@ import { FieldLabels, FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 
 export const FINAL_SUMMARY_KQL = 'summary.final_attempt: true';
+
+/** Same document set as the Synthetics Errors table: summary docs, not run-once, down state. */
+export const ERROR_STATES_KQL =
+  'summary: * and not run_once: * and monitor.status: "down" and state.up: 0';
+
 export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'line',
@@ -127,8 +132,8 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       },
       {
         id: 'monitor_errors',
-        label: i18n.translate('xpack.exploratoryView.expView.errors', {
-          defaultMessage: 'Errors',
+        label: i18n.translate('xpack.exploratoryView.expView.errorStatesLabel', {
+          defaultMessage: 'Error states',
         }),
         metricStateOptions: {
           titlePosition: 'bottom',
@@ -136,7 +141,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
-        formula: `unique_count(state.id, kql='monitor.status: "down"')`,
+        formula: `unique_count(state.id, kql='${ERROR_STATES_KQL}')`,
         format: 'number',
       },
       {

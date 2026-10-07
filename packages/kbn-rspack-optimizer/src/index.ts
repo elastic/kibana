@@ -19,6 +19,7 @@ export {
 export {
   createExternalPluginConfig,
   type ExternalPluginConfigOptions,
+  type ExternalPluginManifest,
 } from './config/create_external_plugin_config';
 
 // Shared config utilities
@@ -38,6 +39,7 @@ export { getExternals } from './config/externals';
 
 // Build runner
 export { runBuild, type BuildOptions, type BuildResult } from './run_build';
+export { reportOptimizerTimings } from './report_optimizer_timings';
 
 // CLI
 export { runRspackCli, type CliOptions } from './cli';
@@ -61,5 +63,8 @@ export type { Limits, UpdateBundleLimitsOptions } from './limits';
 // Types
 export type { ThemeTag } from './types';
 
-// Re-export useful RSPack types
-export type { Configuration, Stats, Compiler, RspackPluginInstance } from '@rspack/core';
+// Re-export useful RSPack types and the natively-loaded runtime value.
+// Consumers needing the `rspack` runtime must use this re-export (pure-ESM
+// packages cannot be loaded by Jest's CJS registry — see rspack_runtime.ts).
+export { rspack } from './rspack_runtime';
+export type { Configuration, Stats, Compiler, Watching, RspackPluginInstance } from '@rspack/core';

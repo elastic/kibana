@@ -17,7 +17,7 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, FilterMeta, TimeRange } from '@kbn/es-query/src/filters';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
   Datatable,
@@ -36,6 +36,7 @@ import type {
   BrushTriggerEvent,
   ChartsPluginSetup,
   ClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { MutableRefObject, ReactElement } from 'react';
@@ -207,6 +208,25 @@ export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
 
+/**
+ * Column descriptor used by the `lens_map_to_columns` expression and the
+ * ES|QL conversion to map datatable columns back to Lens column definitions.
+ */
+export type OriginalColumn = {
+  id: string;
+  label: string;
+  variable?: string;
+  format?: SerializedFieldFormat;
+  dataType?: DataType;
+  customLabel?: boolean;
+  dropPartials?: boolean;
+} & (
+  | { operationType: 'date_histogram'; sourceField: string; interval: number }
+  | { operationType: string; sourceField?: string; interval: never }
+  // text-based ES|QL columns
+  | { operationType?: undefined; sourceField?: string }
+);
+
 export type SortingHint = string;
 
 export type ValueLabelConfig = 'hide' | 'show';
@@ -237,6 +257,7 @@ export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
   indexPatterns: IndexPatternMap;
+  activeDataTable?: Datatable;
 }
 
 export type FieldOnlyDataType =
@@ -290,6 +311,8 @@ export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
   hasReducedTimeRange: boolean;
   inMetricDimension?: boolean;
+  /** True when the user set a custom name on this column, as opposed to the default operation label. */
+  customLabel?: boolean;
 }
 
 export interface DataSourceInfo {
@@ -485,12 +508,6 @@ export interface IndexPatternServiceAPI {
   ) => void;
 }
 
-export interface PublicAPIProps<T> {
-  state: T;
-  layerId: string;
-  indexPatterns: IndexPatternMap;
-}
-
 export interface EditorFrameProps {
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
@@ -645,6 +662,9 @@ export interface GetDropPropsArgs<T = unknown> {
   source?: DraggingIdentifier;
   target: DragDropOperation;
   indexPatterns: IndexPatternMap;
+  // Layer inspector tables. Lets datasources resolve column types against the
+  // Query Result Type overlay for drop decisions; datasources that don't need it can ignore it.
+  activeData?: TableInspectorAdapter;
 }
 
 export interface UserMessage {
@@ -1024,6 +1044,8 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   isMetricDimension?: boolean;
   layerType: LensLayerType | undefined;
   supportStaticValue: boolean;
+  /** When set, the dimension editor only offers the static value option (no quick functions or formula) */
+  staticValueOnly?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
   dataSectionExtra?: React.ReactNode;
@@ -1133,6 +1155,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
+  // restricts the dimension editor to the static value option only (used for ES|QL charts where field-based operations are unavailable)
+  staticValueOnly?: boolean;
   // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
   isMetricDimension?: boolean;
   isBreakdownDimension?: boolean;
@@ -1320,6 +1344,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
     event:
       | ClickTriggerEvent
       | BrushTriggerEvent
+      | AnnotationClickTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
       | ChartSizeEvent

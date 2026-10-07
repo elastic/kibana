@@ -43,3 +43,4 @@ steps:
             flakyRuleDetectionThreshold: __FLAKY_RULE_DETECTION_THRESHOLD__
             flakyRuleProbeAfterMinutes: __FLAKY_RULE_PROBE_AFTER_MINUTES__
             flakyRuleExemptSeverityScore: __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__
+            rootTriggeredBy: '${{ execution.triggeredBy }}'

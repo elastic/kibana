@@ -55,6 +55,7 @@ export {
   AGENT_POLICY_API_ROUTES,
   AGENTS_SETUP_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
   EPM_API_ROUTES,
   SETUP_API_ROUTE,
   // Should probably be removed
@@ -68,12 +69,19 @@ export {
   API_VERSIONS,
   APP_API_ROUTES,
   // Cloud Connector constants
+  AWS_IDENTITY_FEDERATION_ENABLED_FLAG,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
   AWS_ACCOUNT_TYPE_VAR_NAME,
   AZURE_ACCOUNT_TYPE_VAR_NAME,
   GCP_ACCOUNT_TYPE_VAR_NAME,
   FLEET_LOG_INDICES,
+  OBLT_DEFAULT_CATEGORIES,
+  displayedAssetTypes,
+  displayedAssetTypesLookup,
+  CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
+  // Download source constants
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from './constants';
 export {
   // Route services
@@ -88,6 +96,7 @@ export {
   isValidNamespace,
   isValidDataset,
   isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   INVALID_NAMESPACE_CHARACTERS,
   VALID_DATA_STREAM_TYPES,
   getFileMetadataIndexName,
@@ -295,3 +304,4 @@ export {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
 } from './services/cloud_connectors/test_subjects';
+export { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from './services/policy_template';

@@ -8,7 +8,7 @@
  */
 
 import { parse as yamlLoad } from 'yaml';
-import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github';
+import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github.ts';
 import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
 import { getKibanaDir } from '#pipeline-utils/utils';
 
@@ -22,6 +22,7 @@ const mockRunPreBuild = jest.fn();
 const mockGetEvalTriggerStep = jest.fn();
 const mockIsAutomatedVersionBumpPR = jest.fn();
 const mockGetPrChangesCached = jest.fn();
+const mockGetAffectedPackages = jest.fn();
 
 jest.mock('#pipeline-utils', () => {
   const actual = jest.requireActual('#pipeline-utils');
@@ -35,14 +36,15 @@ jest.mock('#pipeline-utils', () => {
     flushCancelOnGateFailureMetadata: mockFlushCancelOnGateFailureMetadata,
     isAutomatedVersionBumpPR: mockIsAutomatedVersionBumpPR,
     getPrChangesCached: mockGetPrChangesCached,
+    getAffectedPackages: mockGetAffectedPackages,
   };
 });
 
-jest.mock('./pre_build', () => ({
+jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
 }));
 
-jest.mock('../../../pipelines/evals/eval_pipeline', () => ({
+jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalTriggerStep: mockGetEvalTriggerStep,
 }));
 
@@ -50,7 +52,7 @@ const ORIGINAL_ENV = process.env;
 
 const importPipelineModule = async () => {
   await jest.isolateModulesAsync(async () => {
-    await import('./pipeline');
+    await import('./pipeline.ts');
   });
 };
 
@@ -87,6 +89,7 @@ describe('pull_request pipeline generation', () => {
     mockGetEvalTriggerStep.mockReturnValue(null);
     mockIsAutomatedVersionBumpPR.mockResolvedValue(false);
     mockGetPrChangesCached.mockResolvedValue([]);
+    mockGetAffectedPackages.mockResolvedValue(new Set());
   });
 
   afterEach(() => {
@@ -259,6 +262,96 @@ describe('pull_request pipeline generation', () => {
     expect(output).toContain('security_serverless_explore.sh');
   });
 
+  it('does not trigger Scout EDR real Fleet for a Fleet plugin-only change', async () => {
+    const changes = [
+      { filename: 'x-pack/platform/plugins/shared/fleet/server/services/agents/agent.ts' },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('scout-edr-real-fleet');
+  });
+
+  it('triggers Scout EDR real Fleet for a fleet_packages.json change', async () => {
+    const changes = [{ filename: 'fleet_packages.json' }];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-edr-real-fleet');
+  });
+
+  it('triggers Scout EDR real Fleet for a flyout Response section change', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/response_section_content.tsx',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-edr-real-fleet');
+  });
+
+  it('triggers Scout EDR real Fleet for a suite-only diff', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/tests/automated_response_actions.spec.ts',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-edr-real-fleet');
+  });
+
+  it('does not trigger Scout EDR real Fleet for an unrelated Security Scout change', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_creation.spec.ts',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('scout-edr-real-fleet');
+  });
+
   it('still triggers Scout suites for a Scout-tests-only diff', async () => {
     const changes = [
       {
@@ -290,5 +383,55 @@ describe('pull_request pipeline generation', () => {
     expect(parsed).toEqual({ steps: [] });
     expect(mockRunPreBuild).not.toHaveBeenCalled();
     expect(mockAreChangesSkippable).not.toHaveBeenCalled();
+  });
+
+  it('emits storybooks when pnpm-lock.yaml changes', async () => {
+    const changes = [{ filename: 'pnpm-lock.yaml' }];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
+    expect(mockGetAffectedPackages).not.toHaveBeenCalled();
+  });
+
+  it('emits storybooks when @kbn/storybook is in the affected set', async () => {
+    mockGetAffectedPackages.mockResolvedValue(new Set(['@kbn/storybook']));
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
+    expect(mockGetAffectedPackages).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({ changedFiles: expect.any(Array) })
+    );
+  });
+
+  it('does not emit storybooks for an unrelated affected set', async () => {
+    mockGetAffectedPackages.mockResolvedValue(new Set(['@kbn/unified-search-plugin']));
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('Build Storybooks');
+  });
+
+  it('emits storybooks when affected-package detection fails', async () => {
+    mockGetAffectedPackages.mockRejectedValue(new Error('git merge-base failed'));
+    jest.spyOn(console, 'error').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
   });
 });

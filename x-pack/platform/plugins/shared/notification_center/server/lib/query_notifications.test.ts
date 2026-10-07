@@ -9,7 +9,6 @@ import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { READ_ALL_BEFORE_DEFAULT } from '../storage/user_storage';
 import { queryNotifications, NOTIFICATION_QUERY_RESULT_LIMIT } from './query_notifications';
-import { severityTTLBoundary } from './severity_ttl_query';
 
 const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) => ({
   '@timestamp': ts,
@@ -49,52 +48,6 @@ describe('queryNotifications', () => {
     );
   });
 
-  it('applies one severity-TTL horizon window per tier plus a forward-compat window', async () => {
-    const { deps, search } = setup();
-
-    await queryNotifications(deps);
-
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter[0]).toEqual({
-      bool: {
-        should: [
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['info'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(30) } } },
-              ],
-            },
-          },
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['warning'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(60) } } },
-              ],
-            },
-          },
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['error', 'critical'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(180) } } },
-              ],
-            },
-          },
-          // Unknown/future severity tiers stay visible for the longest window instead of dropping.
-          {
-            bool: {
-              must_not: { terms: { severity: ['info', 'warning', 'error', 'critical'] } },
-              filter: [{ range: { '@timestamp': { gte: severityTTLBoundary(180) } } }],
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    });
-  });
-
   it('composes namespace, type, and time-range filters', async () => {
     const { deps, search } = setup();
 
@@ -125,7 +78,7 @@ describe('queryNotifications', () => {
     await queryNotifications(deps);
 
     const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter).toHaveLength(1);
+    expect(query.bool.filter).toEqual([]);
   });
 
   it('returns the full collapsed set for the client to paginate', async () => {

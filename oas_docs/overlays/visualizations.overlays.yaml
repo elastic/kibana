@@ -93,36 +93,3 @@ actions:
         description: Visualizations documentation
         url: https://www.elastic.co/docs/explore-analyze/visualize/lens
       x-displayName: Visualizations
-
-  # ──────────────────────────────────────────────
-  # Operation IDs
-  # ──────────────────────────────────────────────
-  # Pin every operationId to a stable, human-readable name.
-  #
-  # Without these actions the router generates the ID from the method and the
-  # path, which produces names like `put-visualizations-id`. Those names ship to
-  # SDK and CLI code generators, where they become command and method names.
-  #
-  # These pins must survive the retirement of the bump-slim overlay. See
-  # https://github.com/elastic/kibana/issues/266195. The bump-slim overlay sets
-  # the same IDs today. Keep the two files in agreement until it is retired.
-  - target: "$.paths['/api/visualizations'].get"
-    description: "Pin operationId for GET /api/visualizations"
-    update:
-      operationId: search-visualizations
-  - target: "$.paths['/api/visualizations'].post"
-    description: "Pin operationId for POST /api/visualizations"
-    update:
-      operationId: create-visualization
-  - target: "$.paths['/api/visualizations/{id}'].get"
-    description: "Pin operationId for GET /api/visualizations/{id}"
-    update:
-      operationId: get-visualization
-  - target: "$.paths['/api/visualizations/{id}'].put"
-    description: "Pin operationId for PUT /api/visualizations/{id}"
-    update:
-      operationId: upsert-visualization
-  - target: "$.paths['/api/visualizations/{id}'].delete"
-    description: "Pin operationId for DELETE /api/visualizations/{id}"
-    update:
-      operationId: delete-visualization

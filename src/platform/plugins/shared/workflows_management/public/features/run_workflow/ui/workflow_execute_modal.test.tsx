@@ -527,7 +527,7 @@ describe('WorkflowExecuteModal', () => {
   });
 
   describe('Auto-run logic', () => {
-    it('auto-runs and closes modal when workflow has no alerts and no inputs', () => {
+    it('auto-runs and closes modal when workflow has no alerts and no inputs', async () => {
       renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
@@ -540,11 +540,13 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
-      expect(mockOnClose).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
+        expect(mockOnClose).toHaveBeenCalled();
+      });
     });
 
-    it('auto-runs only once when onSubmit and onClose change identity', () => {
+    it('auto-runs only once when onSubmit and onClose change identity', async () => {
       const definition = {
         ...baseWorkflowDefinition,
         triggers: [{ type: 'manual' as const }],
@@ -559,8 +561,10 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        expect(mockOnClose).toHaveBeenCalledTimes(1);
+      });
 
       rerender(
         <WorkflowExecuteModal
@@ -669,6 +673,35 @@ describe('WorkflowExecuteModal', () => {
   });
 
   describe('Form submission', () => {
+    it('does not close when onSubmit rejects', async () => {
+      mockOnSubmit.mockRejectedValue(new Error('run failed'));
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={
+            {
+              ...baseWorkflowDefinition,
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
+            } as WorkflowYaml
+          }
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByTestId('executeWorkflowButton'));
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled();
+      });
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
     it('renders the execute button', () => {
       const { getByTestId } = renderWithProviders(
         <WorkflowExecuteModal

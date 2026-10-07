@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-dashboards-common",
+    "@kbn/agent-builder-visualizations-common",
+    "@kbn/as-code-dashboard-schema",
+    "@kbn/controls-constants",
+    "@kbn/custom-content-common",
+    "@kbn/esql-utils",
+    "@kbn/field-types",
+    "@kbn/lens-common",
+    "@kbn/logging",
+    "@kbn/ml-server-schemas",
+    "@kbn/zod"
+  ]
+}

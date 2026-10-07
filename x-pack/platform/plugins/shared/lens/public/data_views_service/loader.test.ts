@@ -8,7 +8,7 @@
 import type { DataViewsContract, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TextBasedPersistedState } from '@kbn/lens-common';
 import type { HttpStart } from '@kbn/core/public';
-import { getESQLTimeField, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import {
   ensureIndexPattern,
   ensureESQLTimeFieldOnAdHocDataViews,
@@ -21,13 +21,9 @@ import { documentField } from '../datasources/form_based/document_field';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLTimeField: jest.fn(),
-  getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
 }));
 
 const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
-const mockGetProjectRoutingFromEsqlQuery = getProjectRoutingFromEsqlQuery as jest.MockedFunction<
-  typeof getProjectRoutingFromEsqlQuery
->;
 
 describe('loader', () => {
   describe('loadIndexPatternRefs', () => {
@@ -367,7 +363,6 @@ describe('loader', () => {
 
     beforeEach(() => {
       mockGetESQLTimeField.mockReset();
-      mockGetProjectRoutingFromEsqlQuery.mockReset().mockReturnValue(undefined);
       (mockDataViews.clearInstanceCache as jest.Mock).mockClear();
     });
 
@@ -596,35 +591,6 @@ describe('loader', () => {
         query: 'FROM logs-*',
         http: mockHttp,
         projectRouting: '_alias:*',
-      });
-    });
-
-    it('should prefer SET project_routing in the query over the picker routing', async () => {
-      const query = 'SET project_routing = "_alias:linked"; FROM logs-*';
-      const adHocDataViews: Record<string, DataViewSpec> = {
-        dv1: { id: 'dv1', title: 'logs-*' },
-      };
-      const textBasedState = {
-        layers: {
-          layer1: { columns: [], index: 'dv1', query: { esql: query } },
-        },
-      } as unknown as TextBasedPersistedState;
-
-      mockGetProjectRoutingFromEsqlQuery.mockReturnValue('_alias:linked');
-      mockGetESQLTimeField.mockResolvedValue('@timestamp');
-
-      await ensureESQLTimeFieldOnAdHocDataViews({
-        adHocDataViews,
-        textBasedState,
-        dataViewsService: mockDataViews,
-        http: mockHttp,
-        projectRouting: '_alias:_origin',
-      });
-
-      expect(mockGetESQLTimeField).toHaveBeenCalledWith({
-        query,
-        http: mockHttp,
-        projectRouting: '_alias:linked',
       });
     });
   });

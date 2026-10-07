@@ -6,22 +6,25 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIllustration, useEuiTheme } from '@elastic/eui';
+import {
+  globalPeopleNetwork,
+  observabilityVideo,
+  projectsGear,
+  supportLaptop,
+} from '@elastic/eui-illustrations';
+import type { EuiIllustrationSource } from '@elastic/eui-illustrations';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import type { DocsLink } from '../add_data_grid';
-import demoIconUrl from './icons/demo_icon.svg';
-import forumIconUrl from './icons/forum_icon.svg';
-import docsIconUrl from './icons/docs_icon.svg';
-import supportIconUrl from './icons/support_icon.svg';
 
 const URL_DEMO_ENV = 'https://ela.st/demo';
 const URL_FORUM = 'https://discuss.elastic.co/';
 
-const linkIcon = (iconUrl: string) => (
-  <EuiIcon size="xl" type={iconUrl} color="subdued" aria-hidden={true} />
+const linkIllustration = (type: EuiIllustrationSource, maxSize: string) => (
+  <EuiIllustration type={type} alt="" css={{ maxInlineSize: maxSize }} />
 );
 
 /** Destinations carry over from the V1 footer (`ExternalResourceLinks` in `observability_shared`). */
@@ -29,8 +32,10 @@ export const useObservabilityDocsLinks = (): DocsLink[] => {
   const {
     services: { docLinks, chrome },
   } = useKibana<ObservabilityOnboardingAppServices>();
+  const { euiTheme } = useEuiTheme();
   const helpSupportUrl = useObservable(chrome.getHelpSupportUrl$());
   const documentationUrl = docLinks.links.observability.guide;
+  const illustrationMaxSize = `calc(${euiTheme.size.base} * 3)`;
 
   return useMemo(
     () => [
@@ -46,7 +51,7 @@ export const useObservabilityDocsLinks = (): DocsLink[] => {
           defaultMessage: 'Explore demo',
         }),
         href: URL_DEMO_ENV,
-        icon: linkIcon(demoIconUrl),
+        icon: linkIllustration(observabilityVideo, illustrationMaxSize),
         'data-test-subj': 'observabilityOnboardingDocsLinksExploreDemo',
       },
       {
@@ -65,7 +70,7 @@ export const useObservabilityDocsLinks = (): DocsLink[] => {
           { defaultMessage: 'Discuss forum. Open Elastic forum' }
         ),
         href: URL_FORUM,
-        icon: linkIcon(forumIconUrl),
+        icon: linkIllustration(globalPeopleNetwork, illustrationMaxSize),
         'data-test-subj': 'observabilityOnboardingDocsLinksDiscussForum',
       },
       {
@@ -86,7 +91,7 @@ export const useObservabilityDocsLinks = (): DocsLink[] => {
           { defaultMessage: 'Learn more about all Elastic features' }
         ),
         href: documentationUrl,
-        icon: linkIcon(docsIconUrl),
+        icon: linkIllustration(projectsGear, illustrationMaxSize),
         'data-test-subj': 'observabilityOnboardingDocsLinksLearnMore',
       },
       {
@@ -101,10 +106,10 @@ export const useObservabilityDocsLinks = (): DocsLink[] => {
           defaultMessage: 'Open Support Hub',
         }),
         href: helpSupportUrl,
-        icon: linkIcon(supportIconUrl),
+        icon: linkIllustration(supportLaptop, illustrationMaxSize),
         'data-test-subj': 'observabilityOnboardingDocsLinksOpenSupportHub',
       },
     ],
-    [documentationUrl, helpSupportUrl]
+    [documentationUrl, helpSupportUrl, illustrationMaxSize]
   );
 };

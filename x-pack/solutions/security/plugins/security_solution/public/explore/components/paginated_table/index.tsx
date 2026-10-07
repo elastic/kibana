@@ -8,6 +8,7 @@
 import type {
   EuiBasicTableProps,
   EuiGlobalToastListToast as Toast,
+  EuiTableFieldDataColumnType,
   EuiTableRowCellProps,
   EuiTitleSize,
 } from '@elastic/eui';
@@ -28,7 +29,6 @@ import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
-import type { EntitiesListColumns } from '../../../entity_analytics/components/entity_store/hooks/use_entities_list_columns';
 import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import type { HostsTableColumns } from '../../hosts/components/hosts_table';
@@ -97,8 +97,7 @@ declare type BasicTableColumns =
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns
-  | UsersTableColumns
-  | EntitiesListColumns;
+  | UsersTableColumns;
 
 export declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
@@ -134,11 +133,15 @@ export interface BasicTableProps<T> {
 }
 type Func<T> = (arg: T) => string | number;
 
+// `EuiTableColumnNameTooltipProps` is not re-exported from the EUI package root.
+type NameTooltip = EuiTableFieldDataColumnType<never>['nameTooltip'];
+
 export interface Columns<T, U = T> {
   align?: string;
   field?: string;
   mobileOptions?: EuiTableRowCellProps['mobileOptions'];
   name: string | React.ReactNode;
+  nameTooltip?: NameTooltip;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
   truncateText?: boolean | { lines: number };
@@ -242,6 +245,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
       <EuiContextMenuItem
         key={item.text}
         icon={limit === item.numberOfRow ? 'check' : 'empty'}
+        aria-current={limit === item.numberOfRow ? 'true' : undefined}
+        data-test-subj={`loadingMorePickSizeRow-${item.numberOfRow}`}
         onClick={() => {
           closePopover();
           updateLimitPagination(item.numberOfRow);

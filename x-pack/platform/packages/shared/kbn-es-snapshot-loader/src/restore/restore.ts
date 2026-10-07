@@ -39,6 +39,7 @@ export async function restoreIndices({
   indices,
   renamePattern,
   renameReplacement,
+  indexSettings,
 }: {
   esClient: Client;
   log: ToolingLog;
@@ -47,6 +48,7 @@ export async function restoreIndices({
   indices: string[];
   renamePattern?: string;
   renameReplacement?: string;
+  indexSettings?: Record<string, unknown>;
 }): Promise<string[]> {
   if (indices.length === 0) {
     throw new Error('No indices specified for restore');
@@ -55,7 +57,7 @@ export async function restoreIndices({
   const hasRename = renamePattern && renameReplacement;
   log.debug(`Restoring ${indices.length} indices${hasRename ? ' to temp location' : ''}`);
 
-  await esClient.snapshot.restore(
+  const restoreResponse = await esClient.snapshot.restore(
     {
       repository: repoName,
       snapshot: snapshotName,
@@ -63,14 +65,45 @@ export async function restoreIndices({
       indices: indices.join(','),
       include_global_state: false,
       ...(hasRename && { rename_pattern: renamePattern, rename_replacement: renameReplacement }),
+      ...(indexSettings !== undefined && { index_settings: indexSettings }),
     },
     { requestTimeout: 5 * 60 * 1000 }
   );
 
-  const restoredNames = hasRename
-    ? indices.map((idx) => idx.replace(new RegExp(renamePattern), renameReplacement))
-    : indices;
+  let restoredNames = restoreResponse.snapshot?.indices;
+  if (indexSettings === undefined) {
+    restoredNames = hasRename
+      ? indices.map((index) => index.replace(new RegExp(renamePattern), renameReplacement))
+      : indices;
+  }
+
+  if (!restoredNames || restoredNames.length === 0) {
+    throw new Error('Snapshot restore response did not include restored index names');
+  }
 
   log.info(`Restore initiated for ${restoredNames.length} indices`);
   return restoredNames;
+}
+
+export async function waitForRestoredIndicesToBeActive({
+  esClient,
+  restoredIndices,
+}: {
+  esClient: Client;
+  restoredIndices: string[];
+}): Promise<void> {
+  const health = await esClient.cluster.health(
+    {
+      index: restoredIndices.join(','),
+      wait_for_active_shards: 'all',
+      timeout: '120s',
+    },
+    { ignore: [408], requestTimeout: 130_000 }
+  );
+
+  if (health.timed_out) {
+    throw new Error(
+      `Restored indices did not become active within 120 seconds: ${restoredIndices.join(', ')}`
+    );
+  }
 }

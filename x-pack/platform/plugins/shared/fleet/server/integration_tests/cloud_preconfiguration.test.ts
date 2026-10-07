@@ -17,6 +17,7 @@ import {
 import { AGENT_POLICY_INDEX } from '../../common';
 import type {
   AgentPolicySOAttributes,
+  BeatsOutputSOAttributes,
   PackagePolicySOAttributes,
   OutputSOAttributes,
 } from '../types';
@@ -191,6 +192,7 @@ describe('Fleet cloud preconfiguration', () => {
             agent: {
               download: {
                 sourceURI: 'https://artifacts.elastic.co/downloads/',
+                sources: ['https://artifacts.elastic.co/downloads/'],
               },
               features: {},
               monitoring: {
@@ -623,7 +625,7 @@ describe('Fleet cloud preconfiguration', () => {
             (so) => so.attributes.output_id === 'es-containerhost'
           );
           expect(outputSO).toBeDefined();
-          expect(outputSO?.attributes.config_yaml).toBeNull();
+          expect((outputSO?.attributes as BeatsOutputSOAttributes)?.config_yaml).toBeNull();
         });
       });
     });

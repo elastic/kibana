@@ -11,6 +11,15 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 const SALESFORCE_API_VERSION = 'v66.0';
 
+// Salesforce caps SOQL/SOSL statements at 100,000 characters and SOSL search
+// strings at 10,000 characters; record Ids are 15 or 18 characters.
+const SALESFORCE_MAX_SOQL_LENGTH = 100_000;
+const SALESFORCE_MAX_SEARCH_TERM_LENGTH = 10_000;
+const SALESFORCE_MAX_RETURNING_LENGTH = 2000;
+const SALESFORCE_MAX_SOBJECT_NAME_LENGTH = 200;
+const SALESFORCE_MAX_RECORD_ID_LENGTH = 18;
+const SALESFORCE_MAX_URL_LENGTH = 2048;
+
 /** Derive instance base URL from the full token URL (strip /services/oauth2/token and any path). */
 function getBaseUrl(tokenUrl: string | undefined): string {
   if (!tokenUrl || tokenUrl.trim() === '') {
@@ -24,8 +33,26 @@ function getBaseUrl(tokenUrl: string | undefined): string {
   return base.replace(/\/+$/, '');
 }
 
+// nextRecordsUrl is appended to the instance URL and requested with the OAuth token, so it must stay a
+// relative cursor path: a value such as `@attacker.example/x` would otherwise change the request host.
+const NEXT_RECORDS_URL_REGEX = /^\/services\/data\/v\d+\.\d+\/(query|search)\/[A-Za-z0-9-]+$/;
+const INVALID_NEXT_RECORDS_URL_MESSAGE =
+  'nextRecordsUrl must be the relative path returned by a previous response, e.g. /services/data/v66.0/query/01gxx0000002-2000';
+
+const NextRecordsUrlSchema = lazySchema(() =>
+  z
+    .string()
+    .max(SALESFORCE_MAX_URL_LENGTH)
+    .regex(NEXT_RECORDS_URL_REGEX, { message: INVALID_NEXT_RECORDS_URL_MESSAGE })
+    .optional()
+    .describe('Pagination URL from previous response')
+);
+
 /** Resolve Salesforce nextRecordsUrl (relative path) to a full URL. */
 function createPaginationUrl(baseUrl: string, nextRecordsUrl: string): string {
+  if (!NEXT_RECORDS_URL_REGEX.test(nextRecordsUrl)) {
+    throw new Error(INVALID_NEXT_RECORDS_URL_MESSAGE);
+  }
   return `${baseUrl}${nextRecordsUrl}`;
 }
 
@@ -88,14 +115,18 @@ export const SalesforceConnector: ConnectorSpec = {
   actions: {
     query: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Run a SOQL query and return matching records with the selected fields. Use this for structured filtering (WHERE), field selection, sorting, or relationship queries; prefer get_record when you already have an Id and search for free-text discovery. Returns records, totalSize, done, and nextRecordsUrl when more pages exist.',
       input: lazySchema(() =>
         z.object({
           soql: z
             .string()
+            .max(SALESFORCE_MAX_SOQL_LENGTH)
             .describe(
               'SOQL query. Prefer LIMIT 10-20 and WHERE to narrow results; use nextRecordsUrl from response for more.'
             ),
-          nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
+          nextRecordsUrl: NextRecordsUrlSchema,
         })
       ),
       handler: async (ctx, input) => {
@@ -116,15 +147,20 @@ export const SalesforceConnector: ConnectorSpec = {
 
     get_record: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Fetch a single Salesforce record by SObject name and record Id, returning all of its fields. Use this when you already have an Id from query, list_records, or search; use query instead when you need filtering or only specific fields.',
       input: lazySchema(() =>
         z.object({
           sobjectName: z
             .string()
+            .max(SALESFORCE_MAX_SOBJECT_NAME_LENGTH)
             .describe(
               'SObject API name (standard or custom, e.g. Account, Contact, MyObject__c). Must match the object that owns the record.'
             ),
           recordId: z
             .string()
+            .max(SALESFORCE_MAX_RECORD_ID_LENGTH)
             .describe(
               'Record Id (15- or 18-char). Get from query, list_records, or search results.'
             ),
@@ -146,14 +182,20 @@ export const SalesforceConnector: ConnectorSpec = {
 
     list_records: {
       isTool: true,
+      scope: 'read',
+      description:
+        'List record Ids for a single SObject type without filtering. Use this for a quick sample of Ids, then follow up with get_record or query for field details; use query when you need WHERE clauses or specific fields. Returns records containing only Id, plus nextRecordsUrl when more pages exist.',
       input: lazySchema(() =>
         z.object({
-          sobjectName: z.string().describe('SObject API name (e.g. Account, Contact, MyObject__c)'),
+          sobjectName: z
+            .string()
+            .max(SALESFORCE_MAX_SOBJECT_NAME_LENGTH)
+            .describe('SObject API name (e.g. Account, Contact, MyObject__c)'),
           limit: z
             .number()
             .default(10)
             .describe('Max records to return (1-2000). Prefer 10-20 to keep context small.'),
-          nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
+          nextRecordsUrl: NextRecordsUrlSchema,
         })
       ),
       handler: async (ctx, input) => {
@@ -181,19 +223,24 @@ export const SalesforceConnector: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Run a SOSL full-text search for a phrase across the SObject types listed in returning. Use this for broad text discovery when you do not know which records match; prefer query (SOQL) for structured filtering on known fields. Returns matching records grouped in searchRecords.',
       input: lazySchema(() =>
         z.object({
           searchTerm: z
             .string()
+            .max(SALESFORCE_MAX_SEARCH_TERM_LENGTH)
             .describe(
               'Search phrase for SOSL full-text search (e.g. "Acme Corp" or "Q4 renewal"). Only searches objects listed in returning; not all text fields are indexed; results capped at ~2000. Prefer query (SOQL) for structured filtering; use search for broad text discovery.'
             ),
           returning: z
             .string()
+            .max(SALESFORCE_MAX_RETURNING_LENGTH)
             .describe(
               'Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep result size down. Custom objects require "Allow Search" enabled. Use describe to discover object names.'
             ),
-          nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
+          nextRecordsUrl: NextRecordsUrlSchema,
         })
       ),
       handler: async (ctx, input) => {
@@ -221,10 +268,14 @@ export const SalesforceConnector: ConnectorSpec = {
 
     describe: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Describe an SObject type, returning its fields (names, types, picklist values) and relationships to other objects. Call this before writing a query or search against an unfamiliar object so you use valid field and object names.',
       input: lazySchema(() =>
         z.object({
           sobjectName: z
             .string()
+            .max(SALESFORCE_MAX_SOBJECT_NAME_LENGTH)
             .describe(
               'SObject API name. Use before query or search to discover field names, relationships, and picklist values. Common standard objects you can describe without prior discovery: Account (companies/orgs), Contact (people linked to Account), Opportunity (sales deals with stage/amount/close date), Case (support tickets), Lead (unqualified prospects), Task (action items/follow-ups), ContentVersion (file/attachment versions; use with ContentDocumentLink for downloads). Custom objects always end with __c (e.g. MyObject__c).'
             ),
@@ -245,12 +296,14 @@ export const SalesforceConnector: ConnectorSpec = {
 
     download_file: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file from Salesforce by its ContentVersion Id. Returns the file as base64-encoded data with its content type. WARNING: Returns potentially large base64 payloads. Only call this when you have a plan to process the binary data (e.g. via an Elasticsearch ingest pipeline attachment processor). Use SOQL on ContentDocumentLink and ContentVersion to discover file Ids first.',
       input: lazySchema(() =>
         z.object({
           contentVersionId: z
             .string()
+            .max(SALESFORCE_MAX_RECORD_ID_LENGTH)
             .describe(
               'ContentVersion record Id (15 or 18 chars). Get from SOQL on ContentVersion or ContentDocumentLink. Returns base64-encoded file content and content-type.'
             ),

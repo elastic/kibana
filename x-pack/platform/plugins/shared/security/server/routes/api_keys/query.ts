@@ -168,7 +168,11 @@ export function defineQueryApiKeysAndAggregationsRoute({
           }
         }
 
-        const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
+        // `search_after` needs a total order; `id` is not sortable here, so `_doc` breaks ties.
+        const transformedSort = sort && [
+          { [sort.field]: { order: sort.direction } },
+          { _doc: { order: 'asc' as const } },
+        ];
         let queryResult: Partial<QueryApiKeyResult>;
         try {
           const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({

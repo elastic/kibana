@@ -122,6 +122,7 @@ const TreeNode = memo<TreeNodeProps>(({ process, children, 'data-test-subj': dat
             <ProcessResult
               command={'kill-process'}
               processResult={process}
+              showEntityId={false}
               data-test-subj={getTestId('details')}
             />
             <EuiSpacer size="xs" />

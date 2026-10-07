@@ -63,6 +63,7 @@ const defaultProps = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
+  esqlVariables: undefined,
   onSave: jest.fn(),
   onClose: jest.fn(),
   onRunPreview: jest.fn(),
@@ -72,7 +73,11 @@ const defaultProps = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseEditFlyoutState.mockReturnValue(baseFlyoutState);
-  (getServices as jest.Mock).mockReturnValue({});
+  (getServices as jest.Mock).mockReturnValue({
+    core: {
+      docLinks: { links: { visualize: { customPanels: 'https://docs.example/custom-panels' } } },
+    },
+  });
 });
 
 describe('EditCustomContentFlyout', () => {
@@ -125,6 +130,15 @@ describe('EditCustomContentFlyout', () => {
         templateSizeBytes: '<div></div>'.length,
       });
     });
+  });
+
+  it('links to the custom panels docs', () => {
+    render(<EditCustomContentFlyout {...defaultProps} />);
+
+    expect(screen.getByTestId('customContentFlyoutDocsLink')).toHaveAttribute(
+      'href',
+      'https://docs.example/custom-panels'
+    );
   });
 
   describe('Cancel', () => {

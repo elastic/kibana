@@ -58,6 +58,7 @@ import {
   Source,
   ButtonGroup,
   FormattedComboBox,
+  MonitorTagsComboBox,
   JSONEditor,
   MonitorTypeRadioGroup,
   HeaderField,
@@ -83,6 +84,8 @@ import {
   MonitorTypeEnum,
   FormMonitorType,
   HTTPMethod,
+  HttpAuthMethod,
+  KerberosAuthType,
   ScreenshotOption,
   Mode,
   TLSVersion,
@@ -95,10 +98,31 @@ import {
   ALLOWED_SCHEDULES_IN_MINUTES,
   ALLOWED_SCHEDULES_IN_SECONDS,
 } from '../constants';
+import { monitorTypeRequiresPrivateLocations } from '../../../../../../common/utils/monitor_location_support';
 import { getDefaultFormFields } from './defaults';
 import { parsePemCertificateEntries } from './parse_pem_certificate_entries';
-import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
+import {
+  validate,
+  validateHeaders,
+  validJSONFormat,
+  WHOLE_NUMBERS_ONLY,
+  FLOATS_ONLY,
+} from './validation';
 import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
+
+export const API_PRIVATE_LOCATIONS_ONLY = i18n.translate(
+  'xpack.synthetics.monitorConfig.locations.apiPrivateOnlyErrorMessage',
+  {
+    defaultMessage: 'API Journey monitors can only run on private locations.',
+  }
+);
+
+const API_PRIVATE_LOCATION_REQUIRED = i18n.translate(
+  'xpack.synthetics.monitorConfig.monitorType.api.privateLocationRequiredTooltip',
+  {
+    defaultMessage: 'API Journey requires a private location.',
+  }
+);
 
 const getScheduleContent = (value: number, seconds?: boolean) => {
   if (seconds) {
@@ -147,15 +171,32 @@ const getSchedules = (monitorType?: MonitorTypeEnum) => {
 };
 
 export const MONITOR_TYPE_CONFIG = {
+  [FormMonitorType.API]: {
+    id: 'syntheticsMonitorTypeAPI',
+    'data-test-subj': 'syntheticsMonitorTypeAPI',
+    label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.api.label', {
+      defaultMessage: 'API Journey',
+    }),
+    value: FormMonitorType.API,
+    descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.api.title', {
+      defaultMessage: 'API Journey',
+    }),
+    description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.api.description', {
+      defaultMessage: 'Run a sequence of HTTP requests without launching a browser.',
+    }),
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
+    icon: 'inputOutput',
+    beta: true,
+  },
   [FormMonitorType.MULTISTEP]: {
     id: 'syntheticsMonitorTypeMultistep',
     'data-test-subj': 'syntheticsMonitorTypeMultistep',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.multiStep.label', {
-      defaultMessage: 'Multistep',
+      defaultMessage: 'Browser Journey',
     }),
     value: FormMonitorType.MULTISTEP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.multiStep.title', {
-      defaultMessage: 'Multistep Browser Journey',
+      defaultMessage: 'Browser Journey',
     }),
     description: i18n.translate(
       'xpack.synthetics.monitorConfig.monitorType.multiStep.description',
@@ -165,7 +206,7 @@ export const MONITOR_TYPE_CONFIG = {
       }
     ),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
-    icon: 'videoPlayer',
+    icon: 'display',
     beta: false,
   },
   [FormMonitorType.SINGLE]: {
@@ -178,7 +219,7 @@ export const MONITOR_TYPE_CONFIG = {
     descriptionTitle: i18n.translate(
       'xpack.synthetics.monitorConfig.monitorType.singlePage.title',
       {
-        defaultMessage: 'Single Page Browser Test',
+        defaultMessage: 'Page load',
       }
     ),
     description: i18n.translate(
@@ -189,61 +230,58 @@ export const MONITOR_TYPE_CONFIG = {
       }
     ),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
-    icon: 'videoPlayer',
+    icon: 'inspect',
     beta: false,
   },
   [FormMonitorType.HTTP]: {
     id: 'syntheticsMonitorTypeHTTP',
     'data-test-subj': 'syntheticsMonitorTypeHTTP',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.label', {
-      defaultMessage: 'HTTP Ping',
+      defaultMessage: 'HTTP',
     }),
     value: FormMonitorType.HTTP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.title', {
       defaultMessage: 'HTTP Ping',
     }),
     description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.description', {
-      defaultMessage:
-        'A lightweight API check to validate the availability of a web service or endpoint.',
+      defaultMessage: 'A lightweight check of a URL without a browser or script.',
     }),
     link: 'https://elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'wifi',
+    icon: 'globe',
     beta: false,
   },
   [FormMonitorType.TCP]: {
     id: 'syntheticsMonitorTypeTCP',
     'data-test-subj': 'syntheticsMonitorTypeTCP',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.label', {
-      defaultMessage: 'TCP Ping',
+      defaultMessage: 'TCP',
     }),
     value: FormMonitorType.TCP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.title', {
       defaultMessage: 'TCP Ping',
     }),
     description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.description', {
-      defaultMessage:
-        'A lightweight API check to validate the availability of a web service or endpoint.',
+      defaultMessage: 'Check that a host and port accept TCP connections.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'wifi',
+    icon: 'ip',
     beta: false,
   },
   [FormMonitorType.ICMP]: {
     id: 'syntheticsMonitorTypeICMP',
     'data-test-subj': 'syntheticsMonitorTypeICMP',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.label', {
-      defaultMessage: 'ICMP Ping',
+      defaultMessage: 'ICMP',
     }),
     value: FormMonitorType.ICMP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.title', {
       defaultMessage: 'ICMP Ping',
     }),
     description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.description', {
-      defaultMessage:
-        'A lightweight API check to validate the availability of a web service or endpoint.',
+      defaultMessage: 'Check that a host responds to ICMP ping.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'wifi',
+    icon: 'bolt',
     beta: false,
   },
 };
@@ -257,14 +295,31 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Monitor type',
     }),
     controlled: true,
-    props: ({ field, reset, space }) => ({
-      onChange: (_: string, monitorType: FormMonitorType) => {
-        const defaultFields = getDefaultFormFields(space)[monitorType];
-        reset(defaultFields);
-      },
-      selectedOption: field?.value,
-      options: Object.values(MONITOR_TYPE_CONFIG),
-    }),
+    props: ({ field, reset, space, locations }) => {
+      const hasUsableApiJourneyLocation = locations.some(
+        (location) => !location.isInvalid && !location.isServiceManaged
+      );
+      return {
+        onChange: (_: string, monitorType: FormMonitorType) => {
+          const defaultFields = getDefaultFormFields(space)[monitorType];
+          reset(defaultFields);
+        },
+        selectedOption: field?.value,
+        // API Journey isn't supported on Serverless yet; hide it there until
+        // it ships in a stack release. Remove this filter once it's enabled.
+        options: Object.values(MONITOR_TYPE_CONFIG)
+          .filter((option) => option.value !== FormMonitorType.API || !kibanaService.isServerless)
+          .map((option) =>
+            option.value === FormMonitorType.API
+              ? {
+                  ...option,
+                  isDisabled: !hasUsableApiJourneyLocation,
+                  disabledReason: API_PRIVATE_LOCATION_REQUIRED,
+                }
+              : option
+          ),
+      };
+    },
     validation: () => ({
       required: true,
     }),
@@ -438,18 +493,39 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'Where do you want to run this test from? Additional locations will increase your total cost.',
     }),
-    props: ({ field, setValue, locations, trigger }) => {
+    dependencies: [ConfigKey.MONITOR_TYPE],
+    validation: ([monitorType]) => ({
+      validate: {
+        privateLocationsOnly: (value: FormLocation[]) => {
+          if (!monitorTypeRequiresPrivateLocations(monitorType as string)) {
+            return true;
+          }
+          return value?.some((location) => location.isServiceManaged)
+            ? API_PRIVATE_LOCATIONS_ONLY
+            : true;
+        },
+      },
+    }),
+    props: ({ field, setValue, locations, trigger, formState }) => {
+      const isPrivateLocationsOnly = monitorTypeRequiresPrivateLocations(
+        formState.defaultValues?.[ConfigKey.MONITOR_TYPE]
+      );
       return {
-        options: Object.values(locations).map((location) => ({
-          label: location.label,
-          id: location.id,
-          isServiceManaged: location.isServiceManaged || false,
-          isInvalid: location.isInvalid,
-          disabled: location.isInvalid,
-        })),
+        options: Object.values(locations).map((location) => {
+          const isPublic = location.isServiceManaged || false;
+          return {
+            label: location.label,
+            id: location.id,
+            isServiceManaged: isPublic,
+            isInvalid: location.isInvalid,
+            disabled: location.isInvalid || (isPrivateLocationsOnly && isPublic),
+          };
+        }),
         selectedOptions: Object.values(field?.value || {}).map((location) => ({
           color:
-            location.isInvalid || !locations.some((s) => s.id === location.id)
+            location.isInvalid ||
+            !locations.some((s) => s.id === location.id) ||
+            (isPrivateLocationsOnly && location.isServiceManaged)
               ? 'danger'
               : location.isServiceManaged
               ? 'default'
@@ -471,7 +547,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           await trigger(ConfigKey.LOCATIONS);
         },
         isDisabled: readOnly,
-        renderOption: (option: FormLocation, searchValue: string) => {
+        renderOption: (option: FormLocation & { disabled?: boolean }, searchValue: string) => {
+          const disabledForApi = isPrivateLocationsOnly && option.isServiceManaged;
           return (
             <EuiToolTip
               anchorProps={{
@@ -483,6 +560,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
                       defaultMessage:
                         'The attached agent policy for this location has been deleted.',
                     })
+                  : disabledForApi
+                  ? API_PRIVATE_LOCATIONS_ONLY
                   : ''
               }
             >
@@ -589,7 +668,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
-    component: FormattedComboBox,
+    component: MonitorTagsComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.tags.label', {
       defaultMessage: 'Tags',
     }),
@@ -743,6 +822,82 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Wait duration is invalid.',
     }),
   },
+  authType: {
+    fieldKey: 'authType',
+    component: Select,
+    controlled: true,
+    label: i18n.translate('xpack.synthetics.monitorConfig.authType.label', {
+      defaultMessage: 'Authentication method',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.authType.helpText', {
+      defaultMessage: 'Select how the monitor authenticates with the server.',
+    }),
+    props: ({ field, setValue }): EuiSelectProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigAuthType',
+      options: [
+        {
+          value: HttpAuthMethod.NONE,
+          text: i18n.translate('xpack.synthetics.monitorConfig.authType.none', {
+            defaultMessage: 'None',
+          }),
+        },
+        {
+          value: HttpAuthMethod.BASIC,
+          text: i18n.translate('xpack.synthetics.monitorConfig.authType.basic', {
+            defaultMessage: 'Basic',
+          }),
+        },
+        {
+          value: HttpAuthMethod.KERBEROS,
+          text: i18n.translate('xpack.synthetics.monitorConfig.authType.kerberos', {
+            defaultMessage: 'Kerberos',
+          }),
+        },
+        {
+          value: HttpAuthMethod.NTLM,
+          text: i18n.translate('xpack.synthetics.monitorConfig.authType.ntlm', {
+            defaultMessage: 'NTLM',
+          }),
+        },
+      ],
+      value: (field?.value as HttpAuthMethod) ?? HttpAuthMethod.NONE,
+      onChange: (event) => {
+        const value = event.target.value as HttpAuthMethod;
+        setValue('authType', value);
+        setValue('kerberos.enabled', value === HttpAuthMethod.KERBEROS);
+        setValue('ntlm.enabled', value === HttpAuthMethod.NTLM);
+        // Hidden Basic fields keep their values unless cleared; otherwise
+        // switching away from Basic still serializes username/password and
+        // either keeps Basic auth (None) or fails mutual-exclusivity validation.
+        if (value !== HttpAuthMethod.BASIC) {
+          setValue(ConfigKey.USERNAME, '');
+          setValue(ConfigKey.PASSWORD, '');
+        }
+        // Disabled Kerberos/NTLM objects are still serialized into encrypted
+        // secrets; reset them to defaults when leaving those methods.
+        if (value !== HttpAuthMethod.KERBEROS) {
+          setValue('kerberos.enabled', false);
+          setValue('kerberos.username', '');
+          setValue('kerberos.password', '');
+          setValue('kerberos.keytab', '');
+          setValue('kerberos.config_path', '');
+          setValue('kerberos.krb5_conf', '');
+          setValue('kerberos.realm', '');
+          setValue('kerberos.service_name', '');
+          setValue('kerberos.auth_type', KerberosAuthType.PASSWORD);
+          setValue('kerberos.enable_krb5_fast', false);
+        }
+        if (value !== HttpAuthMethod.NTLM) {
+          setValue('ntlm.enabled', false);
+          setValue('ntlm.username', '');
+          setValue('ntlm.password', '');
+          setValue('ntlm.domain', '');
+          setValue('ntlm.workstation', '');
+        }
+      },
+      disabled: readOnly,
+    }),
+  },
   [ConfigKey.USERNAME]: {
     fieldKey: ConfigKey.USERNAME,
     component: FieldText,
@@ -752,6 +907,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.username.helpText', {
       defaultMessage: 'Username for authenticating with the server.',
     }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.BASIC;
+    },
+    dependencies: ['authType'],
     props: (): EuiFieldTextProps => ({
       readOnly,
     }),
@@ -765,7 +925,303 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.password.helpText', {
       defaultMessage: 'Password for authenticating with the server.',
     }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.BASIC;
+    },
+    dependencies: ['authType'],
     props: (): EuiFieldPasswordProps => ({
+      readOnly,
+    }),
+  },
+  ['kerberos.auth_type']: {
+    fieldKey: 'kerberos.auth_type',
+    component: Select,
+    controlled: true,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.label', {
+      defaultMessage: 'Kerberos authentication type',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.helpText', {
+      defaultMessage: 'Authenticate with a username and password, or with a keytab file.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: ({ field, setValue }): EuiSelectProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosAuthType',
+      options: [
+        {
+          value: KerberosAuthType.PASSWORD,
+          text: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.password', {
+            defaultMessage: 'Password',
+          }),
+        },
+        {
+          value: KerberosAuthType.KEYTAB,
+          text: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.keytab', {
+            defaultMessage: 'Keytab',
+          }),
+        },
+      ],
+      value: (field?.value as KerberosAuthType) ?? KerberosAuthType.PASSWORD,
+      onChange: (event) => {
+        const value = event.target.value as KerberosAuthType;
+        setValue('kerberos.auth_type', value);
+        // Hidden credential fields remain in the enabled Kerberos payload;
+        // clear the unused method so agents never receive stale secrets.
+        if (value === KerberosAuthType.KEYTAB) {
+          setValue('kerberos.password', '');
+        } else {
+          setValue('kerberos.keytab', '');
+        }
+      },
+      disabled: readOnly,
+    }),
+  },
+  ['kerberos.realm']: {
+    fieldKey: 'kerberos.realm',
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosRealm.label', {
+      defaultMessage: 'Realm',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosRealm.helpText', {
+      defaultMessage: 'The Kerberos realm, e.g. CORP.LOCAL.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosRealm',
+      readOnly,
+    }),
+  },
+  ['kerberos.config_path']: {
+    fieldKey: 'kerberos.config_path',
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosConfigPath.label', {
+      defaultMessage: 'Configuration file path',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosConfigPath.helpText', {
+      defaultMessage:
+        'Path to the krb5.conf file on the agent host, e.g. /etc/krb5.conf. Mutually exclusive with an inline configuration.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosConfigPath',
+      readOnly,
+    }),
+  },
+  ['kerberos.krb5_conf']: {
+    fieldKey: 'kerberos.krb5_conf',
+    component: TextArea,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosKrb5Conf.label', {
+      defaultMessage: 'Inline krb5.conf',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosKrb5Conf.helpText', {
+      defaultMessage:
+        'Inline krb5.conf body when the agent host has no file. Mutually exclusive with a configuration file path.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiTextAreaProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosKrb5Conf',
+      readOnly,
+      rows: 6,
+    }),
+  },
+  ['kerberos.service_name']: {
+    fieldKey: 'kerberos.service_name',
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosServiceName.label', {
+      defaultMessage: 'Service name',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosServiceName.helpText', {
+      defaultMessage: 'Optional service principal name (SPN) to request a ticket for.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosServiceName',
+      readOnly,
+    }),
+  },
+  ['kerberos.username']: {
+    fieldKey: 'kerberos.username',
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosUsername.label', {
+      defaultMessage: 'Username',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosUsername.helpText', {
+      defaultMessage:
+        'Kerberos principal name. Required for both password and keytab authentication.',
+    }),
+    // Heartbeat passes username to NewWithKeytab — hide only when Kerberos is off.
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosUsername',
+      readOnly,
+    }),
+  },
+  ['kerberos.password']: {
+    fieldKey: 'kerberos.password',
+    component: FieldPassword,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosPassword.label', {
+      defaultMessage: 'Password',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosPassword.helpText', {
+      defaultMessage: 'Password of the Kerberos principal.',
+    }),
+    hidden: (dependencies) => {
+      const [authType, kerberosAuthType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS || kerberosAuthType !== KerberosAuthType.PASSWORD;
+    },
+    dependencies: ['authType', 'kerberos.auth_type'],
+    props: (): EuiFieldPasswordProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosPassword',
+      readOnly,
+    }),
+  },
+  ['kerberos.keytab']: {
+    fieldKey: 'kerberos.keytab',
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosKeytab.label', {
+      defaultMessage: 'Keytab file path',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosKeytab.helpText', {
+      defaultMessage: 'Path to the keytab file on the agent host.',
+    }),
+    hidden: (dependencies) => {
+      const [authType, kerberosAuthType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS || kerberosAuthType !== KerberosAuthType.KEYTAB;
+    },
+    dependencies: ['authType', 'kerberos.auth_type'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosKeytab',
+      readOnly,
+    }),
+  },
+  ['kerberos.enable_krb5_fast']: {
+    fieldKey: 'kerberos.enable_krb5_fast',
+    component: Switch,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosEnableFast.label', {
+      defaultMessage: 'Enable Kerberos FAST',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosEnableFast.helpText', {
+      defaultMessage:
+        'Kerberos Flexible Authentication Secure Tunneling. Can conflict with some Active Directory setups; leave off unless required.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: ({ setValue, field }): EuiSwitchProps => ({
+      id: 'syntheticsMonitorConfigKerberosEnableFast',
+      label: i18n.translate('xpack.synthetics.monitorConfig.kerberosEnableFast.switchLabel', {
+        defaultMessage: 'Enable Kerberos FAST',
+      }),
+      checked: field?.value as boolean,
+      onChange: (event) => {
+        setValue('kerberos.enable_krb5_fast', event.target.checked, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      },
+      disabled: readOnly,
+      'data-test-subj': 'syntheticsMonitorConfigKerberosEnableFast',
+    }),
+  },
+  ['ntlm.username']: {
+    fieldKey: 'ntlm.username',
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ntlmUsername.label', {
+      defaultMessage: 'Username',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ntlmUsername.helpText', {
+      defaultMessage: 'Username for NTLM authentication.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.NTLM;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigNtlmUsername',
+      readOnly,
+    }),
+  },
+  ['ntlm.password']: {
+    fieldKey: 'ntlm.password',
+    component: FieldPassword,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ntlmPassword.label', {
+      defaultMessage: 'Password',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ntlmPassword.helpText', {
+      defaultMessage: 'Password for NTLM authentication.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.NTLM;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldPasswordProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigNtlmPassword',
+      readOnly,
+    }),
+  },
+  ['ntlm.domain']: {
+    fieldKey: 'ntlm.domain',
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ntlmDomain.label', {
+      defaultMessage: 'Domain',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ntlmDomain.helpText', {
+      defaultMessage: 'Optional Windows domain for NTLM authentication.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.NTLM;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigNtlmDomain',
+      readOnly,
+    }),
+  },
+  ['ntlm.workstation']: {
+    fieldKey: 'ntlm.workstation',
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ntlmWorkstation.label', {
+      defaultMessage: 'Workstation',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ntlmWorkstation.helpText', {
+      defaultMessage: 'Optional client name sent in the NTLM negotiate message.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.NTLM;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigNtlmWorkstation',
       readOnly,
     }),
   },
@@ -1089,14 +1545,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       validate: {
         validParams: (value) => {
           const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PARAMS];
-          if (validateFn) {
-            return validateFn({
-              [ConfigKey.PARAMS]: value,
-            })
-              ? i18n.translate('xpack.synthetics.monitorConfig.params.error', {
-                  defaultMessage: 'Invalid JSON format',
+          if (validateFn?.({ [ConfigKey.PARAMS]: value })) {
+            return validJSONFormat(value)
+              ? i18n.translate('xpack.synthetics.monitorConfig.params.objectError', {
+                  defaultMessage: 'Parameters must be a JSON object',
                 })
-              : true;
+              : i18n.translate('xpack.synthetics.monitorConfig.params.error', {
+                  defaultMessage: 'Invalid JSON format',
+                });
           }
 
           return true;

@@ -29,12 +29,12 @@ let MOCKS;
 const PLATFORM = process.platform === 'win32' ? 'windows' : process.platform;
 const ARCHITECTURE = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
 const MOCK_VERSION = 'test-version';
-const MOCK_URL = 'http://127.0.0.1:12345';
 const MOCK_FILENAME = 'test-filename';
 
 const DAILY_SNAPSHOT_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
 const PERMANENT_SNAPSHOT_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
+const MOCK_URL = `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/archives/test-id`;
 const TEMP_DIRS = [];
 
 const createArchive = (params = {}) => {
@@ -344,7 +344,7 @@ describe('Artifact', () => {
     });
 
     describe('with custom snapshot manifest URL', () => {
-      const CUSTOM_URL = 'http://www.creedthoughts.gov.www/creedthoughts';
+      const CUSTOM_URL = `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/archives/test-id/manifest.json`;
 
       beforeEach(() => {
         process.env.ES_SNAPSHOT_MANIFEST = CUSTOM_URL;
@@ -356,8 +356,31 @@ describe('Artifact', () => {
         expect(fetch.mock.calls[0][0]).toEqual(CUSTOM_URL);
       });
 
+      it.each([
+        'http://www.creedthoughts.gov.www/creedthoughts',
+        'https://storage.googleapis.com/another-bucket/manifest.json',
+        `${DAILY_SNAPSHOT_BASE_URL}/../another-bucket/manifest.json`,
+      ])('should refuse a manifest outside the snapshot buckets: %s', async (url) => {
+        process.env.ES_SNAPSHOT_MANIFEST = url;
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
+          'ES_SNAPSHOT_MANIFEST must start with'
+        );
+        expect(fetch).not.toHaveBeenCalled();
+      });
+
       afterEach(() => {
         delete process.env.ES_SNAPSHOT_MANIFEST;
+      });
+    });
+
+    describe('with an archive outside the snapshot buckets', () => {
+      it('should refuse the archive', async () => {
+        mockFetch({
+          archives: [createArchive({ url: 'https://attacker.example/elasticsearch.tar.gz' })],
+        });
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
+          'unexpected archive url'
+        );
       });
     });
 

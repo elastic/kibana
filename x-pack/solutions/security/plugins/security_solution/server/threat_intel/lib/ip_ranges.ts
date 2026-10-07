@@ -59,6 +59,15 @@ export const isNonRoutableIPv4 = (ip: string): boolean => {
   if (a === 198 && (b === 18 || b === 19)) return true;
   // multicast 224.0.0.0/4 and reserved/broadcast 240.0.0.0/4
   if (a >= 224) return true;
+  // Azure platform VIP 168.63.129.16/32 (WireServer / host plugin).
+  //
+  // This one is not in any RFC special-use range: it is ordinary public space that
+  // Azure routes only inside the VM, so every rule above passes it. On an Azure
+  // deployment it answers VM-scoped platform requests, and the fetch client lets a
+  // caller supply arbitrary headers, so an untrusted source document could reach it.
+  // The other cloud metadata endpoints sit in link-local 169.254.0.0/16 and are
+  // already covered.
+  if (a === 168 && b === 63 && c === 129 && Number(ip.split('.')[3]) === 16) return true;
   return false;
 };
 
@@ -119,21 +128,28 @@ export const isNonRoutableIPv6 = (ip: string): boolean => {
   //   ::ffff:a9fe:a9fe         (two hex groups)
   //   ::ffff:0:169.254.169.254 (alternative mapped prefix)
   //   ::169.254.169.254        (IPv4-compatible, deprecated but still parsed)
-  const mappedDotted = lower.match(/^::(?:ffff:(?:0:)?)?(\d+\.\d+\.\d+\.\d+)$/);
+  const mappedDotted = lower.match(/^::(?:(?:0|ffff):)*(\d+\.\d+\.\d+\.\d+)$/);
   if (mappedDotted) {
     return isNonRoutableIPv4(mappedDotted[1]);
   }
-  // ::ffff:<hi>:<lo> — IPv4-mapped (canonical form from URL parser for e.g. ::ffff:169.254.169.254)
-  const mappedFfff = lower.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
-  if (mappedFfff) {
-    return isNonRoutableIPv4(hexGroupsToDotted(mappedFfff[1], mappedFfff[2]));
-  }
-
-  // ::<hi>:<lo> — IPv4-compatible (deprecated; URL parser converts ::169.254.169.254 → ::a9fe:a9fe).
-  // Only match the exact two-group-after-:: form to avoid false-positives on normal short IPv6.
-  const compatHex = lower.match(/^::([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
-  if (compatHex) {
-    return isNonRoutableIPv4(hexGroupsToDotted(compatHex[1], compatHex[2]));
+  // Hex spelling of an embedded IPv4, which is what the URL parser actually produces:
+  // it converts any dotted suffix to hex groups, so the dotted matcher above never
+  // sees a host that came from a URL.
+  //
+  // Matched by shape rather than by enumerating spellings. All leading groups are
+  // zero (`::`), any intervening groups are only the mapped marker `ffff` or further
+  // zeros, and the last two groups carry the address. That covers every form in use:
+  //
+  //   ::ffff:a9fe:a9fe     IPv4-mapped            (from ::ffff:169.254.169.254)
+  //   ::ffff:0:a9fe:a9fe   IPv4-translatable/SIIT (from ::ffff:0:169.254.169.254)
+  //   ::a9fe:a9fe          IPv4-compatible        (from ::169.254.169.254)
+  //
+  // Enumerating them individually already missed the SIIT form once, and because a
+  // literal host skips DNS validation entirely, a miss here is a direct route to the
+  // embedded target rather than a defence-in-depth gap.
+  const embedded = lower.match(/^::((?:(?:0|ffff):)*)([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (embedded) {
+    return isNonRoutableIPv4(hexGroupsToDotted(embedded[2], embedded[3]));
   }
 
   return false;

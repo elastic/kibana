@@ -1454,6 +1454,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.gmail.include_full_raw_message.label', {
+          defaultMessage: 'Index full raw email (including headers)',
+        }),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.gmail.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
@@ -1465,7 +1488,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3878,6 +3901,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      sync_all_mail_folders: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.label', {
+          defaultMessage: 'Sync all mail folders',
+        }),
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.tooltip',
+          {
+            defaultMessage:
+              'When enabled, indexes the user mail folders in each mailbox, not only Inbox, Sent, Junk, and Archive. System folders such as Deleted Items, Drafts, Outbox, and search folders are never indexed. Expect longer syncs, more Exchange load, and a larger index.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: null,
         depends_on: [],
@@ -3889,7 +3935,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 12,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3904,13 +3950,39 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.outlook.include_full_raw_message.label',
+          {
+            defaultMessage: 'Index full raw email (including headers)',
+          }
+        ),
+        options: [],
+        order: 13,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.outlook.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
         display: TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 13,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -4541,6 +4613,37 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      expand_role_members: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.servicenow.configuration.expandRoleMembersLabel',
+          {
+            defaultMessage: 'Expand role members',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.servicenow.configuration.expandRoleMembersTooltip',
+          {
+            defaultMessage:
+              "When enabled, ServiceNow role members are written individually onto each document's access control list. Disable this for large tenants to store compact role tokens on documents instead, and resolve membership during access control syncs. Changing this setting requires a full content sync and access control sync.",
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
     },
     features: {
       [SYNC_RULES]: {
@@ -4968,6 +5071,73 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: [],
         validations: [],
         value: true,
+      },
+      expand_site_group_members: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.expandSiteGroupMembersLabel',
+          {
+            defaultMessage: 'Expand site group members',
+          }
+        ),
+        options: [],
+        order: 17,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.expandSiteGroupMembersTooltip',
+          {
+            defaultMessage:
+              "When enabled, SharePoint site group members are written individually onto each document's access control list. Disable this for large site groups to store a compact site group token on documents instead, and resolve membership during access control syncs. Changing this setting requires a full content sync and access control sync.",
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      acl_sync_concurrency: {
+        default_value: 10,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: NUMERIC,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.aclSyncConcurrencyLabel',
+          {
+            defaultMessage: 'Maximum concurrent access control requests',
+          }
+        ),
+        options: [],
+        order: 18,
+        required: false,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.aclSyncConcurrencyTooltip',
+          {
+            defaultMessage:
+              'Number of users processed in parallel during an access control sync. Lower this value if Microsoft Graph throttles the connector.',
+          }
+        ),
+        type: INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [
+          {
+            type: 'greater_than',
+            constraint: 0,
+          },
+        ],
+        value: 10,
       },
     },
     features: {

@@ -20,6 +20,7 @@ import { castArray } from 'lodash';
 import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { getGenAiRecoveryTarget } from './get_recovery_target';
 
 export interface UseGenAiDataResult {
   /** Parsed GenAI fields, or undefined when the document has no gen_ai data. */
@@ -28,49 +29,106 @@ export interface UseGenAiDataResult {
   isGenAiSpan: boolean;
   /** True while long message values are being fetched from `_source`. */
   loading: boolean;
+  /**
+   * True when message values are absent and cannot be recovered because the
+   * record has no usable document key (`_id` or `span.id`) or no index target.
+   */
+  unrecoverableLongFields: boolean;
 }
 
 /**
- * Derives GenAI fields from a doc viewer record.
+ * Derives GenAI fields from a doc viewer record, restoring long message values
+ * that `ignore_above: 1024` dropped from the index but left in `_source`.
  *
- * The `attributes.*` keyword mappings use `ignore_above: 1024`, so long
- * prompt/response values are dropped from the fields API (and flagged in
- * `_ignored`) while surviving in `_source`. This hook restores them in two
- * steps:
- * 1. merge from `hit.raw._source` when the record carries it (e.g. hits built
- *    from the APM span route or the single-doc page), then
- * 2. when `_source` is absent (Discover grid records are fetched with
- *    `_source: false`), run a targeted search for just those fields.
+ * Values are read from `hit.raw._source` when the record carries it, otherwise
+ * refetched by `_id` when available, or by `span.id` + `trace.id` when `_id`
+ * is absent (e.g. ES|QL without `METADATA _id, _index`).  Arming that refetch
+ * differs by data source: in DSL `_ignored` is authoritative, while ES|QL rows
+ * carry it only with `METADATA _ignored`.
+ *
+ * @param indexPattern - The ES|QL `FROM` index pattern from the data view, used
+ *   as a fallback search target when `_index` is not present on the row.  Pass
+ *   `dataView.getIndexPattern()` from the component.
  */
-export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataResult {
+export function useGenAiData({
+  hit,
+  isEsqlMode = false,
+  indexPattern,
+}: {
+  hit: DataTableRecord;
+  isEsqlMode?: boolean;
+  /** ES|QL fallback index target — set to `dataView.getIndexPattern()`. */
+  indexPattern?: string;
+}): UseGenAiDataResult {
   const { metadata, missingLongFields } = useMemo(() => {
     const merged: Record<string, unknown> = { ...hit.flattened };
-    const ignored = hit.raw._ignored ?? [];
+    // castArray because ES|QL returns a single-valued `_ignored` column as a
+    // bare string, which would break the `.some()` below.
+    const ignoredList = castArray(hit.raw._ignored ?? []);
     const missing: string[] = [];
 
+    const isIgnored = (fieldName: string) =>
+      ignoredList.includes(fieldName) ||
+      // Container-level entry, e.g. `['attributes']` for `attributes.gen_ai.*`.
+      ignoredList.some((ancestor) => fieldName.startsWith(`${ancestor}.`));
+
+    // ES|QL rows carry every requested column as a key, so a present-but-empty
+    // `_ignored` proves nothing was dropped; only its absence is inconclusive.
+    const ignoredUnknown = isEsqlMode && !('_ignored' in hit.raw);
+
     for (const fieldName of GEN_AI_LONG_MESSAGE_FIELDS) {
-      if (merged[fieldName] == null || ignored.includes(fieldName)) {
+      // `ignoredUnknown` also enters here for a present value: these fields are
+      // multi-valued and `ignore_above` drops only the over-long elements, so
+      // without `_ignored` a non-null array cannot be assumed complete.
+      if (merged[fieldName] == null || isIgnored(fieldName) || ignoredUnknown) {
         const sourceValue = getFieldFromSource(hit.raw._source, fieldName);
         if (sourceValue != null) {
           merged[fieldName] = castArray(sourceValue);
-        } else if (ignored.includes(fieldName)) {
+        } else if (isIgnored(fieldName) || ignoredUnknown) {
           missing.push(fieldName);
         }
       }
     }
 
     return { metadata: merged, missingLongFields: missing };
-  }, [hit]);
+  }, [hit, isEsqlMode]);
 
   const isGenAiSpan = useMemo(() => hasGenAiData(metadata), [metadata]);
 
-  const docId = hit.raw._id;
-  const docIndex = hit.raw._index;
-  const shouldFetch = isGenAiSpan && missingLongFields.length > 0 && !!docId && !!docIndex;
+  const hasMissing = isGenAiSpan && missingLongFields.length > 0;
+
+  // Extracted to plain variables so the react-hooks/exhaustive-deps rule can
+  // statically verify them: computed-key accesses like `flattened['span.id']`
+  // are flagged as "complex expressions" when placed directly in dep arrays.
+  const flattenedSpanId = hit.flattened['span.id'];
+  const flattenedTraceId = hit.flattened['trace.id'];
+
+  // Resolve a search target (index + query) from the best available key:
+  // `_id`, then `span.id` / `span_id`, with `_index` or `indexPattern` as the
+  // index.  Returns undefined when nothing can be resolved.
+  const target = useMemo(
+    () => (hasMissing ? getGenAiRecoveryTarget({ hit, indexPattern }) : undefined),
+    // Depend on primitives only — Discover hands over a fresh `hit` object each
+    // render, so object identity is not stable. The cacheKey encodes all relevant
+    // values so the fetch is not re-triggered when nothing actually changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      hasMissing,
+      hit.raw._id,
+      hit.raw._index,
+      flattenedSpanId,
+      hit.flattened.span_id,
+      flattenedTraceId,
+      hit.flattened.trace_id,
+      indexPattern,
+    ]
+  );
+
+  const unrecoverableLongFields = hasMissing && !target;
 
   const { value: fetchedSource, loading } = useAbortableAsync(
     async ({ signal }) => {
-      if (!shouldFetch || !docId || !docIndex) {
+      if (!target) {
         return undefined;
       }
 
@@ -79,13 +137,10 @@ export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataRes
         data.search.search(
           {
             params: {
-              index: docIndex,
+              index: target.index,
               size: 1,
-              query: {
-                bool: {
-                  filter: [{ ids: { values: [docId] } }],
-                },
-              },
+              track_total_hits: false,
+              query: target.query,
               _source: [...GEN_AI_LONG_MESSAGE_FIELDS],
             },
           },
@@ -95,7 +150,9 @@ export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataRes
 
       return result.rawResponse.hits.hits[0]?._source as Record<string, unknown> | undefined;
     },
-    [shouldFetch, docId, docIndex]
+    // Use the stable cacheKey string rather than the target object so the dep is
+    // a primitive and React can compare it cheaply.
+    [target?.cacheKey]
   );
 
   const genAi = useMemo(() => {
@@ -108,6 +165,9 @@ export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataRes
       for (const fieldName of missingLongFields) {
         const sourceValue = getFieldFromSource(fetchedSource, fieldName);
         if (sourceValue != null) {
+          // Replaces the whole field: synthetic `_source` returns multi-valued
+          // keywords sorted and de-duplicated, so elements cannot be aligned
+          // with the partially-indexed value.
           merged[fieldName] = castArray(sourceValue);
         }
       }
@@ -116,5 +176,5 @@ export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataRes
     return getGenAiFields(merged);
   }, [isGenAiSpan, metadata, fetchedSource, missingLongFields]);
 
-  return { genAi, isGenAiSpan, loading: shouldFetch && loading };
+  return { genAi, isGenAiSpan, loading: !!target && loading, unrecoverableLongFields };
 }

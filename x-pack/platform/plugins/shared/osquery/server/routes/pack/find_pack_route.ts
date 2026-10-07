@@ -21,7 +21,11 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { findPacksRequestQuerySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { buildScheduleResponseSlice, stripPerQueryRruleFields } from './utils';
+import {
+  buildScheduleResponseSlice,
+  buildExecutionDefaultsResponseSlice,
+  stripPerQueryRruleFields,
+} from './utils';
 import { findPackResponseSchema } from './response_schemas';
 
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -117,6 +121,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             read_only: attributes.version !== undefined && osqueryPackAssetReference,
             // Discriminated find response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
+            ...buildExecutionDefaultsResponseSlice(attributes),
           };
         });
 

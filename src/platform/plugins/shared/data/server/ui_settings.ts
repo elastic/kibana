@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
-import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
+import { DEFAULT_HISTOGRAM_BAR_TARGET, DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
   defaultMessage: 'Lucene',
@@ -287,7 +287,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.histogram.barTargetTitle', {
         defaultMessage: 'Target buckets',
       }),
-      value: 50,
+      value: DEFAULT_HISTOGRAM_BAR_TARGET,
       description: i18n.translate('data.advancedSettings.histogram.barTargetText', {
         defaultMessage:
           'Attempt to generate around this many buckets when using "auto" interval in date and numeric histograms',

@@ -12,6 +12,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -666,6 +667,31 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
 
     const documentsDisplayMode = documentsDisplayModeState ?? 'table';
+
+    // EuiDataGrid doesn't expose its full screen state, so track it to keep it across remounts
+    const isFullScreenRef = useRef(false);
+    const onDataGridFullScreenChange = useCallback(
+      (isFullScreen: boolean) => {
+        isFullScreenRef.current = isFullScreen;
+        onFullScreenChange?.(isFullScreen);
+      },
+      [onFullScreenChange]
+    );
+
+    // The data grid is remounted when the documents display mode changes (see its key), which exits
+    // full screen, so put the new one back in full screen before it's painted
+    useLayoutEffect(() => {
+      if (isFullScreenRef.current) {
+        dataGridRef.current?.setIsFullScreen(true);
+      }
+    }, [documentsDisplayMode]);
+
+    useLayoutEffect(() => {
+      if (isFullScreenRef.current && !dataGridRef.current) {
+        onDataGridFullScreenChange(false);
+      }
+    });
+
     const jsonModeSettings = useMemo<JsonModeSettings>(
       () => jsonModeSettingsState ?? {},
       [jsonModeSettingsState]
@@ -1011,6 +1037,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     const {
       inTableSearchTermCss,
       inTableSearchControl,
+      inTableSearchButton,
+      inTableSearchInput,
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     } = useDataGridInTableSearch({
@@ -1380,7 +1408,8 @@ const InternalUnifiedDataTable = React.forwardRef<
                     additionalControls && 'left' in additionalControls
                       ? additionalControls.left
                       : additionalControls,
-                  inTableSearchControl,
+                  inTableSearchButton,
+                  inTableSearchInput,
                 },
               });
             }
@@ -1389,7 +1418,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         renderCustomToolbar,
         showSummaryColumnToggle,
         additionalControls,
-        inTableSearchControl,
+        inTableSearchButton,
+        inTableSearchInput,
         showSummaryColumn,
         isSummaryOnlyColumn,
         onChangeShowSummaryColumn,
@@ -1536,7 +1566,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       };
     }, [showSummaryColumn, paginationMode, throttledHandleOnScroll]);
 
-    const isRenderComplete = loadingState !== DataLoadingState.loading;
+    const isLoaded = loadingState === DataLoadingState.loaded;
 
     if (!rowCount && loadingState === DataLoadingState.loading) {
       return (
@@ -1562,10 +1592,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         <div
           className="euiDataGrid__noResults"
           css={styles.emptyRow}
-          data-render-complete={isRenderComplete}
-          data-shared-item=""
-          data-title={searchTitle}
-          data-description={searchDescription}
+          data-table-loaded={isLoaded}
           data-document-number={0}
         >
           <EuiText size="xs" color="subdued" textAlign="center">
@@ -1588,11 +1615,7 @@ const InternalUnifiedDataTable = React.forwardRef<
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
             data-test-subj="discoverDocTable"
-            data-render-complete={isRenderComplete}
-            data-shared-item=""
-            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-            data-title={searchTitle}
-            data-description={searchDescription}
+            data-table-loaded={isLoaded}
             data-document-number={displayedRows.length}
             className={classnames(className, 'unifiedDataTable__table')}
             css={[styles.dataTable, inTableSearchTermCss]}
@@ -1619,6 +1642,10 @@ const InternalUnifiedDataTable = React.forwardRef<
               />
             ) : (
               <EuiDataGridMemoized
+                // Remount on display-mode change to reset EuiDataGrid's auto-height cache; otherwise
+                // some rows stay stuck at the taller JSON height when switching back to table mode.
+                // Full screen is restored after the remount (see isFullScreenRef).
+                key={documentsDisplayMode}
                 id={dataGridId}
                 aria-describedby={randomId}
                 aria-labelledby={ariaLabelledBy}
@@ -1642,7 +1669,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 cellContext={cellContextWithInTableSearchSupport}
                 renderCellPopover={renderCustomPopover}
                 virtualizationOptions={virtualizationOptions}
-                onFullScreenChange={onFullScreenChange}
+                onFullScreenChange={onDataGridFullScreenChange}
               />
             )}
           </div>
