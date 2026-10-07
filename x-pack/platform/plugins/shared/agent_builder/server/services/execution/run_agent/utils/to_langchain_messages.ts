@@ -8,14 +8,13 @@
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import type { AIMessage } from '@langchain/core/messages';
 import type { AssistantResponse, ConversationRoundAuthor } from '@kbn/agent-builder-common';
-import { getConversationRoundAuthorDisplayName } from '@kbn/agent-builder-common';
+import {
+  getConversationRoundAuthorDisplayName,
+  isAttachmentEvent,
+} from '@kbn/agent-builder-common';
 import { createAIMessage, createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type {
-  ProcessedAttachment,
-  ProcessedAttachmentType,
-  ProcessedRoundInput,
-} from '@kbn/agent-builder-server';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatInterruptionNotice, formatSubagentRosterNotice } from '../prompts/utils/notices';
 import { formatDate } from '../prompts/utils/helpers';
@@ -33,8 +32,38 @@ import { FULLY_VISIBLE, historyView, type ContextVisibility } from './context_co
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { renderHistorySteps } from './render_steps_to_messages';
-import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 import { formatConversationEvent } from './conversation_event_presentation';
+import {
+  createAttachmentNoticeRenderer,
+  type AttachmentNoticeRenderer,
+} from './attachment_event_presentation';
+import {
+  placeRoundAttachmentEvents,
+  type ResumeAnchors,
+  type RoundAttachmentPlacement,
+} from './attachment_placement';
+
+/** The notice renderer of one prompt build; per-type instructions are given once across it. */
+export const noticeRendererFor = (
+  conversation: Pick<ProcessedConversation, 'attachmentTypes' | 'describeAttachmentType'>,
+  { withTypeInstructions = true }: { withTypeInstructions?: boolean } = {}
+): AttachmentNoticeRenderer => {
+  const renderer = createAttachmentNoticeRenderer({
+    describeType: (type) =>
+      conversation.describeAttachmentType
+        ? conversation.describeAttachmentType(type)
+        : conversation.attachmentTypes.find((candidate) => candidate.type === type)?.description,
+    withTypeInstructions,
+  });
+  const listed = new Set(conversation.attachmentTypes.map(({ type }) => type));
+  return {
+    ...renderer,
+    // Stored data (legacy refs, standalone events) only gets the instructions of the types the
+    // conversation lists, as legacy refs always did.
+    typeInstructions: (types) =>
+      renderer.typeInstructions(types.filter((type) => listed.has(type))),
+  };
+};
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -62,6 +91,8 @@ export interface ConversationToLangchainOptions {
    * prefix stays stable across rounds (prompt-cache friendly).
    */
   conversationTimestamp?: string;
+  /** Shared with the current-run rendering of the same prompt; one per prompt build by default. */
+  attachmentNotices?: AttachmentNoticeRenderer;
 }
 
 /**
@@ -75,9 +106,10 @@ export const prepareMessages = async ({
   compactionSummary,
   visibility = FULLY_VISIBLE,
   conversationTimestamp,
+  attachmentNotices,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
-  const attachmentTypeInstructionsProvided = new Set<string>();
+  const notices = attachmentNotices ?? noticeRendererFor(conversation);
 
   // a round awaiting a prompt is left to the graph, which resumes it
   const { entries, input, inputTimestamp } = historyView(conversation, conversationTimestamp);
@@ -95,15 +127,15 @@ export const prepareMessages = async ({
         ...(await roundToLangchain(entry, {
           resultTransformer: roundResultTransformer?.(entry.id),
           ignoreSteps,
-          attachmentTypes: conversation.attachmentTypes,
-          attachmentTypeInstructionsProvided,
+          notices,
+          resumeAnchors: conversation.resumeAnchors,
           fromStepIndex: index === 0 ? visibility.entryFromStep : 0,
         }))
       );
       continue;
     }
     if (isTimelineStandaloneEvent(entry)) {
-      messages.push(standaloneEventToLangchain(entry.event));
+      messages.push(standaloneEventToLangchain(entry.event, notices));
       continue;
     }
     // a standalone user message: no execution to render
@@ -111,20 +143,12 @@ export const prepareMessages = async ({
       formatUserInput({
         input: entry.userMessage.data,
         timestamp: entry.userMessage.created_at,
-        attachmentTypes: conversation.attachmentTypes,
-        attachmentTypeInstructionsProvided,
+        notices,
       })
     );
   }
 
-  messages.push(
-    formatUserInput({
-      input,
-      timestamp: inputTimestamp,
-      attachmentTypes: conversation.attachmentTypes,
-      attachmentTypeInstructionsProvided,
-    })
-  );
+  messages.push(formatUserInput({ input, timestamp: inputTimestamp, notices }));
 
   return messages;
 };
@@ -151,8 +175,8 @@ export const compactionSummaryMessages = (
 export interface RoundToLangchainOptions {
   resultTransformer?: ToolCallResultTransformer;
   ignoreSteps?: boolean;
-  attachmentTypes?: ProcessedAttachmentType[];
-  attachmentTypeInstructionsProvided?: Set<string>;
+  notices: AttachmentNoticeRenderer;
+  resumeAnchors?: ResumeAnchors;
   /**
    * First step to render, for a round partially covered by the compaction summary. The user
    * message is kept so the visible steps stay anchored to the request they answer.
@@ -165,36 +189,51 @@ export const roundToLangchain = async (
   {
     resultTransformer,
     ignoreSteps = false,
-    attachmentTypes,
-    attachmentTypeInstructionsProvided,
+    notices,
+    resumeAnchors,
     fromStepIndex = 0,
-  }: RoundToLangchainOptions = {}
+  }: RoundToLangchainOptions
 ): Promise<BaseMessage[]> => {
-  const messages: BaseMessage[] = [];
-
-  // user message
-  messages.push(
+  const placement = roundAttachmentPlacement(round, resumeAnchors);
+  const messages: BaseMessage[] = [
     formatUserInput({
       input: round.userMessage.data,
       timestamp: round.userMessage.created_at,
-      attachmentTypes,
-      attachmentTypeInstructionsProvided,
-    })
-  );
-
-  // steps
+      notices,
+    }),
+  ];
   if (!ignoreSteps) {
     messages.push(
       ...(await renderHistorySteps({
         steps: round.steps.slice(fromStepIndex),
         resultTransformer,
+        attachments: { placement, notices },
       }))
     );
   }
-
-  messages.push(roundOutcomeMessage(round));
-
+  messages.push(roundOutcomeMessage(round), ...roundOutcomeNotice(placement, notices));
   return messages;
+};
+
+/** Placement of a history round's attachment events. */
+export const roundAttachmentPlacement = (
+  round: TimelineRound<ProcessedTimelineEvent>,
+  resumeAnchors: ResumeAnchors = new Map()
+): RoundAttachmentPlacement =>
+  placeRoundAttachmentEvents({
+    steps: round.steps,
+    events: round.events.filter(isAttachmentEvent),
+    resumeAnchors,
+    userMessageId: round.userMessage.id,
+  });
+
+/** The notice after a round's outcome: its changes made outside any tool call group. */
+export const roundOutcomeNotice = (
+  placement: RoundAttachmentPlacement,
+  notices: AttachmentNoticeRenderer
+): BaseMessage[] => {
+  const notice = notices.render(placement.afterOutcome);
+  return notice ? [createUserMessage(notice)] : [];
 };
 
 /** The round's assistant response, or the notice standing in for it on an interrupted round. */
@@ -206,24 +245,39 @@ export const roundOutcomeMessage = (round: TimelineRound<ProcessedTimelineEvent>
 };
 
 /**
- * The message a custom conversation event contributes to the history: a user-role message
- * carrying the event's LLM representation, like the other system notices.
+ * The message a standalone event contributes to the history: a user-role message carrying the
+ * event's LLM representation, like the other system notices, then its type's instructions for an
+ * attachment event.
  */
-export const standaloneEventToLangchain = (event: ProcessedStandaloneEvent): HumanMessage =>
-  createUserMessage(formatConversationEvent(event));
+export const standaloneEventToLangchain = (
+  event: ProcessedStandaloneEvent,
+  notices?: AttachmentNoticeRenderer
+): HumanMessage => {
+  const block = formatConversationEvent(event);
+  const instructions =
+    notices && isAttachmentEvent(event)
+      ? notices.typeInstructions([event.data.attachment_type])
+      : '';
+  return createUserMessage(instructions ? `${block}\n\n${instructions}` : block);
+};
 
 export const formatUserInput = ({
   input,
   timestamp,
-  attachmentTypes,
-  attachmentTypeInstructionsProvided,
+  notices,
 }: {
   input: ProcessedRoundInput;
   timestamp?: string;
-  attachmentTypes?: ProcessedAttachmentType[];
-  attachmentTypeInstructionsProvided?: Set<string>;
+  notices: AttachmentNoticeRenderer;
 }): HumanMessage => {
-  const { message, attachments, attachment_context, attachment_refs, author } = input;
+  const {
+    message,
+    attachments,
+    attachment_context,
+    attachment_refs,
+    attachment_events: inputEvents = [],
+    author,
+  } = input;
 
   let content = message;
 
@@ -241,27 +295,17 @@ export const formatUserInput = ({
   if (attachment_context) {
     content += `\n\n${attachment_context}\n`;
   }
-  if (
-    attachment_refs &&
-    attachment_refs.length > 0 &&
-    attachmentTypes &&
-    attachmentTypeInstructionsProvided
-  ) {
-    const roundAttachmentTypes: ProcessedAttachmentType[] = [];
-    for (const ref of attachment_refs) {
-      if (ref.type && !attachmentTypeInstructionsProvided.has(ref.type)) {
-        attachmentTypeInstructionsProvided.add(ref.type);
-        const processedType = attachmentTypes.find((type) => type.type === ref.type);
-        if (processedType) {
-          roundAttachmentTypes.push(processedType);
-        }
-      }
+  if (attachment_refs && attachment_refs.length > 0) {
+    const legacyInstructions = notices.typeInstructions(
+      attachment_refs.map((ref) => ref.type).filter((type): type is string => !!type)
+    );
+    if (legacyInstructions) {
+      content += `\n\n${legacyInstructions}\n`;
     }
-    if (roundAttachmentTypes.length > 0) {
-      const attachmentsInstructions = attachmentTypeInstructions(roundAttachmentTypes);
-
-      content += `\n\n${attachmentsInstructions}\n`;
-    }
+  }
+  const inputNotice = notices.render(inputEvents);
+  if (inputNotice) {
+    content += `\n\n${inputNotice}`;
   }
 
   const prefix = formatInputPrefix({ author, timestamp });

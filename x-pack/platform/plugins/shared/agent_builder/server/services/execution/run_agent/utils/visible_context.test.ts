@@ -11,6 +11,7 @@ import type {
   CompactionCursor,
   CompactionSummary,
   ConversationRoundStep,
+  TimelineEvent,
   ToolCallStep,
   ToolResult,
 } from '@kbn/agent-builder-common';
@@ -21,11 +22,18 @@ import {
   createSubstitutionStep,
 } from '@kbn/agent-builder-common';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
-import { processedCustomEventFixture, timelineFromRounds } from '../../../../test_utils/timeline';
+import {
+  T0,
+  attachmentEventFixture,
+  pausedRoundTimeline,
+  processedCustomEventFixture,
+  timelineFromRounds,
+} from '../../../../test_utils/timeline';
 import type { ProcessedTimelineEvent } from './context_timeline';
 import type { ProcessedConversation } from './prepare_conversation';
 import type { CurrentRun, ToolRenderStateMap } from '../transient_state';
 import { listVisibleUnits } from './context_coverage';
+import { inheritedAttachmentEvents } from '../run_attachment_events';
 import {
   buildContextView,
   renderUnit,
@@ -270,6 +278,225 @@ describe('renderVisibleContext', () => {
     expect(rendered).not.toContain('FIRST_INPUT');
     expect(rendered).not.toContain('COVERED_TEXT');
     expect(rendered.indexOf('VISIBLE_TEXT')).toBeLessThan(rendered.indexOf('SECOND_INPUT'));
+  });
+});
+
+describe('attachment events', () => {
+  const inputEvent = attachmentEventFixture({
+    id: 'in',
+    source: 'chat_input',
+    triggerEventId: 'r::user_message',
+    executionId: 'r::execution',
+    attachmentType: 'esql',
+  });
+  const toolEvent = attachmentEventFixture({
+    id: 'tool',
+    toolCallId: 'c1',
+    executionId: 'r::execution',
+    attachmentId: 'att-2',
+    attachmentType: 'dashboard',
+  });
+  const describeAttachmentType = (type: string) => `${type} instructions`;
+
+  const asProcessed = (events: TimelineEvent[]): ProcessedTimelineEvent[] =>
+    events.map((event) =>
+      event.id === 'r::user_message'
+        ? {
+            ...event,
+            data: { message: 'hello r', attachments: [], attachment_events: [inputEvent] },
+          }
+        : event
+    ) as ProcessedTimelineEvent[];
+
+  const duringRun = () =>
+    renderVisibleContext(
+      {
+        conversation: {
+          ...conversation([]),
+          nextInput: { message: 'Q', attachments: [], attachment_events: [inputEvent] },
+          describeAttachmentType,
+        },
+        run: {
+          ...run([call('c1')], { renderState: renderStateOf(['c1']) }),
+          attachmentEvents: [toolEvent],
+        },
+        phase: 'research',
+      },
+      deps()
+    );
+
+  const nextTurn = () =>
+    renderVisibleContext(
+      {
+        conversation: {
+          ...conversation([
+            // `prepareConversation` puts the linked input events on the processed user message
+            ...timelineFromRounds([
+              {
+                id: 'r',
+                input: { message: 'Q', attachments: [], attachment_events: [inputEvent] },
+                steps: [call('c1')],
+                response: { message: 'A' },
+              },
+            ]),
+            inputEvent,
+            toolEvent,
+          ]),
+          describeAttachmentType,
+        },
+        run: run([]),
+        phase: 'research',
+      },
+      deps()
+    );
+
+  it('renders the round identically during the run and on the next turn', async () => {
+    const current = await duringRun();
+    const later = await nextTurn();
+    expect(text(later.slice(0, current.length))).toEqual(text(current));
+  });
+
+  it('renders the paused round message with its input events during a resume, identically after the turn', async () => {
+    const duringResume = await renderVisibleContext(
+      {
+        conversation: {
+          ...conversation([...asProcessed(pausedRoundTimeline('r', ['c1'])), inputEvent]),
+          describeAttachmentType,
+        },
+        // the resume is seeded with c1; the paused round's tool event arrives through the channel
+        run: {
+          ...run([call('c1'), call('c2')], { renderState: renderStateOf(['c1', 'c2']) }),
+          attachmentEvents: [toolEvent],
+        },
+        phase: 'research',
+      },
+      deps()
+    );
+    const afterTurn = await renderVisibleContext(
+      {
+        conversation: {
+          ...conversation([
+            ...timelineFromRounds([
+              {
+                id: 'r',
+                started_at: T0,
+                input: { message: 'hello r', attachments: [], attachment_events: [inputEvent] },
+                steps: [call('c1'), call('c2')],
+                response: { message: 'A' },
+              },
+            ]),
+            inputEvent,
+            toolEvent,
+          ]),
+          describeAttachmentType,
+        },
+        run: run([]),
+        phase: 'research',
+      },
+      deps()
+    );
+
+    expect(String(duringResume[0].content)).toContain(
+      '<conversation_event type="attachment_added"'
+    );
+    expect(text(afterTurn.slice(0, duringResume.length))).toEqual(text(duringResume));
+  });
+
+  it('renders the input events of a resumed round once, with its user message', async () => {
+    const timeline = [
+      ...asProcessed(pausedRoundTimeline('r', ['c1'])),
+      inputEvent,
+      toolEvent,
+    ] as ProcessedTimelineEvent[];
+    const messages = await renderVisibleContext(
+      {
+        conversation: { ...conversation(timeline), describeAttachmentType },
+        run: {
+          ...run([call('c1')], { renderState: renderStateOf(['c1']) }),
+          attachmentEvents: inheritedAttachmentEvents(timeline, 'r'),
+        },
+        phase: 'research',
+      },
+      deps()
+    );
+    const rendered = text(messages);
+
+    expect(rendered.match(/attachment_id=\\"att-1\\"/g)).toHaveLength(1);
+    expect(String(messages[0].content)).toContain('attachment_id="att-1"');
+    expect(rendered.match(/attachment_id=\\"att-2\\"/g)).toHaveLength(1);
+  });
+
+  it('puts input events inside the user message and tool events right after the tool results', async () => {
+    const [userMessage, , toolResult, notice] = await duringRun();
+    expect(String(userMessage.content)).toContain('<conversation_event type="attachment_added"');
+    expect(String(userMessage.content)).toContain('esql instructions');
+    expect(toolResult.getType()).toBe('tool');
+    expect(String(notice.content)).toContain('attachment_id="att-2"');
+    expect(String(notice.content)).toContain('dashboard instructions');
+  });
+
+  it('renders a change made outside a tool call after the outcome, from the next turn on', async () => {
+    const hookEvent = attachmentEventFixture({
+      id: 'hook',
+      executionId: 'r::execution',
+      attachmentId: 'att-3',
+    });
+    const during = await renderVisibleContext(
+      {
+        conversation: conversation([]),
+        run: {
+          ...run([call('c1')], { renderState: renderStateOf(['c1']) }),
+          attachmentEvents: [hookEvent],
+        },
+        phase: 'research',
+      },
+      deps()
+    );
+    expect(text(during)).not.toContain('att-3');
+
+    const later = await renderVisibleContext(
+      {
+        conversation: conversation([
+          ...timelineFromRounds([
+            {
+              id: 'r',
+              input: { message: 'Q', attachments: [] },
+              steps: [call('c1')],
+              response: { message: 'A' },
+            },
+          ]),
+          hookEvent,
+        ]),
+        run: run([]),
+        phase: 'research',
+      },
+      deps()
+    );
+    const answerIndex = later.findIndex((m) => m.content === 'A');
+    expect(String(later[answerIndex + 1].content)).toContain('att-3');
+  });
+
+  it('renders a cycle notice in its round_cycle unit, so the summarizer and estimates see it', async () => {
+    const history = conversation([
+      ...timelineFromRounds([
+        {
+          id: 'r',
+          input: { message: 'Q', attachments: [] },
+          steps: [call('c1')],
+          response: { message: 'A' },
+        },
+      ]),
+      toolEvent,
+    ]);
+    const view = buildContextView({ conversation: history, run: run([]) }, deps());
+    const units = listVisibleUnits({
+      entries: view.history.entries,
+      steps: [],
+      visibility: view.visibility,
+    });
+    const rendered = await renderUnit(units[0], { view, run: run([]), conversation: history });
+    expect(text(rendered)).toContain('att-2');
+    expect(text(rendered)).not.toContain('ATTACHMENT TYPES');
   });
 });
 
