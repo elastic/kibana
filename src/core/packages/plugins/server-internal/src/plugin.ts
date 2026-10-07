@@ -287,7 +287,7 @@ export class PluginWrapper<
     }
     if (implementsInitialize && !this.hasInitialization) {
       throw new Error(
-        `Plugin "${this.name}" implements initialize() but its manifest does not set "hasInitialization: true". Core needs the flag before any plugin code runs.`
+        `Plugin "${this.name}" has an initialize() method but its manifest does not set "hasInitialization: true". initialize() is a lifecycle hook reserved by core: set the flag if this method is meant to be it, otherwise rename the method.`
       );
     }
   }

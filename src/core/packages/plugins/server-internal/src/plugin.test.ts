@@ -722,7 +722,7 @@ describe('initialize()', () => {
     });
 
     await expect(plugin.init()).rejects.toThrow(
-      'Plugin "some-plugin-id" implements initialize() but its manifest does not set "hasInitialization: true". Core needs the flag before any plugin code runs.'
+      'Plugin "some-plugin-id" has an initialize() method but its manifest does not set "hasInitialization: true". initialize() is a lifecycle hook reserved by core: set the flag if this method is meant to be it, otherwise rename the method.'
     );
   });
 
