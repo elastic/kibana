@@ -56,3 +56,9 @@ export const PRODUCER_TRACE = {
   TRANSACTION_NAME: 'Background job',
   KAFKA_SPAN_NAME: 'Publish to kafka/orders',
 };
+
+export const OTEL_SERVICE = {
+  SERVICE_NAME: 'synth-traces-otel',
+  NAMESPACE: 'production',
+  ESQL_QUERY: 'FROM traces-test.otel-*',
+};

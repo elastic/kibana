@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiImage, EuiLink, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiImage, EuiLink, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -86,6 +87,13 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
     <>
       <EuiEmptyPrompt
         data-test-subj="attackDiscoveryMovedPage"
+        css={css`
+          // Let each body line sit on a single line on wide screens, while the built-in
+          // 'max-width: max-content' still lets the prompt shrink and wrap on smaller ones.
+          .euiEmptyPrompt__content {
+            max-inline-size: none;
+          }
+        `}
         icon={
           <EuiImage
             url={isDarkMode ? simplifyDarkSvg : simplifyLightSvg}
@@ -96,17 +104,34 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
         title={<h2 data-test-subj="attackDiscoveryMovedTitle">{TITLE}</h2>}
         titleSize="m"
         body={
-          <p data-test-subj="attackDiscoveryMovedBody">
-            <FormattedMessage
-              id="xpack.securitySolution.attackDiscovery.moved.description"
-              defaultMessage="{attackDiscovery} now exists as {attacks} and is located under {detections} in the side navigation"
-              values={{
-                attackDiscovery: <em>{ATTACK_DISCOVERY_LABEL}</em>,
-                attacks: <em>{ATTACKS_LABEL}</em>,
-                detections: <strong>{DETECTIONS_LABEL}</strong>,
-              }}
-            />
-          </p>
+          <>
+            <EuiSpacer size="s" />
+            <p data-test-subj="attackDiscoveryMovedBody">
+              <EuiTextColor color="default">
+                <FormattedMessage
+                  id="xpack.securitySolution.attackDiscovery.moved.description"
+                  defaultMessage="{attackDiscovery} now exists as {attacks} and is located under {detections} in the side navigation."
+                  values={{
+                    attackDiscovery: <em>{ATTACK_DISCOVERY_LABEL}</em>,
+                    attacks: <em>{ATTACKS_LABEL}</em>,
+                    detections: <strong>{DETECTIONS_LABEL}</strong>,
+                  }}
+                />
+              </EuiTextColor>
+              <br />
+              <EuiTextColor color="subdued" data-test-subj="attackDiscoveryMovedOptOut">
+                <FormattedMessage
+                  id="xpack.securitySolution.attackDiscovery.moved.optOut"
+                  defaultMessage="Prefer the previous experience? Disable alerts and attacks alignment in {advancedSettingsLink}."
+                  values={{
+                    advancedSettingsLink: (
+                      <EuiLink href={advancedSettingsUrl}>{ADVANCED_SETTINGS_LABEL}</EuiLink>
+                    ),
+                  }}
+                />
+              </EuiTextColor>
+            </p>
+          </>
         }
         actions={
           <SecuritySolutionLinkButton
@@ -117,19 +142,6 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
           >
             {GO_TO_ATTACKS_BUTTON}
           </SecuritySolutionLinkButton>
-        }
-        footer={
-          <EuiText size="s" color="subdued" data-test-subj="attackDiscoveryMovedOptOut">
-            <FormattedMessage
-              id="xpack.securitySolution.attackDiscovery.moved.optOut"
-              defaultMessage="Prefer the previous experience? Disable alerts and attacks alignment in {advancedSettingsLink}."
-              values={{
-                advancedSettingsLink: (
-                  <EuiLink href={advancedSettingsUrl}>{ADVANCED_SETTINGS_LABEL}</EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
         }
       />
 

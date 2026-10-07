@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { RefreshSection } from '.';
@@ -31,18 +30,18 @@ describe('RefreshSection', () => {
     expect(screen.getByTestId('flyoutRefreshButton')).toHaveTextContent('Refresh');
   });
 
-  it('calls onRefresh when the Refresh button is clicked', async () => {
+  it('calls onRefresh when the Refresh button is clicked', () => {
     render(<RefreshSection onClose={mockOnClose} onRefresh={mockOnRefresh} />);
 
-    await userEvent.click(screen.getByTestId('flyoutRefreshButton'));
+    fireEvent.click(screen.getByTestId('flyoutRefreshButton'));
 
     expect(mockOnRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClose when the Refresh button is clicked', async () => {
+  it('calls onClose when the Refresh button is clicked', () => {
     render(<RefreshSection onClose={mockOnClose} onRefresh={mockOnRefresh} />);
 
-    await userEvent.click(screen.getByTestId('flyoutRefreshButton'));
+    fireEvent.click(screen.getByTestId('flyoutRefreshButton'));
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });

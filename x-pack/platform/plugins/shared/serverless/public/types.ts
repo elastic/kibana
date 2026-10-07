@@ -14,6 +14,11 @@ import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigatio
 export interface ServerlessPluginSetup {}
 
 export interface ServerlessPluginStart {
+  /**
+   * @deprecated Project breadcrumb overrides remain only for compatibility fallback back
+   * navigation. Declare hierarchy in the project navigation tree and pass explicit `back`
+   * configuration to `AppHeader` from `@kbn/app-header`.
+   */
   setBreadcrumbs: (
     breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
     params?: Partial<ChromeSetProjectBreadcrumbsParams>

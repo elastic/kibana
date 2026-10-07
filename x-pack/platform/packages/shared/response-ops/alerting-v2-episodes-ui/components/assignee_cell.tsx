@@ -6,90 +6,28 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { useQuery } from '@kbn/react-query';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { UserAvatar, UserToolTip } from '@kbn/user-profile-components';
 import * as i18n from './translations';
+import { UserProfileDisplay } from './user_profile_display';
 
 export interface AlertEpisodeAssigneeCellProps {
   assigneeUid: string | null | undefined;
   userProfile: UserProfileService;
+  isTooltipFocusable?: boolean;
 }
 
 export const AlertEpisodeAssigneeCell = ({
   assigneeUid,
   userProfile,
+  isTooltipFocusable = true,
 }: AlertEpisodeAssigneeCellProps) => {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['alertingV2EpisodeAssigneeProfile', assigneeUid],
-    queryFn: () =>
-      userProfile.bulkGet({
-        uids: new Set([assigneeUid!]),
-        dataPath: 'avatar',
-      }),
-    enabled: Boolean(assigneeUid),
-    staleTime: 60_000,
-    retry: 1,
-  });
-
-  if (!assigneeUid) {
-    return (
-      <EuiText color="subdued" size="s">
-        {i18n.ASSIGNEE_CELL_EMPTY}
-      </EuiText>
-    );
-  }
-
-  if (isLoading) {
-    return <EuiLoadingSpinner size="s" />;
-  }
-
-  if (isError) {
-    return (
-      <EuiToolTip content={assigneeUid}>
-        <EuiText tabIndex={0} color="danger" size="s">
-          {i18n.ASSIGNEE_CELL_PROFILE_LOAD_ERROR}
-        </EuiText>
-      </EuiToolTip>
-    );
-  }
-
-  const profile = data?.[0] as UserProfileWithAvatar;
-
-  if (!profile) {
-    return (
-      <EuiToolTip content={assigneeUid}>
-        <EuiText tabIndex={0} color="subdued" size="s">
-          {i18n.ASSIGNEE_CELL_UNKNOWN_USER}
-        </EuiText>
-      </EuiToolTip>
-    );
-  }
-
-  const user = profile.user;
-  const username = user.username;
-  const avatar = profile.data?.avatar;
-
   return (
-    <UserToolTip user={user} avatar={avatar} position="top">
-      <EuiFlexGroup
-        gutterSize="xs"
-        alignItems="center"
-        responsive={false}
-        css={{ minWidth: 0 }}
-        data-test-subj="alertingV2EpisodeAssigneeCell"
-      >
-        <EuiFlexItem grow={false}>
-          <UserAvatar user={user} avatar={avatar} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-          <EuiText size="s" className="eui-textTruncate" title={username}>
-            {username}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </UserToolTip>
+    <UserProfileDisplay
+      userProfileUid={assigneeUid}
+      userProfile={userProfile}
+      emptyState={i18n.ASSIGNEE_CELL_EMPTY}
+      isTooltipFocusable={isTooltipFocusable}
+      dataTestSubj="alertingV2EpisodeAssigneeCell"
+    />
   );
 };

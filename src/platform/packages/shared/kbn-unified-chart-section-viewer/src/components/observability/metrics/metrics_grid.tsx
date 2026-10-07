@@ -14,8 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
 import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
@@ -25,7 +28,12 @@ import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
+import {
+  createESQLQuery,
+  firstNonNullable,
+  getAggregationLabel,
+  getMetricUniqueKey,
+} from '../../../common/utils';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -34,7 +42,7 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { getEsqlQuery } from './utils/get_esql_query';
+import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -80,6 +88,7 @@ export type MetricsGridProps = Pick<
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
+  userSource?: string;
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
   /**
@@ -94,6 +103,11 @@ export type MetricsGridProps = Pick<
    *
    */
   isTabSelected: boolean;
+  /**
+   * `ChartsGrid` hides an inactive grid with CSS rather than unmounting it, so per-chart
+   * fetches that should pause while hidden (exemplars) need this flag explicitly.
+   */
+  isComponentVisible: boolean;
 };
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
@@ -106,6 +120,7 @@ export const MetricsGrid = ({
   actions,
   dimensions,
   whereStatements,
+  userSource,
   services,
   columns,
   fetchParams,
@@ -114,20 +129,15 @@ export const MetricsGrid = ({
   getUserMessages,
   getDescription,
   isTabSelected,
+  isComponentVisible,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
+  const { flyoutState, onFlyoutStateChange, profileId, gridSettings, onMetricExplored } =
+    useMetricsExperienceState();
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
-
-  const userSource = useMemo<string | undefined>(() => {
-    const userEsql = getEsqlQuery(fetchParams.query);
-    if (!userEsql) return undefined;
-    const pattern = getIndexPatternFromESQLQuery(userEsql);
-    return pattern || undefined;
-  }, [fetchParams.query]);
 
   const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
     useGridNavigation({
@@ -163,7 +173,6 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
       onFlyoutStateChange({
         gridPosition: index,
         metricUniqueKey: getMetricUniqueKey(metricItem),
@@ -173,6 +182,17 @@ export const MetricsGrid = ({
     },
     [onFlyoutStateChange]
   );
+
+  const isFlyoutOpen = Boolean(flyoutData) && isTabSelected;
+
+  // Keyed on whether the flyout is open rather than on `flyoutData`, so switching metrics while it
+  // is open does not dismiss the other flyouts again. This covers both View details and a tab
+  // restoring its `flyoutState` when it becomes active.
+  useEffect(() => {
+    if (isFlyoutOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+    }
+  }, [isFlyoutOpen]);
 
   const handleCloseFlyout = useCallback(() => {
     if (!flyoutState) {
@@ -255,13 +275,17 @@ export const MetricsGrid = ({
                   userSource={userSource}
                   description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
+                  profileId={profileId}
+                  gridSettings={gridSettings}
+                  onMetricExplored={onMetricExplored}
+                  isComponentVisible={isComponentVisible}
                 />
               </EuiFlexItem>
             );
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {flyoutData && isTabSelected && (
+      {flyoutData && isFlyoutOpen && (
         <MetricInsightsFlyout
           metricItem={flyoutData.metricItem}
           esqlQuery={flyoutData.esqlQuery}
@@ -294,6 +318,10 @@ interface ChartItemProps
   whereStatements?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
+  gridSettings: MetricsGridSettings;
+  onMetricExplored?: (metricUniqueKey: string) => void;
+  isComponentVisible: boolean;
 }
 
 const ChartItem = React.memo(
@@ -320,8 +348,11 @@ const ChartItem = React.memo(
     onFocusCell,
     onViewDetails,
     userMessages,
+    profileId,
+    gridSettings,
+    onMetricExplored,
+    isComponentVisible,
   }: ChartItemProps) => {
-    const { profileId, gridSettings, onMetricExplored } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
@@ -348,6 +379,18 @@ const ChartItem = React.memo(
       metricItem.dimensionFields
     );
 
+    const exemplars = useFetchExemplars({
+      fetchParams,
+      services,
+      metricItem,
+      whereStatements,
+      originalSource: userSource,
+      profileId,
+      isComponentVisible,
+    });
+    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
+    void exemplars;
+
     const esqlQuery = useMemo(() => {
       const fieldType = firstNonNullable(metricItem.fieldTypes);
       const isSupported = fieldType !== 'unsigned_long';
@@ -361,6 +404,11 @@ const ChartItem = React.memo(
           })
         : '';
     }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
+
+    const yAxisTitle = useMemo(() => {
+      const instrument = firstNonNullable(metricItem.metricTypes);
+      return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
+    }, [metricItem.metricTypes, gridSettings]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
@@ -407,6 +455,7 @@ const ChartItem = React.memo(
           title={metricItem.metricName}
           description={description}
           chartLayers={chartLayers}
+          yAxisTitle={yAxisTitle}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}

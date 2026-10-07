@@ -50,7 +50,7 @@ const mockServices = createMockServices({
 const mockRule = {
   id: 'rule-1',
   metadata: { name: 'My rule' },
-  query: { format: 'standalone', breach: { query: 'FROM logs' } },
+  query: { base: 'FROM logs' },
 } as unknown as RuleResponse;
 
 // Episode events ESQL query response template (used by useFetchEpisodeEventsQuery)
@@ -80,6 +80,30 @@ const buildEventDataResponse = (lastData: string | null) => ({
   ],
 });
 
+// Group hash lookup response (used by useFetchEpisodeQuery before the episode query)
+const mockGroupHashResponse = {
+  columns: [{ name: 'group_hash', type: 'keyword' }],
+  values: [['gh-1']],
+};
+
+// The section fires its ESQL queries concurrently, so the mock dispatches on
+// the query text instead of relying on call order.
+const mockEsqlResponses = (eventData: string | null | 'error') => {
+  runEsqlAsyncSearchMock.mockImplementation(async ({ params }) => {
+    const query = String(params.query ?? '');
+    if (query.includes('KEEP group_hash')) {
+      return mockGroupHashResponse;
+    }
+    if (query.includes('last_data')) {
+      if (eventData === 'error') {
+        throw new Error('boom');
+      }
+      return buildEventDataResponse(eventData);
+    }
+    return mockEpisodeEventsResponse;
+  });
+};
+
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
@@ -93,7 +117,7 @@ describe('AlertEpisodeMetadataSection', () => {
     } as never);
   });
 
-  it('renders a loading spinner while events / data view are loading', () => {
+  it('renders a skeleton while events / data view are loading', () => {
     runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
     useAlertingEpisodeSourceDataViewMock.mockReturnValue({
       value: undefined,
@@ -107,14 +131,16 @@ describe('AlertEpisodeMetadataSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeMetadataSectionLoading')
+        .querySelector('.euiSkeletonText')
+    ).not.toBeNull();
   });
 
   it('renders an error message when event data fails to load', async () => {
     // Episode events succeed, rule fetch succeeds, but event data fails.
-    runEsqlAsyncSearchMock
-      .mockResolvedValueOnce(mockEpisodeEventsResponse)
-      .mockRejectedValueOnce(new Error('boom'));
+    mockEsqlResponses('error');
     mockHttp.get.mockResolvedValueOnce(mockRule);
 
     render(
@@ -128,9 +154,7 @@ describe('AlertEpisodeMetadataSection', () => {
   });
 
   it('renders the empty state when no event data is available', async () => {
-    runEsqlAsyncSearchMock
-      .mockResolvedValueOnce(mockEpisodeEventsResponse)
-      .mockResolvedValueOnce(buildEventDataResponse(null));
+    mockEsqlResponses(null);
     mockHttp.get.mockResolvedValueOnce(mockRule);
 
     render(
@@ -143,15 +167,11 @@ describe('AlertEpisodeMetadataSection', () => {
     await waitFor(() =>
       expect(screen.getByTestId('alertingV2EpisodeMetadataTabEmpty')).toBeInTheDocument()
     );
-    expect(
-      screen.getByText('No evaluation data is available for this episode.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('No evaluation data is available for this alert.')).toBeInTheDocument();
   });
 
   it('renders the metadata table with the doc-viewer registry render function', async () => {
-    runEsqlAsyncSearchMock
-      .mockResolvedValueOnce(mockEpisodeEventsResponse)
-      .mockResolvedValueOnce(buildEventDataResponse(JSON.stringify({ threshold_met: true })));
+    mockEsqlResponses(JSON.stringify({ threshold_met: true }));
     mockHttp.get.mockResolvedValueOnce(mockRule);
 
     render(
@@ -189,9 +209,7 @@ describe('AlertEpisodeMetadataSection', () => {
       },
     });
 
-    runEsqlAsyncSearchMock
-      .mockResolvedValueOnce(mockEpisodeEventsResponse)
-      .mockResolvedValueOnce(buildEventDataResponse(JSON.stringify({ threshold_met: true })));
+    mockEsqlResponses(JSON.stringify({ threshold_met: true }));
     mockHttp.get.mockResolvedValueOnce(mockRule);
 
     render(

@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiBadge, EuiButton, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import {
   ContentList,
@@ -23,6 +31,7 @@ import {
   createFilterControl,
   defineContentListFilter,
   defineContentListSortField,
+  useRecentlyAccessedDecoration,
   type ContentListClientProviderProps,
   type TableListViewFindItemsFn,
 } from '@kbn/content-list-provider-client';
@@ -279,7 +288,7 @@ const ProposalStory = () => {
           title="Dashboards"
           tabs={[{ label: 'Dashboards', isSelected: true, onClick: () => undefined }]}
           actions={
-            <EuiButton fill iconType="plusInCircle">
+            <EuiButton fill iconType="plusCircle">
               Create dashboard
             </EuiButton>
           }
@@ -331,7 +340,49 @@ const ProposalStory = () => {
   );
 };
 
-const ClientProviderExtensionsStory = () => {
+/**
+ * Mutable in-memory stand-in for `getDashboardRecentlyAccessedService()`.
+ * `get()` returns entries most recent first, like `RecentlyAccessed.get()`.
+ */
+const createMockHistory = (initialIds: string[]) => {
+  let ids = initialIds;
+  return {
+    get: () => ids.map((id) => ({ id })),
+    view: (id: string) => {
+      ids = [id, ...ids.filter((existing) => existing !== id)];
+    },
+    clear: () => {
+      ids = [];
+    },
+  };
+};
+type MockHistory = ReturnType<typeof createMockHistory>;
+
+const ClientProviderExtensionsList = ({ history }: { history: MockHistory }) => {
+  const recents = useRecentlyAccessedDecoration(history);
+
+  const findItems = useMemo<TableListViewFindItemsFn>(
+    () => async (searchQuery, options, signal) =>
+      recents.decorate(await findDashboardItems(searchQuery, options, signal)),
+    [recents]
+  );
+
+  const features = useMemo(
+    () =>
+      ({
+        ...clientProviderFeatures,
+        sorting: {
+          ...clientProviderFeatures.sorting,
+          initialSort: recents.initialSort ?? clientProviderFeatures.sorting.initialSort,
+          fields: (defaults) => ({
+            ...clientProviderFeatures.sorting.fields(defaults),
+            ...recents.sortFields,
+          }),
+        },
+      } satisfies ContentListClientProviderProps['features']),
+    [recents]
+  );
+
   const pageElement = useMemo(
     () => (
       <KibanaContentListPage>
@@ -378,13 +429,76 @@ const ClientProviderExtensionsStory = () => {
         tags: mockTagsService,
         userProfiles: mockContentListUserProfilesServices,
       }}
-      features={clientProviderFeatures}
-      findItems={findDashboardItems}
+      features={features}
+      findItems={findItems}
     >
       {pageElement}
       <EuiSpacer size="m" />
       <StateDiagnosticPanel element={pageElement} />
     </ContentListClientProvider>
+  );
+};
+
+const ClientProviderExtensionsStory = () => {
+  const history = useMemo(
+    () => createMockHistory(['dashboard-005', 'dashboard-002', 'dashboard-007']),
+    []
+  );
+  const [listKey, setListKey] = useState(0);
+  const [dashboardToView, setDashboardToView] = useState(MOCK_DASHBOARDS[0].id);
+  const dashboardOptions = useMemo(
+    () => MOCK_DASHBOARDS.map(({ id, attributes }) => ({ value: id, text: attributes.title })),
+    []
+  );
+  const titleById = useMemo(
+    () => new Map(MOCK_DASHBOARDS.map(({ id, attributes }) => [id, attributes.title])),
+    []
+  );
+  // Dashboards are recorded when viewed and the listing re-reads the history when it
+  // mounts again, so remounting the list mirrors "open a dashboard, then come back".
+  const updateHistory = (update: () => void) => {
+    update();
+    setListKey((key) => key + 1);
+  };
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiSelect
+            compressed
+            aria-label="Dashboard to view"
+            options={dashboardOptions}
+            value={dashboardToView}
+            onChange={(event) => setDashboardToView(event.target.value)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" onClick={() => updateHistory(() => history.view(dashboardToView))}>
+            View dashboard
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" color="text" onClick={() => updateHistory(() => history.clear())}>
+            Clear history
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiText size="xs">
+        <p>History (most recent first):</p>
+        {history.get().length > 0 ? (
+          <ol>
+            {history.get().map(({ id }) => (
+              <li key={id}>{titleById.get(id) ?? id}</li>
+            ))}
+          </ol>
+        ) : (
+          <p>Empty</p>
+        )}
+      </EuiText>
+      <EuiSpacer size="m" />
+      <ClientProviderExtensionsList key={listKey} history={history} />
+    </>
   );
 };
 

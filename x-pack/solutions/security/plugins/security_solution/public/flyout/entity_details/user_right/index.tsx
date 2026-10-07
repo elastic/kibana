@@ -12,7 +12,8 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
@@ -37,6 +38,10 @@ import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from '../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -51,6 +56,7 @@ import {
   USER_PANEL_OBSERVED_USER_QUERY_ID,
 } from '../../../flyout_v2/entity/user/main/constants';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
@@ -80,6 +86,21 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
 
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 
+const USER_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_entity_from_store'
+);
+
+const USER_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_risk_score'
+);
+
+const USER_MANAGED_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_managed_details'
+);
+
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
@@ -98,7 +119,7 @@ export const UserPanel = memo(function UserPanel({
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
-  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const userStoreIdentityFields = useMemo(
     () => (!entityIdProp && userName ? { 'user.name': userName } : undefined),
@@ -110,6 +131,7 @@ export const UserPanel = memo(function UserPanel({
     identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: isInitializing,
+    executionContext: USER_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -137,10 +159,11 @@ export const UserPanel = memo(function UserPanel({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !!observedUser?.entityRecord,
+    executionContext: USER_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, loading } = riskScoreState;
-  const managedUser = useManagedUser();
+  const managedUser = useManagedUser({ executionContext: USER_MANAGED_DETAILS_CONTEXT });
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
@@ -172,12 +195,13 @@ export const UserPanel = memo(function UserPanel({
     })
   );
 
+  const { from: alertFrom, to: alertTo } = useAlertTimeRange(scopeId);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.user,
     entityRecord: entityFromStoreResult.entityRecord,
-    to,
-    from,
+    to: alertTo,
+    from: alertFrom,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
   });
 
@@ -327,22 +351,21 @@ export const UserPanel = memo(function UserPanel({
             identityFields={documentEntityIdentifiers}
             entityRecord={observedUser.entityRecord ?? undefined}
             refetchEntityRecord={entityFromStoreResult.refetch}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
       {!isPreviewMode && assetInventoryEnabled && (
-        <EuiFlyoutFooter>
-          <EuiPanel color="transparent">
-            <Footer
-              userName={userName}
-              identityFields={documentEntityIdentifiers}
-              entity={entityFromStore}
-            />
-          </EuiPanel>
-        </EuiFlyoutFooter>
+        <FlyoutFooter>
+          <Footer
+            userName={userName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
+        </FlyoutFooter>
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter

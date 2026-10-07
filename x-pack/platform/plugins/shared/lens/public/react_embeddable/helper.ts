@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import {
   EVENT_ANNOTATION_GROUP_TYPE,
   type EventAnnotationGroupConfig,
@@ -24,7 +24,12 @@ import type {
   XYVisualizationState,
   XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
-import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
+import {
+  LENS_UNKNOWN_VIS,
+  dropLegacyAggregateQuerySlot,
+  isTextBasedAttributes,
+  EMPTY_KQL_QUERY,
+} from '@kbn/lens-common';
 import type {
   LensByValueSerializedAPIConfig,
   LensSerializedAPIConfig,
@@ -56,10 +61,9 @@ export function createEmptyLensState(
   visualizationType: null | string = null,
   title?: LensSerializedState['title'],
   description?: LensSerializedState['description'],
-  query?: LensSerializedState['query'],
+  query?: Query,
   filters?: LensSerializedState['filters']
 ): LensRuntimeState {
-  const isTextBased = query && isOfAggregateQueryType(query);
   return {
     attributes: {
       version: LENS_ITEM_LATEST_VERSION,
@@ -68,10 +72,14 @@ export function createEmptyLensState(
       visualizationType,
       references: [],
       state: {
-        query: query || { query: '', language: 'kuery' },
+        // chart-scoped KQL/Lucene filter only; ES|QL initial state is never
+        // built here — it enters documents exclusively via the suggestion
+        // pipeline (`getLensAttributesFromSuggestion`), which writes the
+        // query into `datasourceStates.textBased.layers`.
+        query: query ?? EMPTY_KQL_QUERY,
         filters: filters || [],
         internalReferences: [],
-        datasourceStates: { ...(isTextBased ? { textBased: {} } : { formBased: {} }) },
+        datasourceStates: { formBased: {} },
         visualization: {},
       },
     },
@@ -101,7 +109,7 @@ export async function deserializeState(
       return {
         ...state,
         ref_id: refId,
-        attributes,
+        attributes: dropLegacyAggregateQuerySlot(attributes),
         managed,
         sharingSavedObjectProps,
       } satisfies LensRuntimeState;
@@ -112,6 +120,9 @@ export async function deserializeState(
   }
 
   const newState = transformFromApiConfig(state) as LensRuntimeState;
+  if (newState.attributes) {
+    newState.attributes = dropLegacyAggregateQuerySlot(newState.attributes);
+  }
 
   if (newState.isNewPanel) {
     try {
@@ -130,8 +141,13 @@ export async function deserializeState(
   return newState;
 }
 
+/**
+ * A document is text-based (ES|QL) when it has a `textBased` datasource
+ * state. The authoritative queries live in
+ * `state.datasourceStates.textBased.layers[id].query`.
+ */
 export function isTextBasedLanguage(state: LensRuntimeState) {
-  return isOfAggregateQueryType(state.attributes?.state.query);
+  return isTextBasedAttributes(state.attributes);
 }
 
 export function getViewMode(api: unknown) {

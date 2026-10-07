@@ -21,6 +21,8 @@ describe('alert analysis workflow install', () => {
     uninstall: jest.fn().mockResolvedValue(undefined),
     ready: jest.fn().mockResolvedValue(undefined),
     getWorkflowStatus: jest.fn().mockResolvedValue(undefined),
+    getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+    listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
     execute: jest.fn().mockResolvedValue('execution-id'),
   });
 

@@ -28,8 +28,10 @@ export interface SignificantEventsScheduledReviewWorkflowTemplateValues
   extends ManagedWorkflowTemplateValues {
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
-  triageBatchSize: number;
   maxReviewPasses: number;
+  flakyRuleDetectionThreshold: number;
+  flakyRuleProbeAfterMinutes: number;
+  flakyRuleExemptSeverityScore: number;
 }
 
 const SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
@@ -50,17 +52,20 @@ const renderTemplate = (template: string, values: Record<string, string | number
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  pluginId: 'significant_events',
+  pluginId: 'significantEvents',
   version: 3,
   billable: false,
   // The change_point agg needs >= 22 buckets, so detectionLookbackMinutes must be an exact
   // multiple of detectionBucketIntervalMinutes with a quotient in [22, 1000] — the scheduled
   // discovery settings route validates the pair before installing.
+  //
+  // Defaults below only matter on a Kibana restart with an install from before these fields
+  // existed: this workflow re-renders from old persisted values on boot, which won't have them.
   yamlTemplate: ({
     detectionIntervalMinutes,
-    detectionBucketIntervalMinutes,
-    detectionLookbackMinutes,
-    targetCoverageMinutes,
+    detectionBucketIntervalMinutes = 1,
+    detectionLookbackMinutes = 40,
+    targetCoverageMinutes = 30,
   }) =>
     renderTemplate(SCHEDULED_DETECTION_YAML, {
       __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
@@ -73,15 +78,27 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-  pluginId: 'significant_events',
-  version: 3,
+  pluginId: 'significantEvents',
+  version: 6,
   billable: false,
-  yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, triageBatchSize, maxReviewPasses }) =>
+  // Defaults on the 3 flaky-rule fields only matter on a Kibana restart with a pre-upgrade
+  // install: this workflow re-renders from old persisted values on boot, and without a
+  // default the missing fields would render as the literal string "undefined".
+  yamlTemplate: ({
+    reviewIntervalMinutes,
+    discoveryBatchSize,
+    maxReviewPasses,
+    flakyRuleDetectionThreshold = 10,
+    flakyRuleProbeAfterMinutes = 360,
+    flakyRuleExemptSeverityScore = 80,
+  }) =>
     renderTemplate(SCHEDULED_REVIEW_YAML, {
       __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
       __MAX_REVIEW_PASSES__: maxReviewPasses,
       __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
-      __TRIAGE_BATCH_SIZE__: triageBatchSize,
+      __FLAKY_RULE_DETECTION_THRESHOLD__: flakyRuleDetectionThreshold,
+      __FLAKY_RULE_PROBE_AFTER_MINUTES__: flakyRuleProbeAfterMinutes,
+      __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__: flakyRuleExemptSeverityScore,
     }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledReviewWorkflowTemplateValues>;

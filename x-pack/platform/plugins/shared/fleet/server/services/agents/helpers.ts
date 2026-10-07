@@ -10,6 +10,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchHit } from '@kbn/es-types';
 
 import type { FleetServerAgentComponent, OutputMap } from '../../../common/types';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { appContextService } from '..';
 
@@ -24,7 +25,8 @@ export function searchHitToAgent(
   hit: FleetServerAgentESResponse & {
     sort?: SortResults;
     fields?: { status?: AgentStatus[]; pipeline_config?: string[]; signals?: string[] };
-  }
+  },
+  options?: { requireStatusRuntimeField?: boolean }
 ): Agent {
   const outputs: OutputMap | undefined = hit._source?.outputs
     ? Object.entries(hit._source?.outputs).reduce((acc, [key, val]) => {
@@ -73,7 +75,13 @@ export function searchHitToAgent(
     access_api_key_id: hit._source?.access_api_key_id,
     default_api_key_id: hit._source?.default_api_key_id,
     policy_id: hit._source?.policy_id,
-    policy_base_id: hit._source?.policy_base_id,
+    // Always resolved to the base policy id, so consumers indexing base-id-keyed collections can
+    // read this field directly instead of stripping the suffix off `policy_id` themselves. The
+    // fallback covers documents that pre-date `policy_base_id` (agents enrolled via an older
+    // fleet-server during a mixed-version rollout, before the startup backfill catches them).
+    policy_base_id:
+      hit._source?.policy_base_id ??
+      (hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined),
     last_checkin: hit._source?.last_checkin,
     last_checkin_status:
       hit._source?.last_checkin_status?.toLowerCase() as Agent['last_checkin_status'],
@@ -111,14 +119,14 @@ export function searchHitToAgent(
     health: hit._source?.health,
   };
 
-  if (!hit.fields?.status?.length) {
+  if (hit.fields?.status?.length) {
+    agent.status = hit.fields.status[0];
+  } else if (options?.requireStatusRuntimeField !== false) {
     appContextService
       .getLogger()
       .error(
         'Agent status runtime field is missing, unable to get agent status for agent ' + agent.id
       );
-  } else {
-    agent.status = hit.fields.status[0];
   }
   if (hit.fields?.pipeline_config?.length) {
     agent.pipeline_config = hit.fields.pipeline_config[0];

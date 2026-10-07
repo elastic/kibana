@@ -172,10 +172,13 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
   const triggerButton = (
     <EuiButtonEmpty
       size="s"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       flush="both"
       color="text"
+      css={css`
+        color: ${euiTheme.colors.textHeading};
+      `}
       onClick={() => setIsPopoverOpen((v) => !v)}
       data-test-subj="agentBuilderAgentSelectorButton"
       {...getEbtProps({
@@ -183,7 +186,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
         action: AGENT_BUILDER_UI_EBT.action.navSidebar.AGENT_SELECTOR_OPEN,
       })}
     >
-      <EuiText size="m">
+      <EuiText size="m" color="inherit">
         <strong>
           {
             <EuiTextTruncate

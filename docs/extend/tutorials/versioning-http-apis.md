@@ -225,8 +225,9 @@ All Kibana's public endpoints must be versioned using the format described below
 
 ##### Version lifecycle
 
-Introducing a new version or moving a current version into deprecation to eventually be deleted must
-follow [this process](https://github.com/elastic/dev/issues/new?assignees=&labels=breaking-change-proposal&projects=&template=breaking-change.md).
+Introducing a new version, or moving a current version into deprecation to eventually be deleted, is a breaking change
+for API consumers. It must be proposed and reviewed before implementation, and documented in the
+[Kibana breaking changes](/release-notes/breaking-changes.md) release notes.
 
 ##### Version format
 
@@ -285,7 +286,7 @@ When you make a backwards-compatible change, apply it to **all** supported API v
 Core exposes a versioned router that ensures your endpoint's behaviour and formatting all conforms to the versioning specification.
 
 ```typescript
-  router.versioned.
+  router.versioned
     .post({
       access: 'public', // This endpoint is intended for a public audience
       path: '/api/my-app/foo/{id?}',
@@ -367,6 +368,7 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
         await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
         return res.ok({ body: { fooName: req.body.fooString } });
       }
+    );
 ```
 
 #### Use `http.fetch` to send a version

@@ -41,6 +41,7 @@ const githubSpec = {
     searchRepositories: { isTool: true, description: 'Search repos', handler: jest.fn() },
     internalAction: { isTool: false, description: 'Internal', handler: jest.fn() },
   },
+  test: { handler: jest.fn(), enabled: false },
 };
 
 const makeActionsStart = (
@@ -147,6 +148,7 @@ describe('connector-authoring inline tools', () => {
           supportedFeatureIds: ['agentBuilder'],
         },
         actions: {},
+        test: { handler: jest.fn(), enabled: false },
       } as never);
 
       const actionsStart = makeActionsStart([{ id: '.slack2', name: 'Slack' }]);

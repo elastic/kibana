@@ -7,21 +7,12 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
-
-import { AiNavigationIcon } from './icon';
-
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.aiNavigation.projectType.title',
-  { defaultMessage: 'Elastic AI SOC Engine' }
-);
 
 export const createAiNavigationTree = (
   core: CoreStart,
@@ -30,13 +21,6 @@ export const createAiNavigationTree = (
   showAgentBuilderNavAtTop: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
-    {
-      id: 'ease_home',
-      link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
-      icon: AiNavigationIcon,
-      renderAs: 'home',
-    },
     ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
       ? [
           {
@@ -89,7 +73,7 @@ export const createAiNavigationTree = (
       children: [
         {
           link: 'inbox' as AppDeepLinkId,
-          icon: 'email',
+          icon: 'mail',
         },
         {
           link: 'discover' as AppDeepLinkId,
@@ -152,6 +136,7 @@ export const createAiNavigationTree = (
           title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
           children: [
             { link: 'management:index_management' },
+            { link: 'management:esql_views' },
             { link: 'management:transform' },
             { link: 'management:data_quality' },
           ],
@@ -169,6 +154,7 @@ export const createAiNavigationTree = (
           children: [
             { link: 'management:api_keys' },
             { link: 'management:application_connections' },
+            { link: 'management:service_accounts' },
             { link: 'management:roles' },
           ],
         },
@@ -184,7 +170,6 @@ export const createAiNavigationTree = (
             },
           ],
         },
-        ...getAlertingV2ManagementNavPanel(core),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [

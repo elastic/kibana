@@ -8,7 +8,9 @@
  */
 
 import { isFunction, isEqual } from 'lodash';
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -31,6 +33,12 @@ import {
 } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
+import {
+  ExpandedDocLinkability,
+  getExpandedDocLinkability,
+  getExpandedDocRef,
+} from '../../../utils/expanded_doc';
+import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
@@ -54,9 +62,11 @@ import {
 import type {
   DiscoverAppState,
   DiscoverInternalState,
+  ExpandedDocCascadePath,
   TabState,
   UpdateESQLQueryActionPayload,
 } from '../types';
+import { appendAdHocDataViews } from './data_views';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
@@ -64,9 +74,10 @@ export interface RawAppStatePayload {
   appState: DiscoverAppState;
   /**
    * Marks app state changes that come from URL syncing or other internal updates
-   * instead of direct user actions. These updates skip profile state snapshot
-   * syncing so they do not overwrite restorable profile state. This should
-   * rarely be needed outside of URL syncing and specific edge cases.
+   * instead of direct user actions. These updates skip profile app state
+   * snapshot syncing so they do not overwrite restorable profile app state
+   * defaults. This should rarely be needed outside of URL syncing and specific
+   * edge cases.
    */
   isSystemTriggered?: boolean;
 }
@@ -88,12 +99,12 @@ export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (
     dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
   };
 
-export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
+export const syncProfileAppStateSnapshot: InternalStateThunkActionCreator<
   [TabActionPayload<{ appState?: DiscoverAppState }>]
 > = (payload) =>
-  function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
+  function syncProfileAppStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
-    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
+    dispatch(internalStateSlice.actions.syncProfileAppStateSnapshot({ ...payload, profileId }));
   };
 
 /**
@@ -106,6 +117,44 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     if (hasStateChanges) {
       dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
+  };
+
+type ExpandedDocPayload = TabActionPayload<{
+  expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner?: string;
+  expandedDocCascadePath?: ExpandedDocCascadePath;
+  initialDocViewerTabId?: string;
+  initialDocViewerTabState?: object;
+  shouldUpdateUrl?: boolean;
+}>;
+
+/** Sets the expanded document and synchronizes its URL reference. */
+export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
+  function setExpandedDocThunkFn(dispatch, getState) {
+    const { shouldUpdateUrl = true, ...expandedDocPayload } = payload;
+
+    dispatch(internalStateSlice.actions.setExpandedDoc(expandedDocPayload));
+
+    if (!shouldUpdateUrl) {
+      return;
+    }
+
+    const { tabId, expandedDoc, expandedDocOwner = DEFAULT_EXPANDED_DOC_OWNER } = payload;
+    const { appState } = selectTab(getState(), tabId);
+
+    // The restore path cannot reconstruct documents from cascade grids.
+    const nextExpandedDocRef =
+      expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER &&
+      getExpandedDocLinkability(appState.query, expandedDoc) === ExpandedDocLinkability.Linkable
+        ? getExpandedDocRef(expandedDoc)
+        : undefined;
+
+    // Avoid adding URL history when closing a flyout that never wrote a reference.
+    if (isEqual(appState.expandedDoc, nextExpandedDocRef)) {
+      return;
+    }
+
+    dispatch(updateAppState({ tabId, appState: { expandedDoc: nextExpandedDocRef } }));
   };
 
 /**
@@ -126,7 +175,7 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
 
     if (!payload.isSystemTriggered) {
       dispatch(
-        syncProfileStateSnapshot({
+        syncProfileAppStateSnapshot({
           tabId: payload.tabId,
           appState: mergedAppState,
         })
@@ -394,16 +443,47 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
  * Clean ups the ES|QL query and moves to the dataview mode
  */
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
-> = ({ tabId, dataView }) =>
-  function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
-    // Mark all profile state fields to reset when transitioning to data view mode
+  [TabActionPayload<{ dataView: DataView }>],
+  Promise<void>
+> = ({ tabId, dataView: fallbackDataView }) =>
+  async function transitionFromESQLToDataViewThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
+    // Mark all profile app state default fields to reset when transitioning to data view mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
     );
+
+    // If currently in ES|QL mode, find or create a proper (non-ESQL_TYPE) DataView for the
+    // FROM index pattern so Classic mode shows the right index — not the default DataView.
+    // The EsqlSource carries the index pattern as .title; no need to re-parse the query string.
+    let dataView = fallbackDataView;
+    const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentSource = currentDataSource$.getValue();
+    if (currentSource?.kind === 'esql') {
+      try {
+        const savedDataViews = await services.dataViews.getIdsWithTitle();
+        const match = savedDataViews.find((dv) => dv.title === currentSource.title);
+        if (match?.id) {
+          dataView = await services.dataViews.get(match.id);
+        } else {
+          const adHocDataView = await services.dataViews.create({
+            title: currentSource.title,
+            timeFieldName: currentSource.timeFieldName,
+          });
+          await services.dataViews.refreshFields(adHocDataView);
+          dispatch(appendAdHocDataViews(adHocDataView));
+          dataView = adHocDataView;
+        }
+      } catch {
+        // fall through to fallbackDataView
+      }
+    }
 
     const sort = getDefaultSort(
       dataView,
@@ -416,6 +496,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       updateAppState({
         tabId,
         appState: {
+          expandedDoc: undefined,
           query: {
             language: 'kuery',
             query: '',
@@ -444,9 +525,9 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromDataViewToESQLThunkFn(dispatch, getState, { services }) {
-    // Mark all profile state fields to reset when transitioning to ES|QL mode
+    // Mark all profile app state default fields to reset when transitioning to ES|QL mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -459,12 +540,18 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
 
     const allFilters = [...(appState.filters ?? []), ...(tabState.globalState?.filters ?? [])];
-    const queryString = getInitialESQLQuery(dataView, filterQuery, allFilters);
+    const hasQuery = Boolean(filterQuery?.query && String(filterQuery.query).trim());
+    const hasFilters = allFilters.length > 0;
+    const queryString =
+      tabState.skipInitialFetch && !hasQuery && !hasFilters
+        ? ''
+        : getInitialESQLQuery(dataView, filterQuery, allFilters);
 
     dispatch(
       updateAppState({
         tabId,
         appState: {
+          expandedDoc: undefined,
           query: { esql: queryString },
           filters: [],
           dataSource: {
@@ -568,13 +655,13 @@ export const fetchData: InternalStateThunkActionCreator<
   };
 
 /**
- * Pause auto refresh interval if the data view is not time-based or is a rollup
+ * Pause auto refresh interval if the data source is not time-based or is a rollup
  */
 export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
-> = ({ tabId, dataView }) =>
+  [TabActionPayload<{ dataSource: DataSource }>]
+> = ({ tabId, dataSource }) =>
   function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+    if (!dataSource.isTimeBased() || dataSource.isRollup()) {
       const currentState = getState();
       const globalState = selectTab(currentState, tabId).globalState;
       if (globalState?.refreshInterval && !globalState.refreshInterval.pause) {

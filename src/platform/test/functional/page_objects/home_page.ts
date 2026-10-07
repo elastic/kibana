@@ -71,11 +71,15 @@ export class HomePageObject extends FtrService {
   }
 
   async getVisibileSolutions() {
-    const solutionPanels = await this.testSubjects.findAll('~homeSolutionPanel', 2000);
-    const panelAttributes = await Promise.all(
-      solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
-    );
-    return panelAttributes.map((attributeValue) => attributeValue?.split('homeSolutionPanel_')[1]);
+    return this.retry.try(async () => {
+      const solutionPanels = await this.testSubjects.findAll('~homeSolutionPanel', 2000);
+      const panelAttributes = await Promise.all(
+        solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
+      );
+      return panelAttributes.map(
+        (attributeValue) => attributeValue?.split('homeSolutionPanel_')[1]
+      );
+    });
   }
 
   async goToSampleDataPage() {

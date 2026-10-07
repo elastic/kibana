@@ -13,6 +13,7 @@ import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { getEsqlDataView } from './get_esql_data_view';
 import { dataViewMock } from '../__mocks__';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 
 const dataViewAdHoc = {
   id: 'ad-hoc-id',
@@ -43,8 +44,9 @@ describe('getEsqlDataView', () => {
   const services = {
     dataViews: mockDataViewsService,
     http: {
-      post: jest.fn(),
+      post: jest.fn().mockResolvedValue({}),
     } as unknown as HttpStart,
+    cps: cpsPluginMock.createStartContract(),
   };
 
   const mockGetTimeFieldRoute = (query: string, timeFieldResponse: string) => {
@@ -63,8 +65,28 @@ describe('getEsqlDataView', () => {
 
   it('returns the current dataview if it is adhoc with no named params and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from data-view-ad-hoc-title' };
-    const dataView = await getEsqlDataView(query, dataViewAdHocNoAtTimestamp, services);
-    expect(dataView).toStrictEqual(dataViewAdHocNoAtTimestamp);
+    jest.mocked(services.cps.cpsManager!.getProjectRouting).mockReturnValue('_alias:_origin');
+
+    const savedCreate = services.dataViews.create;
+    const savedPost = services.http.post;
+
+    // First call creates the DataView and registers it in the routing WeakMap
+    const createdDataView = { ...dataViewAdHocNoAtTimestamp };
+    services.dataViews.create = jest.fn().mockResolvedValue(createdDataView);
+    services.http.post = jest.fn().mockResolvedValue({});
+    const firstDataView = await getEsqlDataView(query, undefined, services);
+
+    // Second call: same query + same routing → must return the same instance with no I/O
+    jest.mocked(services.dataViews.create).mockClear();
+    jest.mocked(services.http.post).mockClear();
+    const dataView = await getEsqlDataView(query, firstDataView, services);
+
+    expect(dataView).toBe(firstDataView);
+    expect(services.http.post).not.toHaveBeenCalled();
+    expect(services.dataViews.create).not.toHaveBeenCalled();
+
+    services.dataViews.create = savedCreate;
+    services.http.post = savedPost;
   });
 
   it('returns an adhoc dataview if it is adhoc with named params and query index pattern is the same as the dataview index pattern', async () => {
@@ -113,5 +135,29 @@ describe('getEsqlDataView', () => {
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.name).toEqual(dataViewAdHoc.name);
     expect(dataView.timeFieldName).toBeUndefined();
+  });
+
+  it('creates a different data view when project routing changes for the same query', async () => {
+    const query = { esql: 'from routing-aware-data-view' };
+    services.dataViews.create = jest.fn().mockImplementation((spec) =>
+      Promise.resolve({
+        ...dataViewAdHoc,
+        id: spec.id,
+        title: spec.title,
+        getIndexPattern: () => spec.title,
+        timeFieldName: spec.timeFieldName,
+      })
+    );
+    services.http.post = jest.fn().mockResolvedValue({ timeField: '@timestamp' });
+    const getProjectRouting = jest
+      .mocked(services.cps.cpsManager!.getProjectRouting)
+      .mockReturnValue('_alias:_origin');
+
+    const originDataView = await getEsqlDataView(query, undefined, services);
+    getProjectRouting.mockReturnValue('_alias:*');
+    const allProjectsDataView = await getEsqlDataView(query, originDataView, services);
+
+    expect(allProjectsDataView.id).not.toBe(originDataView.id);
+    expect(services.http.post).toHaveBeenCalledTimes(2);
   });
 });

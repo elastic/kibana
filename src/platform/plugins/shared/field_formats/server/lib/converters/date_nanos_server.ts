@@ -9,6 +9,7 @@
 
 import { memoize } from 'lodash';
 import moment from 'moment-timezone';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import {
   analysePatternForFract,
   DateNanosFormat,
@@ -35,7 +36,7 @@ class DateNanosFormatServer extends DateNanosFormat {
 
       this.memoizedConverter = memoize((value: string | number) => {
         if (value === null || value === undefined) {
-          return '-';
+          return NULL_LABEL;
         }
 
         /* On the server, importing moment returns a new instance. Unlike on

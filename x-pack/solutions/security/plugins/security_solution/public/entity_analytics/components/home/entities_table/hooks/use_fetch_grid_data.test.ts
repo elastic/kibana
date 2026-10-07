@@ -5,7 +5,21 @@
  * 2.0.
  */
 
-import { buildInspectData, getEntitiesQuery } from './use_fetch_grid_data';
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { of } from 'rxjs';
+import {
+  buildInspectData,
+  getEntitiesNextPageParam,
+  getEntitiesQuery,
+  useFetchGridData,
+} from './use_fetch_grid_data';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { createReactQueryWrapper } from '../../../../../common/mock/create_react_query_wrapper';
+import { DataViewContext, type DataViewContextValue } from '..';
+import { MAX_ENTITIES_TO_LOAD } from '../constants';
+
+jest.mock('../../../../../common/lib/kibana');
 
 describe('buildInspectData', () => {
   const queryParams = {
@@ -47,12 +61,41 @@ describe('buildInspectData', () => {
   });
 });
 
+describe('getEntitiesNextPageParam', () => {
+  const fullPage = { page: Array(MAX_ENTITIES_TO_LOAD).fill({}) };
+  const partialPage = { page: Array(MAX_ENTITIES_TO_LOAD - 1).fill({}) };
+  const emptyPage = { page: [] };
+
+  it('returns undefined when the last page has fewer than MAX_ENTITIES_TO_LOAD records', () => {
+    expect(getEntitiesNextPageParam(partialPage, [partialPage])).toBeUndefined();
+  });
+
+  it('returns undefined for an empty last page', () => {
+    expect(getEntitiesNextPageParam(emptyPage, [emptyPage])).toBeUndefined();
+  });
+
+  it('returns MAX_ENTITIES_TO_LOAD as the next offset after the first full page', () => {
+    expect(getEntitiesNextPageParam(fullPage, [fullPage])).toBe(MAX_ENTITIES_TO_LOAD);
+  });
+
+  it('advances the offset by MAX_ENTITIES_TO_LOAD per page', () => {
+    expect(getEntitiesNextPageParam(fullPage, [fullPage, fullPage])).toBe(MAX_ENTITIES_TO_LOAD * 2);
+  });
+
+  it('does not use the UI page size (25) for the offset', () => {
+    // Regression guard: the bug was allPages.length * options.pageSize (25),
+    // producing from=25 on page 2 instead of from=500, causing massive overlap.
+    const nextOffset = getEntitiesNextPageParam(fullPage, [fullPage]);
+    expect(nextOffset).toBe(500);
+    expect(nextOffset).not.toBe(25);
+  });
+});
+
 describe('getEntitiesQuery', () => {
   const options = {
     query: undefined,
     sort: [['entity.name', 'asc']] as Array<[string, string]>,
     enabled: true,
-    pageSize: 25,
   };
 
   it('throws when no index pattern is provided', () => {
@@ -71,5 +114,60 @@ describe('getEntitiesQuery', () => {
     const params = getEntitiesQuery(options, undefined, 'entities-latest-default');
 
     expect(params.index).toEqual(['entities-latest-default']);
+  });
+});
+
+describe('useFetchGridData', () => {
+  const mockSearch = jest.fn();
+
+  const createWrapper = (): React.FC<{ children: React.ReactNode }> => {
+    const QueryWrapper = createReactQueryWrapper();
+    const dataView = {
+      getIndexPattern: () => 'entities-latest-default',
+    } as unknown as DataViewContextValue['dataView'];
+    const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
+      React.createElement(
+        QueryWrapper,
+        null,
+        React.createElement(DataViewContext.Provider, { value: { dataView } }, children)
+      );
+    return Wrapper;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: { search: { search: mockSearch } },
+        notifications: { toasts: { addError: jest.fn(), addDanger: jest.fn() } },
+      },
+    });
+  });
+
+  it('tags the entities search with the entities-table execution context', async () => {
+    mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: 0, hits: [] } } }));
+
+    const { result } = renderHook(
+      () =>
+        useFetchGridData({
+          query: undefined,
+          sort: [['entity.name', 'asc']],
+          enabled: true,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockSearch).toHaveBeenCalledTimes(1);
+    expect(mockSearch.mock.calls[0][1]).toEqual({
+      executionContext: {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:home_page',
+          id: 'entities_table',
+        },
+      },
+    });
   });
 });

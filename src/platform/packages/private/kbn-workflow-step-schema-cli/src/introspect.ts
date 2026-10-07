@@ -7,47 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TEMPLATE_VALUE_DEF_NAME } from '@kbn/workflows-yaml';
 import type { JsonObject, JsonValue } from './types';
-
-const isObject = (value: JsonValue | undefined): value is JsonObject =>
-  value !== null && value !== undefined && typeof value === 'object' && !Array.isArray(value);
-
-const resolveLocalRef = (root: JsonObject, ref: string): JsonObject | undefined => {
-  if (!ref.startsWith('#/')) {
-    return undefined;
-  }
-  const segments = ref.slice(2).split('/');
-  let current: JsonValue = root;
-  for (const segment of segments) {
-    const decoded = segment.replace(/~1/g, '/').replace(/~0/g, '~');
-    if (!isObject(current) || !(decoded in current)) {
-      return undefined;
-    }
-    current = current[decoded];
-  }
-  return isObject(current) ? current : undefined;
-};
-
-/**
- * Strip a template-union wrapper (`anyOf: [<concrete>, { $ref: __workflowTemplateValue }]`)
- * added by the `template` transform, returning the single concrete branch. Nodes
- * that are not wrappers (e.g. the pristine composed schema) pass through unchanged,
- * so introspection works on both composed and transformed documents.
- */
-const unwrapTemplate = (node: JsonValue | undefined): JsonValue | undefined => {
-  if (isObject(node) && Array.isArray(node.anyOf)) {
-    const isTemplateRef = (candidate: JsonValue): boolean =>
-      isObject(candidate) &&
-      typeof candidate.$ref === 'string' &&
-      candidate.$ref.endsWith(`/${TEMPLATE_VALUE_DEF_NAME}`);
-    const concrete = node.anyOf.filter((branch) => !isTemplateRef(branch));
-    if (concrete.length === 1 && concrete.length !== node.anyOf.length) {
-      return concrete[0];
-    }
-  }
-  return node;
-};
+import { isObject, resolveLocalRef, resolveTopLevelUnion, unwrapTemplate } from './schema_helpers';
 
 /**
  * Collect string literals from a discriminator `type` node: a bare `const`, an
@@ -116,27 +77,6 @@ const collectUnionDiscriminators = (
 
   visitMember(unionNode);
   return [...out].sort();
-};
-
-/**
- * Resolve the discriminated union backing a top-level array property (`steps` or
- * `triggers`). The property is an array whose `items` is a `$ref` (or inline
- * union); this returns that union node.
- */
-const resolveTopLevelUnion = (root: JsonObject, propertyName: string): JsonValue | undefined => {
-  const properties = root.properties;
-  if (!isObject(properties)) {
-    return undefined;
-  }
-  const propertyNode = unwrapTemplate(properties[propertyName]);
-  if (!isObject(propertyNode)) {
-    return undefined;
-  }
-  let items = unwrapTemplate(propertyNode.items) ?? propertyNode;
-  if (isObject(items) && typeof items.$ref === 'string') {
-    items = resolveLocalRef(root, items.$ref) ?? items;
-  }
-  return items;
 };
 
 /**

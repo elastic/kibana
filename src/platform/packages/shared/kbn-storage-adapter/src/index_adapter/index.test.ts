@@ -242,6 +242,35 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
+  it('forwards priority to the index template when set', async () => {
+    const adapter = new StorageIndexAdapter(
+      esClient,
+      loggerMock,
+      { ...storageSettings, priority: 600 },
+      { isServerless: true }
+    );
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ priority: 600 })
+    );
+  });
+
+  it('omits priority from the index template when unset', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ priority: expect.anything() })
+    );
+  });
+
   it('omits index template settings when isServerless option is true', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
       isServerless: true,

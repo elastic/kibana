@@ -12,6 +12,7 @@ import {
   buildReferences,
   getDataSourceIndex,
   getAdHocDataViewSpec,
+  generateAdHocDataViewId,
   addLayerColumn,
   operationFromColumn,
   buildDataSourceState,
@@ -28,7 +29,7 @@ import type {
   FormBasedLayer,
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
-import type { TextBasedLayer } from '@kbn/lens-common';
+import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
@@ -259,7 +260,7 @@ describe('addLayerColumn', () => {
     expect(layer.columnOrder).toEqual(['metric_reference', 'metric', 'existing']);
   });
 
-  test('adds column with postfix and reference', () => {
+  test('adds column with reference', () => {
     const layer: PersistedIndexPatternLayer = {
       columns: {},
       columnOrder: [],
@@ -281,7 +282,7 @@ describe('addLayerColumn', () => {
       isBucketed: false,
     };
 
-    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], false, '_trendline');
+    addLayerColumn(layer, 'metric_trendline', [parentColumn, referenceColumn], false);
 
     expect(layer.columns.metric_trendline).toBeDefined();
     expect(layer.columns.metric_trendline_reference).toBeDefined();
@@ -353,6 +354,55 @@ describe('buildDatasourceStates', () => {
         },
       }
     `);
+  });
+
+  describe('ES|QL Control Variable reconstruction', () => {
+    const buildEsqlColumns = (
+      query: string,
+      columns: TextBasedLayerColumn[]
+    ): TextBasedLayerColumn[] => {
+      const results = buildDatasourceStates(
+        {
+          type: 'metric',
+          title: 'test',
+          data_source: { type: 'esql', query },
+          metrics: [{ type: 'primary', label: 'test', column: 'test' }],
+          styling: { primary: { value: { sizing: 'auto' } } },
+          sampling: 1,
+          ignore_global_filters: true,
+        },
+        () => undefined,
+        () => columns
+      );
+      const layers = results.layers.textBased?.layers ?? {};
+      return Object.values(layers).flatMap((layer) => layer.columns);
+    };
+
+    it('stamps `variable` (prefix stripped) on a column backed by a genuine Identifier Control', () => {
+      const columns = buildEsqlColumns('FROM logs | STATS COUNT(*) BY ??field', [
+        { columnId: 'a', fieldName: '??field' },
+        { columnId: 'b', fieldName: 'COUNT(*)' },
+      ]);
+
+      expect(columns.find((c) => c.fieldName === '??field')?.variable).toBe('field');
+      expect(columns.find((c) => c.fieldName === 'COUNT(*)')?.variable).toBeUndefined();
+    });
+
+    it('does NOT stamp `variable` on a real column merely named `??x` (not a query parameter)', () => {
+      const columns = buildEsqlColumns('FROM logs | EVAL `??x` = bytes | STATS m = SUM(`??x`)', [
+        { columnId: 'a', fieldName: '??x' },
+      ]);
+
+      expect(columns.find((c) => c.fieldName === '??x')?.variable).toBeUndefined();
+    });
+
+    it('does NOT stamp `variable` for Value (`?`) controls (they are literals, not columns)', () => {
+      const columns = buildEsqlColumns('FROM logs | WHERE os == ?os | STATS COUNT(*)', [
+        { columnId: 'a', fieldName: 'COUNT(*)' },
+      ]);
+
+      expect(columns.every((c) => c.variable === undefined)).toBe(true);
+    });
   });
 });
 
@@ -773,7 +823,8 @@ describe('filtersAndQueryToLensState', () => {
 
     const result = filtersAndQueryToLensState(apiState, []);
 
-    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    // ES|QL data-source queries are never mirrored into the top-level slot
+    expect(result.query).toBeUndefined();
     expect(result.filters).toHaveLength(2);
     expect(result.references).toHaveLength(1);
     expect(result.filters).toMatchObject([
@@ -815,7 +866,8 @@ describe('filtersAndQueryToLensState', () => {
 
     const result = filtersAndQueryToLensState(apiState, []);
 
-    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    // ES|QL data-source queries are never mirrored into the top-level slot
+    expect(result.query).toBeUndefined();
     expect(result.filters).toEqual([]);
     expect(result.references).toEqual([]);
   });
@@ -948,10 +1000,145 @@ describe('filtersAndQueryToApiFormat', () => {
   test('should not include filters if empty and query if ES|QL', () => {
     const lensState = {
       state: { filters: [] as Filter[], query: { esql: 'FROM ...' } as AggregateQuery },
-    } as LensAttributes;
+    } as unknown as LensAttributes;
 
     const result = filtersAndQueryToApiFormat(lensState);
 
     expect(result).toEqual({});
+  });
+});
+
+describe('generateAdHocDataViewId', () => {
+  test('form-based data views differing only in name get distinct ids', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs A',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs B',
+    });
+
+    expect(idA).not.toBe(idB);
+    // Both keep the readable `index-timeField` base
+    expect(idA.startsWith('logs-*-@timestamp-')).toBe(true);
+    expect(idB.startsWith('logs-*-@timestamp-')).toBe(true);
+  });
+
+  test('identical form-based data views share the same base-<hash> id', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs',
+    });
+
+    expect(idA).toBe(idB);
+  });
+
+  test('form-based data views over the same index+timeField but different field settings get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutRuntimeField = generateAdHocDataViewId(base);
+    const withRuntimeField = generateAdHocDataViewId({
+      ...base,
+      fieldSettings: {
+        my_runtime_field: { type: 'keyword', script: "emit('x')" },
+      },
+    });
+
+    expect(withoutRuntimeField).not.toBe(withRuntimeField);
+  });
+
+  test('form-based data views over the same index+timeField but different allowHidden get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutAllowHidden = generateAdHocDataViewId(base);
+    const withAllowHidden = generateAdHocDataViewId({
+      ...base,
+      allowHidden: true,
+    });
+
+    expect(withoutAllowHidden).not.toBe(withAllowHidden);
+  });
+
+  test('form-based data views with name undefined === name === index, get the same id', () => {
+    const noName = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const nameEqualsIndex = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'logs-*',
+    });
+
+    expect(noName).toBe(nameEqualsIndex);
+  });
+
+  test('form-based data views with allowHidden false === allowHidden omitted, get the same id', () => {
+    const omitted = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const explicitFalse = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      allowHidden: false,
+    });
+
+    expect(explicitFalse).toBe(omitted);
+  });
+
+  test('form-based data views with empty field settings === no field settings, get the same id', () => {
+    const noFieldSettings = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const emptyFieldSettings = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      fieldSettings: {},
+    });
+
+    expect(emptyFieldSettings).toBe(noFieldSettings);
+  });
+
+  test('ES|QL data views with an explicit time field keep the readable base id (no canonical hash)', () => {
+    const id = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-*',
+    });
+
+    expect(id).toBe('logs-*-@timestamp');
+  });
+
+  test('ES|QL data views without an explicit time field disambiguate distinct queries by query hash', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: undefined,
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-* | LIMIT 10',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: undefined,
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-* | LIMIT 20',
+    });
+
+    expect(idA).not.toBe(idB);
   });
 });

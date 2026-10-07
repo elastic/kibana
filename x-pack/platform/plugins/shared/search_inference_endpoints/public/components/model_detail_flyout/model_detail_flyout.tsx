@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiToolTip,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -33,6 +32,7 @@ import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
+  isReasoningEffortLevel,
 } from '../../../common/type_guards';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
@@ -43,15 +43,17 @@ import {
   getModelEOLDate,
   getModelReleaseDate,
   getModelStatus,
-  getRegionZoneCounts,
+  getRegionOptions,
 } from '../../utils/eis_utils';
-import { REGION_DISPLAY_NAMES } from '../../../common/constants';
+import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
+import { ModelEolCallout } from './model_eol_callout';
+import { ModelInfoCallout } from './model_info_callout';
+import { ModelUnavailableCallout } from './model_unavailable_callout';
+import { RegionOptions } from './region_options';
 import type { EisInferenceEndpoint } from '../../../common/types';
-import { useInferencePreferencesEnabled } from '../../feature_flag';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
-
-const TOOLTIP_MAX_VISIBLE_REGIONS = 5;
+import { DataRetention } from './data_retention';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -61,6 +63,7 @@ export interface ModelDetailFlyoutProps {
   onDeleteEndpoint?: (endpoint: EisInferenceEndpoint) => void;
   onCopyEndpointId: (id: string) => void;
   canManage?: boolean;
+  onManageRegions?: () => void;
 }
 
 export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
@@ -71,12 +74,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   onDeleteEndpoint,
   onCopyEndpointId,
   canManage = true,
+  onManageRegions,
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
   const usageTracker = useUsageTracker();
-  const showRegions = useInferencePreferencesEnabled();
 
   useEffect(() => {
     usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
@@ -90,7 +93,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     modelMetadata,
     modelReleaseDate,
     modelEOLDate,
-    regionZoneCounts,
+    regionOptions,
   } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
@@ -110,7 +113,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       modelMetadata: endpointModelMetadata,
       modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
       modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
-      regionZoneCounts: getRegionZoneCounts(filtered, allEndpoints),
+      regionOptions: getRegionOptions(filtered),
     };
   }, [allEndpoints, modelId]);
 
@@ -148,6 +151,18 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     setEditingEndpoint(undefined);
   }, [usageTracker, editingEndpoint]);
 
+  const isBlocked = isModelUnavailableUnderRegionPolicy(endpoints, modelId);
+  const canShowLifecycleCallout = !isBlocked;
+  const showEolCallout = canShowLifecycleCallout && modelStatus === EisModelStatus.DeprecatedEOL;
+  const showPreviewCallout = canShowLifecycleCallout && modelStatus === EisModelStatus.Preview;
+  const showLifecycleCallout = showEolCallout || showPreviewCallout;
+  const showCalloutSpacer = isBlocked || showLifecycleCallout;
+
+  const initialReasoningEffort = useMemo(() => {
+    const effort = editingEndpoint?.task_settings?.reasoning?.effort;
+    return isReasoningEffortLevel(effort) ? effort : undefined;
+  }, [editingEndpoint]);
+
   const descriptionListItems = [
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelAuthorLabel', {
@@ -167,67 +182,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelEOLDate,
     },
-    ...(showRegions && regionZoneCounts.length > 0
-      ? [
-          {
-            title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.regionsLabel', {
-              defaultMessage: 'Regions',
-            }),
-            description: (
-              <EuiBadgeGroup data-test-subj="flyoutRegionBadges">
-                {regionZoneCounts.map(({ geo, modelCount, totalCount, modelRegions, geoOnly }) =>
-                  geoOnly ? (
-                    <EuiToolTip
-                      key={geo}
-                      content={i18n.translate(
-                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.geoOnly',
-                        {
-                          defaultMessage: 'Available in the {geo} zone',
-                          values: { geo: geo.toUpperCase() },
-                        }
-                      )}
-                    >
-                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
-                        {geo.toUpperCase()}
-                      </EuiBadge>
-                    </EuiToolTip>
-                  ) : (
-                    <EuiToolTip
-                      key={geo}
-                      title={i18n.translate(
-                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
-                        {
-                          defaultMessage: 'Available in {count} of {total} regions',
-                          values: { count: modelCount, total: totalCount },
-                        }
-                      )}
-                      content={(() => {
-                        const names = modelRegions.map(
-                          (r) => REGION_DISPLAY_NAMES[`${r.csp}::${r.region}`] ?? r.region
-                        );
-                        const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
-                        return names.length > TOOLTIP_MAX_VISIBLE_REGIONS
-                          ? `${visible} ${i18n.translate(
-                              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
-                              {
-                                defaultMessage: 'and {count} more',
-                                values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
-                              }
-                            )}`
-                          : visible;
-                      })()}
-                    >
-                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
-                        {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
-                      </EuiBadge>
-                    </EuiToolTip>
-                  )
-                )}
-              </EuiBadgeGroup>
-            ),
-          },
-        ]
-      : []),
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.dataRetentionLabel', {
+        defaultMessage: 'Data retention',
+      }),
+      description: <DataRetention metadata={modelMetadata} />,
+    },
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
         defaultMessage: 'Documentation',
@@ -269,6 +229,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {isBlocked && (
+          <ModelUnavailableCallout onManageRegions={canManage ? onManageRegions : undefined} />
+        )}
+        {showEolCallout && <ModelEolCallout eolDate={modelEOLDate} />}
+        {showPreviewCallout && <ModelInfoCallout />}
+        {showCalloutSpacer && <EuiSpacer size="m" />}
         <EuiDescriptionList
           type="column"
           compressed
@@ -276,6 +242,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           listItems={descriptionListItems}
           data-test-subj="flyoutModelDetails"
         />
+        <RegionOptions options={regionOptions} />
 
         <EuiHorizontalRule margin="xxl" />
 
@@ -296,7 +263,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     color="text"
                     onClick={handleOpenAddModal}
                     disabled={modelStatus === EisModelStatus.DeprecatedEOL}
@@ -348,6 +315,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           taskTypes={taskTypeOptions}
           initialEndpointId={editingEndpoint?.inference_id}
           initialTaskType={editingEndpoint?.task_type}
+          initialReasoningEffort={initialReasoningEffort}
           onSave={onSaveEndpoint}
           onCancel={handleCloseModal}
         />

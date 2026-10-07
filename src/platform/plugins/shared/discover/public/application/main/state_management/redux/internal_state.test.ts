@@ -8,6 +8,8 @@
  */
 
 import { ExistenceFetchStatus } from '@kbn/unified-field-list';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import {
   createTabItem,
@@ -18,7 +20,11 @@ import {
   selectTab,
 } from '.';
 import { discardFlyoutsOnTabChange } from './internal_state';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  buildDataViewMock,
+  dataViewMock,
+  deepMockedFields,
+} from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { selectDataSourceProfileId } from './runtime_state';
@@ -34,8 +40,12 @@ describe('InternalStateStore', () => {
       store: toolkit.internalState,
       runtimeStateManager: toolkit.runtimeStateManager,
       initializeSingleTab: toolkit.initializeSingleTab,
+      services: toolkit.services,
     };
   };
+
+  const registerEsqlSource = (source: EsqlSource) =>
+    registerEsqlSourceInDataViewsCache(createMockDataViewsService(), source);
 
   it('should set data view', async () => {
     const { store, runtimeStateManager } = await setup();
@@ -47,6 +57,90 @@ describe('InternalStateStore', () => {
     expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
       dataViewMock
     );
+  });
+
+  it('should clear expandedDoc when setDataView is called with a different data view id', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    const differentDataView = buildDataViewMock({
+      id: 'different-data-view-id',
+      fields: deepMockedFields,
+    });
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: differentDataView }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
+  });
+
+  it('should not clear expandedDoc when setDataView is called with the same data view id', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+  });
+
+  it('should not clear expandedDoc when ES|QL DataView id changes but the dataset is the same', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const descSource = await EsqlSource.create({
+      query: 'FROM logstash-* | SORT @timestamp DESC',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const ascSource = await EsqlSource.create({
+      query: 'FROM logstash-* | SORT @timestamp ASC',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const esqlDataView = await registerEsqlSource(descSource);
+    await registerEsqlSource(ascSource);
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, esqlDataView);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: descSource }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: ascSource }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+  });
+
+  it('should clear expandedDoc when ES|QL DataView index pattern changes', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const logsSource = await EsqlSource.create({
+      query: 'FROM logstash-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const metricsSource = await EsqlSource.create({
+      query: 'FROM metrics-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const esqlDataView = await registerEsqlSource(logsSource);
+    await registerEsqlSource(metricsSource);
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, esqlDataView);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: logsSource }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: metricsSource }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
   });
 
   it('should append a new tab to the tabs list', async () => {
@@ -218,25 +312,25 @@ describe('InternalStateStore', () => {
       })
     );
 
-    const prevDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+    const prevProfileAppStateDefaults = selectTab(store.getState(), tabId).profileAppStateDefaults;
 
     store.dispatch(
-      internalStateActions.setProfileStateFieldsToReset({
+      internalStateActions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
     );
 
-    const nextDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+    const nextProfileAppStateDefaults = selectTab(store.getState(), tabId).profileAppStateDefaults;
 
-    expect(nextDefaultProfileState.fieldsToReset).toBe('all');
-    expect(typeof nextDefaultProfileState.resetId).toBe('string');
-    expect(nextDefaultProfileState.resetId).not.toBe('');
-    expect(nextDefaultProfileState.resetId).not.toBe(prevDefaultProfileState.resetId);
-    expect(nextDefaultProfileState.snapshotsByProfileId).toBe(
-      prevDefaultProfileState.snapshotsByProfileId
+    expect(nextProfileAppStateDefaults.fieldsToReset).toBe('all');
+    expect(typeof nextProfileAppStateDefaults.resetId).toBe('string');
+    expect(nextProfileAppStateDefaults.resetId).not.toBe('');
+    expect(nextProfileAppStateDefaults.resetId).not.toBe(prevProfileAppStateDefaults.resetId);
+    expect(nextProfileAppStateDefaults.snapshotsByProfileId).toBe(
+      prevProfileAppStateDefaults.snapshotsByProfileId
     );
-    expect(nextDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+    expect(nextProfileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
       columns: ['field1'],
       rowHeight: 3,
     });
@@ -248,13 +342,13 @@ describe('InternalStateStore', () => {
     const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
     store.dispatch(
-      internalStateActions.setProfileStateFieldsToReset({
+      internalStateActions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: ['columns'],
       })
     );
 
-    const prevDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+    const prevProfileAppStateDefaults = selectTab(store.getState(), tabId).profileAppStateDefaults;
 
     store.dispatch(
       internalStateActions.setAppState({
@@ -265,11 +359,13 @@ describe('InternalStateStore', () => {
       })
     );
 
-    const nextDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+    const nextProfileAppStateDefaults = selectTab(store.getState(), tabId).profileAppStateDefaults;
 
-    expect(nextDefaultProfileState.fieldsToReset).toEqual(prevDefaultProfileState.fieldsToReset);
-    expect(nextDefaultProfileState.resetId).toBe(prevDefaultProfileState.resetId);
-    expect(nextDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+    expect(nextProfileAppStateDefaults.fieldsToReset).toEqual(
+      prevProfileAppStateDefaults.fieldsToReset
+    );
+    expect(nextProfileAppStateDefaults.resetId).toBe(prevProfileAppStateDefaults.resetId);
+    expect(nextProfileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
       columns: ['field1'],
     });
   });
@@ -301,13 +397,15 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).defaultProfileState.snapshotsByProfileId).toEqual({
-      [profileId]: {
-        columns: ['field2'],
-        rowHeight: 3,
-        breakdownField: 'extension',
-      },
-    });
+    expect(selectTab(store.getState(), tabId).profileAppStateDefaults.snapshotsByProfileId).toEqual(
+      {
+        [profileId]: {
+          columns: ['field2'],
+          rowHeight: 3,
+          breakdownField: 'extension',
+        },
+      }
+    );
   });
 
   it('should not update snapshotsByProfileId for system-triggered app state changes', async () => {
@@ -334,11 +432,13 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).defaultProfileState.snapshotsByProfileId).toEqual({
-      [profileId]: {
-        columns: ['field1'],
-      },
-    });
+    expect(selectTab(store.getState(), tabId).profileAppStateDefaults.snapshotsByProfileId).toEqual(
+      {
+        [profileId]: {
+          columns: ['field1'],
+        },
+      }
+    );
   });
 
   it('should reset fieldListExistingFieldsInfo for the tabs with the same dataViewId', async () => {
@@ -403,6 +503,9 @@ describe('InternalStateStore', () => {
     expect(tabsState.allIds).toHaveLength(3);
     expect(tabsState.byId[items[0].id].uiState).toMatchInlineSnapshot(`
       Object {
+        "esqlEditor": Object {
+          "isHistoryOpen": true,
+        },
         "fieldList": Object {
           "nameFilter": "field0",
         },
@@ -411,6 +514,9 @@ describe('InternalStateStore', () => {
     `);
     expect(tabsState.byId[items[1].id].uiState).toMatchInlineSnapshot(`
       Object {
+        "esqlEditor": Object {
+          "isHistoryOpen": true,
+        },
         "fieldList": Object {
           "nameFilter": "field1",
         },
@@ -430,6 +536,9 @@ describe('InternalStateStore', () => {
     `);
     expect(tabsState.byId[items[2].id].uiState).toMatchInlineSnapshot(`
       Object {
+        "esqlEditor": Object {
+          "isHistoryOpen": true,
+        },
         "fieldList": Object {
           "nameFilter": "field2",
         },
@@ -458,6 +567,38 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('test-grid');
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBe('Table');
+  });
+
+  it('should set expandedDocCascadePath for cascade owned flyouts', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const expandedDocCascadePath = {
+      nodePath: ['extension'],
+      nodePathMap: { extension: 'png' },
+    };
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: mockDoc,
+        expandedDocOwner: 'nested-grid',
+        expandedDocCascadePath,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toEqual(
+      expandedDocCascadePath
+    );
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: undefined,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toBeUndefined();
   });
 
   it('should default expandedDocOwner to the main grid when not provided', async () => {
@@ -604,6 +745,7 @@ describe('InternalStateStore', () => {
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toBeUndefined();
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBeUndefined();
   });

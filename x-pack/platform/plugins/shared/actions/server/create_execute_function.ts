@@ -35,6 +35,22 @@ export interface ExecuteOptions
   spaceId: string;
   apiKeyId?: string;
   apiKey: string | null;
+  /**
+   * Id of the UIAM API key in `apiKey`. Persisted so the alerting API key invalidation task can
+   * see this pending execution still needs the key; `apiKeyId` only ever holds an Elasticsearch
+   * key id, so a UIAM key stored there would be invisible to the in-use check.
+   *
+   * Callers must set this only when `apiKey` is that UIAM key. Setting it for an execution that
+   * authenticates with something else records a claim on a key the execution never presents,
+   * which keeps an otherwise unused key alive.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId: string;
   actionTypeId: string;
   priority?: TaskPriority;
@@ -174,6 +190,10 @@ export function createBulkExecutionEnqueuerFunction({
           consumer: actionToExecute.consumer,
           relatedSavedObjects: relatedSavedObjectWithRefs,
           apiKeyId: actionToExecute.apiKeyId,
+          ...(actionToExecute.uiamApiKeyId ? { uiamApiKeyId: actionToExecute.uiamApiKeyId } : {}),
+          ...(actionToExecute.uiamApiKeyExternal !== undefined
+            ? { uiamApiKeyExternal: actionToExecute.uiamApiKeyExternal }
+            : {}),
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,

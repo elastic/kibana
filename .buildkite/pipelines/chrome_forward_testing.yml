@@ -24,7 +24,6 @@ steps:
     soft_fail: true
     agents:
       machineType: n2-highcpu-8
-      diskSizeGb: 130
 
   - wait
 
@@ -65,6 +64,7 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      FTR_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -117,7 +117,6 @@ steps:
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -132,7 +131,6 @@ steps:
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -197,6 +195,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -385,7 +385,6 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -400,7 +399,6 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       machineType: n2-highmem-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -415,7 +413,6 @@ steps:
     label: 'Osquery Cypress Tests on Serverless'
     agents:
       machineType: n2-highmem-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -428,12 +425,9 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -445,12 +439,9 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75

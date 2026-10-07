@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { AgentlessConnectorsInfraService } from '@kbn/content-connectors-plugin/server/services';
-import { SavedObjectsClient } from '@kbn/core/server';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
@@ -59,6 +58,9 @@ import {
   isExpensiveQueriesNotAllowedException,
   isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
+
+const FLEET_AGENT_POLICIES_READ = 'fleet-agent-policies-read';
+const FLEET_AGENTS_READ = 'fleet-agents-read';
 
 export function registerConnectorRoutes({ router, log, getStartServices }: RouteDependencies) {
   router.post(
@@ -1041,8 +1043,11 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       path: '/internal/enterprise_search/{connectorId}/agentless_policy',
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
+          requiredPrivileges: [
+            {
+              anyRequired: [FLEET_AGENT_POLICIES_READ, FLEET_AGENTS_READ],
+            },
+          ],
         },
       },
       validate: {
@@ -1054,6 +1059,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { connectorId } = request.params;
       const { client } = (await context.core).elasticsearch;
+      const soClient = (await context.core).savedObjects.client;
 
       try {
         const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
@@ -1088,26 +1094,24 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           });
         }
 
-        const [_core, start] = await getStartServices();
-
-        const savedObjects = _core.savedObjects;
+        const [, start] = await getStartServices();
 
         const agentlessPoliciesService = start.fleet!.agentlessPoliciesService;
         const packagePolicyService = start.fleet!.packagePolicyService;
         const agentService = start.fleet!.agentService;
-
-        const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
 
         const service = new AgentlessConnectorsInfraService(
           soClient,
           client.asCurrentUser,
           packagePolicyService,
           agentlessPoliciesService,
-          agentService,
           log
         );
 
-        const policy = await service.getAgentPolicyForConnectorId({ connectorId });
+        const policy = await service.getAgentPolicyForConnectorId({
+          connectorId,
+          agentClient: agentService.asScoped(request),
+        });
 
         if (!policy) {
           return response.ok({

@@ -15,10 +15,12 @@ export function useFleetPermissions() {
 
   const canSaveIntegrations: boolean = Boolean(fleet?.authz.integrations.writeIntegrationPolicies);
   const canReadAgentPolicies = Boolean(fleet?.authz.fleet.readAgentPolicies);
+  const canReadAgents = Boolean(fleet?.authz.fleet.readAgents);
   const canCreateAgentPolicies = Boolean(fleet?.authz.fleet.all);
 
   return {
     canReadAgentPolicies,
+    canReadAgents,
     canSaveIntegrations,
     canCreateAgentPolicies,
   };

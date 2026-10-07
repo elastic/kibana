@@ -12,6 +12,7 @@ import type { monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowContextRegistry, YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
@@ -24,15 +25,22 @@ import type { GraphBuildErrorInfo } from '../../../entities/workflows/store/work
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { GetStepPropertyHandler } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/step_property/get_step_property_suggestions';
 import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
-import type { YamlValidationResult } from '../model/types';
+
+export type ConnectorTypesValidationState =
+  | { status: 'loading' }
+  | { status: 'ready'; value: Record<string, ConnectorTypeInfo> }
+  | { status: 'failed'; error: string };
 
 export interface WorkflowYamlValidationContext {
-  connectorTypes: Record<string, ConnectorTypeInfo> | null;
+  registry: WorkflowContextRegistry;
+  connectorTypes: ConnectorTypesValidationState;
   connectorsManagementUrl: string;
+  modelSettingsUrl?: string;
   workflows: WorkflowsResponse | null;
   getPropertyHandler: GetStepPropertyHandler;
   esqlCallbacks: ESQLCallbacks;
   signal?: AbortSignal;
+  warnIgnoredKibanaFetcher?: boolean;
 }
 
 export interface CollectFullWorkflowYamlValidationResultsParams {
@@ -62,12 +70,15 @@ export async function collectFullWorkflowYamlValidationResults({
   context,
 }: CollectFullWorkflowYamlValidationResultsParams): Promise<YamlValidationResult[]> {
   const {
+    registry,
     connectorTypes,
     connectorsManagementUrl,
+    modelSettingsUrl,
     workflows,
     getPropertyHandler,
     esqlCallbacks,
     signal,
+    warnIgnoredKibanaFetcher,
   } = context;
 
   const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
@@ -77,6 +88,7 @@ export async function collectFullWorkflowYamlValidationResults({
       : [];
 
   const results: YamlValidationResult[] = runWorkflowYamlValidations({
+    registry,
     yamlString,
     model,
     yamlDocument,
@@ -84,12 +96,20 @@ export async function collectFullWorkflowYamlValidationResults({
     workflowLookup,
     workflowGraph,
     workflowDefinition,
+    warnIgnoredKibanaFetcher,
   });
 
-  results.push(
-    ...validateConnectorIds(connectorIdItems, connectorTypes, connectorsManagementUrl),
-    ...validateGraphBuild(graphBuildError, workflowLookup, lineCounter)
-  );
+  if (connectorTypes.status === 'ready') {
+    results.push(
+      ...validateConnectorIds(
+        connectorIdItems,
+        connectorTypes.value,
+        connectorsManagementUrl,
+        modelSettingsUrl
+      )
+    );
+  }
+  results.push(...validateGraphBuild(graphBuildError, workflowLookup, lineCounter));
 
   if (stepPropertyItems.length > 0) {
     results.push(...(await validateStepProperties(stepPropertyItems)));

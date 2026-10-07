@@ -11,7 +11,6 @@ import { type Observable, distinctUntilChanged, map, skip } from 'rxjs';
 import { isEqual } from 'lodash';
 import { type GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
-import type { AnyAction, ThunkDispatch } from 'redux-toolkit-v1';
 import {
   internalStateActions,
   selectCurrentProfileStateDefinition,
@@ -21,10 +20,12 @@ import {
   type DiscoverAppState,
   type DiscoverInternalState,
   type InternalStateDependencies,
+  type InternalStateDispatch,
 } from '../redux';
 import { internalStateSlice } from '../redux/internal_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../common/context_awareness';
+import { isTimeRangeValid } from '../../../../utils/validate_time';
 
 /**
  * Create observables and state containers for 2-directional syncing of appState and globalState with the URL
@@ -38,7 +39,7 @@ export const createUrlSyncObservables = ({
   services,
 }: {
   tabId: string;
-  dispatch: ThunkDispatch<DiscoverInternalState, InternalStateDependencies, AnyAction>;
+  dispatch: InternalStateDispatch;
   getState: () => DiscoverInternalState;
   internalState$: Observable<DiscoverInternalState>;
   runtimeStateManager: InternalStateDependencies['runtimeStateManager'];
@@ -89,12 +90,15 @@ export const createUrlSyncObservables = ({
       }
 
       const { time: timeRange, refreshInterval, filters } = state;
+      const normalizedTimeRange = isTimeRangeValid(timeRange)
+        ? timeRange
+        : services.timefilter.getTimeDefaults();
 
       dispatch(
         internalStateActions.setGlobalState({
           tabId,
           globalState: {
-            timeRange,
+            timeRange: normalizedTimeRange,
             refreshInterval,
             filters,
           },

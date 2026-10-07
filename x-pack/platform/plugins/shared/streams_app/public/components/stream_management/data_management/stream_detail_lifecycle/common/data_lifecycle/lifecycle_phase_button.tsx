@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useIsDarkMode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { getInteractivePanelStyles } from './interactive_panel_styles';
@@ -42,7 +42,9 @@ export const LifecyclePhaseButton = ({
   disableInteractions = false,
   showWarningIcon = false,
 }: LifecyclePhaseButtonProps) => {
+  const isDarkMode = useIsDarkMode();
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+  const backgroundColor = phaseColor ?? euiTheme.colors.backgroundBaseSubdued;
   // While any lifecycle-editing flyout is open the timeline is in preview mode, where the stored
   // sizes (which describe the currently applied lifecycle) would be misleading.
   const showSize = Boolean(size) && !isEditLifecycleFlyoutOpen && !disableInteractions;
@@ -71,7 +73,8 @@ export const LifecyclePhaseButton = ({
       onClick={onClick}
       css={getInteractivePanelStyles({
         euiTheme,
-        backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
+        isDarkMode,
+        backgroundColor,
         isPopoverOpen: isPopoverOpen || isBeingEdited,
         minHeight: '48px',
         fullSize: true,
@@ -129,7 +132,6 @@ export const LifecyclePhaseButton = ({
               <EuiText
                 size="xs"
                 color={euiTheme.colors.plainDark}
-                data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
                 css={{
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -137,20 +139,21 @@ export const LifecyclePhaseButton = ({
                   maxWidth: '100%',
                   fontWeight: euiTheme.font.weight.semiBold,
                 }}
+                data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
               >
                 {capitalize(label)}
               </EuiText>
               <EuiText
                 size="xs"
                 color={euiTheme.colors.plainDark}
-                data-test-subj={showSize ? `${prefix}lifecyclePhase-${label}-size` : undefined}
-                title={showSize ? size : undefined}
                 css={{
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   maxWidth: '100%',
                 }}
+                data-test-subj={showSize ? `${prefix}lifecyclePhase-${label}-size` : undefined}
+                title={showSize ? size : undefined}
               >
                 {showSize ? size : null}
               </EuiText>

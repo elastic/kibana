@@ -31,5 +31,18 @@ process.stdout.write(
     id: suite.id,
     name: suite.name,
     slackChannel: suite.slackChannel,
+    // Shard `specFiles` are relative to this file's directory, so the fanout needs it to check them.
+    configPath: suite.configPath,
+    shards: Array.isArray(suite.shards) ? suite.shards : [],
+    stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
+    scoutHook: suite.scoutHook,
+    scoutArch: suite.scoutArch,
+    scoutDomain: suite.scoutDomain,
+    // Per-spec model config and the suite-level fallback, so `get_fanout_matrix.js` can resolve each
+    // spec's models without re-reading the suites config.
+    specModelGroups: Array.isArray(suite.specModelGroups) ? suite.specModelGroups : [],
+    weeklyEisModelGroups: Array.isArray(suite.weeklyEisModelGroups)
+      ? suite.weeklyEisModelGroups
+      : [],
   })
 );

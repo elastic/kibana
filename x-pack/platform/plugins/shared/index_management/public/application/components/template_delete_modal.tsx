@@ -8,7 +8,6 @@
 import React, { Fragment, useState } from 'react';
 import {
   EuiConfirmModal,
-  EuiCallOut,
   EuiCheckbox,
   EuiBadge,
   EuiSpacer,
@@ -17,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { DeleteManagedAssetsCallout } from '@kbn/delete-managed-asset-callout';
 import { deleteTemplates } from '../services/api';
 import { useServices } from '../app_context';
@@ -174,7 +174,7 @@ export const TemplateDeleteModal = ({
           ))}
         </ul>
         {hasSystemTemplate && (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -182,17 +182,15 @@ export const TemplateDeleteModal = ({
                 defaultMessage="Deleting a system template can break Kibana"
               />
             }
-            color="danger"
-            iconType="warning"
             data-test-subj="deleteSystemTemplateCallOut"
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutDescription"
                 defaultMessage="System templates are critical for internal operations.
                   If you delete this template, you can’t recover it."
               />
-            </p>
+            }
+          >
             <EuiCheckbox
               id="confirmDeleteTemplatesCheckbox"
               label={
@@ -204,7 +202,7 @@ export const TemplateDeleteModal = ({
               checked={isDeleteConfirmed}
               onChange={(e) => setIsDeleteConfirmed(e.target.checked)}
             />
-          </EuiCallOut>
+          </KbnDangerCallout>
         )}
       </Fragment>
     </EuiConfirmModal>

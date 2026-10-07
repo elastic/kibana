@@ -29,6 +29,7 @@ import type {
   IContextContainer,
   IContextProvider,
   IRouter,
+  HttpSelfUnauthorizedErrorHandler,
 } from '@kbn/core-http-server';
 import type {
   InternalContextSetup,
@@ -55,7 +56,11 @@ import type {
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 import type { ExternalUrlConfigType } from './external_url';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
-import { createInternalHttpSelfClient } from './self_client';
+import {
+  createInternalHttpSelfClient,
+  type InternalHttpSelfService,
+  type SelfClientUiamAttestationGetter,
+} from './self_client';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -79,6 +84,10 @@ export class HttpService
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
+  private currentConfig?: HttpConfig;
+  private selfClient?: InternalHttpSelfService;
+  private selfClientUiamAttestationGetter?: SelfClientUiamAttestationGetter;
+  private selfClientUnauthorizedErrorHandler?: HttpSelfUnauthorizedErrorHandler;
 
   private readonly log: Logger;
   private readonly env: Env;
@@ -181,7 +190,8 @@ export class HttpService
 
   public async setup(deps: SetupDeps): Promise<InternalHttpServiceSetup> {
     this.requestHandlerContext = deps.context.createContextContainer();
-    this.configSubscription = this.config$.subscribe(() => {
+    this.configSubscription = this.config$.subscribe((config) => {
+      this.currentConfig = config;
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
         // to it, so we warn and don't allow the config to pass through.
@@ -192,6 +202,7 @@ export class HttpService
     });
 
     const config = await firstValueFrom(this.config$);
+    this.currentConfig = config;
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup({
       config$: this.config$,
@@ -209,6 +220,12 @@ export class HttpService
         Router.on('onPostValidate', cb);
       },
       getRegisteredDeprecatedApis: () => serverContract.getDeprecatedRoutes(),
+      setSelfClientUnauthorizedErrorHandler: (handler) => {
+        if (this.selfClientUnauthorizedErrorHandler) {
+          throw new Error('The self client unauthorized error handler was already set');
+        }
+        this.selfClientUnauthorizedErrorHandler = handler;
+      },
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
@@ -245,21 +262,30 @@ export class HttpService
       ...pick(internalSetup, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
-      selfClient: createInternalHttpSelfClient({
+      selfClient: (this.selfClient ??= createInternalHttpSelfClient({
         authRequestHeaders: internalSetup.authRequestHeaders,
         basePath: internalSetup.basePath,
         getServerInfo: internalSetup.getServerInfo,
+        getHttpConfig: () => this.currentConfig!,
         kibanaVersion: this.env.packageInfo.version,
+        log: this.log.get('self-client'),
         target: internalSetup.config.selfHttp.target,
-      }),
+        // Resolved at call time: both are registered after the start contract is built.
+        getUiamAttestationGetter: () => this.selfClientUiamAttestationGetter,
+        getUnauthorizedErrorHandler: () => this.selfClientUnauthorizedErrorHandler,
+      })),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);
+      },
+      setSelfClientUiamAttestationGetter: (getter) => {
+        this.selfClientUiamAttestationGetter = getter;
       },
     };
   }
 
   public async start() {
     const config = await firstValueFrom(this.config$);
+
     if (this.shouldListen(config)) {
       this.log.debug('stopping preboot server');
       await this.prebootServer.stop();
@@ -397,6 +423,8 @@ export class HttpService
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
+    await this.selfClient?.close();
+    this.selfClient = undefined;
   }
 }
 

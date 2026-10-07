@@ -8,12 +8,13 @@
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   MAX_EMBEDDED_RULES_PER_ITEM,
+  MAX_EMBEDDED_ALERTS_PER_ITEM,
+  type DispatchFailureReason,
   type PolicyExecutionHistoryItem,
-  type PolicyExecutionOutcome,
   type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
+import { isSurfacedEventAction, toPolicyExecutionOutcome } from './outcome';
 
 export type { PolicyExecutionHistoryItem };
 
@@ -31,10 +32,6 @@ export interface ResolvedSearchIds {
 }
 
 export const isString = (v: unknown): v is string => typeof v === 'string';
-
-export const isPolicyOutcome = (action: unknown): action is PolicyExecutionOutcome =>
-  action === ACTION_POLICY_EVENT_ACTIONS.DISPATCHED ||
-  action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED;
 
 export function collectIdsFromEvents(events: IValidatedEvent[]): {
   policyIds: string[];
@@ -85,7 +82,7 @@ export function getRelevantRuleIdsFromLogEvent(
   allRuleIds: string[],
   matchingSearchIds?: ResolvedSearchIds,
   mandatoryRuleIds?: string[]
-): string[] {
+): string[] | null {
   const searchNarrows =
     matchingSearchIds !== undefined && !matchingSearchIds.policyIds.includes(policyId);
   const mandatoryActive = mandatoryRuleIds !== undefined && mandatoryRuleIds.length > 0;
@@ -94,12 +91,13 @@ export function getRelevantRuleIdsFromLogEvent(
     return allRuleIds;
   }
 
-  const relevantRuleIds = new Set<string>([
+  const relevantSet = new Set<string>([
     ...(searchNarrows ? matchingSearchIds.ruleIds : []),
     ...(mandatoryActive ? mandatoryRuleIds : []),
   ]);
 
-  return allRuleIds.filter((id) => relevantRuleIds.has(id));
+  const filtered = allRuleIds.filter((id) => relevantSet.has(id));
+  return filtered.length === 0 ? null : filtered;
 }
 
 /**
@@ -126,7 +124,7 @@ export function buildExecutionHistoryItem(
 
   const timestamp = event['@timestamp'];
   const action = event.event?.action;
-  if (!timestamp || !isPolicyOutcome(action)) return null;
+  if (!timestamp || !isSurfacedEventAction(action)) return null;
 
   const savedObjects = event.kibana?.saved_objects ?? [];
   const policyId = savedObjects.find((so) => so.type === ACTION_POLICY_SAVED_OBJECT_TYPE)?.id;
@@ -144,9 +142,9 @@ export function buildExecutionHistoryItem(
     matchingSearchIds,
     mandatoryRuleIds
   );
-  if (relevantRuleIds.length === 0) return null;
+  if (relevantRuleIds === null) return null;
 
-  const totalRuleCount = relevantRuleIds.length;
+  const ruleCount = relevantRuleIds.length;
   const rules = relevantRuleIds
     .slice(0, MAX_EMBEDDED_RULES_PER_ITEM)
     .map((id) => ({ id, name: ruleNames.get(id) ?? null }));
@@ -155,14 +153,26 @@ export function buildExecutionHistoryItem(
     .filter(isString)
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
+  const alertIds = (dispatcher.alert_ids ?? []).filter(isString);
+  const alerts = alertIds.slice(0, MAX_EMBEDDED_ALERTS_PER_ITEM).map((id) => ({ id }));
+
+  const failureReason = dispatcher.failure_reason;
+  const errorMessage = event.error?.message;
+
   return {
-    '@timestamp': timestamp,
+    dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
-    outcome: action,
-    episode_count: Number(dispatcher.episode_count ?? 0),
+    outcome: toPolicyExecutionOutcome(action),
+    alert_count: Number(dispatcher.alert_count ?? 0),
+    alerts,
     action_group_count: Number(dispatcher.action_group_count ?? 0),
     rules,
-    totalRuleCount,
+    rule_count: ruleCount,
     workflows,
+    failure_reason: failureReason as DispatchFailureReason | undefined,
+    error:
+      errorMessage !== undefined
+        ? { message: errorMessage, stack_trace: event.error?.stack_trace ?? null }
+        : null,
   };
 }

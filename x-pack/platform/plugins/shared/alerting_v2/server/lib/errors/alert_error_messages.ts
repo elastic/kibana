@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-export const getAlertEventNotFoundMessage = (groupHash: string, episodeId?: string): string =>
-  `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`;
+export const getAlertSeriesNotFoundMessage = (groupHash: string): string =>
+  `Alert series with group_hash [${groupHash}] not found`;
+
+export const getAlertEpisodeNotFoundMessage = (episodeId: string): string =>
+  `Alert with alert_id [${episodeId}] not found`;
+
+export const getEpisodeNotLatestMessage = (episodeId: string, groupHash: string): string =>
+  `Alert [${episodeId}] is not the latest alert for group [${groupHash}]`;
 
 export const getCannotActivateEpisodeMessage = (episodeId: string): string =>
-  `Cannot activate episode [${episodeId}]. It is already active`;
+  `Cannot activate alert [${episodeId}]. It is already active`;
 
 export const getCannotDeactivateEpisodeMessage = (episodeId: string): string =>
-  `Cannot deactivate episode [${episodeId}]. It is already inactive`;
+  `Cannot deactivate alert [${episodeId}]. It is already inactive`;

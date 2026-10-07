@@ -16,6 +16,13 @@ export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetup): 
   agentBuilder.tools.register({
     id: workflowTools.getExamples,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Workflow Examples',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Search and retrieve example workflow YAML files from the bundled library.
 
 **When to use:** Before generating workflow YAML, to learn correct syntax patterns for triggers, steps, inputs, on-failure handling, etc.

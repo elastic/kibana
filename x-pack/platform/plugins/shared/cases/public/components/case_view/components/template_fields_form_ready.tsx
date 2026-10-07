@@ -6,18 +6,25 @@
  */
 
 import type { FC, MutableRefObject } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { FieldValues } from 'react-hook-form';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, useFormState } from 'react-hook-form';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { getFieldCamelKey, getFieldSnakeKey } from '../../../../common/utils';
 import { FieldsRenderer } from '../../templates_v2/field_types/field_renderer';
+import { useSectionEdit } from '../../templates_v2/field_types/section_edit_context';
 import { getYamlDefaultAsString } from '../../templates_v2/utils';
 import type { OnUpdateFields } from '../types';
 
 export const EMPTY_EXTENDED_FIELDS: Record<string, unknown> = {};
+
+/** The snake-keyed extended fields whose value differs from the last saved one. */
+const getChangedKeys = (dirtyFields: FieldValues | undefined): string[] =>
+  Object.entries((dirtyFields?.[CASE_EXTENDED_FIELDS] ?? {}) as Record<string, boolean>)
+    .filter(([, isDirty]) => isDirty)
+    .map(([key]) => key);
 
 /**
  * Parses a CHECKBOX_GROUP form value (JSON string or plain array) into a `string[]`.
@@ -183,6 +190,60 @@ export const TemplateFieldsFormReady: FC<TemplateFieldsFormReadyProps> = ({
     };
   }, [formApiRef, form]);
 
+  // Present only inside a section that owns edit mode for every form in it (the redesigned sidebar).
+  // Its absence keeps the legacy case view on per-field confirm.
+  const sectionEdit = useSectionEdit();
+  const isSectionMode = !isBatchMode && sectionEdit != null;
+  const { dirtyFields } = useFormState({ control: form.control });
+
+  // Recomputed every render rather than memoized on `dirtyFields`: react-hook-form mutates that
+  // object in place, so its identity does not change when a field becomes dirty and a memo keyed on
+  // it would report zero changes forever.
+  const changedCount = getChangedKeys(dirtyFields).length;
+
+  const formId = useId();
+
+  const collect = useCallback(async () => {
+    const isValid = await form.trigger().catch(() => false);
+    if (!isValid) {
+      return null;
+    }
+    // Read the dirty set at call time rather than closing over it, so `collect` keeps a stable
+    // identity and the registration effect below does not re-run on every keystroke.
+    const keys = getChangedKeys(form.formState.dirtyFields);
+    const values = form.getValues(CASE_EXTENDED_FIELDS) as Record<string, unknown>;
+    return Object.fromEntries(keys.map((key) => [key, values[key]]));
+  }, [form]);
+
+  const commit = useCallback(() => {
+    form.reset(form.getValues());
+  }, [form]);
+
+  const resetToCommitted = useCallback(() => {
+    form.reset(initialDefaultValues);
+  }, [form, initialDefaultValues]);
+
+  useEffect(() => {
+    if (!isSectionMode || !sectionEdit) {
+      return;
+    }
+
+    sectionEdit.registerForm(formId, {
+      changedCount,
+      collect,
+      commit,
+      reset: resetToCommitted,
+    });
+  }, [isSectionMode, sectionEdit, formId, changedCount, collect, commit, resetToCommitted]);
+
+  const { unregisterForm } = sectionEdit ?? {};
+  useEffect(() => {
+    if (!isSectionMode || !unregisterForm) {
+      return;
+    }
+    return () => unregisterForm(formId);
+  }, [isSectionMode, unregisterForm, formId]);
+
   const inflightRef = useRef(false);
   const [savingFieldKey, setSavingFieldKey] = useState<string>();
 
@@ -192,7 +253,7 @@ export const TemplateFieldsFormReady: FC<TemplateFieldsFormReadyProps> = ({
   }, []);
 
   const persist = useCallback(
-    async (fieldName: string, fieldType: string) => {
+    async (fieldName: string, fieldType: string, onPersisted?: () => void) => {
       if (inflightRef.current) return;
       inflightRef.current = true;
       const snakeKey = getFieldSnakeKey(fieldName, fieldType);
@@ -211,6 +272,7 @@ export const TemplateFieldsFormReady: FC<TemplateFieldsFormReadyProps> = ({
         onSuccess: () => {
           form.resetField(path, { defaultValue: value });
           releaseLock();
+          onPersisted?.();
         },
         onError: releaseLock,
       });
@@ -224,9 +286,12 @@ export const TemplateFieldsFormReady: FC<TemplateFieldsFormReadyProps> = ({
         <FieldsRenderer
           resolvedFields={resolvedFields}
           // In batch mode no per-field confirm/cancel buttons are shown; FieldsRenderer
-          // already hides them when onFieldConfirm is undefined.
-          onFieldConfirm={isBatchMode ? undefined : persist}
-          savingFieldKey={isBatchMode ? undefined : savingFieldKey}
+          // already hides them when onFieldConfirm is undefined. Section mode replaces them with
+          // the section's own Save/Cancel bar.
+          onFieldConfirm={isBatchMode || isSectionMode ? undefined : persist}
+          savingFieldKey={isBatchMode || isSectionMode ? undefined : savingFieldKey}
+          viewMode={isSectionMode ? !sectionEdit?.isEditing : !isBatchMode}
+          onSectionEditRequest={isSectionMode ? sectionEdit?.requestEdit : undefined}
         />
       </div>
     </FormProvider>

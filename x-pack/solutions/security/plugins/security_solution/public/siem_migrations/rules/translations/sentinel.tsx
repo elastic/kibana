@@ -117,6 +117,55 @@ export const SENTINEL_RULE_MIGRATION_VENDOR_COPY: RuleMigrationVendorCopy = {
       { defaultMessage: 'Upload your watchlists export' }
     ),
   },
+  rulesFileUpload: {
+    description: i18n.translate(
+      'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.sentinel.description',
+      {
+        defaultMessage:
+          'Upload the Microsoft Sentinel ARM template JSON export containing your Analytics Rules.',
+      }
+    ),
+    prompt: i18n.translate(
+      'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.promptSentinel',
+      { defaultMessage: 'Select or drag and drop the exported JSON file' }
+    ),
+  },
+  copyExportQuery: {
+    description: (
+      <FormattedMessage
+        id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.description"
+        defaultMessage="In the Microsoft Azure portal, navigate to Microsoft Sentinel and open your workspace. Go to {analyticsRules}, select the rules you want to migrate, and click {export}. The downloaded JSON file contains your Analytics Rules and can be uploaded here."
+        values={{
+          analyticsRules: (
+            <b>
+              {i18n.translate(
+                'xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.analyticsRules',
+                { defaultMessage: 'Analytics' }
+              )}
+            </b>
+          ),
+          export: (
+            <b>
+              {i18n.translate(
+                'xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.export',
+                {
+                  defaultMessage: 'Export',
+                }
+              )}
+            </b>
+          ),
+        }}
+      />
+    ),
+    details: {
+      rulesTypeSupportCallout: (
+        <FormattedMessage
+          id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.rulesTypesupport"
+          defaultMessage="As of now only Scheduled & Near Real Time(NRT) rules are supported for migration. Please make sure your export file contains only these types of rules."
+        />
+      ),
+    },
+  },
   copyrightNotice: i18n.translate(
     'xpack.securitySolution.siemMigrations.common.sentinel.copyrightNotice',
     {

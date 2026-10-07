@@ -8,7 +8,6 @@
 import type { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { getExternalReferenceAttachmentRegular } from './attachments/external_reference';
 
 export type Setup = void;
 export type Start = void;
@@ -25,11 +24,10 @@ export interface CasesExamplePublicStartDeps {
 export class CasesFixturePlugin
   implements Plugin<Setup, Start, CasesExamplePublicSetupDeps, CasesExamplePublicStartDeps>
 {
-  public setup(core: CoreSetup<CasesExamplePublicStartDeps>, plugins: CasesExamplePublicSetupDeps) {
-    plugins.cases.attachmentFramework.registerExternalReference(
-      getExternalReferenceAttachmentRegular()
-    );
-
+  public setup(
+    core: CoreSetup<CasesExamplePublicStartDeps>,
+    _plugins: CasesExamplePublicSetupDeps
+  ) {
     core.application.register({
       id: 'cases_fixture',
       title: 'Cases Fixture App',

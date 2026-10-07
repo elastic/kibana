@@ -166,8 +166,14 @@ describe('getNormalizeCommonFields', () => {
         },
         namespace: 'test-namespace',
         version: '8.7.0',
+        maintenanceWindows: [
+          { id: 'mw-1', title: 'First maintenance window' },
+          { id: 'mw-2', title: 'Second maintenance window' },
+        ],
       };
-      const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
+      const normalizedFields = getNormalizeCommonFields(
+        config as unknown as NormalizedProjectProps
+      ); // typecasting to allow testing of invalid user configs
       expect(normalizedFields).toEqual({
         errors: [],
         normalizedFields: {
@@ -235,8 +241,9 @@ describe('getNormalizeCommonFields', () => {
       },
       namespace: 'test-namespace',
       version: '8.7.0',
+      maintenanceWindows: [{ id: 'mw-3', title: 'Maintenance window' }],
     };
-    const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
+    const normalizedFields = getNormalizeCommonFields(config as unknown as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
     expect(normalizedFields).toEqual({
       errors: [],
       normalizedFields: {
@@ -278,6 +285,74 @@ describe('getNormalizeCommonFields', () => {
         spaces: [],
       },
     });
+  });
+});
+
+describe('getNormalizeCommonFields - maintenance windows', () => {
+  const baseConfig = {
+    locations: [{ label: 'US North America', id: 'us_central', isServiceManaged: true }],
+    privateLocations: [],
+    projectId: 'test-projectId',
+    namespace: 'test-namespace',
+    version: '8.7.0',
+  };
+
+  const baseMonitor = {
+    name: 'A monitor',
+    id: 'test-id',
+    type: 'http',
+    urls: 'https://elastic.co',
+    locations: ['us_central'],
+    schedule: 3,
+  };
+
+  const maintenanceWindows = [
+    { id: 'mw-id-1', title: 'Weekend window' },
+    { id: 'mw-id-2', title: 'Nightly Deploy' },
+  ];
+
+  it('keeps valid maintenance window ids', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenanceWindows: ['mw-id-1'] },
+      maintenanceWindows,
+    };
+    const { normalizedFields } = getNormalizeCommonFields(
+      config as unknown as NormalizedProjectProps
+    );
+    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1']);
+  });
+
+  it('resolves maintenance window names to ids', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenanceWindows: ['Weekend window', 'mw-id-2'] },
+      maintenanceWindows,
+    };
+    const { normalizedFields } = getNormalizeCommonFields(
+      config as unknown as NormalizedProjectProps
+    );
+    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1', 'mw-id-2']);
+  });
+
+  it('throws when a referenced maintenance window is unavailable', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenanceWindows: ['mw-id-1'] },
+      maintenanceWindows: [],
+    };
+    expect(() => getNormalizeCommonFields(config as NormalizedProjectProps)).toThrow(/mw-id-1/);
+  });
+
+  it('throws for an unresolved maintenance window reference', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenanceWindows: ['does-not-exist'] },
+      maintenanceWindows,
+    };
+    expect(() => getNormalizeCommonFields(config as unknown as NormalizedProjectProps)).toThrow(
+      /does-not-exist/
+    );
   });
 });
 

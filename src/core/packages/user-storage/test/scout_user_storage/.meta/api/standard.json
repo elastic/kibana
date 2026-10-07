@@ -1,5 +1,8 @@
 {
-  "sha1": "eb6bb663863a8718657032f83bf7e2525559a742",
+  "sha1": "8612ccc3a00117b283c9c8d755a1fdbbc67a8005",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "d977273360e59b2-b2249e5a6068cfd",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/cross_space_read_only.spec.ts",
-        "line": 81,
-        "column": 12
+        "line": 76,
+        "column": 25
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/cross_space_read_only.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 104,
+        "column": 27
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 29,
-        "column": 10
+        "line": 22,
+        "column": 11
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 35,
-        "column": 10
+        "line": 25,
+        "column": 5
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 43,
-        "column": 10
+        "line": 30,
+        "column": 12
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 51,
-        "column": 10
+        "line": 35,
+        "column": 12
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 42,
+        "column": 11
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 67,
-        "column": 10
+        "line": 48,
+        "column": 5
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 73,
-        "column": 10
+        "line": 52,
+        "column": 12
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 86,
-        "column": 10
+        "line": 69,
+        "column": 12
       }
     },
     {
@@ -151,8 +154,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 94,
-        "column": 10
+        "line": 80,
+        "column": 22
       }
     },
     {
@@ -165,8 +168,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 102,
-        "column": 10
+        "line": 85,
+        "column": 75
       }
     },
     {
@@ -179,8 +182,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
-        "line": 111,
-        "column": 10
+        "line": 93,
+        "column": 61
       }
     },
     {
@@ -193,8 +196,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
-        "line": 26,
-        "column": 12
+        "line": 21,
+        "column": 50
       }
     },
     {
@@ -207,8 +210,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 7
       }
     },
     {
@@ -221,8 +224,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 26,
+        "column": 24
       }
     },
     {
@@ -235,8 +238,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 32,
+        "column": 5
       }
     },
     {
@@ -249,8 +252,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
-        "line": 55,
-        "column": 10
+        "line": 36,
+        "column": 23
       }
     },
     {
@@ -263,8 +266,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
-        "line": 66,
-        "column": 10
+        "line": 44,
+        "column": 5
       }
     },
     {
@@ -277,8 +280,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 29,
-        "column": 10
+        "line": 22,
+        "column": 11
       }
     },
     {
@@ -291,8 +294,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 37,
-        "column": 10
+        "line": 24,
+        "column": 19
       }
     },
     {
@@ -305,8 +308,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 46,
-        "column": 10
+        "line": 36,
+        "column": 84
       }
     },
     {
@@ -319,8 +322,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 54,
-        "column": 10
+        "line": 40,
+        "column": 20
       }
     },
     {
@@ -333,8 +336,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 63,
-        "column": 10
+        "line": 50,
+        "column": 12
       }
     },
     {
@@ -347,8 +350,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 72,
-        "column": 10
+        "line": 59,
+        "column": 12
       }
     },
     {
@@ -361,8 +364,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 77,
-        "column": 10
+        "line": 65,
+        "column": 33
       }
     },
     {
@@ -375,8 +378,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 82,
-        "column": 10
+        "line": 66,
+        "column": 41
       }
     },
     {
@@ -389,8 +392,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 89,
-        "column": 10
+        "line": 71,
+        "column": 65
       }
     },
     {
@@ -403,8 +406,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 96,
-        "column": 10
+        "line": 76,
+        "column": 63
       }
     },
     {
@@ -417,8 +420,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 103,
-        "column": 10
+        "line": 81,
+        "column": 50
       }
     },
     {
@@ -431,8 +434,8 @@
       ],
       "location": {
         "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
-        "line": 110,
-        "column": 10
+        "line": 86,
+        "column": 5
       }
     }
   ]

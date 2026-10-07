@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { rules as typescriptEslintRules } from '@typescript-eslint/eslint-plugin';
 import { PreferToastActionProps } from './rules/prefer_toast_action_props';
 import { PreferKbnUiCallout } from './rules/prefer_kbn_ui_callout';
+import { NoRestrictedPackageImports } from './rules/no_restricted_package_imports';
 
 /**
  * Custom ESLint rules for kbn-ui packages.
@@ -18,4 +20,8 @@ import { PreferKbnUiCallout } from './rules/prefer_kbn_ui_callout';
 export const rules = {
   prefer_toast_action_props: PreferToastActionProps,
   prefer_kbn_ui_callout: PreferKbnUiCallout,
+  no_restricted_package_imports: NoRestrictedPackageImports,
+  // `no-restricted-imports` under a separate name, so the kbn-ui allowlist adds to the
+  // repo-wide `no-restricted-imports` config instead of replacing it.
+  portable_imports: typescriptEslintRules['no-restricted-imports'],
 };

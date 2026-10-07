@@ -102,8 +102,9 @@ export const StreamlangYamlEditor = ({
     () =>
       getEditorPanelStyles({
         height,
+        euiTheme,
       }),
-    [height]
+    [height, euiTheme]
   );
 
   const containerStyles = useMemo(
@@ -329,7 +330,7 @@ export const StreamlangYamlEditor = ({
       // NOTE: Incredibly insidious but this must be false or the transforms
       // applied for shadows will break Monaco's fixed positioning for menus
       hasShadow={false}
-      borderRadius="none"
+      borderRadius="m"
       paddingSize="none"
       css={panelStyles}
       data-test-subj={dataTestSubj}

@@ -8,16 +8,18 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { RunTimeMappings } from '../../../../common/api/search_strategy';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { PageScope } from '../../../data_view_manager/constants';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
+import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { EventKind } from './constants/event_kinds';
 import { DocumentFlyout } from '.';
 import type { DocumentFlyoutWrapperProps } from './document_flyout_wrapper';
@@ -47,12 +49,18 @@ const DOCUMENT_NOT_FOUND = i18n.translate(
  * only the internal fetch strategy differs.
  */
 export const DocumentFlyoutWrapperFromPattern = memo(
-  ({ documentId, indexName, renderCellActions, onAlertUpdated }: DocumentFlyoutWrapperProps) => {
+  ({
+    documentId,
+    indexName,
+    renderCellActions,
+    onAlertUpdated,
+    dataTestSubj,
+  }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';
-    const isDataViewInvalid =
-      status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
+    const isDataViewInvalid = status === 'error';
+    const isDataViewDegraded = status === 'ready' && !dataView.hasMatchedIndices();
 
     const shouldSkipSearch = useMemo(
       () => isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView,
@@ -108,11 +116,26 @@ export const DocumentFlyoutWrapperFromPattern = memo(
 
     if (hit) {
       return (
-        <DocumentFlyout
-          hit={hit}
-          renderCellActions={renderCellActions}
-          onAlertUpdated={handleAlertUpdated}
-        />
+        <>
+          {isDataViewDegraded && (
+            <DataViewDegradedCallout
+              compact
+              dataView={dataView}
+              data-test-subj="document-from-pattern-wrapper-data-view-degraded"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.document.fromPatternWrapper.dataViewDegradedDetailsDescription"
+                defaultMessage="The document is still shown below, but field-dependent features may be limited."
+              />
+            </DataViewDegradedCallout>
+          )}
+          <DocumentFlyout
+            hit={hit}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={handleAlertUpdated}
+            dataTestSubj={dataTestSubj}
+          />
+        </>
       );
     }
 

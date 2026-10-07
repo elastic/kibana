@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import {
-  rangeSchema,
   routeDefinitions,
   type ServiceAgentResponse,
   type ServiceAlertsCountRouteResponse,
@@ -21,6 +20,8 @@ import {
   type ServiceMetadataDetails,
   type ServiceMetadataIcons,
   type ServiceMixedIngestionResponse,
+  type ServiceIngestionTypeResponse,
+  type ServiceHasSystemMetricsResponse,
   type ServiceNodeMetadataResponse,
   type ServicesItemsResponse,
   type ServiceSlosResponse,
@@ -28,6 +29,7 @@ import {
   type ServiceTransactionDetailedStatPeriodsResponse,
   type ServiceTransactionTypesResponse,
   type ServiceAnomalyScoreResponse,
+  MAX_SERVICE_NAME_LENGTH,
 } from '@kbn/apm-api-shared';
 import { isoToEpoch } from '@kbn/zod-helpers/v4';
 import {
@@ -36,10 +38,10 @@ import {
   UnknownMLCapabilitiesError,
 } from '@kbn/ml-plugin/server';
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
+import { apmMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { mergeWith, uniq } from 'lodash';
-import { environmentSchema } from '@kbn/apm-types';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
@@ -59,6 +61,7 @@ import { getServiceAgent } from './get_service_agent';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getServiceHasSystemMetrics } from './get_service_has_system_metrics';
+import { getServiceSchemaType } from './get_service_schema_type';
 import { getServiceInstanceContainerMetadata } from './get_service_instance_container_metadata';
 import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
 import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
@@ -72,13 +75,9 @@ import { getServiceSlos } from './get_service_slos';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesAlerts } from './get_services/get_service_alerts';
 import { getServiceAnomalyScoreForService } from './get_services/get_service_anomaly_score_for_service';
-import { getServicesItems } from './get_services/get_services_items';
+import { getServicesItems, MAX_NUMBER_OF_SERVICES } from './get_services/get_services_items';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getThroughput } from './get_throughput';
-
-// Bounds the serviceName path param to satisfy the CodeQL "unbounded string in
-// route validation" rule; 1024 matches the ES keyword default `ignore_above`.
-const MAX_SERVICE_NAME_LENGTH = 1024;
 
 const servicesRoute = createApmServerRoute({
   endpoint: routeDefinitions.services.servicesList.endpoint,
@@ -99,21 +98,34 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
     } = params.query;
-    const savedObjectsClient = (await context.core).savedObjects.client;
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
 
     const coreStart = await core.start();
 
-    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler] =
-      await Promise.all([
-        getMlClient(resources),
-        getApmEventClient(resources),
-        getApmAlertsClient(resources),
-        getApmSloClient(resources),
-        serviceGroupId
-          ? getServiceGroup({ savedObjectsClient, serviceGroupId })
-          : Promise.resolve(null),
-        getRandomSampler({ coreStart, request, probability }),
-      ]);
+    const [
+      mlClient,
+      apmEventClient,
+      apmAlertsClient,
+      sloClient,
+      serviceGroup,
+      randomSampler,
+      maxNumServices,
+    ] = await Promise.all([
+      getMlClient(resources),
+      getApmEventClient(resources),
+      getApmAlertsClient(resources),
+      getApmSloClient(resources),
+      serviceGroupId
+        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+        : Promise.resolve(null),
+      getRandomSampler({ coreStart, request, probability }),
+      uiSettingsClient
+        .get<number>(apmMaxNumberOfServices)
+        .catch((): number => MAX_NUMBER_OF_SERVICES),
+    ]);
 
     return getServicesItems({
       environment,
@@ -131,6 +143,7 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
       searchQuery,
+      maxNumServices,
     });
   },
 });
@@ -252,10 +265,11 @@ const serviceAgentRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { start, end } = params.query;
+    const { environment, start, end } = params.query;
 
     const apmServiceAgent = await getServiceAgent({
       serviceName,
+      environment,
       apmEventClient,
       start,
       end,
@@ -850,16 +864,10 @@ const serviceSlosRoute = createApmServerRoute({
 });
 
 const serviceHasSystemMetricsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/has_system_metrics',
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  params: lazySchema(() =>
-    z.object({
-      path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
-      query: environmentSchema.merge(rangeSchema),
-    })
-  ),
+  endpoint: routeDefinitions.services.hasSystemMetrics.endpoint,
+  params: routeDefinitions.services.hasSystemMetrics.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ hasSystemMetrics: boolean }> => {
+  handler: async (resources): Promise<ServiceHasSystemMetricsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const {
       path: { serviceName },
@@ -867,6 +875,24 @@ const serviceHasSystemMetricsRoute = createApmServerRoute({
     } = resources.params;
 
     return getServiceHasSystemMetrics({ apmEventClient, serviceName, environment, start, end });
+  },
+});
+
+const serviceIngestionTypeRoute = createApmServerRoute({
+  endpoint: routeDefinitions.services.ingestionType.endpoint,
+  params: routeDefinitions.services.ingestionType.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceIngestionTypeResponse> => {
+    const { params, context, getApmIndices } = resources;
+    const {
+      path: { serviceName },
+      query: { environment, start, end },
+    } = params;
+
+    const [core, indices] = await Promise.all([context.core, getApmIndices()]);
+    const esClient = core.elasticsearch.client.asCurrentUser;
+
+    return getServiceSchemaType({ esClient, indices, serviceName, environment, start, end });
   },
 });
 
@@ -892,4 +918,5 @@ export const serviceRouteRepository = {
   ...serviceAnomalyScoreRoute,
   ...serviceSlosRoute,
   ...serviceHasSystemMetricsRoute,
+  ...serviceIngestionTypeRoute,
 };

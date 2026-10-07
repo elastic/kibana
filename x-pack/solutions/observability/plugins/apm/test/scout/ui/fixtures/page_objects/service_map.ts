@@ -12,7 +12,7 @@ import {
   type ScoutPage,
 } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { waitForApmAppMenuReady } from '../page_helpers';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../constants';
 
 export class ServiceMapPage {
@@ -107,7 +107,7 @@ export class ServiceMapPage {
       params.set('kuery', options.kuery);
     }
     await this.page.goto(`${this.kbnUrl.app('apm')}/service-map?${params.toString()}`);
-    return await waitForApmSettingsHeaderLink(this.page);
+    return await waitForApmAppMenuReady(this.page);
   }
 
   async getSearchBar() {

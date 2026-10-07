@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
 import {
@@ -16,7 +17,7 @@ import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_ev
 import type { EventBus, Subscription } from '../event_bus';
 import { createWorkflowSubscriberMocks, handlerFor } from '../test_utils';
 import { AlertActionWorkflowSubscriber } from './alert_action_workflow_subscriber';
-import { ALERT_ACTION_WORKFLOW_TRIGGERS, EPISODE_ASSIGNED_TRIGGER_ID } from './triggers';
+import { ALERT_ACTION_WORKFLOW_TRIGGERS, ALERT_ASSIGNED_TRIGGER_ID } from './triggers';
 
 const episodeAssignedEvent: EpisodeAssignedEvent = {
   type: EPISODE_ASSIGNED_EVENT_TYPE,
@@ -68,13 +69,16 @@ describe('AlertActionWorkflowSubscriber', () => {
     it("forwards context.request through WorkflowService to workflowsExtensions, with the binding's triggerId and the mapped payload", async () => {
       subscriber.start();
 
-      await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request });
+      await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
+        request,
+        origin: 'user',
+      });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-      expect(mockEmitEvent).toHaveBeenCalledWith(EPISODE_ASSIGNED_TRIGGER_ID, {
+      expect(mockEmitEvent).toHaveBeenCalledWith(ALERT_ASSIGNED_TRIGGER_ID, {
         occurredAt: episodeAssignedEvent.occurredAt,
         groupHash: episodeAssignedEvent.groupHash,
-        episodeId: episodeAssignedEvent.episodeId,
+        alertId: episodeAssignedEvent.episodeId,
         ruleId: episodeAssignedEvent.ruleId,
         spaceId: episodeAssignedEvent.spaceId,
         actorUid: episodeAssignedEvent.actorUid,
@@ -82,17 +86,30 @@ describe('AlertActionWorkflowSubscriber', () => {
       });
     });
 
-    it("catches WorkflowService failures, logs them with the binding's triggerId, and does not let the rejection escape the handler", async () => {
+    it("catches WorkflowService failures, logs them with the binding's eventType, and does not let the rejection escape the handler", async () => {
       const failure = new Error('workflows unreachable');
       mockEmitEvent.mockRejectedValueOnce(failure);
 
       subscriber.start();
 
       await expect(
-        handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request })
+        handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
+          request,
+          origin: 'user',
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('workflows unreachable', {
+        labels: {
+          event_type: EPISODE_ASSIGNED_EVENT_TYPE,
+          space_id: episodeAssignedEvent.spaceId,
+          alert_id: episodeAssignedEvent.episodeId,
+          rule_id: episodeAssignedEvent.ruleId,
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
+        },
+        error: expect.objectContaining({ message: 'workflows unreachable' }),
+      });
     });
   });
 

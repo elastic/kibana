@@ -21,8 +21,14 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
-import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
+  getESQLQueryVariables,
+} from '@kbn/esql-utils';
+import { VariableNamePrefix } from '@kbn/esql-types';
 import { Sha256 } from '@kbn/crypto-browser';
+import { stableStringify } from '@kbn/std';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
@@ -56,7 +62,6 @@ import type {
   DataSourceTypeESQL,
   DataSourceTypeNoESQL,
 } from '../schema/data_source';
-import type { DataLayerTypeESQL } from '../schema/charts/xy';
 import type { XScaleSchemaType } from '../schema/charts/shared';
 import { fromFilterLensStateToAPI, toLensStateFilterLanguage } from './columns/filter';
 
@@ -156,17 +161,46 @@ function normalizeWhitespace(str: string): string {
 }
 
 export function generateAdHocDataViewId(
-  dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
+  dataView: Pick<
+    APIAdHocDataView,
+    | 'index'
+    | 'timeFieldName'
+    | 'esqlQuery'
+    | 'dataSourceType'
+    | 'name'
+    | 'allowHidden'
+    | 'fieldSettings'
+  >
 ): string {
   const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
   // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
   // at runtime we fallback to @timestamp if it exists in the index.
   // But different ES|QL queries against the same index can resolve to different time fields. See: https://github.com/elastic/kibana/pull/256764
   // Including a hash of the query in the ID ensures each distinct query gets its own cached DataView, preventing stale time-field resolution.
-  if (dataView.dataSourceType === 'esql' && !dataView.timeFieldName && dataView.esqlQuery) {
-    return `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`;
+  if (dataView.dataSourceType === 'esql') {
+    return !dataView.timeFieldName && dataView.esqlQuery
+      ? `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`
+      : base;
   }
-  return base;
+
+  // For form-based ad hoc data views, two over the same index+timeField can
+  // still differ in specifications (custom name, allowHidden, or runtime/scripted
+  // field settings). Always append a hash of the canonical specification fields so
+  // that identical specs map to the same id and different specs get distinct ids.
+  // Mirrors the ES|QL `base-<hash>` pattern above.
+  //
+  // `stableStringify` sorts keys and omits `undefined` values, so key order and
+  // absent/optional field settings can't perturb the hash.
+  const canonical = {
+    name: dataView.name ?? dataView.index,
+    allowHidden: dataView.allowHidden ? true : undefined, // treat false as undefined
+    fieldSettings:
+      dataView.fieldSettings && Object.keys(dataView.fieldSettings).length > 0
+        ? dataView.fieldSettings
+        : undefined,
+  };
+
+  return `${base}-${sha256Sync(stableStringify(canonical))}`;
 }
 
 export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
@@ -410,6 +444,27 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
   }
 }
 
+/**
+ * Stamps each column's ES|QL Control Variable by matching `??`-prefixed field names against the
+ * Identifier (`??`) variables declared in the layer query.
+ */
+function reconstructESQLControlVariables(
+  columns: TextBasedLayerColumn[],
+  esql: string
+): TextBasedLayerColumn[] {
+  const identifierVariables = new Set(getESQLQueryVariables(esql, VariableNamePrefix.IDENTIFIER));
+  if (identifierVariables.size === 0) {
+    return columns;
+  }
+  return columns.map((column) => {
+    if (!column.fieldName.startsWith(VariableNamePrefix.IDENTIFIER)) {
+      return column;
+    }
+    const variable = column.fieldName.slice(VariableNamePrefix.IDENTIFIER.length);
+    return variable && identifierVariables.has(variable) ? { ...column, variable } : column;
+  });
+}
+
 // internal function used to build datasource states layer
 function buildDatasourceStatesLayer(
   layer: unknown,
@@ -441,7 +496,7 @@ function buildDatasourceStatesLayer(
       index: generateAdHocDataViewId({ ...dataSourceIndex, dataSourceType: 'esql' }),
       query: { esql: ds.query },
       timeField: dataSourceIndex.timeFieldName || undefined,
-      columns,
+      columns: reconstructESQLControlVariables(columns, ds.query),
       ignoreGlobalFilters: layerWithSettings.ignore_global_filters,
     };
   }
@@ -571,30 +626,28 @@ export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
   config: GenericIndexPatternColumn | GenericIndexPatternColumn[],
-  first = false,
-  postfix = ''
+  first = false
 ) => {
   const [column, referenceColumn] = Array.isArray(config) ? config : [config];
-  const name = columnName + postfix;
 
   layer.columns = {
     ...layer.columns,
-    [name]: column,
+    [columnName]: column,
   };
 
-  const referenceColumnId = `${name}_reference`;
+  const referenceColumnId = `${columnName}_reference`;
   if (referenceColumn && 'references' in column) {
     column.references = [referenceColumnId];
     layer.columns[referenceColumnId] = referenceColumn;
   }
 
   if (first) {
-    layer.columnOrder.unshift(name);
+    layer.columnOrder.unshift(columnName);
     if (referenceColumn) {
       layer.columnOrder.unshift(referenceColumnId);
     }
   } else {
-    layer.columnOrder.push(name);
+    layer.columnOrder.push(columnName);
     if (referenceColumn) {
       layer.columnOrder.push(referenceColumnId);
     }
@@ -735,23 +788,10 @@ export const filtersAndQueryToApiFormat = (
   };
 };
 
-function extraQueryFromAPIState(state: LensApiConfig): { esql: string } | Query | undefined {
-  if ('data_source' in state && state.data_source.type === 'esql') {
-    return { esql: state.data_source.query };
-  }
-  if ('layers' in state && Array.isArray(state.layers)) {
-    // pick only the first one for now
-    const esqlLayer = state.layers.find(
-      (layer): layer is DataLayerTypeESQL =>
-        layer.type !== 'reference_lines' &&
-        layer.type !== 'annotations' &&
-        'data_source' in layer &&
-        layer.data_source?.type === 'esql'
-    );
-    if (esqlLayer && 'query' in esqlLayer.data_source) {
-      return { esql: esqlLayer.data_source.query };
-    }
-  }
+function extraQueryFromAPIState(state: LensApiConfig): Query | undefined {
+  // ES|QL queries live exclusively on the text-based datasource layers
+  // (written by the layer transforms); the top-level slot only carries the
+  // chart-scoped KQL/Lucene filter from the API `query` field.
   if ('query' in state && state.query) {
     return queryToLensState(state.query satisfies LensApiFilterType);
   }

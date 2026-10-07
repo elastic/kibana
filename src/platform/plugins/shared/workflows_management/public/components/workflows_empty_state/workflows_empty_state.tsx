@@ -13,10 +13,11 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
+  EuiIllustration,
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
+import { relevanceHandTouch } from '@elastic/eui-illustrations';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLibraryEnabled } from '@kbn/workflows-ui';
@@ -29,7 +30,7 @@ interface WorkflowsEmptyStateProps {
 }
 
 export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStateProps) {
-  const { http, application } = useKibana().services;
+  const { application } = useKibana().services;
   const isLibraryEnabled = useLibraryEnabled();
 
   const navigateToLibrary = useCallback(
@@ -40,10 +41,10 @@ export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStatePro
   return (
     <EuiEmptyPrompt
       icon={
-        <EuiImage
-          size="fullWidth"
-          src={http?.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
+        <EuiIllustration
+          type={relevanceHandTouch}
           alt=""
+          style={{ maxInlineSize: 240, marginInline: 'auto' }}
         />
       }
       title={
@@ -81,7 +82,7 @@ export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStatePro
               {isLibraryEnabled ? (
                 <EuiButtonEmpty
                   onClick={navigateToLibrary}
-                  iconType="arrowRight"
+                  iconType="chevronSingleRight"
                   iconSide="right"
                   aria-label="Explore library"
                 >
@@ -131,14 +132,13 @@ export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStatePro
 }
 
 export function WorkflowsEmptyStateReadOnly() {
-  const { http } = useKibana().services;
   return (
     <EuiEmptyPrompt
       icon={
-        <EuiImage
-          size="fullWidth"
-          src={http?.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
+        <EuiIllustration
+          type={relevanceHandTouch}
           alt=""
+          style={{ maxInlineSize: 240, marginInline: 'auto' }}
         />
       }
       title={

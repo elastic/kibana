@@ -60,7 +60,7 @@ export const DonutChart = memo(function DonutChart({
   if (total === 0) {
     return (
       <EuiEmptyPrompt
-        iconType="visArea"
+        iconType="chartArea"
         title={<h4>{emptyTitle ?? 'No data'}</h4>}
         body={<p>{emptyBody ?? 'No data available.'}</p>}
       />

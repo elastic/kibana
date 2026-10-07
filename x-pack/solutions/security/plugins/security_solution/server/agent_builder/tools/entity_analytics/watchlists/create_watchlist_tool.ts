@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -26,27 +26,29 @@ import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const DEFAULT_RISK_MODIFIER = 1.5;
 
-const schema = z.object({
-  name: z
-    .string()
-    .min(1)
-    .max(MAX_WATCHLIST_NAME_LENGTH)
-    .describe(
-      `The watchlist name. Use the user's exact wording when they named the watchlist, e.g. "Privileged Users" or "Compromised Accounts". Up to ${MAX_WATCHLIST_NAME_LENGTH} characters.`
-    ),
-  description: z
-    .string()
-    .max(MAX_WATCHLIST_DESCRIPTION_LENGTH)
-    .optional()
-    .describe(
-      `Optional short description of the watchlist's purpose. Include this when the user supplied context, e.g. "Sensitive accounts under continuous review". Up to ${MAX_WATCHLIST_DESCRIPTION_LENGTH} characters.`
-    ),
-  riskModifier: riskModifierSchema
-    .optional()
-    .describe(
-      `Optional risk score multiplier. 0 = scores zeroed out, 1 = no change, 2 = doubled. Defaults to ${DEFAULT_RISK_MODIFIER}; only pass a value when the user explicitly asks for a different multiplier.`
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    name: z
+      .string()
+      .min(1)
+      .max(MAX_WATCHLIST_NAME_LENGTH)
+      .describe(
+        `The watchlist name. Use the user's exact wording when they named the watchlist, e.g. "Privileged Users" or "Compromised Accounts". Up to ${MAX_WATCHLIST_NAME_LENGTH} characters.`
+      ),
+    description: z
+      .string()
+      .max(MAX_WATCHLIST_DESCRIPTION_LENGTH)
+      .optional()
+      .describe(
+        `Optional short description of the watchlist's purpose. Include this when the user supplied context, e.g. "Sensitive accounts under continuous review". Up to ${MAX_WATCHLIST_DESCRIPTION_LENGTH} characters.`
+      ),
+    riskModifier: riskModifierSchema
+      .optional()
+      .describe(
+        `Optional risk score multiplier. 0 = scores zeroed out, 1 = no change, 2 = doubled. Defaults to ${DEFAULT_RISK_MODIFIER}; only pass a value when the user explicitly asks for a different multiplier.`
+      ),
+  })
+);
 
 export const SECURITY_CREATE_WATCHLIST_TOOL_ID = securityTool('create_watchlist');
 
@@ -65,6 +67,13 @@ Use this tool when the user explicitly asks to create a new watchlist (e.g. "cre
 Do NOT use this tool to add entities to an existing watchlist — that is a separate action.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Create Watchlist',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

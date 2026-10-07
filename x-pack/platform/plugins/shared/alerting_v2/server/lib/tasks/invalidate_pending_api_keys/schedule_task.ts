@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { AlertingServerStartDependencies } from '../../../types';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { emptyState } from './task_state';
 import { INVALIDATE_API_KEYS_TASK_ID, INVALIDATE_API_KEYS_TASK_TYPE } from './task_definition';
 
@@ -15,7 +16,7 @@ export async function scheduleApiKeyInvalidationTask({
   taskManager,
   interval,
 }: {
-  logger: Logger;
+  logger: LoggerServiceContract;
   taskManager: AlertingServerStartDependencies['taskManager'];
   interval: string;
 }): Promise<void> {
@@ -27,9 +28,11 @@ export async function scheduleApiKeyInvalidationTask({
       state: emptyState,
       params: {},
     });
-  } catch (e) {
-    logger.error(
-      `Error scheduling ${INVALIDATE_API_KEYS_TASK_ID} task, received ${(e as Error).message}`
-    );
+  } catch (error) {
+    logger.error({
+      error,
+      code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
+      labels: { task_id: INVALIDATE_API_KEYS_TASK_ID },
+    });
   }
 }

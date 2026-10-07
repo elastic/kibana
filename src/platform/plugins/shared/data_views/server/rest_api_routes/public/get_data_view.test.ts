@@ -20,6 +20,6 @@ describe('get default data view', () => {
       usageCollection,
       id: '1',
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

@@ -26,6 +26,7 @@ const strictChartTypes = new Set([
   'metric',
   'legacy_metric',
   'xy',
+  'gauge',
 ]);
 
 /**
@@ -51,11 +52,11 @@ export function validateStateTransformsFn(
     const newApiConfig = builder.toAPIFormat(attributes);
 
     expect(() => {
-      schema.validate(newApiConfig);
+      schema.parse(newApiConfig);
     }).not.toThrow();
 
     expect(() => {
-      lensApiConfigSchema.validate(newApiConfig);
+      lensApiConfigSchema.parse(newApiConfig);
     }).not.toThrow();
 
     // Temporary strict mode, all checks should eventually be strict

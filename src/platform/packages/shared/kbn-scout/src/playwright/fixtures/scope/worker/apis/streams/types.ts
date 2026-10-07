@@ -87,9 +87,28 @@ export interface StreamlangDSL {
   steps: unknown[];
 }
 
-export interface IngestStreamProcessing extends StreamlangDSL {
+export interface StreamlangIngestStreamProcessing extends StreamlangDSL {
   updated_at?: string;
 }
+
+export interface NativeIngestStreamProcessing {
+  processors: Array<Record<string, unknown>>;
+  updated_at?: string;
+}
+
+export type IngestStreamProcessing =
+  | StreamlangIngestStreamProcessing
+  | NativeIngestStreamProcessing;
+
+export type StreamlangIngestStreamProcessingUpsert = StreamlangDSL;
+
+export interface NativeIngestStreamProcessingUpsert {
+  processors: Array<Record<string, unknown>>;
+}
+
+export type IngestStreamProcessingUpsert =
+  | StreamlangIngestStreamProcessingUpsert
+  | NativeIngestStreamProcessingUpsert;
 
 export interface WiredRoutingEntry {
   destination: string;
@@ -97,22 +116,22 @@ export interface WiredRoutingEntry {
   status?: RoutingStatus;
 }
 
-export interface WiredIngestShape {
+export interface WiredIngestShape<TProcessing = IngestStreamProcessing> {
   wired: {
     routing: WiredRoutingEntry[];
     fields: Record<string, unknown>;
   };
-  processing: IngestStreamProcessing;
+  processing: TProcessing;
   lifecycle?: unknown;
   settings?: unknown;
   failure_store?: unknown;
 }
 
-export interface ClassicIngestShape {
+export interface ClassicIngestShape<TProcessing = IngestStreamProcessing> {
   classic: {
     field_overrides?: Record<string, unknown>;
   };
-  processing: IngestStreamProcessing;
+  processing: TProcessing;
   lifecycle?: unknown;
   settings?: unknown;
   failure_store?: unknown;
@@ -141,7 +160,17 @@ export interface StreamsIngestGetResponse {
   stream: IngestStreamDefinition & StreamCommonResponseFields;
 }
 
-export type IngestUpsertRequest = WiredIngestShape | ClassicIngestShape;
+export type IngestUpsertRequest =
+  | WiredIngestShape<IngestStreamProcessingUpsert>
+  | ClassicIngestShape<IngestStreamProcessingUpsert>;
+
+export const stripProcessingUpdatedAt = (
+  processing: IngestStreamProcessing | IngestStreamProcessingUpsert
+): IngestStreamProcessingUpsert => {
+  return 'processors' in processing
+    ? { processors: processing.processors }
+    : { steps: processing.steps };
+};
 
 export const isWiredStreamDefinition = (stream: {
   ingest?: unknown;

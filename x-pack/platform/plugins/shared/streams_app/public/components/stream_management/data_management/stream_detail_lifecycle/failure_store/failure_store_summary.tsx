@@ -143,7 +143,7 @@ export const FailureStoreSummary = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={editFailedLifecycleLabel} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType="controlsHorizontal"
+              iconType="controls"
               size="s"
               color="text"
               display="base"

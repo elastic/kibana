@@ -40,9 +40,9 @@ interface ParsedStep {
 }
 
 interface ParsedWorkflow {
-  inputs?: { properties?: Record<string, unknown> };
   name?: string;
   steps?: ParsedStep[];
+  triggers?: Array<{ type?: string; inputs?: { properties?: Record<string, unknown> } }>;
 }
 
 const parsed = parse(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.yaml) as ParsedWorkflow;
@@ -55,6 +55,14 @@ const getStep = (type: string): ParsedStep => {
   return step;
 };
 
+function getManualInputsProperties(workflow: ParsedWorkflow): Record<string, unknown> {
+  const manualTrigger = workflow.triggers?.find((t) => t.type === 'manual');
+  if (!manualTrigger) {
+    throw new Error(`No 'manual' trigger found in workflow`);
+  }
+  return manualTrigger.inputs?.properties ?? {};
+}
+
 describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
   it('uses the expected workflow id', () => {
     expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.id).toBe(
@@ -66,8 +74,8 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 12 for max-step-size on the ai.agent gate step', () => {
-    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(12);
+  it('bumps the version to 13 for the lowercase display tags', () => {
+    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(13);
   });
 
   it('titles the workflow "Security - Attack discovery - Skill"', () => {
@@ -82,7 +90,7 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
 
   describe('inputs', () => {
     it('exposes the candidate_alerts, skill_enabled, connector_id, and retrieval inputs', () => {
-      expect(Object.keys(parsed.inputs?.properties ?? {}).sort()).toEqual([
+      expect(Object.keys(getManualInputsProperties(parsed)).sort()).toEqual([
         'alerts_index_pattern',
         'candidate_alerts',
         'connector_id',
@@ -94,14 +102,16 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
     });
 
     it('declares candidate_alerts as an array input the gate ground-truths', () => {
-      const candidateAlerts = (parsed.inputs?.properties ?? {}).candidate_alerts as {
+      const candidateAlerts = getManualInputsProperties(parsed).candidate_alerts as {
         type?: string;
       };
       expect(candidateAlerts.type).toBe('array');
     });
 
     it('declares skill_enabled as a boolean toggle for additional retrieval', () => {
-      const skillEnabled = (parsed.inputs?.properties ?? {}).skill_enabled as { type?: string };
+      const skillEnabled = getManualInputsProperties(parsed).skill_enabled as {
+        type?: string;
+      };
       expect(skillEnabled.type).toBe('boolean');
     });
   });
@@ -308,8 +318,8 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 3 for max-step-size on the ai.agent render_report step', () => {
-    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(3);
+  it('bumps the version to 4 for the lowercase display tags', () => {
+    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(4);
   });
 
   it('is discoverable from the managed registry by id', () => {
@@ -320,7 +330,7 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
 
   describe('inputs', () => {
     it('exposes connector_id, conversation_id, and execution_uuid inputs', () => {
-      expect(Object.keys(parsedReport.inputs?.properties ?? {}).sort()).toEqual([
+      expect(Object.keys(getManualInputsProperties(parsedReport)).sort()).toEqual([
         'connector_id',
         'conversation_id',
         'execution_uuid',

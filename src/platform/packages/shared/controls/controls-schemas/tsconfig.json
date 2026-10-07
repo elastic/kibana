@@ -15,7 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/controls-constants",
-    "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/presentation-publishing-schemas",
   ]
 }

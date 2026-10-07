@@ -134,6 +134,61 @@ export const entityMaintainerRouteHelpersFactory = (
   };
 };
 
+/** Drain any in-flight Task Manager auto-run of a maintainer so a later seed/stop cannot race it. */
+export const waitForMaintainerToSettle = async ({
+  retry,
+  routes,
+  maintainerId,
+  timeoutMs = 60_000,
+}: {
+  retry: RetryServiceLike;
+  routes: Pick<ReturnType<typeof entityMaintainerRouteHelpersFactory>, 'getMaintainers'>;
+  maintainerId: string;
+  timeoutMs?: number;
+}): Promise<void> => {
+  // Phase 1: wait until the maintainer task exists and is started.
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to be started`,
+    timeoutMs,
+    async () => {
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; taskStatus: string }) => m.id === maintainerId
+      );
+      return isMaintainerStarted(maintainer);
+    }
+  );
+
+  // Phase 2: wait for any in-flight auto-run to complete. TM resets nextRunAt to
+  // now + interval only once the current run finishes, so nextRunAt in the future
+  // with a run count that is stable across two polls means nothing is running.
+  let lastSeenRuns = -1;
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to settle (no in-flight auto-run)`,
+    timeoutMs,
+    async () => {
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number; nextRunAt?: string | null }) => m.id === maintainerId
+      );
+      if (!maintainer) return false;
+
+      const nextRunAt = (maintainer as { nextRunAt?: string | null }).nextRunAt;
+      const runs = maintainer.runs;
+      const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
+      if (isNextRunInFuture) {
+        if (runs === lastSeenRuns) return true;
+        lastSeenRuns = runs;
+        return false;
+      }
+
+      // nextRunAt is in the past or null — a run is pending or in flight. Keep waiting.
+      lastSeenRuns = -1;
+      return false;
+    }
+  );
+};
+
 export const waitForMaintainerRun = async ({
   retry,
   routes,

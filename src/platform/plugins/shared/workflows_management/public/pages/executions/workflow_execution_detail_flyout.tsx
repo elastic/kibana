@@ -7,145 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiCodeBlock,
-  EuiDescriptionList,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
+import { WorkflowDetailStoreProvider } from '../../entities/workflows/store/provider';
+import { WorkflowExecutionFlyout } from '../../features/workflow_execution_detail';
 
 export interface WorkflowExecutionDetailFlyoutProps {
-  hit: DataTableRecord;
+  executionId: string;
   onClose: () => void;
+  /** Call-site compatibility; re-run lives in the shared flyout Take Action menu. */
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
+  /** Call-site compatibility; filter actions remain on the executions table. */
+  onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
 }
 
-const formatValue = (value: unknown): string => {
-  if (value == null) {
-    return '\u2014';
-  }
-  if (Array.isArray(value)) {
-    return value.length === 1 ? formatValue(value[0]) : value.map(formatValue).join(', ');
-  }
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-  return String(value);
-};
-
-const SUMMARY_FIELDS: ReadonlyArray<{ field: string; label: string }> = [
-  {
-    field: 'id',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldId', {
-      defaultMessage: 'Execution ID',
-    }),
-  },
-  {
-    field: 'workflowId',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldWorkflow', {
-      defaultMessage: 'Workflow',
-    }),
-  },
-  {
-    field: 'status',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldStatus', {
-      defaultMessage: 'Status',
-    }),
-  },
-  {
-    field: 'startedAt',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldStarted', {
-      defaultMessage: 'Started at',
-    }),
-  },
-  {
-    field: 'finishedAt',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldFinished', {
-      defaultMessage: 'Finished at',
-    }),
-  },
-  {
-    field: 'triggeredBy',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldTriggeredBy', {
-      defaultMessage: 'Triggered by',
-    }),
-  },
-  {
-    field: 'executedBy',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldExecutedBy', {
-      defaultMessage: 'Executed by',
-    }),
-  },
-];
-
+/**
+ * Executions-page adapter for the shared execution flyout (same UI as workflow detail).
+ * This route is already gated by `workflowsManagement:globalExecutionsView:enabled`.
+ */
 export const WorkflowExecutionDetailFlyout = React.memo<WorkflowExecutionDetailFlyoutProps>(
-  ({ hit, onClose }) => {
-    const flyoutTitleId = useGeneratedHtmlId({ prefix: 'workflowExecutionDetailFlyoutTitle' });
-
-    const summary = useMemo(
-      () =>
-        SUMMARY_FIELDS.map(({ field, label }) => ({
-          title: label,
-          description: formatValue(hit.flattened[field]),
-        })),
-      [hit.flattened]
-    );
-
-    const rawJson = useMemo(
-      () => JSON.stringify(hit.raw?._source ?? hit.flattened, null, 2),
-      [hit.flattened, hit.raw]
-    );
-
+  ({ executionId, onClose }) => {
     return (
-      <EuiFlyout
-        aria-labelledby={flyoutTitleId}
-        data-test-subj="workflowExecutionDetailFlyout"
-        onClose={onClose}
-        ownFocus
-        size="m"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={flyoutTitleId}>
-              {i18n.translate('workflowsManagement.executionsPage.flyoutTitle', {
-                defaultMessage: 'Execution details',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText color="subdued" size="xs">
-            <code>{hit.flattened.id ? formatValue(hit.flattened.id) : hit.id}</code>
-          </EuiText>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiDescriptionList compressed listItems={summary} type="column" />
-          <EuiSpacer size="m" />
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('workflowsManagement.executionsPage.flyoutRawJsonTitle', {
-                defaultMessage: 'Raw document',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiCodeBlock
-            fontSize="s"
-            isCopyable
-            language="json"
-            overflowHeight={400}
-            paddingSize="s"
-          >
-            {rawJson}
-          </EuiCodeBlock>
-        </EuiFlyoutBody>
-      </EuiFlyout>
+      <WorkflowDetailStoreProvider>
+        <WorkflowExecutionFlyout executionId={executionId} onClose={onClose} />
+      </WorkflowDetailStoreProvider>
     );
   }
 );

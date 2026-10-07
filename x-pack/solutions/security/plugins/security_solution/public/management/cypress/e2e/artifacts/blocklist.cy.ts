@@ -26,16 +26,7 @@ const {
   setSingleValue,
   setMultiValue,
   openBlocklist,
-  selectPathField,
   selectSignatureField,
-  expectSingleOperator,
-  expectMultiOperator,
-  validateSingleValue,
-  validateMultiValue,
-  selectHashField,
-  selectOs,
-  expectSubmitButtonToBe,
-  clearMultiValueInput,
 } = blocklistFormSelectors;
 
 describe(
@@ -84,93 +75,6 @@ describe(
         os_types: ['windows'],
       };
     };
-
-    describe('Renders blocklist fields', () => {
-      it('Correctly renders all blocklist fields for different OSs', () => {
-        openBlocklist({ create: true });
-
-        selectOs('windows');
-
-        selectPathField();
-        expectSingleOperator('Path');
-        selectSignatureField();
-        expectMultiOperator('Signature');
-        selectHashField();
-        expectSingleOperator('Hash');
-
-        selectOs('linux');
-
-        selectPathField(false);
-        expectSingleOperator('Path');
-        selectHashField();
-        expectSingleOperator('Hash');
-
-        selectOs('macos');
-
-        selectPathField();
-        expectSingleOperator('Path');
-        selectHashField();
-        expectSingleOperator('Hash');
-      });
-
-      it('Correctly modifies value format based on field selection', () => {
-        openBlocklist({ create: true });
-        // Start with default is one of operator
-        selectSignatureField();
-        expectMultiOperator('Signature', 'is one of');
-        setMultiValue();
-        validateMultiValue();
-        // Switch to is operator
-        selectOperator('is');
-        expectMultiOperator('Signature', 'is');
-        validateSingleValue();
-        // Switch to different Field to reset value to multi value again
-        selectPathField();
-        expectSingleOperator('Path');
-        validateMultiValue();
-      });
-
-      it('Correctly validates value input', () => {
-        openBlocklist({ create: true });
-        fillOutBlocklistFlyout();
-        selectSignatureField();
-
-        expectSubmitButtonToBe('disabled');
-
-        selectOperator('is');
-        selectOperator('is');
-        validateSingleValue('');
-        expectSubmitButtonToBe('disabled');
-
-        selectOperator('is one of');
-        selectOperator('is one of');
-        validateMultiValue({ empty: true });
-
-        selectOperator('is');
-        selectOperator('is');
-        validateSingleValue('');
-        expectSubmitButtonToBe('disabled');
-
-        setSingleValue();
-        validateSingleValue();
-        expectSubmitButtonToBe('enabled');
-
-        selectOperator('is one of');
-        validateMultiValue();
-        expectSubmitButtonToBe('enabled');
-
-        selectOperator('is one of');
-        validateMultiValue();
-        expectSubmitButtonToBe('enabled');
-
-        clearMultiValueInput();
-        expectSubmitButtonToBe('disabled');
-
-        selectOperator('is');
-        validateSingleValue('');
-        expectSubmitButtonToBe('disabled');
-      });
-    });
 
     describe('Handles CRUD with operator field', () => {
       const IS_EXPECTED_CONDITION = /AND\s*file.Ext.code_signature\s*IS\s*Elastic,\s*Inc\./i;

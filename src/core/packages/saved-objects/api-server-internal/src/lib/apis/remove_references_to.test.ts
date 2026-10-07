@@ -210,7 +210,7 @@ describe('SavedObjectsRepository', () => {
           ],
         });
 
-        await expect(repository.removeReferencesTo(type, id, defaultOptions)).rejects.toThrowError(
+        await expect(repository.removeReferencesTo(type, id, defaultOptions)).rejects.toThrow(
           createConflictErrorPayload(type, id)
         );
       });

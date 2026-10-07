@@ -71,7 +71,7 @@ export function ContextualServiceMapControls({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"
-            iconType="minusInCircle"
+            iconType="minusCircle"
             onClick={onCollapseAll}
             disabled={!hasExpandedNodes}
             data-test-subj="contextualServiceMapCollapseAll"

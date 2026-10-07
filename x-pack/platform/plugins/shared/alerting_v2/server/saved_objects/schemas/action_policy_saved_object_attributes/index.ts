@@ -6,10 +6,28 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { actionPolicySavedObjectAttributesSchema } from './v1';
+import { actionPolicySavedObjectAttributesSchema as actionPolicySavedObjectAttributesSchemaV1 } from './v1';
+import { actionPolicySavedObjectAttributesSchema as actionPolicySavedObjectAttributesSchemaV2 } from './v2';
+import { actionPolicySavedObjectAttributesSchemaV3 } from './v3';
+import { actionPolicySavedObjectAttributesSchemaV4 } from './v4';
+import { actionPolicySavedObjectAttributesSchemaV5 } from './v5';
 
-export type ActionPolicySavedObjectAttributes = TypeOf<
-  typeof actionPolicySavedObjectAttributesSchema
+export type ActionPolicySavedObjectAttributesV1 = TypeOf<
+  typeof actionPolicySavedObjectAttributesSchemaV1
 >;
 
-export { actionPolicySavedObjectAttributesSchema as actionPolicySavedObjectAttributesSchemaV1 };
+export type ActionPolicySavedObjectAttributesV2 = TypeOf<
+  typeof actionPolicySavedObjectAttributesSchemaV2
+>;
+
+export type ActionPolicySavedObjectAttributes = TypeOf<
+  typeof actionPolicySavedObjectAttributesSchemaV5
+>;
+
+export {
+  actionPolicySavedObjectAttributesSchemaV1,
+  actionPolicySavedObjectAttributesSchemaV2,
+  actionPolicySavedObjectAttributesSchemaV3,
+  actionPolicySavedObjectAttributesSchemaV4,
+  actionPolicySavedObjectAttributesSchemaV5,
+};

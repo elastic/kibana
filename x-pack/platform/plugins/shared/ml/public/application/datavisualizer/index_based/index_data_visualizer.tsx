@@ -27,7 +27,7 @@ import { HelpMenu } from '../../components/help_menu';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { MlAppHeader } from '../../components/ml_app_header';
+import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
@@ -47,10 +47,11 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   } = services;
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
-  const { selectedDataView: dataView } = useDataSource();
+  const { selectedDataView: dataView, projectRouting } = useDataSource();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
+  const dataVisualizerBack = useDataVisualizerBack();
 
   useEffect(() => {
     getMlNodeCount(mlApi);
@@ -221,6 +222,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                     defaultMessage: 'Index data visualizer',
                   })
             }
+            back={dataVisualizerBack}
           />
           {!dataView && !esql ? (
             <>
@@ -249,6 +251,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
               getAdditionalLinks={getAdditionalLinks}
               showFrozenDataTierChoice={showNodeInfo}
               esql={esql}
+              projectRouting={projectRouting}
             />
           )}
         </>

@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    *
    * Migration: migrate to scout - move to links plugin
    */
-  // Failing: See https://github.com/elastic/kibana/issues/274945
-  describe.skip('links panel navigation', () => {
+  describe('links panel navigation', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles([
@@ -59,6 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         from: FROM_TIME,
         to: TO_TIME,
       });
+      // Setup mutates saved objects out-of-band via the API, so re-mount the
+      // dashboards listing to reflect the imported dashboards before the first test.
+      await dashboard.navigateToApp();
     });
 
     after(async () => {
@@ -99,9 +101,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should disable link if dashboard does not exist', async () => {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        expect(await testSubjects.exists('dashboardLink--Error fetching dashboard--error')).to.be(
-          true
-        );
+        await testSubjects.existOrFail('dashboardLink--Error fetching dashboard--error', {
+          timeout: 5000,
+        });
         expect(
           await testSubjects.isEnabled('dashboardLink--Error fetching dashboard--error')
         ).to.be(false);
