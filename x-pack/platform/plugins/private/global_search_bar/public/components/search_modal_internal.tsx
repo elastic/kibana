@@ -26,6 +26,7 @@ import type { SearchModalProps } from './types';
 import { EmptyMessage } from './empty_message';
 import { SEARCH_MODAL_ROW_HEIGHT_PX, SEARCH_MODAL_SELECTOR_PREFIX } from './types';
 import { CharLimitExceededMessage } from './char_limit_exceeded_message';
+import { ErrorMessage } from './error_message';
 
 export const SearchModalInternal = ({
   globalSearch,
@@ -43,6 +44,7 @@ export const SearchModalInternal = ({
     options,
     isLoading,
     searchCharLimitExceeded,
+    searchError,
     onChange,
     setSearchRef,
     triggerInitialLoad,
@@ -66,6 +68,12 @@ export const SearchModalInternal = ({
     ...option,
     prepend: option.icon ? <EuiIcon color="subdued" size="l" {...option.icon} /> : option.prepend,
   }));
+
+  const getErrorMessage = () => {
+    if (searchCharLimitExceeded) return <CharLimitExceededMessage />;
+    if (searchError) return <ErrorMessage />;
+    return null;
+  };
 
   const headerStyles = css`
     ${mediumAndUpBreakpoint} {
@@ -114,7 +122,7 @@ export const SearchModalInternal = ({
         fullWidth: true,
         isClearable: true,
       }}
-      errorMessage={searchCharLimitExceeded ? <CharLimitExceededMessage /> : null}
+      errorMessage={getErrorMessage()}
       emptyMessage={<EmptyMessage />}
       noMatchesMessage={<SearchPlaceholder />}
       searchable

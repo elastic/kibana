@@ -34,6 +34,7 @@ export interface SearchStateResult {
   options: EuiSelectableTemplateSitewideOption[];
   isLoading: boolean;
   searchCharLimitExceeded: boolean;
+  searchError: boolean;
   searchRef: RefObject<HTMLInputElement | null>;
   setSearchRef: (ref: HTMLInputElement | null) => void;
   triggerInitialLoad: () => void;
@@ -58,6 +59,7 @@ export const useSearchState = ({
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
+  const [searchError, setSearchError] = useState(false);
 
   const searchSubscription = useRef<Subscription | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
@@ -133,6 +135,9 @@ export const useSearchState = ({
           searchSubscription.current = null;
         }
 
+        // a new search attempt clears the previous error
+        setSearchError(false);
+
         if (searchValue.length > globalSearch.searchCharLimit) {
           // setting this will display an error message to the user
           setSearchCharLimitExceeded(true);
@@ -183,9 +188,10 @@ export const useSearchState = ({
           },
           error: (err) => {
             setIsLoading(false);
+            // clear the previous results and set the error state
+            setOptions([]);
+            setSearchError(true);
 
-            // Not doing anything on error right now because it'll either just show the previous
-            // results or empty results which is basically what we want anyways
             apm.captureError(err, {
               labels: {
                 SearchValue: searchValue,
@@ -280,9 +286,10 @@ export const useSearchState = ({
     options,
     isLoading,
     searchCharLimitExceeded,
+    searchError,
+    searchRef,
     onChange,
     setSearchRef,
-    searchRef,
     triggerInitialLoad,
   };
 };

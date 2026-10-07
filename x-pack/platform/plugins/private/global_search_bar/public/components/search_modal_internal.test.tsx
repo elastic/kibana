@@ -8,9 +8,10 @@
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { SEARCH_MODAL_SELECTOR_PREFIX } from './types';
 import { EventReporter } from '../telemetry';
@@ -23,7 +24,7 @@ jest.mock(
       children({ height: 600, width: 600 })
 );
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+const SMALL_SEARCH_CHAR_LIMIT = 2;
 
 describe('SearchModalInternal', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -31,6 +32,13 @@ describe('SearchModalInternal', () => {
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let eventReporter: EventReporter;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
@@ -43,17 +51,32 @@ describe('SearchModalInternal', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the search input and footer', () => {
+  const renderModal = (searchCharLimit = 1000) =>
     render(
       <IntlProvider locale="en">
         <SearchModalInternal
-          globalSearch={{ ...searchService, searchCharLimit: 1000 }}
+          globalSearch={{ ...searchService, searchCharLimit }}
           navigateToUrl={applications.navigateToUrl}
           reportEvent={eventReporter}
           onClose={jest.fn()}
         />
       </IntlProvider>
     );
+
+  const runDebouncedSearch = async () => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      jest.advanceTimersByTime(350);
+    });
+  };
+
+  it('renders the search input and footer', async () => {
+    renderModal();
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     expect(screen.getByTestId('nav-search-input')).toBeInTheDocument();
     expect(screen.getByTestId(`${SEARCH_MODAL_SELECTOR_PREFIX}Footer`)).toBeInTheDocument();
@@ -63,16 +86,7 @@ describe('SearchModalInternal', () => {
     const focusSpy = jest.spyOn(eventReporter, 'searchFocus');
     const blurSpy = jest.spyOn(eventReporter, 'searchBlur');
 
-    const { unmount } = render(
-      <IntlProvider locale="en">
-        <SearchModalInternal
-          globalSearch={{ ...searchService, searchCharLimit: 1000 }}
-          navigateToUrl={applications.navigateToUrl}
-          reportEvent={eventReporter}
-          onClose={jest.fn()}
-        />
-      </IntlProvider>
-    );
+    const { unmount } = renderModal();
 
     expect(focusSpy).toHaveBeenCalledTimes(1);
     expect(blurSpy).not.toHaveBeenCalled();
@@ -80,5 +94,41 @@ describe('SearchModalInternal', () => {
     unmount();
 
     expect(blurSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the error state when the search fails', async () => {
+    (searchService.find as jest.Mock).mockReturnValue(
+      throwError(() => new Error('invalid license'))
+    );
+
+    renderModal();
+
+    await runDebouncedSearch();
+
+    expect(screen.getAllByTestId('nav-search-error').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('nav-search-no-results')).not.toBeInTheDocument();
+  });
+
+  it('replaces the error state with the character limit message when the input exceeds the limit', async () => {
+    (searchService.find as jest.Mock).mockReturnValue(
+      throwError(() => new Error('invalid license'))
+    );
+
+    renderModal(SMALL_SEARCH_CHAR_LIMIT);
+
+    await runDebouncedSearch();
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.click(screen.getByTestId('nav-search-input'));
+    await user.paste('abc');
+
+    act(() => {
+      jest.advanceTimersByTime(350);
+    });
+
+    expect(screen.getAllByTestId('searchCharLimitExceededMessageHeading').length).toBeGreaterThan(
+      0
+    );
+    expect(screen.queryByTestId('nav-search-error')).not.toBeInTheDocument();
   });
 });
