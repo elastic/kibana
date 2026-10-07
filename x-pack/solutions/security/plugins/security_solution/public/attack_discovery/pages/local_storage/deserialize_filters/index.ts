@@ -6,21 +6,23 @@
  */
 
 import { FilterStateStore, type Filter } from '@kbn/es-query';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-const filtersSchema = z.array(
-  z.object({
-    $state: z
-      .union([
-        z.object({
-          store: z.nativeEnum(FilterStateStore),
-        }),
-        z.undefined(),
-      ])
-      .optional(),
-    meta: z.object({}).catchall(z.unknown()),
-    query: z.union([z.record(z.string(), z.any()), z.undefined()]).optional(),
-  })
+const filtersSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      $state: z
+        .union([
+          z.object({
+            store: z.nativeEnum(FilterStateStore),
+          }),
+          z.undefined(),
+        ])
+        .optional(),
+      meta: z.object({}).catchall(z.unknown()),
+      query: z.union([z.record(z.string(), z.any()), z.undefined()]).optional(),
+    })
+  )
 );
 
 export type FiltersSchema = z.infer<typeof filtersSchema>;

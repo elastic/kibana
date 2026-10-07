@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/search-api-panels'
   - '@kbn/cloud-plugin'
   - '@kbn/code-editor'
-  - '@kbn/monaco'
   - '@kbn/console-plugin'
   - '@kbn/shared-ux-utility'
   - '@kbn/index-management-shared-types'

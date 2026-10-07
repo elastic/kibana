@@ -49,6 +49,7 @@ export type {
   AlertingServerSetup,
   AlertingServerStart,
   RulesClientApi,
+  InternalRulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
 } from './types';
