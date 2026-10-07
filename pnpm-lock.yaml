@@ -1763,6 +1763,9 @@ importers:
       '@kbn/dashboard-markdown':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dashboard_markdown
+      '@kbn/dashboard-markdown-schemas':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/dashboard-markdown-schemas
       '@kbn/dashboard-navigation-options-common':
         specifier: workspace:*
         version: link:src/platform/packages/private/dashboard/dashboard-navigation-options-common
@@ -7860,6 +7863,8 @@ importers:
   src/platform/packages/shared/controls/controls-constants: {}
 
   src/platform/packages/shared/controls/controls-schemas: {}
+
+  src/platform/packages/shared/dashboard-markdown-schemas: {}
 
   src/platform/packages/shared/dashboards/dashboards-selector: {}
 
