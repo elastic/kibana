@@ -126,7 +126,7 @@ export function getApmIndicesCombined(apmEventClient: APMEventClient) {
   return uniq([transaction, span, metric, error]).join();
 }
 
-function isIndexNotFoundError(error: unknown): boolean {
+export function isIndexNotFoundError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
     return false;
   }
