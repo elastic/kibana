@@ -982,6 +982,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       secureLogstash: `${ELASTIC_DOCS}reference/fleet/secure-logstash-connections`,
       agentPolicy: `${ELASTIC_DOCS}reference/fleet/agent-policy`,
       agentlessIntegrations: `${ELASTIC_DOCS}solutions/security/get-started/agentless-integrations`,
+      cloudConnectorDeployment: `${ELASTIC_DOCS}manage-data/ingest/managed-integrations/cloud-connector-deployment`,
       api: `${ELASTIC_DOCS}reference/fleet/fleet-api-docs`,
       managedOtlp: `${ELASTIC_DOCS}reference/opentelemetry/motlp`,
       uninstallAgent: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/uninstall-elastic-agent`,

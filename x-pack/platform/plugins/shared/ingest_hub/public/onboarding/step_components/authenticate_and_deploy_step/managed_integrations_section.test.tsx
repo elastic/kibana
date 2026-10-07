@@ -65,6 +65,8 @@ const IAC_INTEGRATIONS: RenderIacTemplateIntegration[] = [
   { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
 ];
 
+const GETTING_STARTED_URL = 'https://docs.mock/cloud-connector';
+
 function setupMocks({
   cloud = undefined,
   setConnectorId = jest.fn(),
@@ -86,7 +88,12 @@ function setupMocks({
   staticKeys?: { access_key_id?: string; secret_access_key?: string };
   searchParams?: string;
 } = {}) {
-  mockUseKibana.mockReturnValue({ services: { cloud } });
+  mockUseKibana.mockReturnValue({
+    services: {
+      cloud,
+      docLinks: { links: { fleet: { cloudConnectorDeployment: GETTING_STARTED_URL } } },
+    },
+  });
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: undefined });
   mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(undefined);
   mockUseLocation.mockReturnValue({ search: searchParams });
@@ -260,6 +267,14 @@ describe('ManagedIntegrationsSection', () => {
       );
     });
 
+    it('links Getting Started to the cloud connector docs', () => {
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('managedIntegrationsSection-gettingStartedLink')).toHaveAttribute(
+        'href',
+        GETTING_STARTED_URL
+      );
+    });
+
     it('renders method radio group', () => {
       renderSection({ showIdentityFederation: true });
       expect(
@@ -290,6 +305,14 @@ describe('ManagedIntegrationsSection', () => {
         'Utilize AWS Access Keys to set up and deploy your AWS account.'
       );
       expect(description).not.toHaveTextContent('Federated Identity');
+    });
+
+    it('links Getting Started to the cloud connector docs', () => {
+      renderSection({ showIdentityFederation: false });
+      expect(screen.getByTestId('managedIntegrationsSection-gettingStartedLink')).toHaveAttribute(
+        'href',
+        GETTING_STARTED_URL
+      );
     });
 
     it('hides method radio group', () => {

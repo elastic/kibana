@@ -608,6 +608,7 @@ export interface DocLinks {
     secureLogstash: string;
     agentPolicy: string;
     agentlessIntegrations: string;
+    cloudConnectorDeployment: string;
     api: string;
     managedOtlp: string;
     uninstallAgent: string;
