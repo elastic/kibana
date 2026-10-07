@@ -14,6 +14,7 @@
     "@kbn/charts-theme",
     "@kbn/cloud-plugin",
     "@kbn/core",
+    "@kbn/core-http-browser",
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/data-plugin",

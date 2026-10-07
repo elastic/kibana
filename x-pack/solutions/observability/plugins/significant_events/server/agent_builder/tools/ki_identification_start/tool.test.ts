@@ -33,7 +33,11 @@ describe('createKiIdentificationStartTool', () => {
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
-    const getSourcesClient = jest.fn();
+    // `run()` resolves the slug and query revision from the catalog itself, so it needs `get`.
+    const sourcesGet = jest.fn().mockResolvedValue({
+      source: { slug: 'logs.nginx', esql_updated_at: '2026-01-01T00:00:00.000Z' },
+    });
+    const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesGet });
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
@@ -60,12 +64,12 @@ describe('createKiIdentificationStartTool', () => {
       managementApi,
       maintenanceService,
       streamsKIsOnboardingClient,
-      getSourcesClient,
+      sourcesGet,
     };
   };
 
   it('triggers onboarding workflow and returns immediately by default', async () => {
-    const { tool, context, managementApi, getSourcesClient } = setup();
+    const { tool, context, managementApi, sourcesGet } = setup();
 
     const result = await tool.handler(
       {
@@ -81,13 +85,13 @@ describe('createKiIdentificationStartTool', () => {
       expect.objectContaining({
         sourceId: 'logs.nginx',
         sourceSlug: 'logs.nginx',
+        sourceRevision: '2026-01-01T00:00:00.000Z',
         skipFeatures: false,
         skipQueries: false,
       }),
       context.request
     );
-    // The tool already resolved the source, so the client does not look it up again.
-    expect(getSourcesClient).not.toHaveBeenCalled();
+    expect(sourcesGet).toHaveBeenCalledWith('logs.nginx');
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({

@@ -190,7 +190,17 @@ export async function applySourceEnabled({
   sourceKnowledgeState?: SourceKnowledgeStateClient;
 }): Promise<void> {
   if (sourceKnowledgeState) {
-    return sourceKnowledgeState.runExclusive({
+    // Cancel before waiting for the lease: a run holding it keeps writing until it is cancelled,
+    // so cancelling inside the lease could wait on the very run it is meant to stop.
+    let cancelError: unknown;
+    if (!source.enabled && !skipCancel) {
+      try {
+        await onboardingClient?.cancelBySourceSlug({ sourceSlug: source.slug, request });
+      } catch (error) {
+        cancelError = error;
+      }
+    }
+    await sourceKnowledgeState.runExclusive({
       sourceId: source.id,
       run: () =>
         applySourceEnabled({
@@ -199,10 +209,14 @@ export async function applySourceEnabled({
           onboardingClient,
           getMaintenanceState,
           request,
-          skipCancel,
+          skipCancel: true,
           skipRuleToggle,
         }),
     });
+    if (cancelError !== undefined) {
+      throw cancelError;
+    }
+    return;
   }
   if (!source.enabled) {
     await cancelOnboardingThen({
@@ -328,7 +342,11 @@ export async function reconcileSourceCatalog({
         skipRuleToggle: !ownedRuleSourceIds.has(source.id),
       });
     } catch (error) {
-      failures.push(error);
+      // A 409 means a write holds the source's lease or its cancelled run is still winding down.
+      // The next sweep retries it, and failing the sweep here would skip every other source too.
+      if (!(error instanceof StatusError && error.statusCode === 409)) {
+        failures.push(error);
+      }
     }
   }
 

@@ -11,6 +11,7 @@ import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
 import type { SourceKnowledgeStateClient } from '../../../lib/knowledge_indicators/source_knowledge_state';
+import { StatusError } from '../../../lib/errors/status_error';
 import {
   createSourceChangeListener,
   reconcileSourceCatalog,
@@ -114,6 +115,70 @@ describe('reconcileSourceCatalog', () => {
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('first', false);
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('second', false);
     expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'orphan-slug', request });
+  });
+
+  it('skips a source whose lease is held and still aligns the others', async () => {
+    const kiClient = makeKiClient(['busy', 'idle']);
+    const sourceKnowledgeState: SourceKnowledgeStateClient = {
+      runExclusive: jest.fn(async ({ sourceId, run }) => {
+        if (sourceId === 'busy') {
+          throw new StatusError('A write is in progress', 409);
+        }
+        return run(
+          { revision: '2026-01-01T00:00:00.000Z', onboardingScheduled: true, lease: null },
+          jest.fn()
+        );
+      }),
+      write: jest.fn(),
+    };
+
+    await expect(
+      reconcileSourceCatalog({
+        sourcesClient: {
+          ...makeSourcesClient([makeSource({ id: 'busy' }), makeSource({ id: 'idle' })]),
+          get: jest.fn(async (id: string) => ({ source: makeSource({ id }) })),
+        } as unknown as SourcesClient,
+        kiClient,
+        onboardingClient: onboardingWithRuns([]),
+        sourceKnowledgeState,
+        maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+        request,
+      })
+    ).resolves.toEqual(expect.objectContaining({ reconcileIds: ['busy', 'idle'] }));
+
+    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('idle', true);
+  });
+
+  it('cancels a disabled source run before waiting for its lease', async () => {
+    const kiClient = makeKiClient(['disabled-source']);
+    const order: string[] = [];
+    cancelBySourceSlug.mockImplementationOnce(async () => {
+      order.push('cancel');
+      return null;
+    });
+    const sourceKnowledgeState: SourceKnowledgeStateClient = {
+      runExclusive: jest.fn(async ({ run }) => {
+        order.push('lease');
+        return run({ revision: undefined, onboardingScheduled: false, lease: null }, jest.fn());
+      }),
+      write: jest.fn(),
+    };
+
+    const disabled = makeSource({ id: 'disabled-source', enabled: false });
+    await reconcileSourceCatalog({
+      sourcesClient: {
+        ...makeSourcesClient([disabled]),
+        get: jest.fn(async () => ({ source: disabled })),
+      } as unknown as SourcesClient,
+      kiClient,
+      onboardingClient: onboardingWithRuns(['disabled-source-slug']),
+      sourceKnowledgeState,
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    // The first lease is the revision reconcile; the enabled-flag alignment must cancel before its own.
+    expect(order).toEqual(['lease', 'cancel', 'lease']);
   });
 
   it('cancels the other orphan runs and retires gone sources when one orphan cancel fails', async () => {
