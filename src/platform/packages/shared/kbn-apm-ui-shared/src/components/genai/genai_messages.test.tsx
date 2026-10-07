@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { GenAiMessages } from './genai_messages';
-import type { GenAiMessage } from './get_genai_fields';
+import type { GenAiMessage } from '@kbn/genai-common';
 import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 jest.mock('@kbn/shared-ux-markdown', () => ({
