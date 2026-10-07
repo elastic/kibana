@@ -66,19 +66,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/242130
-      describe.skip('severity', () => {
+      describe('severity', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the severity of cases to medium correctly', async () => {
           await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('case-table-column-severity-low');
+          const mediumSeverityBadges = await testSubjects.findAll(
+            `case-severity-badge-${CaseSeverity.MEDIUM}`
+          );
+          expect(mediumSeverityBadges).to.have.length(2);
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/245961
-      describe.skip('tags', () => {
+      describe('tags', () => {
         let caseIds: string[] = [];
         beforeEach(async () => {
           caseIds = [];
