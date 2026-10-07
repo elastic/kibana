@@ -54,6 +54,11 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
           const exceptionLists = await getExceptionListClient(context);
           const { id, deleteReferences, ignoreReferences } = request.query;
 
+          // Before anything is removed, including the exception entries a delete with
+          // `deleteReferences` strips first: a caller who cannot read a restricted lookup
+          // list may not delete it or its references.
+          await lists.assertCanDeleteList({ id });
+
           // ignoreReferences=true maintains pre-7.11 behavior of deleting value list without performing any additional checks
           if (!ignoreReferences) {
             // Stream the results from the Point In Time (PIT) finder into this array

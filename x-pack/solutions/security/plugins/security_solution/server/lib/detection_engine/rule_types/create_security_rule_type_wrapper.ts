@@ -311,6 +311,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             secondaryTimestamp,
             ruleExecutionLogger,
             isServerless: isServerless ?? false,
+            isValueListLookupIndex: lists?.isValueListLookupIndex,
           });
 
           warnings.forEach((warningMessage) => ruleExecutionLogger.warn(warningMessage));

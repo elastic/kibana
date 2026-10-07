@@ -16,28 +16,35 @@ import { description } from '../../common/description';
 import { id } from '../../common/id';
 import { immutable } from '../../common/immutable';
 import { name } from '../../common/name';
+import { storageOrUndefined } from '../../common/storage';
 import { tie_breaker_id } from '../../common/tie_breaker_id';
 import { type } from '../../common/type';
 import { updated_at } from '../../common/updated_at';
 import { updated_by } from '../../common/updated_by';
 
 export const listSchema = t.exact(
-  t.type({
-    _version: _versionOrUndefined,
-    '@timestamp': timestampOrUndefined,
-    created_at,
-    created_by,
-    description,
-    id,
-    immutable,
-    meta: metaOrUndefined,
-    name,
-    tie_breaker_id,
-    type,
-    updated_at,
-    updated_by,
-    version,
-  })
+  t.intersection([
+    t.type({
+      _version: _versionOrUndefined,
+      '@timestamp': timestampOrUndefined,
+      created_at,
+      created_by,
+      description,
+      id,
+      immutable,
+      meta: metaOrUndefined,
+      name,
+      tie_breaker_id,
+      type,
+      updated_at,
+      updated_by,
+      version,
+    }),
+    // Optional so pre-existing list documents, which have no storage field, still decode.
+    t.partial({
+      storage: storageOrUndefined,
+    }),
+  ])
 );
 
 export type ListSchema = t.TypeOf<typeof listSchema>;

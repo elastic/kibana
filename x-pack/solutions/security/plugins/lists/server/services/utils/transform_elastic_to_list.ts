@@ -30,6 +30,8 @@ export const transformElasticToList = ({
       // meta can be null if deleted (empty in PUT payload), since update_by_query set deleted values as null
       // return it as undefined to keep it consistent with payload
       meta: hit._source?.meta ?? undefined,
+      // storage is null-normalized for the same reason as meta
+      storage: hit._source?.storage ?? undefined,
     };
   });
 };

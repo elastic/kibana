@@ -53,6 +53,8 @@ dependsOn:
   - '@kbn/security-solution-features'
   - '@kbn/kql'
   - '@kbn/core-spaces-common'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

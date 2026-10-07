@@ -13,6 +13,7 @@ import {
   immutable,
   metaOrUndefined,
   name,
+  storageOrUndefined,
   tie_breaker_id,
   timestamp,
   type,
@@ -22,20 +23,25 @@ import {
 import { version } from '@kbn/securitysolution-io-ts-types';
 
 export const indexEsListSchema = t.exact(
-  t.type({
-    '@timestamp': timestamp,
-    created_at,
-    created_by,
-    description,
-    immutable,
-    meta: metaOrUndefined,
-    name,
-    tie_breaker_id,
-    type,
-    updated_at,
-    updated_by,
-    version,
-  })
+  t.intersection([
+    t.type({
+      '@timestamp': timestamp,
+      created_at,
+      created_by,
+      description,
+      immutable,
+      meta: metaOrUndefined,
+      name,
+      tie_breaker_id,
+      type,
+      updated_at,
+      updated_by,
+      version,
+    }),
+    t.partial({
+      storage: storageOrUndefined,
+    }),
+  ])
 );
 
 export type IndexEsListSchema = t.OutputOf<typeof indexEsListSchema>;

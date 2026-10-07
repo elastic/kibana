@@ -76,6 +76,8 @@ import type { BulkUpdateRulesParams } from '../application/rule/methods/bulk_upd
 import { bulkUpdateRules } from '../application/rule/methods/bulk_update';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
+import type { GetRuleApiKeyIndexPrivilegesParams } from '../application/rule/methods/get_api_key_privileges/get_rule_api_key_index_privileges';
+import { getRuleApiKeyIndexPrivileges } from '../application/rule/methods/get_api_key_privileges/get_rule_api_key_index_privileges';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
 import { unmuteAll } from '../application/rule/methods/unmute_all';
@@ -230,6 +232,8 @@ export class RulesClient {
     bulkDisableRules(this.context, options);
 
   public updateRuleApiKey = (params: { id: string }) => updateRuleApiKey(this.context, params);
+  public getRuleApiKeyIndexPrivileges = (params: GetRuleApiKeyIndexPrivilegesParams) =>
+    getRuleApiKeyIndexPrivileges(this.context, params);
   public disableRule = (params: DisableRuleParams) => disableRule(this.context, params);
   public enableRule = (params: EnableRuleParams) => enableRule(this.context, params);
 

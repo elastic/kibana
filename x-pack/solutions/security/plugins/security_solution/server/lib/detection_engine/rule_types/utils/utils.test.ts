@@ -662,6 +662,63 @@ describe('utils', () => {
   });
 
   describe('hasTimestampFields', () => {
+    const missingIn = (
+      indices: string[]
+    ): Partial<TransportResult<FieldCapsResponse, unknown>> => ({
+      body: {
+        indices: ['threat-feed', ...indices],
+        fields: {
+          '@timestamp': {
+            date: { type: 'date', searchable: true, aggregatable: true, indices: ['threat-feed'] },
+            unmapped: { type: 'unmapped', searchable: false, aggregatable: false, indices },
+          },
+        },
+      },
+    });
+
+    test('reports no warning when every index missing the timestamp may omit it', async () => {
+      const { warningMessage } = await hasTimestampFields({
+        timestampField: '@timestamp',
+        timestampFieldCapsResponse: missingIn([
+          '.value-list-v2-default-blocked-ips',
+        ]) as TransportResult<FieldCapsResponse, unknown>,
+        ruleExecutionLogger,
+        isTimestampOptional: (indexName) => indexName.startsWith('.value-list-v2-'),
+      });
+
+      expect(warningMessage).toBeUndefined();
+      expect(ruleExecutionLogger.warn).not.toHaveBeenCalled();
+    });
+
+    test('reports only the indices that may not omit the timestamp', async () => {
+      const { warningMessage } = await hasTimestampFields({
+        timestampField: '@timestamp',
+        timestampFieldCapsResponse: missingIn([
+          '.value-list-v2-default-blocked-ips',
+          'myfakeindex-1',
+        ]) as TransportResult<FieldCapsResponse, unknown>,
+        ruleExecutionLogger,
+        isTimestampOptional: (indexName) => indexName.startsWith('.value-list-v2-'),
+      });
+
+      expect(warningMessage).toBe(
+        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1"]'
+      );
+    });
+
+    test('reports no warning when the only threat index has no fields at all and may omit the timestamp', async () => {
+      const { warningMessage } = await hasTimestampFields({
+        timestampField: '@timestamp',
+        timestampFieldCapsResponse: {
+          body: { indices: ['.value-list-v2-default-blocked-ips'], fields: {} },
+        } as TransportResult<FieldCapsResponse, unknown>,
+        ruleExecutionLogger,
+        isTimestampOptional: (indexName) => indexName.startsWith('.value-list-v2-'),
+      });
+
+      expect(warningMessage).toBeUndefined();
+    });
+
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
       const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {

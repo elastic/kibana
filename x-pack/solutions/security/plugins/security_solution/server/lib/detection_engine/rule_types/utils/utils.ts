@@ -87,29 +87,47 @@ export const hasTimestampFields = async (args: {
   timestampField: string;
   timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  /**
+   * Indices allowed to have no timestamp field, such as a value list's lookup index read
+   * as a threat index: a list is not time series data and is read whole.
+   */
+  isTimestampOptional?: (indexName: string) => boolean;
 }): Promise<{
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
-  const { timestampField, timestampFieldCapsResponse, ruleExecutionLogger } = args;
+  const { timestampField, timestampFieldCapsResponse, ruleExecutionLogger, isTimestampOptional } =
+    args;
 
   if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
     timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
   ) {
+    const missingIndices = (
+      isEmpty(timestampFieldCapsResponse.body.fields) ||
+      isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
+        ? timestampFieldCapsResponse.body.indices
+        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
+    ) as string | string[] | undefined;
+    const missingList = Array.isArray(missingIndices)
+      ? missingIndices
+      : missingIndices == null
+      ? []
+      : [missingIndices];
+    const reported = missingList.filter((indexName) => !isTimestampOptional?.(indexName));
+    // skip the warning only when every index that lacks the field may lack it; an empty
+    // response (no index at all) still warns, as before
+    if (isTimestampOptional != null && missingList.length > 0 && reported.length === 0) {
+      return { foundNoIndices: false, warningMessage: undefined };
+    }
     // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
     // warning
     const errorString = `The following indices are missing the ${
       timestampField === '@timestamp'
         ? 'timestamp field "@timestamp"'
         : `timestamp override field "${timestampField}"`
-    }: ${JSON.stringify(
-      isEmpty(timestampFieldCapsResponse.body.fields) ||
-        isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
-        ? timestampFieldCapsResponse.body.indices
-        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
-    )}`;
+    }: ${JSON.stringify(isTimestampOptional != null ? reported : missingIndices)}`;
 
     ruleExecutionLogger.warn(errorString);
 
