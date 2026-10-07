@@ -6,34 +6,25 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { KbnClient } from '@kbn/kbn-client';
 
 const SAVED_OBJECTS_API_HEADERS = { [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31' } as const;
 
-export interface KbnRequestable {
-  request<T = unknown>(options: {
-    method: string;
-    path: string;
-    headers?: Record<string, string>;
-    body?: unknown;
-  }): Promise<{ data: T }>;
-}
-
 export async function deleteSavedObject(
-  kbnClient: KbnRequestable,
+  kbnClient: KbnClient,
   type: string,
   id: string
 ): Promise<void> {
-  await kbnClient
-    .request({
-      method: 'DELETE',
-      path: `/api/saved_objects/${type}/${id}`,
-      headers: SAVED_OBJECTS_API_HEADERS,
-    })
-    .catch(() => {});
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `/api/saved_objects/${type}/${id}`,
+    headers: SAVED_OBJECTS_API_HEADERS,
+    ignoreErrors: [404],
+  });
 }
 
 export async function assertSavedObjectExists(
-  kbnClient: KbnRequestable,
+  kbnClient: KbnClient,
   type: string,
   id: string
 ): Promise<void> {

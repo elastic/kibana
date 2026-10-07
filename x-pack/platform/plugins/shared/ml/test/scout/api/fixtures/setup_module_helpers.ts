@@ -6,11 +6,10 @@
  */
 
 import { sortBy } from 'lodash';
-import type { ApiServicesFixture } from '@kbn/scout';
+import type { ApiClientFixture, ApiServicesFixture, KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { INTERNAL_API_HEADERS } from './constants';
 import { deleteSavedObject, assertSavedObjectExists } from './general_test_helpers';
-import type { KbnRequestable } from './general_test_helpers';
 
 export const ALL_MODULE_IDS = [
   'apache_data_stream',
@@ -77,17 +76,6 @@ export interface SetupModuleTestData {
   expected: SetupModuleExpected;
 }
 
-interface ModuleApiClient {
-  post(
-    url: string,
-    opts?: {
-      headers?: Record<string, string>;
-      responseType?: string;
-      body?: unknown;
-    }
-  ): Promise<{ statusCode: number; body: Record<string, unknown> }>;
-}
-
 interface MlSamlAuth {
   asMlPoweruser(): Promise<{ cookieHeader: Record<string, string> }>;
 }
@@ -97,7 +85,7 @@ export interface SetupModuleCtx {
   setTimeout: (ms: number) => void;
   samlAuth: MlSamlAuth;
   anomalyDetection: ApiServicesFixture['ml']['anomalyDetection'];
-  kbnClient: KbnRequestable;
+  kbnClient: KbnClient;
 }
 
 /**
@@ -107,7 +95,7 @@ export interface SetupModuleCtx {
  * the scout_require_api_client_in_api_test ESLint rule can detect its usage.
  */
 export async function runSetupModuleTest(
-  apiClient: ModuleApiClient,
+  apiClient: ApiClientFixture,
   ctx: SetupModuleCtx,
   data: SetupModuleTestData
 ): Promise<void> {
@@ -242,7 +230,7 @@ export async function runSetupModuleTest(
 }
 
 export async function cleanupModuleSavedObjects(
-  kbnClient: KbnRequestable,
+  kbnClient: KbnClient,
   expected: Pick<SetupModuleExpected, 'searches' | 'visualizations' | 'dashboards'>
 ): Promise<void> {
   for (const id of expected.searches) {
