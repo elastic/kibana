@@ -134,7 +134,7 @@ describe('RunLimitsSection', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not warn about exhausted groups hidden from the tab', async () => {
+  it('warns about exhausted groups hidden from the tab when enabling global enforcement', async () => {
     setup(
       response({
         enabled: false,
@@ -150,8 +150,14 @@ describe('RunLimitsSection', () => {
     fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnforcementSwitch'));
     fireEvent.click(screen.getByTestId('nightshiftSaveRunLimitsButton'));
 
+    const modal = await screen.findByTestId('nightshiftRunLimitsConfirmationModal');
+    expect(modal).toHaveTextContent('Enable enforcement with reached limits?');
+    expect(modal).toHaveTextContent('Discovery');
+    expect(save).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Enable and save changes' }));
+
     await waitFor(() => expect(save).toHaveBeenCalledWith({ enabled: true }));
-    expect(screen.queryByTestId('nightshiftRunLimitsConfirmationModal')).not.toBeInTheDocument();
   });
 
   it('does not show the exhaustion callout for groups hidden from the tab', () => {

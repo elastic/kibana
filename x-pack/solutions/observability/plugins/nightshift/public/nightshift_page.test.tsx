@@ -30,7 +30,25 @@ jest.mock('./automations/automations_page', () => ({
   AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
 }));
 jest.mock('./settings/page', () => ({
-  SettingsPage: () => <div data-test-subj="settingsPageStub" />,
+  SettingsPage: ({ headerProps }: { headerProps: { onSandboxSecretsClick?: () => void } }) => {
+    const [draft, setDraft] = React.useState('');
+
+    return (
+      <div data-test-subj="settingsPageStub">
+        <input
+          data-test-subj="settingsPageDraftStub"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+        />
+        <button
+          data-test-subj="settingsPageOpenSandboxSecretsStub"
+          onClick={headerProps.onSandboxSecretsClick}
+        >
+          Open sandbox secrets
+        </button>
+      </div>
+    );
+  },
 }));
 jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./hooks/use_significant_events_availability');
@@ -205,7 +223,12 @@ describe('NightshiftPage', () => {
           ...overrides,
           application: {
             ...services.application,
-            capabilities: { nightshift: { manage: true } },
+            capabilities: {
+              nightshift: {
+                ...services.application.capabilities.nightshift,
+                manage: true,
+              },
+            },
           },
         },
       });
@@ -228,6 +251,19 @@ describe('NightshiftPage', () => {
       await act(async () => fireEvent.click(link));
 
       expect(screen.getByTestId('sandboxSecretsFlyoutStub')).toBeInTheDocument();
+    });
+
+    it('retains unsaved settings when opening a flyout updates the page shell', () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/settings/detections');
+
+      fireEvent.change(screen.getByTestId('settingsPageDraftStub'), {
+        target: { value: 'unsaved changes' },
+      });
+      fireEvent.click(screen.getByTestId('settingsPageOpenSandboxSecretsStub'));
+
+      expect(screen.getByTestId('sandboxSecretsFlyoutStub')).toBeInTheDocument();
+      expect(screen.getByTestId('settingsPageDraftStub')).toHaveValue('unsaved changes');
     });
 
     it('shows the Investigations action when the API and feature flag are available', async () => {

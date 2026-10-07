@@ -141,23 +141,20 @@ export function NightshiftPage(): React.ReactElement | null {
     >
       {isSettingsPage ? (
         <Routes>
-          <Route
-            path="/settings/:tab?"
-            component={() => (
-              <SettingsPage
-                headerProps={{
-                  onManagementClick: navigateToManagement,
-                  managementHref,
-                  onSandboxSecretsClick: canManageSandboxSecrets
-                    ? openSandboxSecretsFlyout
-                    : undefined,
-                  onCustomContextClick: canViewCustomContext ? openCustomContextFlyout : undefined,
-                  onAutomationsClick: canUseAutomations ? navigateToInvestigations : undefined,
-                  investigationsHref: canUseAutomations ? investigationsHref : undefined,
-                }}
-              />
-            )}
-          />
+          <Route path="/settings/:tab?">
+            <SettingsPage
+              headerProps={{
+                onManagementClick: navigateToManagement,
+                managementHref,
+                onSandboxSecretsClick: canManageSandboxSecrets
+                  ? openSandboxSecretsFlyout
+                  : undefined,
+                onCustomContextClick: canViewCustomContext ? openCustomContextFlyout : undefined,
+                onAutomationsClick: canUseAutomations ? navigateToInvestigations : undefined,
+                investigationsHref: canUseAutomations ? investigationsHref : undefined,
+              }}
+            />
+          </Route>
         </Routes>
       ) : (
         <>

@@ -91,7 +91,7 @@ export const RunLimitsSection = ({
 
     const enabling =
       !draftState.saved.enabled && draftState.draft.enabled
-        ? groups.filter((group) => {
+        ? RUN_QUOTA_GROUPS.filter((group) => {
             const limit = draftState.draft.limits[group];
             return isFiniteRunLimit(limit) && response.counts[group] >= limit;
           })
