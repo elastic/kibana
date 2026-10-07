@@ -93,8 +93,7 @@ export const buildLensConfig = async ({
       validationError = await validateEsqlQuery(
         providedEsql,
         buildServerESQLCallbacks({
-          client: esClient.asCurrentUser,
-          internalClient: esClient.asInternalUser,
+          esClient,
           logger,
         })
       );

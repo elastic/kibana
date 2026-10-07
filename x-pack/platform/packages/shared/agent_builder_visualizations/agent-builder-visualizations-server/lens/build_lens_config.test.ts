@@ -151,8 +151,7 @@ describe('buildLensConfig', () => {
     const result = await run(PROVIDED_ESQL);
 
     expect(mockedBuildCallbacks).toHaveBeenCalledWith({
-      client: esClient.asCurrentUser,
-      internalClient: esClient.asInternalUser,
+      esClient,
       logger,
     });
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});

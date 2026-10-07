@@ -169,8 +169,7 @@ export const generateEsql = async ({
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({
-    client: esClient,
-    internalClient: internalEsClient,
+    esClient: { asCurrentUser: esClient, asInternalUser: internalEsClient ?? esClient },
     logger,
   });
 

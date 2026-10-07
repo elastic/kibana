@@ -18,6 +18,11 @@ const makeClient = (resolveIndex: jest.Mock, nodesInfo: jest.Mock) =>
 
 const logger = loggerMock.create();
 
+const asScoped = (client: ElasticsearchClient) => ({
+  asCurrentUser: client,
+  asInternalUser: client,
+});
+
 const nodesInfoWithRoles = (roles: string[]) =>
   jest.fn().mockResolvedValue({ nodes: { node1: { roles } } });
 
@@ -33,7 +38,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const resolveIndex = resolveIndexWith(['logs-test', 'remote:logs']);
     const nodesInfo = nodesInfoWithRoles(['data', 'master', 'remote_cluster_client']);
     const { getSources } = buildServerESQLCallbacks({
-      client: makeClient(resolveIndex, nodesInfo),
+      esClient: asScoped(makeClient(resolveIndex, nodesInfo)),
       logger,
     });
 
@@ -49,7 +54,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const resolveIndex = resolveIndexWith(['logs-test']);
     const nodesInfo = nodesInfoWithRoles(['data', 'master', 'ingest']);
     const { getSources } = buildServerESQLCallbacks({
-      client: makeClient(resolveIndex, nodesInfo),
+      esClient: asScoped(makeClient(resolveIndex, nodesInfo)),
       logger,
     });
 
@@ -66,7 +71,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const resolveIndex = resolveIndexWith(['logs-test']);
     const nodesInfo = jest.fn().mockRejectedValue(new Error('unauthorized'));
     const { getSources } = buildServerESQLCallbacks({
-      client: makeClient(resolveIndex, nodesInfo),
+      esClient: asScoped(makeClient(resolveIndex, nodesInfo)),
       logger,
     });
 
@@ -81,8 +86,10 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const currentNodesInfo = jest.fn();
     const internalNodesInfo = nodesInfoWithRoles(['data']);
     const { getSources } = buildServerESQLCallbacks({
-      client: makeClient(resolveIndexWith([]), currentNodesInfo),
-      internalClient: makeClient(jest.fn(), internalNodesInfo),
+      esClient: {
+        asCurrentUser: makeClient(resolveIndexWith([]), currentNodesInfo),
+        asInternalUser: makeClient(jest.fn(), internalNodesInfo),
+      },
       logger,
     });
 
@@ -98,7 +105,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
   it('caches the role lookup', async () => {
     const nodesInfo = nodesInfoWithRoles(['data']);
     const { getSources } = buildServerESQLCallbacks({
-      client: makeClient(resolveIndexWith([]), nodesInfo),
+      esClient: asScoped(makeClient(resolveIndexWith([]), nodesInfo)),
       logger,
     });
 
@@ -110,7 +117,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
 
   it('reports remote sources as unknown when the node lacks the role', async () => {
     const callbacks = buildServerESQLCallbacks({
-      client: makeClient(resolveIndexWith(['logs-test']), nodesInfoWithRoles(['data'])),
+      esClient: asScoped(makeClient(resolveIndexWith(['logs-test']), nodesInfoWithRoles(['data']))),
       logger,
     });
 
