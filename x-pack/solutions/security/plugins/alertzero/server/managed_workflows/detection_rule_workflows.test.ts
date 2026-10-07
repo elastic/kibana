@@ -735,7 +735,7 @@ describe('detection rule workflows', () => {
           expect(String(rows.with?.rows)).toContain(`contains row[${keyIndex}]`);
         });
 
-        it('fans out only the current revision of each rule', () => {
+        it('reviews a rule only on false positives from its current version', () => {
           const keys = renderRevisionKeys([
             { id: 'rule-1', revision: 31 },
             { id: 'rule-2', revision: 4 },
