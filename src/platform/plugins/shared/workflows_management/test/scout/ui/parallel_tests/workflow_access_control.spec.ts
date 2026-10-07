@@ -7,18 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SamlAuth } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { spaceTest as test } from '../fixtures';
+import { resolveUser } from '../fixtures/resolve_user';
 import { getDummyWorkflowYaml } from '../fixtures/workflows';
-
-// Local SAML synthesizes `elastic_<role>` / `test <role>`, while Cloud logs in as a real QA account.
-const resolveUser = async (samlAuth: SamlAuth, role: string) => {
-  const { username, full_name: fullName, email } = await samlAuth.session.getUserData(role);
-  return { username, displayName: fullName || email || username };
-};
 
 test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
   let workflowId: string | undefined;
