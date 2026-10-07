@@ -12,21 +12,100 @@ import {
   type DateRangePickerProps,
   type DateRangePickerSettings,
 } from '@kbn/date-range-picker';
+import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '../hooks/use_automation_usage';
 import { listLabels } from './translations';
 
 const PRESETS: NonNullable<DateRangePickerProps['presets']> = [
-  { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
-  { start: 'now-48h', end: 'now', label: listLabels.last48Hours },
-  { start: 'now-7d', end: 'now', label: 'Last 7 days' },
-  { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+  {
+    start: 'now/d',
+    end: 'now/d',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.today', {
+      defaultMessage: 'Today',
+    }),
+  },
+  {
+    start: 'now-1d/d',
+    end: 'now-1d/d',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.yesterday', {
+      defaultMessage: 'Yesterday',
+    }),
+  },
+  {
+    start: 'now-15m',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last15Minutes', {
+      defaultMessage: 'Last 15 minutes',
+    }),
+  },
+  {
+    start: 'now-30m',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last30Minutes', {
+      defaultMessage: 'Last 30 minutes',
+    }),
+  },
+  {
+    start: 'now-1h',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last1Hour', {
+      defaultMessage: 'Last 1 hour',
+    }),
+  },
+  {
+    start: 'now-12h',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last12Hours', {
+      defaultMessage: 'Last 12 hours',
+    }),
+  },
+  {
+    start: 'now-24h',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last24Hours', {
+      defaultMessage: 'Last 24 hours',
+    }),
+  },
+  {
+    start: 'now-48h',
+    end: 'now',
+    label: listLabels.last48Hours,
+  },
+  {
+    start: 'now-7d',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last7Days', {
+      defaultMessage: 'Last 7 days',
+    }),
+  },
+  {
+    start: 'now-30d',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last30Days', {
+      defaultMessage: 'Last 30 days',
+    }),
+  },
+  {
+    start: 'now-90d',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last90Days', {
+      defaultMessage: 'Last 90 days',
+    }),
+  },
+  {
+    start: 'now-1y',
+    end: 'now',
+    label: i18n.translate('xpack.nightshift.automations.timeRange.last1Year', {
+      defaultMessage: 'Last 1 year',
+    }),
+  },
 ];
 
 export const AutomationsTimeRangePicker = ({
   onRangeChange,
   onRefresh,
 }: {
-  onRangeChange: (range: TimeRange) => void;
+  onRangeChange: (range: TimeRange, label: string) => void;
   onRefresh: () => void;
 }) => {
   const [value, setValue] = useState(listLabels.last48Hours);
@@ -42,7 +121,11 @@ export const AutomationsTimeRangePicker = ({
     setValue(nextValue);
     setIsInvalid(invalid);
     if (invalid) return;
-    onRangeChange({ start, end });
+    const preset = PRESETS.find((option) => option.start === start && option.end === end);
+    onRangeChange(
+      { start, end },
+      preset?.label ?? nextValue.charAt(0).toUpperCase() + nextValue.slice(1)
+    );
   };
 
   return (

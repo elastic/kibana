@@ -68,7 +68,7 @@ describe('automation request', () => {
             { kind: 'alert', ruleNamePattern: 'cpu', alertStatus: 'inactive', tags: ['infra'] },
           ],
         },
-        execution: { promptTemplate: 'Find the cause', reasoningMode: 'observe' },
+        execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
         completion: {},
         runtime: { dailyDispatchLimit: 20 },
       });

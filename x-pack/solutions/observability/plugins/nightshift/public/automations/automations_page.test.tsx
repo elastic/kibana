@@ -77,17 +77,20 @@ describe('AutomationsPage', () => {
 
   const renderPage = (initialPath = '/automations') => {
     const history = createMemoryHistory({ initialEntries: [initialPath] });
-    return render(
-      <I18nProvider>
-        <Router history={history}>
-          <>
-            <Route path="/automations/:id/runs" component={AutomationsPage} />
-            <Route path="/automations/:id" component={AutomationsPage} />
-            <Route path="/automations" component={AutomationsPage} />
-          </>
-        </Router>
-      </I18nProvider>
-    );
+    return {
+      history,
+      ...render(
+        <I18nProvider>
+          <Router history={history}>
+            <>
+              <Route path="/automations/:id/runs" component={AutomationsPage} />
+              <Route path="/automations/:id" component={AutomationsPage} />
+              <Route path="/automations" component={AutomationsPage} />
+            </>
+          </Router>
+        </I18nProvider>
+      ),
+    };
   };
 
   it('shows the empty state and create action when no automations exist', () => {
@@ -130,7 +133,11 @@ describe('AutomationsPage', () => {
     expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
     expect(screen.queryByText('Alert triage')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(screen.getByText('Showing 1 of 2 automations')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('automationsSearch'), { target: { value: 'nothing' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search and filters' }));
     expect(screen.getByText('Alert triage')).toBeInTheDocument();
     expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
   });
@@ -259,7 +266,11 @@ describe('AutomationsPage', () => {
 
       fireEvent.click(screen.getByTestId('automationToggle-report'));
 
-      expect(toggleMutate).toHaveBeenCalledWith({ id: 'report', isEnabled: true });
+      expect(toggleMutate).toHaveBeenCalledWith({
+        id: 'report',
+        name: 'Daily report',
+        isEnabled: true,
+      });
     });
 
     it('clones an automation from the row actions', async () => {
@@ -282,6 +293,13 @@ describe('AutomationsPage', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(deleteMutate).toHaveBeenCalledWith('report', expect.anything());
+    });
+
+    it('returns to the list when the automation id in the URL does not exist', () => {
+      const { history } = renderPage('/automations/missing');
+
+      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
+      expect(history.location.pathname).toBe('/automations');
     });
 
     it('opens the create flyout', () => {
@@ -343,7 +361,7 @@ describe('AutomationsPage', () => {
       const activeOption = await screen.findByRole('option', { name: /Enabled/ });
       expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
         'Enabled1',
-        'Disabled1',
+        'Paused1',
         'Rate limited1',
       ]);
       expect(activeOption).toHaveTextContent('1');
@@ -365,9 +383,10 @@ describe('AutomationsPage', () => {
       renderPage();
 
       expect(screen.getByTestId('automationsRateLimitBanner')).toHaveTextContent(
-        '1 automation reached their daily trigger limit'
+        '1 automation reached its daily trigger limit'
       );
       fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
+      expect(screen.queryByTestId('automationsShowRateLimited')).not.toBeInTheDocument();
 
       expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();

@@ -16,11 +16,12 @@ jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn()
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 
 const onClose = jest.fn();
+const onCreated = jest.fn();
 
 const renderFlyout = (props: Partial<React.ComponentProps<typeof CreateAutomationFlyout>> = {}) =>
   render(
     <I18nProvider>
-      <CreateAutomationFlyout onClose={onClose} {...props} />
+      <CreateAutomationFlyout onClose={onClose} onCreated={onCreated} {...props} />
     </I18nProvider>
   );
 
@@ -84,13 +85,15 @@ describe('CreateAutomationFlyout', () => {
           tags: ['oncall'],
           isEnabled: false,
           trigger: { rows: [{ kind: 'alert' }] },
-          execution: { promptTemplate: 'Find the root cause', reasoningMode: 'observe' },
+          execution: { promptTemplate: 'Find the root cause', reasoningMode: 'investigate' },
           completion: {},
           runtime: { dailyDispatchLimit: 20 },
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       )
     );
+    mutate.mock.calls[0][1].onSuccess({ id: 'created-1' });
+    expect(onCreated).toHaveBeenCalledWith('created-1');
   });
 
   it('blocks saving with an invalid custom cron', async () => {
@@ -104,18 +107,18 @@ describe('CreateAutomationFlyout', () => {
     expect(screen.getByTestId('submitAutomation')).toBeDisabled();
   });
 
-  it('requires the daily trigger limit to be between 1 and 200', async () => {
+  it('requires the daily trigger limit to be between 1 and 50', async () => {
     renderFlyout();
     await addTrigger('Alert triggered');
     const submitButton = screen.getByTestId('submitAutomation');
     const dailyLimit = screen.getByTestId('automationDailyLimit');
 
-    for (const value of ['', '0', '201', '1.5']) {
+    for (const value of ['', '0', '51', '1.5']) {
       fireEvent.change(dailyLimit, { target: { value } });
       expect(submitButton).toBeDisabled();
     }
 
-    fireEvent.change(dailyLimit, { target: { value: '200' } });
+    fireEvent.change(dailyLimit, { target: { value: '50' } });
     expect(submitButton).toBeEnabled();
   });
 

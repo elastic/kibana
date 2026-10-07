@@ -24,12 +24,19 @@ import { RunCountCell } from './cells/run_count_cell';
 import { AutomationUsageCell } from './cells/usage_cell';
 import { listLabels, runCountColumns } from './translations';
 
+const INTERACTIVE_ELEMENTS =
+  'button, a, input, label, [role="switch"], [role="menu"], [role="dialog"], [role="listbox"]';
+
 export const AutomationsTable = ({
   automations,
   canManage,
   runCounts,
   usedToday,
   getFacets,
+  isRateLimited,
+  pageIndex,
+  pageSize,
+  onPageChange,
   onClone,
   onDelete,
   onOpenAutomation,
@@ -42,6 +49,10 @@ export const AutomationsTable = ({
   runCounts: Map<string, RunCounts>;
   usedToday: Map<string, number>;
   getFacets: (automation: Automation) => AutomationFacets;
+  isRateLimited: (automation: Automation) => boolean;
+  pageIndex: number;
+  pageSize: number;
+  onPageChange: (index: number, size: number) => void;
   onClone: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
   onOpenAutomation: (automation: Automation) => void;
@@ -105,6 +116,7 @@ export const AutomationsTable = ({
         <AutomationUsageCell
           used={usedToday.get(automation.id)}
           limit={automation.runtime.dailyDispatchLimit}
+          isRateLimited={isRateLimited(automation)}
         />
       ),
     },
@@ -117,14 +129,18 @@ export const AutomationsTable = ({
         <EuiSwitch
           label={i18n.translate('xpack.nightshift.automations.toggleLabel', {
             defaultMessage: '{action} {name}',
-            values: { action: isEnabled ? 'Disable' : 'Enable', name: automation.name },
+            values: { action: isEnabled ? 'Pause' : 'Enable', name: automation.name },
           })}
           showLabel={false}
           compressed
           checked={isEnabled}
           disabled={!canManage || toggleAutomation.isLoading}
           onChange={(event) =>
-            toggleAutomation.mutate({ id: automation.id, isEnabled: event.target.checked })
+            toggleAutomation.mutate({
+              id: automation.id,
+              name: automation.name,
+              isEnabled: event.target.checked,
+            })
           }
           data-test-subj={`automationToggle-${automation.id}`}
         />
@@ -167,16 +183,21 @@ export const AutomationsTable = ({
       items={automations}
       columns={columns}
       sorting={{ sort }}
-      onTableChange={({ sort: nextSort }: Criteria<Automation>) =>
-        nextSort && setSort({ field: String(nextSort.field), direction: nextSort.direction })
-      }
-      pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+      onTableChange={({ sort: nextSort, page }: Criteria<Automation>) => {
+        if (nextSort) setSort({ field: String(nextSort.field), direction: nextSort.direction });
+        if (page) onPageChange(page.index, page.size);
+      }}
+      pagination={{ pageIndex, pageSize, pageSizeOptions: [10, 25, 50] }}
       rowHeader="name"
       tableCaption={listLabels.title}
       tableLayout="auto"
       hasBackground={false}
       rowProps={(automation: Automation) => ({
-        onClick: () => onOpenAutomation(automation),
+        onClick: (event: React.MouseEvent<HTMLElement>) => {
+          const target = event.target as HTMLElement;
+          if (!event.currentTarget.contains(target) || target.closest(INTERACTIVE_ELEMENTS)) return;
+          onOpenAutomation(automation);
+        },
         isSelected: automation.id === selectedId,
         'data-automation-row': automation.id,
       })}

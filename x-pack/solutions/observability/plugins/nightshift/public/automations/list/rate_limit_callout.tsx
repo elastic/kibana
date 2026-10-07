@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { getRateLimitTitle, listLabels } from './translations';
 
-export const RateLimitCallout = ({ count, onShow }: { count: number; onShow: () => void }) => (
+export const RateLimitCallout = ({ count, onShow }: { count: number; onShow?: () => void }) => (
   <EuiCallOut
     announceOnMount
     size="s"
@@ -17,13 +17,17 @@ export const RateLimitCallout = ({ count, onShow }: { count: number; onShow: () 
     iconType="hourglass"
     title={getRateLimitTitle(count)}
     text={listLabels.rateLimitBody}
-    actionProps={{
-      primary: {
-        children: listLabels.showRateLimited,
-        onClick: onShow,
-        'data-test-subj': 'automationsShowRateLimited',
-      },
-    }}
+    actionProps={
+      onShow
+        ? {
+            primary: {
+              children: listLabels.showRateLimited,
+              onClick: onShow,
+              'data-test-subj': 'automationsShowRateLimited',
+            },
+          }
+        : undefined
+    }
     data-test-subj="automationsRateLimitBanner"
   />
 );

@@ -18,7 +18,7 @@ describe('automation form values', () => {
         trigger: undefined,
         dailyDispatchLimit: '20',
         instructions: '',
-        mode: 'ask',
+        mode: 'investigate',
         slackAction: undefined,
         isEnabled: false,
       });

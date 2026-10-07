@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
   EuiContextMenu,
@@ -49,12 +50,13 @@ import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
   useAutomationRunsInRange,
-  useCreateAutomation,
   useToggleAutomation,
   useUpdateAutomation,
   type Automation,
 } from '../hooks/use_automations';
-import { toCloneRequestBody } from '../utils/clone_automation';
+import { getDailyUsageTone } from '../utils/daily_usage';
+import { statusLabels } from '../utils/filter_automations';
+import type { RunRange } from '../hooks/use_automation_usage';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
 import { RunHistory, RunStatusIndicator, STATUSES, type Run } from './run_history';
 
@@ -71,8 +73,9 @@ const labels = {
   enabled: i18n.translate('xpack.nightshift.automations.enabledStatus', {
     defaultMessage: 'Enabled',
   }),
-  disabled: i18n.translate('xpack.nightshift.automations.disabledStatus', {
-    defaultMessage: 'Disabled',
+  back: i18n.translate('xpack.nightshift.automations.detail.back', { defaultMessage: 'Back' }),
+  skippedTrigger: i18n.translate('xpack.nightshift.automations.detail.skippedTrigger', {
+    defaultMessage: 'Skipped trigger',
   }),
   noDescription: i18n.translate('xpack.nightshift.automations.detail.noDescription', {
     defaultMessage: 'No description.',
@@ -167,14 +170,20 @@ export const AutomationDetailFlyout = ({
   automation,
   canManage,
   usedToday,
+  runRange,
+  rangeLabel,
   onClose,
+  onClone,
   onDelete,
 }: {
   automations: Automation[];
   automation: Automation;
   canManage: boolean;
   usedToday: number;
+  runRange: RunRange;
+  rangeLabel: string;
   onClose: () => void;
+  onClone: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
 }) => {
   const titleId = useGeneratedHtmlId();
@@ -185,22 +194,17 @@ export const AutomationDetailFlyout = ({
   const initialRunFilter = STATUSES.find((status) => status === statusParam);
   const [isEditing, setIsEditing] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
+  const [isNameInvalid, setIsNameInvalid] = useState(false);
   const [selectedRun, setSelectedRun] = useState<Run>();
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const originalValues = useMemo(() => toAutomationFormValues(automation), [automation]);
   const [values, setValues] = useState<AutomationFormValues>(originalValues);
   const updateAutomation = useUpdateAutomation();
-  const createAutomation = useCreateAutomation();
   const toggleAutomation = useToggleAutomation();
   const isRunsTab = pathname.endsWith('/runs');
   const isDirty = JSON.stringify(values) !== JSON.stringify(originalValues);
   const blocker = getSaveBlocker(values);
-  const valid = canSaveAutomation(values) && Boolean(values.name.trim());
-  const runRange = useMemo(() => {
-    const end = new Date();
-    const start = new Date(end.getTime() - 48 * 60 * 60 * 1000);
-    return { startedAfter: start.toISOString(), startedBefore: end.toISOString() };
-  }, []);
+  const valid = canSaveAutomation(values);
   const runsQuery = useAutomationRunsInRange(
     automation.id,
     runRange.startedAfter,
@@ -210,12 +214,40 @@ export const AutomationDetailFlyout = ({
   const skippedRuns = runs.filter(({ status }) => status === 'skipped').length;
   const startedRuns = (runsQuery.data?.total ?? 0) - skippedRuns;
   const dailyLimit = automation.runtime.dailyDispatchLimit;
-  const isLimitReached = dailyLimit !== undefined && usedToday >= dailyLimit;
+  const isLimitHigh =
+    dailyLimit !== undefined && getDailyUsageTone(usedToday, dailyLimit) !== 'healthy';
   const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
-  const orderedAutomations = automations;
-  const currentIndex = orderedAutomations.findIndex(({ id: rowId }) => rowId === automation.id);
-  const previous = orderedAutomations[currentIndex - 1];
-  const next = orderedAutomations[currentIndex + 1];
+  const currentIndex = automations.findIndex(({ id: rowId }) => rowId === automation.id);
+  const isInList = currentIndex !== -1;
+  const previous = isInList ? automations[currentIndex - 1] : undefined;
+  const next = isInList ? automations[currentIndex + 1] : undefined;
+  const runCount = (status: Run['status']) => runs.filter((run) => run.status === status).length;
+  const runsTooltip = i18n.translate('xpack.nightshift.automations.detail.runsTooltip', {
+    defaultMessage: '{counts} in {range}',
+    values: {
+      counts:
+        [
+          runCount('succeeded') > 0 &&
+            i18n.translate('xpack.nightshift.automations.detail.successfulCount', {
+              defaultMessage: '{count} successful',
+              values: { count: runCount('succeeded') },
+            }),
+          runCount('running') > 0 &&
+            i18n.translate('xpack.nightshift.automations.detail.runningCount', {
+              defaultMessage: '{count} running',
+              values: { count: runCount('running') },
+            }),
+          runCount('failed') > 0 &&
+            i18n.translate('xpack.nightshift.automations.detail.failedCount', {
+              defaultMessage: '{count} failed',
+              values: { count: runCount('failed') },
+            }),
+        ]
+          .filter(Boolean)
+          .join(' · ') || '0',
+      range: rangeLabel,
+    },
+  });
 
   const navigate = (path: string) => history.push(path);
   const requestClose = () => {
@@ -252,8 +284,9 @@ export const AutomationDetailFlyout = ({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [history, isEditing, next, previous, selectedRun, isRunsTab]);
-  const startEditing = () => {
-    setValues(originalValues);
+  const startEditing = (changes: Partial<AutomationFormValues> = {}) => {
+    setValues({ ...originalValues, ...changes });
+    setIsNameInvalid(false);
     setIsEditing(true);
     setIsActionsOpen(false);
   };
@@ -265,6 +298,10 @@ export const AutomationDetailFlyout = ({
   `;
   const save = () => {
     if (!values.trigger || !isTriggerValid(values.trigger)) return;
+    if (!values.name.trim()) {
+      setIsNameInvalid(true);
+      return;
+    }
     updateAutomation.mutate(
       {
         id: automation.id,
@@ -306,24 +343,23 @@ export const AutomationDetailFlyout = ({
           `}
         >
           {isRunsTab && selectedRun ? (
-            <EuiToolTip content={labels.runHistory} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="sortLeft"
-                size="xs"
-                color="text"
-                aria-label={labels.runHistory}
-                data-test-subj="automationRunDetailBack"
-                onClick={() => {
-                  setSelectedRun(undefined);
-                  navigate(`/automations/${automation.id}/runs`);
-                }}
-              />
-            </EuiToolTip>
+            <EuiButtonEmpty
+              iconType="undo"
+              size="xs"
+              color="text"
+              data-test-subj="automationRunDetailBack"
+              onClick={() => {
+                setSelectedRun(undefined);
+                navigate(`/automations/${automation.id}/runs`);
+              }}
+            >
+              {labels.back}
+            </EuiButtonEmpty>
           ) : isEditing ? (
             <EuiTitle size="xs">
               <h2 id={titleId}>{labels.editAutomation}</h2>
             </EuiTitle>
-          ) : (
+          ) : isInList ? (
             <>
               <EuiToolTip content={labels.previous} disableScreenReaderOutput>
                 <EuiButtonIcon
@@ -348,7 +384,7 @@ export const AutomationDetailFlyout = ({
                 />
               </EuiToolTip>
             </>
-          )}
+          ) : null}
           <EuiFlexItem />
           <EuiToolTip content={labels.close} disableScreenReaderOutput>
             <EuiButtonIcon
@@ -382,32 +418,37 @@ export const AutomationDetailFlyout = ({
             <EuiFlyoutBody>
               <div css={bodyCss}>
                 {selectedRun.status === 'skipped' ? (
-                  <EuiDescriptionList
-                    type="column"
-                    listItems={[
-                      {
-                        title: labels.triggered,
-                        description: formatStarted(selectedRun.startedAt),
-                      },
-                      { title: labels.source, description: selectedRun.triggeredBy ?? '—' },
-                      { title: labels.message, description: selectedRun.message ?? '—' },
-                      {
-                        title: labels.reason,
-                        description:
-                          selectedRun.skipReason === 'daily_limit'
-                            ? i18n.translate(
-                                'xpack.nightshift.automations.detail.dailyLimitReason',
-                                {
-                                  defaultMessage:
-                                    'Daily trigger limit of {limit} was already reached, so this trigger did not start a run.',
-                                  values: { limit: selectedRun.dailyLimit ?? '—' },
-                                }
-                              )
-                            : '—',
-                      },
-                      { title: labels.automation, description: automation.name },
-                    ]}
-                  />
+                  <>
+                    <SectionHeader title={labels.skippedTrigger} />
+                    <EuiSpacer size="s" />
+                    <EuiDescriptionList
+                      type="column"
+                      columnWidths={['auto', 1]}
+                      listItems={[
+                        {
+                          title: labels.triggered,
+                          description: formatStarted(selectedRun.startedAt),
+                        },
+                        { title: labels.source, description: selectedRun.triggeredBy ?? '—' },
+                        { title: labels.message, description: selectedRun.message ?? '—' },
+                        {
+                          title: labels.reason,
+                          description:
+                            selectedRun.skipReason === 'daily_limit'
+                              ? i18n.translate(
+                                  'xpack.nightshift.automations.detail.dailyLimitReason',
+                                  {
+                                    defaultMessage:
+                                      'Daily trigger limit of {limit} was already reached, so this trigger did not start a run.',
+                                    values: { limit: selectedRun.dailyLimit ?? '—' },
+                                  }
+                                )
+                              : '—',
+                        },
+                        { title: labels.automation, description: automation.name },
+                      ]}
+                    />
+                  </>
                 ) : (
                   <>
                     <SectionHeader title={labels.run} />
@@ -462,7 +503,7 @@ export const AutomationDetailFlyout = ({
                   <EuiBadgeGroup gutterSize="xs">
                     <EuiBadge color="hollow">{labels.title}</EuiBadge>
                     <EuiBadge color={automation.isEnabled ? 'success' : 'hollow'}>
-                      {automation.isEnabled ? labels.enabled : labels.disabled}
+                      {automation.isEnabled ? labels.enabled : statusLabels.paused}
                     </EuiBadge>
                   </EuiBadgeGroup>
                 </header>
@@ -481,6 +522,7 @@ export const AutomationDetailFlyout = ({
                             onChange={(event) =>
                               toggleAutomation.mutate({
                                 id: automation.id,
+                                name: automation.name,
                                 isEnabled: event.target.checked,
                               })
                             }
@@ -505,6 +547,8 @@ export const AutomationDetailFlyout = ({
                       {
                         title: labels.runsTitle,
                         gap: 'xs',
+                        tooltip: runsTooltip,
+                        onClick: () => navigate(`/automations/${automation.id}/runs`),
                         value: (
                           <div css={{ inlineSize: '100%' }}>
                             {startedRuns}
@@ -525,14 +569,14 @@ export const AutomationDetailFlyout = ({
                           <div
                             css={{
                               inlineSize: '100%',
-                              color: isLimitReached ? limitColor : undefined,
+                              color: isLimitHigh ? limitColor : undefined,
                             }}
                           >
                             {usedToday} / {automation.runtime.dailyDispatchLimit ?? '—'}
                             <EuiSpacer size="xs" />
                             <EuiProgress
                               size="s"
-                              color={isLimitReached ? limitColor : 'success'}
+                              color={isLimitHigh ? limitColor : 'success'}
                               value={usedToday}
                               max={automation.runtime.dailyDispatchLimit ?? 1}
                             />
@@ -567,8 +611,12 @@ export const AutomationDetailFlyout = ({
                     usedToday={usedToday}
                     values={values}
                     tagSuggestions={automations.flatMap(({ tags }) => tags ?? [])}
-                    isNameInvalid={!values.name.trim()}
-                    onChange={(changes) => setValues((current) => ({ ...current, ...changes }))}
+                    isNameInvalid={isNameInvalid}
+                    savedLimit={Number(originalValues.dailyDispatchLimit)}
+                    onChange={(changes) => {
+                      setValues((current) => ({ ...current, ...changes }));
+                      if ('name' in changes) setIsNameInvalid(false);
+                    }}
                   />
                 ) : isRunsTab ? (
                   <RunHistory
@@ -578,6 +626,7 @@ export const AutomationDetailFlyout = ({
                     isLoading={runsQuery.isLoading}
                     startedAfter={runRange.startedAfter}
                     startedBefore={runRange.startedBefore}
+                    rangeLabel={rangeLabel}
                     automationName={automation.name}
                     onSelect={setSelectedRun}
                   />
@@ -610,6 +659,7 @@ export const AutomationDetailFlyout = ({
                       isNameInvalid={false}
                       readOnly
                       showIdentityFields={false}
+                      onRaiseLimit={(limit) => startEditing({ dailyDispatchLimit: String(limit) })}
                       onChange={() => {}}
                     />
                   </>
@@ -630,29 +680,29 @@ export const AutomationDetailFlyout = ({
               >
                 {isEditing ? (
                   <>
-                    <EuiToolTip content={blocker}>
-                      <EuiButton
-                        data-test-subj="automationSaveButton"
-                        size="s"
-                        disabled={
-                          !valid || !isDirty || updateAutomation.isLoading || Boolean(blocker)
-                        }
-                        onClick={save}
-                      >
-                        {labels.save}
-                      </EuiButton>
-                    </EuiToolTip>
                     <EuiButton
                       data-test-subj="automationCancelEditButton"
                       size="s"
                       color="text"
                       onClick={() => {
                         setValues(originalValues);
+                        setIsNameInvalid(false);
                         setIsEditing(false);
                       }}
                     >
                       {labels.cancel}
                     </EuiButton>
+                    <EuiToolTip content={blocker}>
+                      <EuiButton
+                        fill
+                        data-test-subj="automationSaveButton"
+                        size="s"
+                        disabled={!valid || !isDirty || updateAutomation.isLoading}
+                        onClick={save}
+                      >
+                        {labels.save}
+                      </EuiButton>
+                    </EuiToolTip>
                   </>
                 ) : (
                   canManage && (
@@ -661,7 +711,7 @@ export const AutomationDetailFlyout = ({
                         data-test-subj="automationEditButton"
                         size="s"
                         iconType="pencil"
-                        onClick={startEditing}
+                        onClick={() => startEditing()}
                       >
                         {labels.edit}
                       </EuiButton>
@@ -696,7 +746,7 @@ export const AutomationDetailFlyout = ({
                                   icon: 'copy',
                                   'data-test-subj': 'automationCloneButton',
                                   onClick: () => {
-                                    createAutomation.mutate(toCloneRequestBody(automation));
+                                    onClone(automation);
                                     setIsActionsOpen(false);
                                   },
                                 },
@@ -737,6 +787,7 @@ export const AutomationDetailFlyout = ({
           }}
           cancelButtonText={labels.keepEditing}
           confirmButtonText={labels.discard}
+          buttonColor="danger"
         >
           {i18n.translate('xpack.nightshift.automations.detail.discardBody', {
             defaultMessage:
@@ -752,7 +803,13 @@ export const AutomationDetailFlyout = ({
 const InfoStrip = ({
   items,
 }: {
-  items: Array<{ title: string; value: React.ReactNode; gap?: 'xs' | 's' }>;
+  items: Array<{
+    title: string;
+    value: React.ReactNode;
+    gap?: 'xs' | 's';
+    tooltip?: string;
+    onClick?: () => void;
+  }>;
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -778,19 +835,36 @@ const InfoStrip = ({
         }
       `}
     >
-      {items.map(({ title, value, gap = 's' }) => (
-        <div key={title}>
-          <EuiText size="xs" color="subdued">
-            {title}
-          </EuiText>
-          <EuiText
-            size="s"
-            css={{ display: 'flex', alignItems: 'center', paddingBlockStart: euiTheme.size[gap] }}
-          >
-            {value}
-          </EuiText>
-        </div>
-      ))}
+      {items.map(({ title, value, gap = 's', tooltip, onClick }) => {
+        const cell = (
+          <>
+            <EuiText size="xs" color="subdued">
+              {title}
+            </EuiText>
+            <EuiText
+              size="s"
+              css={{ display: 'flex', alignItems: 'center', paddingBlockStart: euiTheme.size[gap] }}
+            >
+              {value}
+            </EuiText>
+          </>
+        );
+        if (!onClick) return <div key={title}>{cell}</div>;
+        return (
+          <EuiToolTip key={title} content={tooltip} display="block">
+            <div
+              role="button"
+              tabIndex={0}
+              data-test-subj="automationInfoRuns"
+              css={{ cursor: 'pointer', inlineSize: '100%' }}
+              onClick={onClick}
+              onKeyDown={(event) => event.key === 'Enter' && onClick()}
+            >
+              {cell}
+            </div>
+          </EuiToolTip>
+        );
+      })}
     </EuiPanel>
   );
 };

@@ -16,13 +16,23 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getDailyUsageTone } from '../../utils/daily_usage';
 import { listLabels } from '../translations';
 
-export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: number }) => {
+export const AutomationUsageCell = ({
+  used,
+  limit,
+  isRateLimited,
+}: {
+  used?: number;
+  limit?: number;
+  isRateLimited: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
   if (limit === undefined || used === undefined) return <>—</>;
 
   const isLimitReached = used >= limit;
+  const isLimitHigh = getDailyUsageTone(used, limit) !== 'healthy';
   const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
   return (
     <div css={{ width: '100%' }}>
@@ -47,7 +57,7 @@ export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: nu
             responsive={false}
             css={{ marginBlockEnd: euiTheme.size.xs }}
           >
-            {isLimitReached && (
+            {isRateLimited && (
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type="hourglass"
@@ -61,7 +71,7 @@ export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: nu
             <EuiFlexItem grow={false}>
               <EuiText
                 size="xs"
-                color={isLimitReached ? limitColor : undefined}
+                color={isLimitHigh ? limitColor : undefined}
                 css={{
                   fontWeight: euiTheme.font.weight.semiBold,
                   fontVariantNumeric: 'tabular-nums',
@@ -75,7 +85,7 @@ export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: nu
             value={Math.min(used, limit)}
             max={limit}
             size="s"
-            color={isLimitReached ? limitColor : 'success'}
+            color={isLimitHigh ? limitColor : 'success'}
           />
         </div>
       </EuiToolTip>

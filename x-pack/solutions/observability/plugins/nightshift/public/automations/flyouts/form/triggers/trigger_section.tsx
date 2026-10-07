@@ -29,6 +29,8 @@ export const AutomationTriggerSection = ({
   onTriggerChange,
   onDailyDispatchLimitChange,
   usedToday,
+  savedLimit,
+  onRaiseLimit,
   readOnly = false,
 }: {
   trigger?: TriggerFormValues;
@@ -36,6 +38,8 @@ export const AutomationTriggerSection = ({
   onTriggerChange: (trigger?: TriggerFormValues) => void;
   onDailyDispatchLimitChange: (value: string) => void;
   usedToday?: number;
+  savedLimit?: number;
+  onRaiseLimit?: (limit: number) => void;
   readOnly?: boolean;
 }) => {
   const [stashedTriggers, setStashedTriggers] = useState<
@@ -54,9 +58,9 @@ export const AutomationTriggerSection = ({
         {!trigger && (
           <>
             <EuiText size="s" color="subdued">
-              {triggerLabels.empty}
+              {readOnly ? triggerLabels.noTrigger : triggerLabels.empty}
             </EuiText>
-            <EuiSpacer size="s" />
+            {!readOnly && <EuiSpacer size="s" />}
             <TriggerPicker
               onSelect={selectTrigger}
               button={(toggle) =>
@@ -120,6 +124,8 @@ export const AutomationTriggerSection = ({
             }
             onChange={onDailyDispatchLimitChange}
             usedToday={usedToday}
+            savedLimit={savedLimit}
+            onRaiseLimit={onRaiseLimit}
             readOnly={readOnly}
           />
         )}

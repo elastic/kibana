@@ -99,7 +99,7 @@ export const createAutomationFormValues = (): AutomationFormValues => ({
   trigger: undefined,
   dailyDispatchLimit: '20',
   instructions: '',
-  mode: 'ask',
+  mode: 'investigate',
   slackAction: undefined,
   isEnabled: false,
 });

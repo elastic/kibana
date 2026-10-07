@@ -29,6 +29,9 @@ const labels = {
   instructions: i18n.translate('xpack.nightshift.automations.flyout.instructions', {
     defaultMessage: 'Instructions',
   }),
+  noInstructions: i18n.translate('xpack.nightshift.automations.flyout.noInstructions', {
+    defaultMessage: 'No instructions',
+  }),
   mode: i18n.translate('xpack.nightshift.automations.flyout.instructionMode', {
     defaultMessage: 'Instruction mode',
   }),
@@ -49,6 +52,22 @@ const modes: Record<
     accent: 'textAccentSecondary' | 'textPrimary';
   }
 > = {
+  investigate: {
+    label: i18n.translate('xpack.nightshift.automations.flyout.investigateMode', {
+      defaultMessage: 'Investigate',
+    }),
+    help: i18n.translate('xpack.nightshift.automations.flyout.investigateModeHelp', {
+      defaultMessage: 'Search and reason over context to trace issues and surface likely causes.',
+    }),
+    placeholder: i18n.translate('xpack.nightshift.automations.flyout.investigatePlaceholder', {
+      defaultMessage:
+        'Describe how Nightshift should investigate and respond when this automation runs…',
+    }),
+    icon: 'search',
+    color: 'primary',
+    badgeColor: 'primary',
+    accent: 'textPrimary',
+  },
   ask: {
     label: i18n.translate('xpack.nightshift.automations.flyout.askMode', { defaultMessage: 'Ask' }),
     help: i18n.translate('xpack.nightshift.automations.flyout.askModeHelp', {
@@ -61,22 +80,6 @@ const modes: Record<
     color: 'accentSecondary',
     badgeColor: 'success',
     accent: 'textAccentSecondary',
-  },
-  investigate: {
-    label: i18n.translate('xpack.nightshift.automations.flyout.investigateMode', {
-      defaultMessage: 'Investigate',
-    }),
-    help: i18n.translate('xpack.nightshift.automations.flyout.investigateModeHelp', {
-      defaultMessage: 'Search and reason over context to trace issues and surface likely causes.',
-    }),
-    placeholder: i18n.translate('xpack.nightshift.automations.flyout.investigatePlaceholder', {
-      defaultMessage:
-        'Describe how Nightshift should investigate and respond when this automation runs…',
-    }),
-    icon: 'reporter',
-    color: 'primary',
-    badgeColor: 'primary',
-    accent: 'textPrimary',
   },
 };
 
@@ -132,7 +135,7 @@ export const AutomationInstructions = ({
             css={{ whiteSpace: 'pre-wrap' }}
             data-test-subj="automationInstructions"
           >
-            {instructions || current.placeholder}
+            {instructions || labels.noInstructions}
           </EuiText>
         </EuiPanel>
       </>

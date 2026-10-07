@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
@@ -33,8 +33,11 @@ import { AutomationDetailFlyout } from './detail_flyout/automation_detail_flyout
 import {
   getAutomationFacets,
   isAutomationRateLimited,
+  isOnlyRateLimitedFilter,
   statusLabels,
 } from './utils/filter_automations';
+
+const DEFAULT_PAGE_SIZE = 10;
 
 export const AutomationsPage = (): React.ReactElement => {
   const history = useHistory();
@@ -46,29 +49,52 @@ export const AutomationsPage = (): React.ReactElement => {
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
   const deleteAutomation = useDeleteAutomation();
   const refreshAutomations = useRefreshAutomations();
-  const createAutomation = useCreateAutomation();
+  const cloneAutomation = useCreateAutomation(true);
   const currentUsername = useCurrentUsername();
-  const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
   const [automationToDelete, setAutomationToDelete] = useState<Automation | undefined>();
   const [range, setRange] = useState<TimeRange>({ start: 'now-48h', end: 'now' });
+  const [rangeLabel, setRangeLabel] = useState(listLabels.last48Hours);
   const [order, setOrder] = useState<string[]>([]);
+  const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
-  const detailAutomation = automations.find((automation) => automation.id === id);
+  const isCreating = id === 'new';
+  const detailAutomation = isCreating
+    ? undefined
+    : automations.find((automation) => automation.id === id);
   const navigate = (path: string) => history.push(path);
-  const { runCounts, usedToday } = useAutomationUsage(automations, range);
+  const { runRange, runCounts, usedToday } = useAutomationUsage(automations, range);
   const isRateLimited = (automation: Automation) =>
     isAutomationRateLimited(automation, usedToday.get(automation.id) ?? 0);
   const getFacets = (automation: Automation) =>
     getAutomationFacets(automation, { isRateLimited: isRateLimited(automation), currentUsername });
-  const { filters, setFilter, clearFilters, hasFilters, visibleAutomations, options } =
-    useAutomationFilters(automations, getFacets);
+  const {
+    filters,
+    setFilter,
+    showOnlyStatus,
+    clearFilterSelections,
+    clearSearchAndFilters,
+    hasFilterSelections,
+    hasActiveFilters,
+    visibleAutomations,
+    options,
+  } = useAutomationFilters(automations, getFacets);
   const rateLimitedCount = automations.filter(isRateLimited).length;
-  const openCreateFlyout = canManage ? () => setIsCreateFlyoutOpen(true) : undefined;
+  const openCreateFlyout = canManage ? () => navigate('/automations/new') : undefined;
   const isEmpty = !isInitialLoading && !error && automations.length === 0;
+  const lastPageIndex = Math.max(0, Math.ceil(visibleAutomations.length / page.size) - 1);
+  const pageIndex = Math.min(page.index, lastPageIndex);
+  const filtersKey = JSON.stringify(filters);
+
+  useEffect(() => setPage((current) => ({ ...current, index: 0 })), [filtersKey]);
+  useEffect(() => {
+    const isUnknownAutomation = Boolean(id) && !isCreating && Boolean(data) && !detailAutomation;
+    if (isUnknownAutomation || (isCreating && !canManage)) history.replace('/automations');
+  }, [id, isCreating, canManage, data, detailAutomation, history]);
 
   const orderedAutomations = order.flatMap((orderedId) =>
     visibleAutomations.filter((automation) => automation.id === orderedId)
   );
+  const cloneNames = automations.map(({ name }) => name);
 
   const renderContent = () => {
     if (isInitialLoading) return <EuiLoadingSpinner size="l" />;
@@ -89,8 +115,8 @@ export const AutomationsPage = (): React.ReactElement => {
       );
     }
     if (visibleAutomations.length === 0) {
-      return hasFilters ? (
-        <FilteredEmptyPrompt onClearFilters={clearFilters} />
+      return hasActiveFilters ? (
+        <FilteredEmptyPrompt onClearFilters={clearSearchAndFilters} />
       ) : (
         <AutomationsEmptyPrompt onCreate={openCreateFlyout} />
       );
@@ -102,7 +128,11 @@ export const AutomationsPage = (): React.ReactElement => {
         runCounts={runCounts}
         usedToday={usedToday}
         getFacets={getFacets}
-        onClone={(automation) => createAutomation.mutate(toCloneRequestBody(automation))}
+        isRateLimited={isRateLimited}
+        pageIndex={pageIndex}
+        pageSize={page.size}
+        onPageChange={(index, size) => setPage({ index, size })}
+        onClone={(automation) => cloneAutomation.mutate(toCloneRequestBody(automation, cloneNames))}
         onDelete={setAutomationToDelete}
         onOpenAutomation={(automation) => navigate(`/automations/${automation.id}`)}
         onOpenRuns={(automation, status) =>
@@ -122,7 +152,11 @@ export const AutomationsPage = (): React.ReactElement => {
             <>
               <RateLimitCallout
                 count={rateLimitedCount}
-                onShow={() => setFilter('statuses', [statusLabels.rateLimited])}
+                onShow={
+                  isOnlyRateLimitedFilter(filters)
+                    ? undefined
+                    : () => showOnlyStatus(statusLabels.rateLimited)
+                }
               />
               <EuiSpacer size="m" />
             </>
@@ -130,26 +164,29 @@ export const AutomationsPage = (): React.ReactElement => {
           <AutomationsToolbar
             filters={filters}
             options={options}
-            hasFilters={hasFilters}
+            hasFilterSelections={hasFilterSelections}
+            hasActiveFilters={hasActiveFilters}
             visibleCount={visibleAutomations.length}
             totalCount={automations.length}
-            range={range}
+            pageIndex={pageIndex}
+            pageSize={page.size}
             onFilterChange={setFilter}
-            onClearFilters={clearFilters}
-            onRangeChange={setRange}
-            onRefresh={(nextRange) => {
+            onClearFilters={clearFilterSelections}
+            onRangeChange={(nextRange, label) => {
               setRange(nextRange);
-              refreshAutomations();
+              setRangeLabel(label);
             }}
+            onRefresh={refreshAutomations}
             onCreate={openCreateFlyout}
           />
         </>
       )}
       {renderContent()}
-      {isCreateFlyoutOpen && (
+      {isCreating && canManage && (
         <CreateAutomationFlyout
           tagSuggestions={options.tags.map(({ label }) => label)}
-          onClose={() => setIsCreateFlyoutOpen(false)}
+          onClose={() => navigate('/automations')}
+          onCreated={(createdId) => history.replace(`/automations/${createdId}`)}
         />
       )}
       {detailAutomation && (
@@ -159,7 +196,14 @@ export const AutomationsPage = (): React.ReactElement => {
           automation={detailAutomation}
           canManage={canManage}
           usedToday={usedToday.get(detailAutomation.id) ?? 0}
+          runRange={runRange}
+          rangeLabel={rangeLabel}
           onClose={() => navigate('/automations')}
+          onClone={(automation) =>
+            cloneAutomation.mutate(toCloneRequestBody(automation, cloneNames), {
+              onSuccess: ({ id: copyId }) => navigate(`/automations/${copyId}`),
+            })
+          }
           onDelete={setAutomationToDelete}
         />
       )}

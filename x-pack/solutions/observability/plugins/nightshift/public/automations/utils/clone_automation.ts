@@ -8,20 +8,27 @@
 import { i18n } from '@kbn/i18n';
 import type { Automation, CreateAutomationBody } from '../hooks/use_automations';
 
-export const toCloneRequestBody = ({
-  name,
-  description,
-  tags,
-  automationType,
-  trigger,
-  execution,
-  completion,
-  runtime,
-}: Automation): CreateAutomationBody => ({
-  name: i18n.translate('xpack.nightshift.automations.cloneName', {
+const getCopyName = (name: string, existingNames: string[]): string => {
+  const taken = new Set(existingNames);
+  const first = i18n.translate('xpack.nightshift.automations.cloneName', {
     defaultMessage: '{name} (copy)',
     values: { name },
-  }),
+  });
+  if (!taken.has(first)) return first;
+  for (let copy = 2; ; copy++) {
+    const candidate = i18n.translate('xpack.nightshift.automations.cloneNumberedName', {
+      defaultMessage: '{name} (copy {copy})',
+      values: { name, copy },
+    });
+    if (!taken.has(candidate)) return candidate;
+  }
+};
+
+export const toCloneRequestBody = (
+  { name, description, tags, automationType, trigger, execution, completion, runtime }: Automation,
+  existingNames: string[]
+): CreateAutomationBody => ({
+  name: getCopyName(name, existingNames),
   description,
   tags,
   isEnabled: false,

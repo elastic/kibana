@@ -67,9 +67,11 @@ const getDiscardBody = (name: string) =>
 
 export const CreateAutomationFlyout = ({
   onClose,
+  onCreated,
   tagSuggestions = [],
 }: {
   onClose: () => void;
+  onCreated: (id: string) => void;
   tagSuggestions?: string[];
 }): React.ReactElement => {
   const [initialValues] = useState(createAutomationFormValues);
@@ -83,7 +85,7 @@ export const CreateAutomationFlyout = ({
     setValues((current) => ({ ...current, ...changes }));
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
   const saveBlocker = getSaveBlocker(values);
-  const canSave = canSaveAutomation(values);
+  const canSave = isDirty && canSaveAutomation(values);
 
   const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
 
@@ -95,7 +97,7 @@ export const CreateAutomationFlyout = ({
       return;
     }
     createAutomation.mutate(toAutomationRequestBody({ ...values, isEnabled, trigger }), {
-      onSuccess: onClose,
+      onSuccess: ({ id }) => onCreated(id),
     });
   };
 

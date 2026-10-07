@@ -84,6 +84,24 @@ export const listLabels = {
   clearFilters: i18n.translate('xpack.nightshift.automations.clearFilters', {
     defaultMessage: 'Clear filters',
   }),
+  clearSearchAndFilters: i18n.translate('xpack.nightshift.automations.clearSearchAndFilters', {
+    defaultMessage: 'Clear search and filters',
+  }),
+  noTagsYet: i18n.translate('xpack.nightshift.automations.noTagsYet', {
+    defaultMessage: 'No tags yet',
+  }),
+  filterByStatus: i18n.translate('xpack.nightshift.automations.filterByStatus', {
+    defaultMessage: 'Filter by status',
+  }),
+  filterByTags: i18n.translate('xpack.nightshift.automations.filterByTags', {
+    defaultMessage: 'Filter by tags',
+  }),
+  filterByAuthor: i18n.translate('xpack.nightshift.automations.filterByAuthor', {
+    defaultMessage: 'Filter by author',
+  }),
+  filterByTrigger: i18n.translate('xpack.nightshift.automations.filterByTrigger', {
+    defaultMessage: 'Filter by trigger',
+  }),
 };
 
 export const getDeleteConfirmTitle = (name: string) =>
@@ -95,7 +113,7 @@ export const getDeleteConfirmTitle = (name: string) =>
 export const getRateLimitTitle = (count: number) =>
   i18n.translate('xpack.nightshift.automations.rateLimitBannerTitle', {
     defaultMessage:
-      '{count, plural, one {# automation} other {# automations}} reached their daily trigger limit',
+      '{count, plural, one {# automation reached its} other {# automations reached their}} daily trigger limit',
     values: { count },
   });
 

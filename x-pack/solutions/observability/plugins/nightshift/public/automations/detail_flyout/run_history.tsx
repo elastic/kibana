@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -22,17 +22,14 @@ import {
   AreaSeries,
   Axis,
   Chart,
-  ColorVariant,
   CurveType,
-  PointShape,
+  PointerEventType,
   Position,
   ScaleType,
   Settings,
-  TextureShape,
   Tooltip,
   TooltipType,
-  type AreaSeriesStyle,
-  type RecursivePartial,
+  type PointerEvent,
 } from '@elastic/charts';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -70,11 +67,9 @@ export const statusLabels: Record<RunStatus, string> = {
 };
 
 const labels = {
-  noRuns: i18n.translate('xpack.nightshift.automations.detail.noRuns', {
-    defaultMessage: 'No runs in the last 48 hours',
-  }),
   noRunsBody: i18n.translate('xpack.nightshift.automations.detail.noRunsBody', {
-    defaultMessage: 'Runs show up here each time a trigger fires.',
+    defaultMessage:
+      'Runs show up here each time a trigger fires. To look further back, change the time range above the automations list.',
   }),
   noFilteredRuns: i18n.translate('xpack.nightshift.automations.detail.noFilteredRuns', {
     defaultMessage: 'No runs match this filter.',
@@ -86,13 +81,9 @@ const labels = {
   automationRun: i18n.translate('xpack.nightshift.automations.detail.automationRun', {
     defaultMessage: 'Automation run',
   }),
-  runsLast48Hours: i18n.translate('xpack.nightshift.automations.detail.runsLast48Hours', {
-    defaultMessage: 'runs · Last 48 hours',
-  }),
   trigger: i18n.translate('xpack.nightshift.automations.detail.trigger', {
     defaultMessage: 'Trigger',
   }),
-  runs: i18n.translate('xpack.nightshift.automations.detail.runs', { defaultMessage: 'runs' }),
 };
 
 export const STATUSES: RunStatus[] = ['succeeded', 'running', 'failed', 'skipped'];
@@ -110,73 +101,47 @@ const STATUS_TONE = {
 } as const;
 const STATUS_HEALTH_COLOR = { succeeded: 'success', running: 'primary', failed: 'danger' } as const;
 const CHART_HEIGHT = 180;
-const BUCKET_MS = 4 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+const DAY_HIGHLIGHT_MS = 1200;
+const DAY_SCROLL_GAP_PX = 16;
+const AREA_SERIES_STYLE = {
+  area: { opacity: 0.22 },
+  line: { strokeWidth: 1.5 },
+  point: { visible: 'never' },
+} as const;
 
-const seriesStyle = (status: RunStatus): RecursivePartial<AreaSeriesStyle> =>
-  status === 'skipped'
-    ? {
-        area: {
-          opacity: 0.22,
-          texture: {
-            shape: TextureShape.Line,
-            stroke: ColorVariant.Series,
-            strokeWidth: 1.25,
-            rotation: -45,
-            size: 6,
-            spacing: { x: 5, y: 5 },
-            opacity: 1,
-          },
-        },
-        line: { strokeWidth: 1.5 },
-        point: { visible: 'never' },
-      }
-    : {
-        point: {
-          visible: 'always',
-          shape: {
-            succeeded: PointShape.Circle,
-            running: PointShape.Diamond,
-            failed: PointShape.X,
-          }[status],
-          radius: status === 'failed' ? 4 : 3,
-          strokeWidth: status === 'failed' ? 1.5 : 1,
-          fill: status === 'failed' ? 'transparent' : ColorVariant.Series,
-          stroke: ColorVariant.Series,
-          opacity: 1,
-        },
-      };
+const pickBucketMs = (windowMs: number) => {
+  const raw = Math.max(1, windowMs / HOUR_MS) / 12;
+  return ([1, 2, 4, 6, 12].find((hours) => raw <= hours) ?? 24) * HOUR_MS;
+};
 
-const StatusSwatch = ({ status, color }: { status: RunStatus; color: string }) =>
-  status === 'skipped' ? (
+const SWATCH_ICON = { succeeded: 'check', failed: 'cross', skipped: 'hourglass' } as const;
+
+const StatusSwatch = ({ status, color }: { status: RunStatus; color: string }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
     <span
       aria-hidden={true}
-      css={css`
-        display: inline-block;
-        inline-size: 12px;
-        block-size: 12px;
-        border-radius: 2px;
-        border: 1px solid ${color};
-        background: repeating-linear-gradient(
-          -45deg,
-          ${color},
-          ${color} 1.25px,
-          transparent 1.25px,
-          transparent 3.5px
-        );
-      `}
-    />
-  ) : (
-    <svg width={12} height={12} viewBox="0 0 12 12" aria-hidden={true} focusable="false">
-      {status === 'succeeded' && <circle cx="6" cy="6" r="4.25" fill={color} />}
-      {status === 'running' && <polygon points="6,1.25 10.75,6 6,10.75 1.25,6" fill={color} />}
-      {status === 'failed' && (
-        <g stroke={color} strokeWidth="1.75" strokeLinecap="round" fill="none">
-          <line x1="2.5" y1="2.5" x2="9.5" y2="9.5" />
-          <line x1="9.5" y1="2.5" x2="2.5" y2="9.5" />
-        </g>
+      css={{
+        display: 'inline-flex',
+        flexShrink: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        inlineSize: euiTheme.size.m,
+        blockSize: euiTheme.size.m,
+      }}
+    >
+      {status === 'running' ? (
+        <svg width={12} height={12} viewBox="0 0 16 16" focusable="false">
+          <polygon points="8,2 14,8 8,14 2,8" fill={color} />
+        </svg>
+      ) : (
+        <EuiIcon type={SWATCH_ICON[status]} size="m" color={color} aria-hidden={true} />
       )}
-    </svg>
+    </span>
   );
+};
 
 const StatusPill = ({
   status,
@@ -239,16 +204,16 @@ const StatusPill = ({
   );
 };
 
-const toBuckets = (runs: Run[], startMs: number, endMs: number) => {
-  const buckets = Array.from({ length: Math.floor((endMs - startMs) / BUCKET_MS) + 1 }, (_, i) => ({
-    time: startMs + i * BUCKET_MS,
+const toBuckets = (runs: Run[], startMs: number, endMs: number, bucketMs: number) => {
+  const buckets = Array.from({ length: Math.floor((endMs - startMs) / bucketMs) + 1 }, (_, i) => ({
+    time: startMs + i * bucketMs,
     succeeded: 0,
     running: 0,
     failed: 0,
     skipped: 0,
   }));
   runs.forEach(({ status, startedAt }) => {
-    const index = Math.floor((Date.parse(startedAt) - startMs) / BUCKET_MS);
+    const index = Math.floor((Date.parse(startedAt) - startMs) / bucketMs);
     buckets[Math.min(Math.max(index, 0), buckets.length - 1)][status] += 1;
   });
   return buckets;
@@ -296,6 +261,7 @@ export const RunHistory = ({
   isLoading,
   startedAfter,
   startedBefore,
+  rangeLabel,
   automationName,
   initialFilter,
   onSelect,
@@ -304,6 +270,7 @@ export const RunHistory = ({
   isLoading: boolean;
   startedAfter: string;
   startedBefore: string;
+  rangeLabel: string;
   automationName: string;
   initialFilter?: RunStatus;
   onSelect: (run: Run) => void;
@@ -311,25 +278,40 @@ export const RunHistory = ({
   const { euiTheme } = useEuiTheme();
   const { baseTheme } = useChartThemes();
   const [filter, setFilter] = useState(initialFilter);
+  const [hoveredBucketMs, setHoveredBucketMs] = useState<number>();
+  const [highlightedDay, setHighlightedDay] = useState<number>();
+  const summaryRef = useRef<HTMLElement>(null);
+  const dayNodesRef = useRef(new Map<number, HTMLDivElement>());
+  const timersRef = useRef<number[]>([]);
+  useEffect(() => () => timersRef.current.forEach((id) => window.clearTimeout(id)), []);
+
   if (isLoading) return <EuiLoadingSpinner size="l" />;
   if (!runs.length)
     return (
       <EuiEmptyPrompt
         titleSize="xs"
-        title={<h3>{labels.noRuns}</h3>}
+        title={
+          <h3>
+            {i18n.translate('xpack.nightshift.automations.detail.noRuns', {
+              defaultMessage: 'No runs in the {range}',
+              values: { range: rangeLabel.toLowerCase() },
+            })}
+          </h3>
+        }
         body={<p>{labels.noRunsBody}</p>}
       />
     );
 
   const startMs = Date.parse(startedAfter);
   const endMs = Date.parse(startedBefore);
+  const bucketMs = pickBucketMs(endMs - startMs);
   const visibleRuns = filter ? runs.filter(({ status }) => status === filter) : runs;
   const counts = STATUSES.map((status) => ({
     status,
     count: runs.filter((run) => run.status === status).length,
   })).filter(({ count, status }) => count > 0 || status === filter);
-  const baseline = toBuckets(runs, startMs, endMs);
-  const buckets = toBuckets(visibleRuns, startMs, endMs);
+  const baseline = toBuckets(runs, startMs, endMs, bucketMs);
+  const buckets = toBuckets(visibleRuns, startMs, endMs, bucketMs);
   const peak = Math.max(
     0,
     ...baseline.map((bucket) => STATUSES.reduce((sum, status) => sum + bucket[status], 0))
@@ -340,10 +322,36 @@ export const RunHistory = ({
     day,
     runs: visibleRuns.filter((run) => dayStart(run) === day),
   }));
+  const startedRuns = runs.filter(({ status }) => status !== 'skipped').length;
+
+  const handlePointerUpdate = (event: PointerEvent) =>
+    setHoveredBucketMs(
+      event.type === PointerEventType.Over && typeof event.x === 'number' ? event.x : undefined
+    );
+
+  const jumpToDay = (bucketStartMs: number) => {
+    const midpointMs = bucketStartMs + bucketMs / 2;
+    const group =
+      groups.find(({ day }) => day <= midpointMs && midpointMs < day + DAY_MS) ??
+      groups.find(({ day }) => day < bucketStartMs + bucketMs && bucketStartMs < day + DAY_MS);
+    const node = group && dayNodesRef.current.get(group.day);
+    if (!group || !node) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    node.style.scrollMarginTop = `${(summaryRef.current?.offsetHeight ?? 0) + DAY_SCROLL_GAP_PX}px`;
+    node.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    timersRef.current.forEach((id) => window.clearTimeout(id));
+    setHighlightedDay(undefined);
+    const delay = reduceMotion ? 50 : 400;
+    timersRef.current = [
+      window.setTimeout(() => setHighlightedDay(group.day), delay),
+      window.setTimeout(() => setHighlightedDay(undefined), delay + DAY_HIGHLIGHT_MS),
+    ];
+  };
 
   return (
     <>
       <section
+        ref={summaryRef}
         css={css`
           position: sticky;
           inset-block-start: 0;
@@ -374,68 +382,75 @@ export const RunHistory = ({
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued" css={{ whiteSpace: 'nowrap' }}>
-              {runs.filter(({ status }) => status !== 'skipped').length} {labels.runsLast48Hours}
+              {i18n.translate('xpack.nightshift.automations.detail.runsSummary', {
+                defaultMessage: '{count, plural, one {# run} other {# runs}} · {range}',
+                values: { count: startedRuns, range: rangeLabel },
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <Chart size={{ height: CHART_HEIGHT }}>
-          <Settings
-            baseTheme={baseTheme}
-            showLegend={false}
-            locale={i18n.getLocale()}
-            theme={{
-              background: { color: 'transparent' },
-              chartMargins: { left: 2, right: 2, top: 8, bottom: 2 },
-            }}
-          />
-          <Tooltip
-            type={TooltipType.VerticalCursor}
-            headerFormatter={({ value }) =>
-              `${moment(value).format('ddd, MMM D, HH:mm')} – ${moment(value)
-                .add(BUCKET_MS)
-                .format('HH:mm')}`
-            }
-          />
-          <Axis
-            id="bottom"
-            position={Position.Bottom}
-            timeAxisLayerCount={0}
-            gridLine={{ visible: false }}
-            tickFormat={(value) =>
-              moment(value).format(
-                moment(value).isSame(moment(value).startOf('day')) ? 'MMM D' : 'HH:mm'
+        <div
+          role="presentation"
+          css={{ cursor: hoveredBucketMs === undefined ? 'default' : 'pointer' }}
+          onClick={() => hoveredBucketMs !== undefined && jumpToDay(hoveredBucketMs)}
+        >
+          <Chart size={{ height: CHART_HEIGHT }}>
+            <Settings
+              baseTheme={baseTheme}
+              showLegend={false}
+              locale={i18n.getLocale()}
+              theme={{
+                background: { color: 'transparent' },
+                chartMargins: { left: 2, right: 2, top: 8, bottom: 2 },
+              }}
+              onPointerUpdate={handlePointerUpdate}
+            />
+            <Tooltip
+              type={TooltipType.VerticalCursor}
+              headerFormatter={({ value }) =>
+                `${moment(value).format('ddd, MMM D, HH:mm')} – ${moment(value)
+                  .add(bucketMs)
+                  .format('HH:mm')}`
+              }
+            />
+            <Axis
+              id="bottom"
+              position={Position.Bottom}
+              timeAxisLayerCount={0}
+              gridLine={{ visible: false }}
+              tickFormat={(value) =>
+                moment(value).format(
+                  moment(value).isSame(moment(value).startOf('day')) ? 'MMM D' : 'HH:mm'
+                )
+              }
+            />
+            <Axis
+              id="left"
+              position={Position.Left}
+              integersOnly
+              domain={{ min: 0, max: yMax }}
+              gridLine={{ visible: true }}
+            />
+            {STATUSES.filter((status) => buckets.some((bucket) => bucket[status] > 0)).map(
+              (status) => (
+                <AreaSeries
+                  key={status}
+                  id={status}
+                  name={statusLabels[status]}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="time"
+                  yAccessors={[status]}
+                  data={buckets}
+                  stackAccessors={['time']}
+                  curve={CurveType.CURVE_MONOTONE_X}
+                  color={euiTheme.colors.vis[STATUS_VIS_COLOR[status]]}
+                  areaSeriesStyle={AREA_SERIES_STYLE}
+                />
               )
-            }
-          />
-          <Axis
-            id="left"
-            position={Position.Left}
-            integersOnly
-            domain={{ min: 0, max: yMax }}
-            gridLine={{ visible: true }}
-          />
-          {STATUSES.filter((status) => buckets.some((bucket) => bucket[status] > 0)).map(
-            (status) => (
-              <AreaSeries
-                key={status}
-                id={status}
-                name={statusLabels[status]}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor="time"
-                yAccessors={[status]}
-                data={buckets}
-                stackAccessors={['time']}
-                curve={CurveType.CURVE_MONOTONE_X}
-                color={euiTheme.colors.vis[STATUS_VIS_COLOR[status]]}
-                areaSeriesStyle={seriesStyle(status)}
-                pointStyleAccessor={(datum) =>
-                  datum.initialY1 ? null : { radius: 0, opacity: 0, strokeWidth: 0 }
-                }
-              />
-            )
-          )}
-        </Chart>
+            )}
+          </Chart>
+        </div>
       </section>
       <section
         css={css`
@@ -450,87 +465,115 @@ export const RunHistory = ({
             {labels.noFilteredRuns}
           </EuiText>
         ) : (
-          groups.map(({ day, runs: dayRuns }) => (
-            <div
-              key={day}
-              css={css`
-                display: flex;
-                flex-direction: column;
-                gap: ${euiTheme.size.s};
-              `}
-            >
-              <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <strong>{formatDay(day)}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {dayRuns.length} {labels.runs}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiPanel
-                hasBorder
-                hasShadow={false}
-                paddingSize="none"
-                css={{ borderRadius: euiTheme.border.radius.small, overflow: 'hidden' }}
+          groups.map(({ day, runs: dayRuns }) => {
+            const skipped = dayRuns.filter(({ status }) => status === 'skipped').length;
+            const started = dayRuns.length - skipped;
+            return (
+              <div
+                key={day}
+                ref={(node) => {
+                  if (node) dayNodesRef.current.set(day, node);
+                  else dayNodesRef.current.delete(day);
+                }}
+                css={css`
+                  display: flex;
+                  flex-direction: column;
+                  gap: ${euiTheme.size.s};
+                `}
               >
-                {dayRuns.map((run) => (
-                  <button
-                    key={run.id}
-                    type="button"
-                    data-test-subj="automationRunRow"
-                    onClick={() => onSelect(run)}
-                    css={css`
-                      display: block;
-                      inline-size: 100%;
-                      padding: ${euiTheme.size.s} ${euiTheme.size.m};
-                      text-align: start;
-                      &:not(:first-child) {
-                        border-block-start: ${euiTheme.border.thin};
-                      }
-                      &:hover,
-                      &:focus-visible {
-                        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-                      }
-                    `}
-                  >
-                    <EuiFlexGroup
-                      gutterSize="xs"
-                      alignItems="center"
-                      responsive={false}
-                      css={{ minBlockSize: `calc(${euiTheme.size.base} + ${euiTheme.size.xs})` }}
+                <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <strong>{formatDay(day)}</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {[
+                        started > 0 &&
+                          i18n.translate('xpack.nightshift.automations.detail.dayRuns', {
+                            defaultMessage: '{count, plural, one {# run} other {# runs}}',
+                            values: { count: started },
+                          }),
+                        skipped > 0 &&
+                          i18n.translate('xpack.nightshift.automations.detail.daySkipped', {
+                            defaultMessage: '{count} skipped',
+                            values: { count: skipped },
+                          }),
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiPanel
+                  hasBorder
+                  hasShadow={false}
+                  paddingSize="none"
+                  css={{
+                    borderRadius: euiTheme.border.radius.small,
+                    overflow: 'hidden',
+                    borderColor: highlightedDay === day ? euiTheme.colors.primary : undefined,
+                  }}
+                >
+                  {dayRuns.map((run) => (
+                    <button
+                      key={run.id}
+                      type="button"
+                      data-test-subj="automationRunRow"
+                      onClick={() => onSelect(run)}
+                      css={css`
+                        display: block;
+                        inline-size: 100%;
+                        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+                        text-align: start;
+                        &:not(:first-child) {
+                          border-block-start: ${euiTheme.border.thin};
+                        }
+                        &:hover,
+                        &:focus-visible {
+                          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+                        }
+                      `}
                     >
-                      <EuiFlexItem grow={false}>
-                        <RunStatusIndicator status={run.status} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued">
-                          · {moment(run.startedAt).fromNow()}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiText size="s" className="eui-textTruncate">
-                      <strong>{run.title || labels.automationRun}</strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued" className="eui-textTruncate">
-                      {run.status === 'skipped'
-                        ? i18n.translate('xpack.nightshift.automations.detail.skippedRunSummary', {
-                            defaultMessage: '{source} · Daily trigger limit of {limit} reached',
-                            values: {
-                              source: run.triggeredBy ?? labels.trigger,
-                              limit: run.dailyLimit ?? '—',
-                            },
-                          })
-                        : automationName}
-                    </EuiText>
-                  </button>
-                ))}
-              </EuiPanel>
-            </div>
-          ))
+                      <EuiFlexGroup
+                        gutterSize="xs"
+                        alignItems="center"
+                        responsive={false}
+                        css={{ minBlockSize: `calc(${euiTheme.size.base} + ${euiTheme.size.xs})` }}
+                      >
+                        <EuiFlexItem grow={false}>
+                          <RunStatusIndicator status={run.status} />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued">
+                            · {moment(run.startedAt).fromNow()}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiText size="s" className="eui-textTruncate">
+                        <strong>{run.title || labels.automationRun}</strong>
+                      </EuiText>
+                      <EuiText size="xs" color="subdued" className="eui-textTruncate">
+                        {run.status === 'skipped'
+                          ? i18n.translate(
+                              'xpack.nightshift.automations.detail.skippedRunSummary',
+                              {
+                                defaultMessage: '{source} · Daily trigger limit of {limit} reached',
+                                values: {
+                                  source: run.triggeredBy ?? labels.trigger,
+                                  limit: run.dailyLimit ?? '—',
+                                },
+                              }
+                            )
+                          : automationName}
+                      </EuiText>
+                    </button>
+                  ))}
+                </EuiPanel>
+              </div>
+            );
+          })
         )}
       </section>
     </>

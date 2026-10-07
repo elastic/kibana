@@ -17,6 +17,9 @@ import { FormSection } from './section_header';
 
 const labels = {
   name: i18n.translate('xpack.nightshift.automations.flyout.nameLabel', { defaultMessage: 'Name' }),
+  nameRequired: i18n.translate('xpack.nightshift.automations.flyout.nameRequired', {
+    defaultMessage: 'Give this automation a name.',
+  }),
   namePlaceholder: i18n.translate('xpack.nightshift.automations.flyout.namePlaceholder', {
     defaultMessage: 'Name this automation',
   }),
@@ -38,6 +41,8 @@ export const AutomationFormBody = ({
   readOnly = false,
   showIdentityFields = true,
   usedToday,
+  savedLimit,
+  onRaiseLimit,
   onChange,
 }: {
   values: AutomationFormValues;
@@ -46,12 +51,19 @@ export const AutomationFormBody = ({
   readOnly?: boolean;
   showIdentityFields?: boolean;
   usedToday?: number;
+  savedLimit?: number;
+  onRaiseLimit?: (limit: number) => void;
   onChange: (changes: Partial<AutomationFormValues>) => void;
 }) => {
   return (
     <>
       {showIdentityFields && (
-        <EuiFormRow fullWidth label={labels.name} isInvalid={isNameInvalid}>
+        <EuiFormRow
+          fullWidth
+          label={labels.name}
+          isInvalid={isNameInvalid}
+          error={isNameInvalid ? labels.nameRequired : undefined}
+        >
           <EuiFieldText
             fullWidth
             compressed
@@ -117,6 +129,8 @@ export const AutomationFormBody = ({
           onTriggerChange={(trigger) => onChange({ trigger })}
           onDailyDispatchLimitChange={(dailyDispatchLimit) => onChange({ dailyDispatchLimit })}
           usedToday={usedToday}
+          savedLimit={savedLimit}
+          onRaiseLimit={onRaiseLimit}
           readOnly={readOnly}
         />
       </FormSection>

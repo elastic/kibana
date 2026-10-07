@@ -38,6 +38,9 @@ export const triggerLabels = {
   empty: i18n.translate('xpack.nightshift.automations.flyout.triggersEmpty', {
     defaultMessage: 'Choose what starts this automation.',
   }),
+  noTrigger: i18n.translate('xpack.nightshift.automations.flyout.noTrigger', {
+    defaultMessage: 'No trigger',
+  }),
   addTrigger: i18n.translate('xpack.nightshift.automations.addTriggerButton', {
     defaultMessage: 'Add trigger',
   }),
@@ -150,6 +153,43 @@ export const triggerLabels = {
             'This automation has handled {used} triggers today (limit of {limit}). Additional triggers are throttled until midnight (UTC).',
           values: { used, limit },
         }),
+  dailyLimitApproaching: i18n.translate(
+    'xpack.nightshift.automations.flyout.dailyLimitApproaching',
+    {
+      defaultMessage: 'Approaching daily trigger limit',
+    }
+  ),
+  getDailyLimitApproachingBody: (used: number, limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.dailyLimitApproachingBody', {
+      defaultMessage:
+        'This automation has handled {used} of {limit} triggers today. Once it reaches the limit, additional triggers are throttled until midnight (UTC).',
+      values: { used, limit },
+    }),
+  highDailyLimit: i18n.translate('xpack.nightshift.automations.flyout.highDailyLimit', {
+    defaultMessage: 'High daily trigger limit',
+  }),
+  getHighDailyLimitBody: (limit: number, softLimit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.highDailyLimitBody', {
+      defaultMessage:
+        'A limit of {limit} allows up to {limit} automation runs per day. Runs can consume investigation credits — consider staying at or below {softLimit} unless you expect sustained high volume.',
+      values: { limit, softLimit },
+    }),
+  getPlanLimitBody: (max: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.planLimitBody', {
+      defaultMessage: 'Your plan allows up to {max} triggers per day for this automation.',
+      values: { max },
+    }),
+  getUnsavedLimitTitle: (limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.unsavedLimitTitle', {
+      defaultMessage: 'New limit of {limit} applies when you save',
+      values: { limit },
+    }),
+  getUnsavedLimitBody: (saved: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.unsavedLimitBody', {
+      defaultMessage:
+        'The saved limit is still {saved} per day, so triggers above {saved} are throttled until you save.',
+      values: { saved },
+    }),
   getRaiseLimit: (limit: number) =>
     i18n.translate('xpack.nightshift.automations.flyout.raiseLimit', {
       defaultMessage: 'Raise limit to {limit}',

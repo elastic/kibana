@@ -83,7 +83,7 @@ const AUTOMATIONS: SeedAutomation[] = [
     tags: [],
     author: 'Nightshift',
     enabled: true,
-    limit: 100,
+    limit: 50,
     runs48h: 2,
     runsToday: 2,
     failed: 0,

@@ -6,11 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_DAILY_LIMIT } from '../../utils/daily_usage';
 import type { AutomationFormValues, TriggerFormValues } from './automation_form_values';
 
 export const validationLabels = {
   cronError: i18n.translate('xpack.nightshift.automations.flyout.cronError', {
     defaultMessage: 'Fix the cron expression to save',
+  }),
+  triggerRequired: i18n.translate('xpack.nightshift.automations.flyout.triggerRequired', {
+    defaultMessage: 'Select a trigger to save',
   }),
   channelRequired: i18n.translate('xpack.nightshift.automations.flyout.channelRequired', {
     defaultMessage: 'Choose a Slack channel to post to before saving',
@@ -31,7 +35,7 @@ const getHour = (time: string): number => Number(time.split(':')[0]);
 
 export const isValidDailyLimit = (value: string): boolean => {
   const limit = Number(value);
-  return value.trim() !== '' && Number.isInteger(limit) && limit >= 1 && limit <= 200;
+  return value.trim() !== '' && Number.isInteger(limit) && limit >= 1 && limit <= MAX_DAILY_LIMIT;
 };
 
 export const hasDailyLimit = (trigger?: TriggerFormValues): boolean =>
@@ -48,6 +52,7 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
 };
 
 export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
+  if (!values.trigger) return validationLabels.triggerRequired;
   if (values.trigger?.kind === 'cron' && !isValidCron(values.trigger.cronExpression)) {
     return validationLabels.cronError;
   }

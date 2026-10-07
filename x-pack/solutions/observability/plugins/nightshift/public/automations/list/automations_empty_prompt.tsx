@@ -32,7 +32,7 @@ export const FilteredEmptyPrompt = ({ onClearFilters }: { onClearFilters: () => 
     body={<p>{listLabels.filteredEmptyBody}</p>}
     actions={
       <EuiButton data-test-subj="nightshiftAutomationsPageButton" onClick={onClearFilters}>
-        {listLabels.clearFilters}
+        {listLabels.clearSearchAndFilters}
       </EuiButton>
     }
   />
