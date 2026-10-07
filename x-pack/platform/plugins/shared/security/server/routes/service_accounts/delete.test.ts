@@ -12,7 +12,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { defineDeleteServiceAccountRoute } from './delete';
-import { deleteServiceAccountQuerySchema, getServiceAccountParamsSchema } from './schemas';
+import { deleteServiceAccountQuerySchema, serviceAccountIdParamsSchema } from './schemas';
 import type { ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -86,7 +86,7 @@ describe('Delete service account route', () => {
         'This route delegates authorization to the service accounts backend, which requires the `manage_security` cluster privilege',
     });
     expect(routeConfig.validate).toEqual({
-      params: getServiceAccountParamsSchema,
+      params: serviceAccountIdParamsSchema,
       query: deleteServiceAccountQuerySchema,
     });
   });

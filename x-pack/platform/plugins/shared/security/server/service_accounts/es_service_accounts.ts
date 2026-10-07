@@ -17,7 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
@@ -195,7 +195,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     try {
       const account = await this.createAccount(request, params);
@@ -215,7 +215,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -244,6 +244,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
+    if (params.trustedPlatformAssumers?.length) {
+      throw Boom.badRequest(
+        'Cannot create a service account: platform assumers are not supported on this deployment.'
+      );
+    }
+
+    // The schema refuses an empty `roles` rather than letting it fall through to the derivation
+    // below, which would answer an explicit "no roles" with the widest possible grant.
     const { name, roles, description } = parseCreateServiceAccountParams(
       params,
       ES_SERVICE_ACCOUNT_ROLE_LIMITS
@@ -1059,13 +1067,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    // While the account may still be alive, this credential is Kibana's one record of the token
-    // it holds. Dropping that record is the one outcome worse than the failure that got us here,
-    // so the credential outlives a rollback that could not finish.
     if (!accountDeleted) {
       return;
     }
 
+    // While the account may still be alive, this credential is Kibana's one record of the token
+    // it holds. Dropping that record is the one outcome worse than the failure that got us here,
+    // so the credential outlives a rollback that could not finish.
     // The delete is idempotent, so the paths that never reached `set` cost nothing here.
     try {
       await this.credentialStore.delete(principal);

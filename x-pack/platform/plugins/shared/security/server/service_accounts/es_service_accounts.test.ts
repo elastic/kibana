@@ -136,6 +136,17 @@ describe('EsServiceAccounts', () => {
   });
 
   describe('#create', () => {
+    it('rejects platform assumers, which this backend cannot grant', async () => {
+      await expect(
+        serviceAccounts.create(request, {
+          ...createParams,
+          trustedPlatformAssumers: ['relay'],
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
     it('persists the description in Elasticsearch and returns it to callers', async () => {
       mockHappyPath();
       const description = 'Reads events for investigation workflows.';

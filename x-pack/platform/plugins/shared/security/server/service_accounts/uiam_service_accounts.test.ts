@@ -11,7 +11,7 @@ import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import type { Logger } from '@kbn/logging';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import type {
   CheckPrivileges,
   CheckPrivilegesResponse,
@@ -41,7 +41,7 @@ describe('UiamServiceAccounts', () => {
   let mockUiam: jest.Mocked<UiamServicePublic>;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
   let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
-  let logger: Logger;
+  let logger: MockedLogger;
   let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
 
   const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
@@ -106,7 +106,7 @@ describe('UiamServiceAccounts', () => {
   beforeEach(() => {
     mockLicense = licenseMock.create();
     mockLicense.isEnabled.mockReturnValue(true);
-    logger = loggingSystemMock.create().get('service-accounts');
+    logger = loggingSystemMock.create().get('service-accounts') as MockedLogger;
     mockUiam = uiamServiceMock.create();
     getCurrentUser = jest.fn().mockReturnValue(null);
     mockCheckPrivileges = {
@@ -314,6 +314,35 @@ describe('UiamServiceAccounts', () => {
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
         elasticsearch: { cluster: ['manage_security'], index: {} },
       });
+    });
+
+    it('resolves the Relay assumer server-side and drops a caller-supplied principal', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue({
+        ...validResponse,
+        assumable_by: [
+          ...validResponse.assumable_by,
+          { type: 'platform-service-account', service_account_id: 'relay-service' },
+        ],
+      });
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        name: 'nightshift-relay',
+        roles: ['editor'],
+        trustedPlatformAssumers: ['relay'],
+        assumable_by: [{ type: 'platform-service-account', service_account_id: 'attacker' }],
+      } as never);
+
+      const [, body] = mockUiam.createServiceAccount.mock.calls[0];
+      expect(body.assumable_by).toEqual([
+        {
+          type: 'project-service-account',
+          organization_id: 'organization-id',
+          project_type: 'security',
+          project_id: 'project-id',
+        },
+        { type: 'platform-service-account', service_account_id: 'relay-service' },
+      ]);
+      expect(JSON.stringify(body)).not.toContain('attacker');
     });
 
     it.each(['Bearer essu_my_token', 'ApiKey essu_key'])(

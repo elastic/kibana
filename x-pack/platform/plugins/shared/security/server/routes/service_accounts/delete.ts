@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deleteServiceAccountQuerySchema, getServiceAccountParamsSchema } from './schemas';
+import { deleteServiceAccountQuerySchema, serviceAccountIdParamsSchema } from './schemas';
 import { serviceAccountsUnavailable } from './unavailable';
 import type { RouteDefinitionParams } from '..';
 import type {
@@ -30,7 +30,7 @@ export function defineDeleteServiceAccountRoute({
         },
       },
       validate: {
-        params: getServiceAccountParamsSchema,
+        params: serviceAccountIdParamsSchema,
         query: deleteServiceAccountQuerySchema,
       },
       options: {

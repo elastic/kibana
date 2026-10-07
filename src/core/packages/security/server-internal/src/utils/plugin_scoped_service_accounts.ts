@@ -63,6 +63,7 @@ export const createPluginScopedServiceAccounts = ({
   return {
     isEnabled: delegate.isEnabled,
     create: delegate.create,
+    delete: delegate.delete,
     bindWorkload: async (request, params) => {
       ensureValid(params);
       return await delegate.bindWorkload(pluginId, request, params);

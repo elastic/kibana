@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
@@ -194,7 +194,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     try {
       const account = await this.createAccount(request, params);
@@ -214,7 +214,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -226,6 +226,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
     );
+    const trustedPlatformAssumers = params.trustedPlatformAssumers ?? [];
 
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
@@ -250,7 +251,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           project_type: this.cloudProjectContext.projectType,
           project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
-          assumable_by: buildAssumableBy(this.cloudProjectContext),
+          assumable_by: buildAssumableBy(this.cloudProjectContext, trustedPlatformAssumers),
         },
         // External API keys must not carry client authentication (`null`); everything else is
         // vouched for with Kibana's own shared secret.
