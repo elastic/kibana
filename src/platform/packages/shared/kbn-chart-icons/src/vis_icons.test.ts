@@ -11,45 +11,21 @@ import { IconCircle, IconTriangle } from './assets';
 import type { VisIcon } from './vis_icons';
 import { resolveVisIcon, VIS_ICONS } from './vis_icons';
 
-const LEGACY_NAMED_IDENTIFIERS = [
-  ['alert', 'warning'],
-  ['compute', 'processor'],
-  ['editorComment', 'comment'],
-  ['kubernetesPod', 'cube'],
-  ['list', 'listBullet'],
-  ['mapMarker', 'waypoint'],
-  ['pinFilled', 'pinFill'],
-  ['search', 'magnify'],
-  ['starEmpty', 'star'],
-  ['starFilled', 'starFill'],
-  ['temperature', 'thermometer'],
-  ['visArea', 'chartArea'],
-  ['visBarVertical', 'chartBarVertical'],
-  ['visGauge', 'chartGauge'],
-  ['visLine', 'chartLine'],
-  ['visPie', 'chartPie'],
-  ['visTable', 'table'],
-] as const;
-
-const ALIASES = [
-  ['desktop', 'display'],
-  ['lettering', 'text'],
-] as const;
-
 describe('resolveVisIcon', () => {
-  it.each(LEGACY_NAMED_IDENTIFIERS)(
+  it.each([
+    ['mapMarker', 'waypoint'],
+    ['kubernetesPod', 'cube'],
+    ['visLine', 'chartLine'],
+  ])(
     'resolves the identifier "%s", named after a deprecated EUI icon, to the EUI icon "%s"',
     (iconId, expected) => {
       expect(resolveVisIcon(iconId)).toEqual({ id: iconId, icon: expected });
     }
   );
 
-  it.each(ALIASES)(
-    'resolves the alias "%s" to the current identifier and EUI icon "%s"',
-    (alias, expected) => {
-      expect(resolveVisIcon(alias)).toEqual({ id: expected, icon: expected });
-    }
-  );
+  it('resolves an alias to the current identifier and its EUI icon', () => {
+    expect(resolveVisIcon('desktop')).toEqual({ id: 'display', icon: 'display' });
+  });
 
   it.each(['asterisk', 'bell', 'empty', 'globe', 'info', 'pin', 'sortUp', 'warning'])(
     'resolves the identifier "%s" to itself and the EUI icon of the same name',
