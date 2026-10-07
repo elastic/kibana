@@ -16,6 +16,7 @@ import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { AgentClient } from '../../services/agents';
 import type { AgentPolicy } from '../../types';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 import {
   bulkGetAgentPoliciesHandler,
@@ -24,6 +25,7 @@ import {
   downloadFullAgentPolicy,
   getFullAgentPolicy,
   GetListAgentPolicyOutputsHandler,
+  getAgentPoliciesHandler,
   populateAssignedAgentsCount,
 } from './handlers';
 
@@ -31,6 +33,7 @@ jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
       get: jest.fn(),
+      list: jest.fn(),
       getByIds: jest.fn(),
       copy: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
@@ -196,6 +199,24 @@ describe('Agent policy API handlers', () => {
         expect.anything(),
         ['1'],
         expect.anything()
+      );
+    });
+  });
+
+  describe('getAgentPoliciesHandler', () => {
+    beforeEach(() => {
+      agentPolicyServiceMock.list.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 });
+    });
+
+    it.each([true, false])('should pass showAgentless=%s to the service', async (showAgentless) => {
+      const request = httpServerMock.createKibanaRequest({
+        query: { showAgentless },
+        authzResult: { [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ]: true },
+      });
+      await getAgentPoliciesHandler(context, request, response);
+      expect(agentPolicyServiceMock.list).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ showAgentless })
       );
     });
   });

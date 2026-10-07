@@ -47,6 +47,7 @@ import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 import { OPAMP_POLICY_NAME } from '../../agents/agent_list_page/components/add_collector_flyout';
 
 import { CreateAgentPolicyFlyout } from './components';
+import { getAgentPoliciesKuery } from './get_agent_policies_kuery';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
@@ -88,20 +89,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     [getPath, history, isCreateAgentPolicyFlyoutOpen, toUrlParams, urlParams]
   );
 
-  const getKuery = (newSearch: string) => {
-    const kueryHideOpAMP = `NOT ${agentPolicySavedObjectType}.name:"${OPAMP_POLICY_NAME}"`;
-    const trimmedSearch = newSearch.trim();
-    if (!trimmedSearch) {
-      return kueryHideOpAMP;
-    }
-    // Free text is not valid in a saved object filter, combining it with another clause would make the server search for the whole string
-    // A colon inside quotes is part of a phrase, not a field query
-    const withoutQuoted = trimmedSearch.replace(/"(?:[^"\\]|\\.)*"/g, '');
-    return withoutQuoted.includes(':')
-      ? `(${kueryHideOpAMP}) AND (${trimmedSearch})`
-      : trimmedSearch;
-  };
-
   // Fetch agent policies
   const {
     isLoading,
@@ -112,7 +99,11 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     perPage: pagination.pageSize,
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
-    kuery: getKuery(search),
+    kuery: getAgentPoliciesKuery({
+      search,
+      fieldPrefix: agentPolicySavedObjectType,
+      hiddenPolicyName: OPAMP_POLICY_NAME,
+    }),
     showAgentless,
     withAgentCount: true, // Explicitly fetch agent count
     full: true,
