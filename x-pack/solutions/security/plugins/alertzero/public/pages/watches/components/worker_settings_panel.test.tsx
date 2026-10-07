@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
 import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
@@ -40,6 +41,8 @@ const createWorker = (workflowId: string | null): Worker => ({
   },
 });
 
+const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+
 const renderPanel = (
   workflowId: string | null,
   isAccordion: boolean,
@@ -58,7 +61,10 @@ const renderPanel = (
   const core = coreMock.createStart();
   core.http.get.mockResolvedValue(undefined);
   core.application.getUrlForApp.mockImplementation(
-    (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+    (appId: string, options?: { path?: string; deepLinkId?: string }) =>
+      options?.deepLinkId === 'model_settings'
+        ? FEATURE_SETTINGS_URL
+        : `/app/${appId}${options?.path ?? ''}`
   );
   const settings = {
     ...createWorker(workflowId).settings,
@@ -73,22 +79,24 @@ const renderPanel = (
   };
 
   render(
-    <KibanaContextProvider services={core}>
-      <WorkerSettingsPanel
-        worker={createWorker(workflowId)}
-        isAccordion={isAccordion}
-        isExpanded
-        onToggle={jest.fn()}
-        enabled={enabled}
-        settings={settings}
-        warningReasons={[]}
-        settingsLocked={false}
-        isSaving={false}
-        canWrite
-        onEnabledChange={jest.fn()}
-        onSettingsChange={jest.fn()}
-      />
-    </KibanaContextProvider>
+    <I18nProvider>
+      <KibanaContextProvider services={core}>
+        <WorkerSettingsPanel
+          worker={createWorker(workflowId)}
+          isAccordion={isAccordion}
+          isExpanded
+          onToggle={jest.fn()}
+          enabled={enabled}
+          settings={settings}
+          warningReasons={[]}
+          settingsLocked={false}
+          isSaving={false}
+          canWrite
+          onEnabledChange={jest.fn()}
+          onSettingsChange={jest.fn()}
+        />
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 
   return core;
@@ -159,6 +167,25 @@ describe('WorkerSettingsPanel view executions link', () => {
       screen.queryByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel models', () => {
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])('points the Models row at Feature settings in a new tab (%s)', (_layout, isAccordion) => {
+    const core = renderPanel(WORKFLOW_ID, isAccordion);
+
+    expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
+      'This Worker uses models configured in Feature settings'
+    );
+    const link = screen.getByTestId(`alertZeroModelsLink-${WORKER_ID}`);
+    expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(core.application.getUrlForApp).toHaveBeenCalledWith('management', {
+      deepLinkId: 'model_settings',
+    });
   });
 });
 

@@ -83,6 +83,12 @@ const composerFocusShadowStyles = (euiThemeContext: UseEuiTheme) => css`
   }
 `;
 
+// In dark mode the wrapper's shadow draws a border overlay over the shell, hiding its focus border.
+const shellStyles = ({ euiTheme }: UseEuiTheme) => css`
+  position: relative;
+  z-index: ${Number(euiTheme.levels.content) + 1};
+`;
+
 const wrapperWithHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
   background-color: ${euiTheme.colors.backgroundBaseDisabled};
 `;
@@ -151,6 +157,7 @@ const InputContainer: React.FC<
         isDisabled={isDisabled}
         isCollapsed={isCollapsed}
         suppressShadow
+        css={shellStyles}
         data-test-subj="agentBuilderConversationInputForm"
         aria-label={containerAriaLabel}
       >

@@ -34,7 +34,7 @@ describe('RuleExecutorEventPublisher', () => {
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
     expect(eventBus.publish).toHaveBeenCalledWith(
       { type: RULE_EXECUTION_SUCCEEDED_EVENT_TYPE, payload },
-      { request }
+      { request, origin: 'user' }
     );
   });
 
@@ -51,7 +51,7 @@ describe('RuleExecutorEventPublisher', () => {
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
     expect(eventBus.publish).toHaveBeenCalledWith(
       { type: RULE_EXECUTION_FAILED_EVENT_TYPE, payload },
-      { request }
+      { request, origin: 'user' }
     );
   });
 });

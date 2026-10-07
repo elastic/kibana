@@ -1272,6 +1272,13 @@ describe('AgentExecutionService', () => {
       expect(events[0].id).toBe(`${roundId}::user_message`);
     });
 
+    it('writes the opening user message without waiting for a refresh', async () => {
+      await converse();
+
+      const [, options] = conversationClient.appendEvents.mock.calls[0];
+      expect(options).toMatchObject({ refresh: false });
+    });
+
     it('falls back to the conversation owner when the requester has no author, as the round rewrite does', async () => {
       await converse();
 
@@ -1430,6 +1437,8 @@ describe('AgentExecutionService', () => {
       expect(events[0]).toMatchObject({ data: { message: 'Pool limit is now 200' } });
       // A standalone message must not look round-derived, or a round write would drop it.
       expect(events[0].id).not.toContain('::user_message');
+      // The caller refreshes its conversation list from the response, so the write waits for it.
+      expect(conversationClient.appendEvents.mock.calls[0][1]).not.toHaveProperty('refresh');
 
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
