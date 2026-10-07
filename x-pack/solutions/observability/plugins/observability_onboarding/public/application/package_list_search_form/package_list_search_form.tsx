@@ -13,6 +13,7 @@ import React, { useRef, useMemo } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { useCardUrlRewrite } from './use_card_url_rewrite';
 import { PackageList } from '../package_list/package_list';
+import { withoutDuplicateAwsCard } from './without_duplicate_aws_card';
 
 interface Props {
   searchQuery: string;
@@ -54,7 +55,7 @@ const PackageListGridWrapper = ({
   const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 
   const list: IntegrationCardItem[] = useMemo(() => {
-    return (customCards ?? [])
+    return withoutDuplicateAwsCard(customCards ?? [], integrationCards)
       .concat(integrationCards)
       .filter((card) =>
         card.categories.some((category) => ['observability', 'os_system'].includes(category))
