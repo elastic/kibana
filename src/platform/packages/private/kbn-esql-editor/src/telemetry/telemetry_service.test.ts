@@ -14,6 +14,7 @@ import {
   ResourceBrowserType,
   ResourceBrowserOpenedFrom,
   ViewSelectedSource,
+  ViewCreatedSource,
 } from './telemetry_service';
 import { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
@@ -21,6 +22,7 @@ import {
   ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RESOURCE_BROWSER_OPENED,
   ESQL_VIEW_SELECTED,
+  ESQL_VIEW_CREATED,
   ESQL_VISOR_NL_SUBMITTED,
   ESQL_VISOR_NL_REVIEWED,
   ESQL_COMMENT_TO_ESQL_SUBMITTED,
@@ -389,6 +391,22 @@ describe('ESQLEditorTelemetryService', () => {
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_REVIEWED, {
         action: AiReviewAction.REJECT,
         lines_changed: 1,
+      });
+    });
+  });
+
+  describe('trackViewCreated', () => {
+    it('tracks the query length rather than the query', () => {
+      telemetryService.trackViewCreated({
+        source: ViewCreatedSource.EDITOR_MENU,
+        hasDescription: true,
+        queryLength: 42,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VIEW_CREATED, {
+        source: 'editor_menu',
+        has_description: true,
+        query_length: 42,
       });
     });
   });

@@ -6,12 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import {
-  ESQL_VIEWS_PAGE_VISITED,
-  ESQL_VIEW_CREATED,
-  ESQL_VIEW_DELETED,
-  ESQL_VIEW_EDITED,
-} from './constants';
+import { ESQL_VIEWS_PAGE_VISITED, ESQL_VIEW_DELETED, ESQL_VIEW_EDITED } from './constants';
 
 const sourceSchema = {
   type: 'keyword' as const,
@@ -25,21 +20,6 @@ export const registerEsqlViewsAnalyticsEvents = (analytics: AnalyticsServiceSetu
   analytics.registerEventType({
     eventType: ESQL_VIEWS_PAGE_VISITED,
     schema: {},
-  });
-
-  analytics.registerEventType({
-    eventType: ESQL_VIEW_CREATED,
-    schema: {
-      source: sourceSchema,
-      has_description: {
-        type: 'boolean',
-        _meta: { description: 'Whether the created view has a description.' },
-      },
-      query_length: {
-        type: 'long',
-        _meta: { description: 'Character count of the query of the created view.' },
-      },
-    },
   });
 
   analytics.registerEventType({

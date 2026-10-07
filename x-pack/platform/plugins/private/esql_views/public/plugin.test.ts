@@ -144,7 +144,6 @@ describe('EsqlViewsPlugin', () => {
 
       expect(getRegisteredEventTypes(core)).toEqual([
         'esql.views_page_visited',
-        'esql.view_created',
         'esql.view_edited',
         'esql.view_deleted',
       ]);
@@ -156,7 +155,7 @@ describe('EsqlViewsPlugin', () => {
       const unmount = await mountConcurrently();
       unmount();
 
-      expect(getRegisteredEventTypes(core)).toHaveLength(4);
+      expect(getRegisteredEventTypes(core)).toHaveLength(3);
     });
 
     it('mounts without telemetry when registering event types fails', async () => {

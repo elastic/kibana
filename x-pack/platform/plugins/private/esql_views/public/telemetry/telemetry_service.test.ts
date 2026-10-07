@@ -34,9 +34,10 @@ describe('TelemetryService', () => {
   it('registers every event type during setup', () => {
     const { analytics } = setupService();
 
+    // `esql.view_created` is registered by @kbn/esql-editor, which can emit it even when this
+    // plugin's management UI is disabled.
     expect(analytics.registerEventType.mock.calls.map(([{ eventType }]) => eventType)).toEqual([
       ESQL_VIEWS_PAGE_VISITED,
-      ESQL_VIEW_CREATED,
       ESQL_VIEW_EDITED,
       ESQL_VIEW_DELETED,
     ]);

@@ -18,6 +18,7 @@ import { KeyboardShortcuts } from '../editor_footer/keyboard_shortcuts';
 import { QueryWrapComponent } from '../editor_footer/query_wrap_component';
 import { MagnifySparklesIcon } from './magnify_sparkles_icon';
 import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
+import { ViewCreatedSource } from '../telemetry/telemetry_service';
 import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
 import { useCanCreateView } from '../save_as_view/use_can_create_view';
 import {
@@ -200,6 +201,7 @@ export function ESQLMenu({
           query={queryToSave}
           onClose={() => setQueryToSave(undefined)}
           onSaved={applySavedView}
+          source={ViewCreatedSource.EDITOR_MENU}
         />
       )}
     </>

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-// `esql.view_selected` completes this set, but is registered by `@kbn/esql-editor`.
+// `esql.view_created` is registered by `@kbn/esql-editor`, which can emit it even when this
+// management UI is disabled; this plugin only reports it. `esql.view_selected` completes the set
+// and is registered and reported by the editor alone.
 export const ESQL_VIEWS_PAGE_VISITED = 'esql.views_page_visited';
 export const ESQL_VIEW_CREATED = 'esql.view_created';
 export const ESQL_VIEW_EDITED = 'esql.view_edited';
