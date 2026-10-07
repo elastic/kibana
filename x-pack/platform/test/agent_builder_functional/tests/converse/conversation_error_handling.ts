@@ -102,11 +102,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('shows a "not found" prompt when conversation ID does not exist', async () => {
       const INVALID_ID = 'this-id-does-not-exist-12345';
-      const initialUrl = await browser.getCurrentUrl();
 
       await agentBuilder.navigateToApp(
         `agents/${agentBuilderDefaultAgentId}/conversations/${INVALID_ID}`
       );
+      const invalidConversationUrl = await browser.getCurrentUrl();
 
       await testSubjects.existOrFail('errorPrompt');
 
@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const newUrl = await browser.getCurrentUrl();
-        expect(newUrl).to.not.equal(initialUrl);
+        expect(newUrl).to.not.equal(invalidConversationUrl);
         expect(newUrl).to.contain('conversations/new');
       });
       await testSubjects.existOrFail('agentBuilderWelcomePage');
