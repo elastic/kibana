@@ -233,9 +233,19 @@ const runVaultKv = async (
   }
 };
 
-export const retrieveConfigFromVault = async (target: VaultTarget) => {
+export const retrieveConfigFromVault = async (
+  target: VaultTarget,
+  /** An earlier KV v2 version to read, e.g. to roll back a bad upload. */
+  version?: number
+) => {
   const { vault, vaultPath, filePath, validate } = target;
-  const stdout = await runVaultKv(vault, ['get', `-field=${KBN_EVALS_CONFIG_FIELD}`, vaultPath]);
+  const versionArgs = version === undefined ? [] : [`-version=${version}`];
+  const stdout = await runVaultKv(vault, [
+    'get',
+    `-field=${KBN_EVALS_CONFIG_FIELD}`,
+    ...versionArgs,
+    vaultPath,
+  ]);
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
   const validated = validate(JSON.parse(value));

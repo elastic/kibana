@@ -680,11 +680,11 @@ node scripts/vault/upload_secrets.js --vault ci-prod
 node scripts/vault/get_command.js --vault ci-prod
 ```
 
-Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions. To undo a bad upload, write an earlier version back (version numbers increase by one per upload), against the ci-prod Vault:
+Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions (numbered up by one per upload). To undo a bad upload, retrieve an earlier version and upload it again (add `--suite <id>` to both for a suite's secret). Retrieve validates the config and fails before touching `config.json` if the version can't be read:
 
 ```bash
-vault kv get -version=<n> -field=config kv/ci-shared/kbn-evals/golden \
-  | vault kv put kv/ci-shared/kbn-evals/golden config=-
+node scripts/vault/retrieve_secrets.js --vault ci-prod --version <n>
+node scripts/vault/upload_secrets.js --vault ci-prod
 ```
 
 ### CI telemetry
