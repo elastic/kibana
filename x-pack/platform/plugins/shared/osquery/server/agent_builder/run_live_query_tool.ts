@@ -197,7 +197,30 @@ export const runLiveQueryTool = (
       const { rows, responded, status: pollStatus, error: pollError } = pollResult;
 
       // Unreadable results are not pending — report the dispatch plus the error.
-      if (pollStatus === 'error') {
+      if (pollResult.status === 'execution_failed') {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                action_id: queryActionId,
+                parent_action_id: parentActionId,
+                agent_count: agentCount,
+                status: 'execution_failed',
+                error: 'query_execution_failed',
+                responded: pollResult.responded,
+                expected: agentCount,
+                error_agents: pollResult.errorAgents,
+                message:
+                  'All responding agents failed to execute the query. Check the SQL and host-side osquery errors before dispatching a corrected query.',
+              },
+            },
+          ],
+        };
+      }
+
+      if (pollResult.status === 'error') {
         return {
           results: [
             {

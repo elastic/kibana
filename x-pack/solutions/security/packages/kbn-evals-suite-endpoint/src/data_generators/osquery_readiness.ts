@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
 export interface OsqueryLiveQueryReadiness {
   packageInstalled: boolean;
@@ -72,11 +73,13 @@ export async function getOsqueryLiveQueryReadiness(
   }
 
   try {
-    const kuery = readiness.osqueryAgentPolicyIds.map((id) => `policy_id:"${id}"`).join(' or ');
+    const policyKuery = readiness.osqueryAgentPolicyIds
+      .map((id) => `policy_id:"${escapeQuotes(id)}" or policy_id:${escapeKuery(id)}#*`)
+      .join(' or ');
     const agents = await kbnClient.request<{ total?: number }>({
       method: 'GET',
       path: `/api/fleet/agents?kuery=${encodeURIComponent(
-        `(${kuery}) and status:online`
+        `(${policyKuery}) and status:online`
       )}&perPage=1`,
     });
 

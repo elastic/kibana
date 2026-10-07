@@ -106,6 +106,8 @@ interface RunLiveQueryResultData {
   rows?: unknown[];
   row_count?: number;
   guidance?: string;
+  error?: string;
+  error_agents?: number;
   message?: string;
 }
 
@@ -118,6 +120,32 @@ const getResultData = (result: ToolHandlerReturn<ToolResult>): RunLiveQueryResul
 };
 
 describe('runLiveQueryTool', () => {
+  it.each(['execution_failed', 'error'])('diagnoses %s independently', async (status) => {
+    (pollActionResponses as jest.Mock).mockResolvedValue({
+      status,
+      rows: [],
+      responded: 1,
+      errorAgents: status === 'execution_failed' ? 1 : 0,
+    });
+    const { context } = buildContext(['osquery-writeLiveQueries', 'osquery-readLiveQueries']);
+    const tool = runLiveQueryTool(context, loggerMock.create(), schemaService());
+    const result = await tool.handler(
+      { query: 'SELECT pid FROM processes', agent_ids: ['agent-1'] },
+      { request: {}, spaceId: 'default' } as any
+    );
+    const data = getResultData(result);
+    if (status === 'execution_failed') {
+      expect(data.status).toBe('execution_failed');
+      expect(data.error).toBe('query_execution_failed');
+      expect(data.error_agents).toBe(1);
+      expect(data.message).toMatch(/failed to execute/);
+      expect(data.message).not.toMatch(/still be running|unreadable|retry/i);
+    } else {
+      expect(data.status).toBe('results_unreadable');
+      expect(data.error).toMatch(/could not be read/);
+    }
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     (pollActionResponses as jest.Mock).mockResolvedValue({

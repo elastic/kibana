@@ -55,7 +55,10 @@ interface FleetAgentLike {
  * that interpolates caller-supplied hostnames or agent IDs into a KQL clause.
  */
 export const escapeKueryValue = (value: string): string =>
-  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/([*?])/g, '\\$1');
 
 /**
  * Resolves host names to Elastic Agent IDs via the Fleet AgentService (the same

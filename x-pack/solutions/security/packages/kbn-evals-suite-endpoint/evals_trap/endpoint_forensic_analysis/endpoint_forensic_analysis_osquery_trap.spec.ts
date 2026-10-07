@@ -8,57 +8,26 @@
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
-import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
-import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
-import { cleanupForensicData } from '../../src/data_generators/cleanup';
-import {
-  seedOsqueryInstalledNoAgents,
-  cleanupOsqueryInstalledNoAgents,
-} from '../../src/data_generators/osquery_trap';
+import { assertOsqueryTrapHasNoAgents } from '../../src/data_generators/osquery_trap';
 
-/**
- * Capability-detection trap — runs in its own spec so it can be invoked as a
- * separate stack invocation (`--grep "Osquery capability trap"`).
- *
- * The trap state (Osquery installed, no agents enrolled) is mutually exclusive
- * with the smoke suite's "Osquery not installed" scenario, so the two cannot
- * share one eval run's stack. Seeding once in beforeAll — and keeping the
- * package installed for the whole run — also avoids the per-worker
- * install/uninstall race that made per-scenario seeding collide.
- */
 evaluate.describe(
   'Endpoint Forensic Analysis — Osquery capability trap',
   { tag: tags.stateful.classic },
   () => {
-    let trapIds: { agentPolicyId: string; packagePolicyId: string } | undefined;
-
-    evaluate.beforeAll(
-      async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
-        await waitForEndpointPackage(kbnClient, esClient, log);
-        await cleanupForensicData({ esClient, internalEsClient });
-        await seedForensicTimeline({ esClient }, log);
-
-        // Seed the trap state ONCE for the whole run: osquery_manager installed
-        // and attached to an empty agent policy, so installed=true but
-        // agents_enrolled=false for every model worker.
-        trapIds = await seedOsqueryInstalledNoAgents(kbnClient, log);
-
-        try {
-          await agentBuilderClient.converse({
-            agentId: agentBuilderDefaultAgentId,
-            input: 'hello',
-          });
-        } catch (e) {
-          log.warning(`Warmup failed: ${e}`);
-        }
+    evaluate.beforeAll(async ({ kbnClient }) => {
+      // Recheck in the actual model worker/space; never infer space-wide state from an empty policy.
+      await assertOsqueryTrapHasNoAgents(kbnClient);
+      await kbnClient.request({
+        method: 'GET',
+        path: `/api/agent_builder/agents/${agentBuilderDefaultAgentId}`,
+      });
+      const { data } = await kbnClient.request<{ results: Array<{ id: string }> }>({
+        method: 'GET',
+        path: '/api/agent_builder/tools',
+      });
+      if (!data.results.some((tool) => tool.id === 'security.osquery.check_integration')) {
+        throw new Error('Trap suite requires security.osquery.check_integration in this space');
       }
-    );
-
-    evaluate.afterAll(async ({ kbnClient, esClient, internalEsClient, log }) => {
-      if (trapIds) {
-        await cleanupOsqueryInstalledNoAgents(kbnClient, log, trapIds);
-      }
-      await cleanupForensicData({ esClient, internalEsClient });
     });
 
     evaluate(

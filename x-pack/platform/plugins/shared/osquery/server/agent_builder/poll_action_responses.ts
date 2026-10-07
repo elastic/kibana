@@ -24,7 +24,12 @@ import { buildSpaceIdFilter } from '../utils/build_space_id_filter';
 const RESULTS_INDEX_PATTERN = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 const ACTION_RESPONSES_INDEX_PATTERN = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
 
-export type LiveQueryPollStatus = 'completed' | 'partial' | 'pending' | 'error';
+export type LiveQueryPollStatus =
+  | 'completed'
+  | 'partial'
+  | 'pending'
+  | 'execution_failed'
+  | 'error';
 
 export interface PollActionResponsesOptions {
   budgetMs: number;
@@ -48,7 +53,7 @@ export interface PollActionResponsesResult {
   expected?: number;
   rows: Array<Record<string, unknown>>;
   status: LiveQueryPollStatus;
-  /** Last search error, when `status` is `error`. */
+  /** Search or query execution error, according to `status`. */
   error?: string;
   /** Distinct agents whose response carried an error, when known. */
   errorAgents?: number;
@@ -108,7 +113,14 @@ const extractRowFromHit = (source: Record<string, unknown>): Record<string, unkn
     Object.entries(provenance).filter(([key]) => !(key in row))
   );
 
-  return Object.keys(missingProvenance).length > 0 ? { ...row, ...missingProvenance } : row;
+  return Object.keys(provenance).length > 0
+    ? {
+        ...row,
+        ...missingProvenance,
+        _agent: { id: provenance.agent_id, name: provenance.agent_name },
+        osquery: row,
+      }
+    : row;
 };
 
 /**
@@ -137,10 +149,12 @@ export const pollActionResponses = async (
   let searchSucceeded = false;
   let lastError: string | undefined;
   let errorAgents: number | undefined;
+  let expectedRows = 0;
   let totalRows: number | undefined;
 
   const allAgentsResponded = () =>
     expectedAgentCount !== undefined && expectedAgentCount > 0 && responded >= expectedAgentCount;
+  const allRowsSearchable = () => (totalRows ?? rows.length) >= expectedRows;
 
   while (Date.now() < deadline) {
     await sleep(intervalMs);
@@ -160,6 +174,11 @@ export const pollActionResponses = async (
           distinct_agents: {
             cardinality: { field: 'agent_id' },
           },
+          rows_by_agent: {
+            terms: { field: 'agent_id', size: expectedAgentCount ?? 10_000 },
+            aggs: { row_count: { max: { field: 'action_response.osquery.count' } } },
+          },
+          expected_rows: { sum_bucket: { buckets_path: 'rows_by_agent>row_count' } },
           error_agents: {
             filter: { exists: { field: 'error' } },
             aggs: {
@@ -179,6 +198,8 @@ export const pollActionResponses = async (
       responded =
         (responsesResult.aggregations?.distinct_agents as { value: number } | undefined)?.value ??
         0;
+      expectedRows =
+        (responsesResult.aggregations?.expected_rows as { value?: number } | undefined)?.value ?? 0;
       errorAgents = (
         responsesResult.aggregations?.error_agents as { distinct?: { value?: number } } | undefined
       )?.distinct?.value;
@@ -210,7 +231,7 @@ export const pollActionResponses = async (
       // Only stop early once every dispatched agent has reported. Stopping at
       // the first response reports a multi-agent query as complete while other
       // agents are still running.
-      if (allAgentsResponded()) {
+      if (allAgentsResponded() && allRowsSearchable()) {
         break;
       }
 
@@ -247,17 +268,18 @@ export const pollActionResponses = async (
       responded,
       ...(expectedAgentCount !== undefined && { expected: expectedAgentCount }),
       rows,
-      status: 'error' as const,
+      status: 'execution_failed' as const,
       error: `All ${errorAgents} responding agent(s) reported an execution error.`,
       errorAgents,
     };
   }
 
-  const status: LiveQueryPollStatus = allAgentsResponded()
-    ? 'completed'
-    : responded > 0 || rows.length > 0
-    ? 'partial'
-    : 'pending';
+  const status: LiveQueryPollStatus =
+    allAgentsResponded() && allRowsSearchable()
+      ? 'completed'
+      : responded > 0 || rows.length > 0
+      ? 'partial'
+      : 'pending';
 
   return {
     responded,

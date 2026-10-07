@@ -19,6 +19,127 @@ const duplicateResponsesSearchResult = (distinctAgents: number) => ({
 });
 
 describe('pollActionResponses', () => {
+  it('keeps SQL aliases separate from trusted agent provenance', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(responsesSearchResult(1))
+      .mockResolvedValueOnce({
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _source: {
+                agent: { id: 'real-agent', name: 'real-host' },
+                osquery: { agent_id: 'sql-id', agent_name: 'sql-name', _agent: 'sql-alias' },
+              },
+            },
+          ],
+        },
+      });
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 1,
+    });
+    expect(result.rows[0]).toEqual({
+      agent_id: 'sql-id',
+      agent_name: 'sql-name',
+      _agent: { id: 'real-agent', name: 'real-host' },
+      osquery: { agent_id: 'sql-id', agent_name: 'sql-name', _agent: 'sql-alias' },
+    });
+  });
+
+  it('waits for result refresh after all agents report nonzero row counts', async () => {
+    jest.useFakeTimers();
+    try {
+      const response = {
+        ...duplicateResponsesSearchResult(2),
+        aggregations: {
+          distinct_agents: { value: 2 },
+          expected_rows: { value: 2 },
+          error_agents: { distinct: { value: 1 } },
+        },
+      };
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(response)
+        .mockResolvedValueOnce({ hits: { total: { value: 0 }, hits: [] } })
+        .mockResolvedValueOnce(response)
+        .mockResolvedValueOnce({
+          hits: { total: { value: 2 }, hits: [{ _source: { osquery: { pid: 1 } } }] },
+        });
+      const polling = pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 1000,
+        intervalMs: 100,
+        maxRows: 1,
+        spaceId: 'default',
+        expectedAgentCount: 2,
+      });
+      await jest.advanceTimersByTimeAsync(200);
+      const result = await polling;
+      expect(search).toHaveBeenCalledTimes(4);
+      expect(result.status).toBe('completed');
+      expect(result.rows).toHaveLength(1);
+      expect(result.truncated).toBe(true);
+      expect(result.responded).toBe(2);
+      expect(result.errorAgents).toBe(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns partial rather than completed when result refresh exceeds the budget', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ...responsesSearchResult(1),
+        aggregations: {
+          distinct_agents: { value: 1 },
+          expected_rows: { value: 2 },
+        },
+      })
+      .mockResolvedValueOnce({ hits: { total: { value: 0 }, hits: [] } })
+      .mockImplementation((request) =>
+        Promise.resolve(
+          request.size === 0
+            ? {
+                ...responsesSearchResult(1),
+                aggregations: { distinct_agents: { value: 1 }, expected_rows: { value: 2 } },
+              }
+            : { hits: { total: { value: 0 }, hits: [] } }
+        )
+      );
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 1,
+    });
+    expect(result.status).toBe('partial');
+    expect(result.rows).toEqual([]);
+  });
+
+  it('completes immediately for a reported zero-row query', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ...responsesSearchResult(1),
+        aggregations: {
+          distinct_agents: { value: 1 },
+          expected_rows: { value: 0 },
+        },
+      })
+      .mockResolvedValueOnce({ hits: { total: { value: 0 }, hits: [] } });
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 1,
+    });
+    expect(result.status).toBe('completed');
+    expect(search).toHaveBeenCalledTimes(2);
+  });
   it('polls action responses for completion metadata and result index for SQL rows', async () => {
     const search = jest
       .fn()
@@ -42,6 +163,11 @@ describe('pollActionResponses', () => {
         size: 0,
         aggs: {
           distinct_agents: { cardinality: { field: 'agent_id' } },
+          rows_by_agent: {
+            terms: { field: 'agent_id', size: 2 },
+            aggs: { row_count: { max: { field: 'action_response.osquery.count' } } },
+          },
+          expected_rows: { sum_bucket: { buckets_path: 'rows_by_agent>row_count' } },
           error_agents: {
             filter: { exists: { field: 'error' } },
             aggs: { distinct: { cardinality: { field: 'agent_id' } } },
@@ -149,7 +275,7 @@ describe('pollActionResponses', () => {
     expect(result.status).toBe('completed');
   });
 
-  it('reports error status when every responding agent reported an execution error', async () => {
+  it('reports execution failure when every responding agent reported an execution error', async () => {
     // Each poll iteration issues two searches (responses, then results).
     const search = jest.fn().mockImplementation(async () => {
       const call = search.mock.calls.length;
@@ -172,7 +298,7 @@ describe('pollActionResponses', () => {
       expectedAgentCount: 2,
     });
 
-    expect(result.status).toBe('error');
+    expect(result.status).toBe('execution_failed');
     expect(result.errorAgents).toBe(2);
     expect(result.error).toMatch(/execution error/);
   });
@@ -243,8 +369,22 @@ describe('pollActionResponses', () => {
       });
 
       expect(result.rows).toEqual([
-        { pid: 1, name: 'launchd', agent_id: 'agent-a', agent_name: 'host-a' },
-        { pid: 2, name: 'svchost', agent_id: 'agent-b', agent_name: 'host-b' },
+        {
+          pid: 1,
+          name: 'launchd',
+          agent_id: 'agent-a',
+          agent_name: 'host-a',
+          _agent: { id: 'agent-a', name: 'host-a' },
+          osquery: { pid: 1, name: 'launchd' },
+        },
+        {
+          pid: 2,
+          name: 'svchost',
+          agent_id: 'agent-b',
+          agent_name: 'host-b',
+          _agent: { id: 'agent-b', name: 'host-b' },
+          osquery: { pid: 2, name: 'svchost' },
+        },
       ]);
     });
 
@@ -267,7 +407,15 @@ describe('pollActionResponses', () => {
         expectedAgentCount: 1,
       });
 
-      expect(result.rows).toEqual([{ pid: 1, agent_id: 'a1', agent_name: 'host-a' }]);
+      expect(result.rows).toEqual([
+        {
+          pid: 1,
+          agent_id: 'a1',
+          agent_name: 'host-a',
+          _agent: { id: 'a1', name: 'host-a' },
+          osquery: { pid: 1 },
+        },
+      ]);
     });
 
     it('falls back to elastic_agent.id and never overwrites a selected column', async () => {
@@ -303,8 +451,18 @@ describe('pollActionResponses', () => {
       });
 
       expect(result.rows).toEqual([
-        { pid: 1, agent_id: 'value-selected-by-the-query' },
-        { pid: 2, agent_id: 'agent-from-elastic-agent' },
+        {
+          pid: 1,
+          agent_id: 'value-selected-by-the-query',
+          _agent: { id: 'agent-from-elastic-agent', name: undefined },
+          osquery: { pid: 1, agent_id: 'value-selected-by-the-query' },
+        },
+        {
+          pid: 2,
+          agent_id: 'agent-from-elastic-agent',
+          _agent: { id: 'agent-from-elastic-agent', name: undefined },
+          osquery: { pid: 2 },
+        },
       ]);
     });
 
@@ -332,7 +490,15 @@ describe('pollActionResponses', () => {
         expectedAgentCount: 1,
       });
 
-      expect(result.rows).toEqual([{ pid: 1, agent_id: 'agent-a', agent_name: 'host-a' }]);
+      expect(result.rows).toEqual([
+        {
+          pid: 1,
+          agent_id: 'agent-a',
+          agent_name: 'host-a',
+          _agent: { id: 'agent-a', name: 'host-a' },
+          osquery: { pid: 1 },
+        },
+      ]);
     });
 
     it('leaves rows untouched when the document carries no identity at all', async () => {

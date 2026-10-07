@@ -6,11 +6,19 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
+import { pollActionResponses } from './poll_action_responses';
+
 import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server/tools';
 import { z } from '@kbn/zod/v4';
 import type { SchemaService } from '../lib/schema_service';
 import { runLiveQueryTool } from './run_live_query_tool';
 import { buildToolContext, toolRequest } from './test_helpers';
+
+jest.mock('./poll_action_responses', () => ({ pollActionResponses: jest.fn() }));
+jest.mock('./assert_action_in_space', () => ({
+  assertActionBelongsToSpace: jest.fn().mockResolvedValue({ found: true, expectedAgentCount: 1 }),
+}));
 
 jest.mock('../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
@@ -35,6 +43,36 @@ const availabilityOf = (definition: { availability?: ToolAvailabilityConfig }) =
   definition.availability!.handler({ request: toolRequest, spaceId: 'default' } as never);
 
 describe('getLiveQueryResultsTool', () => {
+  it.each(['execution_failed', 'error'])('diagnoses %s independently', async (status) => {
+    (pollActionResponses as jest.Mock).mockResolvedValue({
+      status,
+      rows: [],
+      responded: 1,
+      errorAgents: status === 'execution_failed' ? 1 : 0,
+    });
+    const { context } = buildToolContext({ grantedPrivileges: ['osquery-readLiveQueries'] });
+    const tool = getLiveQueryResultsTool(context, loggerMock.create());
+    const result = await tool.handler({ action_id: 'action-1' }, {
+      request: toolRequest,
+      spaceId: 'default',
+    } as any);
+    if (!isToolHandlerStandardReturn(result)) {
+      throw new Error('Expected standard handler return');
+    }
+
+    const data = result.results[0].data as Record<string, unknown>;
+    if (status === 'execution_failed') {
+      expect(data.status).toBe('execution_failed');
+      expect(data.error).toBe('query_execution_failed');
+      expect(data.error_agents).toBe(1);
+      expect(data.message).toMatch(/failed to execute/);
+      expect(data.message).not.toMatch(/still be running|unreadable|retry/i);
+    } else {
+      expect(data.message).toMatch(/could not be read/);
+      expect(data.message).toMatch(/retry/);
+    }
+  });
+
   describe('action_id schema bound', () => {
     // github-actions review #4975398839: the id is free-form model input that
     // goes straight into term queries and echoed messages, so it needs a bound

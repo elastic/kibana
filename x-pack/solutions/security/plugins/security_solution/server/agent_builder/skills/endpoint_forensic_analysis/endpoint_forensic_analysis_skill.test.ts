@@ -190,6 +190,95 @@ describe('endpointForensicAnalysisSkill', () => {
     );
   });
 
+  it.each(['live-state instructions', 'read-only guardrail'])(
+    'requires partial-result follow-up in the %s',
+    (section) => {
+      const content = endpointForensicAnalysisSkill.content;
+      const instructions =
+        section === 'live-state instructions'
+          ? content.slice(content.indexOf('### 2b.'), content.indexOf('### 3.'))
+          : content.slice(content.indexOf('## Tool Selection Guardrails'));
+
+      expect(instructions).toMatch(/status: dispatched.*status: partial/);
+      expect(instructions).toContain('osquery.get_live_query_results');
+      expect(content).toContain('Do not treat rows from a partial response as complete');
+    }
+  );
+
+  it('excludes Windows system directories using full paths, not basenames', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> };
+    const esqlQuery = jest.fn().mockResolvedValue({
+      columns: [
+        { name: 'process.executable' },
+        { name: '@timestamp' },
+        { name: 'process.parent.name' },
+      ],
+      values: [
+        ['C:\\Windows\\System32\\notepad.exe', '2026-01-01T00:00:00Z', 'parent.exe'],
+        ['C:/WINDOWS/SysWOW64/custom.exe', '2026-01-01T00:01:00Z', 'parent.exe'],
+        ['C:\\Windows\\System32\\drivers\\driver.exe', '2026-01-01T00:02:00Z', 'parent.exe'],
+        ['C:\\Users\\alice\\Downloads\\notepad.exe', '2026-01-01T00:03:00Z', 'parent.exe'],
+        ['C:/Temp/System32Payload.exe', '2026-01-01T00:04:00Z', 'parent.exe'],
+        ['/tmp/payload', '2026-01-01T00:05:00Z', 'parent.exe'],
+        ['C:/Windows/explorer.exe', '2026-01-01T00:06:00Z', 'parent.exe'],
+      ],
+    });
+
+    const response = (await extractIocs.handler(
+      { hosts: ['host-a'] },
+      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
+    )) as { results: Array<{ data: { iocs: { process_chain: string[] } } }> };
+
+    expect(response.results[0].data.iocs.process_chain).toEqual([
+      'parent.exe → C:\\Users\\alice\\Downloads\\notepad.exe',
+      'parent.exe → C:/Temp/System32Payload.exe',
+      'parent.exe → /tmp/payload',
+    ]);
+  });
+
+  it('keeps unrelated host hashes out of IoCs and labels them as observed evidence', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> };
+    const esqlQuery = jest.fn().mockResolvedValue({
+      columns: [{ name: 'process.hash.sha256' }, { name: '@timestamp' }],
+      values: [
+        ['ordinary-app-hash', '2026-01-01T00:00:00Z'],
+        ['ordinary-app-hash', '2026-01-01T00:01:00Z'],
+        ['uncorrelated-hash', '2026-01-01T00:02:00Z'],
+        [null, '2026-01-01T00:03:00Z'],
+      ],
+    });
+
+    const response = (await extractIocs.handler(
+      { hosts: ['host-a'] },
+      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
+    )) as {
+      results: Array<{
+        data: {
+          iocs: { file_hashes: string[] };
+          observed_file_hashes: string[];
+          first_seen_by_category: Record<string, string>;
+          guidance: string;
+        };
+      }>;
+    };
+    const data = response.results[0].data;
+
+    expect(data.iocs.file_hashes).toEqual([]);
+    expect(data.first_seen_by_category.file_hashes).toBeUndefined();
+    expect(data.observed_file_hashes).toEqual(['ordinary-app-hash', 'uncorrelated-hash']);
+    expect(data.guidance).toContain('not indicators of compromise');
+    expect(data.guidance).toContain('correlate them with the reconstructed attack');
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'Do not put uncorrelated observed hashes in the IoC table or offer them for hunting'
+    );
+  });
+
   // github-actions review #4975398846: `osquery.*` tools are registered only
   // when the Osquery plugin's `agentBuilderTools` flag is on (default false), so
   // a skill that unconditionally mandates `osquery.check_integration` hands

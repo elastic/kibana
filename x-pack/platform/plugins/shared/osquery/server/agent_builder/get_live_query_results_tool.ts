@@ -67,7 +67,7 @@ export const getLiveQueryResultsTool = (
     openWorldHint: false,
   },
   description:
-    'Wait for and retrieve Osquery live-query results for a dispatched action_id. Use after osquery.run_live_query when status is dispatched/partial, or when the analyst needs rows displayed in chat. Polls action responses until wait_seconds elapses or rows arrive. Each returned row carries agent_id/agent_name so rows from different hosts stay distinguishable.',
+    'Wait for and retrieve Osquery live-query results for a dispatched action_id. Use after osquery.run_live_query when status is dispatched/partial, or when the analyst needs rows displayed in chat. Polls action responses until wait_seconds elapses or rows arrive. Each returned row with provenance carries trusted _agent metadata and original SQL columns under osquery; SQL aliases cannot replace the trusted host identity.',
   schema: getLiveQueryResultsSchema,
   // Feature-flag availability only: reading results for an action that was
   // already dispatched does not depend on the stack still being live-capable.
@@ -120,6 +120,27 @@ export const getLiveQueryResultsTool = (
       });
 
       // Unreadable results are not pending — do not report an empty state.
+      if (pollResult.status === 'execution_failed') {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                action_id: actionId,
+                status: 'execution_failed',
+                error: 'query_execution_failed',
+                responded: pollResult.responded,
+                expected: pollResult.expected,
+                error_agents: pollResult.errorAgents,
+                message:
+                  'All responding agents failed to execute the query. Check the SQL and host-side osquery errors before dispatching a corrected query.',
+              },
+            },
+          ],
+        };
+      }
+
       if (pollResult.status === 'error') {
         return {
           results: [

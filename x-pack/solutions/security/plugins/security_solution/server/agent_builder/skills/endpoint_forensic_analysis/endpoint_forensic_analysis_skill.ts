@@ -146,9 +146,9 @@ For live-state questions, use these Osquery tools in sequence (skip \`${ENDPOINT
 - \`osquery.get_table_schema\` to verify column names before authoring a custom query
 - \`osquery.resolve_agent_ids\` to turn host names into Elastic Agent IDs — \`run_live_query\` takes \`agent_ids\`, not host names. Do NOT query the \`.fleet-agents\` index via ES|QL/search; it requires ES-level privileges most roles lack and fails with a security_exception.
 - \`osquery.run_live_query\` to dispatch a read-only SELECT query to enrolled agents (waits ~30s inline for rows)
-- \`osquery.get_live_query_results\` when \`run_live_query\` returns \`status: dispatched\` — pass the \`action_id\` and wait up to 60s for agent rows
+- \`osquery.get_live_query_results\` when \`run_live_query\` returns \`status: dispatched\` or \`status: partial\` — pass the \`action_id\` and wait up to 60s for agent rows
 
-This path ends once the live-state rows are returned and displayed — do NOT continue into steps 3–7 (patient zero, timeline, IoCs, lateral movement, persistence): those are historical ES|QL reconstruction and were not requested by a live-state question. Only combine paths when the analyst explicitly asks for both live and historical analysis.
+Do not treat rows from a partial response as complete: follow up for pending agents and explicitly report any agents that remain unresolved. This path ends once the live-state results are returned and displayed — do NOT continue into steps 3–7 (patient zero, timeline, IoCs, lateral movement, persistence): those are historical ES|QL reconstruction and were not requested by a live-state question. Only combine paths when the analyst explicitly asks for both live and historical analysis.
 
 After rows return, **display them in chat** as a markdown table (columns from the first row, cap at 20 rows with a note if truncated).
 
@@ -168,7 +168,9 @@ After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IO
 
 - Fill the **First seen** column from the tool's \`first_seen_by_category\` field (earliest \`@timestamp\` for each category); use "—" only when the tool returned rows but the category had no hits.
 - The **Source event** column should reference the telemetry indices queried (e.g. \`logs-endpoint.events.*\`); do not invent per-row event IDs.
-- If the tool result contains an \`error\` field, do NOT report "no indicators found" — say the IoC extraction failed, report the error, and answer from the telemetry you already have. An empty IoC table means absence; an \`error\` means unknown.
+- If the tool result contains an \`error\` field, do NOT report "no indicators found" — say the IoC extraction failed, report the error, and answer from the telemetry you already have. An empty IoC table means no corroborated indicators; an \`error\` means unknown. Observed hashes still require attack correlation.
+
+Do not put uncorrelated observed hashes in the IoC table or offer them for hunting. The tool returns host-wide hashes separately in \`observed_file_hashes\`; host/time scope alone does not establish compromise. Only hashes corroborated by the reconstructed attack belong in the file-hash IoC category.
 
 Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
 
@@ -188,7 +190,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
 - Do **not** use \`platform.core.search\`, \`relevance_search\`, or repeated \`platform.core.list_indices\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
 - Use \`osquery.run_live_query\` only for **read-only SELECT queries** on enrolled agents. Never attempt shell execution or mutating Osquery tables.
-- When \`osquery.run_live_query\` returns \`status: dispatched\`, **must** call \`osquery.get_live_query_results\` with the \`action_id\` before telling the analyst live dispatch is unavailable.
+- When \`osquery.run_live_query\` returns \`status: dispatched\` or \`status: partial\`, **must** call \`osquery.get_live_query_results\` with the \`action_id\` before telling the analyst live dispatch is unavailable.
 - When \`osquery.check_integration\` reports \`agents_enrolled: false\`, do **not** call \`osquery.run_live_query\`; answer from Defend telemetry and state the limitation.
 - When a prebuilt saved query matches, prefer it over authoring a custom query.
 `,
@@ -245,7 +247,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
       type: ToolType.builtin,
       description:
         'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
-        'Returns a typed list of file hashes, network destinations, registry persistence keys, and renamed file extensions. ' +
+        'Returns observed file hashes (not IoCs without attack correlation), network destinations, registry persistence keys, and renamed file extensions. ' +
         'Call this after forensic reconstruction to produce the IoC table for cross-environment hunts and response actions.',
       schema: extractIocsSchema,
       handler: async (args, context) => {
@@ -266,6 +268,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           registry_persistence_keys: [],
           file_extensions: [],
         };
+        const observedFileHashes: string[] = [];
         const firstSeenByCategory: Record<string, string> = {};
         let iocsError: string | undefined;
         let truncated = false;
@@ -296,9 +299,12 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           'ctfmon.exe',
         ]);
         const isNotableExecutable = (exe: string): boolean => {
-          const name = exe.split('\\').pop()?.toLowerCase() ?? '';
+          const normalizedPath = exe.replace(/\\/g, '/').toLowerCase();
+          const name = normalizedPath.split('/').pop() ?? '';
           return (
-            name !== '' && !COMMON_EXECUTABLES.has(name) && !/^(system32|syswow64)\//i.test(name)
+            name !== '' &&
+            !COMMON_EXECUTABLES.has(name) &&
+            !/\/windows\/(system32|syswow64)\//.test(normalizedPath)
           );
         };
 
@@ -360,9 +366,8 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
             const ext = extIdx >= 0 ? v[extIdx] : null;
             const origExt = origExtIdx >= 0 ? v[origExtIdx] : null;
 
-            if (hash && typeof hash === 'string' && !iocs.file_hashes.includes(hash)) {
-              iocs.file_hashes.push(hash);
-              trackCategory('file_hashes', v);
+            if (hash && typeof hash === 'string' && !observedFileHashes.includes(hash)) {
+              observedFileHashes.push(hash);
             }
             if (
               exe &&
@@ -448,6 +453,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 hosts,
                 time_window_hours: timeWindowHours,
                 iocs,
+                observed_file_hashes: observedFileHashes,
                 first_seen_by_category: firstSeenByCategory,
                 ...(truncated && {
                   truncated: true,
@@ -455,7 +461,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 }),
                 ...(iocsError !== undefined && { error: iocsError }),
                 guidance:
-                  'Present as a markdown table (one row per indicator type), then offer a cross-environment hunt with these values.',
+                  'Observed file hashes are not indicators of compromise: correlate them with the reconstructed attack before including them in the IoC table or offering a cross-environment hunt. Present supported indicators as a markdown table.',
               },
             },
           ],

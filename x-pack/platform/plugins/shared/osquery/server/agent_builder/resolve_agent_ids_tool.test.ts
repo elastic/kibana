@@ -86,6 +86,59 @@ const getResultData = (result: ToolHandlerReturn<ToolResult>): ResolvedResult =>
 };
 
 describe('resolveAgentIdsTool', () => {
+  it.each(['*', '?', 'host*?', 'host\\"*?'])(
+    'escapes exact hostname %s in Fleet kuery',
+    async (hostname) => {
+      const { context, listAgents } = buildContext([]);
+      await resolveAgentIdsTool(context, loggerMock.create()).handler({ hostnames: [hostname] }, {
+        request: {},
+      } as never);
+      const escaped = hostname
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/([*?])/g, '\\$1');
+      expect(listAgents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery: expect.stringContaining(`local_metadata.host.hostname:"${escaped}"`),
+        })
+      );
+    }
+  );
+  it('retains exact-hostname post-filtering and request space isolation', async () => {
+    const { context, listAgents } = buildContext([
+      buildAgent({ local_metadata: { host: { hostname: 'unrelated' } } }),
+    ]);
+    context.service.getActiveSpace.mockResolvedValue({ id: 'other-space' });
+    const request = {};
+    const result = await resolveAgentIdsTool(context, loggerMock.create()).handler(
+      { hostnames: ['*'] },
+      { request } as never
+    );
+    expect(context.service.getActiveSpace).toHaveBeenCalledWith(request);
+    expect(context.service.getAgentService().asInternalScopedUser).toHaveBeenCalledWith(
+      'other-space'
+    );
+    expect(listAgents).toHaveBeenCalledTimes(1);
+    expect(getResultData(result).resolved[0].agent_id).toBeNull();
+  });
+
+  it('does not read Fleet when the caller lacks osquery-read', async () => {
+    const { context, listAgents } = buildContext([]);
+    const [, plugins] = await context.getStartServices();
+    plugins.security.authz.mode.useRbacForRequest = () => true;
+    plugins.security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+      jest.fn().mockResolvedValue({ privileges: { kibana: [{ authorized: false }] } })
+    );
+    const result = await resolveAgentIdsTool(context, loggerMock.create()).handler(
+      { hostnames: ['*'] },
+      { request: {} } as never
+    );
+    expect(listAgents).not.toHaveBeenCalled();
+    expect(result).toEqual(
+      expect.objectContaining({ results: [expect.objectContaining({ type: 'error' })] })
+    );
+  });
+
   it('prefers the online agent over stale offline/uninstalled enrollments for the same hostname', async () => {
     // Simulates a host that was re-enrolled multiple times (e.g. an agent
     // version upgrade): Fleet retains every prior enrollment record, all

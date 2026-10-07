@@ -5,15 +5,62 @@
  * 2.0.
  */
 
-/**
- * Replaces the contents of SQL string literals with spaces, preserving length.
- *
- * Keyword and table scanning must not see inside literals: a query such as
- * `SELECT * FROM processes WHERE name = 'update.exe'` is read-only, but a raw
- * keyword scan finds UPDATE in the literal and rejects it.
- */
-const blankStringLiterals = (sql: string): string =>
-  sql.replace(/'(?:[^']|'')*'/g, (match) => `'${' '.repeat(Math.max(match.length - 2, 0))}'`);
+/** Blanks SQL literals and comments in one pass so their delimiters cannot interact. */
+const blankLiteralsAndComments = (sql: string): string => {
+  let state: 'sql' | 'literal' | 'line' | 'block' | 'identifier' = 'sql';
+  let identifierEnd = '';
+  let result = '';
+  for (let i = 0; i < sql.length; i++) {
+    const char = sql[i];
+    const next = sql[i + 1];
+    if (state === 'literal') {
+      result += ' ';
+      if (char === "'") {
+        if (next === "'") {
+          result += ' ';
+          i++;
+        } else {
+          state = 'sql';
+        }
+      }
+    } else if (state === 'identifier') {
+      result += char;
+      if (char === identifierEnd) {
+        if (identifierEnd !== ']' && next === identifierEnd) {
+          result += next;
+          i++;
+        } else {
+          state = 'sql';
+        }
+      }
+    } else if (state === 'line') {
+      result += char === '\n' || char === '\r' ? char : ' ';
+      if (char === '\n' || char === '\r') state = 'sql';
+    } else if (state === 'block') {
+      result += ' ';
+      if (char === '*' && next === '/') {
+        result += ' ';
+        i++;
+        state = 'sql';
+      }
+    } else if (char === '"' || char === '`' || char === '[') {
+      result += char;
+      identifierEnd = char === '[' ? ']' : char;
+      state = 'identifier';
+    } else if (char === "'") {
+      result += ' ';
+      state = 'literal';
+    } else if ((char === '-' && next === '-') || (char === '/' && next === '*')) {
+      result += '  ';
+      i++;
+      state = char === '-' ? 'line' : 'block';
+    } else {
+      result += char;
+    }
+  }
+
+  return result;
+};
 
 /**
  * Osquery tables whose SELECT performs host-side effects. The schema catalog
@@ -117,19 +164,7 @@ export const validateReadOnlyQuery = (
     return 'Query must not be empty';
   }
 
-  // Blank string literals FIRST, then strip comments. The order is
-  // load-bearing (github-actions #4961701853): a `--` or `/* */` *inside* a
-  // string literal is not a comment — e.g. `name = 'x--'`. Stripping comments
-  // from the raw query would delete everything after that `--`, so the
-  // validator would scan only the truncated prefix while `run_live_query`
-  // dispatches the ORIGINAL query — bypassing the table allowlist.
-  const withoutLiterals = blankStringLiterals(trimmed);
-
-  // Strip single-line and block comments before keyword checks
-  const scannable = withoutLiterals
-    .replace(/--[^\n]*/g, ' ')
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .trim();
+  const scannable = blankLiteralsAndComments(trimmed).trim();
 
   // extractTableRefs only scans the first statement's clause keywords.
   if (scannable.includes(';')) {

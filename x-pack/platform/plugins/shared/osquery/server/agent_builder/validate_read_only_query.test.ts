@@ -34,6 +34,76 @@ describe('validateReadOnlyQuery', () => {
     ).toBeNull();
   });
 
+  it.each([
+    "SELECT * FROM processes /* ' */ JOIN curl /* ' */ ON 1=1 WHERE curl.url='http://169.254.169.254/'",
+    "SELECT * FROM processes -- ' first comment\n JOIN curl -- ' second comment\n ON 1=1",
+    "SELECT * FROM processes /* ' */ JOIN shell /* ' */ ON 1=1",
+  ])('rejects table hidden between comment apostrophes: %s', (query) => {
+    expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(
+      /not read-only|not in the Osquery schema catalog/i
+    );
+  });
+
+  it.each([
+    "SELECT * FROM processes WHERE name='/* update */ -- curl'",
+    "SELECT * FROM processes WHERE name='it''s /* curl */' /* ' */",
+    "/* ' */ SELECT * FROM processes -- unmatched ' quote\n WHERE name='safe'",
+  ])('ignores comment delimiters in literals and apostrophes in comments: %s', (query) => {
+    expect(validateReadOnlyQuery(query, ALLOWED)).toBeNull();
+  });
+
+  describe('comment delimiters in quoted identifiers', () => {
+    it.each([
+      'SELECT * FROM processes AS "/*" JOIN curl AS "*/" ON 1=1',
+      'SELECT * FROM processes AS `/*` JOIN curl AS `*/` ON 1=1',
+      'SELECT * FROM processes AS [/*] JOIN curl AS [*/] ON 1=1',
+      'SELECT * FROM processes AS "--" JOIN curl ON 1=1',
+      'SELECT * FROM processes AS `--` JOIN curl ON 1=1',
+      'SELECT * FROM processes AS [--] JOIN curl ON 1=1',
+      'SELECT * FROM processes AS "a""/*" JOIN curl AS "*/" ON 1=1',
+      'SELECT * FROM processes AS `a``/*` JOIN curl AS `*/` ON 1=1',
+      'SELECT * FROM processes AS "\'" JOIN curl AS "\'" ON 1=1',
+      "SELECT * FROM processes AS `'` JOIN curl AS `'` ON 1=1",
+      "SELECT * FROM processes AS ['] JOIN curl AS ['] ON 1=1",
+    ])('rejects the side-effect table despite quoted alias delimiters: %s', (query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/not read-only.*curl/i);
+    });
+
+    it.each(['curl', 'curl_certificate', 'carves', 'yara', 'prometheus_metrics', 'wifi_survey'])(
+      'preserves quoted table recognition for %s',
+      (table) => {
+        const catalog = new Set([...ALLOWED, table]);
+        for (const [open, close] of [
+          ['"', '"'],
+          ['`', '`'],
+          ['[', ']'],
+        ]) {
+          expect(
+            validateReadOnlyQuery(
+              `SELECT * FROM processes AS ${open}/*${close} JOIN ${open}main${close}.${open}${table}${close} AS ${open}*/${close} ON 1=1`,
+              catalog
+            )
+          ).toMatch(new RegExp(`not read-only.*${table}`, 'i'));
+        }
+      }
+    );
+
+    it.each([
+      'SELECT * FROM "processes" AS "/*" JOIN "users" AS "*/" ON 1=1',
+      'SELECT * FROM `processes` AS `/*` JOIN `users` AS `*/` ON 1=1',
+      'SELECT * FROM [processes] AS [/*] JOIN [users] AS [*/] ON 1=1',
+      'SELECT * FROM processes AS "--" JOIN users ON 1=1',
+      'SELECT * FROM processes AS `--` JOIN users ON 1=1',
+      'SELECT * FROM processes AS [--] JOIN users ON 1=1',
+      'SELECT * FROM processes AS "a""/*" JOIN users AS "*/" ON 1=1',
+      'SELECT * FROM processes AS `a``/*` JOIN users AS `*/` ON 1=1',
+      'SELECT * FROM processes /* " ` [ */ WHERE name=\'" ` [ /* -- curl\'',
+      "SELECT * FROM processes -- \" ` [ curl\n WHERE name='safe'",
+    ])('accepts safe identifiers, literals and genuine comments: %s', (query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toBeNull();
+    });
+  });
+
   it('rejects empty query', () => {
     expect(validateReadOnlyQuery('   ', ALLOWED)).toMatch(/empty/i);
   });
