@@ -5,6 +5,8 @@
  * 2.0.
  */
 export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+// Not a saved object index; the prefix keeps it covered by existing system index privileges.
+export const TASK_MANAGER_CLAIM_NUDGE_INDEX = '.kibana_task_manager_claim_nudge';
 
 // Well-known id of the single saved object that stores the runtime task
 // execution control (pause/resume) state. Fetched by id only, never searched.

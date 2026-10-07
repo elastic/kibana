@@ -20,7 +20,7 @@ import {
   groupingModeSchema,
   throttleStrategySchema,
   MATCHER_CONTEXT_FIELDS,
-  PER_EPISODE_STRATEGIES,
+  PER_ALERT_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
   POLICY_MATCHER_TAGS_MAX,
@@ -613,7 +613,7 @@ const formatStrategySet = (strategies: Set<string>): string =>
 
 /**
  * Generates standalone markdown for throttle / grouping compatibility from
- * `groupingModeSchema`, `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
+ * `groupingModeSchema`, `PER_ALERT_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
  * `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
@@ -621,23 +621,21 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
     getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema')
   );
 
-  const perEpisodeOnlyStrategies = [...PER_EPISODE_STRATEGIES].filter(
+  const perAlertOnlyStrategies = [...PER_ALERT_STRATEGIES].filter(
     (strategy) => !AGGREGATE_STRATEGIES.has(strategy)
   );
-  const notPerEpisodeStrategies = [...AGGREGATE_STRATEGIES].filter(
-    (strategy) => !PER_EPISODE_STRATEGIES.has(strategy)
+  const notPerAlertStrategies = [...AGGREGATE_STRATEGIES].filter(
+    (strategy) => !PER_ALERT_STRATEGIES.has(strategy)
   );
 
   const caveats: string[] = [];
-  if (perEpisodeOnlyStrategies.length > 0) {
+  if (perAlertOnlyStrategies.length > 0) {
     caveats.push(
-      `- Only valid with \`per_episode\`: ${formatEnumValuesList(perEpisodeOnlyStrategies)}.`
+      `- Only valid with \`per_alert\`: ${formatEnumValuesList(perAlertOnlyStrategies)}.`
     );
   }
-  if (notPerEpisodeStrategies.length > 0) {
-    caveats.push(
-      `- Not valid with \`per_episode\`: ${formatEnumValuesList(notPerEpisodeStrategies)}.`
-    );
+  if (notPerAlertStrategies.length > 0) {
+    caveats.push(`- Not valid with \`per_alert\`: ${formatEnumValuesList(notPerAlertStrategies)}.`);
   }
   caveats.push(
     `- Require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`): ${formatStrategySet(
@@ -861,7 +859,7 @@ export const generateMatcherContextDoc = (): string => {
   const severities = formatEnumValuesList(getSeverityValues());
 
   const formatMatcherFieldType = (path: string, type: string): string => {
-    if (path === 'episode_status') return episodeStatuses;
+    if (path === 'alert_status') return episodeStatuses;
     if (path === 'severity') return severities;
     if (path === 'data') return '`data.*` object';
     return type;
@@ -875,23 +873,24 @@ export const generateMatcherContextDoc = (): string => {
   return [
     '# Action Policy Matchers',
     '',
-    'A matcher selects which alert **episodes** a policy applies to.',
+    'A matcher selects which **alerts** a policy applies to.',
     'Policies are space-scoped; they are not bound to a rule object.',
     '',
     '```',
     'matcher: { tags?: string[] | null, expression?: string | null }',
     '```',
     '',
-    '## `tags` — match by rule tag',
+    '## `tags` — match by rule routing tag',
     '',
-    `Matches if the episode's rule has **at least one** of the listed tags (OR / any-of).`,
+    `Matches if the alert's rule has **at least one** of the listed tags in its \`metadata.routing_tags\` (OR / any-of).`,
     'Exact string match: case-sensitive, no wildcards, no prefix matching.',
     `Max ${POLICY_MATCHER_TAGS_MAX} tags, up to ${POLICY_MATCHER_TAG_MAX_LENGTH} characters each.`,
     '',
-    "> **Important**: `matcher.tags` is matched against the **rule**'s tags, not the",
-    "> policy's own name or metadata.",
+    "> **Important**: `matcher.tags` is matched against the **rule**'s routing tags",
+    "> (`metadata.routing_tags`), not the rule's `metadata.tags` or the policy's own name",
+    '> or metadata.',
     '',
-    '## `expression` — match by episode content (KQL)',
+    '## `expression` — match by alert content (KQL)',
     '',
     `Max ${MAX_KQL_LENGTH} characters. Only the following fields are available in the KQL expression:`,
     '',
@@ -899,20 +898,20 @@ export const generateMatcherContextDoc = (): string => {
     '|---|---|---|',
     ...rows,
     '',
-    '> **Note**: `rule.id`, `rule.name`, and `rule.tags` are **not** available in the',
+    '> **Note**: `rule.id`, `rule.name`, `rule.tags`, and `rule.routing_tags` are **not** available in the',
     '> KQL expression. Use `matcher.tags` to scope a policy by rule.',
     '',
     '## How `tags` and `expression` combine',
     '',
     '| `tags` | `expression` | Result |',
     '|---|---|---|',
-    '| set | set | **AND** — rule must have a matching tag and KQL must pass |',
+    '| set | set | **AND** — rule must have a matching routing tag and KQL must pass |',
     '| set | absent/null | tag constraint only |',
     "| absent/null | set | no tag constraint; any rule's alerts may match if KQL passes |",
     '| absent/null | absent/null | **catch-all** — matches every alert in the space |',
     '',
     'If `matcher` itself is `null`, or both fields are empty, the policy is a **catch-all**.',
-    'A rule with no tags never matches a policy that has `matcher.tags` set.',
+    'A rule with no routing tags never matches a policy that has `matcher.tags` set.',
     '',
     '## `set_matcher` replaces the whole matcher',
     '',
@@ -926,10 +925,10 @@ export const generateMatcherContextDoc = (): string => {
     '## Examples',
     '',
     '```json',
-    `// one rule (via shared link tag):`,
+    `// one rule (via shared routing tag):`,
     `{ "tags": ["notify-high-cpu"] }`,
     '',
-    `// a family of rules by tag:`,
+    `// a family of rules by routing tag:`,
     `{ "tags": ["production", "payments"] }`,
     '',
     `// severity filter across all rules:`,
@@ -1014,10 +1013,10 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '',
     '## Scoping a policy to one rule',
     '',
-    'A policy matches **episodes**, not a rule object. The only way to scope one policy',
-    'to one rule is a **shared link tag on both sides**:',
+    'A policy matches **alerts**, not a rule object. The only way to scope one policy',
+    'to one rule is a **shared routing tag on both sides**:',
     '',
-    '- The rule must carry a tag that uniquely identifies it.',
+    "- The rule's `metadata.routing_tags` must contain a tag that uniquely identifies it.",
     "- The policy's `matcher.tags` must contain that same tag.",
     '',
     'Use the convention `notify-<rule-slug>` (lowercase kebab of the rule name,',
@@ -1025,17 +1024,17 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '',
     '## Steps',
     '',
-    '### 1. Add the link tag to the rule',
+    '### 1. Add the routing tag to the rule',
     '',
-    'Call `manage_rule` → `set_metadata` with `tags: [<all existing tags>, "notify-<rule-slug>"]`.',
+    'Call `manage_rule` → `set_metadata` with `routing_tags: [<all existing routing tags>, "notify-<rule-slug>"]`.',
     '',
-    '> **Tags are replaced wholesale.** Read the current tags off the rule attachment first',
-    '> and re-send them alongside the new link tag. The rule tag cap is 20; the',
-    '> agent-builder provenance tag consumes one slot. If the rule is already at the cap,',
-    '> ask the user which existing tag to drop.',
+    '> **Routing tags are replaced wholesale.** Read the current routing tags off the rule',
+    '> attachment first and re-send them alongside the new one. The routing tag cap is 20.',
+    '> If the rule is already at the cap, ask the user which existing routing tag to drop.',
+    '> Do not put the routing tag in `tags`; rule tags do not link policies.',
     '',
     '> **Save reminder**: `manage_rule` only updates the in-memory rule attachment.',
-    '> The link tag only takes effect once the user saves the rule',
+    '> The routing tag only takes effect once the user saves the rule',
     '> (Rule → Workflow → Action Policy save order).',
     '',
     '### 2. Create the action policy',
@@ -1047,11 +1046,11 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '   - Use the `workflowId` passed to `generate_workflow`, **not** the workflow `attachmentId`.',
     '3. `set_matcher`: `{ tags: ["notify-<rule-slug>"] }` — **do not omit**.',
     '   An omitted or empty matcher is a space-wide catch-all, not "this rule".',
-    '4. `set_grouping`: `per_episode`',
+    '4. `set_grouping`: `per_alert`',
     '5. `set_throttle`: `{ strategy: "on_status_change" }`',
     '6. `validate`',
     '',
-    'If the rule already has a tag that uniquely identifies it, you may reuse that tag',
+    'If the rule already has a routing tag that uniquely identifies it, you may reuse it',
     'instead of adding `notify-<rule-slug>` — but confirm it is not shared with other rules.',
     '',
     'If the user explicitly requests a cross-rule or shared policy, consult the',
@@ -1071,25 +1070,25 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     'the options below, then `set_grouping` / `set_throttle`.',
     '',
     'A policy matches **alerts**, not a rule object. Policies are space-scoped and are',
-    'not bound to a single rule. The matcher supports a `tags` array (matched against rule',
-    'tags) and an optional KQL `expression` over',
+    'not bound to a single rule. The matcher supports a `tags` array (matched against the',
+    "rule's `metadata.routing_tags`) and an optional KQL `expression` over",
     '[matcher context fields](./action-policy-matchers.md).',
     '',
     '- **Catch-all**: omit `set_matcher` or set matcher to empty/`null`. Confirm with the',
     '  user first — this notifies on every `kind: alert` alert in the space, including',
     '  rules created later.',
-    '- **A family of rules by tag**: `matcher: { tags: ["production"] }`. Matched against the rule\'s tags.',
+    '- **A family of rules by routing tag**: `matcher: { tags: ["production"] }`. Matched against the rule\'s `metadata.routing_tags`.',
     '  Prefer this when the set of rules will grow.',
     '- **Route by severity across rules**: `matcher: { expression: "severity: \\"critical\\"" }` (or combine with tags).',
     '  Useful for a PagerDuty policy vs an email policy.',
     '- **Reuse destinations**: one workflow can serve many rules. Keep Liquid generic —',
-    '  `inputs.payload.rules[ep.rule_id].name`, `ep.episode_status`, and guarded',
-    '  `ep.data.*` — because query columns often differ across rules. If two rules need',
+    '  `inputs.payload.rules[alert.rule_id].name`, `alert.alert_status`, and guarded',
+    '  `alert.data.*` — because query columns often differ across rules. If two rules need',
     '  different message shapes, use two policies (or two workflows) rather than one',
     '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
     '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
     '  another catch-all or overlapping tag matcher.',
-    '- **Grouping**: `per_episode` is still a safe default. `all` batches mixed-rule',
+    '- **Grouping**: `per_alert` is still a safe default. `all` batches mixed-rule',
     '  alerts into a single notification; only use it when the user wants one combined',
     '  message.',
     '',
@@ -1120,7 +1119,7 @@ export const generateActionPolicyOperationsDoc = (): string =>
 /**
  * Generates concise markdown documentation for the action-policy → workflow dispatch payload.
  * Sourced from the `alertingV2NotificationGroup` built-in workflow input definition, which
- * mirrors `ActionPolicyWorkflowPayload` / `AlertEpisode` in `server/lib/dispatcher/types.ts`.
+ * mirrors `ActionPolicyWorkflowPayload` / `ActionPolicyWorkflowPayloadAlert` in `server/lib/dispatcher/types.ts`.
  *
  * At workflow render time the dispatcher schedules with `{ payload }`, so Liquid templates
  * access these fields as `{{ inputs.payload.<field> }}`.
@@ -1138,25 +1137,25 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
   const topLevelTable = formatFieldTable(topLevelFields);
 
   const properties = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
-  const episodesProp = properties?.episodes as JsonSchemaNode | undefined;
-  const episodeItems = episodesProp?.items as JsonSchemaNode | undefined;
-  const episodeFields = episodeItems ? jsonSchemaToFieldTable(episodeItems) : [];
-  const episodeTable = formatFieldTable(episodeFields);
+  const alertsProp = properties?.alerts as JsonSchemaNode | undefined;
+  const alertItems = alertsProp?.items as JsonSchemaNode | undefined;
+  const alertFields = alertItems ? jsonSchemaToFieldTable(alertItems) : [];
+  const alertTable = formatFieldTable(alertFields);
 
   const sections = [
     '# Action Policy Workflow Dispatch Payload',
     '',
     'Catalog of fields the dispatcher passes as `inputs.payload`. In Liquid:',
     '`{{ inputs.payload.<field> }}`, and inside',
-    '`{% for ep in inputs.payload.episodes %}` use `{{ ep.<field> }}`.',
+    '`{% for alert in inputs.payload.alerts %}` use `{{ alert.<field> }}`.',
     '',
     '## Top-Level Fields (`inputs.payload`)',
     '',
     topLevelTable,
   ];
 
-  if (episodeTable) {
-    sections.push('', '## Alert Fields (`inputs.payload.episodes[]`)', '', episodeTable);
+  if (alertTable) {
+    sections.push('', '## Alert Fields (`inputs.payload.alerts[]`)', '', alertTable);
   }
 
   sections.push(
@@ -1166,9 +1165,9 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     "`data` is the rule's ES|QL result row (each query row is written as `data: rowDoc`",
     'on the alert event). Columns depend on the rule query, so they are not listed above.',
     '',
-    '- Nested dotted names: `ep.data.host.name`, not `ep.data["host.name"]`.',
+    '- Nested dotted names: `alert.data.host.name`, not `alert.data["host.name"]`.',
     '- Discover columns with `| LIMIT 0` if they are unclear.',
-    '- Guard empty `data` on recovering/inactive: `| default` or `{% if ep.data %}`.',
+    '- Guard empty `data` on recovering/inactive: `| default` or `{% if alert.data %}`.',
     '',
     '## Example',
     '',
@@ -1187,13 +1186,13 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '    with:',
     '      to:',
     '        - <user-provided-email>',
-    '      subject: "Alert: {{ inputs.payload.episodes | size }} alert(s)"',
+    '      subject: "Alert: {{ inputs.payload.alerts | size }} alert(s)"',
     '      message: >',
-    '        {% for ep in inputs.payload.episodes %}',
-    '        - Rule: {{ inputs.payload.rules[ep.rule_id].name | default: "unknown" }}',
-    '          Host: {{ ep.data.host.name | default: "unknown" }}',
-    '          Errors: {{ ep.data.error_count | default: "n/a" }}',
-    '          Status: {{ ep.episode_status }}',
+    '        {% for alert in inputs.payload.alerts %}',
+    '        - Rule: {{ inputs.payload.rules[alert.rule_id].name | default: "unknown" }}',
+    '          Host: {{ alert.data.host.name | default: "unknown" }}',
+    '          Errors: {{ alert.data.error_count | default: "n/a" }}',
+    '          Status: {{ alert.alert_status }}',
     '        {% endfor %}',
     '',
     '        View execution: {{ execution.url }}',
