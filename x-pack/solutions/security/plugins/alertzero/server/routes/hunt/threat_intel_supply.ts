@@ -176,7 +176,7 @@ export const registerHuntThreatIntelSupplyRoutes = ({
                   'xpack.alertzero.huntThreatIntelSupplyRestoreNotInstalledErrorMessage',
                   {
                     defaultMessage:
-                      'Threat intel supply workflows are not installed in this deployment. Enable threat intel supply, then try again.',
+                      'Threat intel supply workflows are not installed in this deployment yet. Wait until setup finishes (Machine Learning embeddings available), then try again. If this persists after a restart, contact an administrator.',
                   }
                 ),
               },

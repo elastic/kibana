@@ -46,7 +46,7 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<WorkerEnableBlockedReason, () => st
   huntSupplyNotInstalled: () =>
     i18n.translate('xpack.alertzero.huntSupplyNotInstalledErrorMessage', {
       defaultMessage:
-        'Threat intel supply workflows are not installed in this deployment. Enable threat intel supply, then try turning on Hunt Watch again.',
+        'Threat intel supply workflows are not installed in this deployment yet. Wait until setup finishes (Machine Learning embeddings available), then try turning on Hunt Watch again. If this persists after a restart, contact an administrator.',
     }),
 };
 

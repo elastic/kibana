@@ -196,6 +196,12 @@ describe('registerHuntThreatIntelSupplyRoutes', () => {
       response
     );
 
-    expect(response.badRequest).toHaveBeenCalled();
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: expect.stringContaining(
+          'not installed in this deployment yet. Wait until setup finishes'
+        ),
+      },
+    });
   });
 });
