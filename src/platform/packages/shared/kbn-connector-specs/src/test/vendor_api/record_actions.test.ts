@@ -235,6 +235,37 @@ describe('recordActions', () => {
     ).rejects.toThrow(/^The connector config is invalid: .*region/s);
   });
 
+  it('merges fixture config into the config of the action', async () => {
+    const configured: ConnectorSpec = {
+      ...connector,
+      schema: z.object({ serverUrl: z.url().optional() }),
+      actions: {
+        getItem: action(z.object({}), async ({ client, config }) => {
+          if (config?.serverUrl === undefined) {
+            throw new Error('The server URL is required');
+          }
+          return (await client.get(`${config.serverUrl}/v1/items/1`)).data;
+        }),
+      },
+    };
+
+    expect((await recordActions({ connector: configured, specs })).operations.getItem).toEqual([]);
+    const { operations, findings } = await recordActions({
+      connector: configured,
+      specs,
+      fixtures: { getItem: { config: { serverUrl: 'https://api.example.com' } } },
+    });
+    expect(findings).toEqual([]);
+    expect(operations.getItem).toHaveLength(1);
+    await expect(
+      recordActions({
+        connector: configured,
+        specs,
+        fixtures: { getItem: { config: { serverUrl: 'not a url' } } },
+      })
+    ).rejects.toThrow(/^The config of getItem is invalid: /);
+  });
+
   it('serves response overrides and reports those the spec contradicts', async () => {
     const { findings } = await recordActions({
       connector,

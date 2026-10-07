@@ -145,9 +145,17 @@ export const recordActions = async ({
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
   const connectorConfig = config ?? (await sampleConfig(connector));
-  const configResult = await connector.schema?.safeParseAsync(connectorConfig);
-  if (configResult?.success === false) {
-    throw new Error(`The connector config is invalid: ${configResult.error.message}`);
+  const validateConfig = async (candidate: Record<string, unknown>, subject: string) => {
+    const result = await connector.schema?.safeParseAsync(candidate);
+    if (result?.success === false) {
+      throw new Error(`${subject} is invalid: ${result.error.message}`);
+    }
+  };
+  await validateConfig(connectorConfig, 'The connector config');
+  for (const [action, { config: overrides }] of Object.entries(fixtures)) {
+    if (overrides) {
+      await validateConfig({ ...connectorConfig, ...overrides }, `The config of ${action}`);
+    }
   }
   const authTypes = authType === undefined ? authTypeIdsOf(connector) : [authType];
   const operations: ActionsRecording['operations'] = {};
@@ -179,7 +187,7 @@ export const recordActions = async ({
             ...contextOptions,
             connector,
             authType: id,
-            config: connectorConfig,
+            config: { ...connectorConfig, ...fixture.config },
             specs,
             fixtures: toResponseFixtures(fixture.responses),
           });

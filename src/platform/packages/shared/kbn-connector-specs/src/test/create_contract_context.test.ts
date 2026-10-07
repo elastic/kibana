@@ -162,6 +162,45 @@ describe('createContractContext', () => {
     ]);
   });
 
+  it('sends FormData as multipart, as the http adapter does', async () => {
+    const uploadSpec = {
+      ...figmaSpec,
+      paths: {
+        '/v1/files': {
+          post: {
+            requestBody: {
+              required: true,
+              content: { 'multipart/form-data': { schema: { type: 'object' } } },
+            },
+            responses: { '200': { description: 'ok' } },
+          },
+        },
+      },
+    };
+    const { runAction, mock } = await createContractContext({
+      connector: {
+        ...FigmaConnector,
+        actions: {
+          upload: {
+            isTool: false,
+            scope: 'write',
+            input: z.object({}),
+            handler: async ({ client }) => {
+              const form = new FormData();
+              form.append('file', new Blob(['contents']), 'notes.txt');
+              return (await client.post('https://api.figma.com/v1/files', form)).status;
+            },
+          },
+        },
+      },
+      authType: 'api_key_header',
+      specs: [uploadSpec],
+    });
+
+    expect(await runAction('upload', {})).toBe(200);
+    expect(mock.calls[0].requestViolations).toEqual([]);
+  });
+
   it('reports requests the vendor spec rejects', async () => {
     const { runAction, mock } = await createContractContext({
       connector: FirecrawlConnector,

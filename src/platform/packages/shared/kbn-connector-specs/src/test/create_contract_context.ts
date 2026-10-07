@@ -76,6 +76,30 @@ const sampleServiceAccountJson = (): string =>
     token_uri: 'https://oauth2.googleapis.com/token',
   });
 
+const FORM_BOUNDARY = 'contract-mock-boundary';
+
+// The http adapter sends FormData as multipart; axios' fetch adapter would label it
+// form-urlencoded, and the jsdom fetch polyfill can't read it back.
+const toMultipart = async (form: FormData): Promise<Buffer> => {
+  const parts: Buffer[] = [];
+  for (const [name, value] of form) {
+    const header =
+      typeof value === 'string'
+        ? `Content-Disposition: form-data; name="${name}"`
+        : `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n` +
+          `Content-Type: ${value.type || 'application/octet-stream'}`;
+    const content =
+      typeof value === 'string' ? Buffer.from(value) : Buffer.from(await value.arrayBuffer());
+    parts.push(
+      Buffer.from(`--${FORM_BOUNDARY}\r\n${header}\r\n\r\n`),
+      content,
+      Buffer.from('\r\n')
+    );
+  }
+  parts.push(Buffer.from(`--${FORM_BOUNDARY}--\r\n`));
+  return Buffer.concat(parts);
+};
+
 // Secrets whose schema takes any string, but that auth types decode.
 const DECODED_PLACEHOLDERS: Readonly<Record<string, () => string>> = {
   serviceAccountJson: sampleServiceAccountJson,
@@ -194,6 +218,14 @@ export const createContractContext = async ({
   const authSecrets = toSecrets(schema, { ...secrets, authType: id });
 
   const client = axios.create({ adapter: 'fetch', env: { fetch: mock.fetch } });
+  // Registered first, so it runs after the interceptors that connectors add.
+  client.interceptors.request.use(async (requestConfig) => {
+    if (requestConfig.data instanceof FormData) {
+      requestConfig.data = await toMultipart(requestConfig.data);
+      requestConfig.headers.setContentType(`multipart/form-data; boundary=${FORM_BOUNDARY}`);
+    }
+    return requestConfig;
+  });
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
