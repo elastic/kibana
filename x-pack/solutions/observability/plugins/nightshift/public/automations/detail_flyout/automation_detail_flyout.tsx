@@ -15,14 +15,11 @@ import {
   EuiButtonIcon,
   EuiConfirmModal,
   EuiContextMenu,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiHorizontalRule,
-  EuiPanel,
   EuiProgress,
   EuiPopover,
   EuiSpacer,
@@ -37,9 +34,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { useHistory, useLocation } from 'react-router-dom';
-import { buildNightshiftInvestigationFlyoutShareUrl } from '../../common/url_params';
 import { AutomationFormBody } from '../flyouts/form/automation_form_body';
 import {
   toAutomationFormValues,
@@ -58,7 +53,9 @@ import { getDailyUsageTone } from '../utils/daily_usage';
 import { statusLabels } from '../utils/filter_automations';
 import type { RunRange } from '../hooks/use_automation_usage';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
-import { RunHistory, RunStatusIndicator, STATUSES, type Run } from './run_history';
+import { InfoStrip } from './info_strip';
+import { RunHistory, STATUSES, type Run } from './run_history';
+import { RunDetail } from './run_detail';
 
 const labels = {
   title: i18n.translate('xpack.nightshift.automations.detail.title', {
@@ -74,9 +71,6 @@ const labels = {
     defaultMessage: 'Enabled',
   }),
   back: i18n.translate('xpack.nightshift.automations.detail.back', { defaultMessage: 'Back' }),
-  skippedTrigger: i18n.translate('xpack.nightshift.automations.detail.skippedTrigger', {
-    defaultMessage: 'Skipped trigger',
-  }),
   noDescription: i18n.translate('xpack.nightshift.automations.detail.noDescription', {
     defaultMessage: 'No description.',
   }),
@@ -106,19 +100,9 @@ const labels = {
   discard: i18n.translate('xpack.nightshift.automations.flyout.discard', {
     defaultMessage: 'Discard',
   }),
-  saveError: i18n.translate('xpack.nightshift.automations.detail.saveError', {
-    defaultMessage: 'Fix the form issues before saving.',
-  }),
-  investigation: i18n.translate('xpack.nightshift.automations.detail.openInvestigation', {
-    defaultMessage: 'Open investigation',
-  }),
   editAutomation: i18n.translate('xpack.nightshift.automations.detail.editAutomation', {
     defaultMessage: 'Edit automation',
   }),
-  automationRun: i18n.translate('xpack.nightshift.automations.detail.automationRun', {
-    defaultMessage: 'Automation run',
-  }),
-  run: i18n.translate('xpack.nightshift.automations.detail.run', { defaultMessage: 'Run' }),
   description: i18n.translate('xpack.nightshift.automations.detail.description', {
     defaultMessage: 'Description',
   }),
@@ -131,39 +115,10 @@ const labels = {
   todayUsage: i18n.translate('xpack.nightshift.automations.detail.todayUsage', {
     defaultMessage: "Today's usage",
   }),
-  triggered: i18n.translate('xpack.nightshift.automations.detail.triggered', {
-    defaultMessage: 'Triggered',
-  }),
-  source: i18n.translate('xpack.nightshift.automations.detail.source', {
-    defaultMessage: 'Source',
-  }),
-  message: i18n.translate('xpack.nightshift.automations.detail.message', {
-    defaultMessage: 'Message',
-  }),
-  reason: i18n.translate('xpack.nightshift.automations.detail.reason', {
-    defaultMessage: 'Reason',
-  }),
-  started: i18n.translate('xpack.nightshift.automations.detail.started', {
-    defaultMessage: 'Started',
-  }),
-  ended: i18n.translate('xpack.nightshift.automations.detail.ended', { defaultMessage: 'Ended' }),
-  automation: i18n.translate('xpack.nightshift.automations.detail.automation', {
-    defaultMessage: 'Automation',
-  }),
   runsTitle: i18n.translate('xpack.nightshift.automations.detail.runsTitle', {
     defaultMessage: 'Runs',
   }),
 };
-
-const formatDate = (value: string) =>
-  new Date(value).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-
-const formatStarted = (value: string) => `${formatDate(value)} (${moment(value).fromNow()})`;
 
 export const AutomationDetailFlyout = ({
   automations,
@@ -398,99 +353,13 @@ export const AutomationDetailFlyout = ({
           </EuiToolTip>
         </div>
         {isRunsTab && selectedRun ? (
-          <>
-            <header css={headerCss}>
-              <EuiTitle size="s">
-                <h2 id={titleId}>{selectedRun.title || labels.automationRun}</h2>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-                <EuiFlexItem grow={false}>
-                  <RunStatusIndicator status={selectedRun.status} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    · {formatStarted(selectedRun.startedAt)}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </header>
-            <EuiFlyoutBody>
-              <div css={bodyCss}>
-                {selectedRun.status === 'skipped' ? (
-                  <>
-                    <SectionHeader title={labels.skippedTrigger} />
-                    <EuiSpacer size="s" />
-                    <EuiDescriptionList
-                      type="column"
-                      columnWidths={['auto', 1]}
-                      listItems={[
-                        {
-                          title: labels.triggered,
-                          description: formatStarted(selectedRun.startedAt),
-                        },
-                        { title: labels.source, description: selectedRun.triggeredBy ?? '—' },
-                        { title: labels.message, description: selectedRun.message ?? '—' },
-                        {
-                          title: labels.reason,
-                          description:
-                            selectedRun.skipReason === 'daily_limit'
-                              ? i18n.translate(
-                                  'xpack.nightshift.automations.detail.dailyLimitReason',
-                                  {
-                                    defaultMessage:
-                                      'Daily trigger limit of {limit} was already reached, so this trigger did not start a run.',
-                                    values: { limit: selectedRun.dailyLimit ?? '—' },
-                                  }
-                                )
-                              : '—',
-                        },
-                        { title: labels.automation, description: automation.name },
-                      ]}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <SectionHeader title={labels.run} />
-                    <EuiSpacer size="s" />
-                    <EuiDescriptionList
-                      type="column"
-                      columnWidths={['auto', 1]}
-                      listItems={[
-                        { title: labels.source, description: selectedRun.triggeredBy ?? '—' },
-                        { title: labels.message, description: selectedRun.message ?? '—' },
-                        {
-                          title: labels.started,
-                          description: formatStarted(selectedRun.startedAt),
-                        },
-                        {
-                          title: labels.ended,
-                          description: selectedRun.finishedAt
-                            ? formatDate(selectedRun.finishedAt)
-                            : '—',
-                        },
-                        { title: labels.automation, description: automation.name },
-                      ]}
-                    />
-                    {selectedRun.investigationId && (
-                      <>
-                        <EuiHorizontalRule margin="m" />
-                        <EuiButton
-                          size="s"
-                          data-test-subj="automationRunOpenInvestigation"
-                          href={buildNightshiftInvestigationFlyoutShareUrl(
-                            selectedRun.investigationId
-                          )}
-                        >
-                          {labels.investigation}
-                        </EuiButton>
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
-            </EuiFlyoutBody>
-          </>
+          <RunDetail
+            run={selectedRun}
+            automationName={automation.name}
+            titleId={titleId}
+            headerCss={headerCss}
+            bodyCss={bodyCss}
+          />
         ) : (
           <>
             {!isEditing && (
@@ -797,74 +666,5 @@ export const AutomationDetailFlyout = ({
         </EuiConfirmModal>
       )}
     </EuiFlyout>
-  );
-};
-
-const InfoStrip = ({
-  items,
-}: {
-  items: Array<{
-    title: string;
-    value: React.ReactNode;
-    gap?: 'xs' | 's';
-    tooltip?: string;
-    onClick?: () => void;
-  }>;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="none"
-      css={css`
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        & > * {
-          position: relative;
-          min-inline-size: 0;
-          padding: ${euiTheme.size.m};
-        }
-        & > :not(:last-child)::before {
-          content: '';
-          position: absolute;
-          inset-inline-end: 0;
-          inset-block: ${euiTheme.size.base};
-          inline-size: ${euiTheme.border.width.thin};
-          background-color: ${euiTheme.border.color};
-        }
-      `}
-    >
-      {items.map(({ title, value, gap = 's', tooltip, onClick }) => {
-        const cell = (
-          <>
-            <EuiText size="xs" color="subdued">
-              {title}
-            </EuiText>
-            <EuiText
-              size="s"
-              css={{ display: 'flex', alignItems: 'center', paddingBlockStart: euiTheme.size[gap] }}
-            >
-              {value}
-            </EuiText>
-          </>
-        );
-        if (!onClick) return <div key={title}>{cell}</div>;
-        return (
-          <EuiToolTip key={title} content={tooltip} display="block">
-            <div
-              role="button"
-              tabIndex={0}
-              data-test-subj="automationInfoRuns"
-              css={{ cursor: 'pointer', inlineSize: '100%' }}
-              onClick={onClick}
-              onKeyDown={(event) => event.key === 'Enter' && onClick()}
-            >
-              {cell}
-            </div>
-          </EuiToolTip>
-        );
-      })}
-    </EuiPanel>
   );
 };

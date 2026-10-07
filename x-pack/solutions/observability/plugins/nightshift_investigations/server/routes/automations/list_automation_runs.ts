@@ -86,8 +86,6 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         workflowExecutionIds: executions.results.map(({ id }) => id),
         includeInput: true,
         includeOutput: true,
-        startedAfter: params.query.startedAfter,
-        startedBefore: params.query.startedBefore,
         page: 1,
         size: Math.max(executions.results.length, 1),
         sourceIncludes: ['workflowRunId', 'input', 'output'],

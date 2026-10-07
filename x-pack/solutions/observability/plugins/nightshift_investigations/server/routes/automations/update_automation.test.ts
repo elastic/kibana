@@ -62,6 +62,17 @@ it('replaces tags and keeps the other attributes', async () => {
   expect(result).toMatchObject({ id: 'automation-1', tags: ['triage'] });
 });
 
+it('keeps the backing workflow link when saving', async () => {
+  await call({ name: 'Triage renamed' });
+
+  expect(soClient.update).toHaveBeenCalledWith(
+    'nightshift-automation',
+    'automation-1',
+    expect.objectContaining({ workflowId: 'workflow-1', name: 'Triage renamed' }),
+    { mergeAttributes: false }
+  );
+});
+
 it('merges partial nested updates', async () => {
   const result = await call({ isEnabled: false, execution: { reasoningMode: 'investigate' } });
 

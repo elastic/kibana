@@ -14,6 +14,17 @@ import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_ya
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
 
+const applyChanges = <T extends object>(
+  current: T,
+  changes: { [K in keyof T]?: T[K] | null }
+): T => {
+  const updated = { ...current };
+  Object.entries(changes).forEach(([key, value]) => {
+    if (value !== undefined) Object.assign(updated, { [key]: value ?? undefined });
+  });
+  return updated;
+};
+
 export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'PUT /internal/nightshift/automations/{id}',
   options: {
@@ -71,64 +82,18 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id
     );
+    const { body } = params;
     const merged: NightshiftAutomationAttributes = {
-      ...existing.attributes,
-      ...(params.body.name !== undefined && { name: params.body.name }),
-      ...(params.body.description !== undefined &&
-        (params.body.description === null
-          ? { description: undefined }
-          : { description: params.body.description })),
-      ...(params.body.tags !== undefined && { tags: params.body.tags }),
-      ...(params.body.isEnabled !== undefined && { isEnabled: params.body.isEnabled }),
-      ...(params.body.trigger !== undefined && { trigger: params.body.trigger }),
-      ...(params.body.execution && {
-        execution: {
-          ...existing.attributes.execution,
-          ...(params.body.execution.promptTemplate !== undefined && {
-            promptTemplate: params.body.execution.promptTemplate ?? undefined,
-          }),
-          ...(params.body.execution.reasoningMode !== undefined && {
-            reasoningMode: params.body.execution.reasoningMode,
-          }),
-          ...(params.body.execution.agentId !== undefined && {
-            agentId: params.body.execution.agentId,
-          }),
-          ...(params.body.execution.connectorId !== undefined && {
-            connectorId: params.body.execution.connectorId,
-          }),
-        },
+      ...applyChanges(existing.attributes, {
+        name: body.name,
+        description: body.description,
+        tags: body.tags,
+        isEnabled: body.isEnabled,
+        trigger: body.trigger,
       }),
-      ...(params.body.completion && {
-        completion: {
-          ...existing.attributes.completion,
-          ...(params.body.completion.action !== undefined && {
-            action: params.body.completion.action ?? undefined,
-          }),
-          ...(params.body.completion.targetMode !== undefined && {
-            targetMode: params.body.completion.targetMode ?? undefined,
-          }),
-          ...(params.body.completion.destination !== undefined && {
-            destination: params.body.completion.destination ?? undefined,
-          }),
-        },
-      }),
-      ...(params.body.runtime && {
-        runtime: {
-          ...existing.attributes.runtime,
-          ...(params.body.runtime.dailyDispatchLimit !== undefined && {
-            dailyDispatchLimit: params.body.runtime.dailyDispatchLimit ?? undefined,
-          }),
-          ...(params.body.runtime.timeoutSeconds !== undefined && {
-            timeoutSeconds: params.body.runtime.timeoutSeconds,
-          }),
-          ...(params.body.runtime.dedupeWindowSeconds !== undefined && {
-            dedupeWindowSeconds: params.body.runtime.dedupeWindowSeconds,
-          }),
-          ...(params.body.runtime.overlapPolicy !== undefined && {
-            overlapPolicy: params.body.runtime.overlapPolicy,
-          }),
-        },
-      }),
+      execution: applyChanges(existing.attributes.execution, body.execution ?? {}),
+      completion: applyChanges(existing.attributes.completion, body.completion ?? {}),
+      runtime: applyChanges(existing.attributes.runtime, body.runtime ?? {}),
       updatedAt: new Date().toISOString(),
     };
 
@@ -147,11 +112,10 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       }
     }
 
-    const { workflowId: _workflowId, ...soUpdates } = merged;
     await soClient.update<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id,
-      soUpdates,
+      merged,
       { mergeAttributes: false }
     );
 

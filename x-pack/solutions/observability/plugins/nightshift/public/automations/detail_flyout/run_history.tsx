@@ -205,13 +205,16 @@ const StatusPill = ({
 };
 
 const toBuckets = (runs: Run[], startMs: number, endMs: number, bucketMs: number) => {
-  const buckets = Array.from({ length: Math.floor((endMs - startMs) / bucketMs) + 1 }, (_, i) => ({
-    time: startMs + i * bucketMs,
-    succeeded: 0,
-    running: 0,
-    failed: 0,
-    skipped: 0,
-  }));
+  const buckets = Array.from(
+    { length: Math.max(0, Math.floor((endMs - startMs) / bucketMs)) + 1 },
+    (_, i) => ({
+      time: startMs + i * bucketMs,
+      succeeded: 0,
+      running: 0,
+      failed: 0,
+      skipped: 0,
+    })
+  );
   runs.forEach(({ status, startedAt }) => {
     const index = Math.floor((Date.parse(startedAt) - startMs) / bucketMs);
     buckets[Math.min(Math.max(index, 0), buckets.length - 1)][status] += 1;
@@ -222,7 +225,7 @@ const toBuckets = (runs: Run[], startMs: number, endMs: number, bucketMs: number
 const formatDay = (dayStart: number) => {
   const today = moment().startOf('day');
   if (dayStart === today.valueOf()) return labels.today;
-  if (dayStart === today.subtract(1, 'day').valueOf()) return labels.previousDay;
+  if (dayStart === today.clone().subtract(1, 'day').valueOf()) return labels.previousDay;
   return new Date(dayStart).toLocaleDateString(undefined, {
     weekday: 'short',
     month: 'short',

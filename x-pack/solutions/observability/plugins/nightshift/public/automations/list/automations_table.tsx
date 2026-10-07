@@ -65,12 +65,13 @@ export const AutomationsTable = ({
     field: 'name',
     direction: 'asc',
   });
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!selectedId) return;
-    document
-      .querySelector(`[data-automation-row="${selectedId}"]`)
+    container
+      ?.querySelector(`[data-automation-row="${selectedId}"]`)
       ?.scrollIntoView({ block: 'nearest' });
-  }, [selectedId]);
+  }, [container, selectedId]);
   const getAuthorName = (automation: Automation) => getFacets(automation).author;
 
   const columns: Array<EuiBasicTableColumn<Automation>> = [
@@ -83,18 +84,22 @@ export const AutomationsTable = ({
       ),
     },
     {
+      field: 'author',
       name: listLabels.author,
       width: '160px',
       sortable: getAuthorName,
-      render: (automation: Automation) => <AutomationAuthorCell name={getAuthorName(automation)} />,
+      render: (_author: string, automation: Automation) => (
+        <AutomationAuthorCell name={getAuthorName(automation)} />
+      ),
     },
     ...runCountColumns.map(({ status, name, tooltip, width, getViewLabel }) => ({
+      field: `runs-${status}`,
       name,
       nameTooltip: { content: tooltip },
       width,
       align: 'right' as const,
       sortable: (automation: Automation) => runCounts.get(automation.id)?.[status] ?? 0,
-      render: (automation: Automation) => {
+      render: (_count: unknown, automation: Automation) => {
         const count = runCounts.get(automation.id)?.[status];
         return (
           <RunCountCell
@@ -107,12 +112,13 @@ export const AutomationsTable = ({
       },
     })),
     {
+      field: 'usage',
       name: listLabels.usage,
       nameTooltip: { content: listLabels.usageTooltip },
       width: '150px',
       align: 'right' as const,
       sortable: (automation) => usedToday.get(automation.id) ?? 0,
-      render: (automation: Automation) => (
+      render: (_usage: unknown, automation: Automation) => (
         <AutomationUsageCell
           used={usedToday.get(automation.id)}
           limit={automation.runtime.dailyDispatchLimit}
@@ -179,28 +185,31 @@ export const AutomationsTable = ({
   useEffect(() => onOrderChange(orderKey ? orderKey.split('|') : []), [orderKey, onOrderChange]);
 
   return (
-    <EuiInMemoryTable
-      items={automations}
-      columns={columns}
-      sorting={{ sort }}
-      onTableChange={({ sort: nextSort, page }: Criteria<Automation>) => {
-        if (nextSort) setSort({ field: String(nextSort.field), direction: nextSort.direction });
-        if (page) onPageChange(page.index, page.size);
-      }}
-      pagination={{ pageIndex, pageSize, pageSizeOptions: [10, 25, 50] }}
-      rowHeader="name"
-      tableCaption={listLabels.title}
-      tableLayout="auto"
-      hasBackground={false}
-      rowProps={(automation: Automation) => ({
-        onClick: (event: React.MouseEvent<HTMLElement>) => {
-          const target = event.target as HTMLElement;
-          if (!event.currentTarget.contains(target) || target.closest(INTERACTIVE_ELEMENTS)) return;
-          onOpenAutomation(automation);
-        },
-        isSelected: automation.id === selectedId,
-        'data-automation-row': automation.id,
-      })}
-    />
+    <div ref={setContainer}>
+      <EuiInMemoryTable
+        items={automations}
+        columns={columns}
+        sorting={{ sort }}
+        onTableChange={({ sort: nextSort, page }: Criteria<Automation>) => {
+          if (nextSort) setSort({ field: String(nextSort.field), direction: nextSort.direction });
+          if (page) onPageChange(page.index, page.size);
+        }}
+        pagination={{ pageIndex, pageSize, pageSizeOptions: [10, 25, 50] }}
+        rowHeader="name"
+        tableCaption={listLabels.title}
+        tableLayout="auto"
+        hasBackground={false}
+        rowProps={(automation: Automation) => ({
+          onClick: (event: React.MouseEvent<HTMLElement>) => {
+            const target = event.target as HTMLElement;
+            if (!event.currentTarget.contains(target) || target.closest(INTERACTIVE_ELEMENTS))
+              return;
+            onOpenAutomation(automation);
+          },
+          isSelected: automation.id === selectedId,
+          'data-automation-row': automation.id,
+        })}
+      />
+    </div>
   );
 };

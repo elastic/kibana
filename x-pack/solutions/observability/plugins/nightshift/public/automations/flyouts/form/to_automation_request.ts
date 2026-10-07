@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { CreateAutomationBody } from '../../hooks/use_automations';
+import { isEqual } from 'lodash';
+import type {
+  Automation,
+  CreateAutomationBody,
+  UpdateAutomationBody,
+} from '../../hooks/use_automations';
 import {
   SLACK_TRIGGER_EVENTS,
+  toAutomationFormValues,
   isSlackTrigger,
   type AutomationFormValues,
   type TriggerFormValues,
@@ -95,35 +101,66 @@ export const toAutomationRequestBody = (
   };
 };
 
+type TriggerRow = CreateAutomationBody['trigger']['rows'][number];
+
+const keepUnmodeledFields = (original: TriggerRow, row: TriggerRow): TriggerRow => {
+  if (original.kind === 'alert' && row.kind === 'alert' && original.ruleNameMatchMode) {
+    return { ...row, ruleNameMatchMode: original.ruleNameMatchMode };
+  }
+  if (original.kind === 'schedule' && row.kind === 'schedule' && original.scopeQuery) {
+    return { ...row, scopeQuery: original.scopeQuery };
+  }
+  return row;
+};
+
+const toUpdatedTrigger = (
+  row: TriggerRow,
+  originalRows: TriggerRow[]
+): CreateAutomationBody['trigger'] => {
+  const [original, ...otherRows] = originalRows;
+  return original?.kind === row.kind
+    ? { rows: [keepUnmodeledFields(original, row), ...otherRows] }
+    : { rows: [row] };
+};
+
+const toUpdatedCompletion = (
+  values: AutomationFormValues,
+  automation: Automation
+): NonNullable<UpdateAutomationBody['completion']> => {
+  if (values.slackAction) {
+    return {
+      ...automation.completion,
+      action: 'post_to_slack',
+      targetMode:
+        automation.completion.targetMode === 'thread' && values.slackAction.target === 'channel'
+          ? 'thread'
+          : values.slackAction.target,
+      destination: values.slackAction.destination.trim(),
+    };
+  }
+  return automation.completion.action === 'post_to_slack'
+    ? { ...automation.completion, action: null, targetMode: null, destination: null }
+    : automation.completion;
+};
+
 export const toAutomationUpdateBody = (
   values: AutomationFormValues & { trigger: TriggerFormValues },
-  automation: import('../../hooks/use_automations').Automation
-) => {
+  automation: Automation
+): UpdateAutomationBody & { name: string } => {
   const request = toAutomationRequestBody(values);
   return {
     name: request.name,
     description: request.description ?? null,
     tags: request.tags ?? [],
-    trigger: request.trigger,
+    trigger: isEqual(toAutomationFormValues(automation).trigger, values.trigger)
+      ? automation.trigger
+      : toUpdatedTrigger(request.trigger.rows[0], automation.trigger.rows),
     execution: {
       ...automation.execution,
       ...request.execution,
       promptTemplate: values.instructions.trim() || null,
     },
-    completion: {
-      ...automation.completion,
-      ...(values.slackAction
-        ? {
-            action: 'post_to_slack' as const,
-            targetMode: values.slackAction.target,
-            destination: values.slackAction.destination.trim(),
-          }
-        : {
-            action: null,
-            targetMode: null,
-            destination: null,
-          }),
-    },
+    completion: toUpdatedCompletion(values, automation),
     runtime: {
       ...automation.runtime,
       ...(hasDailyLimit(values.trigger)

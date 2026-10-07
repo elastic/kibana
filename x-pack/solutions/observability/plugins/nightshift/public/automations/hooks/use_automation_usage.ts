@@ -19,8 +19,8 @@ export interface RunRange {
   startedBefore: string;
 }
 
-const getTodayRange = (): RunRange => {
-  const start = new Date();
+const getTodayRange = (now: Date): RunRange => {
+  const start = new Date(now);
   start.setUTCHours(0, 0, 0, 0);
   const end = new Date(start);
   end.setUTCDate(end.getUTCDate() + 1);
@@ -54,18 +54,23 @@ const useRunCounts = (ids: string[], { startedAfter, startedBefore }: RunRange) 
   );
 };
 
-export const useAutomationUsage = (automations: Automation[], range: TimeRange) => {
+export const useAutomationUsage = (
+  automations: Automation[],
+  range: TimeRange,
+  refreshedAt: number
+) => {
   const ids = automations.map(({ id }) => id);
-  const { runRange, today } = useMemo(
-    () => ({
+  const { runRange, today } = useMemo(() => {
+    const forceNow = new Date(refreshedAt);
+    return {
       runRange: {
-        startedAfter: datemath.parse(range.start)?.toISOString() ?? range.start,
-        startedBefore: datemath.parse(range.end, { roundUp: true })?.toISOString() ?? range.end,
+        startedAfter: datemath.parse(range.start, { forceNow })?.toISOString() ?? range.start,
+        startedBefore:
+          datemath.parse(range.end, { roundUp: true, forceNow })?.toISOString() ?? range.end,
       },
-      today: getTodayRange(),
-    }),
-    [range]
-  );
+      today: getTodayRange(forceNow),
+    };
+  }, [range, refreshedAt]);
 
   return {
     runRange,

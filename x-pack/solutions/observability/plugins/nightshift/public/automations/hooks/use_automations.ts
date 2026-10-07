@@ -19,6 +19,8 @@ type AutomationsResponse =
 type Automation = AutomationsResponse['automations'][number];
 type CreateAutomationBody =
   NightshiftInvestigationsAPIClientRequestParamsOf<'POST /internal/nightshift/automations'>['params']['body'];
+type UpdateAutomationBody =
+  NightshiftInvestigationsAPIClientRequestParamsOf<'PUT /internal/nightshift/automations/{id}'>['params']['body'];
 
 export const AUTOMATIONS_QUERY_KEY = ['nightshift.automations'] as const;
 
@@ -221,7 +223,7 @@ export const useUpdateAutomation = () => {
 
   return useAutomationMutation<{
     id: string;
-    body: Record<string, unknown> & { name: string };
+    body: UpdateAutomationBody & { name: string };
   }>(
     ({ id, body }) => {
       if (!investigationsClient) {
@@ -258,4 +260,4 @@ export const useDeleteAutomation = () => {
   }, errorToastTitles.delete);
 };
 
-export type { Automation, CreateAutomationBody };
+export type { Automation, CreateAutomationBody, UpdateAutomationBody };

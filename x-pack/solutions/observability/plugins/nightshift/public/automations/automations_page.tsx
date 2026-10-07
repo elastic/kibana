@@ -55,6 +55,7 @@ export const AutomationsPage = (): React.ReactElement => {
   const [automationToDelete, setAutomationToDelete] = useState<Automation | undefined>();
   const [range, setRange] = useState<TimeRange>({ start: 'now-48h', end: 'now' });
   const [rangeLabel, setRangeLabel] = useState(listLabels.last48Hours);
+  const [refreshedAt, setRefreshedAt] = useState(() => Date.now());
   const [order, setOrder] = useState<string[]>([]);
   const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
@@ -63,7 +64,7 @@ export const AutomationsPage = (): React.ReactElement => {
     ? undefined
     : automations.find((automation) => automation.id === id);
   const navigate = (path: string) => history.push(path);
-  const { runRange, runCounts, usedToday } = useAutomationUsage(automations, range);
+  const { runRange, runCounts, usedToday } = useAutomationUsage(automations, range, refreshedAt);
   const isRateLimited = (automation: Automation) =>
     isAutomationRateLimited(automation, usedToday.get(automation.id) ?? 0);
   const getFacets = (automation: Automation) =>
@@ -177,7 +178,10 @@ export const AutomationsPage = (): React.ReactElement => {
               setRange(nextRange);
               setRangeLabel(label);
             }}
-            onRefresh={refreshAutomations}
+            onRefresh={() => {
+              setRefreshedAt(Date.now());
+              refreshAutomations();
+            }}
             onCreate={openCreateFlyout}
           />
         </>

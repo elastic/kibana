@@ -61,12 +61,10 @@ export const AutomationTriggerSection = ({
               {readOnly ? triggerLabels.noTrigger : triggerLabels.empty}
             </EuiText>
             {!readOnly && <EuiSpacer size="s" />}
-            <TriggerPicker
-              onSelect={selectTrigger}
-              button={(toggle) =>
-                readOnly ? (
-                  <></>
-                ) : (
+            {!readOnly && (
+              <TriggerPicker
+                onSelect={selectTrigger}
+                button={(toggle) => (
                   <EuiButton
                     size="s"
                     iconType="plus"
@@ -76,9 +74,9 @@ export const AutomationTriggerSection = ({
                   >
                     {triggerLabels.addTrigger}
                   </EuiButton>
-                )
-              }
-            />
+                )}
+              />
+            )}
           </>
         )}
         {trigger && (
