@@ -8,12 +8,12 @@ mapped_pages:
 Change to your local {{kib}} directory. Start the development server.
 
 ```bash
-yarn start
+pnpm start
 ```
 
-Now you can point your web browser to [http://localhost:5601](http://localhost:5601) and start using {{kib}}! When running `yarn start`, {{kib}} will also log that it is listening on port 5603 due to the base path proxy, but you should still access {{kib}} on port 5601.
+Now you can point your web browser to [http://localhost:5601](http://localhost:5601) and start using {{kib}}! When running `pnpm start`, {{kib}} will also log that it is listening on port 5603 due to the base path proxy, but you should still access {{kib}} on port 5601.
 
-By default, you can log in with username `elastic` and password `changeme`. See the `--help` options on `yarn es <command>` if you’d like to configure a different password.
+By default, you can log in with username `elastic` and password `changeme`. See the `--help` options on `pnpm es <command>` if you’d like to configure a different password.
 
 
 ## Unsupported URL Type [_unsupported_url_type]
@@ -23,7 +23,7 @@ If you’re installing dependencies and seeing an error that looks something lik
 ```
 Unsupported URL Type: link:packages/kbn-eslint-config
 ```
-you’re likely running `npm`. To install dependencies in {{kib}} you need to run `yarn kbn bootstrap`.
+you’re likely running `npm`. To install dependencies in {{kib}} you need to run `pnpm kbn bootstrap`.
 
 % This section doesn't exist here or in the AsciiDoc docs
 % For more info, see [Setting Up Your Development Environment](#setting-up-your-development-environment) above.
@@ -36,7 +36,7 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 ## Using an Alternate YML File [_using_an_alternate_yml_file]
 
-To run Kibana with an alternate yml file, use the `--config` option to specify the path to the desired yml file. For example: `yarn start --config=config/my_config.yml`
+To run Kibana with an alternate yml file, use the `--config` option to specify the path to the desired yml file. For example: `pnpm start --config=config/my_config.yml`
 
 
 ## Potential Optimization Pitfalls [_potential_optimization_pitfalls]
@@ -48,5 +48,5 @@ To run Kibana with an alternate yml file, use the `--config` option to specify t
 
 ## Setting Up SSL [_setting_up_ssl]
 
-{{kib}} includes self-signed certificates that can be used for development purposes in the browser and for communicating with {{es}}: `yarn start --ssl` & `yarn es snapshot --ssl`.
+{{kib}} includes self-signed certificates that can be used for development purposes in the browser and for communicating with {{es}}: `pnpm start --ssl` & `pnpm es snapshot --ssl`.
 

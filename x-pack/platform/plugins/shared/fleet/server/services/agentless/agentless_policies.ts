@@ -277,13 +277,38 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
 
-    let agentPolicy;
+    // Resolve the true agent policy ID from the package policy. Legacy policies (created before
+    // the same-ID invariant) may have a different agent policy ID stored in policy_ids[0].
+    // Loading the package policy first also guards against operating on non-agentless policies.
+    let packagePolicy;
     try {
-      agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+      packagePolicy = await this.packagePolicyService.get(this.soClient, policyId);
     } catch (e) {
       if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        this.logger.warn(`Agent policy ${policyId} not found, cleaning up orphaned resources`);
-        await this.deleteOrphanedAgentlessResources(policyId, user, options);
+        throw new FleetNotFoundError(`Agentless policy ${policyId} not found`);
+      }
+      throw e;
+    }
+
+    if (!packagePolicy || packagePolicy.supports_agentless !== true) {
+      throw new FleetNotFoundError(`Agentless policy ${policyId} not found`);
+    }
+
+    const resolvedAgentPolicyId = packagePolicy.policy_ids[0];
+    const agentPolicyId = resolvedAgentPolicyId ?? policyId;
+    if (!resolvedAgentPolicyId) {
+      this.logger.warn(
+        `Agentless package policy ${policyId} has no policy_ids entry; falling back to package policy ID as agent policy ID`
+      );
+    }
+
+    let agentPolicy;
+    try {
+      agentPolicy = await agentPolicyService.get(this.soClient, agentPolicyId);
+    } catch (e) {
+      if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.logger.warn(`Agent policy ${agentPolicyId} not found, cleaning up orphaned resources`);
+        await this.deleteOrphanedAgentlessResources(agentPolicyId, user, options);
         return;
       }
       throw e;
@@ -294,7 +319,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     }
 
     // Delete agent policy (this will also delete associated package policies)
-    await agentPolicyService.delete(this.soClient, this.esClient, policyId, {
+    await agentPolicyService.delete(this.soClient, this.esClient, agentPolicyId, {
       force: options?.force,
       user,
     });

@@ -182,7 +182,7 @@ export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
  */
 export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   'tsconfig.json',
   '.node-version',
   '.nvmrc',

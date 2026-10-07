@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve } from 'path';
+import { resolve, sep } from 'path';
 import { readFile } from 'fs/promises';
 import { promisify } from 'util';
 
@@ -28,6 +28,11 @@ const parseStringAsync = promisify(parseString);
 describe('dev/mocha/junit report generation', () => {
   afterEach(() => {
     del.sync(resolve(PROJECT_DIR, 'target'));
+    for (const file of Object.keys(require.cache)) {
+      if (file.startsWith(`${PROJECT_DIR}${sep}`)) {
+        delete require.cache[file];
+      }
+    }
   });
 
   it('reports on failed setup hooks', async () => {
@@ -135,5 +140,71 @@ describe('dev/mocha/junit report generation', () => {
       'system-out': ['-- logs are only reported for failed tests --'],
       skipped: [''],
     });
+  });
+
+  const runFixture = async (reportName, file, { abortOnFirstFail = false } = {}) => {
+    const xmlPath = getUniqueJunitReportPath(PROJECT_DIR, reportName);
+    const mocha = new Mocha({
+      reporter: function Runner(runner) {
+        setupJUnitReportGeneration(runner, {
+          reportName,
+          rootDirectory: PROJECT_DIR,
+        });
+        if (abortOnFirstFail) {
+          // Same order as FTR `runTests`: the first fail is recorded, then Mocha is aborted.
+          runner.once('fail', () => runner.abort());
+        }
+      },
+    });
+
+    mocha.addFile(resolve(PROJECT_DIR, file));
+    await new Promise((resolve) => mocha.run(resolve));
+    return parseStringAsync(await readFile(xmlPath));
+  };
+
+  it('does not treat later failures as cascading after a Mocha timeout that did not abort', async () => {
+    const report = await runFixture('timeout', 'timeout.js');
+    const [rootCause, trailing] = report.testsuites.testsuite[0].testcase;
+
+    expect(rootCause.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(rootCause.$.name).toBe('TIMEOUT_SUITE "before all" hook: root cause for "never runs"');
+    expect(rootCause.$['cascading-failure']).toBeUndefined();
+
+    expect(trailing.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(trailing.$.name).toBe('TIMEOUT_SUITE "after all" hook: trailing for "never runs"');
+    expect(trailing.$['cascading-failure']).toBeUndefined();
+  });
+
+  it('does not tag an independent assertion that follows a Mocha timeout', async () => {
+    const report = await runFixture('timeout-then-assert', 'timeout_then_assert.js');
+    const [rootCause, independent] = report.testsuites.testsuite[0].testcase;
+
+    expect(rootCause.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(rootCause.$['cascading-failure']).toBeUndefined();
+
+    expect(independent.failure[0]).toMatch(/INDEPENDENT_ASSERT/);
+    expect(independent.$.name).toBe(
+      'TIMEOUT_THEN_ASSERT "after all" hook: independent failure for "never runs"'
+    );
+    expect(independent.$['cascading-failure']).toBeUndefined();
+  });
+
+  it('tags later failures as cascading only after runner.abort()', async () => {
+    const report = await runFixture('timeout-aborted', 'timeout_aborted.js', {
+      abortOnFirstFail: true,
+    });
+    const [rootCause, cascading] = report.testsuites.testsuite[0].testcase;
+
+    expect(rootCause.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(rootCause.$.name).toBe(
+      'TIMEOUT_ABORTED_SUITE "before all" hook: root cause for "never runs"'
+    );
+    expect(rootCause.$['cascading-failure']).toBeUndefined();
+
+    expect(cascading.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(cascading.$.name).toBe(
+      'TIMEOUT_ABORTED_SUITE "after all" hook: trailing for "never runs"'
+    );
+    expect(cascading.$['cascading-failure']).toBe('true');
   });
 });

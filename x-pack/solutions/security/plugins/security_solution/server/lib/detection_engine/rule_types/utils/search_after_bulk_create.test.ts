@@ -39,6 +39,7 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
+import { getNoReadableShardsWarning } from './no_readable_shards';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
@@ -982,5 +983,25 @@ describe('searchAfterAndBulkCreate', () => {
       expect(warningMessages).toEqual([]);
       expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
     });
+  });
+
+  test('should warn and stop when the search resolved to no shards', async () => {
+    ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
+      ...sampleEmptyDocSearchResults(),
+      _shards: { total: 0, successful: 0, failed: 0, skipped: 0 },
+    });
+
+    const result = await searchAfterAndBulkCreate({
+      sharedParams,
+      services: ruleServices,
+      filter: defaultFilter,
+      buildReasonMessage,
+      eventsTelemetry: undefined,
+    });
+
+    expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+    expect(result.success).toBe(true);
+    expect(result.createdSignalsCount).toBe(0);
+    expect(result.warningMessages).toEqual([getNoReadableShardsWarning({ inputIndex })]);
   });
 });

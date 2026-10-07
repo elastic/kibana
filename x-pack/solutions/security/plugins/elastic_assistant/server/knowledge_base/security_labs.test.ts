@@ -103,7 +103,7 @@ describe('Security labs content', () => {
     plainTextFiles.forEach((file) => {
       it(`corresponding encoded file exists for ${file}`, () => {
         /**
-         * If this test fails, you probably forgot to run `yarn encode-security-labs-content` in x-pack/solutions/security/plugins/elastic_assistant/package.json
+         * If this test fails, you probably forgot to run `pnpm encode-security-labs-content` in x-pack/solutions/security/plugins/elastic_assistant/package.json
          */
         const encodedFileName = `${path.basename(file, path.extname(file))}.encoded.md`;
         const encodedFilePath = path.join(directoryPath, encodedFileName);
