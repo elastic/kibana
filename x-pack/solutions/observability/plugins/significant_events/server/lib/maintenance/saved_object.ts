@@ -109,8 +109,9 @@ export type SignificantEventsMaintenanceStateAttributes = TypeOf<
 >;
 
 /**
- * Rules recorded before version 3 had no space. The old sweep only used the request's own
- * space, so the default space is the only one that could have been touched.
+ * Rules recorded before version 3 had no space, and the stored ids can't recover it. The old
+ * sweep used the triggering request's space, so default is a best guess: a pause started from
+ * another space resumes against the wrong space and leaves those rules disabled.
  */
 export const backfillDisabledRules = (
   attributes: Partial<TypeOf<typeof maintenanceStateAttributesV1>> &
