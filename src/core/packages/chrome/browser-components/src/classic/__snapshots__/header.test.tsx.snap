@@ -49,7 +49,7 @@ exports[`Header renders 1`] = `
         >
           <a
             aria-label="Elastic home"
-            class="css-4ghmd2-logoCss"
+            class="css-r0ozzh-logoCss"
             data-test-subj="logo"
             href="/test/app/home"
           >
@@ -62,7 +62,7 @@ exports[`Header renders 1`] = `
             <svg
               aria-hidden="true"
               aria-labelledby="elasticMark"
-              class="css-1ks1hwq-logoMarkCss"
+              class="css-1k9a18z-logoMarkCss"
               data-test-subj="logoMark"
               fill="none"
               height="19"
