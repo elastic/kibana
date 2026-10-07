@@ -334,6 +334,7 @@ describe('anonymizeRecords', () => {
       anonymizationRules: [regexRule, nerRule],
       regexWorker,
       esClient: mockEsClient,
+      logger,
     });
 
     expect(result.records[0].content).toContain('EMAIL_');
@@ -410,6 +411,26 @@ describe('anonymizeRecords', () => {
     const maskIn = (text: string) => text.match(/PER_[0-9a-f]{40}/)?.[0];
     expect(maskIn(result.records[0].content)).toBeDefined();
     expect(maskIn(result.records[1].content)).toBe(maskIn(result.records[0].content));
+  });
+
+  it('warns when it skips an NER rule because its model is not available, so the gap is visible', async () => {
+    mockEsClient.ml.inferTrainedModel.mockRejectedValueOnce(
+      new Error("The NER model 'model-1' was not found. Please download and deploy the model.")
+    );
+
+    await anonymizeRecords({
+      input: [{ content: 'Contact me at jane@example.com' }],
+      anonymizationRules: [nerRule],
+      regexWorker,
+      esClient: mockEsClient,
+      logger,
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`model: ${(nerRule as { modelId?: string }).modelId ?? 'default'}`)
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('was not found'));
   });
 
   it('throws when regex execution fails and onFailure is "block" (default)', async () => {

@@ -196,6 +196,15 @@ export async function anonymizeRecords({
       if (!shouldIgnoreNerModelError(error)) {
         throw error;
       }
+      // A missing or undeployed model is the one NER failure that does not fail the request, so
+      // leave a trace: the entities this rule would have masked are sent as-is.
+      logger?.warn(
+        `Skipping NER anonymization rule (model: ${
+          nerRule.modelId ?? 'default'
+        }) because the model is not available; text it would have masked is not masked. ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
