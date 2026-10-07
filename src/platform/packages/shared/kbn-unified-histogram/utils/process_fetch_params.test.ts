@@ -72,25 +72,6 @@ describe('processFetchParams', () => {
     ).toBe(false);
   });
 
-  it('assigns isESQLQuery based on query type', async () => {
-    expect(
-      (
-        await processParams({
-          ...commonParams,
-          query: { query: 'foo', language: 'kuery' },
-        })
-      ).isESQLQuery
-    ).toBe(false);
-    expect(
-      (
-        await processParams({
-          ...commonParams,
-          query: { esql: 'from logs' },
-        })
-      ).isESQLQuery
-    ).toBe(true);
-  });
-
   it('assigns columnsMap from columns', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,

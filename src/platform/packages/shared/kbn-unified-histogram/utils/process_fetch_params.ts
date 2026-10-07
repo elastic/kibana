@@ -48,7 +48,6 @@ export const buildFetchParams = ({
 
   const columns = params.columns;
   const isTimeBased = dataSource.isTimeBased() && !dataSource.isRollup();
-  const isESQLQuery = Boolean(query && isOfAggregateQueryType(query));
   const breakdownField = 'breakdownField' in params ? params.breakdownField : initialBreakdownField;
 
   const fetchParams: UnifiedHistogramFetchParams = {
@@ -61,7 +60,6 @@ export const buildFetchParams = ({
     // additional
     lastReloadRequestTime: Date.now(),
     isTimeBased,
-    isESQLQuery,
     columnsMap: params.columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
       acc[column.id] = column;
       return acc;
@@ -71,7 +69,6 @@ export const buildFetchParams = ({
       query,
       columns,
       isTimeBased,
-      isESQLQuery,
       breakdownField,
     }),
     timeInterval: params.timeInterval ?? DEFAULT_TIME_INTERVAL,
@@ -104,14 +101,12 @@ export const processFetchParams = async ({
 
 function getProcessedBreakdownField({
   isTimeBased,
-  isESQLQuery,
   dataSource,
   query,
   columns,
   breakdownField,
 }: {
   isTimeBased: boolean;
-  isESQLQuery: boolean;
   dataSource: UnifiedHistogramFetchParamsExternal['dataSource'];
   query: UnifiedHistogramFetchParams['query'];
   columns: UnifiedHistogramFetchParamsExternal['columns'];
@@ -126,7 +121,7 @@ function getProcessedBreakdownField({
     return undefined;
   }
 
-  if (isESQLQuery) {
+  if (dataSource.kind === 'esql') {
     const breakdownColumn = columns?.find((column) => column.name === breakdownField);
     const field = breakdownColumn
       ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))

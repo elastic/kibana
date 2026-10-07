@@ -52,7 +52,6 @@ export const useTotalHits = ({
       query: fetchParams.query,
       timeRange: fetchParams.timeRange,
       onTotalHitsChange,
-      isPlainRecord: fetchParams.isESQLQuery,
     });
   });
 
@@ -85,7 +84,6 @@ const fetchTotalHits = async ({
   query,
   timeRange,
   onTotalHitsChange,
-  isPlainRecord,
 }: Pick<
   UnifiedHistogramFetch$Arguments['fetchParams'],
   'dataSource' | 'searchSessionId' | 'requestAdapter' | 'filters' | 'query' | 'timeRange'
@@ -95,9 +93,8 @@ const fetchTotalHits = async ({
   hits: UnifiedHistogramHitsContext | undefined;
   chartVisible: boolean;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
-  isPlainRecord?: boolean;
 }) => {
-  if (isPlainRecord) {
+  if (dataSource.kind === 'esql') {
     // skip, it will be handled by Discover code
     return;
   }

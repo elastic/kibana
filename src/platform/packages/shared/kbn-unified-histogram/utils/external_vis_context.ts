@@ -35,7 +35,6 @@ export interface QueryParams {
   dataSource: DataSource;
   query?: Query | AggregateQuery;
   filters: Filter[] | undefined;
-  isPlainRecord?: boolean;
   columns?: DatatableColumn[];
   columnsMap?: Record<string, DatatableColumn>;
   timeRange?: TimeRange;

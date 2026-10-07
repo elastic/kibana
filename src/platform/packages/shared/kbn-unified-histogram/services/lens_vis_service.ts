@@ -238,7 +238,7 @@ export class LensVisService {
       type: UnifiedHistogramSuggestionType;
     }> = [];
 
-    if (queryParams.isPlainRecord) {
+    if (queryParams.dataSource.kind === 'esql') {
       if (isOfAggregateQueryType(queryParams.query)) {
         if (getCategorizeField(queryParams.query.esql).length) {
           // query uses categorize, override the chart to be a simple doc count histogram
@@ -311,7 +311,7 @@ export class LensVisService {
       }
     }
 
-    if (externalVisContext && queryParams.isPlainRecord) {
+    if (externalVisContext && queryParams.dataSource.kind === 'esql') {
       // externalVisContext can be based on an unfamiliar suggestion (not a part of allSuggestions), but it was saved before, so we try to restore it too
       const derivedSuggestion = deriveLensSuggestionFromLensAttributes({
         externalVisContext,
@@ -678,10 +678,10 @@ export class LensVisService {
     queryParams: QueryParams;
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion[] => {
-    const { columns, query, isPlainRecord, dataSource } = queryParams;
+    const { columns, query, dataSource } = queryParams;
     const dataView = resolveLensDataView(dataSource);
 
-    if (!isPlainRecord || !isOfAggregateQueryType(query) || !dataView) {
+    if (dataSource.kind !== 'esql' || !isOfAggregateQueryType(query) || !dataView) {
       return [];
     }
 
@@ -894,7 +894,7 @@ function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   }
 
   if (
-    queryParams.isPlainRecord &&
+    queryParams.dataSource.kind === 'esql' &&
     suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
     !deriveLensSuggestionFromLensAttributes({ externalVisContext, queryParams })
   ) {

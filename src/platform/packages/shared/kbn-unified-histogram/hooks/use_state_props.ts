@@ -50,7 +50,8 @@ export const useStateProps = ({
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
   const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
 
-  const { breakdown, isTimeBased, isESQLQuery, timeInterval } = fetchParams || {};
+  const { breakdown, isTimeBased, dataSource, timeInterval } = fetchParams || {};
+  const isEsql = dataSource?.kind === 'esql';
 
   const hits = useMemo(() => {
     if (totalHitsResult instanceof Error) {
@@ -64,7 +65,7 @@ export const useStateProps = ({
   }, [totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (!isTimeBased && !isESQLQuery) {
+    if (!isTimeBased && !isEsql) {
       return undefined;
     }
 
@@ -72,7 +73,7 @@ export const useStateProps = ({
       hidden: chartHidden,
       timeInterval,
     };
-  }, [chartHidden, isESQLQuery, isTimeBased, timeInterval]);
+  }, [chartHidden, isEsql, isTimeBased, timeInterval]);
 
   /**
    * Callbacks

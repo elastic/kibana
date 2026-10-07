@@ -23,18 +23,16 @@ export const useEditVisualization = ({
   dataSource,
   relativeTimeRange,
   lensAttributes,
-  isPlainRecord,
 }: {
   services: UnifiedHistogramServices;
   dataSource: DataSource | undefined;
   relativeTimeRange?: TimeRange;
   lensAttributes?: TypedLensByValueInput['attributes'];
-  isPlainRecord?: boolean;
 }) => {
   const [canVisualize, setCanVisualize] = useState(false);
 
   const checkCanVisualize = useCallback(async () => {
-    if (!dataSource?.id || isPlainRecord) {
+    if (!dataSource?.id) {
       return false;
     }
 
@@ -57,7 +55,7 @@ export const useEditVisualization = ({
     );
 
     return Boolean(compatibleActions.length);
-  }, [dataSource, isPlainRecord, services.uiActions]);
+  }, [dataSource, services.uiActions]);
 
   const onEditVisualization = useMemo(() => {
     if (!canVisualize || !lensAttributes) {

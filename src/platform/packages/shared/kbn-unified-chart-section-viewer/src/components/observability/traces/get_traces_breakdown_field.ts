@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import type { UnifiedHistogramFetchParams } from '@kbn/unified-histogram/types';
@@ -19,25 +19,23 @@ import type { UnifiedHistogramFetchParams } from '@kbn/unified-histogram/types';
  */
 export const getTracesBreakdownField = ({
   breakdownField,
-  isESQLQuery,
+  dataSource,
   columns,
-  dataView,
 }: {
   breakdownField: string | undefined;
-  isESQLQuery: boolean;
+  dataSource: DataSource;
   columns: UnifiedHistogramFetchParams['columns'];
-  dataView: DataView | undefined;
 }): DataViewField | undefined => {
   if (!breakdownField) {
     return undefined;
   }
 
-  if (isESQLQuery) {
+  if (dataSource.kind === 'esql') {
     const breakdownColumn = columns?.find((column) => column.name === breakdownField);
     return breakdownColumn
       ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
       : undefined;
   }
 
-  return dataView?.getFieldByName(breakdownField);
+  return dataSource.getDataView().getFieldByName(breakdownField);
 };

@@ -13,17 +13,15 @@ import type { UnifiedHistogramChartContext } from '../../../types';
 export function checkChartAvailability({
   chart,
   dataSource,
-  isPlainRecord,
 }: {
   chart?: UnifiedHistogramChartContext;
   dataSource: DataSource | undefined;
-  isPlainRecord?: boolean;
 }): boolean {
   return Boolean(
     chart &&
       dataSource &&
       dataSource.id &&
       !dataSource.isRollup() &&
-      (isPlainRecord || (!isPlainRecord && dataSource.isTimeBased()))
+      (dataSource.kind === 'esql' || dataSource.isTimeBased())
   );
 }
