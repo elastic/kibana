@@ -18,6 +18,8 @@ export type SchemaDialect = 'openapi-3.0' | 'draft-2020-12';
 export interface ContractSpec {
   readonly document: OpenApiDocument;
   readonly dialect: SchemaDialect;
+  /** The spec's name, when the mock was given named specs. */
+  readonly source?: string;
 }
 
 /**

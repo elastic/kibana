@@ -13,7 +13,7 @@ import type { ContractRequest, ContractResponse, Responder } from '../contract/t
 import { isRecord } from '../openapi/schema_walk';
 import type { ContractOperation } from '../openapi/types';
 import type { OperationRef, RecordedExchange, StoredResponse } from './response_engine';
-import { toOperationKey } from './response_engine';
+import { createOperationIndex } from './response_engine';
 
 /** How a cursor-paginated response says there are no more pages. */
 export type PaginationEnd = 'empty_string' | 'null' | 'missing';
@@ -464,16 +464,14 @@ export const withPagination = (
   },
   respond: Responder
 ): Responder => {
-  const byKey = new Map(pagination.map((entry) => [toOperationKey(entry.operation), entry]));
+  const findOperations = createOperationIndex(operations);
   const paginated = new Map(
-    operations.flatMap((operation) => {
-      const entry = byKey.get(toOperationKey(operation));
-      if (!entry) {
-        return [];
-      }
-      const recorded = readRecordedCollection(entry.pagination, recordedExchanges(operation));
-      return [[operation, { pagination: entry.pagination, collectionSize, recorded }] as const];
-    })
+    pagination.flatMap((entry) =>
+      findOperations(entry.operation).map((operation) => {
+        const recorded = readRecordedCollection(entry.pagination, recordedExchanges(operation));
+        return [operation, { pagination: entry.pagination, collectionSize, recorded }] as const;
+      })
+    )
   );
   return (operation, request) => {
     const response = respond(operation, request);

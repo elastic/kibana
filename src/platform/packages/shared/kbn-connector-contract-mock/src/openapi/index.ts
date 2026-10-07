@@ -14,14 +14,19 @@ import type { ContractOperation, OpenApiDocument } from './types';
 
 /**
  * Loads a spec into operations ready for validation, repairing known vendor schema defects
- * and failing if any schema still has a defect that breaks validation.
+ * and failing if any schema still has a defect that breaks validation. `source` names the spec
+ * in the operations' `spec.source`.
  */
-export const loadContractOperations = (document: OpenApiDocument): ContractOperation[] => {
-  const operations = normalizeOperations(loadOperations(document));
+export const loadContractOperations = (
+  document: OpenApiDocument,
+  source?: string
+): ContractOperation[] => {
+  const operations = normalizeOperations(loadOperations(document, source));
   assertSchemasValid(operations);
   return operations;
 };
 
 export { InvalidSchemaError } from './assert_schemas_valid';
+export { convertSwagger2 } from './convert_swagger2';
 export type { InvalidSchemaFailure } from './assert_schemas_valid';
 export type { ContractOperation, ContractSpec, OpenApiDocument, SpecSchema } from './types';
