@@ -54,8 +54,10 @@ import { Controls } from '../controls/controls';
 import { LayersPanel } from '../controls/layers_panel';
 import {
   GraphDisplayOptionsContext,
+  NodeDisplayOverridesContext,
   DEFAULT_GRAPH_DISPLAY_OPTIONS,
   type GraphDisplayOptions,
+  type NodeDisplayOverrides,
 } from './graph_display_options_context';
 import { GRAPH_CONTROLS_LAYERS_ID, GRAPH_ID } from '../test_ids';
 
@@ -165,6 +167,14 @@ export const Graph = memo<GraphProps>(
     };
     const setDisplayOptions = (opts: GraphDisplayOptions) => setStoredDisplayOptions(opts);
     const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
+
+    // Per-node display overrides — keyed by node ID, only entity/event fields.
+    const [nodeOverridesMap, setNodeOverridesMap] = useState<Map<string, NodeDisplayOverrides>>(
+      () => new Map()
+    );
+    const setNodeOverride = useCallback((nodeId: string, opts: NodeDisplayOverrides) => {
+      setNodeOverridesMap((prev) => new Map(prev).set(nodeId, opts));
+    }, []);
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
@@ -315,95 +325,99 @@ export const Graph = memo<GraphProps>(
     );
 
     return (
-      <GraphDisplayOptionsContext.Provider value={displayOptions}>
-        <div {...rest}>
-          <SvgDefsMarker />
-          <ReactFlow
-            key={reactFlowKey}
-            data-test-subj={GRAPH_ID}
-            fitView={true}
-            fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
-            onInit={onInitCallback}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            nodes={nodesState}
-            edges={edgesState}
-            nodesConnectable={false}
-            edgesFocusable={false}
-            // Disable React Flow's built-in selection/focus in non-interactive mode (e.g. flyout
-            // preview) so nodes never receive a selected/focused state through keyboard focus or
-            // programmatic selection, which would otherwise show selection visuals.
-            nodesFocusable={interactive}
-            elementsSelectable={interactive}
-            onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
-            snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-            snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            proOptions={{ hideAttribution: true }}
-            panOnDrag={isGraphInteractive && !isLocked}
-            zoomOnScroll={isGraphInteractive && !isLocked}
-            zoomOnPinch={isGraphInteractive && !isLocked}
-            zoomOnDoubleClick={isGraphInteractive && !isLocked}
-            preventScrolling={interactive}
-            nodesDraggable={interactive && isGraphInteractive && !isLocked}
-            maxZoom={1.3}
-            minZoom={0.1}
-          >
-            {interactive && (
-              <Panel position="bottom-left">
-                <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
-              </Panel>
-            )}
-            {interactive && (
-              <Panel position="bottom-center">
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="none"
-                  css={css`
-                    border: ${euiTheme.border.thin};
-                    border-radius: ${euiTheme.border.radius.medium};
-                    background-color: ${euiTheme.colors.backgroundBasePlain};
-                  `}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      aria-label={LayersLabel}
-                      isOpen={isLayersPanelOpen}
-                      closePopover={() => setIsLayersPanelOpen(false)}
-                      anchorPosition="upCenter"
-                      panelPaddingSize="none"
-                      button={
-                        <EuiToolTip content={LayersLabel} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            iconType="layers"
-                            aria-label={LayersLabel}
-                            size="m"
-                            color={isLayersPanelOpen ? 'primary' : 'text'}
-                            data-test-subj={GRAPH_CONTROLS_LAYERS_ID}
-                            css={css`
-                              border-radius: ${euiTheme.border.radius.medium};
-                            `}
-                            onClick={() => setIsLayersPanelOpen((prev) => !prev)}
-                          />
-                        </EuiToolTip>
-                      }
-                    >
-                      <LayersPanel displayOptions={displayOptions} onChange={setDisplayOptions} />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </Panel>
-            )}
-            {children}
-            <Background id={backgroundId} />
-            {interactive && showMinimap && (
-              <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
-            )}
-          </ReactFlow>
-          <GlobalGraphStyles />
-        </div>
-      </GraphDisplayOptionsContext.Provider>
+      <NodeDisplayOverridesContext.Provider
+        value={{ overrides: nodeOverridesMap, setNodeOverride }}
+      >
+        <GraphDisplayOptionsContext.Provider value={displayOptions}>
+          <div {...rest}>
+            <SvgDefsMarker />
+            <ReactFlow
+              key={reactFlowKey}
+              data-test-subj={GRAPH_ID}
+              fitView={true}
+              fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
+              onInit={onInitCallback}
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              nodes={nodesState}
+              edges={edgesState}
+              nodesConnectable={false}
+              edgesFocusable={false}
+              // Disable React Flow's built-in selection/focus in non-interactive mode (e.g. flyout
+              // preview) so nodes never receive a selected/focused state through keyboard focus or
+              // programmatic selection, which would otherwise show selection visuals.
+              nodesFocusable={interactive}
+              elementsSelectable={interactive}
+              onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
+              snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
+              snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              proOptions={{ hideAttribution: true }}
+              panOnDrag={isGraphInteractive && !isLocked}
+              zoomOnScroll={isGraphInteractive && !isLocked}
+              zoomOnPinch={isGraphInteractive && !isLocked}
+              zoomOnDoubleClick={isGraphInteractive && !isLocked}
+              preventScrolling={interactive}
+              nodesDraggable={interactive && isGraphInteractive && !isLocked}
+              maxZoom={1.3}
+              minZoom={0.1}
+            >
+              {interactive && (
+                <Panel position="bottom-left">
+                  <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
+                </Panel>
+              )}
+              {interactive && (
+                <Panel position="bottom-center">
+                  <EuiFlexGroup
+                    direction="row"
+                    gutterSize="none"
+                    css={css`
+                      border: ${euiTheme.border.thin};
+                      border-radius: ${euiTheme.border.radius.medium};
+                      background-color: ${euiTheme.colors.backgroundBasePlain};
+                    `}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        aria-label={LayersLabel}
+                        isOpen={isLayersPanelOpen}
+                        closePopover={() => setIsLayersPanelOpen(false)}
+                        anchorPosition="upCenter"
+                        panelPaddingSize="none"
+                        button={
+                          <EuiToolTip content={LayersLabel} disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              iconType="layers"
+                              aria-label={LayersLabel}
+                              size="m"
+                              color={isLayersPanelOpen ? 'primary' : 'text'}
+                              data-test-subj={GRAPH_CONTROLS_LAYERS_ID}
+                              css={css`
+                                border-radius: ${euiTheme.border.radius.medium};
+                              `}
+                              onClick={() => setIsLayersPanelOpen((prev) => !prev)}
+                            />
+                          </EuiToolTip>
+                        }
+                      >
+                        <LayersPanel displayOptions={displayOptions} onChange={setDisplayOptions} />
+                      </EuiPopover>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </Panel>
+              )}
+              {children}
+              <Background id={backgroundId} />
+              {interactive && showMinimap && (
+                <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+              )}
+            </ReactFlow>
+            <GlobalGraphStyles />
+          </div>
+        </GraphDisplayOptionsContext.Provider>
+      </NodeDisplayOverridesContext.Provider>
     );
   }
 );

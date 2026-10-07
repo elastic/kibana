@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
+  EuiPopover,
   EuiText,
   EuiTextTruncate,
   EuiToolTip,
@@ -33,6 +34,7 @@ import {
   GRAPH_ENTITY_NODE_DETAILS_ID,
   GRAPH_ENTITY_NODE_RISK_BADGE_ID,
   GRAPH_ENTITY_NODE_LAYERS_PANEL_ID,
+  GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID,
   GRAPH_STACKED_SHAPE_ID,
   GRAPH_TAG_TEXT_ID,
   GRAPH_TAG_COUNT_ID,
@@ -41,7 +43,14 @@ import { getSpanIcon } from './get_span_icon';
 import { getCountryFlag } from './country_flags/country_codes';
 import { showStackedShape } from '../utils';
 import type { EntityNodeViewModel, NodeProps, NodeToolbarItem } from '../types';
-import { useGraphDisplayOptions } from '../graph/graph_display_options_context';
+import {
+  GraphDisplayOptionsContext,
+  useGraphDisplayOptions,
+  useNodeDisplayOverrides,
+  type GraphDisplayOptions,
+  type NodeDisplayOverrides,
+} from '../graph/graph_display_options_context';
+import { LayersPanel } from '../controls/layers_panel';
 
 /** Converts an ISO 3166-1 alpha-2 country code to its flag emoji. */
 const countryCodeToFlag = (code: string): string =>
@@ -798,6 +807,11 @@ const EntityCardHeaderContent: React.FC<EntityCardHeaderContentProps> = ({
   </>
 );
 
+const NodeLayersLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.entityNode.toolbar.layers',
+  { defaultMessage: 'Layers' }
+);
+
 interface ToolbarButtonRowProps {
   items: NodeToolbarItem[];
   isHovered: boolean;
@@ -807,6 +821,11 @@ interface ToolbarButtonRowProps {
   style?: React.CSSProperties;
   /** Additional Emotion CSS merged into the wrapper div (e.g. absolute positioning for grouped nodes). */
   extraCss?: ReturnType<typeof css>;
+  /** When provided, renders a Layers button at the end of the toolbar with a per-node LayersPanel. */
+  nodeLayersButton?: {
+    displayOptions: GraphDisplayOptions;
+    onChange: (opts: NodeDisplayOverrides) => void;
+  };
 }
 
 /** Shared toolbar button row used by both single and grouped entity nodes. */
@@ -817,44 +836,99 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
   onMouseLeave,
   style,
   extraCss,
-}) => (
-  <div
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
-    style={style}
-    css={[
-      css`
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        opacity: ${isHovered ? 1 : 0};
-        pointer-events: ${isHovered ? 'auto' : 'none'};
-        transition: opacity 150ms ease;
-      `,
-      extraCss,
-    ]}
-  >
-    {items.map((item, idx) => (
-      <EuiToolTip
-        key={idx}
-        content={item.toolTipText ?? item.label}
-        data-test-subj={item.toolTipTestSubj}
-        disableScreenReaderOutput={!item.toolTipText}
-      >
-        <EuiButtonIcon
-          data-test-subj={item.testSubject}
-          iconType={item.iconType}
-          iconSize="m"
-          color="text"
-          size="s"
-          aria-label={item.label}
-          disabled={item.disabled}
-          onClick={item.onClick}
-        />
-      </EuiToolTip>
-    ))}
-  </div>
-);
+  nodeLayersButton,
+}) => {
+  const [isLayersOpen, setIsLayersOpen] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={style}
+      css={[
+        css`
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          opacity: ${isHovered ? 1 : 0};
+          pointer-events: ${isHovered ? 'auto' : 'none'};
+          transition: opacity 150ms ease;
+        `,
+        extraCss,
+      ]}
+    >
+      {/* Render items before position 5 (index 4), then the layers button, then the rest */}
+      {items.slice(0, 4).map((item, idx) => (
+        <EuiToolTip
+          key={idx}
+          content={item.toolTipText ?? item.label}
+          data-test-subj={item.toolTipTestSubj}
+          disableScreenReaderOutput={!item.toolTipText}
+        >
+          <EuiButtonIcon
+            data-test-subj={item.testSubject}
+            iconType={item.iconType}
+            iconSize="m"
+            color="text"
+            size="s"
+            aria-label={item.label}
+            disabled={item.disabled}
+            onClick={item.onClick}
+          />
+        </EuiToolTip>
+      ))}
+      {nodeLayersButton && (
+        <EuiPopover
+          aria-label={NodeLayersLabel}
+          isOpen={isLayersOpen}
+          closePopover={() => setIsLayersOpen(false)}
+          anchorPosition="downCenter"
+          panelPaddingSize="none"
+          button={
+            <EuiToolTip content={NodeLayersLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj={GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID}
+                iconType="layers"
+                iconSize="m"
+                color={isLayersOpen ? 'primary' : 'text'}
+                size="s"
+                aria-label={NodeLayersLabel}
+                onClick={() => setIsLayersOpen((prev) => !prev)}
+              />
+            </EuiToolTip>
+          }
+        >
+          <LayersPanel
+            displayOptions={nodeLayersButton.displayOptions}
+            onChange={(opts) =>
+              nodeLayersButton.onChange({ entity: opts.entity, event: opts.event })
+            }
+            showEventMetadata={false}
+          />
+        </EuiPopover>
+      )}
+      {items.slice(4).map((item, idx) => (
+        <EuiToolTip
+          key={idx + 4}
+          content={item.toolTipText ?? item.label}
+          data-test-subj={item.toolTipTestSubj}
+          disableScreenReaderOutput={!item.toolTipText}
+        >
+          <EuiButtonIcon
+            data-test-subj={item.testSubject}
+            iconType={item.iconType}
+            iconSize="m"
+            color="text"
+            size="s"
+            aria-label={item.label}
+            disabled={item.disabled}
+            onClick={item.onClick}
+          />
+        </EuiToolTip>
+      ))}
+    </div>
+  );
+};
 
 /**
  * Shared horizontal card node rendered by all entity node shape types
@@ -882,6 +956,15 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
+  const globalOpts = useGraphDisplayOptions();
+  const { overrides, setNodeOverride } = useNodeDisplayOverrides();
+
+  // Merge global options with per-node overrides (entity/event fields only).
+  const nodeOpts = overrides.get(props.id);
+  const effectiveOpts: GraphDisplayOptions = {
+    entity: { ...globalOpts.entity, ...nodeOpts?.entity },
+    event: { ...globalOpts.event, ...nodeOpts?.event },
+  };
   // Hover state for toolbar visibility.
   // A generous hide-delay keeps the toolbar alive while the mouse travels from
   // the card into the toolbar, which lives in a separate DOM subtree (portal).
@@ -969,7 +1052,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               above the card for both single and grouped nodes.  This avoids
               using ReactFlow's NodeToolbar portal (which positions relative to
               the full 240px NodeShapeContainer, not the card). */}
-          {interactive && toolbarItems.length > 0 && (
+          {interactive && (toolbarItems.length > 0 || !isGrouped) && (
             <ToolbarButtonRow
               items={toolbarItems}
               isHovered={isHovered}
@@ -982,6 +1065,38 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 transform: translateX(-50%);
                 z-index: ${euiTheme.levels.content};
               `}
+              nodeLayersButton={
+                !isGrouped
+                  ? {
+                      displayOptions: effectiveOpts,
+                      onChange: (updatedOpts) => {
+                        // Only persist fields that explicitly differ from the global setting.
+                        // Fields that match global are left out so future global changes
+                        // continue to be inherited by this node for those fields.
+                        const entityDelta: Partial<GraphDisplayOptions['entity']> = {};
+                        for (const k of Object.keys(updatedOpts.entity) as Array<
+                          keyof GraphDisplayOptions['entity']
+                        >) {
+                          if (updatedOpts.entity[k] !== globalOpts.entity[k]) {
+                            entityDelta[k] = updatedOpts.entity[k];
+                          }
+                        }
+                        const eventDelta: Partial<GraphDisplayOptions['event']> = {};
+                        for (const k of Object.keys(updatedOpts.event) as Array<
+                          keyof GraphDisplayOptions['event']
+                        >) {
+                          if (updatedOpts.event[k] !== globalOpts.event[k]) {
+                            eventDelta[k] = updatedOpts.event[k];
+                          }
+                        }
+                        setNodeOverride(props.id, {
+                          entity: entityDelta,
+                          event: eventDelta,
+                        });
+                      },
+                    }
+                  : undefined
+              }
             />
           )}
           <EntityCardWrapper euiTheme={euiTheme} shadow={shadow}>
@@ -1002,22 +1117,26 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
             {/* Metadata panel — hidden in preview (non-interactive) mode and for grouped nodes */}
             {interactive && !isGrouped && (
-              <EntityCardMetadata
-                data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
-                euiTheme={euiTheme}
-              >
-                <SingleEntityMetadataPanel
-                  ips={ips}
-                  countryCodes={countryCodes}
-                  sources={entitySources}
-                  subType={subType}
-                  assetCriticality={assetCriticality}
+              <GraphDisplayOptionsContext.Provider value={effectiveOpts}>
+                <EntityCardMetadata
+                  data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
                   euiTheme={euiTheme}
-                  onIpClick={
-                    ipClickHandler as ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined
-                  }
-                />
-              </EntityCardMetadata>
+                >
+                  <SingleEntityMetadataPanel
+                    ips={ips}
+                    countryCodes={countryCodes}
+                    sources={entitySources}
+                    subType={subType}
+                    assetCriticality={assetCriticality}
+                    euiTheme={euiTheme}
+                    onIpClick={
+                      ipClickHandler as
+                        | ((e: React.MouseEvent<HTMLButtonElement>) => void)
+                        | undefined
+                    }
+                  />
+                </EntityCardMetadata>
+              </GraphDisplayOptionsContext.Provider>
             )}
           </EntityCardWrapper>
 
