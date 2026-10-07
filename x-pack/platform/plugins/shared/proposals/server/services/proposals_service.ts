@@ -394,10 +394,9 @@ export class ProposalsService {
 
   /**
    * Releases the parked gate so the workflow can record the decision behind it.
-   * Writes nothing but the annotations below, and only once every refusal has
-   * passed — so there is nothing to roll back when a resume fails, and the
-   * decision reaches the record by exactly one path regardless of which surface
-   * released the gate.
+   * Writes annotations and a release marker before resuming. The workflow
+   * remains the only writer of the decision; the marker prevents revisions
+   * while that decision is being recorded.
    *
    * The caller is expected to have been authorized already — the routes do it
    * declaratively, and the workflow re-checks the resumer behind the gate.
@@ -423,7 +422,7 @@ export class ProposalsService {
 
     const annotated = await this.annotate(
       proposal,
-      { dismissReason, rationale },
+      { dismissReason, rationale, decisionPending: true },
       { seqNo, primaryTerm }
     );
 
@@ -433,7 +432,7 @@ export class ProposalsService {
   }
 
   /**
-   * Writes the decision's free-text annotations and nothing else.
+   * Writes annotations and the release marker in one optimistic-concurrency write.
    *
    * This is the one thing a route still writes, and it exists because
    * `waitForApproval` reconstructs its resume payload as
@@ -450,10 +449,14 @@ export class ProposalsService {
    */
   private async annotate(
     proposal: StoredProposalRecord,
-    { dismissReason, rationale }: Pick<ReleaseGateParams, 'dismissReason' | 'rationale'>,
+    {
+      dismissReason,
+      rationale,
+      decisionPending,
+    }: Pick<ReleaseGateParams, 'dismissReason' | 'rationale'> & { decisionPending?: boolean },
     { seqNo, primaryTerm }: { seqNo?: number; primaryTerm?: number }
   ): Promise<StoredProposalRecord> {
-    if (dismissReason === undefined && rationale === undefined) {
+    if (dismissReason === undefined && rationale === undefined && decisionPending === undefined) {
       return proposal;
     }
 
@@ -461,6 +464,7 @@ export class ProposalsService {
       ...proposal,
       ...(dismissReason !== undefined ? { dismissReason } : {}),
       ...(rationale !== undefined ? { rationale } : {}),
+      ...(decisionPending !== undefined ? { decisionPending } : {}),
     };
     const { id, ...document } = annotated;
 
@@ -532,6 +536,9 @@ export class ProposalsService {
       ...proposal,
       status,
       decision,
+      ...(params.decision !== undefined || isTerminal(status)
+        ? { decisionPending: undefined }
+        : {}),
       ...(settledAt !== undefined ? { decidedAt: settledAt } : {}),
       ...(params.decision !== undefined
         ? { decidedBy: params.decidedBy ?? proposal.decidedBy }
@@ -602,6 +609,7 @@ export class ProposalsService {
       decidedAt: undefined,
       dismissReason: undefined,
       rationale: undefined,
+      decisionPending: undefined,
       executionError: undefined,
       // Why the attempt this one re-offers failed. Denormalised from the
       // predecessor so the queue can say so from the row it already has.
@@ -664,6 +672,13 @@ export class ProposalsService {
         `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
       );
     }
+    // Non-head revisions are refused above. A release marker on this live head
+    // protects the interval before the workflow records its decision.
+    if (proposal.decisionPending === true) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] cannot be revised while its decision is being recorded`
+      );
+    }
     const { id: _id, ...original } = proposal;
 
     // The override is merged over the predecessor's input and the merged object is
@@ -708,6 +723,7 @@ export class ProposalsService {
       decidedAt: undefined,
       dismissReason: undefined,
       rationale: undefined,
+      decisionPending: undefined,
       executionError: undefined,
       // `previousExecutionError` rides along with the spread untouched: a
       // revision corrects a proposal, it does not run anything, so the last
