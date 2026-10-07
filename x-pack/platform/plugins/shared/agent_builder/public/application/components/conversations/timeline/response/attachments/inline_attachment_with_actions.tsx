@@ -189,6 +189,12 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
             > .euiPanel {
               border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
             }
+
+            /* No header rendered (no action buttons): the content is the top of the card too. */
+            &:first-child,
+            &:first-child > .euiPanel {
+              border-radius: ${AB_PANEL_RADIUS}px;
+            }
           `}
         >
           <TimelineRenderErrorBoundary key={attachmentPreviewKey}>

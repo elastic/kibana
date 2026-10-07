@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IGNORE_SELECTOR, getEffectiveBackgroundColor } from '@kbn/dev-comments';
+import {
+  COMMENTS_BUTTON_SELECTOR,
+  IGNORE_SELECTOR,
+  getEffectiveBackgroundColor,
+} from '@kbn/dev-comments';
 
 /** Elements this far (in px) beyond the viewport are still rendered, so that shadows and edges are not cut short. */
 const OFFSCREEN_MARGIN = 100;
@@ -97,6 +101,22 @@ export const drawScrolledFields = (root: Element) => {
   }
 };
 
+/**
+ * Whether the node is the layer's own UI and should be left out of a screenshot.
+ * The toolbar comments button is ignored so it cannot be commented on, but it
+ * sits among the host's buttons and a hole there looks wrong: it is kept.
+ */
+export const isOmittedFromCapture = (node: Node): boolean => {
+  if (!(node instanceof Element) || !node.matches(IGNORE_SELECTOR)) {
+    return false;
+  }
+  return (
+    !node.matches(COMMENTS_BUTTON_SELECTOR) &&
+    node.closest(COMMENTS_BUTTON_SELECTOR) === null &&
+    node.querySelector(COMMENTS_BUTTON_SELECTOR) === null
+  );
+};
+
 /** What is on screen, at the viewport's size in CSS pixels, without the layer's own UI (marked with `IGNORE_ATTR`). */
 export const captureViewport = async (): Promise<HTMLCanvasElement> => {
   const { default: domtoimage } = await import('dom-to-image-more');
@@ -109,9 +129,7 @@ export const captureViewport = async (): Promise<HTMLCanvasElement> => {
     // `body` is transparent in Kibana (the color is on `html`).
     bgcolor: getEffectiveBackgroundColor(document.body),
     // A filtered node is left out with its whole subtree.
-    filter: (node) =>
-      !(node instanceof Element && node.matches(IGNORE_SELECTOR)) &&
-      !isOffScreen(node, width, height),
+    filter: (node) => !isOmittedFromCapture(node) && !isOffScreen(node, width, height),
     adjustClonedNode: preserveScroll,
     onclone: drawScrolledFields,
   });

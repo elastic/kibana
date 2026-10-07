@@ -19,7 +19,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const PLUGIN_ID = 'entityStore';
+export { PLUGIN_ID } from './plugin_id';
 export const PLUGIN_NAME = 'Entity Store';
 
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
@@ -160,6 +160,7 @@ export interface IdentitySourceFields {
 
 export type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';
 export type { AssetCriticalityLevel, EntityRiskLevels } from './domain/definitions/entity.gen';
+export type { RiskScoreDistribution } from './domain/risk_score_distribution';
 
 export {
   ENTITY_LATEST,

@@ -31,6 +31,8 @@ interface ReviewActionsCallbacks {
 export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   private domNode: HTMLElement | undefined;
   private zoneId: string | undefined;
+  private buttons: HTMLButtonElement[] = [];
+  private isFocusPending = false;
   private readonly afterLineNumber: number;
 
   constructor(
@@ -75,7 +77,22 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     };
   }
 
+  /** Puts keyboard focus on Undo so Replace is the next tab stop. */
+  public focus(): void {
+    this.getDomNode();
+    this.isFocusPending = true;
+  }
+
+  /** Monaco keeps the widget hidden until it renders, so focus can only land from here. */
+  public afterRender(position: monaco.editor.ContentWidgetPositionPreference | null): void {
+    if (!this.isFocusPending || position === null) return;
+    this.isFocusPending = false;
+    this.buttons[0]?.focus({ preventScroll: true });
+  }
+
   public dispose(): void {
+    const ownsFocus = this.domNode?.contains(document.activeElement) ?? false;
+    this.isFocusPending = false;
     this.editor.removeContentWidget(this);
 
     if (this.zoneId) {
@@ -87,6 +104,11 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     }
 
     this.domNode = undefined;
+    this.buttons = [];
+
+    if (ownsFocus) {
+      this.editor.focus();
+    }
   }
 
   private buildDom(): HTMLElement {
@@ -112,6 +134,17 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
         margin-left: ${this.euiTheme.size.s};
       }
     `;
+    container.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab') return;
+      const index = this.buttons.findIndex((button) => button === event.target);
+      if (index === -1) return;
+      // Keep Monaco's Tab command from sending focus back to Undo.
+      event.stopPropagation();
+      const next = this.buttons[index + (event.shiftKey ? -1 : 1)];
+      if (!next) return;
+      event.preventDefault();
+      next.focus({ preventScroll: true });
+    });
 
     const acceptLabel = this.isReplaceMode
       ? i18n.translate('esqlEditor.commentReview.replace', {
@@ -123,18 +156,18 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
           values: { shortcut: isMac ? '⌘⇧↵' : 'Ctrl+Shift+Enter' },
         });
 
-    container.appendChild(
-      this.createButton(
-        i18n.translate('esqlEditor.commentReview.reject', {
-          defaultMessage: 'Undo ({shortcut})',
-          values: { shortcut: isMac ? '⌘⇧⌫' : 'Ctrl+Shift+Backspace' },
-        }),
-        'neutral',
-        this.callbacks.onReject
-      )
+    const rejectButton = this.createButton(
+      i18n.translate('esqlEditor.commentReview.reject', {
+        defaultMessage: 'Undo ({shortcut})',
+        values: { shortcut: isMac ? '⌘⇧⌫' : 'Ctrl+Shift+Backspace' },
+      }),
+      'neutral',
+      this.callbacks.onReject
     );
+    const acceptButton = this.createButton(acceptLabel, 'success', this.callbacks.onAccept);
 
-    container.appendChild(this.createButton(acceptLabel, 'success', this.callbacks.onAccept));
+    this.buttons = [rejectButton, acceptButton];
+    container.append(...this.buttons);
 
     return container;
   }
