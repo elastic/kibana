@@ -171,8 +171,11 @@ describe('manageRuleTool', () => {
         ctx
       );
 
-      const { results } = result as { results: Array<{ data?: { warnings?: string[] } }> };
+      const { results } = result as {
+        results: Array<{ data?: { warnings?: string[]; ruleAttachment?: { time_field?: string } } }>;
+      };
       expect(results[0].data?.warnings).toEqual([expect.stringContaining('event.ingested')]);
+      expect(results[0].data?.ruleAttachment?.time_field).toBe('event.ingested');
 
       const addCall = ctx.attachments.add.mock.calls[0][0] as { data: { time_field?: string } };
       expect(addCall.data.time_field).toBe('event.ingested');
