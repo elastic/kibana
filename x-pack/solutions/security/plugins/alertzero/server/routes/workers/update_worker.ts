@@ -18,11 +18,11 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import type { AlertTriageEnableBlockedReason } from '../../services/workers/workers_service';
+import type { WorkerEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import { hasManageSecurity } from './has_manage_security';
 
-const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReason, () => string> = {
+const WORKER_ENABLE_BLOCKED_MESSAGES: Record<WorkerEnableBlockedReason, () => string> = {
   alertAnalysisWorkflowDisabled: () =>
     i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
       defaultMessage:
@@ -37,6 +37,16 @@ const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReaso
     i18n.translate('xpack.alertzero.alertTriageRuleAttachmentUnavailableErrorMessage', {
       defaultMessage:
         'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
+    }),
+  huntSupplyPrerequisitesUnmet: () =>
+    i18n.translate('xpack.alertzero.huntSupplyPrerequisitesUnmetErrorMessage', {
+      defaultMessage:
+        'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup, then try again.',
+    }),
+  huntSupplyNotInstalled: () =>
+    i18n.translate('xpack.alertzero.huntSupplyNotInstalledErrorMessage', {
+      defaultMessage:
+        'Threat intel supply workflows are not installed in this deployment. Enable threat intel supply, then try turning on Hunt Watch again.',
     }),
 };
 
@@ -134,7 +144,7 @@ export const registerUpdateWorkerRoute = ({
               });
             case 'blocked':
               return response.badRequest({
-                body: { message: ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES[result.reason]() },
+                body: { message: WORKER_ENABLE_BLOCKED_MESSAGES[result.reason]() },
               });
             case 'invalid':
               return response.badRequest({

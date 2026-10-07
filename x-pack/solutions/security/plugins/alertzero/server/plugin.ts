@@ -63,6 +63,8 @@ import { registerAttachments } from './agent_builder/attachments/register_attach
 import { registerStepDefinitions } from './step_types';
 import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
+import { enumerateSpaceIds } from './lib/enumerate_space_ids';
+import { ThreatIntelSupplyService } from './services/threat_intel_supply';
 
 export class AlertZeroPlugin
   implements
@@ -303,6 +305,20 @@ export class AlertZeroPlugin
           : undefined,
       this.logger
     );
+    const threatIntelSupply =
+      management != null
+        ? new ThreatIntelSupplyService({
+            management,
+            managedWorkflows,
+            logger: this.logger,
+            // Internal user: TI reports index is plugin-owned / hidden; route authz
+            // already gates who can enable Hunt.
+            getEsClient: async () => core.elasticsearch.client.asInternalUser,
+            enumerateSpaceIds: () =>
+              enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
+          })
+        : undefined;
+
     this.workersService = new WorkersService(
       management,
       managedWorkflows,
@@ -332,7 +348,8 @@ export class AlertZeroPlugin
       async (request, registration, options) => {
         const client = await plugins.workflowsExtensions.getClient(request);
         await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
-      }
+      },
+      threatIntelSupply
     );
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);

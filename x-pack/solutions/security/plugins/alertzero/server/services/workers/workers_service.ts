@@ -11,6 +11,7 @@ import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   touchesWorkerSettings,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type UpdateWorkerRequestBody,
@@ -42,6 +43,11 @@ import {
   detachAlertTriageWorkerFromAllRules,
   detachRuleIdChunks,
 } from './alert_triage_rule_attachments';
+import {
+  ThreatIntelSupplyHardGateError,
+  ThreatIntelSupplyNotInstalledError,
+  type ThreatIntelSupplyService,
+} from '../threat_intel_supply';
 
 interface AlertTriageOpts {
   getAttachmentService?: AlertTriageAttachmentServiceProvider;
@@ -90,6 +96,15 @@ export type AlertTriageEnableBlockedReason =
   | 'alertAnalysisRuntimeDisabled'
   | 'ruleAttachmentUnavailable';
 
+/** Why Continuous Threat Hunt enable was refused before anything was written. */
+export type HuntSupplyEnableBlockedReason =
+  | 'huntSupplyPrerequisitesUnmet'
+  | 'huntSupplyNotInstalled';
+
+export type WorkerEnableBlockedReason =
+  | AlertTriageEnableBlockedReason
+  | HuntSupplyEnableBlockedReason;
+
 const readServiceAccountId = (
   values: Record<string, unknown> | null | undefined
 ): string | undefined => {
@@ -112,7 +127,7 @@ export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
-  | { outcome: 'blocked'; reason: AlertTriageEnableBlockedReason }
+  | { outcome: 'blocked'; reason: WorkerEnableBlockedReason }
   | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
@@ -135,7 +150,8 @@ export class WorkersService {
       agentTypes?: readonly AgentTypeDefinition[];
     } = {},
     private readonly alertTriageOpts: AlertTriageOpts = {},
-    private readonly installWorkerForRequest: InstallWorkerForRequest
+    private readonly installWorkerForRequest: InstallWorkerForRequest,
+    private readonly threatIntelSupply?: ThreatIntelSupplyService
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -263,6 +279,7 @@ export class WorkersService {
     });
 
     const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+    const isHuntWorker = workerId === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
     // Rules the caller cannot edit (ML rules without ML authz), so this call could not attach or
     // detach them. Reported to the caller: on enable those rules are silently not triaged, and on
     // disable they keep firing the Worker's action against a disabled workflow.
@@ -285,6 +302,23 @@ export class WorkersService {
       );
       if (!alertTriageAttachmentService) {
         return { outcome: 'blocked', reason: 'ruleAttachmentUnavailable' };
+      }
+    }
+
+    // Hunt supply: hard-gate + ensure TI before enabling CTH so a failed ensure never
+    // leaves Hunt on without reports. Disable path tears down after CTH is off.
+    if (isHuntWorker && patch.enabled === true && this.threatIntelSupply) {
+      try {
+        await this.threatIntelSupply.assertHardGate(request);
+        await this.threatIntelSupply.ensureSupplyForSpace(spaceId, request);
+      } catch (err) {
+        if (err instanceof ThreatIntelSupplyHardGateError) {
+          return { outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' };
+        }
+        if (err instanceof ThreatIntelSupplyNotInstalledError) {
+          return { outcome: 'blocked', reason: 'huntSupplyNotInstalled' };
+        }
+        throw err;
       }
     }
 
@@ -437,6 +471,20 @@ export class WorkersService {
         } catch (err) {
           this.logger.error(
             `Alert Triage Worker: rule detachment failed: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        }
+      }
+
+      if (isHuntWorker && !patch.enabled && this.threatIntelSupply) {
+        try {
+          await this.threatIntelSupply.teardownSupplyForSpace(spaceId, request);
+        } catch (err) {
+          // Hunt is already off; log and continue so disable still succeeds when TI
+          // docs are missing or a global update races another space.
+          this.logger.error(
+            `Hunt Watch: threat intel supply teardown failed: ${
               err instanceof Error ? err.message : String(err)
             }`
           );
