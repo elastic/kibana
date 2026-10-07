@@ -8,9 +8,15 @@
  */
 
 import { decodeLegacyParams } from './legacy_decoder';
+import type { SortDirectionsByField } from './url_codec';
 
 describe('legacy_decoder', () => {
-  const validSortFields = new Set(['title', 'updatedAt', 'accessedAt']);
+  const bothDirections = new Set<'asc' | 'desc'>(['asc', 'desc']);
+  const validSortFields: SortDirectionsByField = new Map([
+    ['title', bothDirections],
+    ['updatedAt', bothDirections],
+    ['accessedAt', new Set<'asc' | 'desc'>(['desc'])],
+  ]);
 
   it('returns null when no legacy params are present', () => {
     expect(decodeLegacyParams({ q: 'dashboard' }, validSortFields)).toBeNull();
@@ -104,7 +110,8 @@ describe('legacy_decoder', () => {
 
   it('maps legacy title sort to attributes.title when that is the registered field', () => {
     expect(
-      decodeLegacyParams({ sort: 'title' }, new Set(['attributes.title']))?.state.sort
+      decodeLegacyParams({ sort: 'title' }, new Map([['attributes.title', bothDirections]]))?.state
+        .sort
     ).toEqual({
       field: 'attributes.title',
       direction: 'asc',
@@ -124,6 +131,28 @@ describe('legacy_decoder', () => {
   it('uses TLV default sort directions when sortdir is absent', () => {
     expect(decodeLegacyParams({ sort: 'updatedAt' }, validSortFields)?.state.sort).toEqual({
       field: 'updatedAt',
+      direction: 'desc',
+    });
+  });
+
+  it('drops a legacy sort direction the field does not offer and warns', () => {
+    const onUnknown = jest.fn();
+
+    expect(
+      decodeLegacyParams({ sort: 'accessedAt', sortdir: 'asc' }, validSortFields, onUnknown)
+    ).toEqual({ state: {}, consumed: ['sort', 'sortdir'] });
+    expect(onUnknown).toHaveBeenCalledWith('sort', 'accessedAt');
+  });
+
+  it('keeps a legacy sort whose direction is offered', () => {
+    expect(
+      decodeLegacyParams({ sort: 'accessedAt', sortdir: 'desc' }, validSortFields)?.state.sort
+    ).toEqual({ field: 'accessedAt', direction: 'desc' });
+  });
+
+  it('uses the default direction when the field is not offered', () => {
+    expect(decodeLegacyParams({ sort: 'accessedAt' }, validSortFields)?.state.sort).toEqual({
+      field: 'accessedAt',
       direction: 'desc',
     });
   });
