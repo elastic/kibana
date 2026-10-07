@@ -31,11 +31,6 @@ interface AiIndexManagedRowProps {
   aiIndex: AiIndexHttpItem;
 }
 
-const getManagedIntegratedViaLabel = () =>
-  i18n.translate('xpack.contextEngine.landing.managedRow.integratedVia.elastic', {
-    defaultMessage: 'Elastic (built-in)',
-  });
-
 export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
   const { navigateToContextEngine } = useNavigation();
   const { summary, isLoading: isKiLoading } = useKiList({
@@ -61,7 +56,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
       })}
     >
       <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-        <EuiFlexItem css={{ minWidth: 0 }}>
+        <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
@@ -89,7 +84,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
             {aiIndex.description !== undefined && (
               <EuiFlexItem grow={false}>
                 <EuiText
-                  size="s"
+                  size="xs"
                   color="subdued"
                   data-test-subj="contextAiIndexManagedRowDescription"
                 >
@@ -100,7 +95,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false} css={{ width: 160 }}>
+        <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.contextEngine.landing.managedRow.knowledgeIndicatorsLabel"
@@ -109,18 +104,6 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
           </EuiText>
           <EuiText size="s" data-test-subj="contextAiIndexManagedRowKnowledgeIndicators">
             {isKiLoading ? '' : String(summary.total)}
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false} css={{ width: 160 }}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.contextEngine.landing.managedRow.integratedViaLabel"
-              defaultMessage="Integration"
-            />
-          </EuiText>
-          <EuiText size="s" data-test-subj="contextAiIndexManagedRowIntegratedVia">
-            {getManagedIntegratedViaLabel()}
           </EuiText>
         </EuiFlexItem>
 

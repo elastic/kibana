@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -36,7 +37,10 @@ import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NotificationsStart } from '@kbn/core/public';
 import {
+  DEFAULT_JUDGE_SCORE_DIRECTION,
   UserDefinedEvaluatorDraft,
+  getJudgeScoreDirection,
+  type Direction,
   type JudgeEvidence,
   type JudgeScore,
   type LlmJudgeConfig,
@@ -56,7 +60,13 @@ import {
   type ConnectorSelectorOption,
 } from '../../components/shared/connector_selector';
 import { getErrorMessage } from '../../utils/get_error_message';
-import { parseLabels, toFieldErrors, type FieldErrors } from './lib';
+import {
+  SCORE_DIRECTION_LABELS,
+  SCORE_DIRECTION_OPTIONS,
+  parseLabels,
+  toFieldErrors,
+  type FieldErrors,
+} from './lib';
 import * as i18n from './translations';
 
 interface EvaluatorEditorFlyoutProps {
@@ -69,6 +79,7 @@ interface ScoreFormValue {
   id: number;
   name: string;
   type: 'number' | 'categorical';
+  direction: Direction;
   description: string;
   labels: string;
 }
@@ -77,6 +88,7 @@ const EMPTY_SCORE: ScoreFormValue = {
   id: 0,
   name: '',
   type: 'number',
+  direction: DEFAULT_JUDGE_SCORE_DIRECTION,
   description: '',
   labels: '',
 };
@@ -97,6 +109,7 @@ const toScoreFormValue = (score: JudgeScore, id: number): ScoreFormValue => ({
   id,
   name: score.name,
   type: score.type,
+  direction: getJudgeScoreDirection(score),
   description: score.description ?? '',
   labels: (score.labels ?? [])
     .map(({ value, score: labelScore }) => `${value}=${labelScore}`)
@@ -250,6 +263,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
         parsedScores.push({
           name: scoreName,
           type: score.type,
+          direction: score.direction,
           labels,
           ...(score.description.trim() ? { description: score.description.trim() } : {}),
         });
@@ -259,6 +273,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       parsedScores.push({
         name: scoreName,
         type: score.type,
+        direction: score.direction,
         ...(score.description.trim() ? { description: score.description.trim() } : {}),
       });
     }
@@ -369,6 +384,10 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       for (let attempt = 0; attempt < PROFILE_PROBE_ATTEMPTS && !resolvedProfile; attempt++) {
         if (attempt > 0) {
           await new Promise((resolve) => setTimeout(resolve, PROFILE_PROBE_DELAY_MS));
+          // An edit or a close during the pause abandons the run, so spend no request on it.
+          if (isStaleRun()) {
+            return;
+          }
         }
 
         try {
@@ -628,6 +647,21 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                         />
                       </EuiFormRow>
                     </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow label={i18n.SCORE_DIRECTION_LABEL} fullWidth>
+                        <EuiSelect
+                          value={score.direction}
+                          onChange={(event) =>
+                            updateScore(score.id, {
+                              direction: event.target.value as Direction,
+                            })
+                          }
+                          options={[...SCORE_DIRECTION_OPTIONS]}
+                          fullWidth
+                          data-test-subj={`evalsEvaluatorScoreDirection-${score.id}`}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiSpacer size="l" />
                       <EuiToolTip content={i18n.REMOVE_SCORE_ARIA_LABEL} disableScreenReaderOutput>
@@ -752,8 +786,18 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                     <>
                       {testResult.error ? <p>{testResult.error.message}</p> : null}
                       {(testResult.scores ?? []).map((score) => (
-                        <p key={score.name}>
-                          <strong>{i18n.SCORE_RESULT(score.name, resultValue(score))}</strong>
+                        <p
+                          key={score.name}
+                          data-test-subj={`evalsEvaluatorTestScore-${score.name}`}
+                        >
+                          <strong>{i18n.SCORE_RESULT(score.name, resultValue(score))}</strong>{' '}
+                          <EuiBadge color="hollow">
+                            {
+                              SCORE_DIRECTION_LABELS[
+                                score.direction ?? testResult.evaluator.direction
+                              ]
+                            }
+                          </EuiBadge>
                           {score.explanation
                             ? ` ${i18n.SCORE_EXPLANATION(score.explanation)}`
                             : null}

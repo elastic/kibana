@@ -555,7 +555,11 @@ export class ProposalsService {
    * `workflowExecutionId` is the original's, because the gate execution is
    * still running and parked — approving the clone resumes that same execution.
    */
-  async clone({ id, executionError }: CloneProposalParams, spaceId: string): Promise<string> {
+  async clone(
+    { id, executionError }: CloneProposalParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
     // Asserted here rather than left to the caller, because this is reachable
@@ -615,6 +619,8 @@ export class ProposalsService {
     };
 
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+
+    await this.attachToConversation(cloneId, document.conversationId, document.title, request);
 
     return cloneId;
   }
@@ -742,6 +748,8 @@ export class ProposalsService {
       throw error;
     }
 
+    await this.attachToConversation(revisionId, document.conversationId, document.title, request);
+
     return { proposalId: revisionId, revision };
   }
 
@@ -772,6 +780,31 @@ export class ProposalsService {
    * not walk `supersedes` pointers hop by hop, so the cost does not grow with
    * the length of the chain.
    */
+  /**
+   * The proposal a gate workflow execution created, or undefined while its create step has not
+   * run yet. Revisions inherit the execution id, so the original (revision 1) is the one returned.
+   */
+  async findByWorkflowExecutionId(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<Proposal | undefined> {
+    if (blankToUndefined(workflowExecutionId) === undefined) {
+      return undefined;
+    }
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: { filter: [{ term: { workflowExecutionId } }, { term: { spaceId } }] },
+      },
+      sort: [{ createdAt: { order: 'asc' } }],
+    });
+    const hit = response.hits.hits[0];
+    return hit?._source && hit._id !== undefined
+      ? toProposal(hit._id, hit._source as ProposalDocument)
+      : undefined;
+  }
+
   async getLatestRevision(
     id: string,
     spaceId: string

@@ -7,10 +7,13 @@
 
 import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { MEMORY_AI_INDEX_ID, MEMORY_INDEX } from '../../common/memory';
 import {
-  createInvestigationOptimizeTelemetry,
+  createInvestigationMemoryTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -25,6 +28,30 @@ import {
   type MemoryOptimizeSummary,
 } from './optimize';
 import { createMemoryPageStore, type MemoryPageStore } from './page_store';
+
+/** Registers the AI index so Context Engine manages it; the backing index is created on first write. */
+export const registerMemoryAiIndex = (
+  contextEngine: ContextEnginePluginSetup | undefined,
+  logger: Logger
+): void => {
+  if (!contextEngine) {
+    logger.debug(
+      'contextEngine is not available — Semantic Memory AI index will not be registered'
+    );
+    return;
+  }
+
+  contextEngine.registerAiIndex(MEMORY_AI_INDEX_ID, {
+    description: i18n.translate('xpack.nightshiftInvestigations.memory.aiIndexDescription', {
+      defaultMessage:
+        'Nightshift Semantic Memory — durable lessons the investigator recalls before a run, ranked by usefulness.',
+    }),
+    dest: { type: 'index', value: MEMORY_INDEX },
+    automations: [],
+    sources: [],
+    traces: [],
+  });
+};
 
 export const createMemoryStore = ({
   esClient,
@@ -64,12 +91,7 @@ export const hydrateMemoryWorkspace = async ({
   return materializeMemory({ session, store, logger, query });
 };
 
-/**
- * Agent Builder fires the after-execution hook before it saves the round, so the workflow can
- * reach this step while the round does not exist yet. Waits briefly for it. Kept short: when the
- * workflow's request cannot read the conversation at all (Agent Builder masks that as not found),
- * a long wait would only delay the fallback.
- */
+/** Agent Builder fires the hook before saving the round, so wait briefly, then fall back. */
 const ROUND_READ_RETRY_DELAYS_MS = [1_000, 2_000];
 
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
@@ -82,12 +104,6 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
     });
   });
 
-/**
- * Reads the completed round's steps (reasoning, tool calls, tool results) through the public
- * Agent Builder conversation client, scoped to the workflow's own user and Space. Returns
- * `undefined` when the round cannot be read; the optimizer then works from tool-call parameters.
- * Never guesses a round: without a round id there is nothing safe to match.
- */
 export const loadRoundSteps = async ({
   agentBuilder,
   request,
@@ -188,7 +204,7 @@ export const runMemoryOptimize = async ({
     inference: getInference(),
     savedObjects: getSavedObjects(),
     uiSettings: getUiSettings(),
-    telemetryMetadata: createInvestigationOptimizeTelemetry(interactionId),
+    telemetryMetadata: createInvestigationMemoryTelemetry(interactionId),
     logger,
   });
   if (!model) {
@@ -223,6 +239,8 @@ export const runMemoryOptimize = async ({
     assistantMessage,
     toolCalls,
     investigation,
+    agentId,
+    conversationId,
     logger,
     signal,
   });

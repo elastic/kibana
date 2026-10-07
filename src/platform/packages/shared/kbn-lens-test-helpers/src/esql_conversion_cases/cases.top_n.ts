@@ -124,7 +124,10 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         col2: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2'],
-      expected: { success: false, reason: 'terms_order_by_not_supported' },
+      expected: {
+        success: false,
+        reason: 'terms_rank_metric_not_supported',
+      },
     },
     {
       group: 'top_n',
@@ -135,7 +138,10 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         col2: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2'],
-      expected: { success: false, reason: 'terms_order_by_not_supported' },
+      expected: {
+        success: false,
+        reason: 'terms_order_by_not_supported',
+      },
     },
     {
       group: 'top_n',
@@ -146,19 +152,39 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         col2: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2'],
-      expected: { success: false, reason: 'terms_other_bucket_not_supported' },
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
+      },
     },
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms alongside a second bucket dimension is not convertible',
+      description: 'terms alongside a date histogram is not convertible',
       columns: {
         col1: terms('host.keyword', {}),
         col2: dateHistogram('timestamp', { interval: '1h' }),
         col3: count(),
       },
       columnOrder: ['col1', 'col2', 'col3'],
-      expected: { success: false, reason: 'terms_not_supported' },
+      expected: {
+        success: false,
+        reason: 'terms_date_histogram_not_supported',
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms with accuracy mode and other bucket reports the highest-priority blocker',
+      columns: {
+        col1: terms('host.keyword', { accuracyMode: true, otherBucket: true }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
+      },
     },
     {
       group: 'top_n',
@@ -171,7 +197,10 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         col4: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2', 'col3', 'col4'],
-      expected: { success: false, reason: 'terms_multi_level_not_supported' },
+      expected: {
+        success: false,
+        reason: 'terms_multi_level_not_supported',
+      },
     },
     // Multi-terms parity has three parts: the outer dimension keeps only its top values,
     // `LIMIT n BY` keeps the inner top values per outer value, and a second SORT applies the
