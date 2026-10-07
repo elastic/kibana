@@ -27,6 +27,7 @@ import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inputs';
 import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
 import { formatAttachmentEvent } from './attachment_event_presentation';
+import type { ResumeAnchors } from './attachment_placement';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type {
   ContextTimelineEvent,
@@ -52,6 +53,8 @@ export interface ProcessedConversation {
   attachmentTypes: ProcessedAttachmentType[];
   /** Description of an attachment type, resolved when rendering (types can appear mid-run). */
   describeAttachmentType?: (type: string) => string | undefined;
+  /** Where each resume's input attachments render: `prompt_response` id → the items its pause waited on. */
+  resumeAnchors?: ResumeAnchors;
   attachmentStateManager: AttachmentStateManager;
   /** Persistent sub-agent roster */
   subagentRosterFallback?: Record<string, SubagentEntry>;
@@ -72,6 +75,7 @@ export const prepareConversation = async ({
   context,
   metadata,
   templateId,
+  resumeAnchors,
 }: {
   /** The conversation's normalized context timeline (see `eventsForContext`). */
   timeline: ContextTimelineEvent[];
@@ -80,6 +84,7 @@ export const prepareConversation = async ({
   context: AgentHandlerContext;
   metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
+  resumeAnchors?: ResumeAnchors;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const resolveContext: AttachmentResolveContext = {
@@ -199,6 +204,7 @@ export const prepareConversation = async ({
     describeAttachmentType: (type) =>
       attachmentsService.getTypeDefinition(type)?.getAgentDescription?.() ?? undefined,
     attachmentStateManager,
+    ...(resumeAnchors ? { resumeAnchors } : {}),
     ...(metadata !== undefined ? { metadata } : {}),
     ...(templateId !== undefined ? { template_id: templateId } : {}),
   };

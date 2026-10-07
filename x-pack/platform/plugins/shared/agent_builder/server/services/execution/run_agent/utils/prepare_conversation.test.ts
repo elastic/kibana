@@ -1390,6 +1390,21 @@ describe('prepareConversation', () => {
       expect(userMessage?.data).toMatchObject({ attachment_events: [linked] });
     });
 
+    it('passes the resume anchors through', async () => {
+      const resumeAnchors = new Map([
+        ['r1::prompt_response::1', [{ type: 'tool_call' as const, tool_call_id: 'c1' }]],
+      ]);
+
+      const result = await prepareConversationFromTimeline({
+        timeline: [],
+        nextInput: { message: 'hi' },
+        context: mockContext,
+        resumeAnchors,
+      });
+
+      expect(result.resumeAnchors).toBe(resumeAnchors);
+    });
+
     it('adds no attachment_events to a message without linked events', async () => {
       const result = await prepareConversationFromTimeline({
         timeline: completedRoundTimeline('r1'),
