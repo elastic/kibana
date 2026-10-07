@@ -22,7 +22,7 @@ export interface SecurityDatasetExample extends Example {
   output: {
     criteria: string[];
     /** Optional deterministic routing contract enforced by extra evaluators. */
-    routing?: 'forbid' | 'require';
+    routing?: 'forbid' | 'require' | 'require_troubleshooting';
     required_tool?: string;
   };
 }

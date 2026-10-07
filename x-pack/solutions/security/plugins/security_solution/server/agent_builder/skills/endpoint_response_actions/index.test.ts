@@ -31,12 +31,33 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.name).toBe('endpoint-response-actions');
       expect(skill.basePath).toBe('skills/security/endpoint');
       expect(skill.description).toContain('List enrolled Elastic Defend endpoints');
-      expect(skill.description).toContain('NOT for diagnosing');
-      expect(skill.description).toContain('(use elastic-defend-configuration-troubleshooting)');
+      expect(skill.description).toContain('Do not use this skill');
+      expect(skill.description).toContain('elastic-defend-configuration-troubleshooting');
       expect(skill.description).toContain('by hostname or agent ID');
       expect(skill.description).toContain('isolation state');
       expect(skill.description).toContain('response action by ID');
       expect(skill.content).toContain('Endpoint Response Actions Skill');
+    });
+
+    it('puts the diagnosis redirect before the status use cases', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const redirect = skill.description.toLowerCase().indexOf('why');
+      expect(redirect).toBeGreaterThanOrEqual(0);
+      expect(redirect).toBeLessThan(skill.description.indexOf('List enrolled'));
+      expect(skill.description).toContain('root cause');
+      expect(skill.description).toContain('failed');
+      expect(skill.description).toContain('elastic-defend-configuration-troubleshooting');
+      expect(skill.description.length).toBeLessThanOrEqual(1024);
+    });
+
+    it('stops diagnosis before routing to any response actions tool', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const process = skill.content.slice(skill.content.indexOf('## Process'));
+      expect(process).toMatch(/0\. .*WHY.*unhealthy.*offline.*missing/);
+      expect(process).toContain('WHY a response action');
+      expect(process).toContain("do not call this skill's tools");
+      expect(process).toContain('load elastic-defend-configuration-troubleshooting');
+      expect(process.indexOf('0.')).toBeLessThan(process.indexOf('1.'));
     });
 
     it('includes system instructions in content', () => {

@@ -33,7 +33,7 @@ const evaluateWith = async ({
   requiredTool,
   steps = [],
 }: {
-  routing?: 'forbid' | 'require';
+  routing?: 'forbid' | 'require' | 'require_troubleshooting';
   requiredTool?: string;
   steps?: unknown[];
 }) =>
@@ -49,6 +49,62 @@ const evaluateWith = async ({
   });
 
 describe('createEndpointResponseActionsRoutingEvaluator', () => {
+  it('mixed row passes with troubleshooting skill load even when ERA status is called', async () => {
+    const result = await evaluateWith({
+      routing: 'require_troubleshooting',
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: GET_ENDPOINT_STATUS_TOOL_ID,
+          results: [{ type: 'resource' }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: 'load_skill',
+          params: {
+            skill: 'skills/security/endpoint/elastic-defend-configuration-troubleshooting',
+          },
+          results: [{ type: 'resource' }],
+        },
+      ],
+    });
+
+    expect(result).toEqual({ score: 1, label: 'pass' });
+  });
+
+  it('mixed row fails with only ERA status and no troubleshooting load', async () => {
+    const result = await evaluateWith({
+      routing: 'require_troubleshooting',
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: GET_ENDPOINT_STATUS_TOOL_ID,
+          results: [{ type: 'resource' }],
+        },
+      ],
+    });
+
+    expect(result).toEqual({ score: 0, label: 'fail' });
+  });
+
+  it('mixed row accepts troubleshooting SKILL.md read without ERA status', async () => {
+    const result = await evaluateWith({
+      routing: 'require_troubleshooting',
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'read_file',
+          params: {
+            path: '/skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md',
+          },
+          results: [{ type: 'resource' }],
+        },
+      ],
+    });
+
+    expect(result).toEqual({ score: 1, label: 'pass' });
+  });
+
   it('negative row with only troubleshooting tools passes', async () => {
     const result = await evaluateWith({
       steps: [

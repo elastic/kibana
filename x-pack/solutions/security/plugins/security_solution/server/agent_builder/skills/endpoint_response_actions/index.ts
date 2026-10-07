@@ -43,6 +43,8 @@ improvise one with another tool.
 
 ## Process
 
+0. If the question asks WHY a host is unhealthy, offline, or missing, or WHY a response action (e.g. isolation) failed, stop: do not call this skill's tools; load elastic-defend-configuration-troubleshooting and follow it.
+
 1. **Route intent to the right tool**
    - list / available hosts → \`list_endpoints\`
    - status / is it isolated → \`get_endpoint_status\`
@@ -74,7 +76,7 @@ export const createEndpointResponseActionsSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID (healthy, unhealthy, updating, offline, inactive, unenrolled; unknown when not yet reported) and isolation state, and look up a previously dispatched response action by ID. Read-only — it does not isolate, release, or scan endpoints. NOT for diagnosing why an endpoint is unhealthy, offline, or missing, or why an isolation or other response action failed (use elastic-defend-configuration-troubleshooting).',
+      'Why is a host unhealthy, offline, or missing? Need to diagnose the root cause of a failed isolation or other response action? Do not use this skill; load elastic-defend-configuration-troubleshooting instead. List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID (healthy, unhealthy, updating, offline, inactive, unenrolled; unknown when not yet reported) and isolation state, and look up a previously dispatched response action by ID. Read-only — it does not isolate, release, or scan endpoints.',
     content: SYSTEM_INSTRUCTIONS,
     referencedContent: [
       {

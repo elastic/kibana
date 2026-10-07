@@ -25,7 +25,7 @@ export const GET_RESPONSE_ACTION_STATUS_TOOL_ID =
 export const ENDPOINT_RESPONSE_ACTIONS_TOOL_ROUTING_EVALUATOR_NAME =
   'Endpoint Response Actions Tool Routing';
 
-export type EndpointResponseActionsRouting = 'forbid' | 'require';
+export type EndpointResponseActionsRouting = 'forbid' | 'require' | 'require_troubleshooting';
 
 export interface EndpointResponseActionsRoutingExpected {
   routing?: EndpointResponseActionsRouting;
@@ -96,6 +96,13 @@ export function createEndpointResponseActionsRoutingEvaluator(): Evaluator<
     evaluate: async ({ output, expected }) => {
       const steps = getToolCallSteps(output);
       const routing = expected?.routing ?? 'forbid';
+
+      if (routing === 'require_troubleshooting') {
+        const passed = steps.some((step) =>
+          isSkillActivation(step, 'elastic-defend-configuration-troubleshooting')
+        );
+        return { score: passed ? 1 : 0, label: passed ? 'pass' : 'fail' };
+      }
 
       if (routing === 'require') {
         const requiredTool = expected?.required_tool ?? GET_ENDPOINT_STATUS_TOOL_ID;

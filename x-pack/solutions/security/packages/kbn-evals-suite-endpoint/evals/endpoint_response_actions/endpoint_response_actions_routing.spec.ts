@@ -74,7 +74,7 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
           },
           {
             input: {
-              question: 'Check host eval-routing-unhealthy status — is it unhealthy and why?',
+              question: 'Why is host eval-routing-unhealthy unhealthy and missing check-ins?',
             },
             output: {
               criteria: [
@@ -89,6 +89,38 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
             metadata: {
               golden_id: 'era-011b',
               row_type: 'negative_routing',
+            },
+          },
+        ],
+      },
+      extraEvaluators: ROUTING_EVALUATORS,
+    });
+  });
+
+  evaluate('era-014 mixed host status and diagnosis routing', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint: era-014 mixed host status and diagnosis routing',
+        description:
+          'Validates that a combined status and diagnosis question loads troubleshooting; response actions status tools are permitted.',
+        examples: [
+          {
+            input: {
+              question: 'Check host eval-routing-unhealthy status — is it unhealthy and why?',
+            },
+            output: {
+              criteria: [
+                'Queried endpoint metadata or agent health evidence for eval-routing-unhealthy',
+                'Identified the host as unhealthy or offline with missed check-ins from endpoint or agent metadata',
+                'Explained the cause of the unhealthy state, such as connectivity loss or missed check-ins',
+                'Recommended remediation for the host connectivity or Elastic Defend health, such as restoring agent connectivity or restarting the endpoint service',
+                `Activated the elastic-defend-configuration-troubleshooting skill (via load_skill or reading its SKILL.md at ${TROUBLESHOOTING_SKILL_PATH})`,
+              ],
+              routing: 'require_troubleshooting',
+            },
+            metadata: {
+              golden_id: 'era-014',
+              row_type: 'mixed_routing',
             },
           },
         ],
