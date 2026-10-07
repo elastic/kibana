@@ -20,7 +20,7 @@ export interface BuildAssumableByParams {
 }
 
 /**
- * Relay's platform service account. Matches relay-service Helm
+ * Relay's platform service account. Matches relay-service
  * `uiam.serviceAccountId` (SPIFFE `spiffe://relay-service.elastic.co`).
  * Not caller-supplied.
  */
