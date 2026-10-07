@@ -29,6 +29,7 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 import { getNumber } from './common';
 import { isGridColumnId, type GridColumnId } from './columns/registry';
 import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
@@ -345,7 +346,8 @@ const AlertCountCell = memo(
     onAlertCountClick?: (row: Record<string, unknown>) => void;
   }) => {
     if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
-    const alertCount = value;
+    const count = <FormattedCount count={value} />;
+    const fullCount = value.toLocaleString();
     return (
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
         <EuiFlexItem css={noPointerEventsCss}>
@@ -357,18 +359,23 @@ const AlertCountCell = memo(
             low={getNumber(row, 'alert_low') ?? 0}
           />
         </EuiFlexItem>
-        {onAlertCountClick ? (
-          <EuiBadge
-            color="hollow"
-            onClick={() => onAlertCountClick(row)}
-            onClickAriaLabel={i18nStrings.openAlerts}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            {alertCount}
-          </EuiBadge>
-        ) : (
-          <EuiBadge color="hollow">{alertCount}</EuiBadge>
-        )}
+        <EuiFlexItem grow={false}>
+          {onAlertCountClick ? (
+            <EuiBadge
+              color="hollow"
+              title={fullCount}
+              onClick={() => onAlertCountClick(row)}
+              onClickAriaLabel={i18nStrings.openAlerts}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              {count}
+            </EuiBadge>
+          ) : (
+            <EuiBadge color="hollow" title={fullCount}>
+              {count}
+            </EuiBadge>
+          )}
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

@@ -187,7 +187,7 @@ const enrichAlerts = async (
 export const alertCountColumn = {
   id: ALERT_COUNT_FIELD,
   displayAsText: 'Alerts',
-  initialWidth: 100,
+  initialWidth: 140,
   isSortable: true,
   sortKind: 'foreign',
   isExpandable: false,
