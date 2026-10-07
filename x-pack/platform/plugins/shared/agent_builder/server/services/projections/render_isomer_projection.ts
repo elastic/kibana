@@ -10,9 +10,9 @@ import type {
   OriginIsomerProjection,
   RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
-import { slackProjection } from '../slack';
-import { replyToSpec } from '../spec/reply_to_spec';
-import { resolveSpec } from '../spec/resolve_spec';
+import { replyToSpec } from './reply_to_spec';
+import { resolveSpec } from './resolve_spec';
+import { slackProjection } from './slack';
 import type { ProjectionContext, IsomerProjectionDefinition } from './types';
 
 /** The projections of rounds, one per origin type. */

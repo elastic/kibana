@@ -26,8 +26,8 @@ import {
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import { renderIsomerProjection } from '@kbn/agent-builder-surfaces';
 import type { AttachmentServiceStart } from '../../attachments';
+import { renderIsomerProjection } from '../../projections';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 

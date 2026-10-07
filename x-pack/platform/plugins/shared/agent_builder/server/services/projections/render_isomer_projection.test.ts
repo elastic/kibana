@@ -14,6 +14,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { AttachmentServiceStart } from '../attachments';
 import type { ProjectionContext } from './types';
 import { renderIsomerProjection } from './render_isomer_projection';
 
@@ -62,7 +63,7 @@ const createContext = (
   overrides: Partial<ProjectionContext> = {}
 ): ProjectionContext & { originType?: ConversationOriginType } => ({
   originType: ConversationOriginType.Slack,
-  attachmentsService: { getTypeDefinition: () => undefined },
+  attachmentsService: { getTypeDefinition: () => undefined } as unknown as AttachmentServiceStart,
   logger: loggerMock.create(),
   ...overrides,
 });
@@ -82,12 +83,12 @@ describe('renderIsomerProjection', () => {
     const context = createContext({
       attachmentsService: {
         getTypeDefinition: () => ({
-          toSpec: (data) => ({
+          toSpec: (data: { query: string }) => ({
             type: 'view',
-            body: [{ type: 'markdown', text: `\`${(data as { query: string }).query}\`` }],
+            body: [{ type: 'markdown', text: `\`${data.query}\`` }],
           }),
         }),
-      },
+      } as unknown as AttachmentServiceStart,
     });
 
     const slack = JSON.stringify(renderIsomerProjection(event, context)?.slack);

@@ -7,15 +7,13 @@
 
 import type { OriginIsomerProjection } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
-import type { Spec } from '../spec/pack';
-import type { AttachmentSpecMapping } from '../spec/resolve_spec';
+import type { AttachmentServiceStart } from '../attachments';
+import type { Spec } from './pack';
 
 /** What a projection needs to render a round. */
 export interface ProjectionContext {
   /** Looks up attachment types, whose `toSpec` renders attachments in place of their tags. */
-  attachmentsService: {
-    getTypeDefinition: (type: string) => { toSpec?: AttachmentSpecMapping } | undefined;
-  };
+  attachmentsService: AttachmentServiceStart;
   logger: Logger;
 }
 

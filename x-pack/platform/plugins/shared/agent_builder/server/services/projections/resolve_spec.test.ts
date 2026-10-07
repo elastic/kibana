@@ -7,8 +7,9 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { AttachmentSpecMapping } from '@kbn/agent-builder-server/attachments';
 import type { Spec } from './pack';
-import { resolveSpec, type AttachmentSpecMapping, type ResolveSpecOptions } from './resolve_spec';
+import { resolveSpec, type ResolveSpecOptions } from './resolve_spec';
 
 const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
   id: 'a1',

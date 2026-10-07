@@ -6,6 +6,7 @@
  */
 
 import type { Composition, PrimitiveNode } from '@elastic/isomer-sdk';
+import type { MarkdownNode } from '@kbn/agent-builder-server/attachments';
 import {
   composePacks,
   createPrimitiveDispatcher,
@@ -14,11 +15,6 @@ import {
   requiredString,
   z,
 } from '@elastic/isomer-sdk';
-
-export interface MarkdownNode extends PrimitiveNode {
-  type: 'markdown';
-  text: string;
-}
 
 /**
  * A `<render_attachment>` tag of the reply. `version` is absent when the tag has none.
@@ -33,9 +29,6 @@ export type SpecNode = MarkdownNode | AttachmentNode;
 
 /** A reply as an Isomer composition. */
 export type Spec = Composition<SpecNode>;
-
-/** What an attachment type's `toSpec` mapping returns: a composition without attachment nodes. */
-export type AttachmentSpec = Composition<MarkdownNode>;
 
 const markdown = definePrimitive<MarkdownNode>({
   type: 'markdown',

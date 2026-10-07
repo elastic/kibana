@@ -218,7 +218,6 @@
     "@kbn/agent-builder-skill-loader": "workspace:*",
     "@kbn/agent-builder-sml-plugin": "workspace:*",
     "@kbn/agent-builder-sml-test-types-plugin": "workspace:*",
-    "@kbn/agent-builder-surfaces": "workspace:*",
     "@kbn/agent-builder-tools-base": "workspace:*",
     "@kbn/agent-builder-visualizations": "workspace:*",
     "@kbn/agent-builder-visualizations-common": "workspace:*",

@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/core-ui-settings-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/connector-specs'
-  - '@kbn/agent-builder-surfaces'
 tags:
   - shared-common
   - package

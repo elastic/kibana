@@ -17,6 +17,12 @@ export type {
   AttachmentValidateContext,
 } from './type_definition';
 export type {
+  AttachmentSpec,
+  AttachmentSpecContext,
+  AttachmentSpecMapping,
+  MarkdownNode,
+} from './spec';
+export type {
   AttachmentBoundedTool,
   BuiltinAttachmentBoundedTool,
   IndexSearchAttachmentBoundedTool,

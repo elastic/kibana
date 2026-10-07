@@ -572,9 +572,6 @@ importers:
       '@kbn/agent-builder-sml-test-types-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/agent_builder_sml/plugins/sml_test_types
-      '@kbn/agent-builder-surfaces':
-        specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-surfaces
       '@kbn/agent-builder-tools-base':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
@@ -8950,8 +8947,6 @@ importers:
   x-pack/platform/packages/shared/agent-builder/agent-builder-server: {}
 
   x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader: {}
-
-  x-pack/platform/packages/shared/agent-builder/agent-builder-surfaces: {}
 
   x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base: {}
 

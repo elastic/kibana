@@ -10,19 +10,13 @@ import {
   type AttachmentVersionRef,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentSpec,
+  AttachmentSpecMapping,
+  MarkdownNode,
+} from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
-import type { AttachmentNode, AttachmentSpec, MarkdownNode, Spec, SpecNode } from './pack';
-
-export interface AttachmentSpecContext {
-  attachment: VersionedAttachment;
-  version: number;
-}
-
-/** Maps the data of one attachment version to the composition shown in its place. */
-export type AttachmentSpecMapping<TContent = unknown> = (
-  data: TContent,
-  context: AttachmentSpecContext
-) => AttachmentSpec;
+import type { AttachmentNode, Spec, SpecNode } from './pack';
 
 export interface ResolveSpecOptions {
   /** The conversation's attachments, as carried by `round_complete`. */

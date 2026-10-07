@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { AttachmentSpecMapping } from '@kbn/agent-builder-surfaces';
+import type { AttachmentSpecMapping } from './spec';
 import type { AttachmentBoundedTool } from './tools';
 
 /**

@@ -7,8 +7,8 @@
 
 import { renderSlackEnvelope } from '@elastic/isomer-sdk/slack';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
-import type { IsomerProjectionDefinition } from '../projections/types';
-import { specDispatcher } from '../spec/pack';
+import { specDispatcher } from '../pack';
+import type { IsomerProjectionDefinition } from '../types';
 
 /** Slack projection: the reply rendered as Block Kit. */
 export const slackProjection: IsomerProjectionDefinition<ConversationOriginType.Slack> = {
