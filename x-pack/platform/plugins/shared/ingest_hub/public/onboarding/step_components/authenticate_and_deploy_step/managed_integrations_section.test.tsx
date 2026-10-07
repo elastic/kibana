@@ -796,6 +796,40 @@ describe('ManagedIntegrationsSection', () => {
       expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(false);
     });
 
+    it('reports a replaced stored value as a change in the same session, without ?deploymentId=', () => {
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ searchParams: '', connectorId: undefined });
+      renderSection({
+        showIdentityFederation: false,
+        storedSecretFields: STORED,
+        onReplaceFormDirtyChange,
+      });
+      fireEvent.click(screen.getByText('fire-fields'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('keeps the auth method while a stored value is replaced in the same session', () => {
+      const setStaticKeys = jest.fn();
+      const clearStagedStaticKeys = jest.fn();
+      setupMocks({
+        searchParams: '',
+        connectorId: undefined,
+        setStaticKeys,
+        clearStagedStaticKeys,
+      });
+      MockStaticKeys.mockImplementation(
+        ({ onFieldsChange }: { onFieldsChange?: (f: unknown) => void }) => (
+          <div data-test-subj="static-keys">
+            <button onClick={() => onFieldsChange?.(undefined)}>no-keys-yet</button>
+          </div>
+        )
+      );
+      renderSection({ showIdentityFederation: false, storedSecretFields: STORED });
+      fireEvent.click(screen.getByText('no-keys-yet'));
+      expect(clearStagedStaticKeys).toHaveBeenCalledTimes(1);
+      expect(setStaticKeys).not.toHaveBeenCalled();
+    });
+
     it('marks the form dirty when a stored value is replaced', () => {
       const onReplaceFormDirtyChange = jest.fn();
       const setStaticKeys = jest.fn();

@@ -169,23 +169,26 @@ export function ManagedIntegrationsSection({
     [setConnectorId]
   );
 
-  // In edit mode (resume) typing into a key field, replacing a stored one or not, is a change to
-  // deploy; keeping every stored value is not. Emptying the fields again clears the change.
+  // A deployment is being edited when it was resumed (`?deploymentId=`) or when its policies hold
+  // stored keys, which is also the case right after a deploy in the same session. Typing into a
+  // key field there, replacing a stored one or not, is a change to deploy; keeping every stored
+  // value is not. Emptying the fields again clears the change.
+  const isEditingDeployedKeys = isStaticKeysEditMode || storedSecretFields.length > 0;
   const handleStoredKeysFormChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
-      if (isStaticKeysEditMode && !fields) {
+      if (isEditingDeployedKeys && !fields) {
         // The form has no access key id yet (for example the secret was typed first). Drop only the
-        // in-memory keys: clearing the auth method would leave resume mode, and the access key
+        // in-memory keys: clearing the auth method would leave edit mode, and the access key
         // typed next would no longer mark the deployment as changed.
         clearStagedStaticKeys();
       } else {
         setStaticKeys(fields);
       }
-      if (isStaticKeysEditMode) {
+      if (isEditingDeployedKeys) {
         onReplaceFormDirtyChange?.(Boolean(fields?.access_key_id || fields?.secret_access_key));
       }
     },
-    [setStaticKeys, clearStagedStaticKeys, isStaticKeysEditMode, onReplaceFormDirtyChange]
+    [setStaticKeys, clearStagedStaticKeys, isEditingDeployedKeys, onReplaceFormDirtyChange]
   );
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
