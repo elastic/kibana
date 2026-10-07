@@ -16,7 +16,6 @@ import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { AgentClient } from '../../services/agents';
 import type { AgentPolicy } from '../../types';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
-import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 import {
   bulkGetAgentPoliciesHandler,
@@ -211,7 +210,6 @@ describe('Agent policy API handlers', () => {
     it.each([true, false])('should pass showAgentless=%s to the service', async (showAgentless) => {
       const request = httpServerMock.createKibanaRequest({
         query: { showAgentless },
-        authzResult: { [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ]: true },
       });
       await getAgentPoliciesHandler(context, request, response);
       expect(agentPolicyServiceMock.list).toHaveBeenCalledWith(
