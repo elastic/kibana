@@ -330,6 +330,8 @@ export function useMiDeploy({
         const { results, sharedRefs: storedRefs } = await runWithSharedSecrets({
           items: [...byPolicy.entries()],
           hasTypedSecrets,
+          // An update can delete the secret it replaced: finish one before starting the next.
+          sequential: true,
           run: ([policyId, instanceIdsForPolicy], sharedRefs) =>
             updateManagedIntegrationsPolicy(policyId, instanceIdsForPolicy, {
               instances: serviceSettings?.instances ?? [],

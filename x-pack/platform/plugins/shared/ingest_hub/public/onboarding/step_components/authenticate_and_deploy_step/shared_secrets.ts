@@ -17,6 +17,13 @@ interface RunWithSharedSecretsOptions<TItem, TResult> {
    */
   initialRefs?: ExistingSecretRefs;
   /**
+   * Run the items one after another instead of at once. Updating a policy may delete the secret it
+   * replaced; Fleet only checks the compiled policies of the policy being updated, so a policy
+   * that has switched to the new secret but whose new revision is not written yet could still be
+   * running on the old one. Finishing each update before starting the next rules that out.
+   */
+  sequential?: boolean;
+  /**
    * Creates or updates one policy. `sharedRefs` is defined when the policy must use those refs
    * instead of the typed credentials (the typed ones were already stored by an earlier policy).
    */
@@ -39,6 +46,7 @@ export async function runWithSharedSecrets<TItem, TResult>({
   items,
   hasTypedSecrets,
   initialRefs,
+  sequential = false,
   run,
   getPolicyId,
   fetchRefs,
@@ -47,17 +55,24 @@ export async function runWithSharedSecrets<TItem, TResult>({
   /** Refs created by this run for the typed credentials, when it created any. */
   sharedRefs: ExistingSecretRefs | undefined;
 }> {
+  const runAll = async (
+    toRun: TItem[],
+    refs: ExistingSecretRefs | undefined
+  ): Promise<Array<PromiseSettledResult<TResult>>> => {
+    if (!sequential) return Promise.allSettled(toRun.map((item) => run(item, refs)));
+    const settled: Array<PromiseSettledResult<TResult>> = [];
+    for (const item of toRun) {
+      const [result] = await Promise.allSettled([run(item, refs)]);
+      settled.push(result);
+    }
+    return settled;
+  };
+
   if (initialRefs && initialRefs.size > 0) {
-    return {
-      results: await Promise.allSettled(items.map((item) => run(item, initialRefs))),
-      sharedRefs: initialRefs,
-    };
+    return { results: await runAll(items, initialRefs), sharedRefs: initialRefs };
   }
   if (!hasTypedSecrets || items.length === 0) {
-    return {
-      results: await Promise.allSettled(items.map((item) => run(item, undefined))),
-      sharedRefs: undefined,
-    };
+    return { results: await runAll(items, undefined), sharedRefs: undefined };
   }
 
   const [first, ...rest] = items;
@@ -73,13 +88,13 @@ export async function runWithSharedSecrets<TItem, TResult>({
 
   if (rest.length === 0) return { results: [firstResult], sharedRefs };
   if (sharedRefs) {
-    const restResults = await Promise.allSettled(rest.map((item) => run(item, sharedRefs)));
-    return { results: [firstResult, ...restResults], sharedRefs };
+    return { results: [firstResult, ...(await runAll(rest, sharedRefs))], sharedRefs };
   }
   // Nothing to share: the first run failed or its refs could not be read.
   const restRun = await runWithSharedSecrets({
     items: rest,
     hasTypedSecrets,
+    sequential,
     run,
     getPolicyId,
     fetchRefs,

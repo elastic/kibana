@@ -124,4 +124,85 @@ describe('runWithSharedSecrets', () => {
     ]);
     expect(sharedRefs).toBeUndefined();
   });
+
+  describe('sequential', () => {
+    const deferred = () => {
+      let resolve!: () => void;
+      const promise = new Promise<void>((r) => {
+        resolve = r;
+      });
+      return { promise, resolve };
+    };
+
+    it('starts the next item only after the previous one has finished', async () => {
+      const gates = [deferred(), deferred(), deferred()];
+      const started: string[] = [];
+      const items = ['a', 'b', 'c'];
+      const run = jest.fn(async (item: string) => {
+        started.push(item);
+        await gates[items.indexOf(item)].promise;
+        return item;
+      });
+      const fetchRefs = jest.fn(async () => refs('new-secret'));
+
+      const done = runWithSharedSecrets({
+        items,
+        hasTypedSecrets: true,
+        sequential: true,
+        run,
+        getPolicyId,
+        fetchRefs,
+      });
+
+      await new Promise((r) => setImmediate(r));
+      expect(started).toEqual(['a']);
+      gates[0].resolve();
+      await new Promise((r) => setImmediate(r));
+      expect(started).toEqual(['a', 'b']);
+      gates[1].resolve();
+      await new Promise((r) => setImmediate(r));
+      expect(started).toEqual(['a', 'b', 'c']);
+      gates[2].resolve();
+      const { results } = await done;
+      expect(results.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled', 'fulfilled']);
+    });
+
+    it('keeps going after a failure and keeps the results in item order', async () => {
+      const run = jest.fn(async (item: string) => {
+        if (item === 'b') throw new Error('boom');
+        return item;
+      });
+      const { results } = await runWithSharedSecrets({
+        items: ['a', 'b', 'c'],
+        hasTypedSecrets: false,
+        sequential: true,
+        run,
+        getPolicyId,
+        fetchRefs: jest.fn(),
+      });
+      expect(results.map((r) => r.status)).toEqual(['fulfilled', 'rejected', 'fulfilled']);
+    });
+
+    it('runs everything at once when not sequential', async () => {
+      const gates = [deferred(), deferred()];
+      const started: string[] = [];
+      const items = ['a', 'b'];
+      const run = jest.fn(async (item: string) => {
+        started.push(item);
+        await gates[items.indexOf(item)].promise;
+        return item;
+      });
+      const done = runWithSharedSecrets({
+        items,
+        hasTypedSecrets: false,
+        run,
+        getPolicyId,
+        fetchRefs: jest.fn(),
+      });
+      await new Promise((r) => setImmediate(r));
+      expect(started).toEqual(['a', 'b']);
+      gates.forEach((g) => g.resolve());
+      await done;
+    });
+  });
 });

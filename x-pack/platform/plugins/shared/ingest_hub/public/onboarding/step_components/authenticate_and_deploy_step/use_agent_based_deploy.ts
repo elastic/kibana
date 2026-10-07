@@ -309,6 +309,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             const { results: redeployResults, sharedRefs } = await runWithSharedSecrets({
               items: [...byPolicy.entries()],
               hasTypedSecrets: hasTypedKeys,
+              // An update can delete the secret it replaced: finish one before starting the next.
+              sequential: true,
               run: ([policyId, instanceIdsForPolicy], shared) =>
                 updateAgentBasedPolicy(policyId, instanceIdsForPolicy, {
                   instances: serviceSettings?.instances ?? [],
