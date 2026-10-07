@@ -299,11 +299,13 @@ export const updateVendorApi = async ({
     const unchanged = (await read(file)) === files[file];
     const apiVersion = fetchAll ? apiVersionOf(document) : previous?.sources[name]?.apiVersion;
     const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;
+    const note = previous?.sources[name]?.note;
     sources[name] = {
       format: formats[name],
       url: urls[name],
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),
+      ...(note === undefined ? {} : { note }),
     };
   }
   files[MANIFEST] = serializeManifest({

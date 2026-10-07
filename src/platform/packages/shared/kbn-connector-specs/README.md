@@ -670,7 +670,7 @@ Other handler errors, auth types that can't be used against the contract mock, a
 }
 ```
 
-- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes.
+- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
 - `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-contract-mock` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
 - `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A `{name}` path segment matches any value, as the generated inputs vary. A request that matches nothing and isn't listed fails the script.

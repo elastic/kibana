@@ -192,6 +192,19 @@ describe('updateVendorApi', () => {
     );
   });
 
+  it('keeps the note written on a source', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    const manifest = await readJson('manifest.json');
+    manifest.sources.main.note = 'A test fixture the vendor generates from its API definitions';
+    await fs.writeFile(path.join(directory, 'manifest.json'), JSON.stringify(manifest));
+    documents[SPEC_URL] = specYaml('1.1');
+
+    await update({ refresh: true });
+    expect((await readJson('manifest.json')).sources.main.note).toBe(
+      'A test fixture the vendor generates from its API definitions'
+    );
+  });
+
   it('reports unmatched requests until the manifest explains them', async () => {
     await update({ sources: { main: SPEC_URL } });
 

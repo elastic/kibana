@@ -20,6 +20,8 @@ const sourceSchema = z
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
     fetchedAt: z.iso.datetime(),
+    /** Written by hand, e.g. to explain an unusual source such as a vendor test fixture. */
+    note: z.string().min(1).optional(),
   })
   .strict();
 
