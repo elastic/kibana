@@ -358,8 +358,7 @@ export function ManagedIntegrationsSection({
                     title={i18n.translate(
                       'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.resumeCredentialsCallout',
                       {
-                        defaultMessage:
-                          'Credentials aren’t saved between sessions — re-enter them to continue.',
+                        defaultMessage: 'Credentials couldn’t be found, re-enter them to continue.',
                       }
                     )}
                     data-test-subj="managedIntegrationsSection-resumeCredentialsCallout"
