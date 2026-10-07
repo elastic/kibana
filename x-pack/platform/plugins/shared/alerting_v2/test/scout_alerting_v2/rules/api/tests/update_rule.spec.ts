@@ -681,7 +681,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       );
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
-        body: { query: { base: 'FROM logs-* | STATS count = COUNT(*) BY host.name' } },
+        body: { query: { breach: null } },
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
