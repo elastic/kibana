@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
+import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
 
 /**
@@ -132,8 +133,28 @@ export class ThreatMatchRuleCreatePage {
 
     await this.dismissProjectPickerTour();
     await this.page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
+    await this.waitForFormReady(this.customQueryInput);
     await this.page.testSubj.locator('threatMatchRuleType').click();
     await this.page.testSubj.locator('ruleThreatMatchMappingField').waitFor({ state: 'visible' });
+    // Selecting the rule type renders the Indicator match fields, which start out disabled too
+    await this.waitForFormReady(this.customQueryInput, this.indicatorQueryInput);
+  }
+
+  /**
+   * Waits until the create rule form has finished initializing.
+   *
+   * The form stays disabled while user info, lists and the data view initialize. The query
+   * inputs are the controls that reliably stay `disabled` until initialization is done, and they
+   * are the first thing the tests interact with afterwards, so waiting for them to become enabled
+   * is the readiness signal.
+   */
+  private async waitForFormReady(...queryInputs: Locator[]): Promise<void> {
+    for (const queryInput of queryInputs) {
+      await queryInput.and(this.page.locator(':enabled')).waitFor({
+        state: 'visible',
+        timeout: APP_LOAD_TIMEOUT_MS,
+      });
+    }
   }
 
   /**
