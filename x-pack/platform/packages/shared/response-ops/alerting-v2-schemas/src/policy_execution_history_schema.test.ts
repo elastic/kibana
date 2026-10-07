@@ -14,7 +14,9 @@ import {
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
 } from './constants';
 import {
+  MAX_EMBEDDED_ALERTS_PER_ITEM,
   MAX_EMBEDDED_RULES_PER_ITEM,
+  dispatchFailureReasonSchema,
   listPolicyExecutionHistoryRequestSchema,
   listPolicyExecutionHistoryResponseSchema,
   policyExecutionHistoryItemSchema,
@@ -27,10 +29,11 @@ const validItem = {
   dispatched_at: '2026-06-01T00:00:00.000Z',
   policy: { id: 'policy-1', name: 'My policy' },
   outcome: 'success' as const,
-  episode_count: 2,
+  alert_count: 2,
+  alerts: [{ id: 'alert-1' }, { id: 'alert-2' }],
   action_group_count: 1,
   rules: [{ id: 'rule-1', name: 'Rule 1' }],
-  total_rule_count: 1,
+  rule_count: 1,
   workflows: [{ id: 'workflow-1', name: 'Workflow 1' }],
   error: null,
 };
@@ -113,7 +116,7 @@ describe('policy_execution_history_schema', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('search');
         expect(parsed).not.toHaveProperty('rule_ids');
-        expect(parsed).not.toHaveProperty('episode_ids');
+        expect(parsed).not.toHaveProperty('alert_ids');
         expect(parsed).not.toHaveProperty('outcomes');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
@@ -221,21 +224,21 @@ describe('policy_execution_history_schema', () => {
       });
     });
 
-    describe('episode_ids', () => {
+    describe('alert_ids', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ episode_ids: 'episode-x' });
-        expect(parsed.episode_ids).toEqual(['episode-x']);
+        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ alert_ids: 'episode-x' });
+        expect(parsed.alert_ids).toEqual(['episode-x']);
       });
 
-      it('accepts an array of valid episode ids', () => {
+      it('accepts an array of valid alert ids', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({
-          episode_ids: ['episode-x', 'episode-y'],
+          alert_ids: ['episode-x', 'episode-y'],
         });
-        expect(parsed.episode_ids).toEqual(['episode-x', 'episode-y']);
+        expect(parsed.alert_ids).toEqual(['episode-x', 'episode-y']);
       });
 
       it('rejects an empty array', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ episode_ids: [] }).success).toBe(
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ alert_ids: [] }).success).toBe(
           false
         );
       });
@@ -243,7 +246,7 @@ describe('policy_execution_history_schema', () => {
       it(`rejects an entry longer than ID_MAX_LENGTH (${ID_MAX_LENGTH}) chars`, () => {
         expect(
           listPolicyExecutionHistoryRequestSchema.safeParse({
-            episode_ids: ['episode-x', 'a'.repeat(ID_MAX_LENGTH + 1)],
+            alert_ids: ['episode-x', 'a'.repeat(ID_MAX_LENGTH + 1)],
           }).success
         ).toBe(false);
       });
@@ -361,8 +364,10 @@ describe('policy_execution_history_schema', () => {
         expect(listPolicyExecutionHistoryRequestSchema.parse({ per_page: '25' }).per_page).toBe(25);
       });
 
-      it('accepts per_page=0 for a count-only read', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.parse({ per_page: 0 }).per_page).toBe(0);
+      it('rejects per_page=0', () => {
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ per_page: 0 }).success).toBe(
+          false
+        );
       });
 
       it('rejects negative per_page', () => {
@@ -415,15 +420,6 @@ describe('policy_execution_history_schema', () => {
           listPolicyExecutionHistoryRequestSchema.safeParse({ page: boundaryPage + 1 }).success
         ).toBe(false);
       });
-
-      it('never trips the guard for a count-only read (per_page=0)', () => {
-        expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({
-            page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
-            per_page: 0,
-          }).success
-        ).toBe(true);
-      });
     });
 
     it('round-trips a fully populated query (with already-array fields)', () => {
@@ -432,7 +428,7 @@ describe('policy_execution_history_schema', () => {
         per_page: 25,
         from: '2026-06-01T00:00:00Z',
         to: '2026-06-02T00:00:00Z',
-        episode_ids: ['episode-x', 'episode-y'],
+        alert_ids: ['episode-x', 'episode-y'],
         sort_field: 'dispatched_at' as const,
         sort_order: 'asc' as const,
         search: 'db outage',
@@ -479,6 +475,18 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.parse(item)).toEqual(item);
     });
 
+    it.each(dispatchFailureReasonSchema.options)(
+      'accepts the %s failure reason',
+      (failureReason) => {
+        const item = {
+          ...validItem,
+          outcome: 'failure' as const,
+          failure_reason: failureReason,
+        };
+        expect(policyExecutionHistoryItemSchema.parse(item)).toEqual(item);
+      }
+    );
+
     it('requires error.stack_trace when error is present', () => {
       const item = { ...validItem, error: { message: 'boom' } };
       expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(false);
@@ -506,6 +514,29 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, rules }).success).toBe(
         false
       );
+    });
+
+    it(`accepts an alerts array at the embedded cap (${MAX_EMBEDDED_ALERTS_PER_ITEM})`, () => {
+      const alerts = Array.from({ length: MAX_EMBEDDED_ALERTS_PER_ITEM }, (_, i) => ({
+        id: `alert-${i}`,
+      }));
+      expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, alerts }).success).toBe(
+        true
+      );
+    });
+
+    it(`rejects an alerts array above the embedded cap (${MAX_EMBEDDED_ALERTS_PER_ITEM})`, () => {
+      const alerts = Array.from({ length: MAX_EMBEDDED_ALERTS_PER_ITEM + 1 }, (_, i) => ({
+        id: `alert-${i}`,
+      }));
+      expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, alerts }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects a missing alerts key (absence is encoded as an empty array)', () => {
+      const { alerts: _omit, ...rest } = validItem;
+      expect(policyExecutionHistoryItemSchema.safeParse(rest).success).toBe(false);
     });
 
     it('rejects rows missing a required field', () => {
@@ -555,7 +586,7 @@ describe('policy_execution_history_schema', () => {
       expect(parsed.items).toHaveLength(1);
     });
 
-    it('accepts per_page=0 for a count-only read', () => {
+    it('rejects per_page=0', () => {
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [],
@@ -564,7 +595,7 @@ describe('policy_execution_history_schema', () => {
           total: 42,
           search_matches: null,
         }).success
-      ).toBe(true);
+      ).toBe(false);
     });
 
     it('rejects page below 1', () => {

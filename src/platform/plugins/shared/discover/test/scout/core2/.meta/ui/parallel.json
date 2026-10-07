@@ -1,5 +1,5 @@
 {
-  "sha1": "d34aeaa5c610c94bc66a0ffa543a4989e2dc81f1",
+  "sha1": "1656a557f18342b879ce87940fb192d53af2d3dd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,46 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "785a7d29d403cfa-66af52657e98f78",
+      "title": "Discover inline data view editing discards field edits without changing the shared inline view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_view_editing.spec.ts",
+        "line": 38,
+        "column": 88
+      }
+    },
+    {
+      "id": "785a7d29d403cfa-b375f0fa9863fb6",
+      "title": "Discover inline data view editing keeps filters editable after changing the view and saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_view_editing.spec.ts",
+        "line": 59,
+        "column": 22
       }
     },
     {
@@ -469,8 +509,8 @@
       }
     },
     {
-      "id": "bd77256838a819d-9aa607b80d4bd6c",
-      "title": "Discover session panels on Dashboard shares one inline data view across API-created tabs after saving in Discover and reloading the dashboard",
+      "id": "bd77256838a819d-01aa9a7368c0a8c",
+      "title": "Discover session panels on Dashboard preserves a cell-action filter across panels sharing an inline view after dashboard reload",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -508,8 +548,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/discover_session_dashboard_reload.spec.ts",
-        "line": 141,
-        "column": 27
+        "line": 140,
+        "column": 6
       }
     },
     {
@@ -990,7 +1030,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/inspector_stats.spec.ts",
-        "line": 21,
+        "line": 20,
         "column": 23
       }
     },
@@ -1003,8 +1043,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/inspector_stats.spec.ts",
-        "line": 27,
-        "column": 5
+        "line": 25,
+        "column": 29
+      }
+    },
+    {
+      "id": "fbaefbc433ed14f-bf453897dc4933a",
+      "title": "Internal Discover session on Dashboard loads an internally saved session through Content Management in a linked dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/internal_discover_session_dashboard.spec.ts",
+        "line": 24,
+        "column": 35
       }
     },
     {
@@ -1218,8 +1271,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 50,
-        "column": 80
+        "line": 52,
+        "column": 56
       }
     },
     {
@@ -1238,7 +1291,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 53,
+        "line": 56,
         "column": 7
       }
     },
@@ -1258,7 +1311,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 61,
+        "line": 64,
         "column": 22
       }
     },
@@ -1278,7 +1331,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 75,
+        "line": 78,
         "column": 27
       }
     },
@@ -1298,7 +1351,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 90,
+        "line": 93,
         "column": 27
       }
     },
@@ -1318,7 +1371,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 97,
+        "line": 100,
         "column": 31
       }
     },
@@ -1338,7 +1391,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 115,
+        "line": 118,
         "column": 31
       }
     },
@@ -1358,7 +1411,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 157,
+        "line": 160,
         "column": 43
       }
     },
@@ -1378,7 +1431,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 171,
+        "line": 174,
         "column": 27
       }
     },
@@ -1398,7 +1451,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 189,
+        "line": 192,
         "column": 19
       }
     },
@@ -1418,7 +1471,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 202,
+        "line": 205,
         "column": 10
       }
     },
@@ -1438,7 +1491,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 213,
+        "line": 216,
         "column": 31
       }
     },
@@ -1458,7 +1511,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 222,
+        "line": 225,
         "column": 23
       }
     },
@@ -1471,8 +1524,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 53,
-        "column": 92
+        "line": 56,
+        "column": 25
       }
     },
     {
@@ -1484,7 +1537,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 58,
+        "line": 61,
         "column": 15
       }
     },
@@ -1497,7 +1550,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 64,
+        "line": 67,
         "column": 7
       }
     },
@@ -1510,7 +1563,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 79,
+        "line": 82,
         "column": 27
       }
     },
@@ -1523,7 +1576,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 93,
+        "line": 96,
         "column": 27
       }
     },
@@ -1536,7 +1589,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 100,
+        "line": 101,
         "column": 29
       }
     },

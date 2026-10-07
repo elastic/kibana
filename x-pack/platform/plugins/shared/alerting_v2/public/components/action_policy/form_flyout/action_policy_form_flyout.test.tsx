@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,11 +15,17 @@ import { ActionPolicyFormFlyout } from './action_policy_form_flyout';
 const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
+let mockIsLicenseValid = true;
+
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return {
+        capabilities: {},
         getUrlForApp: mockGetUrlForApp,
       };
     }
@@ -89,8 +95,8 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -113,6 +119,7 @@ jest.mock('../../../hooks/use_fetch_workflows', () => ({
       size: 100,
     },
     isLoading: false,
+    refetch: jest.fn(),
   }),
 }));
 
@@ -129,11 +136,13 @@ const renderFlyout = ({
   onSave,
   onUpdate,
   initialValues,
+  isLoading = false,
 }: {
   onClose?: jest.Mock;
   onSave?: jest.Mock;
   onUpdate?: jest.Mock;
   initialValues?: ActionPolicyResponse;
+  isLoading?: boolean;
 }) => {
   return render(
     <I18nProvider>
@@ -142,12 +151,17 @@ const renderFlyout = ({
         onSave={onSave}
         onUpdate={onUpdate}
         initialValues={initialValues}
+        isLoading={isLoading}
       />
     </I18nProvider>
   );
 };
 
 describe('ActionPolicyFormFlyout', () => {
+  beforeEach(() => {
+    mockIsLicenseValid = true;
+  });
+
   it('renders create mode and closes on cancel', async () => {
     const user = userEvent.setup({ delay: null });
     const onClose = jest.fn();
@@ -159,6 +173,28 @@ describe('ActionPolicyFormFlyout', () => {
 
     await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('blocks closing while saving', () => {
+    const onClose = jest.fn();
+
+    renderFlyout({ onClose, onSave: jest.fn(), isLoading: true });
+
+    expect(screen.queryByTestId('euiFlyoutCloseButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.cancelButton)).toBeDisabled();
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('shows the license warning and disables submission when the license is invalid', () => {
+    mockIsLicenseValid = false;
+
+    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+
+    expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeDisabled();
   });
 
   it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
@@ -218,7 +254,7 @@ describe('ActionPolicyFormFlyout', () => {
       name: 'Policy from test',
       description: 'Description from test',
       matcher: null,
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       groupBy: [],
       throttleStrategy: 'on_status_change',
       throttleInterval: '',
@@ -252,12 +288,11 @@ describe('ActionPolicyFormFlyout', () => {
     );
   });
 
-  it('renders edit mode and submits update payload with optional fields and version', async () => {
+  it('renders edit mode and submits update payload with optional fields', async () => {
     const user = userEvent.setup({ delay: null });
     const onUpdate = jest.fn();
     const initialValues: ActionPolicyResponse = {
       id: 'policy-1',
-      version: 'WzEsMV0=',
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       enabled: true,
@@ -288,20 +323,16 @@ describe('ActionPolicyFormFlyout', () => {
     await user.click(updateButton);
 
     await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1));
-    expect(onUpdate).toHaveBeenCalledWith(
-      'policy-1',
-      {
-        name: 'Critical production alerts',
-        description: 'Routes critical alerts',
-        matcher: { expression: 'data.severity : "critical"' },
-        groupingMode: 'per_field',
-        groupBy: ['host.name', 'service.name'],
-        throttleStrategy: 'time_interval',
-        throttleInterval: '5m',
-        destinations: [{ type: 'workflow', id: 'workflow-2' }],
-        inlineActions: [],
-      },
-      'WzEsMV0='
-    );
+    expect(onUpdate).toHaveBeenCalledWith('policy-1', {
+      name: 'Critical production alerts',
+      description: 'Routes critical alerts',
+      matcher: { expression: 'data.severity : "critical"' },
+      groupingMode: 'per_field',
+      groupBy: ['host.name', 'service.name'],
+      throttleStrategy: 'time_interval',
+      throttleInterval: '5m',
+      destinations: [{ type: 'workflow', id: 'workflow-2' }],
+      inlineActions: [],
+    });
   });
 });

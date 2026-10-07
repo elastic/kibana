@@ -16,7 +16,10 @@ import { WorkflowDetailPage } from './workflow_detail_page';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  setWorkflow,
+  setYamlString,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -120,8 +123,19 @@ jest.mock('./workflow_detail_test_step_modal', () => ({
   ),
 }));
 jest.mock('../../../features/workflow_execution_detail', () => ({
-  WorkflowExecutionFlyout: ({ executionId }: { executionId: string }) => (
-    <div data-test-subj="workflow-execution-flyout">{executionId}</div>
+  WorkflowExecutionFlyout: ({
+    executionId,
+    onClose,
+  }: {
+    executionId: string;
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="workflow-execution-flyout">
+      {executionId}
+      <button type="button" data-test-subj="closeExecutionFlyout" onClick={onClose}>
+        {'Close'}
+      </button>
+    </div>
   ),
 }));
 jest.mock('../../../features/workflow_execution_detail_old', () => ({
@@ -195,7 +209,7 @@ describe('WorkflowDetailPage', () => {
       }
     );
 
-    return { ...view, navigateToApp, historyRef };
+    return { ...view, navigateToApp, historyRef, store };
   };
 
   beforeEach(() => {
@@ -227,6 +241,30 @@ describe('WorkflowDetailPage', () => {
 
       expect(mockLoadConnectors).toHaveBeenCalled();
       expect(mockLoadWorkflow).toHaveBeenCalledWith({ id: 'test-workflow-123' });
+    });
+
+    it('stores the replay run mode before opening the modal', () => {
+      const clearReplayExecutionId = jest.fn();
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'executions' as const,
+        selectedExecutionId: 'exec-1',
+        replayExecutionId: 'exec-1',
+        replayIsTestRun: true,
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+        clearReplayExecutionId,
+      });
+
+      const { store } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+        s.dispatch(setYamlString(mockWorkflow.yaml));
+      });
+
+      expect(store.getState().detail.replay).toEqual(
+        expect.objectContaining({ executionId: 'exec-1', isTestRun: true })
+      );
+      expect(store.getState().detail.isTestModalOpen).toBe(true);
+      expect(clearReplayExecutionId).toHaveBeenCalled();
     });
 
     it('should set default yaml when no id is provided', () => {
@@ -427,11 +465,12 @@ describe('WorkflowDetailPage', () => {
     });
 
     it('opens the list flyout on Executions click and closes it on the next click', () => {
-      const setSelectedExecution = jest.fn();
+      const updateUrlState = jest.fn();
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow' as const,
         selectedExecutionId: undefined,
-        setSelectedExecution,
+        setSelectedExecution: jest.fn(),
+        updateUrlState,
         setActiveTab: jest.fn(),
       });
 
@@ -446,15 +485,64 @@ describe('WorkflowDetailPage', () => {
       fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
       expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
       expect(screen.queryByTestId('workflow-execution-flyout')).not.toBeInTheDocument();
-      expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
+      expect(updateUrlState).toHaveBeenCalledWith(
+        {
+          tab: 'workflow',
+          executionId: undefined,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: true }
+      );
+    });
+
+    it('returns the editor to the workflow tab when the execution detail closes', () => {
+      const updateUrlState = jest.fn();
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'executions' as const,
+        selectedExecutionId: 'execution-123',
+        setSelectedExecution: jest.fn(),
+        updateUrlState,
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      fireEvent.click(screen.getByTestId('closeExecutionFlyout'));
+      expect(updateUrlState).toHaveBeenCalledWith(
+        {
+          tab: 'workflow',
+          executionId: undefined,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: false }
+      );
+    });
+
+    it('opens the detail flyout for an unsaved workflow run', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow' as const,
+        selectedExecutionId: 'exec-1',
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({ id: undefined });
+
+      expect(screen.getByTestId('workflow-execution-flyout')).toHaveTextContent('exec-1');
+      expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
     });
 
     it('closes the detail and list flyouts when Executions is clicked while a run is selected', () => {
-      const setSelectedExecution = jest.fn();
+      const updateUrlState = jest.fn();
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow' as const,
         selectedExecutionId: 'execution-123',
-        setSelectedExecution,
+        setSelectedExecution: jest.fn(),
+        updateUrlState,
         setActiveTab: jest.fn(),
       });
 
@@ -467,7 +555,15 @@ describe('WorkflowDetailPage', () => {
 
       fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
       expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
-      expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
+      expect(updateUrlState).toHaveBeenCalledWith(
+        {
+          tab: 'workflow',
+          executionId: undefined,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: true }
+      );
     });
   });
 

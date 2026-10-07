@@ -11,13 +11,12 @@ import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 
 interface UpdateSignificantEventArgs {
-  eventUuid: string;
+  eventId: string;
   status: SignificantEventStatus;
   assessmentNote?: string;
 }
 
 interface UpdateSignificantEventResult {
-  event_uuid: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
@@ -27,6 +26,14 @@ const UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.updateEvent.successToastTitle',
   {
     defaultMessage: 'Significant event updated',
+  }
+);
+
+const UPDATE_NO_CHANGE_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.noChangeToastTitle',
+  {
+    defaultMessage:
+      'No change made: the significant event already has that status or no longer exists',
   }
 );
 
@@ -53,12 +60,12 @@ export const useUpdateSignificantEvent = ({
   const queryClient = useQueryClient();
 
   const mutation = useMutation<UpdateSignificantEventResult, Error, UpdateSignificantEventArgs>({
-    mutationFn: ({ eventUuid, status, assessmentNote }: UpdateSignificantEventArgs) =>
+    mutationFn: ({ eventId, status, assessmentNote }: UpdateSignificantEventArgs) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/events/{id}/update',
         {
           params: {
-            path: { id: eventUuid },
+            path: { id: eventId },
             body: {
               status,
               ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
@@ -67,8 +74,12 @@ export const useUpdateSignificantEvent = ({
           signal: null,
         }
       ),
-    onSuccess: () => {
-      toasts.addSuccess({ title: UPDATE_SUCCESS_TOAST_TITLE });
+    onSuccess: ({ updated }) => {
+      if (updated === 0) {
+        toasts.addInfo({ title: UPDATE_NO_CHANGE_TOAST_TITLE });
+      } else {
+        toasts.addSuccess({ title: UPDATE_SUCCESS_TOAST_TITLE });
+      }
       onUpdateSuccess?.();
     },
     onError: (error) => {
