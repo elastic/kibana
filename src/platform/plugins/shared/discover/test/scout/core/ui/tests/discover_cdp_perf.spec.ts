@@ -140,6 +140,11 @@ test.describe(
       perfTracker,
       log,
     }) => {
+      await pageObjects.discover.setQueryMode('classic');
+      await page.reload();
+      await page.testSubj.waitForSelector('homeApp', { timeout: 20000 });
+      await perfTracker.waitForJsLoad(cdp);
+
       const beforeMetrics = await perfTracker.capturePagePerformanceMetrics(cdp);
 
       // Navigate to Discover app
