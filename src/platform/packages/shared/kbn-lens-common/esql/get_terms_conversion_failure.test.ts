@@ -24,10 +24,10 @@ describe('getTermsConversionFailure', () => {
     expect(getTermsConversionFailure(createTermsColumn(), context())).toBeUndefined();
   });
 
-  it('returns terms_not_supported when a date histogram is present', () => {
+  it('returns terms_date_histogram_not_supported when a date histogram is present', () => {
     expect(
       getTermsConversionFailure(createTermsColumn(), context({ hasDateHistogram: true }))
-    ).toBe('terms_not_supported');
+    ).toBe('terms_date_histogram_not_supported');
   });
 
   it('allows an outer/inner terms pair', () => {
@@ -42,27 +42,27 @@ describe('getTermsConversionFailure', () => {
     );
   });
 
-  it('returns terms_not_supported for multi-terms secondary fields', () => {
+  it('returns terms_multiple_fields_not_supported for multi-terms secondary fields', () => {
     expect(
       getTermsConversionFailure(createTermsColumn({ secondaryFields: ['geo.src'] }), context())
-    ).toBe('terms_not_supported');
+    ).toBe('terms_multiple_fields_not_supported');
   });
 
-  it('returns terms_not_supported when accuracy mode is enabled', () => {
+  it('returns terms_accuracy_mode_not_supported when accuracy mode is enabled', () => {
     expect(getTermsConversionFailure(createTermsColumn({ accuracyMode: true }), context())).toBe(
-      'terms_not_supported'
+      'terms_accuracy_mode_not_supported'
     );
   });
 
-  it('returns terms_not_supported when include filters are set', () => {
+  it('returns terms_include_exclude_not_supported when include filters are set', () => {
     expect(getTermsConversionFailure(createTermsColumn({ include: ['host-a'] }), context())).toBe(
-      'terms_not_supported'
+      'terms_include_exclude_not_supported'
     );
   });
 
-  it('returns terms_not_supported when exclude filters are set', () => {
+  it('returns terms_include_exclude_not_supported when exclude filters are set', () => {
     expect(getTermsConversionFailure(createTermsColumn({ exclude: ['host-b'] }), context())).toBe(
-      'terms_not_supported'
+      'terms_include_exclude_not_supported'
     );
   });
 
@@ -78,14 +78,32 @@ describe('getTermsConversionFailure', () => {
     expect(getTermsConversionFailure(column, context())).toBeUndefined();
   });
 
-  it.each([
-    { type: 'rare' as const, maxDocCount: 3 },
-    { type: 'significant' as const },
-    { type: 'custom' as const },
-  ])('returns terms_order_by_not_supported for orderBy $type', (orderBy) => {
-    expect(getTermsConversionFailure(createTermsColumn({ orderBy }), context())).toBe(
-      'terms_order_by_not_supported'
-    );
+  it.each([{ type: 'rare' as const, maxDocCount: 3 }, { type: 'significant' as const }])(
+    'returns terms_order_by_not_supported for orderBy $type',
+    (orderBy) => {
+      expect(getTermsConversionFailure(createTermsColumn({ orderBy }), context())).toBe(
+        'terms_order_by_not_supported'
+      );
+    }
+  );
+
+  it('returns terms_custom_order_by_not_supported for custom ranking', () => {
+    expect(
+      getTermsConversionFailure(createTermsColumn({ orderBy: { type: 'custom' } }), context())
+    ).toBe('terms_custom_order_by_not_supported');
+  });
+
+  it('returns only the highest-priority blocker when several apply', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({
+          accuracyMode: true,
+          otherBucket: true,
+          orderBy: { type: 'rare', maxDocCount: 3 },
+        }),
+        context({ hasDateHistogram: true })
+      )
+    ).toBe('terms_other_bucket_not_supported');
   });
 
   it('allows orderBy column and alphabetical', () => {

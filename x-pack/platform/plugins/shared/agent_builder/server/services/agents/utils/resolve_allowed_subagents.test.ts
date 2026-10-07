@@ -8,7 +8,10 @@
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import { resolveAllowedSubagents } from './resolve_allowed_subagents';
 
-type MockValue = { description?: string } | 'deny' | 'missing';
+type MockValue =
+  | { description?: string; configuration?: { inference_feature_id?: string } }
+  | 'deny'
+  | 'missing';
 
 const makeRegistry = (map: Record<string, MockValue>) => ({
   get: jest.fn(async (id: string) => {
@@ -113,6 +116,22 @@ describe('resolveAllowedSubagents', () => {
       agentRegistry: registry,
     });
     expect(out[0].description).toBe('(no description)');
+  });
+
+  it('carries the inference feature a real id declares, and none for _self', async () => {
+    const registry = makeRegistry({
+      a: { description: 'Alpha', configuration: { inference_feature_id: 'my_feature' } },
+      b: { description: 'Beta', configuration: {} },
+    });
+    const out = await resolveAllowedSubagents({
+      configuredIds: ['a', 'b', SELF_AGENT_ID],
+      agentRegistry: registry,
+    });
+    expect(out).toEqual([
+      { id: 'a', description: 'Alpha', inferenceFeatureId: 'my_feature' },
+      { id: 'b', description: 'Beta' },
+      { id: SELF_AGENT_ID, description: 'This agent (self-fork).' },
+    ]);
   });
 
   it('dedupes _self as well', async () => {

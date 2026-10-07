@@ -52,6 +52,16 @@ const OPTIONAL_STEP_IDS: DatasetWizardStepId[] = ['settings'];
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
 
+interface SaveError {
+  title: string;
+  text: string;
+}
+
+const toSaveError = (text: string): SaveError => ({
+  title: createDatasetWizardStrings.saveErrorTitle,
+  text,
+});
+
 export function CreateDatasetWizardPage({
   dataSources,
   existingDataSetNames,
@@ -67,11 +77,11 @@ export function CreateDatasetWizardPage({
 }) {
   const history = useHistory();
   const {
-    services: { datasetsClient },
+    services: { datasetsClient, toasts },
   } = useKibana<DataFederationKibanaServices>();
   const isEditMode = initialDataSet !== undefined;
   const datasetNameToEdit = initialDataSet?.name;
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<SaveError | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const formDefaultValues = useMemo(
     (): CreateDatasetFormValues =>
@@ -128,7 +138,7 @@ export function CreateDatasetWizardPage({
 
     const formatValid = await methods.trigger('settings.format');
     if (!formatValid) {
-      setSaveError(createDatasetWizardStrings.settingsFormatRequired);
+      setSaveError(toSaveError(createDatasetWizardStrings.settingsFormatRequired));
       return;
     }
 
@@ -136,28 +146,52 @@ export function CreateDatasetWizardPage({
       (f) => f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME
     );
     if (timestampField && timestampField.path.trim() === '') {
-      setSaveError(createDatasetWizardStrings.timestampFieldPathRequiredSave);
+      setSaveError(toSaveError(createDatasetWizardStrings.timestampFieldPathRequiredSave));
       return;
     }
 
     setIsSaving(true);
+    const previousName = initialDataSet?.name.trim();
+    let savedName: string;
     try {
       const payload = buildDatasetPayload(values);
       await datasetsClient.add(payload);
-
-      const previousId = initialDataSet?.name.trim();
-      if (previousId && previousId !== payload.name) {
-        await datasetsClient.delete(previousId);
-      }
-
-      await loadDataSets();
-      goToDatasets();
+      savedName = payload.name;
     } catch (error) {
-      setSaveError(getFlyoutSaveErrorMessage(error));
+      setSaveError(toSaveError(getFlyoutSaveErrorMessage(error)));
+      setIsSaving(false);
+      return;
+    }
+
+    if (previousName && previousName !== savedName) {
+      try {
+        await datasetsClient.delete(previousName);
+      } catch (error) {
+        setSaveError({
+          title: createDatasetWizardStrings.deletePreviousErrorTitle,
+          text: createDatasetWizardStrings.deletePreviousErrorText(
+            savedName,
+            previousName,
+            getFlyoutSaveErrorMessage(error)
+          ),
+        });
+        setIsSaving(false);
+        return;
+      }
+    }
+
+    try {
+      await loadDataSets();
+    } catch (error) {
+      toasts.addDanger({
+        title: createDatasetWizardStrings.refreshAfterSaveErrorTitle(savedName),
+        text: getFlyoutSaveErrorMessage(error),
+      });
     } finally {
       setIsSaving(false);
+      goToDatasets();
     }
-  }, [datasetsClient, goToDatasets, initialDataSet, loadDataSets, methods]);
+  }, [datasetsClient, goToDatasets, initialDataSet, loadDataSets, methods, toasts]);
 
   const activeStepId = STEPS[activeStepIndex].id;
   const isLastStep = activeStepIndex === LAST_STEP_INDEX;
@@ -170,8 +204,8 @@ export function CreateDatasetWizardPage({
       saveError ? (
         <>
           <KbnDangerCallout
-            title={createDatasetWizardStrings.saveErrorTitle}
-            text={saveError}
+            title={saveError.title}
+            text={saveError.text}
             size="s"
             announceOnMount
             data-test-subj="createDatasetWizardSaveError"
@@ -226,7 +260,6 @@ export function CreateDatasetWizardPage({
                 }))}
               />
               <EuiSpacer size="l" />
-              {apiError}
               <WizardStepProvider value={setStepContent}>
                 <div
                   data-test-subj="createDatasetWizardContent"
@@ -251,6 +284,7 @@ export function CreateDatasetWizardPage({
                 </div>
               </WizardStepProvider>
               <EuiSpacer size="l" />
+              {apiError}
               <EuiFlexGroup gutterSize="m" responsive={false}>
                 {activeStepIndex > 0 ? (
                   <EuiFlexItem grow={false}>

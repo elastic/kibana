@@ -19,6 +19,7 @@ import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_t
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
 import { createRuleExceptionStepDefinition } from './create_rule_exception_step/create_rule_exception_step';
+import { buildExceptionEntriesFilterStepDefinition } from './build_exception_entries_filter_step/build_exception_entries_filter_step';
 import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
 import { createNoteStepDefinition } from './create_note_step/create_note_step';
 import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
@@ -26,6 +27,7 @@ import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
+import { getAlertEntitiesStepDefinition } from './get_alert_entities_step/get_alert_entities_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
@@ -37,7 +39,7 @@ describe('registerWorkflowSteps (public)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(18);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(20);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
   });
 
@@ -65,6 +67,8 @@ describe('registerWorkflowSteps (public)', () => {
       loader16,
       loader17,
       loader18,
+      loader19,
+      loader20,
     ] = workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
@@ -78,12 +82,14 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader9()).resolves.toBe(enableRuleStepDefinition);
     await expect(loader10()).resolves.toBe(disableRuleStepDefinition);
     await expect(loader11()).resolves.toBe(createRuleExceptionStepDefinition);
-    await expect(loader12()).resolves.toBe(createExceptionListItemStepDefinition);
-    await expect(loader13()).resolves.toBe(createNoteStepDefinition);
-    await expect(loader14()).resolves.toBe(deleteNoteStepDefinition);
-    await expect(loader15()).resolves.toBe(getNotesStepDefinition);
-    await expect(loader16()).resolves.toBe(updateNoteStepDefinition);
-    await expect(loader17()).resolves.toBe(createRuleStepDefinition);
-    await expect(loader18()).resolves.toBe(patchRuleStepDefinition);
+    await expect(loader12()).resolves.toBe(buildExceptionEntriesFilterStepDefinition);
+    await expect(loader13()).resolves.toBe(createExceptionListItemStepDefinition);
+    await expect(loader14()).resolves.toBe(createNoteStepDefinition);
+    await expect(loader15()).resolves.toBe(deleteNoteStepDefinition);
+    await expect(loader16()).resolves.toBe(getNotesStepDefinition);
+    await expect(loader17()).resolves.toBe(updateNoteStepDefinition);
+    await expect(loader18()).resolves.toBe(createRuleStepDefinition);
+    await expect(loader19()).resolves.toBe(patchRuleStepDefinition);
+    await expect(loader20()).resolves.toBe(getAlertEntitiesStepDefinition);
   });
 });
