@@ -7,6 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { PARITY_DOCS, type ParityDoc } from './chrysalis_parity_docs';
 
 const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
 export const TELEMETRY_INDEX = 'logs-windows.sysmon_operational-default';
@@ -22,10 +23,15 @@ export const SECURITY_LABS_INDEX = 'security-labs-content-default';
  *    reference (Windows endpoint telemetry, entity risk scores, Security Labs
  *    content). Opt in with SEED_PROFILE=enriched; run under a separate
  *    experiment label — scores across profiles are NOT comparable.
+ *  - `parity`: replays the original benchmark simulator dataset from
+ *    chrysalis_parity_docs.ts, with timestamps shifted to seed time.
+ *    Opt in with SEED_PROFILE=parity under a separate experiment label.
  */
-export type SeedProfile = 'minimal' | 'enriched';
+export type SeedProfile = 'minimal' | 'enriched' | 'parity';
 export const seedProfile: SeedProfile =
-  process.env.SEED_PROFILE === 'enriched' ? 'enriched' : 'minimal';
+  process.env.SEED_PROFILE === 'enriched' || process.env.SEED_PROFILE === 'parity'
+    ? process.env.SEED_PROFILE
+    : 'minimal';
 
 interface AlertDoc {
   '@timestamp': string;
@@ -58,6 +64,45 @@ const baseAlert: AlertDoc = {
   'kibana.alert.workflow_status': 'open',
 };
 
+const RESTAMP_KEYS = new Set([
+  '@timestamp',
+  'shift_start',
+  'shift_end',
+  'intended_timestamp',
+  'original_time',
+  'workflow_status_updated_at',
+  'first_seen',
+  'last_seen',
+]);
+
+function loadParityDocs(): { docs: ParityDoc[]; anchor: number } {
+  const docs = PARITY_DOCS;
+  const timestamps = docs
+    .map((d) => Date.parse(d.doc['@timestamp'] as string))
+    .filter((t) => !Number.isNaN(t));
+  return { docs, anchor: Math.max(...timestamps) };
+}
+
+/** Re-stamp all timestamp-like fields relative to `now`, preserving deltas. */
+function restamp(doc: Record<string, unknown>, offsetMs: number): Record<string, unknown> {
+  const walk = (o: unknown): unknown => {
+    if (Array.isArray(o)) return o.map(walk);
+    if (o && typeof o === 'object') {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(o as Record<string, unknown>)) {
+        if (RESTAMP_KEYS.has(k) && typeof v === 'string') {
+          const t = Date.parse(v);
+          out[k] = Number.isNaN(t) ? v : new Date(t + offsetMs).toISOString();
+        } else {
+          out[k] = walk(v);
+        }
+      }
+      return out;
+    }
+    return o;
+  };
+  return walk(doc) as Record<string, unknown>;
+}
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60000).toISOString();
 
 // --- Enriched profile fixtures -------------------------------------------------
@@ -263,6 +308,23 @@ export async function seedChrysalisAlerts({
   count?: number;
 }): Promise<void> {
   try {
+    if (seedProfile === 'parity') {
+      const { docs, anchor } = loadParityDocs();
+      const offset = Date.now() - anchor;
+      const byIndex = new Map<string, Array<Record<string, unknown>>>();
+      for (const { index, doc } of docs) {
+        const list = byIndex.get(index) ?? [];
+        list.push(restamp(doc, offset));
+        byIndex.set(index, list);
+      }
+      for (const [index, group] of byIndex) {
+        await bulkCreateOrThrow(esClient, index, group, seedIdPrefix(index));
+        log.info(`Seeded ${group.length} docs into ${index} (parity)`);
+      }
+      log.info(`Seeded ${docs.length} Chrysalis parity docs across ${byIndex.size} indices`);
+      return;
+    }
+
     const docs: AlertDoc[] =
       seedProfile === 'enriched'
         ? enrichedAlerts
@@ -398,9 +460,34 @@ export async function cleanupChrysalisAlerts({
       query: { match_all: {} },
       refresh: true,
       conflicts: 'proceed',
+      ignore_unavailable: true,
     });
     log.info(`Cleaned up alerts from ${ALERT_INDEX}`);
-    if (seedProfile === 'enriched') {
+    if (seedProfile === 'parity') {
+      const { docs } = loadParityDocs();
+      const byIndex = new Map<string, number>();
+      for (const { index } of docs) {
+        byIndex.set(index, (byIndex.get(index) ?? 0) + 1);
+      }
+      for (const [index, count] of byIndex) {
+        try {
+          await esClient.deleteByQuery({
+            index,
+            query: {
+              ids: {
+                values: Array.from({ length: count }, (_, i) => `${seedIdPrefix(index)}-${i}`),
+              },
+            },
+            refresh: true,
+            conflicts: 'proceed',
+            ignore_unavailable: true,
+          });
+          log.info(`Removed parity docs from ${index}`);
+        } catch (err) {
+          log.warning(`Cleanup warning for ${index}: ${err}`);
+        }
+      }
+    } else if (seedProfile === 'enriched') {
       await cleanupEnrichedSources(esClient, log);
     }
   } catch (err) {
