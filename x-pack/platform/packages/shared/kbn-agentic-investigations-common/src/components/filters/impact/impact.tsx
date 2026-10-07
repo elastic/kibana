@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -16,22 +16,20 @@ import {
   EuiTextTruncate,
   EuiTitle,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import type { ImpactFilterable } from './entity_ids';
 import { impactPills } from './impact_pills';
 import type { ImpactPill } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
-
-/** Collapsed Impact shows at most this many rows; the rest hides behind `+n`. */
-const MAX_PILL_ROWS = 2;
+import { findVisiblePills, isVisibleIndex } from './visible_pills';
+import type { PillMeasurements, VisiblePills } from './visible_pills';
 
 export const IMPACT_PILLS_TEST_SUBJ = 'alertzeroImpactPills';
 export const IMPACT_PILL_TEST_SUBJ = 'alertzeroImpactPill';
 export const IMPACT_OVERFLOW_TEST_SUBJ = 'alertzeroImpactOverflow';
 export const IMPACT_COLLAPSE_TEST_SUBJ = 'alertzeroImpactCollapse';
-
-const MEASURE_ITEM_SELECTOR = `[data-test-subj="${IMPACT_PILL_TEST_SUBJ}"], [data-test-subj="${IMPACT_OVERFLOW_TEST_SUBJ}"]`;
 
 interface ImpactProps {
   items: readonly ImpactFilterable[];
@@ -99,138 +97,51 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   );
 };
 
-/**
- * Which pills the collapsed row shows: the first `prefixCount` in order, plus
- * the selected pill appended at the end when it falls past that prefix.
- */
-interface VisiblePills {
-  prefixCount: number;
-  pinnedIndex: number | null;
-}
-
-const isVisibleIndex = (index: number, { prefixCount, pinnedIndex }: VisiblePills): boolean =>
-  index < prefixCount || index === pinnedIndex;
-
-const setMeasureVisibility = (root: HTMLElement, visible: VisiblePills, overflowCount: number) => {
-  root
-    .querySelectorAll<HTMLElement>(`[data-test-subj="${IMPACT_PILL_TEST_SUBJ}"]`)
-    .forEach((element, index) => {
-      element.style.display = isVisibleIndex(index, visible) ? '' : 'none';
-    });
-
-  const overflowElement = root.querySelector<HTMLElement>(
-    `[data-test-subj="${IMPACT_OVERFLOW_TEST_SUBJ}"]`
-  );
-  if (overflowElement) {
-    overflowElement.style.display = overflowCount > 0 ? '' : 'none';
-  }
-};
-
-const countPillRows = (root: HTMLElement): number => {
-  const rowTops = new Set<number>();
-  root.querySelectorAll<HTMLElement>(MEASURE_ITEM_SELECTOR).forEach((element) => {
-    if (element.style.display !== 'none') {
-      rowTops.add(element.offsetTop);
-    }
-  });
-  return rowTops.size;
-};
-
-const visiblePillCount = ({ prefixCount, pinnedIndex }: VisiblePills): number =>
-  pinnedIndex !== null && pinnedIndex >= prefixCount ? prefixCount + 1 : prefixCount;
-
-const fitsInMaxRows = (root: HTMLElement, visible: VisiblePills, total: number): boolean => {
-  setMeasureVisibility(root, visible, total - visiblePillCount(visible));
-  return countPillRows(root) <= MAX_PILL_ROWS;
-};
-
-/** Largest `prefixCount` for the given pin that fits, with `+n`, in `MAX_PILL_ROWS`. */
-const largestFittingPrefix = (
-  root: HTMLElement,
-  total: number,
-  pinnedIndex: number | null,
-  from: number
-): number => {
-  for (let candidate = from; candidate > 0; candidate -= 1) {
-    if (fitsInMaxRows(root, { prefixCount: candidate, pinnedIndex }, total)) {
-      return candidate;
-    }
-  }
-  return 0;
-};
-
-/**
- * Largest prefix of `pills` that, together with the `+n` pill, fits in
- * `MAX_PILL_ROWS`. A selected pill past that prefix is pinned at the end of
- * the row instead, shortening the prefix as needed, so the active filter
- * is always visible and clearable.
- */
-const findVisiblePills = (
-  root: HTMLElement,
-  pills: readonly ImpactPill[],
-  entityFilter: string | null
-): VisiblePills => {
-  const total = pills.length;
-  if (total === 0) {
-    return { prefixCount: 0, pinnedIndex: null };
-  }
-
-  const prefixCount = largestFittingPrefix(root, total, null, total);
-  const selectedIndex = entityFilter
-    ? pills.findIndex((pill) => pill.entityId === entityFilter)
-    : -1;
-  if (selectedIndex < 0 || selectedIndex < prefixCount) {
-    return { prefixCount, pinnedIndex: null };
-  }
-
-  return {
-    prefixCount: largestFittingPrefix(root, total, selectedIndex, prefixCount),
-    pinnedIndex: selectedIndex,
-  };
-};
-
 export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFilterChange }) => {
   const { euiTheme } = useEuiTheme();
-  const rowRef = useRef<HTMLDivElement>(null);
-  const measureRef = useRef<HTMLDivElement>(null);
-
-  const pills = useMemo(() => impactPills(items), [items]);
-  // What the collapsed row would show, tracked even while expanded so the
-  // collapse control disappears once everything fits again.
-  const [collapsed, setCollapsed] = useState<VisiblePills>({
-    prefixCount: pills.length,
-    pinnedIndex: null,
-  });
+  const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
+  const { width: observedWidth } = useResizeObserver(rowElement, 'width');
+  // Refs into the hidden measuring copy; the visible row is never inspected.
+  const pillRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const overflowRef = useRef<HTMLDivElement>(null);
+  const [measurements, setMeasurements] = useState<PillMeasurements | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const recalculateCollapsed = useCallback(() => {
-    if (!measureRef.current) {
+  const pills = useMemo(() => impactPills(items), [items]);
+  // `gutterSize="s"` on EuiFlexGroup renders `gap: euiTheme.size.s`.
+  const gap = parseFloat(euiTheme.size.s);
+
+  // Measure every pill's natural width once per resize or pill change. The
+  // state update lands before paint, so the uncollapsed row never flashes.
+  useLayoutEffect(() => {
+    if (!rowElement || !overflowRef.current) {
       return;
     }
-    const next = findVisiblePills(measureRef.current, pills, entityFilter);
-    setCollapsed((previous) =>
-      previous.prefixCount === next.prefixCount && previous.pinnedIndex === next.pinnedIndex
-        ? previous
-        : next
-    );
-  }, [entityFilter, pills]);
-
-  useLayoutEffect(() => {
-    recalculateCollapsed();
-
-    const observer = new ResizeObserver(recalculateCollapsed);
-    if (rowRef.current) {
-      observer.observe(rowRef.current);
-    }
-    return () => observer.disconnect();
-  }, [recalculateCollapsed]);
+    setMeasurements({
+      pillWidths: pills.map(
+        (_, index) => pillRefs.current[index]?.getBoundingClientRect().width ?? 0
+      ),
+      overflowWidth: overflowRef.current.getBoundingClientRect().width,
+      containerWidth: rowElement.getBoundingClientRect().width,
+      gap,
+    });
+  }, [rowElement, observedWidth, pills, gap]);
 
   if (pills.length === 0) {
     return null;
   }
 
-  // Items stretch to the row height and center their pill, so every item in a
-  // row shares one offsetTop regardless of pill height (the +n pill is shorter).
+  // What the collapsed row would show, derived during render so changing the
+  // filter never re-measures. Tracked even while expanded so the collapse
+  // control disappears once everything fits again. Until the first
+  // measurement every pill is shown.
+  const collapsed: VisiblePills =
+    measurements && measurements.pillWidths.length === pills.length
+      ? findVisiblePills(measurements, pills, entityFilter)
+      : { prefixCount: pills.length, pinnedIndex: null };
+
+  // Items stretch to the row height and center their pill, so the shorter +n
+  // pill lines up with the count pills beside it.
   const pillItemStyles = css({ justifyContent: 'center' });
 
   const collapsedPills = pills.filter((_, index) => isVisibleIndex(index, collapsed));
@@ -238,9 +149,14 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
   const showAll = isExpanded && overflowCount > 0;
   const visiblePills = showAll ? pills : collapsedPills;
 
-  const renderPill = (pill: ImpactPill, interactive: boolean) => (
+  const renderPill = (
+    pill: ImpactPill,
+    interactive: boolean,
+    ref?: (element: HTMLDivElement | null) => void
+  ) => (
     <EuiFlexItem
       key={pill.entityId}
+      ref={ref}
       grow={false}
       css={pillItemStyles}
       data-test-subj={IMPACT_PILL_TEST_SUBJ}
@@ -265,10 +181,9 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
         <h3>{IMPACT_LABELS.title}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <div ref={rowRef} css={css({ position: 'relative', width: '100%' })}>
-        {/* Hidden copy of every pill, used to find how many fit in MAX_PILL_ROWS. */}
+      <div ref={setRowElement} css={css({ position: 'relative', width: '100%' })}>
+        {/* Hidden copy of every pill, measured to find how many fit in MAX_PILL_ROWS. */}
         <div
-          ref={measureRef}
           aria-hidden
           css={css({
             position: 'absolute',
@@ -280,8 +195,13 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
           })}
         >
           <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-            {pills.map((pill) => renderPill(pill, false))}
+            {pills.map((pill, index) =>
+              renderPill(pill, false, (element) => {
+                pillRefs.current[index] = element;
+              })
+            )}
             <EuiFlexItem
+              ref={overflowRef}
               grow={false}
               css={pillItemStyles}
               data-test-subj={IMPACT_OVERFLOW_TEST_SUBJ}

@@ -37,34 +37,23 @@ const pillLabels = () =>
     .getAllByRole('button')
     .map((button) => button.getAttribute('aria-label'));
 
-const MEASURED_SUBJS = new Set([IMPACT_PILL_TEST_SUBJ, IMPACT_OVERFLOW_TEST_SUBJ]);
-
 /**
- * jsdom has no layout, so emulate a wrapping row: `perRow` pills per line,
- * hidden (`display: none`) items take no space, each line is 30px tall.
+ * jsdom has no layout, so give the measured elements fixed widths: 100px pills,
+ * a 40px `+n` pill and a 320px row. With the 8px gap that is three pills per row.
  */
-const mockWrappingLayout = (perRow: number) => {
-  const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetTop');
-  Object.defineProperty(HTMLElement.prototype, 'offsetTop', {
-    configurable: true,
-    get(this: HTMLElement) {
-      if (!MEASURED_SUBJS.has(this.dataset.testSubj ?? '')) {
-        return 0;
-      }
-      const visibleSiblings = Array.from(this.parentElement?.children ?? []).filter(
-        (sibling) => (sibling as HTMLElement).style.display !== 'none'
-      );
-      return Math.floor(visibleSiblings.indexOf(this) / perRow) * 30;
-    },
-  });
-  return () => {
-    if (original) {
-      Object.defineProperty(HTMLElement.prototype, 'offsetTop', original);
-    } else {
-      delete (HTMLElement.prototype as Partial<HTMLElement>).offsetTop;
-    }
-  };
-};
+const mockPillWidths = () =>
+  jest
+    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+    .mockImplementation(function (this: HTMLElement) {
+      const testSubj = this.getAttribute('data-test-subj');
+      const width =
+        testSubj === IMPACT_PILL_TEST_SUBJ
+          ? 100
+          : testSubj === IMPACT_OVERFLOW_TEST_SUBJ
+          ? 40
+          : 320;
+      return { width, height: 0, top: 0, left: 0, right: width, bottom: 0, x: 0, y: 0 } as DOMRect;
+    });
 
 const sevenHosts = Array.from({ length: 7 }, (_, index) =>
   investigation({ id: `inv-${index}`, entityIds: [`host-${index}`] })
@@ -123,14 +112,14 @@ describe('Impact', () => {
   });
 
   describe('two-row collapse', () => {
-    let restoreLayout: () => void;
+    let widthSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      restoreLayout = mockWrappingLayout(3);
+      widthSpy = mockPillWidths();
     });
 
     afterEach(() => {
-      restoreLayout();
+      widthSpy.mockRestore();
     });
 
     it('hides pills past two rows behind a +n pill that counts the hidden ones', () => {
