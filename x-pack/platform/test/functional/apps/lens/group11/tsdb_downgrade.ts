@@ -21,7 +21,6 @@ import {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { lens } = getPageObjects(['common', 'lens']);
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
@@ -138,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         runTestsForEachScenario(tsdbConvertedToStream, 'tsdb', (indexes) => {
-          it('should keep TSDB restrictions only if a tsdb stream is in the dataView mix', async () => {
+          it('should allow average for a downgraded counter field', async () => {
             await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
@@ -152,13 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            const expectsTsdbRestrictions = indexes.some(({ mode }) => mode === 'tsdb');
-            await retry.waitFor('TSDB restrictions to match the data view', async () => {
-              return (
-                (await testSubjects.exists('lns-indexPatternDimension-average incompatible')) ===
-                expectsTsdbRestrictions
-              );
-            });
+            await testSubjects.missingOrFail('lns-indexPatternDimension-average incompatible');
             await lens.closeDimensionEditor();
           });
 
