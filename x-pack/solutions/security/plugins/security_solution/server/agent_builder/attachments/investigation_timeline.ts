@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
@@ -16,22 +16,26 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
  */
 export const MAX_TIMELINE_EVENTS = 50;
 
-const investigationTimelineEventSchema = z.object({
-  /** Event time as an ISO-8601 string, taken verbatim from `@timestamp` in the telemetry. */
-  timestamp: z.string().min(1).max(64),
-  /** Host the event occurred on. Required per event so a multi-host chain reads unambiguously. */
-  host: z.string().min(1).max(256),
-  /**
-   * What happened, with the specifics an analyst needs to act: process and parent names, PIDs,
-   * acting user, command lines, file paths, addresses, accounts. A bare classification
-   * ("lateral movement") is not enough on its own.
-   */
-  description: z.string().min(1).max(2000),
-});
+const investigationTimelineEventSchema = lazySchema(() =>
+  z.object({
+    /** Event time as an ISO-8601 string, taken verbatim from `@timestamp` in the telemetry. */
+    timestamp: z.string().min(1).max(64),
+    /** Host the event occurred on. Required per event so a multi-host chain reads unambiguously. */
+    host: z.string().min(1).max(256),
+    /**
+     * What happened, with the specifics an analyst needs to act: process and parent names, PIDs,
+     * acting user, command lines, file paths, addresses, accounts. A bare classification
+     * ("lateral movement") is not enough on its own.
+     */
+    description: z.string().min(1).max(2000),
+  })
+);
 
-export const investigationTimelineAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  events: z.array(investigationTimelineEventSchema).max(MAX_TIMELINE_EVENTS),
-});
+export const investigationTimelineAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    events: z.array(investigationTimelineEventSchema).max(MAX_TIMELINE_EVENTS),
+  })
+);
 
 export type InvestigationTimelineAttachmentData = z.infer<
   typeof investigationTimelineAttachmentDataSchema

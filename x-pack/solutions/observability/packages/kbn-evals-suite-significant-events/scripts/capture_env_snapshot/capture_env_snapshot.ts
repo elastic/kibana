@@ -10,6 +10,7 @@ import { Client, errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { extractDataStreamName } from '@kbn/es-snapshot-loader';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
@@ -20,6 +21,7 @@ import {
 } from '../lib/constants';
 import { resolvePatterns, parseCommonSnapshotFlags, toSnapshotName } from '../lib/snapshot_utils';
 import { withTempSuperuser } from '../lib/user_utils';
+import { RULE_EVENTS_DATA_STREAM } from '../../src/data_generators/snapshot_indices';
 
 async function fetchMapping(
   esClient: Client,
@@ -79,7 +81,12 @@ async function captureDataStream({
     const result = await sysClient.reindex(
       {
         wait_for_completion: true,
-        source: { index: sourceIndex },
+        source: {
+          index: sourceIndex,
+          ...(sourceIndex === RULE_EVENTS_DATA_STREAM
+            ? { query: { term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE } } }
+            : {}),
+        },
         dest: { index: snapshotIndex },
       },
       { requestTimeout: 30 * 60 * 1000 }

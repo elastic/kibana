@@ -26,6 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const timelionChartSelector = 'timelionChart';
+  const timelionCodeEditorTestId = 'timelionCodeEditor';
 
   describe('Timelion visualization', () => {
     before(async () => {
@@ -42,7 +43,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     const initVisualization = async (expression: string, interval: string = '12h') => {
       await visEditor.setTimelionInterval(interval);
-      await monacoEditor.setCodeEditorValue(expression);
+      await monacoEditor.setCodeEditorValueByCssSelector(
+        `[data-test-subj="${timelionCodeEditorTestId}"]`,
+        expression
+      );
       await visEditor.clickGo();
     };
 
@@ -242,10 +246,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('expression typeahead', () => {
       it('should display function suggestions', async () => {
         await monacoEditor.setCodeEditorValue('');
-        await monacoEditor.typeCodeEditorValue('.e', 'timelionCodeEditor');
+        await monacoEditor.simulateTyping('timelionCodeEditor', '.e');
         // wait for monaco editor model will be updated with new value
         await common.sleep(300);
-        let value = await monacoEditor.getCodeEditorValue(0);
+        let value = await monacoEditor.getCodeEditorValueByTestSubj(timelionCodeEditorTestId);
         expect(value).to.eql('.e');
         const suggestions = await timelion.getSuggestionItemsText();
         expect(suggestions.length).to.eql(2);
@@ -254,7 +258,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await timelion.clickSuggestion(1);
         // wait for monaco editor model will be updated with new value
         await common.sleep(300);
-        value = await monacoEditor.getCodeEditorValue(0);
+        value = await monacoEditor.getCodeEditorValueByTestSubj(timelionCodeEditorTestId);
         expect(value).to.eql('.es()');
       });
 
@@ -263,17 +267,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const typeExpressionTriggeringSuggestions = async (expression: string) => {
             const prefix = expression.slice(0, -1);
             const triggerCharacter = expression.slice(-1);
-            await monacoEditor.typeCodeEditorValue(prefix, 'timelionCodeEditor');
+            await monacoEditor.simulateTyping(timelionCodeEditorTestId, prefix);
             await retry.try(async () => {
               const value = await monacoEditor.getCodeEditorValue(0);
               expect(value.includes(prefix)).to.eql(true);
             });
-            await monacoEditor.typeCodeEditorValue(triggerCharacter, 'timelionCodeEditor');
+            await monacoEditor.simulateTyping(timelionCodeEditorTestId, triggerCharacter);
           };
 
           it('should show index pattern suggestions for index argument', async () => {
             await monacoEditor.setCodeEditorValue('');
-            await monacoEditor.typeCodeEditorValue('.es(index=', 'timelionCodeEditor');
+            await monacoEditor.simulateTyping(timelionCodeEditorTestId, '.es(index=');
             // wait for index patterns will be loaded
             await common.sleep(500);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up

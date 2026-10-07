@@ -279,7 +279,8 @@ export class ProposalsService {
   }
 
   /**
-   * Per bucket, how many proposals were open at any point during it. Open means
+   * Per bucket, how many proposals were open at any point during it, except the bucket still in
+   * progress, which counts what is open now. Open means
    * `status: 'pending'`, so an expiry closes a proposal the same way a decision
    * does. An anchor count seeds a running sum that opens and closes then move,
    * keeping this to four queries rather than one per bucket.
@@ -359,13 +360,17 @@ export class ProposalsService {
         runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
       }
 
+      // The bucket in progress reports what is open now, so it agrees with the queues and
+      // `currentOpen` rather than counting proposals already closed within it.
+      const counts = i === bucketCount - 1 ? { ...runningSums } : openDuring;
+
       // Keeps the key set stable: a category whose only event here was a close
       // is absent from the pre-close snapshot.
       for (const cat of Object.keys(runningSums)) {
-        openDuring[cat] ??= 0;
+        counts[cat] ??= 0;
       }
 
-      buckets.push({ timestamp, counts: openDuring });
+      buckets.push({ timestamp, counts });
     }
 
     return { buckets, currentOpen: parseEsqlScalar(currentOpenResponse, 'currentOpen') };
