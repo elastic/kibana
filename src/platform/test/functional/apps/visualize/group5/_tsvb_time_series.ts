@@ -181,7 +181,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await dashboard.waitForRenderComplete();
 
             await retry.try(async () => {
-              const el = await elasticChart.getCanvas();
+              const panel = await testSubjects.find(`embeddablePanelHoverActions-${visName}`);
+              const el = await panel.findByCssSelector('.echChart canvas:last-of-type');
 
               await el.clickMouseButton({
                 xOffset: clickCoordinates.x,
