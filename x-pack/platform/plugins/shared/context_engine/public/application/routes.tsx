@@ -10,14 +10,18 @@ import React from 'react';
 import { ContextLandingPage } from './context_landing_page';
 import { AiIndexDetailPage } from './pages/ai_index_detail_page';
 import { CreateAiIndexPage } from './pages/create_ai_index_page';
-import { KiDetailPage } from './pages/ki_detail_page';
+import { ViewKiPage } from './pages/view_ki_page';
 import { CONTEXT_ENGINE_PATHS } from './paths';
 
 export const ContextEngineRoutes = () => (
   <Routes>
     <Route path={CONTEXT_ENGINE_PATHS.create} exact component={CreateAiIndexPage} />
-    <Route path={CONTEXT_ENGINE_PATHS.kiDetail} exact component={KiDetailPage} />
-    <Route path={CONTEXT_ENGINE_PATHS.detail} exact component={AiIndexDetailPage} />
+    <Route path={CONTEXT_ENGINE_PATHS.viewKi} exact component={ViewKiPage} />
+    <Route
+      path={[CONTEXT_ENGINE_PATHS.detail, CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators]}
+      exact
+      component={AiIndexDetailPage}
+    />
     <Route path={CONTEXT_ENGINE_PATHS.landing} exact component={ContextLandingPage} />
   </Routes>
 );

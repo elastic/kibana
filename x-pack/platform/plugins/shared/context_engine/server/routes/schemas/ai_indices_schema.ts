@@ -38,7 +38,11 @@ import {
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
-import { KI_LIFECYCLE_STATUSES, MAX_KI_ID_LENGTH } from '../../../common/step_types/ki';
+import {
+  KI_LIFECYCLE_STATUSES,
+  MAX_KI_ID_LENGTH,
+  type KiLifecycleStatus,
+} from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,
   validateAiIndexId,
@@ -299,7 +303,12 @@ export const createAiIndexBodySchema = schema.object({
 export const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
 const kiLifecycleStatusQuerySchema = schema.oneOf(
-  KI_LIFECYCLE_STATUSES.map((status) => schema.literal(status))
+  KI_LIFECYCLE_STATUSES.map((status) => schema.literal(status)) as [Type<KiLifecycleStatus>],
+  {
+    meta: {
+      description: 'Knowledge Indicator governance.lifecycle.status value.',
+    },
+  }
 );
 
 export const listKisQuerySchema = schema.object({

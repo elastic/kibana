@@ -11,7 +11,7 @@ export const contextEngineQueryKeys = {
   aiIndex: {
     list: () => ['context_engine', 'ai_index', 'list'] as const,
     detail: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId] as const,
-    kiList: (
+    listKi: (
       aiIndexId: string,
       size: number,
       type: string | undefined,
@@ -21,12 +21,12 @@ export const contextEngineQueryKeys = {
         'context_engine',
         'ai_index',
         aiIndexId,
-        'ki_list',
+        'list_ki',
         size,
         type ?? '',
         lifecycleStatus.join(','),
       ] as const,
-    ki: (
+    viewKi: (
       aiIndexId: string,
       index: string,
       kiId: string,

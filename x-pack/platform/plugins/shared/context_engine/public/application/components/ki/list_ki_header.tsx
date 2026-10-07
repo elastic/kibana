@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
-import { ALL_TYPE_FILTER, type KiListTypeFilter } from './helpers';
+import { ALL_TYPE_FILTER, type ListKiTypeFilter } from './list_ki_helpers';
 
 const TYPE_FILTER_MIN_WIDTH = '18rem';
 
@@ -28,41 +28,41 @@ interface TypeFilterOption {
   'data-test-subj': string;
 }
 
-interface KiListHeaderProps {
+interface ListKiHeaderProps {
   destValue: string;
   indexManagementHref?: string;
   discoverHref?: string;
-  typeFilter: KiListTypeFilter;
+  typeFilter: ListKiTypeFilter;
   typeFilterOptions: TypeFilterOption[];
-  onTypeFilterChange: (filter: KiListTypeFilter) => void;
+  onTypeFilterChange: (filter: ListKiTypeFilter) => void;
 }
 
-export const KiListHeader = ({
+export const ListKiHeader = ({
   destValue,
   indexManagementHref,
   discoverHref,
   typeFilter,
   typeFilterOptions,
   onTypeFilterChange,
-}: KiListHeaderProps) => {
+}: ListKiHeaderProps) => {
   const destLink =
     indexManagementHref !== undefined ? (
       <EuiLink
         href={indexManagementHref}
-        data-test-subj="contextKiListPanelDestLink"
+        data-test-subj="contextListKiPanelDestLink"
         {...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
-          action: CONTEXT_ENGINE_UI_EBT.action.kiList.DEST_LINK,
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+          action: CONTEXT_ENGINE_UI_EBT.action.listKi.DEST_LINK,
         })}
       >
         {destValue}
       </EuiLink>
     ) : (
-      <code data-test-subj="contextKiListPanelDest">{destValue}</code>
+      <code data-test-subj="contextListKiPanelDest">{destValue}</code>
     );
 
   const typeFilterLegend = i18n.translate(
-    'xpack.contextEngine.aiIndexDetail.kiList.typeFilterLegend',
+    'xpack.contextEngine.aiIndexDetail.listKi.typeFilterLegend',
     {
       defaultMessage: 'Filter Knowledge Indicators by type',
     }
@@ -91,7 +91,7 @@ export const KiListHeader = ({
               aria-label={typeFilterLegend}
               compressed
               fullWidth
-              data-test-subj="contextKiListTypeFilters"
+              data-test-subj="contextListKiTypeFilters"
               options={superSelectOptions}
               valueOfSelected={typeFilter.value}
               onChange={(id) => {
@@ -111,9 +111,9 @@ export const KiListHeader = ({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiText size="s" data-test-subj="contextKiListPanelSummary">
+            <EuiText size="s" data-test-subj="contextListKiPanelSummary">
               <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.kiList.backingIndex"
+                id="xpack.contextEngine.aiIndexDetail.listKi.backingIndex"
                 defaultMessage="Backing index {dest}"
                 values={{ dest: destLink }}
               />
@@ -125,14 +125,14 @@ export const KiListHeader = ({
                 href={discoverHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                data-test-subj="contextKiListDiscoverLink"
+                data-test-subj="contextListKiDiscoverLink"
                 {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.kiList.DISCOVER_LINK,
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK,
                 })}
               >
                 <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.kiList.discoverLink"
+                  id="xpack.contextEngine.aiIndexDetail.listKi.discoverLink"
                   defaultMessage="View raw docs in Discover"
                 />
               </EuiLink>

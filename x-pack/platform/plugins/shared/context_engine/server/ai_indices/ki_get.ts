@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { readKiDocumentLifecycleStatus } from '../../common/ki_lifecycle_status';
 import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { GetKiResponse, KiDocument } from '../../common/http_api/knowledge_indicators';
@@ -28,31 +29,14 @@ export const kiIdQuery = (kiId: string) => ({
   },
 });
 
-const readLifecycleStatus = (document: KiDocument): KiLifecycleStatus | undefined => {
-  const governance = document.governance;
-  const lifecycle =
-    typeof governance === 'object' && governance !== null && !Array.isArray(governance)
-      ? governance.lifecycle
-      : undefined;
-  if (
-    typeof lifecycle === 'object' &&
-    lifecycle !== null &&
-    !Array.isArray(lifecycle) &&
-    (lifecycle.status === 'active' || lifecycle.status === 'deleted')
-  ) {
-    return lifecycle.status;
-  }
-  return undefined;
-};
-
 const isKiLifecycleAllowed = (
   document: KiDocument,
   lifecycleStatuses?: KiLifecycleStatus[]
 ): boolean => {
   if (lifecycleStatuses === undefined) {
-    return readLifecycleStatus(document) !== 'deleted';
+    return readKiDocumentLifecycleStatus(document) !== 'deleted';
   }
-  const status = readLifecycleStatus(document);
+  const status = readKiDocumentLifecycleStatus(document);
   if (status === undefined) {
     return lifecycleStatuses.includes('active');
   }

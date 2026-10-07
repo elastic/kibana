@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   INDEX_MANAGEMENT_LOCATOR_ID,
@@ -19,37 +19,37 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { isIndexPattern } from '../../../../common/ai_index_dest';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import { useKiList } from '../../hooks/use_ki_list';
+import { useListKi } from '../../hooks/use_list_ki';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   ALL_TYPE_FILTER,
   getDiscoverEsqlQuery,
   getIndexManagementLocatorParams,
-  getKiListTypeFilterLabel,
-  type KiListTypeFilter,
-} from './helpers';
-import { KiListBody } from './ki_list_body';
-import { KiListFooter } from './ki_list_footer';
-import { KiListHeader } from './ki_list_header';
+  getListKiTypeFilterLabel,
+  type ListKiTypeFilter,
+} from './list_ki_helpers';
+import { ListKiBody } from './list_ki_body';
+import { ListKiFooter } from './list_ki_footer';
+import { ListKiHeader } from './list_ki_header';
 
-interface KiListPanelProps {
+interface ListKiPanelProps {
   aiIndex: GetAiIndexResponse;
 }
 
-export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelProps) => {
+export const ListKiPanel = ({ aiIndex: { id: aiIndexId, dest } }: ListKiPanelProps) => {
   const {
     services: { share, application },
   } = useKibana();
 
-  const [typeFilter, setTypeFilter] = useState<KiListTypeFilter>(ALL_TYPE_FILTER);
+  const [typeFilter, setTypeFilter] = useState<ListKiTypeFilter>(ALL_TYPE_FILTER);
   const [size, setSize] = useState(DEFAULT_KI_PAGE_SIZE);
 
-  const onTypeFilterChange = (filter: KiListTypeFilter) => {
+  const onTypeFilterChange = (filter: ListKiTypeFilter) => {
     setTypeFilter(filter);
     setSize(DEFAULT_KI_PAGE_SIZE);
   };
 
-  const { kis, total, summary, isLoading, isFetching, error } = useKiList({
+  const { kis, total, summary, isLoading, isFetching, error } = useListKi({
     aiIndexId,
     size,
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
@@ -60,14 +60,14 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
       [{ type: ALL_TYPE_FILTER.value, count: summary.total }, ...summary.countsByType].map(
         ({ type, count }) => ({
           value: type,
-          label: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.filterType', {
+          label: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.filterType', {
             defaultMessage: '{typeLabel} ({count})',
-            values: { typeLabel: getKiListTypeFilterLabel(type), count },
+            values: { typeLabel: getListKiTypeFilterLabel(type), count },
           }),
-          'data-test-subj': `contextKiListFilter-${type}`,
+          'data-test-subj': `contextListKiFilter-${type}`,
           ...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
-            action: CONTEXT_ENGINE_UI_EBT.action.kiList.FILTER_TYPE,
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+            action: CONTEXT_ENGINE_UI_EBT.action.listKi.FILTER_TYPE,
           }),
         })
       ),
@@ -106,8 +106,8 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
     canLinkToIndexManagement && indexManagementUrl ? indexManagementUrl : undefined;
 
   return (
-    <div data-test-subj="contextKiListPanel">
-      <KiListHeader
+    <div data-test-subj="contextListKiPanel">
+      <ListKiHeader
         destValue={dest.value}
         indexManagementHref={indexManagementHref}
         discoverHref={discoverHref}
@@ -118,9 +118,9 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
 
       <EuiSpacer size="l" />
 
-      <KiListBody aiIndexId={aiIndexId} kis={kis} isLoading={isLoading} error={error} />
+      <ListKiBody aiIndexId={aiIndexId} kis={kis} isLoading={isLoading} error={error} />
 
-      <KiListFooter
+      <ListKiFooter
         loadedCount={kis.length}
         total={total}
         size={size}

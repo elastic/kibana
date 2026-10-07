@@ -33,7 +33,15 @@ export type KiJsonPrimitive = string | number | boolean | null;
 export type KiJsonValue = KiJsonPrimitive | KiJsonValue[] | { [key: string]: KiJsonValue };
 
 export interface KiDocument {
-  [key: string]: KiJsonValue;
+  content?: string;
+  description?: string;
+  '@timestamp'?: string;
+  updated_at?: string;
+  expires_at?: string;
+  tags?: string[];
+  attributes?: KiJsonValue;
+  governance?: KiJsonValue;
+  [key: string]: KiJsonValue | undefined;
 }
 
 export interface GetKiResponse {

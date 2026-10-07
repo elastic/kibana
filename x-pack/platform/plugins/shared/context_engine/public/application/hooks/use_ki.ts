@@ -6,10 +6,8 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { KI_LIFECYCLE_STATUSES } from '../../../common/step_types/ki';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
-import { getKi } from '../api/knowledge_indicators';
-import { contextEngineQueryKeys } from './query_keys';
+import { createKiQueryOptions } from './ki_query_options';
 import { useKibana } from './use_kibana';
 
 interface UseKiArgs {
@@ -31,15 +29,7 @@ export const useKi = ({ aiIndexId, kiId, index, enabled = true }: UseKiArgs): Us
   } = useKibana();
 
   const { data, isLoading, error } = useQuery<GetKiResponse, Error>({
-    queryKey: contextEngineQueryKeys.aiIndex.ki(aiIndexId, index, kiId, KI_LIFECYCLE_STATUSES),
-    queryFn: ({ signal }) =>
-      getKi(http, {
-        aiIndexId,
-        kiId,
-        index,
-        lifecycleStatus: [...KI_LIFECYCLE_STATUSES],
-        signal,
-      }),
+    ...createKiQueryOptions(http, { aiIndexId, kiId, index }),
     enabled: enabled && index.length > 0,
   });
 

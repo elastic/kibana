@@ -17,74 +17,75 @@ import React, { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { KiListItem } from '../../../../common/http_api/knowledge_indicators';
 import { useNavigation } from '../../hooks/use_navigation';
-import { getKiDetailPath } from '../../paths';
-import { getKiDisplayTitle, getKiDisplayTypeLabel, noneValueLabel } from './helpers';
+import { usePrefetchKi } from '../../hooks/use_prefetch_ki';
+import { getViewKiPath } from '../../paths';
+import { getKiDisplayTitle, noneValueLabel } from './list_ki_helpers';
 import { KiFormattedDate } from './ki_formatted_date';
-import { KiListLifecycleStatusBadge } from './ki_list_lifecycle_status_badge';
+import { ListKiLifecycleStatusBadge } from './list_ki_lifecycle_status_badge';
+import { KiTypeDisplay } from './ki_type_display';
 
-interface KiListTableRow extends KiListItem {
+interface ListKiTableRow extends KiListItem {
   rowKey: string;
 }
 
-interface KiListTableProps {
+interface ListKiTableProps {
   aiIndexId: string;
   kis: KiListItem[];
 }
 
-const toTableRow = (ki: KiListItem): KiListTableRow => ({
+const toTableRow = (ki: KiListItem): ListKiTableRow => ({
   ...ki,
   rowKey: `${ki.index}:${ki.id}`,
 });
 
-export const KiListTable = ({ aiIndexId, kis }: KiListTableProps) => {
+export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
   const { navigateToContextEngine } = useNavigation();
+  const prefetchKi = usePrefetchKi(aiIndexId);
 
   const items = useMemo(() => kis.map(toTableRow), [kis]);
 
-  const columns = useMemo((): Array<EuiBasicTableColumn<KiListTableRow>> => {
+  const columns = useMemo((): Array<EuiBasicTableColumn<ListKiTableRow>> => {
     return [
       {
         field: 'title',
-        name: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.columnTitle', {
+        name: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.columnTitle', {
           defaultMessage: 'Title',
         }),
         sortable: false,
-        width: '46%',
+        width: '55%',
         render: (_, ki) => (
-          <EuiTextBlockTruncate lines={2} cloneElement>
+          <EuiTextBlockTruncate lines={1} cloneElement>
             <span data-test-subj="contextKiRowTitle">{getKiDisplayTitle(ki.title)}</span>
           </EuiTextBlockTruncate>
         ),
       },
       {
         field: 'type',
-        name: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.columnType', {
+        name: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.columnType', {
           defaultMessage: 'Type',
         }),
         sortable: false,
-        width: '18%',
+        width: '25%',
         render: (_, ki) => (
-          <EuiText size="s" color="subdued" data-test-subj="contextKiRowType">
-            {getKiDisplayTypeLabel(ki.type)}
-          </EuiText>
+          <KiTypeDisplay as="text" type={ki.type} data-test-subj="contextKiRowType" />
         ),
       },
       {
         field: 'lifecycle_status',
-        name: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.columnStatus', {
+        name: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.columnStatus', {
           defaultMessage: 'Status',
         }),
         sortable: false,
-        width: '15%',
-        render: (_, ki) => <KiListLifecycleStatusBadge lifecycleStatus={ki.lifecycle_status} />,
+        width: '10%',
+        render: (_, ki) => <ListKiLifecycleStatusBadge lifecycleStatus={ki.lifecycle_status} />,
       },
       {
         field: 'updated_at',
-        name: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.columnUpdatedAt', {
+        name: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.columnUpdatedAt', {
           defaultMessage: 'Updated',
         }),
         sortable: false,
-        width: '21%',
+        width: '10%',
         render: (_, ki) =>
           ki.updated_at ? (
             <EuiText size="s" data-test-subj="contextKiRowUpdatedAt">
@@ -101,8 +102,8 @@ export const KiListTable = ({ aiIndexId, kis }: KiListTableProps) => {
 
   return (
     <EuiBasicTable
-      data-test-subj="contextKiListTable"
-      tableCaption={i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.tableCaption', {
+      data-test-subj="contextListKiTable"
+      tableCaption={i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.tableCaption', {
         defaultMessage: 'Knowledge Indicators',
       })}
       items={items}
@@ -112,18 +113,19 @@ export const KiListTable = ({ aiIndexId, kis }: KiListTableProps) => {
         const title = getKiDisplayTitle(ki.title);
         return {
           'data-test-subj': 'contextKiRow',
+          onMouseEnter: () => prefetchKi(ki),
           onClick: () =>
-            navigateToContextEngine(getKiDetailPath(aiIndexId, ki.id), {
+            navigateToContextEngine(getViewKiPath(aiIndexId, ki.id), {
               index: ki.index,
             }),
           style: { cursor: 'pointer' },
-          'aria-label': i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.viewKi', {
+          'aria-label': i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.viewKi', {
             defaultMessage: 'View Knowledge Indicator {title}',
             values: { title },
           }),
           ...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
-            action: CONTEXT_ENGINE_UI_EBT.action.kiList.OPEN_ROW,
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+            action: CONTEXT_ENGINE_UI_EBT.action.listKi.OPEN_ROW,
           }),
         };
       }}

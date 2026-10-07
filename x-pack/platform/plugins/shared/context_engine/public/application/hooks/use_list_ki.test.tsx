@@ -11,9 +11,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useKiList } from './use_ki_list';
+import { useListKi } from './use_list_ki';
 
-const renderUseKiList = (core: CoreStart, args: Parameters<typeof useKiList>[0]) => {
+const renderUseListKi = (core: CoreStart, args: Parameters<typeof useListKi>[0]) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(
@@ -22,16 +22,16 @@ const renderUseKiList = (core: CoreStart, args: Parameters<typeof useKiList>[0])
       React.createElement(QueryClientProvider, { client: queryClient }, children)
     );
 
-  return renderHook(() => useKiList(args), { wrapper });
+  return renderHook(() => useListKi(args), { wrapper });
 };
 
-describe('useKiList', () => {
+describe('useListKi', () => {
   it('shows an error toast when notifyOnError is enabled and the request fails', async () => {
     const core = coreMock.createStart();
     const requestError = new Error('Request timed out');
     (core.http.get as jest.Mock).mockRejectedValue(requestError);
 
-    const { result } = renderUseKiList(core, {
+    const { result } = renderUseListKi(core, {
       aiIndexId: 'my-ai-index',
       notifyOnError: true,
     });
@@ -55,7 +55,7 @@ describe('useKiList', () => {
     const core = coreMock.createStart();
     (core.http.get as jest.Mock).mockRejectedValue(new Error('Request timed out'));
 
-    const { result } = renderUseKiList(core, {
+    const { result } = renderUseListKi(core, {
       aiIndexId: 'my-ai-index',
     });
 

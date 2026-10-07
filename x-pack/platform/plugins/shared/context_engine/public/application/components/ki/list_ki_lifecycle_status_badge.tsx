@@ -8,23 +8,27 @@
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import type { KiLifecycleStatus } from '../../../../common/step_types/ki';
-import { getKiLifecycleStatusLabel, normalizeKiLifecycleStatus } from './helpers';
+import { normalizeKiLifecycleStatus } from './list_ki_helpers';
+import { kiLabelCapitalizeCss } from './ki_type_display';
 
-interface KiListLifecycleStatusBadgeProps {
+interface ListKiLifecycleStatusBadgeProps {
   lifecycleStatus?: KiLifecycleStatus;
+  'data-test-subj'?: string;
 }
 
-export const KiListLifecycleStatusBadge = ({
+export const ListKiLifecycleStatusBadge = ({
   lifecycleStatus,
-}: KiListLifecycleStatusBadgeProps) => {
+  'data-test-subj': dataTestSubj = 'contextKiRowLifecycleStatus',
+}: ListKiLifecycleStatusBadgeProps) => {
   const status = normalizeKiLifecycleStatus(lifecycleStatus);
 
   return (
     <EuiBadge
       color={status === 'deleted' ? 'danger' : 'success'}
-      data-test-subj="contextKiRowLifecycleStatus"
+      data-test-subj={dataTestSubj}
+      css={kiLabelCapitalizeCss}
     >
-      {getKiLifecycleStatusLabel(status)}
+      {status}
     </EuiBadge>
   );
 };

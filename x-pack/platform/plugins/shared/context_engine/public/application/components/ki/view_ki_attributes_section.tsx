@@ -9,25 +9,25 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { KiDocument } from '../../../../common/http_api/knowledge_indicators';
-import { documentAttributesToRows } from './ki_detail_helpers';
+import { documentAttributesToRows } from './view_ki_helpers';
 import {
-  KiDetailSidebarBreakableText,
-  KiDetailSidebarDescriptionList,
-  KiDetailSidebarSectionTitle,
-} from './ki_detail_sidebar';
+  ViewKiSidebarBreakableText,
+  ViewKiSidebarDescriptionList,
+  ViewKiSidebarSectionTitle,
+} from './view_ki_sidebar';
 
-interface KiDetailAttributesPanelProps {
+interface ViewKiAttributesSectionProps {
   document: KiDocument;
 }
 
-export const KiDetailAttributesSection = ({ document }: KiDetailAttributesPanelProps) => {
+export const ViewKiAttributesSection = ({ document }: ViewKiAttributesSectionProps) => {
   const viewItems = useMemo(
     () =>
       documentAttributesToRows(document)
-        .filter((row) => row.key.trim().length > 0 && row.value.trim().length > 0)
+        .filter((row) => row.key && row.value)
         .map((row) => ({
           title: row.key,
-          description: <KiDetailSidebarBreakableText>{row.value}</KiDetailSidebarBreakableText>,
+          description: <ViewKiSidebarBreakableText>{row.value}</ViewKiSidebarBreakableText>,
         })),
     [document]
   );
@@ -37,17 +37,17 @@ export const KiDetailAttributesSection = ({ document }: KiDetailAttributesPanelP
   }
 
   return (
-    <section data-test-subj="contextKiDetailAttributesPanel">
-      <KiDetailSidebarSectionTitle>
+    <section data-test-subj="contextViewKiAttributesSection">
+      <ViewKiSidebarSectionTitle>
         <FormattedMessage
-          id="xpack.contextEngine.kiDetail.attributes.title"
+          id="xpack.contextEngine.viewKi.attributes.title"
           defaultMessage="Attributes"
         />
-      </KiDetailSidebarSectionTitle>
+      </ViewKiSidebarSectionTitle>
       <EuiSpacer size="s" />
-      <KiDetailSidebarDescriptionList
+      <ViewKiSidebarDescriptionList
         listItems={viewItems}
-        data-test-subj="contextKiDetailAttributesList"
+        data-test-subj="contextViewKiAttributesList"
       />
     </section>
   );

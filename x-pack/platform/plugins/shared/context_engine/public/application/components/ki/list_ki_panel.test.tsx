@@ -17,12 +17,21 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import { KiListPanel } from './ki_list_panel';
+import { getViewKiPath } from '../../paths';
+import { ListKiPanel } from './list_ki_panel';
 
-const mockUseKiList = jest.fn();
+const mockUseListKi = jest.fn();
+const mockNavigateToContextEngine = jest.fn();
 
-jest.mock('../../hooks/use_ki_list', () => ({
-  useKiList: (...args: unknown[]) => mockUseKiList(...args),
+jest.mock('../../hooks/use_list_ki', () => ({
+  useListKi: (...args: unknown[]) => mockUseListKi(...args),
+}));
+
+jest.mock('../../hooks/use_navigation', () => ({
+  useNavigation: () => ({
+    createContextEngineUrl: (path: string) => path,
+    navigateToContextEngine: mockNavigateToContextEngine,
+  }),
 }));
 
 const aiIndex: GetAiIndexResponse = {
@@ -42,8 +51,8 @@ const SAMPLE_INDEX_MANAGEMENT_URL =
 const SAMPLE_DISCOVER_URL = '/app/discover#/?_a=(query:(esql:FROM%20ai-index-idx-sample-ki))';
 
 const selectTypeFilter = (type: string) => {
-  fireEvent.click(screen.getByTestId('contextKiListTypeFilters'));
-  fireEvent.click(screen.getByTestId(`contextKiListFilter-${type}`));
+  fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
+  fireEvent.click(screen.getByTestId(`contextListKiFilter-${type}`));
 };
 
 interface RenderOptions {
@@ -93,7 +102,7 @@ const renderWithProviders = (ui: React.ReactElement, options: RenderOptions = {}
   );
 };
 
-describe('KiListPanel', () => {
+describe('ListKiPanel', () => {
   const stableCountsByType = [
     { type: 'playbook', count: 1 },
     { type: 'policy', count: 1 },
@@ -101,7 +110,7 @@ describe('KiListPanel', () => {
   ];
 
   beforeEach(() => {
-    mockUseKiList.mockImplementation(({ type }: { type?: string }) => ({
+    mockUseListKi.mockImplementation(({ type }: { type?: string }) => ({
       kis: [
         {
           id: 'ki-1',
@@ -126,18 +135,28 @@ describe('KiListPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the list rows and type filters from counts_by_type', async () => {
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+  it('navigates to KI detail when a row is clicked', () => {
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
-    expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('contextKiListRows')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextKiRow'));
+
+    expect(mockNavigateToContextEngine).toHaveBeenCalledWith(getViewKiPath('sample-ki', 'ki-1'), {
+      index: 'ai-index-idx-sample-ki',
+    });
+  });
+
+  it('renders the list rows and type filters from counts_by_type', async () => {
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
+
+    expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiRows')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiRowTitle')).toHaveTextContent('Refund playbook');
-    expect(screen.getByTestId('contextKiListTypeFilters')).toHaveTextContent('All (6)');
-    fireEvent.click(screen.getByTestId('contextKiListTypeFilters'));
-    expect(screen.getByTestId('contextKiListFilter-playbook')).toBeInTheDocument();
-    expect(screen.getByTestId('contextKiListFilter-policy')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiTypeFilters')).toHaveTextContent('All (6)');
+    fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
+    expect(screen.getByTestId('contextListKiFilter-playbook')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiFilter-policy')).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByTestId('contextKiListPanelDestLink')).toHaveAttribute(
+      expect(screen.getByTestId('contextListKiPanelDestLink')).toHaveAttribute(
         'href',
         SAMPLE_INDEX_MANAGEMENT_URL
       );
@@ -145,22 +164,22 @@ describe('KiListPanel', () => {
   });
 
   it('renders the backing index as plain text when the user lacks index management access', async () => {
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />, { indexManagementMonitor: false });
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />, { indexManagementMonitor: false });
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextKiListPanelDest')).toHaveTextContent(
+      expect(screen.getByTestId('contextListKiPanelDest')).toHaveTextContent(
         'ai-index-idx-sample-ki'
       );
     });
-    expect(screen.queryByTestId('contextKiListPanelDestLink')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
   });
 
   it('requests a type filter when a type is selected from the dropdown', () => {
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
     selectTypeFilter('playbook');
 
-    expect(mockUseKiList).toHaveBeenLastCalledWith(
+    expect(mockUseListKi).toHaveBeenLastCalledWith(
       expect.objectContaining({
         type: 'playbook',
       })
@@ -168,29 +187,29 @@ describe('KiListPanel', () => {
   });
 
   it('keeps all type filter options in the dropdown after selecting a type', () => {
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
     selectTypeFilter('playbook');
 
-    fireEvent.click(screen.getByTestId('contextKiListTypeFilters'));
-    expect(screen.getByTestId('contextKiListFilter-all')).toBeInTheDocument();
-    expect(screen.getByTestId('contextKiListFilter-playbook')).toBeInTheDocument();
-    expect(screen.getByTestId('contextKiListFilter-policy')).toBeInTheDocument();
-    expect(screen.getByTestId('contextKiListFilter-faq')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
+    expect(screen.getByTestId('contextListKiFilter-all')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiFilter-playbook')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiFilter-policy')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiFilter-faq')).toBeInTheDocument();
   });
 
   it('keeps the backing index label unchanged when a type is selected', () => {
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
     selectTypeFilter('playbook');
 
-    expect(screen.getByTestId('contextKiListPanelSummary')).toHaveTextContent(
+    expect(screen.getByTestId('contextListKiPanelSummary')).toHaveTextContent(
       'Backing index ai-index-idx-sample-ki'
     );
   });
 
   it('shows a loading skeleton while the first page is loading', () => {
-    mockUseKiList.mockReturnValue({
+    mockUseListKi.mockReturnValue({
       kis: [],
       total: 0,
       summary: {
@@ -203,14 +222,14 @@ describe('KiListPanel', () => {
       refetch: jest.fn(),
     });
 
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
-    expect(screen.getByTestId('contextKiListLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextKiListRows')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiRows')).not.toBeInTheDocument();
   });
 
   it('shows an error message when the list request fails', () => {
-    mockUseKiList.mockReturnValue({
+    mockUseListKi.mockReturnValue({
       kis: [],
       total: 0,
       summary: {
@@ -223,15 +242,15 @@ describe('KiListPanel', () => {
       refetch: jest.fn(),
     });
 
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
-    expect(screen.getByTestId('contextKiListError')).toHaveTextContent(
+    expect(screen.getByTestId('contextListKiError')).toHaveTextContent(
       'Unable to load Knowledge Indicators.'
     );
   });
 
   it('shows an empty state when there are no Knowledge Indicators', () => {
-    mockUseKiList.mockReturnValue({
+    mockUseListKi.mockReturnValue({
       kis: [],
       total: 0,
       summary: {
@@ -244,30 +263,30 @@ describe('KiListPanel', () => {
       refetch: jest.fn(),
     });
 
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
-    expect(screen.getByTestId('contextKiListEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextKiListTypeFilters')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiTypeFilters')).not.toBeInTheDocument();
   });
 
   it('renders a Discover link when discover is available', () => {
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
-    expect(screen.getByTestId('contextKiListDiscoverLink')).toHaveAttribute(
+    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
       'href',
       SAMPLE_DISCOVER_URL
     );
   });
 
   it('hides the Discover link when discover is unavailable', () => {
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />, { discoverShow: false });
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />, { discoverShow: false });
 
-    expect(screen.queryByTestId('contextKiListDiscoverLink')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiDiscoverLink')).not.toBeInTheDocument();
   });
 
   it('renders the destination as plain text for index patterns', () => {
     renderWithProviders(
-      <KiListPanel
+      <ListKiPanel
         aiIndex={{
           ...aiIndex,
           dest: { type: 'index', value: 'ai-index-idx-logs-*' },
@@ -275,12 +294,12 @@ describe('KiListPanel', () => {
       />
     );
 
-    expect(screen.getByTestId('contextKiListPanelDest')).toHaveTextContent('ai-index-idx-logs-*');
-    expect(screen.queryByTestId('contextKiListPanelDestLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiPanelDest')).toHaveTextContent('ai-index-idx-logs-*');
+    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
   });
 
   it('requests a larger page size when load more is clicked', () => {
-    mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
+    mockUseListKi.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
         id: `ki-${index}`,
         index: 'ai-index-idx-sample-ki',
@@ -298,11 +317,11 @@ describe('KiListPanel', () => {
       refetch: jest.fn(),
     }));
 
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
-    fireEvent.click(screen.getByTestId('contextKiListLoadMoreButton'));
+    fireEvent.click(screen.getByTestId('contextListKiLoadMoreButton'));
 
-    expect(mockUseKiList).toHaveBeenLastCalledWith(
+    expect(mockUseListKi).toHaveBeenLastCalledWith(
       expect.objectContaining({
         size: DEFAULT_KI_PAGE_SIZE * 2,
       })
@@ -310,7 +329,7 @@ describe('KiListPanel', () => {
   });
 
   it('shows the cap reached message with a Discover link at the max page size', () => {
-    mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
+    mockUseListKi.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
         id: `ki-${index}`,
         index: 'ai-index-idx-sample-ki',
@@ -328,25 +347,25 @@ describe('KiListPanel', () => {
       refetch: jest.fn(),
     }));
 
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />);
 
     const loadMoreClicks = MAX_KI_PAGE_SIZE / DEFAULT_KI_PAGE_SIZE - 1;
     for (let click = 0; click < loadMoreClicks; click++) {
-      fireEvent.click(screen.getByTestId('contextKiListLoadMoreButton'));
+      fireEvent.click(screen.getByTestId('contextListKiLoadMoreButton'));
     }
 
-    expect(screen.getByTestId('contextKiListCapReached')).toHaveTextContent(
+    expect(screen.getByTestId('contextListKiCapReached')).toHaveTextContent(
       `Showing the first ${MAX_KI_PAGE_SIZE} results.`
     );
-    expect(screen.getByTestId('contextKiListCapReachedDiscoverLink')).toHaveAttribute(
+    expect(screen.getByTestId('contextListKiCapReachedDiscoverLink')).toHaveAttribute(
       'href',
       SAMPLE_DISCOVER_URL
     );
-    expect(screen.queryByTestId('contextKiListLoadMoreButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiLoadMoreButton')).not.toBeInTheDocument();
   });
 
   it('shows the cap reached message without a Discover link when discover is unavailable', () => {
-    mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
+    mockUseListKi.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
         id: `ki-${index}`,
         index: 'ai-index-idx-sample-ki',
@@ -364,16 +383,16 @@ describe('KiListPanel', () => {
       refetch: jest.fn(),
     }));
 
-    renderWithProviders(<KiListPanel aiIndex={aiIndex} />, { discoverShow: false });
+    renderWithProviders(<ListKiPanel aiIndex={aiIndex} />, { discoverShow: false });
 
     const loadMoreClicks = MAX_KI_PAGE_SIZE / DEFAULT_KI_PAGE_SIZE - 1;
     for (let click = 0; click < loadMoreClicks; click++) {
-      fireEvent.click(screen.getByTestId('contextKiListLoadMoreButton'));
+      fireEvent.click(screen.getByTestId('contextListKiLoadMoreButton'));
     }
 
-    expect(screen.getByTestId('contextKiListCapReached')).toHaveTextContent(
+    expect(screen.getByTestId('contextListKiCapReached')).toHaveTextContent(
       `Showing the first ${MAX_KI_PAGE_SIZE} results.`
     );
-    expect(screen.queryByTestId('contextKiListCapReachedDiscoverLink')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiCapReachedDiscoverLink')).not.toBeInTheDocument();
   });
 });

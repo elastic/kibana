@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { GetKiResponse } from '../../../../common/http_api/knowledge_indicators';
+import { css } from '@emotion/react';
 
-export const buildKiDetailDocumentView = (ki: GetKiResponse): Record<string, unknown> => ({
-  id: ki.id,
-  ...ki.document,
-});
+export const viewKiLoadingPanelCss = css`
+  min-height: 400px;
+`;

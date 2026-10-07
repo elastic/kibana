@@ -23,7 +23,7 @@ import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../../common/constants';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
-import { useKiList } from '../../hooks/use_ki_list';
+import { useListKi } from '../../hooks/use_list_ki';
 import { useNavigation } from '../../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../../paths';
 
@@ -33,7 +33,7 @@ interface AiIndexManagedRowProps {
 
 export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
   const { navigateToContextEngine } = useNavigation();
-  const { summary, isLoading: isKiLoading } = useKiList({
+  const { summary, isLoading: isKiLoading } = useListKi({
     aiIndexId: aiIndex.id,
     size: KI_SUMMARY_PAGE_SIZE,
   });

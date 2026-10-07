@@ -17,7 +17,7 @@ import { getErrorMessage } from '../utils/get_error_message';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
-interface UseKiListArgs {
+interface UseListKiArgs {
   aiIndexId: string | undefined;
   size?: number;
   type?: string;
@@ -25,34 +25,34 @@ interface UseKiListArgs {
   notifyOnError?: boolean;
 }
 
-interface UseKiListSummary {
+interface UseListKiSummary {
   total: number;
   countsByType: KiTypeCount[];
 }
 
-interface UseKiListResult {
+interface UseListKiResult {
   kis: ListKisResponse['kis'];
   total: number;
-  summary: UseKiListSummary;
+  summary: UseListKiSummary;
   isLoading: boolean;
   isFetching: boolean;
   error: Error | undefined;
   refetch: () => void;
 }
 
-export const useKiList = ({
+export const useListKi = ({
   aiIndexId,
   size = DEFAULT_KI_PAGE_SIZE,
   type,
   enabled = true,
   notifyOnError = false,
-}: UseKiListArgs): UseKiListResult => {
+}: UseListKiArgs): UseListKiResult => {
   const {
     services: { http, notifications },
   } = useKibana();
 
   const { data, isLoading, isFetching, error, refetch } = useQuery<ListKisResponse, Error>({
-    queryKey: contextEngineQueryKeys.aiIndex.kiList(
+    queryKey: contextEngineQueryKeys.aiIndex.listKi(
       aiIndexId ?? '',
       size,
       type,
@@ -81,7 +81,7 @@ export const useKiList = ({
 
     const toastMessage = getErrorMessage(error);
     notifications.toasts.addError(error, {
-      title: i18n.translate('xpack.contextEngine.kiList.loadErrorTitle', {
+      title: i18n.translate('xpack.contextEngine.listKi.loadErrorTitle', {
         defaultMessage: 'Unable to load Knowledge Indicators',
       }),
       ...(toastMessage ? { toastMessage } : {}),

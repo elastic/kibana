@@ -7,15 +7,10 @@
 
 import { useCallback } from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
-import type {
-  AiIndexCreatedLocationState,
-  AiIndexSelectedTabLocationState,
-} from '../ai_index_created_location_state';
+import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 import { useKibana } from './use_kibana';
 
-export type ContextEngineLocationState =
-  | AiIndexCreatedLocationState
-  | AiIndexSelectedTabLocationState;
+export type ContextEngineLocationState = AiIndexCreatedLocationState;
 
 const buildPath = (path: string, params?: Record<string, string>): string => {
   const queryParams = new URLSearchParams(params);

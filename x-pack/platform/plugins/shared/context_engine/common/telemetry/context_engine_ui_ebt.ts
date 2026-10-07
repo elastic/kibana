@@ -26,8 +26,8 @@ const ebtElement = {
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
   aiIndexDetailPageAutomationsPanel: 'contextEngine.aiIndexDetailPage.automationsPanel',
   aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
-  aiIndexDetailPageKiListPanel: 'contextEngine.aiIndexDetailPage.kiListPanel',
-  kiDetailPage: 'contextEngine.kiDetailPage',
+  aiIndexDetailPageListKiPanel: 'contextEngine.aiIndexDetailPage.listKiPanel',
+  viewKiPage: 'contextEngine.viewKiPage',
   aiIndexEditFlyoutSourcePicker: 'contextEngine.aiIndexEditFlyout.sourcePicker',
   aiIndexDetailFlyout: 'contextEngine.aiIndexDetailFlyout',
   aiIndexDetailFlyoutSignalGroup: 'contextEngine.aiIndexDetailFlyout.signalGroup',
@@ -102,7 +102,7 @@ const ebtAction = {
     NEXT: 'next_signal',
     INTERACT_FEEDBACK_AGENT: 'interact_feedback_agent',
   },
-  kiList: {
+  listKi: {
     DEST_LINK: 'open_destination',
     DISCOVER_LINK: 'open_ki_discover',
     FILTER_TYPE: 'filter_type',
@@ -110,10 +110,7 @@ const ebtAction = {
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',
     OPEN_ROW: 'open_row',
   },
-  kiDetail: {
-    EDIT: 'edit_ki',
-    SAVE: 'save_ki',
-    CANCEL: 'cancel_ki',
+  viewKi: {
     TAB_DETAILS: 'tab_details',
     TAB_DOCUMENT: 'tab_document',
   },

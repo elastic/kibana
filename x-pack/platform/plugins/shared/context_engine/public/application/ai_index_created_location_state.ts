@@ -12,12 +12,3 @@ export interface AiIndexCreatedLocationState {
 export const AI_INDEX_CREATED_LOCATION_STATE: AiIndexCreatedLocationState = {
   aiIndexCreated: true,
 };
-
-/** Navigated with this state to land back on the Knowledge Indicators tab, e.g. from the KI detail page. */
-export interface AiIndexSelectedTabLocationState {
-  selectedTab: 'knowledge_indicators';
-}
-
-export const AI_INDEX_KNOWLEDGE_INDICATORS_TAB_LOCATION_STATE: AiIndexSelectedTabLocationState = {
-  selectedTab: 'knowledge_indicators',
-};

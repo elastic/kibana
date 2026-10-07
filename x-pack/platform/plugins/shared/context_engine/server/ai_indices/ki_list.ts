@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
+import { toOptionalKiLifecycleStatus } from '../../common/ki_lifecycle_status';
 import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
@@ -46,7 +47,7 @@ const toOptionalString = (value: unknown): string | undefined =>
 const toKiListItem = (row: Record<string, unknown>): KiListItem => {
   const { _index: index, id, type, title, updated_at: updatedAt } = row;
   const updatedAtValue = toOptionalString(updatedAt);
-  const lifecycleStatus = toOptionalString(row[KI_LIFECYCLE_STATUS_FIELD]);
+  const lifecycleStatus = toOptionalKiLifecycleStatus(row[KI_LIFECYCLE_STATUS_FIELD]);
   return {
     id: String(id),
     index: String(index),

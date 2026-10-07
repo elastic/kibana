@@ -14,10 +14,15 @@ const parseIsoDate = (value: string): Date | undefined => {
   return Number.isNaN(date.getTime()) ? undefined : date;
 };
 
-export const KiFormattedDate = ({ value }: { value: string }) => {
+interface KiFormattedDateProps {
+  value: string;
+  className?: string;
+}
+
+export const KiFormattedDate = ({ value, className }: KiFormattedDateProps) => {
   const date = parseIsoDate(value);
   if (!date) {
-    return <>{value}</>;
+    return <span className={className}>{value}</span>;
   }
 
   return (
@@ -34,7 +39,7 @@ export const KiFormattedDate = ({ value }: { value: string }) => {
         />
       }
     >
-      <span tabIndex={0}>
+      <span tabIndex={0} className={className}>
         <FormattedRelative value={date} />
       </span>
     </EuiToolTip>

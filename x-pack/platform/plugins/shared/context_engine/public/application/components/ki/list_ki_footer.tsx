@@ -13,7 +13,7 @@ import React from 'react';
 import { MAX_KI_PAGE_SIZE } from '../../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 
-interface KiListFooterProps {
+interface ListKiFooterProps {
   loadedCount: number;
   total: number;
   size: number;
@@ -22,14 +22,14 @@ interface KiListFooterProps {
   onLoadMore: () => void;
 }
 
-export const KiListFooter = ({
+export const ListKiFooter = ({
   loadedCount,
   total,
   size,
   isLoading,
   discoverHref,
   onLoadMore,
-}: KiListFooterProps) => {
+}: ListKiFooterProps) => {
   const hasMore = loadedCount < total;
   const canLoadMore = hasMore && size < MAX_KI_PAGE_SIZE;
   const capReached = hasMore && size >= MAX_KI_PAGE_SIZE;
@@ -49,13 +49,13 @@ export const KiListFooter = ({
                 size="s"
                 onClick={onLoadMore}
                 isLoading={isLoading}
-                data-test-subj="contextKiListLoadMoreButton"
+                data-test-subj="contextListKiLoadMoreButton"
                 {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.kiList.LOAD_MORE,
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.listKi.LOAD_MORE,
                 })}
               >
-                {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.loadMoreButton', {
+                {i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.loadMoreButton', {
                   defaultMessage: 'Load more',
                 })}
               </EuiButton>
@@ -67,11 +67,11 @@ export const KiListFooter = ({
       {capReached && (
         <>
           <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued" data-test-subj="contextKiListCapReached">
+          <EuiText size="xs" color="subdued" data-test-subj="contextListKiCapReached">
             <p>
               {discoverHref ? (
                 <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.kiList.capReachedWithDiscover"
+                  id="xpack.contextEngine.aiIndexDetail.listKi.capReachedWithDiscover"
                   defaultMessage="Showing the first {count} results. {discoverLink} to view all Knowledge Indicators."
                   values={{
                     count: MAX_KI_PAGE_SIZE,
@@ -80,14 +80,14 @@ export const KiListFooter = ({
                         href={discoverHref}
                         target="_blank"
                         rel="noopener noreferrer"
-                        data-test-subj="contextKiListCapReachedDiscoverLink"
+                        data-test-subj="contextListKiCapReachedDiscoverLink"
                         {...getEbtProps({
-                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
-                          action: CONTEXT_ENGINE_UI_EBT.action.kiList.DISCOVER_CAP_REACHED,
+                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+                          action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_CAP_REACHED,
                         })}
                       >
                         <FormattedMessage
-                          id="xpack.contextEngine.aiIndexDetail.kiList.capReachedDiscoverLink"
+                          id="xpack.contextEngine.aiIndexDetail.listKi.capReachedDiscoverLink"
                           defaultMessage="Open in Discover"
                         />
                       </EuiLink>
@@ -95,7 +95,7 @@ export const KiListFooter = ({
                   }}
                 />
               ) : (
-                i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.capReached', {
+                i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.capReached', {
                   defaultMessage: 'Showing the first {count} results.',
                   values: { count: MAX_KI_PAGE_SIZE },
                 })

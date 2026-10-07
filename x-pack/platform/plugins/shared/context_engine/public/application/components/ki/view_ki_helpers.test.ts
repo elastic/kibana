@@ -11,7 +11,7 @@ import {
   getWriterAgentId,
   parseWriterUri,
   readKiGovernance,
-} from './ki_detail_helpers';
+} from './view_ki_helpers';
 
 describe('parseWriterUri', () => {
   it('parses scheme and identifier', () => {
@@ -34,6 +34,8 @@ describe('parseWriterUri', () => {
 describe('getWriterAgentId', () => {
   it('reads agent_id from writer metadata', () => {
     expect(getWriterAgentId({ run_id: 'run-1', agent_id: 'elastic_agent' })).toBe('elastic_agent');
+    expect(getWriterAgentId({ run_id: 'run-1', agent_id: 42 })).toBe('42');
+    expect(getWriterAgentId({ run_id: 'run-1', agent_id: '' })).toBeUndefined();
     expect(getWriterAgentId({ run_id: 'run-1' })).toBeUndefined();
   });
 });
@@ -80,5 +82,18 @@ describe('readKiGovernance', () => {
         governance: { provenance: { created_by: 'workflow://legacy-wf' } },
       }).createdBy
     ).toEqual({ uri: 'workflow://legacy-wf', metadata: {} });
+  });
+
+  it('returns a typed lifecycle status when present', () => {
+    expect(
+      readKiGovernance({
+        governance: { lifecycle: { status: 'deleted' } },
+      }).lifecycleStatus
+    ).toBe('deleted');
+    expect(
+      readKiGovernance({
+        governance: { lifecycle: { status: 'pending' } },
+      }).lifecycleStatus
+    ).toBeUndefined();
   });
 });
