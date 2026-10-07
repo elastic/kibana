@@ -66,6 +66,12 @@ export type CustomGridColumnsConfiguration = Record<
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
+/**
+ * Render mode of the grid: 'interactive' (default) or 'print', which renders it without
+ * interactive controls (sorting, column actions/resizing, drag-and-drop, etc.)
+ */
+export type DataGridRenderMode = 'interactive' | 'print';
+
 export type DocumentsDisplayMode = 'table' | 'json';
 
 /**

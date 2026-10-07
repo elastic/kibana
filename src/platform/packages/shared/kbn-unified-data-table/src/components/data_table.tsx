@@ -80,6 +80,7 @@ import type {
   CustomBulkActions,
   DocMap,
   DocumentsDisplayMode,
+  DataGridRenderMode,
   JsonModeSettings,
 } from '../types';
 import {
@@ -473,16 +474,9 @@ interface InternalUnifiedDataTableProps {
    */
   disableCellActions?: boolean;
   /**
-   * Disable column actions for the table.
+   * Render mode of the grid
    */
-  disableColumnActions?: boolean;
-  /**
-   * Whether the table is rendered in an interactive context. When `false`, cell value rendering
-   * suppresses live, user-navigable content (e.g. links from a URL field formatter), in addition
-   * to the cell/column actions already gated by `disableCellActions`/`disableColumnActions`.
-   * Defaults to `true`.
-   */
-  isInteractive?: boolean;
+  renderMode?: DataGridRenderMode;
   /**
    * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
    */
@@ -670,8 +664,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdatePageIndex,
       disableCellActions = false,
       disableCellPopover = false,
-      disableColumnActions = false,
-      isInteractive = true,
+      renderMode = 'interactive',
       customBulkActions,
       hideDefaultBulkActions,
       shouldKeepAdHocDataViewImmutable,
@@ -689,6 +682,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       services;
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
+
+    const isInteractive = renderMode === 'interactive';
 
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
@@ -804,7 +799,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       sort,
       dataView,
       isPlainRecord,
-      isSortEnabled,
+      isSortEnabled: isSortEnabled && isInteractive,
       isInMemorySortEnabled,
       isSummaryOnlyColumn,
       onSort,
@@ -908,11 +903,14 @@ const InternalUnifiedDataTable = React.forwardRef<
             onChangePage: changeCurrentPageIndex,
             pageIndex: currentPageIndex,
             pageSize: currentPageSize,
-            pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize),
+            pageSizeOptions: isInteractive
+              ? rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize)
+              : [],
           }
         : undefined;
     }, [
       isPaginationEnabled,
+      isInteractive,
       rowsPerPageOptions,
       onUpdateRowsPerPage,
       currentPageSize,
@@ -1072,7 +1070,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     } = useDataGridInTableSearch({
-      enableInTableSearch,
+      enableInTableSearch: enableInTableSearch && isInteractive,
       dataGridWrapper,
       dataGridRef,
       visibleColumns,
@@ -1175,7 +1173,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       triggerId: cellActionsTriggerId,
       dataGridRef,
       metadata: allCellActionsMetadata,
-      disableCellActions,
+      disableCellActions: disableCellActions || !isInteractive,
     });
 
     const {
@@ -1229,8 +1227,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           settings,
           dataView,
           isSummaryOnlyColumn,
-          isSortEnabled,
-          isResizable,
+          isSortEnabled: isSortEnabled && isInteractive,
+          isResizable: isResizable && isInteractive,
           isPlainRecord,
           services: {
             uiSettings,
@@ -1248,8 +1246,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           customGridColumnsConfiguration,
           onResize,
           sortedColumns,
-          disableCellActions,
-          disableColumnActions,
+          disableCellActions: disableCellActions || !isInteractive,
+          disableColumnActions: !isInteractive,
           dataGridRef,
           hideFilteringOnComputedColumns,
           documentsDisplayMode,
@@ -1268,6 +1266,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         isPlainRecord,
         isSortEnabled,
         isResizable,
+        isInteractive,
         onFilter,
         onResize,
         settings,
@@ -1279,7 +1278,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         visibleColumns,
         sortedColumns,
         disableCellActions,
-        disableColumnActions,
         hideFilteringOnComputedColumns,
         documentsDisplayMode,
       ]
@@ -1288,7 +1286,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const columnsVisibility = useMemo(
       () => ({
-        canDragAndDropColumns: isSummaryOnlyColumn ? false : canDragAndDropColumns,
+        canDragAndDropColumns:
+          isInteractive && !isSummaryOnlyColumn ? canDragAndDropColumns : false,
         visibleColumns,
         setVisibleColumns: (newColumns: string[]) => {
           const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
@@ -1300,6 +1299,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         onSetColumns,
         shouldPrependTimeFieldColumn,
         canDragAndDropColumns,
+        isInteractive,
         isSummaryOnlyColumn,
       ]
     );
@@ -1312,8 +1312,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         canSetExpandedDoc,
       });
 
-      const filteredLeadColumns = leadColumns.filter((column) =>
-        controlColumnIds.includes(column.id)
+      const filteredLeadColumns = leadColumns.filter(
+        (column) => isInteractive && controlColumnIds.includes(column.id)
       );
 
       if (getRowIndicator) {
@@ -1340,6 +1340,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       displayedRows,
       externalControlColumns,
       getRowIndicator,
+      isInteractive,
       rowAdditionalLeadingControls,
       visibleRowLeadingControls,
     ]);
@@ -1361,7 +1362,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 rows={displayedRows}
                 setIsFilterActive={setIsFilterActive}
                 selectedDocsState={selectedDocsState}
-                enableComparisonMode={enableComparisonMode}
+                enableComparisonMode={enableComparisonMode && isInteractive}
                 setIsCompareActive={setIsCompareActive}
                 fieldFormats={fieldFormats}
                 pageIndex={unifiedDataTableContextValue.pageIndex}
@@ -1396,6 +1397,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       displayedRows,
       selectedDocsState,
       enableComparisonMode,
+      isInteractive,
       setIsFilterActive,
       setIsCompareActive,
       fieldFormats,
@@ -1465,6 +1467,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions
       | undefined => {
       if (
+        !isInteractive ||
         !showDisplaySelectorProp ||
         (!onUpdateDataGridDensity &&
           !onUpdateRowHeight &&
@@ -1503,6 +1506,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         ),
       };
     }, [
+      isInteractive,
       showDisplaySelectorProp,
       headerRowHeight,
       maxAllowedSampleSize,
@@ -1528,19 +1532,21 @@ const InternalUnifiedDataTable = React.forwardRef<
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled && !isJsonSourceMode,
-        showColumnSelector: isJsonSourceMode
-          ? false
-          : isColumnSelectorEnabled && toolbarVisibilityDefaults.showColumnSelector,
+        showSortSelector: isInteractive && isSortEnabled && !isJsonSourceMode,
+        showColumnSelector:
+          isInteractive && !isJsonSourceMode
+            ? isColumnSelectorEnabled && toolbarVisibilityDefaults.showColumnSelector
+            : false,
         additionalControls,
         showDisplaySelector,
-        showKeyboardShortcuts,
+        showKeyboardShortcuts: isInteractive && showKeyboardShortcuts,
         showFullScreenSelector: showFullScreenButton,
       }),
       [
         isJsonSourceMode,
         isSortEnabled,
         isColumnSelectorEnabled,
+        isInteractive,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,

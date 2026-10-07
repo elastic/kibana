@@ -63,42 +63,41 @@ const baseProps = {
   onUpdateSampleSize: jest.fn(),
 };
 
-describe('DiscoverGrid isInteractive', () => {
+describe('DiscoverGrid renderMode', () => {
   beforeEach(() => {
     mockUnifiedDataTable.mockClear();
   });
 
-  it('passes interactive props to UnifiedDataTable when isInteractive is true', () => {
-    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} isInteractive={true} />);
+  // UnifiedDataTable is responsible for gating its own interactive controls off of the single
+  // `renderMode` prop (see data_table.test.tsx); DiscoverGrid just needs to forward it
+  // untouched and keep requesting its usual feature set regardless of the value.
+  it("forwards renderMode='interactive' to UnifiedDataTable", () => {
+    render(
+      <DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} renderMode="interactive" />
+    );
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    expect(lastProps?.renderMode).toBe('interactive');
     expect(lastProps?.canDragAndDropColumns).toBe(true);
-    expect(lastProps?.visibleCellActions).toBe(3);
+    expect(lastProps?.enableComparisonMode).toBe(true);
     expect(lastProps?.enableInTableSearch).toBe(true);
-    expect(lastProps?.isSortEnabled).not.toBe(false);
-    expect(lastProps?.disableCellActions).not.toBe(true);
-    expect(lastProps?.isInteractive).toBe(true);
+    expect(lastProps?.showSummaryColumnToggle).toBe(true);
+    expect(lastProps?.visibleCellActions).toBe(3);
   });
 
-  it('passes disabled props to UnifiedDataTable when isInteractive is false', () => {
-    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} isInteractive={false} />);
+  it("forwards renderMode='print' to UnifiedDataTable", () => {
+    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} renderMode="print" />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    expect(lastProps?.isSortEnabled).toBe(false);
-    expect(lastProps?.disableCellActions).toBe(true);
-    expect(lastProps?.disableColumnActions).toBe(true);
-    expect(lastProps?.isColumnSelectorEnabled).toBe(false);
-    expect(lastProps?.showKeyboardShortcuts).toBe(false);
-    expect(lastProps?.showDisplaySelector).toBe(false);
-    expect(lastProps?.rowsPerPageOptions).toEqual([]);
-    expect(lastProps?.actions).toBe(false);
-    expect(lastProps?.isResizable).toBe(false);
-    expect(lastProps?.canDragAndDropColumns).toBeUndefined();
-    expect(lastProps?.isInteractive).toBe(false);
+    expect(lastProps?.renderMode).toBe('print');
+    expect(lastProps?.canDragAndDropColumns).toBe(true);
+    expect(lastProps?.enableComparisonMode).toBe(true);
+    expect(lastProps?.enableInTableSearch).toBe(true);
+    expect(lastProps?.showSummaryColumnToggle).toBe(true);
+    expect(lastProps?.visibleCellActions).toBe(3);
   });
 
-  it('defaults to interactive mode when isInteractive is not set', () => {
+  it('leaves renderMode undefined (UnifiedDataTable defaults to interactive) when not set', () => {
     render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    expect(lastProps?.canDragAndDropColumns).toBe(true);
-    expect(lastProps?.isSortEnabled).not.toBe(false);
+    expect(lastProps?.renderMode).toBeUndefined();
   });
 });

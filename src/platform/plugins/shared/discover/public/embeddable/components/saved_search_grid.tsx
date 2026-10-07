@@ -66,6 +66,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     interceptedWarnings,
     searchContext,
     flyoutMenuTrailingActions,
+    isInteractive,
     ...gridProps
   } = props;
   const { euiTheme } = useEuiTheme();
@@ -169,7 +170,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         hideFilteringOnComputedColumns={true}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
-        renderCustomToolbar={props.isInteractive ? renderCustomToolbarWithElements : undefined}
+        renderMode={isInteractive ? 'interactive' : 'print'}
+        renderCustomToolbar={isInteractive ? renderCustomToolbarWithElements : undefined}
         externalCustomRenderers={cellRenderers}
         enableComparisonMode
         showColumnTokens
