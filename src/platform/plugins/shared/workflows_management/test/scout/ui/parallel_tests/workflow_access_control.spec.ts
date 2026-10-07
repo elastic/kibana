@@ -24,12 +24,21 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     // Resolve real identities from the live session — local SAML synthesizes
     // `elastic_<role>` / `test <role>`, while Cloud authenticates real QA accounts.
     // getUserData also activates each profile so it appears in the access picker.
-    const { username: ownerUsername, full_name: ownerFullName, email: ownerEmail } =
-      await samlAuth.session.getUserData('editor');
+    const {
+      username: ownerUsername,
+      full_name: ownerFullName,
+      email: ownerEmail,
+    } = await samlAuth.session.getUserData('editor');
     owner = { username: ownerUsername, displayName: ownerFullName || ownerEmail || ownerUsername };
-    const { username: viewerUsername, full_name: viewerFullName, email: viewerEmail } =
-      await samlAuth.session.getUserData('viewer');
-    viewer = { username: viewerUsername, displayName: viewerFullName || viewerEmail || viewerUsername };
+    const {
+      username: viewerUsername,
+      full_name: viewerFullName,
+      email: viewerEmail,
+    } = await samlAuth.session.getUserData('viewer');
+    viewer = {
+      username: viewerUsername,
+      displayName: viewerFullName || viewerEmail || viewerUsername,
+    };
   });
 
   test.beforeEach(async () => {
