@@ -20,6 +20,17 @@ expect.extend(matchers);
 // Type-only import above survives this mock: types are erased at runtime.
 jest.mock('@kbn/fleet-plugin/public', () => ({
   CardIcon: () => <span data-test-subj="resultCardIconStub" />,
+  SearchMemberMatchDescription: ({
+    memberTitles,
+    collectionTitle,
+  }: {
+    memberTitles: string[];
+    collectionTitle: string;
+  }) => (
+    <span data-test-subj="searchMemberMatchStub">{`${memberTitles.join(
+      ' + '
+    )} in ${collectionTitle}`}</span>
+  ),
 }));
 
 const item: IntegrationCardItem = {
@@ -80,6 +91,20 @@ describe('createRenderResultCard', () => {
       '/app/integrations/detail/nginx-1.0.0/overview'
     );
     expect(card.querySelector('a')).not.toHaveAttribute('target');
+  });
+
+  it('explains which bundled service the search matched instead of the description', () => {
+    renderCard({
+      ...item,
+      searchMemberMatch: { memberTitles: ['Amazon GuardDuty'], collectionTitle: 'AWS' },
+    });
+
+    expect(screen.getByTestId('searchMemberMatchStub')).toHaveTextContent(
+      'Amazon GuardDuty in AWS'
+    );
+    expect(
+      screen.queryByText('Collect logs and metrics from Nginx servers with Elastic Agent.')
+    ).not.toBeInTheDocument();
   });
 
   it('reports a plain result click with the card id', async () => {

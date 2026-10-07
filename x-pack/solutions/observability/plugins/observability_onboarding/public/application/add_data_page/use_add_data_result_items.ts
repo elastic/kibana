@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { withSearchMemberMatch } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem, UseLocalSearchType } from '@kbn/fleet-plugin/public';
 import { useCardUrlRewrite } from '../package_list_search_form/use_card_url_rewrite';
 
@@ -49,7 +50,7 @@ export function useAddDataResultItems({
     const results = matchedIds
       ? categoryFiltered.filter(({ id }) => matchedIds.has(id))
       : categoryFiltered;
-    return results.map(rewriteUrl);
+    return results.map((card) => rewriteUrl(withSearchMemberMatch(card, term)));
   }, [categoryFiltered, localSearch, searchTerm, rewriteUrl]);
 
   return { items };
