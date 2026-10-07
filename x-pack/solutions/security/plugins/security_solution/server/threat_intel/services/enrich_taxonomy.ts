@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { THREAT_CATEGORIES, THREAT_REGIONS } from '../../../common/threat_intel';
 import { logStageUsage } from '../lib/cost_tracker';
 import {
@@ -29,12 +29,14 @@ const closedSet = <T extends string>(allowed: readonly T[], max: number) =>
     .transform((values) => values.filter((v): v is T => (allowed as readonly string[]).includes(v)))
     .transform((values) => [...new Set(values)].slice(0, max));
 
-export const taxonomyOutputSchema = z.object({
-  categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
-  regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
-  relevance: z.number().min(0).max(1),
-  diamond_suitable: z.boolean(),
-});
+export const taxonomyOutputSchema = lazySchema(() =>
+  z.object({
+    categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
+    regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
+    relevance: z.number().min(0).max(1),
+    diamond_suitable: z.boolean(),
+  })
+);
 
 export type TaxonomyOutput = z.infer<typeof taxonomyOutputSchema>;
 

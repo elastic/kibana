@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
 import type { ImpactService } from '../services/impact_service';
 import { impactAttachment } from './impact_attachment_type';
 
@@ -15,14 +16,17 @@ export const registerImpactAttachment = (
   agentBuilder: AgentBuilderPluginSetup,
   {
     getImpactService,
+    privileges,
     logger,
   }: {
     getImpactService: () => ImpactService;
+    privileges: ImpactPrivilegesChecker;
     logger: Logger;
   }
 ): void => {
   impactAttachment.registerAttachmentType(agentBuilder, {
     getService: () => getImpactService().getDocumentService(),
+    assertCanRead: (request) => privileges.assertCanRead(request),
     logger,
   });
 };

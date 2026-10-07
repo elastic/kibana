@@ -33,6 +33,9 @@ import {
   registerResolutionRulesDisable,
   registerUpdate,
   registerCheckPrivileges,
+  registerEngineConfig,
+  registerInternalStart,
+  registerInternalStop,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -53,6 +56,9 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerCRUDDelete(router);
   registerStart(router);
   registerUpdate(router);
+  registerEngineConfig(router);
+  registerInternalStart(router);
+  registerInternalStop(router);
   registerResolutionLink(router);
   registerResolutionUnlink(router);
   registerResolutionGroup(router);

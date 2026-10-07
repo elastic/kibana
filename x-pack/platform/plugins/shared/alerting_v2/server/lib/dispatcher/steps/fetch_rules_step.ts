@@ -47,7 +47,7 @@ export class FetchRulesStep implements DispatcherStep {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.metadata.name,
-        tags: doc.attributes.metadata.tags ?? [],
+        routingTags: doc.attributes.metadata.routing_tags ?? [],
       });
     }
 

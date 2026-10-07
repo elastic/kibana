@@ -96,7 +96,7 @@ export interface Rule {
   id: RuleId;
   spaceId: string;
   name: string;
-  tags: string[];
+  routingTags: string[];
 }
 
 export interface PolicyMatcherAttributes {
