@@ -35,7 +35,12 @@ export interface EnhanceDashboardActionDeps {
   draftAttachmentId: IdGenerator;
 }
 
-const isEnhanceable = (
+const REQUIRES_ESQL_TOOLTIP = i18n.translate(
+  'xpack.agentBuilderDashboards.enhanceDashboard.requiresEsqlTooltip',
+  { defaultMessage: 'Enhance requires at least one ES|QL visualization' }
+);
+
+const canEnhance = (
   dashboardApi: DashboardApi,
   access: EmbeddableChatAccess,
   canWrite: boolean
@@ -43,7 +48,9 @@ const isEnhanceable = (
   dashboardApi.viewMode$.getValue() === 'edit' &&
   canWrite &&
   access.hasRequiredLicense &&
-  access.hasLlmConnector &&
+  access.hasLlmConnector;
+
+const hasEsqlPanel = (dashboardApi: DashboardApi): boolean =>
   Object.entries(dashboardApi.children$.getValue()).some(
     ([id, child]) =>
       Boolean(dashboardApi.layout$.getValue().panels[id]) &&
@@ -66,11 +73,18 @@ export const createEnhanceDashboardAction = ({
         defaultMessage: 'Enhance this dashboard',
       }),
     getIconType: () => 'sparkles',
+    getDisplayNameTooltip: ({ dashboardApi }) =>
+      hasEsqlPanel(dashboardApi) ? '' : REQUIRES_ESQL_TOOLTIP,
     isCompatible: async ({ dashboardApi }) =>
-      isEnhanceable(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards),
+      canEnhance(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards),
     getCompatibilityChangesSubject: ({ dashboardApi }): Observable<undefined> =>
+      dashboardApi.viewMode$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+    isDisabled: ({ dashboardApi }) => !hasEsqlPanel(dashboardApi),
+    getDisabledStateChangesSubject: ({ dashboardApi }): Observable<undefined> =>
       merge(
-        dashboardApi.viewMode$.pipe(skip(1)),
         dashboardApi.layout$.pipe(
           map((layout) => Object.keys(layout.panels).length),
           distinctUntilChanged(),
@@ -87,7 +101,10 @@ export const createEnhanceDashboardAction = ({
         )
       ).pipe(map(() => undefined)),
     execute: async ({ dashboardApi }) => {
-      if (!isEnhanceable(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards)) {
+      if (
+        !hasEsqlPanel(dashboardApi) ||
+        !canEnhance(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards)
+      ) {
         return;
       }
 
