@@ -972,16 +972,16 @@ export const ConsoleStepInputSchema = z.object({
   message: z.unknown().optional(),
 });
 
+export const WorkflowRunAsModeSchema = z.enum(['default', 'inherit', 'override']);
+export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
+
 // Base schema shared by both workflow.execute and workflow.executeAsync
 export const WorkflowExecuteStepInputSchema = z.object({
   'workflow-id': z.string().min(1).max(1024),
   inputs: z.record(z.string(), z.unknown()).optional(),
-  runAsMode: z
-    .enum(['default', 'inherit', 'override'])
-    .optional()
-    .describe(
-      'Use default identity, inherit the parent service account, or override the managed child service account for this execution.'
-    ),
+  'run-as-mode': WorkflowRunAsModeSchema.optional().describe(
+    'Use default identity, inherit the parent service account, or override the managed child service account for this execution.'
+  ),
 });
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({

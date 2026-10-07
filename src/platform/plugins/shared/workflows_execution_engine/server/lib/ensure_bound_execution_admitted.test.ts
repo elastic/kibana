@@ -28,25 +28,27 @@ const execution: Partial<EsWorkflowExecution> = {
 };
 
 describe('ensureBoundExecutionAdmitted', () => {
-  const workflows = { isWorkflowEnabledRealtime: jest.fn() };
+  const workflows = {
+    isWorkflowEnabledRealtime: jest.fn(),
+    isManagedChildAdmissibleRealtime: jest.fn(),
+  };
   const executions = { discardUnstartedExecution: jest.fn() };
 
   beforeEach(() => {
     workflows.isWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
+    workflows.isManagedChildAdmissibleRealtime.mockReset().mockResolvedValue(true);
     executions.discardUnstartedExecution.mockReset().mockResolvedValue(undefined);
   });
 
   it('requires live managed eligibility and allows global definitions for inheritance', async () => {
     await ensureBoundExecutionAdmitted(execution, workflows, executions);
-    expect(workflows.isWorkflowEnabledRealtime).toHaveBeenCalledWith('child', 'default', {
-      includeGlobal: true,
-      requireManaged: true,
-    });
+    expect(workflows.isManagedChildAdmissibleRealtime).toHaveBeenCalledWith('child', 'default');
+    expect(workflows.isWorkflowEnabledRealtime).not.toHaveBeenCalled();
     expect(executions.discardUnstartedExecution).not.toHaveBeenCalled();
   });
 
   it('discards an ineligible inherited execution before it can be scheduled', async () => {
-    workflows.isWorkflowEnabledRealtime.mockResolvedValue(false);
+    workflows.isManagedChildAdmissibleRealtime.mockResolvedValue(false);
     await expect(ensureBoundExecutionAdmitted(execution, workflows, executions)).rejects.toThrow(
       'Child workflow child must exist, be managed, enabled, valid, and available in space default'
     );
@@ -55,7 +57,7 @@ describe('ensureBoundExecutionAdmitted', () => {
 
   it('discards the execution and propagates a failed eligibility lookup', async () => {
     const error = new Error('storage unavailable');
-    workflows.isWorkflowEnabledRealtime.mockRejectedValue(error);
+    workflows.isManagedChildAdmissibleRealtime.mockRejectedValue(error);
     await expect(ensureBoundExecutionAdmitted(execution, workflows, executions)).rejects.toBe(
       error
     );

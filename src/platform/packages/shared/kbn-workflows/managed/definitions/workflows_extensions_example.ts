@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowRunAsMode } from '../../spec/schema';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../types';
 
 export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
@@ -80,9 +81,10 @@ export const EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW_ID =
 export interface InheritedServiceAccountTemplateValues extends ManagedWorkflowTemplateValues {
   serviceAccountId?: string;
   childWorkflowId?: string;
-  runAsMode?: 'default' | 'inherit' | 'override';
+  runAsMode?: WorkflowRunAsMode;
   asynchronous?: boolean;
   waitForInput?: boolean;
+  fallbackChild?: boolean;
   message?: string;
 }
 
@@ -91,16 +93,30 @@ export const EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW = {
   pluginId: 'workflowsExtensionsExample',
   version: 1,
   billable: false,
-  yamlTemplate: (values) => `name: Managed ${
-    values.childWorkflowId ? 'parent' : 'child'
-  } identity example
+  yamlTemplate: (values) => {
+    const childCall = values.childWorkflowId
+      ? `  - name: child
+    type: ${values.asynchronous ? 'workflow.executeAsync' : 'workflow.execute'}
+    with:
+      workflow-id: ${JSON.stringify(values.childWorkflowId)}
+${values.runAsMode !== undefined ? `      run-as-mode: ${values.runAsMode}\n` : ''}`
+      : '';
+    const settings = [
+      values.serviceAccountId ? `  run_as: ${JSON.stringify(values.serviceAccountId)}\n` : '',
+      values.fallbackChild && childCall
+        ? `  on-failure:\n    fallback:\n${childCall
+            .split('\n')
+            .filter(Boolean)
+            .map((line) => `    ${line}`)
+            .join('\n')}\n`
+        : '',
+    ].join('');
+    return `name: Managed ${values.childWorkflowId ? 'parent' : 'child'} identity example
 description: ${JSON.stringify(
-    values.message ?? 'Proves the effective identity of a managed parent or child workflow.'
-  )}
+      values.message ?? 'Proves the effective identity of a managed parent or child workflow.'
+    )}
 enabled: true
-${
-  values.serviceAccountId ? `settings:\n  run_as: ${JSON.stringify(values.serviceAccountId)}\n` : ''
-}triggers:
+${settings ? `settings:\n${settings}` : ''}triggers:
   - type: manual
 steps:
 ${
@@ -122,18 +138,20 @@ ${
       method: GET
       path: /_security/_authenticate
 ${
-  values.childWorkflowId
-    ? `  - name: child
-    type: ${values.asynchronous ? 'workflow.executeAsync' : 'workflow.execute'}
+  values.fallbackChild
+    ? `  - name: fail
+    type: elasticsearch.request
     with:
-      workflow-id: ${JSON.stringify(values.childWorkflowId)}
-${values.runAsMode !== undefined ? `      runAsMode: ${values.runAsMode}\n` : ''}`
-    : ''
+      method: GET
+      path: /_managed_child_inheritance_missing_endpoint
+`
+    : childCall
 }  - name: message
     type: console
     with:
       message: ${JSON.stringify(values.message ?? 'Managed identity example completed')}
-`,
+`;
+  },
   management: {
     lifecycle: 'dynamic',
     versionStrategy: 'auto',

@@ -15,6 +15,7 @@ import type {
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
 import {
+  ensureInheritedBindingCurrent,
   getWorkflowOriginalRequest,
   resolveInheritedWorkflowIdentity,
   withWorkflowExecutionIdentity,
@@ -38,16 +39,17 @@ const child = {
 const revision = createHash('sha256').update(child.yaml).digest('hex');
 const approval: WorkflowExecuteStep['with'] = {
   'workflow-id': child.id,
-  runAsMode: 'inherit',
+  'run-as-mode': 'inherit',
 };
 const parent = (
   withInput = approval,
   accountId: string | undefined = 'account-a'
 ): Pick<
   EsWorkflowExecution,
-  'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity'
+  'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity' | 'managed'
 > => ({
   id: 'parent-execution',
+  managed: true,
   workflowId: 'parent',
   spaceId: 'default',
   workflowDefinition: {
@@ -142,7 +144,7 @@ describe('inherited workflow execution identity', () => {
   });
 
   it.each([
-    { ...approval, runAsMode: 'default' as const },
+    { ...approval, 'run-as-mode': 'default' as const },
     { 'workflow-id': child.id },
     { ...approval, 'workflow-id': '{{ inputs.child }}' },
     { 'workflow-id': child.id, inheritRunAs: true },
@@ -179,12 +181,12 @@ describe('inherited workflow execution identity', () => {
     };
     await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
       expect(() => resolveInheritedWorkflowIdentity(request, boundChild, context)).toThrow(
-        'runAsMode: override'
+        'run-as-mode: override'
       );
     });
     await withWorkflowExecutionIdentity(
       core,
-      parent({ 'workflow-id': child.id, runAsMode: 'override' }),
+      parent({ 'workflow-id': child.id, 'run-as-mode': 'override' }),
       caller,
       async (request) => {
         expect(resolveInheritedWorkflowIdentity(request, boundChild, context)).toEqual(identity);
@@ -248,6 +250,90 @@ describe('inherited workflow execution identity', () => {
         workloadId: 'root',
       });
     });
+  });
+
+  it.each([false, undefined])(
+    'rejects an unmanaged parent at the identity boundary (%s)',
+    async (managed) => {
+      await withWorkflowExecutionIdentity(
+        core,
+        { ...parent(), managed },
+        caller,
+        async (request) => {
+          expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+            'Only managed parent'
+          );
+        }
+      );
+    }
+  );
+
+  it.each(['workflow.execute', 'workflow.executeAsync'] as const)(
+    'accepts a saved workflow-level fallback choice for %s with a generated runtime ID',
+    async (type) => {
+      const fallbackStep = { name: 'child', type, with: approval };
+      const execution = parent();
+      execution.workflowDefinition = {
+        ...execution.workflowDefinition,
+        steps: [],
+        settings: {
+          run_as: 'account-a',
+          'on-failure': { fallback: [fallbackStep] },
+        },
+      };
+      await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
+        expect(
+          resolveInheritedWorkflowIdentity(request, child, {
+            ...context,
+            parentStepId: 'workflow-level-on-failure_fail_child',
+            parentStepName: 'child',
+          })
+        ).toEqual(identity);
+      });
+    }
+  );
+
+  it('checks the inherited root binding before persistence', async () => {
+    const binding = {
+      pluginId: 'workflows',
+      workloadType: 'workflow',
+      workloadId: 'root',
+      spaceId: 'default',
+      serviceAccountId: 'account-a',
+      boundBy: { type: 'service_account' as const, serviceAccountId: 'account-a' },
+      boundAt: '2026-10-07T00:00:00.000Z',
+    };
+    const rootIdentity = {
+      ...identity,
+      inheritedFrom: {
+        workloadId: 'root',
+        workflowId: 'parent',
+        executionId: 'parent-execution',
+        revision,
+      },
+    };
+    core.security.serviceAccounts.getWorkloadBinding.mockResolvedValue(binding);
+    await ensureInheritedBindingCurrent(core, rootIdentity, 'default');
+    expect(core.security.serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith({
+      workloadType: 'workflow',
+      workloadId: 'root',
+      spaceId: 'default',
+    });
+    core.security.serviceAccounts.getWorkloadBinding.mockResolvedValue({
+      ...binding,
+      serviceAccountId: 'other',
+    });
+    await expect(ensureInheritedBindingCurrent(core, rootIdentity, 'default')).rejects.toThrow(
+      'binding has changed'
+    );
+    core.security.serviceAccounts.getWorkloadBinding.mockResolvedValue(null);
+    await expect(ensureInheritedBindingCurrent(core, rootIdentity, 'default')).rejects.toThrow(
+      'binding has changed'
+    );
+    core.security.serviceAccounts.isEnabled.mockReturnValue(false);
+    await expect(ensureInheritedBindingCurrent(core, rootIdentity, 'default')).rejects.toThrow(
+      'disabled'
+    );
   });
 
   it('never falls back to the caller after revocation or feature disablement', async () => {

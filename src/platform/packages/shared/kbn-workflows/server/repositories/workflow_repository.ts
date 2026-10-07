@@ -138,12 +138,29 @@ export class WorkflowRepository {
     return map.get(`${spaceId}:${workflowId}`) ?? false;
   }
 
-  /** Checks live admission state, requiring valid managed definitions for inherited execution. */
-  async isWorkflowEnabledRealtime(
-    workflowId: string,
-    spaceId: string,
-    options?: Pick<WorkflowLookupOptions, 'includeGlobal'> & { requireManaged?: boolean }
-  ): Promise<boolean> {
+  /** Reads the enabled state from the translog after an execution becomes searchable. */
+  async isWorkflowEnabledRealtime(workflowId: string, spaceId: string): Promise<boolean> {
+    try {
+      const response = await this.options.esClient.get<{
+        enabled?: boolean;
+        spaceId?: string;
+        deleted_at?: string | null;
+      }>({
+        index: this.options.indexName,
+        id: workflowId,
+        _source_includes: ['enabled', 'spaceId', 'deleted_at'],
+        realtime: true,
+      });
+      const source = response._source;
+      return source?.spaceId === spaceId && source.enabled === true && !source.deleted_at;
+    } catch (error) {
+      if (error.statusCode === 404) return false;
+      throw error;
+    }
+  }
+
+  /** Checks managed child eligibility in the execution space or global catalog without comparing revisions. */
+  async isManagedChildAdmissibleRealtime(workflowId: string, spaceId: string): Promise<boolean> {
     try {
       const response = await this.options.esClient.get<{
         enabled?: boolean;
@@ -160,12 +177,10 @@ export class WorkflowRepository {
       const source = response._source;
       return Boolean(
         source &&
-          (source.spaceId === spaceId ||
-            (options?.includeGlobal === true &&
-              source.spaceId === GLOBAL_WORKFLOW_SPACE_ID &&
-              source.managed === true)) &&
+          (source.spaceId === spaceId || source.spaceId === GLOBAL_WORKFLOW_SPACE_ID) &&
           source.enabled === true &&
-          (!options?.requireManaged || (source.managed === true && source.valid === true)) &&
+          source.managed === true &&
+          source.valid === true &&
           !source.deleted_at
       );
     } catch (error) {

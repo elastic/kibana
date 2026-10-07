@@ -22,7 +22,7 @@ const validateStepIdentity = (
   step: StepInfo,
   workflows: WorkflowsResponse | null
 ): { property: StepPropInfo; message: string } | undefined => {
-  const modeProperty = step.propInfos['with.runAsMode'];
+  const modeProperty = step.propInfos['with.run-as-mode'];
   const mode = modeProperty && getValueFromValueNode(modeProperty.valueNode);
   if (mode !== 'inherit' && mode !== 'override') return;
   const workflowIdProperty = step.propInfos['with.workflow-id'];

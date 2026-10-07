@@ -116,7 +116,7 @@ export async function getWorkflowSuggestions(
     return [];
   }
 
-  const identityMode = focusedStepInfo?.propInfos['with.runAsMode'];
+  const identityMode = focusedStepInfo?.propInfos['with.run-as-mode'];
   const mode = identityMode && getValueFromValueNode(identityMode.valueNode);
   const inheritsIdentity = mode === 'inherit' || mode === 'override';
   const searchPrefix = lineParseResult.fullKey ?? '';

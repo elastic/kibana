@@ -198,9 +198,9 @@ describe.each(['workflow.execute', 'workflow.executeAsync'])(
   '%s identity-aware targets',
   (stepType) => {
     it.each([
-      ['runAsMode: inherit', 1],
-      ['runAsMode: override', 1],
-      ['runAsMode: default', 2],
+      ['run-as-mode: inherit', 1],
+      ['run-as-mode: override', 1],
+      ['run-as-mode: default', 2],
     ])('filters eligible children with %s', async (identityOption, count) => {
       const lineCounter = new LineCounter();
       const document = parseDocument(

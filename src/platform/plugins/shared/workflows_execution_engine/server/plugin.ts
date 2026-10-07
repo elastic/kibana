@@ -80,6 +80,7 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import {
+  ensureInheritedBindingCurrent,
   getWorkflowOriginalRequest,
   resolveInheritedWorkflowIdentity,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
@@ -1313,18 +1314,12 @@ export class WorkflowsExecutionEnginePlugin
             ? context.parentWorkflowExecutionId
             : undefined,
         parentStepId: typeof context.parentStepId === 'string' ? context.parentStepId : undefined,
+        parentStepName:
+          typeof context.parentStepName === 'string' ? context.parentStepName : undefined,
         spaceId,
       });
-      if (inheritedIdentity?.inheritedFrom) {
-        if (!coreStart.security.serviceAccounts.isEnabled())
-          throw Boom.forbidden('Service account execution is disabled.');
-        const binding = await coreStart.security.serviceAccounts.getWorkloadBinding({
-          workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
-          workloadId: inheritedIdentity.inheritedFrom.workloadId,
-          spaceId,
-        });
-        if (binding?.serviceAccountId !== inheritedIdentity.id)
-          throw Boom.forbidden('The parent service account binding has changed.');
+      if (inheritedIdentity) {
+        await ensureInheritedBindingCurrent(coreStart, inheritedIdentity, spaceId);
       }
 
       const authenticatedUser = await getAuthenticatedUser(

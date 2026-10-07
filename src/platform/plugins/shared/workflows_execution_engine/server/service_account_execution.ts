@@ -16,13 +16,13 @@ import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/wor
 export const WORKFLOW_SERVICE_ACCOUNT_TYPE = 'workflow';
 type IdentityExecution = Pick<
   EsWorkflowExecution,
-  'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity'
+  'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity' | 'managed'
 >;
 const originalRequests = new WeakMap<KibanaRequest, KibanaRequest>();
 const executingWorkflows = new WeakMap<KibanaRequest, IdentityExecution>();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
-  runAsMode: true,
+  'run-as-mode': true,
 });
 
 export const getExecutionServiceAccountId = (execution: IdentityExecution): string | undefined =>
@@ -39,6 +39,7 @@ export const resolveInheritedWorkflowIdentity = (
     parentWorkflowId?: string;
     parentWorkflowExecutionId?: string;
     parentStepId?: string;
+    parentStepName?: string;
     spaceId?: string;
   }
 ): EsWorkflowExecution['effectiveIdentity'] => {
@@ -49,6 +50,9 @@ export const resolveInheritedWorkflowIdentity = (
     throw Boom.forbidden(
       'Service account inheritance requires a parent executing as a service account.'
     );
+  if (parent.managed !== true) {
+    throw Boom.forbidden('Only managed parent workflows can delegate a service account.');
+  }
   if (
     parent.id !== context.parentWorkflowExecutionId ||
     parent.workflowId !== context.parentWorkflowId ||
@@ -59,15 +63,24 @@ export const resolveInheritedWorkflowIdentity = (
     );
   }
   let identityChoice: ReturnType<typeof inheritedIdentitySchema.safeParse> | undefined;
-  visitNestedSteps(parent.workflowDefinition.steps, ({ step }) => {
-    if (
-      step.name === context.parentStepId &&
-      (step.type === 'workflow.execute' || step.type === 'workflow.executeAsync')
-    ) {
-      identityChoice = inheritedIdentitySchema.safeParse(step.with);
+  visitNestedSteps(
+    [
+      ...parent.workflowDefinition.steps,
+      ...(parent.workflowDefinition.settings?.['on-failure']?.fallback ?? []),
+    ],
+    ({ step }) => {
+      if (
+        step.name === (context.parentStepName ?? context.parentStepId) &&
+        (step.type === 'workflow.execute' || step.type === 'workflow.executeAsync') &&
+        'with' in step
+      ) {
+        identityChoice = inheritedIdentitySchema.safeParse(step.with);
+      }
     }
-  });
-  const mode = identityChoice?.success ? identityChoice.data.runAsMode ?? 'default' : 'default';
+  );
+  const mode = identityChoice?.success
+    ? identityChoice.data['run-as-mode'] ?? 'default'
+    : 'default';
   if (
     !identityChoice?.success ||
     mode === 'default' ||
@@ -81,7 +94,7 @@ export const resolveInheritedWorkflowIdentity = (
     throw Boom.forbidden('Only managed child workflows can inherit a parent service account.');
   }
   if (mode === 'inherit' && workflow.definition?.settings?.run_as) {
-    throw Boom.badRequest('Use runAsMode: override to replace the child service account.');
+    throw Boom.badRequest('Use run-as-mode: override to replace the child service account.');
   }
   const revision = createHash('sha256').update(workflow.yaml).digest('hex');
   return {
@@ -94,6 +107,26 @@ export const resolveInheritedWorkflowIdentity = (
       revision,
     },
   };
+};
+
+/** Rejects changed delegation before persistence; credential acquisition checks again at run/resume. */
+export const ensureInheritedBindingCurrent = async (
+  core: CoreStart,
+  identity: NonNullable<EsWorkflowExecution['effectiveIdentity']>,
+  spaceId: string
+): Promise<void> => {
+  if (!identity.inheritedFrom) return;
+  if (!core.security.serviceAccounts.isEnabled()) {
+    throw Boom.forbidden('Service account execution is disabled.');
+  }
+  const binding = await core.security.serviceAccounts.getWorkloadBinding({
+    workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+    workloadId: identity.inheritedFrom.workloadId,
+    spaceId,
+  });
+  if (binding?.serviceAccountId !== identity.id) {
+    throw Boom.forbidden('The parent service account binding has changed.');
+  }
 };
 
 export const getWorkflowOriginalRequest = (request: KibanaRequest): KibanaRequest =>

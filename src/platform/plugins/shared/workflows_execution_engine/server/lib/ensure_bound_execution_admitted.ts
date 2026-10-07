@@ -14,7 +14,10 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 /** Admits a searchable bound execution only while its persisted workflow still accepts runs. */
 export const ensureBoundExecutionAdmitted = async (
   execution: Partial<EsWorkflowExecution>,
-  workflows: Pick<WorkflowRepository, 'isWorkflowEnabledRealtime'>,
+  workflows: Pick<
+    WorkflowRepository,
+    'isWorkflowEnabledRealtime' | 'isManagedChildAdmissibleRealtime'
+  >,
   executions: Pick<WorkflowExecutionRepository, 'discardUnstartedExecution'>
 ): Promise<void> => {
   const inheritsIdentity = !!execution.effectiveIdentity?.inheritedFrom;
@@ -24,12 +27,10 @@ export const ensureBoundExecutionAdmitted = async (
   try {
     // Paired with deletion's disable-then-search order: either deletion sees this
     // already-refreshed execution, or this real-time read sees the disabled/deleted workflow.
-    if (
-      !(await workflows.isWorkflowEnabledRealtime(workflowId, spaceId, {
-        includeGlobal: inheritsIdentity,
-        requireManaged: inheritsIdentity,
-      }))
-    ) {
+    const admitted = inheritsIdentity
+      ? await workflows.isManagedChildAdmissibleRealtime(workflowId, spaceId)
+      : await workflows.isWorkflowEnabledRealtime(workflowId, spaceId);
+    if (!admitted) {
       if (inheritsIdentity) {
         throw new Error(
           `Child workflow ${workflowId} must exist, be managed, enabled, valid, and available in space ${spaceId} to inherit a service account.`

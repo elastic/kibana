@@ -131,9 +131,9 @@ steps:
       expect(labels).toContain('inputs');
       expect(labels).not.toContain('inheritRunAs');
       if (isManaged && enabled) {
-        expect(labels).toContain('runAsMode');
+        expect(labels).toContain('run-as-mode');
       } else {
-        expect(labels).not.toContain('runAsMode');
+        expect(labels).not.toContain('run-as-mode');
       }
     });
 
@@ -160,7 +160,7 @@ steps:
       for (const isManaged of [undefined, true, false]) {
         rerender({ isManaged });
         const completions = await complete(result.current.jsonSchema, `${yaml}      `);
-        expect(completions?.items.some(({ label }) => label === 'runAsMode')).toBe(
+        expect(completions?.items.some(({ label }) => label === 'run-as-mode')).toBe(
           isManaged === true
         );
       }
@@ -181,7 +181,7 @@ steps:
       const completions = await complete(result.current.jsonSchema, `${nestedYaml}          `);
       const labels = completions?.items.map(({ label }) => label);
       expect(labels).toContain('inputs');
-      expect(labels?.includes('runAsMode')).toBe(isManaged);
+      expect(labels?.includes('run-as-mode')).toBe(isManaged);
       expect(labels).not.toContain('inheritRunAs');
     });
 
@@ -193,7 +193,7 @@ steps:
         'file:///existing.yaml',
         'yaml',
         1,
-        `${yaml}      runAsMode: inherit\n`
+        `${yaml}      run-as-mode: inherit\n`
       );
       expect(await service.doValidation(document, false)).toEqual([]);
     });

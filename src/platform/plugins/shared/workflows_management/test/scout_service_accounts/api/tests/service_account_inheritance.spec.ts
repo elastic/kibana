@@ -10,19 +10,20 @@
 import { apiTest } from '@kbn/scout';
 import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowRunAsMode } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { workflowSystemIndex } from '../../../../server/storage/indices';
 import { authenticationStep, createServiceAccountSuite } from '../fixtures/service_account_suite';
-import { withGlobalManagedWorkflow } from '../fixtures/with_global_managed_workflow';
 
 interface ManagedOptions {
   serviceAccountId?: string;
   childWorkflowId?: string;
-  runAsMode?: 'default' | 'inherit' | 'override';
+  runAsMode?: WorkflowRunAsMode;
   asynchronous?: boolean;
   waitForInput?: boolean;
   message?: string;
+  global?: boolean;
+  fallbackChild?: boolean;
 }
 const authenticatedAs = (execution: WorkflowExecutionDto): string =>
   JSON.stringify(execution.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output);
@@ -35,7 +36,7 @@ apiTest.describe(
   { tag: ['@local-stateful-classic'] },
   () => {
     const { setup, teardown, getContext, cleanupWorkflows } = createServiceAccountSuite();
-    const installed = new Set<string>();
+    const installed = new Map<string, boolean>();
     let headers: Record<string, string>;
     let editorHeaders: Record<string, string>;
 
@@ -56,7 +57,7 @@ apiTest.describe(
     });
 
     apiTest.afterEach(async ({ apiClient }) => {
-      for (const suffix of [...installed].reverse()) {
+      for (const [suffix, global] of [...installed].reverse()) {
         const query = new URLSearchParams();
         NonTerminalExecutionStatuses.forEach((status) => query.append('statuses', status));
         await expect
@@ -72,7 +73,7 @@ apiTest.describe(
             { timeout: 30_000 }
           )
           .toBe(0);
-        const deleted = await apiClient.delete(path(suffix), {
+        const deleted = await apiClient.delete(`${path(suffix)}?global=${global}`, {
           headers: getContext().headers,
           responseType: 'json',
         });
@@ -90,13 +91,14 @@ apiTest.describe(
       existing?: string
     ) => {
       const suffix = existing ?? `inherit-${Date.now()}-${installed.size}`;
-      const result = await apiClient.post(path(suffix), {
+      const { global = false, ...body } = options;
+      const result = await apiClient.post(`${path(suffix)}?global=${global}`, {
         headers: getContext().headers,
-        body: options,
+        body,
         responseType: 'json',
       });
       expect(result, JSON.stringify(result.body)).toHaveStatusCode(200);
-      installed.add(suffix);
+      installed.set(suffix, global);
       return suffix;
     };
     const run = async (
@@ -112,8 +114,12 @@ apiTest.describe(
       expect(result, JSON.stringify(result.body)).toHaveStatusCode(200);
       return result.body.workflowExecutionId as string;
     };
-    const childExecution = async (apiClient: ApiClientFixture, parent: WorkflowExecutionDto) => {
-      const call = parent.stepExecutions?.find((step) => step.stepId === 'child');
+    const childExecution = async (
+      apiClient: ApiClientFixture,
+      parent: WorkflowExecutionDto,
+      stepId = 'child'
+    ) => {
+      const call = parent.stepExecutions?.find((step) => step.stepId === stepId);
       const id =
         call?.state?.executionId ?? (call?.output as { executionId?: string })?.executionId;
       expect(typeof id).toBe('string');
@@ -207,34 +213,61 @@ apiTest.describe(
         async ({ apiClient, esClient }) => {
           apiTest.setTimeout(150_000);
           const { readOnlyAccountId, wait } = getContext();
-          const child = await install(apiClient, { waitForInput: true });
-          await withGlobalManagedWorkflow(esClient, workflowId(child), async () => {
-            const parent = await install(apiClient, {
-              serviceAccountId: readOnlyAccountId,
-              childWorkflowId: workflowId(child),
-              runAsMode: 'inherit',
-              asynchronous,
-            });
-            const parentRun = await wait(
-              apiClient,
-              await run(apiClient, parent),
-              asynchronous ? 'completed' : 'waiting_for_child',
-              headers
-            );
-            const childRun = await childExecution(apiClient, parentRun);
-            const paused = await wait(apiClient, childRun.id, 'waiting_for_input', headers);
-            const stored = await esClient.get<{ spaceId: string }>({
-              index: workflowSystemIndex('executions'),
-              id: childRun.id,
-            });
-            expect(stored._source?.spaceId).toBe('default');
-            await new Promise((resolve) => setTimeout(resolve, 16_000));
-            await resume(apiClient, paused);
-            const completed = await wait(apiClient, childRun.id, 'completed', headers);
-            expect(authenticatedAs(completed)).toContain(readOnlyAccountId);
-            expect(completed.effectiveIdentity?.inheritedFrom?.workloadId).toBe(workflowId(parent));
-            await wait(apiClient, parentRun.id, 'completed', headers);
+          const child = await install(apiClient, { waitForInput: true, global: true });
+          const parent = await install(apiClient, {
+            serviceAccountId: readOnlyAccountId,
+            childWorkflowId: workflowId(child),
+            runAsMode: 'inherit',
+            asynchronous,
           });
+          const parentRun = await wait(
+            apiClient,
+            await run(apiClient, parent),
+            asynchronous ? 'completed' : 'waiting_for_child',
+            headers
+          );
+          const childRun = await childExecution(apiClient, parentRun);
+          const paused = await wait(apiClient, childRun.id, 'waiting_for_input', headers);
+          const stored = await esClient.get<{ spaceId: string }>({
+            index: workflowSystemIndex('executions'),
+            id: childRun.id,
+          });
+          expect(stored._source?.spaceId).toBe('default');
+          await new Promise((resolve) => setTimeout(resolve, 16_000));
+          await resume(apiClient, paused);
+          const completed = await wait(apiClient, childRun.id, 'completed', headers);
+          expect(authenticatedAs(completed)).toContain(readOnlyAccountId);
+          expect(completed.effectiveIdentity?.inheritedFrom?.workloadId).toBe(workflowId(parent));
+          await wait(apiClient, parentRun.id, 'completed', headers);
+        }
+      );
+    }
+
+    for (const asynchronous of [false, true]) {
+      apiTest(
+        `${
+          asynchronous ? 'async' : 'sync'
+        } workflow-level fallback inherits the parent service account`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(150_000);
+          const { readOnlyAccountId, wait } = getContext();
+          const child = await install(apiClient);
+          const parent = await install(apiClient, {
+            serviceAccountId: readOnlyAccountId,
+            childWorkflowId: workflowId(child),
+            runAsMode: 'inherit',
+            fallbackChild: true,
+            asynchronous,
+          });
+          const parentRun = await wait(apiClient, await run(apiClient, parent), 'failed', headers);
+          const childRun = await childExecution(
+            apiClient,
+            parentRun,
+            'workflow-level-on-failure_fail_child'
+          );
+          const completed = await wait(apiClient, childRun.id, 'completed', headers);
+          expect(authenticatedAs(completed)).toContain(readOnlyAccountId);
+          expect(completed.effectiveIdentity?.inheritedFrom?.workloadId).toBe(workflowId(parent));
         }
       );
     }
@@ -298,7 +331,7 @@ apiTest.describe(
         };
         const parent = await install(apiClient, { ...parentOptions, runAsMode: 'inherit' });
         const failed = await wait(apiClient, await run(apiClient, parent), 'failed', headers);
-        expect(JSON.stringify(failed.stepExecutions)).toContain('runAsMode: override');
+        expect(JSON.stringify(failed.stepExecutions)).toContain('run-as-mode: override');
         await expectNoChildren(apiClient, workflowId(child));
         await install(apiClient, { ...parentOptions, runAsMode: 'override' }, parent);
         const completed = await wait(apiClient, await run(apiClient, parent), 'completed', headers);

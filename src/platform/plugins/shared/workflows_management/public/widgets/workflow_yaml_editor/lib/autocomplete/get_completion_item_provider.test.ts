@@ -86,7 +86,7 @@ describe('getCompletionItemProvider', () => {
     [true, true],
   ])('gates typed identity value completions (managed=%s, SA=%s)', async (managed, enabled) => {
     for (const stepType of ['workflow.execute', 'workflow.executeAsync']) {
-      const field = 'runAsMode';
+      const field = 'run-as-mode';
       jest.mocked(buildContext).mockReturnValueOnce({
         path: ['steps', 0, 'with', field],
         focusedStepInfo: createStepInfo({ stepType }),

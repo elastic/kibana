@@ -45,7 +45,7 @@ describe.each(['workflow.execute', 'workflow.executeAsync'])(
       );
     };
 
-    it.each(['runAsMode: inherit', 'runAsMode: override'])(
+    it.each(['run-as-mode: inherit', 'run-as-mode: override'])(
       'rejects an unmanaged target with %s',
       (option) => {
         const results = validate(['workflow-id: ordinary', option]);
@@ -55,23 +55,28 @@ describe.each(['workflow.execute', 'workflow.executeAsync'])(
     );
 
     it('rejects an expression for the child ID', () => {
-      const results = validate(['workflow-id: "{{ inputs.child }}"', 'runAsMode: inherit']);
+      const results = validate(['workflow-id: "{{ inputs.child }}"', 'run-as-mode: inherit']);
       expect(results).toHaveLength(1);
       expect(results[0].message).toContain('literal workflow-id');
     });
 
-    it.each(['runAsMode: default'])('preserves ordinary execution with %s', (option) => {
+    it.each(['run-as-mode: default'])('preserves ordinary execution with %s', (option) => {
       expect(validate(['workflow-id: ordinary', option])).toEqual([]);
     });
 
     it('accepts a managed child and leaves input names alone', () => {
       expect(
-        validate(['workflow-id: managed', 'runAsMode: inherit', 'inputs:', '  runAsMode: default'])
+        validate([
+          'workflow-id: managed',
+          'run-as-mode: inherit',
+          'inputs:',
+          '  run-as-mode: default',
+        ])
       ).toEqual([]);
     });
 
     it('does not misclassify a child that is missing from the lookup', () => {
-      expect(validate(['workflow-id: missing', 'runAsMode: inherit'])).toEqual([]);
+      expect(validate(['workflow-id: missing', 'run-as-mode: inherit'])).toEqual([]);
     });
   }
 );

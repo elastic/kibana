@@ -7,7 +7,7 @@
   type: workflow.execute
   with:
     workflow-id: system-example-inherited-service-account-child
-    runAsMode: inherit
+    run-as-mode: inherit
 ```
 
 | Mode | Behavior |
@@ -16,13 +16,13 @@
 | `inherit` | Parent's SA; rejects a child with its own `settings.run_as`. |
 | `override` | Parent's SA for this execution, even when the child has its own SA. Its saved binding is unchanged. |
 
-The child ID and identity mode must be literal values in the saved parent definition. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
+The child ID and identity mode must be literal values in the saved parent definition, including calls in workflow-level `settings.on-failure.fallback` steps. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
 
-The YAML editor suggests identity fields only for managed workflows with SAs enabled. Inheritance modes filter the child picker to managed workflows. Editor validation flags conflicting identity options, templated child IDs, and known unmanaged targets before execution. Whether a child already has its own SA is checked at execution time.
+The YAML editor suggests identity fields only for managed workflows with SAs enabled. Inheritance modes filter the child picker to managed workflows. Editor validation flags templated child IDs and known unmanaged targets before execution. Whether a child already has its own SA is checked at execution time.
 
 ## Authorization and lifetime
 
-Every inherited hop requires a managed child stored in the execution space or globally (`spaceId: "*"`), and a live parent SA request. Global definitions execute in the parent's space using the root parent's binding; the child needs no global binding. Definitions stored in another concrete space remain ineligible. The final live admission check requires the child to still exist, be managed, enabled, valid, and not deleted; it does not compare YAML or definition revisions. The original caller must still have execution access to the child. Admission also checks that the root parent's workload binding still matches the inherited SA. Further inherited calls retain that root binding.
+The identity resolver requires a managed parent at every delegated hop. Every inherited hop requires a managed child stored in the execution space or globally (`spaceId: "*"`), and a live parent SA request. Global definitions execute in the parent's space using the root parent's binding; the child needs no global binding. Definitions stored in another concrete space remain ineligible. The final live admission check requires the child to still exist, be managed, enabled, valid, and not deleted; it does not compare YAML or definition revisions. The original caller must still have execution access to the child. Admission also checks that the root parent's workload binding still matches the inherited SA. Further inherited calls retain that root binding.
 
 The child execution stores its effective identity, immediate parent workflow/execution, root workload ID, and a hash of the executed YAML for audit. The hash is internal metadata, not a user-maintained revision. Run and resume obtain fresh scoped credentials from the root binding, including after an async parent completes. Binding changes, revocation, or disabling SAs fail the child without falling back to the caller. `executedBy` continues to identify the initiating caller.
 
@@ -34,10 +34,11 @@ This approach trusts managed-workflow publishers. Ordinary workflow APIs reject 
 
 Enable SAs and load `examples/developer_examples` and `examples/workflows_extensions_example`. The example-only `/internal/workflows_extensions_example/managed_identity/{suffix}` endpoint installs the registered managed template, accepting bounded options rather than arbitrary YAML.
 
-- `POST` with `{}` installs an unbound managed child.
+- `POST` with `{}` installs an unbound managed child. Add `?global=true` to install it globally through the managed-workflows API; use the same query on `DELETE` to uninstall it.
 - `POST` with `{"serviceAccountId":"<SA>","childWorkflowId":"system-example-inherited-service-account-child","runAsMode":"inherit"}` installs a managed parent.
+- Set `fallbackChild: true` on the parent to exercise its child call from a workflow-level failure handler.
 - Set `asynchronous: true` for `workflow.executeAsync`, or `waitForInput: true` on the child to test durable resume.
-- Set `runAsMode: override` to use the parent SA over a child's saved SA.
+- Set the example option `runAsMode: override` to use the parent SA over a child's saved SA.
 - `POST .../{suffix}/run` executes the example; `DELETE .../{suffix}` uninstalls it.
 
 The Scout `service_account_inheritance.spec.ts` suite covers these paths using real plugin installation and scoped execution credentials.

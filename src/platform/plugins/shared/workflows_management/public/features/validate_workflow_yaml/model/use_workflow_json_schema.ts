@@ -58,7 +58,7 @@ const hideChildIdentitySuggestions = (jsonSchema: z.core.JSONSchema.JSONSchema):
         step?.properties?.with,
         jsonSchema
       );
-      const property = inputs?.properties?.runAsMode;
+      const property = inputs?.properties?.['run-as-mode'];
       if (property && typeof property === 'object') {
         property.doNotSuggest = true;
       }

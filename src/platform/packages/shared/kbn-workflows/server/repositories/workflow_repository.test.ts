@@ -580,22 +580,6 @@ describe('WorkflowRepository.isWorkflowEnabledRealtime', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
-  it.each([
-    [{ enabled: true, spaceId: '*', managed: true }, true],
-    [{ enabled: true, spaceId: '*', managed: false }, false],
-    [{ enabled: true, spaceId: '*' }, false],
-    [{ enabled: true, spaceId: 'other', managed: true }, false],
-    [{ enabled: false, spaceId: '*', managed: true }, false],
-    [{ enabled: true, spaceId: '*', managed: true, deleted_at: '2026-10-06' }, false],
-  ])('only opts into live global managed workflows: %j', async (source, expected) => {
-    esClient.get.mockResolvedValue({ _source: source } as never);
-    await expect(
-      repository.isWorkflowEnabledRealtime('workflow', 'default', {
-        includeGlobal: true,
-      })
-    ).resolves.toBe(expected);
-  });
-
   it('treats a deleted workflow as disabled but propagates storage errors', async () => {
     esClient.get.mockRejectedValueOnce({ statusCode: 404 });
     await expect(repository.isWorkflowEnabledRealtime('workflow', 'default')).resolves.toBe(false);
@@ -635,13 +619,13 @@ describe('WorkflowRepository inherited execution admission', () => {
     [{ enabled: false }, false],
     [{ valid: false }, false],
     [{ spaceId: 'other' }, false],
-    [{ spaceId: '*' }, false],
+    [{ spaceId: '*' }, true],
     [{ deleted_at: '2026-09-30' }, false],
   ])('checks eligibility without comparing content: %j', async (override, expected) => {
     esClient.get.mockResolvedValue({ _source: { ...source, ...override } } as never);
-    await expect(
-      repository.isWorkflowEnabledRealtime(workflow.id, 'default', { requireManaged: true })
-    ).resolves.toBe(expected);
+    await expect(repository.isManagedChildAdmissibleRealtime(workflow.id, 'default')).resolves.toBe(
+      expected
+    );
     expect(esClient.get).toHaveBeenLastCalledWith(
       expect.objectContaining({ id: 'child', realtime: true })
     );
@@ -665,22 +649,19 @@ describe('WorkflowRepository inherited execution admission', () => {
         _source: { ...source, spaceId: '*', ...override },
       } as never);
       await expect(
-        repository.isWorkflowEnabledRealtime(workflow.id, 'default', {
-          includeGlobal: true,
-          requireManaged: true,
-        })
+        repository.isManagedChildAdmissibleRealtime(workflow.id, 'default')
       ).resolves.toBe(expected);
     }
   );
 
   it('rejects missing children and propagates storage failures', async () => {
     esClient.get.mockRejectedValueOnce({ statusCode: 404 });
-    await expect(
-      repository.isWorkflowEnabledRealtime(workflow.id, 'default', { requireManaged: true })
-    ).resolves.toBe(false);
+    await expect(repository.isManagedChildAdmissibleRealtime(workflow.id, 'default')).resolves.toBe(
+      false
+    );
     esClient.get.mockRejectedValueOnce(new Error('Unavailable'));
     await expect(
-      repository.isWorkflowEnabledRealtime(workflow.id, 'default', { requireManaged: true })
+      repository.isManagedChildAdmissibleRealtime(workflow.id, 'default')
     ).rejects.toThrow('Unavailable');
   });
 });

@@ -10,7 +10,7 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
-import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
+import { WorkflowsManagementOperationPrivileges, WorkflowRunAsModeSchema } from '@kbn/workflows';
 import { EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsRequestHandlerContext } from '@kbn/workflows-extensions/server';
 import { EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID } from '../managed_workflows';
@@ -21,8 +21,10 @@ export const registerManagedIdentityRoutes = (
 ): void => {
   const path = '/internal/workflows_extensions_example/managed_identity/{id}';
   const params = schema.object({ id: schema.string({ minLength: 1, maxLength: 256 }) });
-  const options = (request: KibanaRequest<{ id: string }>) => ({
-    spaceId: getSpaceId(request),
+  const query = schema.object({ global: schema.maybe(schema.boolean()) });
+  const [defaultMode, inheritMode, overrideMode] = WorkflowRunAsModeSchema.options;
+  const options = (request: KibanaRequest<{ id: string }>, global = false) => ({
+    spaceId: global ? '*' : getSpaceId(request),
     workflowIdSuffix: request.params.id,
   });
 
@@ -40,16 +42,18 @@ export const registerManagedIdentityRoutes = (
       },
       validate: {
         params,
+        query,
         body: schema.object({
           serviceAccountId: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
           childWorkflowId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
           runAsMode: schema.maybe(
             schema.oneOf([
-              schema.literal('default'),
-              schema.literal('inherit'),
-              schema.literal('override'),
+              schema.literal(defaultMode),
+              schema.literal(inheritMode),
+              schema.literal(overrideMode),
             ])
           ),
+          fallbackChild: schema.maybe(schema.boolean()),
           asynchronous: schema.maybe(schema.boolean()),
           waitForInput: schema.maybe(schema.boolean()),
           message: schema.maybe(schema.string({ maxLength: 1024 })),
@@ -63,7 +67,7 @@ export const registerManagedIdentityRoutes = (
           EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID,
           EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW_ID,
           {
-            ...options(request),
+            ...options(request, request.query.global),
             values: {
               ...request.body,
               message: request.body.message ?? 'Managed identity example completed',
@@ -124,7 +128,7 @@ export const registerManagedIdentityRoutes = (
       security: {
         authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.delete] },
       },
-      validate: { params },
+      validate: { params, query },
     },
     async (context, request, response) => {
       try {
@@ -132,7 +136,7 @@ export const registerManagedIdentityRoutes = (
         await workflows.managedWorkflows.uninstall(
           EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID,
           EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW_ID,
-          options(request)
+          options(request, request.query.global)
         );
         return response.noContent();
       } catch (error) {

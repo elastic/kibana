@@ -13,6 +13,7 @@ import type {
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
   WorkflowRepository,
+  WorkflowRunAsMode,
 } from '@kbn/workflows';
 import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
@@ -72,14 +73,14 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   private getInput(): {
     workflowId: string;
     inputs: Record<string, unknown>;
-    runAsMode: 'default' | 'inherit' | 'override';
+    runAsMode: WorkflowRunAsMode;
   } {
     const step = this.init.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
     const renderedWith =
       this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
         step.with || {}
       ) as Record<string, unknown>;
-    const runAsMode = step.with.runAsMode ?? 'default';
+    const runAsMode = step.with['run-as-mode'] ?? 'default';
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
@@ -144,7 +145,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       stepExecutionRuntime.setInput({
         'workflow-id': workflowId,
         inputs,
-        ...(inheritParentIdentity ? { runAsMode } : {}),
+        ...(inheritParentIdentity ? { 'run-as-mode': runAsMode } : {}),
       });
 
       // Select executor based on step type
@@ -188,7 +189,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         this.init.spaceId,
         this.init.request,
         currentDepth,
-        inheritParentIdentity
+        inheritParentIdentity,
+        node.configuration.name
       );
 
       this.handleResult(result);
