@@ -12,8 +12,7 @@ import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormHelpText, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiComboBox, EuiFormHelpText, EuiFormRow, EuiTextColor } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 import type { FieldConfig, FieldHook, ValidationConfig } from '../../shared_imports';
@@ -74,12 +73,11 @@ const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFi
   defaultMessage: 'Select a timestamp field for use with the global time filter.',
 });
 
-const timestampOptionsErrorTitle = i18n.translate(
-  'indexPatternEditor.editor.form.timeFieldsErrorTitle',
-  {
-    defaultMessage: "Couldn't retrieve the list of timestamp fields",
-  }
-);
+const getTimestampOptionsErrorText = (error: Error) =>
+  i18n.translate('indexPatternEditor.editor.form.timeFieldsError', {
+    defaultMessage: "Couldn't retrieve the list of timestamp fields: {message}",
+    values: { message: error.message },
+  });
 
 export const TimestampField = ({
   options$,
@@ -103,7 +101,9 @@ export const TimestampField = ({
   const selectTimestampHelp = options.length ? timestampFieldHelp : '';
 
   // when the field list request failed the empty list of options is not meaningful,
-  // the callout explains the failure instead
+  // the error help text explains the failure instead
+  const timestampErrorHelp =
+    optionsError && !isLoadingOptions ? getTimestampOptionsErrorText(optionsError) : '';
   const timestampNoFieldsHelp =
     options.length === 0 && !isLoadingOptions && hasMatchedIndices && !optionsError
       ? noTimestampOptionText
@@ -121,7 +121,7 @@ export const TimestampField = ({
             field={field}
             optionsAsComboBoxOptions={optionsAsComboBoxOptions}
             isLoadingOptions={isLoadingOptions}
-            optionsError={optionsError}
+            timestampErrorHelp={timestampErrorHelp}
             disabled={disabled}
             timestampNoFieldsHelp={timestampNoFieldsHelp}
             selectTimestampHelp={selectTimestampHelp}
@@ -136,7 +136,7 @@ interface TimestampFieldRendererProps {
   field: FieldHook<EuiComboBoxOptionOption<string>>;
   optionsAsComboBoxOptions: Array<EuiComboBoxOptionOption<string>>;
   isLoadingOptions: boolean;
-  optionsError?: Error;
+  timestampErrorHelp: string;
   disabled?: boolean;
   timestampNoFieldsHelp: string;
   selectTimestampHelp: string;
@@ -146,7 +146,7 @@ const TimestampFieldRenderer = ({
   field,
   optionsAsComboBoxOptions,
   isLoadingOptions,
-  optionsError,
+  timestampErrorHelp,
   disabled,
   timestampNoFieldsHelp,
   selectTimestampHelp,
@@ -221,21 +221,16 @@ const TimestampFieldRenderer = ({
             fullWidth
           />
           <EuiFormHelpText>
-            {timestampNoFieldsHelp || selectTimestampHelp || <>&nbsp;</>}
+            {timestampErrorHelp ? (
+              <EuiTextColor color="warning" data-test-subj="timestampFieldError">
+                {timestampErrorHelp}
+              </EuiTextColor>
+            ) : (
+              timestampNoFieldsHelp || selectTimestampHelp || <>&nbsp;</>
+            )}
           </EuiFormHelpText>
         </>
       </EuiFormRow>
-      {optionsError && (
-        <>
-          <EuiSpacer size="s" />
-          <KbnWarningCallout
-            title={timestampOptionsErrorTitle}
-            text={optionsError.message}
-            size="s"
-            data-test-subj="timestampFieldError"
-          />
-        </>
-      )}
     </>
   );
 };
