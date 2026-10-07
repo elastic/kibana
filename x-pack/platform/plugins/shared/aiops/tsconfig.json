@@ -87,7 +87,6 @@
     "@kbn/licensing-types",
     "@kbn/unified-data-table",
     "@kbn/esql-utils",
-    "@kbn/discover-utils",
     "@kbn/css-utils",
     "@kbn/cps",
     "@kbn/zod",
