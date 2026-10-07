@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { getCopyLinkFlyoutAction } from '@kbn/agentic-investigations-common';
 
 /**
  * Opens Agent Builder's conversation details flyout for the conversation named in the URL.
@@ -22,9 +23,11 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 export const useInvestigationDetails = ({
   conversationId,
   onClose,
+  onCopyLink,
 }: {
   conversationId?: string;
   onClose: () => void;
+  onCopyLink: (conversationId: string) => boolean;
 }): void => {
   const {
     services: { agentBuilder },
@@ -34,6 +37,8 @@ export const useInvestigationDetails = ({
   // would discard whichever tab the analyst had switched to.
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const onCopyLinkRef = useRef(onCopyLink);
+  onCopyLinkRef.current = onCopyLink;
 
   useEffect(() => {
     if (!conversationId || !agentBuilder) {
@@ -52,6 +57,7 @@ export const useInvestigationDetails = ({
     void agentBuilder
       .openConversationDetails({
         conversationId,
+        trailingActions: [getCopyLinkFlyoutAction(() => onCopyLinkRef.current(conversationId))],
         onClose: () => {
           if (!isTearingDown) {
             onCloseRef.current();

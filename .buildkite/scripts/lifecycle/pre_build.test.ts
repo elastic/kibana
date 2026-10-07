@@ -69,7 +69,7 @@ if [[ "$*" == *".version"* ]]; then
   exit 0
 fi
 if [[ "$*" == *".bucket"* ]]; then
-  echo "mock-bucket"
+  echo "\${MOCK_BUCKET:-kibana-ci-es-snapshots-daily/9.9.9/archives/20260930-000000_abcdef12}"
   exit 0
 fi
 exit 0
@@ -162,7 +162,7 @@ describe('lifecycle pre_build.sh', () => {
       expect.arrayContaining([
         expect.stringMatching(/node .*ci_stats_start\.ts/),
         expect.stringContaining(
-          'buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT https://storage.googleapis.com/mock-bucket/manifest.json'
+          'buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT https://storage.googleapis.com/kibana-ci-es-snapshots-daily/9.9.9/archives/20260930-000000_abcdef12/manifest.json'
         ),
         expect.stringContaining('buildkite-agent meta-data set ingest:is_draft_pr true'),
         expect.stringContaining('buildkite-agent meta-data set ingest:pr_labels ci:foo,ci:bar'),
@@ -233,6 +233,18 @@ describe('lifecycle pre_build.sh', () => {
     expect(result.calls).toEqual(
       expect.arrayContaining([expect.stringContaining('buildkite-agent meta-data set')])
     );
+  });
+
+  it.each([
+    'other-bucket/9.9.9/archives/20260930-000000_abcdef12',
+    'kibana-ci-es-snapshots-daily/9.9.8/archives/20260930-000000_abcdef12',
+    'kibana-ci-es-snapshots-daily/9.9.9/archives/../../other',
+    'null',
+  ])('fails on unexpected manifest bucket %s', (bucket) => {
+    const result = runPreBuildScript({ MOCK_BUCKET: bucket });
+
+    expect(result.status).not.toBe(0);
+    expect(hasCall(result.calls, 'meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT')).toBe(false);
   });
 
   it('fails when manifest resolution command fails', () => {

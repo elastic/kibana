@@ -431,4 +431,14 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
     ),
   ],
+
+  [
+    '.solarwinds_platform',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSolarWindsPlatform" */ './specs/solarwinds_platform/icon'
+        )
+    ),
+  ],
 ]);

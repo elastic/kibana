@@ -230,6 +230,84 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
   });
 });
 
+describe('ServiceFieldsForm — agent-based "at least one source" hint', () => {
+  const optional = (name: string, title: string) => ({
+    name,
+    type: 'text' as const,
+    title,
+    required: false,
+    show_user: true,
+  });
+  const varDefsByInput = {
+    'aws-s3': {
+      bucket_arn: optional('bucket_arn', 'Bucket ARN'),
+      queue_url: optional('queue_url', 'Queue URL'),
+    },
+  };
+  const AGENT_VIEW: AwsServiceMatrixEntry = {
+    id: 'waf',
+    name: 'AWS WAF',
+    category: 'security_identity_compliance',
+    signalTypes: ['logs'],
+    dataStreams: ['waf'],
+    packageName: 'aws',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    inputs: ['aws-s3'],
+    optionalConfig: ['bucket_arn', 'queue_url'],
+    defaultEnabled: true,
+    defaultEnabledInputs: ['aws-s3'],
+    showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
+    ecfSettings: {
+      requiredConfig: ['bucket_arn'],
+      dataStreams: ['waf'],
+      inputs: ['aws-s3'],
+      defaultEnabledInputs: ['aws-s3'],
+    },
+    varDefsByInput,
+    varDefsByDataStream: {
+      waf: {
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput,
+      },
+    },
+  };
+
+  const withBucket = (bucket_arn: string) => ({
+    waf: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { bucket_arn } } },
+  });
+
+  it('names the source fields while none is filled', () => {
+    renderForm(AGENT_VIEW, { varsByDataStream: withBucket('') });
+    expect(screen.getByTestId('serviceSettingsFlyout-sourceRequiredHint')).toHaveTextContent(
+      'Provide at least one of: Bucket ARN, Queue URL.'
+    );
+  });
+
+  it('clears the hint once a source is filled', () => {
+    renderForm(AGENT_VIEW, { varsByDataStream: withBucket('arn:aws:s3:::b') });
+    expect(
+      screen.queryByTestId('serviceSettingsFlyout-sourceRequiredHint')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows no hint in the ECF view, which enforces the ARN as required instead', () => {
+    renderForm(
+      { ...AGENT_VIEW, settingsScope: 'ecf', requiredConfig: ['bucket_arn'] },
+      {
+        varsByDataStream: withBucket(''),
+      }
+    );
+    expect(
+      screen.queryByTestId('serviceSettingsFlyout-sourceRequiredHint')
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('ServiceFieldsForm — data_stream.dataset onChange extraction', () => {
   const DATASET_SERVICE: AwsServiceMatrixEntry = {
     id: 'test_otel',
