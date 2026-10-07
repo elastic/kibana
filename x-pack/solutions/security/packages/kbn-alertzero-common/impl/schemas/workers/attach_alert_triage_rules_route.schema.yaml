@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: Attach rules to the Alert Triage Worker API endpoint
+  version: '1'
+paths:
+  /internal/alertzero/workers/{workerId}/rules/_attach:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AttachAlertTriageRules
+      description: >-
+        Attaches a Worker's rule action to detection rules in the request's space,
+        but only while that space's Worker is enabled. A Worker that is not enabled, or an
+        unavailable AlertZero or rule-attachment service, is reported as a typed outcome with a
+        200 response rather than an error, so a caller can tell "nothing to do" from a failure.
+        Rules that already carry the action are left alone. The caller needs rule write access
+        and runs the attach as themselves. Only a Worker that runs through a per-rule action
+        accepts rules (today, Alert Triage): any other Worker answers 400, and an unknown id 404.
+      summary: Attach rules to a Worker
+      tags:
+        - AlertZero API
+      parameters:
+        - name: workerId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Managed Worker workflow id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - ruleIds
+              properties:
+                ruleIds:
+                  type: array
+                  minItems: 1
+                  maxItems: 2000
+                  description: Saved object ids of the rules to attach.
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 512
+      responses:
+        '400':
+          description: The Worker does not attach to rules, or the request body is invalid.
+        '404':
+          description: No Worker has this id.
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    required:
+                      - outcome
+                    properties:
+                      outcome:
+                        type: string
+                        enum:
+                          - worker_disabled
+                          - worker_unavailable
+                        description: >-
+                          worker_disabled: the Worker is not installed or not enabled in this space.
+                          worker_unavailable: AlertZero or the rule-attachment service cannot be used here.
+                  - type: object
+                    required:
+                      - outcome
+                      - matched
+                      - updated
+                    properties:
+                      outcome:
+                        type: string
+                        enum:
+                          - attached
+                      matched:
+                        type: integer
+                        minimum: 0
+                        description: >-
+                          The requested ids that still match a rule (ids of rules deleted since the
+                          request was made are ignored).
+                      updated:
+                        type: integer
+                        minimum: 0
+                        description: Rules that did not carry the action and now do.
