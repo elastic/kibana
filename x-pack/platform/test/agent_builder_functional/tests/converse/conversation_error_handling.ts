@@ -67,10 +67,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
-
-      await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       // Now set up the LLM proxy to work correctly for the retry
@@ -144,10 +143,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Wait for error to appear
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
-
-      await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       await agentBuilder.clickNewConversationButton();
@@ -208,10 +206,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
-
-      await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       // Navigate back to the successful conversation
@@ -249,10 +246,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Assert error is visible
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
-
-      await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       // Now set up interceptors for the new message
@@ -314,10 +310,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Assert error is visible
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
-
-      await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       // Assert the previous round is still visible
