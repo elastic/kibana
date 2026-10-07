@@ -538,5 +538,32 @@ describe('convertFormBasedToTextBasedLayer', () => {
       const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0];
       expect(column).not.toHaveProperty('params');
     });
+
+    const createDateHistogramLayers = (overrides: Record<string, unknown>) => [
+      createConvertibleLayer(
+        'FROM test-index | STATS COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)',
+        {
+          '@timestamp': createColumnMapping('col1', '@timestamp', 'date', {
+            operationType: 'date_histogram',
+            sourceField: '@timestamp',
+            interval: 1800000,
+            ...overrides,
+          }),
+        }
+      ),
+    ];
+
+    it.each([true, false])('preserves dropPartials: %s on date histogram columns', (value) => {
+      const result = convertFormBasedToTextBasedLayer({
+        layersToConvert: createDateHistogramLayers({ dropPartials: value }),
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(),
+      });
+
+      const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0];
+      expect(column?.params).toEqual({ dropPartials: value });
+    });
   });
 });

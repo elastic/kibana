@@ -107,6 +107,11 @@ const buildTextBasedColumn = ({
     }
   }
 
+  // Preserve dropPartials if it's set
+  if ('dropPartials' in sourceColumn && sourceColumn.dropPartials !== undefined) {
+    column.params = { ...column.params, dropPartials: sourceColumn.dropPartials };
+  }
+
   return column;
 };
 
