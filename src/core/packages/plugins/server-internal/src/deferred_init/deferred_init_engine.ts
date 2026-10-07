@@ -288,7 +288,10 @@ export class DeferredInitEngine {
 
   /**
    * Emits through the record's subject, queueing emissions requested while one is in progress
-   * (a subscriber that re-kicks synchronously) so every subscriber sees them in order.
+   * (a subscriber that re-kicks synchronously) so every subscriber sees them in order. While an
+   * emission is in progress the subject's value lags behind the queued transitions, so
+   * `getStatus()` and `ensureInitialized()` called from inside a subscriber report the state
+   * before them.
    */
   private emit(record: DeferredInitRecord, status: PluginInitStatus): void {
     if (record.emitting) {
@@ -305,6 +308,7 @@ export class DeferredInitEngine {
       }
     } finally {
       record.emitting = false;
+      record.pendingEmissions = undefined;
     }
   }
 

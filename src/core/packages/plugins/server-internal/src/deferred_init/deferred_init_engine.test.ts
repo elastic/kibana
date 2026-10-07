@@ -373,6 +373,7 @@ describe('DeferredInitEngine', () => {
 
   describe('status', () => {
     it('getStatus() and status$ never invoke the runner, in any state', async () => {
+      jest.spyOn(Math, 'random').mockReturnValue(1);
       const runner = attach(
         createRunner().mockRejectedValueOnce(new Error('boom')).mockResolvedValue(undefined)
       );

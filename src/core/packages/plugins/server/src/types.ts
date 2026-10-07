@@ -284,8 +284,9 @@ export interface PluginManifest {
    *
    * Core decides when `initialize()` runs: right after the plugin start loop at
    * boot while `plugins.initializeOnBoot` is `true` (the default), otherwise on
-   * first use. It runs on every Kibana instance against the same cluster, so the
-   * work must be safe to run concurrently.
+   * first use, or right after boot on a node without the `ui` role. It runs on
+   * every Kibana instance against the same cluster, so the work must be safe to
+   * run concurrently.
    *
    * Default is `false`.
    */
