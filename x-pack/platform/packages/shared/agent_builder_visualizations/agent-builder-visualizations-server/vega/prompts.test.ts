@@ -88,18 +88,15 @@ describe('createAuthorVegaSpecPrompt', () => {
 });
 
 describe('vegaEsqlAdditionalInstructions', () => {
-  it('requires an explicit WHERE time-range filter on the raw source field', () => {
-    expect(vegaEsqlAdditionalInstructions).toContain(
-      'WHERE <time field> >= ?_tstart AND <time field> < ?_tend'
-    );
-    expect(vegaEsqlAdditionalInstructions).toContain('RAW source time field');
-    expect(vegaEsqlAdditionalInstructions).toContain(
-      'Never filter or bucket on a field produced by'
-    );
+  it('defers to the shared time guidance instead of requiring an extra time filter', () => {
+    expect(vegaEsqlAdditionalInstructions).toContain('add no extra time filter');
+    expect(vegaEsqlAdditionalInstructions).not.toContain('?_tstart');
   });
 
-  it('sizes @timestamp buckets with time-picker bounds', () => {
-    expect(vegaEsqlAdditionalInstructions).toContain('TBUCKET(100, ?_tstart, ?_tend)');
+  it('keeps time filtering and bucketing on a source field', () => {
+    expect(vegaEsqlAdditionalInstructions).toContain(
+      'never filter or bucket on a field produced by'
+    );
   });
 
   it('asks to RENAME dotted columns to dotless aliases, except the time field', () => {

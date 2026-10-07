@@ -9,19 +9,17 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
-// Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
+// Vega-specific ES|QL guidance; see issue #275519 for why the time field must be a source field.
 export const vegaEsqlAdditionalInstructions = `
-## Vega time-range filtering (required)
+## Time field for Vega
 
-This query feeds a Vega chart. Its ES|QL data source only applies the time picker when the query filters the RAW source time field, so every time-based chart needs \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`.
-
-\`@timestamp\`: \`TBUCKET(100, ?_tstart, ?_tend)\`. A \`WHERE\` on \`@timestamp\` does not size a numeric \`TBUCKET\`, so pass the bounds as well. Any other date field: \`BUCKET(<time field>, 100, ?_tstart, ?_tend)\`.
+This query feeds a Vega chart. Its ES|QL data source applies the time picker like Lens does, so follow the time guidance above and add no extra time filter. Kibana applies the time range to the source time field the query filters or buckets on, so never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`.
 
 ## Field names for Vega
 
 Vega interprets a dot in a field name as a nested-object path, but ES|QL result columns are flat, so a column whose name contains a dot (e.g. \`host.name\`) is misread and renders as "undefined".
 - RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec. Prefer this over leaving dotted names for the renderer to escape.
-- This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
+- This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field.`;
 
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   if (!columns || columns.length === 0) {
