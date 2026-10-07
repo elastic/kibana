@@ -6,6 +6,7 @@
  */
 
 import { EntityType } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
   getEuidSourceFields,
   getEuidNamespaceSourceFields,
@@ -32,6 +33,21 @@ describe('getEuidSourceFields', () => {
       expect.arrayContaining(['user.email', 'user.id', 'user.name', 'user.domain', 'host.id'])
     );
     expect(result.requiresOneOf).toEqual(result.identitySourceFields);
+  });
+
+  it('includes user.entity.id for user (ranked first for cloud.provider aws)', () => {
+    const result = getEuidSourceFields(EntityType.enum.user);
+
+    expect(result.identitySourceFields).toContain('user.entity.id');
+    expect(result.identitySourceFields).not.toContain('cloud.provider');
+  });
+
+  it('stores every user identity source field on the entity record (record-based lookups rank on them)', () => {
+    const { fields } = getEntityDefinitionWithoutId(EntityType.enum.user);
+    const storedFields = new Set(fields.map(({ destination }) => destination));
+    const { identitySourceFields } = getEuidSourceFields(EntityType.enum.user);
+
+    expect(identitySourceFields.filter((field) => !storedFields.has(field))).toEqual([]);
   });
 });
 

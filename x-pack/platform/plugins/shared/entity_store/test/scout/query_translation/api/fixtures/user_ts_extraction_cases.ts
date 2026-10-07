@@ -401,6 +401,150 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       cloud: { provider: 'aws' },
     },
   },
+  // --- AWS: user.entity.id (IAM ARN) ranked first when cloud.provider is aws ---
+  {
+    id: 'asset-cloud-provider-aws-iam-role-entity-id',
+    query: { term: { 'user.name': 'scout-aws-iam-role' } },
+    dslFilterSource: {
+      user: {
+        id: 'arn:aws:iam::123456789012:role/scout/ScoutRole',
+        name: 'scout-aws-iam-role',
+        entity: { id: 'arn:aws:iam::123456789012:role/scout/ScoutRole' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:arn:aws:iam::123456789012:role/scout/ScoutRole@aws',
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout-aws-iam-role',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        id: 'arn:aws:iam::123456789012:role/scout/ScoutRole',
+        name: 'scout-aws-iam-role',
+        entity: { id: 'arn:aws:iam::123456789012:role/scout/ScoutRole' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-iam-user-entity-id',
+    query: { term: { 'user.name': 'scout-aws-iam-user' } },
+    dslFilterSource: {
+      user: {
+        id: 'arn:aws:iam::123456789012:user/scout-aws-iam-user',
+        name: 'scout-aws-iam-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-iam-user' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:arn:aws:iam::123456789012:user/scout-aws-iam-user@aws',
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout-aws-iam-user',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        id: 'arn:aws:iam::123456789012:user/scout-aws-iam-user',
+        name: 'scout-aws-iam-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-iam-user' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-entity-id-over-email',
+    query: { term: { 'user.name': 'scout-aws-sso' } },
+    dslFilterSource: {
+      user: {
+        email: 'scout-aws-sso@example.com',
+        id: 'AROAEXAMPLE:scout-aws-sso@example.com',
+        name: 'scout-aws-sso',
+        entity: { id: 'arn:aws:iam::123456789012:role/ScoutSsoRole' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:arn:aws:iam::123456789012:role/ScoutSsoRole@aws',
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout-aws-sso',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        email: 'scout-aws-sso@example.com',
+        id: 'AROAEXAMPLE:scout-aws-sso@example.com',
+        name: 'scout-aws-sso',
+        entity: { id: 'arn:aws:iam::123456789012:role/ScoutSsoRole' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-local-precedence',
+    query: { term: { 'user.name': 'scout-aws-local-user' } },
+    dslFilterSource: {
+      user: {
+        name: 'scout-aws-local-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-local-user' },
+      },
+      host: { id: 'scout-aws-ec2-host' },
+      event: { kind: 'event', module: 'system', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:scout-aws-local-user@scout-aws-ec2-host@local',
+    expectedMeta: {
+      namespace: USER_ENTITY_NAMESPACE.Local,
+      confidence: ENTITY_CONFIDENCE.Medium,
+      entityName: 'scout-aws-local-user',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        name: 'scout-aws-local-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-local-user' },
+      },
+      host: { id: 'scout-aws-ec2-host' },
+      event: { kind: 'event', module: 'system', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-cloudtrail-event-does-not-create',
+    query: { term: { 'user.name': 'scout-aws-cloudtrail-user' } },
+    dslFilterSource: {
+      user: {
+        id: 'AIDAEXAMPLESCOUT',
+        name: 'scout-aws-cloudtrail-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-cloudtrail-user' },
+      },
+      event: { kind: 'event', module: 'aws', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        id: 'AIDAEXAMPLESCOUT',
+        name: 'scout-aws-cloudtrail-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-cloudtrail-user' },
+      },
+      event: { kind: 'event', module: 'aws', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
   // --- IAM event types without `event.kind: asset`: no longer an IdP create path ---
   {
     id: 'idp-iam-okta-user-id',

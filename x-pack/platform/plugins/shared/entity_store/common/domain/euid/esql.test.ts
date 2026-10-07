@@ -310,7 +310,10 @@ describe('getEuidEsqlEvaluation', () => {
     expect(result).toContain('user_email_present =');
     expect(result).toContain('user_id_present =');
     expect(result).toContain('user_name_present =');
-    expect(result).not.toMatch(/entity\.id.*IS NOT NULL AND/);
+    expect(result).toContain('user_entity_id_present =');
+    // The output column itself never gets a presence check (user.entity.id is an identity field).
+    expect(result).not.toMatch(/\bentity_id_present\b/);
+    expect(result).not.toContain('TO_STRING(entity.id)');
   });
 
   it('honours the outputColumn parameter', () => {
