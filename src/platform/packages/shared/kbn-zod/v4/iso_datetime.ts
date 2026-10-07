@@ -10,11 +10,11 @@
 import type { $ZodISODateTimeParams } from 'zod/v4/core';
 import { z } from 'zod/v4';
 
-export type IsoDateTimeOptions = string | $ZodISODateTimeParams;
+type IsoDateTimeParams = Omit<$ZodISODateTimeParams, 'precision'>;
 
-const resolveIsoDateTimeParams = (
-  options?: IsoDateTimeOptions
-): $ZodISODateTimeParams | undefined =>
+export type IsoDateTimeOptions = string | IsoDateTimeParams;
+
+const resolveIsoDateTimeParams = (options?: IsoDateTimeOptions): IsoDateTimeParams | undefined =>
   typeof options === 'string' ? { message: options } : options;
 
 /**
@@ -24,11 +24,6 @@ const resolveIsoDateTimeParams = (
  */
 export const isoDateTime = (options?: IsoDateTimeOptions): z.ZodString => {
   const resolvedOptions = resolveIsoDateTimeParams(options);
-
-  if (resolvedOptions?.precision !== undefined) {
-    return z.iso.datetime(resolvedOptions) as unknown as z.ZodString;
-  }
-
   const minutePrecisionSchema = z.iso.datetime({ ...resolvedOptions, precision: -1 });
   const fullPrecisionSchema = z.iso.datetime(resolvedOptions);
 

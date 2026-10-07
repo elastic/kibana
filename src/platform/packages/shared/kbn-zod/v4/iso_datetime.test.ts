@@ -44,12 +44,6 @@ describe('isoDateTime', () => {
     expect(schema.safeParse(offsetMinute).success).toBe(false);
   });
 
-  it('delegates to z.iso.datetime when precision is explicit', () => {
-    const schema = isoDateTime({ precision: -1 });
-    expect(schema.parse(utcMinute)).toBe(utcMinute);
-    expect(schema.safeParse(utcSecond).success).toBe(false);
-  });
-
   it('emits a single date-time string in JSON Schema', () => {
     const schema = isoDateTime({ offset: true });
     expect(z.toJSONSchema(schema)).toEqual(
