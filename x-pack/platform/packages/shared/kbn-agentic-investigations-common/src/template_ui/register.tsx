@@ -67,6 +67,8 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * needs Kibana HTTP hooks unavailable in this package.
    */
   renderProposedActions?: import('./slots').OverviewSlotProps['renderProposedActions'];
+  /** Count shown beside the "Proposed actions" heading. */
+  renderProposedActionsCount?: import('./slots').OverviewSlotProps['renderProposedActionsCount'];
   /**
    * When provided, the header renders an interactive assignee picker instead of the read-only
    * avatar stack. Supplied by the caller so the picker can use HTTP hooks and Kibana context
@@ -106,6 +108,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderEscalationModal,
   wrapEscalationButton,
   renderProposedActions,
+  renderProposedActionsCount,
   renderAssignees,
   renderStatus,
   renderCloseInvestigationModal,
@@ -122,6 +125,7 @@ export const registerAgenticInvestigationTemplateUI = ({
             conversation={conversation}
             attachmentsService={attachmentsService}
             renderProposedActions={renderProposedActions}
+            renderProposedActionsCount={renderProposedActionsCount}
           />
         </Suspense>
       );

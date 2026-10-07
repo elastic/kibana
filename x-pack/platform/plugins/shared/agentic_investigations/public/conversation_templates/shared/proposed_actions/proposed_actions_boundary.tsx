@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Component, Suspense, type PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
@@ -38,3 +38,24 @@ export const ProposedActionsBoundary: React.FC<React.PropsWithChildren> = ({ chi
     </KibanaErrorBoundary>
   </KibanaErrorBoundaryProvider>
 );
+
+/**
+ * For a count beside a heading: a failed chunk load or a render error leaves the heading bare
+ * rather than replacing it with an error prompt, and nothing shows while the chunk loads.
+ */
+export class ProposedActionsCountBoundary extends Component<
+  PropsWithChildren,
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    const { hasError } = this.state;
+    const { children } = this.props;
+    return hasError ? null : <Suspense fallback={null}>{children}</Suspense>;
+  }
+}

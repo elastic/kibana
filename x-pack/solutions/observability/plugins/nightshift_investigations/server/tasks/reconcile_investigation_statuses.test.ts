@@ -19,7 +19,7 @@ import {
 
 const HOUR_MS = 60 * 60 * 1000;
 
-type SweepFields = 'created_at';
+type SweepFields = 'created_at' | 'status' | 'started_at' | 'execution_id';
 type SweepResult = FindInvestigationsAcrossSpacesResult<SweepFields>;
 type SweepInvestigation = SweepResult['results'][number];
 
@@ -28,16 +28,25 @@ const investigation = ({
   spaceId = 'default',
   version = 'WzEsMV0=',
   createdAt = new Date().toISOString(),
+  status = 'pending',
+  startedAt,
+  executionId,
 }: {
   id: string;
   spaceId?: string;
   version?: string;
   createdAt?: string;
+  status?: InvestigationStatus;
+  startedAt?: string;
+  executionId?: string;
 }): SweepInvestigation => ({
   investigation: {
     id,
     version,
     created_at: createdAt,
+    status,
+    ...(startedAt && { started_at: startedAt }),
+    ...(executionId && { execution_id: executionId }),
   },
   spaceId,
 });
@@ -220,7 +229,7 @@ describe('reconcileInvestigationStatuses', () => {
     expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
   });
 
-  it('leaves an old investigation alone when its execution has been missing', async () => {
+  it('leaves an old pending investigation alone when its execution is missing', async () => {
     const { investigationSweepRepository, run } = setup();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
       page([
@@ -234,6 +243,60 @@ describe('reconcileInvestigationStatuses', () => {
     expect(result).toEqual({ scanned: 1, reconciled: 0 });
   });
 
+  describe('a running investigation whose execution is missing', () => {
+    const running = (startedAt: string) =>
+      page([
+        investigation({
+          id: 'inv-1',
+          status: 'running',
+          startedAt,
+          executionId: 'exec-follow-up',
+        }),
+      ]);
+
+    it('is left alone while its run may still be going', async () => {
+      const { investigationSweepRepository, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+        running(new Date(Date.now() - HOUR_MS).toISOString())
+      );
+
+      const result = await run();
+
+      expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+      expect(result).toEqual({ scanned: 1, reconciled: 0 });
+    });
+
+    it('is failed once it outlives the workflow timeout', async () => {
+      const { investigationSweepRepository, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+        running(new Date(Date.now() - 2 * HOUR_MS).toISOString())
+      );
+
+      const result = await run();
+
+      expect(investigationSweepRepository.updateInSpace).toHaveBeenCalledWith({
+        id: 'inv-1',
+        spaceId: 'default',
+        version: 'WzEsMV0=',
+        patch: {
+          status: 'failed',
+          completed_at: expect.any(String),
+          error: 'Investigation did not finish within the workflow timeout',
+        },
+      });
+      expect(result).toEqual({ scanned: 1, reconciled: 1 });
+    });
+
+    it('is left alone when its start time cannot be parsed', async () => {
+      const { investigationSweepRepository, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(running('not-a-date'));
+
+      await run();
+
+      expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+    });
+  });
+
   it('leaves an investigation with an unparseable created_at alone when its execution is missing', async () => {
     const { investigationSweepRepository, run } = setup();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
@@ -243,6 +306,49 @@ describe('reconcileInvestigationStatuses', () => {
     await run();
 
     expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+  });
+
+  describe('an investigation a later run continued', () => {
+    const continued = () => page([investigation({ id: 'inv-1', executionId: 'exec-follow-up' })]);
+
+    it("is looked up by its latest run's execution", async () => {
+      const { investigationSweepRepository, getExecutionSummaries, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(continued());
+
+      await run();
+
+      expect(getExecutionSummaries).toHaveBeenCalledWith(['exec-follow-up'], 'default');
+    });
+
+    it('is not settled by its first execution while the latest run is still going', async () => {
+      const { investigationSweepRepository, getExecutionSummaries, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(continued());
+      getExecutionSummaries.mockResolvedValue(
+        new Map([
+          ['inv-1', execution(ExecutionStatus.COMPLETED)],
+          ['exec-follow-up', execution(ExecutionStatus.RUNNING)],
+        ])
+      );
+
+      const result = await run();
+
+      expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+      expect(result).toEqual({ scanned: 1, reconciled: 0 });
+    });
+
+    it('is settled once the latest run stops without writing its outcome', async () => {
+      const { investigationSweepRepository, getExecutionSummaries, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(continued());
+      getExecutionSummaries.mockResolvedValue(
+        new Map([['exec-follow-up', execution(ExecutionStatus.CANCELLED)]])
+      );
+
+      await run();
+
+      const update = investigationSweepRepository.updateInSpace.mock.calls[0][0];
+      expect(update.id).toBe('inv-1');
+      expect(update.patch.status).toBe('cancelled');
+    });
   });
 
   it('does not reconcile an execution from a removed workflow', async () => {
@@ -263,9 +369,15 @@ describe('reconcileInvestigationStatuses', () => {
 
   it('never reads a failed execution lookup as a missing execution', async () => {
     const { investigationSweepRepository, getExecutionSummaries, run } = setup();
+    const twoHoursAgo = new Date(Date.now() - 2 * HOUR_MS).toISOString();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
       page([
-        investigation({ id: 'inv-1', createdAt: new Date(Date.now() - 2 * HOUR_MS).toISOString() }),
+        investigation({
+          id: 'inv-1',
+          createdAt: twoHoursAgo,
+          status: 'running',
+          startedAt: twoHoursAgo,
+        }),
       ])
     );
     getExecutionSummaries.mockRejectedValue(new Error('workflows unavailable'));
