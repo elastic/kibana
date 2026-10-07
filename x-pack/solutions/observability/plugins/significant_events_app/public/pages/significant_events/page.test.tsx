@@ -257,7 +257,7 @@ describe('SignificantEventsPage gated tabs', () => {
       settleGates({ [tab]: { isEnabled: false, isLoading: false } });
       setup({ tab, isDeveloperMode: false });
 
-      expect(screen.getByTestId('redirect-to')).toHaveTextContent('streams');
+      expect(screen.getByTestId('redirect-to')).toHaveTextContent('sources');
     }
   );
 
@@ -265,9 +265,9 @@ describe('SignificantEventsPage gated tabs', () => {
     // Only the gate that governs the requested tab matters. Making every cold load
     // wait for all three would blank the page for tabs that need none of them.
     settleGates({ memory: { isEnabled: false, isLoading: true } });
-    setup({ tab: 'streams', isDeveloperMode: false });
+    setup({ tab: 'sources', isDeveloperMode: false });
 
-    expect(screen.getByTestId('streams-tab-content')).toBeInTheDocument();
+    expect(screen.getByTestId('sources-tab-content')).toBeInTheDocument();
     expect(screen.queryByTestId('app-loading')).not.toBeInTheDocument();
   });
 });
