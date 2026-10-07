@@ -82,8 +82,8 @@ export const findLeftoverPackagePolicies = async (
 };
 
 /**
- * Deletes package policies across all spaces, bumping the affected agent
- * policies once per batch rather than once per deleted policy.
+ * Deletes package policies across all spaces, then bumps each affected agent
+ * policy once rather than once per batch.
  */
 export const deletePackagePolicies = async (
   packagePolicyIds: string[],
@@ -97,37 +97,39 @@ export const deletePackagePolicies = async (
   const totalBatches = Math.ceil(
     packagePolicyIds.length / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE
   );
+  const agentPolicyIds = new Set<string>();
 
-  for (let i = 0; i < packagePolicyIds.length; i += DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) {
-    if (signal?.aborted) {
-      return;
-    }
-    const batch = packagePolicyIds.slice(i, i + DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE);
-    logger.info(
-      `[PrivateLocationCleanUpTask] Deleting batch ${
-        i / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 1
-      }/${totalBatches} of ${batch.length} package policies`
-    );
-    // Fleet's default bumps the agent policy for every deleted package policy,
-    // recompiling and redeploying it each time (thousands of units on a Windows
-    // private location).
-    const results = await fleet.packagePolicyService.delete(soClient, esClient, batch, {
-      force: true,
-      spaceIds: ['*'],
-      ignoreMissing: true,
-      bumpRevision: false,
-    });
-    const agentPolicyIds = new Set<string>();
-    for (const result of results ?? []) {
-      if (result.success) {
-        result.policy_ids?.forEach((policyId) => agentPolicyIds.add(policyId));
-        if (result.policy_id) {
-          agentPolicyIds.add(result.policy_id);
+  try {
+    for (let i = 0; i < packagePolicyIds.length; i += DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) {
+      if (signal?.aborted) {
+        return;
+      }
+      const batch = packagePolicyIds.slice(i, i + DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE);
+      logger.info(
+        `[PrivateLocationCleanUpTask] Deleting batch ${
+          i / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 1
+        }/${totalBatches} of ${batch.length} package policies`
+      );
+      // Fleet's default bumps the agent policy for every deleted package policy,
+      // recompiling and redeploying it each time (thousands of units on a Windows
+      // private location).
+      const results = await fleet.packagePolicyService.delete(soClient, esClient, batch, {
+        force: true,
+        spaceIds: ['*'],
+        ignoreMissing: true,
+        bumpRevision: false,
+      });
+      for (const result of results ?? []) {
+        if (result.success) {
+          result.policy_ids?.forEach((policyId) => agentPolicyIds.add(policyId));
+          if (result.policy_id) {
+            agentPolicyIds.add(result.policy_id);
+          }
         }
       }
     }
-    // Bump before the next batch: these deletes are already durable, and nothing
-    // later could tell that this agent policy still owes a revision.
+  } finally {
+    // Deletes that already landed must not be left undeployed by an abort or a failed batch.
     await bumpAgentPolicyRevisions([...agentPolicyIds], server);
   }
 };

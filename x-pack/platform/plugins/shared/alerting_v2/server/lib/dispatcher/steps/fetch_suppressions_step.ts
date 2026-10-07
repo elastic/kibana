@@ -65,7 +65,7 @@ export class FetchSuppressionsStep implements DispatcherStep {
 
     const suppressions: SuppressionRow[] = [
       ...episodeResponses.flat(),
-      ...seriesResponses.flat().map((row) => ({ ...row, episode_id: null })),
+      ...seriesResponses.flat().map((row) => ({ ...row, alert_id: null })),
     ];
 
     return { type: 'continue', data: { suppressions: SuppressionIndex.of(suppressions) } };

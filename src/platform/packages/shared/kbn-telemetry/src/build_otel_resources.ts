@@ -13,8 +13,22 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 import {
   ATTR_SERVICE_INSTANCE_ID,
   ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
+  ATTR_PROCESS_COMMAND_ARGS,
 } from '@opentelemetry/semantic-conventions/incubating';
 
+/**
+ * We are not interested in the CLI arguments, so this omits `process.command_args` and keeps only a count.
+ */
+const processDetector: resources.ResourceDetector = {
+  detect(config) {
+    const detected = resources.processDetector.detect(config);
+    const { [ATTR_PROCESS_COMMAND_ARGS]: commandArgs, ...attributes } = detected.attributes || {};
+    if (Array.isArray(commandArgs)) {
+      attributes['process.args_count'] = commandArgs.length;
+    }
+    return { attributes };
+  },
+};
 /**
  * Unified function to build the OpenTelemetry resource for all services.
  * @param serviceName The service name used to look up APM config (defaults to 'kibana').
@@ -27,7 +41,7 @@ export function buildOtelResources(serviceName: string = 'kibana') {
         resources.envDetector,
         resources.hostDetector,
         resources.osDetector,
-        resources.processDetector,
+        processDetector,
       ],
     })
     .merge(resources.resourceFromAttributes(deriveAttributesFromApmConfig(serviceName)));
