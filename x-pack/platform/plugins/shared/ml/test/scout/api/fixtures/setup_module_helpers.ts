@@ -9,7 +9,6 @@ import { sortBy } from 'lodash';
 import type { ApiClientFixture, ApiServicesFixture, KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { INTERNAL_API_HEADERS } from './constants';
-import { deleteSavedObject, assertSavedObjectExists } from './general_test_helpers';
 
 export const ALL_MODULE_IDS = [
   'apache_data_stream',
@@ -208,21 +207,24 @@ export async function runSetupModuleTest(
     if (data.expected.searches.length > 0) {
       await step('verify saved searches exist', async () => {
         for (const id of data.expected.searches) {
-          await assertSavedObjectExists(kbnClient, 'search', id);
+          const savedObject = await kbnClient.savedObjects.get({ type: 'search', id });
+          expect(savedObject.id).toBe(id);
         }
       });
     }
     if (data.expected.visualizations.length > 0) {
       await step('verify visualizations exist', async () => {
         for (const id of data.expected.visualizations) {
-          await assertSavedObjectExists(kbnClient, 'visualization', id);
+          const savedObject = await kbnClient.savedObjects.get({ type: 'visualization', id });
+          expect(savedObject.id).toBe(id);
         }
       });
     }
     if (data.expected.dashboards.length > 0) {
       await step('verify dashboards exist', async () => {
         for (const id of data.expected.dashboards) {
-          await assertSavedObjectExists(kbnClient, 'dashboard', id);
+          const savedObject = await kbnClient.savedObjects.get({ type: 'dashboard', id });
+          expect(savedObject.id).toBe(id);
         }
       });
     }
@@ -234,12 +236,12 @@ export async function cleanupModuleSavedObjects(
   expected: Pick<SetupModuleExpected, 'searches' | 'visualizations' | 'dashboards'>
 ): Promise<void> {
   for (const id of expected.searches) {
-    await deleteSavedObject(kbnClient, 'search', id);
+    await kbnClient.savedObjects.delete({ type: 'search', id });
   }
   for (const id of expected.visualizations) {
-    await deleteSavedObject(kbnClient, 'visualization', id);
+    await kbnClient.savedObjects.delete({ type: 'visualization', id });
   }
   for (const id of expected.dashboards) {
-    await deleteSavedObject(kbnClient, 'dashboard', id);
+    await kbnClient.savedObjects.delete({ type: 'dashboard', id });
   }
 }
