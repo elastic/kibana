@@ -121,7 +121,9 @@ function StackTracesContent() {
   }, [state.status, state.data?.charts.length, onPageReady, rangeFrom, rangeTo]);
 
   return (
-    <NoProfilingDataPrompt hasData={state.data?.charts.length !== 0}>
+    <NoProfilingDataPrompt
+      hasData={state.status !== AsyncStatus.Settled || state.data?.charts.length !== 0}
+    >
       <StackTraces
         type={topNType}
         state={state}

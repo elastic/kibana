@@ -11,7 +11,7 @@ import {
   COLLECTOR_PACKAGE_POLICY_NAME,
   OTEL_PROFILING_EVENTS_DATA_STREAM,
   otelEsArchiverPath,
-  PROFILING_OTEL_TEST_DATES,
+  PROFILING_OTEL_TEST_NAMESPACE,
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from './constants';
 
@@ -108,20 +108,13 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
           symbolizerId: symbolizer?.id,
         };
       };
-      // Loads the OTel profiling data unless its events are already there, since loading it twice
-      // would fail on the documents with fixed ids.
+      // Loads the OTel profiling data unless its own events are already there, since loading it
+      // twice would fail on the documents with fixed ids.
       const loadOtelData = async (): Promise<void> => {
         const { count } = await esClient.count({
           index: OTEL_PROFILING_EVENTS_DATA_STREAM,
           ignore_unavailable: true,
-          query: {
-            range: {
-              '@timestamp': {
-                gte: PROFILING_OTEL_TEST_DATES.rangeFrom,
-                lt: PROFILING_OTEL_TEST_DATES.rangeTo,
-              },
-            },
-          },
+          query: { term: { 'k8s.namespace.name': PROFILING_OTEL_TEST_NAMESPACE } },
         });
 
         if (count > 0) {

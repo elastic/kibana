@@ -8,17 +8,20 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { FlameGraph } from '../../../components/flamegraph';
 import type { AsyncState } from '../../../hooks/use_async';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { FlameGraphView } from '.';
 
+const mockFetchElasticFlamechart = jest.fn().mockResolvedValue({});
+
 jest.mock('@kbn/ebt-tools', () => ({ usePerformanceContext: () => ({ onPageReady: jest.fn() }) }));
 jest.mock('../../../components/flamegraph', () => ({ FlameGraph: jest.fn(() => null) }));
 jest.mock('../../../components/contexts/profiling_dependencies/use_profiling_dependencies', () => ({
   useProfilingDependencies: () => ({
-    services: { fetchElasticFlamechart: jest.fn() },
+    services: { fetchElasticFlamechart: mockFetchElasticFlamechart },
     start: { core: { uiSettings: { get: () => false } } },
   }),
 }));
@@ -50,9 +53,26 @@ const mockFlamegraphState = (state: Partial<AsyncState<ElasticFlameGraph>>) =>
     ...state,
   });
 
+// Runs the request the view passes to `useTimeRangeAsync`
+const requestFlamegraph = () => {
+  const [[request]] = jest.mocked(useTimeRangeAsync).mock.calls;
+  return request({ http: {} as Parameters<typeof request>[0]['http'] });
+};
+
 describe('FlameGraphView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('requests the flamegraph of the selected schema', () => {
+    mockFlamegraphState({ status: AsyncStatus.Loading });
+
+    render(<FlameGraphView />);
+    requestFlamegraph();
+
+    expect(mockFetchElasticFlamechart).toHaveBeenCalledWith(
+      expect.objectContaining({ schema: ProfilingSchema.OTEL })
+    );
   });
 
   it('prompts to change the search when the flamegraph has no samples', () => {

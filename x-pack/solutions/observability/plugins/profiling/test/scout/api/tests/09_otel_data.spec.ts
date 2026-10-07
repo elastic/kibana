@@ -16,6 +16,7 @@ import {
   internalApiHeaders,
   PROFILING_OTEL_TEST_DATES,
   PROFILING_OTEL_TEST_HOST_ID,
+  PROFILING_OTEL_TEST_KUERY,
   profilingApiEndpoints,
 } from '../../common/fixtures/constants';
 
@@ -102,10 +103,14 @@ const get = async (
 ) => {
   const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
-  return apiClient.get(`${endpoint}?${new URLSearchParams({ kuery: '', ...query })}`, {
-    headers: { ...cookieHeader, ...internalApiHeaders },
-    responseType: 'json',
-  });
+  // Only this test data's events, so other OTel data in its time range does not change the results
+  return apiClient.get(
+    `${endpoint}?${new URLSearchParams({ kuery: PROFILING_OTEL_TEST_KUERY, ...query })}`,
+    {
+      headers: { ...cookieHeader, ...internalApiHeaders },
+      responseType: 'json',
+    }
+  );
 };
 
 apiTest.describe('Profiling data APIs by schema', { tag: tags.stateful.classic }, () => {

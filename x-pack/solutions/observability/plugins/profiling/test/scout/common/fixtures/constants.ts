@@ -20,7 +20,8 @@ export const esArchiversPath = Path.join(__dirname, 'es_archiver', 'profiling', 
 
 // OTel profiling data, adapted from the Elasticsearch profiling OTel integration tests. All but one of
 // its events are within `PROFILING_OTEL_TEST_DATES`, which no Universal Profiling data overlaps, and
-// have container, pod and executable names added so every Stacktraces grouping has data.
+// have container, pod and executable names added so every Stacktraces grouping has data. All of its
+// events are in the `PROFILING_OTEL_TEST_NAMESPACE` namespace.
 export const otelEsArchiverPath = Path.join(
   __dirname,
   'es_archiver',
@@ -33,6 +34,11 @@ export const PROFILING_OTEL_TEST_DATES = {
 } as const;
 // The host every OTel profiling event in `otelEsArchiverPath` was sampled on.
 export const PROFILING_OTEL_TEST_HOST_ID = '8457605156473051743';
+// The Kubernetes namespace that tells the OTel profiling events in `otelEsArchiverPath` apart from
+// any other OTel profiling data, and the KQL query that matches only them. Don't change the value unless
+// you update the OTEL data.json file as well
+export const PROFILING_OTEL_TEST_NAMESPACE = 'profiling-scout';
+export const PROFILING_OTEL_TEST_KUERY = `k8s.namespace.name: "${PROFILING_OTEL_TEST_NAMESPACE}"`;
 export const esResourcesEndpoint = 'api/profiling/setup/es_resources';
 
 // Headers required by internal profiling API routes (xsrf + internal origin).

@@ -8,16 +8,19 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { TopNFunctions } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { DifferentialTopNFunctionsGrid } from '../../../components/differential_topn_functions_grid';
 import type { AsyncState } from '../../../hooks/use_async';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { DifferentialTopNFunctionsView } from '.';
 
+const mockFetchTopNFunctions = jest.fn().mockResolvedValue({});
+
 jest.mock('@kbn/ebt-tools', () => ({ usePerformanceContext: () => ({ onPageReady: jest.fn() }) }));
 jest.mock('../../../components/contexts/profiling_dependencies/use_profiling_dependencies', () => ({
   useProfilingDependencies: () => ({
-    services: { fetchElasticFlamechart: jest.fn(), fetchTopNFunctions: jest.fn() },
+    services: { fetchElasticFlamechart: jest.fn(), fetchTopNFunctions: mockFetchTopNFunctions },
     start: { core: { uiSettings: { get: () => false } } },
   }),
 }));
@@ -76,9 +79,33 @@ const mockTopNFunctionsStates = (
   }));
 };
 
+// Runs the baseline and comparison requests the view passes to `useTimeRangeAsync`
+const requestTopNFunctions = () => {
+  const [[baselineRequest], [comparisonRequest]] = jest.mocked(useTimeRangeAsync).mock.calls;
+  const http = {} as Parameters<typeof baselineRequest>[0]['http'];
+  return [baselineRequest({ http }), comparisonRequest({ http })];
+};
+
 describe('DifferentialTopNFunctionsView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('requests the baseline and comparison functions of the selected schema', () => {
+    mockTopNFunctionsStates({ status: AsyncStatus.Loading }, { status: AsyncStatus.Loading });
+
+    render(<DifferentialTopNFunctionsView />);
+    requestTopNFunctions();
+
+    expect(mockFetchTopNFunctions).toHaveBeenCalledTimes(2);
+    expect(mockFetchTopNFunctions).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ schema: ProfilingSchema.OTEL })
+    );
+    expect(mockFetchTopNFunctions).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ schema: ProfilingSchema.OTEL })
+    );
   });
 
   it('prompts to change the search when there are no baseline functions', () => {

@@ -129,4 +129,13 @@ describe('StackTracesView', () => {
 
     expect(screen.queryByTestId('profilingNoDataPrompt')).not.toBeInTheDocument();
   });
+
+  it('does not prompt while reloading after a search without stacktraces', () => {
+    mockStackTracesState({ status: AsyncStatus.Loading, data: { charts: [] } });
+
+    render(<StackTracesView />);
+
+    expect(screen.queryByTestId('profilingNoDataPrompt')).not.toBeInTheDocument();
+    expect(StackTraces).toHaveBeenCalled();
+  });
 });

@@ -8,16 +8,19 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { FlameGraph } from '../../../components/flamegraph';
 import type { AsyncState } from '../../../hooks/use_async';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { DifferentialFlameGraphsView } from '.';
 
+const mockFetchElasticFlamechart = jest.fn().mockResolvedValue({});
+
 jest.mock('@kbn/ebt-tools', () => ({ usePerformanceContext: () => ({ onPageReady: jest.fn() }) }));
 jest.mock('../../../components/contexts/profiling_dependencies/use_profiling_dependencies', () => ({
   useProfilingDependencies: () => ({
-    services: { fetchElasticFlamechart: jest.fn(), fetchTopNFunctions: jest.fn() },
+    services: { fetchElasticFlamechart: mockFetchElasticFlamechart, fetchTopNFunctions: jest.fn() },
     start: { core: { uiSettings: { get: () => false } } },
   }),
 }));
@@ -74,9 +77,32 @@ const mockFlamegraphsState = (state: Partial<AsyncState<DifferentialFlamegraphs>
     ...state,
   });
 
+// Runs the request the view passes to `useTimeRangeAsync`
+const requestFlamegraphs = () => {
+  const [[request]] = jest.mocked(useTimeRangeAsync).mock.calls;
+  return request({ http: {} as Parameters<typeof request>[0]['http'] });
+};
+
 describe('DifferentialFlameGraphsView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('requests the baseline and comparison flamegraphs of the selected schema', () => {
+    mockFlamegraphsState({ status: AsyncStatus.Loading });
+
+    render(<DifferentialFlameGraphsView />);
+    requestFlamegraphs();
+
+    expect(mockFetchElasticFlamechart).toHaveBeenCalledTimes(2);
+    expect(mockFetchElasticFlamechart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ schema: ProfilingSchema.OTEL })
+    );
+    expect(mockFetchElasticFlamechart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ schema: ProfilingSchema.OTEL })
+    );
   });
 
   it('prompts to change the search when the baseline flamegraph has no samples', () => {

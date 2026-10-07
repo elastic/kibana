@@ -8,16 +8,19 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { TopNFunctions } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
 import type { AsyncState } from '../../../hooks/use_async';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { TopNFunctionsView } from '.';
 
+const mockFetchTopNFunctions = jest.fn().mockResolvedValue({});
+
 jest.mock('@kbn/ebt-tools', () => ({ usePerformanceContext: () => ({ onPageReady: jest.fn() }) }));
 jest.mock('../../../components/contexts/profiling_dependencies/use_profiling_dependencies', () => ({
   useProfilingDependencies: () => ({
-    services: { fetchElasticFlamechart: jest.fn(), fetchTopNFunctions: jest.fn() },
+    services: { fetchElasticFlamechart: jest.fn(), fetchTopNFunctions: mockFetchTopNFunctions },
     start: { core: { uiSettings: { get: () => false } } },
   }),
 }));
@@ -58,9 +61,26 @@ const mockTopNFunctionsState = (state: Partial<AsyncState<TopNFunctions>>) =>
     ...state,
   });
 
+// Runs the request the view passes to `useTimeRangeAsync`
+const requestTopNFunctions = () => {
+  const [[request]] = jest.mocked(useTimeRangeAsync).mock.calls;
+  return request({ http: {} as Parameters<typeof request>[0]['http'] });
+};
+
 describe('TopNFunctionsView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('requests the functions of the selected schema', () => {
+    mockTopNFunctionsState({ status: AsyncStatus.Loading });
+
+    render(<TopNFunctionsView />);
+    requestTopNFunctions();
+
+    expect(mockFetchTopNFunctions).toHaveBeenCalledWith(
+      expect.objectContaining({ schema: ProfilingSchema.OTEL })
+    );
   });
 
   it('prompts to change the search when there are no functions', () => {
