@@ -228,10 +228,13 @@ export const isByOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
  * definition winning (as Elasticsearch does when a name is reused).
  * Given | STATS count = COUNT() BY addr = address
  * returns { addr, { type: 'keyword' ... } }
+ * A bare expression grouping (e.g. BUCKET(@timestamp, 1 d)) defines an implicitly-named column;
+ * `query` is required to recover its source text, which is the name aggregations reference.
  */
 export const getColumnsDefinedInByClause = (
   command: Pick<ESQLCommand, 'args'>,
   inputColumns: Map<string, ESQLColumnData>,
+  query?: string,
   unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): Map<string, ESQLUserDefinedColumn> => {
   const typeOf = (thing: ESQLAstItem) =>
@@ -258,8 +261,8 @@ export const getColumnsDefinedInByClause = (
         continue;
       }
 
-      // A bare grouping reusing an assigned name shadows it, so the rightmost
-      // binding (the input column it references) is the one aggregations resolve against.
+      // A bare column grouping references an input field already in scope, unless it reuses an
+      // assigned name — then it shadows that assignment with the input column it points to.
       if (isColumn(grouping)) {
         const name = getColumnName(grouping);
         if (assignments.has(name)) {
@@ -270,6 +273,19 @@ export const getColumnsDefinedInByClause = (
             userDefined: true,
           });
         }
+        continue;
+      }
+
+      // A bare expression grouping (e.g. `BUCKET(@timestamp, 1 d)`) defines an implicitly-named
+      // column whose name is its source text; aggregations reference it via a backtick identifier.
+      if (query !== undefined && !Array.isArray(grouping) && !isOptionNode(grouping)) {
+        const name = query.substring(grouping.location.min, grouping.location.max + 1);
+        assignments.set(name, {
+          name,
+          type: typeOf(grouping),
+          location: grouping.location,
+          userDefined: true,
+        });
       }
     }
   }

@@ -122,7 +122,12 @@ export const columnsAfter = (
   const inputColumns = new Map<string, ESQLColumnData>();
   previousColumns.forEach((col) => inputColumns.set(col.name, col)); // TODO make this more efficient
 
-  const assignments = getColumnsDefinedInByClause(command, inputColumns, unmappedFieldsStrategy);
+  const assignments = getColumnsDefinedInByClause(
+    command,
+    inputColumns,
+    query,
+    unmappedFieldsStrategy
+  );
   const aggregatingColumns = new Map([...inputColumns, ...assignments]);
 
   // Aggregation expressions can reference columns defined in the BY clause, while
