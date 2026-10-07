@@ -12,7 +12,6 @@ import {
 } from './constants';
 import {
   customContentStateSchema,
-  customContentUpdateSchema,
   customContentPanelUpdateSchema,
   readEsqlQuery,
   toEsqlQueryState,
@@ -69,45 +68,6 @@ describe('customContentStateSchema', () => {
   });
 });
 
-describe('customContentUpdateSchema', () => {
-  it('accepts a prompt on its own', () => {
-    expect(customContentUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(true);
-  });
-
-  it('accepts an esqlQuery on its own', () => {
-    expect(customContentUpdateSchema.safeParse({ esqlQuery: 'FROM logs-*' }).success).toBe(true);
-  });
-
-  // The dashboard tool targets the panel with its own `panelId`, so an identifier here would be
-  // a second, redundant way to say the same thing.
-  it('does not require a panel identifier', () => {
-    expect(customContentUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(true);
-  });
-
-  it('requires at least one of prompt or esqlQuery', () => {
-    expect(customContentUpdateSchema.safeParse({}).success).toBe(false);
-  });
-
-  it('accepts a null esqlQuery to clear the query', () => {
-    expect(customContentUpdateSchema.safeParse({ esqlQuery: null }).success).toBe(true);
-  });
-
-  it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
-    expect(
-      customContentUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        prompt: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1),
-      }).success
-    ).toBe(false);
-  });
-
-  it('rejects an empty prompt', () => {
-    expect(customContentUpdateSchema.safeParse({ embeddable_id: 'p1', prompt: '' }).success).toBe(
-      false
-    );
-  });
-});
-
 describe('customContentPanelUpdateSchema', () => {
   it('requires embeddable_id so the chat tool cannot act on the wrong panel', () => {
     expect(customContentPanelUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(
@@ -124,6 +84,34 @@ describe('customContentPanelUpdateSchema', () => {
 
   it('still requires at least one of prompt or esqlQuery', () => {
     expect(customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1' }).success).toBe(false);
+  });
+
+  it('accepts an esqlQuery on its own', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: 'FROM logs-*' })
+        .success
+    ).toBe(true);
+  });
+
+  it('accepts a null esqlQuery to clear the query', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: null }).success
+    ).toBe(true);
+  });
+
+  it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({
+        embeddable_id: 'p1',
+        prompt: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1),
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects an empty prompt', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', prompt: '' }).success
+    ).toBe(false);
   });
 });
 

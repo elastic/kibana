@@ -21,7 +21,7 @@ import type {
   StorageHostDetailsAPIResponse,
 } from '../common/storage_explorer';
 import type { TopNResponse } from '../common/topn';
-import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
+import type { SetupDataCollectionInstructions } from '../server/routes/universal_profiling/setup/get_cloud_setup_instructions';
 import type { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface APMTransactionsPerService {
@@ -29,10 +29,6 @@ export interface APMTransactionsPerService {
     serviceName: string;
     transactions: Array<{ name: string | null; samples: number | null }>;
   };
-}
-
-export interface ProfilingSetupStatus extends ProfilingStatus {
-  has_required_role: boolean;
 }
 
 export interface Services {
@@ -58,7 +54,7 @@ export interface Services {
     kuery: string;
     showErrorFrames: boolean;
   }) => Promise<ElasticFlameGraph>;
-  fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingSetupStatus>;
+  fetchProfilingStatus: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingStatus>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
   setupDataCollectionInstructions: (params: {
     http: AutoAbortedHttpService;
@@ -126,9 +122,8 @@ export function getServices(): Services {
       const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
       return createFlameGraph(baseFlamegraph, showErrorFrames);
     },
-    fetchHasSetup: async ({ http }) => {
-      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as ProfilingSetupStatus;
-      return hasSetup;
+    fetchProfilingStatus: async ({ http }) => {
+      return (await http.get(paths.Status, {})) as ProfilingStatus;
     },
     postSetupResources: async ({ http }) => {
       await http.post(paths.HasSetupESResources, { body: JSON.stringify({}) });

@@ -54,6 +54,7 @@ savedObjectsClient: SavedObjectsClientContract
 - `@emotion/react`, `@emotion/css`
 - `react`, `react-dom`
 - `@kbn/i18n`
+- other `@kbn/ui-*` packages under `src/platform/kbn-ui/`
 
 Additional dependencies _may_ exist, will require review, and should be kept to an absolute minimum.
 

@@ -295,6 +295,47 @@ agentBuilder.agents.register({
 Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts)
 for the full list of available configuration options.
 
+### Choosing the agent's model
+
+By default, agents run on the model selected by the user in the Chat UI, or on the first model of the
+Agent Builder inference feature. A built-in agent can instead run on a model of its own, by declaring an
+inference feature in its configuration.
+
+First, register a `chat_completion` inference feature with the `searchInferenceEndpoints` plugin, during setup.
+Admins can then pick the models of that feature from the model settings page, and `recommendedEndpoints`
+is used until they do:
+
+```ts
+const result = searchInferenceEndpoints.features.register({
+  featureId: 'my_solution_agent',
+  parentFeatureId: 'my_solution', // optional, groups the feature under a parent in the UI
+  featureName: 'My solution agent',
+  featureDescription: 'Models used by the My solution agent',
+  taskType: 'chat_completion',
+  recommendedEndpoints: ['.anthropic-claude-5-sonnet-chat_completion'],
+});
+if (!result.ok) {
+  logger.warn(`Failed to register the inference feature: ${result.error}`);
+}
+```
+
+Then reference the feature from the agent's configuration:
+
+```ts
+agentBuilder.agents.register({
+  id: 'platform.my_solution.agent',
+  name: 'My solution agent',
+  description: 'Agent specialized in my solution',
+  configuration: {
+    instructions: 'You are a specialist [...]',
+    tools: [{ tool_ids: ['[...]'] }],
+    inference_feature_id: 'my_solution_agent',
+  },
+});
+```
+
+`inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
+
 ## Registering attachment types
 
 Attachments are used to provide additional context when conversing with an agent.
@@ -1158,6 +1199,11 @@ const options = {
 Back returns to the conversation details flyout. Closing any flyout in the group closes all of them.
 A flyout opened with a different `historyKey` hides the conversation details flyout until it closes,
 with no Back button.
+
+In the full-screen conversation, Agent Builder's own flyouts (canvas, trace, execution JSON, tool
+response, sub-agent execution, clarification questions) join the same group, so they stack on top of
+the conversation details flyout and of each other. Outside-click doesn't close them; use Back, the
+close button or Escape. In the embeddable sidebar these flyouts are not managed and don't stack.
 
 ### Rules
 

@@ -148,6 +148,93 @@ describe('buildAgentBasedTargets', () => {
     expect(groups[0].instanceIds).toEqual(['vpcflow']);
   });
 
+  it('splits originals of the same package into one group per namespace', () => {
+    const vpc = makeSimpleService('vpcflow');
+    const s3 = makeSimpleService('s3');
+    const groups = buildAgentBasedTargets(
+      [makeInstance(), makeInstance({ instanceId: 's3', serviceId: 's3', name: 'AWS s3' })],
+      ['vpcflow', 's3'],
+      new Map([
+        ['vpcflow', vpc],
+        ['s3', s3],
+      ]),
+      {
+        vpcflow: { enabledDataStreams: ['vpcflow'], varsByDataStream: {}, namespace: 'prod' },
+        s3: { enabledDataStreams: ['s3'], varsByDataStream: {}, namespace: 'staging' },
+      }
+    );
+    expect(groups).toHaveLength(2);
+    expect(groups.map((g) => g.namespace).sort()).toEqual(['prod', 'staging']);
+    expect(groups.map((g) => g.groupId).sort()).toEqual(['aws__prod', 'aws__staging']);
+  });
+
+  it('keeps originals of the same package and namespace in a single group', () => {
+    const vpc = makeSimpleService('vpcflow');
+    const s3 = makeSimpleService('s3');
+    const groups = buildAgentBasedTargets(
+      [makeInstance(), makeInstance({ instanceId: 's3', serviceId: 's3', name: 'AWS s3' })],
+      ['vpcflow', 's3'],
+      new Map([
+        ['vpcflow', vpc],
+        ['s3', s3],
+      ]),
+      {
+        vpcflow: { enabledDataStreams: ['vpcflow'], varsByDataStream: {}, namespace: 'prod' },
+        s3: { enabledDataStreams: ['s3'], varsByDataStream: {}, namespace: 'prod' },
+      }
+    );
+    expect(groups).toHaveLength(1);
+    expect(groups[0].groupId).toBe('aws__prod');
+    expect(groups[0].instanceIds.sort()).toEqual(['s3', 'vpcflow']);
+  });
+
+  it('keeps the package name as groupId when no namespace is set', () => {
+    const svc = makeSimpleService();
+    const groups = buildAgentBasedTargets(
+      [makeInstance()],
+      ['vpcflow'],
+      new Map([['vpcflow', svc]])
+    );
+    expect(groups[0].groupId).toBe('aws');
+    expect(groups[0].namespace).toBe('');
+  });
+
+  it('carries a duplicate instance namespace onto its own group', () => {
+    const svc = makeSimpleService();
+    const groups = buildAgentBasedTargets(
+      [makeInstance({ instanceId: 'vpcflow__dup-1', name: 'Second', isDuplicate: true })],
+      ['vpcflow'],
+      new Map([['vpcflow', svc]]),
+      {
+        'vpcflow__dup-1': {
+          enabledDataStreams: ['vpcflow'],
+          varsByDataStream: {},
+          namespace: 'eu',
+        },
+      }
+    );
+    const dup = groups.find((g) => g.isDuplicateGroup);
+    expect(dup?.namespace).toBe('eu');
+  });
+
+  it("does not give a duplicate the original's namespace when it has none of its own", () => {
+    const svc = makeSimpleService();
+    const groups = buildAgentBasedTargets(
+      [
+        makeInstance(),
+        makeInstance({ instanceId: 'vpcflow__dup-1', name: 'Second', isDuplicate: true }),
+      ],
+      ['vpcflow'],
+      new Map([['vpcflow', svc]]),
+      {
+        vpcflow: { enabledDataStreams: ['vpcflow'], varsByDataStream: {}, namespace: 'prod' },
+        'vpcflow__dup-1': { enabledDataStreams: ['vpcflow'], varsByDataStream: {} },
+      }
+    );
+    const dup = groups.find((g) => g.isDuplicateGroup);
+    expect(dup?.namespace).toBe('');
+  });
+
   it('drops persisted instances whose service was deselected in step 1', () => {
     const svc = makeSimpleService();
     const groups = buildAgentBasedTargets(
@@ -296,6 +383,66 @@ describe('deployNewAgentPolicy', () => {
     expect(body.namespace).toBe('custom-ns');
     expect(body.package_policies[0].namespace).toBeUndefined();
   });
+
+  it('sets the instance namespace on the package policy and keeps the agent policy default', async () => {
+    const svc = makeSimpleService();
+    const storedServiceVars = {
+      vpcflow: { enabledDataStreams: ['vpcflow'], varsByDataStream: {}, namespace: 'prod' },
+    };
+    const groups = buildAgentBasedTargets(
+      [],
+      ['vpcflow'],
+      new Map([['vpcflow', svc]]),
+      storedServiceVars
+    );
+
+    await deployNewAgentPolicy(groups, {
+      ...BASE_OPTS,
+      storedServiceVars,
+      agentPolicyName: 'AWS Agent Policy 1',
+    });
+
+    const body = mockSendCreateAgentPolicy.mock.calls[0][0];
+    expect(body.namespace).toBe('default');
+    expect(body.package_policies[0].namespace).toBe('prod');
+  });
+
+  it.each([
+    ['prod.eu', 'prod_eu'],
+    ['prod(}', 'prod)^'],
+  ])(
+    'gives distinct package policy names to namespaces %s and %s, which sanitize to the same string',
+    async (vpcNamespace, s3Namespace) => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1);
+      const vpc = makeSimpleService('vpcflow');
+      const s3 = makeSimpleService('s3');
+      const storedServiceVars = {
+        vpcflow: { enabledDataStreams: ['vpcflow'], varsByDataStream: {}, namespace: vpcNamespace },
+        s3: { enabledDataStreams: ['s3'], varsByDataStream: {}, namespace: s3Namespace },
+      };
+      const groups = buildAgentBasedTargets(
+        [makeInstance(), makeInstance({ instanceId: 's3', serviceId: 's3', name: 'AWS s3' })],
+        ['vpcflow', 's3'],
+        new Map([
+          ['vpcflow', vpc],
+          ['s3', s3],
+        ]),
+        storedServiceVars
+      );
+
+      await deployNewAgentPolicy(groups, {
+        ...BASE_OPTS,
+        storedServiceVars,
+        agentPolicyName: 'AWS Agent Policy 1',
+      });
+
+      const names = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies.map(
+        (pp: { name: string }) => pp.name
+      );
+      expect(new Set(names).size).toBe(2);
+      nowSpy.mockRestore();
+    }
+  );
 
   it('passes sys_monitoring: true when withSysMonitoring is true', async () => {
     const svc = makeSimpleService();
@@ -724,6 +871,29 @@ describe('deployToExistingAgentPolicies', () => {
     expect(result.packagePolicyIdsByInstance).toEqual({ vpcflow: 'pp-ok' });
     expect(result.failedInstances).toEqual(['vpcflow__dup-1']);
     expect(result.errorsByInstance['vpcflow__dup-1']).toBe('Package policy is invalid');
+  });
+});
+
+describe('deployToExistingAgentPolicies namespace', () => {
+  it('sends the instance namespace so it overrides the target policy namespace', async () => {
+    const svc = makeSimpleService();
+    const storedServiceVars = {
+      vpcflow: { enabledDataStreams: ['vpcflow'], varsByDataStream: {}, namespace: 'prod' },
+    };
+    const groups = buildAgentBasedTargets(
+      [makeInstance()],
+      ['vpcflow'],
+      new Map([['vpcflow', svc]]),
+      storedServiceVars
+    );
+
+    await deployToExistingAgentPolicies(groups, {
+      ...BASE_OPTS,
+      storedServiceVars,
+      selectedAgentPolicyIds: ['policy-a'],
+    });
+
+    expect(mockSendCreatePackagePolicy.mock.calls[0][0].namespace).toBe('prod');
   });
 });
 

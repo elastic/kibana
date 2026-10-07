@@ -17,18 +17,21 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
-import { dashboardTools } from '../../../common';
-import { retrieveLatestVersion } from './attachment_state';
 import {
-  createAttachmentPanelResolver,
-  createControlFieldCapabilitiesResolver,
-  createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
-} from './core';
+} from '@kbn/dashboard-agent-authoring';
+import {
+  dashboardTools,
+  DASHBOARD_UPDATED_UI_EVENT,
+  type DashboardUpdatedUiEventData,
+} from '../../../common';
+import { retrieveLatestVersion } from './attachment_state';
+import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
+import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
@@ -114,13 +117,12 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels: existing visualization attachments by id (\`source: "attachment"\`, preferred over copying their config), resolved panel configs (\`source: "config"\`), or Lens/Vega visualizations from a natural-language query (\`source: "request"\`; pick the engine with the panel "renderer" field, defaults to Lens)
-3. edit existing Lens, Vega, markdown, custom content, or ML anomaly panel content
+2. add panels generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), by-value panels (\`source: "config"\`: markdown or ML anomaly panels), or existing visualization attachments by id (\`source: "attachment"\`)
+3. edit existing Lens, Vega, custom content, markdown, or ML anomaly panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
-8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express`,
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -141,15 +143,10 @@ Use operations[] to:
           dashboardData: latestVersion?.data,
           operations,
           logger,
-          resolvePanelContent: createVisPanelResolver({
+          resolvePanelContent: createPanelResolver({
             logger,
             modelProvider,
             events,
-            esClient,
-          }),
-          resolveCustomContentTemplate: createCustomContentTemplateResolver({
-            logger,
-            modelProvider,
             esClient,
           }),
           resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
@@ -183,6 +180,18 @@ Use operations[] to:
         }
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
+
+        events.sendUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData>(
+          DASHBOARD_UPDATED_UI_EVENT,
+          {
+            attachment: {
+              id: attachment.id,
+              type: DASHBOARD_ATTACHMENT_TYPE,
+              data: finalDashboardData,
+              origin: attachment.origin,
+            },
+          }
+        );
 
         return {
           results: [

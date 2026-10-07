@@ -32,6 +32,7 @@ const EMPTY_TRANSFORM: TransformResult = {
   foreachGroups: [],
   bypassLaneNodes: [],
   nodeRefs: {},
+  fallbackLanes: [],
 };
 
 const HANDLE_SIDE_TO_POSITION: Record<HandleSide, Position> = {
@@ -412,16 +413,46 @@ export function useWorkflowLayout({
       return (label ? stepExecutionMap?.[label] : undefined) ?? stepExecutionMap?.[nodeId];
     };
 
+    // Pre-build a map from fallback owner id → Set of lane node ids so the
+    // failure-edge traversal check is O(1) per node, not O(lane-size²).
+    const laneNodesByOwner = new Map<string, Set<string>>();
+    for (const [nodeId, node] of nodeById) {
+      const fof = (node.data as Record<string, unknown>).fallbackOf;
+      if (typeof fof === 'string') {
+        let s = laneNodesByOwner.get(fof);
+        if (!s) {
+          s = new Set();
+          laneNodesByOwner.set(fof, s);
+        }
+        s.add(nodeId);
+      }
+    }
+
     const mapped = allEdges.map((e) => {
       const laid = layoutEdgeById.get(e.id);
+      const isFailure = (e as { isFailure?: boolean }).isFailure === true;
+
       // Fork edges (if/switch branches) highlight only for the branch that ran;
       // edges leaving an empty (bypass) lane inherit that lane's traversal;
+      // failure edges traverse when any lane node has started (third rule, see
+      // plan assumption 8 — step records are created at RUNNING, never SKIPPED);
       // everything else falls back to source-step completion.
       let traversed: boolean;
       if (e.branchType) {
         traversed = traversedForkEdgeIds.has(e.id);
       } else if (allBypassLaneIds.has(e.source)) {
         traversed = traversedBypassIds.has(e.source);
+      } else if (isFailure) {
+        // Probe the whole lane, not just the head: guards (if:) on lane steps
+        // mean the head may never have run even if a later step did.
+        // SKIPPED step records are not emitted by the engine today but the union
+        // type allows them; excluding them guards a representable-but-unemitted
+        // state (plan assumption 9).
+        const laneNodes = laneNodesByOwner.get(e.source) ?? new Set<string>();
+        traversed = [...laneNodes].some((nodeId) => {
+          const exec = getExec(nodeId);
+          return exec !== undefined && exec.status !== ExecutionStatus.SKIPPED;
+        });
       } else {
         // Trigger nodes have no persisted step execution; mirror the node's
         // synthetic "completed" status so the trigger's outgoing edge highlights
@@ -437,6 +468,9 @@ export function useWorkflowLayout({
         id: e.id,
         source: e.source,
         target: e.target,
+        // Failure edges exit via the dedicated bottom-right handle so React Flow
+        // hands computeEdgePath the correct sourceX (right edge, not centre).
+        sourceHandle: isFailure ? 'fallback' : undefined,
         type: 'workflowEdge',
         data: {
           label: e.label,
@@ -445,6 +479,7 @@ export function useWorkflowLayout({
           branchType: e.branchType,
           isMerge: mergeNodeIds.has(e.target),
           hideEndMarker: allBypassLaneIds.has(e.target),
+          isFailure,
         },
       };
     });
