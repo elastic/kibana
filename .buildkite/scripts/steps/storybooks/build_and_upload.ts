@@ -12,8 +12,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import pLimit from 'p-limit';
-import { storybookAliases } from '@kbn/dev/storybook/aliases';
+import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
 import { getKibanaDir } from '#pipeline-utils';
+
+const { storybookAliases } = loadKibanaModule<typeof import('@kbn/dev/storybook/aliases')>(
+  '@kbn/dev/storybook/aliases'
+);
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
 
