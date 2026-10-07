@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useKibana } from './use_kibana';
 
 const FIND_RULES_PATH = '/internal/alerting/rules/_find';
@@ -33,6 +34,7 @@ export const useRuleSuggestions = (search: string, tag: string) => {
       const { data, total } = await http.post<FindRulesResponse>(FIND_RULES_PATH, {
         body: JSON.stringify({
           search: search ? `${escapeSearchOperators(search)}*` : undefined,
+          rule_type_ids: OBSERVABILITY_RULE_TYPE_IDS,
           search_fields: ['name', 'tags'],
           default_search_operator: 'AND',
           filter: tag ? `alert.attributes.tags: "${escapeKqlValue(tag)}"` : undefined,

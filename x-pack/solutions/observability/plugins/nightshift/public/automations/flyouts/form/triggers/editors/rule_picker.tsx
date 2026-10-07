@@ -28,6 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useRuleSuggestions } from '../../../../../hooks/use_rule_suggestions';
@@ -77,6 +78,7 @@ export const RulePicker = ({
   const { tags } = useGetRuleTagsQuery({
     enabled: true,
     search: view === 'tags' ? search : '',
+    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
     perPage: MAX_TAGS,
     http,
     toasts: notifications.toasts,

@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/react-query'
   - '@kbn/response-ops-rules-apis'
+  - '@kbn/rule-data-utils'
   - '@kbn/scout-oblt'
   - '@kbn/serverless'
   - '@kbn/share-plugin'
