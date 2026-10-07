@@ -44,6 +44,11 @@ export function getAnonymizationUiSettings(): Record<string, UiSettingsParams> {
           em: (chunks) => `<em>${chunks}</em>`,
         },
       }),
+      // Managed from the Anonymization page, so it is not listed in Advanced Settings: `readonly`
+      // removes it from that page, and `readonlyMode: 'ui'` (not 'strict') keeps writes through the
+      // settings client and the API working, which the page and `kibana.yml` overrides rely on.
+      readonly: true,
+      readonlyMode: 'ui',
       schema: anonymizationSettingsSchema,
       type: 'json',
       requiresPageReload: true,

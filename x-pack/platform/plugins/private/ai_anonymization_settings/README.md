@@ -15,6 +15,10 @@ The page has four tabs:
 - **Settings**: the master "Mask PII in AI requests" switch (mirrored in the page header) and the
   `onFailure` behavior (`block` vs `allow_unsafe`) used when anonymization cannot run.
 
+The setting itself is no longer listed in **Advanced Settings** (it is registered `readonly` with
+`readonlyMode: 'ui'`, like the GenAI settings): this page is the place to edit it. It can still be
+written through the API and set with `uiSettings.overrides` in `kibana.yml`.
+
 Named-entity-recognition (NER) rule support still exists in the underlying schema and pipeline
 (`@kbn/ai-anonymization-server`) but is intentionally not surfaced anywhere on
 this page.
