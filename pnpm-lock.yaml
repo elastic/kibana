@@ -12712,17 +12712,11 @@ packages:
   '@types/inquirer@7.3.1':
     resolution: {integrity: sha512-osD38QVIfcdgsPCT0V3lD7eH0OFurX71Jft18bZrsVQWVRt6TuxRzlr0GJLrxoHZR2V5ph7/qP8se/dcnI7o0g==}
 
-  '@types/istanbul-lib-coverage@2.0.1':
-    resolution: {integrity: sha512-hRJD2ahnnpLgsj6KWMYSrmXkM3rm2Dl1qkx6IOFD5FnuNPXJIG5L0dhgKXCYTRMGzU4n0wImQ/xfmRc4POUFlg==}
-
   '@types/istanbul-lib-coverage@2.0.6':
     resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
 
   '@types/istanbul-lib-report@1.1.1':
     resolution: {integrity: sha512-3BUTyMzbZa2DtDI2BkERNC6jJw2Mr2Y0oGI7mRxYNBPxppbtEK1F66u3bKwU2g+wxwWI7PAoRpJnOY1grJqzHg==}
-
-  '@types/istanbul-reports@3.0.0':
-    resolution: {integrity: sha512-nwKNbvnwJ2/mndE9ItP/zc2TCzw6uuodnF4EHYWD+gCQDVBuRQL5UzbZD0/ezy1iKsFU2ZQiDqg4M9dN4+wZgA==}
 
   '@types/istanbul-reports@3.0.4':
     resolution: {integrity: sha512-pk2B1NWalF9toCRu6gjBzR69syFjP4Od8WRAX+0mmf9lAjCRicLOWc+ZrxZHx/0XRjotgkF9t6iaMJ+aXcOdZQ==}
@@ -13149,9 +13143,6 @@ packages:
 
   '@types/yargs@15.0.3':
     resolution: {integrity: sha512-XCMQRK6kfpNBixHLyHUsGmXrpEmFFxzMrcnSXFMziHd8CoNJo8l16FkHyQq4x+xbM7E2XL83/O78OD8u+iZTdQ==}
-
-  '@types/yargs@17.0.24':
-    resolution: {integrity: sha512-6i0aC7jV6QzQB8ne1joVZ0eSFIstHsCrobmOtghM11yGlH0j43FKL2UhWdELkyps0zuf7qVTUVCCR+tgSlyLLw==}
 
   '@types/yargs@17.0.35':
     resolution: {integrity: sha512-qUHkeCyQFxMXg79wQfTtfndEC+N9ZZg76HJftDJp+qH2tV7Gj4OJi7l+PiWwJ+pWtW8GwSmqsDj/oymhrTWXjg==}
@@ -26237,7 +26228,7 @@ snapshots:
     dependencies:
       '@jest/console': 29.7.0
       '@jest/types': 29.6.3
-      '@types/istanbul-lib-coverage': 2.0.1
+      '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.0
 
   '@jest/test-sequencer@29.7.0':
@@ -26270,10 +26261,10 @@ snapshots:
   '@jest/types@29.6.3':
     dependencies:
       '@jest/schemas': 29.6.3
-      '@types/istanbul-lib-coverage': 2.0.1
-      '@types/istanbul-reports': 3.0.0
+      '@types/istanbul-lib-coverage': 2.0.6
+      '@types/istanbul-reports': 3.0.4
       '@types/node': 24.10.13
-      '@types/yargs': 17.0.24
+      '@types/yargs': 17.0.35
       chalk: 4.1.2
 
   '@jest/types@30.5.1':
@@ -29456,17 +29447,11 @@ snapshots:
       '@types/through': 0.0.30
       rxjs: 6.6.7
 
-  '@types/istanbul-lib-coverage@2.0.1': {}
-
   '@types/istanbul-lib-coverage@2.0.6': {}
 
   '@types/istanbul-lib-report@1.1.1':
     dependencies:
-      '@types/istanbul-lib-coverage': 2.0.1
-
-  '@types/istanbul-reports@3.0.0':
-    dependencies:
-      '@types/istanbul-lib-report': 1.1.1
+      '@types/istanbul-lib-coverage': 2.0.6
 
   '@types/istanbul-reports@3.0.4':
     dependencies:
@@ -29961,10 +29946,6 @@ snapshots:
   '@types/yargs-parser@13.0.0': {}
 
   '@types/yargs@15.0.3':
-    dependencies:
-      '@types/yargs-parser': 13.0.0
-
-  '@types/yargs@17.0.24':
     dependencies:
       '@types/yargs-parser': 13.0.0
 
@@ -41166,7 +41147,7 @@ snapshots:
   v8-to-istanbul@9.0.1:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@types/istanbul-lib-coverage': 2.0.1
+      '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 1.8.0
 
   val-loader@6.0.0(webpack@5.96.1):
