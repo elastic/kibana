@@ -13,12 +13,7 @@ import { expect } from '../../../../../api';
 apiTest.describe(
   `SAML Auth fixture`,
   {
-    tag: [
-      ...tags.deploymentAgnostic,
-      ...tags.serverless.observability.logs_essentials,
-      ...tags.serverless.vectordb,
-      ...tags.serverless.workplaceai,
-    ],
+    tag: [...tags.serverless.all],
   },
   () => {
     apiTest(`should create a session for 'admin' role`, async ({ samlAuth }) => {
