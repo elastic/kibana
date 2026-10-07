@@ -8,7 +8,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { EvidenceChart, InvestigationEvidence } from '@kbn/significant-events-schema';
+import type {
+  EvidenceChart,
+  InvestigationEvidence,
+} from '@kbn/agentic-investigations-plugin/common';
 import { EvidenceList } from './evidence_list';
 
 const renderEvidence = (evidence: InvestigationEvidence[]) =>

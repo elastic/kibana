@@ -11,9 +11,11 @@ import { i18n } from '@kbn/i18n';
 import {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
   type InvestigationLocatorParams,
-  type InvestigationStatus,
-  type InvestigationSubjectType,
 } from '@kbn/nightshift-investigations-plugin/common';
+import type {
+  InvestigationSummary,
+  ListInvestigationsResponse,
+} from '@kbn/agentic-investigations-plugin/common';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useKibana } from '../utils/kibana_react';
@@ -22,20 +24,35 @@ import { getInvestigationsClient } from '../services/investigations_client';
 export const VIEWED_INVESTIGATIONS_STORAGE_KEY = 'xpack.observability.viewedInvestigationIds';
 export const MAX_VIEWED_INVESTIGATIONS = 200;
 
-const getStatusQuery = (alertId: string) => ({
-  concurrency_key: alertId,
-  statuses: [
-    'pending',
-    'running',
-    'completed',
-    'failed',
-    'cancelled',
-  ] satisfies InvestigationStatus[],
-  subject_types: ['alert'] satisfies InvestigationSubjectType[],
-  sort_field: 'created_at' as const,
-  sort_order: 'desc' as const,
-  size: 1,
+/*
+ * The shared investigations list API (agenticInvestigations). Spelled out rather than imported,
+ * so this plugin does not load the agentic investigations bundle; a test pins them.
+ */
+export const SHARED_INVESTIGATIONS_URL = '/internal/investigations/investigations';
+export const SHARED_INVESTIGATIONS_API_VERSION = '1';
+
+const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
+
+/**
+ * A start records the alert as a subject of its investigation only once the investigation's run
+ * begins, so for a moment the list does not know about it. The started id counts as in progress
+ * until the list shows it, for at most this long.
+ */
+const PENDING_START_TIMEOUT_MS = 2 * 60_000;
+
+const getAlertInvestigationsQuery = (alertId: string) => ({
+  subject_type: 'alert',
+  subject_id: alertId,
+  sort_field: 'updated_at',
+  sort_order: 'desc',
+  per_page: 10,
 });
+
+/** The investigation an alert's actions refer to: the open one, else the most recent. */
+const pickAlertInvestigation = (
+  investigations: InvestigationSummary[] | undefined
+): InvestigationSummary | undefined =>
+  investigations?.find(({ metadata }) => metadata.status === 'open') ?? investigations?.[0];
 
 export const useInvestigationAvailability = () => {
   const kibana = useKibana();
@@ -71,23 +88,31 @@ export const useInvestigateAlert = ({
   const investigationLocator = services?.share?.url?.locators?.get<InvestigationLocatorParams>(
     NIGHTSHIFT_INVESTIGATION_LOCATOR_ID
   );
-  const basePath = services?.http?.basePath?.get?.() ?? '';
+  const http = services?.http;
+  const basePath = http?.basePath?.get?.() ?? '';
   const statusQueryKey = ['alertInvestigations', basePath, alertId] as const;
   const queryClient = useQueryClient();
   const { data: availability } = useInvestigationAvailability();
-  const canInvestigate = Boolean(enabled && alertId && investigationsClient);
+  const [pendingStart, setPendingStart] = useState<{ id: string; at: number } | undefined>();
+  const canInvestigate = Boolean(enabled && alertId && investigationsClient && http);
+  const isAwaitingStartIn = (data: ListInvestigationsResponse | undefined): boolean =>
+    pendingStart !== undefined &&
+    Date.now() - pendingStart.at < PENDING_START_TIMEOUT_MS &&
+    !data?.results.some(({ id }) => id === pendingStart.id);
   const { data: investigations, isSuccess: isStatusLoaded } = useQuery({
     queryKey: statusQueryKey,
+    // Investigations record the alert as a subject, so the shared list finds them by its id.
     queryFn: ({ signal }) =>
-      investigationsClient!.fetch('GET /internal/nightshift/investigations', {
-        signal: signal ?? null,
-        params: { query: getStatusQuery(alertId ?? '') },
+      http!.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
+        version: SHARED_INVESTIGATIONS_API_VERSION,
+        query: getAlertInvestigationsQuery(alertId ?? ''),
+        signal,
       }),
-    enabled: canInvestigate,
+    enabled: canInvestigate && availability?.available === true,
     retry: false,
-    refetchInterval: (data) =>
-      data?.results.some(({ status }) => status === 'pending' || status === 'running')
-        ? 5_000
+    refetchInterval: (data: ListInvestigationsResponse | undefined) =>
+      isAwaitingStartIn(data) || data?.results.some(({ in_progress: inProgress }) => inProgress)
+        ? IN_PROGRESS_REFETCH_INTERVAL_MS
         : false,
   });
   const [viewedInvestigationIds = [], setViewedInvestigationIds] = useLocalStorage<string[]>(
@@ -95,13 +120,15 @@ export const useInvestigateAlert = ({
     []
   );
   const [isStarting, setIsStarting] = useState(false);
-  const latestInvestigation = investigations?.results[0];
-  const latestStatus = latestInvestigation?.status;
-  const hasOngoingInvestigation = latestStatus === 'pending' || latestStatus === 'running';
+  const latestInvestigation = pickAlertInvestigation(investigations?.results);
+  const hasOngoingInvestigation =
+    latestInvestigation?.in_progress === true || isAwaitingStartIn(investigations);
   const isInvestigating = isStarting || hasOngoingInvestigation;
+  // In the vocabulary of the run statuses this replaced: an investigation nothing works on reads as
+  // completed.
+  const viewedInvestigationState = latestInvestigation?.in_progress ? 'running' : 'completed';
   const showInvestigateAction = availability?.available === true;
-  const investigationId =
-    alertId && latestInvestigation ? latestInvestigation.investigation_id : '';
+  const investigationId = alertId && latestInvestigation ? latestInvestigation.id : '';
   const viewInvestigationUrl = useMemo(
     () => (investigationId ? investigationLocator?.getRedirectUrl({ investigationId }) : undefined),
     [investigationId, investigationLocator]
@@ -117,19 +144,18 @@ export const useInvestigateAlert = ({
     );
   }, [investigationId, setViewedInvestigationIds]);
 
-  const isFinished = latestStatus === 'failed' || latestStatus === 'cancelled';
   const isOpened = Boolean(investigationId && viewedInvestigationIds.includes(investigationId));
 
   const showViewInvestigation =
     showInvestigateAction &&
     !isInvestigating &&
-    (latestStatus === 'completed' || isFinished) &&
+    latestInvestigation !== undefined &&
     Boolean(viewInvestigationUrl);
   const showInvestigateButton =
     showInvestigateAction &&
     isStatusLoaded &&
     !isInvestigating &&
-    (!latestInvestigation || (latestStatus === 'completed' && isOpened) || isFinished);
+    (!latestInvestigation || isOpened);
 
   const viewInvestigationActionLabel = i18n.translate(
     'xpack.observability.alerts.viewInvestigationButtonLabel',
@@ -155,13 +181,15 @@ export const useInvestigateAlert = ({
 
     setIsStarting(true);
     try {
-      await investigationsClient.fetch('POST /internal/nightshift/investigations', {
-        signal: null,
-        params: {
-          // TODO(ns-1619 s5): look the alert's investigation up by subject on the shared API.
-          body: { subject: { type: 'alert', id: alertId } },
-        },
-      });
+      // An open investigation that already holds the alert is continued, not duplicated.
+      const { investigation_id: startedId } = await investigationsClient.fetch(
+        'POST /internal/nightshift/investigations',
+        {
+          signal: null,
+          params: { body: { subject: { type: 'alert', id: alertId } } },
+        }
+      );
+      setPendingStart({ id: startedId, at: Date.now() });
       services?.notifications?.toasts?.addSuccess({
         title: i18n.translate('xpack.observability.alerts.investigationStarted', {
           defaultMessage: 'Investigation started',
@@ -198,7 +226,7 @@ export const useInvestigateAlert = ({
     viewInvestigationEbtProps: getEbtProps({
       action: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
       element: ebtElement,
-      detail: latestStatus,
+      detail: latestInvestigation ? viewedInvestigationState : undefined,
     }),
     markInvestigationViewed,
   };

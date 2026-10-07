@@ -5,9 +5,12 @@ agent) so it can be embedded anywhere in Kibana — a significant-event flyout, 
 chat panel, etc.
 
 - `InvestigationOutput` — presentational component. Takes no service dependencies; the
-  caller supplies a `status` (`running` / `loading` / `complete` / `failed` /
-  `unavailable`), the latest `state`, and an optional `error` detail message.
-- `useInvestigationState` — hook that sources those props for a given execution id: it
-  follows the agent execution's live event stream while the investigation runs (resuming
-  after transient stream failures), and reads the persisted final result off the workflow
-  execution once it is terminal, caching terminal results across remounts.
+  caller supplies a `status` (`loading` / `running` / `complete` / `unavailable`), the
+  `investigation` from the shared investigations API, and an optional `error` detail message.
+- `useInvestigation` — hook that sources those props for an investigation id (the investigation's
+  Agent Builder conversation id): it reads `GET /internal/investigations/investigations/{id}` and
+  reads it again every few seconds while `in_progress` is true.
+
+- `EvidenceList`, `EvidenceItem`, `EvidenceChart`, and `ImpactSection` render the evidence the
+  agent recorded (self-contained static charts and Markdown) and the impact, in the shapes the
+  shared investigations API returns. `InvestigationOutput` uses them for hypotheses and impact.
