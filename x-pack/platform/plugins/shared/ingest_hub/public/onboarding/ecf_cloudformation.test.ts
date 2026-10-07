@@ -634,9 +634,7 @@ describe('isEcfStackArnValid()', () => {
   });
 
   it('rejects a bare stack/ prefix with no stack name', () => {
-    expect(
-      isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:stack/')
-    ).toBe(false);
+    expect(isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:stack/')).toBe(false);
   });
 });
 
