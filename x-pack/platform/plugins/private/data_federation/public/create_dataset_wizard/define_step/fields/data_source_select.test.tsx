@@ -19,13 +19,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
       dataSourcesClient: {
         add: jest.fn(),
       },
-      docLinks: {
-        links: {
-          dataFederation: {
-            authentication: 'https://example.com/authentication',
-          },
-        },
-      },
     },
   }),
 }));
@@ -94,11 +87,7 @@ describe('DataSourceSelect', () => {
     });
 
     expect(getByTestId('createDatasetDataSourceAuthenticationCallout')).toHaveTextContent(
-      'Check authentication for this dataset'
-    );
-    expect(getByTestId('createDatasetDataSourceAuthenticationLearnMore')).toHaveAttribute(
-      'href',
-      'https://example.com/authentication'
+      'Check data source permissions'
     );
   });
 });

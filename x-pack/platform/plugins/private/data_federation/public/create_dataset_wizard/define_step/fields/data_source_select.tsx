@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiSpacer,
   EuiSuperSelect,
   useEuiTheme,
@@ -60,7 +59,7 @@ export function DataSourceSelect({
 }) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { dataSourcesClient, docLinks },
+    services: { dataSourcesClient },
   } = useKibana<DataFederationKibanaServices>();
   const [isCreateDataSourceOpen, setIsCreateDataSourceOpen] = useState(false);
 
@@ -166,18 +165,7 @@ export function DataSourceSelect({
             title={createDatasetWizardStrings.dataSourceAuthenticationCalloutTitle}
             data-test-subj="createDatasetDataSourceAuthenticationCallout"
           >
-            <p>
-              {createDatasetWizardStrings.dataSourceAuthenticationCalloutDescription}{' '}
-              <EuiLink
-                color="primary"
-                href={docLinks.links.dataFederation.authentication}
-                target="_blank"
-                external
-                data-test-subj="createDatasetDataSourceAuthenticationLearnMore"
-              >
-                {createDatasetWizardStrings.learnMore}
-              </EuiLink>
-            </p>
+            <p>{createDatasetWizardStrings.dataSourceAuthenticationCalloutDescription}</p>
           </EuiCallOut>
         </>
       ) : null}

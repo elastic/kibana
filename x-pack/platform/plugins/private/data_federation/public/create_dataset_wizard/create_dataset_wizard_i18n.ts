@@ -294,7 +294,7 @@ export const createDatasetWizardStrings = {
   dataSourceAuthenticationCalloutTitle: i18n.translate(
     'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutTitle',
     {
-      defaultMessage: 'Check authentication for this dataset',
+      defaultMessage: 'Check data source permissions',
     }
   ),
 
@@ -302,7 +302,7 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
     {
       defaultMessage:
-        'Access is granted per bucket. Before adding this dataset, make sure this data source has access to its bucket in your cloud provider.',
+        'Before adding this dataset, make sure the data source can read the data. Access is managed in your cloud provider.',
     }
   ),
 
