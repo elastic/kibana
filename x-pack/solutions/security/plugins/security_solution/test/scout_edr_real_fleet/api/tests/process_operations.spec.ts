@@ -105,12 +105,7 @@ const waitForNewSleepPid = async (
 
 apiTest.describe(
   'Real agent process response actions',
-  {
-    // Cypress tags were @ess, @serverless, and @skipInServerlessMKI.
-    // stateful.classic is ESS, local and Cloud. Serverless is local Security
-    // complete only, so Cloud serverless (MKI) stays out.
-    tag: [...tags.stateful.classic, '@local-serverless-security_complete'],
-  },
+  { tag: [...tags.stateful.classic, '@local-serverless-security_complete'] },
   () => {
     apiTest.setTimeout(TEST_TIMEOUT_MS);
 
