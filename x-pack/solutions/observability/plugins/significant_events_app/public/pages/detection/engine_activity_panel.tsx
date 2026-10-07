@@ -82,15 +82,21 @@ export const EngineActivityPanel = ({
   expanded = false,
   onOpenActivity,
   headerAction,
+  title,
+  minimal = false,
+  integrated = false,
 }: {
   streams?: string[];
   expanded?: boolean;
   onOpenActivity?: () => void;
   headerAction?: React.ReactNode;
+  title?: string;
+  minimal?: boolean;
+  integrated?: boolean;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const id = useGeneratedHtmlId({ prefix: 'engineActivity' });
-  const activity = useEngineActivity({ live: !expanded });
+  const activity = useEngineActivity({ live: true });
   const { core } = useKibana();
   const { triggerSignificantEventsDiscovery } = useSignificantEventsDiscoveryApi();
   const canManage = getNightshiftCapabilities(core.application.capabilities.nightshift).canManage;
@@ -157,6 +163,39 @@ export const EngineActivityPanel = ({
     : unavailable
     ? euiTheme.colors.warning
     : euiTheme.colors.textSubdued;
+  if (minimal) {
+    const learningAllowed =
+      learningEnabled &&
+      watched.some((stream) => !preferences.data?.pausedStreams.includes(stream.name));
+    const discoveryAllowed = scheduledEnabled && !discoveryPaused;
+    const allPaused =
+      paused || (preferences.data && watched.length > 0 && !learningAllowed && !discoveryAllowed);
+    const agentState = active ? journey.running : allPaused ? journey.paused : journey.idle;
+    const status = unavailable
+      ? journey.engineUnavailable
+      : !activity.data || !maintenance.data || !preferences.data
+      ? journey.waiting
+      : i18n.translate('xpack.significantEventsApp.pocMode.agentStatus', {
+          defaultMessage: 'Agent · {status}',
+          values: { status: agentState },
+        });
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m" wrap>
+        <EuiFlexItem grow={false}>
+          <span role="status" aria-live="polite">
+            <EuiBadge
+              color={unavailable || allPaused ? 'warning' : active ? 'primary' : 'hollow'}
+              iconType={active ? 'dot' : allPaused ? 'pause' : 'clock'}
+              data-test-subj="detectionPocAgentStatus"
+            >
+              {status}
+            </EuiBadge>
+          </span>
+        </EuiFlexItem>
+        {headerAction && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
+      </EuiFlexGroup>
+    );
+  }
   return (
     <EuiPanel
       hasBorder={expanded}
@@ -164,7 +203,9 @@ export const EngineActivityPanel = ({
       paddingSize={expanded ? 's' : 'none'}
       data-test-subj="detectionEngineActivity"
       css={css`
-        background: ${active
+        background: ${integrated
+          ? 'transparent'
+          : active
           ? `linear-gradient(110deg, color-mix(in srgb, ${euiTheme.colors.primary} 9%, ${euiTheme.colors.backgroundBasePlain}), ${euiTheme.colors.backgroundBasePlain} 70%)`
           : euiTheme.colors.backgroundBasePlain};
         border-color: ${active
@@ -224,7 +265,13 @@ export const EngineActivityPanel = ({
               font-size: ${euiTheme.font.scale.xs}rem;
             `}
           >
-            <strong>{copy.engine}</strong>
+            <strong
+              css={css`
+                font-size: ${integrated ? euiTheme.font.scale.s : euiTheme.font.scale.xs}rem;
+              `}
+            >
+              {title || copy.engine}
+            </strong>
             <span
               role="status"
               aria-live="polite"
@@ -234,6 +281,17 @@ export const EngineActivityPanel = ({
             >
               {state}
             </span>
+            {integrated && (
+              <EuiToolTip
+                content={i18n.translate('xpack.significantEventsApp.activityStrip.refreshHint', {
+                  defaultMessage: 'Activity updates every second',
+                })}
+              >
+                <EuiBadge color={unavailable ? 'warning' : 'hollow'} iconType="dot" tabIndex={0}>
+                  {unavailable ? copy.offline : !activity.data ? journey.waiting : copy.live}
+                </EuiBadge>
+              </EuiToolTip>
+            )}
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -329,17 +387,19 @@ export const EngineActivityPanel = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.significantEventsApp.activityStrip.refreshHint', {
-              defaultMessage: 'Activity updates every second',
-            })}
-          >
-            <EuiBadge color={unavailable ? 'warning' : 'hollow'} iconType="dot" tabIndex={0}>
-              {unavailable ? copy.offline : !activity.data ? journey.waiting : copy.live}
-            </EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
+        {!integrated && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate('xpack.significantEventsApp.activityStrip.refreshHint', {
+                defaultMessage: 'Activity updates every second',
+              })}
+            >
+              <EuiBadge color={unavailable ? 'warning' : 'hollow'} iconType="dot" tabIndex={0}>
+                {unavailable ? copy.offline : !activity.data ? journey.waiting : copy.live}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
         {headerAction && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
       </EuiFlexGroup>
       {unavailable && expanded && (

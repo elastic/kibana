@@ -11,6 +11,7 @@ import type {
   QueryWithOccurrences,
   SignificantEventResponse,
 } from '@kbn/significant-events-schema';
+import { getStreamDeployment } from './deployment_scope';
 
 export interface DetectionEntity {
   id: string;
@@ -81,7 +82,10 @@ export const buildDetectionModel = (
 
   for (const feature of entityFeatures) {
     const name = featureName(feature);
-    const namespace = property(feature, 'service_namespace') || property(feature, 'namespace');
+    const namespace =
+      property(feature, 'service_namespace') ||
+      property(feature, 'namespace') ||
+      getStreamDeployment(feature.stream_name);
     const environment =
       property(feature, 'environment') || property(feature, 'deployment_environment');
     const candidates = entities.filter(
@@ -126,8 +130,17 @@ export const buildDetectionModel = (
     for (const entity of streamOwners(feature.stream_name)) entity.features.push(feature);
   }
 
-  const resolveEndpoint = (name: string, stream: string): DetectionEntity | undefined => {
-    const candidates = entities.filter((entity) => entity.name === normalizeName(name));
+  const resolveEndpoint = (
+    name: string,
+    stream: string,
+    namespace?: string
+  ): DetectionEntity | undefined => {
+    const deployment =
+      namespace || streamOwners(stream)[0]?.namespace || getStreamDeployment(stream);
+    const candidates = entities.filter(
+      (entity) =>
+        entity.name === normalizeName(name) && (!deployment || entity.namespace === deployment)
+    );
     const local = candidates.filter((entity) =>
       entity.features.some((feature) => feature.stream_name === stream)
     );
@@ -136,8 +149,16 @@ export const buildDetectionModel = (
   const relationships: DetectionRelationship[] = [];
   let unresolvedRelationships = 0;
   for (const feature of activeFeatures.filter((item) => item.type === 'dependency')) {
-    const source = resolveEndpoint(property(feature, 'source'), feature.stream_name);
-    const target = resolveEndpoint(property(feature, 'target'), feature.stream_name);
+    const source = resolveEndpoint(
+      property(feature, 'source'),
+      feature.stream_name,
+      property(feature, 'source_namespace')
+    );
+    const target = resolveEndpoint(
+      property(feature, 'target'),
+      feature.stream_name,
+      property(feature, 'target_namespace')
+    );
     if (!source || !target || source === target) {
       unresolvedRelationships++;
       continue;
@@ -195,7 +216,8 @@ export interface PositionedEntity {
 
 /** Keeps dependency layers stable, with a separate row for entities without known relationships. */
 export const positionDetectionEntities = (
-  model: DetectionModel
+  model: DetectionModel,
+  preferredColumns = 3
 ): { nodes: PositionedEntity[]; width: number; height: number } => {
   const connected = new Set(model.relationships.flatMap((edge) => [edge.source, edge.target]));
   const depth = new Map(model.entities.map((entity) => [entity.id, 0]));
@@ -223,7 +245,7 @@ export const positionDetectionEntities = (
     const layer = Math.min(depth.get(entity.id) ?? 0, 4);
     layers.set(layer, [...(layers.get(layer) ?? []), entity]);
   }
-  const columns = Math.max(3, layers.size);
+  const columns = Math.max(3, layers.size, preferredColumns);
   const width = columns * 240;
   const rows = Math.max(1, ...[...layers.values()].map((layer) => layer.length));
   const connectedHeight = rows * 96 + 70;

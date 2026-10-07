@@ -35,13 +35,14 @@ export const RuleCoverage = ({
     <div
       data-test-subj="detectionRuleCoverage"
       css={css`
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(110px, 1fr) auto;
         gap: ${euiTheme.size.s};
         align-items: center;
-        margin-left: auto;
       `}
     >
       <EuiToolTip
+        display="block"
         content={
           <span>
             {summary}.{' '}
@@ -59,17 +60,20 @@ export const RuleCoverage = ({
         <div
           tabIndex={0}
           css={css`
-            display: flex;
-            align-items: center;
-            gap: ${euiTheme.size.s};
+            display: grid;
+            gap: ${euiTheme.size.xs};
             font-size: ${euiTheme.font.scale.xs}rem;
+            border-radius: ${euiTheme.border.radius.small};
+            &:focus-visible {
+              outline: 2px solid ${euiTheme.colors.primary};
+            }
           `}
         >
           <div
             css={css`
               display: flex;
-              align-items: baseline;
               justify-content: space-between;
+              align-items: baseline;
               gap: ${euiTheme.size.s};
             `}
           >
@@ -80,42 +84,67 @@ export const RuleCoverage = ({
             >
               {label}
             </span>
-            <strong>{total ? `${partial ? '≥' : ''}${percent}%` : '—'}</strong>
+            <strong
+              css={css`
+                font-size: ${euiTheme.font.scale.s}rem;
+                font-variant-numeric: tabular-nums;
+                color: ${euiTheme.colors.text};
+              `}
+            >
+              {total ? `${partial ? '≥' : ''}${percent}%` : '—'}
+            </strong>
           </div>
           <div
-            role={total ? 'progressbar' : undefined}
-            aria-label={summary}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={total ? percent : undefined}
             css={css`
-              width: 64px;
-              height: 4px;
-              overflow: hidden;
-              border-radius: 4px;
-              background: ${euiTheme.colors.backgroundBaseSubdued};
+              display: flex;
+              align-items: center;
+              gap: ${euiTheme.size.s};
             `}
           >
             <div
-              style={{ width: `${percent}%` }}
+              role={total ? 'progressbar' : undefined}
+              aria-label={summary}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={total ? percent : undefined}
               css={css`
-                height: 100%;
+                flex: 1;
+                height: 5px;
+                overflow: hidden;
                 border-radius: 4px;
-                background: ${euiTheme.colors.primary};
-                transition: width 300ms ease;
-                @media (prefers-reduced-motion: reduce) {
-                  transition: none;
-                }
+                background: ${euiTheme.colors.backgroundBaseSubdued};
               `}
-            />
+            >
+              <div
+                style={{ width: `${percent}%` }}
+                css={css`
+                  height: 100%;
+                  border-radius: 4px;
+                  background: linear-gradient(
+                    90deg,
+                    color-mix(
+                      in srgb,
+                      ${euiTheme.colors.primary} 55%,
+                      ${euiTheme.colors.backgroundBaseSubdued}
+                    ),
+                    ${euiTheme.colors.primary}
+                  );
+                  transition: width 300ms ease;
+                  @media (prefers-reduced-motion: reduce) {
+                    transition: none;
+                  }
+                `}
+              />
+            </div>
+            <span
+              css={css`
+                color: ${euiTheme.colors.textSubdued};
+                font-variant-numeric: tabular-nums;
+              `}
+            >
+              {covered}/{total}
+            </span>
           </div>
-          <span
-            css={css`
-              color: ${euiTheme.colors.textSubdued};
-            `}
-          >
-            {covered}/{total}
-          </span>
         </div>
       </EuiToolTip>
       {(covered < total || showGaps) && (

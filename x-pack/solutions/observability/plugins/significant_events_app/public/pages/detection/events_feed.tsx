@@ -57,7 +57,7 @@ export const DetectionEventsFeed = ({
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [severity, setSeverity] = useState('all');
-  const [sort, setSort] = useState('recent');
+  const [sort, setSort] = useState('significantFirst');
   const [limit, setLimit] = useState(30);
   const items = useMemo(() => {
     const merged: FeedItem[] = [
@@ -100,10 +100,14 @@ export const DetectionEventsFeed = ({
       })
       .sort(
         (a, b) =>
+          (sort === 'significantFirst'
+            ? Number(b.kind === 'event') - Number(a.kind === 'event')
+            : 0) ||
           (sort === 'severity'
             ? (b.kind === 'event' ? parseInt(b.event.severity, 10) : 0) -
               (a.kind === 'event' ? parseInt(a.event.severity, 10) : 0)
-            : 0) || Date.parse(b.timestamp) - Date.parse(a.timestamp)
+            : 0) ||
+          Date.parse(b.timestamp) - Date.parse(a.timestamp)
       );
   }, [detections, events, kind, search, status, severity, sort]);
 
@@ -209,8 +213,17 @@ export const DetectionEventsFeed = ({
               defaultMessage: 'Sort events',
             })}
             value={sort}
-            onChange={(event) => setSort(event.target.value)}
+            onChange={(event) => {
+              setSort(event.target.value);
+              setLimit(30);
+            }}
             options={[
+              {
+                value: 'significantFirst',
+                text: i18n.translate('xpack.significantEventsApp.feed.significantFirst', {
+                  defaultMessage: 'Significant events first',
+                }),
+              },
               {
                 value: 'recent',
                 text: i18n.translate('xpack.significantEventsApp.feed.newest', {

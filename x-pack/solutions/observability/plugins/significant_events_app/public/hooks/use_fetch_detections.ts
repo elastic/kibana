@@ -72,6 +72,7 @@ export const useFetchDetectionHistory = (ruleUuid: string | undefined) => {
       );
     },
     enabled: !!ruleUuid,
+    refetchInterval: 5000,
     onError: showFetchErrorToast,
   });
 };

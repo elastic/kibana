@@ -108,7 +108,7 @@ const RuleActivityChart = ({
       </EuiText>
     );
   return (
-    <Chart size={{ width: '100%', height: compact ? 86 : 210 }}>
+    <Chart size={{ width: '100%', height: compact ? 48 : 210 }}>
       <Settings
         baseTheme={dependencies.start.charts.theme.chartsDefaultBaseTheme}
         theme={[
@@ -278,9 +278,11 @@ export const RulesWorkspace = ({
   onInspect,
   onSelectService,
   allRulesHref,
+  scopeLabel,
 }: {
   entities: DetectionEntity[];
   selected?: DetectionEntity;
+  scopeLabel?: string;
   queries: QueryWithOccurrences[];
   start: number;
   end: number;
@@ -301,12 +303,14 @@ export const RulesWorkspace = ({
   const scoped = uniqueRules(selected?.queries ?? queries);
   const assigned = new Set(entities.flatMap((entity) => entity.queries.map(ruleKey)));
   const unassigned = queries.filter((rule) => !assigned.has(ruleKey(rule)));
-  const groups = entities.map((entity) => ({
-    id: entity.id,
-    label: entity.label,
-    entity,
-    queries: uniqueRules(entity.queries),
-  }));
+  const groups = entities
+    .map((entity) => ({
+      id: entity.id,
+      label: entity.label,
+      entity,
+      queries: uniqueRules(entity.queries),
+    }))
+    .filter((group) => group.queries.length > 0);
   return (
     <div data-test-subj="detectionRulesWorkspace">
       <EuiPanel hasBorder hasShadow={false} paddingSize="l">
@@ -320,7 +324,7 @@ export const RulesWorkspace = ({
                     color: ${euiTheme.colors.text};
                   `}
                 >
-                  {selected?.label || labels.allServices}
+                  {selected?.label || scopeLabel || labels.allServices}
                 </strong>{' '}
                 · {rulesLabel(scoped.length)}
               </p>
@@ -401,15 +405,29 @@ export const RulesWorkspace = ({
               key={group.id}
               hasBorder
               hasShadow={false}
-              paddingSize="m"
+              paddingSize="s"
               css={css`
                 margin-bottom: ${euiTheme.size.s};
               `}
             >
-              <EuiFlexGroup gutterSize="l" alignItems="center" wrap>
-                <EuiFlexItem
+              <div
+                css={css`
+                  display: grid;
+                  grid-template-columns: minmax(220px, 0.6fr) minmax(0, 1fr);
+                  gap: ${euiTheme.size.l};
+                  align-items: center;
+                  @media (max-width: 700px) {
+                    grid-template-columns: minmax(0, 1fr);
+                    gap: ${euiTheme.size.s};
+                  }
+                `}
+              >
+                <div
                   css={css`
-                    min-width: 200px;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
                   `}
                 >
                   <EuiButtonEmpty
@@ -418,43 +436,57 @@ export const RulesWorkspace = ({
                     iconType="apps"
                     onClick={() => onSelectService(group.id)}
                     data-test-subj="detectionRulesWorkspaceService"
+                    css={css`
+                      align-self: flex-start;
+                      max-width: 100%;
+                      text-align: left;
+                    `}
                   >
                     {group.label}
                   </EuiButtonEmpty>
-                  <EuiText size="xs" color="subdued">
-                    <p>
-                      {rulesLabel(group.queries.length)} ·{' '}
-                      {matchesLabel(group.queries.reduce((sum, rule) => sum + matches(rule), 0))}
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem
+                  <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+                    <EuiFlexItem grow={false}>
+                      {group.queries.length ? (
+                        <EuiButtonEmpty
+                          size="xs"
+                          flush="left"
+                          iconType={expanded.has(group.id) ? 'arrowDown' : 'arrowRight'}
+                          aria-expanded={expanded.has(group.id)}
+                          aria-controls={`${id}-${group.id}`}
+                          onClick={() => toggleGroup(group.id, !expanded.has(group.id))}
+                          data-test-subj="detectionRulesWorkspaceExpandService"
+                        >
+                          {rulesLabel(group.queries.length)}
+                        </EuiButtonEmpty>
+                      ) : (
+                        <EuiText size="xs" color="subdued">
+                          {rulesLabel(0)}
+                        </EuiText>
+                      )}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {matchesLabel(group.queries.reduce((sum, rule) => sum + matches(rule), 0))}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+                <div
                   css={css`
-                    min-width: 220px;
+                    min-width: 0;
                   `}
                 >
                   <RuleActivityChart queries={group.queries} start={start} end={end} compact />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {group.queries.length > 0 && (
-                <EuiAccordion
-                  id={`${id}-${group.id}`}
-                  buttonContent={i18n.translate(
-                    'xpack.significantEventsApp.rulesWorkspace.expandRules',
-                    {
-                      defaultMessage: 'View {count, plural, one {# rule} other {# rules}}',
-                      values: { count: group.queries.length },
-                    }
-                  )}
-                  initialIsOpen={false}
-                  onToggle={(open) => toggleGroup(group.id, open)}
-                  paddingSize="s"
-                >
-                  {expanded.has(group.id) && (
+                </div>
+              </div>
+              <div id={`${id}-${group.id}`}>
+                {expanded.has(group.id) && (
+                  <>
+                    <EuiSpacer size="s" />
                     <RuleList queries={group.queries} onInspect={onInspect} />
-                  )}
-                </EuiAccordion>
-              )}
+                  </>
+                )}
+              </div>
             </EuiPanel>
           ))}
           {unassigned.length > 0 && (

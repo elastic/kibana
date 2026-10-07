@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 
 /**
- * Bordered metadata card used in flyout second-headers to display
+ * Compact metadata label used in flyout second-headers to display
  * a labelled piece of metadata (confidence, severity, type, stream, …).
  */
 export function FlyoutMetadataCard({
@@ -20,12 +20,12 @@ export function FlyoutMetadataCard({
   children: React.ReactNode;
 }) {
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+    <EuiPanel hasShadow={false} paddingSize="s" color="transparent">
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false} alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h3>{title}</h3>
-          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            <span>{title}</span>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       </EuiFlexGroup>

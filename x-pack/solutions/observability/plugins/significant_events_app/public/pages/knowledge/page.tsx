@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import type { Feature } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
+import { useViewportSpace } from '../detection/use_viewport_space';
 import { WorkspacePage } from '../../components/workspace_page';
 import { KnowledgeIndicatorDetailsFlyout } from '../../components/knowledge_indicators/knowledge_indicator_details_flyout';
 import { KnowledgeBrowser } from '../detection/knowledge_browser';
@@ -36,6 +37,7 @@ export const KnowledgePage = (): React.ReactElement => (
 
 const KnowledgeWorkspace = (): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const sidebar = useViewportSpace<HTMLDivElement>();
   const history = useHistory();
   const location = useLocation();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -140,85 +142,96 @@ const KnowledgeWorkspace = (): React.ReactElement => {
           }
         `}
       >
-        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-          <EuiText size="xs" color="subdued">
-            <strong>
-              {journey.services} · {model.entities.length}
-            </strong>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFieldSearch
-            compressed
-            fullWidth
-            placeholder={labels.search}
-            aria-label={labels.search}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            data-test-subj="knowledgeServiceSearch"
-          />
-          <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            size="s"
-            iconType="documents"
-            onClick={() => select()}
-            aria-pressed={!selected}
-            data-test-subj="knowledgeAllServices"
-          >
-            {labels.allServices}
-          </EuiButtonEmpty>
-          <div
+        <div ref={sidebar.ref} style={{ height: sidebar.height }}>
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            paddingSize="m"
             css={css`
-              max-height: 650px;
-              overflow-y: auto;
+              height: 100%;
+              min-height: 0;
+              display: flex;
+              flex-direction: column;
+              overflow: hidden;
             `}
           >
-            {visibleEntities.map((entity) => (
-              <button
-                key={entity.id}
-                type="button"
-                aria-pressed={selected?.id === entity.id}
-                onClick={() => select(entity.id)}
-                data-test-subj="knowledgeServiceFilter"
-                css={css`
-                  display: block;
-                  width: 100%;
-                  text-align: left;
-                  padding: ${euiTheme.size.s};
-                  margin-top: ${euiTheme.size.xs};
-                  border-radius: ${euiTheme.border.radius.medium};
-                  color: ${euiTheme.colors.text};
-                  background: ${selected?.id === entity.id
-                    ? `color-mix(in srgb, ${euiTheme.colors.primary} 10%, transparent)`
-                    : 'transparent'};
-                  &:hover {
-                    background: ${euiTheme.colors.backgroundBaseSubdued};
-                  }
-                  &:focus-visible {
-                    outline: 2px solid ${euiTheme.colors.primary};
-                  }
-                `}
-              >
-                <EuiText size="xs">
-                  <strong>{entity.label}</strong>
-                </EuiText>
-                {entity.namespace && (
-                  <EuiText size="xs" color="subdued">
-                    {entity.namespace}
+            <EuiText size="xs" color="subdued">
+              <strong>
+                {journey.services} · {model.entities.length}
+              </strong>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiFieldSearch
+              compressed
+              fullWidth
+              placeholder={labels.search}
+              aria-label={labels.search}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              data-test-subj="knowledgeServiceSearch"
+            />
+            <EuiSpacer size="s" />
+            <EuiButtonEmpty
+              size="s"
+              iconType="documents"
+              onClick={() => select()}
+              aria-pressed={!selected}
+              data-test-subj="knowledgeAllServices"
+            >
+              {labels.allServices}
+            </EuiButtonEmpty>
+            <div
+              css={css`
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow-y: auto;
+              `}
+            >
+              {visibleEntities.map((entity) => (
+                <button
+                  key={entity.id}
+                  type="button"
+                  aria-pressed={selected?.id === entity.id}
+                  onClick={() => select(entity.id)}
+                  data-test-subj="knowledgeServiceFilter"
+                  css={css`
+                    display: block;
+                    width: 100%;
+                    text-align: left;
+                    padding: ${euiTheme.size.s};
+                    margin-top: ${euiTheme.size.xs};
+                    border-radius: ${euiTheme.border.radius.medium};
+                    color: ${euiTheme.colors.text};
+                    background: ${selected?.id === entity.id
+                      ? `color-mix(in srgb, ${euiTheme.colors.primary} 10%, transparent)`
+                      : 'transparent'};
+                    &:hover {
+                      background: ${euiTheme.colors.backgroundBaseSubdued};
+                    }
+                    &:focus-visible {
+                      outline: 2px solid ${euiTheme.colors.primary};
+                    }
+                  `}
+                >
+                  <EuiText size="xs">
+                    <strong>{entity.label}</strong>
                   </EuiText>
-                )}
-              </button>
-            ))}
-          </div>
-        </EuiPanel>
+                  {entity.namespace && (
+                    <EuiText size="xs" color="subdued">
+                      {entity.namespace}
+                    </EuiText>
+                  )}
+                </button>
+              ))}
+            </div>
+          </EuiPanel>
+        </div>
         <div
           css={css`
             min-width: 0;
           `}
         >
           {query.isError && <EuiCallOut announceOnMount color="warning" title={labels.loadError} />}
-          {query.data.queries.total > query.data.queries.queries.length && (
-            <EuiCallOut announceOnMount color="warning" title={labels.partial} />
-          )}
           <KnowledgeBrowser
             features={features}
             model={model}

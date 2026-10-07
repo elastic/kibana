@@ -359,11 +359,11 @@ export const labels = {
     defaultMessage: 'Loading your system…',
   }),
   emptyTitle: i18n.translate('xpack.significantEventsApp.detection.emptyTitle', {
-    defaultMessage: 'Your system starts with a Stream',
+    defaultMessage: 'Your system starts with a source',
   }),
   emptyBody: i18n.translate('xpack.significantEventsApp.detection.emptyBody', {
     defaultMessage:
-      'Choose watched Streams in Detection so Nightshift can learn your services and dependencies. This map fills in from real knowledge as it becomes available.',
+      'Choose watched sources in Detection so Nightshift can learn your services and dependencies. This map fills in from real knowledge as it becomes available.',
   }),
   partial: i18n.translate('xpack.significantEventsApp.detection.partial', {
     defaultMessage:

@@ -22,8 +22,9 @@ import {
 import type { Feature } from '@kbn/significant-events-schema';
 import { positionDetectionEntities, type DetectionModel } from './model';
 import { labels } from './translations';
+import { useViewportSpace } from './use_viewport_space';
 
-const MIN_ZOOM = 0.35;
+const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 4;
 interface TopologyCamera {
   zoom: number;
@@ -42,26 +43,49 @@ export const DetectionTopology = ({
   model,
   title,
   description,
-  selectedId,
+  selectedId: singleSelectedId,
+  selectedIds,
   onSelect,
   onInspectFeature,
+  height: fixedHeight,
+  showLegend = true,
 }: {
   model: DetectionModel;
+  height?: number;
+  showLegend?: boolean;
   title?: string;
   description?: string;
   selectedId?: string;
+  selectedIds?: string[];
   onSelect: (id: string) => void;
   onInspectFeature: (feature: Feature) => void;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const selection = new Set(selectedIds ?? (singleSelectedId ? [singleSelectedId] : []));
+  const selectedId = selectedIds?.at(-1) ?? singleSelectedId;
   const markerId = useGeneratedHtmlId({ prefix: 'detectionTopologyArrow' });
   const [focus, setFocus] = useState(false);
   const [camera, setCamera] = useState<TopologyCamera>({ zoom: 1, x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
-  const svgRef = useRef<SVGSVGElement>(null);
+  const { ref: svgRef, height: availableHeight } = useViewportSpace<SVGSVGElement>(72);
+  const [viewport, setViewport] = useState({ width: 960, height: 480 });
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const observer = new ResizeObserver(() => {
+      const { width, height } = svg.getBoundingClientRect();
+      if (width > 0 && height > 0) {
+        setViewport((previous) =>
+          previous.width === width && previous.height === height ? previous : { width, height }
+        );
+      }
+    });
+    observer.observe(svg);
+    return () => observer.disconnect();
+  }, [svgRef]);
   const dragRef = useRef<TopologyDrag>();
   const suppressClick = useRef(false);
-  const lastFocusedId = useRef<string>();
+  const lastFocus = useRef<string>();
   const cameraRef = useRef(camera);
   const animationFrame = useRef<number>();
   const cancelCameraAnimation = useCallback((): void => {
@@ -72,19 +96,45 @@ export const DetectionTopology = ({
     cameraRef.current = camera;
   }, [camera]);
   useEffect(() => cancelCameraAnimation, [cancelCameraAnimation]);
-  const layout = useMemo(() => positionDetectionEntities(model), [model]);
+  const columns = Math.max(3, Math.min(8, Math.floor(viewport.width / 220)));
+  const layout = useMemo(() => positionDetectionEntities(model, columns), [model, columns]);
   const neighbors = new Set([
-    selectedId,
+    ...selection,
     ...model.relationships
-      .filter((edge) => edge.source === selectedId || edge.target === selectedId)
+      .filter((edge) => selection.has(edge.source) || selection.has(edge.target))
       .flatMap((edge) => [edge.source, edge.target]),
   ]);
   const positions = new Map(layout.nodes.map((node) => [node.entity.id, node]));
-  const viewWidth = layout.width / camera.zoom;
-  const viewHeight = layout.height / camera.zoom;
+  const viewWidth = viewport.width / camera.zoom;
+  const viewHeight = viewport.height / camera.zoom;
+  const fitCamera = useCallback(
+    (ids: string[]): TopologyCamera => {
+      const nodes = ids.length
+        ? layout.nodes.filter((node) => ids.includes(node.entity.id))
+        : layout.nodes;
+      if (!nodes.length) return { zoom: 1, x: 0, y: 0 };
+      const left = Math.min(...nodes.map((node) => node.x));
+      const right = Math.max(...nodes.map((node) => node.x + 184));
+      const top = Math.min(...nodes.map((node) => node.y));
+      const bottom = Math.max(...nodes.map((node) => node.y + 64));
+      return {
+        zoom: Math.max(
+          MIN_ZOOM,
+          Math.min(
+            MAX_ZOOM,
+            viewport.width / Math.max(440, right - left + 120),
+            viewport.height / Math.max(240, bottom - top + 120)
+          )
+        ),
+        x: (left + right) / 2 - layout.width / 2,
+        y: (top + bottom) / 2 - layout.height / 2,
+      };
+    },
+    [layout, viewport]
+  );
   const resetCamera = (): void => {
     cancelCameraAnimation();
-    setCamera({ zoom: 1, x: 0, y: 0 });
+    setCamera(fitCamera([]));
   };
   const zoomAt = useCallback(
     (factor: number, anchor?: DOMPoint): void => {
@@ -102,45 +152,37 @@ export const DetectionTopology = ({
     [layout.width, layout.height, cancelCameraAnimation]
   );
 
-  const centerEntity = useCallback(
-    (id: string): void => {
-      const node = layout.nodes.find((item) => item.entity.id === id);
-      if (!node) return;
-      const target = {
-        zoom: Math.min(MAX_ZOOM, Math.max(1.7, Math.min(layout.width / 440, layout.height / 240))),
-        x: node.x + 92 - layout.width / 2,
-        y: node.y + 32 - layout.height / 2,
-      };
-      cancelCameraAnimation();
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        setCamera(target);
-        return;
-      }
-      const initial = cameraRef.current;
-      const startedAt = performance.now();
-      const animate = (now: number): void => {
-        const progress = Math.min(1, (now - startedAt) / 280);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setCamera({
-          zoom: initial.zoom + (target.zoom - initial.zoom) * eased,
-          x: initial.x + (target.x - initial.x) * eased,
-          y: initial.y + (target.y - initial.y) * eased,
-        });
-        animationFrame.current = progress < 1 ? requestAnimationFrame(animate) : undefined;
-      };
-      animationFrame.current = requestAnimationFrame(animate);
-    },
-    [layout, cancelCameraAnimation]
-  );
+  const selectedKey = JSON.stringify([...selection].sort());
   useEffect(() => {
-    if (lastFocusedId.current === selectedId) return;
-    lastFocusedId.current = selectedId;
-    if (selectedId) centerEntity(selectedId);
-    else {
-      cancelCameraAnimation();
-      setCamera({ zoom: 1, x: 0, y: 0 });
+    const ids: string[] = JSON.parse(selectedKey);
+    const target = fitCamera(ids);
+    const focusKey = JSON.stringify([selectedKey, viewport, target]);
+    if (lastFocus.current === focusKey) return;
+    const initialFocus = lastFocus.current === undefined;
+    lastFocus.current = focusKey;
+    cancelCameraAnimation();
+    if (
+      initialFocus ||
+      !ids.length ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      setCamera(target);
+      return;
     }
-  }, [selectedId, centerEntity, cancelCameraAnimation]);
+    const initial = cameraRef.current;
+    const startedAt = performance.now();
+    const animate = (now: number): void => {
+      const progress = Math.min(1, (now - startedAt) / 280);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCamera({
+        zoom: initial.zoom + (target.zoom - initial.zoom) * eased,
+        x: initial.x + (target.x - initial.x) * eased,
+        y: initial.y + (target.y - initial.y) * eased,
+      });
+      animationFrame.current = progress < 1 ? requestAnimationFrame(animate) : undefined;
+    };
+    animationFrame.current = requestAnimationFrame(animate);
+  }, [selectedKey, fitCamera, viewport, cancelCameraAnimation]);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -157,7 +199,7 @@ export const DetectionTopology = ({
     };
     svg.addEventListener('wheel', onWheel, { passive: false });
     return () => svg.removeEventListener('wheel', onWheel);
-  }, [zoomAt]);
+  }, [zoomAt, svgRef]);
 
   const stopPanning = (event: React.PointerEvent<SVGSVGElement>): void => {
     if (dragRef.current?.pointerId !== event.pointerId) return;
@@ -239,6 +281,10 @@ export const DetectionTopology = ({
           role="group"
           aria-label={labels.graphLabel}
           ref={svgRef}
+          style={{
+            height:
+              fixedHeight ?? (availableHeight !== undefined ? Math.max(280, availableHeight) : 480),
+          }}
           tabIndex={0}
           viewBox={`${(layout.width - viewWidth) / 2 + camera.x} ${
             (layout.height - viewHeight) / 2 + camera.y
@@ -320,8 +366,6 @@ export const DetectionTopology = ({
               outline: 2px solid ${euiTheme.colors.primary};
               outline-offset: -2px;
             }
-            min-height: 300px;
-            max-height: 580px;
           `}
         >
           <defs>
@@ -341,7 +385,7 @@ export const DetectionTopology = ({
             const source = positions.get(edge.source);
             const target = positions.get(edge.target);
             if (!source || !target) return null;
-            const related = edge.source === selectedId || edge.target === selectedId;
+            const related = selection.has(edge.source) || selection.has(edge.target);
             const fromX = source.x + 184;
             const toX = target.x - 6;
             const bend = Math.max(25, (toX - fromX) / 2);
@@ -385,7 +429,7 @@ export const DetectionTopology = ({
             );
           })}
           {layout.nodes.map(({ entity, x, y }) => {
-            const selected = entity.id === selectedId;
+            const selected = selection.has(entity.id);
             const activeRules = entity.queries.filter((query) => query.rule_backed).length;
             const openEvents = entity.events.filter((event) => event.status === 'open').length;
             const color = openEvents
@@ -404,13 +448,11 @@ export const DetectionTopology = ({
                 aria-pressed={selected}
                 transform={`translate(${x}, ${y})`}
                 onClick={() => {
-                  centerEntity(entity.id);
                   onSelect(entity.id);
                 }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
-                    centerEntity(entity.id);
                     onSelect(entity.id);
                   }
                 }}
@@ -524,29 +566,31 @@ export const DetectionTopology = ({
           </EuiToolTip>
         </div>
       </div>
-      <div
-        css={css`
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: ${euiTheme.size.s} ${euiTheme.size.l};
-          border-top: 1px solid ${euiTheme.colors.borderBasePlain};
-        `}
-      >
-        <EuiFlexGroup gutterSize="l" wrap>
-          <EuiHealth color={euiTheme.colors.primary}>{labels.covered}</EuiHealth>
-          <EuiHealth color={euiTheme.colors.mediumShade}>{labels.coverageGap}</EuiHealth>
-          <EuiHealth color={euiTheme.colors.danger}>{labels.withEvents}</EuiHealth>
-        </EuiFlexGroup>
-        <EuiToolTip content={labels.graphHint} disableScreenReaderOutput>
-          <EuiButtonIcon
-            data-test-subj="significantEventsAppDetectionTopologyButton"
-            iconType="question"
-            size="s"
-            aria-label={labels.graphHint}
-          />
-        </EuiToolTip>
-      </div>
+      {showLegend && (
+        <div
+          css={css`
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: ${euiTheme.size.s} ${euiTheme.size.l};
+            border-top: 1px solid ${euiTheme.colors.borderBasePlain};
+          `}
+        >
+          <EuiFlexGroup gutterSize="l" wrap>
+            <EuiHealth color={euiTheme.colors.primary}>{labels.covered}</EuiHealth>
+            <EuiHealth color={euiTheme.colors.mediumShade}>{labels.coverageGap}</EuiHealth>
+            <EuiHealth color={euiTheme.colors.danger}>{labels.withEvents}</EuiHealth>
+          </EuiFlexGroup>
+          <EuiToolTip content={labels.graphHint} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="significantEventsAppDetectionTopologyButton"
+              iconType="question"
+              size="s"
+              aria-label={labels.graphHint}
+            />
+          </EuiToolTip>
+        </div>
+      )}
     </EuiPanel>
   );
 };

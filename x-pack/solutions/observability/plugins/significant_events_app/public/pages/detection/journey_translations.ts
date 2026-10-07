@@ -71,27 +71,27 @@ export const journey = {
     defaultMessage: 'Resume learning',
   }),
   streamSearch: i18n.translate('xpack.significantEventsApp.journeys.streamSearch', {
-    defaultMessage: 'Search streams',
+    defaultMessage: 'Search sources',
   }),
   customStream: i18n.translate('xpack.significantEventsApp.journeys.customStream', {
-    defaultMessage: 'Create ES|QL stream',
+    defaultMessage: 'Create ES|QL source',
   }),
   streamName: i18n.translate('xpack.significantEventsApp.journeys.streamName', {
-    defaultMessage: 'Stream name',
+    defaultMessage: 'Source name',
   }),
   streamQuery: i18n.translate('xpack.significantEventsApp.journeys.streamQuery', {
     defaultMessage: 'ES|QL query',
   }),
   createStream: i18n.translate('xpack.significantEventsApp.journeys.createStream', {
-    defaultMessage: 'Create stream',
+    defaultMessage: 'Create source',
   }),
   addStreamHint: i18n.translate('xpack.significantEventsApp.journeys.addStreamHint', {
     defaultMessage:
-      'Create a query stream to watch a focused slice of your data. Saving starts learning and discovery.',
+      'Create an ES|QL source to watch a focused slice of your data. Saving starts learning and discovery.',
   }),
   streamImpact: i18n.translate('xpack.significantEventsApp.journeys.streamImpact', {
     defaultMessage:
-      'Applying watched patterns starts continuous learning and scheduled discovery for matching streams. Existing knowledge and events remain available.',
+      'Applying watched patterns starts continuous learning and scheduled discovery for matching sources. Existing knowledge and events remain available.',
   }),
   watchedPatterns: i18n.translate('xpack.significantEventsApp.journeys.watchedPatterns', {
     defaultMessage: 'Watched index patterns',
@@ -104,7 +104,7 @@ export const journey = {
   }),
   configureHint: i18n.translate('xpack.significantEventsApp.journeys.configureHint', {
     defaultMessage:
-      'Choose existing streams or create an ES|QL stream. Knowledge is retained when learning is paused.',
+      'Choose existing sources or create an ES|QL source. Knowledge is retained when learning is paused.',
   }),
   watching: i18n.translate('xpack.significantEventsApp.journeys.watching', {
     defaultMessage: 'Watching',
@@ -117,7 +117,7 @@ export const journey = {
   }),
   streamReady: i18n.translate('xpack.significantEventsApp.journeys.streamReady', {
     defaultMessage:
-      'Streams configured. Learning and discovery are enabled; progress appears in Engine activity.',
+      'Sources configured. Learning and discovery are enabled; progress appears in Engine.',
   }),
   startDiscovery: i18n.translate('xpack.significantEventsApp.journeys.startDiscovery', {
     defaultMessage: 'Run discovery now',
@@ -184,7 +184,7 @@ export const journey = {
     defaultMessage: 'Knowledge',
   }),
   streams: i18n.translate('xpack.significantEventsApp.journeys.streams', {
-    defaultMessage: 'Streams',
+    defaultMessage: 'Sources',
   }),
   learning: i18n.translate('xpack.significantEventsApp.journeys.learning', {
     defaultMessage: 'Learning your system',
@@ -212,13 +212,13 @@ export const journey = {
     defaultMessage: 'Paused',
   }),
   off: i18n.translate('xpack.significantEventsApp.journeys.off', {
-    defaultMessage: 'No watched streams',
+    defaultMessage: 'No watched sources',
   }),
   waiting: i18n.translate('xpack.significantEventsApp.journeys.waiting', {
     defaultMessage: 'Waiting for a run',
   }),
   learningHint: i18n.translate('xpack.significantEventsApp.journeys.learningHint', {
-    defaultMessage: 'Extracting knowledge and generating rules from your streams.',
+    defaultMessage: 'Extracting knowledge and generating rules from your sources.',
   }),
   evaluationHint: i18n.translate('xpack.significantEventsApp.journeys.evaluationHint', {
     defaultMessage: 'Checking rules against incoming telemetry.',
@@ -245,10 +245,10 @@ export const journey = {
     defaultMessage: 'No runs recorded yet',
   }),
   noRunsHint: i18n.translate('xpack.significantEventsApp.journeys.noRunsHint', {
-    defaultMessage: 'Once a watched stream is onboarded, its progress appears here.',
+    defaultMessage: 'Once a watched source is onboarded, its progress appears here.',
   }),
   configureStreams: i18n.translate('xpack.significantEventsApp.journeys.configureStreams', {
-    defaultMessage: 'Configure streams',
+    defaultMessage: 'Configure sources',
   }),
   engineUnavailable: i18n.translate('xpack.significantEventsApp.journeys.engineUnavailable', {
     defaultMessage: 'Workflow progress is unavailable',
@@ -419,7 +419,7 @@ export const journey = {
     defaultMessage: 'Open infrastructure',
   }),
   streamSettings: i18n.translate('xpack.significantEventsApp.journeys.streamSettings', {
-    defaultMessage: 'Watched streams',
+    defaultMessage: 'Watched sources',
   }),
   lastActivity: i18n.translate('xpack.significantEventsApp.journeys.lastActivity', {
     defaultMessage: 'Last activity',

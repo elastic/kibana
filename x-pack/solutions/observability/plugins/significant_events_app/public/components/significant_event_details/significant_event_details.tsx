@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiButtonGroup,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -23,57 +24,24 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
+  SignalVerdict,
   SignalEntry,
   SignificantEvent,
   SignificantEventResponse,
-  SignalVerdict,
 } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { buildDiscoverParams } from '../../util/discover_helpers';
 import { formatTimestamp } from '../../util/formatters';
 import { InfoPanel } from '../info_panel';
 import { useKibana } from '../../hooks/use_kibana';
+import { signalVerdicts } from './signal_verdicts';
+import { EvidenceChain } from '../evidence_chain/evidence_chain';
+import { useEvidence } from '../evidence_chain/evidence_context';
+import { EventImpactMap } from './event_impact_map';
+import { changeTypeLabel } from '../../pages/significant_events/components/shared/translations';
 import { journey } from '../../pages/detection/journey_translations';
 
-const verdicts: Record<SignalVerdict, { label: string; color: string; icon: string }> = {
-  confirms: {
-    label: i18n.translate('xpack.significantEventsApp.evidence.confirms', {
-      defaultMessage: 'Confirms',
-    }),
-    color: 'danger',
-    icon: 'checkCircleFill',
-  },
-  refutes: {
-    label: i18n.translate('xpack.significantEventsApp.evidence.refutes', {
-      defaultMessage: 'Refutes',
-    }),
-    color: 'success',
-    icon: 'crossCircle',
-  },
-  off_topic: {
-    label: i18n.translate('xpack.significantEventsApp.evidence.offTopic', {
-      defaultMessage: 'Unrelated to this rule',
-    }),
-    color: 'hollow',
-    icon: 'branch',
-  },
-  inconclusive: {
-    label: i18n.translate('xpack.significantEventsApp.evidence.inconclusive', {
-      defaultMessage: 'Inconclusive',
-    }),
-    color: 'warning',
-    icon: 'question',
-  },
-  not_checked: {
-    label: i18n.translate('xpack.significantEventsApp.evidence.notChecked', {
-      defaultMessage: 'Not checked',
-    }),
-    color: 'hollow',
-    icon: 'clock',
-  },
-};
 const SignalRow = ({
   signal,
   eventTime,
@@ -81,10 +49,11 @@ const SignalRow = ({
   signal: SignalEntry;
   eventTime: string;
 }): React.ReactElement => {
-  const { core, dependencies } = useKibana();
+  const { dependencies } = useKibana();
+  const { href, onNavigate } = useEvidence();
   const { euiTheme } = useEuiTheme();
   const id = useGeneratedHtmlId({ prefix: 'eventSignal' });
-  const verdict = verdicts[signal.verdict] ?? verdicts.not_checked;
+  const verdict = signalVerdicts[signal.verdict] ?? signalVerdicts.not_checked;
   const timeRange = signal.evidence?.time_range ?? {
     from: new Date(Date.parse(eventTime) - 3600000).toISOString(),
     to: eventTime,
@@ -99,15 +68,17 @@ const SignalRow = ({
     evidenceQuery && locator
       ? locator.getRedirectUrl(buildDiscoverParams(evidenceQuery, timeRange))
       : undefined;
-  const ruleHref = core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-    path: `/detection?${new URLSearchParams({
-      view: 'rules',
-      ruleId: signal.metadata.rule_uuid,
-      stream: signal.stream_name,
-      rangeFrom: timeRange.from,
-      rangeTo: timeRange.to,
-    })}`,
-  });
+  const ruleTarget = {
+    kind: 'rule' as const,
+    id: signal.metadata.rule_uuid,
+    stream: signal.stream_name,
+  };
+  const detectionTarget = {
+    kind: 'detection' as const,
+    id: signal.metadata.detection_id,
+    ruleId: signal.metadata.rule_uuid,
+    stream: signal.stream_name,
+  };
   return (
     <EuiPanel
       hasBorder
@@ -125,7 +96,22 @@ const SignalRow = ({
       <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
         <EuiFlexItem>
           <EuiText size="s">
-            <strong>{signal.metadata.rule_name}</strong>
+            <EuiButtonEmpty
+              size="s"
+              flush="left"
+              href={href(ruleTarget)}
+              onClick={
+                onNavigate
+                  ? (event) => {
+                      event.preventDefault();
+                      onNavigate(ruleTarget);
+                    }
+                  : undefined
+              }
+              data-test-subj="significantEventSignalRule"
+            >
+              {signal.metadata.rule_name}
+            </EuiButtonEmpty>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -134,6 +120,8 @@ const SignalRow = ({
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiBadge color="hollow">{changeTypeLabel(signal.metadata.change_point_type)}</EuiBadge>
       <EuiSpacer size="s" />
       <EuiText size="s">
         <p>{signal.description}</p>
@@ -151,10 +139,18 @@ const SignalRow = ({
           <EuiButtonEmpty
             data-test-subj="significantEventsAppSignalRowViewRuleButton"
             size="xs"
-            href={ruleHref}
+            href={href(detectionTarget)}
+            onClick={
+              onNavigate
+                ? (event) => {
+                    event.preventDefault();
+                    onNavigate(detectionTarget);
+                  }
+                : undefined
+            }
           >
             {i18n.translate('xpack.significantEventsApp.evidence.viewRule', {
-              defaultMessage: 'View rule',
+              defaultMessage: 'Inspect detection',
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -203,150 +199,209 @@ export const SignificantEventDetails = ({
 }: {
   event: SignificantEvent | SignificantEventResponse;
 }): React.ReactElement => {
-  const { core } = useKibana();
   const { euiTheme } = useEuiTheme();
-  const signals = event.signals ?? [];
-  const knowledgeHref = (id: string, stream?: string) =>
-    core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-      path: `/knowledge?${new URLSearchParams({ knowledgeId: id, ...(stream ? { stream } : {}) })}`,
-    });
+  const [filter, setFilter] = useState('all');
+  const filterId = useGeneratedHtmlId({ prefix: 'eventSignalFilter' });
+  const signals = [...(event.signals ?? [])].sort(
+    (a, b) =>
+      Date.parse(a.collected_at || a.evidence?.time_range?.to || event['@timestamp']) -
+      Date.parse(b.collected_at || b.evidence?.time_range?.to || event['@timestamp'])
+  );
+  const counts = (Object.keys(signalVerdicts) as SignalVerdict[]).map((verdict) => ({
+    verdict,
+    ...signalVerdicts[verdict],
+    count: signals.filter((signal) => signal.verdict === verdict).length,
+  }));
+  const visible =
+    filter === 'all' ? signals : signals.filter((signal) => signal.verdict === filter);
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {event.summary && (
-        <InfoPanel
-          title={i18n.translate('xpack.significantEventsApp.evidence.summary', {
-            defaultMessage: 'What happened',
-          })}
+    <EuiFlexGroup direction="column" gutterSize="l">
+      {(event.summary || event.assessment_note) && (
+        <EuiPanel
+          hasBorder
+          hasShadow={false}
+          paddingSize="m"
+          css={css`
+            border-left: 3px solid
+              ${event.status === 'open' ? euiTheme.colors.danger : euiTheme.colors.mediumShade};
+          `}
         >
+          <EuiText size="xs" color="subdued">
+            <strong>
+              {i18n.translate('xpack.significantEventsApp.eventDetail.happened', {
+                defaultMessage: 'What happened',
+              })}
+            </strong>
+          </EuiText>
+          <EuiSpacer size="s" />
           <EuiText size="s">
             <p>{event.summary}</p>
           </EuiText>
-        </InfoPanel>
-      )}
-      {(event.symptom_hypothesis || event.assessment_note) && (
-        <InfoPanel
-          title={i18n.translate('xpack.significantEventsApp.evidence.reasoning', {
-            defaultMessage: 'Why this matters',
-          })}
-        >
-          <EuiText size="s">
-            {event.symptom_hypothesis && <p>{event.symptom_hypothesis}</p>}
-            {event.assessment_note && <p>{event.assessment_note}</p>}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
-            <p>
-              {i18n.translate('xpack.significantEventsApp.evidence.confidenceHint', {
-                defaultMessage:
-                  'Severity describes the assessed impact. Confidence is the agent’s assessment of the evidence; review the supporting and refuting signals below.',
-              })}
-            </p>
-          </EuiText>
-        </InfoPanel>
-      )}
-      {(event.blast_radius?.length ?? 0) > 0 && (
-        <InfoPanel
-          title={i18n.translate('xpack.significantEventsApp.evidence.affectedTopology', {
-            defaultMessage: 'Affected topology',
-          })}
-        >
-          <div
-            css={css`
-              display: grid;
-              gap: ${euiTheme.size.s};
-            `}
-          >
-            {event.blast_radius?.map((entry, index) => (
-              <EuiPanel
-                key={`${entry.feature_id}-${index}`}
-                color="subdued"
-                hasShadow={false}
-                paddingSize="m"
+          {event.symptom_hypothesis && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiText size="xs" color="subdued">
+                <strong>
+                  {i18n.translate('xpack.significantEventsApp.eventDetail.impact', {
+                    defaultMessage: 'Impact',
+                  })}
+                </strong>
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiText size="s">
+                <p>{event.symptom_hypothesis}</p>
+              </EuiText>
+            </>
+          )}
+          {event.assessment_note && (
+            <>
+              <EuiSpacer size="m" />
+              <div
+                css={css`
+                  padding: ${euiTheme.size.s} ${euiTheme.size.m};
+                  background: ${euiTheme.colors.backgroundBaseSubdued};
+                  border-radius: ${euiTheme.border.radius.medium};
+                `}
               >
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type={
-                        entry.type === 'dependency'
-                          ? 'graphApp'
-                          : entry.type === 'infrastructure'
-                          ? 'boxesVertical'
-                          : 'apps'
-                      }
-                      aria-hidden={true}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButtonEmpty
-                      data-test-subj="significantEventsAppSignificantEventDetailsButton"
-                      size="s"
-                      flush="left"
-                      href={knowledgeHref(entry.feature_id, entry.stream_name)}
-                    >
-                      {entry.type === 'dependency'
-                        ? `${entry.source} → ${entry.target}`
-                        : entry.type === 'entity'
-                        ? entry.name
-                        : entry.title || entry.feature_id}
-                    </EuiButtonEmpty>
-                    <EuiText size="xs" color="subdued">
-                      <p>
-                        {entry.type === 'infrastructure' && entry.workloads?.length
-                          ? entry.workloads.join(' · ')
-                          : entry.stream_name}
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            ))}
-          </div>
-        </InfoPanel>
-      )}
-      {(event.causal_features?.length ?? 0) > 0 && (
-        <InfoPanel title={journey.relatedKnowledge}>
-          <EuiText size="xs" color="subdued">
-            <p>
-              {i18n.translate('xpack.significantEventsApp.evidence.knowledgeHint', {
-                defaultMessage:
-                  'Candidate context from learned knowledge. A relationship alone does not establish the cause.',
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="s" wrap>
-            {event.causal_features?.map((feature) => (
-              <EuiFlexItem grow={false} key={`${feature.stream_name}:${feature.feature_id}`}>
-                <EuiBadge
-                  color="hollow"
-                  iconType="documents"
-                  href={knowledgeHref(feature.feature_id, feature.stream_name)}
-                >
-                  {feature.name}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </InfoPanel>
+                <EuiText size="xs" color="subdued">
+                  <strong>
+                    {i18n.translate('xpack.significantEventsApp.eventDetail.assessment', {
+                      defaultMessage: 'Agent assessment',
+                    })}
+                  </strong>
+                </EuiText>
+                <EuiSpacer size="xs" />
+                <EuiText size="s">
+                  <p>{event.assessment_note}</p>
+                </EuiText>
+              </div>
+            </>
+          )}
+        </EuiPanel>
       )}
       {signals.length > 0 && (
         <InfoPanel
-          title={i18n.translate('xpack.significantEventsApp.evidence.signals', {
-            defaultMessage: 'Signals · {count}',
-            values: { count: signals.length },
+          title={i18n.translate('xpack.significantEventsApp.eventDetail.balance', {
+            defaultMessage: 'Evidence balance',
           })}
         >
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {signals.map((signal, index) => (
+          <div
+            role="img"
+            aria-label={counts
+              .filter((item) => item.count)
+              .map((item) => `${item.count} ${item.label}`)
+              .join(', ')}
+            css={css`
+              display: flex;
+              gap: 3px;
+              height: 10px;
+              overflow: hidden;
+              border-radius: ${euiTheme.border.radius.small};
+              margin-bottom: ${euiTheme.size.m};
+            `}
+          >
+            {counts
+              .filter((item) => item.count > 0)
+              .map((item) => (
+                <div
+                  key={item.verdict}
+                  css={css`
+                    flex: ${item.count};
+                    background: ${item.verdict === 'confirms'
+                      ? euiTheme.colors.danger
+                      : item.verdict === 'refutes'
+                      ? euiTheme.colors.success
+                      : item.verdict === 'inconclusive'
+                      ? euiTheme.colors.warning
+                      : euiTheme.colors.mediumShade};
+                  `}
+                />
+              ))}
+          </div>
+          <EuiFlexGroup gutterSize="m" wrap>
+            {counts
+              .filter((item) => item.count > 0)
+              .map((item) => (
+                <EuiFlexItem grow={false} key={item.verdict}>
+                  <EuiText size="s">
+                    <EuiIcon
+                      type={item.icon}
+                      color={
+                        item.verdict === 'confirms'
+                          ? 'danger'
+                          : item.verdict === 'refutes'
+                          ? 'success'
+                          : 'subdued'
+                      }
+                      aria-hidden={true}
+                    />{' '}
+                    <strong>{item.count}</strong> {item.label}
+                  </EuiText>
+                </EuiFlexItem>
+              ))}
+          </EuiFlexGroup>
+        </InfoPanel>
+      )}
+      <EventImpactMap event={event} />
+      {signals.length > 0 && (
+        <section>
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('xpack.significantEventsApp.eventDetail.signals', {
+                defaultMessage: 'Checked signals · {count}',
+                values: { count: signals.length },
+              })}
+            </strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.significantEventsApp.eventDetail.filter', {
+              defaultMessage: 'Filter checked signals',
+            })}
+            buttonSize="compressed"
+            idSelected={`${filterId}-${filter}`}
+            onChange={(value) => setFilter(value.slice(filterId.length + 1))}
+            options={[
+              {
+                id: `${filterId}-all`,
+                label: i18n.translate('xpack.significantEventsApp.eventDetail.all', {
+                  defaultMessage: 'All ({count})',
+                  values: { count: signals.length },
+                }),
+              },
+              ...counts
+                .filter((item) => item.count)
+                .map((item) => ({
+                  id: `${filterId}-${item.verdict}`,
+                  label: `${item.label} (${item.count})`,
+                })),
+            ]}
+          />
+          <EuiSpacer size="m" />
+          <div
+            css={css`
+              display: grid;
+              gap: ${euiTheme.size.m};
+              padding-left: ${euiTheme.size.m};
+              border-left: 1px solid ${euiTheme.colors.borderBasePlain};
+            `}
+          >
+            {visible.map((signal, index) => (
               <SignalRow
                 key={`${signal.metadata.detection_id}-${index}`}
                 signal={signal}
                 eventTime={event['@timestamp']}
               />
             ))}
-          </EuiFlexGroup>
-        </InfoPanel>
+          </div>
+        </section>
       )}
+      <EvidenceChain
+        focus={{
+          kind: 'event',
+          event: 'created_at' in event ? event : { ...event, created_at: event['@timestamp'] },
+        }}
+      />
     </EuiFlexGroup>
   );
 };

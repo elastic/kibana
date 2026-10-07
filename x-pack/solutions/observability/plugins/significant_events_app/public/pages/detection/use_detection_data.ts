@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { getQueryBucketParams } from '../../util/get_query_bucket_params';
-import { useEngineActivity } from './use_engine_activity';
+import type { EngineActivity } from './use_engine_activity';
 
-export const useDetectionData = (rangeFrom: string, rangeTo: string) => {
+export const useDetectionData = (rangeFrom: string, rangeTo: string, enabled = true) => {
   const {
     dependencies: {
       start: {
@@ -20,9 +20,10 @@ export const useDetectionData = (rangeFrom: string, rangeTo: string) => {
       },
     },
   } = useKibana();
-  const engineActivity = useEngineActivity();
+  const cache = useQueryClient();
   const query = useQuery({
     queryKey: ['detectionWorkspace', rangeFrom, rangeTo],
+    enabled,
     queryFn: async ({ signal }) => {
       const range = getAbsoluteTimeRange(
         { from: rangeFrom, to: rangeTo },
@@ -57,7 +58,12 @@ export const useDetectionData = (rangeFrom: string, rangeTo: string) => {
       ]);
       return { features, queries, detections, events, activity, start, end };
     },
-    refetchInterval: engineActivity.data?.runs.some((run) => run.active) ? 3000 : 15_000,
+    refetchInterval: () =>
+      cache
+        .getQueryData<EngineActivity>(['detectionEngineActivity'])
+        ?.runs.some((run) => run.active)
+        ? 3000
+        : 15_000,
     refetchOnWindowFocus: true,
     keepPreviousData: true,
   });

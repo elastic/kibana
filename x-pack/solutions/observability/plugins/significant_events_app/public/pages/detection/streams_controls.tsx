@@ -21,11 +21,12 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiLink,
+  EuiToolTip,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -41,6 +42,7 @@ import {
 import { parseIndexPatterns, streamMatchesIndexPatterns } from '@kbn/streams-schema';
 import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { useEvidence } from '../../components/evidence_chain/evidence_context';
 import { useKibana } from '../../hooks/use_kibana';
 import { useMaintenanceStatus } from '../../hooks/use_significant_events_maintenance';
 import { useOnboardingApi } from '../../hooks/use_onboarding_api';
@@ -48,11 +50,16 @@ import { useEngineActivity } from './use_engine_activity';
 import { useEngineSettings } from './use_engine_settings';
 import { journey } from './journey_translations';
 
-export const StreamsControls = (): React.ReactElement => {
+export const StreamsControls = ({
+  selectedSource,
+}: {
+  selectedSource?: string;
+}): React.ReactElement => {
   const { core, dependencies } = useKibana();
+  const { href: evidenceHref, onNavigate } = useEvidence();
   const { euiTheme } = useEuiTheme();
   const cache = useQueryClient();
-  const activity = useEngineActivity();
+  const activity = useEngineActivity({ live: true });
   const preferences = useEngineSettings();
   const onboarding = useOnboardingApi();
   const maintenance = useMaintenanceStatus();
@@ -132,7 +139,7 @@ export const StreamsControls = (): React.ReactElement => {
         throw new Error(
           i18n.translate('xpack.significantEventsApp.streams.duplicate', {
             defaultMessage:
-              'A stream with this name already exists. Edit that stream or choose a different name.',
+              'A source with this name already exists. Edit that source or choose a different name.',
           })
         );
       const enabled = await core.settings.client.set(
@@ -151,6 +158,62 @@ export const StreamsControls = (): React.ReactElement => {
       core.notifications.toasts.addSuccess(journey.streamReady);
       await cache.invalidateQueries({ queryKey: ['streamList'] });
     });
+  const editorTitle = editing
+    ? i18n.translate('xpack.significantEventsApp.streams.editTitle', {
+        defaultMessage: 'Edit ES|QL source',
+      })
+    : journey.customStream;
+  const editorForm = (
+    <>
+      <EuiText size="s" color="subdued">
+        <p>{journey.addStreamHint}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFormRow label={journey.streamName} fullWidth>
+        <EuiFieldText
+          data-test-subj="significantEventsAppStreamsControlsFieldText"
+          fullWidth
+          value={name}
+          maxLength={1000}
+          disabled={editing}
+          onChange={(event) => setName(event.target.value)}
+        />
+      </EuiFormRow>
+      <EuiFormRow label={journey.streamQuery} fullWidth>
+        <EuiTextArea
+          data-test-subj="significantEventsAppStreamsControlsTextArea"
+          fullWidth
+          value={query}
+          rows={8}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </EuiFormRow>
+      {error && <EuiCallOut announceOnMount title={error} color="danger" />}
+    </>
+  );
+  const editorActions = (
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-test-subj="significantEventsAppStreamsControlsButton"
+          onClick={() => setCreating(false)}
+        >
+          {journey.cancel}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="significantEventsAppStreamsControlsButton"
+          fill
+          isLoading={busy}
+          isDisabled={!name.trim() || !query.trim()}
+          onClick={create}
+        >
+          {editing ? journey.save : journey.createStream}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="l">
       {configured && (
@@ -171,95 +234,99 @@ export const StreamsControls = (): React.ReactElement => {
           <EuiSpacer size="m" />
         </>
       )}
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>{journey.streamSettings}</h2>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <p>{journey.configureHint}</p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="significantEventsAppStreamsControlsButton"
-            size="s"
-            iconType="plusCircle"
-            isDisabled={!canSavePatterns}
-            onClick={() => {
-              setEditing(false);
-              setName('');
-              setQuery('FROM logs-*');
-              setCreating(true);
-            }}
-          >
-            {journey.customStream}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFormRow label={journey.watchedPatterns} fullWidth>
-        <EuiTextArea
-          data-test-subj="significantEventsAppStreamsControlsTextArea"
-          fullWidth
-          compressed
-          value={patterns}
-          rows={2}
-          disabled={!canSavePatterns || busy}
-          onChange={(event) => setPatterns(event.target.value)}
-        />
-      </EuiFormRow>
-      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="significantEventsAppStreamsControlsButton"
-            size="xs"
-            isDisabled={!canSavePatterns}
-            onClick={() => setPatterns('logs-*,logs.*')}
-          >
-            {journey.allLogs}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="significantEventsAppStreamsControlsButton"
-            size="xs"
-            isDisabled={!canSavePatterns}
-            onClick={() => setPatterns('metrics-*,metrics.*')}
-          >
-            {journey.allMetrics}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.significantEventsApp.journeys.streamMatchCount', {
-              defaultMessage: '{count} streams in scope',
-              values: { count: matches.length },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="significantEventsAppStreamsControlsButton"
-            size="s"
-            isDisabled={!canSavePatterns || busy}
-            onClick={() => setConfirm({ kind: 'patterns' })}
-          >
-            {journey.savePatterns}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiFieldSearch
-        data-test-subj="significantEventsAppStreamsControlsFieldSearch"
-        compressed
-        fullWidth
-        aria-label={journey.streamSearch}
-        placeholder={journey.streamSearch}
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-      />
-      <EuiSpacer size="m" />
+      {!selectedSource && (
+        <>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h2>{journey.streamSettings}</h2>
+              </EuiTitle>
+              <EuiText size="xs" color="subdued">
+                <p>{journey.configureHint}</p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="significantEventsAppStreamsControlsButton"
+                size="s"
+                iconType="plusCircle"
+                isDisabled={!canSavePatterns}
+                onClick={() => {
+                  setEditing(false);
+                  setName('');
+                  setQuery('FROM logs-*');
+                  setCreating(true);
+                }}
+              >
+                {journey.customStream}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFormRow label={journey.watchedPatterns} fullWidth>
+            <EuiTextArea
+              data-test-subj="significantEventsAppStreamsControlsTextArea"
+              fullWidth
+              compressed
+              value={patterns}
+              rows={2}
+              disabled={!canSavePatterns || busy}
+              onChange={(event) => setPatterns(event.target.value)}
+            />
+          </EuiFormRow>
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="significantEventsAppStreamsControlsButton"
+                size="xs"
+                isDisabled={!canSavePatterns}
+                onClick={() => setPatterns('logs-*,logs.*')}
+              >
+                {journey.allLogs}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="significantEventsAppStreamsControlsButton"
+                size="xs"
+                isDisabled={!canSavePatterns}
+                onClick={() => setPatterns('metrics-*,metrics.*')}
+              >
+                {journey.allMetrics}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.significantEventsApp.journeys.streamMatchCount', {
+                  defaultMessage: '{count} sources in scope',
+                  values: { count: matches.length },
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="significantEventsAppStreamsControlsButton"
+                size="s"
+                isDisabled={!canSavePatterns || busy}
+                onClick={() => setConfirm({ kind: 'patterns' })}
+              >
+                {journey.savePatterns}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFieldSearch
+            data-test-subj="significantEventsAppStreamsControlsFieldSearch"
+            compressed
+            fullWidth
+            aria-label={journey.streamSearch}
+            placeholder={journey.streamSearch}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       {(error || activity.isError) && (
         <>
           <EuiCallOut
@@ -273,7 +340,11 @@ export const StreamsControls = (): React.ReactElement => {
       )}
       {activity.isLoading && <EuiLoadingSpinner />}
       {streams
-        .filter((stream) => stream.name.toLowerCase().includes(search.toLowerCase()))
+        .filter((stream) =>
+          selectedSource
+            ? stream.name === selectedSource
+            : stream.name.toLowerCase().includes(search.toLowerCase())
+        )
         .map((stream) => {
           const run = activity.data?.runs.find((item) => item.stream === stream.name);
           const paused = pausedStreams.includes(stream.name);
@@ -288,7 +359,38 @@ export const StreamsControls = (): React.ReactElement => {
               <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
                 <EuiFlexItem>
                   <EuiText size="s">
-                    <strong>{stream.name}</strong>
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.significantEventsApp.sources.exploreEvidence',
+                        {
+                          defaultMessage:
+                            'Explore the service, knowledge, rules and detections connected to this source.',
+                        }
+                      )}
+                    >
+                      <EuiLink
+                        href={evidenceHref({
+                          kind: 'source',
+                          id: stream.name,
+                          stream: stream.name,
+                        })}
+                        onClick={
+                          onNavigate
+                            ? (event) => {
+                                event.preventDefault();
+                                onNavigate({
+                                  kind: 'source',
+                                  id: stream.name,
+                                  stream: stream.name,
+                                });
+                              }
+                            : undefined
+                        }
+                        data-test-subj="sourceExploreEvidence"
+                      >
+                        <strong>{stream.name}</strong>
+                      </EuiLink>
+                    </EuiToolTip>
                   </EuiText>
                   <EuiText size="xs" color="subdued">
                     <p>{run?.error || stream.description}</p>
@@ -419,60 +521,34 @@ export const StreamsControls = (): React.ReactElement => {
           {error && <EuiCallOut announceOnMount title={error} color="danger" />}
         </EuiConfirmModal>
       )}
-      {creating && (
-        <EuiModal onClose={() => setCreating(false)} aria-labelledby={`${id}-create`}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle id={`${id}-create`}>
-              {editing
-                ? i18n.translate('xpack.significantEventsApp.streams.editTitle', {
-                    defaultMessage: 'Edit ES|QL stream',
-                  })
-                : journey.customStream}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText size="s" color="subdued">
-              <p>{journey.addStreamHint}</p>
-            </EuiText>
+      {creating &&
+        (selectedSource ? (
+          <EuiPanel hasBorder hasShadow={false}>
+            <EuiTitle size="xs">
+              <h3>{editorTitle}</h3>
+            </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFormRow label={journey.streamName}>
-              <EuiFieldText
-                data-test-subj="significantEventsAppStreamsControlsFieldText"
-                value={name}
-                maxLength={1000}
-                disabled={editing}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </EuiFormRow>
-            <EuiFormRow label={journey.streamQuery}>
-              <EuiTextArea
-                data-test-subj="significantEventsAppStreamsControlsTextArea"
-                value={query}
-                rows={8}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </EuiFormRow>
-            {error && <EuiCallOut announceOnMount title={error} color="danger" />}
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              data-test-subj="significantEventsAppStreamsControlsButton"
-              onClick={() => setCreating(false)}
-            >
-              {journey.cancel}
-            </EuiButtonEmpty>
-            <EuiButton
-              data-test-subj="significantEventsAppStreamsControlsButton"
-              fill
-              isLoading={busy}
-              isDisabled={!name.trim() || !query.trim()}
-              onClick={create}
-            >
-              {editing ? journey.save : journey.createStream}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      )}
+            {editorForm}
+            <EuiSpacer size="l" />
+            {editorActions}
+          </EuiPanel>
+        ) : (
+          <EuiFlyout
+            size="l"
+            maxWidth={960}
+            onClose={() => setCreating(false)}
+            aria-labelledby={`${id}-create`}
+            data-test-subj="detectionCreateSourceFlyout"
+          >
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="m">
+                <h2 id={`${id}-create`}>{editorTitle}</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>{editorForm}</EuiFlyoutBody>
+            <EuiFlyoutFooter>{editorActions}</EuiFlyoutFooter>
+          </EuiFlyout>
+        ))}
     </EuiPanel>
   );
 };

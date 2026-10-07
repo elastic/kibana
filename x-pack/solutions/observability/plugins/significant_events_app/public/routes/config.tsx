@@ -12,6 +12,7 @@ import { DateRangeRedirect } from '../app_root/date_range_redirect';
 import { SignificantEventsAppPageTemplate } from '../components/page_template';
 import { RedirectTo } from '../components/redirect_to';
 import { DetectionPage } from '../pages/detection/page';
+import { SourcesPage } from '../pages/detection/sources_page';
 import { KnowledgePage } from '../pages/knowledge/page';
 import { SettingsPage } from '../pages/settings/page';
 import { SignificantEventsPage } from '../pages/significant_events/page';
@@ -37,6 +38,13 @@ const significantEventsAppRoutes = {
         element: (
           <DateRangeRedirect>
             <DetectionPage />
+          </DateRangeRedirect>
+        ),
+      },
+      '/detection/sources': {
+        element: (
+          <DateRangeRedirect>
+            <SourcesPage />
           </DateRangeRedirect>
         ),
       },

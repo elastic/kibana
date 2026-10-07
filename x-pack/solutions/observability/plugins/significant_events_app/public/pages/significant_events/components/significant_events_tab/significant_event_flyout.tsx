@@ -37,6 +37,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { useEvidence } from '../../../../components/evidence_chain/evidence_context';
 import { SeverityFeedback } from '../../../detection/severity_feedback';
 import { journey } from '../../../detection/journey_translations';
 import { formatTimestamp } from '../../../../util/formatters';
@@ -147,36 +148,13 @@ const STATUS_LABEL = i18n.translate(
   }
 );
 
-const EMPTY_VALUE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.emptyValue',
-  { defaultMessage: '—' }
-);
-
 interface SignificantEventFlyoutProps {
   event: SignificantEventResponse;
   onClose: () => void;
 }
 
-const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => {
-  if (items.length === 0) {
-    return (
-      <EuiText size="s" color="subdued">
-        {EMPTY_VALUE}
-      </EuiText>
-    );
-  }
-  return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-      {items.map((item, idx) => (
-        <EuiFlexItem grow={false} key={`${item}-${idx}`}>
-          <EuiBadge color={color ?? 'default'}>{item}</EuiBadge>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-};
-
 export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyoutProps) => {
+  const { href, onNavigate } = useEvidence();
   const {
     services: { focusedSignificantEventService },
     core: {
@@ -194,7 +172,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     queryFn: ({ signal }) =>
       significantEventsRepositoryClient.fetch('GET /internal/significant_events/events', {
         signal: signal ?? null,
-        params: { query: { to: event.created_at, perPage: 1000, page: 1 } },
+        params: { query: { to: new Date(event.created_at).toISOString(), perPage: 1000, page: 1 } },
       }),
   });
   const priorOccurrences = (priorEvents.data?.hits ?? [])
@@ -350,14 +328,8 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               aria-label={COPY_LINK_ARIA_LABEL}
               onClick={() => {
                 const ok = copyToClipboard(
-                  new URL(
-                    getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-                      path: `/detection?view=events&eventId=${encodeURIComponent(
-                        latestEvent.event_id
-                      )}`,
-                    }),
-                    window.location.origin
-                  ).href
+                  new URL(href({ kind: 'event', id: latestEvent.event_id }), window.location.origin)
+                    .href
                 );
                 if (ok) {
                   notifications.toasts.addSuccess({ title: COPY_LINK_SUCCESS });
@@ -379,6 +351,14 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       </FlyoutToolbarHeader>
 
       <EuiFlyoutHeader hasBorder>
+        <EuiText size="xs" color="subdued">
+          <p>
+            {i18n.translate('xpack.significantEventsApp.eventDetail.kind', {
+              defaultMessage: 'Significant event',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>{latestEvent.title}</h2>
         </EuiTitle>
@@ -386,7 +366,29 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           {formatTimestamp(event.created_at ?? event['@timestamp'])}
         </EuiText>
         <EuiSpacer size="m" />
-        <BadgeRow items={latestEvent.stream_names ?? []} color="hollow" />
+        <EuiFlexGroup gutterSize="xs" wrap>
+          {latestEvent.stream_names.map((stream) => (
+            <EuiFlexItem key={stream} grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                iconType="database"
+                href={href({ kind: 'source', id: stream, stream })}
+                onClick={
+                  onNavigate
+                    ? (clickEvent) => {
+                        clickEvent.preventDefault();
+                        onNavigate({ kind: 'source', id: stream, stream });
+                      }
+                    : undefined
+                }
+                data-test-subj="significantEventSourceLink"
+              >
+                {stream}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>
@@ -405,12 +407,27 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           {latestEvent.confidence != null && (
             <EuiFlexItem>
               <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
-                <EuiHealth
-                  color={getConfidenceColor(Math.round(latestEvent.confidence * 100))}
-                  textSize="xs"
+                <EuiToolTip
+                  content={i18n.translate('xpack.significantEventsApp.eventDetail.confidenceHint', {
+                    defaultMessage:
+                      'Agent-assessed confidence. {confirmed} of {total} checked signals confirm this event; {knowledge} knowledge references provide context.',
+                    values: {
+                      confirmed: latestEvent.signals.filter(
+                        (signal) => signal.verdict === 'confirms'
+                      ).length,
+                      total: latestEvent.signals.length,
+                      knowledge: latestEvent.causal_features?.length ?? 0,
+                    },
+                  })}
                 >
-                  {`${Math.round(latestEvent.confidence * 100)}%`}
-                </EuiHealth>
+                  <EuiHealth
+                    tabIndex={0}
+                    color={getConfidenceColor(Math.round(latestEvent.confidence * 100))}
+                    textSize="xs"
+                  >
+                    {`${Math.round(latestEvent.confidence * 100)}%`}
+                  </EuiHealth>
+                </EuiToolTip>
               </FlyoutMetadataCard>
             </EuiFlexItem>
           )}
@@ -447,9 +464,15 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                   data-test-subj="significantEventsAppSignificantEventFlyoutButton"
                   key={prior.event_id}
                   size="s"
-                  href={getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-                    path: `/detection?view=events&eventId=${encodeURIComponent(prior.event_id)}`,
-                  })}
+                  href={href({ kind: 'event', id: prior.event_id })}
+                  onClick={
+                    onNavigate
+                      ? (clickEvent) => {
+                          clickEvent.preventDefault();
+                          onNavigate({ kind: 'event', id: prior.event_id });
+                        }
+                      : undefined
+                  }
                 >
                   {formatTimestamp(prior.created_at)} · {prior.title}
                 </EuiButtonEmpty>

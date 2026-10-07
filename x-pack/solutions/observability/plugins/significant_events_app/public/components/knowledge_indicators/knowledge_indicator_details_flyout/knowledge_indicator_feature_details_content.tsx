@@ -7,6 +7,8 @@
 
 import {
   EuiBadge,
+  EuiAccordion,
+  useGeneratedHtmlId,
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiDescriptionList,
@@ -21,8 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
-import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useEvidence } from '../../evidence_chain/evidence_context';
 import { useFetchDiscoveryQueries } from '../../../hooks/use_fetch_discovery_queries';
 import { FeatureCorrection } from '../../../pages/detection/feature_correction';
 import { journey } from '../../../pages/detection/journey_translations';
@@ -42,8 +43,9 @@ export function KnowledgeIndicatorFeatureDetailsContent({
   onOpenInDiscover,
   onUpdated,
 }: Props) {
+  const propertiesId = useGeneratedHtmlId({ prefix: 'knowledgeProperties' });
   const { isDeveloperMode } = useDeveloperMode();
-  const { core } = useKibana();
+  const { href, onNavigate } = useEvidence();
   const rules = useFetchDiscoveryQueries({ name: feature.stream_name, page: 1, perPage: 1000 });
   const relatedRules =
     rules.data?.queries.filter((item) =>
@@ -125,6 +127,11 @@ export function KnowledgeIndicatorFeatureDetailsContent({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <InfoPanel title={DESCRIPTION_LABEL}>
+          <EuiText>{feature.description || NO_DESCRIPTION_AVAILABLE}</EuiText>
+        </InfoPanel>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <InfoPanel title={journey.relatedRules}>
           {relatedRules.length ? (
@@ -134,13 +141,19 @@ export function KnowledgeIndicatorFeatureDetailsContent({
                   data-test-subj="significantEventsAppKnowledgeIndicatorFeatureDetailsContentButton"
                   size="xs"
                   iconType="visLine"
-                  href={core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-                    path: `/detection?${new URLSearchParams({
-                      view: 'rules',
-                      ruleId: item.query.id,
-                      stream: feature.stream_name,
-                    })}`,
-                  })}
+                  href={href({ kind: 'rule', id: item.query.id, stream: feature.stream_name })}
+                  onClick={
+                    onNavigate
+                      ? (event) => {
+                          event.preventDefault();
+                          onNavigate({
+                            kind: 'rule',
+                            id: item.query.id,
+                            stream: feature.stream_name,
+                          });
+                        }
+                      : undefined
+                  }
                 >
                   {item.query.title}
                 </EuiButtonEmpty>
@@ -156,40 +169,38 @@ export function KnowledgeIndicatorFeatureDetailsContent({
         <FeatureCorrection feature={feature} onSaved={onUpdated} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <InfoPanel
-          title={GENERAL_INFORMATION_LABEL}
-          headerRightContent={
-            onOpenInDiscover ? (
-              <EuiButtonEmpty
-                data-test-subj="significantEventsAppFeatureDetailsFlyoutOpenInDiscover"
-                size="xs"
-                iconType="discoverApp"
-                iconSide="left"
-                onClick={onOpenInDiscover}
-              >
-                {OPEN_IN_DISCOVER_LABEL}
-              </EuiButtonEmpty>
-            ) : undefined
-          }
-        >
-          {listItems.map((item, index) => (
-            <React.Fragment key={item.title}>
-              <EuiDescriptionList
-                type="column"
-                columnWidths={[1, 2]}
-                compressed
-                listItems={[item]}
-              />
-              {index < listItems.length - 1 && <EuiHorizontalRule margin="m" />}
-            </React.Fragment>
-          ))}
-        </InfoPanel>
+        <EuiAccordion id={propertiesId} buttonContent={GENERAL_INFORMATION_LABEL} paddingSize="m">
+          <InfoPanel
+            title={GENERAL_INFORMATION_LABEL}
+            headerRightContent={
+              onOpenInDiscover ? (
+                <EuiButtonEmpty
+                  data-test-subj="significantEventsAppFeatureDetailsFlyoutOpenInDiscover"
+                  size="xs"
+                  iconType="discoverApp"
+                  iconSide="left"
+                  onClick={onOpenInDiscover}
+                >
+                  {OPEN_IN_DISCOVER_LABEL}
+                </EuiButtonEmpty>
+              ) : undefined
+            }
+          >
+            {listItems.map((item, index) => (
+              <React.Fragment key={item.title}>
+                <EuiDescriptionList
+                  type="column"
+                  columnWidths={[1, 2]}
+                  compressed
+                  listItems={[item]}
+                />
+                {index < listItems.length - 1 && <EuiHorizontalRule margin="m" />}
+              </React.Fragment>
+            ))}
+          </InfoPanel>
+        </EuiAccordion>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <InfoPanel title={DESCRIPTION_LABEL}>
-          <EuiText>{feature.description || NO_DESCRIPTION_AVAILABLE}</EuiText>
-        </InfoPanel>
-      </EuiFlexItem>
+
       <EuiFlexItem>
         <InfoPanel title={EVIDENCE_LABEL}>
           {evidence.length > 0 ? (
