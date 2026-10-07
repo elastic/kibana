@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- we need to import monaco directly for this service
+import type { monaco } from '@kbn/monaco';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { PLUGIN_ID } from '../../../../../common';
+
+declare global {
+  interface Window {
+    MonacoEnvironment?: monaco.Environment;
+  }
+}
 
 export class WorkflowEditorPage {
   public yamlEditor: Locator;
@@ -32,7 +40,7 @@ export class WorkflowEditorPage {
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
     this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
-    this.runButton = this.page.testSubj.locator('runWorkflowHeaderButton');
+    this.runButton = this.page.testSubj.locator('workflowBottomBarRunButton');
     this.validationErrorsAccordion = this.page.testSubj.locator(
       'workflowYamlEditorValidationErrorsList'
     );
@@ -56,14 +64,14 @@ export class WorkflowEditorPage {
   }
 
   async openAccessDialog(): Promise<void> {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.click('workflowAccessButton');
+    await this.page.testSubj.locator('appHeader').hover();
+    await this.page.testSubj.click('~shareTopNavButton');
     await this.accessMode.waitFor({ state: 'visible' });
   }
 
   async hoverDisabledAccessButton(): Promise<void> {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.locator('workflowAccessButton').hover({ force: true });
+    await this.page.testSubj.locator('appHeader').hover();
+    await this.page.testSubj.locator('~shareTopNavButton').hover({ force: true });
   }
 
   async setAccessMode(mode: 'private' | 'public'): Promise<void> {
@@ -139,7 +147,6 @@ export class WorkflowEditorPage {
   /**
    * Switch to the graph view by clicking the bottom bar toggle.
    * Waits for the graph canvas to become visible.
-   * Requires the `workflows:experimentalFeatures` UI setting to be true.
    */
   async switchToGraphView(): Promise<void> {
     await this.page.testSubj.click('workflowEditorViewToggle-graph');
@@ -198,13 +205,12 @@ export class WorkflowEditorPage {
     const uri = await this.getEditorUri(editor);
     await this.page.evaluate(
       ({ modelUri, editorValue }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
 
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
-        const editorModel = monacoEnv.monaco.editor.getModel(modelUri);
+        const editorModel = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
         if (!editorModel) {
           throw new Error('Editor not found');
         }
@@ -236,13 +242,12 @@ export class WorkflowEditorPage {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
       ({ modelUri, text, occ }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const model = monacoEnv.monaco.editor.getModel(modelUri);
+        const model = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
         if (!model) {
           throw new Error('Editor model not found');
         }
@@ -290,12 +295,11 @@ export class WorkflowEditorPage {
   async getYamlEditorValue(): Promise<string> {
     const uri = await this.getEditorUri(this.yamlEditor);
     return this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
-      const model = monacoEnv.monaco.editor.getModel(modelUri);
+      const model = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
       if (!model) {
         throw new Error('Editor model not found');
       }
@@ -351,7 +355,7 @@ export class WorkflowEditorPage {
   }
 
   async acceptYamlSuggestion(name: string): Promise<void> {
-    await this.getYamlEditorSuggestWidget().getByRole('option', { name, exact: true }).dblclick();
+    await this.getYamlEditorSuggestionItem(name).dblclick();
   }
 
   async dismissYamlSuggestions(): Promise<void> {
@@ -362,7 +366,7 @@ export class WorkflowEditorPage {
     return this.serviceAccountPopup.getByRole('option', { name, exact: true });
   }
 
-  async openServiceAccountPicker(
+  async focusServiceAccountSetting(
     yaml: string,
     format: 'block' | 'inline' = 'block'
   ): Promise<void> {
@@ -375,7 +379,72 @@ export class WorkflowEditorPage {
       await this.page.keyboard.press('End');
     }
     await this.page.keyboard.press('Control+Space');
+  }
+
+  async openServiceAccountPicker(
+    yaml: string,
+    format: 'block' | 'inline' = 'block'
+  ): Promise<void> {
+    await this.focusServiceAccountSetting(yaml, format);
     await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async openCreateServiceAccount(): Promise<void> {
+    await this.serviceAccountPopup.getByRole('button', { name: 'Create account' }).click();
+    await this.page.testSubj.locator('createServiceAccountFlyout').waitFor();
+  }
+
+  async openServiceAccountRoles(): Promise<void> {
+    await this.page.testSubj.locator('serviceAccountRolesSelector').click();
+  }
+
+  async closeServiceAccountRoles(): Promise<void> {
+    await this.page.getByRole('listbox', { name: 'Select roles' }).press('Escape');
+    await this.page.getByRole('listbox', { name: 'Select roles' }).waitFor({ state: 'hidden' });
+  }
+
+  async fillServiceAccount(name: string, description: string): Promise<void> {
+    const flyout = this.page.testSubj.locator('createServiceAccountFlyout');
+    await this.page.testSubj.locator('serviceAccountNameInput').fill(name);
+    await this.page.testSubj.locator('createServiceAccountDescription').fill(description);
+    await flyout.getByRole('button', { name: 'Set privileges' }).click();
+    await this.page.getByRole('listbox', { name: 'Select roles' }).press('End');
+    await this.page.testSubj.locator('roleOption-viewer').click();
+    await this.closeServiceAccountRoles();
+  }
+
+  async submitServiceAccount(): Promise<void> {
+    await this.page.testSubj.locator('createServiceAccountSubmit').click();
+  }
+
+  async waitForCreateServiceAccountClosed(): Promise<void> {
+    await this.page.testSubj.locator('createServiceAccountFlyout').waitFor({ state: 'hidden' });
+  }
+
+  async cancelCreateServiceAccount(): Promise<void> {
+    await this.page.testSubj
+      .locator('createServiceAccountFlyout')
+      .getByRole('button', { name: 'Cancel' })
+      .click();
+  }
+
+  async focusServiceAccountControls(): Promise<void> {
+    await this.page.keyboard.press('Shift+Tab');
+  }
+
+  async retryServiceAccounts(): Promise<void> {
+    await this.serviceAccountPopup.getByRole('button', { name: 'Try again' }).click();
+  }
+
+  async clickServiceAccountPlaceholder(): Promise<void> {
+    const activateEditor = this.yamlEditor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    if (await activateEditor.isVisible()) {
+      await activateEditor.focus();
+      await this.page.keyboard.press('Enter');
+    }
+    await this.yamlEditor.getByText('Select service account', { exact: true }).click();
   }
 
   async openExistingServiceAccountPicker(id: string): Promise<void> {
@@ -468,6 +537,39 @@ export class WorkflowEditorPage {
     return handle.jsonValue() as Promise<{ backgroundImage: string; maskImage: string }>;
   }
 
+  /** Returns a locator for a suggestion item by its label text.
+   * Monaco's suggest widget list rows are exposed with role="option" in some
+   * environments and role="listitem" in others (observed on Linux CI, where a captured
+   * failure snapshot showed `listbox "Suggest"` containing `listitem "consts, Property"`
+   * rows rather than `option` ones) — the ARIA role monaco applies isn't a stable
+   * cross-environment contract, so match either role to stay resilient to it.
+   */
+  public getYamlEditorSuggestionItem(name: string) {
+    const widget = this.getYamlEditorSuggestWidget();
+    return widget.getByRole('option', { name }).or(widget.getByRole('listitem', { name }));
+  }
+
+  /**
+   * Types text into the YAML editor at the current cursor position, character by character.
+   * Unlike `setYamlEditorValue`, this simulates typing so language-aware editor features
+   * such as autocomplete suggestions are triggered.
+   */
+  async typeInYamlEditor(text: string): Promise<void> {
+    await this.waitForEditorToLoad();
+    await this.page.evaluate((textToType: string) => {
+      const container = document.querySelector('[data-test-subj="workflowYamlEditor"]');
+      const editor = window.MonacoEnvironment?.monaco?.editor
+        ?.getEditors()
+        ?.find((e) => container?.contains(e.getDomNode()));
+      if (editor) {
+        editor.focus();
+        for (let i = 0; i < textToType.length; i++) {
+          editor.trigger('keyboard', 'type', { text: textToType[i] });
+        }
+      }
+    }, text);
+  }
+
   /**
    * Save the workflow
    */
@@ -558,12 +660,11 @@ export class WorkflowEditorPage {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
       ({ modelUri, text, insertion }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
-        const model = monacoEnv.monaco.editor.getModel(modelUri);
+        const model = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
         if (!model) {
           throw new Error('Editor model not found');
         }
@@ -579,12 +680,11 @@ export class WorkflowEditorPage {
         const endOffset = offset + text.length;
         const position = model.getPositionAt(endOffset);
 
-        // Get the editor instance and set cursor position + focus
+        // Get the editor instance by matching the model URI (avoids picking the wrong
+        // editor when multiple editors exist on the page, e.g. JSON input editors).
         const editors = monacoEnv.monaco.editor.getEditors();
-        const editor = editors.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
-          (candidate: any) => candidate.getModel()?.uri?.toString() === model.uri.toString()
-        );
+        const editor = editors.find((e) => e.getModel()?.uri?.toString() === model.uri.toString());
+
         if (!editor) {
           throw new Error('No editor instance found for the YAML model');
         }
@@ -594,6 +694,8 @@ export class WorkflowEditorPage {
         if (insertion) {
           editor.trigger('autocomplete-test', 'type', { text: insertion });
         }
+
+        // Trigger suggest directly via the editor command
         editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
       },
       { modelUri: uri, text: searchText, insertion: textToInsert }
@@ -619,8 +721,7 @@ export class WorkflowEditorPage {
   async getEditorVisibleLineRange(): Promise<{ startLine: number; endLine: number }> {
     const uri = await this.getEditorUri(this.yamlEditor);
     return this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
@@ -652,13 +753,12 @@ export class WorkflowEditorPage {
     const uri = await this.getEditorUri(this.yamlEditor);
     return this.page.evaluate(
       ({ modelUri, text }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const model = monacoEnv.monaco.editor.getModel(modelUri);
+        const model = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
         if (!model) {
           throw new Error('Editor model not found');
         }
@@ -693,8 +793,7 @@ export class WorkflowEditorPage {
   async focusYamlEditor(): Promise<void> {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
@@ -719,8 +818,7 @@ export class WorkflowEditorPage {
   async triggerUndoInYamlEditor(): Promise<void> {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
@@ -737,8 +835,7 @@ export class WorkflowEditorPage {
   async triggerRedoInYamlEditor(): Promise<void> {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }

@@ -95,11 +95,7 @@ async function resolveTaskDocumentConflictsOnce({
     );
   }
 
-  if (currentTask.startedAt?.valueOf() !== originalTask.startedAt?.valueOf()) {
-    throwNotRetryableError(
-      `Unable to resolve task document conflicts for task "${label}": task startedAt has been updated by another worker`
-    );
-  }
+  // `startedAt` is deliberately not checked: the only writer of a non-null value is the claim, which always bumps `attempts` and sets `ownerId`, so the checks above already catch a competing claim.
 
   const updatedTask: PartialConcreteTaskInstance = {
     ...currentTask,

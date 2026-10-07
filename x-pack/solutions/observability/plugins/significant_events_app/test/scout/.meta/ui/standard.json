@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 46,
-        "column": 25
+        "line": 57,
+        "column": 9
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 69,
+        "column": 9
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 78,
-        "column": 54
+        "line": 88,
+        "column": 9
       }
     }
   ]

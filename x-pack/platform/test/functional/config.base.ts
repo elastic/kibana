@@ -65,6 +65,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'histogram:barTarget': 50,
       },
       globalDefaults: {
         // Disable tours globally for all tests

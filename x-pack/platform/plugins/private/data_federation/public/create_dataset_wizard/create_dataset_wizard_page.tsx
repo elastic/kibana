@@ -6,10 +6,17 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageSection,
+  EuiSpacer,
+  EuiStepsHorizontal,
+} from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -27,24 +34,33 @@ import { StepAdditional } from './options_step/step_additional';
 import { StepDataset } from './define_step/step_dataset';
 import { StepMapping } from './mapping_step/step_mapping';
 import { StepReview } from './review_step/step_review';
-import type { DatasetWizardContent, DatasetWizardSection } from './types';
+import { getValidStepIds } from './step_validity';
+import type { DatasetWizardStepContent, DatasetWizardStepId } from './types';
+import { WizardStepProvider } from './wizard_step_context';
 
-const { FormWizard, FormWizardStep } = Forms;
-
-const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWizardContent => ({
-  dataset: {
-    name: values.name,
-    description: values.description,
-    data_source: values.data_source,
-    resource: values.resource,
-    format: values.settings.format,
-  },
-  settings: values.settings,
-  mapping: values.mappings,
-});
+const STEPS: Array<{ id: DatasetWizardStepId; label: string }> = [
+  { id: 'dataset', label: createDatasetWizardStrings.datasetStepLabel },
+  { id: 'settings', label: createDatasetWizardStrings.additionalStepLabel },
+  { id: 'mapping', label: createDatasetWizardStrings.mappingStepLabel },
+  { id: 'review', label: createDatasetWizardStrings.reviewStepLabel },
+];
+const LAST_STEP_INDEX = STEPS.length - 1;
+const INITIAL_STEP_CONTENT: DatasetWizardStepContent = { validate: async () => true };
+const NARROW_STEPS: DatasetWizardStepId[] = ['dataset'];
+const OPTIONAL_STEP_IDS: DatasetWizardStepId[] = ['settings'];
 
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
+
+interface SaveError {
+  title: string;
+  text: string;
+}
+
+const toSaveError = (text: string): SaveError => ({
+  title: createDatasetWizardStrings.saveErrorTitle,
+  text,
+});
 
 export function CreateDatasetWizardPage({
   dataSources,
@@ -61,11 +77,11 @@ export function CreateDatasetWizardPage({
 }) {
   const history = useHistory();
   const {
-    services: { datasetsClient },
+    services: { datasetsClient, toasts },
   } = useKibana<DataFederationKibanaServices>();
   const isEditMode = initialDataSet !== undefined;
   const datasetNameToEdit = initialDataSet?.name;
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<SaveError | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const formDefaultValues = useMemo(
     (): CreateDatasetFormValues =>
@@ -75,6 +91,42 @@ export function CreateDatasetWizardPage({
   const methods = useForm<CreateDatasetFormValues>({
     defaultValues: formDefaultValues,
   });
+
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const [stepContent, setStepContent] = useState(INITIAL_STEP_CONTENT);
+  // Field rules only run while their step is mounted, so a step can only be skipped over once it
+  // has passed validation, and its result is re-recorded whenever it is left in either direction.
+  // A saved dataset's steps start out validated when its values pass them; a new dataset's
+  // optional steps hold defaults that always pass, while its required steps must be visited.
+  const [validatedStepIds, setValidatedStepIds] = useState<ReadonlySet<DatasetWizardStepId>>(
+    () => new Set(isEditMode ? getValidStepIds(formDefaultValues) : OPTIONAL_STEP_IDS)
+  );
+
+  // Rules can depend on values from other steps (e.g. CSV character defaults on the format), so a
+  // validated step must also still pass for the current values to be skipped over.
+  const skipsUnvalidatedStep = (index: number) => {
+    const validStepIds = getValidStepIds(methods.getValues());
+    return STEPS.slice(activeStepIndex + 1, index).some(
+      ({ id }) => !validatedStepIds.has(id) || !validStepIds.includes(id)
+    );
+  };
+
+  const goToStep = async (index: number) => {
+    if (index === activeStepIndex) return;
+    const isForward = index > activeStepIndex;
+    if (isForward && skipsUnvalidatedStep(index)) return;
+    const isActiveStepValid = await stepContent.validate();
+    if (isForward && !isActiveStepValid) return;
+    const activeId = STEPS[activeStepIndex].id;
+    setValidatedStepIds((prev) => {
+      const next = new Set(prev);
+      if (isActiveStepValid) next.add(activeId);
+      else next.delete(activeId);
+      return next;
+    });
+    setStepContent(INITIAL_STEP_CONTENT);
+    setActiveStepIndex(index);
+  };
 
   const goToDatasets = useCallback(() => {
     history.push(DATASETS_PATH);
@@ -86,7 +138,7 @@ export function CreateDatasetWizardPage({
 
     const formatValid = await methods.trigger('settings.format');
     if (!formatValid) {
-      setSaveError(createDatasetWizardStrings.settingsFormatRequired);
+      setSaveError(toSaveError(createDatasetWizardStrings.settingsFormatRequired));
       return;
     }
 
@@ -94,36 +146,66 @@ export function CreateDatasetWizardPage({
       (f) => f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME
     );
     if (timestampField && timestampField.path.trim() === '') {
-      setSaveError(createDatasetWizardStrings.timestampFieldPathRequiredSave);
+      setSaveError(toSaveError(createDatasetWizardStrings.timestampFieldPathRequiredSave));
       return;
     }
 
     setIsSaving(true);
+    const previousName = initialDataSet?.name.trim();
+    let savedName: string;
     try {
       const payload = buildDatasetPayload(values);
       await datasetsClient.add(payload);
-
-      const previousId = initialDataSet?.name.trim();
-      if (previousId && previousId !== payload.name) {
-        await datasetsClient.delete(previousId);
-      }
-
-      await loadDataSets();
-      goToDatasets();
+      savedName = payload.name;
     } catch (error) {
-      setSaveError(getFlyoutSaveErrorMessage(error));
+      setSaveError(toSaveError(getFlyoutSaveErrorMessage(error)));
+      setIsSaving(false);
+      return;
+    }
+
+    if (previousName && previousName !== savedName) {
+      try {
+        await datasetsClient.delete(previousName);
+      } catch (error) {
+        setSaveError({
+          title: createDatasetWizardStrings.deletePreviousErrorTitle,
+          text: createDatasetWizardStrings.deletePreviousErrorText(
+            savedName,
+            previousName,
+            getFlyoutSaveErrorMessage(error)
+          ),
+        });
+        setIsSaving(false);
+        return;
+      }
+    }
+
+    try {
+      await loadDataSets();
+    } catch (error) {
+      toasts.addDanger({
+        title: createDatasetWizardStrings.refreshAfterSaveErrorTitle(savedName),
+        text: getFlyoutSaveErrorMessage(error),
+      });
     } finally {
       setIsSaving(false);
+      goToDatasets();
     }
-  }, [datasetsClient, goToDatasets, initialDataSet, loadDataSets, methods]);
+  }, [datasetsClient, goToDatasets, initialDataSet, loadDataSets, methods, toasts]);
+
+  const activeStepId = STEPS[activeStepIndex].id;
+  const isLastStep = activeStepIndex === LAST_STEP_INDEX;
+
+  const isStepDisabled = (index: number) =>
+    index > activeStepIndex && (stepContent.isValid === false || skipsUnvalidatedStep(index));
 
   const apiError = useMemo(
     () =>
       saveError ? (
         <>
           <KbnDangerCallout
-            title={createDatasetWizardStrings.saveErrorTitle}
-            text={saveError}
+            title={saveError.title}
+            text={saveError.text}
             size="s"
             announceOnMount
             data-test-subj="createDatasetWizardSaveError"
@@ -163,27 +245,31 @@ export function CreateDatasetWizardPage({
                 marginInline: 'auto',
               }}
             >
-              <FormWizard<DatasetWizardContent, DatasetWizardSection>
-                defaultValue={wizardContentFromFormValues(formDefaultValues)}
-                isEditing={isEditMode}
-                onSave={onSave}
-                isSaving={isSaving}
-                apiError={apiError}
-                texts={{
-                  save: isEditMode
-                    ? createDatasetWizardStrings.saveButton
-                    : createDatasetWizardStrings.saveDatasetButton,
-                }}
-              >
-                <FormWizardStep
-                  id="dataset"
-                  label={createDatasetWizardStrings.datasetStepLabel}
-                  isRequired
+              <EuiStepsHorizontal
+                steps={STEPS.map(({ id, label }, index) => ({
+                  title: label,
+                  status:
+                    index === activeStepIndex
+                      ? 'current'
+                      : index < activeStepIndex
+                      ? 'complete'
+                      : 'incomplete',
+                  disabled: isStepDisabled(index),
+                  onClick: () => goToStep(index),
+                  'data-test-subj': `createDatasetWizardStep-${id}`,
+                }))}
+              />
+              <EuiSpacer size="l" />
+              <WizardStepProvider value={setStepContent}>
+                <div
+                  data-test-subj="createDatasetWizardContent"
+                  style={
+                    NARROW_STEPS.includes(activeStepId)
+                      ? { width: '100%', maxWidth: MAX_WIDTH_NARROW_PX }
+                      : undefined
+                  }
                 >
-                  <div
-                    data-test-subj="createDatasetWizardContent"
-                    style={{ width: '100%', maxWidth: MAX_WIDTH_NARROW_PX }}
-                  >
+                  {activeStepId === 'dataset' && (
                     <StepDataset
                       dataSources={dataSources}
                       existingDataSetNames={existingDataSetNames}
@@ -191,27 +277,46 @@ export function CreateDatasetWizardPage({
                       isEditMode={isEditMode}
                       datasetNameToEdit={datasetNameToEdit}
                     />
-                  </div>
-                </FormWizardStep>
-                <FormWizardStep
-                  id="settings"
-                  label={createDatasetWizardStrings.additionalStepLabel}
-                >
-                  <div data-test-subj="createDatasetWizardContent">
-                    <StepAdditional />
-                  </div>
-                </FormWizardStep>
-                <FormWizardStep id="mapping" label={createDatasetWizardStrings.mappingStepLabel}>
-                  <div data-test-subj="createDatasetWizardContent">
-                    <StepMapping />
-                  </div>
-                </FormWizardStep>
-                <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel}>
-                  <div data-test-subj="createDatasetWizardContent">
-                    <StepReview dataSources={dataSources} />
-                  </div>
-                </FormWizardStep>
-              </FormWizard>
+                  )}
+                  {activeStepId === 'settings' && <StepAdditional />}
+                  {activeStepId === 'mapping' && <StepMapping />}
+                  {activeStepId === 'review' && <StepReview dataSources={dataSources} />}
+                </div>
+              </WizardStepProvider>
+              <EuiSpacer size="l" />
+              {apiError}
+              <EuiFlexGroup gutterSize="m" responsive={false}>
+                {activeStepIndex > 0 ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="chevronSingleLeft"
+                      onClick={() => goToStep(activeStepIndex - 1)}
+                      data-test-subj="backButton"
+                    >
+                      {createDatasetWizardStrings.backButton}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    iconType={isLastStep ? undefined : 'chevronSingleRight'}
+                    iconSide="right"
+                    onClick={() => (isLastStep ? onSave() : goToStep(activeStepIndex + 1))}
+                    disabled={stepContent.isValid === false}
+                    isLoading={isSaving}
+                    data-test-subj="nextButton"
+                  >
+                    {isLastStep
+                      ? isSaving
+                        ? createDatasetWizardStrings.savingButton
+                        : isEditMode
+                        ? createDatasetWizardStrings.saveButton
+                        : createDatasetWizardStrings.addDatasetButton
+                      : createDatasetWizardStrings.nextButton}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </div>
           </FormProvider>
         </div>

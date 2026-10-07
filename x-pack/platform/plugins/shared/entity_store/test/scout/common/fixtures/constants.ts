@@ -62,6 +62,9 @@ export const ENTITY_STORE_ROUTES = {
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE}/check_privileges`,
+    START: `${INTERNAL_BASE}/start`,
+    STOP: `${INTERNAL_BASE}/stop`,
+    ENGINE_CONFIG: (entityType: string) => `${INTERNAL_BASE}/${entityType}`,
     FORCE_LOG_EXTRACTION: (entityType: string) =>
       `${INTERNAL_BASE}/${entityType}/force_log_extraction`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE}/force_history_snapshot`,

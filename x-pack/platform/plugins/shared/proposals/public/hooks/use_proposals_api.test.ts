@@ -19,6 +19,7 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useSettleDeclinedProposal,
 } from './use_proposals_api';
 import {
   PROPOSALS_INTERNAL_URL,
@@ -631,5 +632,100 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     });
 
     await waitFor(() => expect(result.current.isDecliningP1).toBe(false));
+  });
+});
+
+describe('useSettleDeclinedProposal', () => {
+  it('reads as declining for that proposal only until its decision lands', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValueOnce({ decision: undefined }).mockResolvedValueOnce({
+      decision: 'dismissed',
+    });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => ({
+        settle: useSettleDeclinedProposal(),
+        isDecliningP1: useIsDecliningProposal('p-1'),
+        isDecliningP2: useIsDecliningProposal('p-2'),
+      }),
+      { wrapper: Wrapper }
+    );
+
+    let settled: Promise<void> | undefined;
+    act(() => {
+      settled = result.current.settle('p-1');
+    });
+
+    await waitFor(() => expect(result.current.isDecliningP1).toBe(true));
+    expect(result.current.isDecliningP2).toBe(false);
+
+    await act(async () => {
+      await settled;
+    });
+
+    await waitFor(() => expect(result.current.isDecliningP1).toBe(false));
+    expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows the decline only on the client it was given, until the decision lands', async () => {
+    let resolveDecision!: (value: { decision: string }) => void;
+    const http = makeHttp();
+    http.get.mockReturnValue(
+      new Promise((resolve) => {
+        resolveDecision = resolve;
+      })
+    );
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    // The caller (a flyout's status toggle) and the cards run in different clients.
+    const caller = createWrapper();
+    const cards = createWrapper();
+    const { result: settleHook } = renderHook(() => useSettleDeclinedProposal(), {
+      wrapper: caller.Wrapper,
+    });
+    const { result: onCallerClient } = renderHook(() => useIsDecliningProposal('p-1'), {
+      wrapper: caller.Wrapper,
+    });
+    const { result: onCardsClient } = renderHook(() => useIsDecliningProposal('p-1'), {
+      wrapper: cards.Wrapper,
+    });
+
+    let settled: Promise<void> | undefined;
+    act(() => {
+      settled = settleHook.current('p-1', cards.queryClient);
+    });
+
+    await waitFor(() => expect(onCardsClient.current).toBe(true));
+    expect(onCallerClient.current).toBe(false);
+
+    await act(async () => {
+      resolveDecision({ decision: 'dismissed' });
+      await settled;
+    });
+
+    await waitFor(() => expect(onCardsClient.current).toBe(false));
+  });
+
+  it('leaves nothing behind in the mutation cache once it settles', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValue({ decision: 'dismissed' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const { result } = renderHook(() => useSettleDeclinedProposal(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current('p-1');
+    });
+
+    expect(queryClient.getMutationCache().getAll()).toHaveLength(0);
   });
 });
