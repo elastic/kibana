@@ -6,23 +6,14 @@
  */
 
 import type { SchemaOutput } from './schema_output';
-import {
+import type {
   GetCertsParamsType,
   CertMonitorType,
   CertType,
   CertResultType,
   CertFacetCountType,
   CertFacetsType,
-} from './zod/certs';
-
-export {
-  GetCertsParamsType,
-  CertMonitorType,
-  CertType,
-  CertResultType,
-  CertFacetCountType,
-  CertFacetsType,
-};
+} from './schemas/certs';
 
 export type GetCertsParams = SchemaOutput<typeof GetCertsParamsType>;
 export type CertFacetCount = SchemaOutput<typeof CertFacetCountType>;

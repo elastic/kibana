@@ -62,7 +62,6 @@ import type {
   TaskClaimCandidate,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
-
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
@@ -702,7 +701,7 @@ export class TaskStore {
    */
   public async update(
     doc: ConcreteTaskInstance,
-    options: { validate: boolean }
+    options: { validate: boolean; refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     return this.executionContextRunner.run(() => this._update(doc, options), {
       id: 'update',
@@ -711,7 +710,7 @@ export class TaskStore {
 
   private async _update(
     doc: ConcreteTaskInstance,
-    options: { validate: boolean }
+    options: { validate: boolean; refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     let updatedSavedObject;
     let attributes;
@@ -725,7 +724,7 @@ export class TaskStore {
         doc.id,
         attributes,
         {
-          refresh: false,
+          refresh: options.refresh ?? false,
           version: doc.version,
         }
       );

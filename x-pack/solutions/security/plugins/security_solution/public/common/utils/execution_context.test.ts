@@ -42,6 +42,12 @@ describe('EA_EXECUTION_CONTEXT_NAMES', () => {
     }
   );
 
+  it('ENTITY_DETAILS_FLYOUT resolves to the exact expected string', () => {
+    expect(EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT).toBe(
+      'entity_analytics:entity_details_flyout'
+    );
+  });
+
   it('ENTITY_RESOLUTION resolves to the exact expected string', () => {
     expect(EA_EXECUTION_CONTEXT_NAMES.ENTITY_RESOLUTION).toBe('entity_analytics:entity_resolution');
   });
