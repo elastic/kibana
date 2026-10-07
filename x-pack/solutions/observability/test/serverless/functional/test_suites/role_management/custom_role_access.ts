@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'timePicker', 'common', 'header']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'timePicker', 'discover', 'header']);
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -86,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should access Discover app', async () => {
-      await pageObjects.common.navigateToApp('discover');
+      await pageObjects.discover.navigateToApp({ queryMode: 'classic' });
       await pageObjects.timePicker.setDefaultAbsoluteRange();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart', { timeout: 5000 });

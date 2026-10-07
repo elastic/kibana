@@ -181,9 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('Log Level Badge Cell', () => {
         it('should render log.level badge cell', async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-logs,logstash*');
@@ -226,9 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it("should not render log.level badge cell if it's not a logs data source", async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-*');
@@ -265,9 +261,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       describe('Service Name Cell', () => {
         it('should render service.name cell', async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-logs,logstash*');
@@ -297,9 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it("should not render service.name cell if it's not a logs data source", async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-*');
@@ -327,9 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Summary column', () => {
         it('should render a summary of the log entry replacing the original document', async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-logs,logstash*');
@@ -340,9 +330,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should NOT render the summary column if the source does not match logs', async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-*');
