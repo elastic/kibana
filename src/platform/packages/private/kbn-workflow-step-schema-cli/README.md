@@ -129,7 +129,9 @@ its bytes against the manifest `sha256`.
 ## CI generation and CDN publishing
 
 The artifact is generated in CI and committed to the repo, then published to the
-CDN from the release/serverless build pipelines.
+CDN from the release/serverless build pipelines. **Only a bot "sync" PR writes the
+committed artifact**: feature PRs never commit it, so concurrent PRs cannot conflict
+on it (see [Who commits the artifact](#who-commits-the-artifact)).
 
 ### Generation (committed to the repo)
 
@@ -166,9 +168,44 @@ The config runs exclusively via
 `.buildkite/scripts/steps/code_generation/workflow_step_schema_codegen.sh`,
 wired into the `Checks` pipeline step (`checks.sh`). It is excluded from the
 regular Jest integration lane via `.buildkite/disabled_jest_configs.json` to
-avoid a redundant double boot. Any drift is auto-committed back to the PR inline
-by `check_for_changed_files`. Set `WORKFLOW_SCHEMA_OUTPUT_DIR` to write
+avoid a redundant double boot. Set `WORKFLOW_SCHEMA_OUTPUT_DIR` to write
 elsewhere (e.g. under the gitignored `target/`) when experimenting locally.
+
+The same boot also checks the per-step `definitionHash` approvals (see
+`workflows_extensions/dev_docs/STEPS.md`). Unapproved steps are written to
+`WORKFLOW_STEP_APPROVAL_REPORT` (when set) rather than failing the test, and the
+codegen script fails PR and merge queue builds on a non-empty report.
+
+### Who commits the artifact
+
+The codegen script behaves differently per build type:
+
+| Build | Behavior |
+| --- | --- |
+| Feature PR | Generates (guards and approvals still run), annotates the PR when the schema changed, and resets `generated/` to the PR's merge-base (one auto-commit if the PR carried an old copy). The schema is never committed by feature PRs. |
+| Merge queue | Generates for the guards and approvals, then discards the output. |
+| On-merge | Generates; on drift it triggers the sync pipeline (async) and discards the output. |
+| Sync PR (`workflow_step_schema_sync_*` branch) | Generates and auto-commits as before. |
+
+The `kibana-workflow-step-schema-sync` pipeline
+(`.buildkite/scripts/steps/workflow_step_schema/sync_pr.sh`) runs on on-merge drift
+and on a daily schedule. It regenerates the schema and opens, or force-updates, a
+single `[One Workflow] Update workflow step schema` PR, which is auto-approved
+(`auto-approve-machine-prs.yml`), has no code owner, and is auto-merged through the
+merge queue. The committed copy therefore lags `main` by roughly the time of one
+sync (around 1–3 hours after a schema-changing merge).
+
+Because the committed copy can lag, publishing warns when a sync is pending (see
+below). To publish the schema of a specific commit (for example the sync PR's merge
+commit), run the `kibana-workflow-step-schema-republish` pipeline on that commit:
+
+```
+node .buildkite/scripts/steps/trigger_pipeline.ts kibana-workflow-step-schema-republish <branch> <commit> "" \
+  "CHANNEL=release BASE_VERSION=9.5.0 FULL_VERSION=9.5.0-rc1"
+```
+
+`CHANNEL` is `release` or `serverless`; `BASE_VERSION` is required for `release`.
+Add `DRY_RUN=true` to verify and stage without uploading.
 
 ### CDN layout
 
@@ -194,7 +231,10 @@ published `index.json` (the committed copy omits all three), and `gcloud storage
 the bytes with `cache-control: public, max-age=300`.
 
 The CDN publish is `soft_fail` on both paths; a Buildkite warning annotation is emitted
-on failure so the CDN staleness is visible without trawling job logs.
+on failure so the CDN staleness is visible without trawling job logs. When an open sync
+PR or a running sync/on-merge build exists for the branch, `publish_schema.sh` annotates
+that the published schema may be stale (and still publishes); the republish pipeline
+above fixes it once the sync PR has merged.
 
 ## Limitations (accepted)
 

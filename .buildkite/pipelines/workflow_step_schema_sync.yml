@@ -1,0 +1,15 @@
+steps:
+  - command: .buildkite/scripts/steps/workflow_step_schema/sync_pr.sh
+    label: 'Sync workflow step schema'
+    timeout_in_minutes: 60
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2d-standard-4
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
