@@ -102,7 +102,7 @@ const setup = ({
 } = {}) => {
   const client = {
     get: jest.fn(),
-    search: jest.fn(async ({ filter }: { filter: KueryNode }) => {
+    search: jest.fn(async ({ filter }: { filter: KueryNode; page?: number; perPage?: number }) => {
       const results = isAttachmentLookup(filter) ? attachmentHolders : searchResults;
       return { results, total: results.length };
     }),
@@ -419,6 +419,7 @@ describe('InvestigationsQueryService', () => {
 
       expect(subjectSearch).toHaveBeenCalledWith({
         spaceId: SPACE_ID,
+        size: 10_000,
         filter: [
           { terms: { subjectType: ['alert'] } },
           { terms: { subjectId: ['alert-1', 'alert-2'] } },
@@ -440,6 +441,7 @@ describe('InvestigationsQueryService', () => {
 
       expect(impactSearch).toHaveBeenCalledWith({
         spaceId: SPACE_ID,
+        size: 10_000,
         filter: [
           {
             nested: {
@@ -460,6 +462,46 @@ describe('InvestigationsQueryService', () => {
       expect(client.bulkGet).toHaveBeenCalledWith(['conv-2']);
     });
 
+    it('does not let candidates the caller cannot read take the slots of their own matches', async () => {
+      // 1,500 subject matches: the first 1,200 are other users' private investigations.
+      const ids = Array.from({ length: 1500 }, (_, i) => `conv-${i}`);
+      const readable = ids
+        .slice(1200)
+        .map((id, i) =>
+          conversation(id, { updated_at: new Date(Date.UTC(2026, 0, 1, 0, i)).toISOString() })
+        );
+      const { service, client, subjectSearch } = setup({ bulkGetResults: readable });
+      subjectSearch.mockResolvedValue(ids);
+
+      const response = await service.list(
+        request,
+        parseQuery({ subject_id: 'alert-1', sort_field: 'updated_at', per_page: 100 })
+      );
+
+      // Every candidate is read as the caller, in chunks, before anything is capped.
+      expect(client.bulkGet).toHaveBeenCalledTimes(2);
+      expect(client.bulkGet.mock.calls.flatMap(([chunk]) => chunk)).toEqual(ids);
+      expect(response.pagination.total).toBe(300);
+      expect(response.results[0].id).toBe('conv-1499');
+    });
+
+    it('caps the candidates after the access check, keeping the first ones in sort order', async () => {
+      const ids = Array.from({ length: 1200 }, (_, i) => `conv-${i}`);
+      const readable = ids.map((id, i) =>
+        conversation(id, { created_at: new Date(Date.UTC(2026, 0, 1, 0, i)).toISOString() })
+      );
+      const { service, subjectSearch } = setup({ bulkGetResults: readable });
+      subjectSearch.mockResolvedValue(ids);
+
+      const response = await service.list(
+        request,
+        parseQuery({ subject_id: 'alert-1', sort_field: 'created_at', sort_order: 'desc' })
+      );
+
+      expect(response.pagination.total).toBe(1000);
+      expect(response.results[0].id).toBe('conv-1199');
+    });
+
     it('returns nothing without reading conversations when the side indexes match nothing', async () => {
       const { service, client, impactSearch } = setup();
       impactSearch.mockResolvedValue([]);
@@ -469,6 +511,24 @@ describe('InvestigationsQueryService', () => {
       expect(response.results).toEqual([]);
       expect(client.bulkGet).not.toHaveBeenCalled();
       expect(client.search).not.toHaveBeenCalled();
+    });
+
+    it('reads past a full page of in-progress investigations for in_progress=false', async () => {
+      // The 1,000 newest investigations are all in progress; the idle ones are older.
+      const busy = Array.from({ length: 1000 }, (_, i) => conversation(`busy-${i}`));
+      const idle = Array.from({ length: 5 }, (_, i) => conversation(`idle-${i}`));
+      const { service, client } = setup({ inProgressIds: busy.map(({ id }) => id) });
+      const all = [...busy, ...idle];
+      client.search.mockImplementation(async ({ page = 1, perPage = 50 }) => {
+        const results = all.slice((page - 1) * perPage, page * perPage);
+        return { results, total: all.length };
+      });
+
+      const response = await service.list(request, parseQuery({ in_progress: 'false' }));
+
+      expect(client.search).toHaveBeenCalledTimes(2);
+      expect(response.pagination.total).toBe(5);
+      expect(response.results.map(({ id }) => id).sort()).toEqual(idle.map(({ id }) => id).sort());
     });
 
     it('reads in-progress investigations by id and excludes them for in_progress=false', async () => {

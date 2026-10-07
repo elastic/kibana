@@ -80,6 +80,21 @@ describe('InProgressResolver', () => {
     );
   });
 
+  it('judges a running execution without a heartbeat by its creation time', async () => {
+    const { resolver } = setup({
+      executions: [
+        conversationExecution('conv-old', {
+          '@timestamp': new Date(NOW - STALE_AGENT_HEARTBEAT_MS - 1).toISOString(),
+        }),
+        conversationExecution('conv-new', { '@timestamp': new Date(NOW - 1000).toISOString() }),
+      ],
+    });
+
+    await expect(resolver.findInProgressIds(request, SPACE_ID)).resolves.toEqual(
+      new Set(['conv-new'])
+    );
+  });
+
   it('checks one investigation against the running executions', async () => {
     const { resolver } = setup({ executions: [conversationExecution('conv-a')] });
 

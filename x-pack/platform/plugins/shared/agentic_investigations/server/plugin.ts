@@ -259,6 +259,7 @@ export class AgenticInvestigationsPlugin
       getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
       privileges: startPrivileges,
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     if (this.escalationsEnabled) {
@@ -314,6 +315,7 @@ export class AgenticInvestigationsPlugin
           subjects: subjects.getDocumentService(),
           impact: this.requireImpactService().getDocumentService(),
           hypotheses: this.requireHypothesesService().getDocumentService(),
+          deleteClaims: (ids, spaceId) => subjects.deleteClaimsByConversationIds(ids, spaceId),
           deleteAllClaims: () => subjects.deleteAllClaimsAcrossSpaces(),
         });
       },

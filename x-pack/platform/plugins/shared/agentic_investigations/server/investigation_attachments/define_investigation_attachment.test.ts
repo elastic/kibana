@@ -313,8 +313,9 @@ describe('InvestigationAttachmentDocService', () => {
     await expect(service.listByConversationIds(ids, SPACE_ID)).rejects.toBeInstanceOf(
       InvestigationAttachmentInvalidRequestError
     );
+    // Candidate searches may return up to Elasticsearch's result window of conversations.
     await expect(
-      service.searchConversationIds({ spaceId: SPACE_ID, filter: [], size: 1001 })
+      service.searchConversationIds({ spaceId: SPACE_ID, filter: [], size: 10_001 })
     ).rejects.toBeInstanceOf(InvestigationAttachmentInvalidRequestError);
   });
 
