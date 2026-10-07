@@ -53,4 +53,48 @@ describe('ServiceAccountsAPIClient', () => {
       });
     });
   });
+
+  describe('#delete', () => {
+    it('deletes the account through the internal route, encoding the id', async () => {
+      const http = httpServiceMock.createStartContract();
+      http.delete.mockResolvedValue({ warnings: [] });
+
+      await expect(
+        new ServiceAccountsAPIClient(http).delete('kibana/nightshift-relay')
+      ).resolves.toEqual({ warnings: [] });
+
+      expect(http.delete).toHaveBeenCalledWith(
+        '/internal/security/service_account/kibana%2Fnightshift-relay',
+        { query: {} }
+      );
+    });
+
+    it('asks the route to delete a bound account when forced', async () => {
+      const http = httpServiceMock.createStartContract();
+      http.delete.mockResolvedValue({ warnings: [] });
+
+      await new ServiceAccountsAPIClient(http).delete('kibana/nightshift-relay', { force: true });
+
+      expect(http.delete).toHaveBeenCalledWith(
+        '/internal/security/service_account/kibana%2Fnightshift-relay',
+        { query: { force: true } }
+      );
+    });
+  });
+
+  describe('#listWorkloads', () => {
+    it('gets the bound workloads from the internal route, encoding the id', async () => {
+      const http = httpServiceMock.createStartContract();
+      const response = { workloads: [] };
+      http.get.mockResolvedValue(response);
+
+      await expect(
+        new ServiceAccountsAPIClient(http).listWorkloads('kibana/nightshift-relay')
+      ).resolves.toBe(response);
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/security/service_account/kibana%2Fnightshift-relay/workloads'
+      );
+    });
+  });
 });

@@ -12,7 +12,7 @@ import {
   getLineRemainderWithoutConsoleComments,
   isEscaped,
   isInsideConsoleString,
-} from '@kbn/monaco/src/languages/console/utils';
+} from '@kbn/monaco/src/languages/definitions/console/utils';
 import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,

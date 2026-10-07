@@ -18,6 +18,8 @@ import {
 } from '@kbn/nightshift-ai';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../../types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
@@ -101,9 +103,11 @@ const validateQueriesSchema = z.object({
 
 export const createValidateQueriesTool = ({
   getScopedClients,
+  server,
   logger,
 }: {
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
   return {
@@ -113,23 +117,25 @@ export const createValidateQueriesTool = ({
       'Validate and finalize a complete KI query batch. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. A batch is finalized only when every query passes.',
     schema: validateQueriesSchema,
     handler: async ({ target_id: targetId, queries }, context) => {
-      if (queries.length === 0) {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                target_id: targetId,
-                queries: [],
-                finalized: true,
-                finalized_queries: [],
-              },
-            },
-          ],
-        };
-      }
-
       try {
+        await assertCanReadSignificantEvents({ request: context.request, server });
+
+        if (queries.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  target_id: targetId,
+                  queries: [],
+                  finalized: true,
+                  finalized_queries: [],
+                },
+              },
+            ],
+          };
+        }
+
         const scopedClients = await getScopedClients({ request: context.request });
         const stream = await scopedClients.streamsClient.getStream(targetId);
         const target = streamToAnalysisTarget(stream);
