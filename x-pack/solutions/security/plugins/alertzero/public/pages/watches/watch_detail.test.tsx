@@ -1032,7 +1032,7 @@ describe('WatchDetailPage', () => {
       expect(screen.getByTestId(`alertZeroModelsRow-${huntWorker.id}`)).toBeInTheDocument();
     });
 
-    it('drops a pending switch-on when the block appears after it was made', () => {
+    it('drops a pending switch-on when the block appears, and keeps it dropped after the block clears', () => {
       mockUseWatch.mockReturnValue({
         data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID) },
         isLoading: false,
@@ -1063,6 +1063,13 @@ describe('WatchDetailPage', () => {
 
       expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'false');
       expect(enabledSwitch(ruleTuning)).toBeDisabled();
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+
+      mockUseWorkers.mockReturnValue(workersQuery(detectionWorkers));
+      rerender(tree());
+
+      expect(enabledSwitch(ruleTuning)).toBeEnabled();
+      expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'false');
       expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
     });
 

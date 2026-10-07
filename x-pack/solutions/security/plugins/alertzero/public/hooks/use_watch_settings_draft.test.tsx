@@ -187,7 +187,7 @@ describe('useWatchSettingsDraft', () => {
     expect(savedWorkers).toEqual([written]);
   });
 
-  it('voids a pending switch-on once the Worker can no longer be switched on', async () => {
+  it('drops a pending switch-on once the Worker can no longer be switched on', async () => {
     const { result, rerender } = renderHook(
       ({ workers }: { workers: Worker[] }) => useWatchSettingsDraft(workers),
       { initialProps: { workers: [ruleTuning] } }
@@ -202,6 +202,11 @@ describe('useWatchSettingsDraft', () => {
     rerender({ workers: [blocked] });
 
     expect(result.current.resolve(blocked)).toMatchObject({ enabled: false, dirty: false });
+    expect(result.current.isDirty).toBe(false);
+
+    rerender({ workers: [ruleTuning] });
+
+    expect(result.current.resolve(ruleTuning)).toMatchObject({ enabled: false, dirty: false });
     expect(result.current.isDirty).toBe(false);
     await act(async () => {
       await result.current.save();

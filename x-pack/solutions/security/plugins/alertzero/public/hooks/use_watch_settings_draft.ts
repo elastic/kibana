@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type {
@@ -35,11 +35,13 @@ interface WorkerDraftOverlay {
   error?: string;
 }
 
-/** A pending switch-on is void while the Worker can't be switched on, so Save never sends it. */
+/** A pending switch-on is void once the Worker can't be switched on, so Save never sends it. */
+const isVoidSwitchOn = (worker: Worker, overlay: WorkerDraftOverlay | undefined): boolean =>
+  overlay?.enabled === true && !worker.enabled && isWorkerEnableBlocked(worker.blockingReasons);
+
+/** Hides a void switch-on for the render before the hook drops it from the draft. */
 const draftEnabled = (worker: Worker, overlay: WorkerDraftOverlay | undefined) =>
-  overlay?.enabled === true && !worker.enabled && isWorkerEnableBlocked(worker.blockingReasons)
-    ? undefined
-    : overlay?.enabled;
+  isVoidSwitchOn(worker, overlay) ? undefined : overlay?.enabled;
 
 const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined): boolean => {
   if (!overlay) {
@@ -65,6 +67,22 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
   const { mutateAsync } = useUpdateWorker();
   const [overlays, setOverlays] = useState<Record<string, WorkerDraftOverlay>>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  // Dropped rather than hidden, so the switch-on can't come back if the block later clears.
+  useEffect(() => {
+    setOverlays((current) => {
+      const voided = workers.filter((worker) => isVoidSwitchOn(worker, current[worker.id]));
+      if (voided.length === 0) {
+        return current;
+      }
+      const next = { ...current };
+      for (const { id } of voided) {
+        const { enabled: _dropped, ...rest } = next[id];
+        next[id] = rest;
+      }
+      return next;
+    });
+  }, [workers]);
 
   const resolve = useCallback(
     (worker: Worker) => {
