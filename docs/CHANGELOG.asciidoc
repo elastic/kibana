@@ -164,6 +164,8 @@ Machine Learning::
 
 The 8.19.22 release includes the following fixes.
 
+IMPORTANT: The 8.19.22 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/t/kibana-8-19-22-9-4-7-9-5-4-security-update-esa-2026-187/390860[security advisory] for more details.
+
 [float]
 [[fixes-v8.19.22]]
 === Fixes
