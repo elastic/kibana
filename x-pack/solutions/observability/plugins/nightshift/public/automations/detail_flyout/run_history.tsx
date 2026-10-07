@@ -355,7 +355,7 @@ export const RunHistory = ({
         css={css`
           position: sticky;
           inset-block-start: 0;
-          z-index: 1;
+          z-index: ${euiTheme.levels.content};
           display: flex;
           flex-direction: column;
           gap: ${euiTheme.size.s};

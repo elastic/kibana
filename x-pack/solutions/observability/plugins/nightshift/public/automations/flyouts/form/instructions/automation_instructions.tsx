@@ -63,7 +63,7 @@ const modes: Record<
       defaultMessage:
         'Describe how Nightshift should investigate and respond when this automation runs…',
     }),
-    icon: 'search',
+    icon: 'reporter',
     color: 'primary',
     badgeColor: 'primary',
     accent: 'textPrimary',

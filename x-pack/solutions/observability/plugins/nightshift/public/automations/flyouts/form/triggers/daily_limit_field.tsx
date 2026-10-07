@@ -15,6 +15,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { Sentence } from './pills/sentence';
 import { triggerLabels } from './translations';
 import { isValidDailyLimit } from '../validation';
@@ -124,18 +125,19 @@ export const DailyLimitField = ({
         />
       )}
       {limit > SOFT_DAILY_LIMIT && (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount={false}
           size="s"
-          color="warning"
-          iconType="alert"
           css={calloutCss}
           title={triggerLabels.highDailyLimit}
+          text={
+            <>
+              <p>{triggerLabels.getHighDailyLimitBody(limit, SOFT_DAILY_LIMIT)}</p>
+              <p>{triggerLabels.getPlanLimitBody(MAX_DAILY_LIMIT)}</p>
+            </>
+          }
           data-test-subj="automationDailyLimitSoftCapCallout"
-        >
-          <p>{triggerLabels.getHighDailyLimitBody(limit, SOFT_DAILY_LIMIT)}</p>
-          <p>{triggerLabels.getPlanLimitBody(MAX_DAILY_LIMIT)}</p>
-        </EuiCallOut>
+        />
       )}
       {!readOnly && savedLimit !== undefined && savedLimit !== limit && (
         <EuiCallOut
@@ -145,10 +147,9 @@ export const DailyLimitField = ({
           iconType="save"
           css={calloutCss}
           title={triggerLabels.getUnsavedLimitTitle(limit)}
+          text={<p>{triggerLabels.getUnsavedLimitBody(savedLimit)}</p>}
           data-test-subj="automationDailyLimitUnsavedCallout"
-        >
-          <p>{triggerLabels.getUnsavedLimitBody(savedLimit)}</p>
-        </EuiCallOut>
+        />
       )}
     </div>
   );

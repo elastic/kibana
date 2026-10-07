@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
@@ -100,18 +101,18 @@ export const AutomationsPage = (): React.ReactElement => {
     if (isInitialLoading) return <EuiLoadingSpinner size="l" />;
     if (error && !data) {
       return (
-        <EuiCallOut announceOnMount color="danger" iconType="warning">
-          <p>{AUTOMATIONS_LOAD_ERROR_TITLE}</p>
-          <EuiButton
-            data-test-subj="nightshiftAutomationsPageButton"
-            color="danger"
-            onClick={() => refetch()}
-            iconType="refresh"
-            size="s"
-          >
-            {RETRY_BUTTON_LABEL}
-          </EuiButton>
-        </EuiCallOut>
+        <KbnDangerCallout
+          announceOnMount
+          title={AUTOMATIONS_LOAD_ERROR_TITLE}
+          actionProps={{
+            primary: {
+              children: RETRY_BUTTON_LABEL,
+              iconType: 'refresh',
+              onClick: () => refetch(),
+              'data-test-subj': 'nightshiftAutomationsPageButton',
+            },
+          }}
+        />
       );
     }
     if (visibleAutomations.length === 0) {

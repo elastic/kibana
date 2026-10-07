@@ -39,7 +39,7 @@ export const AutomationActions = ({
       button={
         <EuiToolTip content={allActionsLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesVertical"
+            iconType="ellipsis"
             color="primary"
             aria-label={allActionsLabel}
             onClick={(event: React.MouseEvent) => {
