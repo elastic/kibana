@@ -37,6 +37,7 @@ export interface SimilarCasesTableProps {
   pagination: Pagination;
   selectedColumns: CasesColumnSelection[];
   onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
+  sorting?: EuiBasicTableProps<SimilarCaseUI>['sorting'];
 }
 
 export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
@@ -46,6 +47,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   pagination,
   selectedColumns,
   onSelectedColumnsChange,
+  sorting,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -135,6 +137,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
           tableCaption={i18n.TABLE_CAPTION}
           onChange={onChange}
           pagination={pagination}
+          sorting={sorting}
           columns={columns}
           data-test-subj="similar-cases-table"
           itemId="id"

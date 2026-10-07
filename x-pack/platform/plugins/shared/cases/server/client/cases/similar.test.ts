@@ -249,7 +249,7 @@ describe('similar', () => {
     );
 
     expect(mockClientArgs.services.caseService.findCases).toHaveBeenCalledWith(
-      expect.objectContaining({ sortField: 'createdAt', sortOrder: 'asc' })
+      expect.objectContaining({ sortField: 'created_at', sortOrder: 'asc' })
     );
   });
 
