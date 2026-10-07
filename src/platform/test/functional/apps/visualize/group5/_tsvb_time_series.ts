@@ -216,6 +216,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
             expect(hasMachineRawFilter).to.be(true);
             await filterBar.removeFilter('machine.os.raw');
+            await filterBar.expectNoFilter('machine.os.raw', 'win 7');
           });
 
           it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
@@ -228,7 +229,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.setChartType('Bar');
             await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.clickPanelOptions('timeSeries');
+            const renderingCount = await elasticChart.getVisualizationRenderingCount();
             await visualBuilder.setIntervalValue('1w');
+            await elasticChart.waitForRenderingCount(renderingCount + 1);
+            await visChart.waitForVisualizationRenderingStabilized();
 
             await act('vis_2', { x: -130, y: 10 });
 
