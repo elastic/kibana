@@ -13,7 +13,7 @@ import type {
 } from '../../../../../common/step_types/package_report';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import { decidePackageReport } from './decide_package_report';
+import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
@@ -35,29 +35,64 @@ export type WriteCoverageKis = (subjects: CoverageSubject[]) => Promise<Coverage
 type MintSuppression = Extract<PackageReportOutput, { status: 'packaged' }>['mintSuppression'];
 
 /**
- * True when the Investigation already carries at least one Proposal. A rerun that reaches the same
- * Investigation (reopened, or re-hunted after the hunt-once gate clears) would otherwise mint a
- * second, independent chain for what may be the very same finding: `decidePackageReport`'s
- * `subjectKey` is deterministic per finding, but nothing downstream of this step dedupes on it
- * yet, so the guard here is coarse -- it suppresses every new Proposal this run would mint, not
- * only ones that collide with an existing `subjectKey`. See the implementation
+ * Count of Proposals the Investigation already carries (any status, including settled), before
+ * this run's own proposals are minted. Used two ways: greater than zero means a rerun that reaches
+ * the same Investigation (reopened, or re-hunted after the hunt-once gate clears) would otherwise
+ * mint a second, independent chain for what may be the very same finding -- `decidePackageReport`'s
+ * `subjectKey` is deterministic per finding, but nothing downstream of this step dedupes on it yet,
+ * so the guard here is coarse, suppressing every new Proposal this run would mint, not only ones
+ * that collide with an existing `subjectKey`. It is also the baseline `expectedProposalCount` is
+ * built on (see below), so the settlement barrier each gate checks accounts for proposals that
+ * already existed before this run, not just the ones this run mints. See the implementation
  * (`check_existing_proposals.ts`) for which statuses count as "existing" and why.
  */
-export type HasExistingProposals = (investigationConversationId: string) => Promise<boolean>;
+export type CountExistingProposals = (investigationConversationId: string) => Promise<number>;
 
 export interface RunPackageReportDeps {
   listRespondActions: ListRespondActions;
   writeCoverageKis: WriteCoverageKis;
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
-  hasExistingProposals: HasExistingProposals;
+  countExistingProposals: CountExistingProposals;
 }
+
+/**
+ * The settlement barrier threshold each gate checks before closing the Investigation
+ * (`hunt_proposal_gate.yaml`'s `created_count >= expectedProposalCount`). Baselined on
+ * `existingProposalCount` rather than just `newProposalCount`: nothing on a Proposal records
+ * which run minted it, so a gate's `created_count` is always the Investigation's all-time total,
+ * never scoped to a single run. Comparing that all-time total against only this run's new-proposal
+ * count would let the barrier be satisfied by an earlier run's history alone, before this run's
+ * own proposals exist. The baseline makes the barrier track what it actually means: the all-time
+ * total has to reach "everything that existed before this run, plus everything this run adds."
+ *
+ * Exported and kept as a pure function, separate from the suppression decision above, specifically
+ * so it can be tested with `existingProposalCount > 0` and `mintSuppression: 'none'` together --
+ * a combination `runPackageReport` cannot currently produce (the existing-Proposals guard above
+ * suppresses minting entirely whenever any Proposal already exists, so in every case this
+ * actually runs today, `existingProposalCount` is 0 and this collapses to `newProposalCount`).
+ * That makes it dead weight today, but load-bearing for elastic/security-team#19822: once that
+ * phase replaces the coarse guard with real per-finding dedup, a new Proposal minting alongside
+ * an Investigation's older ones becomes exactly the case this formula exists for. Do not simplify
+ * this back to `newProposalCount` because it looks unreachable -- that is the bug this type was
+ * fixing.
+ */
+export const computeExpectedProposalCount = ({
+  mintSuppression,
+  existingProposalCount,
+  newProposalCount,
+}: {
+  mintSuppression: MintSuppression;
+  existingProposalCount: number;
+  newProposalCount: number;
+}): number => (mintSuppression === 'none' ? existingProposalCount + newProposalCount : 0);
 
 /**
  * Orchestrates packaging for one Investigation run. Throws
  * {@link PackageReportIdentityError} when the conversation id does not match the report
  * binding; returns typed `run_incomplete` when the run claimed a hit whose current-run SSE
- * state cannot be read, and when a hunt that did not complete left nothing to package.
+ * state cannot be read, when fewer current-run SSEs were found than the hunt prepared (a
+ * partial `attach_sse` foreach), and when a hunt that did not complete left nothing to package.
  */
 export const runPackageReport = async ({
   spaceId,
@@ -66,6 +101,7 @@ export const runPackageReport = async ({
   runId,
   huntStatus,
   hasConfirmedHit,
+  expectedSseCount,
   attachments,
   deps,
 }: {
@@ -75,6 +111,20 @@ export const runPackageReport = async ({
   runId: string;
   huntStatus: PackageReportInput['huntStatus'];
   hasConfirmedHit: boolean;
+  /**
+   * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
+   * output). Compared against what `readCurrentRunState` actually found: `attach_sse`'s
+   * `foreach` swallows a per-item attach failure with `continue`, so a shortfall here is
+   * otherwise invisible -- packaging would read the attachments that did land and proceed as
+   * if the run were complete, silently dropping whichever finding failed to attach.
+   *
+   * Undefined skips the check below rather than failing closed: an already-installed Worker
+   * that has not yet picked up the call site supplying this field (its `yamlTemplate` hash does
+   * not cover the imported YAML it renders, so it only updates when its own `version` bumps)
+   * must not have every packaging call start erroring just because this step's own schema
+   * changed out from under it -- that would turn a staleness gap into an outage.
+   */
+  expectedSseCount: number | undefined;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -107,10 +157,21 @@ export const runPackageReport = async ({
     // later sweep hunts it again. Closing here would have that sweep write its findings --
     // a real hit included -- into an Investigation this run had already closed.
     if (!hasConfirmedHit && huntStatus === 'success') {
+      // No SSE means no technique-level detail either, so this writes the same report-scoped
+      // fallback subject `deriveCoverageSubjects` already emits when a run's SSE names no
+      // techniques -- the one piece of "we looked" this run can honestly claim is the reportId.
+      const subjects = deriveCoverageSubjects({
+        spaceId,
+        state: { reportId, techniques: [], hasConfirmedHit: false, corroboratedTechniques: [] },
+        investigationConversationId,
+      });
+      const coverage = await deps.writeCoverageKis(subjects);
       return {
         status: 'packaged',
-        coverage: { written: [], skipped: [] },
+        coverage,
         proposals: [],
+        proposalBullets: [],
+        omittedProposalCount: 0,
         dismiss: true,
         closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
         expectedProposalCount: 0,
@@ -122,6 +183,17 @@ export const runPackageReport = async ({
       reason: hasConfirmedHit
         ? `No current-run SSE attachment for runId=${runId}`
         : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}`,
+    };
+  }
+
+  // A partial `attach_sse` foreach (some items attached, some swallowed a failure via
+  // `continue`) leaves a non-empty but short current-run state -- the gap the `!state`
+  // branch above cannot see, since it only catches a total miss. Reported the same way as a
+  // total miss: `run_incomplete`, not packaged off an incomplete finding set.
+  if (expectedSseCount !== undefined && state.sseCount < expectedSseCount) {
+    return {
+      status: 'run_incomplete',
+      reason: `Hunt prepared ${expectedSseCount} significant security event attachment(s) but only ${state.sseCount} were found for runId=${runId}; the remainder failed to attach`,
     };
   }
 
@@ -143,10 +215,11 @@ export const runPackageReport = async ({
   // hit) has no proposals to suppress, and `decidePackageReport` never returns `dismiss: false`
   // with an empty `proposals` (the analyst-recommendation fallback always fills it).
   let mintSuppression: MintSuppression = 'none';
+  let existingProposalCount = 0;
   if (!decided.dismiss) {
     try {
-      const alreadyExists = await deps.hasExistingProposals(investigationConversationId);
-      mintSuppression = alreadyExists ? 'existing_proposals' : 'none';
+      existingProposalCount = await deps.countExistingProposals(investigationConversationId);
+      mintSuppression = existingProposalCount > 0 ? 'existing_proposals' : 'none';
     } catch {
       // Fails closed: the guard's job is to never let a duplicate mint through, so the one case
       // it must not mishandle is the one where it cannot tell. But a lookup failure is not "a
@@ -162,12 +235,21 @@ export const runPackageReport = async ({
   // barrier each gate checks before closing the Investigation. Not persisted to
   // conversation metadata: the platform `investigation` template's schema has no room
   // for it.
-  const expectedProposalCount = proposals.length;
+  const expectedProposalCount = computeExpectedProposalCount({
+    mintSuppression,
+    existingProposalCount,
+    newProposalCount: proposals.length,
+  });
+
+  const { bullets: proposalBullets, omittedCount: omittedProposalCount } =
+    buildProposalSummaryBullets(proposals);
 
   return {
     status: 'packaged',
     coverage,
     proposals,
+    proposalBullets,
+    omittedProposalCount,
     // Not forced to `true`: a confirmed hit the guard suppressed is not benign. Accepted
     // consequence, not an oversight: `decidePackageReport` could not previously return
     // `dismiss: false` with an empty `proposals` (it always filled at least the

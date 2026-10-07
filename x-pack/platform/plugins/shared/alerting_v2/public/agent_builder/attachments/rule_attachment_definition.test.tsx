@@ -8,13 +8,19 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
 const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
 const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
-const mockNavigateToUrl = jest.fn();
+const mockRulesNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
-const mockPrepend = (path: string) => `/base${path}`;
+
+jest.mock('../../application/bind_locators_to_host', () => ({
+  getAlertingV2Locators: () => ({
+    rulesLocators: { navigateSync: (...args: unknown[]) => mockRulesNavigateSync(...args) },
+  }),
+}));
 
 jest.mock('@kbn/core-di-browser', () => ({
   Context: {
@@ -22,12 +28,6 @@ jest.mock('@kbn/core-di-browser', () => ({
   },
   CoreStart: (key: string) => key,
   useService: (token: unknown) => {
-    if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: mockPrepend } };
-    }
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
@@ -92,6 +92,18 @@ describe('createRuleAttachmentDefinition', () => {
     });
   });
 
+  describe('getHeader', () => {
+    it.each([
+      ['alert', 'bell'],
+      ['signal', 'chartBarVertical'],
+    ])('returns the %s kind icon', (kind, icon) => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+
+      expect(definition.getHeader!({ attachment: { data: { kind } } as any })).toEqual({ icon });
+    });
+  });
+
   describe('getActionButtons', () => {
     it('returns Preview button when not in canvas and openCanvas is provided', () => {
       const services = createMockServices();
@@ -135,7 +147,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('draft')).toBeDefined();
+      expect(getByText('Draft')).toBeDefined();
     });
 
     it('shows enabled status when origin set and enabled is undefined (server default)', () => {
@@ -147,7 +159,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('enabled')).toBeDefined();
+      expect(getByText('Enabled')).toBeDefined();
     });
 
     it('shows disabled status when origin set and enabled is false', () => {
@@ -159,7 +171,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('disabled')).toBeDefined();
+      expect(getByText('Disabled')).toBeDefined();
     });
 
     it('shows schedule interval', () => {
@@ -171,7 +183,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('Every 5m')).toBeDefined();
+      expect(getByText('Every 5 min')).toBeDefined();
     });
   });
 
@@ -344,7 +356,10 @@ describe('createRuleAttachmentDefinition', () => {
         const viewButton = buttons.find((b: { label: string }) => b.label === 'View in Rules');
         viewButton.handler();
 
-        expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('rule-123'));
+        expect(mockRulesNavigateSync).toHaveBeenCalledWith({
+          ruleId: 'rule-123',
+          host: OBSERVABILITY_ALERTING_HOST.rules,
+        });
       });
     });
   });

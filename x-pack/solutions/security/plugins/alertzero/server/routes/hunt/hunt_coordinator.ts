@@ -20,6 +20,7 @@ import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../.
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
+import { buildImpactEntities } from '../../services/watches/hunt/common/build_impact_entities';
 import { resolveScopedModel } from './lib/scoped_model';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
@@ -56,6 +57,11 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
  * Runs the two-tier hunt pipeline (Tier 1 + optional Tier 2) for a single report.
  * The coordinator does NOT write feedback — `completed_successfully` on the result
  * tells the caller whether the managed-workflow feedback step should proceed.
+ *
+ * A blocked scope answers 200 with `status: 'blocked'` rather than an error status,
+ * deliberately differing from the standalone `hunt_for_threat` route's 409: this route
+ * chains Tier 1 into Tier 2, so a caller already reads the status field either way, and
+ * `hunt_for_threat` has no such chain to read one from. See elastic/security-team#19741.
  */
 export const registerHuntCoordinatorRoute = ({
   router,
@@ -131,6 +137,9 @@ export const registerHuntCoordinatorRoute = ({
             logger,
           });
 
+          // The Worker fan-out supplies a run id so one sweep's children share it,
+          // which is what the packaging barrier and conclusion dedupe key off. Only
+          // mint one when the caller has no sweep to tie the run to.
           const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
             report_id,
             spaceId,
@@ -153,11 +162,14 @@ export const registerHuntCoordinatorRoute = ({
 
           // SSE entries ride the response only on a confirmed hit for a named
           // report; the hunt child fans out over them with ai.attachment.add.
-          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone.
-          const body: HuntCoordinatorResponse =
-            result.has_confirmed_hit && report_id
-              ? { ...result, sse: buildSseData(result, report_id, { spaceId }) }
-              : result;
+          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone. The impact
+          // entities come from those same entries, so a run attaches impact only
+          // for what it confirmed.
+          let body: HuntCoordinatorResponse = result;
+          if (result.has_confirmed_hit && report_id) {
+            const sse = buildSseData(result, report_id, { spaceId });
+            body = { ...result, sse, impacted_entities: buildImpactEntities(sse) };
+          }
           return response.ok({ body });
         } catch (err) {
           if (err instanceof InvalidHuntWindowError) {

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep, isPlainObject } from 'lodash';
+import { isPlainObject } from 'lodash';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
-import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { extractReferences, type SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { extractReferences } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import {
   deserializeEsqlControls,
@@ -21,7 +20,8 @@ import {
   applySessionTabTypeState,
   toStoredSessionSettings,
   pinnedFiltersToAppFilters,
-  fromStoredSessionSettings,
+  fromStoredClassicSessionSettings,
+  fromStoredEsqlSessionSettings,
 } from '../../common/session/session_tab_mapping';
 import {
   fromStoredSearchAndTable,
@@ -42,6 +42,7 @@ import type {
   DiscoverSessionResolveMetadata,
 } from './api_client';
 import { fromApiVisContext, toApiVisContext } from '../../common/session/vis_context';
+import { normalizeSessionFilters } from './normalize_session_filters';
 
 // Converts between API documents and Discover's in-memory sessions, including their references.
 // Shared conversions map the fields directly; this file assembles tabs, references, and metadata.
@@ -57,7 +58,7 @@ export const fromDiscoverSessionApiResponse = (
   const tabsWithReferences = data.tabs.map(fromApiTabToDiscoverTab);
   const { references: tagReferences } = toStoredTags({ tags: data.tags });
 
-  return {
+  return normalizeSessionFilters({
     id,
     title: data.title,
     description: data.description,
@@ -66,7 +67,7 @@ export const fromDiscoverSessionApiResponse = (
     managed: meta.managed ?? false,
     references: [...tagReferences, ...tabsWithReferences.flatMap(({ references }) => references)],
     ...(resolve?.outcome !== undefined && { sharingSavedObjectProps: resolve }),
-  };
+  });
 };
 
 /** Converts a Discover session into a create or upsert request body. */
@@ -102,7 +103,7 @@ const fromApiTabToDiscoverTab = (apiTab: DiscoverSessionInternalData['tabs'][num
     label: apiTab.label,
     ...tabFields,
     ...toStoredSessionSettings(apiTab),
-    serializedSearchSource: normalizeSearchSourceFilters(serializedSearchSource),
+    serializedSearchSource,
     visContext: fromApiVisContext(
       apiTab.vis_context,
       getVisContextRequestData(apiTab, getInlineDataView(serializedSearchSource)?.id)
@@ -118,13 +119,16 @@ const fromDiscoverTabToApiTab = (tab: DiscoverSessionTab): DiscoverSessionClient
     ? tab.serializedSearchSource
     : pinnedFiltersToAppFilters(tab.serializedSearchSource);
   const searchAndTableFields = fromStoredSearchAndTable(tab, searchSource);
+  const sessionSettings = isDiscoverSessionEsqlTab(searchAndTableFields)
+    ? fromStoredEsqlSessionSettings(tab)
+    : fromStoredClassicSessionSettings(tab);
 
   const apiTab = applySessionTabTypeState(
     {
       id: tab.id,
       label: tab.label,
       ...searchAndTableFields,
-      ...fromStoredSessionSettings(tab),
+      ...sessionSettings,
     },
     tab.tabTypeState
   );
@@ -159,17 +163,4 @@ const getApiVisContext = (visContext: DiscoverSessionTab['visContext']) => {
   }
 
   return toApiVisContext(visContext);
-};
-
-/** Applies FilterManager's defaults to copied filters so opening a session does not look like an edit. */
-const normalizeSearchSourceFilters = (searchSource: SerializedSearchSourceFields) => {
-  const { filter } = searchSource;
-  if (!filter) {
-    return searchSource;
-  }
-
-  return {
-    ...searchSource,
-    filter: mapAndFlattenFilters(cloneDeep(filter)),
-  };
 };

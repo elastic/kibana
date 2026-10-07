@@ -84,6 +84,16 @@ describe('buildVegaConfig', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('removes the redundant time range params from a provided PROMQL query', async () => {
+    await run(
+      'PROMQL index=metrics-tsds start=?_tstart end=?_tend load=(avg by (instance) (node_load1))'
+    );
+
+    const expectedEsql = 'PROMQL index=metrics-tsds load=(avg by (instance) (node_load1))';
+    expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(expectedEsql, {});
+    expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: expectedEsql });
+  });
+
   it('returns a valid spec when the graph omits the authoring note', async () => {
     invoke.mockResolvedValue({ spec: SPEC, error: null, esqlQuery: PROVIDED_ESQL });
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "008c5f69977cea8dc65cb9ac14853028b810b5ee",
+  "sha1": "830dd8bb3ff66650bc97bbc2f7f03f5d02073264",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -10,12 +10,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_crud.spec.ts",
-        "line": 44,
-        "column": 44
+        "line": 46,
+        "column": 24
       }
     },
     {
@@ -23,13 +23,12 @@
       "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_crud.spec.ts",
-        "line": 89,
-        "column": 41
+        "line": 96,
+        "column": 26
       }
     },
     {
@@ -41,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 36,
-        "column": 23
+        "line": 37,
+        "column": 7
       }
     },
     {
@@ -54,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 46,
-        "column": 47
+        "line": 48,
+        "column": 13
       }
     },
     {
@@ -67,8 +66,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 64,
-        "column": 11
+        "line": 65,
+        "column": 13
       }
     },
     {
