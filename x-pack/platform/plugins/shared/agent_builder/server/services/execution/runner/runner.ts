@@ -43,7 +43,7 @@ import type {
   ScopedRunnerRunAgentParams,
   SubAgentExecutor,
   WritableToolResultStore,
-  ConversationAccess,
+  ExecutionConversationAccess,
 } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -144,7 +144,7 @@ export interface CreateScopedRunnerDeps {
   /** Id of the parent execution that spawned this one, if any. */
   parentExecutionId?: string;
   /** How this run relates to its conversation. */
-  conversationAccess: ConversationAccess;
+  conversationAccess: ExecutionConversationAccess;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
   /** Experimental features enabled for this runner context. */
@@ -299,7 +299,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode: AgentExecutionMode;
     interactivity: InteractivityConfig;
     parentExecutionId?: string;
-    conversationAccess?: ConversationAccess;
+    conversationAccess?: ExecutionConversationAccess;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });

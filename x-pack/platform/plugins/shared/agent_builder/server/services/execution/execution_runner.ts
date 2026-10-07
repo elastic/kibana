@@ -28,7 +28,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
+import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
 import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import {
@@ -672,7 +672,7 @@ const toConversationAccess = ({
 }: {
   storeConversation: boolean;
   conversationOperation: ConversationOperation;
-}): ConversationAccess => {
+}): ExecutionConversationAccess => {
   if (storeConversation) {
     return 'readWrite';
   }

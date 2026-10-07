@@ -16,7 +16,7 @@ import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
 import type { ToolHandlerContext } from '../tools/handler';
-import type { ConversationAccess } from '../agents/provider';
+import type { ExecutionConversationAccess } from '../agents/provider';
 
 export { HookLifecycle, HookExecutionMode };
 
@@ -43,7 +43,7 @@ export interface BeforeAgentHookContext extends AgentHookContextBase {
    * How this run relates to its conversation. With `readOnly`, `conversationId` names a real
    * conversation that will not receive this round.
    */
-  conversationAccess: ConversationAccess;
+  conversationAccess: ExecutionConversationAccess;
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {
@@ -66,7 +66,7 @@ export interface AfterExecutionHookContext extends AgentHookContextBase {
    * How this run relates to its conversation. With `readOnly`, `conversationId` names a real
    * conversation that will not receive this round.
    */
-  conversationAccess: ConversationAccess;
+  conversationAccess: ExecutionConversationAccess;
   /** Connector used by this execution, which may differ from a folded pending round's connector. */
   connectorId?: string;
   agentConfiguration: AgentConfiguration;

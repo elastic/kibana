@@ -214,8 +214,10 @@ export interface DeploymentContext {
  *   (ephemeral run). Unrelated to the presentational `read_only` conversation flag.
  * - `none`: the run stores nothing and its conversation, if any, is a placeholder that is never
  *   persisted (one-shot run).
+ *
+ * Unrelated to conversation access control: the caller's permissions are checked separately.
  */
-export type ConversationAccess = 'readWrite' | 'readOnly' | 'none';
+export type ExecutionConversationAccess = 'readWrite' | 'readOnly' | 'none';
 
 export interface AgentHandlerContext {
   /**
@@ -365,9 +367,9 @@ export interface AgentHandlerContext {
    */
   parentExecutionId?: string;
   /**
-   * How this run relates to its conversation, see {@link ConversationAccess}.
+   * How this run relates to its conversation, see {@link ExecutionConversationAccess}.
    */
-  conversationAccess: ConversationAccess;
+  conversationAccess: ExecutionConversationAccess;
   /**
    * Sub-agent executor for spawning child agent executions.
    */

@@ -12,7 +12,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { ConversationAccess } from '@kbn/agent-builder-server';
+import type { ExecutionConversationAccess } from '@kbn/agent-builder-server';
 import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -40,7 +40,7 @@ describe('runBeforeAgentWorkflows', () => {
       conversationId?: string;
       agentId?: string;
       roundExecutionIndex?: number;
-      conversationAccess?: ConversationAccess;
+      conversationAccess?: ExecutionConversationAccess;
     } = {}
   ) => ({
     request,
