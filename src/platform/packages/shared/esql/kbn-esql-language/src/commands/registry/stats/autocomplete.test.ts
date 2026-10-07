@@ -130,8 +130,8 @@ describe('STATS Autocomplete', () => {
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
-  const suggest = async (query: string, context = mockContext) => {
-    const cursorPosition = query.length;
+  const suggest = async (query: string, context = mockContext, offset?: number) => {
+    const cursorPosition = offset ?? query.length;
     const { innerText, root, command, tokens } = findAutocompleteAstPosition(query, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
@@ -1044,6 +1044,41 @@ describe('STATS Autocomplete', () => {
             ...allGroupingFunctions,
           ]
         );
+      });
+    });
+
+    describe('columns defined in the BY clause', () => {
+      const suggestBefore = async (prefix: string, suffix: string) =>
+        (await suggest(prefix + suffix, mockContext, prefix.length)).map(({ label }) => label);
+
+      it('suggests a BY-defined column inside an aggregation function argument', async () => {
+        const labels = await suggestBefore('FROM a | STATS AVG(', ') BY abc = doubleField');
+
+        expect(labels).toContain('abc');
+      });
+
+      it('suggests a BY-defined column inside an unclosed aggregation function argument', async () => {
+        const labels = await suggestBefore('FROM a | STATS AVG(', ' BY abc = doubleField');
+
+        expect(labels).toContain('abc');
+      });
+
+      it('suggests a BY-defined column in the per-aggregation WHERE clause', async () => {
+        const labels = await suggestBefore(
+          'FROM a | STATS COUNT() WHERE ',
+          'BY abc = keywordField'
+        );
+
+        expect(labels).toContain('abc');
+      });
+
+      it('does not suggest a BY-defined column within the BY clause itself', async () => {
+        const labels = await suggestBefore(
+          'FROM a | STATS COUNT() BY abc = keywordField, def = ',
+          ''
+        );
+
+        expect(labels).not.toContain('abc');
       });
     });
   });
