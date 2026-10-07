@@ -35,7 +35,7 @@ const QUERY_ACTION_ID = 'query-action-uuid';
 const buildOsqueryContext = ({
   bulkCreate = jest.fn().mockResolvedValue(undefined),
   indicesExists = jest.fn().mockResolvedValue(true),
-  bulk = jest.fn().mockResolvedValue(undefined),
+  bulk = jest.fn().mockResolvedValue({ errors: false, items: [] }),
   reportEvent = jest.fn(),
 }: {
   bulkCreate?: jest.Mock;
@@ -131,6 +131,30 @@ describe('createActionHandler', () => {
     expect(bulk).toHaveBeenCalledTimes(1);
   });
 
+  it('throws when the osquery action document fails to index', async () => {
+    const bulk = jest.fn().mockResolvedValue({
+      errors: true,
+      items: [{ index: { status: 429, error: { type: 'es_rejected', reason: 'rejected' } } }],
+    });
+    const { context, reportEvent } = buildOsqueryContext({ bulk });
+
+    await expect(
+      createActionHandler(
+        context,
+        { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
+        {
+          space: { id: 'production' },
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+        }
+      )
+    ).rejects.toThrow(/Failed to write osquery action document .*: rejected/);
+    expect(reportEvent).not.toHaveBeenCalled();
+  });
+
+  // The top-level space_id above is dropped by Fleet Server before it reaches the
+  // agent. `data` is the only field with opaque passthrough, and osquerybeat copies
+  // it onto result / action-response documents as `action_data`, so this is what
+  // actually makes results visible in a named space.
   it('also writes space_id inside the action data blob for a named space', async () => {
     const { context, bulkCreate } = buildOsqueryContext();
 

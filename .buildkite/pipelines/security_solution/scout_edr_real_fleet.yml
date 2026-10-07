@@ -33,7 +33,7 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
-    timeout_in_minutes: 60
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '-1'
