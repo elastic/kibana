@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/charts-theme'
   - '@kbn/cloud-plugin'
-  - '@kbn/code-editor'
   - '@kbn/core'
   - '@kbn/cps'
   - '@kbn/cps-utils'
