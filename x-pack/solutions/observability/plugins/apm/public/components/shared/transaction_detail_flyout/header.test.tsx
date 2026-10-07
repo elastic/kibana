@@ -149,10 +149,7 @@ describe('useTransactionDetailFlyoutHeader', () => {
       'href',
       '/app/apm/services/checkout/alerts?kuery=transaction.name:%20%22GET%22'
     );
-    expect(badge).toHaveAttribute(
-      'aria-label',
-      '3 active alerts for GET /api/orders of checkout'
-    );
+    expect(badge).toHaveAttribute('aria-label', '3 active alerts for GET /api/orders of checkout');
     expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
     expect(badge).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutAlertsBadge');
   });
