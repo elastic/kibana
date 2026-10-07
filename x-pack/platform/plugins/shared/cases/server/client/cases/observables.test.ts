@@ -809,13 +809,13 @@ describe('bulkDeleteObservables', () => {
     expect(mockCaseService.patchCase).not.toHaveBeenCalled();
   });
 
-  it('should create a user action with the count of removed observables, not requested', async () => {
+  it('should create a user action with the count of removed observables, not requested (duplicate ids)', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
 
     await bulkDeleteObservables(
       {
-        caseId: caseSO.id,
-        observableIds: [mockObservable.id, 'missing-observable-id'],
+        caseId: caseSOWithMultipleObservables.id,
+        observableIds: [mockObservable.id, mockObservable.id],
       },
       mockClientArgs
     );
@@ -823,8 +823,8 @@ describe('bulkDeleteObservables', () => {
     expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
       userAction: {
         type: UserActionTypes.observables,
-        caseId: caseSO.id,
-        owner: 'securitySolution',
+        caseId: caseSOWithMultipleObservables.id,
+        owner: caseSOWithMultipleObservables.attributes.owner,
         user: mockClientArgs.user,
         payload: { observables: { count: 1, actionType: 'delete' } },
       },
