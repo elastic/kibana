@@ -15,10 +15,13 @@ import type { Detection, LifecycleDetection } from '@kbn/significant-events-sche
 import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '../../../common/significant_event_detection_attachment';
 import { lifecycleDetectionAttachmentSchema } from '../../../common/significant_event_detection_attachment_schema';
 import type { GetScopedClients } from '../../routes/types';
+import { canReadSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../types';
 
 interface CreateSignificantEventDetectionAttachmentTypeOptions {
   logger: Logger;
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
 }
 
 const toLifecycleDetection = (detection: Detection): LifecycleDetection | undefined => {
@@ -49,6 +52,7 @@ export const formatDetectionAsText = (detection: LifecycleDetection): string => 
 export const createSignificantEventDetectionAttachmentType = ({
   logger,
   getScopedClients,
+  server,
 }: CreateSignificantEventDetectionAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
   LifecycleDetection
@@ -57,6 +61,9 @@ export const createSignificantEventDetectionAttachmentType = ({
     detectionId: string,
     context: AttachmentResolveContext
   ): Promise<LifecycleDetection | undefined> => {
+    if (!(await canReadSignificantEvents({ request: context.request, server }))) {
+      return undefined;
+    }
     const { getDetectionClient } = await getScopedClients({ request: context.request });
 
     try {
