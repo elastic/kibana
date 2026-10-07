@@ -23,14 +23,16 @@ export const DEFAULT_VAGRANTFILE = path.join(__dirname, 'vagrant', 'Vagrantfile'
 const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
 const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promise<void> => {
-  const maxAttempts = 6;
+  // The install exec timeout should already have released `vagrant ssh`. Stay under the
+  // 10 minute enrolledEndpoint fixture: 3 × 30s plus two 2s pauses.
+  const maxAttempts = 3;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await execa.command('vagrant destroy -f', {
         env: { VAGRANT_CWD: vagrantCwd },
         stdio: ['inherit', 'pipe', 'pipe'],
-        timeout: 120_000,
+        timeout: 30_000,
       });
       return;
     } catch (error) {
@@ -45,8 +47,7 @@ const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promi
         return;
       }
 
-      // A Playwright retry can start while the previous `vagrant ssh` still holds the machine lock.
-      await new Promise((resolve) => setTimeout(resolve, 5_000));
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
     }
   }
 };
@@ -487,9 +488,10 @@ export const createVagrantHostVmClient = (
       ...(options?.timeoutMs ? { timeout: options.timeoutMs } : {}),
     });
 
-    // `vagrant ssh` only returns when the remote command exits. Stream its
-    // output so a hung `elastic-agent install` is visible before the timeout.
-    if (!options?.silent) {
+    // Stream only bounded commands. Other ssh calls (for example `unzip -p`) stay quiet
+    // until they return. A streamed failure logs the error message; other failures log `dump(e)`.
+    const streamOutput = options?.timeoutMs !== undefined && !options.silent;
+    if (streamOutput) {
       subprocess.stdout?.on('data', (chunk: Buffer) => {
         const text = chunk.toString().trimEnd();
         if (text) {
@@ -506,10 +508,15 @@ export const createVagrantHostVmClient = (
 
     const execResponse = await subprocess.catch((e) => {
       if (!options?.silent) {
-        log.error(dump(e));
+        // Streamed commands already printed stdout/stderr; log the failure reason only.
+        log.error(streamOutput ? (e instanceof Error ? e.message : String(e)) : dump(e));
       }
       throw e;
     });
+
+    if (!streamOutput && !options?.silent) {
+      log.verbose(execResponse);
+    }
 
     return {
       stdout: execResponse.stdout,

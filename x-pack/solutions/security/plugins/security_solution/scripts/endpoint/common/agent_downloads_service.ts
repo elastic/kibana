@@ -20,6 +20,23 @@ import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils
 import { SettingsStorage } from './settings_storage';
 
 const DOWNLOAD_LOCK_WAIT_MS = 10 * 60 * 1000;
+const DOWNLOAD_LOCK_POLL_MS = 500;
+
+interface DownloadLockOptions {
+  /** How long to wait for a live or unwritten lock before failing. */
+  waitMs?: number;
+  /** Delay between checks while waiting. */
+  pollMs?: number;
+}
+
+/** Positive integer pid. Empty or non-numeric text means the owner is still writing the file. */
+const readLockPid = (ownerText: string): number | undefined => {
+  const trimmed = ownerText.trim();
+  if (!/^[1-9]\d*$/.test(trimmed)) {
+    return undefined;
+  }
+  return Number(trimmed);
+};
 
 const isProcessAlive = (pid: number): boolean => {
   if (!Number.isInteger(pid) || pid <= 0) {
@@ -65,35 +82,43 @@ const removeStaleDownloadLock = (lockPath: string, expectedOwner: string): void 
   }
 
   const contents = readDownloadLock(heldAside);
-  if (contents === undefined || contents === expectedOwner) {
+  if (contents === undefined || contents.trim() === expectedOwner.trim()) {
     fs.rmSync(heldAside, { force: true });
     return;
   }
 
-  for (let attempt = 0; attempt < 5; attempt++) {
-    try {
-      fs.renameSync(heldAside, lockPath);
+  // `link` fails with EEXIST when the destination exists. `rename` would replace it.
+  try {
+    fs.linkSync(heldAside, lockPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+      fs.rmSync(heldAside, { force: true });
       return;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
-        throw error;
-      }
     }
+    throw error;
   }
+  fs.rmSync(heldAside, { force: true });
+};
 
-  throw new Error(`Displaced agent download lock could not be restored to [${lockPath}]`);
+const releaseDownloadLock = (lockPath: string): void => {
+  if (readDownloadLock(lockPath) === String(process.pid)) {
+    fs.rmSync(lockPath, { force: true });
+  }
 };
 
 /**
  * One shared tarball path is used by every worker. Hold an exclusive lock so a
  * second download does not truncate or delete the file the first one is writing.
  */
-const withDownloadLock = async <T>(
+export const withDownloadLock = async <T>(
   log: ToolingLog,
   lockPath: string,
-  run: () => Promise<T>
+  run: () => Promise<T>,
+  options?: DownloadLockOptions
 ): Promise<T> => {
   const started = Date.now();
+  const waitMs = options?.waitMs ?? DOWNLOAD_LOCK_WAIT_MS;
+  const pollMs = options?.pollMs ?? DOWNLOAD_LOCK_POLL_MS;
   let reportedWait = false;
 
   while (true) {
@@ -106,20 +131,26 @@ const withDownloadLock = async <T>(
       }
 
       const ownerText = readDownloadLock(lockPath);
-      const owner = Number(ownerText);
-      if (ownerText !== undefined && !isProcessAlive(owner)) {
-        removeStaleDownloadLock(lockPath, ownerText);
-      } else if (ownerText !== undefined) {
-        if (!reportedWait) {
-          reportedWait = true;
-          log.info(`Waiting for agent download lock held by pid ${owner}`);
-        }
+      if (ownerText !== undefined) {
+        const owner = readLockPid(ownerText);
+        if (owner !== undefined && !isProcessAlive(owner)) {
+          removeStaleDownloadLock(lockPath, ownerText);
+        } else {
+          if (!reportedWait) {
+            reportedWait = true;
+            log.info(
+              owner === undefined
+                ? 'Waiting for agent download lock contents to be written'
+                : `Waiting for agent download lock held by pid ${owner}`
+            );
+          }
 
-        if (Date.now() - started > DOWNLOAD_LOCK_WAIT_MS) {
-          throw new Error(`Timed out waiting for agent download lock [${lockPath}]`);
-        }
+          if (Date.now() - started >= waitMs) {
+            throw new Error(`Timed out waiting for agent download lock [${lockPath}]`);
+          }
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, pollMs));
+        }
       }
     }
   }
@@ -127,7 +158,7 @@ const withDownloadLock = async <T>(
   try {
     return await run();
   } finally {
-    fs.rmSync(lockPath, { force: true });
+    releaseDownloadLock(lockPath);
   }
 };
 

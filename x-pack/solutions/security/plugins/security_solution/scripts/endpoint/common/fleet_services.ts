@@ -837,6 +837,9 @@ interface EnrollHostVmWithFleetOptions {
  * @param useAgentCache
  * @param timeoutMs
  */
+/** `elastic-agent install` blocks until enrollment finishes, so cap it separately from `timeoutMs`. */
+const AGENT_INSTALL_TIMEOUT_MS = 180_000;
+
 export const enrollHostVmWithFleet = async ({
   hostVm,
   kbnClient,
@@ -930,7 +933,7 @@ export const enrollHostVmWithFleet = async ({
   // `elastic-agent install` blocks until enrollment finishes and does not
   // return output until then. Cap it so a hung install fails with the VM
   // output and the next attempt can destroy the machine.
-  await hostVm.exec(agentEnrollCommand, { timeoutMs: 180_000 });
+  await hostVm.exec(agentEnrollCommand, { timeoutMs: AGENT_INSTALL_TIMEOUT_MS });
 
   return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
 };
