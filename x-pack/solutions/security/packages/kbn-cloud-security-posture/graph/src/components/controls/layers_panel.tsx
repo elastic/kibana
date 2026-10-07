@@ -65,7 +65,11 @@ export interface LayersPanelProps {
 }
 
 /** Popover panel content shown when the graph Layers button is clicked. */
-export const LayersPanel = ({ displayOptions, onChange, showEventMetadata = true }: LayersPanelProps) => {
+export const LayersPanel = ({
+  displayOptions,
+  onChange,
+  showEventMetadata = true,
+}: LayersPanelProps) => {
   const { euiTheme } = useEuiTheme();
   // Each mounted instance gets a unique prefix so label clicks always resolve
   // to the correct <input> even when multiple LayersPanels exist in the DOM.
