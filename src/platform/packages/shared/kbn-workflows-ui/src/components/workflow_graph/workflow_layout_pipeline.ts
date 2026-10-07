@@ -203,7 +203,11 @@ export const computeWorkflowLayout = (
   // before the next branch starts — "invisible compound container" model.
   // Runs after pass 1 (which enforces declaration order using spine-only widths)
   // so this pass can assume branches are already in the correct cross-axis order.
-  const { nodes: compactedNodes, edges: compactedEdges } = enforceForkBranchCompoundOrder(
+  const {
+    nodes: compactedNodes,
+    edges: compactedEdges,
+    packedLaneHeads,
+  } = enforceForkBranchCompoundOrder(
     orderedNodes,
     orderedEdges,
     transformed,
@@ -219,13 +223,25 @@ export const computeWorkflowLayout = (
   // fallback lane, compute how much its owner moved since dagLayout and apply
   // the residual to every lane node that did not independently move by the same
   // amount (guards against a node moved by both pass 1 and this pass).
+  //
+  // Skip any lane pass 1b already repositioned (`packedLaneHeads`): that pass
+  // re-places a branch's whole fallback hierarchy — any depth, since its BFS
+  // walks into nested (fallback-of-a-fallback) lanes too — against branch-local
+  // obstacles, not by mirroring the owner's delta. For a nested lane, the owner
+  // itself is a lane node pass 1b also repositioned independently, so its delta
+  // since dagLayout need not match the nested lane's own delta; re-applying a
+  // "residual" here re-derives a bogus correction that can drag the lane back
+  // into a sibling branch's column (e.g. a fallback-of-a-fallback landing on
+  // top of the `if`'s other branch).
   let syncedNodes = compactedNodes;
   if (transformed.fallbackLanes.length > 0) {
     const nodeById = new Map(compactedNodes.map((n) => [n.id, n]));
     const syncedMap = new Map<string, DagPositionedNode>();
     // Process outer lanes first (depth ascending) so inner-lane owners already
     // have their updated position in syncedMap when the inner lane is visited.
-    const lanesByDepth = [...transformed.fallbackLanes].sort((a, b) => a.depth - b.depth);
+    const lanesByDepth = [...transformed.fallbackLanes]
+      .filter((lane) => !packedLaneHeads.has(lane.head))
+      .sort((a, b) => a.depth - b.depth);
     for (const lane of lanesByDepth) {
       const ownerNode = syncedMap.get(lane.owner) ?? nodeById.get(lane.owner);
       const ownerInitialCx = initialCentres.get(lane.owner);

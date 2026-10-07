@@ -575,7 +575,12 @@ export const enforceForkBranchCompoundOrder = (
   direction: 'TB' | 'LR',
   nodeSep: number,
   containerDescendants: ReadonlyMap<string, ReadonlySet<string>>
-): { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] } => {
+): {
+  nodes: DagPositionedNode[];
+  edges: DagPositionedEdge[];
+  /** Heads of every lane this pass fully re-placed — see packedLaneHeads below. */
+  packedLaneHeads: ReadonlySet<string>;
+} => {
   const crossAxis: 'x' | 'y' = direction === 'TB' ? 'x' : 'y';
   const mainAxis: 'x' | 'y' = crossAxis === 'x' ? 'y' : 'x';
   const crossSpan: 'width' | 'height' = crossAxis === 'x' ? 'width' : 'height';
@@ -584,6 +589,16 @@ export const enforceForkBranchCompoundOrder = (
   const mutableNodes: MutableNodes = new Map(
     nodes.map((n) => [n.id, { x: n.x, y: n.y, width: n.width, height: n.height }])
   );
+
+  // Heads of every lane re-placed by packBranchCompounds below, across the
+  // outer graph and every foreachGroup body. A lane in this set was already
+  // positioned from scratch against branch-local obstacles (any depth, since
+  // the branch-lane BFS collects nested lanes too) — the caller's post-dagre
+  // "re-sync to owner delta" pass must skip these, since that pass assumes the
+  // lane was *not* independently repositioned and its delta-matching heuristic
+  // does not hold once a lane's own owner was itself repositioned here (see
+  // workflow_layout_pipeline.ts pass 1c).
+  const packedLaneHeads = new Set<string>();
 
   // Partition lanes by host graph: outer graph (graphId === undefined) vs per-group.
   const outerLanes = transformed.fallbackLanes.filter((l) => l.graphId === undefined);
@@ -728,6 +743,7 @@ export const enforceForkBranchCompoundOrder = (
             for (const lane of queue) {
               if (!branchLaneIds.has(lane.head)) {
                 branchLanes.push(lane);
+                packedLaneHeads.add(lane.head);
                 for (const id of lane.nodes) branchLaneIds.add(id);
                 for (const nested of graphLanes) {
                   if (lane.nodes.includes(nested.owner) && !branchLaneIds.has(nested.head)) {
@@ -890,7 +906,7 @@ export const enforceForkBranchCompoundOrder = (
     return { ...original, x: updated.x, y: updated.y } as DagPositionedNode;
   });
 
-  return { nodes: resultNodes, edges: [...edges] };
+  return { nodes: resultNodes, edges: [...edges], packedLaneHeads };
 };
 
 /**

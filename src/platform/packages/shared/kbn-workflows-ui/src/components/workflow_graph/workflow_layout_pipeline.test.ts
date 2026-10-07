@@ -1000,6 +1000,75 @@ describe('spec 02 regression — named fixtures', () => {
     expect(pairs).toHaveLength(0);
   });
 
+  // ── variant G — fallback-of-a-fallback inside a fork branch ────────────────
+  // then-fallback (depth 0) itself has its own on-failure.fallback (depth 1),
+  // and else-step has its own (depth 0) fallback too — the combination that
+  // reproduces the bug (with else-step a plain step, pass 1b's local-obstacle
+  // computation happens to re-derive the same origin pass 1c would have, so
+  // the bug was latent but invisible; giving else-step its own fallback changes
+  // the branch-local obstacles enough that pass 1b and pass 1c disagree).
+  // A since-fixed bug in pass 1c's owner-delta "re-sync" re-derived a bogus
+  // correction for the depth-1 lane (whose owner is itself a lane node, not a
+  // spine node) and dragged it to land exactly on the else branch's column —
+  // invisible to findOverlappingPairs because the colliding nodes sit at
+  // different ranks; it only showed up as the else branch's long merge-edge
+  // cutting through the depth-1 lane's cards.
+  it('variant G (fallback-of-a-fallback inside then): depth-1 lane stays left of else, not just depth-0', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'then-step',
+                type: 'http',
+                'on-failure': {
+                  fallback: [
+                    {
+                      name: 'then-fallback',
+                      type: 'http',
+                      'on-failure': {
+                        fallback: [
+                          { name: 'then-fallback-2a', type: 'http' },
+                          { name: 'then-fallback-2b', type: 'http' },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            else: [
+              {
+                name: 'else-step',
+                type: 'http',
+                'on-failure': { fallback: [{ name: 'else-fallback', type: 'http' }] },
+              },
+            ],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const thenFallback2a = findNode(result.nodes, 'then-fallback-2a');
+    const thenFallback2b = findNode(result.nodes, 'then-fallback-2b');
+    const elseNode = findNode(result.nodes, 'else-step');
+    // The depth-1 lane (fallback-of-a-fallback) must stay left of the else
+    // branch by at least a full node separation, same as the depth-0 lane does.
+    expect(thenFallback2a.x + thenFallback2a.width).toBeLessThanOrEqual(
+      elseNode.x - WORKFLOW_NODE_SEP + CENTER_TOLERANCE
+    );
+    expect(thenFallback2b.x + thenFallback2b.width).toBeLessThanOrEqual(
+      elseNode.x - WORKFLOW_NODE_SEP + CENTER_TOLERANCE
+    );
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
   // ── continue: true — spine head shared between fallback and spine lanes ────
   it('continue: true — fork is not skipped (asymmetric exclusion)', () => {
     // Without the asymmetric exclusion fix, buildLaneSets would classify the
