@@ -67,9 +67,12 @@ export async function runStackMonitor(
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   monitorAbortController: AbortController
 ): Promise<void> {
+  let isFirstIteration = true;
   while (!monitorAbortController.signal.aborted) {
-    // Check cancellation immediately before waiting - ensures fast cancellation detection
-    await processNodeStackMonitoring(params, monitoredStepExecutionRuntime);
+    // The first pass skips the Elasticsearch cancel read so short steps never issue one;
+    // the remote check runs from the second pass, at most once per 500ms.
+    await processNodeStackMonitoring(params, monitoredStepExecutionRuntime, isFirstIteration);
+    isFirstIteration = false;
 
     // If monitoring was aborted during the check, exit early
     if (monitorAbortController.signal.aborted) {

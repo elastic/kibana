@@ -145,7 +145,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     monitorAbortController = new AbortController();
 
     // Run stack monitoring once before the race so timeouts/cancel win over step.run().
-    await processNodeStackMonitoring(params, stepExecutionRuntime);
+    // Cancel requests are refreshed by the background monitor, so don't await an ES read here.
+    await processNodeStackMonitoring(params, stepExecutionRuntime, true);
 
     /**
      * Run monitoring in parallel with step execution to handle:

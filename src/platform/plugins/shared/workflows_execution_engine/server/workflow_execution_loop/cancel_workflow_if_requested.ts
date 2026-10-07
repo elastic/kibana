@@ -31,9 +31,15 @@ export async function cancelWorkflowIfRequested(
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   workflowLogger: IWorkflowEventLogger,
   workflowExecutionCursor: WorkflowExecutionCursorApi,
-  monitorAbortController?: AbortController
+  monitorAbortController?: AbortController,
+  skipRemoteCheck: boolean = false
 ): Promise<void> {
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
+    // Callers on the step start path must not wait on an Elasticsearch read;
+    // the background monitor loop refreshes the flag instead.
+    if (skipRemoteCheck) {
+      return;
+    }
     try {
       const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionState.getWorkflowExecution().id,

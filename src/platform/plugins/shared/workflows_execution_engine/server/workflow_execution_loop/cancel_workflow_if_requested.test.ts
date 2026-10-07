@@ -233,6 +233,22 @@ describe('cancelWorkflowIfRequested', () => {
       expect(workflowExecutionState.upsertStep).not.toHaveBeenCalled();
     });
 
+    it('should not call ES when skipRemoteCheck is true and cancelRequested is false in state', async () => {
+      await cancelWorkflowIfRequested(
+        workflowExecutionRepository,
+        workflowExecutionState,
+        monitoredStepExecutionRuntime,
+        workflowLogger,
+        workflowExecutionCursor,
+        monitorAbortController,
+        true
+      );
+
+      expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(monitorAbortController.signal.aborted).toBe(false);
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
     it('should skip ES call when cancelRequested is already true in state', async () => {
       workflowExecution.cancelRequested = true;
       workflowExecutionState.getWorkflowExecution.mockReturnValue(workflowExecution);
