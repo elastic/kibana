@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isAttachmentEvent } from '@kbn/agent-builder-common';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedStandaloneEvent } from './context_timeline';
@@ -14,11 +15,14 @@ import type { ProcessedStandaloneEvent } from './context_timeline';
  *
  * The representation is untrusted (it is derived from an API-supplied payload), so it is
  * XML-escaped by `generateXmlTree`. The event id is deliberately not exposed: it is a
- * Kibana-internal identifier no tool consumes.
+ * Kibana-internal identifier no tool consumes. An attachment event's representation is already
+ * the complete block (see `formatAttachmentEvent`).
  */
 export const formatConversationEvent = (event: ProcessedStandaloneEvent): string =>
-  generateXmlTree({
-    tagName: 'conversation_event',
-    attributes: { type: event.type, timestamp: formatDate(event.created_at) },
-    children: [event.representation.value],
-  });
+  isAttachmentEvent(event)
+    ? event.representation.value
+    : generateXmlTree({
+        tagName: 'conversation_event',
+        attributes: { type: event.type, timestamp: formatDate(event.created_at) },
+        children: [event.representation.value],
+      });
