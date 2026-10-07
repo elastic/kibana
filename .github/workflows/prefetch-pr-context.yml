@@ -15,6 +15,11 @@ on:
         description: Artifact name used to publish the prefetched context.
         required: true
         type: string
+      include_duplicate_candidates:
+        description: Include duplicate fixer PR candidates.
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   prefetch_pr_context:
@@ -39,6 +44,21 @@ jobs:
           script: |
             const { prefetchPrContext } = require('./.github/scripts/prefetch_pr_context');
             await prefetchPrContext({ github, core });
+
+      - name: Detect duplicate fix PRs
+        if: inputs.include_duplicate_candidates
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
+            await writeDuplicateCandidates({
+              github,
+              core,
+              prNumber: Number(process.env.PR_NUMBER),
+              outputDir: '/tmp/pr-context',
+            });
 
       - name: Upload PR context artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
