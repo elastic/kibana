@@ -68,9 +68,7 @@ export type AlertTriageAttachmentServiceProvider = (
  * Hunt enable finds a required TI document missing, without owning TI YAML or
  * declaring a reverse plugin dependency.
  */
-export type ThreatIntelSupplyWorkflowInstaller = (params: {
-  spaceId: string;
-}) => Promise<void>;
+export type ThreatIntelSupplyWorkflowInstaller = (params: { spaceId: string }) => Promise<void>;
 
 /**
  * Soft-enable contract. Always returned from `setup()` so optional consumers

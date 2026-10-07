@@ -89,9 +89,9 @@ describe('Worker settings declarations', () => {
   });
 
   it('allows only Manual autonomy for Continuous Threat Hunt', () => {
-    expect(
-      getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)
-    ).toEqual(['manual']);
+    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)).toEqual(
+      ['manual']
+    );
   });
 
   it('rejects Assisted autonomy for Continuous Threat Hunt', () => {

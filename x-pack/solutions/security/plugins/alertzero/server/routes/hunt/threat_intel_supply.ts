@@ -162,8 +162,7 @@ export const registerHuntThreatIntelSupplyRoutes = ({
                 message: i18n.translate(
                   'xpack.alertzero.huntThreatIntelSupplyRestoreHuntOffErrorMessage',
                   {
-                    defaultMessage:
-                      'Turn on Hunt Watch before restoring threat intel supply.',
+                    defaultMessage: 'Turn on Hunt Watch before restoring threat intel supply.',
                   }
                 ),
               },

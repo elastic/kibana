@@ -42,10 +42,12 @@ const restoreRequest = () =>
     },
   });
 
-const setupRoutes = (supply: {
-  getSupplyStatus: jest.Mock;
-  restoreSupplyForSpace: jest.Mock;
-} | null) => {
+const setupRoutes = (
+  supply: {
+    getSupplyStatus: jest.Mock;
+    restoreSupplyForSpace: jest.Mock;
+  } | null
+) => {
   const router = httpServiceMock.createRouter();
   const getAddVersion = jest.fn();
   const postAddVersion = jest.fn();
@@ -116,11 +118,7 @@ describe('registerHuntThreatIntelSupplyRoutes', () => {
     });
     const response = httpServerMock.createResponseFactory();
 
-    await getHandler(
-      createRouteContextMock(),
-      httpServerMock.createKibanaRequest(),
-      response
-    );
+    await getHandler(createRouteContextMock(), httpServerMock.createKibanaRequest(), response);
 
     expect(response.ok).toHaveBeenCalledWith({ body: STATUS });
   });
@@ -133,11 +131,7 @@ describe('registerHuntThreatIntelSupplyRoutes', () => {
     });
     const response = httpServerMock.createResponseFactory();
 
-    await postHandler(
-      createRouteContextMock({ manageSecurity: true }),
-      restoreRequest(),
-      response
-    );
+    await postHandler(createRouteContextMock({ manageSecurity: true }), restoreRequest(), response);
 
     expect(response.ok).toHaveBeenCalledWith({ body: { ...STATUS, drift: false } });
   });
@@ -152,11 +146,7 @@ describe('registerHuntThreatIntelSupplyRoutes', () => {
     });
     const response = httpServerMock.createResponseFactory();
 
-    await postHandler(
-      createRouteContextMock({ manageSecurity: true }),
-      restoreRequest(),
-      response
-    );
+    await postHandler(createRouteContextMock({ manageSecurity: true }), restoreRequest(), response);
 
     expect(response.badRequest).toHaveBeenCalled();
   });
@@ -171,11 +161,7 @@ describe('registerHuntThreatIntelSupplyRoutes', () => {
     });
     const response = httpServerMock.createResponseFactory();
 
-    await postHandler(
-      createRouteContextMock({ manageSecurity: true }),
-      restoreRequest(),
-      response
-    );
+    await postHandler(createRouteContextMock({ manageSecurity: true }), restoreRequest(), response);
 
     expect(response.badRequest).toHaveBeenCalled();
   });
@@ -190,11 +176,7 @@ describe('registerHuntThreatIntelSupplyRoutes', () => {
     });
     const response = httpServerMock.createResponseFactory();
 
-    await postHandler(
-      createRouteContextMock({ manageSecurity: true }),
-      restoreRequest(),
-      response
-    );
+    await postHandler(createRouteContextMock({ manageSecurity: true }), restoreRequest(), response);
 
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {

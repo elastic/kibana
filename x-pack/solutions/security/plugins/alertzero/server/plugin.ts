@@ -137,8 +137,7 @@ export class AlertZeroPlugin
   };
 
   private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
-    registerAlertTriageAttachmentServiceProvider:
-      this.registerAlertTriageAttachmentServiceProvider,
+    registerAlertTriageAttachmentServiceProvider: this.registerAlertTriageAttachmentServiceProvider,
     registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
   });
 

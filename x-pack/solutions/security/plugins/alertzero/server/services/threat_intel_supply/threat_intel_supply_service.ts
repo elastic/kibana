@@ -134,7 +134,10 @@ export class ThreatIntelSupplyService {
    * Re-ensures TI workflows while Hunt is already on. Rejects when hard-gate
    * fails or Hunt is off in this space (Restore is not a substitute for enable).
    */
-  async restoreSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<ThreatIntelSupplyStatus> {
+  async restoreSupplyForSpace(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ThreatIntelSupplyStatus> {
     await this.assertHardGate(request);
     if (!(await this.isHuntEnabledInSpace(spaceId))) {
       throw new ThreatIntelSupplyHuntDisabledError();
@@ -171,9 +174,7 @@ export class ThreatIntelSupplyService {
     ]);
 
     const workflows: ThreatIntelSupplyWorkflowStatus[] = [ingest, enrich, attribute];
-    const otherSpaceHunting = !huntEnabled
-      ? await this.isHuntEnabledInOtherSpace(spaceId)
-      : false;
+    const otherSpaceHunting = !huntEnabled ? await this.isHuntEnabledInOtherSpace(spaceId) : false;
 
     if (!huntEnabled && otherSpaceHunting) {
       for (const row of workflows) {
@@ -183,9 +184,7 @@ export class ThreatIntelSupplyService {
       }
     }
 
-    const drift =
-      huntEnabled &&
-      workflows.some((row) => !row.installed || !row.enabled);
+    const drift = huntEnabled && workflows.some((row) => !row.installed || !row.enabled);
 
     return { workflows, hardGate, drift, huntEnabled };
   }
@@ -223,12 +222,7 @@ export class ThreatIntelSupplyService {
     if (existing.enabled === enabled) {
       return;
     }
-    await this.deps.management.updateWorkflow(
-      workflowId,
-      { enabled },
-      workflowSpaceId,
-      request
-    );
+    await this.deps.management.updateWorkflow(workflowId, { enabled }, workflowSpaceId, request);
   }
 
   private async readWorkflowStatus(

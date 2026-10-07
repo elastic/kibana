@@ -188,8 +188,10 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
-import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
-import { initSecurityManagedWorkflowsClient } from './workflows/managed_workflows';
+import {
+  registerSecurityManagedWorkflowOwner,
+  initSecurityManagedWorkflowsClient,
+} from './workflows/managed_workflows';
 import { installSecurityManagedWorkflowsAndMarkReady } from './workflows/security_managed_workflows';
 import { ensureThreatIntelSupplyWorkflowsForSpace } from './workflows/threat_intel_workflow/install';
 import { SecuritySolutionEventBus } from './events/event_bus';
