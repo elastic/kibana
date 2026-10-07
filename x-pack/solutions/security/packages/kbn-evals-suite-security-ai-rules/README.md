@@ -193,12 +193,12 @@ Five evaluators that query OTel spans for non-functional signals:
 
 ### Skip Wrappers
 
-`skipNegativeCases` (N/A for `category: 'negative'` examples) is applied to the ten structural CODE evaluators and to ES|QL Functional Equivalence. `skipMissingIndexFailures` (N/A when the rule creation tool failed because no index pattern matched) and `skipAgentErrors` (N/A for any other agent/environment error) are applied to those same evaluators plus Rejection and Tool Trajectory, via the `skip(...)` helper in `createEvaluateDataset`. ES|QL Functional Equivalence additionally uses `skipNonEsqlReferences` when the reference rule has no ES|QL ground truth.
+`skipNegativeCases` (N/A for `category: 'negative'` examples) is applied to the ten structural CODE evaluators and to ES|QL Functional Equivalence. `skipMissingIndexFailures` (N/A when the rule creation tool failed because no index pattern matched) and `skipAgentErrors` (N/A for any other agent/environment error) are applied to those same evaluators plus Rejection, via the `skip(...)` helper in `createEvaluateDataset`. ES|QL Functional Equivalence additionally uses `skipNonEsqlReferences` when the reference rule has no ES|QL ground truth.
 
-Three evaluators are deliberately **not** wrapped:
+Three evaluator groups are deliberately **not** wrapped with `skipNegativeCases`:
 
 - **Rejection** — it is the evaluator that scores negative cases, so it must run on them.
-- **Tool Trajectory** — negative cases are evaluated against the empty golden sequence, which is how a tool call on a refusal prompt is caught. It is still wrapped with `skipAgentErrors` / `skipMissingIndexFailures`, so an infrastructure failure returns N/A rather than a trajectory score.
+- **Tool Trajectory** — negative cases are evaluated against the empty golden sequence, which is how a tool call on a refusal prompt is caught. It uses `skipUnobservedTrajectories` / `skipMissingIndexFailures`: a failed request without an observed tool sequence or a missing-index failure returns N/A. A completed round with observed tool calls (including an empty sequence) is scored even when no rule was generated.
 - **The five trace-based observability evaluators and Skill Invocation** — they read OTel spans rather than the generated rule, and handle their missing-data cases themselves (`trace_based/factory.ts`): a missing `traceId` returns N/A (`score: null`, label `unavailable`); an invalid one, or a span query that exhausts its retries without ever producing a value, returns label `error` with no score; a metric the provider never emitted for a complete trace returns N/A with label `unavailable`; and a query that fails after a usable value was already seen returns that value with label `potentially_incomplete`. `skip(...)` is therefore not applied to them, so a missing-index example can still report `error`/`unavailable`/`potentially_incomplete` in those columns while the CODE evaluators report N/A.
 
 ## Viewing Results

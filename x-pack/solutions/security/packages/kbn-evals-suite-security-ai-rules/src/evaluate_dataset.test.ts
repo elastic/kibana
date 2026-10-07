@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createEvaluateDataset } from './evaluate_dataset';
+import {
+  clearDatasetSkipSummaries,
+  createEvaluateDataset,
+  getDatasetSkipSummaries,
+} from './evaluate_dataset';
 
 type FactoryDeps = Parameters<typeof createEvaluateDataset>[0];
 type DatasetArg = Parameters<ReturnType<typeof createEvaluateDataset>>[0]['dataset'];
@@ -56,6 +60,7 @@ const registeredEvaluatorNames = (runExperiment: jest.Mock): string[] =>
 describe('createEvaluateDataset', () => {
   afterEach(() => {
     delete process.env.SELECTED_EVALUATORS;
+    clearDatasetSkipSummaries();
   });
 
   it('registers the trace-based and skill-invocation evaluators', async () => {
@@ -77,6 +82,61 @@ describe('createEvaluateDataset', () => {
     await createEvaluateDataset(deps)({ dataset });
 
     expect(registeredEvaluatorNames(runExperiment)).toEqual([SKILL_INVOCATION_EVALUATOR]);
+  });
+
+  it('keeps infrastructure failure counters at zero when a negative case generates a rule', async () => {
+    const { deps, runExperiment } = createHarness();
+    const prompt = 'detect tomorrow before it happens';
+    const generatedRule = {
+      name: 'Impossible detection',
+      description: 'A rule that should not have been generated',
+      query: 'FROM logs-* | WHERE event.category == "process"',
+      type: 'esql',
+      language: 'esql',
+      severity: 'medium',
+      riskScore: 50,
+      interval: '5m',
+      from: 'now-6m',
+      tags: [],
+      threat: [],
+    };
+    const taskResult = {
+      generatedRule,
+      traceId: 'negative-rule-trace',
+      toolCalls: ['security.create_detection_rule'],
+    };
+    const negativeDataset: DatasetArg = {
+      name: 'negative_generated_rule',
+      description: 'Negative-case rule generation summary regression',
+      examples: [],
+    };
+    (deps.chatClient.generateRule as jest.Mock).mockResolvedValue(taskResult);
+    runExperiment.mockImplementation(async ({ task }, evaluators) => {
+      const input = { prompt };
+      const expected = { category: 'negative' };
+      const output = await task({ input, output: expected });
+      expect(output).toEqual(taskResult);
+      const rejection = evaluators.find(
+        (evaluator: { name: string }) => evaluator.name === 'Rejection'
+      );
+      expect(await rejection.evaluate({ input, output, expected, metadata: null })).toMatchObject({
+        score: 0,
+      });
+    });
+
+    await createEvaluateDataset(deps)({ dataset: negativeDataset });
+
+    expect(deps.chatClient.generateRule).toHaveBeenCalledWith(prompt);
+    expect(getDatasetSkipSummaries()).toEqual([
+      {
+        datasetName: negativeDataset.name,
+        totalExamples: 1,
+        succeeded: 0,
+        missingIndexSkips: 0,
+        otherFailures: 0,
+        otherFailureReasons: [],
+      },
+    ]);
   });
 
   describe('Tool Trajectory on the task path', () => {
