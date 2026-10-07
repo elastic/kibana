@@ -247,7 +247,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // assert new tab query contains the correct match query for the categorize function in the new tab
           expect(
             /FROM logstash-\*\s*\|\s*WHERE MATCH\(@message, .*, \{"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"\}\)/.test(
-              newTabQuery
+              newTabQuery.replace(/\s+/g, ' ')
             )
           ).to.be(true);
         });
