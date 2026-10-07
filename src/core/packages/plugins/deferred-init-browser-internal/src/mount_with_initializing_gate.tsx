@@ -16,9 +16,9 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DeferredInitStatus } from '@kbn/core-deferred-init-browser';
 
 export interface MountWithInitializingGateDeps<HistoryLocationState = unknown> {
-  /** The plugin whose deferred init this gate is waiting on. Shown in the failed-state message. */
+  /** The plugin whose `initialize()` this gate is waiting on. Shown in the failed-state message. */
   pluginId: string;
-  /** The plugin's real app mount function, called once init is `available`. */
+  /** The plugin's real app mount function, called once the plugin is `available`. */
   mount: AppMount<HistoryLocationState>;
   status$: Observable<DeferredInitStatus>;
   onRetry: () => void;
@@ -26,10 +26,11 @@ export interface MountWithInitializingGateDeps<HistoryLocationState = unknown> {
 }
 
 /**
- * Wraps a lazy plugin's app mount so it never runs until deferred init is `available`: renders
- * `<AppInitializingGate>` into the app's element while waiting, then swaps it out for the real
- * app once ready. `status$` never re-emits after `available` (it's terminal), so the gate is
- * only ever shown once, before the real app takes over the element for good.
+ * Wraps the app mount of a plugin with `initialize()` so it never runs until the plugin is
+ * `available`: renders `<AppInitializingGate>` into the app's element while waiting, then swaps
+ * it out for the real app once ready. `status$` never re-emits after `available` (it's
+ * terminal), so the gate is only ever shown once, before the real app takes over the element
+ * for good.
  *
  * @internal
  */
@@ -108,8 +109,8 @@ export function mountWithInitializingGate<HistoryLocationState = unknown>({
             }
             // This wrapper's own mount promise resolved back in `AppContainer` as soon as the gate
             // went up, so core already recorded the app as mounted and will not route this rejection
-            // to its error boundary the way it does for a non-lazy app. Without handling it here the
-            // user is left on the blank element `clearGate` just emptied.
+            // to its error boundary the way it does for an app that is not gated. Without handling
+            // it here the user is left on the blank element `clearGate` just emptied.
             //
             // Logged as well as rendered: the gate only shows `error.message`, and attaching this
             // handler is what stops the rejection reaching the global `unhandledrejection` listener

@@ -11,29 +11,28 @@ import type { Observable } from 'rxjs';
 import type { AppInitializingState, AppInitializingError } from '@kbn/core-application-browser';
 
 /**
- * Status of a plugin's server-side deferred (lazy) initialization, as observed from the browser.
+ * Status of a plugin's server-side `initialize()`, as observed from the browser.
  *
- * @public
+ * @internal
  */
 export interface DeferredInitStatus {
   status: AppInitializingState;
-  /** Present only when `status === 'failed'`: the plugin's most recent lazyInitialize() error. */
+  /** The plugin's most recent `initialize()` error; present after a failed attempt, in any state, until an attempt succeeds. */
   error?: AppInitializingError;
-  /** Present only when `status === 'failed'`: how many consecutive attempts have failed. */
+  /** How many consecutive attempts have failed; present after a failed attempt, in any state, until an attempt succeeds. */
   attempts?: number;
 }
 
 /**
- * Status of a plugin's server-side deferred (lazy) initialization, as observed from the browser.
- * Core already uses this to automatically gate a lazy plugin's registered app behind
- * `<AppInitializingGate>`; this contract exposes the same underlying poll loop for plugins that
- * need to build custom UI on top of it instead of (or in addition to) the automatic gate.
+ * Browser-side view of each plugin's server-side `initialize()` status. Core uses it to gate the
+ * registered apps of a plugin with `initialize()` behind `<AppInitializingGate>`; it is a core
+ * mechanism and is not exposed to plugins.
  *
- * @public
+ * @internal
  */
 export interface DeferredInitStart {
   /**
-   * Observable of a plugin's deferred-init status. Core owns the underlying fetch loop
+   * Observable of a plugin's initialization status. Core owns the underlying fetch loop
    * (triggering, polling, backoff, cleanup); the returned observable is shared across
    * subscribers and stops polling once no one is subscribed.
    */

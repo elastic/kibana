@@ -27,8 +27,8 @@ import type { DeferredInitEngine } from './deferred_init_engine';
 
 const GATED_METHODS: ReadonlySet<string> = new Set(['get', 'post', 'put', 'patch', 'delete']);
 
-/** The 503 response returned while a plugin's deferred init is not yet `available`. */
-const initializingResponse = (
+/** The 503 response returned while a plugin's `initialize()` has not succeeded. */
+const unavailableResponse = (
   response: KibanaResponseFactory,
   pluginId: string,
   status: PluginInitState
@@ -36,7 +36,7 @@ const initializingResponse = (
   // Both 503 trigger paths (here and the central handler for an escaped
   // PluginInitializationError) send this same `{ pluginId, status }` body so clients read one
   // stable shape. Not the default error envelope. The UI's real status channel is the un-gated
-  // core state endpoint.
+  // core plugin initialization status route.
   const body: DeferredInitUnavailableBody = { pluginId, status };
   return response.custom({
     statusCode: 503,
@@ -47,9 +47,10 @@ const initializingResponse = (
 };
 
 /**
- * Wrap a plugin's router so that, while the plugin's deferred init is not `available`, every
- * route returns `503` + `Retry-After` with body `{ status }`, and the first such request kicks
- * the deferred work. Once init succeeds, routes delegate to the original handler unchanged.
+ * Wraps a plugin's router so that, while the plugin's `initialize()` has not succeeded, every
+ * route returns `503` + `Retry-After: 1` with body `{ pluginId, status }`, and the first such
+ * request starts the plugin's `initialize()` (or retries it once background retries are
+ * exhausted). Once it succeeds, routes delegate to the original handler unchanged.
  *
  * Gating is automatic and plugin-wide: the plugin author registers routes normally. Only the
  * route-registration methods are intercepted; everything else (routerPath, getRoutes, etc.)
@@ -71,7 +72,7 @@ export function createGuardedRouter<Context extends RequestHandlerContextBase>(
     return (context, request, response) => {
       const status = engine.ensureInitialized(pluginId);
       if (status !== 'available') {
-        return initializingResponse(response, pluginId, status);
+        return unavailableResponse(response, pluginId, status);
       }
       return handler(context, request, response);
     };
@@ -113,7 +114,7 @@ function createGuardedVersionedRouter<Context extends RequestHandlerContextBase>
         route.addVersion(options, (context, request, response): MaybePromise<IKibanaResponse> => {
           const status = engine.ensureInitialized(pluginId);
           if (status !== 'available') {
-            return initializingResponse(response, pluginId, status);
+            return unavailableResponse(response, pluginId, status);
           }
           return handler(context, request, response);
         })

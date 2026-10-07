@@ -184,9 +184,7 @@ export class PluginsSystem<T extends PluginType> {
           // author writes no status code. Read-only: `status$` never starts an attempt.
           (deps as PluginsServiceSetupDeps).status.plugins.set(
             pluginName,
-            engine
-              .status$(pluginName)
-              .pipe(map((status) => toServiceStatus(pluginName, status.state)))
+            engine.status$(pluginName).pipe(map((status) => toServiceStatus(pluginName, status)))
           );
           this.log.info(
             `Plugin "${pluginName}" has an initialize() hook; its routes and apps are served once it has run.`

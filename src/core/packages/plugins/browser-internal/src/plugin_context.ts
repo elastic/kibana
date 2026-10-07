@@ -170,7 +170,6 @@ export function createPluginStartContext<
       currentLocation$: deps.application.currentLocation$,
     },
     customBranding: deps.customBranding,
-    deferredInit: deps.deferredInit,
     docLinks: deps.docLinks,
     executionContext: deps.executionContext,
     featureFlags: deps.featureFlags,

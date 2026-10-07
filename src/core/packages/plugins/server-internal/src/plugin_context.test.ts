@@ -503,6 +503,8 @@ describe('createPluginSetupContext', () => {
       const router = ctx.http.createRouter();
       expect(router).not.toBe(rawRouter);
       expect(ctx.http.createRouter()).toBe(router);
+      // Asset serving is never gated: the browser needs the plugin's bundles to render the gate.
+      expect(deps.httpResources.createRegistrar).toHaveBeenCalledWith(rawRouter);
 
       const handler = jest.fn().mockReturnValue('ok');
       router.get({ path: '/foo' } as never, handler);

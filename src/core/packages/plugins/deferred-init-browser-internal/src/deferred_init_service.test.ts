@@ -87,6 +87,27 @@ describe('DeferredInitService', () => {
     subscription.unsubscribe();
   });
 
+  it('carries the error message and attempt count through while a retry is in progress', async () => {
+    http.get.mockResolvedValue({
+      pluginId: 'pluginA',
+      status: 'initializing',
+      error: { message: 'boom' },
+      attempts: 1,
+    });
+
+    const emissions: unknown[] = [];
+    const { getStatus$ } = service.start({ http: http as any });
+    const subscription = getStatus$('pluginA').subscribe((status) => emissions.push(status));
+
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(emissions).toEqual([
+      { status: 'initializing', error: { message: 'boom' }, attempts: 1 },
+    ]);
+
+    subscription.unsubscribe();
+  });
+
   it('does not re-emit when polling the same failed status repeatedly', async () => {
     http.get.mockResolvedValue({
       pluginId: 'pluginA',

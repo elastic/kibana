@@ -35,11 +35,12 @@ const isSameStatus = (a: DeferredInitStatus, b: DeferredInitStatus): boolean =>
   a.status === b.status && a.error?.message === b.error?.message && a.attempts === b.attempts;
 
 /**
- * Owns the browser-side poll loop against core's deferred-init status endpoint, so plugins never
- * hand-roll `setInterval` + cleanup + trigger themselves. One shared, ref-counted poll per plugin
- * id: the first subscriber starts polling (which also triggers the plugin's deferred work
- * server-side, since the status endpoint's `ensureInitialized` kicks it), the last unsubscribing
- * one stops it.
+ * Owns the browser-side poll loop against core's plugin initialization status endpoint, so
+ * plugins never hand-roll `setInterval` + cleanup + trigger themselves. One shared, ref-counted
+ * poll per plugin id: the first subscriber starts polling (which also starts the plugin's
+ * `initialize()` server-side, since the status endpoint's `ensureInitialized` kicks it), the
+ * last unsubscribing one stops it. `error` and `attempts` are passed through unchanged in every
+ * state, so the gate can keep showing them during a retry.
  *
  * @internal
  */

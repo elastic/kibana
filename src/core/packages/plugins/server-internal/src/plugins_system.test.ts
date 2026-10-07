@@ -1056,7 +1056,9 @@ describe('initialize()', () => {
     expect(statusSet).toHaveBeenCalledTimes(1);
     const [pluginName, status$] = statusSet.mock.calls[0];
     expect(pluginName).toBe('pluginA');
-    await expect(firstValueFrom(status$)).resolves.toEqual(toServiceStatus('pluginA', 'idle'));
+    await expect(firstValueFrom(status$)).resolves.toEqual(
+      toServiceStatus('pluginA', { state: 'idle', attempts: 0 })
+    );
   });
 });
 

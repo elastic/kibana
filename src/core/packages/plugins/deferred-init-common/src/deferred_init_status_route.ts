@@ -10,7 +10,7 @@
 import type { PluginInitState } from './plugin_init_status';
 
 /**
- * Route pattern for core's always-available deferred-init status endpoint, shared between the
+ * Route pattern for core's always-available plugin initialization status endpoint, shared between the
  * server route registration and the browser status client so the two can't drift.
  *
  * @internal
@@ -26,9 +26,9 @@ export const DEFERRED_INIT_STATUS_ROUTE = '/internal/core/deferred_init/{pluginI
 export interface DeferredInitStatusResponse {
   pluginId: string;
   status: PluginInitState;
-  /** Present only when `status === 'failed'`: the plugin's most recent `initialize()` error. */
+  /** The plugin's most recent `initialize()` error; present after a failed attempt, in any state, until an attempt succeeds. */
   error?: { message: string };
-  /** Present only when `status === 'failed'`: how many consecutive attempts have failed. */
+  /** How many consecutive attempts have failed; present after a failed attempt, in any state, until an attempt succeeds. */
   attempts?: number;
 }
 

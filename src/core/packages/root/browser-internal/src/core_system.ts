@@ -433,7 +433,6 @@ export class CoreSystem {
       });
 
       const pricing = await this.pricing.start({ http });
-      const deferredInit = this.deferredInit.start({ http });
 
       const core: InternalCoreStart = {
         analytics,
@@ -459,7 +458,6 @@ export class CoreSystem {
         userProfile,
         rendering,
         pricing,
-        deferredInit,
       };
 
       await this.plugins.start(core);

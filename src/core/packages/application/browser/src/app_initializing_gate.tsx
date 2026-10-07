@@ -15,28 +15,29 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export type AppInitializingState = 'idle' | 'initializing' | 'available' | 'failed';
 
-/** A plugin's most recent deferred-init failure, as surfaced to the initializing UI. */
+/** A plugin's most recent `initialize()` failure, as surfaced to the initializing UI. */
 export interface AppInitializingError {
   message: string;
 }
 
 export interface AppInitializingGateProps {
-  /** Current deferred-init state. Lazy plugins get this gate automatically from `core.deferredInit`; see `@kbn/core-deferred-init-browser`. */
+  /** Current initialization state. A plugin with `initialize()` gets this gate automatically around its registered apps; see `@kbn/core-deferred-init-browser-internal`. */
   status: AppInitializingState;
-  /** The plugin whose deferred init this gate is waiting on. Shown in the failed-state message. */
+  /** The plugin whose `initialize()` this gate is waiting on. Shown in the failed-state message. */
   pluginId: string;
   /**
-   * Present when `status === 'failed'`: the underlying error, from the plugin's `lazyInitialize()`
-   * or from the application's own `mount()` -- see {@link AppInitializingGateProps.failureStage}.
+   * The underlying error, from the plugin's `initialize()` or from the application's own
+   * `mount()` -- see {@link AppInitializingGateProps.failureStage}. Present after a failed
+   * attempt; rendered only while `status === 'failed'`.
    */
   error?: AppInitializingError;
-  /** Present when `status === 'failed'`: how many consecutive attempts have failed so far. */
+  /** How many consecutive attempts have failed so far. Present after a failed attempt; rendered only while `status === 'failed'`. */
   attempts?: number;
   /**
    * Which step failed, when `status === 'failed'`. `initialization` (the default) means the
-   * plugin's deferred init threw; `mount` means deferred init succeeded but the application's own
-   * `mount()` rejected afterwards. Only the wording differs -- both offer a page reload, which is
-   * the right remediation for either.
+   * plugin's `initialize()` threw; `mount` means `initialize()` succeeded but the application's
+   * own `mount()` rejected afterwards. Only the wording differs -- both offer a page reload,
+   * which is the right remediation for either.
    */
   failureStage?: 'initialization' | 'mount';
   /** Invoked when the user clicks "Reload page" in the failed state. */

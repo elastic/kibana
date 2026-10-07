@@ -8,7 +8,7 @@
  */
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import type { IRouter, RequestHandler } from '@kbn/core-http-server';
+import type { IRouter, RequestHandler, RouteMethod, RouteRegistrar } from '@kbn/core-http-server';
 import { createGuardedRouter } from './guarded_router';
 import type { DeferredInitEngine } from './deferred_init_engine';
 
@@ -20,6 +20,11 @@ const createEngine = (
   ensureInitialized: jest.fn().mockReturnValue(status),
 });
 
+type GatedMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
+
+const registerRoute = (router: IRouter, method: GatedMethod, handler: RequestHandler) =>
+  (router[method] as unknown as RouteRegistrar<RouteMethod>)({ path: '/foo' } as never, handler);
+
 const invokeWrapped = async (wrapped: RequestHandler, engine: ReturnType<typeof createEngine>) => {
   const response = mockRouter.createResponseFactory();
   const result = await wrapped({} as never, mockRouter.createKibanaRequest(), response);
@@ -27,7 +32,7 @@ const invokeWrapped = async (wrapped: RequestHandler, engine: ReturnType<typeof 
 };
 
 describe('createGuardedRouter', () => {
-  it('returns 503 with retry-after while deferred init is not available, without calling the handler', async () => {
+  it('returns 503 with retry-after while the plugin is initializing, without calling the handler', async () => {
     const inner = mockRouter.create();
     const engine = createEngine('initializing');
     const guarded = createGuardedRouter(
@@ -98,6 +103,58 @@ describe('createGuardedRouter', () => {
       })
     );
   });
+
+  it.each<GatedMethod>(['get', 'post', 'put', 'patch', 'delete'])(
+    'gates %s routes with 503, retry-after: 1 and status failed while the last attempt failed',
+    async (method) => {
+      const inner = mockRouter.create();
+      const engine = createEngine('failed');
+      const guarded = createGuardedRouter(
+        inner as unknown as IRouter,
+        engine as unknown as DeferredInitEngine,
+        PLUGIN_ID
+      );
+      const handler = jest.fn().mockReturnValue('ok');
+
+      registerRoute(guarded, method, handler);
+      const [, wrapped] = (inner[method] as jest.Mock).mock.calls[0] as [unknown, RequestHandler];
+
+      const { response, result } = await invokeWrapped(wrapped, engine);
+
+      expect(engine.ensureInitialized).toHaveBeenCalledWith(PLUGIN_ID);
+      expect(handler).not.toHaveBeenCalled();
+      expect(response.custom).toHaveBeenCalledWith({
+        statusCode: 503,
+        headers: { 'retry-after': '1' },
+        bypassErrorFormat: true,
+        body: { pluginId: PLUGIN_ID, status: 'failed' },
+      });
+      expect(result).toBe(response.custom.mock.results[0].value);
+    }
+  );
+
+  it.each<GatedMethod>(['put', 'patch', 'delete'])(
+    'delegates %s routes to the original handler once the plugin is available',
+    async (method) => {
+      const inner = mockRouter.create();
+      const engine = createEngine('available');
+      const guarded = createGuardedRouter(
+        inner as unknown as IRouter,
+        engine as unknown as DeferredInitEngine,
+        PLUGIN_ID
+      );
+      const handler = jest.fn().mockReturnValue('ok');
+
+      registerRoute(guarded, method, handler);
+      const [, wrapped] = (inner[method] as jest.Mock).mock.calls[0] as [unknown, RequestHandler];
+
+      const { response, result } = await invokeWrapped(wrapped, engine);
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(result).toBe('ok');
+      expect(response.custom).not.toHaveBeenCalled();
+    }
+  );
 
   it('passes non-registration methods through to the underlying router', () => {
     const inner = mockRouter.create();

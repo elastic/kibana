@@ -33,7 +33,7 @@ export interface InternalCoreSetup
   > {
   application: InternalApplicationSetup;
   chrome: InternalChromeSetup;
-  /** Internal-only: used to gate a lazy plugin's registered app during setup. Not public API. */
+  /** Internal-only: used during setup to gate the registered apps of a plugin with `initialize()`. Not public API. */
   deferredInit: DeferredInitStart;
   featureFlags: FeatureFlagsSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
