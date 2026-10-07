@@ -233,7 +233,7 @@ All routes are internal and versioned (`/internal/investigations/escalations`, v
 1. Fetches the investigation through the caller's scoped client — this enforces that the caller can see the investigation they are escalating.
 2. Validates that the target is an `investigation` conversation (throws a `400` otherwise).
 3. Resolves the escalation template's declared fields at runtime via `agentBuilder.conversationTemplates.get('escalation')`.
-4. Copies the intersection of the investigation's metadata and those declared fields, **excluding `status`** (so the escalation opens with `status: 'open'` from the template default) and **excluding `linked_investigations`** (set separately to `[linked_investigation_id]`). This filter is what prevents a `400` from `workflow_execution_id`, which is declared on the investigation template but not on the escalation template.
+4. Copies the intersection of the investigation's metadata and those declared fields, **excluding `status`** (so the escalation opens with `status: 'open'` from the template default) and **excluding `linked_investigations`** (set separately to `[linked_investigation_id]`). This filter is what prevents a `400` from `workflow_execution_ids`, which is declared on the investigation template but not on the escalation template.
 5. Creates the conversation with `templateId: 'escalation'` and no explicit `agentId` — the default agent is used, so collaborators can always see the escalation regardless of their access to the investigation's agent.
 
 ### List behaviour
@@ -269,3 +269,28 @@ The filter is **fixed and server-side**: `template_id: "escalation" and not meta
 - **Last-write-wins on concurrent appends.** The array union for `linked_investigations` is computed in the service (outside the OCC write callback), so two concurrent `PATCH` requests can each read stale state and one link can be silently lost. The fix is to move the union computation into `writeConversation`'s `fields` callback. Accepted for MVP; follow-up filed.
 - **List caps at 10,000 results.** Offset pagination cannot go beyond Elasticsearch's default result window. Escalations beyond that threshold are unreachable through this API. `search_after` would be needed for deeper paging.
 - **Closed escalations are never returned.** The `status: "closed"` filter is not toggleable. A separate endpoint or a future filter parameter would be needed to retrieve closed escalations.
+
+## Investigation workflow executions
+
+The shared `investigation` template stores an ordered `workflow_execution_ids` text array.
+Seed it with the creating workflow's execution ID in `ai.conversation.create` metadata:
+
+```yaml
+metadata:
+  workflow_execution_ids: ["{{ execution.id }}"]
+```
+
+When another workflow takes over an existing investigation, append its execution ID:
+
+```yaml
+- name: append_workflow_execution
+  type: investigations.appendWorkflowExecutionId
+  with:
+    conversationId: "{{ inputs.conversationId }}"
+    workflowExecutionId: "{{ execution.id }}"
+```
+
+The step requires conversation `converse` access and the `investigation` template. It returns
+`{ workflowExecutionId }`, preserves existing order, and skips the write when the ID is already
+present. A missing list is initialized. Appends assume sequential handoffs; concurrent callers
+can overwrite each other's additions.

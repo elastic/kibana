@@ -39,6 +39,8 @@ export interface OverviewTabProps {
    * only when supplied, so an investigation without that data simply lacks the section.
    */
   sections?: OverviewSections;
+  /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
+  proposedActionsCount?: React.ReactNode;
 }
 
 /** Host-rendered overview sections, in the order the tab shows them. */
@@ -53,7 +55,14 @@ export interface OverviewSections {
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
-  ({ investigation, attachments, attachmentsService, proposedActionsContent, sections = {} }) => {
+  ({
+    investigation,
+    attachments,
+    attachmentsService,
+    proposedActionsContent,
+    proposedActionsCount,
+    sections = {},
+  }) => {
     const { summary } = investigation;
     const { subjects, impact, conclusion, trace } = sections;
     const [expanded, setExpanded] = useState(false);
@@ -116,7 +125,10 @@ export const OverviewTab = memo<OverviewTabProps>(
 
         {proposedActionsContent && (
           <EuiFlexItem>
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.proposedActions}>
+            <DetailsBlock
+              title={DETAILS_FLYOUT_LABELS.sections.proposedActions}
+              titleAppend={proposedActionsCount}
+            >
               {proposedActionsContent}
             </DetailsBlock>
           </EuiFlexItem>

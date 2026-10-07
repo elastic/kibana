@@ -137,7 +137,7 @@ export const createAlertAttachmentType = ({
         if (!canRead) {
           attachmentLogger.debug({
             message: 'Unauthorized to resolve episode attachment',
-            labels: { episode_id: alertId, space_id: context.spaceId },
+            labels: { alert_id: alertId, space_id: context.spaceId },
           });
           return undefined;
         }
@@ -160,7 +160,7 @@ export const createAlertAttachmentType = ({
         attachmentLogger.warn({
           message: 'Failed to resolve episode attachment',
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
-          labels: { episode_id: alertId, space_id: context.spaceId },
+          labels: { alert_id: alertId, space_id: context.spaceId },
           error,
         });
         return undefined;
@@ -188,7 +188,7 @@ export const createAlertAttachmentType = ({
         attachmentLogger.warn({
           message: 'Failed to check episode attachment staleness',
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
-          labels: { episode_id: attachment.origin, space_id: context.spaceId },
+          labels: { alert_id: attachment.origin, space_id: context.spaceId },
           error,
         });
         return false;
