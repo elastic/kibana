@@ -57,6 +57,8 @@ const storageSettings = {
       managedVersion: types.long({ index: false }),
       version: types.long({ index: false }),
       definitionHash: types.keyword({ index: false }),
+      // Opaque id of the workflow page URL. Indexed: the public page route looks it up.
+      pageKey: types.keyword({}),
       managedTemplateValues: types.object({ enabled: false }),
       originManagedWorkflowId: types.keyword({}),
       lifecycle: types.keyword({}),
@@ -91,6 +93,7 @@ export interface WorkflowProperties extends WorkflowAccessSubject {
   managedVersion?: number | null;
   version?: number;
   definitionHash?: string | null;
+  pageKey?: string;
   managedTemplateValues?: Record<string, unknown> | null;
   originManagedWorkflowId?: string | null;
   lifecycle?: 'static' | 'dynamic' | null;

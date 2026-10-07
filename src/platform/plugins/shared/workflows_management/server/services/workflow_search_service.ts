@@ -77,6 +77,32 @@ type WorkflowAggsResponse = Record<
 export class WorkflowSearchService {
   constructor(private readonly deps: WorkflowSearchDeps) {}
 
+  /**
+   * Finds the workflow behind a page URL. Space-scoped on purpose: a page key from one
+   * space never resolves in another, and global workflows have no page.
+   */
+  async getWorkflowByPageKey(pageKey: string, spaceId: string): Promise<WorkflowDetailDto | null> {
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: false },
+      deleted: 'not_deleted',
+    });
+    must.push({ term: { pageKey } });
+    try {
+      const response = await this.deps.esClient.search<WorkflowProperties>({
+        index: `${workflowIndexName}-*`,
+        size: 1,
+        query: { bool: { must, must_not } },
+      });
+      const [hit] = response.hits.hits;
+      return hit?._source ? transformStorageDocumentToWorkflowDto(hit._id, hit._source) : null;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
   async getWorkflowsSubscribedToTrigger(
     triggerId: string,
     spaceId: string

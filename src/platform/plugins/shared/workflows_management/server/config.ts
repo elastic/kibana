@@ -72,6 +72,20 @@ const configSchema = schema.object({
    * this plugin).
    */
   library: librarySchema,
+  /**
+   * Workflow pages (proof of concept): hosted forms for the `page` trigger, keyed by
+   * the trigger's `page-id`. Both `enabled` and `runAsApiKey` are required before the
+   * unauthenticated routes are mounted.
+   */
+  pages: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    /**
+     * Encoded Elasticsearch API key every page submission runs as. A page
+     * visitor has no Kibana identity and the execution engine requires one.
+     * Deployment-wide in this POC; the real feature stores a key per page.
+     */
+    runAsApiKey: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;

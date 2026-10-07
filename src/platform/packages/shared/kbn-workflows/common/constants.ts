@@ -107,3 +107,26 @@ export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
  * trigger node. Matches `HIGHLIGHTED_STEP_TRIGGER` in workflows_management.
  */
 export const WORKFLOW_GRAPH_FOCUS_TRIGGER = '__trigger';
+
+/**
+ * Execution metadata flag for inputs that came from an untrusted caller, such as an
+ * anonymous workflow page visitor. The engine treats those inputs as plain data and
+ * never evaluates `${{ ... }}` expressions in them.
+ */
+export const UNTRUSTED_INPUTS_METADATA_KEY = 'untrustedInputs';
+
+/** True when the execution's inputs came from an untrusted caller. */
+export const hasUntrustedInputs = (metadata: Record<string, unknown> | undefined): boolean =>
+  metadata?.[UNTRUSTED_INPUTS_METADATA_KEY] === true;
+
+/**
+ * Execution metadata a child workflow inherits from its parent: untrusted inputs stay
+ * untrusted after `workflow.execute`, so a parent cannot pass a visitor's `${{ ... }}`
+ * value to a child that would evaluate it.
+ */
+export const getInheritedChildMetadata = (
+  parentMetadata: Record<string, unknown> | undefined
+): { metadata: Record<string, unknown> } | undefined =>
+  hasUntrustedInputs(parentMetadata)
+    ? { metadata: { [UNTRUSTED_INPUTS_METADATA_KEY]: true } }
+    : undefined;
