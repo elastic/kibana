@@ -1997,6 +1997,7 @@ export class WorkflowsExecutionEnginePlugin
 
     const triggerEvents: TriggerEventsContract = {
       emitEvent: (params) => triggerEventHandler.handleEvent(params),
+      emitBatch: (params) => triggerEventHandler.handleBatch(params),
       isEnabled: this.config.eventDriven.enabled,
       isLogEventsEnabled: this.config.eventDriven.logEvents,
       maxEventChainDepth: this.config.eventDriven.maxChainDepth,
