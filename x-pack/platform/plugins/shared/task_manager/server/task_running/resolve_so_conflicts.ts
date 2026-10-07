@@ -134,6 +134,14 @@ async function resolveTaskDocumentConflictsOnce({
     );
   }
 
+  if (currentTask.attempts !== originalTask.attempts) {
+    throwNotRetryableError(
+      `Unable to resolve task document conflicts for task "${label}": task attempts has been updated by another worker`
+    );
+  }
+
+  // `startedAt` is deliberately not checked: the only writer of a non-null value is the claim, which always bumps `attempts` and sets `ownerId`, so the checks above already catch a competing claim.
+
   const scheduleChanged = !isEqual(originalTask.schedule, currentTask.schedule);
   const runAtChanged = originalTask.runAt.valueOf() !== currentTask.runAt.valueOf();
 
