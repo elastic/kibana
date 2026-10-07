@@ -6,23 +6,12 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
-  ProjectMonitorThrottlingConfigCodec,
+import type {
   ProjectMonitorCodec,
   ProjectMonitorsRequestCodec,
   LegacyProjectMonitorsRequestCodec,
   ProjectMonitorMetaDataCodec,
-  ProjectMonitorsResponseCodec,
-} from '../zod/monitor_types_project';
-
-export {
-  ProjectMonitorThrottlingConfigCodec,
-  ProjectMonitorCodec,
-  ProjectMonitorsRequestCodec,
-  LegacyProjectMonitorsRequestCodec,
-  ProjectMonitorMetaDataCodec,
-  ProjectMonitorsResponseCodec,
-};
+} from '../schemas/monitor_types_project';
 
 // io-ts typed `schedule` as `string | number`. The zod codec only accepts
 // `number | '10s' | '30s'`, so the public alias keeps the wider static type.
