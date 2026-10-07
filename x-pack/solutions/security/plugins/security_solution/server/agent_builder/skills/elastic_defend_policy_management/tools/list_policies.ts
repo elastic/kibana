@@ -89,7 +89,9 @@ export const createListPoliciesTool = ({
     id: LIST_POLICIES_TOOL_ID,
     description:
       'List Elastic Defend endpoint policies in the current space as a bounded page of identity, ' +
-      'normalized hash, and compact posture. Each item id is the reusable identifier for later get, compare, rollout status, or assess calls. A name with name_string_truncated true is display-only and is not an exact stored name. Usage and enrolled-agent counts are returned only in usage mode under endpoint-list read. Does not write policies.',
+      'normalized hash, and compact posture. Each item id is the reusable identifier for later get, compare, rollout status, or assess calls. ' +
+      'When the user requests changing an individual setting to an explicit value (including across "each" or "every" policy), do not call this tool before or alongside field-reference lookup; call field reference first and wait until that value is validated against acceptedValues before listing policies. ' +
+      'A name with name_string_truncated true is display-only and is not an exact stored name. Usage and enrolled-agent counts are returned only in usage mode under endpoint-list read. Does not write policies.',
     schema: listPoliciesSchema,
     maxResultTokens: LIST_POLICIES_MAX_RESULT_TOKENS,
     run: async (

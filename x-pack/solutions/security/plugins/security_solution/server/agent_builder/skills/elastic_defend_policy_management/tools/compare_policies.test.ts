@@ -10,6 +10,7 @@ import { createOtherResult } from '@kbn/agent-builder-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { z } from '@kbn/zod/v4';
 import { policyFactory } from '../../../../../common/endpoint/models/policy_config';
 import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
@@ -18,7 +19,6 @@ import { describePathWritability, getFieldRegistry } from '../domain/field_regis
 import { hashPolicyConfig } from '../domain/hash_policy_config';
 import { normalize } from '../domain/normalize_policy_config';
 import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
-import type { PolicyReferenceInput } from '../domain/input_schemas';
 import type { EndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
 import type { EndpointPolicyRead } from '../services/read_policy';
 import {
@@ -93,7 +93,10 @@ const createContext = () =>
     { spaceId: SPACE_ID }
   );
 
-const getResult = async (from: PolicyReferenceInput, to: PolicyReferenceInput) => {
+const getResult = async (
+  from: z.infer<typeof comparePoliciesSchema>['from'],
+  to: z.infer<typeof comparePoliciesSchema>['to']
+) => {
   const tool = createComparePoliciesTool({
     endpointAppContextService: createMockEndpointAppContextService(),
     getStartServices,
@@ -137,34 +140,26 @@ describe('createComparePoliciesTool', () => {
     });
   });
 
-  it('accepts mixed live and preset refs and rejects invalid refs', () => {
-    expect(
-      comparePoliciesSchema.parse({
-        from: { idOrName: '  policy-1  ' },
-        to: { preset: 'EDRComplete' },
-      })
-    ).toEqual({
-      from: { idOrName: 'policy-1' },
-      to: { preset: 'EDRComplete' },
-    });
-    expect(
-      comparePoliciesSchema.safeParse({
-        from: { idOrName: 'policy-1', preset: 'EDRComplete' },
-        to: { idOrName: 'policy-2' },
-      }).success
-    ).toBe(false);
-    expect(
-      comparePoliciesSchema.safeParse({
-        from: { idOrName: '' },
-        to: { idOrName: 'policy-2' },
-      }).success
-    ).toBe(false);
-    expect(
-      comparePoliciesSchema.safeParse({
-        from: { preset: 'EDRComplete' },
-        to: {},
-      }).success
-    ).toBe(false);
+  it('emits strict exclusive serialized branches', () => {
+    const jsonSchema = z.toJSONSchema(comparePoliciesSchema, { io: 'input' });
+    expect(jsonSchema.type).toBe('object');
+    expect(jsonSchema.required).toEqual(['from', 'to']);
+    for (const side of ['from', 'to'] as const) {
+      const sideSchema = jsonSchema.properties?.[side];
+      expect(sideSchema).toBeDefined();
+      if (typeof sideSchema !== 'object') {
+        throw new Error('expected a compare side schema object');
+      }
+      const branches = sideSchema.anyOf ?? [];
+      expect(branches).toHaveLength(2);
+      for (const field of ['idOrName', 'preset'] as const) {
+        const branch = branches.find((b) => field in (b.properties ?? {}));
+        expect(branch).toBeDefined();
+        expect(branch?.type).toBe('object');
+        expect(branch?.required).toEqual([field]);
+        expect(branch?.additionalProperties).toBe(false);
+      }
+    }
   });
 
   it('presents both service-read sides with digested hashes and truthful totals', async () => {
