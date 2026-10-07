@@ -7,6 +7,7 @@
 
 import { COLUMN_GAP } from './canvas_constants';
 import { applyLayout, layoutGraph } from './layout';
+import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
 describe('layoutGraph', () => {
   it('returns an empty map for no nodes', () => {
@@ -24,7 +25,8 @@ describe('layoutGraph', () => {
 
     expect(source.x).toBe(0);
     expect(destination.x).toBe(COLUMN_GAP);
-    // A 1:1 chain shares a row so the connector is a straight horizontal line.
+    // Untyped nodes fall back to a single height estimate, so sharing a row also
+    // means sharing a top edge.
     expect(source.y).toBe(destination.y);
   });
 
@@ -40,6 +42,27 @@ describe('layoutGraph', () => {
     expect(positions.get('s1')!.x).toBe(0);
     expect(positions.get('s2')!.x).toBe(0);
     expect(positions.get('s1')!.y).not.toEqual(positions.get('s2')!.y);
+  });
+
+  it('places disconnected unit nodes on rows that do not overlap classic flows', () => {
+    const positions = layoutGraph(
+      [
+        { id: 'classic-source' },
+        { id: 'classic-destination' },
+        { id: 'configured-source' },
+        { id: 'unconfigured-source' },
+      ],
+      [{ source: 'classic-source', target: 'classic-destination' }]
+    );
+
+    expect(positions.get('classic-source')!.y).toBe(positions.get('classic-destination')!.y);
+    expect(
+      new Set([
+        positions.get('classic-source')!.y,
+        positions.get('configured-source')!.y,
+        positions.get('unconfigured-source')!.y,
+      ]).size
+    ).toBe(3);
   });
 
   it('lays a multi-node chain into one column per depth (extensible topology)', () => {
@@ -62,19 +85,24 @@ describe('applyLayout', () => {
 
   it('repositions every node and preserves other node properties', () => {
     const nodes = [
-      { id: 'source', position: { x: 999, y: 999 }, type: 'source', data: { keep: true } },
-      { id: 'destination', position: { x: -50, y: 5 }, type: 'destination' },
+      {
+        id: 'source',
+        position: { x: 999, y: 999 },
+        type: SOURCE_NODE_TYPE,
+        data: { keep: true },
+      },
+      { id: 'destination', position: { x: -50, y: 5 }, type: DESTINATION_NODE_TYPE },
     ];
 
     const result = applyLayout(nodes, edges);
     const source = result.find((node) => node.id === 'source')!;
     const destination = result.find((node) => node.id === 'destination')!;
 
-    expect(source.position).toEqual({ x: 0, y: 0 });
+    expect(source.position.x).toBe(0);
+    expect(source.position).not.toEqual({ x: 999, y: 999 });
     expect(destination.position.x).toBe(COLUMN_GAP);
-    expect(source.position.y).toBe(destination.position.y);
     // Non-position fields survive the re-layout.
-    expect(source.type).toBe('source');
+    expect(source.type).toBe(SOURCE_NODE_TYPE);
     expect(source.data).toEqual({ keep: true });
   });
 

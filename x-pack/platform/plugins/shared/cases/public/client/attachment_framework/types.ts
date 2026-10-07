@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import type { EuiCommentProps, IconType, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
+import type { EuiCommentProps, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
 import type { z } from '@kbn/zod/v4';
 import type {
   UnifiedReferenceAttachmentPayload,
@@ -40,19 +40,22 @@ interface CustomAttachmentAction extends BaseAttachmentAction {
 
 export type AttachmentAction = ButtonAttachmentAction | CustomAttachmentAction;
 
-export interface AttachmentViewObject<Props = {}> {
-  timelineAvatar?: EuiCommentProps['timelineAvatar'];
+export interface AttachmentCreationActivity<Props = {}> {
   getActions?: (props: Props) => AttachmentAction[];
   event?: EuiCommentProps['event'];
   eventColor?: EuiCommentProps['eventColor'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
-  deleteSuccessTitle?: string;
+  deleteSuccessToast?: string;
   className?: string;
   css?: EuiCommentProps['css'];
 }
 
-export interface AttachmentTabViewObject<Props = {}> {
+export interface AttachmentRemovalActivity<Props = {}> {
+  event?: EuiCommentProps['event'];
+}
+
+export interface AttachmentList<Props = {}> {
   children?: React.ComponentType<Props>;
 }
 
@@ -62,8 +65,8 @@ export interface CommonAttachmentViewProps {
   permissions: CasesPermissions;
 }
 
-/** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
-export interface CommonAttachmentTabViewProps {
+/** Props for case-level attachment lists (Alerts/Events/… table hosts). */
+export interface CommonAttachmentListViewProps {
   caseData: CaseUI;
   searchTerm?: string;
 }
@@ -116,15 +119,44 @@ export interface UnifiedHybridAttachmentViewProps<
   data?: Data;
 }
 
+export interface DocumentActionProps {
+  /** Scoping id for DOM ids and test subjects — the id of the hosting activity row. */
+  id: string;
+  /** ES `_id` of the target document. */
+  documentId: string;
+  /** ES index the document lives in. Absent when the origin was never enriched. */
+  index?: string;
+}
+
+export interface WorkflowActivityLabelProps {
+  workflowName: React.ReactNode;
+  count?: number;
+}
+
+export interface AttachmentWorkflow {
+  getActivityLabel: (props: WorkflowActivityLabelProps) => React.ReactNode;
+}
+
 export interface AttachmentType<Props> {
   id: string;
-  icon: IconType;
-  displayName: string;
-  getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
-  getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
-  getAttachmentTabViewObject?: (
-    props?: CommonAttachmentTabViewProps
-  ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
+  getIcon: (props: Props) => EuiCommentProps['timelineAvatar'];
+  getLabel: () => string;
+  getCreationActivity: (props: Props) => AttachmentCreationActivity<Props>;
+  getRemovalActivity?: (props: Props) => AttachmentRemovalActivity<Props>;
+  getAttachmentList?: (
+    props?: CommonAttachmentListViewProps
+  ) => AttachmentList<CommonAttachmentListViewProps>;
+  /**
+   * Returns a control that opens the ES document this attachment type points at, for
+   * activity rows that reference the document but are not the attachment's own row
+   * (e.g. a workflow run recorded against `cases.attachment`).
+   *
+   * Return `null` when the target cannot be resolved (e.g. no `index`). Types whose
+   * documents have no flyout should omit this method entirely.
+   */
+  getDocumentAction?: (props: DocumentActionProps) => AttachmentAction | null;
+  /** Enables this registered type to render workflow activity labels. */
+  workflow?: AttachmentWorkflow;
 }
 
 interface UnifiedAttachmentSchema {
@@ -160,5 +192,5 @@ export type RegisteredUnifiedAttachmentType =
   | UnifiedHybridAttachmentType;
 
 export interface AttachmentFramework {
-  registerUnified: (unifiedAttachmentType: RegisteredUnifiedAttachmentType) => void;
+  registerAttachment: (attachmentType: RegisteredUnifiedAttachmentType) => void;
 }

@@ -420,7 +420,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
-    expect(calculateHealthStatus).toBeCalledTimes(1);
+    expect(calculateHealthStatus).toHaveBeenCalledTimes(1);
     expect(calculateHealthStatus.mock.calls[0][0].stats.capacity_estimation).toBeUndefined();
   });
 });

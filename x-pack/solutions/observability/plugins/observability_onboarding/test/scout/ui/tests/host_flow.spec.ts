@@ -25,12 +25,6 @@ test.describe.serial(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [V2_FF_ID]: false },
-      });
-    });
-
     test('Linux tile navigates to /host/linux with OTel as the selected collection method', async ({
       pageObjects,
       page,
@@ -141,14 +135,20 @@ test.describe.serial(
       page,
       pageObjects,
     }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [V2_FF_ID]: false },
-      });
-      await pageObjects.host.gotoPath('/host/linux');
-      await pageObjects.onboarding.useCaseGridByTestId.waitFor({ state: 'visible' });
-      await expect(pageObjects.host.landingWrapper).toHaveCount(0);
-      await expect(pageObjects.host.layout('linux')).toHaveCount(0);
-      await expect(page).not.toHaveURL(/\/host\//);
+      try {
+        await apiServices.core.settings({
+          'feature_flags.overrides': { [V2_FF_ID]: false },
+        });
+        await pageObjects.host.gotoPath('/host/linux');
+        await pageObjects.onboarding.useCaseGridByTestId.waitFor({ state: 'visible' });
+        await expect(pageObjects.host.landingWrapper).toHaveCount(0);
+        await expect(pageObjects.host.layout('linux')).toHaveCount(0);
+        await expect(page).not.toHaveURL(/\/host\//);
+      } finally {
+        await apiServices.core.settings({
+          'feature_flags.overrides': { [V2_FF_ID]: true },
+        });
+      }
     });
   }
 );

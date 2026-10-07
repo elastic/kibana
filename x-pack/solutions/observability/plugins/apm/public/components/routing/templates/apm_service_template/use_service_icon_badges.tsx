@@ -15,6 +15,7 @@ import React, { useMemo } from 'react';
 import { isOpenTelemetryAgentName } from '../../../../../common/agent_name';
 import { ServerlessType } from '../../../../../common/serverless';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { APM_EBT_ACTIONS, SERVICE_HEADER_EBT_ELEMENTS } from '../../../app/ebt_constants';
 import { getContainerIcon } from '../../../shared/service_icons';
 import { ServiceIconBadge } from '../../../shared/service_icons/service_icon_badge';
 
@@ -47,9 +48,10 @@ function getServerlessTitle(serverlessType?: ServerlessType): string {
 
 function useServiceIconCandidates({
   serviceName,
+  environment,
   start,
   end,
-}: Pick<Props, 'serviceName' | 'start' | 'end'>) {
+}: Pick<Props, 'serviceName' | 'environment' | 'start' | 'end'>) {
   const isDarkMode = useKibanaIsDarkMode();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
@@ -58,12 +60,12 @@ function useServiceIconCandidates({
         return callApmApi('GET /internal/apm/services/{serviceName}/metadata/icons', {
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { start, end, environment },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end, environment]
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
@@ -72,7 +74,7 @@ function useServiceIconCandidates({
     return [
       {
         key: 'service' as const,
-        iconType: getAgentIcon(icons?.agentName, isDarkMode) || 'node',
+        iconType: getAgentIcon(icons?.agentName, isDarkMode) || 'vectorTriangle',
         title: i18n.translate('xpack.apm.serviceIcons.service', {
           defaultMessage: 'Service',
         }),
@@ -98,7 +100,7 @@ function useServiceIconCandidates({
       },
       {
         key: 'serverless' as const,
-        iconType: getServerlessIcon(icons?.serverlessType) || 'node',
+        iconType: getServerlessIcon(icons?.serverlessType) || 'vectorTriangle',
         title: getServerlessTitle(icons?.serverlessType),
         isVisible: !!icons?.serverlessType,
       },
@@ -127,7 +129,12 @@ export function useServiceIconBadges({
   start,
   end,
 }: Props): AppHeaderBadge[] {
-  const { candidates, isLoading } = useServiceIconCandidates({ serviceName, start, end });
+  const { candidates, isLoading } = useServiceIconCandidates({
+    serviceName,
+    environment,
+    start,
+    end,
+  });
 
   return useMemo(() => {
     if (isLoading) {
@@ -155,6 +162,11 @@ export function useServiceIconBadges({
           environment={environment}
           start={start}
           end={end}
+          ebt={{
+            action: APM_EBT_ACTIONS.VIEW_SERVICE_METADATA,
+            element: SERVICE_HEADER_EBT_ELEMENTS.ICON_BADGE,
+            detail: item.key,
+          }}
         />
       ),
     }));

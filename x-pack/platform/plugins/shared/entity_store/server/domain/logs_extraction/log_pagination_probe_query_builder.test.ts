@@ -6,6 +6,9 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+import type { ExtractionMode } from '../../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { TIMESTAMP_FIELD } from './query_builder_commons';
 import {
   LOG_EXTRACTION_SAMPLE_PROBABILITY,
@@ -16,6 +19,8 @@ import {
   roundSampleProbability,
   scaledProbeLimit,
 } from './log_pagination_probe_query_builder';
+
+const userDefinition = getEntityDefinition('user', 'default');
 
 describe('roundSampleProbability', () => {
   it('bounds a long floating-point value to 4 decimal places', () => {
@@ -45,7 +50,7 @@ describe('buildLogPaginationCursorProbeEsql', () => {
   it('samples, sorts ASC, limits to the scaled sample size, then aggregates MAX(timestamp) and COUNT(*)', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
-      type: 'user',
+      entityDefinition: userDefinition,
       fromDateISO: '2024-01-01T00:00:00.000Z',
       toDateISO: '2024-01-02T00:00:00.000Z',
       maxLogsPerPage: 100,
@@ -56,7 +61,7 @@ describe('buildLogPaginationCursorProbeEsql', () => {
   it('emits a SAMPLE stage and a LIMIT scaled to a custom sample probability', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
-      type: 'user',
+      entityDefinition: userDefinition,
       fromDateISO: '2024-01-01T00:00:00.000Z',
       toDateISO: '2024-01-02T00:00:00.000Z',
       maxLogsPerPage: 100,
@@ -70,7 +75,7 @@ describe('buildLogPaginationCursorProbeEsql', () => {
   it('defaults sampleProbability to LOG_EXTRACTION_SAMPLE_PROBABILITY when omitted', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
-      type: 'user',
+      entityDefinition: userDefinition,
       fromDateISO: '2024-01-01T00:00:00.000Z',
       toDateISO: '2024-01-02T00:00:00.000Z',
       maxLogsPerPage: 100,
@@ -82,7 +87,7 @@ describe('buildLogPaginationCursorProbeEsql', () => {
   it('omits the SAMPLE stage entirely at sampleProbability=1 (exact, unsampled probe)', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
-      type: 'user',
+      entityDefinition: userDefinition,
       fromDateISO: '2024-01-01T00:00:00.000Z',
       toDateISO: '2024-01-02T00:00:00.000Z',
       maxLogsPerPage: 100,
@@ -96,7 +101,7 @@ describe('buildLogPaginationCursorProbeEsql', () => {
   it('rounds a long floating-point sampleProbability before embedding it in the query', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
-      type: 'user',
+      entityDefinition: userDefinition,
       fromDateISO: '2024-01-01T00:00:00.000Z',
       toDateISO: '2024-01-02T00:00:00.000Z',
       maxLogsPerPage: 3000,
@@ -105,6 +110,52 @@ describe('buildLogPaginationCursorProbeEsql', () => {
     expect(q).toContain('| SAMPLE 0.8333');
     expect(q).not.toContain('0.8333333333333334');
   });
+});
+
+/**
+ * The probe draws the slice boundary and feeds the volume cap, so it has to see exactly the
+ * documents the extraction query will go on to read. A gate reaching one but not the other would
+ * strand logs inside a slice that no pass ever scans.
+ */
+describe('buildLogPaginationCursorProbeEsql extraction gate', () => {
+  const probeFor = (extractionMode: ExtractionMode) =>
+    buildLogPaginationCursorProbeEsql({
+      indexPatterns: ['logs-*'],
+      entityDefinition: getEntityDefinition('user', 'default', extractionMode),
+      fromDateISO: '2024-01-01T00:00:00.000Z',
+      toDateISO: '2024-01-02T00:00:00.000Z',
+      maxLogsPerPage: 100,
+    });
+
+  it('single: probes without a gate', () => {
+    expect(probeFor(EXTRACTION_MODE.single)).not.toContain('event.kind');
+  });
+
+  it('priority: probes only asset documents', () => {
+    expect(probeFor(EXTRACTION_MODE.priority)).toContain(
+      'AND (MV_CONTAINS(TO_STRING(event.kind), "asset"))'
+    );
+  });
+
+  it('nonPriority: probes the complement, including documents without event.kind', () => {
+    expect(probeFor(EXTRACTION_MODE.nonPriority)).toContain(
+      'AND (TO_STRING(event.kind) IS NULL OR NOT (MV_CONTAINS(TO_STRING(event.kind), "asset")))'
+    );
+  });
+
+  it.each([EXTRACTION_MODE.priority, EXTRACTION_MODE.nonPriority] as const)(
+    '%s: the gate is the only difference from the single probe',
+    (extractionMode) => {
+      const gateLine = probeFor(extractionMode)
+        .split('\n')
+        .find((line) => line.includes('event.kind'));
+
+      expect(gateLine).toBeDefined();
+      expect(probeFor(extractionMode).replace(`\n${gateLine}`, '')).toBe(
+        probeFor(EXTRACTION_MODE.single)
+      );
+    }
+  );
 });
 
 describe('interpretLogPaginationCursorRows', () => {

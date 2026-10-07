@@ -96,7 +96,10 @@ export const getLatestEntityMetadataDoc = async <TDoc>(
     const response = await esClient.search<TDoc>({
       index: params.index,
       size: 1,
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      // `unmapped_type` keeps this a graceful "no hits" instead of a hard
+      // search_phase_execution_exception on a backing index where `@timestamp`
+      // has no mapping yet (e.g. a freshly auto-created index that never received a document).
+      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       query: {
         bool: {
           filter: [

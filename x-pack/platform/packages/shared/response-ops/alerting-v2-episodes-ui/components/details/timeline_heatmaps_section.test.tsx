@@ -104,8 +104,10 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     );
 
     expect(
-      screen.getByTestId('alertingV2EpisodeTimelineHeatmapsSectionLoading')
-    ).toBeInTheDocument();
+      screen
+        .getByTestId('alertingV2EpisodeTimelineHeatmapsSectionLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('renders an error state when events fail to load', async () => {

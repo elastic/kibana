@@ -31,10 +31,6 @@ import { InvestigationFlyout } from './investigation_flyout';
 
 type FlyoutScenario =
   | 'investigationCompleted'
-  | 'investigationRunning'
-  | 'investigationLoading'
-  | 'investigationFailed'
-  | 'investigationUnavailable'
   | 'investigationEmpty'
   | 'investigationWithoutChat'
   | 'eventInvestigationCompleted'
@@ -61,45 +57,6 @@ const signalWithVerdict = (verdict: SignalEntry['verdict']): SignalEntry => ({
 
 const renderScenario = (scenario: FlyoutScenario): React.ReactElement => {
   switch (scenario) {
-    case 'investigationRunning':
-      return (
-        <InvestigationFlyout
-          eventTitle={checkoutEvent.title}
-          investigation={runningInvestigation}
-          status="running"
-          state={runningInvestigationState}
-          onClose={noop}
-        />
-      );
-    case 'investigationLoading':
-      return (
-        <InvestigationFlyout
-          eventTitle={checkoutEvent.title}
-          investigation={runningInvestigation}
-          status="loading"
-          onClose={noop}
-        />
-      );
-    case 'investigationFailed':
-      return (
-        <InvestigationFlyout
-          eventTitle={checkoutEvent.title}
-          investigation={completedInvestigation}
-          status="failed"
-          error="The investigation failed because no inference connector was available."
-          onClose={noop}
-        />
-      );
-    case 'investigationUnavailable':
-      return (
-        <InvestigationFlyout
-          eventTitle={checkoutEvent.title}
-          investigation={completedInvestigation}
-          status="unavailable"
-          error="You do not have permission to view this investigation."
-          onClose={noop}
-        />
-      );
     case 'investigationEmpty':
       return (
         <InvestigationFlyout
@@ -229,22 +186,6 @@ type Story = StoryObj<typeof NightshiftFlyoutStory>;
 
 export const InvestigationCompleted: Story = {
   args: { scenario: 'investigationCompleted' },
-};
-
-export const InvestigationRunning: Story = {
-  args: { scenario: 'investigationRunning' },
-};
-
-export const InvestigationLoading: Story = {
-  args: { scenario: 'investigationLoading' },
-};
-
-export const InvestigationFailed: Story = {
-  args: { scenario: 'investigationFailed' },
-};
-
-export const InvestigationUnavailable: Story = {
-  args: { scenario: 'investigationUnavailable' },
 };
 
 export const InvestigationEmptyResults: Story = {

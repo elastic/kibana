@@ -110,7 +110,7 @@ describe('<SnapshotList />', () => {
     describe('url parameters', () => {
       test('query is updated with repository name from the url', async () => {
         renderSnapshotList('/snapshots?repository=test_repo');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
           searchField: 'repository',
           searchValue: 'test_repo',
@@ -121,7 +121,7 @@ describe('<SnapshotList />', () => {
 
       test('query is updated with snapshot policy name from the url', async () => {
         renderSnapshotList('/snapshots?policy=test_policy');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
           searchField: 'policyName',
           searchValue: 'test_policy',
@@ -132,7 +132,7 @@ describe('<SnapshotList />', () => {
 
       test('query is not updated with unknown params from the url', async () => {
         renderSnapshotList('/snapshots?some_param=test_param');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
       });
@@ -161,7 +161,7 @@ describe('<SnapshotList />', () => {
           target: { value: 'snapshot=test_snapshot' },
         });
         // the last request was without any search params
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
         // advance the timers until after the debounce timeout
@@ -171,7 +171,7 @@ describe('<SnapshotList />', () => {
         });
 
         await waitFor(() => {
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: 'test_snapshot',
@@ -210,7 +210,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('term_snapshot_search');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'snapshot',
               searchValue: 'term_snapshot_search',
@@ -224,7 +224,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('2022.02.10');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'snapshot',
               searchValue: '2022.02.10',
@@ -238,7 +238,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-test_snapshot');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'snapshot',
               searchValue: 'test_snapshot',
@@ -252,7 +252,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('snapshot:test_snapshot');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'snapshot',
               searchValue: 'test_snapshot',
@@ -266,7 +266,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-snapshot:test_snapshot');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'snapshot',
               searchValue: 'test_snapshot',
@@ -280,7 +280,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('snapshot=test_snapshot');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'snapshot',
               searchValue: 'test_snapshot',
@@ -294,7 +294,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-snapshot=test_snapshot');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'snapshot',
               searchValue: 'test_snapshot',
@@ -310,7 +310,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('repository:test_repository');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'repository',
               searchValue: 'test_repository',
@@ -324,7 +324,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-repository:test_repository');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'repository',
               searchValue: 'test_repository',
@@ -338,7 +338,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('repository=test_repository');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'repository',
               searchValue: 'test_repository',
@@ -352,7 +352,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-repository=test_repository');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'repository',
               searchValue: 'test_repository',
@@ -368,7 +368,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('policyName:test_policy');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'policyName',
               searchValue: 'test_policy',
@@ -382,7 +382,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-policyName:test_policy');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'policyName',
               searchValue: 'test_policy',
@@ -396,7 +396,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('policyName=test_policy');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'policyName',
               searchValue: 'test_policy',
@@ -410,7 +410,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-policyName=test_policy');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'policyName',
               searchValue: 'test_policy',
@@ -426,7 +426,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('state:SUCCESS');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'state',
               searchValue: 'SUCCESS',
@@ -440,7 +440,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-state:FAILED');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'state',
               searchValue: 'FAILED',
@@ -454,7 +454,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('state=IN_PROGRESS');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'state',
               searchValue: 'IN_PROGRESS',
@@ -468,7 +468,7 @@ describe('<SnapshotList />', () => {
           renderSnapshotList();
           await setSearchTextAndFlushDebounce('-state=PARTIAL');
           await waitFor(() => {
-            expect(useLoadSnapshots).lastCalledWith({
+            expect(useLoadSnapshots).toHaveBeenLastCalledWith({
               ...DEFAULT_SNAPSHOT_LIST_PARAMS,
               searchField: 'state',
               searchValue: 'PARTIAL',
@@ -486,7 +486,7 @@ describe('<SnapshotList />', () => {
         fireEvent.change(screen.getByTestId('snapshotListSearch'), {
           target: { value: 'term1 term2' },
         });
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
         expect(screen.getByTestId('snapshotListSearchError')).toBeInTheDocument();
@@ -500,7 +500,7 @@ describe('<SnapshotList />', () => {
         fireEvent.change(screen.getByTestId('snapshotListSearch'), {
           target: { value: 'snapshot=test_snapshot policyName:test_policy' },
         });
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
         expect(screen.getByTestId('snapshotListSearchError')).toBeInTheDocument();
@@ -514,7 +514,7 @@ describe('<SnapshotList />', () => {
         fireEvent.change(screen.getByTestId('snapshotListSearch'), {
           target: { value: 'unknown_field=test' },
         });
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
         expect(screen.getByTestId('snapshotListSearchError')).toBeInTheDocument();

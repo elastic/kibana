@@ -26,9 +26,9 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
         '&:after': {
           content: '""',
           position: 'absolute',
-          top: '0%',
+          top: '50%',
           left: '50%',
-          transform: 'translateX(-50%)',
+          transform: 'translate(-50%, -50%)',
           width: `calc(100% - calc(${euiTheme.border.width.thin} * 2))`,
           height: '100%',
           zIndex: -1,
@@ -41,6 +41,7 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
     width: 'fit-content',
   }),
   bodyContainer: css({
+    height: 'inherit',
     overflowY: 'auto',
     overflowAnchor: 'none',
     scrollbarGutter: 'auto',

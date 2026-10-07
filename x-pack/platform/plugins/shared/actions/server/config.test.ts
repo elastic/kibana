@@ -44,11 +44,28 @@ describe('config validation', () => {
           "*",
         ],
         "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
           "enabled": false,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -99,11 +116,28 @@ describe('config validation', () => {
           "*",
         ],
         "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
           "enabled": false,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -263,11 +297,28 @@ describe('config validation', () => {
           "*",
         ],
         "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
           "enabled": false,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -454,11 +505,28 @@ describe('config validation', () => {
           "*",
         ],
         "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
           "enabled": false,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -533,6 +601,60 @@ describe('config validation', () => {
     ).toThrowErrorMatchingInlineSnapshot(
       `"[inboundEvents.maxEmitted]: Value must be equal to or lower than [250]."`
     );
+
+    expect(empty.inboundEvents.admission).toEqual({
+      enabled: true,
+      maxInFlight: 50,
+      maxInFlightPerConnector: 10,
+    });
+    expect(empty.inboundEvents.rateLimit).toEqual({
+      enabled: true,
+      maxKeys: 10000,
+      remoteAddress: { limit: 10, window: '1m' },
+      connector: { limit: 300, window: '1m' },
+    });
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { remoteAddress: { window: 'nope' } } },
+      })
+    ).toThrow(/string is not a valid duration/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { remoteAddress: { limit: 0 } } },
+      })
+    ).toThrow(/greater than \[1\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { connector: { limit: 1501 } } },
+      })
+    ).toThrow(/lower than \[1500\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { maxKeys: 10001 } },
+      })
+    ).toThrow(/lower than \[10000\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 0 } },
+      })
+    ).toThrow(/greater than \[1\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 101 } },
+      })
+    ).toThrow(/lower than \[100\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 5, maxInFlightPerConnector: 10 } },
+      })
+    ).toThrow(/maxInFlightPerConnector/);
   });
 
   describe('email.services.ses', () => {
@@ -613,6 +735,22 @@ describe('config validation', () => {
     });
   });
 
+  describe('auth.ears.enabled default', () => {
+    test('defaults enabled to true when ears.url is set but enabled is omitted', () => {
+      const result = configSchema.validate({
+        auth: { ears: { url: 'https://ears.example.com' } },
+      });
+      expect(result.auth?.ears?.enabled).toBe(true);
+    });
+
+    test('respects explicit enabled: false when ears.url is set', () => {
+      const result = configSchema.validate({
+        auth: { ears: { url: 'https://ears.example.com', enabled: false } },
+      });
+      expect(result.auth?.ears?.enabled).toBe(false);
+    });
+  });
+
   describe('auth.ears.ssl', () => {
     test('accepts certificate and key together', () => {
       const result = configSchema.validate({
@@ -683,6 +821,76 @@ describe('config validation', () => {
       const result = configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: true });
 
       expect(result.relay?.url).toEqual('http://relay.test');
+    });
+  });
+
+  describe('relay.uiam', () => {
+    test('defaults to disabled on serverless', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: false });
+    });
+
+    test('can be enabled on serverless when mTLS is configured', () => {
+      const result = configSchema.validate(
+        {
+          relay: {
+            url: 'https://relay.test',
+            ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+            uiam: { enabled: true },
+          },
+        },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: true });
+    });
+
+    test('rejects being enabled without mTLS configured', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: true }
+        )
+      ).toThrow(
+        '[relay]: must specify [relay.ssl.certificate] and [relay.ssl.key] when [relay.uiam.enabled] is set'
+      );
+    });
+
+    test('rejects being enabled with only a certificate configured', () => {
+      expect(() =>
+        configSchema.validate(
+          {
+            relay: {
+              url: 'https://relay.test',
+              ssl: { certificate: '/path/to/cert.pem' },
+              uiam: { enabled: true },
+            },
+          },
+          { serverless: true }
+        )
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
+    });
+
+    test('is rejected outside serverless', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: false }
+        )
+      ).toThrow(/\[relay\.uiam\]/);
+    });
+
+    test('is absent outside serverless when not specified', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: false }
+      );
+
+      expect(result.relay?.uiam).toBeUndefined();
     });
   });
 

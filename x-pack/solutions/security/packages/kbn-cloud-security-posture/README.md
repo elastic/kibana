@@ -21,7 +21,7 @@ The code is under the `graph` folder.
 ## Storybook
 
 General look of the component can be checked visually running the following storybook:
-`yarn storybook cloud_security_posture_graph`
+`pnpm storybook cloud_security_posture_graph`
 
 Note that all the interactions are mocked.
 

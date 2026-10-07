@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { FtrService } from '../ftr_provider_context';
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -242,12 +243,19 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
-    await this.testSubjects.click('moreActionsButton');
+    await this.retry.tryForTime(3000, async () => {
+      if (await this.testSubjects.exists('deleteIndexPatternButton')) return;
+      if (await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton)) {
+        await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+        return;
+      }
+      throw new Error('Data view delete action has not rendered');
+    });
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
   async getIndexPageHeading() {
-    return await this.testSubjects.getVisibleText('indexPatternTitle');
+    return await this.testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title);
   }
 
   async getManagedTag() {
@@ -497,7 +505,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async isIndexPatternListEmpty() {
-    return !(await this.testSubjects.exists('indexPatternTable', { timeout: 5000 }));
+    return !(await this.testSubjects.waitForExists('indexPatternTable', { timeout: 5000 }));
   }
 
   async removeLogstashIndexPatternIfExist() {
@@ -781,6 +789,9 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // getVisibleText returns '' while the flyout is still animating in, and the retry accepts
+      // that empty read; wait for the static title to actually paint before returning it.
+      if (!alertText) throw new Error('delete data view flyout title has not rendered yet');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
@@ -935,7 +946,11 @@ export class SettingsPageObject extends FtrService {
     await this.flyout.closeFlyout();
 
     // We might have unsaved changes and we need to confirm inside the modal
-    if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {
+    if (
+      await this.testSubjects.waitForExists('runtimeFieldModifiedFieldConfirmModal', {
+        timeout: 2000,
+      })
+    ) {
       this.log.debug('Unsaved changes for the field: need to confirm');
       await this.testSubjects.click('confirmModalConfirmButton');
     }
@@ -1110,16 +1125,15 @@ export class SettingsPageObject extends FtrService {
 
   async openScriptedFieldHelp(activeTab: string) {
     this.log.debug('open Scripted Fields help');
-    let isOpen = await this.testSubjects.exists('scriptedFieldsHelpFlyout');
-    if (!isOpen) {
-      await this.retry.try(async () => {
-        await this.testSubjects.click('scriptedFieldsHelpLink');
-        isOpen = await this.testSubjects.exists('scriptedFieldsHelpFlyout');
-        if (!isOpen) {
-          throw new Error('Failed to open scripted fields help');
-        }
-      });
-    }
+    await this.retry.try(async () => {
+      // Re-check before clicking: a flyout that opened after the previous attempt's wait covers
+      // the help link with its overlay mask, so clicking again would be intercepted.
+      if (await this.testSubjects.exists('scriptedFieldsHelpFlyout')) return;
+      await this.testSubjects.click('scriptedFieldsHelpLink');
+      if (!(await this.testSubjects.waitForExists('scriptedFieldsHelpFlyout', { timeout: 5000 }))) {
+        throw new Error('Failed to open scripted fields help');
+      }
+    });
 
     if (activeTab) {
       // The flyout slides in with an entrance animation; a tab click issued before it settles can

@@ -6,13 +6,13 @@
  */
 
 import apm from 'elastic-apm-node';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { DEFAULT_SPACE_ID, type SpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
 import type {
   RuleRunnerErrorStackTraceLog,
@@ -60,6 +60,7 @@ import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
+import { updateRuleMissingUiamKeyTag } from './update_rule_missing_uiam_key_tag';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
@@ -79,11 +80,6 @@ import {
   evaluatePerAlertSnoozeExpiry,
   evaluatePerAlertSnoozeConditions,
 } from './lib';
-// Imported directly rather than through `./lib`: that barrel is also the entry point for widely used
-// helpers such as `withAlertingSpan`, so adding a module with heavy dependencies to it changes module
-// initialization order for every importer and closes an import cycle that leaves
-// `DEFAULT_APP_CATEGORIES` undefined in `alert_deletion_client`.
-import { isMissingUiamApiKeyRunError, repairUiamApiKey } from './lib/repair_uiam_api_key';
 import {
   ErrorWithType,
   isOutdatedTaskVersionError,
@@ -336,6 +332,7 @@ export class TaskRunner<
     fakeRequest,
     rule,
     effectiveApiKey,
+    uiamApiKeyId,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     const { activeInstances, expiredInstances } = evaluatePerAlertSnoozeExpiry(
@@ -356,13 +353,9 @@ export class TaskRunner<
     });
 
     const {
-      params: { alertId: ruleId, spaceId: maybeSpaceId },
+      params: { alertId: ruleId, spaceId },
       state: { previousStartedAt },
     } = this.taskInstance;
-    // spaceId is optional in the persisted task params (legacy), but is always
-    // populated for tasks scheduled by the rules client. Default to the built-in
-    // space at this trusted boundary so the branded SpaceId flows downstream.
-    const spaceId: SpaceId = brandSpaceId(maybeSpaceId ?? DEFAULT_SPACE_ID);
 
     const { queryDelaySettings, flappingSettings: spaceFlappingSettings } =
       await this.context.rulesSettingsService.getSettings(fakeRequest, spaceId);
@@ -509,6 +502,13 @@ export class TaskRunner<
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
+      // Carry the UIAM key id so the connector tasks are visible to the API key invalidation
+      // task's in-use guard, which cannot see the encrypted key material itself.
+      uiamApiKeyId,
+      // Mirror the rule run's own credential treatment onto the connector tasks: the request is
+      // marked by getFakeKibanaRequest from the rule's persisted `uiamApiKeyExternal`, so asking
+      // it here cannot drift from what the cluster client will decide for this very run.
+      uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
@@ -546,11 +546,16 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const alerts = alertsClient.getRawAlertInstancesForState(true);
+      // Do not drop recovered alerts from task state unless AAD was persisted
+      // with tracked: false for those same ids.
+      const shouldOptimizeTaskState = this.shouldLogAndScheduleActionsForAlerts();
+      const alerts = alertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
-      alertsToUpdateWithLastScheduledActions =
-        alertsClient.getAlertsToUpdateWithLastScheduledActions();
+      if (shouldOptimizeTaskState) {
+        alertsToUpdateWithLastScheduledActions =
+          alertsClient.getAlertsToUpdateWithLastScheduledActions();
+      }
     }
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {
@@ -670,8 +675,11 @@ export class TaskRunner<
         this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
       }
 
-      const ruleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
+      const loadedRuleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
         getDecryptedRule(this.context, ruleId, spaceId)
+      );
+      const ruleData = await withAlertingSpan('alerting:update-missing-uiam-api-key-tag', () =>
+        updateRuleMissingUiamKeyTag(this.context, ruleId, spaceId, loadedRuleData)
       );
 
       // Check that this task is current
@@ -913,14 +921,6 @@ export class TaskRunner<
       runRuleResult = asErr(err);
       schedule = asErr(err);
       shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
-
-      // The rule's UIAM API key is unusable, so re-grant it now: the rule's next scheduled run then
-      // authenticates with a working credential instead of failing the same way indefinitely.
-      if (isMissingUiamApiKeyRunError(err)) {
-        await withAlertingSpan('alerting:repair-uiam-api-key', () =>
-          repairUiamApiKey({ context: this.context, logger: this.logger, ruleId, spaceId })
-        );
-      }
     }
 
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>

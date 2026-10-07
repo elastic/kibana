@@ -11,6 +11,7 @@ import { merge } from 'rxjs';
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS, type DataViewField } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
 import type { Dictionary } from '@kbn/ml-url-state';
@@ -67,7 +68,8 @@ export const useDataVisualizerGridData = (
   input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
-  onUpdate?: (params: Dictionary<unknown>) => void
+  onUpdate?: (params: Dictionary<unknown>) => void,
+  projectRouting?: string
 ) => {
   const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
   const { services } = useDataVisualizerKibana();
@@ -184,6 +186,32 @@ export const useDataVisualizerGridData = (
     data.query.filterManager,
   ]);
 
+  // Hydrate saved-search filters into FilterManager after render so filter badges appear
+  // without triggering UnifiedSearch setState during useMemo/render.
+  useEffect(() => {
+    const savedFilters = currentSavedSearch?.searchSource?.getField('filter') as
+      | Filter[]
+      | undefined;
+    if (!savedFilters?.length) {
+      return;
+    }
+
+    const filterManager = data.query.filterManager;
+    const existing = filterManager.getFilters();
+    const missing = savedFilters.filter(
+      (savedFilter) =>
+        !existing.some(
+          (existingFilter) =>
+            existingFilter.meta?.key === savedFilter.meta?.key &&
+            JSON.stringify(existingFilter.meta?.params) === JSON.stringify(savedFilter.meta?.params)
+        )
+    );
+
+    if (missing.length > 0) {
+      filterManager.addFilters(missing);
+    }
+  }, [currentSavedSearch, data.query.filterManager]);
+
   const _timeBuckets = useTimeBuckets(uiSettings);
 
   const timefilter = useTimefilter({
@@ -260,7 +288,7 @@ export const useDataVisualizerGridData = (
         searchQuery,
         sessionId: searchSessionId,
         index: currentDataView.title,
-        projectRouting: cps?.cpsManager?.getProjectRouting(),
+        projectRouting: projectRouting ?? cps?.cpsManager?.getProjectRouting(),
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
@@ -280,6 +308,7 @@ export const useDataVisualizerGridData = (
       browserSessionSeed,
       input.timeRange?.from,
       input.timeRange?.to,
+      projectRouting,
       cps,
     ]
   );

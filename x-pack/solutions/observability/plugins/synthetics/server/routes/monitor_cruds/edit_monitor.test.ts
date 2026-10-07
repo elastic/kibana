@@ -29,7 +29,7 @@ jest.mock('../telemetry/monitor_upgrade_sender', () => ({
 // mocked here to reach the route's space-authorization check without exercising
 // the full monitor/location validation and normalization pipeline.
 jest.mock('./monitor_locations_utils', () => ({
-  assertCanUpdateMonitorInAllSpaces: jest.fn(),
+  assertCanPerformMonitorBulkActionInAllSpaces: jest.fn(),
   validateMonitorPrivateLocationSpaces: jest.fn().mockReturnValue(null),
 }));
 
@@ -207,9 +207,11 @@ describe('editSyntheticsMonitorRoute', () => {
   });
 
   it("authorizes the union of the monitor's previous and newly-submitted spaces, not just the new ones", async () => {
-    const { assertCanUpdateMonitorInAllSpaces } = jest.requireMock('./monitor_locations_utils');
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
     const forbidden = { status: 403 };
-    assertCanUpdateMonitorInAllSpaces.mockResolvedValue(forbidden);
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
 
     const { routeContext } = getRouteContextMock();
     routeContext.request = {
@@ -243,12 +245,73 @@ describe('editSyntheticsMonitorRoute', () => {
     const result = await editSyntheticsMonitorRoute().handler(routeContext);
 
     expect(result).toBe(forbidden);
-    expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledTimes(1);
-    const [, spacesArg] = assertCanUpdateMonitorInAllSpaces.mock.calls[0];
+    expect(assertCanPerformMonitorBulkActionInAllSpaces).toHaveBeenCalledTimes(1);
+    const [, spacesArg] = assertCanPerformMonitorBulkActionInAllSpaces.mock.calls[0];
     // 'space-b' was dropped from the submitted payload but must still be
     // authorized - removing a monitor from a space is itself a change that
     // requires bulk_update privileges there.
     expect(spacesArg).toEqual(expect.arrayContaining(['space-a', 'space-b']));
     expect(spacesArg).toHaveLength(2);
+  });
+
+  describe('params that are not a JSON object', () => {
+    const editWithParams = async (storedParams: string, body: Record<string, unknown>) => {
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+        './monitor_locations_utils'
+      );
+      // Reaching the space authorization check means params validation let the edit through.
+      const forbidden = { status: 403 };
+      assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+      const { normalizeAPIConfig } = jest.requireMock('./monitor_validation');
+      normalizeAPIConfig.mockImplementation(
+        jest.requireActual('./monitor_validation').normalizeAPIConfig
+      );
+
+      const { routeContext } = getRouteContextMock();
+      routeContext.request = { params: { monitorId }, query: {}, body } as any;
+      routeContext.spaceId = 'default';
+      routeContext.response = {
+        badRequest: jest.fn((r) => r),
+        customError: jest.fn((r) => r),
+      } as any;
+      routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+        decryptedMonitor: { id: monitorId, type: 'synthetics-monitor', namespaces: ['default'] },
+        normalizedMonitor: {
+          id: monitorId,
+          attributes: {
+            origin: 'ui',
+            [ConfigKey.MONITOR_TYPE]: 'browser',
+            [ConfigKey.PARAMS]: storedParams,
+            locations: [],
+          },
+        },
+      });
+
+      const result = await editSyntheticsMonitorRoute().handler(routeContext);
+      return { result, forbidden, response: routeContext.response };
+    };
+
+    it('does not re-reject unchanged stored params on an unrelated edit', async () => {
+      const { result, forbidden } = await editWithParams('["secret"]', {
+        [ConfigKey.ENABLED]: false,
+      });
+
+      expect(result).toBe(forbidden);
+    });
+
+    it('rejects an edit that sets params to something that is not a JSON object', async () => {
+      const { result, forbidden, response } = await editWithParams('{"token":"secret"}', {
+        [ConfigKey.PARAMS]: '["secret"]',
+      });
+
+      expect(result).not.toBe(forbidden);
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: 'Invalid params: Params must be a JSON object.',
+          }),
+        })
+      );
+    });
   });
 });

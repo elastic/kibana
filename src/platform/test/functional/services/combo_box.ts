@@ -31,29 +31,27 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxSelector data-test-subj selector
    * @param value option text
    * @param options optional configuration
-   * @param options.maxRetries maximum number of retry attempts (default: 0)
+   * @param options.timeout optional timeout for retrying the selection
    */
 
   public async set(
     comboBoxSelector: string,
     value: string,
-    options: { retryCount?: number } = {}
+    options: { timeout?: number } = {}
   ): Promise<void> {
-    const { retryCount = 0 } = options;
-    this.log.debug(
-      `comboBox.set, comboBoxSelector: ${comboBoxSelector}, retryCount: ${retryCount}`
-    );
-    if (retryCount < 1) {
+    const { timeout } = options;
+    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}, timeout: ${timeout}`);
+    if (timeout === undefined) {
       const comboBox = await this.testSubjects.find(comboBoxSelector);
       await this.setElement(comboBox, value);
     } else {
-      await this.retry.tryWithRetries(
-        `comboBox.set, comboBoxSelector: ${comboBoxSelector}`,
+      await this.retry.tryForTime(
+        timeout,
         async () => {
           const comboBox = await this.testSubjects.find(comboBoxSelector);
           await this.setElement(comboBox, value);
         },
-        { retryCount, retryDelay: 1000 }
+        { description: `comboBox.set, comboBoxSelector: ${comboBoxSelector}`, retryDelay: 1000 }
       );
     }
   }
@@ -204,11 +202,10 @@ export class ComboBoxService extends FtrService {
     comboBoxElement: WebElementWrapper,
     filterValue: string
   ): Promise<void> {
-    const input = await comboBoxElement.findByTagName('input');
-
+    // Re-resolve the input on each attempt: combobox re-renders, staling a captured
+    // handle so that retrying type on a fixed reference cannot recover.
     await this.retry.try(async () => {
-      // Wait for the input to not be disabled before typing into it (otherwise
-      // typing will sometimes trigger the global search bar instead)
+      const input = await comboBoxElement.findByTagName('input');
       expect(await input.isEnabled()).to.equal(true);
 
       // Some Kibana comboboxes force state to not be clearable, so we can't use `input.clearValue()`.
@@ -351,25 +348,27 @@ export class ComboBoxService extends FtrService {
     this.log.debug('comboBox.closeOptionsList');
 
     // wait for potential other animations to finish (e.g. due to closing on selection)
-    const isOptionListClosed = await this.retry.tryWithRetries(
-      'wait for possible ongoing closing of the combobox listbox',
+    const isOptionListClosed = await this.retry.tryForTime(
+      5000,
       async () => {
-        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-          timeout: 50,
-        });
+        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList');
 
         return !isOpen;
       },
       {
-        timeout: 5000,
+        description: 'wait for possible ongoing closing of the combobox listbox',
         initialDelay: 500,
-        retryCount: 3,
       }
     );
 
     if (!isOptionListClosed) {
-      const input = await comboBoxElement.findByTagName('input');
-      await input.pressKeys(this.browser.keys.ESCAPE);
+      // The input may be temporarily disabled or re-rendered (e.g. an auto-save triggered by a
+      // just-committed value), so re-resolve it on each attempt and verify the list is gone.
+      await this.retry.try(async () => {
+        const input = await comboBoxElement.findByTagName('input');
+        await input.pressKeys(this.browser.keys.ESCAPE);
+        await this.testSubjects.missingOrFail('~comboBoxOptionsList', { timeout: 1000 });
+      });
     }
   }
 
@@ -380,9 +379,7 @@ export class ComboBoxService extends FtrService {
    */
   public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.openOptionsList');
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-      timeout: 50,
-    });
+    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList');
 
     if (!isOptionsListOpen) {
       await this.retry.try(async () => {

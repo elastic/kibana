@@ -91,7 +91,7 @@ describe('DefaultFormatEditor', () => {
   it('should render nothing', () => {
     const { container } = renderDefaultFormatEditor();
 
-    expect(onError).toBeCalled();
+    expect(onError).toHaveBeenCalled();
     expect(container).toBeEmptyDOMElement();
   });
 

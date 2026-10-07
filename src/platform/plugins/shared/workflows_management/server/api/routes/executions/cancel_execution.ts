@@ -16,7 +16,7 @@ import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerCancelExecutionRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, spaces } = deps;
   router.versioned
     .post({
       path: '/api/workflows/executions/{executionId}/cancel',
@@ -45,14 +45,11 @@ export function registerCancelExecutionRoute(deps: RouteDependencies) {
         try {
           const { executionId } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          await api.cancelWorkflowExecution(executionId, spaceId, request);
-          audit.logExecutionCanceled(request, { executionId });
+          await api.cancelWorkflowExecution(executionId, spaceId, request, {
+            channel: 'kibana_execution_view',
+          });
           return response.ok();
         } catch (error) {
-          audit.logExecutionCanceled(request, {
-            executionId: request.params.executionId,
-            error,
-          });
           return handleRouteError(response, error, { checkNotFound: true });
         }
       })

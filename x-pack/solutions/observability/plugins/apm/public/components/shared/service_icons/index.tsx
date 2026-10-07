@@ -89,12 +89,12 @@ export function ServiceIcons({ start, end, serviceName, environment, size = 'm' 
         return callApmApi('GET /internal/apm/services/{serviceName}/metadata/icons', {
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { start, end, environment },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end, environment]
   );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
@@ -122,7 +122,7 @@ export function ServiceIcons({ start, end, serviceName, environment, size = 'm' 
     {
       key: 'service',
       icon: {
-        type: getAgentIcon(icons?.agentName, isDarkMode) || 'node',
+        type: getAgentIcon(icons?.agentName, isDarkMode) || 'vectorTriangle',
       },
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
@@ -157,7 +157,7 @@ export function ServiceIcons({ start, end, serviceName, environment, size = 'm' 
     {
       key: 'serverless',
       icon: {
-        type: getServerlessIcon(icons?.serverlessType) || 'node',
+        type: getServerlessIcon(icons?.serverlessType) || 'vectorTriangle',
       },
       isVisible: !!icons?.serverlessType,
       title: getServerlessTitle(icons?.serverlessType),

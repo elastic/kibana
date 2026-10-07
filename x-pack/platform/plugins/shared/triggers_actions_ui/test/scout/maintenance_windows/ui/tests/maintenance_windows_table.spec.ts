@@ -10,8 +10,8 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, MAINTENANCE_WINDOWS_APP_PATH } from '../fixtures';
 
-const TABLE_LOADED_CSS =
-  '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
+const TABLE_TEST_SUBJ = 'maintenance-windows-table';
+const TABLE_LOADED_CSS = `.euiBasicTable[data-test-subj="${TABLE_TEST_SUBJ}"]:not(.euiBasicTable-loading)`;
 const PAGE_READY_SELECTOR = `${TABLE_LOADED_CSS}, [data-test-subj="mw-empty-prompt"]`;
 const TABLE_LOAD_TIMEOUT = 30_000;
 const TOAST_TITLE = 'euiToastHeader__title';
@@ -68,21 +68,18 @@ const searchMws = async (page: ScoutPage, text: string) => {
   await page.locator(PAGE_READY_SELECTOR).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
 };
 
-// Read status text from the <td data-test-subj="maintenance-windows-column-status"> cell
-// directly — no EUI internal CSS classes needed.
+// Reads the status column via the shared EuiBasicTable component object. The
+// status badge carries a trailing icon character in its accessible text, hence
+// the cleanup regex below.
 const getMwRowStatuses = async (page: ScoutPage): Promise<string[]> => {
-  const rows = await page.testSubj.locator('list-item').all();
-  const statuses: string[] = [];
-  for (const row of rows) {
-    const cell = row.locator('[data-test-subj="maintenance-windows-column-status"]');
-    statuses.push(
-      ((await cell.innerText()) ?? '')
-        .trim()
-        .replace(/[^a-zA-Z\s]+$/, '')
-        .trim()
-    );
-  }
-  return statuses;
+  const statusCells = await page.components.basicTable(TABLE_TEST_SUBJ).cells('status');
+  const texts = await statusCells.allInnerTexts();
+  return texts.map((text) =>
+    text
+      .trim()
+      .replace(/[^a-zA-Z\s]+$/, '')
+      .trim()
+  );
 };
 
 // Dismiss all visible toasts to prevent accumulation across actions in a single test.

@@ -6,14 +6,16 @@
  */
 
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
-import { CONVERSATION_TEMPLATES } from '../../../../common/templates';
-import { validateTemplateDefinition } from './validation';
 
-// Validate all code-registered templates at module load time so a malformed
-// built-in fails fast rather than at first use.
-for (const template of CONVERSATION_TEMPLATES) {
-  validateTemplateDefinition(template);
-}
+/**
+ * Module-level map of registered conversation templates. Populated synchronously
+ * when templates are registered at plugin setup, before any conversation client is created.
+ * Enables sync access inside OCC field callbacks and converter functions that cannot be async.
+ */
+const templates = new Map<string, ConversationTemplate>();
 
-export const getTemplate = (id: string): ConversationTemplate | undefined =>
-  CONVERSATION_TEMPLATES.find((t) => t.id === id);
+export const registerTemplate = (template: ConversationTemplate): void => {
+  templates.set(template.id, template);
+};
+
+export const getTemplate = (id: string): ConversationTemplate | undefined => templates.get(id);

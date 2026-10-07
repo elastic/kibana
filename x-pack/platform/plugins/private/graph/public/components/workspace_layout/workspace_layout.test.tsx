@@ -11,16 +11,17 @@ import { WorkspaceLayoutComponent } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
   IndexPatternProvider,
   Workspace,
+  WorkspaceNode,
 } from '../../types';
 import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { GraphVisualization } from '../graph_visualization';
+import { ControlPanel } from '../control_panel';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -44,9 +45,7 @@ describe('workspace_layout', () => {
     capabilities: {} as Capabilities,
     coreStart: coreMock.createStart(),
     graphSavePolicy: 'configAndDataWithConsent' as GraphSavePolicy,
-    navigation: {} as NavigationStart,
     canEditDrillDownUrls: true,
-    setHeaderActionMenu: jest.fn(),
     sharingSavedObjectProps: {
       outcome: 'exactMatch',
       aliasTargetId: '',
@@ -115,5 +114,25 @@ describe('workspace_layout', () => {
       />
     );
     expect(component.find(GraphVisualization).exists()).toBe(true);
+  });
+
+  it('rerenders the control panel when editor focus changes', () => {
+    const firstNode = { id: 'first-node' } as WorkspaceNode;
+    const secondNode = { id: 'second-node' } as WorkspaceNode;
+    const component = shallow(<WorkspaceLayoutComponent {...defaultProps} />);
+
+    component.find(ControlPanel).prop('selectSelected')(firstNode);
+    component.update();
+    expect(component.find(ControlPanel).props()).toMatchObject({
+      control: 'editLabel',
+      selectedNode: firstNode,
+    });
+
+    component.find(ControlPanel).prop('selectSelected')(secondNode);
+    component.update();
+    expect(component.find(ControlPanel).props()).toMatchObject({
+      control: 'editLabel',
+      selectedNode: secondNode,
+    });
   });
 });

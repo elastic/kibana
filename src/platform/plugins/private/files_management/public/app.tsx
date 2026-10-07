@@ -8,9 +8,10 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { TableListView } from '@kbn/content-management-table-list-view';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
@@ -41,11 +42,33 @@ export const App: FunctionComponent = () => {
     .filter(({ managementUiActions }) => managementUiActions?.list?.enabled === false)
     .map(({ id }) => id);
 
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem: {
+        id: 'diagnostics',
+        label: i18nTexts.diagnosticsFlyoutTitle,
+        iconType: 'stats',
+        testId: 'filesManagementOpenDiagnosticsFlyoutButton',
+        run: () => setShowDiagnosticsFlyout(true),
+      },
+    }),
+    []
+  );
+
+  const onFetchSuccess = useCallback(() => undefined, []);
+  const setPageDataTestSubject = useCallback(() => undefined, []);
+
   return (
     <div data-test-subj="filesManagementApp">
-      <TableListView<FilesUserContentSchema>
+      <AppHeader
         title={i18nTexts.tableListTitle}
         description={i18nTexts.tableListDescription}
+        menu={menu}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+      <TableListViewTable<FilesUserContentSchema>
+        tableCaption={i18nTexts.tableListTitle}
         titleColumnName={i18nTexts.titleColumnName}
         emptyPrompt={<EmptyPrompt />}
         entityName={i18nTexts.entityName}
@@ -85,15 +108,8 @@ export const App: FunctionComponent = () => {
           await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
         }}
         withoutPageTemplateWrapper
-        additionalRightSideActions={[
-          <EuiButtonEmpty
-            onClick={() => setShowDiagnosticsFlyout(true)}
-            aria-label={i18nTexts.diagnosticsFlyoutTitle}
-            data-test-subj="filesManagementOpenDiagnosticsFlyoutButton"
-          >
-            {i18nTexts.diagnosticsFlyoutTitle}
-          </EuiButtonEmpty>,
-        ]}
+        onFetchSuccess={onFetchSuccess}
+        setPageDataTestSubject={setPageDataTestSubject}
         rowItemActions={({ attributes }) => {
           const definition = getFileKindDefinition(attributes.fileKind);
           return {

@@ -30,6 +30,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
     summary: 'Create visualization',
+    operationId: 'create-visualization',
     description: [
       'Creates a Lens visualization and saves it to the library.',
       '',
@@ -94,7 +95,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
           const responseItem = getLensResponseItem(builder, result.item);
 
           return res.created<LensCreateResponseBody>({
-            body: responseItem,
+            body: lensCreateResponseBodySchema.parse(responseItem),
           });
         } catch (error) {
           if (isBoom(error) && error.output.statusCode === 403) {

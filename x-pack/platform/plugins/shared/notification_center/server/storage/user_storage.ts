@@ -7,30 +7,51 @@
 
 import { z } from '@kbn/zod/v4';
 import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
+import { notificationIdSchema } from '../../common/notification_schema';
 
 /**
  * Register the user storage keys needed for Notification Center.
  * This is used to track whether users have marked notifications as read.
  */
 
-/** Timestamp marker: notifications at or before it are read; also used to ensure
- * new users are not flooded with notifications.
+/** Timestamp marker: notifications at or before it are read.
  */
 export const READ_ALL_BEFORE_KEY = 'notificationCenter:readAllBefore';
 
-/** Individually-read ids newer than `readAllBefore`;
- * advancing the readAllBefore marker keeps this within a reasonable size.
+/** Per-id read overrides keyed by `notification_id`.
+ * One entry for the read state of any given notification a user has manually marked.
+ * Size limited by `MAX_OVERRIDES`. `markAllRead` resets the overrides entirely.
  */
-export const READ_KEY = 'notificationCenter:read';
+export const OVERRIDES_KEY = 'notificationCenter:overrides';
 
-/** userStorage doesn't allow null defaults for key values, so we use this default to represent an unset state. */
+/** userStorage doesn't allow null defaults for key values, so this stands for an unset marker
+ * until a user's first read replaces it.
+ */
 export const READ_ALL_BEFORE_DEFAULT = '1970-01-01T00:00:00.000Z';
 
-/** Ceiling for the array of read ids */
-export const MAX_READ_IDS = 500;
+/** Ceiling for the number of per-id read overrides. */
+export const MAX_OVERRIDES = 500;
 
 export const readAllBeforeSchema = z.iso.datetime();
-export const readSchema = z.array(z.string()).max(MAX_READ_IDS);
+
+/**
+ * An override for one notification ID.
+ *
+ * `read` allows the client to mark the notification as read or unread explicitly.
+ * `markedAt` records when the override was written.
+ */
+export const readOverrideSchema = z
+  .object({ read: z.boolean(), markedAt: z.iso.datetime() })
+  .strict();
+
+export const overridesSchema = z
+  .record(notificationIdSchema, readOverrideSchema)
+  .refine((overrides) => Object.keys(overrides).length <= MAX_OVERRIDES, {
+    message: `Cannot exceed ${MAX_OVERRIDES} read overrides`,
+  });
+
+export type ReadOverride = z.infer<typeof readOverrideSchema>;
+export type ReadOverrides = z.infer<typeof overridesSchema>;
 
 /** Registers the read-state keys; core throws on a duplicate key, so call once. */
 export const registerNotificationUserStorage = (userStorage: UserStorageServiceSetup) => {
@@ -40,9 +61,9 @@ export const registerNotificationUserStorage = (userStorage: UserStorageServiceS
       defaultValue: READ_ALL_BEFORE_DEFAULT,
       scope: 'global',
     },
-    [READ_KEY]: {
-      schema: readSchema,
-      defaultValue: [],
+    [OVERRIDES_KEY]: {
+      schema: overridesSchema,
+      defaultValue: {},
       scope: 'global',
     },
   });

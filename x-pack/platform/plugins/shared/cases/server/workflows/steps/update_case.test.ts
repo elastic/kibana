@@ -86,6 +86,33 @@ describe('updateCaseStepDefinition', () => {
     });
   });
 
+  it('passes extended_fields through to bulkUpdate', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = jest.fn().mockResolvedValue([createCaseResponseFixture]);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, bulkUpdate },
+    } as unknown as CasesClient);
+    const definition = updateCaseStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        updates: {
+          extended_fields: { priority_as_keyword: 'low' },
+        },
+      })
+    );
+
+    expect(bulkUpdate).toHaveBeenCalledWith({
+      cases: [
+        expect.objectContaining({
+          id: 'case-1',
+          extended_fields: { priority_as_keyword: 'low' },
+        }),
+      ],
+    });
+  });
+
   it('returns original error when update call throws', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const bulkUpdate = jest.fn().mockRejectedValue(new Error('update failed'));

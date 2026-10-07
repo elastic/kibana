@@ -10,11 +10,12 @@ import { screen, waitFor, within } from '@testing-library/react';
 
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplatesList } from './templates_list';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/208265
-describe.skip('TemplatesList', () => {
+describe('TemplatesList', () => {
+  let user: UserEvent;
+
   const onDeleteTemplate = jest.fn();
   const onEditTemplate = jest.fn();
 
@@ -24,8 +25,18 @@ describe.skip('TemplatesList', () => {
     onEditTemplate,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
 
   it('renders correctly', () => {
@@ -99,7 +110,7 @@ describe.skip('TemplatesList', () => {
       <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[0]] }} />
     );
 
-    await userEvent.click(
+    await user.click(
       await screen.findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
     );
 
@@ -113,7 +124,7 @@ describe.skip('TemplatesList', () => {
 
     const list = await screen.findByTestId('templates-list');
 
-    await userEvent.click(
+    await user.click(
       await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
     );
 
@@ -127,13 +138,13 @@ describe.skip('TemplatesList', () => {
 
     const list = await screen.findByTestId('templates-list');
 
-    await userEvent.click(
+    await user.click(
       await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
     );
 
     expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByText('Delete'));
+    await user.click(await screen.findByText('Delete'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();

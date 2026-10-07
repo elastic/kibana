@@ -94,7 +94,7 @@ describe('CommonFlyout ', () => {
     await userEvent.click(await screen.findByTestId('common-flyout-cancel'));
 
     await waitFor(() => {
-      expect(props.onCloseFlyout).toBeCalled();
+      expect(props.onCloseFlyout).toHaveBeenCalled();
     });
   });
 
@@ -104,7 +104,7 @@ describe('CommonFlyout ', () => {
     await userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
 
     await waitFor(() => {
-      expect(props.onCloseFlyout).toBeCalled();
+      expect(props.onCloseFlyout).toHaveBeenCalled();
     });
   });
 
@@ -113,7 +113,7 @@ describe('CommonFlyout ', () => {
 
     await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
-    expect(props.onSaveField).not.toBeCalled();
+    expect(props.onSaveField).not.toHaveBeenCalled();
   });
 
   describe('CustomFieldsFlyout', () => {
@@ -138,7 +138,7 @@ describe('CommonFlyout ', () => {
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
-        expect(props.onSaveField).toBeCalledWith({
+        expect(props.onSaveField).toHaveBeenCalledWith({
           key: expect.anything(),
           label: 'Summary',
           required: false,
@@ -170,7 +170,7 @@ describe('CommonFlyout ', () => {
         await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
-          expect(props.onSaveField).toBeCalledWith({
+          expect(props.onSaveField).toHaveBeenCalledWith({
             key: expect.anything(),
             label: 'Summary',
             required: false,
@@ -189,7 +189,7 @@ describe('CommonFlyout ', () => {
         await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
-          expect(props.onSaveField).toBeCalledWith({
+          expect(props.onSaveField).toHaveBeenCalledWith({
             key: expect.anything(),
             label: 'Summary',
             required: false,
@@ -210,7 +210,7 @@ describe('CommonFlyout ', () => {
         await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
-          expect(props.onSaveField).toBeCalledWith({
+          expect(props.onSaveField).toHaveBeenCalledWith({
             key: expect.anything(),
             label: 'Summary',
             required: true,
@@ -229,7 +229,7 @@ describe('CommonFlyout ', () => {
         await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
-          expect(props.onSaveField).toBeCalledWith({
+          expect(props.onSaveField).toHaveBeenCalledWith({
             key: expect.anything(),
             label: 'Summary',
             required: true,
@@ -292,7 +292,7 @@ describe('CommonFlyout ', () => {
         await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
-          expect(props.onSaveField).toBeCalledWith({
+          expect(props.onSaveField).toHaveBeenCalledWith({
             key: expect.anything(),
             label: 'Summary',
             required: false,
@@ -315,7 +315,7 @@ describe('CommonFlyout ', () => {
         await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
-          expect(props.onSaveField).toBeCalledWith({
+          expect(props.onSaveField).toHaveBeenCalledWith({
             key: expect.anything(),
             label: 'Summary',
             required: true,
@@ -364,6 +364,8 @@ describe('CommonFlyout ', () => {
       id: '',
       owner: mockedTestProvidersOwner[0],
       observableTypes: [],
+      extractObservables: true,
+      workflowTags: [],
     };
 
     const renderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
@@ -476,7 +478,7 @@ describe('CommonFlyout ', () => {
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
-        expect(props.onSaveField).toBeCalledWith({
+        expect(props.onSaveField).toHaveBeenCalledWith({
           key: expect.anything(),
           caseFields: {
             connector: {
@@ -488,7 +490,7 @@ describe('CommonFlyout ', () => {
             customFields: [],
             settings: {
               syncAlerts: true,
-              extractObservables: false,
+              extractObservables: true,
             },
           },
           description: 'Template description',
@@ -534,7 +536,7 @@ describe('CommonFlyout ', () => {
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
-        expect(props.onSaveField).toBeCalledWith({
+        expect(props.onSaveField).toHaveBeenCalledWith({
           key: 'random_key',
           name: 'Template 1',
           description: 'test description',
@@ -552,7 +554,7 @@ describe('CommonFlyout ', () => {
             customFields: [],
             settings: {
               syncAlerts: true,
-              extractObservables: false,
+              extractObservables: true,
             },
           },
         });
@@ -593,7 +595,7 @@ describe('CommonFlyout ', () => {
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
-        expect(props.onSaveField).toBeCalledWith({
+        expect(props.onSaveField).toHaveBeenCalledWith({
           key: 'random_key',
           name: 'Template 1',
           description: 'test description',
@@ -607,7 +609,7 @@ describe('CommonFlyout ', () => {
             },
             settings: {
               syncAlerts: true,
-              extractObservables: false,
+              extractObservables: true,
             },
             customFields: [
               {
@@ -689,7 +691,7 @@ describe('CommonFlyout ', () => {
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
-        expect(props.onSaveField).toBeCalledWith({
+        expect(props.onSaveField).toHaveBeenCalledWith({
           key: 'random_key',
           name: 'Template 1',
           description: 'test description',
@@ -709,7 +711,7 @@ describe('CommonFlyout ', () => {
             },
             settings: {
               syncAlerts: true,
-              extractObservables: false,
+              extractObservables: true,
             },
           },
         });
@@ -766,7 +768,7 @@ describe('CommonFlyout ', () => {
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
-        expect(props.onSaveField).toBeCalledWith({
+        expect(props.onSaveField).toHaveBeenCalledWith({
           caseFields: {
             connector: {
               fields: null,

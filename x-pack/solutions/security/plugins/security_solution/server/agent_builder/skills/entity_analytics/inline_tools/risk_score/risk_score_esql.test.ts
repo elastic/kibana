@@ -92,6 +92,7 @@ describe('riskScoreInlineToolHandler', () => {
       expect.objectContaining({
         index: RISK_SCORE_LATEST_INDEX,
         nlQuery: 'What is the risk score?',
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
@@ -137,6 +138,7 @@ describe('riskScoreInlineToolHandler', () => {
         additionalContext: expect.stringContaining(
           `${euid.esql.getEuidDocumentsContainsIdFilter('host')}`
         ),
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
@@ -175,6 +177,7 @@ describe('riskScoreInlineToolHandler', () => {
       expect.objectContaining({
         index: RISK_SCORE_LATEST_INDEX,
         nlQuery: 'What is the risk score?',
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({

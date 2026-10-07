@@ -23,7 +23,7 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 | POST | `/api/security/entity_store/stop` | Stop extraction tasks |
 | POST | `/api/security/entity_store/uninstall` | Uninstall entity store |
 | GET | `/api/security/entity_store/status` | Status (`?include_components=true`) |
-| PUT | `/api/security/entity_store` | Update `logExtraction` config without reinstall |
+| PUT | `/api/security/entity_store` | Update `logExtraction` and/or `historySnapshot` (`frequency`, `retentionDays`) config without reinstall |
 | POST | `/api/security/entity_store/check_privileges` | Check security privileges |
 
 ### CRUD
@@ -61,7 +61,7 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 | GET | `/internal/security/entity_store/entity_maintainers` | List maintainers |
 | PUT | `/internal/security/entity_store/entity_maintainers/start/{id}` | Start maintainer |
 | PUT | `/internal/security/entity_store/entity_maintainers/stop/{id}` | Stop maintainer |
-| PUT | `/internal/security/entity_store/entity_maintainers/run/{id}` | Run maintainer immediately |
+| POST | `/internal/security/entity_store/entity_maintainers/run/{id}` | Run maintainer immediately |
 | POST | `/internal/security/entity_store/entity_maintainers/init` | Initialize maintainers |
 
 ### Utility / Debugging
@@ -104,7 +104,7 @@ curl -s "http://localhost:5601/kbn/internal/security/entity_store/entity_maintai
   -u elastic:changeme -H "x-elastic-internal-origin: kibana" -H "elastic-api-version: 2"
 
 # Run a maintainer (INTERNAL)
-curl -s -X PUT "http://localhost:5601/kbn/internal/security/entity_store/entity_maintainers/run/risk-score" \
+curl -s -X POST "http://localhost:5601/kbn/internal/security/entity_store/entity_maintainers/run/risk-score" \
   -u elastic:changeme -H "kbn-xsrf: true" -H "x-elastic-internal-origin: kibana" -H "elastic-api-version: 2"
 
 # Force extraction (INTERNAL)

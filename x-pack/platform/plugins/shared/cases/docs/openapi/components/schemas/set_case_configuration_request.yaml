@@ -32,7 +32,24 @@ properties:
         - type
       properties:
         $ref: 'case_configure_customfields.yaml'
+  extractObservables:
+    type: boolean
+    description: >
+      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+      When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.
+      For owners that do not support observable extraction (currently Observability), setting this to `true`
+      has no effect on case creation; new cases for those owners always use `false`.
   owner:
     $ref: 'owner.yaml'
   templates:
     $ref: 'templates.yaml'
+  workflowTags:
+    type: array
+    description: >
+      Workflow tags that limit which workflows appear in Cases workflow selectors.
+      An empty array shows all workflows.
+    maxItems: 100
+    items:
+      type: string
+      minLength: 1
+      maxLength: 1024

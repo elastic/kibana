@@ -69,6 +69,10 @@ export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
  */
 export const KibanaPageTemplate = Object.assign(_KibanaPageTemplate, {
   Sidebar: EuiPageTemplate.Sidebar,
+  /**
+   * @deprecated For top-level application route headers, use `AppHeader` from
+   * `@kbn/app-header`. For non-route content, use `EuiPageTemplate.Header` directly.
+   */
   Header: EuiPageTemplate.Header,
   Section: EuiPageTemplate.Section,
   BottomBar: EuiPageTemplate.BottomBar,

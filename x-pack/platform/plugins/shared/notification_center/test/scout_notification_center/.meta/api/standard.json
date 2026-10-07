@@ -1,8 +1,7 @@
 {
-  "sha1": "def50ee59963c3cf6ade45bb121cd392095006d5",
+  "sha1": "9df86faca1d24ea90d5b73dbe9e10ff3acd688aa",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -34,6 +33,20 @@
       }
     },
     {
+      "id": "95cda9a57ffdcd7-45f8787405266c5",
+      "title": "Notification Center - read-state routes without a user profile unread status is forbidden",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/forbidden.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    },
+    {
       "id": "95cda9a57ffdcd7-f958a9963f88500",
       "title": "Notification Center - read-state routes without a user profile listing notifications stays available",
       "expectedStatus": "passed",
@@ -43,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/forbidden.spec.ts",
-        "line": 29,
-        "column": 26
+        "line": 32,
+        "column": 52
       }
     },
     {
@@ -76,8 +89,8 @@
       }
     },
     {
-      "id": "ec3adfe4a124ece-0869127fb7e361d",
-      "title": "Notification Center - GET notifications accepts severity as a single query value",
+      "id": "ec3adfe4a124ece-121697461254593",
+      "title": "Notification Center - GET notifications returns severity on each item for consumers to facet on",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -90,34 +103,6 @@
       }
     },
     {
-      "id": "ec3adfe4a124ece-ae2f97bf5efa31b",
-      "title": "Notification Center - GET notifications accepts severity as repeated query values",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 85,
-        "column": 14
-      }
-    },
-    {
-      "id": "ec3adfe4a124ece-5d61b64e6e80d23",
-      "title": "Notification Center - GET notifications rejects an unknown severity value",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 98,
-        "column": 59
-      }
-    },
-    {
       "id": "ec3adfe4a124ece-08ebf48b0094f3e",
       "title": "Notification Center - GET notifications rejects an unknown query parameter",
       "expectedStatus": "passed",
@@ -127,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 101,
-        "column": 7
+        "line": 84,
+        "column": 26
       }
     },
     {
@@ -213,6 +198,62 @@
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/mark_read.spec.ts",
         "line": 33,
         "column": 56
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-6c44cfc85599642",
+      "title": "Notification Center - read-state annotation annotates isRead against the newest copy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 76,
+        "column": 18
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-3cb5922cc1892c9",
+      "title": "Notification Center - read-state annotation orders by recency, not by read state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 110,
+        "column": 36
+      }
+    },
+    {
+      "id": "5c86894be28d7a1-f8a9f1c422234bd",
+      "title": "Notification Center - read-state annotation omits isRead for callers without a user profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
+        "line": 119,
+        "column": 14
+      }
+    },
+    {
+      "id": "6f397048bbb5cea-2b6b1e79a87aafa",
+      "title": "Notification Center - unread status tracks read-state transitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/unread_status.spec.ts",
+        "line": 35,
+        "column": 5
       }
     }
   ]

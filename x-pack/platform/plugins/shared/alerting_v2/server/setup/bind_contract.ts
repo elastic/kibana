@@ -6,26 +6,41 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { Start } from '@kbn/core-di';
+import { Setup, Start } from '@kbn/core-di';
 import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
+import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { InternalRulesClient } from '../lib/internal_rules_client';
 import type {
+  AlertingServerSetup,
   AlertingServerStart,
   RulesClientApi,
+  InternalRulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
 } from '../types';
 
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
+  bind(Setup).toDynamicValue(({ get }) => {
+    const registry = get(ArtifactTypeRegistry);
+    const contract: AlertingServerSetup = {
+      registerArtifactType: (definition) => {
+        registry.register(definition);
+      },
+    };
+    return contract;
+  });
+
   bind(Start).toDynamicValue(({ get }) => {
     const injection = get(CoreStart('injection'));
 
-    const buildScope = (request: KibanaRequest, spaceId?: string) => {
+    const buildScope = (request: KibanaRequest, spaceId?: SpaceId) => {
       const scope = injection.fork();
       scope.bind(Request).toConstantValue(request);
       scope.bind(Global).toConstantValue(Request);
@@ -42,9 +57,12 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       },
       async getRulesClientWithRequestInSpace(
         request: KibanaRequest,
-        spaceId: string
+        spaceId: SpaceId
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
+      },
+      async getUnsafeInternalRulesClient(): Promise<InternalRulesClientApi> {
+        return get(InternalRulesClient);
       },
       async getActionPolicyClientWithRequest(
         request: KibanaRequest
@@ -53,7 +71,7 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       },
       async getActionPolicyClientWithRequestInSpace(
         request: KibanaRequest,
-        spaceId: string
+        spaceId: SpaceId
       ): Promise<ActionPolicyClientApi> {
         return buildScope(request, spaceId).get(ActionPolicyClient);
       },

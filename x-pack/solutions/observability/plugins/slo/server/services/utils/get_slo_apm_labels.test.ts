@@ -76,4 +76,15 @@ describe('getSloApmLabels', () => {
 
     expect(getSloApmLabels(slo).slo_budgeting_method).toBe('timeslices');
   });
+
+  it('defaults prevent_cross_project_search to false when unset', () => {
+    const slo = createSLO();
+    const settings = {
+      syncDelay: slo.settings.syncDelay,
+      frequency: slo.settings.frequency,
+      preventInitialBackfill: slo.settings.preventInitialBackfill,
+    };
+
+    expect(getSloApmLabels({ ...slo, settings }).slo_prevent_cross_project_search).toBe(false);
+  });
 });

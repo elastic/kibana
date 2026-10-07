@@ -17,6 +17,7 @@ import {
   MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
+  MAX_LENGTH_PER_WORKFLOW_TAG,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -27,6 +28,7 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -121,6 +123,32 @@ describe('configure', () => {
             label: 'Example Label',
           },
         ],
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('has expected attributes in request with extractObservables', () => {
+      const request = {
+        ...defaultRequest,
+        extractObservables: true,
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('has expected attributes in request with extractObservables set to false', () => {
+      const request = {
+        ...defaultRequest,
+        extractObservables: false,
       };
       const query = ConfigurationRequestRt.decode(request);
 
@@ -334,6 +362,19 @@ describe('configure', () => {
       });
     });
 
+    it('has expected attributes in request with extractObservables', () => {
+      const request = {
+        ...defaultRequest,
+        extractObservables: false,
+      };
+      const query = ConfigurationPatchRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = ConfigurationPatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
@@ -353,6 +394,82 @@ describe('configure', () => {
       const result = ConfigurationPatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
+    });
+  });
+
+  describe('workflowTags', () => {
+    const requestCodecs = [
+      {
+        name: 'ConfigurationRequestRt',
+        codec: ConfigurationRequestRt,
+        schema: ConfigurationRequestSchema,
+        defaultRequest: { connector: serviceNow, closure_type: 'close-by-user', owner: 'Cases' },
+      },
+      {
+        name: 'ConfigurationPatchRequestRt',
+        codec: ConfigurationPatchRequestRt,
+        schema: ConfigurationPatchRequestSchema,
+        defaultRequest: {
+          connector: serviceNow,
+          closure_type: 'close-by-user',
+          version: 'WzQ3LDFd',
+        },
+      },
+    ];
+
+    describe.each(requestCodecs)('$name', ({ codec, schema, defaultRequest }) => {
+      it('accepts workflow tags', () => {
+        const request = { ...defaultRequest, workflowTags: ['soc-triage', 'enrichment'] };
+
+        expect(codec.decode(request)).toStrictEqual({ _tag: 'Right', right: request });
+        expect(schema.safeParse(request).data).toStrictEqual(request);
+      });
+
+      it('accepts an empty list of workflow tags', () => {
+        const request = { ...defaultRequest, workflowTags: [] };
+
+        expect(codec.decode(request)).toStrictEqual({ _tag: 'Right', right: request });
+        expect(schema.safeParse(request).success).toBe(true);
+      });
+
+      it(`limits workflow tags to ${MAX_WORKFLOW_TAGS_PER_CONFIGURATION}`, () => {
+        const workflowTags = Array.from(
+          { length: MAX_WORKFLOW_TAGS_PER_CONFIGURATION + 1 },
+          (_, index) => `tag-${index}`
+        );
+        const message = `The length of the field workflow tags is too long. Array must be of length <= ${MAX_WORKFLOW_TAGS_PER_CONFIGURATION}.`;
+
+        expect(PathReporter.report(codec.decode({ ...defaultRequest, workflowTags }))[0]).toContain(
+          message
+        );
+        expect(schema.safeParse({ ...defaultRequest, workflowTags }).error?.message).toContain(
+          message
+        );
+      });
+
+      it(`limits each workflow tag to ${MAX_LENGTH_PER_WORKFLOW_TAG} characters`, () => {
+        const workflowTags = ['a'.repeat(MAX_LENGTH_PER_WORKFLOW_TAG + 1)];
+        const message = `The length of the workflow tag is too long. The maximum length is ${MAX_LENGTH_PER_WORKFLOW_TAG}.`;
+
+        expect(PathReporter.report(codec.decode({ ...defaultRequest, workflowTags }))[0]).toContain(
+          message
+        );
+        expect(schema.safeParse({ ...defaultRequest, workflowTags }).error?.message).toContain(
+          message
+        );
+      });
+
+      it('rejects empty workflow tags', () => {
+        const workflowTags = ['   '];
+        const message = 'The workflow tag field cannot be an empty string.';
+
+        expect(PathReporter.report(codec.decode({ ...defaultRequest, workflowTags }))[0]).toContain(
+          message
+        );
+        expect(schema.safeParse({ ...defaultRequest, workflowTags }).error?.message).toContain(
+          message
+        );
+      });
     });
   });
 

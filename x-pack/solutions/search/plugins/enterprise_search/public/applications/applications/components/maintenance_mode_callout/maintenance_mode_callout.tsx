@@ -7,22 +7,20 @@
 
 import React from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export const MaintenanceModeCallout = () => {
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={i18n.translate('xpack.enterpriseSearch.maintenanceModeCallout.title', {
         defaultMessage: 'Maintenance Mode Notice',
       })}
-    >
-      <p>
-        {i18n.translate('xpack.enterpriseSearch.maintenanceModeCallout.description', {
-          defaultMessage:
-            'Search applications is in maintenance mode and will only receive security updates and bug fixes in future releases.',
-        })}
-      </p>
-    </EuiCallOut>
+      text={i18n.translate('xpack.enterpriseSearch.maintenanceModeCallout.description', {
+        defaultMessage:
+          'Search applications is in maintenance mode and will only receive security updates and bug fixes in future releases.',
+      })}
+    />
   );
 };

@@ -62,6 +62,7 @@ export {
 export { aggregateTaskOverduePercentilesForType } from './queries/aggregate_task_overdue_percentiles_for_type';
 
 export { runInvalidate } from './invalidate_api_keys/lib';
+export { decodeStoredApiKey, getUiamApiKeyId, getUiamApiKeySecret } from './lib/api_key_utils';
 export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
@@ -125,6 +126,9 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   },
   exposeToUsage: {
     claim_strategy: true,
+    claim_nudge: {
+      enabled: true,
+    },
     discovery: {
       active_nodes_lookback: true,
     },

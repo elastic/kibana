@@ -20,17 +20,30 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../common/ebt_constants';
+import { getLatestInvestigation } from '../event/significant_event_status';
 import { SignificantEventItem } from './significant_event_item';
+
+const getEventInvestigationRunStatus = (
+  event: SignificantEvent,
+  investigationStatuses: Record<string, InvestigationRunStatus> | undefined
+): InvestigationRunStatus | null | undefined => {
+  const workflowExecutionId = getLatestInvestigation(event)?.workflow_execution_id;
+  if (!workflowExecutionId || !investigationStatuses) {
+    return undefined;
+  }
+  return investigationStatuses[workflowExecutionId] ?? null;
+};
 
 export interface SignificantEventListProps {
   title: string;
   events: SignificantEvent[];
+  investigationStatuses?: Record<string, InvestigationRunStatus>;
   selectedEventUuid?: string;
   statusColor: 'danger' | 'success';
   filterActive?: boolean;
@@ -38,13 +51,14 @@ export interface SignificantEventListProps {
   onEventClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
   onCloseClick?: (event: SignificantEvent) => void;
-  closingEventUuid?: string;
+  closingEventId?: string;
   sectionRef?: React.Ref<HTMLElement>;
 }
 
 export function SignificantEventList({
   title,
   events,
+  investigationStatuses,
   selectedEventUuid,
   statusColor,
   filterActive = false,
@@ -52,7 +66,7 @@ export function SignificantEventList({
   onEventClick,
   onChatClick,
   onCloseClick,
-  closingEventUuid,
+  closingEventId,
   sectionRef,
 }: SignificantEventListProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -112,12 +126,12 @@ export function SignificantEventList({
               <EuiFlexGroup justifyContent="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="nightshiftClearBlastRadiusFilterButton"
+                    data-test-subj="nightshiftClearImpactedServicesFilterButton"
                     flush="left"
                     onClick={onClearFilter}
                     size="s"
                     {...getEbtProps({
-                      action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_BLAST_RADIUS_FILTER,
+                      action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_IMPACTED_SERVICES_FILTER,
                       element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
                       detail:
                         statusColor === 'danger'
@@ -151,7 +165,7 @@ export function SignificantEventList({
         >
           {events.map((event, index) => (
             <li
-              key={event.event_uuid}
+              key={event.event_id}
               css={
                 index < events.length - 1
                   ? css`
@@ -162,11 +176,15 @@ export function SignificantEventList({
             >
               <SignificantEventItem
                 event={event}
-                isSelected={event.event_uuid === selectedEventUuid}
+                investigationRunStatus={getEventInvestigationRunStatus(
+                  event,
+                  investigationStatuses
+                )}
+                isSelected={event.event_id === selectedEventUuid}
                 onClick={onEventClick}
                 onChatClick={onChatClick}
                 onCloseClick={onCloseClick}
-                isClosing={event.event_uuid === closingEventUuid}
+                isClosing={event.event_id === closingEventId}
               />
             </li>
           ))}

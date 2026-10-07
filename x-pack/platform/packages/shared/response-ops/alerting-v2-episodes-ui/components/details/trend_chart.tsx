@@ -20,7 +20,7 @@ import {
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { TrendSeries, TrendThreshold } from './trend_types';
+import { TREND_CHART_HEIGHT, type TrendSeries, type TrendThreshold } from './trend_types';
 import { computeTrendAxisDomain } from './trend_axis_domain';
 
 interface AlertEpisodeTrendChartServices {
@@ -31,8 +31,6 @@ export interface AlertEpisodeTrendChartProps {
   series: TrendSeries;
   thresholds: TrendThreshold[];
 }
-
-const CHART_HEIGHT = 240;
 
 export const AlertEpisodeTrendChart = ({ series, thresholds }: AlertEpisodeTrendChartProps) => {
   const { services } = useKibana<AlertEpisodeTrendChartServices>();
@@ -49,7 +47,7 @@ export const AlertEpisodeTrendChart = ({ series, thresholds }: AlertEpisodeTrend
   const chartMargins = { right: thresholds.length > 0 ? 16 : 0 };
 
   return (
-    <div style={{ height: CHART_HEIGHT }} data-test-subj="alertingV2EpisodeTrendChartCanvas">
+    <div style={{ height: TREND_CHART_HEIGHT }} data-test-subj="alertingV2EpisodeTrendChartCanvas">
       <Chart>
         <Tooltip
           headerFormatter={({ value }) =>

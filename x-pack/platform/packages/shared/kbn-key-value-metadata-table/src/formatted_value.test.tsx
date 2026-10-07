@@ -87,7 +87,7 @@ describe('FormattedValue', () => {
     expect(container.textContent).toMatch('13:30:45.123');
   });
 
-  it.each([['hello world'], ['synth-service-2'], ['1.3.4'], ['1234567'], ['service-1']])(
+  it.each([['hello world'], ['synth-service-2'], ['1.3.4'], ['1234567'], ['service-1'], ['0050']])(
     'renders plain string "%s" as-is',
     (value) => {
       const { container } = renderWithTheme(<FormattedValue value={value} {...dateProps} />);

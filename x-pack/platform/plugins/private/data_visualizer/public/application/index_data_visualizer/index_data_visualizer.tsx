@@ -8,7 +8,7 @@ import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +33,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout } from '@kbn/ui-callout';
+import type { GetAdditionalLinks } from '@kbn/file-upload-common';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -42,7 +43,6 @@ import { IndexDataVisualizerESQL } from './components/index_data_visualizer_view
 
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataVisualizerDataSourcePicker } from '../common/components/data_source_picker';
-import type { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
@@ -53,6 +53,7 @@ const localStorage = new Storage(window.localStorage);
 export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
   getAdditionalLinks?: GetAdditionalLinks;
+  projectRouting?: string;
 }
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
@@ -114,6 +115,7 @@ const DataVisualizerESQLStateContextProvider = () => {
 const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
   getAdditionalLinks,
+  projectRouting,
 }) => {
   const { services } = useDataVisualizerKibana();
   const {
@@ -179,7 +181,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
 
   useEffect(() => {
     const prevSearchString = urlSearchString;
-    const parsedQueryString = parse(prevSearchString, { sort: false });
+    const parsedQueryString = queryString.parse(prevSearchString, { sort: false });
 
     const getDataView = async () => {
       if (typeof parsedQueryString?.savedSearchId === 'string') {
@@ -229,7 +231,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
     ) => {
       const prevSearchString = urlSearchString;
       const urlState = parseUrlState(prevSearchString);
-      const parsedQueryString = parse(prevSearchString, { sort: false });
+      const parsedQueryString = queryString.parse(prevSearchString, { sort: false });
 
       if (!Object.hasOwn(urlState, accessor)) {
         urlState[accessor] = {};
@@ -249,7 +251,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
       }
 
       try {
-        const oldLocationSearchString = stringify(parsedQueryString, {
+        const oldLocationSearchString = queryString.stringify(parsedQueryString, {
           sort: false,
           encode: false,
         });
@@ -261,13 +263,13 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearchString = stringify(parsedQueryString, {
+        const newLocationSearchString = queryString.stringify(parsedQueryString, {
           sort: false,
           encode: false,
         });
 
         if (oldLocationSearchString !== newLocationSearchString) {
-          const newSearchString = stringify(parsedQueryString, { sort: false });
+          const newSearchString = queryString.stringify(parsedQueryString, { sort: false });
           if (replaceState) {
             history.replace({ search: newSearchString });
           } else {
@@ -291,6 +293,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
           currentSavedSearch={currentSavedSearch}
           currentSessionId={currentSessionId}
           getAdditionalLinks={getAdditionalLinks}
+          projectRouting={projectRouting}
         />
       ) : (
         <DataVisualizerDataSourcePicker currentDataView={null} />
@@ -303,12 +306,14 @@ export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
+  projectRouting?: string;
 }
 
 export const IndexDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
   showFrozenDataTierChoice = true,
   esql,
+  projectRouting,
 }) => {
   const coreStart = getCoreStart();
   const {
@@ -324,6 +329,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     uiActions,
     charts,
     unifiedSearch,
+    cps,
   } = getPluginsStart();
   const services = {
     ...coreStart,
@@ -339,6 +345,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     uiActions,
     charts,
     unifiedSearch,
+    cps,
   };
 
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
@@ -351,6 +358,7 @@ export const IndexDataVisualizer: FC<Props> = ({
       'uiSettings',
       'userProfile',
       'i18n',
+      'cps',
     ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
@@ -365,6 +373,7 @@ export const IndexDataVisualizer: FC<Props> = ({
               <DataVisualizerStateContextProvider
                 IndexDataVisualizerComponent={IndexDataVisualizerView}
                 getAdditionalLinks={getAdditionalLinks}
+                projectRouting={projectRouting}
               />
             ) : (
               <DataVisualizerESQLStateContextProvider />

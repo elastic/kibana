@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'node:crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
@@ -14,7 +15,7 @@ import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { spaceTest } from '../../fixtures';
 
-const getConcurrencyWorkflowYaml = (strategy: string) => `
+const getConcurrencyWorkflowYaml = (strategy: string, isolationKey: string) => `
 name: Scout API Test Workflow
 enabled: true
 description: Temporary workflow created by Scout API tests
@@ -29,7 +30,7 @@ triggers:
           type: string
 settings:
   concurrency:
-    key: "{{inputs.env}}-{{inputs.problem}}"
+    key: "{{inputs.env}}-{{inputs.problem}}-${isolationKey}"
     strategy: "${strategy}"
 
 
@@ -41,16 +42,19 @@ steps:
   - name: wait_step_1
     type: wait
     with:
-      duration: 5s
+      # Stay under the 5s engine threshold so waits sleep in-process instead of
+      # parking on a workflow:resume Task Manager task (see handleExecutionDelay).
+      duration: 2s
   - name: wait_step_2
     type: wait
     with:
-      duration: 5s
+      duration: 2s
   - name: hello_world_step_2
     type: console
     with:
       message: "Hello from Scout API test 2"
 `;
+
 spaceTest.describe(
   'Workflow execution concurrency control',
   { tag: tags.deploymentAgnostic },
@@ -62,6 +66,7 @@ spaceTest.describe(
     async function runConcurrencyWorkflow(
       workflowsApi: WorkflowsApiService,
       workflowId: string,
+      isolationKey: string,
       { waitTimeout = 20_000 }: { waitTimeout?: number } = {}
     ) {
       const events = [
@@ -76,11 +81,10 @@ spaceTest.describe(
 
       for (const event of events) {
         const response = await workflowsApi.run(workflowId, event);
-        await new Promise((resolve) => setTimeout(resolve, 1500));
 
         scheduledExecutions.push({
           workflowExecutionId: response.workflowExecutionId,
-          concurrencyKey: `${event.env}-${event.problem}`,
+          concurrencyKey: `${event.env}-${event.problem}-${isolationKey}`,
         });
       }
 
@@ -116,13 +120,15 @@ spaceTest.describe(
     spaceTest(
       'cancel-in-progress strategy cancels previous executions and completes the latest',
       async ({ apiServices }) => {
+        const isolationKey = randomUUID();
         const createdWorkflow = await apiServices.workflowsApi.create(
-          getConcurrencyWorkflowYaml('cancel-in-progress')
+          getConcurrencyWorkflowYaml('cancel-in-progress', isolationKey)
         );
 
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
-          createdWorkflow.id
+          createdWorkflow.id,
+          isolationKey
         );
 
         Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
@@ -148,13 +154,15 @@ spaceTest.describe(
     spaceTest(
       'drop strategy drops new executions until there is an already running execution',
       async ({ apiServices }) => {
+        const isolationKey = randomUUID();
         const createdWorkflow = await apiServices.workflowsApi.create(
-          getConcurrencyWorkflowYaml('drop')
+          getConcurrencyWorkflowYaml('drop', isolationKey)
         );
 
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
-          createdWorkflow.id
+          createdWorkflow.id,
+          isolationKey
         );
 
         Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
@@ -180,20 +188,23 @@ spaceTest.describe(
     spaceTest(
       'queue strategy queues new executions and runs them sequentially until all complete',
       async ({ apiServices }) => {
-        // Scout's default test timeout is 60s. Queue serialises 3 ~10s runs for
-        // the same key (~30s) plus ~6s of inter-run delays, so 120s leaves CI headroom.
-        spaceTest.setTimeout(120_000);
+        // Scout's default test timeout is 60s. Queue serialises 3 ~4s runs for
+        // the same key (~12s), so 90s leaves CI headroom for Task Manager pickup.
+        spaceTest.setTimeout(90_000);
 
+        const isolationKey = randomUUID();
         const createdWorkflow = await apiServices.workflowsApi.create(
-          getConcurrencyWorkflowYaml('queue')
+          getConcurrencyWorkflowYaml('queue', isolationKey)
         );
 
-        // The queue strategy serialises executions per concurrency key. With 3 queued
-        // dev/issue-1 runs each taking ~10s, the last one finishes at ~30s. We use a
-        // 60s timeout so waitForTermination does not expire prematurely.
+        // The queue strategy serialises executions per concurrency key. Waits are 2s
+        // (under the 5s in-process vs workflow:resume threshold) so 3 queued runs
+        // finish in ~12s without parking on Task Manager. 60s is still enough
+        // headroom if the initial workflow:run claim is slow.
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
           createdWorkflow.id,
+          isolationKey,
           { waitTimeout: 60_000 }
         );
 
