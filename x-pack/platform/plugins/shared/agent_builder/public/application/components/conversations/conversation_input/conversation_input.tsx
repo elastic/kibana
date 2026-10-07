@@ -61,10 +61,10 @@ const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.pos
 const getMessageTooLongLabel = (characterCount: number): string =>
   i18n.translate('xpack.agentBuilder.conversationInput.messageTooLong', {
     defaultMessage:
-      'Message is too long ({characterCount} / {maxLength} characters). Shorten it to send.',
+      'Message is too long ({characterCount, number} / {maxLength, number} characters). Shorten it to send.',
     values: {
-      characterCount: characterCount.toLocaleString(),
-      maxLength: CHAT_MESSAGE_MAX_LENGTH.toLocaleString(),
+      characterCount,
+      maxLength: CHAT_MESSAGE_MAX_LENGTH,
     },
   });
 
