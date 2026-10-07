@@ -15,7 +15,7 @@ type AnyDataSource = EsqlSource | DataViewSource;
 /**
  * True when both sources represent the same dataset.
  *
- * ES|QL compares {@link EsqlSource.datasetKey} (FROM + time field + project routing),
+ * ES|QL compares {@link EsqlSource.datasetId} (FROM + time field + project routing),
  * not query-instance `id`. Classic and mixed switches compare `id`.
  */
 export const isSameDataset = (
@@ -27,7 +27,7 @@ export const isSameDataset = (
   }
 
   if (current.kind === 'esql' && next.kind === 'esql') {
-    return current.datasetKey === next.datasetKey;
+    return current.datasetId === next.datasetId;
   }
 
   return current.id === next.id;

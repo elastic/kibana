@@ -11,7 +11,7 @@ import { isEqual, cloneDeep } from 'lodash';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { EsqlSource, type DataSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import type {
   TextBasedLayerColumn,
   LensPartitionVisualizationState as PieVisualizationState,
@@ -161,11 +161,8 @@ export const isPreferredEsqlVisCompatibleWithCurrentQuery = (
     const compareTimeField = Boolean(timeFieldName && layer.timeField);
 
     return (
-      EsqlSource.getDatasetKey(
-        layerIndexPattern,
-        compareTimeField ? layer.timeField : undefined
-      ) ===
-      EsqlSource.getDatasetKey(currentIndexPattern, compareTimeField ? timeFieldName : undefined)
+      layerIndexPattern === currentIndexPattern &&
+      (!compareTimeField || layer.timeField === timeFieldName)
     );
   });
 };

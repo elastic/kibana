@@ -24,6 +24,7 @@ import {
   selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
+  getDataViewOfSource,
   useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -39,7 +40,11 @@ export const TabsView = (props: SingleTabViewProps) => {
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
-  const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
+  const currentDataSource = useCurrentTabRuntimeState((tab) => tab.currentDataSource$);
+  const currentDataView = useMemo(
+    () => getDataViewOfSource(currentDataSource),
+    [currentDataSource]
+  );
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
   const isProjectChromeStyle = useIsProjectChromeStyle();
   const { euiTheme } = useEuiTheme();
