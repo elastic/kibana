@@ -144,8 +144,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       await entityStoreUtils.cleanEngines();
       await entityStoreUtilsCustomSpace.cleanEngines();
-      await cleanUpRiskScoreMaintainer({ es, log });
-      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName });
+      await cleanUpRiskScoreMaintainer({ es, log, supertest });
+      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName, supertest });
       await deleteRiskEngineConfigs();
       await deleteRiskEngineConfigs(customSpaceName);
     });
@@ -153,8 +153,8 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await entityStoreUtils.cleanEngines();
       await entityStoreUtilsCustomSpace.cleanEngines();
-      await cleanUpRiskScoreMaintainer({ es, log });
-      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName });
+      await cleanUpRiskScoreMaintainer({ es, log, supertest });
+      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName, supertest });
       await deleteRiskEngineConfigs();
       await deleteRiskEngineConfigs(customSpaceName);
     });
