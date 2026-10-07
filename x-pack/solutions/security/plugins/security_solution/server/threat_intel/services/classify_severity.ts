@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { type SeverityLevel, type ThreatCategory } from '../../../common/threat_intel';
 import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
@@ -17,7 +17,7 @@ import {
   selectOverflowRetryArticleContext,
 } from './article_context';
 
-const severityLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
+const severityLevelSchema = lazySchema(() => z.enum(['low', 'medium', 'high', 'critical']));
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -28,10 +28,12 @@ const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max)
 /** A sentence or two justifying the level, not an essay. */
 const SEVERITY_RATIONALE_CHAR_LIMIT = 2_000;
 
-export const classifySeverityLlmOutputSchema = z.object({
-  level: severityLevelSchema,
-  rationale: boundedText(SEVERITY_RATIONALE_CHAR_LIMIT).optional(),
-});
+export const classifySeverityLlmOutputSchema = lazySchema(() =>
+  z.object({
+    level: severityLevelSchema,
+    rationale: boundedText(SEVERITY_RATIONALE_CHAR_LIMIT).optional(),
+  })
+);
 
 export type ClassifySeverityLlmOutput = z.infer<typeof classifySeverityLlmOutputSchema>;
 

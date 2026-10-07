@@ -13,6 +13,7 @@ import { buildInboundEventsClient } from './client';
 import { authorizeKibanaInboundRequest } from './authorize_kibana_inbound_request';
 import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
 import { getDecryptedInboundConnector } from './get_decrypted_inbound_connector';
+import type { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 
 export type { InboundEventsClient } from './client';
@@ -29,6 +30,7 @@ export interface InboundEventsClientArgs {
   maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getStartServices: CoreSetup['getStartServices'];
+  rateLimiter: InboundEventRateLimiter;
   inMemoryConnectors: InMemoryConnector[];
 }
 

@@ -20,6 +20,7 @@ import type { RequestDocumentationAction } from './actions';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
+import { withPromqlKeyword } from './promql_keyword';
 
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
@@ -203,9 +204,19 @@ export const generateEsql = async ({
             name: 'request_documentation',
           });
           const docPromise = requestDocModel
-            .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
+            .invoke(
+              createRequestDocumentationPromptNoResource({
+                nlQuery,
+                documentation,
+                additionalContext,
+              })
+            )
             .then(({ commands = [], functions = [] }) => {
-              const requestedKeywords = [...commands, ...functions];
+              const requestedKeywords = withPromqlKeyword(
+                [...commands, ...functions],
+                nlQuery,
+                additionalContext
+              );
               return {
                 type: 'request_documentation' as const,
                 requestedKeywords,
