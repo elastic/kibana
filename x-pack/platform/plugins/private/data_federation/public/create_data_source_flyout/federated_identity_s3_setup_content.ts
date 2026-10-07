@@ -25,14 +25,12 @@ export const s3FederatedIdentitySetupStrings = {
     defaultMessage: 'Paste the ARN returned by step 3 above.',
   }),
 
-  deployRoleArnLabel: i18n.translate(
-    'xpack.dataFederation.createFlyout.s3.federated.roleArnLabel.deploy',
-    { defaultMessage: 'Role ARN (from CloudFormation Outputs)' }
-  ),
-
   deployRoleArnHelp: i18n.translate(
     'xpack.dataFederation.createFlyout.s3.federated.roleArnHelp.deploy',
-    { defaultMessage: 'CloudFormation → Stacks → your stack → Outputs → RoleArn' }
+    {
+      defaultMessage:
+        'After the resources are created, copy RoleArn value from Outputs in CloudFormation and paste it here.',
+    }
   ),
 
   cloudFormationMethod: i18n.translate(
@@ -224,16 +222,16 @@ export const getS3FederatedIdentityDeployConfig = ({
   subject: string;
 }): FederatedIdentityDeployConfig => ({
   title: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.title', {
-    defaultMessage: 'Deploy with AWS CloudFormation',
+    defaultMessage: 'Set up AWS access with CloudFormation',
   }),
   description: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.description', {
-    defaultMessage: 'Runs a stack in the AWS console and returns a role ARN to paste below.',
+    defaultMessage: 'Open the template in AWS and create the required resources.',
   }),
   launchUrl: buildS3CloudFormationLaunchUrl({ jwtIssuer, subject }),
   launchButtonLabel: i18n.translate(
     'xpack.dataFederation.createFlyout.s3.federated.deploy.launchButton',
     {
-      defaultMessage: 'Launch CloudFormation template',
+      defaultMessage: 'Open template in AWS Console',
     }
   ),
   createsTitle: i18n.translate(
@@ -247,14 +245,13 @@ export const getS3FederatedIdentityDeployConfig = ({
       id: 'idp',
       label: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.idp', {
         defaultMessage:
-          'IAM OIDC identity provider that trusts the JWT issuer for your Elastic project or deployment.',
+          'An IAM OIDC identity provider that trusts your Elastic project or deployment.',
       }),
     },
     {
       id: 'role',
       label: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.role', {
-        defaultMessage:
-          'IAM role with a trust policy scoped to your project or deployment ID (sub condition).',
+        defaultMessage: 'An IAM role restricted to your project or deployment ID.',
       }),
     },
     {
@@ -263,7 +260,7 @@ export const getS3FederatedIdentityDeployConfig = ({
         'xpack.dataFederation.createFlyout.s3.federated.deploy.creates.policy',
         {
           defaultMessage:
-            'S3 read policy granting s3:GetObject, s3:ListBucket, and s3:GetBucketLocation.',
+            'An S3 read policy with s3:GetObject, s3:ListBucket, and s3:GetBucketLocation permissions.',
         }
       ),
     },

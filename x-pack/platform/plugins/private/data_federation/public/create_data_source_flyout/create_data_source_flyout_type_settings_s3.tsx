@@ -286,11 +286,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
         </>
       ) : null}
       <EuiFormRow
-        label={
-          isCloudFormation
-            ? s3FederatedIdentitySetupStrings.deployRoleArnLabel
-            : s3FederatedIdentitySetupStrings.roleArnLabel
-        }
+        label={s3FederatedIdentitySetupStrings.roleArnLabel}
         fullWidth
         isInvalid={Boolean(roleArnState.error)}
         error={roleArnState.error?.message}
