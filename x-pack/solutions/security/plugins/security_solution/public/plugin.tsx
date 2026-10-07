@@ -97,7 +97,6 @@ import {
   registerRuleAttachment,
   registerRulePreviewAttachment,
   registerSiemMigrationRuleItemsAttachment,
-  registerImpactAttachment,
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';

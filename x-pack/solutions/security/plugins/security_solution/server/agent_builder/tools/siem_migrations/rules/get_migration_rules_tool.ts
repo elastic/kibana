@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
