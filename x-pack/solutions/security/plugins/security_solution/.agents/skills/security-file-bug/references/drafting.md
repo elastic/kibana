@@ -6,11 +6,29 @@ Repo: `elastic/kibana`. Body: this skill's `templates/bug-report.md` (not `.gith
 
 Do not invent steps, expected behaviour, versions, or feature-flag names.
 
+## Scope
+
+**Confirmed finding only.** Title, steps, **Current behaviour**, and **Expected behavior** cover the named defect and nothing adjacent.
+
+**Expected** is the user-visible close condition for that finding (what the user should see). It is not a design, an implementation, or a punch list.
+
+Never suggest the fix. Do not write how to implement it, what to change in the URL/API/code, or “probably worth fixing X together.”
+
+Related things you noticed (other controls, similar gaps, “same category”) do **not** join Expected or the title. Put them under **Any additional information:** as “also noticed, not part of this defect,” or file a second ticket. Do not expand this issue.
+
+## Ready to file
+
+Always show the full draft and **end the turn** before any `write`. The human must see title, type, labels, body, and files, then approve **that** draft in a later message.
+
+Run `scan-wip` on the finding and draft. Hits: draft/WIP PR, work in progress, known or intentional limitation, by design, not yet implemented. A matching open or draft PR from search is the same stop. Noting it under Additional information is **not** clearance. Ask **file anyway?** Hard stop. Only then `check-draft --wip-ok`.
+
 ## Headings
 
 Use the template headings. **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout). **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
 
-**Title** (new issues): `[<team name>] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team. If `format-title` exits 2, the symptom is too long — ask the human to shorten it. Do not file a clipped title.
+**Title** (new issues): `[<team name>] [Bug] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team. If `format-title` exits 2, the symptom is too long — ask the human to shorten it. Do not file a clipped title.
+
+**Release label:** run `infer-release`. A concrete stack version (`9.6.0`, `v9.6.0`, `9.6.0 (notes…)`) becomes `v9.6.0`. If the version is `Unknown`, a PR build, `main`, or otherwise not `X.Y` / `X.Y.Z`, ask. Do not invent a `v*` label. Create also always gets `bug` and `triage_needed`. GitHub Type is Bug (`write` sets `--type Bug`).
 
 **Feature flags:** exact flag id, on/off, and **how to enable it**. If confirmed default/GA, write `No feature flag (default/GA)`.
 

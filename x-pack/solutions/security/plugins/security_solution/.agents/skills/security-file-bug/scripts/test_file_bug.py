@@ -25,11 +25,13 @@ from file_bug import (  # noqa: E402
     finding_from_jsonl,
     format_issue_title,
     infer_deployment,
+    infer_release_label,
     infer_team_label,
     pack_gaps,
     parse_search_results,
     render_bug_body,
     scan_sensitive,
+    scan_wip,
     upload_evidence,
     validate_labels,
     write_github,
@@ -381,19 +383,19 @@ class FormatIssueTitleTest(unittest.TestCase):
     def test_strips_team_prefix(self):
         self.assertEqual(
             format_issue_title("Team:Entity Analytics", "Risk table empty"),
-            "[Entity Analytics] Risk table empty",
+            "[Entity Analytics] [Bug] Risk table empty",
         )
 
     def test_collapses_whitespace(self):
         self.assertEqual(
             format_issue_title("Entity Analytics", "  risk   table  "),
-            "[Entity Analytics] risk table",
+            "[Entity Analytics] [Bug] risk table",
         )
 
     def test_strips_trailing_period(self):
         self.assertEqual(
             format_issue_title("Entity Analytics", "Risk table empty."),
-            "[Entity Analytics] Risk table empty",
+            "[Entity Analytics] [Bug] Risk table empty",
         )
 
     def test_rejects_vague_symptom(self):
@@ -402,8 +404,8 @@ class FormatIssueTitleTest(unittest.TestCase):
 
     def test_rejects_too_long(self):
         with self.assertRaises(TitleTooLong) as raised:
-            format_issue_title("Entity Analytics", "x" * 80)
-        self.assertIn("≤72", str(raised.exception))
+            format_issue_title("Entity Analytics", "x" * 130)
+        self.assertIn("≤140", str(raised.exception))
         self.assertNotIn("…", str(raised.exception))
 
 
@@ -482,6 +484,35 @@ class InferDeploymentTest(unittest.TestCase):
         self.assertEqual(result.label, "ECH")
 
 
+class InferReleaseLabelTest(unittest.TestCase):
+    def test_stack_version_to_v_label(self):
+        result = infer_release_label({}, {"kibana_version": "9.6.0"})
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "v9.6.0")
+
+    def test_strips_leading_v_and_trailing_notes(self):
+        result = infer_release_label(
+            {}, {"kibana_version": "v9.6.0 (serverless PR of #293848)"}
+        )
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "v9.6.0")
+
+    def test_minor_only_pads_patch(self):
+        result = infer_release_label({}, {"kibana_version": "9.6"})
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "v9.6.0")
+
+    def test_unknown_asks(self):
+        result = infer_release_label({}, {"kibana_version": "Unknown"})
+        self.assertEqual(result.status, "ask")
+        self.assertIsNone(result.label)
+
+    def test_pr_build_asks(self):
+        result = infer_release_label({}, {"kibana_version": "main"})
+        self.assertEqual(result.status, "ask")
+        self.assertIn("not a stack release", result.hint or "")
+
+
 class PackGapsTest(unittest.TestCase):
     def test_fixture_is_thin_without_always_ask(self):
         finding = json.loads((FIXTURES / "finding.json").read_text())
@@ -491,6 +522,7 @@ class PackGapsTest(unittest.TestCase):
         self.assertIn("deployment", gaps)
         self.assertIn("spaces", gaps)
         self.assertNotIn("version", gaps)
+        self.assertNotIn("release", gaps)
         self.assertNotIn("steps", gaps)
         self.assertNotIn("role", gaps)
 
@@ -538,6 +570,23 @@ class ScanSensitiveTest(unittest.TestCase):
         self.assertEqual(scan_sensitive("Table shows 0 entities"), [])
 
 
+class ScanWipTest(unittest.TestCase):
+    def test_flags_draft_pr_note(self):
+        hits = scan_wip(
+            "PR #293848 is still a draft, so this may be known work in progress."
+        )
+        self.assertEqual(hits, ["wip_or_limitation"])
+
+    def test_flags_known_limitation(self):
+        self.assertEqual(
+            scan_wip("This is a known limitation of the old table."),
+            ["wip_or_limitation"],
+        )
+
+    def test_clean_repro_is_empty(self):
+        self.assertEqual(scan_wip("Group by is lost after a hard reload."), [])
+
+
 class CheckDraftTest(unittest.TestCase):
     def test_complete_draft_is_fileable(self):
         finding = {
@@ -552,9 +601,10 @@ class CheckDraftTest(unittest.TestCase):
         body = render_bug_body(finding, {"kibana_version": "9.3.0"})
         gaps = check_draft(
             body=body,
-            title="[Entity Analytics] Risk table empty",
+            title="[Entity Analytics] [Bug] Risk table empty",
             finding=finding,
             config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
         )
         self.assertEqual(gaps, [])
 
@@ -590,20 +640,50 @@ class CheckDraftTest(unittest.TestCase):
         body = render_bug_body(finding, {"kibana_version": "9.3.0"})
         gaps = check_draft(
             body=body,
-            title="[Entity Analytics] Risk table empty",
+            title="[Entity Analytics] [Bug] Risk table empty",
             finding=finding,
             config={"kibana_version": "9.3.0"},
-            labels=["bug", "Team:Entity Analytics"],
+            labels=["bug", "triage_needed", "Team:Entity Analytics"],
         )
         self.assertIn("tester_label", gaps)
         gaps = check_draft(
             body=body,
-            title="[Entity Analytics] Risk table empty",
+            title="[Entity Analytics] [Bug] Risk table empty",
             finding=finding,
             config={"kibana_version": "9.3.0"},
-            labels=["bug", "Team:Entity Analytics", TESTER_SOURCE_LABEL],
+            labels=["bug", "triage_needed", "Team:Entity Analytics", TESTER_SOURCE_LABEL],
         )
         self.assertNotIn("tester_label", gaps)
+
+    def test_draft_pr_note_is_wip_until_cleared(self):
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "No feature flag (default/GA)",
+            "deployment": "ECH",
+            "role": "none",
+            "spaces": "default",
+        }
+        body = render_bug_body(finding, {"kibana_version": "9.3.0"})
+        body += "\nPR #293848 is still a draft.\n"
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("wip_or_limitation", gaps)
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+            wip_ok=True,
+        )
+        self.assertNotIn("wip_or_limitation", gaps)
 
 
 class EmbedUploadsTest(unittest.TestCase):
@@ -769,6 +849,8 @@ class WriteGithubTest(unittest.TestCase):
             )
         self.assertEqual(len(calls), 1)
         self.assertEqual(calls[0][0:3], ["gh", "issue", "create"])
+        self.assertIn("--type", calls[0])
+        self.assertIn("Bug", calls[0])
 
     def test_create_adds_tester_label_from_finding(self):
         calls = []
@@ -792,8 +874,39 @@ class WriteGithubTest(unittest.TestCase):
             run_gh=run_gh,
         )
         self.assertIn(TESTER_SOURCE_LABEL, result["labels"])
+        self.assertIn("bug", result["labels"])
+        self.assertIn("triage_needed", result["labels"])
         self.assertIn("--label", calls[0])
         self.assertIn(TESTER_SOURCE_LABEL, calls[0])
+        self.assertIn("--type", calls[0])
+        self.assertIn("Bug", calls[0])
+
+    def test_create_adds_release_label_from_version(self):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            return {
+                "returncode": 0,
+                "stdout": "https://github.com/elastic/kibana/issues/1",
+                "stderr": "",
+            }
+
+        result = write_github(
+            action="create",
+            repo="elastic/kibana",
+            title="[Entity Analytics] [Bug] Risk table empty",
+            body="body",
+            labels=["Team:Entity Analytics"],
+            number=None,
+            config={"kibana_version": "9.6.0"},
+            run_gh=run_gh,
+        )
+        self.assertEqual(
+            result["labels"],
+            ["bug", "triage_needed", "Team:Entity Analytics", "v9.6.0"],
+        )
+        self.assertIn("v9.6.0", calls[0])
 
     def test_comment_adds_tester_label_to_existing_issue(self):
         calls = []
@@ -967,7 +1080,7 @@ class FileBugCliTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertEqual(
             json.loads(result.stdout)["title"],
-            "[Entity Analytics] Risk table empty",
+            "[Entity Analytics] [Bug] Risk table empty",
         )
 
     def test_parse_search_cli(self):
@@ -988,6 +1101,14 @@ class FileBugCliTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 2)
         self.assertEqual(json.loads(result.stdout)["status"], "ask")
+
+    def test_infer_release_cli(self):
+        with TemporaryDirectory() as tmp:
+            config = Path(tmp) / "config.json"
+            config.write_text(json.dumps({"kibana_version": "9.6.0"}), encoding="utf-8")
+            result = run_cli("infer-release", "--config", str(config))
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(json.loads(result.stdout)["label"], "v9.6.0")
 
     def test_from_findings_cli(self):
         jsonl = "\n".join(
@@ -1024,6 +1145,11 @@ class FileBugCliTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("email", json.loads(result.stdout)["hits"])
 
+    def test_scan_wip_cli_asks(self):
+        result = run_cli("scan-wip", "--text", "PR #12 is still a draft")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("wip_or_limitation", json.loads(result.stdout)["hits"])
+
     def test_check_draft_cli_exits_2_without_stamp(self):
         finding = {
             "current_behavior": "Table shows 0",
@@ -1046,7 +1172,7 @@ class FileBugCliTest(unittest.TestCase):
                 "--body",
                 str(body_path),
                 "--title",
-                "[Entity Analytics] Risk table empty",
+                "[Entity Analytics] [Bug] Risk table empty",
             )
         self.assertEqual(result.returncode, 2)
         self.assertIn("stamp", json.loads(result.stdout)["gaps"])
@@ -1067,12 +1193,12 @@ class FileBugCliTest(unittest.TestCase):
             "--label",
             "Team:Entity Analytics",
             "--symptom",
-            "x" * 80,
+            "x" * 130,
         )
         self.assertEqual(result.returncode, 2)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["status"], "ask")
-        self.assertIn("≤72", payload["error"])
+        self.assertIn("≤140", payload["error"])
 
     def test_embed_uploads_cli_writes_out_file(self):
         with TemporaryDirectory() as tmp:
@@ -1239,6 +1365,8 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("Preconditions:", self.text)
         self.assertIn("Environment setup questions", self.text)
         self.assertIn("exact error message", self.text.lower())
+        self.assertIn("Confirmed finding only", self.text)
+        self.assertIn("Never suggest the fix", self.text)
 
     def test_path_steps_live_in_skill_only(self):
         drafting = (SKILL_ROOT / "references" / "drafting.md").read_text(encoding="utf-8")
@@ -1253,6 +1381,10 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("Path B — exploratory-tester pack", self.text)
         self.assertIn("two full loops", self.text.lower())
         self.assertIn("[<team name>]", self.text)
+        self.assertIn("[Bug]", self.text)
+        self.assertIn("triage_needed", self.text)
+        self.assertIn("infer-release", self.text)
+        self.assertIn("--type Bug", self.text)
         self.assertIn("Unknown", self.text)
         self.assertIn("Do not assume every session is local Scout", self.text)
         self.assertIn("thin", self.text.lower())
@@ -1272,6 +1404,10 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("Fileable checklist", self.text)
         self.assertIn("check-draft", self.text)
         self.assertIn("scan-sensitive", self.text)
+        self.assertIn("scan-wip", self.text)
+        self.assertIn("file anyway", self.text.lower())
+        self.assertIn("end the turn", self.text.lower())
+        self.assertIn("Never write in the same turn", self.skill)
         self.assertIn("Filed via security-file-bug", self.text)
         self.assertIn("open and closed", self.text)
         self.assertIn("second", self.text.lower())

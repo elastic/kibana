@@ -24,11 +24,13 @@ from file_bug import (  # noqa: E402
     finding_from_jsonl,
     format_issue_title,
     infer_deployment,
+    infer_release_label,
     infer_team_label,
     pack_gaps,
     parse_search_results,
     render_bug_body,
     scan_sensitive,
+    scan_wip,
     upload_evidence,
     validate_labels,
     write_github,
@@ -218,6 +220,18 @@ def _cmd_infer_deployment(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_infer_release(args: argparse.Namespace) -> int:
+    finding = _read_json(args.finding) if args.finding else {}
+    config = _read_json(args.config) if args.config else {}
+    if not isinstance(finding, dict) or not isinstance(config, dict):
+        return _fail("finding and config must be JSON objects")
+    result = infer_release_label(finding, config)
+    return _emit(
+        {"status": result.status, "label": result.label, "hint": result.hint},
+        EXIT_ASK if result.status == "ask" else EXIT_OK,
+    )
+
+
 def _cmd_from_findings(args: argparse.Namespace) -> int:
     records = [
         json.loads(line)
@@ -258,10 +272,26 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
         finding=finding,
         config=config,
         labels=labels or None,
+        wip_ok=bool(args.wip_ok),
     )
     return _emit(
         {"fileable": not gaps, "gaps": gaps},
         EXIT_ASK if gaps else EXIT_OK,
+    )
+
+
+def _cmd_scan_wip(args: argparse.Namespace) -> int:
+    texts: list[str] = []
+    if args.finding:
+        texts.append(_read_text(args.finding))
+    if args.body:
+        texts.append(_read_text(args.body))
+    if args.text:
+        texts.append(args.text)
+    hits = scan_wip(*texts)
+    return _emit(
+        {"hits": hits},
+        EXIT_ASK if hits else EXIT_OK,
     )
 
 
@@ -398,7 +428,7 @@ def _build_parser() -> argparse.ArgumentParser:
     infer.add_argument("--knowledge", required=True, help="security-domain-knowledge.md path")
     infer.set_defaults(handler=_cmd_infer_team)
 
-    title = subparsers.add_parser("format-title", help="Build [<team name>] symptom")
+    title = subparsers.add_parser("format-title", help="Build [<team name>] [Bug] symptom")
     title.add_argument("--label", required=True, help="Team:* label or display name")
     title.add_argument("--symptom", required=True)
     title.set_defaults(handler=_cmd_format_title)
@@ -419,6 +449,13 @@ def _build_parser() -> argparse.ArgumentParser:
     deploy.add_argument("--config", default=None)
     deploy.add_argument("--finding", default=None)
     deploy.set_defaults(handler=_cmd_infer_deployment)
+
+    release = subparsers.add_parser(
+        "infer-release", help="Map Version to a vX.Y.Z label, or ask"
+    )
+    release.add_argument("--config", default=None)
+    release.add_argument("--finding", default=None)
+    release.set_defaults(handler=_cmd_infer_release)
 
     from_findings = subparsers.add_parser(
         "from-findings", help="Pick one finding from parse-findings JSONL"
@@ -447,7 +484,20 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Comma-separated labels that will be applied on create",
     )
+    draft.add_argument(
+        "--wip-ok",
+        action="store_true",
+        help="Human said file anyway after a draft/WIP or known-limitation hit",
+    )
     draft.set_defaults(handler=_cmd_check_draft)
+
+    wip = subparsers.add_parser(
+        "scan-wip", help="Flag draft/WIP PRs and known/intentional limitations"
+    )
+    wip.add_argument("--finding", default=None)
+    wip.add_argument("--body", default=None)
+    wip.add_argument("--text", default=None)
+    wip.set_defaults(handler=_cmd_scan_wip)
 
     sensitive = subparsers.add_parser(
         "scan-sensitive", help="Flag emails, case IDs, NDA/customer wording"

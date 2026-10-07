@@ -13,14 +13,16 @@ from typing import Callable, Literal
 WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 UNKNOWN_ANSWER = "Unknown"
 FILED_VIA = "Filed via security-file-bug"
-MAX_TITLE_LEN = 72
+MAX_TITLE_LEN = 140
 SOURCE_EXPLORATORY_TESTER = "exploratory-tester"
 TESTER_SOURCE_LABEL = "sec-eng-prod:exploratory-tester"
+CREATE_LABELS = ("bug", "triage_needed")
+ISSUE_TYPE = "Bug"
 _MEDIA_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4", ".webm", ".mov")
 
 
 class TitleTooLong(ValueError):
-    """Symptom does not fit in MAX_TITLE_LEN after the [team] prefix."""
+    """Symptom does not fit in MAX_TITLE_LEN after the [team] [Bug] prefix."""
 
 
 _VAGUE_SYMPTOMS = frozenset(
@@ -58,7 +60,19 @@ _SENSITIVE_WORD_RE = re.compile(
     r"\bnda\b|\bcustomer\s+(?:name|id|org|organization)\b|\bour customer\b",
     re.I,
 )
-_TITLE_FORMAT_RE = re.compile(r"^\[.+\] .+")
+_TITLE_FORMAT_RE = re.compile(r"^\[.+?\] \[Bug\] .+")
+_STACK_RELEASE_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?$")
+_WIP_RE = re.compile(
+    r"\b(?:draft\s+pr|wip\s+pr|work[\s-]in[\s-]progress|known\s+limitation|"
+    r"intentional(?:\s+limitation)?|by\s+design|not\s+yet\s+implemented|"
+    r"still\s+a\s+draft|known\s+work\s+in\s+progress)\b",
+    re.I,
+)
+_DRAFT_PR_RE = re.compile(
+    r"(?:PR\s*#?\d+|#\d+)[^\n.]{0,80}\bdraft\b|"
+    r"\bdraft\b[^\n.]{0,80}(?:PR\s*#?\d+|#\d+)",
+    re.I,
+)
 
 
 @dataclass(frozen=True)
@@ -90,7 +104,7 @@ def format_issue_title(team_label: str, symptom: str) -> str:
         raise ValueError("team label and symptom are required")
     if symptom_text.lower() in _VAGUE_SYMPTOMS:
         raise ValueError("symptom is too vague")
-    prefix = f"[{name}] "
+    prefix = f"[{name}] [Bug] "
     budget = MAX_TITLE_LEN - len(prefix)
     if budget < 1:
         raise ValueError("team name leaves no room for a symptom")
@@ -175,18 +189,27 @@ def is_tester_finding(finding: dict, config: dict | None = None) -> bool:
     return str(setup.get("skill") or "").strip() == SOURCE_EXPLORATORY_TESTER
 
 
+def _unique_labels(*groups: list) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for group in groups:
+        for name in group:
+            text = str(name).strip()
+            if text and text not in seen:
+                seen.add(text)
+                merged.append(text)
+    return merged
+
+
 def with_source_labels(
     labels: list, finding: dict, config: dict | None = None
 ) -> list[str]:
-    merged: list[str] = []
-    seen: set[str] = set()
     extras = [TESTER_SOURCE_LABEL] if is_tester_finding(finding, config) else []
-    for name in [*extras, *[str(label) for label in labels]]:
-        text = name.strip()
-        if text and text not in seen:
-            seen.add(text)
-            merged.append(text)
-    return merged
+    return _unique_labels(extras, labels)
+
+
+def with_create_labels(labels: list) -> list[str]:
+    return _unique_labels(list(CREATE_LABELS), labels)
 
 
 def decide_write_path(matches: list[IssueMatch]) -> WritePath:
@@ -653,6 +676,37 @@ def infer_deployment(finding: dict, config: dict) -> DeploymentInference:
     return DeploymentInference("ask", None)
 
 
+@dataclass(frozen=True)
+class ReleaseInference:
+    status: Literal["confident", "ask"]
+    label: str | None
+    hint: str | None = None
+
+
+def infer_release_label(finding: dict, config: dict) -> ReleaseInference:
+    """Map a stack version to a `vX.Y.Z` label, or ask when it is not a release."""
+    environment = _environment(config)
+    raw = _first_text(
+        finding.get("version"),
+        finding.get("kibana_version"),
+        _stack_version(config, environment),
+    )
+    if not raw or raw.lower() == UNKNOWN_ANSWER.lower():
+        return ReleaseInference(
+            "ask", None, "Version is missing or Unknown — confirm the stack release"
+        )
+    token = raw.strip().split()[0]
+    matched = _STACK_RELEASE_RE.fullmatch(token)
+    if not matched:
+        return ReleaseInference(
+            "ask",
+            None,
+            f"{token!r} is not a stack release (need X.Y or X.Y.Z)",
+        )
+    major, minor, patch = matched.group(1), matched.group(2), matched.group(3) or "0"
+    return ReleaseInference("confident", f"v{major}.{minor}.{patch}")
+
+
 def _deployment(finding: dict, config: dict, environment: dict) -> str | None:
     result = infer_deployment(finding, config)
     if result.status == "confident":
@@ -755,6 +809,8 @@ def pack_gaps(finding: dict, config: dict) -> list[str]:
     gaps: list[str] = []
     if not _stack_version(config, environment):
         gaps.append("version")
+    elif infer_release_label(finding, config).status == "ask":
+        gaps.append("release")
     if not _numbered_steps(finding):
         gaps.append("steps")
     if not _current_behaviour(finding, evidence, session_dir):
@@ -820,6 +876,14 @@ def with_filed_stamp(body: str) -> str:
     return f"{text}\n\n{FILED_VIA}\n"
 
 
+def scan_wip(*texts: object) -> list[str]:
+    """Flag draft/WIP PRs and known/intentional limitations in a draft."""
+    blob = "\n".join(str(text) for text in texts if text)
+    if _WIP_RE.search(blob) or _DRAFT_PR_RE.search(blob):
+        return ["wip_or_limitation"]
+    return []
+
+
 def scan_sensitive(*texts: object) -> list[str]:
     blob = "\n".join(str(text) for text in texts if text)
     hits: list[str] = []
@@ -841,17 +905,25 @@ def check_draft(
     finding: dict,
     config: dict,
     labels: list | None = None,
+    wip_ok: bool = False,
 ) -> list[str]:
     gaps = list(pack_gaps(finding, config))
     if title is not None:
         if len(title) > MAX_TITLE_LEN or not _TITLE_FORMAT_RE.match(title):
             gaps.append("title")
+        names = [str(label) for label in (labels or [])]
+        if "bug" not in names:
+            gaps.append("bug_label")
+        if "triage_needed" not in names:
+            gaps.append("triage_label")
     if FILED_VIA not in body:
         gaps.append("stamp")
     if is_tester_finding(finding, config) and title is not None:
         if TESTER_SOURCE_LABEL not in [str(label) for label in (labels or [])]:
             gaps.append("tester_label")
     gaps.extend(f"sensitive:{hit}" for hit in scan_sensitive(body, json.dumps(finding)))
+    if not wip_ok and not finding.get("file_despite_wip"):
+        gaps.extend(scan_wip(body, json.dumps(finding)))
     return gaps
 
 
@@ -1282,6 +1354,8 @@ def _gh_create(
         title,
         "--body-file",
         str(body_file),
+        "--type",
+        ISSUE_TYPE,
     ]
     for label in labels:
         argv += ["--label", str(label)]
@@ -1350,6 +1424,11 @@ def write_github(
         raise ValueError(f"action {action!r} needs an issue number")
 
     labels = with_source_labels(labels, finding or {}, config)
+    if action == "create":
+        labels = with_create_labels(labels)
+        release = infer_release_label(finding or {}, config or {})
+        if release.status == "confident" and release.label:
+            labels = _unique_labels(labels, [release.label])
     workdir = Path(tempfile.mkdtemp(prefix="file_bug_body_"))
     try:
         body_file = workdir / "body.md"

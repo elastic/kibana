@@ -19,10 +19,10 @@ While collecting or drafting, read `references/drafting.md`. Scripts under `scri
 |---|---|
 | 1. Collect | Path A (scratch/media) or Path B (named tester finding). One bug per loop. |
 | 2. Search | Open **and** closed. `parse-search` → `decide`. Empty search is not “new”. |
-| 3. Draft and stop | Show draft. `check-draft` + `scan-sensitive`. Wait for write-yes. |
+| 3. Draft and stop | Show the **full draft**, then **end the turn**. `check-draft` + `scan-sensitive` + `scan-wip`. Never write in that turn. |
 | 4. Write | Upload → `embed-uploads --out embedded.md` → `write --body-file embedded.md`. |
 
-“Create a bug”, “file this ticket”, or “file finding 2” means **prepare a draft**, not write.
+“Create a bug”, “file this ticket”, or “file finding 2” means **prepare a draft**, not write. A write never happens until the human has **seen that draft** and then said **yes** to *that* draft in a later message.
 
 ## Inputs
 
@@ -49,7 +49,7 @@ Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body` with `$SE
 
 ## Fileable checklist
 
-Do not ask for a write-yes until `check-draft` exits 0, or you have walked every remaining gap (`Unknown` is allowed). `check-draft` is the bar. Path B create also needs `sec-eng-prod:exploratory-tester`. Title: `[<team name>]` + symptom (`format-title`; no clipped title). Stamp: `Filed via security-file-bug`.
+Do not ask for a write-yes until `check-draft` exits 0, or you have walked every remaining gap (`Unknown` is allowed). `check-draft` is the bar. Always **show the full draft** (title, type, labels, body, files) and **end the turn** before any write. Path B create also needs `sec-eng-prod:exploratory-tester`. Title: `[<team name>] [Bug]` + symptom (`format-title`; no clipped title). Create labels always include `bug` and `triage_needed`. `write` sets GitHub Type to Bug. Stamp: `Filed via security-file-bug`. A `wip` / `wip_or_limitation` hit is not fileable until they say **file anyway**.
 
 ## Scripts
 
@@ -63,6 +63,8 @@ Every GitHub label read and write goes through `python3 …/scripts/file-bug.py 
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py check-pack \
   --finding "$FINDING_JSON" --config "$CONFIG_JSON"
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py infer-deployment \
+  --finding "$FINDING_JSON" --config "$CONFIG_JSON"
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py infer-release \
   --finding "$FINDING_JSON" --config "$CONFIG_JSON"
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py scan-sensitive \
   --finding "$FINDING_JSON"
@@ -79,7 +81,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/secur
 
 ### 2. Search
 
-You own the query. Search **open and closed**. Empty results are **not** proof the bug is new — run a **second** query before proposing create. `gh issue view` candidate bodies and match the *work*, not title keywords.
+You own the query. Search **open and closed issues** and **open PRs** (include drafts). Empty issue results are **not** proof the bug is new — run a **second** issue query before proposing create. `gh issue view` / `gh pr view` candidate bodies and match the *work*, not title keywords. A matching **draft or WIP PR**, or a known/intentional limitation, is a pre-file stop — do not treat a note in Additional information as clearance.
 
 ```bash
 GH_PAGER=cat gh search issues --repo elastic/kibana --limit 10 --json number,state,title,body \
@@ -91,14 +93,20 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/secur
 
 ### 3. Draft and stop
 
-Show title (create), labels, body or comment, and files to upload. Then:
+**Always present the complete draft before opening a ticket.** Show title (create), GitHub Type, labels, full body or comment, and files to upload. Then **end the turn**. Never write in the same turn you first show the draft.
 
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py validate-labels \
   --labels "bug,Team:…" --repo elastic/kibana
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py scan-wip \
+  --finding "$FINDING_JSON" --body body.md
 ```
 
-Always include `bug` on a new issue. Path B also `sec-eng-prod:exploratory-tester`. Wait for an **explicit yes**.
+Always include `bug` and `triage_needed` on a new issue. If `infer-release` is confident, also that `vX.Y.Z` label (`validate-labels`). If it exits 2, ask for the stack release. Path B also `sec-eng-prod:exploratory-tester`. `write` sets `--type Bug`.
+
+If `scan-wip` or `check-draft` reports `wip_or_limitation`, ask whether to **file anyway** (draft/WIP PR or known limitation). Do not ask for write-yes until they say file anyway; then `check-draft --wip-ok`.
+
+Write-yes is a **later** message that clearly approves **this** shown draft (for example “yes, file it”). “Create a bug” / “file finding 2” is not that yes.
 
 ### 4. Write (only after yes)
 
@@ -112,7 +120,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/secur
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py write \
   --action create|comment|reopen_comment \
   --repo elastic/kibana --title "…" --body-file embedded.md \
-  --label bug --label "Team:…" --label sec-eng-prod:exploratory-tester \
+  --label bug --label triage_needed --label "Team:…" --label sec-eng-prod:exploratory-tester \
   --finding "$FINDING_JSON"
 ```
 
@@ -124,9 +132,12 @@ A failed **create** must not be retried. A **comment** is not retried. If `reope
 
 Stop. You are about to write without a yes, or to file the wrong body:
 
-- “They said file finding 2, I can create now.” → draft only.
+- “They said file finding 2, I can create now.” → draft only. Show the draft and end the turn.
+- “Draft looks good, I’ll write in this same turn.” → stop. Write-yes is a later message.
+- “I noted the draft PR in Additional, I can file.” → `scan-wip` hit. Ask **file anyway** first.
 - “I’ll batch the always-ask questions.” → **Hard stop** after each.
 - “2 and 5 are one ticket.” → two issues. Do not combine findings.
+- “Same class of bug, I’ll add it to Expected / suggest they fix it together.” → confirmed finding only. Never suggest the fix. Adjacent notes go in Additional information or a second ticket.
 - “embed wrote JSON, I’ll `write --body-file body.md`.” → write `embedded.md`.
 - “I’ll paste the uploaded image or video URL as-is.” → images must be `![filename](url)`; videos must be `<video src="url" controls></video>` on their own paragraph.
 - “Title is long, I’ll clip it.” → `format-title` exit 2.
