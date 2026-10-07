@@ -18,7 +18,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
 
   const retryNavigationOptions = {
-    retryCount: 2,
     retryDelay: 0,
     timeout: config.get('timeouts.try') * 2,
   };
@@ -68,8 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(() => logsUi.cleanIndices());
 
       it('Shows no data page when indices do not exist', async () => {
-        await retry.tryWithRetries(
-          "retry if indices haven't been refreshed yet",
+        await retry.try(
           async () => {
             await logsUi.logEntryCategoriesPage.navigateTo();
 
@@ -77,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(await logsUi.logEntryCategoriesPage.getNoDataScreen()).to.be.ok();
             });
           },
-          retryNavigationOptions
+          { ...retryNavigationOptions, description: "retry if indices haven't been refreshed yet" }
         );
       });
 
@@ -95,8 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('shows setup page when indices exist', async () => {
-          await retry.tryWithRetries(
-            "retry if indices haven't been refreshed yet",
+          await retry.try(
             async () => {
               await logsUi.logEntryCategoriesPage.navigateTo();
 
@@ -104,7 +101,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 expect(await logsUi.logEntryCategoriesPage.getSetupScreen()).to.be.ok();
               });
             },
-            retryNavigationOptions
+            {
+              ...retryNavigationOptions,
+              description: "retry if indices haven't been refreshed yet",
+            }
           );
         });
 

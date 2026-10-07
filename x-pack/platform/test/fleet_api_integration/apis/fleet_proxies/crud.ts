@@ -163,7 +163,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(fleetServerHost.name).to.eql('Test 123 updated');
 
-        await pRetry(
+        await retry.try(
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
             if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {
@@ -177,9 +177,7 @@ export default function (providerContext: FtrProviderContext) {
               'https://testupdated.fr:3232'
             );
           },
-          {
-            maxRetryTime: 30 * 1000, // 30s for the task to run
-          }
+          { description: 'wait for fleet policy deploy' }
         );
       });
 
@@ -202,7 +200,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        await pRetry(
+        await retry.try(
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
             if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {
@@ -212,9 +210,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(undefined);
             expect(fleetPolicyAfter?.data?.agent.download.proxy_url).to.be(undefined);
           },
-          {
-            maxRetryTime: 30 * 1000, // 30s for the task to run
-          }
+          { description: 'wait for fleet policy delete' }
         );
       });
     });

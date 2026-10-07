@@ -120,8 +120,8 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should upgrade managed package policies', async () => {
         await apiClient.setup();
-
-        await pRetry(
+        await retry.tryForTime(
+          60_000,
           async () => {
             const res = await es.search({
               index: INGEST_SAVED_OBJECT_INDEX,
@@ -150,7 +150,8 @@ export default function (providerContext: FtrProviderContext) {
             }
           },
           {
-            maxRetryTime: 20 * 1000,
+            description: 'Searching for managed package policies to be upgraded',
+            retryDelay: 10000,
           }
         );
       });

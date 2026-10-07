@@ -20,8 +20,7 @@ export function createTransformHelper(
     assertNotFound: async (transformId: string) => {
       const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
 
-      return await retry.tryWithRetries(
-        `Wait for transform ${transformId} to be deleted`,
+      return await retry.try(
         async () => {
           await supertestWithoutAuth
             .get(`/internal/transform/transforms/${transformId}`)
@@ -32,13 +31,16 @@ export function createTransformHelper(
             .timeout(10000)
             .expect(404);
         },
-        { retryCount: 10, retryDelay: 3000 }
+        {
+          description: `Wait for transform ${transformId} to be deleted`,
+          timeout: 30000,
+          retryDelay: 3000,
+        }
       );
     },
 
     assertExist: async (transformId: string) => {
-      return await retry.tryWithRetries(
-        `Wait for transform ${transformId} to exist`,
+      return await retry.try(
         async () => {
           const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
 
@@ -52,7 +54,11 @@ export function createTransformHelper(
             .expect(200);
           return response.body;
         },
-        { retryCount: 10, retryDelay: 3000 }
+        {
+          description: `Wait for transform ${transformId} to exist`,
+          timeout: 30000,
+          retryDelay: 3000,
+        }
       );
     },
   };

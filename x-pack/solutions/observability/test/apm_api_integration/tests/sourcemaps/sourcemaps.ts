@@ -49,8 +49,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       throw new Error(`Expected ${expectedCount} source maps, got ${actualCount}`);
     };
-
-    return pRetry(getSourceMapCount, { minTimeout: 100, retries: 10, factor: 1.5 }); // max wait is ~17s (https://www.wolframalpha.com/input?i2d=true&i=sum+100*Power%5B1.5%2Cj%5D%5C%2844%29+j%3D1+to+10)
+    return await retry.tryForTime(17_000, getSourceMapCount, {
+      description: 'waitForSourceMapCount',
+      retryDelay: 100,
+    });
   }
 
   async function deleteAllApmSourceMaps() {

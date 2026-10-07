@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should stage filter when item selected but not create filter pill', async () => {
-        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'ios', { timeout: 20_000 });
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
         });
         await common.sleep(500); // Wait for DOM to stabilize after clear
-        await comboBox.set('listControlSelect0', 'osx', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'osx', { timeout: 20_000 });
         await visEditor.inputControlSubmit();
         await common.sleep(1000);
 
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
-        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'ios', { timeout: 20_000 });
         await visEditor.inputControlSubmit();
         await filterBar.expectFilter(FIELD_NAME, 'ios');
 
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add filter pill when item selected', async () => {
-        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'ios', { timeout: 20_000 });
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');

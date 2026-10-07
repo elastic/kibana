@@ -45,7 +45,6 @@ export async function getActiveApmAlerts({
   return response.hits.hits.map((hit) => hit._source);
 }
 
-const RETRIES_COUNT = 10;
 export function waitForActiveApmAlert({
   ruleId,
   esClient,
@@ -69,12 +68,6 @@ export function waitForActiveApmAlert({
 
       return activeApmAlerts[0];
     },
-    {
-      retries: RETRIES_COUNT,
-      factor: 1.5,
-      onFailedAttempt: (error) => {
-        log.info(`Attempt ${error.attemptNumber}/${RETRIES_COUNT}: Waiting for active alert`);
-      },
-    }
-  );
+    retryDelay: 500,
+  });
 }

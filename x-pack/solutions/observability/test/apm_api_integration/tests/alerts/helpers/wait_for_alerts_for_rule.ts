@@ -48,6 +48,5 @@ export async function waitForAlertsForRule({
 
       return alerts;
     },
-    { retries: 5 }
-  );
+  });
 }

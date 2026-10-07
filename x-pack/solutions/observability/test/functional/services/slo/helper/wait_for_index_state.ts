@@ -33,8 +33,7 @@ export async function waitForDocumentInIndex<T>({
       }
       return response;
     },
-    { retries: 10 }
-  );
+  });
 }
 
 export async function waitForIndexToBeEmpty<T>({
@@ -53,6 +52,5 @@ export async function waitForIndexToBeEmpty<T>({
       }
       return response;
     },
-    { retries: 10 }
-  );
+  });
 }

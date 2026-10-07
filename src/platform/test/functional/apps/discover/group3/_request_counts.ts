@@ -60,8 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const expectSearchCount = async (type: 'ese' | 'esql', searchCount: number) => {
-      await retry.tryWithRetries(
-        `expect ${type} request to match count ${searchCount}`,
+      await retry.try(
         async () => {
           if (searchCount === 0) {
             await browser.execute(async () => {
@@ -84,7 +83,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
           expect(count).to.be(searchCount);
         },
-        { retryCount: 5, retryDelay: 500 }
+        {
+          description: `expect ${type} request to match count ${searchCount}`,
+          timeout: 5000,
+          retryDelay: 500,
+        }
       );
     };
 

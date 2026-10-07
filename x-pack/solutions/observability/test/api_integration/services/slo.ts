@@ -37,8 +37,7 @@ async function waitForIndexToBeEmpty<T>({
       }
       return response;
     },
-    { retries: 10 }
-  );
+  });
 }
 
 type FetchHistoricalSummaryParams = t.OutputOf<

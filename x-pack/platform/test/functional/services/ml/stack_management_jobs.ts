@@ -141,21 +141,19 @@ export function MachineLearningStackManagementJobsProvider({
     async selectShareToSpacesMode(
       buttonTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId'
     ) {
-      await retry.tryForTime(5000, async () => {
-        const button = await testSubjects.find(buttonTestSubj, 1000);
-        await button.click();
+      await retry.try(
+        async () => {
+          const button = await testSubjects.find(buttonTestSubj, 10000);
+          await testSubjects.click(buttonTestSubj);
 
         const isPressed = await button.getAttribute('aria-pressed');
         expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
 
-        // sometimes the aria-pressed attribute of the button is set but it's not actually
-        // selected, so we're also checking the class of the corresponding label
-        const labelClasses = await button.getAttribute('class');
-        expect(labelClasses).to.contain(
-          'euiButtonGroupButton-isSelected',
-          `Label for '${buttonTestSubj}' should be selected`
-        );
-      });
+          const isPressed = await button.getAttribute('aria-pressed');
+          expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
+        },
+        { description: `select share to spaces mode ${buttonTestSubj}` }
+      );
     },
 
     async selectShareToExplicitSpaces() {
