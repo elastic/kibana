@@ -19,6 +19,8 @@ import {
   createRiskScoreValidityEvaluator,
   createRuleTypeLanguageEvaluator,
   createSeverityValidityEvaluator,
+  RULE_EVALUATOR_DIRECTION,
+  createEvaluateDataset,
 } from './dataset_evaluator';
 
 // `expected` in EvaluatorParams is TExample['output'], i.e. RuleCreationExample['output'],
@@ -257,5 +259,57 @@ describe('createQueryExecutabilityEvaluator', () => {
     const result = await evaluator.evaluate(makeArgs(makeRule()));
     expect(result.score).toBe(1);
     expect(result.metadata).toMatchObject({ rowCount: 0 });
+  });
+});
+
+// Wiring regression coverage (mirrors kbn-evals-suite-security-ai-rules/src/evaluate_dataset.test.ts):
+// deleting the trajectory/tool-routing spread or the Gap Addressed evaluator from
+// createEvaluateDataset's default list would silently drop metrics from every run while
+// leaving all other unit tests green.
+describe('createEvaluateDataset wiring', () => {
+  const stubClient = { run: jest.fn(async () => ({})) } as never;
+  const stubEs = {} as never;
+  const stubLog = {
+    info: jest.fn(),
+    debug: jest.fn(),
+    warning: jest.fn(),
+    error: jest.fn(),
+  } as never;
+
+  const captureEvaluators = async () => {
+    let captured: unknown;
+    const executorClient = {
+      runExperiment: jest.fn(async (_exp: unknown, evaluators: unknown) => {
+        captured = evaluators;
+      }),
+    } as never;
+    const evaluateDataset = createEvaluateDataset({
+      ruleCreationClient: stubClient,
+      evaluators: {} as never,
+      executorClient,
+      esClient: stubEs,
+      traceEsClient: stubEs,
+      log: stubLog,
+    });
+    await evaluateDataset({
+      dataset: { name: 'wiring', description: '', examples: [] },
+    });
+    return captured as Array<{ name: string; direction: string }>;
+  };
+
+  it('registers the tool-routing and trajectory evaluators in the default set', async () => {
+    const names = (await captureEvaluators()).map((e) => e.name);
+    expect(names).toContain('Tool Routing');
+    expect(names).toContain('Trajectory: Call Count');
+    expect(names).toContain('Trajectory: Call Order');
+    expect(names).toContain('Gap Addressed');
+  });
+
+  it('registers every evaluator as a maximize gate', async () => {
+    const evaluators = await captureEvaluators();
+    expect(evaluators.length).toBeGreaterThan(0);
+    for (const e of evaluators) {
+      expect(e.direction).toBe(RULE_EVALUATOR_DIRECTION);
+    }
   });
 });
