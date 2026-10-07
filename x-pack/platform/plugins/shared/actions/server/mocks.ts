@@ -67,6 +67,7 @@ const createStartMock = () => {
     isSystemActionConnector: jest.fn(),
     registerDynamicConnector: jest.fn(),
     unregisterDynamicConnector: jest.fn(),
+    getConnectorWithDecryptedSecrets: jest.fn(),
     getRelayClient: jest.fn(),
   });
 

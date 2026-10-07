@@ -22,6 +22,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { NightshiftInvestigationsConfig } from './config';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
@@ -81,6 +83,8 @@ import {
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
+import { createOnboardingClient } from './onboarding/onboarding_client';
+import { registerOnboardingTools } from './onboarding/tools';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
@@ -188,6 +192,32 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('sandbox_secrets'),
     });
 
+    const onboardingClient = createOnboardingClient({
+      getDeps: () => ({
+        workflowsManagement: this.workflowsManagement,
+        spaces: this.spaces,
+        actions: this.actionsStart,
+      }),
+      logger: this.logger.get('onboarding'),
+    });
+
+    // The connector connected through onboarding wins over the kibana.yml one.
+    const resolveTelemetryConnector = async (
+      request: KibanaRequest
+    ): Promise<{ connectorId: string; readableIndices?: string } | undefined> => {
+      const onboardingConnectorId = await onboardingClient.getConnectorId(request);
+      if (onboardingConnectorId) {
+        return { connectorId: onboardingConnectorId };
+      }
+      const { sandbox } = this.ctx.config.get();
+      return sandbox?.telemetry_connector_id
+        ? {
+            connectorId: sandbox.telemetry_connector_id,
+            readableIndices: sandbox.telemetry_readable_indices,
+          }
+        : undefined;
+    };
+
     registerInvestigationReconciliationTask({
       core,
       taskManager: plugins.taskManager,
@@ -214,7 +244,8 @@ export class NightshiftInvestigationsPlugin
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
-        telemetryConnectorId,
+        resolveTelemetryConnectorId: async ({ request }) =>
+          (await resolveTelemetryConnector(request))?.connectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
@@ -222,6 +253,10 @@ export class NightshiftInvestigationsPlugin
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
+      registerOnboardingTools(plugins.agentBuilder.tools, {
+        getActions: () => this.actionsStart,
+        availability: this.getInvestigationAvailability(),
+      });
       plugins.agentBuilder.tools.register(
         createInvestigationProgressReportTool({
           logger: this.logger.get('investigation_progress_report_tool'),
@@ -236,8 +271,7 @@ export class NightshiftInvestigationsPlugin
         const getSandboxStart = () => this.sandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
-          telemetryConnectorId,
-          telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
+          resolveTelemetryConnector,
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
@@ -247,6 +281,27 @@ export class NightshiftInvestigationsPlugin
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+            getSavedConnectorSecrets: async (request) => {
+              const connectorId = await onboardingClient.getConnectorId(request);
+              const actions = this.actionsStart;
+              if (
+                !connectorId ||
+                !actions ||
+                actions.inMemoryConnectors.some(({ id }) => id === connectorId)
+              ) {
+                return [];
+              }
+              try {
+                const { secrets } = await actions.getConnectorWithDecryptedSecrets(
+                  request,
+                  connectorId
+                );
+                return [secrets];
+              } catch {
+                // A connector the caller cannot read is never injected into their commands.
+                return [];
+              }
+            },
           }),
           logger: sandboxLogger.get('output_redaction'),
         };
@@ -419,6 +474,7 @@ export class NightshiftInvestigationsPlugin
           isCortexEnabled: () => this.cortexEnabled,
           sandboxSecretsClient,
           customContextClient,
+          onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -652,6 +708,9 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
+    await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
     if (this.cortexEnabled || this.memoryEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });

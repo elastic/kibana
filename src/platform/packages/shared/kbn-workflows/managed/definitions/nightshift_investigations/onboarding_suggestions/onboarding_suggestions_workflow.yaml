@@ -1,0 +1,143 @@
+version: '1'
+name: Nightshift Onboarding Suggestions
+description: >
+  Explores the deployments a user just connected to Nightshift and suggests their first
+  investigations. The execution is the onboarding state: its inputs name the connected
+  connectors and its outputs carry the suggestions.
+enabled: true
+settings:
+  timeout: '10m'
+  concurrency:
+    key: 'nightshift-onboarding-suggestions-{{ workflow.spaceId }}'
+    strategy: cancel-in-progress
+    max: 1
+tags:
+  - observability
+  - nightshift
+  - onboarding
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        connector_ids:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 256
+          description: External Elasticsearch connectors to explore.
+      required:
+        - connector_ids
+      additionalProperties: false
+
+outputs:
+  properties:
+    connector_ids:
+      type: array
+      items:
+        type: string
+    suggestions:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
+  additionalProperties: false
+
+steps:
+  - name: resolve_model
+    type: nightshift.resolveModel
+    with:
+      step: investigation
+
+  - name: suggest
+    type: ai.agent
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
+    plugin-id: 'nightshift_onboarding'
+    aggregate-by: 'nightshift'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
+    timeout: 300s
+    with:
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        skill_ids: []
+        tools:
+          - tool_ids:
+              - nightshift_onboarding_list_indices
+              - nightshift_onboarding_esql
+              - nightshift_onboarding_kibana_get
+        instructions: >
+          You are Nightshift, an SRE agent. A user just connected their Elastic deployment.
+          Explore it quickly with the nightshift_onboarding tools and propose the best first
+          investigations Nightshift could run for them. Speed matters, the user is waiting:
+          use at most 10 tool calls, run independent calls in parallel, prefer ES|QL STATS over
+          raw documents, bound every query to the last 24 hours with a LIMIT, and never retry a
+          failing query more than once. Base every suggestion on data you actually observed.
+          Only use the nightshift_onboarding tools: every other tool (execute_api, describe_api,
+          read_file and so on) reaches the Nightshift cluster itself, not the user's deployment,
+          so its data must never appear in a suggestion.
+      message: |
+        Explore these connected deployments (pass the id as connector_id to every tool call):
+        {% for connector_id in inputs.connector_ids %}- {{ connector_id }}
+        {% endfor %}
+
+        Look at, in this order, skipping what does not exist:
+        1. Active alerts: list ".alerts-*" with includeHidden, then for example
+           FROM .alerts-* | WHERE kibana.alert.status == "active" AND @timestamp > NOW() - 24 hours
+           | STATS count = COUNT(*), last_seen = MAX(@timestamp) BY kibana.alert.rule.name, kibana.alert.severity
+           | SORT count DESC | LIMIT 10
+        2. Which telemetry exists: list "logs-*", "traces-*" and "metrics-*".
+        3. Error spikes in logs: errors in the last hour against the previous 23 hours, by service.name.
+        4. Trace errors and latency by service.name (event.outcome == "failure", transaction.duration.us).
+        5. If the Kibana API is reachable: violated SLOs (/api/observability/slos) and open cases
+           (/api/cases/_find?status=open). Skip silently when it is not.
+
+        Then return 3 to 6 suggestions, most valuable first. Each suggestion is one investigation:
+        - title: short headline (max 80 characters) naming the concrete entity and symptom.
+        - prompt: one self-contained question for the investigation agent, written as the user would
+          ask it. Name the concrete services, rules, indices and time window you saw. Max 400 characters.
+        - rationale: what you saw that makes it worth investigating, with numbers (max 160 characters).
+        - source: alert, slo, case, error_spike, latency or other.
+        - severity: critical, high, medium or low, based on user impact.
+        - entities: up to 5 service, host or rule names.
+        If the cluster has little data, still return at least 3 suggestions, for example about the
+        noisiest services or log sources you found.
+      schema:
+        type: object
+        properties:
+          suggestions:
+            type: array
+            maxItems: 6
+            items:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 120
+                prompt:
+                  type: string
+                  maxLength: 1000
+                rationale:
+                  type: string
+                  maxLength: 300
+                source:
+                  type: string
+                  enum: [alert, slo, case, error_spike, latency, other]
+                severity:
+                  type: string
+                  enum: [critical, high, medium, low]
+                entities:
+                  type: array
+                  maxItems: 5
+                  items:
+                    type: string
+              required: [title, prompt, rationale, source]
+        required: [suggestions]
+
+  - name: output_suggestions
+    type: workflow.output
+    with:
+      connector_ids: '${{ inputs.connector_ids }}'
+      suggestions: '${{ steps.suggest.output.structured_output.suggestions }}'

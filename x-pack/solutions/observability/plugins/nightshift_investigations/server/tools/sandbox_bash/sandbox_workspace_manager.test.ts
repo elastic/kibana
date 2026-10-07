@@ -94,7 +94,11 @@ describe('createSandboxWorkspaceManager', () => {
     jest.clearAllMocks();
     mockWriteElasticManifest.mockResolvedValue(undefined);
     logger = loggingSystemMock.createLogger();
-    manager = createSandboxWorkspaceManager({ getDeps: () => ({}), logger });
+    manager = createSandboxWorkspaceManager({
+      getDeps: () => ({}),
+      resolveTelemetryConnector: async () => undefined,
+      logger,
+    });
   });
 
   it('writes manifest when session isReset is true', async () => {
@@ -233,6 +237,7 @@ describe('createSandboxWorkspaceManager', () => {
     const createManagerWithSecrets = (listKeysForSandbox: jest.Mock) =>
       createSandboxWorkspaceManager({
         getDeps: () => ({ sandboxSecretsClient: { listKeysForSandbox } }),
+        resolveTelemetryConnector: async () => undefined,
         logger,
       });
 
@@ -289,7 +294,7 @@ describe('createSandboxWorkspaceManager', () => {
     });
   });
 
-  describe('telemetryConnectorId', () => {
+  describe('telemetry connector', () => {
     let managerWithTelemetry: ReturnType<typeof createSandboxWorkspaceManager>;
     let actions: ReturnType<typeof actionsMock.createStart>;
     let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -313,9 +318,18 @@ describe('createSandboxWorkspaceManager', () => {
       actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
       actions.getActionsAuthorizationWithRequest.mockReturnValue(authorization);
       actions.inMemoryConnectors = [{ ...connector, secrets: {} }];
+      // Mirrors the actions plugin: read as the user, then require execute on the type.
+      actions.getConnectorWithDecryptedSecrets.mockImplementation(async (request, id) => {
+        const found = await actionsClient.get({ id });
+        await authorization.ensureAuthorized({
+          operation: 'execute',
+          actionTypeId: found.actionTypeId,
+        });
+        return { ...found, config: found.config ?? {}, secrets: {} };
+      });
       managerWithTelemetry = createSandboxWorkspaceManager({
         getDeps: () => ({ actions }),
-        telemetryConnectorId: 'elasticsearch-telemetry',
+        resolveTelemetryConnector: async () => ({ connectorId: 'elasticsearch-telemetry' }),
         logger,
       });
     });
@@ -336,8 +350,10 @@ describe('createSandboxWorkspaceManager', () => {
       const session = createSessionMock(false);
       const configuredManager = createSandboxWorkspaceManager({
         getDeps: () => ({ actions }),
-        telemetryConnectorId: 'elasticsearch-telemetry',
-        telemetryReadableIndices: 'Read remote-a:logs-service-*',
+        resolveTelemetryConnector: async () => ({
+          connectorId: 'elasticsearch-telemetry',
+          readableIndices: 'Read remote-a:logs-service-*',
+        }),
         logger,
       });
 

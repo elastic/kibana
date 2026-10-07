@@ -10,9 +10,27 @@ import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { SANDBOX_BASH_TOOL_ID } from './tool';
 
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
+const renderKibanaSection = (): string[] => [
+  '## Kibana',
+  '',
+  'The same command environment also contains `CONNECTOR_CONFIG_KIBANAURL`, the Kibana of this',
+  'deployment. It accepts the same `Authorization: ApiKey` header. Use it for Kibana-managed',
+  'objects such as alerting rules, SLOs and cases; alert documents themselves are in `.alerts-*`.',
+  '',
+  '```bash',
+  'curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
+  '  -H "elastic-api-version: 2023-10-31" \\',
+  '  "$CONNECTOR_CONFIG_KIBANAURL/api/alerting/rules/_find?per_page=20"',
+  '```',
+  '',
+];
+
 export const renderElasticManifest = (
   connectorId: string,
-  { readableIndices }: { readableIndices?: string } = {}
+  {
+    readableIndices,
+    hasKibanaUrl = false,
+  }: { readableIndices?: string; hasKibanaUrl?: boolean } = {}
 ): string =>
   [
     '# Elasticsearch telemetry',
@@ -49,17 +67,20 @@ export const renderElasticManifest = (
     '  -d \'{"query":"FROM logs-* | WHERE @timestamp >= \\"2026-01-01T00:00:00Z\\" AND @timestamp < \\"2026-01-01T01:00:00Z\\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20"}\'',
     '```',
     '',
+    ...(hasKibanaUrl ? renderKibanaSection() : []),
   ].join('\n');
 
 export const writeElasticManifest = async ({
   session,
   connectorId,
   readableIndices,
+  hasKibanaUrl,
   logger,
 }: {
   session: SandboxSession;
   connectorId: string;
   readableIndices?: string;
+  hasKibanaUrl?: boolean;
   logger: Logger;
 }): Promise<void> => {
   logger.debug(`Writing Elasticsearch manifest`);
@@ -67,7 +88,10 @@ export const writeElasticManifest = async ({
   const [result] = await session.writeFiles([
     {
       path: '/workspace/elastic.md',
-      content: Buffer.from(renderElasticManifest(connectorId, { readableIndices }), 'utf8'),
+      content: Buffer.from(
+        renderElasticManifest(connectorId, { readableIndices, hasKibanaUrl }),
+        'utf8'
+      ),
     },
   ]);
   if (!result?.success) throw new Error('Failed to write sandbox telemetry guidance');
