@@ -13,9 +13,12 @@ import {
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
-import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
-import { getErrorMessage } from '../utils';
-import type { CustomContentPanelResolutionRequest } from '../operations/panels';
+import {
+  createPanelFailureResult,
+  getErrorMessage,
+  type CustomContentPanelResolutionRequest,
+  type PanelContentAttempt,
+} from '@kbn/dashboard-agent-authoring';
 
 const resolveCustomContentState = async (
   request: CustomContentPanelResolutionRequest,

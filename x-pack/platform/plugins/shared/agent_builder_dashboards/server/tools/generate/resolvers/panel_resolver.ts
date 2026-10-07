@@ -6,12 +6,12 @@
  */
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
-import type { ResolvePanelContent } from '../operations/panels';
+import type { ResolvePanelContent } from '@kbn/dashboard-agent-authoring';
 import { createVisPanelResolver, type VisPanelResolverDeps } from './vis_panel_resolver';
 import { createCustomContentPanelResolver } from './custom_content_panel_resolver';
 
 /**
- * Default implementation of the generate core's `ResolvePanelContent` seam:
+ * Default implementation of dashboard authoring's `ResolvePanelContent` seam:
  * routes each panel request to the resolver for its `renderer`.
  */
 export const createPanelResolver = (deps: VisPanelResolverDeps): ResolvePanelContent => {

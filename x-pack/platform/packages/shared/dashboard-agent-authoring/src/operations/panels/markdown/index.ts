@@ -6,9 +6,14 @@
  */
 
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
 import type { ConfigPanelTypeDefinition } from '../config_panel_type';
+
+/**
+ * Embeddable type of dashboard markdown panels. Mirrors the private
+ * dashboard-markdown plugin's constant, which shared packages cannot import.
+ */
+export const MARKDOWN_EMBEDDABLE_TYPE = 'markdown';
 
 /**
  * Markdown panel logic.
