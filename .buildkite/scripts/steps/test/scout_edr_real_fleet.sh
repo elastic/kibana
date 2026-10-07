@@ -10,11 +10,15 @@ source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
 
 # UI project drives the browser. API project enrolls a host and talks to Kibana over HTTP.
 # Each config boots its own stack and VM. Keep both out of default Scout (excluded_configs).
-CONFIGS=(
-  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts"
-  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts"
+# Location is always local. The scan spec also runs on local serverless Security complete.
+# Do not add a cloud serverless run: that target is MKI.
+UI_CONFIG="x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts"
+API_CONFIG="x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts"
+RUNS=(
+  "$UI_CONFIG|--arch stateful --domain classic"
+  "$API_CONFIG|--arch stateful --domain classic"
+  "$API_CONFIG|--arch serverless --domain security_complete"
 )
-MODE='--arch stateful --domain classic'
 
 upload_events_if_available() {
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
@@ -47,7 +51,9 @@ upload_events_if_available() {
 
 SUITE_EXIT_CODE=0
 
-for CONFIG_PATH in "${CONFIGS[@]}"; do
+for RUN in "${RUNS[@]}"; do
+  CONFIG_PATH="${RUN%%|*}"
+  MODE="${RUN#*|}"
   echo "--- Scout EDR Real Fleet Tests"
   echo "Config: $CONFIG_PATH"
   echo "Mode: $MODE"
@@ -71,15 +77,15 @@ for CONFIG_PATH in "${CONFIGS[@]}"; do
   upload_events_if_available
 
   if [[ $EXIT_CODE -eq 2 ]]; then
-    echo "No tests found for EDR Real Fleet ($CONFIG_PATH)"
+    echo "No tests found for EDR Real Fleet ($CONFIG_PATH, $MODE)"
     echo "^^^ +++"
     SUITE_EXIT_CODE=10
   elif [[ $EXIT_CODE -ne 0 ]]; then
-    echo "Scout test exited with code $EXIT_CODE for EDR Real Fleet ($CONFIG_PATH, ${duration})"
+    echo "Scout test exited with code $EXIT_CODE for EDR Real Fleet ($CONFIG_PATH, $MODE, ${duration})"
     echo "^^^ +++"
     SUITE_EXIT_CODE=10
   else
-    echo "EDR Real Fleet passed for $CONFIG_PATH (${duration})"
+    echo "EDR Real Fleet passed for $CONFIG_PATH ($MODE, ${duration})"
   fi
 done
 

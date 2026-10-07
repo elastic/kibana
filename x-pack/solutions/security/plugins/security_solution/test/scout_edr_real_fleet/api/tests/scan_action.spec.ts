@@ -6,7 +6,7 @@
  */
 
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-security';
-import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
+import { getPlaywrightTagsFor, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ACTION_DETAILS_ROUTE, SCAN_ROUTE } from '../../../../common/endpoint/constants';
 import type {
@@ -23,6 +23,15 @@ const ACTION_TIMEOUT_MS = 180_000;
 const TEST_TIMEOUT_MS = 12 * 60 * 1000;
 const SCAN_SUCCESS_CODE = 'ra_scan_success_done';
 const SCAN_NOT_FOUND_CODE = 'ra_scan_error_not-found';
+
+/**
+ * Local stateful and local serverless Security complete.
+ * Cloud serverless is MKI. This spec enrolls a local Endpoint VM and is not tagged for it.
+ */
+const SCAN_ACTION_TAGS = [
+  ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+  ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
+];
 
 type ScanActionDetails = ActionDetails<
   ResponseActionScanOutputContent,
@@ -123,7 +132,7 @@ const waitForOutputCode = async (
   return completed as ScanActionDetails;
 };
 
-apiTest.describe('Real agent scan response action', { tag: ['@local-stateful-classic'] }, () => {
+apiTest.describe('Real agent scan response action', { tag: SCAN_ACTION_TAGS }, () => {
   let requestHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
