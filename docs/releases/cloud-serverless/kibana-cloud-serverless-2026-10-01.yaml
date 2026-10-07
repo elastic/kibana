@@ -1,0 +1,373 @@
+products:
+- product: cloud-serverless
+  target: 2026-10-01
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-10-01
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 290915.yaml
+    checksum: f52552be08cb438dcab78bcab7c198ec9196fd7e
+  type: bug-fix
+  title: Keep the selected step on refresh and copy field paths in the workflow flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290915
+  issues:
+  - https://github.com/elastic/security-team/issues/19353
+- file:
+    name: 291105.yaml
+    checksum: a29cd79ea945007f24141c61aedc6585b07269a2
+  type: bug-fix
+  title: Delete leftover Synthetics private location package policies
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/291105
+- file:
+    name: 291514.yaml
+    checksum: 66237604aed6187cb2d635a6cf0680e513841daa
+  type: breaking-change
+  title: Remove the Playground app
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Removes the Playground app. Saved playgrounds (prompts, queries, index selections, and connector settings) are deleted on upgrade and cannot be exported.
+  impact: Playground is no longer available. Saved playgrounds are deleted when you upgrade, and you can't export them afterward. Any `xpack.searchPlayground.*` setting in `kibana.yml` is ignored and logs a deprecation warning. Kibana still starts.
+  action: Use Agent Builder instead of Playground.
+  subtype: other
+  prs:
+  - https://github.com/elastic/kibana/pull/291514
+- file:
+    name: 291719.yaml
+    checksum: 39afd942866165102c8e6b6795ba529c35db4a44
+  type: bug-fix
+  title: Fix "Read only" badge shown to users who can manage case templates
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/291719
+  issues:
+  - https://github.com/elastic/kibana/issues/291321
+- file:
+    name: 294059.yaml
+    checksum: f9d9fd503e4bfb4afed544ee403ddc60514fa3d0
+  type: bug-fix
+  title: Fix API keys grid showing rows in inconsistent order when paging
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the API keys management grid showing rows in an inconsistent order when paging back and forth, which could also skip keys created at the same moment.
+  prs:
+  - https://github.com/elastic/kibana/pull/294059
+  issues:
+  - https://github.com/elastic/kibana/issues/294054
+- file:
+    name: 293924.yaml
+    checksum: 577e381eac8143282be8610ba215e4be8b1ac9bb
+  type: bug-fix
+  title: Wrap markdown table cells in Security AI Assistant instead of truncating them
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an issue where long text in table cells in the Security AI Assistant was cut off or caused the whole conversation to scroll horizontally.
+  prs:
+  - https://github.com/elastic/kibana/pull/293924
+- file:
+    name: 293656.yaml
+    checksum: 41cc416582a091b5c3952a6dc572395a6400d530
+  type: bug-fix
+  title: Fix Attack Discovery not auto-selecting a connector when multiple are available
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/293656
+  issues:
+  - https://github.com/elastic/sdh-security-team/issues/1836
+- file:
+    name: 292666.yaml
+    checksum: c9cde13de182d45a87bbe5bddb87a99529eee095
+  type: feature
+  title: Enable the Enhance dashboard action
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/292666
+- file:
+    name: 292579.yaml
+    checksum: e51d3f76d3c1f0205d868550342ba8cccc58e7d6
+  type: enhancement
+  title: Allow other workflows to call Alert Analysis and receive a structured verdict
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Makes the managed Alert Analysis workflow callable by other workflows with structured verdict output. Standalone Alert Analysis keeps its behavior, apart from shared-path hardening for batch verdict filtering, space-scoped enrichment, and tighter agent schema bounds.
+  prs:
+  - https://github.com/elastic/kibana/pull/292579
+- file:
+    name: 293939.yaml
+    checksum: da1715078be9c2a13e0b93e7b7a7de57b41d4d43
+  type: enhancement
+  title: Add a setting for the maximum number of services in APM Services Inventory
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds the `observability:apmMaxNumberOfServices` advanced setting. The default is 1,000 and the maximum is 5,000.
+  prs:
+  - https://github.com/elastic/kibana/pull/293939
+  issues:
+  - https://github.com/elastic/kibana/issues/293926
+- file:
+    name: 293492.yaml
+    checksum: ba1d3208f55c6366f2a605f7d5afc18a37223735
+  type: bug-fix
+  title: Retry dropped task document conflicts so forced rule runs are not lost
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an issue where asking a rule to run immediately, or changing its schedule, could be silently discarded if the request arrived while the rule was finishing a run, leaving it to wait until its next scheduled run.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/293492
+  issues:
+  - https://github.com/elastic/kibana/issues/247714
+- file:
+    name: 293685.yaml
+    checksum: 72644c436d20d59fedf60556d276bfa28a0f00ef
+  type: enhancement
+  title: Add support for ES|QL views in chat
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/293685
+- file:
+    name: 293758.yaml
+    checksum: 239328f8a741739c7610101ae23f6b0c7d4b3cad
+  type: feature
+  title: Add Azure Functions connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/293758
+  issues:
+  - https://github.com/elastic/security-team/issues/18427
+- file:
+    name: 292535.yaml
+    checksum: 2ec4ac8f5b7cfc6bf00e69449f91bbfa19093e34
+  type: enhancement
+  title: Add the flyout options gear icon to all main flyouts in Security
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/292535
+- file:
+    name: 292431.yaml
+    checksum: 9587937815bd6d1fac46133aa90edd3a1f0c9a01
+  type: bug-fix
+  title: Fix workflow editor auto-complete for feature-based LLM inference endpoints
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/292431
+- file:
+    name: 284860.yaml
+    checksum: a437147a7479fbbe320253d5a0f815924a6623dc
+  type: enhancement
+  title: Create workflow execution indices as hidden indices
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/284860
+- file:
+    name: 293331.yaml
+    checksum: b36e1f8e715652c5241d5830a4204dea579a803d
+  type: enhancement
+  title: Show region options in the Elastic Inference Service model flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Improves the Elastic Inference Service model flyout by showing the geographies and regions where each model's inference traffic can be restricted.
+  prs:
+  - https://github.com/elastic/kibana/pull/293331
+- file:
+    name: 290950.yaml
+    checksum: a33f4b34e82448042377adc0c82b533054d8a826
+  type: enhancement
+  title: Show each `foreach` item as its own step in workflow execution history
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290950
+- file:
+    name: 293783.yaml
+    checksum: 9366c93bb54caeacc7f7ee53083796722f597c49
+  type: bug-fix
+  title: Fix Synthetics diagnostics listing agent policies from other spaces
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/293783
+- file:
+    name: 290910.yaml
+    checksum: dcb29aeecb2a61db4bf133b5e74cdf135dd975e5
+  type: bug-fix
+  title: Restore resume actions and nested run links in the workflow execution flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290910
+  issues:
+  - https://github.com/elastic/security-team/issues/19352
+- file:
+    name: 293756.yaml
+    checksum: d50bd61f6c0c6ed710cec814a818ba2186c0c6f4
+  type: feature
+  title: Add image upload to the Agent Builder chat input
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds the ability to paste an image from your clipboard into the Agent Builder chat input to give the agent visual context. The agent can describe the image and answer follow-up questions about it in later messages.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/293756
+  issues:
+  - https://github.com/elastic/kibana/issues/285096
+- file:
+    name: 292608.yaml
+    checksum: d7403bf14441ec1e7f94c5302aadf893d9a5acd2
+  type: enhancement
+  title: Add views to the ES|QL resource browser
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds ES|QL views to the data source browser in the ES|QL editor, so you can find and insert views alongside your indices and data streams, and filter the list to show only views.
+  prs:
+  - https://github.com/elastic/kibana/pull/292608
+  issues:
+  - https://github.com/elastic/kibana/issues/291774
+- file:
+    name: 290782.yaml
+    checksum: 76ea87ae54fe30c96e17a8b6e84bda0f603a02c2
+  type: bug-fix
+  title: Show nested steps when you select an iteration in the workflow execution flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290782
+  issues:
+  - https://github.com/elastic/security-team/issues/19307
+- file:
+    name: 291469.yaml
+    checksum: 12ab4568c15f54219b63cd36510aa3de191317ea
+  type: enhancement
+  title: Bridge local Windows user entities to Active Directory by SID
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Automated entity resolution now links local Windows and CrowdStrike endpoint user entities to the matching Active Directory user by SID. The CrowdStrike-namespace SID bridge and the Microsoft 365 UPN bridge are off by default.
+  prs:
+  - https://github.com/elastic/kibana/pull/291469
+  issues:
+  - https://github.com/elastic/kibana/issues/291275
+- file:
+    name: 286620.yaml
+    checksum: 17274c09a811fa2d7cb0628cec53201d38f61b7a
+  type: feature
+  title: Make Agent Builder connectors available as a technical preview
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Shows the **Connectors** pages and the `execute_connector_sub_action` tool in Agent Builder without the experimental features setting. The pages carry a **Technical preview** badge.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/286620
+  issues:
+  - https://github.com/elastic/kibana/issues/286567
+- file:
+    name: 293658.yaml
+    checksum: d9a54cc3c4dedc416d83cfc859d02e8189a527e9
+  type: bug-fix
+  title: Fix workflow executions hanging when a resume task cannot be scheduled
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/293658
+  issues:
+  - https://github.com/elastic/security-team/issues/19676
+- file:
+    name: 293855.yaml
+    checksum: b9325537ec31412440e459580e66d6f5cd5cd428
+  type: bug-fix
+  title: Fix default LLM check failing legacy AI connector configurations
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an issue where the default LLM selection check rejected legacy AI connector configurations, even when the underlying inference endpoint matched the LLM call. Agent Builder now also gives administrator-configured, feature-specific LLM settings precedence over the default connector.
+  prs:
+  - https://github.com/elastic/kibana/pull/293855
+  issues:
+  - https://github.com/elastic/kibana/issues/293814
+- file:
+    name: 293802.yaml
+    checksum: ba59d4d9f317d5d41ae7a882d5169bd4be310087
+  type: feature
+  title: Enable Elastic Authentication Redirect Service OAuth for connectors by default
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Turns on the Elastic Authentication Redirect Service OAuth flow for connectors by default when a service URL is configured.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/293802
+- file:
+    name: 293357.yaml
+    checksum: a77e2a2acea4a3571f371276c6d7a4f599660e15
+  type: enhancement
+  title: Show release and end of life in the Elastic Inference Service table
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Improves the Elastic Inference Service table so it shows the model name, type, provider, release date, and end of life.
+  prs:
+  - https://github.com/elastic/kibana/pull/293357
+- file:
+    name: 292911.yaml
+    checksum: 45f4aa1533730d65e0b50179e76d78e61e1f32a3
+  type: bug-fix
+  title: Fix rules created or enabled by a workflow failing after the API key is revoked
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/292911

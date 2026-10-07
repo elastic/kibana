@@ -65,6 +65,19 @@ export interface GetAgentAiIndicesResponse {
   warnings?: AgentAiIndicesWarning[];
 }
 
+export type AgentModelSource = 'agent_feature' | 'default';
+
+export interface AgentModelConnector {
+  id: string;
+  name: string;
+}
+
+export interface GetAgentModelResponse {
+  inference_feature_id?: string;
+  connector?: AgentModelConnector;
+  source: AgentModelSource;
+}
+
 /**
  * Response shape for `GET /api/agent_builder/agents/{id}/access_control`.
  *

@@ -64,6 +64,8 @@ export type DataTableColumnsMeta = Record<
   {
     type: DatatableColumnMeta['type'];
     esType?: DatatableColumnMeta['esType'];
+    /** True when the column was produced by ES|QL (EVAL, STATS, …), not an index field. */
+    isComputedColumn?: boolean;
   }
 >;
 

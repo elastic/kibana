@@ -15,5 +15,4 @@ export const SECOND_CLIENT_P12 = readFileSync(
   require.resolve('@kbn/security-api-integration-helpers/pki/second_client.p12')
 );
 
-// Must match the `pki` config set's pinned Kibana host:port (set via configureHTTP2)
-export const KIBANA_TLS_ORIGIN = 'https://localhost:5620';
+export { KIBANA_TLS_ORIGIN } from '@kbn/scout';

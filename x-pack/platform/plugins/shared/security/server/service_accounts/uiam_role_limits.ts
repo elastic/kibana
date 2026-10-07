@@ -6,12 +6,13 @@
  */
 
 import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
+import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from '../../common/service_accounts/constants';
 
 /**
  * How many roles one UIAM service account may be given. UIAM allows 50 application roles per role
  * assignment, because the roles are encoded into every token it mints.
  */
-export const UIAM_SERVICE_ACCOUNT_MAX_ROLES = 50;
+export { UIAM_SERVICE_ACCOUNT_MAX_ROLES };
 
 /** The longest role name UIAM accepts, its bound for a role id. */
 export const UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH = 507;

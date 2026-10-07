@@ -50,7 +50,7 @@ export const mockRenderingSetupDeps = {
   customBranding,
   status,
   userSettings,
-  i18n: i18nServiceMock.createSetupContract(),
+  i18n: i18nServiceMock.createInternalSetupContract(),
 };
 export const mockRenderingStartDeps = {
   featureFlags: coreFeatureFlagsMock.createStart(),

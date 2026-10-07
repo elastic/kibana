@@ -29,10 +29,21 @@ const mockContext = {
   resolve: jest.fn(),
 };
 
-const call = (id: string, query: { page?: number; size?: number } = {}) =>
+const call = (
+  id: string,
+  query: { page?: number; size?: number; startedAfter?: string; startedBefore?: string } = {}
+) =>
   handler({
     request: mockRequest,
-    params: { path: { id }, query: { page: query.page ?? 1, size: query.size ?? 20 } },
+    params: {
+      path: { id },
+      query: {
+        page: query.page ?? 1,
+        size: query.size ?? 20,
+        startedAfter: query.startedAfter,
+        startedBefore: query.startedBefore,
+      },
+    },
     getAutomationsSoClient,
     getWorkflowsManagement,
     context: mockContext,
@@ -61,7 +72,15 @@ it('returns mapped runs when the automation has a workflowId', async () => {
   const result = await call('auto-1');
 
   expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
-    { workflowId: 'wf-1', omitStepRuns: true, page: 1, size: 20, request: mockRequest },
+    {
+      workflowId: 'wf-1',
+      omitStepRuns: true,
+      page: 1,
+      size: 20,
+      startedAfter: undefined,
+      startedBefore: undefined,
+      request: mockRequest,
+    },
     'default'
   );
   expect(result).toEqual({
@@ -98,6 +117,24 @@ it('passes custom pagination to getWorkflowExecutions', async () => {
 
   expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
     expect.objectContaining({ page: 2, size: 10 }),
+    'default'
+  );
+});
+
+it('passes the selected time range to the workflow execution query', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1' } });
+  mockGetWorkflowExecutions.mockResolvedValue({ results: [], total: 0, page: 1, size: 100 });
+
+  await call('auto-1', {
+    startedAfter: '2026-09-01T00:00:00.000Z',
+    startedBefore: '2026-09-03T00:00:00.000Z',
+  });
+
+  expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
+    expect.objectContaining({
+      startedAfter: '2026-09-01T00:00:00.000Z',
+      startedBefore: '2026-09-03T00:00:00.000Z',
+    }),
     'default'
   );
 });
