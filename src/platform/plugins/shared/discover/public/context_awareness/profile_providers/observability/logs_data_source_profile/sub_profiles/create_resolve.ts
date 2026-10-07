@@ -13,18 +13,30 @@ import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
+export interface CreateResolveOptions {
+  /**
+   * Whether the integration resolves in Classic navigation. Defaults to true; set false for
+   * integrations whose data is also claimed by another solution (e.g. Windows logs are
+   * Security-relevant), so Classic only activates them under explicit Observability navigation.
+   */
+  enabledInClassicNav?: boolean;
+}
+
 export const createResolve = (
-  baseIndexPattern: string
+  baseIndexPattern: string,
+  { enabledInClassicNav = true }: CreateResolveOptions = {}
 ): LogsDataSourceProfileProvider['resolve'] => {
   const testIndexPattern = testPatternAgainstAllowedList([
     createRegExpPatternFrom(baseIndexPattern, 'data'),
   ]);
 
   return (params) => {
-    if (
-      params.rootContext.solutionType !== SolutionType.Observability &&
-      params.rootContext.solutionType !== SolutionType.Default
-    ) {
+    const { solutionType } = params.rootContext;
+    const isSupportedSolutionType =
+      solutionType === SolutionType.Observability ||
+      (enabledInClassicNav && solutionType === SolutionType.Default);
+
+    if (!isSupportedSolutionType) {
       return { isMatch: false };
     }
 

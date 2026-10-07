@@ -148,4 +148,40 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
       });
     });
   });
+
+  describe('Classic navigation (SolutionType.Default)', () => {
+    const resolveInClassic = (profileId: string, indexPattern: string) => {
+      const provider = providers.find((candidate) => candidate.profileId === profileId);
+      if (!provider) {
+        throw new Error(`Missing provider ${profileId}`);
+      }
+      const dataView = createStubIndexPattern({ spec: { title: indexPattern } });
+      dataView.matchedIndices = [indexPattern.replace('-*', '-default')];
+
+      return provider.resolve({
+        rootContext: { profileId: 'classic-nav-root-profile', solutionType: SolutionType.Default },
+        dataSource: createEsqlDataSource(),
+        query: { esql: `FROM ${indexPattern}` },
+        dataView,
+      });
+    };
+
+    it('activates an integration that is enabled in Classic', async () => {
+      expect(
+        await resolveInClassic(
+          'observability-nginx-access-logs-data-source-profile',
+          'logs-nginx.access-*'
+        )
+      ).toEqual(RESOLUTION_MATCH);
+    });
+
+    it('does not activate the Windows logs profile, which is Observability-navigation only', async () => {
+      expect(
+        await resolveInClassic(
+          'observability-windows-logs-data-source-profile',
+          'logs-windows.powershell-*'
+        )
+      ).toEqual({ isMatch: false });
+    });
+  });
 });

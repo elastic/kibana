@@ -89,8 +89,9 @@ Features contributed (all apply once the profile matches, except where noted):
 
 `logs_data_source_profile/sub_profiles/integration_logs.ts` extends the base logs
 profile per integration. Each sub-profile's `resolve` (`sub_profiles/create_resolve.ts`)
-adds the `Observability | Default` solution gate and then requires the index pattern to
-match the integration's **base pattern** (whole-string regex). In Classic these
+adds a solution gate — `Observability | Default`, or `Observability`-only for integrations
+that opt out of Classic via `enabledInClassicNav: false` — and then requires the index
+pattern to match the integration's **base pattern** (whole-string regex). In Classic these
 integration sub-profiles are the **only** logs activation path — detection is limited to
 this fixed list, with no `observability:logSources` extension. When it matches it
 overrides the default columns (and, for some, recommended fields):
@@ -104,6 +105,10 @@ overrides the default columns (and, for some, recommended fields):
 | `logs-nginx.error` | `log.level`, `message` |
 | `logs-system` | `log.level`, `process.name`, `host.name`, `message` |
 | `logs-windows` | `log.level`, `host.name`, `message` |
+
+> `logs-windows` is **Observability-navigation only** (`enabledInClassicNav: false`): Windows
+> logs are also Security-relevant, so Classic must not auto-activate the Observability logs
+> profile for them.
 
 ### Document — `observability-log-document-profile`
 

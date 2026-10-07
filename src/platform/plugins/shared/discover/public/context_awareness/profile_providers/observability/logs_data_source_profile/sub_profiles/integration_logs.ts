@@ -19,6 +19,7 @@ type IntegrationLogsProfileProvider = Pick<LogsDataSourceProfileProvider, 'profi
   baseIndexPattern: string;
   defaultAppState: CreateGetDefaultAppStateParams;
   recommendedFields?: string[];
+  enabledInClassicNav?: boolean;
 };
 
 const integrationLogsProfileProviders: IntegrationLogsProfileProvider[] = [
@@ -95,6 +96,8 @@ const integrationLogsProfileProviders: IntegrationLogsProfileProvider[] = [
     defaultAppState: {
       defaultColumns: [LOG_LEVEL_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN],
     },
+    // Windows logs are also Security-relevant, so keep them out of Classic auto-detection.
+    enabledInClassicNav: false,
   },
 ];
 
@@ -102,7 +105,7 @@ export const createIntegrationLogsDataSourceProfileProviders = (
   logsDataSourceProfileProvider: LogsDataSourceProfileProvider
 ) => {
   return integrationLogsProfileProviders.map(
-    ({ profileId, baseIndexPattern, defaultAppState, recommendedFields }) =>
+    ({ profileId, baseIndexPattern, defaultAppState, recommendedFields, enabledInClassicNav }) =>
       extendProfileProvider(logsDataSourceProfileProvider, {
         profileId,
         profile: {
@@ -115,7 +118,7 @@ export const createIntegrationLogsDataSourceProfileProviders = (
               }
             : {}),
         },
-        resolve: createResolve(baseIndexPattern),
+        resolve: createResolve(baseIndexPattern, { enabledInClassicNav }),
       })
   );
 };
