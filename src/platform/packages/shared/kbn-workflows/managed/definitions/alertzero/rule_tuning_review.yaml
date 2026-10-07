@@ -563,8 +563,29 @@ steps:
                 enum: [low, medium, high]
             required: [change_type, summary, title, fp_pattern, reasoning, confidence]
 
+  # Turns a proposed exception into a filters array (the rule's own filters plus one
+  # excluding matching alerts) instead of creating the exception itself, so the change
+  # can be backtested the same way a query change is below. Only the entries matter here;
+  # eligibility to actually run the backtest is decided by can_preview_query_change, same
+  # gate the query arm uses, since both reuse the same preview mechanism.
+  - name: build_exception_filter
+    type: security.buildExceptionEntriesFilter
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      existing_filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+    on-failure:
+      continue: true
+
   # Rules using a data view, timestamp override, or alert suppression need fields
-  # the preview API cannot conditionally omit, so query auto-apply is restricted.
+  # the preview API cannot conditionally omit, so query and exception auto-apply is
+  # restricted the same way (both reuse this same preview mechanism below). The type
+  # check alone excludes saved-query rules, which carry no inline query. The exception arm additionally
+  # requires its filter to have been built: falling back to the rule's own filters
+  # would backtest the unchanged rule and present it as the exception's result.
   # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
   - name: can_preview_query_change
     type: data.set
@@ -573,7 +594,10 @@ steps:
         and steps.fetch_rule.output.enabled == true }}
     with:
       supported: >-
-        ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+        ${{ (steps.diagnose_rule.output.structured_output.change_type == 'query'
+            or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
+              and steps.build_exception_filter.error == null
+              and steps.build_exception_filter.output.filters != null))
           and steps.fetch_rule.output.type == 'query'
           and steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
@@ -619,10 +643,19 @@ steps:
           type: query
           name: "{{ steps.fetch_rule.output.name }}"
           description: "{{ steps.fetch_rule.output.description }}"
-          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+          # Only the query arm changes the query itself; the exception arm backtests via
+          # filters instead, so it previews the rule's own unchanged query.
+          query: >-
+            {% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
-          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          # build_exception_filter's output (the rule's filters plus the negated exception
+          # clause) takes precedence when it ran; otherwise this previews unchanged, same
+          # as the query arm.
+          filters: >-
+            ${{ steps.build_exception_filter.output.filters
+              | default: steps.fetch_rule.output.filters
+              | default: consts.no_items }}
           exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
           severity: "{{ steps.fetch_rule.output.severity }}"
           severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
@@ -789,7 +822,8 @@ steps:
         Apply the recommended change in the Detection Rules UI.
         {% endcase %}
 
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query"
+          or steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
@@ -799,15 +833,16 @@ steps:
         current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %},
         proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
-        Current query preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
+        Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
         {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
-        Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
+        Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest: this rule is not a query rule, or uses a data view, timestamp
-        override, or alert suppression, which the preview API cannot reproduce.
-        Approving still applies the proposed query, so judge it on the query itself
+        No backtest: this rule is not a plain query rule (saved query, data view,
+        timestamp override, or alert suppression are not supported by the preview),
+        or the proposed exception could not be converted into a preview filter.
+        Approving still applies the proposed change, so judge it on the change itself
         and the false positives above rather than on a simulated alert count.
         {% endif %}
         {% endif %}

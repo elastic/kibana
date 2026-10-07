@@ -26,6 +26,16 @@ import { registerInvestigationStepDefinitions } from './investigations/step_type
 import { registerWorkflowExecutionStepDefinitions } from './workflow_execution/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { createSetImpactTool } from './impact/tools/set_impact_tool';
+import { registerSubjectAttachment, subjectAttachment } from './subjects/attachments';
+import { SubjectsService } from './subjects/services/subjects_service';
+import {
+  createSubjectClaimStorageClient,
+  SubjectClaimsService,
+} from './subjects/services/subject_claims_service';
+import { createSubjectsClient } from './subjects/services/subjects_client';
+import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
+import { HypothesesService } from './hypotheses/services/hypotheses_service';
+import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
@@ -53,6 +63,8 @@ export class AgenticInvestigationsPlugin
   private readonly logger: Logger;
   private readonly escalationsEnabled: boolean;
   private impactService?: ImpactService;
+  private subjectsService?: SubjectsService;
+  private hypothesesService?: HypothesesService;
   private escalationsService?: EscalationsService;
   private assignmentsService?: AssignmentsService;
   private investigationStatusService?: InvestigationStatusService;
@@ -71,12 +83,7 @@ export class AgenticInvestigationsPlugin
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
-    registerImpactAttachment(agentBuilder, {
-      getImpactService: () => this.requireImpactService(),
-      logger: this.logger,
-    });
-
-    // Steps and tools register during setup but only run once Kibana has
+    // Attachment types, steps and tools register during setup but only run once Kibana has
     // started, so the authorization service is resolved per call rather than
     // captured here — `security.authz` does not exist yet.
     const impactPrivileges = createImpactPrivilegesChecker({
@@ -84,9 +91,33 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
+    registerImpactAttachment(agentBuilder, {
+      getImpactService: () => this.requireImpactService(),
+      privileges: impactPrivileges,
+      logger: this.logger,
+    });
+    registerSubjectAttachment(agentBuilder, {
+      getSubjectsService: () => this.requireSubjectsService(),
+      privileges: impactPrivileges,
+      logger: this.logger,
+    });
+    registerHypothesesAttachment(agentBuilder, {
+      getHypothesesService: () => this.requireHypothesesService(),
+      privileges: impactPrivileges,
+      logger: this.logger,
+    });
+
     agentBuilder.tools.register(
       createSetImpactTool({
         getImpactService: () => this.requireImpactService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: impactPrivileges,
+        logger: this.logger,
+      })
+    );
+    agentBuilder.tools.register(
+      createSetHypothesesTool({
+        getHypothesesService: () => this.requireHypothesesService(),
         resolveUser: (request) => this.requireUserResolver()(request),
         privileges: impactPrivileges,
         logger: this.logger,
@@ -170,6 +201,17 @@ export class AgenticInvestigationsPlugin
       }),
     });
 
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    this.subjectsService = new SubjectsService({
+      documents: subjectAttachment.createService({ esClient, logger: this.logger }),
+      claims: new SubjectClaimsService({
+        storage: createSubjectClaimStorageClient({ esClient, logger: this.logger }),
+      }),
+    });
+    this.hypothesesService = new HypothesesService({
+      documents: hypothesesAttachment.createService({ esClient, logger: this.logger }),
+    });
+
     this.investigationStatusService = new InvestigationStatusService({
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
@@ -178,13 +220,14 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
+    const startPrivileges = createImpactPrivilegesChecker({
+      getSecurity: async () => plugins.security,
+      logger: this.logger,
+    });
     const getImpactClient = createImpactClient({
       getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
-      privileges: createImpactPrivilegesChecker({
-        getSecurity: async () => plugins.security,
-        logger: this.logger,
-      }),
+      privileges: startPrivileges,
     });
 
     if (this.escalationsEnabled) {
@@ -205,8 +248,18 @@ export class AgenticInvestigationsPlugin
         plugins.agentBuilder.conversations.getScopedClient({ request }),
     });
 
+    const getSubjectsClient = createSubjectsClient({
+      getSubjectsService: () => this.requireSubjectsService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: startPrivileges,
+      resolveUser: (request) => this.requireUserResolver()(request),
+      getConversationClient: (request) => this.getConversationClient(request),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+    });
+
     return {
       getImpactClient,
+      getSubjectsClient,
       getEscalationsService: () => this.requireEscalationsService(),
     };
   }
@@ -218,6 +271,24 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.impactService;
+  }
+
+  private requireSubjectsService(): SubjectsService {
+    if (!this.subjectsService) {
+      throw new Error(
+        'Subjects service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.subjectsService;
+  }
+
+  private requireHypothesesService(): HypothesesService {
+    if (!this.hypothesesService) {
+      throw new Error(
+        'Hypotheses service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.hypothesesService;
   }
 
   private requireEscalationsService(): EscalationsService {

@@ -171,6 +171,7 @@ export {
   type AgentAccessControlPrincipalType,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentConfigurationInput,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
   agentIdRegexp,
