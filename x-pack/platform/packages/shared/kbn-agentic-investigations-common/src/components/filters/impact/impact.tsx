@@ -195,32 +195,35 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
   const measureRef = useRef<HTMLDivElement>(null);
 
   const pills = useMemo(() => impactPills(items), [items]);
-  const [visible, setVisible] = useState<VisiblePills>({
+  // What the collapsed row would show, tracked even while expanded so the
+  // collapse control disappears once everything fits again.
+  const [collapsed, setCollapsed] = useState<VisiblePills>({
     prefixCount: pills.length,
     pinnedIndex: null,
   });
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const recalculateVisible = useCallback(() => {
+  const recalculateCollapsed = useCallback(() => {
     if (!measureRef.current) {
       return;
     }
-    if (isExpanded) {
-      setVisible({ prefixCount: pills.length, pinnedIndex: null });
-      return;
-    }
-    setVisible(findVisiblePills(measureRef.current, pills, entityFilter));
-  }, [entityFilter, isExpanded, pills]);
+    const next = findVisiblePills(measureRef.current, pills, entityFilter);
+    setCollapsed((previous) =>
+      previous.prefixCount === next.prefixCount && previous.pinnedIndex === next.pinnedIndex
+        ? previous
+        : next
+    );
+  }, [entityFilter, pills]);
 
   useLayoutEffect(() => {
-    recalculateVisible();
+    recalculateCollapsed();
 
-    const observer = new ResizeObserver(recalculateVisible);
+    const observer = new ResizeObserver(recalculateCollapsed);
     if (rowRef.current) {
       observer.observe(rowRef.current);
     }
     return () => observer.disconnect();
-  }, [recalculateVisible]);
+  }, [recalculateCollapsed]);
 
   if (pills.length === 0) {
     return null;
@@ -230,8 +233,10 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
   // row shares one offsetTop regardless of pill height (the +n pill is shorter).
   const pillItemStyles = css({ justifyContent: 'center' });
 
-  const visiblePills = pills.filter((_, index) => isVisibleIndex(index, visible));
-  const overflowCount = Math.max(0, pills.length - visiblePills.length);
+  const collapsedPills = pills.filter((_, index) => isVisibleIndex(index, collapsed));
+  const overflowCount = Math.max(0, pills.length - collapsedPills.length);
+  const showAll = isExpanded && overflowCount > 0;
+  const visiblePills = showAll ? pills : collapsedPills;
 
   const renderPill = (pill: ImpactPill, interactive: boolean) => (
     <EuiFlexItem
@@ -297,7 +302,7 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
           data-test-subj={IMPACT_PILLS_TEST_SUBJ}
         >
           {visiblePills.map((pill) => renderPill(pill, true))}
-          {isExpanded ? (
+          {showAll ? (
             <EuiFlexItem
               grow={false}
               css={pillItemStyles}

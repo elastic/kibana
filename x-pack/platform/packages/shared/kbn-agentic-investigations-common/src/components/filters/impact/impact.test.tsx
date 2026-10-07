@@ -60,6 +60,8 @@ const mockWrappingLayout = (perRow: number) => {
   return () => {
     if (original) {
       Object.defineProperty(HTMLElement.prototype, 'offsetTop', original);
+    } else {
+      delete (HTMLElement.prototype as Partial<HTMLElement>).offsetTop;
     }
   };
 };
@@ -164,6 +166,25 @@ describe('Impact', () => {
       );
       expect(visibleRow().getAllByTestId(IMPACT_PILL_TEST_SUBJ)).toHaveLength(5);
       expect(visibleRow().getByTestId(IMPACT_OVERFLOW_TEST_SUBJ)).toHaveTextContent('+2');
+    });
+
+    it('drops the collapse control when an expanded list shrinks to fit', () => {
+      const { rerender } = renderWithKibanaRenderContext(
+        <Impact items={sevenHosts} entityFilter={null} onEntityFilterChange={jest.fn()} />
+      );
+      fireEvent.click(visibleRow().getByRole('button', { name: 'Show 2 more' }));
+      expect(visibleRow().getByTestId(IMPACT_COLLAPSE_TEST_SUBJ)).toBeInTheDocument();
+
+      rerender(
+        <Impact
+          items={sevenHosts.slice(0, 6)}
+          entityFilter={null}
+          onEntityFilterChange={jest.fn()}
+        />
+      );
+      expect(visibleRow().getAllByTestId(IMPACT_PILL_TEST_SUBJ)).toHaveLength(6);
+      expect(visibleRow().queryByTestId(IMPACT_COLLAPSE_TEST_SUBJ)).not.toBeInTheDocument();
+      expect(visibleRow().queryByTestId(IMPACT_OVERFLOW_TEST_SUBJ)).not.toBeInTheDocument();
     });
 
     it('shows every pill without a +n when they fit in two rows', () => {
