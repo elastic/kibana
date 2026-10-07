@@ -87,11 +87,6 @@ export class AgenticInvestigationsPlugin
       registerEscalationConversationEvents(agentBuilder);
     }
 
-    registerImpactAttachment(agentBuilder, {
-      getImpactService: () => this.requireImpactService(),
-      logger: this.logger,
-    });
-
     // Attachment types, steps and tools register during setup but only run once Kibana has
     // started, so the authorization service is resolved per call rather than
     // captured here — `security.authz` does not exist yet.
