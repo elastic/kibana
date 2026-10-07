@@ -800,7 +800,9 @@ describe('executeRuleOperations', () => {
           fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
         } as never);
 
-        const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'event.ingested' }];
+        const ops: RuleOperation[] = [
+          { operation: 'set_time_field', time_field: 'event.ingested' },
+        ];
         const result = await executeRuleOperations(existingWithQuery, ops, esClient);
 
         expect(result.data.time_field).toBe('event.ingested');
