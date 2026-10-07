@@ -115,7 +115,18 @@ describe('MixedCreateRuleFlyout', () => {
     expect(onChooseEsql).toHaveBeenCalled();
 
     await openMeasureSuggestions(user);
+    expect(screen.getByText('CPU, memory, disk, network on hosts or containers')).toBeInTheDocument();
+    expect(
+      screen.getByText('Error rates, latency, throughput for services')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Error counts, patterns, or anomalies in log data')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesDomain-synthetics')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesDomain-slo')).toBeInTheDocument();
+
     await user.click(screen.getByTestId('mixedRulesDomain-apm'));
+    expect(screen.getByTestId('mixedRulesMeasureSearch')).toHaveValue('APM');
     expect(screen.getByTestId('mixedRulesContinueClassic')).toBeInTheDocument();
     expect(screen.queryByText('Create')).not.toBeInTheDocument();
     expect(screen.queryByText('Rules on Rules')).not.toBeInTheDocument();

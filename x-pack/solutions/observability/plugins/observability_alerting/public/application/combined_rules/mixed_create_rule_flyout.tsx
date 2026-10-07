@@ -32,6 +32,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  euiCanAnimate,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,8 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { useFindTemplatesQuery } from '@kbn/response-ops-rules-apis/hooks/use_find_templates_query';
 import type { CoreStart } from '@kbn/core/public';
+import { AiButton } from '@kbn/ui-ai-components';
+import { SparklesIcon } from './sparkles_icon';
 
 const TITLE_ID = 'mixedCreateRuleFlyoutTitle';
 const CLASSIC_TITLE_ID = 'mixedClassicRuleTypesFlyoutTitle';
@@ -757,7 +760,7 @@ const MixedClassicRuleTypesFlyoutInner = ({
   );
 };
 
-type DataDomain = 'infra' | 'apm' | 'logs' | 'custom' | 'specific';
+type DataDomain = 'infra' | 'apm' | 'logs' | 'synthetics' | 'slo' | 'custom' | 'specific';
 type CreatePath = 'threshold' | 'esql';
 
 const DEFAULT_CREATE_PATHS: CreatePath[] = ['threshold', 'esql'];
@@ -765,12 +768,23 @@ const DEFAULT_CREATE_PATHS: CreatePath[] = ['threshold', 'esql'];
 type DataDomainOption = {
   id: DataDomain;
   label: string;
+  /** Short subtitle shown under the label in search suggestions. */
+  description: string;
   /** When true, Universal can’t cover this well yet — route to Classic. */
   prefersClassic?: boolean;
+  /**
+   * Term passed to the Classic rule-type search. Must match rule type names
+   * (e.g. "APM", "SLOs") — full suggestion descriptions return no results.
+   */
+  classicSearch?: string;
   /** Ordered Create-section paths (Threshold, ES|QL). */
   createPaths: CreatePath[];
   hint: string;
   examplePrompt: string;
+};
+
+type DomainSuggestionOption = EuiSelectableOption & {
+  description?: string;
 };
 
 /** Same options as the Agent Builder ask-user question — offered as search suggestions. */
@@ -779,6 +793,9 @@ const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
     id: 'infra',
     label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainInfra', {
       defaultMessage: 'Infrastructure metrics',
+    }),
+    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainInfraDescription', {
+      defaultMessage: 'CPU, memory, disk, network on hosts or containers',
     }),
     createPaths: ['threshold', 'esql'],
     hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainInfraHint', {
@@ -793,7 +810,11 @@ const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
     label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainApm', {
       defaultMessage: 'Application / APM',
     }),
+    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainApmDescription', {
+      defaultMessage: 'Error rates, latency, throughput for services',
+    }),
     prefersClassic: true,
+    classicSearch: 'APM',
     createPaths: [],
     hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainApmHint', {
       defaultMessage: 'APM and ML rules are only supported in Classic alerting.',
@@ -807,6 +828,9 @@ const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
     label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainLogs', {
       defaultMessage: 'Logs',
     }),
+    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainLogsDescription', {
+      defaultMessage: 'Error counts, patterns, or anomalies in log data',
+    }),
     createPaths: ['threshold', 'esql'],
     hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainLogsHint', {
       defaultMessage:
@@ -817,9 +841,54 @@ const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
     }),
   },
   {
+    id: 'synthetics',
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSynthetics', {
+      defaultMessage: 'Synthetics / Uptime',
+    }),
+    description: i18n.translate(
+      'xpack.observabilityAlerting.mixedCreate.domainSyntheticsDescription',
+      {
+        defaultMessage: 'Availability and response times for endpoints and journeys',
+      }
+    ),
+    prefersClassic: true,
+    classicSearch: 'Synthetics',
+    createPaths: [],
+    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSyntheticsHint', {
+      defaultMessage: 'Synthetics and Uptime rules are only supported in Classic alerting.',
+    }),
+    examplePrompt: i18n.translate(
+      'xpack.observabilityAlerting.mixedCreate.domainSyntheticsExample',
+      {
+        defaultMessage: 'Synthetics',
+      }
+    ),
+  },
+  {
+    id: 'slo',
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSlo', {
+      defaultMessage: 'SLOs',
+    }),
+    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSloDescription', {
+      defaultMessage: 'Burn rate and error budget for service level objectives',
+    }),
+    prefersClassic: true,
+    classicSearch: 'SLOs',
+    createPaths: [],
+    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSloHint', {
+      defaultMessage: 'SLO burn-rate rules are only supported in Classic alerting.',
+    }),
+    examplePrompt: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSloExample', {
+      defaultMessage: 'SLOs',
+    }),
+  },
+  {
     id: 'custom',
     label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainCustom', {
       defaultMessage: 'Custom index',
+    }),
+    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainCustomDescription', {
+      defaultMessage: 'Query a specific index with ES|QL or a threshold',
     }),
     createPaths: ['esql', 'threshold'],
     hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainCustomHint', {
@@ -834,6 +903,7 @@ const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
 const SPECIFIC_DOMAIN_FALLBACK: DataDomainOption = {
   id: 'specific',
   label: '',
+  description: '',
   createPaths: ['threshold', 'esql'],
   hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSpecificHint', {
     defaultMessage: 'Turn on AI mode to describe it, or start from a Threshold builder.',
@@ -851,11 +921,17 @@ const inferDataDomain = (text: string): DataDomain | null => {
   if (!value) {
     return null;
   }
-  if (/\b(apm|service|transaction|span|trace)\b/.test(value)) {
+  if (/\b(apm|transaction|span|trace|latency|throughput)\b/.test(value)) {
     return 'apm';
   }
   if (/\b(ml|anomaly|machine learning)\b/.test(value)) {
     return 'apm';
+  }
+  if (/\b(synthetics?|uptime|heartbeat|monitor journey|ping check)\b/.test(value)) {
+    return 'synthetics';
+  }
+  if (/\b(slo|slis?|error budget|burn rate)\b/.test(value)) {
+    return 'slo';
   }
   // Classic threshold-style rule types → Universal Threshold (not Classic).
   if (/\b(metric threshold|log threshold|index threshold)\b/.test(value)) {
@@ -880,11 +956,55 @@ const inferDataDomain = (text: string): DataDomain | null => {
 };
 
 const measureSearchStyles = {
-  aiButtonSelected: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBasePrimary,
-      color: euiTheme.colors.textPrimary,
-    }),
+  /** Matches Discover "Query with AI" sparkle twinkle on hover/focus. */
+  aiButtonSparkleHover: ({ euiTheme }: UseEuiTheme) => css`
+    overflow: visible;
+
+    &::after {
+      content: none;
+    }
+
+    @keyframes mixedCreateSparkleTwinkle {
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.45;
+        transform: scale(0.85);
+      }
+    }
+
+    ${euiCanAnimate} {
+      &:hover svg path,
+      &:focus-visible svg path {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation-name: mixedCreateSparkleTwinkle;
+        animation-duration: calc(${euiTheme.animation.extraSlow} * 2);
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+      }
+
+      &:hover svg path:nth-of-type(2),
+      &:focus-visible svg path:nth-of-type(2) {
+        animation-delay: ${euiTheme.animation.slow};
+      }
+
+      &:hover svg path:nth-of-type(3),
+      &:focus-visible svg path:nth-of-type(3) {
+        animation-delay: ${euiTheme.animation.extraSlow};
+      }
+    }
+  `,
+  aiButtonSelected: ({ euiTheme }: UseEuiTheme) => css`
+    background: linear-gradient(
+      180deg,
+      ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+      ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+    ) !important;
+  `,
 };
 
 const V2OptionsBody = ({
@@ -917,11 +1037,12 @@ const V2OptionsBody = ({
   const prefersClassic = Boolean(activeDomain?.prefersClassic && showClassic);
   const createPathIds = activeDomain?.createPaths ?? DEFAULT_CREATE_PATHS;
 
-  const domainSuggestionOptions = useMemo<Array<EuiSelectableOption>>(
+  const domainSuggestionOptions = useMemo<DomainSuggestionOption[]>(
     () =>
       DATA_DOMAIN_OPTIONS.map((option) => ({
         label: option.label,
         key: option.id,
+        description: option.description,
         checked: selectedDomain === option.id ? ('on' as const) : undefined,
         'data-test-subj': `mixedRulesDomain-${option.id}`,
       })),
@@ -931,16 +1052,39 @@ const V2OptionsBody = ({
   const selectDomainSuggestion = (domain: DataDomain) => {
     const option = DATA_DOMAIN_OPTIONS.find((item) => item.id === domain);
     setSelectedDomain(domain);
-    setMeasureText(option?.examplePrompt ?? '');
+    // Main title goes in the search field — Classic rule-type filter needs it
+    // (e.g. "SLOs", "APM"), not the longer description.
+    setMeasureText(option?.classicSearch ?? option?.label ?? '');
     setIsSuggestionsOpen(false);
   };
 
+  const classicBrowseSearch = useMemo(() => {
+    const trimmed = measureText.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    // Only substitute the Classic search term when the field still holds the
+    // selected suggestion title — keep free-text (e.g. "Anomaly") as typed.
+    if (
+      activeDomain?.classicSearch &&
+      (trimmed === activeDomain.classicSearch ||
+        trimmed === activeDomain.label ||
+        trimmed === activeDomain.description)
+    ) {
+      return activeDomain.classicSearch;
+    }
+    return trimmed;
+  }, [activeDomain, measureText]);
+
   const onMeasureTextChange = (value: string) => {
     setMeasureText(value);
+    const normalized = value.trim().toLowerCase();
     const matchingSuggestion = DATA_DOMAIN_OPTIONS.find(
       (option) =>
-        option.examplePrompt === value ||
-        option.label.toLowerCase() === value.trim().toLowerCase()
+        option.classicSearch?.toLowerCase() === normalized ||
+        option.label.toLowerCase() === normalized ||
+        option.examplePrompt.toLowerCase() === normalized ||
+        option.description.toLowerCase() === normalized
     );
     setSelectedDomain(matchingSuggestion?.id ?? null);
   };
@@ -1040,7 +1184,7 @@ const V2OptionsBody = ({
                         'xpack.observabilityAlerting.mixedCreate.measurePlaceholder',
                         {
                           defaultMessage:
-                            'Search or pick a suggestion — CPU, APM, logs, or a custom index',
+                            'Search or pick a suggestion — metrics, APM, logs, synthetics, SLOs…',
                         }
                       )}
                       data-test-subj="mixedRulesMeasureSearch"
@@ -1053,7 +1197,7 @@ const V2OptionsBody = ({
                     />
                   }
                 >
-                  <EuiSelectable
+                  <EuiSelectable<DomainSuggestionOption>
                     singleSelection
                     options={domainSuggestionOptions}
                     onChange={(options) => {
@@ -1062,7 +1206,19 @@ const V2OptionsBody = ({
                         selectDomainSuggestion(selected.key as DataDomain);
                       }
                     }}
-                    listProps={{ rowHeight: 40, showIcons: false }}
+                    renderOption={(option) => (
+                      <div>
+                        <EuiText size="s">
+                          <strong>{option.label}</strong>
+                        </EuiText>
+                        {option.description ? (
+                          <EuiText size="xs" color="subdued">
+                            {option.description}
+                          </EuiText>
+                        ) : null}
+                      </div>
+                    )}
+                    listProps={{ rowHeight: 56, showIcons: true }}
                     data-test-subj="mixedRulesMeasureSuggestions"
                   >
                     {(list) => list}
@@ -1102,10 +1258,10 @@ const V2OptionsBody = ({
               defaultMessage: 'Describe a rule in natural language with the AI agent',
             })}
           >
-            <EuiButton
+            <AiButton
               size="s"
-              color="text"
-              iconType="sparkles"
+              variant="outlined"
+              iconType={SparklesIcon as unknown as 'sparkles'}
               aria-pressed={isAiMode}
               isSelected={isAiMode}
               onClick={() => {
@@ -1120,12 +1276,15 @@ const V2OptionsBody = ({
                 });
               }}
               data-test-subj="mixedRulesAiMode"
-              css={isAiMode ? measureSearchStyles.aiButtonSelected : undefined}
+              css={[
+                measureSearchStyles.aiButtonSparkleHover,
+                isAiMode ? measureSearchStyles.aiButtonSelected : undefined,
+              ]}
             >
               {i18n.translate('xpack.observabilityAlerting.mixedCreate.aiModeLabel', {
                 defaultMessage: 'Ask Agent',
               })}
-            </EuiButton>
+            </AiButton>
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -1157,10 +1316,11 @@ const V2OptionsBody = ({
           description={i18n.translate(
             'xpack.observabilityAlerting.mixedCreate.continueClassicDescription',
             {
-              defaultMessage: 'Browse APM and ML rule types and templates.',
+              defaultMessage:
+                'Browse Classic rule types and templates for this data domain.',
             }
           )}
-          onClick={() => onBrowseClassic(measureText.trim() || undefined)}
+          onClick={() => onBrowseClassic(classicBrowseSearch)}
           data-test-subj="mixedRulesContinueClassic"
         />
       ) : (

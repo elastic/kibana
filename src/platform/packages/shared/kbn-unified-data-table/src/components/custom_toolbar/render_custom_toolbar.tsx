@@ -30,6 +30,8 @@ interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarPr
   saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
+  /** Rendered on the right side, immediately before the keyboard shortcuts control group. */
+  beforeKeyboardShortcuts?: React.ReactElement;
 }
 
 export const internalRenderCustomToolbar = (
@@ -39,6 +41,7 @@ export const internalRenderCustomToolbar = (
     saveToDashboardButton,
     leftSide,
     bottomSection,
+    beforeKeyboardShortcuts,
     toolbarProps: {
       hasRoomForGridControls,
       columnControl,
@@ -104,6 +107,9 @@ export const internalRenderCustomToolbar = (
             {Boolean(inTableSearchInput) && (
               <EuiFlexItem grow={false}>{inTableSearchInput}</EuiFlexItem>
             )}
+            {beforeKeyboardShortcuts ? (
+              <EuiFlexItem grow={false}>{beforeKeyboardShortcuts}</EuiFlexItem>
+            ) : null}
             {Boolean(
               keyboardShortcutsControl || displayControl || fullScreenControl || inTableSearchButton
             ) && (
@@ -148,10 +154,12 @@ export const getRenderCustomToolbarWithElements = ({
   saveToDashboardButton,
   leftSide,
   bottomSection,
+  beforeKeyboardShortcuts,
 }: {
   saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
+  beforeKeyboardShortcuts?: React.ReactElement;
 }): UnifiedDataTableRenderCustomToolbar => {
   const reservedSpace = <></>;
   return (props) =>
@@ -159,6 +167,7 @@ export const getRenderCustomToolbarWithElements = ({
       ...props,
       leftSide: leftSide || reservedSpace,
       bottomSection,
+      beforeKeyboardShortcuts,
       saveToDashboardButton,
     });
 };

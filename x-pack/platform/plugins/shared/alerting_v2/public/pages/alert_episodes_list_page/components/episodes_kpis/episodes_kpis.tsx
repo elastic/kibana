@@ -26,6 +26,7 @@ import {
   EPISODES_KPIS_SNOOZED,
   EPISODES_KPIS_UNASSIGNED_ALERTS,
 } from '../../translations';
+import { EPISODES_KPIS_PANEL_ID } from '../../utils/episodes_panels_visibility';
 
 interface EpisodesKpisServices {
   expressions: ExpressionsStart;
@@ -50,93 +51,97 @@ export const EpisodesKpis = ({ services, filterState, timeRange }: EpisodesKpisP
 
   if (isError) {
     return (
-      <EuiPanel hasBorder>
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          title={EPISODES_KPIS_ERROR_TITLE}
-          iconType="error"
-        >
-          {EPISODES_KPIS_ERROR}
-        </EuiCallOut>
-      </EuiPanel>
+      <div id={EPISODES_KPIS_PANEL_ID}>
+        <EuiPanel hasBorder>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            title={EPISODES_KPIS_ERROR_TITLE}
+            iconType="error"
+          >
+            {EPISODES_KPIS_ERROR}
+          </EuiCallOut>
+        </EuiPanel>
+      </div>
     );
   }
 
   return (
-    <EuiFlexGroup gutterSize="m">
-      <EuiFlexItem>
-        <EuiPanel hasBorder data-test-subj="episodesKpisAlertsPanel">
-          <EuiTitle size="xxs">
-            <h3>{EPISODES_KPIS_ALERTS_PANEL_TITLE}</h3>
-          </EuiTitle>
-          <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-            <EuiFlexItem>
-              <EuiStat
-                title={data?.alertsCount ?? 0}
-                description={EPISODES_KPIS_ALERTS_COUNT}
-                textAlign="left"
-                reverse
-                isLoading={isLoading}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiStat
-                title={data?.firingRules ?? 0}
-                description={EPISODES_KPIS_FIRING_RULES}
-                textAlign="left"
-                reverse
-                isLoading={isLoading}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiStat
-                title={data?.assignedToMe ?? 0}
-                description={EPISODES_KPIS_ASSIGNED_TO_ME}
-                textAlign="left"
-                reverse
-                isLoading={isLoading}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasBorder data-test-subj="episodesKpisAlertActionsPanel">
-          <EuiTitle size="xxs">
-            <h3>{EPISODES_KPIS_ALERT_ACTIONS_PANEL_TITLE}</h3>
-          </EuiTitle>
-          <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-            <EuiFlexItem>
-              <EuiStat
-                title={data?.unassigned ?? 0}
-                description={EPISODES_KPIS_UNASSIGNED_ALERTS}
-                textAlign="left"
-                reverse
-                isLoading={isLoading}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiStat
-                title={data?.acknowledged ?? 0}
-                description={EPISODES_KPIS_ACKNOWLEDGED}
-                textAlign="left"
-                reverse
-                isLoading={isLoading}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiStat
-                title={data?.snoozed ?? 0}
-                description={EPISODES_KPIS_SNOOZED}
-                textAlign="left"
-                reverse
-                isLoading={isLoading}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div id={EPISODES_KPIS_PANEL_ID}>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <EuiPanel hasBorder data-test-subj="episodesKpisAlertsPanel">
+            <EuiTitle size="xxs">
+              <h3>{EPISODES_KPIS_ALERTS_PANEL_TITLE}</h3>
+            </EuiTitle>
+            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+              <EuiFlexItem>
+                <EuiStat
+                  title={data?.alertsCount ?? 0}
+                  description={EPISODES_KPIS_ALERTS_COUNT}
+                  textAlign="left"
+                  reverse
+                  isLoading={isLoading}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiStat
+                  title={data?.firingRules ?? 0}
+                  description={EPISODES_KPIS_FIRING_RULES}
+                  textAlign="left"
+                  reverse
+                  isLoading={isLoading}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiStat
+                  title={data?.assignedToMe ?? 0}
+                  description={EPISODES_KPIS_ASSIGNED_TO_ME}
+                  textAlign="left"
+                  reverse
+                  isLoading={isLoading}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel hasBorder data-test-subj="episodesKpisAlertActionsPanel">
+            <EuiTitle size="xxs">
+              <h3>{EPISODES_KPIS_ALERT_ACTIONS_PANEL_TITLE}</h3>
+            </EuiTitle>
+            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+              <EuiFlexItem>
+                <EuiStat
+                  title={data?.unassigned ?? 0}
+                  description={EPISODES_KPIS_UNASSIGNED_ALERTS}
+                  textAlign="left"
+                  reverse
+                  isLoading={isLoading}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiStat
+                  title={data?.acknowledged ?? 0}
+                  description={EPISODES_KPIS_ACKNOWLEDGED}
+                  textAlign="left"
+                  reverse
+                  isLoading={isLoading}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiStat
+                  title={data?.snoozed ?? 0}
+                  description={EPISODES_KPIS_SNOOZED}
+                  textAlign="left"
+                  reverse
+                  isLoading={isLoading}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };

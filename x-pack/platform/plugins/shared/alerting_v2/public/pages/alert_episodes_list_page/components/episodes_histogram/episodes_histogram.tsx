@@ -50,6 +50,7 @@ import {
   EPISODES_HISTOGRAM_QUERY_ERROR,
   EPISODES_HISTOGRAM_RETRY,
 } from '../../translations';
+import { EPISODES_HISTOGRAM_PANEL_ID } from '../../utils/episodes_panels_visibility';
 
 interface EpisodesHistogramServices {
   application: ApplicationStart;
@@ -261,7 +262,12 @@ export const EpisodesHistogram = ({
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="xs" data-test-subj="episodesHistogramPanel">
+    <EuiPanel
+      id={EPISODES_HISTOGRAM_PANEL_ID}
+      hasBorder
+      paddingSize="xs"
+      data-test-subj="episodesHistogramPanel"
+    >
       {error ? (
         <EuiCallOut
           announceOnMount

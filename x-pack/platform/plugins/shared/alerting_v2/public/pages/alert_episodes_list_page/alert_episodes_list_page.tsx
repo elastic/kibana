@@ -73,11 +73,18 @@ import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
+import { EpisodesPanelsToggle } from './components/episodes_panels_toggle';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
+import {
+  getHistogramHidden,
+  getKpisHidden,
+  setHistogramHidden,
+  setKpisHidden,
+} from './utils/episodes_panels_visibility';
 import { CLASSIC_EPISODES_DATA_SOURCE } from '../../episode_sources';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
@@ -223,6 +230,35 @@ const AlertEpisodesListPageContent = () => {
     setRowHeight,
     onResize,
   } = useEpisodesTableConfig(services.storage);
+  const [isKpisHidden, setIsKpisHidden] = useState(() => getKpisHidden(services.storage));
+  const [isHistogramHidden, setIsHistogramHidden] = useState(() =>
+    getHistogramHidden(services.storage)
+  );
+  const onToggleKpis = useCallback(() => {
+    setIsKpisHidden((current) => {
+      const next = !current;
+      setKpisHidden(services.storage, next);
+      return next;
+    });
+  }, [services.storage]);
+  const onToggleHistogram = useCallback(() => {
+    setIsHistogramHidden((current) => {
+      const next = !current;
+      setHistogramHidden(services.storage, next);
+      return next;
+    });
+  }, [services.storage]);
+  const panelsToggle = useMemo(
+    () => (
+      <EpisodesPanelsToggle
+        isKpisHidden={isKpisHidden}
+        isHistogramHidden={isHistogramHidden}
+        onToggleKpis={onToggleKpis}
+        onToggleHistogram={onToggleHistogram}
+      />
+    ),
+    [isKpisHidden, isHistogramHidden, onToggleKpis, onToggleHistogram]
+  );
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
   const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
@@ -375,6 +411,7 @@ const AlertEpisodesListPageContent = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
+        beforeKeyboardShortcuts: panelsToggle,
       }),
     [
       euiTheme.size.s,
@@ -382,6 +419,7 @@ const AlertEpisodesListPageContent = () => {
       hasActiveFilters,
       isEpisodeListCapped,
       loadedEpisodesCount,
+      panelsToggle,
     ]
   );
 
@@ -631,20 +669,24 @@ const AlertEpisodesListPageContent = () => {
             services={services}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EpisodesHistogram
-            services={services}
-            dataView={dataView}
-            filterState={filterState}
-            timeRange={timeRange}
-            onTimeRangeChange={handleTimeChange}
-            breakdownField={histogramBreakdownField}
-            onBreakdownFieldChange={setHistogramBreakdownField}
-          />
-        </EuiFlexItem>
+        {!isKpisHidden ? (
+          <EuiFlexItem grow={false}>
+            <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
+          </EuiFlexItem>
+        ) : null}
+        {!isHistogramHidden ? (
+          <EuiFlexItem grow={false}>
+            <EpisodesHistogram
+              services={services}
+              dataView={dataView}
+              filterState={filterState}
+              timeRange={timeRange}
+              onTimeRangeChange={handleTimeChange}
+              breakdownField={histogramBreakdownField}
+              onBreakdownFieldChange={setHistogramBreakdownField}
+            />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem
           grow
           css={css`
