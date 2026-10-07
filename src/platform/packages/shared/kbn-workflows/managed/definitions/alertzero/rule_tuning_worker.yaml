@@ -218,8 +218,6 @@ steps:
     on-failure:
       continue: true
 
-  # The live revision of every enabled candidate, in the harvest's
-  # `,uuid@revision,` key format.
   - name: resolve_current_revisions
     type: data.set
     with:
