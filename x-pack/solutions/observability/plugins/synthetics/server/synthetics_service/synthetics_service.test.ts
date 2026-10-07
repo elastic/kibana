@@ -75,10 +75,7 @@ describe('SyntheticsService', () => {
 
   const logger = loggerMock.create();
 
-  const telemetry = new SyntheticsTelemetry(
-    coreMock.createSetup().analytics,
-    loggerMock.create()
-  );
+  const telemetry = new SyntheticsTelemetry(coreMock.createSetup().analytics, loggerMock.create());
 
   const serverMock: SyntheticsServerSetup = {
     logger,
