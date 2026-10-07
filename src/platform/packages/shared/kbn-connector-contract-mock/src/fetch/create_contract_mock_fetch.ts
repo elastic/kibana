@@ -50,7 +50,9 @@ const toQuery = (params: URLSearchParams): Record<string, string | string[]> => 
 const toContractRequest = async (request: Request): Promise<ContractRequest> => {
   const url = new URL(request.url);
   const headers: Record<string, string> = Object.fromEntries(request.headers);
-  const text = request.body ? await request.text() : '';
+  // Read unconditionally: fetch polyfills such as whatwg-fetch (Kibana's jsdom preset) leave
+  // `request.body` undefined even when the request has one.
+  const text = await request.text();
   let body: unknown = text || undefined;
   if (text) {
     headers['content-length'] ??= String(Buffer.byteLength(text));
