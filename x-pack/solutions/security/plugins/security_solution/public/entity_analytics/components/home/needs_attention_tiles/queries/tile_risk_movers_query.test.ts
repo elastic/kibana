@@ -36,14 +36,22 @@ describe('buildRiskMoversCountQuery', () => {
     expect(query).not.toMatch(/MAX\(risk_score/);
   });
 
-  it('compares the entity doc score to the boundary score, after the LOOKUP JOIN', () => {
+  it('compares the entity doc score to the boundary score, after merging both by entity.id', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    const joinIdx = query.indexOf('| LOOKUP JOIN .entities-v1');
-    const riseIdx = query.indexOf(
-      '| WHERE entity.risk.calculated_score_norm - boundary_score >= 10'
+    const mergeIdx = query.indexOf('| STATS boundary_score = MAX(boundary_score),');
+    const riseIdx = query.indexOf('| WHERE current_score - boundary_score >= 10');
+    expect(mergeIdx).toBeGreaterThan(-1);
+    expect(riseIdx).toBeGreaterThan(mergeIdx);
+    expect(query).not.toContain('LOOKUP JOIN');
+  });
+
+  it('reads the current score from the scored entity docs', () => {
+    const query = buildRiskMoversCountQuery('default', '.entities-v1');
+    expect(query).toContain('  FROM .entities-v1');
+    expect(query).toContain(
+      '  | WHERE entity.risk.calculated_score_norm IS NOT NULL AND entity.name IS NOT NULL'
     );
-    expect(joinIdx).toBeGreaterThan(-1);
-    expect(riseIdx).toBeGreaterThan(joinIdx);
+    expect(query).toContain('current_score = entity.risk.calculated_score_norm');
   });
 
   it('derives entity_euid from all three entity types via COALESCE', () => {
@@ -60,28 +68,19 @@ describe('buildRiskMoversCountQuery', () => {
     );
   });
 
-  it('renames entity_euid to entity.id before the LOOKUP JOIN', () => {
+  it('renames entity_euid to entity.id in the boundary branch', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    const renameIdx = query.indexOf('| RENAME entity_euid AS `entity.id`');
-    const joinIdx = query.indexOf('| LOOKUP JOIN .entities-v1');
-    expect(renameIdx).toBeGreaterThan(-1);
-    expect(joinIdx).toBeGreaterThan(renameIdx);
+    expect(query).toContain('  | RENAME entity_euid AS `entity.id`');
   });
 
-  it('drops risk-history rows with no matching entity-latest record after the LOOKUP JOIN', () => {
-    const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    const joinIdx = query.indexOf('| LOOKUP JOIN .entities-v1');
-    const dropIdx = query.indexOf('| WHERE entity.name IS NOT NULL');
-    expect(joinIdx).toBeGreaterThan(-1);
-    expect(dropIdx).toBeGreaterThan(joinIdx);
-  });
-
-  it('applies entity filter clauses after the LOOKUP JOIN', () => {
-    const filter = '| WHERE entity.type == "host"';
+  it('applies entity filter clauses to the entity branch', () => {
+    const filter = '| WHERE entity.EngineMetadata.Type == "host"';
     const query = buildRiskMoversCountQuery('default', '.entities-v1', '24h', [filter]);
-    const joinIdx = query.indexOf('| LOOKUP JOIN');
-    const filterIdx = query.indexOf(filter);
-    expect(filterIdx).toBeGreaterThan(joinIdx);
+    const entityBranchIdx = query.indexOf('  FROM .entities-v1');
+    const filterIdx = query.indexOf(`  ${filter}`);
+    const mergeIdx = query.indexOf('| STATS boundary_score = MAX(boundary_score),');
+    expect(filterIdx).toBeGreaterThan(entityBranchIdx);
+    expect(filterIdx).toBeLessThan(mergeIdx);
   });
 
   it('defaults to 24h when no time range is supplied', () => {
