@@ -59,7 +59,7 @@ export const createEscalationConversationEventUiDefinitions = ({
       type: ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
       getHeader,
       render: ({ data }) => (
-        <EuiText size="s" data-test-subj="escalationCreatedFromInvestigationEvent">
+        <EuiText size="s" color="primary" data-test-subj="escalationCreatedFromInvestigationEvent">
           <FormattedMessage
             id="xpack.agenticInvestigations.escalations.events.createdFrom"
             defaultMessage="New escalation created from {title}"
@@ -72,7 +72,7 @@ export const createEscalationConversationEventUiDefinitions = ({
       type: ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
       getHeader,
       render: ({ data }) => (
-        <EuiText size="s" data-test-subj="escalationInvestigationLinkedEvent">
+        <EuiText size="s" color="primary" data-test-subj="escalationInvestigationLinkedEvent">
           <FormattedMessage
             id="xpack.agenticInvestigations.escalations.events.linked"
             defaultMessage="{title} has been linked to this escalation"
