@@ -285,14 +285,14 @@ export const ConfigSchema = z
         'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
       ),
     /**
-     * When true, nothing from this run is persisted. With `conversation_id`, the conversation is
-     * loaded as context but not modified.
+     * When true, the run writes nothing to a conversation. With `conversation_id`, the conversation
+     * is loaded as context but not modified.
      */
     ephemeral: z
       .boolean()
       .optional()
       .describe(
-        'When true, nothing from this run is persisted. With conversation_id, the conversation is loaded as context but not modified: no message, round, metadata or workspace change is written. Defaults to false.'
+        'When true, the run writes nothing to a conversation: no conversation is created and, with conversation_id, the conversation is loaded as context but not modified (no message, round, metadata or workspace change). Defaults to false.'
       ),
     /**
      * Connector telemetry feature id used to attribute this step's LLM calls for billing
