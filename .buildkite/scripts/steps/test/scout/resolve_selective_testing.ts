@@ -49,6 +49,10 @@ const log: ScoutLog = {
   warning: (message) => writeLog(`WARN ${message}`),
 };
 
+// Exclude documentation files from the module graph — they can't affect runtime.
+// Mirrors SCOUT_TESTS_ONLY_IGNORE_PATTERNS in @kbn/scout-info.
+const DOCS_IGNORE_PATTERNS = ['**/README*', '**/*.md', '**/CHANGELOG*'];
+
 const [mergeBase, outPath] = process.argv.slice(2);
 
 if (!mergeBase || !outPath) {
@@ -59,10 +63,6 @@ if (!mergeBase || !outPath) {
 (async () => {
   // List changed files once; reuse for both affected-packages and critical-files check.
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
-
-  // Exclude documentation files from the module graph — they can't affect runtime.
-  // Mirrors SCOUT_TESTS_ONLY_IGNORE_PATTERNS in @kbn/scout-info.
-  const DOCS_IGNORE_PATTERNS = ['**/README*', '**/*.md', '**/CHANGELOG*'];
 
   // Skip Scout when all affected modules are not related.
   const directlyAffected = await getAffectedPackages(mergeBase, {

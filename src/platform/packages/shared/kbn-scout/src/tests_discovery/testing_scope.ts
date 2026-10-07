@@ -58,9 +58,12 @@ const filterExisting = (
  * Returns true when at least one non-noise, non-Jest-test changed file matches the Scout critical-files list.
  */
 export const criticalScoutFilesTouched = (changedFiles: readonly string[]): boolean =>
-  changedFiles
-    .filter((file) => !matchesAny(file, IGNORE_MATCHERS) && !matchesAny(file, JEST_TEST_MATCHERS))
-    .some((file) => matchesAny(file, CRITICAL_FILES_MATCHERS));
+  changedFiles.some(
+    (file) =>
+      !matchesAny(file, IGNORE_MATCHERS) &&
+      !matchesAny(file, JEST_TEST_MATCHERS) &&
+      matchesAny(file, CRITICAL_FILES_MATCHERS)
+  );
 
 /**
  * Returns true when, after dropping noise files (READMEs, markdown, changelogs),
