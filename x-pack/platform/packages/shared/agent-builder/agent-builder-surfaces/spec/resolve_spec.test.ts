@@ -10,8 +10,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Spec } from './pack';
 import { resolveSpec, type AttachmentSpecMapping, type ResolveSpecOptions } from './resolve_spec';
 
-const conversationUrl = 'http://localhost:5601/app/agent_builder/agents/a/conversations/c';
-
 const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
   id: 'a1',
   type: 'text',
@@ -34,7 +32,6 @@ const toText: AttachmentSpecMapping = (data, { version }) => ({
 const createOptions = (overrides: Partial<ResolveSpecOptions> = {}): ResolveSpecOptions => ({
   attachments: [createAttachment()],
   getMapping: (type) => (type === 'text' ? toText : undefined),
-  conversationUrl,
   logger: loggerMock.create(),
   ...overrides,
 });
@@ -74,44 +71,28 @@ describe('resolveSpec', () => {
     });
   });
 
-  it('links to Kibana for types without a mapping', () => {
+  const textOnly = [{ type: 'markdown', text: 'Here it is:' }];
+
+  it('leaves out types without a mapping', () => {
     const options = createOptions({
       attachments: [createAttachment({ type: 'case', description: 'Case #12' })],
     });
 
-    expect(resolveSpec(createSpec(), options).body[1]).toEqual({
-      type: 'markdown',
-      text: `_Case #12_ · [View in Kibana](${conversationUrl})`,
-    });
+    expect(resolveSpec(createSpec(), options).body).toEqual(textOnly);
   });
 
-  it('links to Kibana for missing attachments and versions', () => {
-    const missingAttachment = resolveSpec(createSpec(), createOptions({ attachments: [] }));
-    const missingVersion = resolveSpec(createSpec(9), createOptions());
-
-    expect(missingAttachment.body[1]).toEqual({
-      type: 'markdown',
-      text: `_Attachment unavailable_ · [View in Kibana](${conversationUrl})`,
-    });
-    expect(missingVersion.body[1]).toEqual({
-      type: 'markdown',
-      text: `_text_ · [View in Kibana](${conversationUrl})`,
-    });
+  it('leaves out missing attachments and versions', () => {
+    expect(resolveSpec(createSpec(), createOptions({ attachments: [] })).body).toEqual(textOnly);
+    expect(resolveSpec(createSpec(9), createOptions()).body).toEqual(textOnly);
   });
 
-  it('links to Kibana and logs when a mapping fails', () => {
-    const logger = loggerMock.create();
+  it('leaves out attachments whose mapping fails', () => {
     const options = createOptions({
-      logger,
       getMapping: () => () => {
         throw new Error('boom');
       },
     });
 
-    expect(resolveSpec(createSpec(), options).body[1]).toEqual({
-      type: 'markdown',
-      text: `_text_ · [View in Kibana](${conversationUrl})`,
-    });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    expect(resolveSpec(createSpec(), options).body).toEqual(textOnly);
   });
 });

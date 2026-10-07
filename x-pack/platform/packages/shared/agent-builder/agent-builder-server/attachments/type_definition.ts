@@ -92,7 +92,7 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
   maxContentLength?: number;
   /**
    * Maps the attachment's data to an Isomer composition, so it renders on surfaces other than
-   * Kibana, such as Slack. Without it, those surfaces show its description and a link to Kibana.
+   * Kibana, such as Slack. Without it, those surfaces leave it out.
    */
   toSpec?: AttachmentSpecMapping<TContent>;
 }

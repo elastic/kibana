@@ -21,14 +21,13 @@ const projectionDefinitions: IsomerProjectionDefinition[] = [slackProjection];
 /**
  * Renders the projection of the round's origin through Isomer: the reply becomes a spec, its
  * attachments are resolved, and the origin's definition renders it. Returns nothing when the
- * origin has no projection, the reply is empty, or rendering fails.
+ * origin has no projection, nothing in the reply can be rendered, or rendering fails.
  */
 export const renderIsomerProjection = (
   { data: { round, attachments = [] } }: RoundCompleteEvent,
   {
     originType,
     attachmentsService,
-    conversationUrl,
     logger,
   }: ProjectionContext & { originType?: ConversationOriginType }
 ): OriginIsomerProjection | undefined => {
@@ -42,6 +41,7 @@ export const renderIsomerProjection = (
     const spec = replyToSpec(round.response.message);
 
     if (!spec) {
+      logger.warn(`Leaving out the ${definition.id} projection: the reply is empty`);
       return undefined;
     }
 
@@ -49,15 +49,19 @@ export const renderIsomerProjection = (
       attachments,
       attachmentRefs: round.input.attachment_refs,
       getMapping: (type) => attachmentsService.getTypeDefinition(type)?.toSpec,
-      conversationUrl,
       logger,
     });
 
+    if (resolved.body.length === 0) {
+      logger.warn(
+        `Leaving out the ${definition.id} projection: none of the reply could be rendered`
+      );
+      return undefined;
+    }
+
     return { [definition.id]: definition.render(resolved) };
   } catch (error) {
-    logger.warn(
-      `Failed to render the ${definition.id} projection, leaving it out: ${error.message}`
-    );
+    logger.warn(`Leaving out the ${definition.id} projection: rendering failed: ${error.message}`);
 
     return undefined;
   }

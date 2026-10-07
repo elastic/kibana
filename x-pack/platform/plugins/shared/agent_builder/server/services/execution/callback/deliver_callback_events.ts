@@ -27,8 +27,6 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import { renderIsomerProjection } from '@kbn/agent-builder-surfaces';
-import { addSpaceIdToPath } from '@kbn/core-spaces-common';
-import { AGENTBUILDER_PATH } from '../../../../common/features';
 import type { AttachmentServiceStart } from '../../attachments';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
@@ -47,14 +45,12 @@ export const deliverCallbackEvents = ({
   events$,
   callbackDeliveryService,
   attachmentsService,
-  getKibanaUrl,
   logger,
 }: {
   execution: AgentExecution;
   events$: Observable<ChatEvent>;
   callbackDeliveryService: CallbackDeliveryService;
   attachmentsService: AttachmentServiceStart;
-  getKibanaUrl: () => string;
   logger: Logger;
 }): Promise<void> => {
   // Only conversation executions have callbacks.
@@ -135,14 +131,10 @@ export const deliverCallbackEvents = ({
               return EMPTY;
             }
 
-            const { agentId, spaceId, agentParams } = execution;
-            const conversationPath = `${AGENTBUILDER_PATH}/agents/${agentId}/conversations/${agentParams.conversationId}`;
-
             // Output for the round's origin, such as the Slack payload of Slack rounds.
             const projection = renderIsomerProjection(roundCompleteEvent, {
-              originType: agentParams.origin?.type,
+              originType: execution.agentParams.origin?.type,
               attachmentsService,
-              conversationUrl: `${addSpaceIdToPath(getKibanaUrl(), spaceId)}${conversationPath}`,
               logger,
             });
 

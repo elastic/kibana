@@ -16,8 +16,6 @@ export interface ProjectionContext {
   attachmentsService: {
     getTypeDefinition: (type: string) => { toSpec?: AttachmentSpecMapping } | undefined;
   };
-  /** Linked from attachments that can't be shown, so they can be seen in Kibana. */
-  conversationUrl: string;
   logger: Logger;
 }
 

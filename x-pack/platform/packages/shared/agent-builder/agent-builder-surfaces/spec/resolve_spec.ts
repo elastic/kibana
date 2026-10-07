@@ -30,8 +30,6 @@ export interface ResolveSpecOptions {
   /** The round's attachment refs, which pick the version of tags without one. */
   attachmentRefs?: AttachmentVersionRef[];
   getMapping: (type: string) => AttachmentSpecMapping | undefined;
-  /** Linked from attachments that can't be shown, so they can be seen in Kibana. */
-  conversationUrl: string;
   logger: Logger;
 }
 
@@ -48,11 +46,6 @@ const resolveVersion = (
   attachmentRefs.find((ref) => ref.attachment_id === attachmentId)?.version ??
   attachment.versions.at(-1)?.version;
 
-const toLinkNode = (label: string, conversationUrl: string): MarkdownNode => ({
-  type: 'markdown',
-  text: `_${label}_ · [View in Kibana](${conversationUrl})`,
-});
-
 const toHeadingNode = ({ title, subtitle }: AttachmentSpec): MarkdownNode[] => {
   const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
   return heading ? [{ type: 'markdown', text: heading }] : [];
@@ -60,20 +53,27 @@ const toHeadingNode = ({ title, subtitle }: AttachmentSpec): MarkdownNode[] => {
 
 const resolveAttachmentNode = (
   node: AttachmentNode,
-  { attachments, attachmentRefs, getMapping, conversationUrl, logger }: ResolveSpecOptions
+  { attachments, attachmentRefs, getMapping, logger }: ResolveSpecOptions
 ): MarkdownNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
   if (!attachment) {
-    return [toLinkNode('Attachment unavailable', conversationUrl)];
+    logger.warn(`Leaving out attachment "${node.attachmentId}": it is not in the conversation`);
+    return [];
   }
 
-  const label = attachment.description ?? attachment.type;
   const version = resolveVersion(node, attachment, attachmentRefs);
   const attachmentVersion = version === undefined ? undefined : getVersion(attachment, version);
-  const mapping = getMapping(attachment.type);
+  if (!attachmentVersion) {
+    logger.warn(`Leaving out attachment "${attachment.id}": version ${version} not found`);
+    return [];
+  }
 
-  if (!attachmentVersion || !mapping) {
-    return [toLinkNode(label, conversationUrl)];
+  const mapping = getMapping(attachment.type);
+  if (!mapping) {
+    logger.debug(
+      `Leaving out attachment "${attachment.id}": type "${attachment.type}" has no toSpec`
+    );
+    return [];
   }
 
   try {
@@ -83,16 +83,14 @@ const resolveAttachmentNode = (
     });
     return [...toHeadingNode(spec), ...spec.body];
   } catch (error) {
-    logger.warn(
-      `Failed to map attachment "${attachment.id}" of type "${attachment.type}" to a spec: ${error.message}`
-    );
-    return [toLinkNode(label, conversationUrl)];
+    logger.warn(`Leaving out attachment "${attachment.id}": its toSpec failed: ${error.message}`);
+    return [];
   }
 };
 
 /**
  * Replaces the spec's attachment nodes with what their type's mapping returns. Attachments that
- * are missing, have no mapping, or fail to map become their description and a link to Kibana.
+ * are missing, have no mapping, or fail to map are left out.
  */
 export const resolveSpec = (spec: Spec, options: ResolveSpecOptions): Spec => ({
   ...spec,

@@ -103,7 +103,6 @@ describe('TaskHandler event streaming and finalization', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
   const attachmentsService = {};
-  const getKibanaUrl = () => 'http://localhost:5601';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -132,7 +131,6 @@ describe('TaskHandler event streaming and finalization', () => {
       elasticsearch: { client: { asInternalUser: {} } },
       callbackDeliveryService,
       attachmentsService,
-      getKibanaUrl,
     } as never);
 
   const run = () =>
@@ -186,7 +184,6 @@ describe('TaskHandler event streaming and finalization', () => {
       events$: expect.anything(),
       callbackDeliveryService,
       attachmentsService,
-      getKibanaUrl,
       logger: expect.anything(),
     });
     expect(collectAndWriteEventsMock).toHaveBeenCalledTimes(1);

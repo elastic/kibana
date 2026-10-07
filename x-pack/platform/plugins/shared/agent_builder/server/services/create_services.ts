@@ -61,7 +61,6 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
   private readonly config: AgentBuilderConfig;
-  private getKibanaUrl?: () => string;
 
   constructor(config: AgentBuilderConfig) {
     this.config = config;
@@ -73,10 +72,7 @@ export class ServiceManager {
     cloud,
     usageApi,
     actions,
-    getKibanaUrl,
   }: ServiceSetupDeps): InternalSetupServices {
-    this.getKibanaUrl = getKibanaUrl;
-
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
@@ -139,7 +135,7 @@ export class ServiceManager {
     deductiveRegister,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
-    if (!this.services || !this.getKibanaUrl) {
+    if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
 
@@ -280,7 +276,6 @@ export class ServiceManager {
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
       attachmentsService: attachments,
-      getKibanaUrl: this.getKibanaUrl,
     });
 
     executionService = createAgentExecutionService({

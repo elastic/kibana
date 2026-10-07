@@ -27,8 +27,6 @@ export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
   attachmentsService: AttachmentServiceStart;
-  /** Base URL of Kibana, without a space. */
-  getKibanaUrl: () => string;
 }
 
 /**
@@ -109,7 +107,6 @@ class TaskHandlerImpl implements TaskHandler {
       events$,
       callbackDeliveryService: this.deps.callbackDeliveryService,
       attachmentsService: this.deps.attachmentsService,
-      getKibanaUrl: this.deps.getKibanaUrl,
       logger: this.logger,
     });
 

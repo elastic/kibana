@@ -26,16 +26,12 @@ const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
 const getTypeDefinition = jest.fn();
 const projectionDeps = {
   attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
-  getKibanaUrl: () => 'http://localhost:5601',
 };
 const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
   ({
     executionId: 'execution-1',
     executionMode: AgentExecutionMode.conversation,
-    agentId: 'agent-1',
-    spaceId: 'default',
     agentParams: {
-      conversationId: 'conversation-1',
       nextInput: { message: 'hello' },
       ...(url ? { callback: { url } } : {}),
     },
@@ -173,8 +169,7 @@ describe('deliverCallbackEvents', () => {
     expect(service.makeCallbackRequest).not.toHaveBeenCalled();
   });
 
-  it('logs and resolves without subscribing when the callback URL fails validation', async () => {
-    const logger = loggerMock.create();
+  it('resolves without subscribing when the callback URL fails validation', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     service.validateCallbackUrl.mockImplementation(() => {
       throw new Error('target url is not added to the Kibana config xpack.actions.allowedHosts');
@@ -185,13 +180,10 @@ describe('deliverCallbackEvents', () => {
       events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
       ...projectionDeps,
-      logger,
+      logger: loggerMock.create(),
     });
 
     expect(service.makeCallbackRequest).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('not added to the Kibana config xpack.actions.allowedHosts')
-    );
   });
 
   it('delivers one running envelope per event, in order, through a single request function', async () => {
@@ -348,7 +340,7 @@ describe('deliverCallbackEvents', () => {
     expect(roundCompleteEvent).not.toHaveProperty('projection');
   });
 
-  it('renders attachments through their type mapping, linking the others to the conversation', async () => {
+  it('renders attachments through their type mapping, and leaves out the others', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const textAttachment = {
       id: 'a1',
@@ -388,9 +380,6 @@ describe('deliverCallbackEvents', () => {
     );
 
     expect(slack).toContain('Attached note');
-    expect(slack).toContain(
-      'http://localhost:5601/app/agent_builder/agents/agent-1/conversations/conversation-1'
-    );
     expect(slack).not.toContain('render_attachment');
   });
 
@@ -467,8 +456,7 @@ describe('deliverCallbackEvents', () => {
     expect(calls).toEqual(['start:one', 'end:one', 'start:two', 'end:two']);
   });
 
-  it('logs and continues with the next event when a delivery fails', async () => {
-    const logger = loggerMock.create();
+  it('continues with the next event when a delivery fails', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     service.makeCallbackRequest
       .mockRejectedValueOnce(new Error('Callback delivery failed with status 400'))
@@ -480,13 +468,10 @@ describe('deliverCallbackEvents', () => {
       events$: of(...events),
       callbackDeliveryService: service,
       ...projectionDeps,
-      logger,
+      logger: loggerMock.create(),
     });
 
     expect(service.makeCallbackRequest).toHaveBeenCalledTimes(2);
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Callback delivery failed with status 400')
-    );
   });
 
   it('delivers a failure payload with a failure error code when the stream errors', async () => {
@@ -595,7 +580,6 @@ describe('deliverCallbackEvents', () => {
   });
 
   it('resolves even when the failure delivery fails', async () => {
-    const logger = loggerMock.create();
     const { service } = createCallbackDeliveryServiceMock();
     service.makeCallbackRequest.mockRejectedValue(new Error('callback failed'));
 
@@ -605,9 +589,8 @@ describe('deliverCallbackEvents', () => {
         events$: throwError(() => new Error('agent boom')),
         callbackDeliveryService: service,
         ...projectionDeps,
-        logger,
+        logger: loggerMock.create(),
       })
     ).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('callback failed'));
   });
 });

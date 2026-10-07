@@ -22,11 +22,10 @@ jest.mock('@elastic/isomer-sdk/slack', () => ({
   renderSlackEnvelope: jest.fn(jest.requireActual('@elastic/isomer-sdk/slack').renderSlackEnvelope),
 }));
 
-const conversationUrl = 'http://localhost:5601/app/agent_builder/agents/a/conversations/c';
-
 const esqlAttachment: VersionedAttachment = {
   id: 'a1',
   type: 'esql',
+  description: 'Latest logs',
   current_version: 1,
   versions: [
     {
@@ -64,7 +63,6 @@ const createContext = (
 ): ProjectionContext & { originType?: ConversationOriginType } => ({
   originType: ConversationOriginType.Slack,
   attachmentsService: { getTypeDefinition: () => undefined },
-  conversationUrl,
   logger: loggerMock.create(),
   ...overrides,
 });
@@ -98,12 +96,13 @@ describe('renderIsomerProjection', () => {
     expect(slack).not.toContain('render_attachment');
   });
 
-  it('links unmapped attachments to Kibana', () => {
-    const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
+  it('leaves out unmapped attachments', () => {
+    const event = createRoundCompleteEvent('Here: <render_attachment id="a1" />', [esqlAttachment]);
 
     const slack = JSON.stringify(renderIsomerProjection(event, createContext())?.slack);
 
-    expect(slack).toContain(`<${conversationUrl}|View in Kibana>`);
+    expect(slack).toContain('Here:');
+    expect(slack).not.toContain('Latest logs');
     expect(slack).not.toContain('render_attachment');
   });
 
@@ -111,16 +110,20 @@ describe('renderIsomerProjection', () => {
     jest.mocked(isomerSlack.renderSlackEnvelope).mockImplementationOnce(() => {
       throw new Error('boom');
     });
-    const logger = loggerMock.create();
 
     expect(
-      renderIsomerProjection(createRoundCompleteEvent('Hello'), createContext({ logger }))
+      renderIsomerProjection(createRoundCompleteEvent('Hello'), createContext())
     ).toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 
   it('renders nothing when the reply is empty', () => {
     expect(renderIsomerProjection(createRoundCompleteEvent(''), createContext())).toBeUndefined();
+  });
+
+  it('renders nothing when none of the reply can be rendered', () => {
+    const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
+
+    expect(renderIsomerProjection(event, createContext())).toBeUndefined();
   });
 
   it('renders nothing for rounds without an origin', () => {

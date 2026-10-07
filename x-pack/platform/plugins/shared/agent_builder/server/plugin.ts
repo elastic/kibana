@@ -55,7 +55,6 @@ import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
 import { getDeploymentInfo } from './utils/deployment_info';
-import { getKibanaUrl } from './utils/get_kibana_url';
 
 export class AgentBuilderPlugin
   implements
@@ -135,7 +134,6 @@ export class AgentBuilderPlugin
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
       actions: setupDeps.actions,
-      getKibanaUrl: () => getKibanaUrl(coreSetup, setupDeps.cloud),
     });
 
     registerTaskDefinitions({
