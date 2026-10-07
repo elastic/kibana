@@ -266,7 +266,7 @@ describe('AlertZero response-action workflows', () => {
     expect(body?.parameters).toContain('inputs.actionInput.parameters');
   });
 
-  it('memory dump is process-only, low impact, reversible, and names Execute Operations as the privilege', () => {
+  it('memory dump is process-only, low impact, irreversible, and names Execute Operations as the privilege', () => {
     const parsed = parseWorkflow(ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW.yaml);
     const parameters =
       parsed.triggers?.[0]?.inputs?.properties?.actionInput?.properties?.parameters;
@@ -278,7 +278,7 @@ describe('AlertZero response-action workflows', () => {
     // host-scoped for packaging's schema introspection.
     expect(parameters?.properties?.type?.enum).toEqual(['process']);
     expect(parsed.consts?.actionMetadata?.impact).toBe('low');
-    expect(parsed.consts?.actionMetadata?.reversible).toBe(true);
+    expect(parsed.consts?.actionMetadata?.reversible).toBe(false);
     expect(failStep?.with?.message).toEqual(expect.stringContaining('Execute Operations'));
   });
 });

@@ -120,6 +120,16 @@ describe('selectProcessActions', () => {
       expect(decision.rule).toBe('protected_system_process');
     });
 
+    it('gives way to the stale rule, so a stale protected process proposes nothing', () => {
+      const decision = selectProcessActions({
+        selector: selector({ processName: 'lsass.exe', observedAt: '2026-09-24T23:59:59.000Z' }),
+        host: host(['memdump_process']),
+        state: state(),
+      });
+      expect(decision.rule).toBe('stale');
+      expect(decision.actions).toEqual([]);
+    });
+
     it('beats a confirmed destructive technique (order: 1 before 3)', () => {
       const decision = selectProcessActions({
         selector: selector({ processName: 'lsass.exe' }),
@@ -244,6 +254,15 @@ describe('selectProcessActions', () => {
             ],
           },
         }),
+      });
+      expect(decision.rule).toBe('destructive_technique');
+    });
+
+    it('matches roots on both sides: an attributed T1486 is killed when T1486.001 is confirmed', () => {
+      const decision = selectProcessActions({
+        selector: selector({ techniqueId: 'T1486', techniqueIds: ['T1486'] }),
+        host: host(),
+        state: state(confirmed('T1486.001')),
       });
       expect(decision.rule).toBe('destructive_technique');
     });

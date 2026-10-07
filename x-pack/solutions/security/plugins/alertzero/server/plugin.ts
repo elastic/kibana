@@ -217,7 +217,6 @@ export class AlertZeroPlugin
       getHuntServices: () => this.requireHuntServices(),
       getResolveHostEnrollment: makeScopedResolveHostEnrollment(
         () => this.fleetAgentService,
-        () => this.coreStart?.elasticsearch.client.asInternalUser,
         stepsLogger
       ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),

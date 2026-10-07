@@ -147,7 +147,25 @@ describe('makeResolveHostEnrollment', () => {
         index: ENDPOINT_METADATA_CURRENT_PATTERN,
         size: 1,
         _source: ['Endpoint.capabilities'],
-        query: { term: { 'agent.id': 'agent-1' } },
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    { term: { 'agent.id': 'agent-1' } },
+                    { term: { 'HostDetails.agent.id': 'agent-1' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        sort: [
+          { 'event.created': { order: 'desc', unmapped_type: 'date' } },
+          { 'HostDetails.event.created': { order: 'desc', unmapped_type: 'date' } },
+        ],
         ignore_unavailable: true,
         allow_no_indices: true,
       });
@@ -175,11 +193,11 @@ describe('makeResolveHostEnrollment', () => {
       await expect(resolve('host-a')).resolves.toMatchObject({ capabilities: [] });
     });
 
-    it('yields [] and logs at debug when the metadata search throws (e.g. the index is unreadable)', async () => {
+    it('yields [] and logs a warning when the metadata search throws (e.g. the index is unreadable)', async () => {
       const esClient = {
         search: jest.fn().mockRejectedValue(new Error('search_phase_execution_exception')),
       } as unknown as ElasticsearchClient;
-      const logger = { debug: jest.fn() } as unknown as Logger;
+      const logger = { warn: jest.fn() } as unknown as Logger;
       const resolve = makeResolveHostEnrollment(
         agentClientWith([{ id: 'agent-1' }]),
         esClient,
@@ -191,7 +209,7 @@ describe('makeResolveHostEnrollment', () => {
         agentId: 'agent-1',
         capabilities: [],
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('capabilities lookup failed for agent agent-1')
       );
     });
@@ -207,7 +225,6 @@ describe('makeResolveHostEnrollment', () => {
 });
 
 describe('makeScopedResolveHostEnrollment', () => {
-  const noEsClient = () => undefined;
   const agentService = (listAgents = jest.fn()) => {
     const asInternalScopedUser = jest.fn(() => ({ listAgents } as unknown as AgentClient));
     return { service: { asInternalScopedUser } as unknown as AgentService, asInternalScopedUser };
@@ -217,7 +234,7 @@ describe('makeScopedResolveHostEnrollment', () => {
     const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-1' }], total: 1 });
     const { service, asInternalScopedUser } = agentService(listAgents);
 
-    const resolve = makeScopedResolveHostEnrollment(() => service, noEsClient)('space-a');
+    const resolve = makeScopedResolveHostEnrollment(() => service)('space-a');
     await expect(resolve('host-a')).resolves.toEqual({
       enrolled: true,
       agentId: 'agent-1',
@@ -229,7 +246,7 @@ describe('makeScopedResolveHostEnrollment', () => {
 
   it('resolves a client per space rather than reusing one across spaces', () => {
     const { service, asInternalScopedUser } = agentService();
-    const scoped = makeScopedResolveHostEnrollment(() => service, noEsClient);
+    const scoped = makeScopedResolveHostEnrollment(() => service);
 
     scoped('space-a');
     scoped('space-b');
@@ -242,7 +259,7 @@ describe('makeScopedResolveHostEnrollment', () => {
     const { service } = agentService(listAgents);
     const getAgentService = jest.fn<AgentService | undefined, []>().mockReturnValue(undefined);
 
-    const scoped = makeScopedResolveHostEnrollment(getAgentService, noEsClient);
+    const scoped = makeScopedResolveHostEnrollment(getAgentService);
     await expect(scoped('space-a')('host-a')).resolves.toEqual({ enrolled: false });
 
     getAgentService.mockReturnValue(service);
@@ -253,30 +270,29 @@ describe('makeScopedResolveHostEnrollment', () => {
     });
   });
 
-  it('reads the ES client lazily and uses it for the capabilities lookup', async () => {
+  it('uses the ES client passed per call, not one fixed at setup, for the capabilities lookup', async () => {
     const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-1' }], total: 1 });
     const { service } = agentService(listAgents);
     const esClient = esClientWith([{ _source: { Endpoint: { capabilities: ['isolation'] } } }]);
-    const getEsClient = jest.fn<ElasticsearchClient | undefined, []>().mockReturnValue(undefined);
 
-    const scoped = makeScopedResolveHostEnrollment(() => service, getEsClient);
+    const scoped = makeScopedResolveHostEnrollment(() => service);
     await expect(scoped('space-a')('host-a')).resolves.toMatchObject({ capabilities: [] });
 
-    getEsClient.mockReturnValue(esClient);
-    await expect(scoped('space-a')('host-a')).resolves.toMatchObject({
+    await expect(scoped('space-a', esClient)('host-a')).resolves.toMatchObject({
       capabilities: ['isolation'],
     });
+    expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 
   it('treats every host as unenrolled when Fleet is absent', async () => {
-    const resolve = makeScopedResolveHostEnrollment(() => undefined, noEsClient)('space-a');
+    const resolve = makeScopedResolveHostEnrollment(() => undefined)('space-a');
     await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
   });
 
   it('never falls back to an unscoped client when the space is empty', async () => {
     const { service, asInternalScopedUser } = agentService();
 
-    const resolve = makeScopedResolveHostEnrollment(() => service, noEsClient)('');
+    const resolve = makeScopedResolveHostEnrollment(() => service)('');
     await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
 
     expect(asInternalScopedUser).not.toHaveBeenCalled();

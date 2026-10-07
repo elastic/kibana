@@ -50,7 +50,27 @@ const readEndpointCapabilities = async ({
       index: ENDPOINT_METADATA_CURRENT_PATTERN,
       size: 1,
       _source: ['Endpoint.capabilities'],
-      query: { term: { 'agent.id': agentId } },
+      // Same match and ordering as `getESQueryHostMetadataByIDs`: the id lives under either
+      // field depending on the metadata version, and the newest document wins.
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { term: { 'agent.id': agentId } },
+                  { term: { 'HostDetails.agent.id': agentId } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+      sort: [
+        { 'event.created': { order: 'desc', unmapped_type: 'date' } },
+        { 'HostDetails.event.created': { order: 'desc', unmapped_type: 'date' } },
+      ],
       ignore_unavailable: true,
       allow_no_indices: true,
     });
@@ -60,7 +80,9 @@ const readEndpointCapabilities = async ({
       ? capabilities
       : [];
   } catch (error) {
-    logger?.debug(
+    // Warn, not debug: a privilege failure here silently downgrades every response to
+    // "suspend only", and nothing else would surface it.
+    logger?.warn(
       `resolveHostEnrollment: endpoint capabilities lookup failed for agent ${agentId}; treating as none — ${
         error instanceof Error ? error.message : String(error)
       }`
@@ -136,20 +158,17 @@ export const makeResolveHostEnrollment = (
  * Binds host enrollment lookups to the space the caller runs in, because hostnames are not
  * unique across spaces and an unscoped search can act on another space's agent.
  *
- * The service and ES client are read through getters because step definitions register during
- * `setup` but run after `start`. Without a space there is no correct lookup to make, so every
+ * The service is read through a getter because step definitions register during `setup` but
+ * run after `start`. The ES client is passed per call: it must be the step's own scoped client so
+ * the calling user's privileges apply to the endpoint metadata read, not the internal user's. Without a space there is no correct lookup to make, so every
  * host reports unenrolled -- a recommendation instead of an action, rather than acting on
  * whichever space's host matched first.
  */
 export const makeScopedResolveHostEnrollment =
-  (
-    getAgentService: () => AgentService | undefined,
-    getEsClient: () => ElasticsearchClient | undefined,
-    logger?: Logger
-  ) =>
-  (spaceId: string): ResolveHostEnrollment =>
+  (getAgentService: () => AgentService | undefined, logger?: Logger) =>
+  (spaceId: string, esClient?: ElasticsearchClient): ResolveHostEnrollment =>
     makeResolveHostEnrollment(
       spaceId ? getAgentService()?.asInternalScopedUser(spaceId) : undefined,
-      getEsClient(),
+      esClient,
       logger
     );

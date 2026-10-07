@@ -105,10 +105,11 @@ const findDestructiveTechniqueFor = (
   if (attributed.length === 0) {
     return findConfirmedTechnique(state, DESTRUCTIVE_TECHNIQUES);
   }
+  // Roots on both sides, as `findConfirmedTechnique` does: `T1486` is confirmed by `T1486.001`.
   return attributed.find(
     (id) =>
       (DESTRUCTIVE_TECHNIQUES as readonly string[]).includes(techniqueRoot(id)) &&
-      state.evidence.tier2Confirmed.some((t) => t.techniqueId === id)
+      state.evidence.tier2Confirmed.some((t) => techniqueRoot(t.techniqueId) === techniqueRoot(id))
   );
 };
 
@@ -147,6 +148,15 @@ export const selectProcessActions = ({
   const process = describeProcess(selector);
   const canDump = host.capabilities.includes(MEMDUMP_PROCESS_CAPABILITY);
 
+  if (isStale(selector, state)) {
+    return {
+      rule: 'stale',
+      actions: [],
+      why: `Rule: stale process; ${process} was last seen ${selector.observedAt}, outside the response window`,
+      heldBack: `No action was proposed for ${process} on ${host.name}: it was last seen ${selector.observedAt}, outside the response window`,
+    };
+  }
+
   if (isProtectedProcess(selector)) {
     return {
       rule: 'protected_system_process',
@@ -157,15 +167,6 @@ export const selectProcessActions = ({
       heldBack: canDump
         ? `Kill and suspend were not proposed for ${process} on ${host.name}: it is a protected system process, so only a memory dump is proposed`
         : `No action was proposed for ${process} on ${host.name}: it is a protected system process and the endpoint does not report ${MEMDUMP_PROCESS_CAPABILITY}`,
-    };
-  }
-
-  if (isStale(selector, state)) {
-    return {
-      rule: 'stale',
-      actions: [],
-      why: `Rule: stale process; ${process} was last seen ${selector.observedAt}, outside the response window`,
-      heldBack: `No action was proposed for ${process} on ${host.name}: it was last seen ${selector.observedAt}, outside the response window`,
     };
   }
 
