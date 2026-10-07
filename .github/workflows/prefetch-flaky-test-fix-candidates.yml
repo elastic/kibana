@@ -7,7 +7,7 @@ on:
   workflow_call:
     inputs:
       pr_number:
-        description: Flaky-test fix PR to find potential duplicate fixes for.
+        description: flaky-test-fixer PR to find potential duplicate fixes for.
         required: true
         type: string
       artifact_name:
