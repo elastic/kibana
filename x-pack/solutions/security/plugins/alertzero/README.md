@@ -76,6 +76,10 @@ Workers install when a user enables one or saves settings on one. There is no Wa
 
 Managed-workflow ownership remains registered when optional runtime dependencies are missing, so their absence does not cause installed AlertZero workflows to be deleted as orphans.
 
+Each Worker runs as its own `alertzero_<worker>` service account, with a role of the same name. AlertZero creates both from the browser, with the admin's privileges, when a Worker is turned on without an account, and reuses existing ones without changing them.
+
+**Known limitation (MVP):** AlertZero does not detect or repair a Worker whose role or service account was deleted. If the role is deleted, the Worker's runs fail with authorization errors until the role is re-created with the same name and privileges. If the account is deleted (Kibana only allows this with force while Workers are bound to it), the Worker's runs fail until it is re-bound to a new account through the worker API (`PATCH /internal/alertzero/workers/{workerId}` with a new `settings.serviceAccountId` and the Worker's current `settingsRevision`). Detecting and repairing both cases is planned post-MVP.
+
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
 
 ```yaml
