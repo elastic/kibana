@@ -139,10 +139,17 @@ describe('getColumnsWithHighlights', () => {
   it('follows a RENAME of a derived highlight column', () => {
     const query =
       'FROM books | HIGHLIGHT "Tolkien" ON * | RENAME highlight_title AS hl | RENAME hl AS h';
-    expect(Object.keys(getColumnsWithHighlights(query, ['title', 'h', 'highlight_body']))).toEqual([
-      'highlight_body',
-      'h',
-    ]);
+    expect(
+      Object.keys(getColumnsWithHighlights(query, ['title', 'h', 'highlight_body'])).sort()
+    ).toEqual(['h', 'highlight_body']);
+  });
+
+  it('keeps a generated column that a later HIGHLIGHT recreates after a RENAME', () => {
+    const query =
+      'FROM books | HIGHLIGHT "Tolkien" ON * | RENAME highlight_title AS h | HIGHLIGHT "Ring" ON *';
+    expect(
+      Object.keys(getColumnsWithHighlights(query, ['title', 'h', 'highlight_title'])).sort()
+    ).toEqual(['h', 'highlight_title']);
   });
 
   it('cannot tell the derived columns apart when the prefix is empty', () => {
