@@ -33,6 +33,10 @@ const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkL
   defaultMessage: 'Sandbox secrets',
 });
 
+const customContextLabel = i18n.translate('xpack.nightshift.customContextLinkLabel', {
+  defaultMessage: 'Custom context',
+});
+
 const investigationsLabel = i18n.translate('xpack.nightshift.investigationsButtonLabel', {
   defaultMessage: 'Investigations',
 });
@@ -85,6 +89,7 @@ export function NightshiftAppHeader({
   onSettingsClick,
   settingsHref,
   onSandboxSecretsClick,
+  onCustomContextClick,
   onAutomationsClick,
   investigationsHref,
   tabs,
@@ -96,6 +101,8 @@ export function NightshiftAppHeader({
   settingsHref?: string;
   /** Shows the sandbox secrets menu item when set. */
   onSandboxSecretsClick?: () => void;
+  /** Shows the custom context menu item when set. */
+  onCustomContextClick?: () => void;
   onAutomationsClick?: () => void | Promise<void>;
   investigationsHref?: string;
   tabs?: AppHeaderTab[];
@@ -125,6 +132,18 @@ export function NightshiftAppHeader({
                 iconType: 'lock',
                 run: () => onSandboxSecretsClick(),
                 testId: 'nightshiftSandboxSecretsLink',
+                overflow: true,
+              },
+            ]
+          : []),
+        ...(onCustomContextClick
+          ? [
+              {
+                id: 'nightshiftCustomContext',
+                label: customContextLabel,
+                iconType: 'documentation',
+                run: () => onCustomContextClick(),
+                testId: 'nightshiftCustomContextLink',
                 overflow: true,
               },
             ]
@@ -166,6 +185,7 @@ export function NightshiftAppHeader({
       onAutomationsClick,
       onManagementClick,
       onSandboxSecretsClick,
+      onCustomContextClick,
       onSettingsClick,
       settingsHref,
     ]
