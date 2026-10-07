@@ -268,7 +268,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
             userMessage: processedConversation.nextInput.message,
             recentContext: buildRecentContext(
               groupTimelineEntries(processedConversation.timeline).flatMap((entry) => {
-                // Custom events carry no user input to match skills against.
+                // Standalone events carry no user input to match skills against.
                 if (isTimelineStandaloneEvent(entry)) {
                   return [];
                 }

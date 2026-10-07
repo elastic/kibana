@@ -10,11 +10,14 @@ import {
   ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
+  isAttachmentEvent,
 } from '@kbn/agent-builder-common';
 import {
   BOOM,
   T0,
+  T1,
   abortedExec0Timeline,
+  attachmentEventFixture,
   completedRoundTimeline,
   customEventFixture,
   eventsNativeConversation,
@@ -22,6 +25,7 @@ import {
   pausedAndResumedRoundTimeline,
   pausedRoundTimeline,
   timelineFromRounds,
+  userMessageEvent,
 } from '../../../../test_utils/timeline';
 import {
   standaloneEvents,
@@ -34,6 +38,7 @@ import {
   isTimelineRound,
   isTimelineStandaloneUserMessage,
   lastExecutionTerminal,
+  linkedInputEvents,
   roundInterruption,
   roundResponse,
   standaloneUserMessages,
@@ -362,5 +367,105 @@ describe('standaloneUserMessages', () => {
       },
     } as TimelineEvent;
     expect(standaloneUserMessages([message, linked]).map((event) => event.id)).toEqual(['m1']);
+  });
+});
+
+describe('attachment events on the context timeline', () => {
+  it('re-stamps resume attachment events into their folded round', () => {
+    const conversation = eventsNativeConversation([
+      ...pausedAndResumedRoundTimeline(),
+      attachmentEventFixture({ id: 'att-exec0', executionId: 'r1::execution', toolCallId: 'c1' }),
+      attachmentEventFixture({
+        id: 'att-exec1',
+        executionId: 'r1::execution::1',
+        source: 'chat_input',
+        triggerEventId: 'r1::prompt_response::1',
+      }),
+    ]);
+
+    const [round] = groupTimelineRounds(eventsForContext(conversation));
+
+    expect(
+      round.events.filter(isAttachmentEvent).map((event) => [event.id, event.execution_id])
+    ).toEqual([
+      ['att-exec0', 'r1::execution'],
+      ['att-exec1', 'r1::execution'],
+    ]);
+    expect(standaloneEvents(eventsForContext(conversation))).toEqual([]);
+  });
+
+  it('gives a standalone message its linked input events and no standalone entry for them', () => {
+    const message = { ...userMessageEvent('m'), id: 'm1' } as TimelineEvent;
+    const linked = attachmentEventFixture({
+      id: 'att',
+      source: 'chat_input',
+      triggerEventId: 'm1',
+    });
+    const entries = groupTimelineEntries(
+      eventsForContext(eventsNativeConversation([message, linked]))
+    );
+
+    expect(entries).toHaveLength(1);
+    expect(
+      isTimelineStandaloneUserMessage(entries[0]) && entries[0].events.map((event) => event.id)
+    ).toEqual(['att']);
+  });
+
+  it('makes out-of-execution events standalone entries in timeline order', () => {
+    const conversation = eventsNativeConversation([
+      ...completedRoundTimeline('r1', T0),
+      attachmentEventFixture({ id: 'api', source: 'http_api', createdAt: T1 }),
+      attachmentEventFixture({
+        id: 'legacy-workflow',
+        source: 'workflow',
+        createdAt: T1,
+        legacy: true,
+      }),
+    ]);
+    const entries = groupTimelineEntries(eventsForContext(conversation));
+
+    expect(
+      entries.map((entry) => (isTimelineStandaloneEvent(entry) ? entry.event.id : 'round'))
+    ).toEqual(['round', 'api', 'legacy-workflow']);
+  });
+
+  it('never makes legacy chat_input events standalone entries', () => {
+    const conversation = eventsNativeConversation([
+      {
+        ...userMessageEvent('m'),
+        id: 'm1',
+        data: { message: 'x', attachment_refs: [{ attachment_id: 'a', version: 1 }] },
+      } as TimelineEvent,
+      attachmentEventFixture({ id: 'old-input', source: 'chat_input', legacy: true }),
+    ]);
+
+    expect(standaloneEvents(eventsForContext(conversation))).toEqual([]);
+  });
+
+  it('falls back to its own position for a chat_input event whose message is missing', () => {
+    const orphan = attachmentEventFixture({
+      id: 'orphan',
+      source: 'chat_input',
+      triggerEventId: 'gone',
+    });
+
+    expect(
+      standaloneEvents(eventsForContext(eventsNativeConversation([orphan]))).map(
+        (event) => event.id
+      )
+    ).toEqual(['orphan']);
+  });
+});
+
+describe('linkedInputEvents', () => {
+  it('selects the current-format chat_input events linked to the message', () => {
+    const events = [
+      attachmentEventFixture({ id: 'a', source: 'chat_input', triggerEventId: 'm1' }),
+      attachmentEventFixture({ id: 'b', source: 'execution', triggerEventId: 'm1' }),
+      attachmentEventFixture({ id: 'c', source: 'chat_input', triggerEventId: 'm1', legacy: true }),
+      attachmentEventFixture({ id: 'd', source: 'chat_input', triggerEventId: 'm2' }),
+    ];
+
+    expect(linkedInputEvents(events, 'm1').map((event) => event.id)).toEqual(['a']);
   });
 });
