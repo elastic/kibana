@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { POLICY_SCOPE_SUMMARIES } from '../../components/action_policy/details_flyout/policy_scope_summary';
 import { ActionPolicyInlineContent } from './action_policy_inline_content';
 
 const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
@@ -53,34 +54,10 @@ describe('ActionPolicyInlineContent', () => {
     expect(screen.getByText('Disabled')).toBeDefined();
   });
 
-  it('renders the rule tags of the matcher', () => {
+  it('renders the policy scope section', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText('Rule tags:')).toBeDefined();
-    expect(screen.getByText('production')).toBeDefined();
-    expect(screen.getByText('sre')).toBeDefined();
-  });
-
-  it('renders the advanced matching query', () => {
-    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText('Advanced matching query:')).toBeDefined();
-    expect(screen.getByText('alert_status: "active"')).toBeDefined();
-  });
-
-  it('omits rule tags and query rows when the matcher has neither', () => {
-    const attachment = createAttachment();
-    attachment.data.matcher = { tags: [], expression: '  ' };
-    render(<ActionPolicyInlineContent attachment={attachment} isSidebar={false} />);
-    expect(screen.queryByText('Rule tags:')).toBeNull();
-    expect(screen.queryByText('Advanced matching query:')).toBeNull();
-  });
-
-  it('renders only the policy scope title when matcher is null', () => {
-    const attachment = createAttachment();
-    attachment.data.matcher = null;
-    render(<ActionPolicyInlineContent attachment={attachment} isSidebar={false} />);
     expect(screen.getByText('Policy scope')).toBeDefined();
-    expect(screen.queryByText('Rule tags:')).toBeNull();
-    expect(screen.queryByText('Advanced matching query:')).toBeNull();
+    expect(screen.getByText(POLICY_SCOPE_SUMMARIES.tagsAndExpression)).toBeDefined();
   });
 
   it('renders the info bar with dispatch mode, frequency and destination count', () => {

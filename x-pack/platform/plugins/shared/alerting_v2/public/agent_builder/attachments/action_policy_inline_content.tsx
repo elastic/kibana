@@ -6,25 +6,14 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import {
-  getPolicyScopeKind,
   POLICY_SCOPE_LABEL,
-  POLICY_SCOPE_SUMMARIES,
+  PolicyScopeSummary,
 } from '../../components/action_policy/details_flyout/policy_scope_summary';
-import { BadgeList } from '../../components/action_policy/badge_list';
 import {
   DISPATCH_PER_LABEL,
   FREQUENCY_LABEL,
@@ -43,8 +32,6 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
   const isEnabled = data.enabled ?? true;
   const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
 
-  const tags = data.matcher?.tags ?? [];
-  const expression = data.matcher?.expression?.trim();
   const destinationCount = data.destinations?.length ?? 0;
 
   const containerCss = css`
@@ -56,55 +43,13 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <h5>{POLICY_SCOPE_LABEL}</h5>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  type="info"
-                  size="s"
-                  content={POLICY_SCOPE_SUMMARIES[getPolicyScopeKind(data.matcher)]}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="xxs">
+              <h5>{POLICY_SCOPE_LABEL}</h5>
+            </EuiTitle>
           </EuiFlexItem>
-
-          {tags.length > 0 && (
-            <EuiFlexItem grow={false} data-test-subj="actionPolicyInlineRuleTags">
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {i18n.translate('xpack.alertingV2.actionPolicyAttachment.ruleTags', {
-                      defaultMessage: 'Rule tags:',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <BadgeList items={tags} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-
-          {expression && (
-            <EuiFlexItem grow={false} data-test-subj="actionPolicyInlineMatchingQuery">
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {i18n.translate('xpack.alertingV2.actionPolicyAttachment.advancedQuery', {
-                      defaultMessage: 'Advanced matching query:',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiCode>{expression}</EuiCode>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <PolicyScopeSummary matcher={data.matcher} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
