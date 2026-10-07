@@ -119,12 +119,7 @@ export async function collectFullWorkflowYamlValidationResults({
 
   if (workflowLookup && lineCounter) {
     results.push(
-      ...validateWorkflowExecutionIdentity(
-        workflowLookup,
-        workflows,
-        lineCounter,
-        context.isManaged
-      )
+      ...validateWorkflowExecutionIdentity(workflowLookup, lineCounter, context.isManaged)
     );
     results.push(...validateWorkflowInputs(workflowLookup, workflows, lineCounter));
 

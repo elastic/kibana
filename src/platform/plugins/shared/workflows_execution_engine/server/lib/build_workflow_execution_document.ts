@@ -96,8 +96,9 @@ export const buildWorkflowExecutionDocument = (
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
-    ...(inheritedIdentity ? { effectiveIdentity: inheritedIdentity } : {}),
-    ...(!inheritedIdentity && workflow.definition?.settings?.run_as
+    ...(inheritedIdentity
+      ? { effectiveIdentity: inheritedIdentity }
+      : workflow.definition?.settings?.run_as
       ? {
           effectiveIdentity: {
             type: 'service_account' as const,

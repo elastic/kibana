@@ -10,67 +10,23 @@
 import type { LineCounter } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { getValueFromValueNode } from '@kbn/workflows-yaml';
-import type {
-  StepInfo,
-  StepPropInfo,
-  WorkflowLookup,
-  YamlValidationResult,
-} from '@kbn/workflows-yaml';
-import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
+import type { WorkflowLookup, YamlValidationResult } from '@kbn/workflows-yaml';
 
-const validateStepIdentity = (
-  step: StepInfo,
-  workflows: WorkflowsResponse | null,
-  isManaged: boolean
-): { property: StepPropInfo; message: string } | undefined => {
-  const modeProperty = step.propInfos['with.run-as-mode'];
-  const mode = modeProperty && getValueFromValueNode(modeProperty.valueNode);
-  if (mode !== 'inherit' && mode !== 'override') return;
-  if (!isManaged) {
-    return {
-      property: modeProperty,
-      message: i18n.translate('workflows.validateExecutionIdentity.managedParentErrorMessage', {
-        defaultMessage: 'Service account inheritance is only available to managed workflows.',
-      }),
-    };
-  }
-  const workflowIdProperty = step.propInfos['with.workflow-id'];
-  if (!workflowIdProperty) return;
-  const workflowId = getValueFromValueNode(workflowIdProperty.valueNode);
-  if (typeof workflowId !== 'string') return;
-  if (workflowId.includes('{{') || workflowId.includes('{%')) {
-    return {
-      property: workflowIdProperty,
-      message: i18n.translate('workflows.validateExecutionIdentity.literalChildErrorMessage', {
-        defaultMessage:
-          'Service account inheritance requires a literal workflow-id. Expressions are not supported.',
-      }),
-    };
-  }
-  const child = workflows?.workflows[workflowId];
-  if (child && child.managed !== true) {
-    return {
-      property: workflowIdProperty,
-      message: i18n.translate('workflows.validateExecutionIdentity.managedChildErrorMessage', {
-        defaultMessage: 'Only managed child workflows can inherit a parent service account.',
-      }),
-    };
-  }
-};
-
-/** Validates child identity choices before the execution engine admits the child. */
+/** Rejects inheritance in editable, unmanaged workflow definitions. */
 export const validateWorkflowExecutionIdentity = (
   lookup: WorkflowLookup,
-  workflows: WorkflowsResponse | null,
   lineCounter: LineCounter,
   isManaged: boolean
-): YamlValidationResult[] =>
-  Object.values(lookup.steps).flatMap((step) => {
+): YamlValidationResult[] => {
+  if (isManaged) return [];
+  return Object.values(lookup.steps).flatMap((step) => {
     if (step.stepType !== 'workflow.execute' && step.stepType !== 'workflow.executeAsync')
       return [];
-    const issue = validateStepIdentity(step, workflows, isManaged);
-    const range = issue?.property.valueNode?.range ?? issue?.property.keyNode?.range;
-    if (!issue || !range) return [];
+    const property = step.propInfos['with.run-as-mode'];
+    const mode = property && getValueFromValueNode(property.valueNode);
+    if (mode !== 'inherit' && mode !== 'override') return [];
+    const range = property.valueNode?.range ?? property.keyNode?.range;
+    if (!range) return [];
     const start = lineCounter.linePos(range[0]);
     const end = lineCounter.linePos(range[1]);
     return [
@@ -79,7 +35,9 @@ export const validateWorkflowExecutionIdentity = (
         owner: 'step-property-validation',
         ruleId: 'invalidStepProperty',
         severity: 'error',
-        message: issue.message,
+        message: i18n.translate('workflows.validateExecutionIdentity.managedParentErrorMessage', {
+          defaultMessage: 'Service account inheritance is only available to managed workflows.',
+        }),
         startLineNumber: start.line,
         startColumn: start.col,
         endLineNumber: end.line,
@@ -88,3 +46,4 @@ export const validateWorkflowExecutionIdentity = (
       },
     ];
   });
+};

@@ -36,35 +36,6 @@ interface UseWorkflowJsonSchemaResult {
   uri: string | null;
 }
 
-const hideChildIdentitySuggestions = (jsonSchema: z.core.JSONSchema.JSONSchema): void => {
-  const workflowSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(jsonSchema, jsonSchema);
-  const stepsSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
-    workflowSchema?.properties?.steps,
-    jsonSchema
-  );
-  const stepSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
-    stepsSchema?.items,
-    jsonSchema
-  );
-  for (const candidate of stepSchema?.oneOf ?? []) {
-    const step = getOrResolveObject<z.core.JSONSchema.JSONSchema>(candidate, jsonSchema);
-    const type = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
-      step?.properties?.type,
-      jsonSchema
-    );
-    if (type?.const === 'workflow.execute' || type?.const === 'workflow.executeAsync') {
-      const inputs = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
-        step?.properties?.with,
-        jsonSchema
-      );
-      const property = inputs?.properties?.['run-as-mode'];
-      if (property && typeof property === 'object') {
-        property.doNotSuggest = true;
-      }
-    }
-  }
-};
-
 export const useWorkflowJsonSchema = ({
   loose = false,
 }: UseWorkflowJsonSchemaOptions = {}): UseWorkflowJsonSchemaResult => {
@@ -103,10 +74,6 @@ export const useWorkflowJsonSchema = ({
           // Hide completion without invalidating a saved workflow's execution identity.
           runAsSchema.doNotSuggest = true;
         }
-      }
-
-      if (jsonSchema) {
-        hideChildIdentitySuggestions(jsonSchema);
       }
 
       return {

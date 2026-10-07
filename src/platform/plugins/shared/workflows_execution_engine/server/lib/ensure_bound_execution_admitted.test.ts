@@ -20,8 +20,6 @@ const execution: Partial<EsWorkflowExecution> = {
     id: 'parent-sa',
     inheritedFrom: {
       workloadId: 'root-parent',
-      workflowId: 'parent',
-      executionId: 'parent-execution',
     },
   },
 };

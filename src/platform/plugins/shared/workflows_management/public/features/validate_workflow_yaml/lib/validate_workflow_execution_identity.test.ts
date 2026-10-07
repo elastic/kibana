@@ -10,24 +10,11 @@
 import { LineCounter, parseDocument } from 'yaml';
 import { buildWorkflowLookup } from '@kbn/workflows-yaml';
 import { validateWorkflowExecutionIdentity } from './validate_workflow_execution_identity';
-import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
-
-const workflows: WorkflowsResponse = {
-  totalWorkflows: 2,
-  workflows: {
-    managed: { id: 'managed', name: 'Managed', managed: true },
-    ordinary: { id: 'ordinary', name: 'Ordinary' },
-  },
-};
 
 describe.each(['workflow.execute', 'workflow.executeAsync'])(
   '%s identity validation',
   (stepType) => {
-    const validate = (
-      fields: string[],
-      children: WorkflowsResponse | null = workflows,
-      isManaged = true
-    ) => {
+    const validate = (fields: string[], isManaged: boolean) => {
       const yaml = [
         'name: parent',
         'steps:',
@@ -44,62 +31,38 @@ describe.each(['workflow.execute', 'workflow.executeAsync'])(
       const document = parseDocument(yaml, { lineCounter });
       return validateWorkflowExecutionIdentity(
         buildWorkflowLookup(document, lineCounter),
-        children,
         lineCounter,
         isManaged
       );
     };
 
-    it.each(['inherit', 'override'])(
-      'rejects an unmanaged parent using %s, even before children load',
-      (mode) => {
-        const results = validate(['workflow-id: managed', `run-as-mode: ${mode}`], null, false);
-        expect(results).toHaveLength(1);
-        expect(results[0]).toMatchObject({
-          message: 'Service account inheritance is only available to managed workflows.',
-          startLineNumber: 11,
-        });
-      }
-    );
-
-    it('allows default execution for unmanaged parents', () => {
-      expect(validate(['workflow-id: ordinary', 'run-as-mode: default'], workflows, false)).toEqual(
-        []
-      );
-    });
-
-    it.each(['run-as-mode: inherit', 'run-as-mode: override'])(
-      'rejects an unmanaged target with %s',
-      (option) => {
-        const results = validate(['workflow-id: ordinary', option]);
-        expect(results).toHaveLength(1);
-        expect(results[0].message).toContain('Only managed');
-      }
-    );
-
-    it('rejects an expression for the child ID', () => {
-      const results = validate(['workflow-id: "{{ inputs.child }}"', 'run-as-mode: inherit']);
+    it.each(['inherit', 'override'])('rejects an unmanaged parent using %s', (mode) => {
+      const results = validate(['workflow-id: managed', `run-as-mode: ${mode}`], false);
       expect(results).toHaveLength(1);
-      expect(results[0].message).toContain('literal workflow-id');
+      expect(results[0]).toMatchObject({
+        message: 'Service account inheritance is only available to managed workflows.',
+        startLineNumber: 11,
+      });
     });
 
-    it.each(['run-as-mode: default'])('preserves ordinary execution with %s', (option) => {
-      expect(validate(['workflow-id: ordinary', option])).toEqual([]);
-    });
+    it.each([[], ['run-as-mode: default']])(
+      'allows default execution for unmanaged parents (%j)',
+      (...fields) => {
+        expect(validate(['workflow-id: ordinary', ...fields], false)).toEqual([]);
+      }
+    );
 
-    it('accepts a managed child and leaves input names alone', () => {
+    it.each(['inherit', 'override'])(
+      'leaves managed workflow child eligibility to the engine (%s)',
+      (mode) => {
+        expect(validate(['workflow-id: managed', `run-as-mode: ${mode}`], true)).toEqual([]);
+      }
+    );
+
+    it('does not treat a child input as an identity option', () => {
       expect(
-        validate([
-          'workflow-id: managed',
-          'run-as-mode: inherit',
-          'inputs:',
-          '  run-as-mode: default',
-        ])
+        validate(['workflow-id: ordinary', 'inputs:', '  run-as-mode: inherit'], false)
       ).toEqual([]);
-    });
-
-    it('does not misclassify a child that is missing from the lookup', () => {
-      expect(validate(['workflow-id: missing', 'run-as-mode: inherit'])).toEqual([]);
     });
   }
 );

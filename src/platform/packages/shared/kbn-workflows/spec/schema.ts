@@ -979,9 +979,11 @@ export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
 export const WorkflowExecuteStepInputSchema = z.object({
   'workflow-id': z.string().min(1).max(1024),
   inputs: z.record(z.string(), z.unknown()).optional(),
-  'run-as-mode': WorkflowRunAsModeSchema.optional().describe(
-    'Use default identity, inherit the parent service account, or override the managed child service account for this execution.'
-  ),
+  'run-as-mode': WorkflowRunAsModeSchema.optional()
+    .describe(
+      'Use default identity, inherit the parent service account, or override the managed child service account for this execution.'
+    )
+    .meta({ doNotSuggest: true }),
 });
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
@@ -1243,8 +1245,6 @@ export const WorkflowEffectiveIdentitySchema = z.object({
   inheritedFrom: z
     .object({
       workloadId: z.string().max(1024),
-      workflowId: z.string().max(1024),
-      executionId: z.string().max(1024),
     })
     .optional(),
 });

@@ -71,8 +71,6 @@ const identity: NonNullable<EsWorkflowExecution['effectiveIdentity']> = {
   id: 'account-a',
   inheritedFrom: {
     workloadId: 'parent',
-    workflowId: 'parent',
-    executionId: 'parent-execution',
   },
 };
 
@@ -234,8 +232,6 @@ describe('inherited workflow execution identity', () => {
         ...identity,
         inheritedFrom: {
           workloadId: 'root',
-          workflowId: 'parent',
-          executionId: 'parent-execution',
         },
       },
     };
@@ -302,8 +298,6 @@ describe('inherited workflow execution identity', () => {
       ...identity,
       inheritedFrom: {
         workloadId: 'root',
-        workflowId: 'parent',
-        executionId: 'parent-execution',
       },
     };
     core.security.serviceAccounts.getWorkloadBinding.mockResolvedValue(binding);

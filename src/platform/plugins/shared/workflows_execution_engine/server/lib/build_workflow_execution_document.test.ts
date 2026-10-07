@@ -51,8 +51,6 @@ describe('buildWorkflowExecutionDocument', () => {
         id: 'parent-account',
         inheritedFrom: {
           workloadId: 'parent',
-          workflowId: 'parent',
-          executionId: 'parent-execution',
         },
       };
       const workflow = {
@@ -70,8 +68,13 @@ describe('buildWorkflowExecutionDocument', () => {
         ...baseParams,
         workflow,
         inheritedIdentity,
+        context: { parentWorkflowId: 'parent', parentWorkflowExecutionId: 'parent-run' },
       });
       expect(execution.effectiveIdentity).toEqual(inheritedIdentity);
+      expect(execution.context).toMatchObject({
+        parentWorkflowId: 'parent',
+        parentWorkflowExecutionId: 'parent-run',
+      });
       expect(execution.executedBy).toBe('user-1');
       expect(execution.workflowDefinition?.settings?.run_as).toBe(childAccount);
       expect(execution.yaml).toBe(baseWorkflow.yaml);

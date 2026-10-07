@@ -80,8 +80,6 @@ describe('resumeWorkflow', () => {
             id: 'account-a',
             inheritedFrom: {
               workloadId: 'root-parent',
-              workflowId: 'parent',
-              executionId: 'parent-run',
             },
           }
         : undefined,

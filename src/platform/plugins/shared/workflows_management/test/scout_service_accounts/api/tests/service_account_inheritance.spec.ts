@@ -195,13 +195,15 @@ apiTest.describe(
           const completed = await wait(apiClient, paused.id, 'completed', headers);
           expect(authenticatedAs(completed)).toContain(readOnlyAccountId);
           expect(completed.executedBy).toBe(parentExecution.executedBy);
+          expect(completed.context).toMatchObject({
+            parentWorkflowId: workflowId(parent),
+            parentWorkflowExecutionId: parentExecution.id,
+          });
           expect(completed.effectiveIdentity).toMatchObject({
             type: 'service_account',
             id: readOnlyAccountId,
             inheritedFrom: {
               workloadId: workflowId(parent),
-              workflowId: workflowId(parent),
-              executionId: parentExecution.id,
             },
           });
           await wait(apiClient, parentExecution.id, 'completed', headers);

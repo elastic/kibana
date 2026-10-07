@@ -118,9 +118,14 @@ steps:
       jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
     });
 
-    it.each([false, true])('never suggests identity fields (SA=%s)', async (enabled) => {
+    it.each([
+      [false, false],
+      [false, true],
+      [true, false],
+      [true, true],
+    ])('never suggests identity fields (SA=%s, loose=%s)', async (enabled, loose) => {
       services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
-      const { result } = renderHook(() => useWorkflowJsonSchema());
+      const { result } = renderHook(() => useWorkflowJsonSchema({ loose }));
       const completions = await complete(result.current.jsonSchema, `${yaml}      `);
       const labels = completions?.items.map(({ label }) => label);
       expect(labels).toContain('inputs');

@@ -17,8 +17,10 @@ type IdentityExecution = Pick<
   EsWorkflowExecution,
   'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity' | 'managed'
 >;
-const originalRequests = new WeakMap<KibanaRequest, KibanaRequest>();
-const executingWorkflows = new WeakMap<KibanaRequest, IdentityExecution>();
+const executionContexts = new WeakMap<
+  KibanaRequest,
+  { originalRequest: KibanaRequest; execution: IdentityExecution }
+>();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
   'run-as-mode': true,
@@ -43,7 +45,7 @@ export const resolveInheritedWorkflowIdentity = (
   }
 ): EsWorkflowExecution['effectiveIdentity'] => {
   if (!context.inheritParentIdentity) return undefined;
-  const parent = executingWorkflows.get(request);
+  const parent = executionContexts.get(request)?.execution;
   const accountId = parent && getExecutionServiceAccountId(parent);
   if (!parent?.id || !accountId)
     throw Boom.forbidden(
@@ -100,8 +102,6 @@ export const resolveInheritedWorkflowIdentity = (
     id: accountId,
     inheritedFrom: {
       workloadId: parent.effectiveIdentity?.inheritedFrom?.workloadId ?? parent.workflowId,
-      workflowId: parent.workflowId,
-      executionId: parent.id,
     },
   };
 };
@@ -127,7 +127,7 @@ export const ensureInheritedBindingCurrent = async (
 };
 
 export const getWorkflowOriginalRequest = (request: KibanaRequest): KibanaRequest =>
-  originalRequests.get(request) ?? request;
+  executionContexts.get(request)?.originalRequest ?? request;
 
 export const withWorkflowExecutionIdentity = async <T>(
   core: CoreStart,
@@ -151,13 +151,11 @@ export const withWorkflowExecutionIdentity = async <T>(
       expectedServiceAccountId: serviceAccountId,
     },
     async (scopedRequest) => {
-      originalRequests.set(scopedRequest, originalRequest);
-      executingWorkflows.set(scopedRequest, execution);
+      executionContexts.set(scopedRequest, { originalRequest, execution });
       try {
         return await execute(scopedRequest);
       } finally {
-        originalRequests.delete(scopedRequest);
-        executingWorkflows.delete(scopedRequest);
+        executionContexts.delete(scopedRequest);
       }
     }
   );
