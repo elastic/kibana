@@ -287,6 +287,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
       });
     }),
     removeOutputFromAll: jest.fn(),
+    getSpacesForPoliciesUsingOutput: jest.fn(),
     getPackagePolicySavedObjects: jest.fn(),
     rollback: jest.fn(),
     restoreRollback: jest.fn(),
@@ -312,6 +313,9 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
     deployPolicy: jest.fn().mockRejectedValue(Promise.resolve()),
+    getSpacesForPoliciesUsingOutput: jest.fn(),
+    getSpacesForPoliciesUsingFleetServerHost: jest.fn(),
+    getSpacesForPoliciesUsingDownloadSource: jest.fn(),
   };
 };
 

@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/server';
 
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -39,6 +43,7 @@ import {
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 import { getFleetProxy } from './fleet_proxies';
 import {
   extractAndWriteDownloadSourcesSecrets,
@@ -438,7 +443,7 @@ class DownloadSourceService {
     }
   }
 
-  public async delete(id: string) {
+  public async delete(id: string, options?: { request?: KibanaRequest }) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
 
@@ -447,6 +452,26 @@ class DownloadSourceService {
     if (targetDS.is_default) {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
     }
+
+    if (options?.request) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(options.request)) {
+        const { spaceIds, truncated } =
+          await agentPolicyService.getSpacesForPoliciesUsingDownloadSource(id);
+        if (truncated) {
+          throw new DownloadSourceError(
+            `Unable to verify delete authorization for download source ${id}: too many agent policies to enumerate`
+          );
+        }
+        await assertPrivilegesInSpaces({
+          request: options.request,
+          spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage: `Insufficient privileges to delete download source ${id}: it is used by agent policies in spaces you are not authorized to access`,
+        });
+      }
+    }
+
     await agentPolicyService.removeDefaultSourceFromAll(
       appContextService.getInternalUserESClient(),
       id

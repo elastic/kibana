@@ -19,6 +19,7 @@ describe('convertSecurityApi', () => {
     source = {
       authc: {
         getCurrentUser: jest.fn(),
+        getPrincipal: jest.fn(),
         getRedactedSessionId: jest.fn(),
         apiKeys: {
           areAPIKeysEnabled: jest.fn(),
@@ -72,6 +73,18 @@ describe('convertSecurityApi', () => {
 
       expect(source.authc.getCurrentUser).toHaveBeenCalledTimes(1);
       expect(source.authc.getCurrentUser).toHaveBeenCalledWith(request);
+    });
+  });
+
+  describe('getPrincipal', () => {
+    it('delegates directly to the source', () => {
+      const output = convertSecurityApi(source);
+      const request = httpServerMock.createKibanaRequest();
+
+      output.authc.getPrincipal(request);
+
+      expect(source.authc.getPrincipal).toHaveBeenCalledTimes(1);
+      expect(source.authc.getPrincipal).toHaveBeenCalledWith(request);
     });
   });
 });

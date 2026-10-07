@@ -26,6 +26,9 @@ export interface AgentPolicyServiceInterface {
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];
   deployPolicy: (typeof agentPolicyService)['deployPolicy'];
+  getSpacesForPoliciesUsingOutput: (typeof agentPolicyService)['getSpacesForPoliciesUsingOutput'];
+  getSpacesForPoliciesUsingFleetServerHost: (typeof agentPolicyService)['getSpacesForPoliciesUsingFleetServerHost'];
+  getSpacesForPoliciesUsingDownloadSource: (typeof agentPolicyService)['getSpacesForPoliciesUsingDownloadSource'];
 }
 
 // Agent services
