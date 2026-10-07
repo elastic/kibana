@@ -269,7 +269,9 @@ const enrichCausalFeatures = async (
       // indicator's subtype and confidence are enriched.
       blast_radius: item.blast_radius?.map((entry) => {
         const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
-        return feature ? { ...entry, subtype: feature.subtype, confidence: feature.confidence } : entry;
+        return feature
+          ? { ...entry, subtype: feature.subtype, confidence: feature.confidence }
+          : entry;
       }),
     }));
   } catch (error) {
