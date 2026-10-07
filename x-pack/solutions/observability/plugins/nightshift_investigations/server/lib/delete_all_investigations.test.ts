@@ -15,6 +15,7 @@ describe('deleteAllInvestigations', () => {
       subjectClaims: 3,
       impact: 1,
       hypotheses: 1,
+      complete: true,
     };
     const agenticInvestigations = {
       deleteSubjectInvestigationDataAcrossSpaces: jest.fn().mockResolvedValue(investigationData),

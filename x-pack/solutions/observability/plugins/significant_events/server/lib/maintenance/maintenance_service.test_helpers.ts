@@ -280,6 +280,7 @@ export function makeService(params?: {
             subjectClaims: 0,
             impact: 0,
             hypotheses: 0,
+            complete: true,
           },
         };
   const deleteAllInvestigations = investigations ? jest.fn(async () => investigations) : undefined;

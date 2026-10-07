@@ -510,6 +510,13 @@ export const createSignificantEventsMaintenanceService = ({
         });
         return 0;
       }
+      if (!investigationData.complete) {
+        failures.push({
+          target: 'investigations',
+          error:
+            'Investigation data was only partly deleted because more was being written; run the reset again',
+        });
+      }
       return investigationData.investigations;
     } catch (error) {
       failures.push({ target: 'investigations', error: toMessage(error) });

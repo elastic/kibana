@@ -68,6 +68,7 @@ describe('SignificantEventsMaintenanceService', () => {
             subjectClaims: 3,
             impact: 2,
             hypotheses: 2,
+            complete: true,
           },
         },
       });
@@ -285,6 +286,32 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.partialFailures).toContainEqual({
         target: 'investigations',
         error: 'Agentic investigations plugin is not available',
+      });
+    });
+
+    it('records a partial failure when the investigation data was only partly deleted', async () => {
+      const { api } = makeManagementApi();
+      const { service } = makeService({
+        management: api,
+        investigations: {
+          investigationData: {
+            investigations: 100,
+            subjects: 100,
+            subjectClaims: 100,
+            impact: 0,
+            hypotheses: 0,
+            complete: false,
+          },
+        },
+      });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.deleted?.investigations).toBe(100);
+      expect(summary.partialFailures).toContainEqual({
+        target: 'investigations',
+        error:
+          'Investigation data was only partly deleted because more was being written; run the reset again',
       });
     });
 
