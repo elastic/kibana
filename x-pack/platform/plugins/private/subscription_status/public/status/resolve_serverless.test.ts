@@ -13,49 +13,45 @@ const BASE_URL = 'https://cloud.elastic.co';
 const BILLING_URL = `${BASE_URL}/billing`;
 const PRICING_URL = `${BASE_URL}/cloud-pricing-table`;
 
-interface FakeCloudOptions {
+interface ResolveOptions {
   isServerlessEnabled?: boolean;
   organizationInTrial?: boolean;
   projectType?: ProjectType;
   baseUrl?: string;
   getPrivilegedUrls?: () => Promise<CloudPrivilegedUrls>;
-}
-
-interface Location {
   csp?: string;
   region?: string;
 }
 
-const DEFAULT_CLOUD: FakeCloudOptions = {
+const DEFAULTS: ResolveOptions = {
   isServerlessEnabled: true,
   organizationInTrial: true,
   projectType: 'search',
   baseUrl: BASE_URL,
   getPrivilegedUrls: async () => ({ billingUrl: BILLING_URL }),
+  csp: 'aws',
+  region: 'us-east-1',
 };
 
-const DEFAULT_LOCATION: Location = { csp: 'aws', region: 'us-east-1' };
-
 // Spread rather than default params, so an explicit `undefined` overrides the default.
-const createCloud = (options: FakeCloudOptions): ServerlessCloud => {
-  const { isServerlessEnabled, organizationInTrial, projectType, baseUrl, getPrivilegedUrls } = {
-    ...DEFAULT_CLOUD,
-    ...options,
-  };
-  return {
+const resolve = (options: ResolveOptions = {}) => {
+  const {
+    isServerlessEnabled,
+    organizationInTrial,
+    projectType,
+    baseUrl,
+    getPrivilegedUrls,
+    csp,
+    region,
+  } = { ...DEFAULTS, ...options };
+  const cloud: ServerlessCloud = {
     isServerlessEnabled: Boolean(isServerlessEnabled),
     serverless: { projectId: 'project-id', projectType, organizationInTrial },
     getPrivilegedUrls: getPrivilegedUrls ?? (async () => ({})),
     getUrls: () => ({ baseUrl }),
   };
+  return resolveServerlessStatus({ cloud, csp, region });
 };
-
-const resolve = (options: FakeCloudOptions = {}, location: Location = {}) =>
-  resolveServerlessStatus({
-    cloud: createCloud(options),
-    ...DEFAULT_LOCATION,
-    ...location,
-  });
 
 describe('resolveServerlessStatus', () => {
   it.each([
@@ -116,7 +112,7 @@ describe('resolveServerlessStatus', () => {
   });
 
   it('omits the region subtitle and provider when the provider is unknown', async () => {
-    expect(await resolve({}, { csp: undefined })).toMatchObject({
+    expect(await resolve({ csp: undefined })).toMatchObject({
       subtitle: undefined,
       secondaryAction: {
         href: `${PRICING_URL}?productType=serverless&solution=elasticsearch&region=us-east-1`,

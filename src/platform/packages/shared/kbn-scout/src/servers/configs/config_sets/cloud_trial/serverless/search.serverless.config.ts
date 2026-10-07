@@ -13,10 +13,6 @@ import type { ScoutServerConfig } from '../../../../../types';
 /**
  * Serverless Elasticsearch project whose organization is in trial, on AWS us-east-1.
  * `xpack.cloud.serverless.in_trial` is read at boot, so it can't be toggled at runtime.
- *
- * Run tests:
- *   node scripts/scout.js run-tests --arch serverless --domain search \
- *     --config x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/playwright.config.ts
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

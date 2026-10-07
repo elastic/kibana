@@ -97,15 +97,6 @@ const getPricingUrl = ({
   return `${baseUrl.replace(/\/$/, '')}/cloud-pricing-table?${params}`;
 };
 
-const getBillingUrl = async (cloud: ServerlessCloud): Promise<string | undefined> => {
-  try {
-    const { billingUrl } = await cloud.getPrivilegedUrls();
-    return billingUrl;
-  } catch {
-    return undefined;
-  }
-};
-
 /** Resolves the subscription status of a Serverless project, or `undefined` when no badge applies. */
 export const resolveServerlessStatus = async ({
   cloud,
@@ -120,7 +111,10 @@ export const resolveServerlessStatus = async ({
     defaultMessage: 'Trial',
   });
 
-  const billingUrl = await getBillingUrl(cloud);
+  const billingUrl = await cloud.getPrivilegedUrls().then(
+    (urls) => urls.billingUrl,
+    () => undefined
+  );
   if (!billingUrl) {
     return {
       kind: 'tooltip',
