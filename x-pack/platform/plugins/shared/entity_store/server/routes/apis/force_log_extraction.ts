@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -22,16 +22,20 @@ import {
   resolveExtractionMode,
 } from '../../../common/domain/definitions/registry';
 
-const paramsSchema = z.object({
-  entityType: EntityType,
-});
+const paramsSchema = lazySchema(() =>
+  z.object({
+    entityType: EntityType,
+  })
+);
 
-const bodySchema = z.object({
-  fromDateISO: z.string().datetime(),
-  toDateISO: z.string().datetime(),
-  /** Which extraction process to run as. Defaults to the one this deployment actually runs. */
-  process: ExtractionMode.optional(),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    fromDateISO: z.string().datetime(),
+    toDateISO: z.string().datetime(),
+    /** Which extraction process to run as. Defaults to the one this deployment actually runs. */
+    process: ExtractionMode.optional(),
+  })
+);
 
 export function registerForceLogExtraction(router: EntityStorePluginRouter) {
   router.versioned
