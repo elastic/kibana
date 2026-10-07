@@ -642,6 +642,30 @@ describe('IndexPatterns', () => {
     });
   });
 
+  test('overwriting a data view with a new ID drops redacted namespaces', async () => {
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ id: 'old-id', namespaces: ['default', '?', '?'] }]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({
+      ...savedObject,
+      id: 'new-id',
+      namespaces: ['default'],
+    });
+    indexPatterns.setDefault = jest.fn();
+
+    await indexPatterns.createAndSaveDataViewLazy(
+      { id: 'new-id', title: 'kibana-*', name: 'Kibana *' },
+      true
+    );
+
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(expect.anything(), {
+      id: 'new-id',
+      initialNamespaces: ['default'],
+      overwrite: true,
+      managed: false,
+    });
+  });
+
   test('overwriting a data view uses explicitly supplied namespaces', async () => {
     savedObjectsClient.find = jest
       .fn()

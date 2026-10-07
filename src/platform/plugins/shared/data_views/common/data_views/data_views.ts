@@ -13,6 +13,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 import type { PersistenceAPI } from '../types';
 import { DataViewLazy } from './data_view_lazy';
 import { DEFAULT_DATA_VIEW_ID } from '../constants';
@@ -1285,7 +1286,10 @@ export class DataViewsService {
       if (overwrite) {
         if (dupe.id !== dataView.id) {
           if (preserveNamespaces && dupe.namespaces) {
-            dataView.namespaces = dupe.namespaces;
+            // Spaces the user cannot access are redacted as UNKNOWN_SPACE and cannot be used as initial namespaces
+            dataView.namespaces = dupe.namespaces.filter(
+              (namespace) => namespace !== UNKNOWN_SPACE
+            );
           }
           await this.delete(dupe.id);
         }
