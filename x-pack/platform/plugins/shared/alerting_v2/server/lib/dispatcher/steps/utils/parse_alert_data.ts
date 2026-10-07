@@ -6,13 +6,13 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import type { AlertEpisodeData } from '../../types';
+import type { AlertData } from '../../types';
 
-export function parseDataJson(json: string): AlertEpisodeData {
+export function parseDataJson(json: string): AlertData {
   try {
     const parsed = JSON.parse(json);
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
-    const result: AlertEpisodeData = {};
+    const result: AlertData = {};
     for (const [key, value] of Object.entries(parsed)) {
       if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
         set(result, key.split('.'), value);
