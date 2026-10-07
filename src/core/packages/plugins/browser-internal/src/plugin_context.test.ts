@@ -87,7 +87,7 @@ describe('createPluginSetupContext', () => {
 
   const createApp = (): App => ({ id: 'app', title: 'App', mount: jest.fn() });
 
-  it('registers the app unchanged when the plugin is not lazy-init enabled', () => {
+  it('registers the app unchanged when the plugin has no initialize()', () => {
     const plugin = createPlugin(createPluginManifest(testPluginId));
     const deps = createDeps();
     const app = createApp();
@@ -103,7 +103,7 @@ describe('createPluginSetupContext', () => {
     expect(deps.deferredInit.getStatus$).not.toHaveBeenCalled();
   });
 
-  it('wraps the app mount behind the initializing gate when the plugin is lazy-init enabled', () => {
+  it('wraps the app mount behind the initializing gate when the plugin has initialize()', () => {
     const plugin = createPlugin({
       ...createPluginManifest(testPluginId),
       hasInitialization: true,

@@ -316,18 +316,27 @@ export interface Plugin<
   /**
    * Expensive, Elasticsearch-bound initialization work, kept out of `setup()` and `start()`.
    *
-   * Core calls it with the same arguments as `start()` and decides when: today right after
-   * `start()` returns during boot (while `plugins.initializeOnBoot` is `true`), later on
-   * first use for plugins core chooses to initialize lazily. Plugin code is identical in
-   * both cases. `start()` is never awaited on it; a contract function that needs
-   * initialized state awaits `this.initialization.initialize()` itself
-   * (see {@link PluginInitializerContext.initialization}).
+   * Core calls it with the same arguments as `start()` and alone decides when. With
+   * `plugins.initializeOnBoot: true` (the default) it runs at boot, once every plugin's
+   * `start()` has returned. With `plugins.initializeOnBoot: false` it runs on first use:
+   * a request to one of the plugin's routes, one of its browser apps loading, the
+   * plugin's own `this.initialization.initialize()` call, a dependent's
+   * `core.plugins.initializePlugin()` call, or, on a node without the `ui` role, right
+   * after boot, since no request would ever reach it there. Plugin code is identical in
+   * both modes: `start()` runs at boot either way and never waits for it, and a contract
+   * function that needs initialized state awaits `this.initialization.initialize()`
+   * itself (see {@link PluginInitializerContext.initialization}). Do not await
+   * `this.initialization.initialize()` from inside this method, directly or through one
+   * of your contract functions: it would wait for itself and never settle.
    *
    * While it has not succeeded on this Kibana instance, routes registered through the
    * plugin's router answer 503 and the plugin's browser apps show a loading screen.
-   * A thrown error never fails boot: core retries with a jittered exponential backoff,
-   * and any later `initialize()` call or request starts a fresh attempt. Success is
-   * sticky for the lifetime of the process.
+   * A thrown error never fails boot: core retries in the background with a jittered
+   * exponential backoff, a bounded number of times. While a retry is scheduled, requests
+   * keep getting 503, and the plugin's own `this.initialization.initialize()` call starts
+   * a fresh attempt at once; once background retries are exhausted, the next request or
+   * call starts one.
+   * Success is sticky for the lifetime of the process.
    *
    * @remarks Runs on every Kibana instance against the same cluster, concurrently and
    * without coordination, so the work must be safe to run more than once. Only plugins
@@ -485,9 +494,12 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   };
   /**
    * Status of this plugin's own {@link Plugin.initialize} work, and the way to wait for it.
+   * Core decides when that work runs (see `plugins.initializeOnBoot`); awaiting it here is
+   * what keeps the plugin's code correct in either mode.
    *
-   * Keep it on the instance and await `initialize()` from the contract functions and
-   * route handlers that need initialized state:
+   * Keep it on the instance and await `initialize()` from the contract functions, task
+   * runners and other post-boot code paths that need initialized state. Routes registered
+   * through the plugin's own router are gated by core and need nothing extra:
    *
    * @example
    * ```ts

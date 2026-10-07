@@ -821,8 +821,8 @@ describe('lifecycle guard', () => {
   });
 });
 
-describe('deferred-init engine wiring', () => {
-  it('registers the deferred-init engine with the runtime contract resolver, when present', async () => {
+describe('DeferredInitEngine wiring', () => {
+  it('registers the DeferredInitEngine with the runtime contract resolver, when present', async () => {
     const engine = new DeferredInitEngine(logger.get());
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
     const plugin = createPlugin('somePlugin');

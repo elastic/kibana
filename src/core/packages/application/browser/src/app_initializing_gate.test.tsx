@@ -72,7 +72,7 @@ describe('AppInitializingGate', () => {
       </AppInitializingGate>
     );
 
-    // Deferred init succeeded here; it was the app's own mount() that rejected, so the copy must
+    // initialize() succeeded here; it was the app's own mount() that rejected, so the copy must
     // not blame initialization.
     expect(result.getByText(`"${PLUGIN_ID}" failed to load`)).toBeTruthy();
     expect(result.queryByText(`"${PLUGIN_ID}" failed to initialize`)).toBeNull();

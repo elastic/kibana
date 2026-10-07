@@ -239,7 +239,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       // `failed`, since an initialization attempt only rejects once it has failed.
       if (isPluginInitializationError(error)) {
         this.log.debug(
-          `503 deferred-init for "${error.pluginId}"`,
+          `503 Plugin "${error.pluginId}" not initialized`,
           formatErrorMeta(503, { request, error })
         );
         const body: DeferredInitUnavailableBody = {

@@ -14,7 +14,9 @@
 export type PluginInitState = 'idle' | 'initializing' | 'available' | 'failed';
 
 /**
- * Where a plugin's `initialize()` stands on this Kibana instance.
+ * Where a plugin's `initialize()` stands on this Kibana instance. Held in memory per instance,
+ * like any other `/status` entry: every instance runs `initialize()` itself and reports its own
+ * state.
  * @public
  */
 export interface PluginInitStatus {

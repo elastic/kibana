@@ -13,7 +13,9 @@ import type { PluginInitStatus } from '@kbn/core-deferred-init-common';
 export type { PluginInitState, PluginInitStatus } from '@kbn/core-deferred-init-common';
 
 /**
- * Lets a plugin wait for, or inspect, its own initialization.
+ * Lets a plugin wait for, or inspect, its own initialization. Core decides when the plugin's
+ * `initialize()` runs (at boot by default, on first use when `plugins.initializeOnBoot` is
+ * `false`); this object is how the plugin's own code makes sure it has, in either mode.
  * See {@link PluginInitializerContext.initialization}.
  * @public
  */
@@ -26,6 +28,9 @@ export interface PluginInitialization {
    * the last attempt failed and a retry is still scheduled. Rejects with a
    * {@link PluginInitializationError} when the attempt fails, and rejects when called
    * during the plugin `setup` or `start` lifecycle, where awaiting it would block boot.
+   * Do not await it from inside your own `initialize()`, directly or through one of your
+   * contract functions: it would join the attempt that called it, wait for itself and
+   * never settle.
    */
   initialize(): Promise<void>;
   /** Never triggers anything. Replays the current value to new subscribers. */
