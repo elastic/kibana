@@ -220,7 +220,7 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async openSavedQueryManagementComponent() {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists('queryBarMenuPanel'))) {
+      if (!(await this.testSubjects.waitForExists('queryBarMenuPanel', { timeout: 500 }))) {
         await this.testSubjects.click('showQueryBarMenu');
       }
       await this.testSubjects.existOrFail('queryBarMenuPanel');

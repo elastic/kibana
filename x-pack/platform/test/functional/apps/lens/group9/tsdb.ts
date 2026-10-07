@@ -200,7 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             for (const supportedOp of supportedOperations) {
               // now check if the provided function has no incompatibility tooltip
               expect(
-                await testSubjects.exists(
+                await testSubjects.waitForExists(
                   `lns-indexPatternDimension-${supportedOp.name} incompatible`
                 )
               ).to.eql(supportedOp[fieldType]);
@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             for (const unsupportedOp of unsupportedOperatons) {
               // now check if the provided function has the incompatibility tooltip
               expect(
-                await testSubjects.exists(
+                await testSubjects.waitForExists(
                   `lns-indexPatternDimension-${unsupportedOp.name} incompatible`
                 )
               ).to.eql(!unsupportedOp[fieldType]);
