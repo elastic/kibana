@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -52,6 +53,13 @@ const mockIndexPatterns = [
   },
 ] as DataView[];
 
+const mockPresets = [
+  { start: 'now-15m', end: 'now', label: 'Last 15 minutes', isEditable: false },
+  { start: 'now-1h', end: 'now', label: 'Last hour', isEditable: false },
+  { start: 'now-24h', end: 'now', label: 'Last 24 hours', isEditable: false },
+  { start: 'now-7d', end: 'now', label: 'Last 7 days', isEditable: false },
+];
+
 const mockTimeHistory = {
   get: () => {
     return [];
@@ -86,7 +94,30 @@ const services = {
     get: () => {},
   },
   settings: { client: { get: () => {} } },
-  notifications: action('notifications'),
+  notifications: {
+    toasts: {
+      addSuccess: action('toasts.addSuccess'),
+      addDanger: action('toasts.addDanger'),
+      addWarning: action('toasts.addWarning'),
+      addError: action('toasts.addError'),
+      remove: action('toasts.remove'),
+    },
+  },
+  kql: {
+    autocomplete: {
+      hasQuerySuggestions: () => Promise.resolve(false),
+      getQuerySuggestions: () => [],
+    },
+  },
+  dataViews: {
+    get: () => Promise.resolve(mockIndexPatterns[0]),
+    create: () => Promise.resolve(mockIndexPatterns[0]),
+    getIndices: () => Promise.resolve([]),
+    getIdsWithTitle: () => [
+      { id: '1234', title: 'logstash-*' },
+      { id: '1235', title: 'test-*' },
+    ],
+  },
   http: {
     basePath: {
       prepend: () => 'http://test',
@@ -101,7 +132,27 @@ const services = {
   },
   storage: createMockStorage(),
   data: {
+    search: {
+      isBackgroundSearchEnabled: false,
+      session: {
+        state$: new BehaviorSubject('none'),
+        getSessionId: () => undefined,
+        save: () => Promise.resolve(),
+      },
+    },
+    dateRangePickerPresets: {
+      getDefaultPresets: () => mockPresets,
+      getPresets$: () => of(mockPresets),
+      canPersist: () => false,
+      savePreset: () => Promise.resolve(),
+      deletePreset: () => Promise.resolve(),
+    },
     query: {
+      timefilter: {
+        timefilter: {
+          getAutoRefreshFetch$: () => EMPTY,
+        },
+      },
       savedQueries: {
         findSavedQueries: () =>
           Promise.resolve({
