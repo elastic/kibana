@@ -152,6 +152,17 @@ describe('getColumnsWithHighlights', () => {
     ).toEqual(['h', 'highlight_title']);
   });
 
+  it('uses the field a field-targeting query names when ON is omitted', () => {
+    expect(
+      Object.keys(getColumnsWithHighlights('FROM books | HIGHLIGHT MATCH(title, "Tolkien")'))
+    ).toEqual(['highlight_title']);
+  });
+
+  it('styles the source column a field-targeting query overwrites with an empty prefix', () => {
+    const query = 'FROM books | HIGHLIGHT prefix = "" title : "Tolkien"';
+    expect(Object.keys(getColumnsWithHighlights(query, ['title', 'author']))).toEqual(['title']);
+  });
+
   it('cannot tell the derived columns apart when the prefix is empty', () => {
     const query = 'FROM books | HIGHLIGHT prefix = "" "Tolkien" ON *';
     expect(getColumnsWithHighlights(query, ['title', 'description'])).toEqual({});

@@ -27,6 +27,7 @@ import type {
   ESQLFunction,
   ESQLMap,
 } from '@elastic/esql/types';
+import { deriveQueryFieldNames } from '@kbn/esql-language';
 import { getArgsFromRenameFunction, replaceColumnNamesIfRenamed } from './query_parsing_helpers';
 
 export const DEFAULT_HIGHLIGHT_PRE_TAG = '<em>';
@@ -149,16 +150,20 @@ export function getColumnsWithHighlights(
 
     const prefix = command.prefix?.valueUnquoted ?? HIGHLIGHT_COMMAND_DEFAULT_PREFIX;
 
-    const { highlightFields } = command;
+    const { highlightFields, queryExpression } = command;
 
-    for (const field of highlightFields ?? []) {
-      // A parameter cannot be resolved to a column name here, and a pattern other than `*` is
-      // rejected by the language.
-      if (!isColumn(field) || field.name.includes('*')) {
-        continue;
-      }
+    // The fields the query text names: the ON list, or without ON the fields the query narrows
+    // to. A parameter cannot be resolved here, and a pattern other than `*` is rejected by the
+    // language.
+    const namedFieldNames =
+      highlightFields !== undefined
+        ? highlightFields
+            .filter((field) => isColumn(field) && !field.name.includes('*'))
+            .map(({ name }) => name)
+        : queryExpression && deriveQueryFieldNames(queryExpression);
 
-      const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [`${prefix}${field.name}`]);
+    for (const fieldName of namedFieldNames ?? []) {
+      const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [`${prefix}${fieldName}`]);
 
       columnsWithHighlights[resolvedColumnName] = {
         preTag,
@@ -166,12 +171,12 @@ export function getColumnsWithHighlights(
       };
     }
 
-    // `ON *`, or an omitted ON, highlights fields that only the response tells apart. Their
-    // columns are the ones that start with the prefix; an empty prefix overwrites the source
-    // columns, which cannot be told apart from the rest.
+    // `ON *`, or an omitted ON whose fields the query does not name, highlights fields that only
+    // the response tells apart. Their columns are the ones that start with the prefix; an empty
+    // prefix overwrites the source columns, which cannot be told apart from the rest.
     const highlightsDerivedFields =
-      highlightFields === undefined ||
-      highlightFields.some((field) => isColumn(field) && field.name === '*');
+      namedFieldNames === undefined ||
+      Boolean(highlightFields?.some((field) => isColumn(field) && field.name === '*'));
 
     if (highlightsDerivedFields && prefix !== '') {
       // The response names are final; only a generated column renamed later needs resolving,
