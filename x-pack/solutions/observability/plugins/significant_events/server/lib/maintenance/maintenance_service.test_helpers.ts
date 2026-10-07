@@ -17,7 +17,6 @@ import type { SignificantEventsServer } from '../../types';
 import type { KnowledgeIndicatorType } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
-import { EVENTS_DATA_STREAM } from '../significant_events/events/data_stream';
 import { createSignificantEventsMaintenanceService } from './maintenance_service';
 
 export const REQUEST = { headers: {} } as KibanaRequest;
@@ -239,7 +238,6 @@ export function makeService(params?: {
     Object.entries(
       params?.dataStreams ?? {
         [DETECTIONS_DATA_STREAM]: 0,
-        [EVENTS_DATA_STREAM]: 0,
         [KNOWLEDGE_INDICATORS_DATA_STREAM]: 0,
       }
     )

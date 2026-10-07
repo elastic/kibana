@@ -24,12 +24,10 @@ export type MigrationPrebuiltRule = ElasticRulePartial &
   >;
 
 export type MigrationCustomRule = ElasticRulePartial &
-  Required<
-    Pick<
-      ElasticRulePartial,
-      'title' | 'description' | 'query' | 'query_language' | 'severity' | 'risk_score'
-    >
-  >;
+  Required<Pick<ElasticRulePartial, 'title' | 'description' | 'severity' | 'risk_score'>> & {
+    // query fields are nullable in the schema (null unsets them); a custom rule always has them
+    [K in 'query' | 'query_language']-?: NonNullable<ElasticRulePartial[K]>;
+  };
 
 export const isMigrationPrebuiltRule = (rule?: ElasticRule): rule is MigrationPrebuiltRule =>
   !!(rule?.title && rule?.description && rule?.prebuilt_rule_id);

@@ -32,6 +32,11 @@ export const registerTaskManagerRunSoonRoute = (
         params: schema.object({
           taskId: schema.string(),
         }),
+        body: schema.nullable(
+          schema.object({
+            requestImmediateClaim: schema.maybe(schema.boolean()),
+          })
+        ),
       },
     },
     async (
@@ -50,7 +55,11 @@ export const registerTaskManagerRunSoonRoute = (
       const { taskId } = req.params;
 
       try {
-        return res.ok({ body: await startContract.runSoon(taskId) });
+        return res.ok({
+          body: await startContract.runSoon(taskId, {
+            requestImmediateClaim: req.body?.requestImmediateClaim,
+          }),
+        });
       } catch (err) {
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }
