@@ -6,11 +6,13 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
+import { registerWorkflowExecutionPublicStepDefinitions } from './workflow_execution/step_types';
 import { registerTemplate } from './conversation_templates/registry/register_template';
 import { escalationTemplate } from './conversation_templates/templates/escalation/register';
 import { investigationTemplate } from './conversation_templates/templates/investigation/register';
@@ -49,6 +51,7 @@ export class AgenticInvestigationsPublicPlugin
   ): AgenticInvestigationsPublicPluginSetup {
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
+    registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
     return {};
   }
 
@@ -59,6 +62,12 @@ export class AgenticInvestigationsPublicPlugin
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder);
+      if (this.escalationsEnabled) {
+        registerEscalationConversationEventUiDefinitions({
+          conversationEvents: agentBuilder.conversationEvents,
+          application: core.application,
+        });
+      }
       registerSubjectAttachmentTypes(agentBuilder);
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({

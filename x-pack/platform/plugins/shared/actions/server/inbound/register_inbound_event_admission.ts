@@ -7,7 +7,14 @@
 
 import { normalizeConnectorTypeId } from '@kbn/connector-specs';
 import type { LifecycleResponseFactory } from '@kbn/core-http-server';
-import type { HttpServiceSetup, KibanaRequest, Logger, OnPreAuthToolkit } from '@kbn/core/server';
+import type {
+  HttpServiceSetup,
+  KibanaRequest,
+  Logger,
+  OnPreAuthToolkit,
+  OnPreResponseInfo,
+  OnPreResponseToolkit,
+} from '@kbn/core/server';
 
 import type { InboundEventAdmissionConfig } from '../actions_config';
 import {
@@ -152,5 +159,65 @@ export const admitInboundEventRequest = ({
   }
 
   request.events.completed$.subscribe({ next: decision.release });
+  return toolkit.next();
+};
+
+/**
+ * Counts a body rejected by the route `maxBytes` limit. That 413 is produced before the handler runs.
+ */
+export const registerInboundEventSizeOutcome = ({
+  http,
+  logger,
+  getSpaceId,
+}: {
+  http: Pick<HttpServiceSetup, 'registerOnPreResponse'>;
+  logger: Logger;
+  getSpaceId: (request: KibanaRequest) => string;
+}): void => {
+  http.registerOnPreResponse((request, preResponse, toolkit) =>
+    recordOversizedInboundEvent({ request, preResponse, toolkit, logger, getSpaceId })
+  );
+};
+
+export const recordOversizedInboundEvent = ({
+  request,
+  preResponse,
+  toolkit,
+  logger,
+  getSpaceId,
+}: {
+  request: KibanaRequest;
+  preResponse: OnPreResponseInfo;
+  toolkit: OnPreResponseToolkit;
+  logger: Logger;
+  getSpaceId: (request: KibanaRequest) => string;
+}) => {
+  if (preResponse.statusCode !== 413 || !isInboundEventsRoute(request)) {
+    return toolkit.next();
+  }
+
+  const ids = readInboundEventIds(request.route.path);
+  const connectorTypeId =
+    ids && ids !== 'malformed' ? normalizeConnectorTypeId(ids.connectorTypeId) : 'unknown';
+  const connectorId = ids && ids !== 'malformed' ? ids.connectorId : 'unknown';
+  let spaceId = 'unknown';
+  try {
+    spaceId = getSpaceId(request);
+  } catch (error) {
+    logger.debug(
+      `Inbound events size outcome could not read the space id: ${
+        error instanceof Error ? error.message : 'unknown'
+      }`
+    );
+  }
+
+  logInboundIngressOutcome(logger, {
+    outcome: 'payload_too_large',
+    spaceId,
+    connectorId,
+    connectorTypeId,
+    requestId: request.id,
+    detail: 'body_exceeds_max_bytes',
+  });
   return toolkit.next();
 };
