@@ -130,6 +130,11 @@ components:
         metadata:
           type: object
           additionalProperties: true
+        direction:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Direction'
+          description: >-
+            This score's own direction, for evaluators whose scores do not all
+            share one. Absent means the evaluator's `direction` applies.
     EvaluateResultError:
       type: object
       required:

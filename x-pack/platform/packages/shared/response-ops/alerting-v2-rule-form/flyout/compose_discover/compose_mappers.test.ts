@@ -108,6 +108,20 @@ describe('composeFormToCreateRequest', () => {
     expect(result.metadata.tags).toBeUndefined();
   });
 
+  it('maps routing tags when present and omits them when empty', () => {
+    const withRoutingTags = composeFormToCreateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+    });
+    expect(withRoutingTags.metadata.routing_tags).toEqual(['sre']);
+
+    const withoutRoutingTags = composeFormToCreateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: [] },
+    });
+    expect(withoutRoutingTags.metadata).not.toHaveProperty('routing_tags');
+  });
+
   it('maps grouping when present', () => {
     const values: FormValues = {
       ...baseFormValues,
@@ -326,6 +340,19 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.metadata?.tags).toEqual(['prod', 'infra']);
   });
 
+  it('sends routing tags when present', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+    });
+    expect(result.metadata?.routing_tags).toEqual(['sre']);
+  });
+
+  it('nullifies routing tags when empty (clear all routing tags on a partial update)', () => {
+    const result = composeFormToUpdateRequest(baseFormValues);
+    expect(result.metadata?.routing_tags).toBeNull();
+  });
+
   it('preserves grouping when present', () => {
     const values: FormValues = {
       ...baseFormValues,
@@ -379,6 +406,14 @@ describe('mapRuleToComposeFormValues', () => {
     });
     expect(result.stateTransitionAlertDelayMode).toBe('immediate');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
+  });
+
+  it('loads routing tags from the rule', () => {
+    const rule = {
+      ...baseRuleResponse,
+      metadata: { ...baseRuleResponse.metadata, routing_tags: ['sre'] },
+    } as RuleResponse;
+    expect(mapRuleToComposeFormValues(rule).metadata.routingTags).toEqual(['sre']);
   });
 
   it('maps schedule with lookback', () => {
