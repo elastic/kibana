@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
+import { isAlertStatusWorkflowTriggerEnabled } from '../lib/events/alert_status_changed_setting';
 import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
 import type {
   IntervalSchedule,
@@ -85,6 +86,8 @@ import {
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
+import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
+import { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../lib/workflow_extensions/events';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -521,6 +524,20 @@ export class TaskRunner<
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
 
+    // ActionScheduler calls alert.unscheduleActions() once it has scheduled a per-alert action,
+    // which clears getScheduledActionOptions(). Snapshot the action group of each new alert
+    // (id -> group) now so the alertStatusChanged payload can still report it afterwards.
+    // Only done when the batch could be built; the per-space setting is still read later.
+    const newAlertActionGroups = new Map<string, string>();
+    if (!this.cancelled && this.ruleType.autoRecoverAlerts && this.context.alertingEventBus) {
+      for (const [id, alert] of Object.entries(alertsClient.getProcessedAlerts('new'))) {
+        const actionGroup = alert.getScheduledActionOptions()?.actionGroup;
+        if (actionGroup != null) {
+          newAlertActionGroups.set(id, actionGroup);
+        }
+      }
+    }
+
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
         if (isRuleSnoozed(rule)) {
@@ -573,6 +590,66 @@ export class TaskRunner<
       );
     }
 
+    // Collect alert status-change events for rules whose alerts recover automatically.
+    // The batch is returned and published to the bus only after processRunResults()
+    // completes. Cancelled runs collect and publish nothing on purpose: a run cancelled
+    // for timeout is treated as a failed run, so its events are dropped (at most once).
+    let alertStatusChangedBatch: RunRuleResult['alertStatusChangedBatch'];
+    if (!this.cancelled && this.ruleType.autoRecoverAlerts && this.context.alertingEventBus) {
+      const newAlerts = alertsClient.getProcessedAlerts('new');
+      const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
+      const newEntries = Object.entries(newAlerts);
+      const recoveredEntries = Object.entries(recoveredAlerts);
+
+      // The per-space advanced setting is read only when there is something to emit, and after
+      // the executor has finished. While it is off, nothing is built or published.
+      if (
+        (newEntries.length > 0 || recoveredEntries.length > 0) &&
+        (await isAlertStatusWorkflowTriggerEnabled({
+          uiSettings: this.context.uiSettings,
+          savedObjects: this.context.savedObjects,
+          request: fakeRequest,
+          logger: this.logger,
+        }))
+      ) {
+        const rulePayload: AlertStatusChangedV1Payload['rule'] = {
+          id: ruleId,
+          name: rule.name,
+          spaceId,
+          consumer: rule.consumer,
+          ruleTypeId: this.ruleType.id,
+          tags: rule.tags,
+          ruleTypeName: this.ruleType.name,
+        };
+
+        alertStatusChangedBatch = {
+          request: fakeRequest,
+          events: [
+            ...newEntries.map(([id, alert]) => ({
+              rule: rulePayload,
+              alert: {
+                id: alert.getId(),
+                uuid: alert.getUuid(),
+                status: 'active' as const,
+                actionGroup: newAlertActionGroups.get(id) ?? null,
+                start: alert.getStart(),
+              },
+            })),
+            ...recoveredEntries.map(([, alert]) => ({
+              rule: rulePayload,
+              alert: {
+                id: alert.getId(),
+                uuid: alert.getUuid(),
+                status: 'recovered' as const,
+                actionGroup: alert.getLastScheduledActions()?.group ?? null,
+                start: alert.getStart(),
+              },
+            })),
+          ],
+        };
+      }
+    }
+
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       state: {
@@ -581,6 +658,7 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
+      alertStatusChangedBatch,
       expiredSnoozedInstances:
         expiredInstances.length > 0 || conditionExpiredInstances.length > 0
           ? [
@@ -926,6 +1004,27 @@ export class TaskRunner<
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
       this.processRunResults({ schedule, runRuleResult })
     );
+
+    // Publish alert status-change events only after processRunResults() has completed.
+    // Events follow persisted state, the same as actions do.
+    // - If the rule type throws, the run result is an error and nothing is published. The state
+    //   falls back to the previous run, so the next run classifies those alerts again.
+    // - If the rule type only records an error (addLastRunError) and finishes, the new alert
+    //   state is persisted and its actions are scheduled, so the events are published too.
+    //   Holding them back would lose them, because the next run sees those alerts as ongoing.
+    // - A run cancelled for timeout publishes nothing.
+    if (isOk(runRuleResult) && !this.cancelled && this.context.alertingEventBus) {
+      const batch = runRuleResult.value.alertStatusChangedBatch;
+      if (batch) {
+        const bus = this.context.alertingEventBus;
+        for (const payload of batch.events) {
+          bus.publish(
+            { type: ALERT_STATUS_CHANGED_EVENT_TYPE, payload },
+            { request: batch.request }
+          );
+        }
+      }
+    }
 
     return {
       state: getState({

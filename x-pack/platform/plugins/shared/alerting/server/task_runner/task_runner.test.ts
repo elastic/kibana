@@ -34,6 +34,7 @@ import {
 import type { TaskRunnerContext } from './types';
 import { ApiKeyType } from './types';
 import { TaskRunner } from './task_runner';
+import { ActionScheduler } from './action_scheduler';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
@@ -50,6 +51,7 @@ import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -62,6 +64,7 @@ import {
   mockedRuleTypeSavedObject,
   ruleType,
   RULE_NAME,
+  RULE_TYPE_ID,
   generateRunnerResult,
   RULE_ACTIONS,
   generateEnqueueFunctionInput,
@@ -77,6 +80,7 @@ import {
   mockAAD,
   mockedRawRuleSO,
 } from './fixtures';
+import { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../lib/workflow_extensions/events';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
@@ -107,6 +111,8 @@ import {
 } from './maintenance_windows/maintenance_windows_service.mock';
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { alertStatusChangedV1EventSchema } from '../../common/workflows/triggers/alert_status_changed';
+import { ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID } from '../../common/workflows/triggers/alert_status_changed_setting';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
@@ -4507,4 +4513,381 @@ describe('Task Runner', () => {
     }
     expect(alertingEventLogger.logTimeout).not.toHaveBeenCalled();
   }
+
+  // ---------------------------------------------------------------------------
+  // alerting.v1.alertStatusChanged workflow trigger
+  // ---------------------------------------------------------------------------
+
+  describe('alerting.v1.alertStatusChanged workflow trigger', () => {
+    const mockBus = { publish: jest.fn(), subscribe: jest.fn() };
+
+    /** Minimal alert stub — only the methods task_runner.ts calls for the payload. */
+    const makeMockAlert = (opts: {
+      id: string;
+      uuid: string;
+      start?: string | null;
+      actionGroup?: string | null;
+      lastGroup?: string | null;
+    }) => ({
+      getId: () => opts.id,
+      getUuid: () => opts.uuid,
+      getStart: () => opts.start ?? null,
+      getScheduledActionOptions: () =>
+        opts.actionGroup !== undefined ? { actionGroup: opts.actionGroup } : null,
+      getLastScheduledActions: () =>
+        opts.lastGroup !== undefined ? { group: opts.lastGroup } : null,
+    });
+
+    const contextWithBus = () => ({
+      ...taskRunnerFactoryInitializerParams,
+      alertingEventBus: mockBus,
+    });
+
+    const createRunnerWithBus = (
+      overrides: Partial<ConstructorParameters<typeof TaskRunner>[0]> = {}
+    ) => createTaskRunner({ context: contextWithBus(), ...overrides });
+
+    const settingsClient = uiSettingsServiceMock.createClient();
+
+    beforeEach(() => {
+      mockBus.publish.mockClear();
+      settingsClient.get.mockReset();
+      settingsClient.get.mockResolvedValue(true);
+      uiSettingsService.asScopedToClient.mockReturnValue(settingsClient);
+      ruleType.autoRecoverAlerts = true;
+      ruleType.executor.mockResolvedValue({ state: {} });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+      alertsClient.getRawAlertInstancesForState.mockReturnValue({
+        rawActiveAlerts: {},
+        rawRecoveredAlerts: {},
+      });
+      // Repair shallow-spread mutation from the "should return shouldDisableTask" test
+      // (line ~3779) which sets mockedRawRuleSO.attributes.enabled = false on the
+      // shared attributes reference, and the outer beforeEach never resets it.
+      mockedRawRuleSO.attributes.enabled = true;
+      // Use a rule with no actions so ActionScheduler is a no-op and won't
+      // call methods on our minimal alert stubs.
+      mockGetRuleFromRaw.mockReturnValue({ ...(mockedRuleTypeSavedObject as Rule), actions: [] });
+      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+      alertsClient.getProcessedAlerts.mockReturnValue({});
+    });
+
+    afterEach(() => {
+      ruleType.autoRecoverAlerts = true;
+      ruleType.cancelAlertsOnRuleTimeout = true;
+    });
+
+    describe('advanced setting gate', () => {
+      const newAlertProcessed = () => {
+        const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'new' ? { 'alert-1': alert } : {}
+        );
+      };
+
+      test('does not publish when the setting is off', async () => {
+        settingsClient.get.mockResolvedValue(false);
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(settingsClient.get).toHaveBeenCalledWith(ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID);
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+
+      test('does not publish when reading the setting fails', async () => {
+        settingsClient.get.mockRejectedValue(new Error('saved objects unavailable'));
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+
+      test('reads the setting through a saved objects client that skips the security extension', async () => {
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        // The client is built from the rule's own request, so the read stays space scoped, and
+        // it skips the security extension so a rule owner without config access still reads it.
+        expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ excludedExtensions: [SECURITY_EXTENSION_ID] })
+        );
+        expect(uiSettingsService.asScopedToClient).toHaveBeenCalled();
+        expect(settingsClient.get).toHaveBeenCalledWith(ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID);
+      });
+
+      describe('when the rule is muted', () => {
+        // The describe-level beforeEach copies the shared rule fixture, and this beforeAll runs
+        // before it, so every test here sees a muted rule.
+        beforeAll(() => {
+          mockedRuleTypeSavedObject.muteAll = true;
+        });
+        afterAll(() => {
+          mockedRuleTypeSavedObject.muteAll = false;
+        });
+
+        test('still publishes, because muting only suppresses notifications', async () => {
+          newAlertProcessed();
+
+          await createRunnerWithBus().run();
+
+          expect(mockBus.publish).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      test('does not read the setting when no alert changed status', async () => {
+        await createRunnerWithBus().run();
+
+        expect(settingsClient.get).not.toHaveBeenCalled();
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+    });
+
+    test('keeps the action group of a new alert when ActionScheduler unschedules its actions', async () => {
+      // Model the real Alert: the per-alert action scheduler calls unscheduleActions() after it
+      // schedules an action, which clears the scheduled options.
+      let scheduledGroup: string | null = 'default';
+      const alert = {
+        ...makeMockAlert({ id: 'alert-1', uuid: 'uuid-1' }),
+        getScheduledActionOptions: () =>
+          scheduledGroup === null ? undefined : { actionGroup: scheduledGroup },
+        unscheduleActions: () => {
+          scheduledGroup = null;
+        },
+      };
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      // The rule keeps its per-alert action (not `actions: []`).
+      mockGetRuleFromRaw.mockReturnValue({
+        ...(mockedRuleTypeSavedObject as Rule),
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: 'action',
+            params: {},
+            uuid: 'action-uuid-1',
+          },
+        ],
+      });
+      const runSpy = jest.spyOn(ActionScheduler.prototype, 'run').mockImplementation(async () => {
+        alert.unscheduleActions();
+        return { throttledSummaryActions: {} };
+      });
+
+      try {
+        await createRunnerWithBus().run();
+        expect(runSpy).toHaveBeenCalledTimes(1);
+      } finally {
+        runSpy.mockRestore();
+      }
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      expect(mockBus.publish.mock.calls[0][0].payload.alert.actionGroup).toBe('default');
+    });
+
+    test('publishes active event when an alert transitions to new', async () => {
+      const alert = makeMockAlert({
+        id: 'alert-1',
+        uuid: 'uuid-1',
+        start: '2024-01-01T00:00:00.000Z',
+        actionGroup: 'default',
+      });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      expect(mockBus.publish).toHaveBeenCalledWith(
+        {
+          type: ALERT_STATUS_CHANGED_EVENT_TYPE,
+          payload: {
+            rule: {
+              id: '1',
+              name: RULE_NAME,
+              spaceId: 'default',
+              consumer: 'bar',
+              ruleTypeId: RULE_TYPE_ID,
+              tags: ['rule-', '-tags'],
+              ruleTypeName: ruleType.name,
+            },
+            alert: {
+              id: 'alert-1',
+              uuid: 'uuid-1',
+              status: 'active',
+              actionGroup: 'default',
+              start: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        },
+        expect.anything()
+      );
+    });
+
+    test('payload built in task_runner passes alertStatusChangedV1EventSchema.parse()', async () => {
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      const published = mockBus.publish.mock.calls[0][0];
+      expect(() => alertStatusChangedV1EventSchema.parse(published.payload)).not.toThrow();
+    });
+
+    test('publishes recovered event when an alert recovers', async () => {
+      const alert = makeMockAlert({
+        id: 'alert-2',
+        uuid: 'uuid-2',
+        start: '2024-01-01T00:00:00.000Z',
+        lastGroup: 'default',
+      });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'recovered' ? { 'alert-2': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      expect(mockBus.publish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ALERT_STATUS_CHANGED_EVENT_TYPE,
+          payload: expect.objectContaining({
+            alert: expect.objectContaining({
+              id: 'alert-2',
+              uuid: 'uuid-2',
+              status: 'recovered',
+              actionGroup: 'default',
+              start: '2024-01-01T00:00:00.000Z',
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    test('publishes one event per alert when both new and recovered alerts exist', async () => {
+      const newAlert = makeMockAlert({ id: 'new-1', uuid: 'uuid-new', actionGroup: 'default' });
+      const recAlert = makeMockAlert({ id: 'rec-1', uuid: 'uuid-rec', lastGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) => {
+        if (type === 'new') return { 'new-1': newAlert };
+        if (type === 'recovered') return { 'rec-1': recAlert };
+        return {};
+      });
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(2);
+    });
+
+    test('does not publish when there are no new or recovered alerts', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue({});
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
+    test('does not publish when autoRecoverAlerts is false', async () => {
+      ruleType.autoRecoverAlerts = false;
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
+    test('publishes when the executor records a run error but finishes, because the alert state is persisted', async () => {
+      // addLastRunError does not make the run result an error, so the new alert state is saved
+      // and its actions are scheduled. Holding the events back would lose them for good, since
+      // the next run sees these alerts as ongoing.
+      ruleResultService.getLastRunResults.mockReturnValue({
+        errors: [{ message: 'executor error', userError: false }],
+        warnings: [],
+        outcomeMessage: '',
+      });
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not publish when the executor throws', async () => {
+      // A thrown executor makes the run result an error, so the state falls back to the previous
+      // run and the next run classifies these alerts again.
+      ruleType.executor.mockRejectedValue(new Error('executor failed'));
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
+    test('does not publish when the run is cancelled while the rule saved object is being updated', async () => {
+      // The batch is built before processRunResults() awaits the post-run rule update, so a
+      // timeout that cancels the task during that await must still suppress publication.
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      elasticsearchService.client.asInternalUser.update.mockImplementationOnce(async () => {
+        await taskRunner.cancel();
+        return {
+          _id: 'alert:1',
+          _index: 'idx',
+          _version: 2,
+          _seq_no: 2,
+          _primary_term: 1,
+          result: 'updated',
+          _shards: { total: 1, successful: 1, failed: 0 },
+        };
+      });
+
+      await taskRunner.run();
+
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
+    test('does not publish when run is cancelled, even when cancelAlertsOnRuleTimeout is disabled', async () => {
+      // With cancelAlertsOnRuleTimeout:false, shouldLogAndScheduleActionsForAlerts() returns
+      // true for a cancelled run, so alerts are still persisted. A cancelled run must still
+      // publish nothing. The run is cancelled very early here, so this test does not show which
+      // check stops it. The test above covers the check that runs after the rule update.
+      ruleType.cancelAlertsOnRuleTimeout = false;
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus({
+        context: { ...contextWithBus(), cancelAlertsOnRuleTimeout: false },
+      });
+      const promise = taskRunner.run();
+      await Promise.resolve();
+      await taskRunner.cancel();
+      await promise;
+
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+  });
 });
