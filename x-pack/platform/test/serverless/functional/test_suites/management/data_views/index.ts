@@ -25,7 +25,5 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
     });
 
     loadTestFile(require.resolve('./serverless'));
-    loadTestFile(require.resolve('./_edit_field'));
-    loadTestFile(require.resolve('./_cache'));
   });
 };
