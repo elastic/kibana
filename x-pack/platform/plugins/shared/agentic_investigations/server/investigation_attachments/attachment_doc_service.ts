@@ -26,8 +26,14 @@ import { withTransientSearchRetry } from './search_with_transient_retry';
 /** Two writers converge on the retry; the third attempt is spare. */
 export const MAX_INVESTIGATION_ATTACHMENT_WRITE_ATTEMPTS = 3;
 
-/** Ceiling on conversation ids per bulk read or candidate search. */
+/** Ceiling on conversation ids per bulk read, and the default for a candidate search. */
 export const MAX_INVESTIGATION_ATTACHMENT_CONVERSATION_IDS = 1000;
+
+/**
+ * Ceiling on the conversation ids one candidate search returns: Elasticsearch's result window.
+ * The list API reads these as the caller before it applies its own candidate cap.
+ */
+export const MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS = 10_000;
 
 /** Bound on ids forwarded to Elasticsearch. Matches the HTTP schemas of every entity. */
 export const MAX_INVESTIGATION_ATTACHMENT_ID_LENGTH = 256;
@@ -182,7 +188,9 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
 
   /**
    * Conversation ids whose documents match every filter clause, for list filters that start from
-   * this index. Unique, in hit order, at most `size`.
+   * this index. Unique, at most `size` (up to {@link MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS}).
+   * Hits are collapsed on the conversation, so the window counts conversations, not documents: a
+   * conversation with many matching documents takes one slot.
    */
   async searchConversationIds({
     spaceId,
@@ -194,16 +202,17 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
     size?: number;
   }): Promise<string[]> {
     assertBoundedId(spaceId, 'spaceId');
-    if (size < 1 || size > MAX_INVESTIGATION_ATTACHMENT_CONVERSATION_IDS) {
+    if (size < 1 || size > MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS) {
       throw new InvestigationAttachmentInvalidRequestError(
-        `size must be between 1 and ${MAX_INVESTIGATION_ATTACHMENT_CONVERSATION_IDS}`
+        `size must be between 1 and ${MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS}`
       );
     }
 
     const response = await this.search({
       track_total_hits: false,
-      size: Math.min(size * this.maxDocumentsPerConversation, MAX_RESULT_WINDOW),
+      size,
       _source: ['conversationId'],
+      collapse: { field: 'conversationId' },
       query: { bool: { filter: [{ term: { spaceId } }, ...filter] } },
     });
 
@@ -213,11 +222,34 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
       if (conversationId !== undefined) {
         conversationIds.add(conversationId);
       }
-      if (conversationIds.size >= size) {
+    }
+    return [...conversationIds];
+  }
+
+  /**
+   * Maintenance: the conversations that hold documents, in every space, at most `size`. Read as
+   * the internal user; callers authorize the cross-space operation themselves.
+   */
+  async findConversationsAcrossSpaces(
+    size: number = MAX_INVESTIGATION_ATTACHMENT_CONVERSATION_IDS
+  ): Promise<Array<{ spaceId: string; conversationId: string }>> {
+    const response = await this.search({
+      track_total_hits: false,
+      size: Math.min(size * this.maxDocumentsPerConversation, MAX_RESULT_WINDOW),
+      _source: ['spaceId', 'conversationId'],
+      query: { match_all: {} },
+    });
+    const found = new Map<string, { spaceId: string; conversationId: string }>();
+    for (const hit of response.hits.hits) {
+      const { spaceId, conversationId } = hit._source ?? {};
+      if (spaceId !== undefined && conversationId !== undefined) {
+        found.set(`${spaceId}/${conversationId}`, { spaceId, conversationId });
+      }
+      if (found.size >= size) {
         break;
       }
     }
-    return [...conversationIds];
+    return [...found.values()];
   }
 
   /** Maintenance: removes every document of the given conversations in the space. */

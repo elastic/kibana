@@ -44,7 +44,7 @@ import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
-import { resolveTimeFieldForQuery } from './resolve_time_field';
+import { getDateFieldsForQuery, resolveTimeFieldForQuery } from './resolve_time_field';
 
 type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
 
@@ -186,6 +186,21 @@ export const setNoDataOperationSchema = z
     'Use `set_no_data` to control what happens when data stops arriving. Requires `kind: alert`.'
   );
 
+export const setTimeFieldOperationSchema = z
+  .object({
+    operation: z.literal('set_time_field'),
+    time_field: z
+      .string()
+      .min(1)
+      .max(128)
+      .describe(
+        'The date field used for the lookback window range filter. Auto-detected from the index during `set_query` when not set; use this operation to override when auto-detection fails or picks the wrong field.'
+      ),
+  })
+  .describe(
+    'Use `set_time_field` to explicitly set the date field for the lookback window. Use after `set_query` fails to auto-detect a time field, or when the index has multiple date fields and the wrong one was chosen.'
+  );
+
 export const setGroupingOperationSchema = groupingSchema
   .extend({
     operation: z.literal('set_grouping'),
@@ -244,6 +259,7 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setKindOperationSchema,
   setScheduleOperationSchema,
   setQueryOperationSchema,
+  setTimeFieldOperationSchema,
   setRecoveryOperationSchema,
   setNoDataOperationSchema,
   setGroupingOperationSchema,
@@ -314,6 +330,7 @@ export interface EsqlColumn {
 export interface RuleOperationsResult {
   data: Partial<RuleAttachmentData>;
   queryColumns?: EsqlColumn[];
+  warnings?: string[];
 }
 
 /**
@@ -349,6 +366,7 @@ export const executeRuleOperations = async (
 ): Promise<RuleOperationsResult> => {
   let next = { ...data };
   let lastQueryColumns: EsqlColumn[] | undefined;
+  const warnings: string[] = [];
 
   for (const op of operations) {
     switch (op.operation) {
@@ -401,27 +419,48 @@ export const executeRuleOperations = async (
         let resolvedTimeField: string | null | undefined;
         if (esClient) {
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
-          // Resolve the time field from the index.
+
           resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
-          // `null` means the index has no usable date field.
-          if (resolvedTimeField === null) {
-            const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
-            throw new RuleOperationValidationError(
-              `Could not determine a time field for the query: the source index ` +
-                `${
-                  sourceIndex ? `"${sourceIndex}"` : ''
-                } has no \`date\` or \`date_nanos\` field ` +
-                `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
-                `Add a date field to the data, or query an index that has one.`
+          const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
+          const wasTimeFieldReplaced =
+            Boolean(next.time_field) &&
+            Boolean(resolvedTimeField) &&
+            resolvedTimeField !== next.time_field;
+          if (wasTimeFieldReplaced) {
+            warnings.push(
+              `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
+                `\`date_nanos\` field on ${
+                  sourceIndex ? `"${sourceIndex}"` : 'the source index'
+                }, so "${resolvedTimeField}" was auto-selected instead. ` +
+                `Use \`set_time_field\` if a different date field is needed.`
             );
           }
-          // `undefined` means we couldn't look up the index (non-FROM query, or
-          // fieldCaps failed). Fall back to any existing time field; if there is
-          // none, fail rather than let the schema silently default to @timestamp.
+          if (resolvedTimeField === null) {
+            if (next.time_field) {
+              warnings.push(
+                `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
+                  `\`date_nanos\` field on ${
+                    sourceIndex ? `"${sourceIndex}"` : 'the source index'
+                  }. ` +
+                  `The rule may fail at execution time. Use \`set_time_field\` to correct it, ` +
+                  `or verify the field exists on the target index.`
+              );
+            } else {
+              throw new RuleOperationValidationError(
+                `Could not determine a time field for the query: the source index ` +
+                  `${
+                    sourceIndex ? `"${sourceIndex}"` : ''
+                  } has no \`date\` or \`date_nanos\` field ` +
+                  `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
+                  `Add a date field to the data, or use \`set_time_field\` to specify one.`
+              );
+            }
+          }
           if (resolvedTimeField === undefined && !next.time_field) {
             throw new RuleOperationValidationError(
               `Could not determine a time field for the query and none is set. A \`date\` or ` +
-                `\`date_nanos\` field is required for the rule's lookback window; set one explicitly.`
+                `\`date_nanos\` field is required for the rule's lookback window; use ` +
+                `\`set_time_field\` to specify one.`
             );
           }
         }
@@ -451,6 +490,25 @@ export const executeRuleOperations = async (
         break;
       }
 
+      case 'set_time_field': {
+        // Without a query there is no index to check; `set_query` re-checks it later.
+        if (esClient && next.query) {
+          const dateFields = await getDateFieldsForQuery(esClient, getRootEsqlQuery(next.query));
+          // Only reject when the index reports date fields and this isn't one of them;
+          // lookups that fail or return nothing (federated sources, views) can't be verified.
+          if (dateFields && dateFields.length > 0 && !dateFields.includes(op.time_field)) {
+            throw new RuleOperationValidationError(
+              `The field "${op.time_field}" is not a \`date\` or \`date_nanos\` field on the ` +
+                `query's source index. Available date fields: ${dateFields
+                  .sort()
+                  .map((field) => `"${field}"`)
+                  .join(', ')}.`
+            );
+          }
+        }
+        next = { ...next, time_field: op.time_field };
+        break;
+      }
       case 'set_no_data':
         next = { ...next, no_data: op.no_data };
         break;
@@ -610,5 +668,6 @@ export const executeRuleOperations = async (
   return {
     data: next,
     ...(lastQueryColumns ? { queryColumns: lastQueryColumns } : {}),
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 };
