@@ -76,7 +76,6 @@ export const riskScoreDynamicInlineToolHandler = async (
         events,
         nlQuery: prompt,
         esClient: esClient.asCurrentUser,
-        internalEsClient: esClient.asInternalUser,
         index: riskScoreIndexPattern,
         additionalContext: `${message}\n${defaultMessage}\n${queryExtraContext ?? ''}`,
         execute: 'data',
