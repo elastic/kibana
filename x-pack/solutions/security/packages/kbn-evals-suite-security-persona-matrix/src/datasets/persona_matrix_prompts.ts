@@ -233,6 +233,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     metadata: {
       expectedSkill: 'detection-rule-edit',
+      // Without Security Labs content the reference-sanctioned stop path is a correct
+      // outcome; the trajectory score on this example is expected to be lower.
       expectedTools: ['security.security_labs_search', 'security.create_detection_rule'],
       severity: 'high',
       tags: ['rule-creation', 'research'],
