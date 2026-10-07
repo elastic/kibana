@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { useApmIndices } from '../../../hooks/use_apm_indices';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -22,7 +23,6 @@ import {
   type ServiceFlyoutContextValue,
 } from './service_flyout_context';
 import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
-import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
 
 const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
