@@ -147,9 +147,9 @@ describe('criticalScoutFilesTouched', () => {
 
   it('returns false when all changed files are documentation noise (README, *.md, CHANGELOG)', () => {
     // Noise files inside a critical package must not trigger a full suite run on their own.
-    expect(
-      criticalScoutFilesTouched(['src/platform/packages/shared/kbn-scout/README.md'])
-    ).toBe(false);
+    expect(criticalScoutFilesTouched(['src/platform/packages/shared/kbn-scout/README.md'])).toBe(
+      false
+    );
     expect(criticalScoutFilesTouched(['README.md', 'docs/CHANGELOG.md'])).toBe(false);
   });
 
@@ -506,9 +506,7 @@ describe('resolveScoutTestingScope', () => {
   it('returns tests-only for Scout spec files inside the kbn-scout package itself', () => {
     // kbn-scout's own test specs must not be misclassified as critical-files
     // just because the kbn-scout package appears in CRITICAL_FILES_SCOUT.
-    touch(
-      'src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts'
-    );
+    touch('src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts');
     const scope = resolveScoutTestingScope(
       codeChanges([
         'src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/saml_login.spec.ts',
