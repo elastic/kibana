@@ -25,6 +25,7 @@ const baseArgs: QueryArgs = {
   pageSize: 2,
   rowsMode: 'resolved',
   concreteEntityIndexName: '.entities.v2.latest.default-00001',
+  anomalyJobIds: ['security_auth_rare_user'],
 };
 
 const row = (id: string, value: number | null): Row => ({ 'entity.id': id, alert_count: value });

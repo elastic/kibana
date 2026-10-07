@@ -106,8 +106,8 @@ Array [
 exports[`entities grid query builders enrich queries enrichAnomalyCount builds its query from the page rows 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | WHERE user.name IN (\\"alice\\", \\"bob\\") OR host.id IN (\\"h-1\\") OR user.email IN (\\"bob@corp.com\\") OR host.name IN (\\"web-1\\", \\"web-2\\") OR service.name IN (\\"payments\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
@@ -755,8 +755,8 @@ exports[`entities grid query builders sort by anomaly_count builds the sort and 
 exports[`entities grid query builders sort by anomaly_count builds the sort and count queries with entity filters and no search: sort 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -865,8 +865,8 @@ exports[`entities grid query builders sort by anomaly_count builds the sort and 
 exports[`entities grid query builders sort by anomaly_count builds the sort and count queries with filters and a cursor: sort 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -975,8 +975,8 @@ exports[`entities grid query builders sort by anomaly_count builds the sort and 
 exports[`entities grid query builders sort by anomaly_count builds the sort and count queries: sort 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1076,8 +1076,8 @@ FROM entities-latest-default
 exports[`entities grid query builders sort by anomaly_count builds the sort query with a cursor on an empty value: sort 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2946,8 +2946,8 @@ Array [
 exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of a page after a value with entity filters 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3036,8 +3036,8 @@ FROM .ml-anomalies-*
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3138,8 +3138,8 @@ FROM .ml-anomalies-*
 exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of a page after an empty value 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3239,8 +3239,8 @@ FROM .ml-anomalies-*
 exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of the first page ascending 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3327,8 +3327,8 @@ FROM .ml-anomalies-*
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3427,8 +3427,8 @@ FROM .ml-anomalies-*
 exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of the first page descending 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3515,8 +3515,8 @@ FROM .ml-anomalies-*
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-*
-| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+FROM .ml-anomalies-shared*
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),

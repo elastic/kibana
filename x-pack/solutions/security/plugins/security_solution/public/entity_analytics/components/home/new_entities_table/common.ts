@@ -109,6 +109,8 @@ export interface QueryArgs {
   entityExpression?: string;
   /** Extra native entity-doc fields from Fields (not catalog / not enrich). */
   keepFields?: readonly string[];
+  /** Installed security ML jobs; the anomaly columns count only their records. */
+  anomalyJobIds: readonly string[];
 }
 
 export interface RunContext {
@@ -164,7 +166,19 @@ export const isSortableColumn = (column: ColumnDescriptor): column is SortableCo
 export const entityAliasOf = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
 export const alertsIndexOf = (namespace: string) => `.alerts-security.alerts-${namespace}`;
 export const riskScoreIndexOf = (namespace: string) => `risk-score.risk-score-${namespace}`;
-export const ML_ANOMALY_INDICES = '.ml-anomalies-*';
+
+// ── ML anomalies ─────────────────────────────────────────────────────────────
+// One definition of an entity anomaly, shared by the anomalies tile and column.
+
+export const ML_ANOMALY_INDICES = '.ml-anomalies-shared*';
+
+/** Final anomaly records with a score. */
+export const ANOMALY_RECORD_FILTER =
+  'result_type == "record" AND is_interim == false AND record_score >= 1';
+
+/** Records of the installed security jobs; matches nothing when there are none. */
+export const buildAnomalyJobFilter = (jobIds: readonly string[]): string =>
+  jobIds.length ? `job_id IN (${toList(jobIds)})` : 'false';
 
 // ── primitives ───────────────────────────────────────────────────────────────
 

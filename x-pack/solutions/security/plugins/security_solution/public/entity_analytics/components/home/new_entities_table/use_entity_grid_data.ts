@@ -11,6 +11,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type {
   TimeRange,
   RowsMode,
@@ -24,6 +25,7 @@ import {
   entityIdsOf,
   getEntityId,
   getNumber,
+  ANOMALY_COUNT_FIELD,
   GROUP_SIZE_FIELD,
   enrichEntityRows,
   createEsqlRunner,
@@ -58,13 +60,24 @@ interface GridQueryScope {
 const entityGridKeys = {
   shell: (
     scope: GridQueryScope,
-    page: { sortDirection: SortDir; pageIndex: number; pageSize: number; keepFieldsKey: string }
+    page: {
+      sortDirection: SortDir;
+      pageIndex: number;
+      pageSize: number;
+      keepFieldsKey: string;
+      anomalyJobIdsKey: string;
+    }
   ) => ['entity-grid', 'shell', { ...scope, ...page }] as const,
   count: (spaceId: string, countQuery: string | null) =>
     ['entity-grid', 'count', { spaceId, countQuery }] as const,
   enrich: (
     scope: GridQueryScope,
-    page: { sortDirection: SortDir; entityIdsKey: string; shellUpdatedAt: number }
+    page: {
+      sortDirection: SortDir;
+      entityIdsKey: string;
+      shellUpdatedAt: number;
+      anomalyJobIdsKey: string;
+    }
   ) => ['entity-grid', 'enrich', { ...scope, ...page }] as const,
 };
 
@@ -157,6 +170,10 @@ export const useEntityGridData = ({
   const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
   const concreteEntityIndexName = resolvedIndex?.indexName ?? null;
 
+  const { jobIds: anomalyJobIds, loading: isAnomalyJobsLoading } = useInstalledSecurityJobsIds();
+  const anomalyJobIdsKey = anomalyJobIds.join('\0');
+  const isAnomalySort = sortField === ANOMALY_COUNT_FIELD;
+
   const keepFieldsKey = (keepFields ?? []).join('\0');
   const sortColumn = findSortableColumn(sortField);
 
@@ -169,8 +186,15 @@ export const useEntityGridData = ({
     concreteEntityIndexName,
     spaceId,
   };
+  // Only the anomaly sort reads the anomaly jobs; other shells don't wait for them.
   const shellKey = (index: number) =>
-    entityGridKeys.shell(scope, { sortDirection, pageIndex: index, pageSize, keepFieldsKey });
+    entityGridKeys.shell(scope, {
+      sortDirection,
+      pageIndex: index,
+      pageSize,
+      keepFieldsKey,
+      anomalyJobIdsKey: isAnomalySort ? anomalyJobIdsKey : '',
+    });
 
   /** Query arguments for the resolved index; call only when the index is known. */
   const buildArgs = (indexName: string, cursor: PageCursor | null): QueryArgs => ({
@@ -184,6 +208,7 @@ export const useEntityGridData = ({
     searchExpression,
     entityExpression,
     keepFields,
+    anomalyJobIds,
   });
 
   // Page N's cursor is page N-1's cached next_cursor. If the user jumps ahead,
@@ -249,7 +274,10 @@ export const useEntityGridData = ({
       };
     },
     {
-      enabled: !!concreteEntityIndexName && (fetchPageIndex === 0 || cursor != null),
+      enabled:
+        !!concreteEntityIndexName &&
+        (fetchPageIndex === 0 || cursor != null) &&
+        !(isAnomalySort && isAnomalyJobsLoading),
       // Keep painting the last page while the next shell key loads (page/sort/filter).
       // Count stays strict below so pagination totals don't lag behind the tile/filter.
       keepPreviousData: true,
@@ -271,6 +299,7 @@ export const useEntityGridData = ({
       sortDirection,
       entityIdsKey: entityIdsOf(shellRows ?? []).join('\0'),
       shellUpdatedAt: shellQuery.dataUpdatedAt,
+      anomalyJobIdsKey,
     }),
     async ({ signal }): Promise<Row[]> => {
       if (!concreteEntityIndexName || !shellRows) return [];
@@ -292,7 +321,8 @@ export const useEntityGridData = ({
         !!concreteEntityIndexName &&
         shellQuery.isSuccess &&
         !shellQuery.isPreviousData &&
-        shellRows != null,
+        shellRows != null &&
+        !isAnomalyJobsLoading,
       keepPreviousData: true,
       // Enrich data only goes stale with its shell: a shell refetch changes the key
       // (shellUpdatedAt) and runs it again. Refetching a cached enrich on mount would

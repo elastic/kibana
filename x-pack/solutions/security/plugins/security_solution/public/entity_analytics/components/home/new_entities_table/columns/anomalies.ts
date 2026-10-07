@@ -12,6 +12,8 @@ import {
   getNumber,
   ANOMALY_COUNT_FIELD,
   ML_ANOMALY_INDICES,
+  ANOMALY_RECORD_FILTER,
+  buildAnomalyJobFilter,
   buildEuidStages,
   buildEntitiesInViewConditions,
   buildEntitiesInViewCountQuery,
@@ -34,15 +36,20 @@ import type { SplitSortPlan } from './split_sort';
 
 /** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
 const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
-const ANOMALY_BASE_FILTER = `result_type == "record" AND is_interim == false`;
 
 /**
- * Final anomaly records in the time range, one row per record with its derived `entity.id`.
- * `identityPrefilter` narrows the records before the EUID evaluation, which can't push down.
+ * Final anomaly records of the security jobs in the time range, one row per record with its
+ * derived `entity.id`. `identityPrefilter` narrows the records before the EUID evaluation,
+ * which can't push down.
  */
-const buildAnomalyEntityRows = ({ timeRange }: QueryArgs, identityPrefilter?: string): string[] => [
+const buildAnomalyEntityRows = (
+  { timeRange, anomalyJobIds }: QueryArgs,
+  identityPrefilter?: string
+): string[] => [
   `FROM ${ML_ANOMALY_INDICES}`,
-  `| WHERE ${ANOMALY_BASE_FILTER} AND \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
+  `| WHERE ${ANOMALY_RECORD_FILTER} AND \`@timestamp\` >= "${lookbackCutoff(
+    timeRange
+  )}" AND ${buildAnomalyJobFilter(anomalyJobIds)}`,
   ...(identityPrefilter ? [`| WHERE ${identityPrefilter}`] : []),
   ...buildEuidStages(),
 ];

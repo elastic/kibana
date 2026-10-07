@@ -12,6 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type { TimeRange } from './use_entity_analytics_url_state';
 import {
   entityAliasOf,
@@ -45,11 +46,21 @@ const getEntityChildrenQueryKey = (
 ) =>
   [ENTITY_CHILDREN_QUERY_KEY, entityId, timeRange, concreteEntityIndexName, keepFieldsKey] as const;
 
-/** The enrich key repeats the shell key and the shell data time, so it refetches on new shell data. */
+/**
+ * The enrich key repeats the shell key and the shell data time, so it refetches on new shell
+ * data, and the anomaly jobs the anomaly counts read.
+ */
 const getEntityChildrenEnrichQueryKey = (
   shellKey: ReturnType<typeof getEntityChildrenQueryKey>,
-  shellUpdatedAt: number
-) => [ENTITY_CHILDREN_ENRICH_QUERY_KEY, ...shellKey.slice(1), shellUpdatedAt] as const;
+  shellUpdatedAt: number,
+  anomalyJobIdsKey: string
+) =>
+  [
+    ENTITY_CHILDREN_ENRICH_QUERY_KEY,
+    ...shellKey.slice(1),
+    shellUpdatedAt,
+    anomalyJobIdsKey,
+  ] as const;
 
 const buildChildQuery = (
   namespace: string,
@@ -73,6 +84,7 @@ interface FetchEntityChildrenParams {
   searchService: DataPublicPluginStart['search'];
   http: HttpSetup;
   keepFields?: readonly string[];
+  anomalyJobIds: readonly string[];
   signal?: AbortSignal;
 }
 
@@ -96,6 +108,7 @@ const enrichEntityChildren = async (
     timeRange,
     spaceId,
     concreteEntityIndexName,
+    anomalyJobIds,
     searchService,
     http,
     signal,
@@ -111,6 +124,7 @@ const enrichEntityChildren = async (
     pageSize: 100,
     rowsMode: 'individual',
     concreteEntityIndexName,
+    anomalyJobIds,
   };
 
   return enrichEntityRows(
@@ -142,6 +156,8 @@ export const useEntityChildren = ({
   const spaceId = useSpaceId() ?? 'default';
   const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
   const concreteEntityIndexName = resolvedIndex?.indexName ?? null;
+  const { jobIds: anomalyJobIds, loading: isAnomalyJobsLoading } = useInstalledSecurityJobsIds();
+  const anomalyJobIdsKey = anomalyJobIds.join('\0');
 
   const expandedIdList = useMemo(() => [...expandedIds], [expandedIds]);
 
@@ -157,9 +173,10 @@ export const useEntityChildren = ({
             searchService,
             http,
             keepFields,
+            anomalyJobIds,
           }
         : null,
-    [concreteEntityIndexName, timeRange, spaceId, searchService, http, keepFields]
+    [concreteEntityIndexName, timeRange, spaceId, searchService, http, keepFields, anomalyJobIds]
   );
 
   const shellQueries = useQueries({
@@ -191,14 +208,18 @@ export const useEntityChildren = ({
         keepFieldsKey
       );
       return {
-        queryKey: getEntityChildrenEnrichQueryKey(shellKey, shell?.dataUpdatedAt ?? 0),
+        queryKey: getEntityChildrenEnrichQueryKey(
+          shellKey,
+          shell?.dataUpdatedAt ?? 0,
+          anomalyJobIdsKey
+        ),
         queryFn: ({ signal }: QueryFunctionContext) => {
           if (!fetchParams) throw new Error('entity store index not resolved');
           const rows = queryClient.getQueryData<Row[]>(shellKey) ?? shell?.data;
           if (!rows) return [];
           return enrichEntityChildren(rows, { ...fetchParams, entityId, signal });
         },
-        enabled: !!fetchParams && shell?.isSuccess === true,
+        enabled: !!fetchParams && shell?.isSuccess === true && !isAnomalyJobsLoading,
         staleTime: CHILDREN_STALE_TIME_MS,
         cacheTime: CHILDREN_CACHE_TIME_MS,
         retry: false,
@@ -230,12 +251,19 @@ export const useEntityChildren = ({
       );
       const rows =
         queryClient.getQueryData<Row[]>(
-          getEntityChildrenEnrichQueryKey(shellKey, shellUpdatedAt)
+          getEntityChildrenEnrichQueryKey(shellKey, shellUpdatedAt, anomalyJobIdsKey)
         ) ?? queryClient.getQueryData<Row[]>(shellKey);
       if (rows) map.set(entityId, rows);
     }
     return map;
-  }, [childDataKey, queryClient, timeRange, concreteEntityIndexName, keepFieldsKey]);
+  }, [
+    childDataKey,
+    queryClient,
+    timeRange,
+    concreteEntityIndexName,
+    keepFieldsKey,
+    anomalyJobIdsKey,
+  ]);
 
   const isAnyChildFetching = [...shellQueries, ...enrichQueries].some((q) => q.isFetching);
 

@@ -21,6 +21,7 @@ const BASE_ARGS: QueryArgs = {
   pageSize: 25,
   rowsMode: 'resolved',
   concreteEntityIndexName: '.entities.v2.latest.default-00001',
+  anomalyJobIds: ['security_auth_rare_user'],
 };
 
 const ENTITY_EXPRESSION = 'asset.criticality IN ("high_impact", "extreme_impact")';

@@ -7,9 +7,13 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../new_entities_table';
+import {
+  ANOMALY_RECORD_FILTER,
+  ML_ANOMALY_INDICES,
+  buildAnomalyJobFilter,
+} from '../../new_entities_table';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
-const ML_ANOMALIES_INDEX = '.ml-anomalies-shared*';
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 /**
@@ -27,12 +31,11 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
-  parts.push(`FROM ${ML_ANOMALIES_INDEX}`);
-
-  const jobFilter =
-    jobIds.length > 0 ? ` AND job_id IN (${jobIds.map((id) => `"${id}"`).join(', ')})` : '';
+  parts.push(`FROM ${ML_ANOMALY_INDICES}`);
   parts.push(
-    `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - ${timeRange}${jobFilter}`
+    `| WHERE ${ANOMALY_RECORD_FILTER} AND @timestamp >= NOW() - ${timeRange} AND ${buildAnomalyJobFilter(
+      jobIds
+    )}`
   );
 
   for (const entityType of ENTITY_TYPES) {
