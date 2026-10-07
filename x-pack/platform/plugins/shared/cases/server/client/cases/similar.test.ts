@@ -155,6 +155,7 @@ describe('similar', () => {
           ],
           "search": "-\\"cases:mock-id\\"",
           "sortField": "created_at",
+          "sortOrder": "desc",
         }
       `);
   });
@@ -310,5 +311,39 @@ describe('similar', () => {
       mockCasesClient
     );
     expect(mockClientArgs.services.caseService.findCases).not.toHaveBeenCalled();
+  });
+
+  it('should forward explicit sort params to caseService.findCases', async () => {
+    await similar(
+      mockCase.id,
+      {
+        page: 1,
+        perPage: 10,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockClientArgs.services.caseService.findCases).toHaveBeenCalledWith(
+      expect.objectContaining({ sortField: 'createdAt', sortOrder: 'asc' })
+    );
+  });
+
+  it('should use defaultSortField and desc order when no sort params are provided', async () => {
+    await similar(
+      mockCase.id,
+      {
+        page: 1,
+        perPage: 10,
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockClientArgs.services.caseService.findCases).toHaveBeenCalledWith(
+      expect.objectContaining({ sortField: 'created_at', sortOrder: 'desc' })
+    );
   });
 });
