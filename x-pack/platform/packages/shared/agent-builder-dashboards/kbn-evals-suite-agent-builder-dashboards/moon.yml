@@ -17,11 +17,13 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards
 dependsOn:
-  - '@kbn/evals'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-dashboards-common'
+  - '@kbn/evals'
+  - '@kbn/lens-common'
+  - '@kbn/lens-embeddable-utils'
   - '@kbn/tooling-log'
-  - '@kbn/core'
-  - '@kbn/scout'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package

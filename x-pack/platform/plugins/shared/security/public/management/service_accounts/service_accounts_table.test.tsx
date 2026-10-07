@@ -40,9 +40,11 @@ describe('ServiceAccountsTable', () => {
   const renderTable = ({
     hasMore = false,
     hasLoadMoreError = false,
+    onDeleteAccount,
   }: {
     hasMore?: boolean;
     hasLoadMoreError?: boolean;
+    onDeleteAccount?: (account: ServiceAccountTableItem) => void;
   } = {}) => {
     const onLoadMore = jest.fn();
 
@@ -54,6 +56,7 @@ describe('ServiceAccountsTable', () => {
           isLoadingMore={false}
           hasLoadMoreError={hasLoadMoreError}
           onLoadMore={onLoadMore}
+          onDeleteAccount={onDeleteAccount}
         />
       </EuiProvider>
     );
@@ -85,6 +88,19 @@ describe('ServiceAccountsTable', () => {
         <TableWithLoadMore />
       </EuiProvider>
     );
+  };
+
+  const openRoleFilter = async () => {
+    fireEvent.click(screen.getByLabelText('Role Selection'));
+    await screen.findByTestId('euiSelectableList');
+  };
+
+  const clickRoleOption = (role: string) =>
+    fireEvent.click(within(screen.getByTestId('euiSelectableList')).getByText(role));
+
+  const closeRoleFilter = async () => {
+    fireEvent.click(screen.getByLabelText('Role Selection'));
+    await waitFor(() => expect(screen.queryByTestId('euiSelectableList')).not.toBeInTheDocument());
   };
 
   it('renders directory metadata without unavailable follow-up actions', () => {
@@ -120,21 +136,18 @@ describe('ServiceAccountsTable', () => {
   it('filters accounts by the selected role and restores them when cleared', async () => {
     renderTable();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    const viewerOption = await screen.findByRole('option', { name: 'viewer' });
-    await waitFor(() => expect(viewerOption).toBeVisible());
-    fireEvent.click(viewerOption);
+    await openRoleFilter();
+    clickRoleOption('viewer');
 
     expect(screen.getByText('nightshift-relay')).toBeVisible();
     expect(screen.queryByText('incident-responder')).not.toBeInTheDocument();
 
-    fireEvent.click(await screen.findByRole('option', { name: 'viewer' }));
+    clickRoleOption('viewer');
 
     expect(screen.getByText('incident-responder')).toBeVisible();
     expect(screen.getByText('nightshift-relay')).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await waitFor(() => expect(viewerOption).not.toBeVisible());
+    await closeRoleFilter();
   });
 
   it.each([
@@ -215,16 +228,13 @@ describe('ServiceAccountsTable', () => {
     renderPaginatedTable();
 
     fireEvent.click(screen.getByTestId('pagination-button-next'));
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    const editorOption = await screen.findByRole('option', { name: 'editor' });
-    await waitFor(() => expect(editorOption).toBeVisible());
-    fireEvent.click(editorOption);
+    await openRoleFilter();
+    clickRoleOption('editor');
 
     expect(screen.getByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await waitFor(() => expect(editorOption).not.toBeVisible());
+    await closeRoleFilter();
   });
 
   it('offers to retry when loading the next cursor page fails', () => {
@@ -232,5 +242,23 @@ describe('ServiceAccountsTable', () => {
 
     expect(screen.getByText('Unable to load more service accounts.')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
+  });
+
+  it('starts deleting the account from its row', () => {
+    const onDeleteAccount = jest.fn();
+    renderTable({ onDeleteAccount });
+
+    const [firstRowDelete] = screen.getAllByTestId('serviceAccountsDeleteAction');
+    fireEvent.click(firstRowDelete);
+
+    expect(onDeleteAccount).toHaveBeenCalledTimes(1);
+    expect(onDeleteAccount.mock.calls[0][0]).toMatchObject({ id: expect.any(String) });
+  });
+
+  it('offers no row actions unless deleting is allowed', () => {
+    renderTable();
+
+    expect(screen.queryByTestId('serviceAccountsDeleteAction')).not.toBeInTheDocument();
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 });

@@ -30,12 +30,12 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'shares one inline data view across API-created tabs after saving in Discover and reloading the dashboard',
+      'preserves a cell-action filter across panels sharing an inline view after dashboard reload',
       async ({ apiServices, page, pageObjects, scoutSpace }) => {
-        const { dashboard, discover, filterBar } = pageObjects;
+        const { dashboard, dataGrid, discover, filterBar } = pageObjects;
         const tabs = [
-          { id: 'original', label: 'Original' },
-          { id: 'copy', label: 'Copy' },
+          { id: 'original', label: 'Original', column_order: ['extension.raw'] },
+          { id: 'copy', label: 'Copy', column_order: ['bytes'] },
         ];
         const savedSearchName = `Shared inline view ${scoutSpace.id}`;
         const session: DiscoverSessionApiDataInput = {
@@ -47,7 +47,6 @@ spaceTest.describe(
               index_pattern: 'logstash*',
               time_field: '@timestamp',
             },
-            column_order: ['extension'],
           })),
         };
         const sessionId = await apiServices.discover.create(session, scoutSpace.id);
@@ -69,15 +68,15 @@ spaceTest.describe(
           }).toPass({ timeout: 10_000 });
         };
 
-        const expectSharedFilterEditor = async () => {
-          await filterBar.clickEditFilter('extension.raw', 'css');
+        const expectSharedFilterEditor = async (value: string) => {
+          await filterBar.clickEditFilter('extension.raw', value);
           await expect
             .poll(() => page.components.comboBox('filterFieldSuggestionList').getSelectedOptions())
             .toStrictEqual(['extension.raw']);
           await expect(page.testSubj.locator('filterIndexPatternsSelect')).toBeHidden();
           await expect
             .poll(() => filterBar.getFilterEditorSelectedPhrases())
-            .toStrictEqual(['css']);
+            .toStrictEqual([value]);
           await expect(page.testSubj.locator('saveFilter')).toBeEnabled();
           await filterBar.closeFieldEditorModal();
         };
@@ -89,8 +88,8 @@ spaceTest.describe(
           await expect(discover.unsavedChangesIndicator()).toBeHidden();
         });
 
-        const unfilteredCount = await spaceTest.step(
-          'filter both tabs as linked dashboard panels',
+        const { unfilteredCount, filterValue } = await spaceTest.step(
+          'filter both linked panels from a cell in the original tab',
           async () => {
             const dashboardId = await apiServices.dashboard.create(
               {
@@ -115,11 +114,15 @@ spaceTest.describe(
             }).toPass({ timeout: 10_000 });
             const [initialCount] = await readPanelHitCounts();
 
-            await filterBar.addFilter({ field: 'extension.raw', operator: 'is', value: 'css' });
-            await expectFilteredPanels(initialCount);
-            await expectSharedFilterEditor();
+            const cellValue = dataGrid.getCellValue(0, 'extension.raw');
+            await expect(cellValue).toBeVisible();
+            const value = (await cellValue.innerText()).trim();
 
-            return initialCount;
+            await dataGrid.filterCell({ rowIndex: 0, columnId: 'extension.raw', mode: 'for' });
+            await expectFilteredPanels(initialCount);
+            await expectSharedFilterEditor(value);
+
+            return { unfilteredCount: initialCount, filterValue: value };
           }
         );
 
@@ -129,7 +132,7 @@ spaceTest.describe(
           await dashboard.waitForPanelsToLoad(2);
 
           await expectFilteredPanels(unfilteredCount);
-          await expectSharedFilterEditor();
+          await expectSharedFilterEditor(filterValue);
           await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
           await expect(dashboard.unsavedChangesIndicator).toBeHidden();
         });

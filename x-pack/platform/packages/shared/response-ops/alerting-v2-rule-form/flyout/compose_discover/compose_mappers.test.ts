@@ -56,6 +56,16 @@ const baseFormValues: FormValues = {
 // ── composeFormToCreateRequest ───────────────────────────────────────────────
 
 describe('composeFormToCreateRequest', () => {
+  it('maps builder type to builder metadata', () => {
+    const result = composeFormToCreateRequest(baseFormValues, 'threshold');
+
+    expect(result.metadata).toEqual({
+      name: 'Test Rule',
+      tags: ['tag1'],
+      builder: { type: 'threshold' },
+    });
+  });
+
   it('maps basic form values to create request', () => {
     const result = composeFormToCreateRequest(baseFormValues);
     expect(result.kind).toBe('alert');
@@ -106,6 +116,20 @@ describe('composeFormToCreateRequest', () => {
     };
     const result = composeFormToCreateRequest(values);
     expect(result.metadata.tags).toBeUndefined();
+  });
+
+  it('maps routing tags when present and omits them when empty', () => {
+    const withRoutingTags = composeFormToCreateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+    });
+    expect(withRoutingTags.metadata.routing_tags).toEqual(['sre']);
+
+    const withoutRoutingTags = composeFormToCreateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: [] },
+    });
+    expect(withoutRoutingTags.metadata).not.toHaveProperty('routing_tags');
   });
 
   it('maps grouping when present', () => {
@@ -291,6 +315,18 @@ describe('composeFormToCreateRequest', () => {
 // ── composeFormToUpdateRequest ───────────────────────────────────────────────
 
 describe('composeFormToUpdateRequest', () => {
+  it('maps builder type to builder metadata', () => {
+    const result = composeFormToUpdateRequest(baseFormValues, 'threshold');
+
+    expect(result.metadata?.builder).toEqual({ type: 'threshold' });
+  });
+
+  it('clears builder metadata outside builder mode', () => {
+    const result = composeFormToUpdateRequest(baseFormValues);
+
+    expect(result.metadata?.builder).toBeNull();
+  });
+
   it('excludes kind from update request', () => {
     const result = composeFormToUpdateRequest(baseFormValues);
     expect(result).not.toHaveProperty('kind');
@@ -324,6 +360,19 @@ describe('composeFormToUpdateRequest', () => {
     };
     const result = composeFormToUpdateRequest(values);
     expect(result.metadata?.tags).toEqual(['prod', 'infra']);
+  });
+
+  it('sends routing tags when present', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+    });
+    expect(result.metadata?.routing_tags).toEqual(['sre']);
+  });
+
+  it('nullifies routing tags when empty (clear all routing tags on a partial update)', () => {
+    const result = composeFormToUpdateRequest(baseFormValues);
+    expect(result.metadata?.routing_tags).toBeNull();
   });
 
   it('preserves grouping when present', () => {
@@ -379,6 +428,14 @@ describe('mapRuleToComposeFormValues', () => {
     });
     expect(result.stateTransitionAlertDelayMode).toBe('immediate');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
+  });
+
+  it('loads routing tags from the rule', () => {
+    const rule = {
+      ...baseRuleResponse,
+      metadata: { ...baseRuleResponse.metadata, routing_tags: ['sre'] },
+    } as RuleResponse;
+    expect(mapRuleToComposeFormValues(rule).metadata.routingTags).toEqual(['sre']);
   });
 
   it('maps schedule with lookback', () => {
@@ -470,8 +527,10 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransition).toEqual({
       pendingCount: 3,
       pendingTimeframe: '10m',
+      pendingOperator: null,
       recoveringCount: null,
       recoveringTimeframe: null,
+      recoveringOperator: null,
     });
     expect(result.stateTransitionAlertDelayMode).toBe('duration');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');

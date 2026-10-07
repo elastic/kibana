@@ -35,19 +35,16 @@ describe('addConversationEventStepDefinition', () => {
   };
 
   const buildDefinition = (
-    convOverrides: Parameters<typeof createWorkflowStepConversationClientMock>[0] = {},
-    { experimental = true }: { experimental?: boolean } = {}
+    convOverrides: Parameters<typeof createWorkflowStepConversationClientMock>[0] = {}
   ) => {
     const conv = createWorkflowStepConversationClientMock(convOverrides);
     const agents = createWorkflowStepAgentRegistryMock();
-    const isExperimentalEnabled = jest.fn().mockResolvedValue(experimental);
     const definition = addConversationEventStepDefinition({
       getConversationClient: conv.getConversationClient,
       getAgentRegistry: agents.getAgentRegistry,
       getExecutionService: jest.fn(),
-      isExperimentalEnabled,
     });
-    return { conv, isExperimentalEnabled, definition };
+    return { conv, definition };
   };
 
   it('creates expected step definition structure', () => {
@@ -65,10 +62,13 @@ describe('addConversationEventStepDefinition', () => {
 
     const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
 
-    expect(conv.addCustomEvents).toHaveBeenCalledWith({
-      id: conversationId,
-      events: [{ type: 'text_note', data: { text: 'Escalated by workflow' } }],
-    });
+    expect(conv.addCustomEvents).toHaveBeenCalledWith(
+      {
+        id: conversationId,
+        events: [{ type: 'text_note', data: { text: 'Escalated by workflow' } }],
+      },
+      { source: 'workflow' }
+    );
     expect(result).toEqual({
       output: {
         conversation_id: conversationId,
@@ -88,23 +88,13 @@ describe('addConversationEventStepDefinition', () => {
       createStepHandlerContext({ input: { conversation_id: conversationId, type: 'text_note' } })
     );
 
-    expect(conv.addCustomEvents).toHaveBeenCalledWith({
-      id: conversationId,
-      events: [{ type: 'text_note', data: {} }],
-    });
-  });
-
-  it('returns an error without writing when experimental features are disabled', async () => {
-    const { conv, definition } = buildDefinition({}, { experimental: false });
-
-    const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
-
-    expect(result).toEqual({
-      error: expect.objectContaining({
-        message: expect.stringMatching(/experimental features/i),
-      }),
-    });
-    expect(conv.addCustomEvents).not.toHaveBeenCalled();
+    expect(conv.addCustomEvents).toHaveBeenCalledWith(
+      {
+        id: conversationId,
+        events: [{ type: 'text_note', data: {} }],
+      },
+      { source: 'workflow' }
+    );
   });
 
   it('propagates validation errors for unknown event types', async () => {

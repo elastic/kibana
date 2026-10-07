@@ -27,3 +27,9 @@ export const TRANSLATION_TAB_LABEL = i18n.translate(
     defaultMessage: 'Translation',
   }
 );
+
+export const ADD_TO_CHAT_PROMPT = (ruleTitle: string) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.rules.translationDetails.addToChatPrompt', {
+    defaultMessage: 'Please help me with this Automatic migration rule: {ruleTitle}',
+    values: { ruleTitle },
+  });

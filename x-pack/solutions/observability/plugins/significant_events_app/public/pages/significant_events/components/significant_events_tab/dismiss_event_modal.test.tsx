@@ -29,22 +29,31 @@ describe('DismissEventModal', () => {
     });
   });
 
-  it('disables confirm until a reason is entered', () => {
+  it('enables confirm without an assessment note and omits the note', () => {
     render(<DismissEventModal eventId="event-1" onClose={jest.fn()} />);
 
     const confirm = screen.getByTestId('sigEventDismissConfirmButton');
-    expect(confirm).toBeDisabled();
-    expect(updateEventStatus).not.toHaveBeenCalled();
-
-    fireEvent.change(screen.getByTestId('sigEventDismissReasonInput'), {
-      target: { value: '  known rate limiter  ' },
-    });
     expect(confirm).toBeEnabled();
 
     fireEvent.click(confirm);
     expect(updateEventStatus).toHaveBeenCalledWith({
       eventId: 'event-1',
-      status: 'dismissed',
+      status: 'inactive',
+      assessmentNote: undefined,
+    });
+  });
+
+  it('sends the trimmed assessment note when entered', () => {
+    render(<DismissEventModal eventId="event-1" onClose={jest.fn()} />);
+
+    fireEvent.change(screen.getByTestId('sigEventDismissReasonInput'), {
+      target: { value: '  known rate limiter  ' },
+    });
+    fireEvent.click(screen.getByTestId('sigEventDismissConfirmButton'));
+
+    expect(updateEventStatus).toHaveBeenCalledWith({
+      eventId: 'event-1',
+      status: 'inactive',
       assessmentNote: 'known rate limiter',
     });
   });

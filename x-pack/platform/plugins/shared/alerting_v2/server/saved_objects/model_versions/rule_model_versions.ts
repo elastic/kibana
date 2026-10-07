@@ -13,6 +13,7 @@ import {
   ruleSavedObjectAttributesSchemaV4,
   ruleSavedObjectAttributesSchemaV5,
   ruleSavedObjectAttributesSchemaV6,
+  ruleSavedObjectAttributesSchemaV7,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -187,6 +188,33 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV6.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV6,
+    },
+  },
+  '9': {
+    /*
+     * Adds and indexes `metadata.routing_tags`, which action policies match on.
+     * Optional, so existing rules need no backfill.
+     *
+     * The rules client filters on the field in the same release that adds its
+     * mapping, so this is NOT rollback-compatible: a node rolled back to model
+     * version 8 does not know the field. Accepted while alerting v2 is
+     * experimental.
+     */
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              routing_tags: { type: 'keyword', ignore_above: 128 },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV7.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV7,
     },
   },
 };

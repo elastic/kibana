@@ -97,7 +97,7 @@ ${dashboardDesignGuidancePrompt}
 
 ## ES|QL
 
-Omit the \`esql\` field on Lens and Vega panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`. Custom content is the exception: the tool does not generate its query, so pass \`esql\` whenever the panel needs data (see Custom content panels).
+Omit the \`esql\` field on visualization panels unless the query came from \`${platformCoreTools.generateEsql}\` or the user pasted it. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`. A query you wrote yourself doesn't qualify, even after running it with \`${platformCoreTools.executeEsql}\`: running a query only shows that it works, so use \`${platformCoreTools.executeEsql}\` to inspect results, not to approve your own queries. Custom content is the exception: the tool does not generate its query, so pass \`esql\` whenever the panel needs data (see Custom content panels).
 
 ## Controls
 
