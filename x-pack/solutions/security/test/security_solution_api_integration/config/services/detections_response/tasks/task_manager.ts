@@ -8,17 +8,17 @@
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { waitFor } from '../wait_for';
 
-export const taskHasRun = async (taskId: string, kbn: KbnClient, after: Date): Promise<boolean> => {
-  const task = await kbn.savedObjects.get({
+const taskRunCount = async (taskId: string, kbn: KbnClient): Promise<number> => {
+  const task = await kbn.savedObjects.get<{ state?: string }>({
     type: 'task',
     id: taskId,
   });
 
-  const runAt = new Date(task.attributes.runAt);
-  const status = task.attributes.status;
+  const state: { runs?: number } = JSON.parse(task.attributes.state ?? '{}');
 
-  return runAt > after && status === TaskStatus.Idle;
+  return state.runs ?? 0;
 };
 
 export const launchTask = async (
@@ -49,4 +49,41 @@ export const launchTask = async (
   logger.info(`Task ${taskId} launched`);
 
   return new Date(runAt);
+};
+
+/**
+ * Launches `taskId` and polls `condition` until it holds, relaunching the task whenever a run
+ * completes without satisfying it, as happens when a telemetry task no-ops because Elastic's
+ * telemetry services were momentarily unreachable.
+ */
+export const launchTaskAndWaitFor = async (
+  taskId: string,
+  kbn: KbnClient,
+  logger: ToolingLog,
+  conditionName: string,
+  condition: () => Promise<boolean>,
+  maxTimeout: number = 180_000
+): Promise<void> => {
+  let runs = await taskRunCount(taskId, kbn);
+  await launchTask(taskId, kbn, logger);
+
+  await waitFor(
+    async () => {
+      if (await condition()) {
+        return true;
+      }
+
+      const currentRuns = await taskRunCount(taskId, kbn);
+      if (currentRuns > runs) {
+        runs = currentRuns;
+        logger.info(`Task ${taskId} ran without satisfying the condition, relaunching it`);
+        await launchTask(taskId, kbn, logger);
+      }
+
+      return false;
+    },
+    `task ${taskId} to satisfy '${conditionName}'`,
+    logger,
+    maxTimeout
+  );
 };

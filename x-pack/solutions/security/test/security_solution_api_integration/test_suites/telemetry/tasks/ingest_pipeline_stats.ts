@@ -9,11 +9,9 @@ import {
   cleanupDatastreams,
   cleanupIngestPipelines,
   indexRandomData,
-  launchTask,
+  launchTaskAndWaitFor,
   randomDatastream,
   randomIngestPipeline,
-  taskHasRun,
-  waitFor,
 } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -44,38 +42,37 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should publish events when scheduled', async () => {
-        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
-
         const opts = {
           eventTypes: [INGEST_PIPELINES_STATS_EBT],
           withTimeoutMs: 1000,
           fromTimestamp: new Date().toISOString(),
         };
 
-        await waitFor(
+        await launchTaskAndWaitFor(
+          TASK_ID,
+          kibanaServer,
+          logger,
+          `${INGEST_PIPELINES_STATS_EBT} to be published`,
           async () => {
             const events = await ebtServer.getEvents(Number.MAX_SAFE_INTEGER, opts);
 
-            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-            const eventCount = events.length;
-
-            return hasRun && eventCount >= 0;
-          },
-          'waitForTaskToRun',
-          logger
+            return events.length >= 1;
+          }
         );
       });
 
       it('should publish events for a new pipeline', async () => {
-        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
-
         const opts = {
           eventTypes: [INGEST_PIPELINES_STATS_EBT],
           withTimeoutMs: 1000,
           fromTimestamp: new Date().toISOString(),
         };
 
-        await waitFor(
+        await launchTaskAndWaitFor(
+          TASK_ID,
+          kibanaServer,
+          logger,
+          `${INGEST_PIPELINES_STATS_EBT} to be published for pipeline ${pipeline}`,
           async () => {
             const events = await ebtServer
               .getEvents(Number.MAX_SAFE_INTEGER, opts)
@@ -83,13 +80,8 @@ export default ({ getService }: FtrProviderContext) => {
               .then((result) => result.flat())
               .then((result) => result.filter((ev) => (ev as any).name === pipeline));
 
-            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-            const eventCount = events.length;
-
-            return hasRun && eventCount >= 1;
-          },
-          'waitForTaskToRun',
-          logger
+            return events.length >= 1;
+          }
         );
       });
     });
