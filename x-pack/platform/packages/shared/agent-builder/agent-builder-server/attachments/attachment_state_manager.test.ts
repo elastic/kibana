@@ -9,13 +9,7 @@ import type {
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  ATTACHMENT_REF_OPERATION,
-  hashContent,
-  getLatestVersion,
-  getVersion,
-} from '@kbn/agent-builder-common/attachments';
+import { hashContent, getLatestVersion, getVersion } from '@kbn/agent-builder-common/attachments';
 import {
   createAttachmentStateManager,
   type AttachmentStateManager,
@@ -746,67 +740,6 @@ describe('AttachmentStateManager', () => {
     });
   });
 
-  describe('access tracking', () => {
-    it('records created when adding', async () => {
-      const attachment = await manager.add({
-        id: 'att-1',
-        type: 'text',
-        data: { content: 'test' },
-      });
-
-      expect(manager.getAccessedRefs()).toEqual([
-        {
-          attachment_id: attachment.id,
-          version: 1,
-          operation: ATTACHMENT_REF_OPERATION.created,
-          actor: ATTACHMENT_REF_ACTOR.system,
-        },
-      ]);
-    });
-
-    it('records updated on update and does not override created', async () => {
-      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
-      await manager.update('att-1', { data: { content: 'v2' } });
-
-      expect(manager.getAccessedRefs()).toEqual([
-        {
-          attachment_id: 'att-1',
-          version: 1,
-          operation: ATTACHMENT_REF_OPERATION.created,
-          actor: ATTACHMENT_REF_ACTOR.system,
-        },
-        {
-          attachment_id: 'att-1',
-          version: 2,
-          operation: ATTACHMENT_REF_OPERATION.updated,
-          actor: ATTACHMENT_REF_ACTOR.system,
-        },
-      ]);
-    });
-
-    it('records read via get() with actor', async () => {
-      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
-      manager.clearAccessTracking();
-
-      const latest = manager.get('att-1', { actor: ATTACHMENT_REF_ACTOR.agent });
-      const v1 = manager.get('att-1', { version: 1, actor: ATTACHMENT_REF_ACTOR.agent });
-
-      expect(latest?.version).toBe(1);
-      expect(v1?.version).toBe(1);
-      // After get() calls with actor, read tracking should be recorded
-      expect(manager.getAccessedRefs().length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('clears access tracking', async () => {
-      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
-      expect(manager.getAccessedRefs()).toHaveLength(1);
-
-      manager.clearAccessTracking();
-
-      expect(manager.getAccessedRefs()).toHaveLength(0);
-    });
-  });
-
   describe('change log', () => {
     it('records added with current_version 1 on add()', async () => {
       const created = await manager.add({ type: 'text', data: { content: 'a' } });
@@ -967,15 +900,6 @@ describe('AttachmentStateManager', () => {
       expect(manager.drainChanges().map((change) => change.tool_call_id)).toEqual([
         'call-1',
         undefined,
-      ]);
-    });
-
-    it('shares access tracking with tool call views', async () => {
-      const created = await manager
-        .forToolCall('call-1')
-        .add({ type: 'text', data: { content: 'a' } });
-      expect(manager.getAccessedRefs()).toEqual([
-        expect.objectContaining({ attachment_id: created.id, version: 1 }),
       ]);
     });
 

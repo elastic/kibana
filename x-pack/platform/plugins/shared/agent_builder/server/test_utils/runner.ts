@@ -263,8 +263,6 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     restore: jest.fn(),
     permanentDelete: jest.fn(),
     rename: jest.fn(),
-    getAccessedRefs: jest.fn(),
-    clearAccessTracking: jest.fn(),
     drainChanges: jest.fn().mockReturnValue([]),
     forToolCall: jest.fn(),
     clearChanges: jest.fn(),

@@ -25,7 +25,7 @@ describe('mergeAttachmentInputs', () => {
   /** Merges each batch in turn, as consecutive messages on one conversation would. */
   const mergeBatches = async (batches: AttachmentInput[][]) => {
     let stored: VersionedAttachment[] = [];
-    const refsPerBatch = [];
+    const changesPerBatch = [];
 
     for (const inputs of batches) {
       const stateManager = createAttachmentStateManager(stored, {
@@ -40,32 +40,37 @@ describe('mergeAttachmentInputs', () => {
         validateContext,
       });
 
-      refsPerBatch.push(stateManager.getAccessedRefs());
+      changesPerBatch.push(stateManager.drainChanges());
       stored = stateManager.getAll();
     }
 
-    return { stored, refsPerBatch };
+    return { stored, changesPerBatch };
   };
 
   it('versions an existing attachment when its content changes', async () => {
-    const { stored, refsPerBatch } = await mergeBatches([
+    const { stored, changesPerBatch } = await mergeBatches([
       [{ id: 'a1', type: 'text', data: { text: 'one' } }],
       [{ id: 'a1', type: 'text', data: { text: 'two' } }],
     ]);
 
     expect(stored).toHaveLength(1);
     expect(stored[0].versions).toHaveLength(2);
-    expect(refsPerBatch.map(([ref]) => ref.version)).toEqual([1, 2]);
+    expect(changesPerBatch).toEqual([
+      [expect.objectContaining({ kind: 'added', attachment_id: 'a1', current_version: 1 })],
+      [expect.objectContaining({ kind: 'updated', attachment_id: 'a1', current_version: 2 })],
+    ]);
   });
 
   it('reuses a stored attachment when the same content is posted again', async () => {
-    const { stored, refsPerBatch } = await mergeBatches([
+    const { stored, changesPerBatch } = await mergeBatches([
       [{ type: 'text', data: { text: 'same' } }],
       [{ type: 'text', data: { text: 'same' } }],
     ]);
 
-    // The second batch references the stored attachment rather than storing a copy.
     expect(stored).toHaveLength(1);
-    expect(refsPerBatch.map(([ref]) => ref.attachment_id)).toEqual([stored[0].id, stored[0].id]);
+    expect(changesPerBatch).toEqual([
+      [expect.objectContaining({ kind: 'added', attachment_id: stored[0].id })],
+      [],
+    ]);
   });
 });
