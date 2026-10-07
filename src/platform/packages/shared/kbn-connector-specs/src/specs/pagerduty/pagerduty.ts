@@ -18,6 +18,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { pagerdutySkillFile } from './skills/pagerduty-skill';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   AddRespondersInput,
@@ -470,6 +471,8 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
   },
 
+  skillFiles: [pagerdutySkillFile],
+
   skill: [
     '## PagerDuty Connector Usage Guide',
     '',
@@ -496,22 +499,11 @@ export const PagerdutyConnector: ConnectorSpec = {
     '',
     '### Finding Who Is On Call',
     '',
-    'To find who is currently on call for a named schedule:',
-    '1. Call `listSchedules` with a `query` matching the schedule name (e.g., "primary" or "database") to get candidate schedule IDs.',
-    '2. Call `listOncalls` with `schedule_ids` set to the IDs returned in step 1 to get the current on-call assignments.',
-    '',
-    'If you only need to know who is on call right now without knowing which schedule, call `listOncalls` directly with a `since`/`until` time range (ISO 8601 format) and optionally an `escalation_policy_ids` filter.',
-    'Set `earliest: true` to return only the first on-call entry per user+policy combination and reduce noise.',
+    '1. Use the `/pagerduty` skill to get schedule information, including who is on call.',
     '',
     '### Investigating Incidents',
     '',
-    'To investigate incidents, use `listIncidents` with one or more of these filters:',
-    '- `status`: array of statuses — "triggered", "acknowledged", or "resolved"',
-    '- `urgencies`: array — "high" or "low"',
-    '- `since` / `until`: ISO 8601 date range to scope by creation time',
-    '- `service_ids`: limit to specific services',
-    '- `request_scope`: "all" (default), "teams", or "assigned" (incidents assigned to the current user)',
-    '- `sort_by`: array of sort fields with direction, e.g. ["created_at:desc"]',
+    'To investigate incidents, use the `/pagerduty` skill',
     '',
     'Once you have an incident ID from the list, call `getIncident` for full details including assignments, service, and timestamps.',
     '',
@@ -528,7 +520,12 @@ export const PagerdutyConnector: ConnectorSpec = {
     '### Working with Escalation Policies',
     '',
     'To explore escalation policies:',
-    '1. Call `listEscalationPolicies` with an optional `query` (free-text name/description search) or `team_ids` / `user_ids` filters.',
+    '1. Use the `/pagerduty` skill for escalation related topics.',
     '2. Use the returned IDs to call `getEscalationPolicy` for full details: escalation rules, delay minutes, targets, associated services, and teams.',
+    '',
+    '### User and Team lookup',
+    'To explore teams and users:',
+    '1. Use the `/pagerduty` skill to lookup users or teams.',
+    "2. Use the returned IDs to call 'getTeam' for full team details.",
   ].join('\n'),
 };
