@@ -669,6 +669,19 @@ describe('SyntheticsService', () => {
       SECRETS.forEach((secret) => expect(wireBody).not.toContain(secret));
     });
 
+    it.each([
+      ['a custom namespace', { namespace: 'custom-ns' }, 'custom-ns'],
+      ['a space id used as the namespace', { namespace: 'my-space' }, 'my-space'],
+      ['no namespace', {}, 'default'],
+    ])('sends the monitor namespace for %s', async (_label, overrides, expectedNamespace) => {
+      const { service, locations } = getMockedService();
+
+      await service.deleteConfigs([getDeleteConfig([locations[0]], overrides) as any]);
+
+      const [monitor] = getServiceRequests()[0].data.monitors;
+      expect(monitor.data_stream).toEqual({ namespace: expectedNamespace });
+    });
+
     it('identifies the monitor by its heartbeat id when one is given', async () => {
       const { service, locations } = getMockedService();
 
@@ -777,14 +790,24 @@ describe('SyntheticsService', () => {
       (mockCoreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue({
         createPointInTimeFinder,
       });
-      return { createPointInTimeFinder };
+      return { createPointInTimeFinder, close };
     };
 
-    const readMonitor = (id: string, type: string, locations: HeartbeatConfig['locations']) => ({
+    const readMonitor = (
+      id: string,
+      type: string,
+      locations: HeartbeatConfig['locations'],
+      namespace?: string
+    ) => ({
       id: `so-${id}`,
       type: 'synthetics-monitor-multi-space',
-      attributes: { id, type, locations, schedule: { number: '5', unit: 'm' } },
+      attributes: { id, type, locations, schedule: { number: '5', unit: 'm' }, namespace },
     });
+    const privateLocation = {
+      id: 'my-private-location',
+      label: 'Private',
+      isServiceManaged: false,
+    };
 
     beforeEach(() => {
       mockLicense();
@@ -807,7 +830,7 @@ describe('SyntheticsService', () => {
         type: syntheticsMonitorSOTypes,
         perPage: 100,
         namespaces: [ALL_SPACES_ID],
-        fields: ['id', 'type', 'locations', 'schedule'],
+        fields: ['id', 'type', 'locations', 'schedule', 'namespace'],
       });
     });
 
@@ -841,11 +864,7 @@ describe('SyntheticsService', () => {
     it('skips pages that only hold private location monitors', async () => {
       const { service, locations } = getMockedService();
       mockMonitorPages([
-        [
-          readMonitor('mon-private', 'http', [
-            { id: 'my-private-location', label: 'Private', isServiceManaged: false },
-          ]),
-        ],
+        [readMonitor('mon-private', 'http', [privateLocation])],
         [readMonitor('mon-public', 'http', [locations[0]])],
       ]);
 
@@ -855,6 +874,71 @@ describe('SyntheticsService', () => {
       expect(getServiceRequests()[0].data.monitors.map(({ id }: any) => id)).toEqual([
         'mon-public',
       ]);
+    });
+
+    it('sends every page that holds a service location monitor, not only the first', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([
+        [readMonitor('mon-1', 'http', [locations[0]]), readMonitor('mon-2', 'tcp', [locations[0]])],
+        [readMonitor('mon-private', 'http', [privateLocation])],
+        [readMonitor('mon-3', 'browser', [locations[0]])],
+        [readMonitor('mon-4', 'icmp', [locations[0]])],
+      ]);
+
+      await service.deleteAllConfigs();
+
+      const requests = getServiceRequests();
+      expect(requests).toHaveLength(3);
+      expect(requests.map(({ data }) => data.monitors.map(({ id }: any) => id))).toEqual([
+        ['mon-1', 'mon-2'],
+        ['mon-3'],
+        ['mon-4'],
+      ]);
+    });
+
+    it('keeps going and returns the errors when the service rejects a page', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([
+        [readMonitor('mon-1', 'http', [locations[0]])],
+        [readMonitor('mon-2', 'http', [locations[0]])],
+      ]);
+      (axios as jest.MockedFunction<typeof axios>)
+        .mockRejectedValueOnce({ response: { status: 500, data: { reason: 'boom' } } })
+        .mockResolvedValueOnce({} as AxiosResponse);
+
+      const errors = await service.deleteAllConfigs();
+
+      expect(axios).toHaveBeenCalledTimes(2);
+      expect(errors).toEqual([{ locationId: locations[0].id, error: { reason: 'boom' } }]);
+    });
+
+    it('sends the namespace each monitor has', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([
+        [
+          readMonitor('mon-1', 'http', [locations[0]], 'custom-ns'),
+          readMonitor('mon-2', 'http', [locations[0]]),
+        ],
+      ]);
+
+      await service.deleteAllConfigs();
+
+      const { monitors } = getServiceRequests()[0].data;
+      expect(
+        monitors.map(({ id, data_stream: dataStream }: any) => [id, dataStream.namespace])
+      ).toEqual([
+        ['mon-1', 'custom-ns'],
+        ['mon-2', 'default'],
+      ]);
+    });
+
+    it('closes the finder once every page was read', async () => {
+      const { service, locations } = getMockedService();
+      const { close } = mockMonitorPages([[readMonitor('mon-1', 'http', [locations[0]])]]);
+
+      await service.deleteAllConfigs();
+
+      expect(close).toHaveBeenCalledTimes(1);
     });
 
     it('does not call the service when there is no valid API key', async () => {

@@ -63,7 +63,11 @@ import {
 
 type MonitorToDelete = Pick<
   MonitorFields,
-  ConfigKey.MONITOR_QUERY_ID | ConfigKey.MONITOR_TYPE | ConfigKey.LOCATIONS | ConfigKey.SCHEDULE
+  | ConfigKey.MONITOR_QUERY_ID
+  | ConfigKey.MONITOR_TYPE
+  | ConfigKey.LOCATIONS
+  | ConfigKey.SCHEDULE
+  | ConfigKey.NAMESPACE
 >;
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
@@ -370,6 +374,7 @@ export class SyntheticsService {
           ConfigKey.MONITOR_TYPE,
           ConfigKey.LOCATIONS,
           ConfigKey.SCHEDULE,
+          ConfigKey.NAMESPACE,
         ],
       });
   }
@@ -662,6 +667,7 @@ export class SyntheticsService {
       return;
     }
 
+    const pushErrors: ServiceLocationErrors = [];
     for await (const result of finder.find()) {
       const monitors = this.formatDeleteConfigs(
         result.saved_objects.map(({ attributes }) => ({ monitor: attributes }))
@@ -676,9 +682,12 @@ export class SyntheticsService {
           monitors,
           license,
         };
-        return await this.apiClient.delete(data);
+        pushErrors.push(...(await this.apiClient.delete(data)));
       }
     }
+
+    finder.close().catch(() => {});
+    return pushErrors;
   }
 
   async getSyntheticsParams({
@@ -777,7 +786,8 @@ export class SyntheticsService {
   /**
    * The service finds the monitors to delete by id and type alone, so unlike the other pushes the
    * body is never formatted: it carries no config, params or secrets. `locations` only routes the
-   * request and is dropped before it is sent. Browser monitors keep their schedule because services
+   * request and is dropped before it is sent. The namespace is kept so the body never claims the
+   * default one for a monitor that has its own. Browser monitors keep their schedule because services
    * older than synthetics-service#2049 (v1.13.14) take it from the request to unschedule the monitor.
    */
   formatDeleteConfigs(
@@ -790,6 +800,7 @@ export class SyntheticsService {
       return {
         [ConfigKey.MONITOR_QUERY_ID]: heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID],
         [ConfigKey.MONITOR_TYPE]: type,
+        [ConfigKey.NAMESPACE]: monitor[ConfigKey.NAMESPACE],
         [ConfigKey.LOCATIONS]: monitor[ConfigKey.LOCATIONS],
         ...(type === MonitorTypeEnum.BROWSER && schedule
           ? formatMonitorConfigFields(
