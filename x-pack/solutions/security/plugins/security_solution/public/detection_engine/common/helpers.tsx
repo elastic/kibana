@@ -25,6 +25,7 @@ import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
@@ -169,6 +170,16 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       'group_by' in rule.alert_suppression &&
       rule.alert_suppression.group_by) ||
     [],
+  [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]:
+    'alert_suppression' in rule &&
+    rule.alert_suppression &&
+    'group_by_v2' in rule.alert_suppression &&
+    Array.isArray(rule.alert_suppression.group_by_v2)
+      ? rule.alert_suppression.group_by_v2.map(({ field, sequence_index: sequenceIndex }) => ({
+          field,
+          ...(sequenceIndex != null ? { sequenceIndex } : {}),
+        }))
+      : [],
   [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]:
     'alert_suppression' in rule && rule.alert_suppression?.duration
       ? AlertSuppressionDurationType.PerTimePeriod

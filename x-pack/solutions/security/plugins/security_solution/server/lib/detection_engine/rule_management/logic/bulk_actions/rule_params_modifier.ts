@@ -20,6 +20,7 @@ import type {
   AlertSuppressionCamel,
   AlertSuppressionDuration,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import { getEffectiveSuppressionGroupByFields } from '../../../rule_types/utils/effective_alert_suppression_fields';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
@@ -127,7 +128,9 @@ const shouldSkipAddAlertSuppressionBulkAction = (
     return false;
   }
 
-  return action.value.group_by.every((field) => alertSuppression?.groupBy?.includes(field));
+  const actionFields = getEffectiveSuppressionGroupByFields(action.value);
+  const existingFields = getEffectiveSuppressionGroupByFields(alertSuppression);
+  return actionFields.every((field) => existingFields.includes(field));
 };
 
 // eslint-disable-next-line complexity
@@ -288,11 +291,13 @@ const applyBulkActionEditToRuleParams = (
         break;
       }
 
+      const { group_by, group_by_v2, missing_fields_strategy, duration } = action.value;
       ruleParams.alertSuppression = {
-        groupBy: action.value.group_by,
+        ...(group_by != null && group_by.length > 0 ? { groupBy: group_by } : {}),
+        ...(group_by_v2 != null && group_by_v2.length > 0 ? { groupByV2: group_by_v2 } : {}),
         missingFieldsStrategy:
-          action.value.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-        duration: action.value.duration,
+          missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+        duration,
       };
 
       break;
