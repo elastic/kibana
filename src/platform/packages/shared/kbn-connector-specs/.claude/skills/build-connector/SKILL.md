@@ -204,6 +204,20 @@ cluster, a System node pool), run at least one action against each variant you c
 mutation cannot be tested safely, record it as `⚠️ Not validated` in Task 12 rather than skipping it
 silently.
 
+A chat test also only reads the first page. For **every list action that pages**, fetch page 2
+explicitly through `_execute`: take the cursor, next link or page number from the first response and pass
+it back, with a small page size so a second page exists. Then compare what the vendor did with the
+operation's `pagination` descriptor in `vendor_api/manifest.json`: the parameter that selects the page,
+the page size parameter, where the next cursor sits in the response and what marks the last page. The
+contract mock pages the connector according to that descriptor, so a wrong one passes the contract test
+while the real API pages differently. Correct the descriptor, rerun
+`node scripts/connector_vendor_api --connector <id>`, and note the page-2 call in the action's row in
+Task 12.
+
+A spec defect found while testing (a parameter the API takes but the spec lacks, a wrong type, a
+documented limit the spec doesn't encode) goes into `vendor_api/overlay.yaml`, with what the real API did
+as the action's `description`; see "Record the vendor API contract" in the `create-connector` skill.
+
 Mark task 7 as `completed`.
 
 ---
@@ -291,7 +305,7 @@ Mark task 9 as `completed`.
 
 Mark task 10 as `in_progress`.
 
-Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
+Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. Rerun `node scripts/connector_vendor_api --connector <id> --check` and the vendor API contract test (`node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts`), as fixes made since Task 1 often leave the artifacts out of date. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
 
 Mark task 10 as `completed`.
 
@@ -339,6 +353,9 @@ Read `create-connector/reference/pr-validation-table.md` for the full format and
   test data/credentials, or because live testing (Tasks 4-11) was deferred entirely for this connector —
   mark `⚠️ Not validated — needs manual verification` rather than leaving the row out.
 - For any action that failed and remains unresolved, mark `❌ Fail` with a short description.
+- Above the table, report the vendor API contract result from Task 10: the sources and API versions
+  recorded against, whether the contract test passes, and the overlay actions and `unmatched` entries,
+  each with its evidence.
 
 Keep this table's markdown handy (in the task output or scratch notes) — it must be included verbatim
 under a `## Validated` heading in the PR description when this connector's PR is opened, whether that

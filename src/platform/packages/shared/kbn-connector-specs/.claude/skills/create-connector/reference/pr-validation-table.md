@@ -14,6 +14,11 @@ still need manual verification before merge. It is a checklist, not just a repor
 Sentry trial org" or "Live testing was deferred for this connector; the table below lists every action
 as a manual verification checklist.">
 
+**Vendor API contract:** <✅ the contract test passes, or ❌ what fails>, recorded against
+<source name, spec URL and API version for each source>. Overlay actions: <none, or one line each with
+its evidence>. Unmatched requests: <none, or one line each with its reason>. <Or: exempted, with the
+reason from `vendor_api_exemptions.json`.>
+
 | Action               | What was tested                                                   | Result                                    |
 | -------------------- | ------------------------------------------------------------------ | ------------------------------------------ |
 | test (connectivity)  | <what credential/config was used>                                  | ✅ Pass                                    |
@@ -50,6 +55,11 @@ as a manual verification checklist.">
   `count: 2`". An asynchronous API accepts a request and can still fail the operation later.
 - **If an action failed and the failure is unresolved**, mark it `❌ Fail`, describe what broke, and link
   to a follow-up issue or note if it's a known limitation rather than silently dropping the row.
+- **Report the vendor API contract** in the line above the table. It is checked offline, so it is the
+  one result that holds even when live testing was deferred, and a reviewer needs the sources, overlay
+  actions and unmatched requests to judge whether they are evidence-backed corrections or workarounds.
+- **For a list action that pages**, say whether page 2 was fetched and whether the vendor paged as the
+  `pagination` descriptor in `vendor_api/manifest.json` declares.
 - Place the `## Validated` section directly above `## Test plan` in the PR body.
 
 ## When live testing is fully deferred

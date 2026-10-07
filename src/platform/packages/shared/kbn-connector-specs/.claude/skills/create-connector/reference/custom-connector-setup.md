@@ -123,6 +123,17 @@ action you plan to implement, find the vendor's official API reference and confi
   come back `null`/empty even though the API call itself succeeds with a 200 — this is easy to miss because
   nothing errors, the data is just quietly missing.
 
+- **Machine-readable spec**: find the vendor's own OpenAPI 3, Swagger 2.0 or Google API Discovery
+  document, and write down its URL and the API version it describes (`info.version`). Prefer a URL the
+  vendor publishes and keeps current (its docs host or its own GitHub repository) over a community
+  mirror. A connector that calls several API versions or products gets one source per spec (`v1`, `v2`).
+  The connector's `vendor_api/` artifacts are recorded from these URLs (see "Record the vendor API
+  contract" in the skill). If the vendor publishes none, note that too: the connector then needs an
+  exemption with a reason.
+- **Limits stated only in prose**: note every limit the docs state in text but the spec doesn't encode
+  ("max 100 items", "up to 500 characters"), with the docs URL. Each one becomes a `.max()` in the
+  input schema and an overlay action, so the contract test checks the connector against it.
+
 Cross-reference this research against the fields you're about to add `.describe()` text for — the
 description should state the *verified* format/constraint, not an assumed one.
 

@@ -169,6 +169,19 @@ Use these utilities from `src/platform/packages/shared/kbn-connector-specs/src/l
 - `create_mcp_client_from_axios.ts` — creates an MCP client from an Axios-based connector context
 - `call_tool_helpers.ts` — helpers for calling MCP tools
 
+## Vendor API Contract
+
+The vendor API contract test needs `vendor_api/` artifacts or an exemption for every connector. An
+MCP-native connector calls MCP tools, not operations of an OpenAPI spec, so add it to
+`vendor_api_exemptions.json` at the package root, in the PR that adds the connector:
+
+```json
+".my_connector": "Calls the vendor's hosted MCP server, which has no OpenAPI spec to record against"
+```
+
+If some actions also call the vendor's REST API directly, record those instead; see "Record the vendor
+API contract" in the skill.
+
 ## ID Alignment
 
 MCP-native connectors follow the same ID alignment rules as custom connectors:
