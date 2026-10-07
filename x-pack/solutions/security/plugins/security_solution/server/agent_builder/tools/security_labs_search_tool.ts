@@ -55,7 +55,7 @@ export const securityLabsSearchTool = (
       const unavailableResult = (reason: string, settingsUrl: string) => ({
         results: [
           createErrorResult({
-            message: `${reason} Stop this request and make no further tool calls. Tell the user Security Labs research is unavailable and provide this exact markdown link: [GenAI Settings](${settingsUrl}). Do not continue from attachments, prior knowledge, or other sources.`,
+            message: `${reason} Stop this request and make no further tool calls, including product_documentation, generate_esql, attachment reads, and rule creation. Tell the user Security Labs research is unavailable and provide this exact markdown link: [GenAI Settings](${settingsUrl}). Do not continue from attachments, prior knowledge, or other sources.`,
             metadata: {
               status: 'unavailable',
               nextAction: 'stop',

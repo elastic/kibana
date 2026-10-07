@@ -78,7 +78,7 @@ When you determine a rule cannot be created:
 
 If \`security.security_labs_search\` returns \`metadata.status: unavailable\` and \`metadata.nextAction: stop\`, stop the current request immediately. This takes precedence over every creation, editing, and attachment-persistence instruction below, even if the rule attachment already contains enough information to continue.
 
-Tell the user Security Labs research is unavailable and include \`[GenAI Settings](<metadata.settingsUrl>)\` using the exact URL returned by the tool. Make no further tool calls. Do not draft, create, edit, or preview a rule, and do not substitute attachments, prior knowledge, or another research source. Wait for the user to resolve the unavailable research before continuing.
+Tell the user Security Labs research is unavailable and include \`[GenAI Settings](<metadata.settingsUrl>)\` using the exact URL returned by the tool. Make no further tool calls: not \`product_documentation\` (even though Step 2 lists it), not \`generate_esql\`, not attachment tools, and not \`security.create_detection_rule\`. Do not draft, create, edit, or preview a rule, and do not substitute attachments, prior knowledge, or another research source. Wait for the user to resolve the unavailable research before continuing.
 
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 

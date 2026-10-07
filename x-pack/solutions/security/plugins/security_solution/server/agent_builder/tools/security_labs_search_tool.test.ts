@@ -143,6 +143,7 @@ describe('securityLabsSearchTool', () => {
         expect(errorResult.data.message).toContain(`[GenAI Settings](${settingsUrl})`);
         expect(errorResult.data.message).toContain('make no further tool calls');
         expect(errorResult.data.message).toContain('Do not continue from attachments');
+        expect(errorResult.data.message).toContain('including product_documentation');
         expect(retrieveDocumentation).not.toHaveBeenCalled();
       }
     );
