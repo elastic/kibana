@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export type MappingRuntimeFieldType =
   | 'boolean'
@@ -17,34 +17,36 @@ export type MappingRuntimeFieldType =
   | 'long'
   | 'lookup';
 
-export const runtimeMappings = z
-  .record(
-    z.string(),
-    z.object({
-      type: z.union([
-        z.literal('boolean'),
-        z.literal('date'),
-        z.literal('double'),
-        z.literal('geo_point'),
-        z.literal('ip'),
-        z.literal('keyword'),
-        z.literal('long'),
-        z.literal('lookup'),
-      ]),
-      script: z
-        .union([
-          z.string(),
-          z.object({ source: z.string() }),
-          z.object({ id: z.string(), params: z.record(z.any(), z.any()) }),
-        ])
-        .optional(),
-      fetch_fields: z.array(z.string()).optional(),
-      format: z.string().optional(),
-      input_field: z.string().optional(),
-      target_field: z.string().optional(),
-      target_index: z.string().optional(),
-    })
-  )
-  .optional();
+export const runtimeMappings = lazySchema(() =>
+  z
+    .record(
+      z.string(),
+      z.object({
+        type: z.union([
+          z.literal('boolean'),
+          z.literal('date'),
+          z.literal('double'),
+          z.literal('geo_point'),
+          z.literal('ip'),
+          z.literal('keyword'),
+          z.literal('long'),
+          z.literal('lookup'),
+        ]),
+        script: z
+          .union([
+            z.string(),
+            z.object({ source: z.string() }),
+            z.object({ id: z.string(), params: z.record(z.any(), z.any()) }),
+          ])
+          .optional(),
+        fetch_fields: z.array(z.string()).optional(),
+        format: z.string().optional(),
+        input_field: z.string().optional(),
+        target_field: z.string().optional(),
+        target_index: z.string().optional(),
+      })
+    )
+    .optional()
+);
 
 export type RunTimeMappings = z.infer<typeof runtimeMappings>;

@@ -752,6 +752,7 @@ packages:
   - 'src/platform/packages/shared/kbn-config'
   - 'src/platform/packages/shared/kbn-config-schema'
   - 'src/platform/packages/shared/kbn-connector-cli'
+  - 'src/platform/packages/shared/kbn-connector-contract-mock'
   - 'src/platform/packages/shared/kbn-connector-schemas'
   - 'src/platform/packages/shared/kbn-connector-specs'
   - 'src/platform/packages/shared/kbn-content-management-utils'
