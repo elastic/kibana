@@ -270,6 +270,91 @@ describe('createSubagentTool', () => {
     expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'medium' });
   });
 
+  describe('when the sub-agent declares its own inference feature', () => {
+    const allowedSubagents = [
+      { id: 'solution-agent', description: 'Solution.', inferenceFeatureId: 'my_feature' },
+    ];
+
+    const completedEvents$ = () => {
+      const events$ = new ReplaySubject<ChatEvent>();
+      events$.next({ type: ChatEventType.roundComplete, data: { round: mockRound } } as ChatEvent);
+      events$.complete();
+      return events$.asObservable();
+    };
+
+    it('runs a one-shot sub-agent without passing the parent model', async () => {
+      const executeSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner-agent',
+        allowedSubagents,
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+
+      const { context, modelProvider } = createMockContext();
+      await callHandler(
+        tool,
+        {
+          agent_id: 'solution-agent',
+          description: 'test',
+          prompt: 'Do something',
+          effort: EffortLevels.low,
+        },
+        context
+      );
+
+      expect(modelProvider.selectModel).not.toHaveBeenCalled();
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ agentId: 'solution-agent', connectorId: undefined })
+      );
+    });
+
+    it('creates a persistent sub-agent without passing the parent model', async () => {
+      const createSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'child-exec', events$: completedEvents$() });
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner-agent',
+        allowedSubagents,
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          getExecution: jest.fn(),
+          createSubAgent,
+          sendToSubAgent: jest.fn(),
+        },
+        parentConversationId: 'parent-convo',
+        subagentTracker: new SubagentTracker(),
+        conversationExists: jest.fn().mockResolvedValue(false),
+      });
+
+      const { context, modelProvider } = createMockContext();
+      await callHandler(
+        tool,
+        {
+          agent_id: 'solution-agent',
+          description: 'test',
+          prompt: 'Do something',
+          mode: SubagentMode.persistent,
+          name: 'solver',
+        },
+        context
+      );
+
+      expect(modelProvider.selectModel).not.toHaveBeenCalled();
+      expect(createSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ agentId: 'solution-agent', connectorId: undefined })
+      );
+    });
+  });
+
   it('returns execution_id immediately when run_in_background is true', async () => {
     const events$ = new ReplaySubject<ChatEvent>();
     const registerExecution = jest.fn();

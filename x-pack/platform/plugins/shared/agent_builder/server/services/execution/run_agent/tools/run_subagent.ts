@@ -43,6 +43,7 @@ import { partitionDestructiveApis } from '../api';
 import type { ResolvedSubagent } from '../../../agents/utils/resolve_allowed_subagents';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
+import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
 
 export const SubAgentToolName = internalTools.runSubagent;
 
@@ -329,6 +330,9 @@ export const createSubagentTool = ({
   const orderedAllowed = orderAllowedWithSelfFirst(allowedSubagents);
   const allowedIds = orderedAllowed.map((a) => a.id) as [string, ...string[]];
   const allowedIdsSet = new Set(allowedIds);
+  const inferenceFeatureIdBySubagent = new Map(
+    orderedAllowed.map(({ id, inferenceFeatureId }) => [id, inferenceFeatureId])
+  );
 
   const schema = z.object({
     agent_id: z
@@ -461,10 +465,11 @@ export const createSubagentTool = ({
       };
 
       try {
-        const subAgentModel = await modelProvider.selectModel({
+        const selectedConnectorId = await selectSubagentConnectorId({
+          modelProvider,
           effortLevel: effort as EffortLevel,
+          inferenceFeatureId: inferenceFeatureIdBySubagent.get(agent_id),
         });
-        const selectedConnectorId = subAgentModel.connector.connectorId;
         if (isPersistent) {
           const finalName = name ?? 'subagent';
 

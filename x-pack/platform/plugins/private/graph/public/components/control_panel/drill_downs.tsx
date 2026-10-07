@@ -41,13 +41,18 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
             const onOpenUrlTemplate = () => openUrlTemplate(urlTemplate);
 
             return (
-              <li className="list-group-item">
+              <li key={urlTemplate.url} className="list-group-item">
                 {urlTemplate.icon && (
                   <>
                     <IconRenderer icon={urlTemplate.icon} css={noUserSelectStyles} />{' '}
                   </>
                 )}
-                <EuiLink onClick={onOpenUrlTemplate}>{urlTemplate.description}</EuiLink>
+                <EuiLink
+                  data-test-subj={urlTemplate.isDefault ? 'graphRawDocumentsDrilldown' : undefined}
+                  onClick={onOpenUrlTemplate}
+                >
+                  {urlTemplate.description}
+                </EuiLink>
               </li>
             );
           })}
