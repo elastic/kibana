@@ -150,18 +150,6 @@ steps:
   # next-noisiest one; the empty-array `terms` matches nothing, which makes that
   # `must_not` a no-op — the fail-open path when the lookup errored, the parse was
   # inconsistent, or no review is pending.
-  # Counts, FP rate and alert_ids are grouped per rule revision, so a review only
-  # ever sees alerts the rule's current logic produced; resolve_fanout_rows keeps
-  # the group matching the rule's live revision, read from the rules API because
-  # the newest alert still carries the old revision when an edit stopped the noise.
-  # Trade-off: `revision` moves on any content edit, cosmetic ones (description,
-  # tags) included, so such an edit drops the rule's evidence and the next review
-  # waits for min_fp_count new false positives. That beats diagnosing the current
-  # rule with alerts an older version produced. An older revision that still
-  # qualifies can hold a candidate slot until it ages out of the window; the
-  # overscan beyond the launch cap absorbs that. The reviewed watermark stays
-  # per rule: a review of any revision retires the false positives before it.
-  # `rule_revision_key` is comma-delimited so revision 3 never matches 31.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
@@ -237,9 +225,6 @@ steps:
     with:
       rule_revision_keys: ",{% for rule in steps.list_enabled_candidates.output.data %}{{ rule.id }}@{{ rule.revision }},{% endfor %}"
 
-  # Only harvest rows of an enabled rule's current revision are included in the
-  # fan-out. Fails closed: without the rule lookup no revision is known, so no
-  # rule is reviewed.
   - name: resolve_fanout_rows
     type: data.set
     with:
