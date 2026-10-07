@@ -648,13 +648,19 @@ export const getResolutionCompositeQuery = (
   index,
   size: 0,
   query: targetEntityIds
-    ? { terms: { resolution_target_id: targetEntityIds } }
-    : { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+    ? { terms: { 'entity.relationships.resolution.resolved_to': targetEntityIds } }
+    : { exists: { field: 'entity.relationships.resolution.resolved_to' } },
   aggs: {
     by_resolution_target: {
       composite: {
         size: pageSize,
-        sources: [{ resolution_target_id: { terms: { field: 'resolution_target_id' } } }],
+        sources: [
+          {
+            resolution_target_id: {
+              terms: { field: 'entity.relationships.resolution.resolved_to' },
+            },
+          },
+        ],
         ...(afterKey ? { after: afterKey } : {}),
       },
     },
@@ -664,12 +670,16 @@ export const getResolutionCompositeQuery = (
 /**
  * Resolution scoring filtered by an explicit `resolution_target_id IN (...)` list.
  *
- * `COALESCE(resolution_target_id, entity_id)` after the LOOKUP JOIN routes
- * alerts on resolution targets that aren't themselves iterated by the entity
- * store (so they have no lookup row) to their own EUID — keeping their alerts
- * attributed to the requested target. `relationship_type` defaults to "self"
- * on the same path; `parseEsqlResolutionScoreRow` drops "self" entries from
- * `related_entities`.
+ * Instead of a pre-built lookup index (Phase 0), joins directly against the
+ * entity store's latest index (`entities-latest`). The join key is `entity.id`
+ * (the store's EUID field). A synthetic column `entity.id = entity_id` is
+ * created just before the join so the column name matches the store's field;
+ * the original `entity_id` column is preserved and used as the COALESCE
+ * fallback for entities not present in the store.
+ *
+ * `relationship_type` is derived from the presence of
+ * `entity.relationships.resolution.resolved_to`; `parseEsqlResolutionScoreRow`
+ * drops "self" entries from `related_entities`.
  */
 export const getResolutionScoreESQLByIds = (
   entityType: EntityType,
@@ -677,7 +687,7 @@ export const getResolutionScoreESQLByIds = (
   sampleSize: number,
   pageSize: number,
   alertsIndex: string,
-  lookupIndex: string
+  entityStoreIndex: string
 ): string => {
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
   const fieldEvals = euid.esql.getFieldEvaluations(entityType);
@@ -703,10 +713,12 @@ export const getResolutionScoreESQLByIds = (
     `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
     `entity_id)`;
 
-  // Compute entity_id (cheap), then override with the pre-stamped field when present,
-  // then LOOKUP JOIN to recover resolution_target_id, then filter on resolution_target_id
-  // BEFORE the CONCAT/base64 builders run so per-row string-allocation work only
-  // happens for alerts that survive the IN-clause.
+  // Compute entity_id (cheap), then override with the pre-stamped field when present.
+  // Create entity.id = entity_id as the join key (matches the store's field name),
+  // then LOOKUP JOIN against entities-latest to pull resolution.resolved_to.
+  // entity_id (no dot) is preserved as the COALESCE fallback for alerts not in the store.
+  // Filter on resolution_target_id BEFORE the CONCAT/base64 builders run so per-row
+  // string-allocation work only happens for alerts that survive the IN-clause.
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
@@ -714,9 +726,10 @@ export const getResolutionScoreESQLByIds = (
     ${fieldEvalsClause}
     ${euidEvalClause}
     ${storedEuidCoalesceClause}
-    | LOOKUP JOIN ${lookupIndex} ON entity_id
-    | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
-           relationship_type = COALESCE(relationship_type, "self")
+    | EVAL entity.id = entity_id
+    | LOOKUP JOIN ${entityStoreIndex} ON entity.id
+    | EVAL resolution_target_id = COALESCE(entity.relationships.resolution.resolved_to, entity_id),
+           relationship_type = CASE(entity.relationships.resolution.resolved_to IS NOT NULL, "entity.relationships.resolution.resolved_to", "self")
     | WHERE resolution_target_id IN (${idsClause})
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
