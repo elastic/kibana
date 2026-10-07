@@ -180,10 +180,6 @@ const ONBOARDING_WORKER_EVENT_TRIGGERS: Record<string, string> = {
 export const onboardingWorkerEventTrigger = (workerId: string): string | undefined =>
   ONBOARDING_WORKER_EVENT_TRIGGERS[workerId];
 
-export const INTRO_TITLE = i18n.translate('xpack.alertzero.onboarding.intro.title', {
-  defaultMessage: 'AlertZero in 90 seconds',
-});
-
 export const INTRO_PROMO_LEAD = i18n.translate('xpack.alertzero.onboarding.intro.promoLead', {
   defaultMessage: 'AlertZero is a coworker that is always there — always working for you.',
 });
