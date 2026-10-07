@@ -10,6 +10,7 @@
 import { Subject } from 'rxjs';
 import { getDefaultApproximation } from '../approximation_manager';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
+import { dashboardClient } from '../../dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import { loadDashboardApi } from './load_dashboard_api';
@@ -120,10 +121,9 @@ describe('loadDashboardApi', () => {
 
       test('prefers saved object value over localStorage', async () => {
         jest.mocked(getDefaultApproximation).mockReturnValue({ esql_approximation: true });
-        // @ts-ignore
-        require('../../dashboard_client').dashboardClient.get.mockResolvedValueOnce({
+        jest.mocked(dashboardClient.get).mockResolvedValueOnce({
           data: { ...DEFAULT_DASHBOARD_STATE, esql_approximation: false },
-        });
+        } as Awaited<ReturnType<typeof dashboardClient.get>>);
         await loadDashboardApi({
           getCreationOptions: async () => ({ useSessionStorageIntegration: false }),
           savedObjectId: '12345',
