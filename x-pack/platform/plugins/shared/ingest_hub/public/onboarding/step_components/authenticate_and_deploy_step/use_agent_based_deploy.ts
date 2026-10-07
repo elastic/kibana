@@ -27,7 +27,6 @@ import { toSOAuthMethod } from './agent_based_section/credential_method_selector
 import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
 import {
-  completeAgentCredentials,
   fetchPackagePolicySecretRefs,
   filterSecretRefsForMethod,
   withoutCoveredCredentials,
@@ -200,8 +199,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // New package policies reuse the keys the user kept from an already deployed one. Read
         // before cleanup, from a policy cleanup keeps: deleting the policy that holds a secret
         // deletes the secret, so refs read from it would dangle.
-        // Half-typed keys are never sent (see completeAgentCredentials).
-        const credentials = completeAgentCredentials(agentCredentialsRef.current);
+        const credentials = agentCredentialsRef.current;
         const typedCreds = credentials;
         const keysMethod =
           agentCredentialMethod === 'static_keys' || agentCredentialMethod === 'temporary_keys'

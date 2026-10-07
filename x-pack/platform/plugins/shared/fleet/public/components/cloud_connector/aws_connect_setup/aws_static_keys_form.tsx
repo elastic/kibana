@@ -53,20 +53,21 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
   );
   // The stored credentials are replaced or kept together; a replaced field starts empty, not with
   // the value kept in memory from an earlier entry.
-  const resetStoredFields = () =>
-    setFields((prev) => ({
-      ...prev,
-      ...Object.fromEntries((storedSecretFields ?? []).map((field) => [field, ''])),
-    }));
+  const withoutStoredFields = (current: typeof fields) => ({
+    ...current,
+    ...Object.fromEntries((storedSecretFields ?? []).map((field) => [field, ''])),
+  });
   const handleReplace = () => {
     replace();
-    resetStoredFields();
+    setFields(withoutStoredFields);
   };
   const handleCancelReplace = () => {
     cancel();
-    resetStoredFields();
-    // Nothing is entered any more.
-    onFieldsChange?.(undefined);
+    const next = withoutStoredFields(fields);
+    setFields(next);
+    // Whatever is still typed in a field that is not stored stays and is still reported; when
+    // nothing is typed any more, nothing is entered.
+    onFieldsChange?.(Object.values(next).some(Boolean) ? next : undefined);
   };
   const hasAccessKeyId = !!fields.access_key_id || isStored('access_key_id');
   const hasSecretAccessKey = !!fields.secret_access_key || isStored('secret_access_key');

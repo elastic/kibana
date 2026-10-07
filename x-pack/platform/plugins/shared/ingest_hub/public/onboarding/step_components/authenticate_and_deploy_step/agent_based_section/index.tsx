@@ -487,9 +487,13 @@ export function AgentBasedSection({
                       onFieldsChange={(creds) => {
                         notifyStoredCredentialsReplaced(creds);
                         setStaticKeyCreds(creds ?? undefined);
-                        notifyCredentialChange('static_keys', {
-                          staticCreds: creds ?? undefined,
-                        });
+                        // No credentials entered (cleared, or the stored ones were kept): tell the
+                        // parent so, instead of letting it fall back to the previous values.
+                        if (creds) {
+                          notifyCredentialChange('static_keys', { staticCreds: creds });
+                        } else {
+                          onCredentialsChange?.(undefined);
+                        }
                       }}
                       data-test-subj="agentBasedSection-directAccessKeysForm"
                     />
@@ -501,7 +505,11 @@ export function AgentBasedSection({
                       onFieldsChange={(creds) => {
                         notifyStoredCredentialsReplaced(creds);
                         setTemporaryKeyCreds(creds ?? undefined);
-                        notifyCredentialChange('temporary_keys', { tempCreds: creds ?? undefined });
+                        if (creds) {
+                          notifyCredentialChange('temporary_keys', { tempCreds: creds });
+                        } else {
+                          onCredentialsChange?.(undefined);
+                        }
                       }}
                       data-test-subj="agentBasedSection-temporaryKeysForm"
                     />

@@ -145,6 +145,33 @@ describe('AwsStaticKeysForm stored secrets', () => {
       expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('');
     });
 
+    it('keeps reporting what is still typed in a field that is not stored', () => {
+      const onReadyChange = jest.fn();
+      const onFieldsChange = jest.fn();
+      // Only the secret access key is stored; the access key id is a plain field.
+      renderWithI18n(
+        <AwsStaticKeysForm
+          storedSecretFields={['secret_access_key']}
+          onReadyChange={onReadyChange}
+          onFieldsChange={onFieldsChange}
+        />
+      );
+      fireEvent.change(screen.getByTestId('awsStaticKeysForm-accessKeyId'), {
+        target: { value: 'typed-key' },
+      });
+      fireEvent.click(screen.getByTestId('awsStaticKeysForm-secretAccessKey-replace'));
+      fireEvent.click(screen.getByTestId('awsStaticKeysForm-cancelReplace'));
+
+      expect(screen.getByTestId('awsStaticKeysForm-secretAccessKey-stored')).toBeInTheDocument();
+      expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('typed-key');
+      expect(onReadyChange).toHaveBeenLastCalledWith(true);
+      // The typed access key id is still part of what is entered.
+      expect(onFieldsChange).toHaveBeenLastCalledWith({
+        access_key_id: 'typed-key',
+        secret_access_key: '',
+      });
+    });
+
     it('has nothing to cancel when no secret is stored', () => {
       renderWithI18n(<AwsStaticKeysForm />);
       expect(screen.queryByTestId('awsStaticKeysForm-cancelReplace')).not.toBeInTheDocument();

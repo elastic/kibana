@@ -381,27 +381,6 @@ describe('useMiDeploy — kept secret refs', () => {
       );
     });
 
-    it('never sends half-typed keys: a cleanup-only run keeps the stored secrets', async () => {
-      mockCleanup.mockResolvedValue({
-        toDelete: [],
-        toUpdate: [{ policyId: 'policy-A', survivingInstanceIds: ['elb'] }],
-      });
-      await runDeploy(
-        makeParams({
-          deployGroups: [makeGroup('elb')],
-          serviceStatuses: { elb: 'receiving' },
-          policyIdsByInstance: { elb: 'policy-A', removed: 'policy-A' },
-          pendingCleanupPolicyIds: { removed: 'policy-A' },
-          // The access key id was typed, the secret was not.
-          authenticateAndDeployStep: {
-            staticKeys: { access_key_id: 'AKID', secret_access_key: '' },
-          },
-        })
-      );
-
-      expect(mockCleanup.mock.calls[0][0].authenticateAndDeployStep.staticKeys).toBeUndefined();
-    });
-
     it('does not share anything for a single policy or without typed keys', async () => {
       await runDeploy(makeParams());
       expect(mockUpdate).not.toHaveBeenCalled();

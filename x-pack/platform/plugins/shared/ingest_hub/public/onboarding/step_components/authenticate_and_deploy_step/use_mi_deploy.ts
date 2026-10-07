@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 import type { AwsServiceMatrixEntry, DataFormat } from '../../aws_service_matrix';
 import type {
@@ -17,11 +17,7 @@ import type { ServiceSettingsPersistedState } from '../service_settings_step/use
 import { buildInstanceStatuses, collectDeployResults, deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
-import {
-  completeStaticKeysOnly,
-  fetchAgentlessSecretRefs,
-  withoutCoveredCredentials,
-} from './secret_refs';
+import { fetchAgentlessSecretRefs, withoutCoveredCredentials } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import type { ExistingSecretRefs } from './secret_refs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
@@ -229,7 +225,7 @@ export function useMiDeploy({
   deployGroups,
   nonAgentlessServices,
   serviceSettings,
-  authenticateAndDeployStep: typedAuthenticateAndDeployStep,
+  authenticateAndDeployStep,
   namespace,
   selectedServiceIds,
   dataFormat,
@@ -254,15 +250,6 @@ export function useMiDeploy({
   isDirty,
   isAuthDirty,
 }: UseMiDeployParams): (instanceIds?: string[]) => Promise<{ cleanupFailed: boolean }> {
-  // Half-typed keys are never sent (see completeStaticKeysOnly): that covers the deploy, the
-  // dirty update and the cleanup updates alike.
-  const authenticateAndDeployStep = useMemo(
-    () => ({
-      ...typedAuthenticateAndDeployStep,
-      staticKeys: completeStaticKeysOnly(typedAuthenticateAndDeployStep.staticKeys),
-    }),
-    [typedAuthenticateAndDeployStep]
-  );
   return useCallback(
     async (instanceIds?: string[]) => {
       const isInitialDeploy = instanceIds === undefined;

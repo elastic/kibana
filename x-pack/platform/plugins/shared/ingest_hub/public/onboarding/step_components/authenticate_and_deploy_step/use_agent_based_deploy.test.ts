@@ -1293,32 +1293,6 @@ describe('useAgentBasedDeploy — kept secret refs', () => {
     expect(started).toEqual(['pkg-policy-A', 'pkg-policy-C', 'pkg-policy-D']);
   });
 
-  it('never sends half-typed keys: they are blanked so the stored refs are used', async () => {
-    setupFlow('static_keys');
-    const { result } = renderHook(() => useAgentBasedDeploy());
-    act(() => {
-      result.current.setAgentCredentials({
-        method: 'static_keys',
-        access_key_id: 'AKID',
-        secret_access_key: '',
-      });
-    });
-    await act(async () => {
-      await result.current.handleDeploy();
-    });
-
-    const deployOpts = mockDeployToExistingAgentPolicies.mock.calls[0][1];
-    expect(deployOpts.agentCredentials).toStrictEqual({
-      method: 'static_keys',
-      access_key_id: '',
-      secret_access_key: '',
-      session_token: '',
-    });
-    expect(mockCleanupAgentBasedPolicies.mock.calls[0][0].agentCredentials).toStrictEqual(
-      deployOpts.agentCredentials
-    );
-  });
-
   it('exposes the surviving policy for the credential forms', () => {
     setupFlow('static_keys', {
       policyIdsByInstance: { serviceX: 'pkg-policy-X', serviceA: 'pkg-policy-A' },

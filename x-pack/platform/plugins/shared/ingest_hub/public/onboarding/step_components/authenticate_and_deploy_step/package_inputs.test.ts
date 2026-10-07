@@ -565,18 +565,96 @@ describe('buildPackageVars — stored secret refs', () => {
     });
   });
 
-  it('lets a replaced field win over its stored ref and keeps the other one', () => {
-    expect(
-      buildPackageVars(
-        '',
-        { access_key_id: '', secret_access_key: 'NEW' },
-        PKG_VARS,
-        undefined,
-        refs
-      )
-    ).toEqual({
-      access_key_id: { isSecretRef: true, id: 'ref-akid' },
-      secret_access_key: 'NEW',
+  describe('stored credentials are replaced as a set', () => {
+    it('uses the typed values when every stored credential is replaced', () => {
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' },
+          PKG_VARS,
+          undefined,
+          refs
+        )
+      ).toEqual({ access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' });
+    });
+
+    it('keeps the stored refs when only one stored credential was typed (no mismatched pair)', () => {
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: '' },
+          PKG_VARS,
+          undefined,
+          refs
+        )
+      ).toEqual({
+        access_key_id: { isSecretRef: true, id: 'ref-akid' },
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+      });
+    });
+
+    it('keeps a typed value for a credential that has no stored ref', () => {
+      // Only the secret access key is stored as a secret; the access key id is a plain var.
+      const onlySecretRef = new Map([
+        ['secret_access_key', { isSecretRef: true as const, id: 'ref-secret' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: '' },
+          PKG_VARS,
+          undefined,
+          onlySecretRef
+        )
+      ).toEqual({
+        access_key_id: 'NEW-AKID',
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+      });
+    });
+
+    it('applies to agent-based temporary keys: all three must be replaced together', () => {
+      const tempRefs = new Map([
+        ...refs,
+        ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          undefined,
+          PKG_VARS,
+          {
+            method: 'temporary_keys',
+            access_key_id: 'NEW-AKID',
+            secret_access_key: 'NEW-SECRET',
+            session_token: '',
+          },
+          tempRefs
+        )
+      ).toEqual({
+        access_key_id: { isSecretRef: true, id: 'ref-akid' },
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+        session_token: { isSecretRef: true, id: 'ref-token' },
+      });
+    });
+
+    it('does not let a stored session token block typed static keys', () => {
+      const withToken = new Map([
+        ...refs,
+        ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' },
+          PKG_VARS,
+          undefined,
+          withToken
+        )
+      ).toEqual({
+        access_key_id: 'NEW-AKID',
+        secret_access_key: 'NEW-SECRET',
+        session_token: { isSecretRef: true, id: 'ref-token' },
+      });
     });
   });
 
@@ -596,13 +674,13 @@ describe('buildPackageVars — stored secret refs', () => {
         '',
         undefined,
         PKG_VARS,
-        { method: 'temporary_keys', access_key_id: '', secret_access_key: '', session_token: 'T' },
+        { method: 'temporary_keys', access_key_id: '', secret_access_key: '', session_token: '' },
         tempRefs
       )
     ).toEqual({
       access_key_id: { isSecretRef: true, id: 'ref-akid' },
       secret_access_key: { isSecretRef: true, id: 'ref-secret' },
-      session_token: 'T',
+      session_token: { isSecretRef: true, id: 'ref-token' },
     });
   });
 

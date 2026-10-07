@@ -139,6 +139,7 @@ function setupMocks({
         <button onClick={() => onFieldsChange?.({ access_key_id: '', secret_access_key: '' })}>
           clear-secret
         </button>
+        <button onClick={() => onFieldsChange?.(undefined)}>no-credentials</button>
       </div>
     )
   );
@@ -239,6 +240,7 @@ interface RenderOptions {
   deployErrors?: Record<string, string> | undefined;
   secretSourcePolicyId?: string;
   onStoredCredentialsReplacedChange?: jest.Mock;
+  onCredentialsChange?: jest.Mock;
 }
 
 function renderSection(props: RenderOptions = {}) {
@@ -258,6 +260,7 @@ function renderSection(props: RenderOptions = {}) {
           deployErrors={props.deployErrors}
           secretSourcePolicyId={props.secretSourcePolicyId}
           onStoredCredentialsReplacedChange={props.onStoredCredentialsReplacedChange}
+          onCredentialsChange={props.onCredentialsChange}
         />
       </React.Suspense>
     </I18nProvider>
@@ -840,6 +843,28 @@ describe('AgentBasedSection', () => {
         expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(true);
         fireEvent.click(screen.getByText('clear-session-token'));
         expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(false);
+      });
+
+      it('tells the parent no credentials are entered when the form reports none (cancel), not the previous ones', async () => {
+        mockFetchSecretRefs.mockResolvedValue(REFS);
+        const onCredentialsChange = jest.fn();
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'static_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1', onCredentialsChange });
+        await waitFor(() => expect(screen.getByTestId('static-keys-form')).toBeInTheDocument());
+
+        fireEvent.click(screen.getByText('replace-secret'));
+        expect(onCredentialsChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ method: 'static_keys', secret_access_key: 'NEW' })
+        );
+
+        // The replacement is cancelled: nothing entered, so the stale replacement is not resent.
+        fireEvent.click(screen.getByText('no-credentials'));
+        expect(onCredentialsChange).toHaveBeenLastCalledWith(undefined);
       });
 
       it('does not report a replacement when nothing is stored', async () => {

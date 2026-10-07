@@ -272,19 +272,33 @@ export function buildPackageVars(
   // the deployed package actually declares it.
   if (globalRegion && pkgVarNames.has('region')) vars.region = globalRegion;
 
-  const setCredentialVar = (name: CredentialVarName, typedValue: string | undefined) => {
-    if (!pkgVarNames.has(name)) return;
-    const value = typedValue || existingSecretRefs?.get(name);
-    if (value) vars[name] = value;
+  // The credentials that have a stored secret are replaced as a set: an access key id only works
+  // with its own secret access key, so a typed value for a stored credential only counts when every
+  // stored credential of the method is replaced. Otherwise the stored ref is kept, and a half-typed
+  // set is never sent next to the ref of the other half. A typed value for a credential with no
+  // stored ref (a package may keep only some of them as secrets) always counts.
+  const setCredentialVars = (typed: Partial<Record<CredentialVarName, string>>) => {
+    const declared = (Object.keys(typed) as CredentialVarName[]).filter((name) =>
+      pkgVarNames.has(name)
+    );
+    const stored = declared.filter((name) => existingSecretRefs?.has(name));
+    const isCompleteReplacement = stored.every((name) => !!typed[name]);
+    for (const name of declared) {
+      const ref = existingSecretRefs?.get(name);
+      const useTyped = !!typed[name] && (!ref || isCompleteReplacement);
+      const value = useTyped ? typed[name] : ref;
+      if (value) vars[name] = value;
+    }
   };
 
   if (agentCredentials) {
     const { method } = agentCredentials;
     if (method === 'static_keys' || method === 'temporary_keys') {
-      setCredentialVar('access_key_id', agentCredentials.access_key_id);
-      setCredentialVar('secret_access_key', agentCredentials.secret_access_key);
-      if (method === 'temporary_keys')
-        setCredentialVar('session_token', agentCredentials.session_token);
+      setCredentialVars({
+        access_key_id: agentCredentials.access_key_id,
+        secret_access_key: agentCredentials.secret_access_key,
+        ...(method === 'temporary_keys' ? { session_token: agentCredentials.session_token } : {}),
+      });
     } else if (method === 'shared_credentials') {
       if (agentCredentials.shared_credential_file && pkgVarNames.has('shared_credential_file'))
         vars.shared_credential_file = agentCredentials.shared_credential_file;
@@ -296,10 +310,13 @@ export function buildPackageVars(
     }
   } else {
     // Agentless path: staticKeys is used when no agentCredentials are provided.
-    setCredentialVar('access_key_id', staticKeys?.access_key_id);
-    setCredentialVar('secret_access_key', staticKeys?.secret_access_key);
-    // Only ever a kept ref: the in-memory static keys have no session token.
-    setCredentialVar('session_token', undefined);
+    setCredentialVars({
+      access_key_id: staticKeys?.access_key_id,
+      secret_access_key: staticKeys?.secret_access_key,
+    });
+    // The in-memory static keys have no session token: only a stored one is kept.
+    const sessionTokenRef = existingSecretRefs?.get('session_token');
+    if (sessionTokenRef && pkgVarNames.has('session_token')) vars.session_token = sessionTokenRef;
   }
   return Object.keys(vars).length > 0 ? vars : undefined;
 }
