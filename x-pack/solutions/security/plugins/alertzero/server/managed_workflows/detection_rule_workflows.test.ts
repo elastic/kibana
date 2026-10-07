@@ -675,9 +675,10 @@ describe('detection rule workflows', () => {
         );
       });
 
-      // A rule edited mid-window still has FPs from its older revision. Diagnosing the
-      // current rule with them proposes a fix for logic that no longer runs, so every
-      // count, the FP rate and the alert ids come from the live revision only.
+      // A rule edited within the analysis period (analysis_window_days) still has FPs
+      // from its older revision in that period. Diagnosing the current rule with them
+      // proposes a fix for logic that no longer runs, so every count, the FP rate and
+      // the alert ids come from the live revision only.
       describe('current rule revision', () => {
         const resolveRevisions = tuningSteps.find(
           ({ name }) => name === 'resolve_current_revisions'
