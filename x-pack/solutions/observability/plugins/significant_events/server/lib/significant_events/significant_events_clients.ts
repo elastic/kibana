@@ -14,34 +14,24 @@ import {
   type detectionsMappings,
 } from './detections';
 import type { DetectionClient } from './detections';
-import { EventService, eventsDataStream, type StoredEvent, type eventsMappings } from './events';
-import type { EventClient, SignificantEventsReadClient } from './events';
+import { RuleEventsClient } from './events/rule_events_client';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
 
 export interface SignificantEventsServices {
   detection: DetectionService;
-  event: EventService;
 }
 
 export interface SignificantEventsClients {
   getDetectionClient: () => Promise<DetectionClient>;
-  getEventClient: () => Promise<EventClient>;
-  /**
-   * Flag-aware accessor for read-only `{id}`/list lookups migrated onto `RuleEventsClient`
-   * (currently: `eventsSearchRoute`, `eventsLifecycleRoute`, `eventsGetRoute`,
-   * `eventsTriggerInvestigationRoute`). Honors
-   * `useRuleEventsRead`. Only call this for handlers that exclusively call `findByEventId` (or
-   * the list/search equivalent) — any handler needing `EventClient`-only methods (`bulkCreate`,
-   * `findByEventUuid`, `findLatestActive`, `emitTrigger`, …) must keep using `getEventClient()`,
-   * which always returns `EventClient` regardless of the flag.
-   */
-  getEventSearchClient: () => Promise<SignificantEventsReadClient>;
+  /** Reads Significant Events from `.rule-events`. Writes go through `AlertEventsClient`. */
+  getEventSearchClient: () => Promise<RuleEventsClient>;
+  /** Fire-and-forget workflow trigger emitter; undefined when workflows are unavailable. */
+  emitTrigger: TriggerEmitter | undefined;
 }
 
 export function createSignificantEventsServices(): SignificantEventsServices {
   return {
     detection: new DetectionService(),
-    event: new EventService(),
   };
 }
 
@@ -51,43 +41,14 @@ export function createSignificantEventsClients({
   esClient,
   space,
   triggerEmitter,
-  useRuleEventsRead,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
   space: string;
   triggerEmitter?: TriggerEmitter;
-  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
-  useRuleEventsRead?: boolean;
 }): SignificantEventsClients {
-  const buildEventClientOptions = async () => ({
-    dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
-      eventsDataStream.name
-    ),
-    esClient,
-    space,
-    triggerEmitter,
-  });
-
-  // Shared EventClient instance — both `getEventClient` and `getEventSearchClient` (when flag is
-  // off) return the same object so that `eventSearchClient === eventClient` identity checks in
-  // write-path helpers correctly short-circuit the redundant legacy-lineage lookup (#1517).
-  // This `let` is declared inside `createSignificantEventsClients` — one closure per request;
-  // no cross-request state is shared.
-  // Promise-based memoization: storing the promise (not the resolved value) ensures concurrent
-  // callers racing before initialization completes all receive the same instance rather than each
-  // constructing their own, which would silently break the `eventSearchClient === eventClient`
-  // identity checks in write-path helpers.
-  let sharedEventClientPromise: Promise<EventClient> | undefined;
-  const getSharedEventClient = (): Promise<EventClient> => {
-    if (!sharedEventClientPromise) {
-      sharedEventClientPromise = buildEventClientOptions().then(
-        (opts) => services.event.getClient(opts) as EventClient
-      );
-    }
-    return sharedEventClientPromise;
-  };
+  const eventSearchClient = new RuleEventsClient({ esClient, space });
 
   return {
     getDetectionClient: async () =>
@@ -99,18 +60,7 @@ export function createSignificantEventsClients({
         esClient,
         space,
       }),
-    // Every caller of `getEventClient()` (routes other than `eventsSearchRoute`, agent-builder
-    // tools, workflow triggers) uses the full `EventClient` surface (`bulkCreate`,
-    // `findByEventUuid`, `findLatestActive`, `emitTrigger`, …), which `RuleEventsClient`
-    // intentionally does not implement (#1517).
-    getEventClient: getSharedEventClient,
-    getEventSearchClient: async (): Promise<SignificantEventsReadClient> => {
-      if (!useRuleEventsRead) {
-        // Return the shared EventClient so callers can use `readClient === eventClient` to detect
-        // that no synthetic-UUID translation is needed.
-        return getSharedEventClient();
-      }
-      return services.event.getClient({ ...(await buildEventClientOptions()), useRuleEventsRead });
-    },
+    getEventSearchClient: async () => eventSearchClient,
+    emitTrigger: triggerEmitter,
   };
 }

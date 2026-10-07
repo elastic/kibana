@@ -277,18 +277,31 @@ describe('createVegaGraph', () => {
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
     expect(invoke).toHaveBeenCalledTimes(2);
+    // The original prompt is unchanged; the unparsable response and its error are appended.
+    const [[firstPrompt], [retryPrompt]] = invoke.mock.calls;
+    expect(retryPrompt).toEqual([
+      ...firstPrompt,
+      ['ai', 'not json at all'],
+      ['human', expect.stringMatching(/JSON/)],
+    ]);
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).mark).toBe('line');
   });
 
   it('rejects an authored spec with no renderable view and retries', async () => {
+    const failedResponse = asCodeBlock({ title: 'no mark here', spec: { description: 'empty' } });
     invoke
-      .mockResolvedValueOnce(asCodeBlock({ title: 'no mark here', spec: { description: 'empty' } }))
+      .mockResolvedValueOnce(failedResponse)
       .mockResolvedValueOnce(asCodeBlock({ title: 'Arc chart', spec: { mark: 'arc' } }));
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
     expect(invoke).toHaveBeenCalledTimes(2);
+    const [, [retryPrompt]] = invoke.mock.calls;
+    expect(retryPrompt.slice(-2)).toEqual([
+      ['ai', failedResponse],
+      ['human', expect.stringContaining('Vega-Lite spec must declare a "mark"')],
+    ]);
     expect(state.error).toBeNull();
     expect(state.title).toBe('Arc chart');
     expect(JSON.parse(state.spec!).mark).toBe('arc');

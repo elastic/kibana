@@ -403,6 +403,18 @@ export interface TaskUserScope {
   userName?: string;
 }
 
+/**
+ * How a task authenticates when it runs. The fields other than `type` depend on the type: a
+ * `service_account` credential names the workload the task runs as.
+ */
+export interface TaskCredential {
+  type: string;
+  workloadType?: string;
+  workloadId?: string;
+  spaceId?: string;
+  expectedServiceAccountId?: string | null;
+}
+
 /*
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
@@ -639,11 +651,32 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * How the task authenticates when it runs. Part of the AAD, so it is only written when the task is created.
+   */
+  credential?: TaskCredential;
+
+  /**
+   * Encrypted secret material for `credential`. For a service account it holds no secret, only a
+   * value whose decryption fails if `credential` was changed. Only written when the task is created.
+   */
+  encryptedCredential?: string;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
   id: ConcreteTaskInstance['id'];
 };
+
+/**
+ * A task as returned by the claim candidate search, carrying only the metadata the claim
+ * phase needs. The omitted fields are loaded for the winners of the claim instead, so the
+ * missing type members keep a candidate from being mistaken for a runnable task.
+ */
+export type TaskClaimCandidate = Omit<
+  ConcreteTaskInstance,
+  'state' | 'params' | 'apiKey' | 'uiamApiKey'
+>;
 
 export interface ConcreteTaskInstanceVersion {
   /** The _id of the the document (not the SO id) */

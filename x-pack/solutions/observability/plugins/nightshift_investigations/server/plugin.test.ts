@@ -9,13 +9,14 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
 
-const createPlugin = () =>
+const createPlugin = (memoryEnabled = false) =>
   new NightshiftInvestigationsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
       sandbox: undefined,
       cortex: { enabled: false },
       decision_trees: { enabled: true },
+      memory: { enabled: memoryEnabled },
     })
   );
 
@@ -42,6 +43,25 @@ describe('NightshiftInvestigationsPlugin setup', () => {
 
     expect(() => setup.registerInvestigationQuota(callback)).toThrow(
       'Investigation quota callback is already registered'
+    );
+  });
+
+  it('registers model resolution when Cortex and decision trees are disabled', () => {
+    const registerStepDefinition = jest.fn();
+    const dependencies = {
+      ...createSetupDeps(),
+      workflowsManagement: {},
+      workflowsExtensions: {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerTriggerDefinition: jest.fn(),
+        registerStepDefinition,
+      },
+    } as unknown as NightshiftInvestigationsSetupDeps;
+
+    createPlugin().setup(coreMock.createSetup(), dependencies);
+
+    expect(registerStepDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'nightshift.resolveModel' })
     );
   });
 });

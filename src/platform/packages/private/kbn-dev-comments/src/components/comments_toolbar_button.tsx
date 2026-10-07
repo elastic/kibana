@@ -10,10 +10,8 @@
 import React, { type MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IGNORE_ATTR } from '../constants';
+import { COMMENTS_BUTTON_TEST_SUBJ, IGNORE_ATTR } from '../constants';
 import { useComments, useCommentsState } from './comments_context';
-
-export const COMMENTS_BUTTON_TEST_SUBJ = 'devCommentsButton';
 
 const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
 
@@ -41,9 +39,9 @@ export const CommentsToolbarButton = () => {
   return (
     <EuiToolTip
       title={`${label} (${SHORTCUT})`}
-      content={i18n.translate('devComments.button.passThrough', {
-        defaultMessage: 'Hold {key} to click through to the page',
-        values: { key: PASS_THROUGH_KEY },
+      content={i18n.translate('devComments.button.modifiers', {
+        defaultMessage: 'Hold {passThroughKey} to interact with the page',
+        values: { passThroughKey: PASS_THROUGH_KEY },
       })}
       anchorProps={ignoreProps}
     >

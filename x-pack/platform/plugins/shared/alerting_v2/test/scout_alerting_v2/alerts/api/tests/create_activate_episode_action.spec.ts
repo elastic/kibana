@@ -50,7 +50,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
@@ -69,7 +69,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       expect(actions[0]).toMatchObject({
         action_type: 'activate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         space_id: 'default',
         reason,
@@ -97,7 +97,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           type: 'alert',
           data: { 'host.name': 'host-a' },
           severity: 'high',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
@@ -122,7 +122,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
         group_hash: groupHash,
         status: 'breached',
         type: 'alert',
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
         data: { 'host.name': 'host-a' },
         severity: 'high',
         space_id: 'default',
@@ -166,7 +166,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects alert_id over 150 chars with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getActivateEpisodeActionUrl('a'.repeat(151)), {
       headers: writerHeaders,
       body: { reason: 'valid reason' },
@@ -175,14 +175,14 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('returns 404 when episode_id matches no events', async ({ apiClient }) => {
+  apiTest('returns 404 when alert_id matches no events', async ({ apiClient }) => {
     const response = await apiClient.post(getActivateEpisodeActionUrl('unknown-episode'), {
       headers: writerHeaders,
       body: { reason: 'valid reason' },
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
+    expect(response.body.code).toBe('ALERT_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ alert_id: 'unknown-episode' });
   });
 
   apiTest(
@@ -203,13 +203,13 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
@@ -219,9 +219,9 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       });
 
       expect(response).toHaveStatusCode(409);
-      expect(response.body.code).toBe('ALERT_EPISODE_NOT_LATEST');
+      expect(response.body.code).toBe('ALERT_NOT_LATEST');
       expect(response.body.details).toMatchObject({
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
         group_hash: groupHash,
       });
 
@@ -246,7 +246,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
@@ -256,7 +256,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       });
 
       expect(response).toHaveStatusCode(409);
-      expect(response.body.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
+      expect(response.body.code).toBe('INVALID_ALERT_STATE_TRANSITION');
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
       expect(ruleEvents).toHaveLength(1);
@@ -282,7 +282,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeId, status: 'recovering', status_count: 2 },
+          alert: { id: episodeId, status: 'recovering', status_count: 2 },
         }),
       ]);
 
@@ -295,7 +295,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
         status: 'breached',
       });
     }
@@ -314,7 +314,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeId, status: 'pending', status_count: 1 },
+          alert: { id: episodeId, status: 'pending', status_count: 1 },
         }),
       ]);
 
@@ -327,7 +327,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
         status: 'breached',
       });
     }
@@ -352,7 +352,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
@@ -370,12 +370,12 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       expect(activateActions[0]).toMatchObject({
         action_type: 'activate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
       });
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
         status: 'breached',
       });
     }

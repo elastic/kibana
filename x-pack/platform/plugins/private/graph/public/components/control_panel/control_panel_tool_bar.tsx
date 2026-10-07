@@ -91,6 +91,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={undoButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphUndo"
             iconType={'undo'}
             size="xs"
             aria-label={undoButtonMsg}
@@ -103,6 +104,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={redoButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphRedo"
             iconType="redo"
             size="xs"
             aria-label={redoButtonMsg}
@@ -115,6 +117,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={expandButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphExpandSelection"
             iconType="plus"
             size="xs"
             aria-label={expandButtonMsg}
@@ -127,6 +130,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={addLinksButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphFillConnections"
             iconType="link"
             size="xs"
             aria-label={addLinksButtonMsg}
@@ -152,6 +156,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={blocklistButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphBlockSelection"
             iconType="eyeSlash"
             size="xs"
             aria-label={blocklistButtonMsg}
@@ -164,6 +169,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={customStyleButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphStyleSelection"
             iconType="brush"
             size="xs"
             aria-label={customStyleButtonMsg}
@@ -176,6 +182,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={drillDownButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphDrilldown"
             iconType="info"
             size="xs"
             aria-label={drillDownButtonMsg}

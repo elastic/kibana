@@ -45,21 +45,39 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumn(columnName: string) {
-    popularizeField(dataView, columnName, dataViews, capabilities);
+    onRemoveColumns([columnName]);
+  }
 
-    const nextColumns = removeColumn(columns || [], columnName);
+  function onRemoveColumns(columnNames: string[]): string[] {
+    const namesToRemove = new Set(columnNames);
+    if (namesToRemove.size === 0) {
+      return [];
+    }
+
+    const currentColumns = columns || [];
+    const nextColumns: string[] = [];
+    const removedColumnNames: string[] = [];
+    for (const col of currentColumns) {
+      if (namesToRemove.has(col)) {
+        removedColumnNames.push(col);
+      } else {
+        nextColumns.push(col);
+      }
+    }
     // The state's sort property is an array of [sortByColumn,sortDirection]
-    const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
+    const nextSort =
+      sort && sort.length ? sort.filter((subArr) => !namesToRemove.has(subArr[0])) : [];
 
     let nextSettings = cleanColumnSettings(nextColumns, settings);
 
     // When columns are removed, reset the last column to auto width if only absolute
     // width columns remain, to ensure the columns fill the available grid space
-    if (nextColumns.length < (columns?.length ?? 0)) {
+    if (nextColumns.length < currentColumns.length) {
       nextSettings = adjustLastColumnWidth(nextColumns, nextSettings);
     }
 
     setAppState({ columns: nextColumns, sort: nextSort, settings: nextSettings });
+    return removedColumnNames;
   }
 
   function onMoveColumn(columnName: string, newIndex: number) {
@@ -88,6 +106,7 @@ export function getStateColumnActions({
   return {
     onAddColumn,
     onRemoveColumn,
+    onRemoveColumns,
     onMoveColumn,
     onSetColumns,
   };
@@ -98,13 +117,6 @@ function addColumn(columns: string[], columnName: string) {
     return columns;
   }
   return [...columns, columnName];
-}
-
-function removeColumn(columns: string[], columnName: string) {
-  if (!columns.includes(columnName)) {
-    return columns;
-  }
-  return columns.filter((col) => col !== columnName);
 }
 
 function moveColumn(columns: string[], columnName: string, newIndex: number) {

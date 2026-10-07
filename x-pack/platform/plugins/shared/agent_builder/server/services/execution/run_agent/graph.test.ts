@@ -7,7 +7,9 @@
 
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
-import type { ChatCompleteCacheControl } from '@kbn/inference-common';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ConversationRoundStepType, type ConversationRoundStep } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
@@ -19,12 +21,17 @@ import type { PromptFactory } from './prompts';
 import { RunTracker, type ToolExecutionBuffer } from './run_tracker';
 import type { StateType } from './state';
 import type { ProcessedConversation } from './utils/prepare_conversation';
+import { compactContext } from './utils/conversation_compactor';
+import { createToolResultStoreMock } from '../../../test_utils/runner';
 
 jest.mock('@langchain/langgraph/prebuilt', () => ({
   ToolNode: jest.fn().mockImplementation(() => ({
     invoke: jest.fn().mockResolvedValue([]),
   })),
 }));
+
+jest.mock('./utils/conversation_compactor', () => ({ compactContext: jest.fn() }));
+const compactContextMock = compactContext as jest.Mock;
 
 const askName = internalTools.askUserQuestion.replace(/\./g, '_');
 
@@ -87,12 +94,18 @@ const createTestGraph = ({
     events: { emit: jest.fn() } as unknown as AgentEventEmitter,
     structuredOutput,
     outputSchema,
-    processedConversation: {} as ProcessedConversation,
+    processedConversation: { timeline: [] } as unknown as ProcessedConversation,
     promptFactory,
     roundId: 'test-round',
     sessionId,
     cacheControl,
     toolExecutionBuffer,
+    contextManagement: {
+      connector: { connectorId: 'test-connector' } as InferenceConnector,
+      resultStore: createToolResultStoreMock(),
+      resultTransformer: jest.fn().mockResolvedValue([]),
+      logger: loggerMock.create(),
+    },
   });
 
   return {
@@ -507,5 +520,115 @@ describe('createAgentGraph', () => {
       'c2',
     ]);
     expect(tracker.executionProjection()).toEqual(latest.steps);
+  });
+
+  describe('context management', () => {
+    const contextLengthError = () =>
+      new InferenceTaskError(ChatCompletionErrorCode.ContextLengthExceededError, 'too long', {});
+    const compactionSummary = {
+      summarized_up_to: { round_id: 'round-0', tool_call_id: 'x1' },
+      summarized_round_count: 0,
+      created_at: 't',
+      token_count: 1,
+      structured_data: {},
+    };
+
+    beforeEach(() => {
+      compactContextMock.mockReset();
+    });
+
+    it('records the input tokens of the last research call', async () => {
+      const { graph, researchInvoke } = createTestGraph();
+      researchInvoke.mockResolvedValue(
+        new AIMessage({
+          content: 'done',
+          usage_metadata: { input_tokens: 123, output_tokens: 1, total_tokens: 124 },
+        })
+      );
+
+      const result = await graph.invoke({ cycleLimit: 10 });
+
+      expect(result.lastCallUsage).toEqual({ inputTokens: 123 });
+    });
+
+    it('clears the last call usage when the latest research call reports none', async () => {
+      const { graph, researchInvoke } = createTestGraph();
+      researchInvoke
+        .mockResolvedValueOnce(
+          new AIMessage({
+            content: 'a',
+            tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }],
+            usage_metadata: { input_tokens: 123, output_tokens: 1, total_tokens: 124 },
+          })
+        )
+        .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+      mockToolNodeOnce([
+        new ToolMessage({ tool_call_id: 'c1', content: 'r1', artifact: { results: [] } }),
+      ]);
+
+      const result = await graph.invoke({ cycleLimit: 10 });
+
+      expect(researchInvoke).toHaveBeenCalledTimes(2);
+      expect(result.lastCallUsage).toBeUndefined();
+    });
+
+    it('compacts with the reactive cap and retries when the research call exceeds the context window', async () => {
+      const { graph, researchInvoke } = createTestGraph();
+      compactContextMock.mockResolvedValue({
+        summary: compactionSummary,
+        tokensBefore: 100,
+        tokensAfter: 10,
+        summarizedCycleCount: 1,
+      });
+      researchInvoke
+        .mockRejectedValueOnce(contextLengthError())
+        .mockResolvedValueOnce(new AIMessage({ content: 'the answer' }));
+
+      const result = await graph.invoke({ cycleLimit: 10 });
+
+      expect(compactContextMock).toHaveBeenCalledWith(
+        expect.objectContaining({ tailCapTokens: 20_000 }),
+        expect.anything()
+      );
+      expect(result.finalAnswer).toBe('the answer');
+      expect(result.compactionSummary).toEqual(compactionSummary);
+      expect(result.compactionRequest).toBeUndefined();
+      expect(result.contextRetryCount).toBe(0);
+      expect(result.steps).toEqual([
+        {
+          type: ConversationRoundStepType.compaction,
+          summarized_cycle_count: 1,
+          token_count_before: 100,
+          token_count_after: 10,
+        },
+      ]);
+    });
+
+    it('surfaces the context-length error when it persists after a compaction', async () => {
+      const { graph, researchInvoke } = createTestGraph();
+      compactContextMock.mockResolvedValue({
+        summary: compactionSummary,
+        tokensBefore: 100,
+        tokensAfter: 10,
+        summarizedCycleCount: 1,
+      });
+      researchInvoke.mockRejectedValue(contextLengthError());
+
+      await expect(graph.invoke({ cycleLimit: 10 })).rejects.toMatchObject({
+        meta: { errCode: AgentExecutionErrorCode.contextLengthExceeded },
+      });
+      expect(researchInvoke).toHaveBeenCalledTimes(2);
+    });
+
+    it('surfaces the context-length error when nothing can be compacted', async () => {
+      const { graph, researchInvoke } = createTestGraph();
+      compactContextMock.mockResolvedValue(undefined);
+      researchInvoke.mockRejectedValue(contextLengthError());
+
+      await expect(graph.invoke({ cycleLimit: 10 })).rejects.toMatchObject({
+        meta: { errCode: AgentExecutionErrorCode.contextLengthExceeded },
+      });
+      expect(researchInvoke).toHaveBeenCalledTimes(1);
+    });
   });
 });
