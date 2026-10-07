@@ -8,7 +8,7 @@
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import type { PanelContent, PanelContentAttempt } from '../../resolve_panel';
-import { withSectionId } from './panel_kind';
+import { sectionIdField, type ConfigPanelKind, type RequestPanelKind } from './panel_kind';
 import { lensPanelKind, vegaPanelKind, type VisPanelResolutionRequest } from './vis';
 import { markdownPanelKind } from './markdown';
 import { customContentPanelKind, type CustomContentPanelResolutionRequest } from './custom_content';
@@ -28,8 +28,8 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * - `'config'`: authored by value, discriminated by `type`.
  * - `'attachment'`: an existing visualization attachment from the conversation.
  *
- * Each kind's module describes it once (`defineConfigPanelKind` or `defineRequestPanelKind`). Registering
- * it in one of the lists below derives its members of the per-operation item schemas, the
+ * Each kind's module describes it once, as an object declared `as const satisfies ConfigPanelKind` or
+ * `as const satisfies RequestPanelKind`. Registering it in one of the lists below derives its members of the per-operation item schemas, the
  * embeddable-type lookups, and the type lists in descriptions and errors. List order is the order
  * of the schema unions sent to the model.
  */
@@ -49,21 +49,21 @@ const CONFIG_PANEL_KINDS = [
   singleMetricViewerPanelKind,
 ] as const;
 
-/** Every request kind must have a `PanelResolutionRequest` the host can resolve. */
+/**
+ * The `satisfies` check makes a request kind whose renderer has no `PanelResolutionRequest`
+ * fail to compile, so the host can resolve every request kind.
+ */
 const REQUEST_PANEL_KINDS = [
   lensPanelKind,
   vegaPanelKind,
   customContentPanelKind,
 ] as const satisfies ReadonlyArray<{ readonly renderer: PanelRenderer }>;
 
-type ConfigPanelKind = (typeof CONFIG_PANEL_KINDS)[number];
-type RequestPanelKind = (typeof REQUEST_PANEL_KINDS)[number];
-
-/** Maps a non-empty kind list onto the non-empty option tuple `z.discriminatedUnion` expects. */
-const mapKinds = <TKinds extends readonly [object, ...object[]], TValue>(
-  kinds: TKinds,
-  pick: (kind: TKinds[number]) => TValue
-): [TValue, ...TValue[]] => [pick(kinds[0]), ...kinds.slice(1).map(pick)];
+/**
+ * `z.discriminatedUnion` expects a non-empty tuple, while `Array.map` returns a plain array.
+ * Only called with the kind lists above, which are never empty.
+ */
+const toNonEmpty = <T>([first, ...rest]: readonly T[]): [T, ...T[]] => [first, ...rest];
 
 /** Joins items as "a, b, or c". */
 const formatList = (items: readonly string[]): string =>
@@ -74,7 +74,7 @@ export const CONFIG_PANEL_TYPE_LIST = formatList(CONFIG_PANEL_KINDS.map(({ type 
 
 const configPanelInputSchema = z.discriminatedUnion(
   'type',
-  mapKinds(CONFIG_PANEL_KINDS, ({ addInputSchema }) => addInputSchema)
+  toNonEmpty(CONFIG_PANEL_KINDS.map(({ addInputSchema }) => addInputSchema))
 );
 
 export type ConfigPanelInput = z.infer<typeof configPanelInputSchema>;
@@ -126,7 +126,7 @@ export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
   configPanelInputSchema,
   z.discriminatedUnion(
     'renderer',
-    mapKinds(REQUEST_PANEL_KINDS, ({ addInputSchema }) => addInputSchema)
+    toNonEmpty(REQUEST_PANEL_KINDS.map(({ addInputSchema }) => addInputSchema))
   ),
   attachmentPanelInputSchema,
 ]);
@@ -145,13 +145,13 @@ export type PanelRequestInput = Extract<NewPanelInput, { source: 'request' }>;
 export const addPanelsItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion(
     'type',
-    mapKinds(CONFIG_PANEL_KINDS, ({ addPanelsInputSchema }) => addPanelsInputSchema)
+    toNonEmpty(CONFIG_PANEL_KINDS.map(({ addPanelsInputSchema }) => addPanelsInputSchema))
   ),
   z.discriminatedUnion(
     'renderer',
-    mapKinds(REQUEST_PANEL_KINDS, ({ addPanelsInputSchema }) => addPanelsInputSchema)
+    toNonEmpty(REQUEST_PANEL_KINDS.map(({ addPanelsInputSchema }) => addPanelsInputSchema))
   ),
-  withSectionId(attachmentPanelInputSchema),
+  attachmentPanelInputSchema.extend({ sectionId: sectionIdField }),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -160,11 +160,11 @@ export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
 export const editPanelItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion(
     'renderer',
-    mapKinds(REQUEST_PANEL_KINDS, ({ editInputSchema }) => editInputSchema)
+    toNonEmpty(REQUEST_PANEL_KINDS.map(({ editInputSchema }) => editInputSchema))
   ),
   z.discriminatedUnion(
     'type',
-    mapKinds(CONFIG_PANEL_KINDS, ({ editInputSchema }) => editInputSchema)
+    toNonEmpty(CONFIG_PANEL_KINDS.map(({ editInputSchema }) => editInputSchema))
   ),
 ]);
 
@@ -180,8 +180,14 @@ export type PanelResolutionRequest =
 /** Engine that renders a `source: 'request'` panel. */
 export type PanelRenderer = NonNullable<PanelResolutionRequest['renderer']>;
 
-/** Keyed by the kinds' renderers, so a resolvable renderer without a kind fails to compile below. */
-const requestPanelKindByRenderer = new Map<RequestPanelKind['renderer'], RequestPanelKind>(
+/** The renderers that have a request kind. */
+type RegisteredPanelRenderer = (typeof REQUEST_PANEL_KINDS)[number]['renderer'];
+
+/**
+ * Keyed by `RegisteredPanelRenderer`, so passing a `PanelRenderer` to `get` below fails to compile
+ * when a resolution request's renderer has no request kind.
+ */
+const requestPanelKindByRenderer = new Map<RegisteredPanelRenderer, RequestPanelKind>(
   REQUEST_PANEL_KINDS.map((kind) => [kind.renderer, kind])
 );
 

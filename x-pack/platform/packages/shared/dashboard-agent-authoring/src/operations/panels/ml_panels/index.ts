@@ -16,7 +16,7 @@ import {
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { z } from '@kbn/zod/v4';
-import { defineConfigPanelKind } from '../panel_kind';
+import { sectionIdField, type ConfigPanelKind } from '../panel_kind';
 
 /**
  * ML anomaly detection panel logic.
@@ -76,11 +76,13 @@ export const editAnomalyChartsPanelConfigInputSchema = anomalyChartsPanelConfigI
     ),
   });
 
-export const anomalyChartsPanelKind = defineConfigPanelKind({
+export const anomalyChartsPanelKind = {
+  source: 'config',
   type: 'ml_anomaly_charts',
   embeddableType: 'ml_anomaly_charts',
   label: 'anomaly charts',
   addInputSchema: anomalyChartsPanelConfigInputSchema,
+  addPanelsInputSchema: anomalyChartsPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
   editInputSchema: editAnomalyChartsPanelConfigInputSchema,
   toEmbeddableConfig: (config) => {
     const { severity_threshold: severityThreshold, ...rest } = config;
@@ -91,7 +93,7 @@ export const anomalyChartsPanelKind = defineConfigPanelKind({
       ...(normalizedThreshold != null ? { severity_threshold: normalizedThreshold } : {}),
     };
   },
-});
+} as const satisfies ConfigPanelKind;
 
 // ─── Anomaly Swim Lane ────────────────────────────────────────────────────────
 
@@ -121,13 +123,15 @@ export const editAnomalySwimlaneConfigInputSchema = anomalySwimlaneConfigInputSc
     ),
   });
 
-export const anomalySwimlanePanelKind = defineConfigPanelKind({
+export const anomalySwimlanePanelKind = {
+  source: 'config',
   type: 'ml_anomaly_swimlane',
   embeddableType: 'ml_anomaly_swimlane',
   label: 'anomaly swim lane',
   addInputSchema: anomalySwimlaneConfigInputSchema,
+  addPanelsInputSchema: anomalySwimlaneConfigInputSchema.extend({ sectionId: sectionIdField }),
   editInputSchema: editAnomalySwimlaneConfigInputSchema,
-});
+} as const satisfies ConfigPanelKind;
 
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────
 
@@ -159,10 +163,12 @@ export const editSingleMetricViewerConfigInputSchema = singleMetricViewerConfigI
     ),
   });
 
-export const singleMetricViewerPanelKind = defineConfigPanelKind({
+export const singleMetricViewerPanelKind = {
+  source: 'config',
   type: 'ml_single_metric_viewer',
   embeddableType: 'ml_single_metric_viewer',
   label: 'single metric viewer',
   addInputSchema: singleMetricViewerConfigInputSchema,
+  addPanelsInputSchema: singleMetricViewerConfigInputSchema.extend({ sectionId: sectionIdField }),
   editInputSchema: editSingleMetricViewerConfigInputSchema,
-});
+} as const satisfies ConfigPanelKind;

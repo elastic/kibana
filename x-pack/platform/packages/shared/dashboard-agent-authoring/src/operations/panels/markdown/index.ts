@@ -8,7 +8,7 @@
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE, markdownStateSchema } from '@kbn/dashboard-markdown-schemas';
 import { z } from '@kbn/zod/v4';
-import { defineConfigPanelKind } from '../panel_kind';
+import { sectionIdField, type ConfigPanelKind } from '../panel_kind';
 
 /**
  * Markdown panel logic.
@@ -48,10 +48,12 @@ const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
     ),
   });
 
-export const markdownPanelKind = defineConfigPanelKind({
+export const markdownPanelKind = {
+  source: 'config',
   type: 'markdown',
   embeddableType: MARKDOWN_EMBEDDABLE_TYPE,
   label: 'markdown',
   addInputSchema: markdownPanelConfigInputSchema,
+  addPanelsInputSchema: markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
   editInputSchema: editMarkdownPanelConfigInputSchema,
-});
+} as const satisfies ConfigPanelKind;

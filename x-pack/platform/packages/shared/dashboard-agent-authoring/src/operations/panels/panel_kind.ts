@@ -8,7 +8,8 @@
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 
-const sectionIdField = z
+/** The `sectionId` that `add_panels` items carry on top of a new-panel input. */
+export const sectionIdField = z
   .string()
   .max(256)
   .optional()
@@ -16,28 +17,28 @@ const sectionIdField = z
     'Existing section id or the key of an add_section earlier in this call. If omitted, panel is added at the top level.'
   );
 
-/** Adds the `sectionId` that `add_panels` items carry on top of a new-panel input. */
-export const withSectionId = <TShape extends z.ZodRawShape>(schema: z.ZodObject<TShape>) =>
-  schema.extend({ sectionId: sectionIdField });
-
-interface PanelKindDefinition<TAddShape extends z.ZodRawShape, TEdit extends z.ZodObject> {
+interface PanelKindBase {
   /** Embeddable type panels of this kind are stored as. Edits may only target panels of this type. */
   readonly embeddableType: string;
   /** Human-readable name used in errors and descriptions, e.g. "anomaly charts". */
   readonly label: string;
   /** Input that creates a panel of this kind (`add_section` items). */
-  readonly addInputSchema: z.ZodObject<TAddShape>;
+  readonly addInputSchema: z.ZodObject;
+  /** `addInputSchema` extended with `sectionId: sectionIdField` (`add_panels` items). */
+  readonly addPanelsInputSchema: z.ZodObject;
   /** Input that edits an existing panel of this kind by id (`edit_panels` items). */
-  readonly editInputSchema: TEdit;
+  readonly editInputSchema: z.ZodObject;
 }
 
-/** A panel kind the agent authors by value (`source: 'config'`), discriminated by `type`. */
-interface ConfigPanelKindDefinition<
-  TType extends string,
-  TAddShape extends z.ZodRawShape,
-  TEdit extends z.ZodObject
-> extends PanelKindDefinition<TAddShape, TEdit> {
-  readonly type: TType;
+/**
+ * A panel kind the agent authors by value (`source: 'config'`), discriminated by `type`.
+ *
+ * Declare kinds with `as const satisfies ConfigPanelKind`: `satisfies` checks the shape, and
+ * `as const` keeps the literal `type` and the exact schema types the registry builds unions from.
+ */
+export interface ConfigPanelKind extends PanelKindBase {
+  readonly source: 'config';
+  readonly type: string;
   /** Maps the agent-facing config onto the embeddable's stored config. Defaults to passing it through. */
   readonly toEmbeddableConfig?: (config: AttachmentPanel['config']) => AttachmentPanel['config'];
 }
@@ -45,63 +46,10 @@ interface ConfigPanelKindDefinition<
 /**
  * A panel kind generated server-side (`source: 'request'`), discriminated by `renderer`. The host's
  * `ResolvePanelContent` implementation turns its requests into panel content.
+ *
+ * Declare kinds with `as const satisfies RequestPanelKind`, as for `ConfigPanelKind`.
  */
-interface RequestPanelKindDefinition<
-  TRenderer extends string,
-  TAddShape extends z.ZodRawShape,
-  TEdit extends z.ZodObject
-> extends PanelKindDefinition<TAddShape, TEdit> {
-  readonly renderer: TRenderer;
-}
-
-/** A defined by-value panel kind, as listed in the registry. */
-export type ConfigPanelKind<
-  TType extends string,
-  TAddShape extends z.ZodRawShape,
-  TEdit extends z.ZodObject
-> = ConfigPanelKindDefinition<TType, TAddShape, TEdit> & {
-  readonly source: 'config';
-  readonly addPanelsInputSchema: ReturnType<typeof withSectionId<TAddShape>>;
-};
-
-/** A defined server-generated panel kind, as listed in the registry. */
-export type RequestPanelKind<
-  TRenderer extends string,
-  TAddShape extends z.ZodRawShape,
-  TEdit extends z.ZodObject
-> = RequestPanelKindDefinition<TRenderer, TAddShape, TEdit> & {
+export interface RequestPanelKind extends PanelKindBase {
   readonly source: 'request';
-  readonly addPanelsInputSchema: ReturnType<typeof withSectionId<TAddShape>>;
-};
-
-/**
- * Defines a by-value panel kind. Its module is the only place the kind is described; the registry
- * in `panels/index.ts` derives the operation schemas and lookups from it.
- */
-export const defineConfigPanelKind = <
-  TType extends string,
-  TAddShape extends z.ZodRawShape,
-  TEdit extends z.ZodObject
->(
-  kind: ConfigPanelKindDefinition<TType, TAddShape, TEdit>
-): ConfigPanelKind<TType, TAddShape, TEdit> => ({
-  ...kind,
-  source: 'config',
-  addPanelsInputSchema: withSectionId(kind.addInputSchema),
-});
-
-/**
- * Defines a server-generated panel kind. Its module is the only place the kind is described; the
- * registry in `panels/index.ts` derives the operation schemas and lookups from it.
- */
-export const defineRequestPanelKind = <
-  TRenderer extends string,
-  TAddShape extends z.ZodRawShape,
-  TEdit extends z.ZodObject
->(
-  kind: RequestPanelKindDefinition<TRenderer, TAddShape, TEdit>
-): RequestPanelKind<TRenderer, TAddShape, TEdit> => ({
-  ...kind,
-  source: 'request',
-  addPanelsInputSchema: withSectionId(kind.addInputSchema),
-});
+  readonly renderer: string;
+}
