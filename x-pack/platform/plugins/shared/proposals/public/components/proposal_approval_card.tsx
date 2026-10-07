@@ -145,7 +145,10 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     : undefined;
 
   return (
-    <div css={css({ padding: `${euiTheme.size.m}` })} data-test-subj={`proposalCard-${proposalId}`}>
+    <div
+      css={css({ padding: `${euiTheme.size.xs}` })}
+      data-test-subj={`proposalCard-${proposalId}`}
+    >
       <ApprovalContent
         key={isReplaced ? 'replaced' : 'current'}
         proposal={liveProposal}
@@ -170,6 +173,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
               })}
             />
           </div>
+          <EuiSpacer size="m" />
         </>
       )}
     </div>
