@@ -1,8 +1,7 @@
 {
-  "sha1": "c73be1ce85ab04fd35a8b79481ea897b83527960",
+  "sha1": "7447f6d9f382d905b1bdb029ed81b93cb7ad5830",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_create.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 23
       }
     },
@@ -29,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_create.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 5
       }
     },
@@ -43,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_delete.spec.ts",
-        "line": 24,
+        "line": 25,
         "column": 23
       }
     },
@@ -57,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_delete.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 69
       }
     },
@@ -213,6 +212,76 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_update.spec.ts",
         "line": 21,
         "column": 42
+      }
+    },
+    {
+      "id": "cb73557010fc86d-bff939b33db4d4f",
+      "title": "User Profile Page details: should set the full name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 45,
+        "column": 26
+      }
+    },
+    {
+      "id": "cb73557010fc86d-62b1eacc206ab18",
+      "title": "User Profile Page details: should set the email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 52,
+        "column": 11
+      }
+    },
+    {
+      "id": "cb73557010fc86d-c72cf0a702f2089",
+      "title": "User Profile Page change password: should set the current password and enter a new password, then submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 67,
+        "column": 68
+      }
+    },
+    {
+      "id": "cb73557010fc86d-994237d89fbc8e1",
+      "title": "User Profile Page theme: should change theme based on the User Profile Theme control with default Adv. Settings value (light)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 79,
+        "column": 24
+      }
+    },
+    {
+      "id": "cb73557010fc86d-35a62590c3b696a",
+      "title": "User Profile Page theme: should change theme based on the User Profile Theme control with default Adv. Settings value set to dark",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 94,
+        "column": 7
       }
     }
   ]

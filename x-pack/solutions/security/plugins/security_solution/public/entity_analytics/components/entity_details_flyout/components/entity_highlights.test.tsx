@@ -188,7 +188,7 @@ describe('EntityHighlights', () => {
     });
 
     expect(screen.getByText('Entity summary')).toBeInTheDocument();
-    expect(screen.getByTestId('asset-criticality-selector')).toBeInTheDocument();
+    expect(screen.getByTestId('entity-highlights-accordionHeader')).toBeInTheDocument();
   });
 
   it('hides the section when user has insufficient license', () => {

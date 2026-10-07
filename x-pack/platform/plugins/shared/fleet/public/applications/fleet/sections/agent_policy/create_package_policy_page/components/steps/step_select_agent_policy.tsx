@@ -24,7 +24,6 @@ import { Error } from '../../../../../components';
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
 import { sendBulkGetAgentPolicies } from '../../../../../hooks';
-import { useIncompatibleAgentVersionStatus } from '../../../../../hooks/use_incompatible_agent_version_status';
 import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { AgentPolicyMultiSelect } from './components/agent_policy_multi_select';
@@ -170,12 +169,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     (policy) => !initialSelectedAgentPolicyIds.find((id) => policy.id === id)
   );
 
-  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
-    packageInfo,
-    newlySelectedAgentPolicies
-  );
-  const someNewAgentPoliciesHaveAllAgentIncompatible = incompatibleAgentVersion.status === 'ALL';
-
   // Display agent policies list error if there is one
   if (agentPoliciesError) {
     return (
@@ -251,23 +244,12 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   </span>
                 ) : null
               }
-              isInvalid={Boolean(
-                someNewAgentPoliciesHaveLimitedPackage ||
-                  someNewAgentPoliciesHaveAllAgentIncompatible
-              )}
+              isInvalid={Boolean(someNewAgentPoliciesHaveLimitedPackage)}
               error={
                 someNewAgentPoliciesHaveLimitedPackage ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError"
                     defaultMessage="This integration can only be added once per agent policy."
-                  />
-                ) : someNewAgentPoliciesHaveAllAgentIncompatible ? (
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddIncompatibleAgentVersionError"
-                    defaultMessage="None of the agents using the selected agent policies are compatible with this integration. This integration requires agents on version {versionCondition}."
-                    values={{
-                      versionCondition: incompatibleAgentVersion.versionCondition,
-                    }}
                   />
                 ) : null
               }

@@ -24,19 +24,14 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
   const fileName = 'code_snippet_otel_host.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
-  await onboardingHomePage.selectHostUseCase();
-  await onboardingHomePage.selectOtelHostQuickstart();
-
   const osName = process.env.OS_NAME || os.platform();
-  await otelHostFlowPage.selectPlatform(osName);
+  const landing = await onboardingHomePage.openOtelHostFromLanding(osName);
+  if (landing === 'v1') {
+    await otelHostFlowPage.selectPlatform(osName);
+  }
 
-  await otelHostFlowPage.copyCollectorDownloadSnippetToClipboard();
-  const collectorDownloadSnippet = (await page.evaluate(
-    'navigator.clipboard.readText()'
-  )) as string;
-
-  await otelHostFlowPage.copyCollectorStartSnippetToClipboard();
-  const collectorStartSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
+  const collectorDownloadSnippet = await otelHostFlowPage.getCollectorDownloadSnippet();
+  const collectorStartSnippet = await otelHostFlowPage.getCollectorStartSnippet();
 
   const codeSnippet = `${collectorDownloadSnippet}\n${collectorStartSnippet} > collector-output.log 2>&1 &`;
 

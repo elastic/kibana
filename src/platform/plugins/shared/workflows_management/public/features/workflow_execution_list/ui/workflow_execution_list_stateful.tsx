@@ -57,6 +57,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     error,
     setPaginationObserver,
     refetch,
+    hasNextPage,
   } = useWorkflowExecutions({
     workflowId,
     statuses: filters.statuses,
@@ -85,11 +86,25 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     pollKey: workflowId,
   });
 
-  const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+  const { selectedExecutionId, updateUrlState } = useWorkflowUrlState();
+  const [lastViewedExecutionId, setLastViewedExecutionId] = useState<string | null>(null);
 
-  const handleViewWorkflowExecution = (executionId: string) => {
-    setSelectedExecution(executionId);
-  };
+  const handleViewWorkflowExecution = useCallback(
+    (executionId: string) => {
+      setLastViewedExecutionId(executionId);
+      // replace: false so Back returns to the draft. updateUrlState replaces by default.
+      updateUrlState(
+        {
+          tab: 'executions',
+          executionId,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: false }
+      );
+    },
+    [updateUrlState]
+  );
 
   const onConfirmCancel = useCallback(async () => {
     if (!workflowId) {
@@ -138,6 +153,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       executions={workflowExecutions ?? null}
       onExecutionClick={handleViewWorkflowExecution}
       selectedId={selectedExecutionId ?? null}
+      lastViewedId={lastViewedExecutionId}
       isInitialLoading={isLoadingWorkflowExecutions}
       isLoadingMore={isLoadingMoreWorkflowExecutions}
       error={error as Error | null}
@@ -145,6 +161,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
       showExecutor={showExecutor}
+      hasNextPage={Boolean(hasNextPage)}
       canCancel={canCancelWorkflowExecution}
       isCancelInProgress={isCancelInProgress}
       onConfirmCancel={onConfirmCancel}

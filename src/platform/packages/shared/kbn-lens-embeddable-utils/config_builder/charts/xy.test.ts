@@ -300,6 +300,71 @@ test('it generates xy chart with multiple reference lines', async () => {
   });
 });
 
+describe('y-axis title', () => {
+  const baseConfig = {
+    chartType: 'xy' as const,
+    title: 'test',
+    dataset: {
+      esql: 'from test | count=count() by @timestamp',
+    },
+    layers: [
+      {
+        type: 'series' as const,
+        seriesType: 'line' as const,
+        xAxis: '@timestamp',
+        yAxis: [
+          {
+            label: 'test',
+            value: 'count',
+          },
+        ],
+      },
+    ],
+  };
+
+  it('sets a custom y-axis title in the visualization state when yTitle is provided', async () => {
+    const result = await buildXY(
+      { ...baseConfig, yTitle: 'Avg' },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.yTitle).toBe('Avg');
+  });
+
+  it('omits yTitle from the visualization state when yTitle is not provided', async () => {
+    const result = await buildXY(baseConfig, {
+      dataViewsAPI: mockDataViewsService() as any,
+    });
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.yTitle).toBeUndefined();
+  });
+
+  it('sets a custom x-axis title in the visualization state when xTitle is provided', async () => {
+    const result = await buildXY(
+      { ...baseConfig, xTitle: 'Time' },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.xTitle).toBe('Time');
+  });
+
+  it('omits xTitle from the visualization state when xTitle is not provided', async () => {
+    const result = await buildXY(baseConfig, {
+      dataViewsAPI: mockDataViewsService() as any,
+    });
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.xTitle).toBeUndefined();
+  });
+});
+
 describe('breakdown handling', () => {
   it('should not include splitAccessors when breakdown is undefined', async () => {
     const result = await buildXY(

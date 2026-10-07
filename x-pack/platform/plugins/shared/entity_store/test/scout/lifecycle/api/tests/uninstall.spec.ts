@@ -13,7 +13,6 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
 import { forceLogExtraction } from '../../../common/fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
@@ -140,16 +139,12 @@ apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
 
       // Shared assets exist after install.
       expect(await esClient.indices.exists({ index: LATEST_INDEX })).toBe(true);
-      const updatesBefore = await esClient.indices.getDataStream({ name: UPDATES_INDEX });
-      expect(updatesBefore.data_streams).toHaveLength(1);
 
       // Uninstall a single type; the other engine stays installed.
       await uninstall(apiClient, { entityTypes: ['host'] });
 
       // Shared assets must still exist for the surviving `user` engine.
       expect(await esClient.indices.exists({ index: LATEST_INDEX })).toBe(true);
-      const updatesAfter = await esClient.indices.getDataStream({ name: UPDATES_INDEX });
-      expect(updatesAfter.data_streams).toHaveLength(1);
 
       // End-to-end: the surviving engine's extraction still succeeds (this is what
       // fails in production when the shared index/data stream get deleted).

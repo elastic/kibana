@@ -19,6 +19,19 @@ interface FormatActionToEnqueueOpts {
    * see `getFakeKibanaRequest` in `rule_loader.ts` (`effectiveApiKey`).
    */
   apiKey: string | null;
+  /**
+   * Id of the UIAM API key in `apiKey`, persisted alongside it on the action task
+   * params so the API key invalidation task's in-use guard can see the enqueued
+   * connector task still needs the key. `apiKeyId` never holds a UIAM id.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM credential. The
+   * actions plugin persists it on the action task params and uses it to mark the
+   * connector execution fake request so the Elasticsearch cluster client does not
+   * attach the UIAM shared secret, which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean | null;
   executionId: string;
   priority?: TaskPriority;
   ruleConsumer: string;
@@ -32,6 +45,8 @@ export const formatActionToEnqueue = (opts: FormatActionToEnqueueOpts) => {
     action,
     apiKey,
     apiKeyId,
+    uiamApiKeyId,
+    uiamApiKeyExternal,
     executionId,
     priority,
     ruleConsumer,
@@ -48,6 +63,9 @@ export const formatActionToEnqueue = (opts: FormatActionToEnqueueOpts) => {
     spaceId,
     apiKey: apiKey ?? null,
     apiKeyId,
+    ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
+    // Only persisted when true: absent means internal-key treatment (fail closed).
+    ...(uiamApiKeyExternal ? { uiamApiKeyExternal: true } : {}),
     consumer: ruleConsumer,
     source: asSavedObjectExecutionSource({
       id: ruleId,

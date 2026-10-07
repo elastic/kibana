@@ -13,6 +13,7 @@ import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('logs-*'),
+  getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
   parseTimeFieldFromESQLQuery: jest.fn().mockReturnValue(undefined),
 }));
 
@@ -28,8 +29,13 @@ jest.mock('@kbn/esql-server-utils', () => ({
   })),
 }));
 
-const { parseTimeFieldFromESQLQuery } = jest.requireMock('@kbn/esql-utils');
+const {
+  parseTimeFieldFromESQLQuery,
+  getIndexPatternFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
+} = jest.requireMock('@kbn/esql-utils');
 const { Parser } = jest.requireMock('@elastic/esql');
+const { EsqlService } = jest.requireMock('@kbn/esql-server-utils');
 
 function buildMocks() {
   const handler = jest.fn();
@@ -39,16 +45,14 @@ function buildMocks() {
     }),
   };
 
-  const featureFlags = { getBooleanValue: jest.fn().mockResolvedValue(false) };
   const esClient = {
     asCurrentUser: {
       fieldCaps: jest.fn().mockResolvedValue({ fields: { '@timestamp': {} } }),
-      transport: { request: jest.fn().mockResolvedValue({ columns: [] }) },
+      esql: { query: jest.fn().mockResolvedValue({ columns: [] }) },
     },
   };
   const core = {
     elasticsearch: { client: esClient },
-    featureFlags,
   };
   const requestHandlerContext = { core: Promise.resolve(core) };
   const response = {
@@ -77,6 +81,71 @@ describe('registerGetTimeFieldRoute', () => {
       expect.objectContaining({ path: TIMEFIELD_ROUTE }),
       expect.any(Function)
     );
+  });
+
+  it('forwards project routing to field caps', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
+    registerGetTimeFieldRoute(router, context);
+
+    await handler(
+      requestHandlerContext,
+      { body: { query: 'FROM logs-*', projectRouting: '_alias:*' } },
+      response
+    );
+
+    const core = await requestHandlerContext.core;
+    expect(core.elasticsearch.client.asCurrentUser.fieldCaps).toHaveBeenCalledWith({
+      index: 'logs-*',
+      fields: '@timestamp',
+      include_unmapped: false,
+      project_routing: '_alias:*',
+    });
+  });
+
+  it('prefers SET project_routing over the provided project routing', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
+    getProjectRoutingFromEsqlQuery.mockReturnValueOnce('_alias:linked');
+    registerGetTimeFieldRoute(router, context);
+
+    await handler(
+      requestHandlerContext,
+      {
+        body: {
+          query: 'SET project_routing = "_alias:linked"; FROM logs-*',
+          projectRouting: '_alias:_origin',
+        },
+      },
+      response
+    );
+
+    const core = await requestHandlerContext.core;
+    expect(core.elasticsearch.client.asCurrentUser.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({ project_routing: '_alias:linked' })
+    );
+  });
+
+  it('returns @timestamp for a dataset source without using fieldCaps', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    getIndexPatternFromESQLQuery.mockReturnValueOnce('my-dataset');
+    Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
+    EsqlService.mockImplementationOnce(() => ({
+      getViews: jest.fn().mockResolvedValue({ views: [] }),
+      getDatasets: jest.fn().mockResolvedValue({ datasets: [{ name: 'my-dataset' }] }),
+    }));
+
+    const core = await requestHandlerContext.core;
+    core.elasticsearch.client.asCurrentUser.esql.query.mockResolvedValueOnce({
+      columns: [{ name: '@timestamp' }],
+    });
+
+    registerGetTimeFieldRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query: 'FROM my-dataset' } }, response);
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { timeField: '@timestamp' } });
+    expect(core.elasticsearch.client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
   });
 
   describe('nesting-depth guard', () => {

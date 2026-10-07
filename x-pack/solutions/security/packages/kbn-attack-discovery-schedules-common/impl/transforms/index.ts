@@ -10,6 +10,7 @@ export { convertScheduleActionsToAlertingActions } from './convert_schedule_acti
 export { createScheduleExecutionSummary } from './create_schedule_execution_summary';
 export {
   generateAttackDiscoveryAlertHash,
+  getGenerationSourceHashSuffix,
   transformToBaseAlertDocument,
   type AttackDiscoveryAlertDocumentBase,
 } from './transform_to_alert_documents';

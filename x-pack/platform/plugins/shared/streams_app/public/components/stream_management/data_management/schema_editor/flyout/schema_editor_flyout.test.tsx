@@ -168,6 +168,37 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
       });
     });
 
+    it('keeps mapped status when staging a description-only edit of a built-in root field', async () => {
+      const builtInField: SchemaField = {
+        name: '@timestamp',
+        parent: 'logs.otel',
+        status: 'mapped',
+        type: 'date',
+        description: 'original description',
+      };
+
+      const { onStage } = renderFlyout({
+        field: builtInField,
+        streamName: 'logs.otel',
+        isDescriptionOnlyMode: true,
+      });
+
+      expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
+
+      const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+      await user.clear(descriptionTextArea);
+      await user.type(descriptionTextArea, 'updated description');
+
+      const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
+      expect(stageButton).toBeEnabled();
+      await user.click(stageButton);
+
+      expect(onStage).toHaveBeenCalledWith({
+        ...builtInField,
+        description: 'updated description',
+      });
+    });
+
     it('allows only editing description for documentation-only fields (status: unmapped) when isDescriptionOnlyMode is true', async () => {
       // Doc-only fields from getDefinitionFields have status: 'unmapped' without a type property
       // When opened with isDescriptionOnlyMode, only description editing is allowed

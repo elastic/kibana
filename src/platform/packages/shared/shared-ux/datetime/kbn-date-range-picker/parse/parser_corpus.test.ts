@@ -55,7 +55,7 @@ type CheckedFields = Pick<
 interface CorpusRow {
   /** What the user types into the input. */
   input: string;
-  /** Options passed to the parser (presets, delimiter, roundRelativeTime, dateFormat). */
+  /** Options passed to the parser (presets, delimiter, roundRelativeTime, inputDateFormats). */
   options?: TimeRangeTransformOptions;
   /** Why this row exists / what behaviour it documents. */
   note: string;
@@ -305,6 +305,50 @@ describe('parser corpus: textToTimeRange (English)', () => {
           startOffset: null,
         },
       },
+      {
+        input: 'now/y+3M',
+        note: 'rounding then offset (chained date math); validity is calendar-dependent (Apr 1 vs now)',
+        expected: {
+          start: 'now/y+3M',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+        },
+      },
+      {
+        input: 'now-3M/y+3M',
+        note: 'offset, rounding, then further offset',
+        expected: {
+          start: 'now-3M/y+3M',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '-1y/y+3M to now/y+3M',
+        note: 'fiscal-year style range: chained math on both bounds',
+        expected: {
+          start: 'now-1y/y+3M',
+          end: 'now/y+3M',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+          startOffset: null,
+          endOffset: null,
+          isInvalid: false,
+        },
+      },
+      {
+        input: 'now-1d/d+8h+50m',
+        note: 'longer chained expression (offset + round + offsets)',
+        expected: {
+          start: 'now-1d/d+8h+50m',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+          isInvalid: false,
+        },
+      },
     ]);
   });
 
@@ -462,6 +506,12 @@ describe('parser corpus: textToTimeRange (English)', () => {
         note: 'false preserves an existing rounding suffix',
         expected: { start: 'now-7d/d', end: 'now', startOffset: offset(-7, 'd', 'd') },
       },
+      {
+        input: 'now/y+3M',
+        options: { roundRelativeTime: true },
+        note: 'chained date math is left unchanged (no extra inferred rounding)',
+        expected: { start: 'now/y+3M', end: 'now', startOffset: null },
+      },
     ]);
   });
 
@@ -515,6 +565,14 @@ describe('parser corpus: textToTimeRange (English)', () => {
           end: 'now-7d',
           type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
           isInvalid: true,
+        },
+      },
+      {
+        input: '/d',
+        note: 'leading slash is not a valid datemath start',
+        expected: {
+          isInvalid: true,
+          start: '',
         },
       },
     ]);
@@ -586,6 +644,16 @@ describe('parser corpus: prettifyValue (English)', () => {
         input: '-7d to Jan 5, 2026',
         note: 'relative start, non-ISO absolute end (only ISO ends get reformatted)',
         expected: '-7d to Jan 5, 2026',
+      },
+      {
+        input: 'now/y+3M to now',
+        note: 'chained date math is not collapsed',
+        expected: 'now/y+3M to now',
+      },
+      {
+        input: '-1y/y+3M to now/y+3M',
+        note: 'chained date math range is not prettified',
+        expected: '-1y/y+3M to now/y+3M',
       },
     ]);
   });
@@ -1262,6 +1330,182 @@ describe('parser corpus: textToTimeRange (fr-FR)', () => {
         input: 'next 3 days',
         options: { locale },
         note: 'English duration phrase recognized while French is the active locale',
+        expected: { start: 'now', end: 'now+3d', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+});
+
+describe('parser corpus: textToTimeRange (pt-BR)', () => {
+  const locale = 'pt-BR';
+
+  runCorpus([
+    {
+      input: 'hoje',
+      options: { locale },
+      note: 'Portuguese named range "today"',
+      expected: {
+        start: 'now/d',
+        end: 'now/d',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'esta semana até agora',
+      options: { locale },
+      note: 'Portuguese week-to-date named range — contains the delimiter word "até"',
+      expected: {
+        start: 'now/w',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'últimos 15 minutos',
+      options: { locale },
+      note: 'masculine plural agreement — "minuto" is masculine',
+      expected: {
+        start: 'now-15m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'últimas 24 horas',
+      options: { locale },
+      note: 'feminine plural agreement — "hora" is feminine',
+      expected: { start: 'now-24h', end: 'now', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'última 1 semana',
+      options: { locale },
+      note: 'feminine singular agreement',
+      expected: { start: 'now-1w', end: 'now', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'últimos 24 horas',
+      options: { locale },
+      note:
+        'the masculine-plural form parses even against a feminine unit ' +
+        '(generation prefers the agreeing "últimas")',
+      expected: { start: 'now-24h', end: 'now', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'último 1 mês',
+      options: { locale },
+      note: 'masculine singular agreement',
+      expected: { start: 'now-1M', end: 'now', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'próximas 24 horas',
+      options: { locale },
+      note: 'feminine plural agreement (future)',
+      expected: {
+        start: 'now',
+        end: 'now+24h',
+        type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'próxima semana',
+      options: { locale },
+      note: 'future named range — "next week"',
+      expected: { start: 'now+1w/w', end: 'now+1w/w', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'mês passado',
+      options: { locale },
+      note: 'past named range — "last month"',
+      expected: { start: 'now-1M/M', end: 'now-1M/M', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'há 7 minutos',
+      options: { locale },
+      note: 'Portuguese instant (past) — moment pt-br\'s own "há %s"',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: '7 minutos atrás',
+      options: { locale },
+      note: 'the common spoken past-instant variant',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'em 7 minutos',
+      options: { locale },
+      note: 'Portuguese instant (future) — "in 7 minutes"',
+      expected: {
+        start: 'now',
+        end: 'now+7m',
+        type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'now-7m até now',
+      options: { locale },
+      note: 'Portuguese delimiter "até" splits a range explicitly',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'now-7m a now',
+      options: { locale },
+      note: 'the bare preposition "a" is also accepted as a delimiter',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'há 3 dias a há 2 dias',
+      options: { locale },
+      note:
+        'bare "a" between two phrases that each contain an "a"-adjacent word — only the ' +
+        'candidate split whose sides both parse wins',
+      expected: {
+        start: 'now-3d',
+        end: 'now-2d',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+  ]);
+
+  describe('merge requirement: English still parses with pt-BR active', () => {
+    runCorpus([
+      {
+        input: 'next 3 days',
+        options: { locale },
+        note: 'English duration phrase recognized while Portuguese is the active locale',
         expected: { start: 'now', end: 'now+3d', isNaturalLanguage: true, isInvalid: false },
       },
     ]);

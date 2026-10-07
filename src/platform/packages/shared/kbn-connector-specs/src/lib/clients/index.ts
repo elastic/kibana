@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ClientTypeSpec } from './client_type_spec';
+import { createMcpClientType } from '../mcp/client/client_type';
+import type { ClientTypeSpecs } from './client_registry';
+import { mongodbClientType } from './mongodb_client_type';
+import { mssqlClientType } from './mssql';
+import { mysqlClientType } from './mysql';
 
 export type {
   ClientTypeSpec,
@@ -15,17 +19,15 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
 } from './client_type_spec';
 
-// No client types are registered yet. `ClientTypeId` resolves to `never`
-// until a client type is added to `ClientRegistry`.
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ClientRegistry {}
+export type { ClientRegistry, ClientTypeId, ClientTypeSpecs } from './client_registry';
 
-export type ClientTypeId = keyof ClientRegistry;
-
-export type ClientTypeSpecs = Readonly<{
-  [K in ClientTypeId]: ClientTypeSpec<ClientRegistry[K]>;
-}>;
-
-export const clientTypes: ClientTypeSpecs = {};
+export const clientTypes: ClientTypeSpecs = {
+  mcp: createMcpClientType(),
+  mongodb: mongodbClientType,
+  mssql: mssqlClientType,
+  mysql: mysqlClientType,
+};

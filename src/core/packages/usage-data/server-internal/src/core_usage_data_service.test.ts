@@ -106,6 +106,19 @@ describe('CoreUsageDataService', () => {
       expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([CORE_USAGE_STATS_TYPE]);
     });
 
+    it('registers the provenance telemetry post-auth handler', () => {
+      const http = httpServiceMock.createInternalSetupContract();
+      const metrics = metricsServiceMock.createInternalSetupContract();
+      const savedObjectsStartPromise = Promise.resolve(
+        savedObjectsServiceMock.createStartContract()
+      );
+      const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+      service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
+
+      expect(http.registerOnPostAuth).toHaveBeenCalledTimes(1);
+      expect(http.registerOnPostAuth).toHaveBeenCalledWith(expect.any(Function));
+    });
+
     describe('#registerType', () => {
       it('registers core usage stats type', async () => {
         const http = httpServiceMock.createInternalSetupContract();
@@ -723,7 +736,7 @@ describe('CoreUsageDataService', () => {
         service.getMarkedAsSafe = mockGetMarkedAsSafe;
         await getConfigsUsageData();
 
-        expect(mockGetMarkedAsSafe).toBeCalledTimes(2);
+        expect(mockGetMarkedAsSafe).toHaveBeenCalledTimes(2);
         expect(mockGetMarkedAsSafe.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [

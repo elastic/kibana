@@ -107,8 +107,8 @@ describe('convertToPercentileRankColumn', () => {
   test('should return null if field is not specified', () => {
     mockGetFieldNameFromField.mockReturnValue(null);
     expect(convertToPercentileRankColumn({ agg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(0);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if field absent at the index pattern', () => {
@@ -116,8 +116,8 @@ describe('convertToPercentileRankColumn', () => {
     dataView.getFieldByName = mockGetFieldByName;
 
     expect(convertToPercentileRankColumn({ agg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 
   test('should return percentile rank column for percentile ranks', () => {
@@ -131,8 +131,8 @@ describe('convertToPercentileRankColumn', () => {
         sourceField: 'bytes',
       })
     );
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 
   test('should return percentile rank column for single percentile rank', () => {
@@ -148,7 +148,7 @@ describe('convertToPercentileRankColumn', () => {
         sourceField: 'bytes',
       })
     );
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 });

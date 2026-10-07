@@ -403,7 +403,6 @@ export const Tabs: React.FC<TabsProps> = ({
                     isLoading={isRefreshing}
                     isDisabled={isRefreshing}
                     size="m"
-                    color="success"
                     className="eui-fullWidth"
                   >
                     {refreshAriaLabel}

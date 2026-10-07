@@ -34,7 +34,7 @@ describe('useGetCaseConnectors', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith('test-id', abortCtrl.signal);
+    expect(spyOnGetCases).toHaveBeenCalledWith('test-id', abortCtrl.signal);
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {

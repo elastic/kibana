@@ -13,6 +13,7 @@ import type {
   EvalsExecutorClient,
 } from '@kbn/evals';
 import {
+  calculateSetMetrics,
   createEsqlEquivalenceEvaluator,
   createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
@@ -31,7 +32,6 @@ import {
   validateInterval,
   parseDateMathSeconds,
   extractMitreTechniques,
-  calculateSetMetrics,
   hasRequiredFields,
 } from './helpers';
 
@@ -214,6 +214,7 @@ function createQuerySyntaxValidityEvaluator(): Evaluator<RuleExample, RuleGenera
   return {
     name: 'Query Syntax Validity',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       if (!output?.generatedRule?.query) {
         return { score: 0, metadata: { error: 'No query generated' } };
@@ -236,6 +237,7 @@ function createFieldCoverageEvaluator(): Evaluator<RuleExample, RuleGenerationTa
   return {
     name: 'Field Coverage',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       if (!output?.generatedRule) {
         return {
@@ -259,6 +261,7 @@ function createRuleTypeLanguageEvaluator(): Evaluator<RuleExample, RuleGeneratio
   return {
     name: 'Rule Type & Language',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const { type, language } = output?.generatedRule ?? {};
       const typeOk = type === 'esql';
@@ -275,6 +278,7 @@ function createMitreAccuracyEvaluator(): Evaluator<RuleExample, RuleGenerationTa
   return {
     name: 'MITRE Accuracy',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       if (!output?.generatedRule) {
         return { score: 0, metadata: { error: 'No rule generated' } };
@@ -302,6 +306,7 @@ function createSeverityValidityEvaluator(): Evaluator<RuleExample, RuleGeneratio
   return {
     name: 'Severity Validity',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const severity = output?.generatedRule?.severity;
       const valid = validateSeverity(severity);
@@ -314,6 +319,7 @@ function createRiskScoreValidityEvaluator(): Evaluator<RuleExample, RuleGenerati
   return {
     name: 'Risk Score Validity',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const riskScore = output?.generatedRule?.riskScore;
       const valid = validateRiskScore(riskScore);
@@ -326,6 +332,7 @@ function createIntervalFormatEvaluator(): Evaluator<RuleExample, RuleGenerationT
   return {
     name: 'Interval Format',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const interval = output?.generatedRule?.interval;
       if (!interval) return { score: 0, metadata: { error: 'No interval set' } };
@@ -339,6 +346,7 @@ function createLookbackGapEvaluator(): Evaluator<RuleExample, RuleGenerationTask
   return {
     name: 'Lookback Gap',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const { from, interval } = output?.generatedRule ?? {};
       const fromSec = parseDateMathSeconds(from);
@@ -356,6 +364,7 @@ function createSeverityMatchEvaluator(): Evaluator<RuleExample, RuleGenerationTa
   return {
     name: 'Severity Match',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       const generated = output?.generatedRule?.severity;
       const expectedSeverity = expected?.severity;
@@ -369,6 +378,7 @@ function createRiskScoreMatchEvaluator(): Evaluator<RuleExample, RuleGenerationT
   return {
     name: 'Risk Score Match',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       const generated = output?.generatedRule?.riskScore;
       const expectedScore = expected?.riskScore;
@@ -398,6 +408,7 @@ function createRejectionEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOu
   return {
     name: 'Rejection',
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       if (expected?.category !== 'negative') {
         return { score: null, label: 'N/A', explanation: 'Not applicable: not a negative case' };
@@ -428,6 +439,7 @@ export function createRuleNameEvaluator(
   return {
     name: 'Rule Name',
     kind: 'LLM',
+    direction: 'maximize',
     evaluate: async ({ input, output, expected, metadata }) => {
       const generatedName = output?.generatedRule?.name ?? '(no name generated)';
       const expectedName = expected?.name ?? '(no expected name)';
@@ -455,6 +467,7 @@ export function createRuleDescriptionEvaluator(
   return {
     name: 'Rule Description',
     kind: 'LLM',
+    direction: 'maximize',
     evaluate: async ({ input, output, expected, metadata }) => {
       const generatedDesc = output?.generatedRule?.description ?? '(no description generated)';
       const expectedDesc = expected?.description ?? '(no expected description)';

@@ -5,55 +5,72 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonGroup,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import type { InputFieldProps } from '@kbn/fleet-plugin/public';
+import {
+  DataStreamTypeSelector,
+  LazyPackagePolicyInputVarField,
+  useGetDataStreams,
+} from '@kbn/fleet-plugin/public';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
 import {
   REGION_FIELD_NAMES,
   getFlyoutFields,
-  getRequiredBooleanFields,
+  getMissingSourceGroup,
+  getRegionFieldName,
   getRequiredTextFields,
-  hasTransportChoice,
   isAdvancedVar,
   resolveFieldMeta,
   toDraft,
   toTyped,
 } from './field_config';
-import type { TransportType } from './field_config';
+import type { ServiceDataStreamVars } from './use_service_settings';
 
-const TRANSPORT_OPTIONS = [
-  {
-    id: 'aws-s3' as TransportType,
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.s3', {
-      defaultMessage: 'S3',
-    }),
-  },
-  {
-    id: 'aws-cloudwatch' as TransportType,
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.cloudwatch', {
-      defaultMessage: 'CloudWatch',
-    }),
-  },
-];
+function getInputDisplayLabel(input: string, inputTitles?: Record<string, string>): string {
+  if (inputTitles?.[input]) return inputTitles[input];
+  switch (input) {
+    case 'httpjson':
+    case 'cel':
+      return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.httpjson', {
+        defaultMessage: 'Collect logs via API',
+      });
+    case 'aws-s3':
+      return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.s3', {
+        defaultMessage: 'Collect logs via S3',
+      });
+    case 'aws-cloudwatch':
+      return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.cloudwatch', {
+        defaultMessage: 'Collect logs via CloudWatch',
+      });
+    default:
+      return input;
+  }
+}
 
 export interface ServiceFieldsFormProps {
   service: AwsServiceMatrixEntry;
-  draft: Record<string, string>;
-  draftTransport: TransportType | null;
-  onFieldChange: (fieldName: string, value: string) => void;
-  onTransportChange: (transport: TransportType) => void;
+  varsByDataStream: Record<string, ServiceDataStreamVars>;
+  globalRegion: string;
+  onFieldChange: (dsId: string, input: string, fieldName: string, value: string) => void;
+  onInputToggle: (dsId: string, input: string, enabled: boolean) => void;
 }
 
 // ECF trigger vars reference a "Collect logs via S3 Bucket" toggle that doesn't exist in
@@ -62,23 +79,51 @@ const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
 
 function VarField({
   service,
+  activeInput,
   fieldName,
   draft,
   onFieldChange,
   forceShowErrors,
+  datastreams,
 }: {
   service: AwsServiceMatrixEntry;
+  activeInput: string;
   fieldName: string;
-  draft: Record<string, string>;
-  onFieldChange: (fieldName: string, value: string) => void;
+  draft: Record<string, Record<string, string | string[]>>;
+  onFieldChange: (input: string, fieldName: string, value: string) => void;
   forceShowErrors?: boolean;
+  datastreams?: InputFieldProps['datastreams'];
 }) {
-  const meta = resolveFieldMeta(service, fieldName);
+  const { colorMode } = useEuiTheme();
+  const meta = resolveFieldMeta(service, activeInput, fieldName);
   if (!meta) return null;
-  const value = toTyped(draft[fieldName], meta);
+  const value = toTyped(draft[activeInput]?.[fieldName], meta);
+
+  if (fieldName === 'data_stream.type') {
+    const selected = typeof value === 'string' ? value : (meta.def.default as string) ?? 'logs';
+    return (
+      <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
+        <DataStreamTypeSelector
+          value={selected}
+          onChange={(id) => onFieldChange(activeInput, fieldName, id)}
+          helpText={i18n.translate(
+            'xpack.ingestHub.serviceSettingsStep.flyout.dataStreamType.help',
+            {
+              defaultMessage:
+                "Select a data stream type for this policy. This setting changes the name of the integration's data stream.",
+            }
+          )}
+        />
+      </div>
+    );
+  }
+
   const isRequired = !meta.isBool && (service.requiredConfig ?? []).includes(fieldName);
+  const isEmpty = Array.isArray(value)
+    ? value.length === 0
+    : typeof value === 'string' && !value.trim();
   const errors =
-    forceShowErrors && isRequired && typeof value === 'string' && !value.trim()
+    forceShowErrors && isRequired && isEmpty
       ? [
           i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.requiredField.error', {
             defaultMessage: 'This field is required.',
@@ -86,81 +131,146 @@ function VarField({
         ]
       : null;
   const varDef = ECF_TRIGGER_VARS.has(fieldName)
-    ? { ...meta.def, description: undefined }
+    ? { ...meta.def, description: undefined, multi: true, required: true }
     : meta.def;
+  // KibanaStyledComponentsThemeProvider supplies the legacy styled-components EUI theme that
+  // Fleet's var field accesses via props.theme.eui (e.g. FixedHeightDiv for yaml fields).
   return (
-    <div data-test-subj={`serviceSettingsFlyout-field-${fieldName}`}>
-      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-        <LazyPackagePolicyInputVarField
-          varDef={varDef}
-          value={value}
-          onChange={(next) => onFieldChange(fieldName, toDraft(next))}
-          errors={errors}
-          forceShowErrors={forceShowErrors}
-          packageName={service.packageName}
-        />
-      </Suspense>
+    <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
+      <KibanaStyledComponentsThemeProvider darkMode={colorMode === 'DARK'}>
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <LazyPackagePolicyInputVarField
+            varDef={varDef}
+            value={value}
+            onChange={(next) => {
+              // DatasetComponent calls onChange with { dataset, package } — an object, not a
+              // string. toDraft() would produce "[object Object]"; extract the dataset name.
+              const raw =
+                fieldName === 'data_stream.dataset' &&
+                next !== null &&
+                typeof next === 'object' &&
+                !Array.isArray(next)
+                  ? (next as { dataset?: unknown }).dataset ?? ''
+                  : next;
+              const nextDraft = toDraft(raw);
+              // Compare against the effective displayed value (toTyped materializes manifest
+              // defaults for untouched fields). Using draft[activeInput]?.[fieldName] here
+              // would be undefined for untouched fields, making toDraft() return '' and
+              // silently swallowing a clear-to-empty action on a field whose default is non-empty.
+              if (nextDraft !== toDraft(value)) {
+                onFieldChange(activeInput, fieldName, nextDraft);
+              }
+            }}
+            errors={errors}
+            forceShowErrors={forceShowErrors}
+            packageName={service.packageName}
+            datastreams={datastreams}
+          />
+        </Suspense>
+      </KibanaStyledComponentsThemeProvider>
     </div>
   );
 }
 
-export function ServiceFieldsForm({
+function InputVarFields({
   service,
-  draft,
-  draftTransport,
+  activeInput,
+  varsByInput,
+  globalRegion,
   onFieldChange,
-  onTransportChange,
-}: ServiceFieldsFormProps) {
+}: {
+  service: AwsServiceMatrixEntry;
+  activeInput: string;
+  varsByInput: Record<string, Record<string, string | string[]>>;
+  globalRegion: string;
+  onFieldChange: (input: string, fieldName: string, value: string) => void;
+}) {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
 
-  const hasTransport = hasTransportChoice(service);
-  const requiredTextFields = getRequiredTextFields(service, draftTransport);
+  const allConfigFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  // data_stream.dataset is only present on OTel input-package services. useGetDataStreams cannot
+  // be called conditionally (Rules of Hooks), so the fetch always fires — only the derived
+  // value is guarded to avoid building a sorted list for every ECS-format flyout.
+  const needsDatastreams = allConfigFields.includes('data_stream.dataset');
+  const { data: dataStreamsData } = useGetDataStreams();
+  const datastreams = useMemo(() => {
+    if (!needsDatastreams) return undefined;
+    const all = dataStreamsData?.data_streams ?? [];
+    // Mirror Fleet's sortDatastreamsByDataset: package's own streams first, then alphabetical.
+    return [...all].sort((a, b) => {
+      const aOwn = a.dataset.startsWith(service.packageName ?? '') ? 0 : 1;
+      const bOwn = b.dataset.startsWith(service.packageName ?? '') ? 0 : 1;
+      if (aOwn !== bOwn) return aOwn - bOwn;
+      return a.dataset.localeCompare(b.dataset);
+    });
+  }, [dataStreamsData, service.packageName, needsDatastreams]);
+  const regionFieldName = getRegionFieldName(service, activeInput);
+  const regionMeta = allConfigFields.includes(regionFieldName)
+    ? resolveFieldMeta(service, activeInput, regionFieldName)
+    : undefined;
+
+  const requiredTextFields = getRequiredTextFields(service, activeInput);
   const requiredTextFieldSet = new Set(requiredTextFields);
-  const flyoutFields = getFlyoutFields(service, draftTransport);
+  const flyoutFields = getFlyoutFields(service, activeInput);
   const otherFlyoutFields = flyoutFields.filter(
     (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
   );
-  const requiredBoolFields = getRequiredBooleanFields(service, draftTransport);
-
-  // Split each field group into primary (shown by default) and advanced (hidden).
   const isAdvanced = (fieldName: string) => {
-    const meta = resolveFieldMeta(service, fieldName);
+    const meta = resolveFieldMeta(service, activeInput, fieldName);
     return meta ? isAdvancedVar(meta.def) : false;
   };
 
-  const primaryBoolFields = requiredBoolFields.filter((f) => !isAdvanced(f));
-  const advancedBoolFields = requiredBoolFields.filter(isAdvanced);
+  // Collect ALL bool fields from both required and optional config — getRequiredBooleanFields
+  // only covers show_user:true bools from requiredConfig, missing optional bools like
+  // "Enable request tracing" (show_user:false in optionalConfig).
+  const allBoolFields = allConfigFields.filter((f) => {
+    const meta = resolveFieldMeta(service, activeInput, f);
+    return meta?.isBool ?? false;
+  });
+  const primaryBoolFields = allBoolFields.filter((f) => !isAdvanced(f));
+  const advancedBoolFields = allBoolFields.filter(isAdvanced);
   const primaryOtherFields = otherFlyoutFields.filter((f) => !isAdvanced(f));
   const advancedOtherFields = otherFlyoutFields.filter(isAdvanced);
 
-  const advancedFields = [...advancedBoolFields, ...advancedOtherFields];
-  const hasAdvancedOptions = advancedFields.length > 0;
+  const hasAdvancedOptions = advancedBoolFields.length > 0 || advancedOtherFields.length > 0;
 
+  const draft = varsByInput[activeInput] ?? {};
   const anyRequiredEmpty = requiredTextFields.some((f) => {
-    const meta = resolveFieldMeta(service, f);
+    const meta = resolveFieldMeta(service, activeInput, f);
     const effective = meta ? toTyped(draft[f], meta) : draft[f] ?? '';
+    if (Array.isArray(effective)) return effective.length === 0;
     return typeof effective === 'string' && !effective.trim();
   });
 
+  // At least one of the input's source vars (bucket ARN / queue URL, log group ...) is mandatory.
+  const missingSourceGroup = getMissingSourceGroup(service, activeInput, draft);
+  const missingSourceLabels = (missingSourceGroup ?? []).map(
+    (f) => resolveFieldMeta(service, activeInput, f)?.def.title ?? f
+  );
+
   return (
     <>
-      {hasTransport && (
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.legend', {
-            defaultMessage: 'Transport type',
-          })}
-          options={TRANSPORT_OPTIONS}
-          idSelected={draftTransport ?? 'aws-s3'}
-          onChange={(id) => onTransportChange(id as TransportType)}
-          buttonSize="compressed"
-          color="primary"
-          data-test-subj="serviceSettingsFlyout-transportToggle"
-        />
+      {regionMeta && (
+        <>
+          <EuiFormRow
+            label={
+              regionMeta.def.title ??
+              i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.region.label', {
+                defaultMessage: 'Region',
+              })
+            }
+          >
+            <EuiFieldText
+              value={globalRegion}
+              disabled
+              data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${regionFieldName}`}
+            />
+          </EuiFormRow>
+          {requiredTextFields.length > 0 && <EuiSpacer size="m" />}
+        </>
       )}
-
       {requiredTextFields.length > 0 && (
         <>
-          <EuiSpacer size="m" />
           {anyRequiredEmpty && (
             <>
               <EuiText size="s" color="danger" data-test-subj="serviceSettingsFlyout-requiredHint">
@@ -179,10 +289,12 @@ export function ServiceFieldsForm({
               {i > 0 && <EuiSpacer size="m" />}
               <VarField
                 service={service}
+                activeInput={activeInput}
                 fieldName={fieldName}
-                draft={draft}
+                draft={varsByInput}
                 onFieldChange={onFieldChange}
                 forceShowErrors={anyRequiredEmpty}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}
@@ -197,12 +309,33 @@ export function ServiceFieldsForm({
               {i > 0 && <EuiSpacer size="m" />}
               <VarField
                 service={service}
+                activeInput={activeInput}
                 fieldName={fieldName}
-                draft={draft}
+                draft={varsByInput}
                 onFieldChange={onFieldChange}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}
+        </>
+      )}
+
+      {missingSourceGroup && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText
+            size="s"
+            color="danger"
+            data-test-subj="serviceSettingsFlyout-sourceRequiredHint"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.flyout.sourceRequiredHint"
+                defaultMessage="Provide at least one of: {fields}."
+                values={{ fields: missingSourceLabels.join(', ') }}
+              />
+            </p>
+          </EuiText>
         </>
       )}
 
@@ -214,9 +347,11 @@ export function ServiceFieldsForm({
               {i > 0 && <EuiSpacer size="m" />}
               <VarField
                 service={service}
+                activeInput={activeInput}
                 fieldName={fieldName}
-                draft={draft}
+                draft={varsByInput}
                 onFieldChange={onFieldChange}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}
@@ -244,13 +379,15 @@ export function ServiceFieldsForm({
           </EuiFlexGroup>
           {isShowingAdvanced && (
             <>
+              <EuiSpacer size="s" />
               {advancedBoolFields.map((fieldName, i) => (
                 <React.Fragment key={fieldName}>
                   {i > 0 && <EuiSpacer size="m" />}
                   <VarField
                     service={service}
+                    activeInput={activeInput}
                     fieldName={fieldName}
-                    draft={draft}
+                    draft={varsByInput}
                     onFieldChange={onFieldChange}
                   />
                 </React.Fragment>
@@ -260,8 +397,9 @@ export function ServiceFieldsForm({
                   {(i > 0 || advancedBoolFields.length > 0) && <EuiSpacer size="m" />}
                   <VarField
                     service={service}
+                    activeInput={activeInput}
                     fieldName={fieldName}
-                    draft={draft}
+                    draft={varsByInput}
                     onFieldChange={onFieldChange}
                   />
                 </React.Fragment>
@@ -270,6 +408,114 @@ export function ServiceFieldsForm({
           )}
         </>
       )}
+    </>
+  );
+}
+
+export function ServiceFieldsForm({
+  service,
+  varsByDataStream,
+  globalRegion,
+  onFieldChange,
+  onInputToggle,
+}: ServiceFieldsFormProps) {
+  const { euiTheme } = useEuiTheme();
+  const dataStreams = service.dataStreams ?? [];
+  const multiDs = dataStreams.length > 1;
+
+  if (dataStreams.length === 0) return null;
+
+  if (!multiDs) {
+    // Single data-stream service — render input toggles for all inputs.
+    const dsId = dataStreams[0];
+    const dsView = makeDsView(service, dsId);
+    const dsInputs = dsView.inputs ?? [];
+    const dsVars = varsByDataStream[dsId];
+
+    return (
+      <>
+        {dsInputs.map((input, idx) => {
+          const isEnabled = dsVars
+            ? dsVars.enabledInputs.includes(input)
+            : (dsView.defaultEnabledInputs?.length
+                ? dsView.defaultEnabledInputs
+                : dsInputs
+              ).includes(input);
+          return (
+            <React.Fragment key={input}>
+              {idx > 0 && <EuiHorizontalRule margin="m" />}
+              <EuiSwitch
+                label={getInputDisplayLabel(input, service.inputTitles)}
+                checked={isEnabled}
+                onChange={(e) => onInputToggle(dsId, input, e.target.checked)}
+                data-test-subj={`serviceSettingsFlyout-inputToggle-${input}`}
+              />
+              {isEnabled && (
+                <>
+                  <EuiSpacer size="m" />
+                  <div style={{ paddingLeft: euiTheme.size.xl }}>
+                    <InputVarFields
+                      service={dsView}
+                      activeInput={input}
+                      varsByInput={dsVars?.varsByInput ?? {}}
+                      globalRegion={globalRegion}
+                      onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
+                    />
+                  </div>
+                </>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </>
+    );
+  }
+
+  // Multi-data-stream service — flat input toggles; DS enabled state is derived from inputs.
+  const inputItems = dataStreams.flatMap((dsId) => {
+    const dsView = makeDsView(service, dsId);
+    const dsInfo = service.varDefsByDataStream?.[dsId];
+    const dsVars = varsByDataStream[dsId];
+    const dsInputs = dsView.inputs ?? [];
+    return dsInputs.map((input) => ({ dsId, input, dsView, dsInfo, dsVars, dsInputs }));
+  });
+
+  return (
+    <>
+      {inputItems.map(({ dsId, input, dsView, dsInfo, dsVars, dsInputs }, idx) => {
+        const isInputEnabled = dsVars
+          ? dsVars.enabledInputs.includes(input)
+          : (dsInfo?.defaultEnabledInputs ?? []).includes(input);
+        const label =
+          dsInputs.length === 1
+            ? dsInfo?.title ?? getInputDisplayLabel(input, service.inputTitles)
+            : `${dsInfo?.title ?? dsId} — ${getInputDisplayLabel(input, service.inputTitles)}`;
+        return (
+          <React.Fragment key={`${dsId}-${input}`}>
+            {idx > 0 && <EuiHorizontalRule margin="m" />}
+            <EuiSwitch
+              label={label}
+              checked={isInputEnabled}
+              onChange={(e) => onInputToggle(dsId, input, e.target.checked)}
+              data-test-subj={`serviceSettingsFlyout-inputToggle-${dsId}-${input}`}
+            />
+            {isInputEnabled && (
+              <>
+                <EuiSpacer size="m" />
+                <div style={{ paddingLeft: euiTheme.size.xl }}>
+                  <InputVarFields
+                    service={dsView}
+                    activeInput={input}
+                    varsByInput={dsVars?.varsByInput ?? {}}
+                    globalRegion={globalRegion}
+                    onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
+                  />
+                </div>
+              </>
+            )}
+          </React.Fragment>
+        );
+      })}
     </>
   );
 }

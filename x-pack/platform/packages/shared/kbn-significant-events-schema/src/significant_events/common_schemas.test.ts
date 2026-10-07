@@ -60,9 +60,9 @@ describe('signalEntrySchema verdict/evidence consistency', () => {
     expect(parseSignal({ verdict: 'refutes', evidence: null }).success).toBe(false);
   });
 
-  it('rejects inconclusive with found evidence', () => {
+  it('accepts inconclusive with found evidence (rate-flat rows)', () => {
     expect(parseSignal({ verdict: 'inconclusive', evidence: evidence('found') }).success).toBe(
-      false
+      true
     );
   });
 
@@ -70,6 +70,26 @@ describe('signalEntrySchema verdict/evidence consistency', () => {
     expect(parseSignal({ verdict: 'inconclusive', evidence: evidence('empty') }).success).toBe(
       true
     );
+  });
+
+  it('rejects inconclusive when evidence is omitted', () => {
+    expect(parseSignal({ verdict: 'inconclusive' }).success).toBe(false);
+  });
+
+  it('rejects inconclusive when evidence is null', () => {
+    expect(parseSignal({ verdict: 'inconclusive', evidence: null }).success).toBe(false);
+  });
+
+  it('accepts evidence carrying the executed time_range', () => {
+    expect(
+      parseSignal({
+        verdict: 'confirms',
+        evidence: {
+          ...evidence('found'),
+          time_range: { from: '2026-07-20T07:00:00.000Z', to: '2026-07-20T08:00:00.000Z' },
+        },
+      }).success
+    ).toBe(true);
   });
 
   it('rejects not_checked with query evidence', () => {

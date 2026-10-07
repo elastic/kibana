@@ -35,6 +35,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { GetAdditionalLinks } from '@kbn/file-upload-common';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -64,7 +65,6 @@ import { DocumentCountContent } from '../../../common/components/document_count_
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import {
   MIN_SAMPLER_PROBABILITY,
@@ -108,6 +108,7 @@ export interface IndexDataVisualizerViewProps {
   currentSavedSearch: SavedSearch | null;
   currentSessionId?: string;
   getAdditionalLinks?: GetAdditionalLinks;
+  projectRouting?: string;
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
@@ -161,7 +162,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
     dataVisualizerListState.searchString
   );
 
-  const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
+  const { currentDataView, currentSessionId, getAdditionalLinks, projectRouting } =
+    dataVisualizerProps;
+  const resolvedProjectRouting = projectRouting ?? cps?.cpsManager?.getProjectRouting();
 
   const dataViewFields: DataViewField[] = currentDataView.fields;
 
@@ -253,7 +256,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
     input,
     dataVisualizerListState,
     savedRandomSamplerPreference,
-    setGlobalState
+    setGlobalState,
+    resolvedProjectRouting
   );
 
   useEffect(
@@ -541,7 +545,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
                     setFrozenDataPreference={setFrozenDataPreference}
                     dataView={currentDataView}
                     query={undefined}
-                    projectRouting={cps?.cpsManager?.getProjectRouting()}
+                    projectRouting={resolvedProjectRouting}
                     disabled={false}
                     timefilter={timefilter}
                   />

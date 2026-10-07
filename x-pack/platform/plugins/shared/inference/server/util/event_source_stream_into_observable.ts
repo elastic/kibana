@@ -8,10 +8,7 @@
 import type { Readable } from 'node:stream';
 import { createParser } from 'eventsource-parser';
 import { Observable } from 'rxjs';
-import { createInferenceRequestError } from '@kbn/inference-common';
-
-/** Caps hung inference streams at 10 minutes so Kibana terminates them with a typed error. */
-const MAX_STREAM_DURATION_MS = 10 * 60 * 1000;
+import { createInferenceRequestError, MAX_STREAM_DURATION_MS } from '@kbn/inference-common';
 
 export function eventSourceStreamIntoObservable(
   readable: Readable,
@@ -25,18 +22,27 @@ export function eventSourceStreamIntoObservable(
     });
 
     let tornDown = false;
-    const maxDurationTimer = setTimeout(() => {
-      readable.destroy(
-        createInferenceRequestError(
-          `Inference stream exceeded the maximum allowed duration of ${maxDurationMs}ms`,
-          408
-        )
+    const deadline = Date.now() + maxDurationMs;
+    const createTimeoutError = () =>
+      createInferenceRequestError(
+        `Inference stream exceeded the maximum allowed duration of ${maxDurationMs}ms`,
+        408
       );
+
+    // idle-stream guard only: a busy stream drains on the microtask queue,
+    // starving timers — the in-band deadline check below covers that case
+    const maxDurationTimer = setTimeout(() => {
+      readable.destroy(createTimeoutError());
     }, maxDurationMs);
 
     async function processStream() {
       for await (const chunk of readable) {
+        if (Date.now() > deadline) {
+          throw createTimeoutError();
+        }
         parser.feed(chunk.toString());
+        // yield a macrotask per chunk so timers and cancellation stay serviced
+        await new Promise<void>((resolve) => setImmediate(resolve));
       }
     }
 

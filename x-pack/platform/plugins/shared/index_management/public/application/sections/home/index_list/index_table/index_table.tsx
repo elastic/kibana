@@ -398,7 +398,8 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
   setURLParam(paramName: string, value: string | boolean) {
     const { location, history } = this.props;
     const { pathname, search } = location;
-    const params: Record<string, string | string[] | boolean | null | undefined> = qs.parse(search);
+    const params: Record<string, string | Array<string | null> | boolean | null | undefined> =
+      qs.parse(search);
     if (value) {
       params[paramName] = value;
     } else {
@@ -866,7 +867,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         isLoading={indicesLoading}
-                        color="success"
                         onClick={loadIndices}
                         iconType="refresh"
                         data-test-subj="reloadIndicesButton"

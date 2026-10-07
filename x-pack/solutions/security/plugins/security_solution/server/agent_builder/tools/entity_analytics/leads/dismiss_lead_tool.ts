@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -21,15 +21,17 @@ import { securityTool } from '../../constants';
 
 export const SECURITY_DISMISS_LEAD_TOOL_ID = securityTool('dismiss_lead');
 
-const schema = z.object({
-  id: z.string().min(1).describe('The ID of the lead to dismiss.'),
-  title: z
-    .string()
-    .optional()
-    .describe(
-      'The lead title, shown to the user in the confirmation prompt. Pass this when available from list_leads.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    id: z.string().min(1).describe('The ID of the lead to dismiss.'),
+    title: z
+      .string()
+      .optional()
+      .describe(
+        'The lead title, shown to the user in the confirmation prompt. Pass this when available from list_leads.'
+      ),
+  })
+);
 
 export const dismissLeadTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -69,10 +71,7 @@ export const dismissLeadTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (
-          !privileges.adhoc.has_write_permissions ||
-          !privileges.scheduled.has_write_permissions
-        ) {
+        if (!privileges.has_write_permissions) {
           const errorMessage = 'You do not have permission to dismiss leads in this space.';
           telemetryTracker.recordFailure(errorMessage);
           return {

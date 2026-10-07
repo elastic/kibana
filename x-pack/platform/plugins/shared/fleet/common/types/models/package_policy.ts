@@ -8,7 +8,6 @@
 import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
 import type { GlobalDataTag } from './agent_policy';
-
 /** Boolean expression syntax evaluated by Elastic Agent. */
 export type AgentConditionExpression = string;
 

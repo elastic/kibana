@@ -17,8 +17,10 @@ import type { HeartbeatConfig } from '../../common/runtime_types';
 import { LocationStatus } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
+import * as monitorUpgradeSender from '../routes/telemetry/monitor_upgrade_sender';
 import type { SyntheticsServerSetup } from '../types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 
 jest.mock('axios', () => jest.fn());
 
@@ -73,6 +75,8 @@ describe('SyntheticsService', () => {
 
   const logger = loggerMock.create();
 
+  const telemetry = createMockTelemetryEventsSender(true);
+
   const serverMock: SyntheticsServerSetup = {
     logger,
     syntheticsEsClient: mockEsClient,
@@ -93,6 +97,9 @@ describe('SyntheticsService', () => {
     coreStart: mockCoreStart,
     encryptedSavedObjects: mockEncryptedSO(),
     savedObjectsClient: savedObjectsClientMock.create()!,
+    telemetry,
+    isElasticsearchServerless: false,
+    stackVersion: '9.5.0',
   } as unknown as SyntheticsServerSetup;
 
   const mockConfig = {
@@ -101,7 +108,6 @@ describe('SyntheticsService', () => {
       manifestUrl: 'https://test-manifest.com',
     },
     enabled: true,
-    rebalancePrivateLocationShardsTaskEnabled: true,
   };
 
   mockLicense();
@@ -149,7 +155,9 @@ describe('SyntheticsService', () => {
     service.locations = locations;
     service.isAllowed = true;
 
-    jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+    jest.spyOn(service, 'getOutput').mockResolvedValue({
+      output: { hosts: ['es'], api_key: 'i:k' },
+    });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
     service.getMaintenanceWindows = jest.fn();
@@ -190,7 +198,6 @@ describe('SyntheticsService', () => {
         password: '12345',
       },
       enabled: true,
-      rebalancePrivateLocationShardsTaskEnabled: true,
     };
     const service = new SyntheticsService(serverMock);
 
@@ -245,11 +252,17 @@ describe('SyntheticsService', () => {
   });
 
   describe('apiKey errors', () => {
-    jest.spyOn(apiKeys, 'getAPIKeyForSyntheticsService').mockResolvedValue({
-      isValid: false,
-    });
+    const sendErrorTelemetryEventsSpy = jest.spyOn(
+      monitorUpgradeSender,
+      'sendErrorTelemetryEvents'
+    );
+
     beforeEach(() => {
       jest.clearAllMocks();
+      jest.spyOn(apiKeys, 'getAPIKeyForSyntheticsService').mockResolvedValue({
+        isValid: false,
+        reason: 'invalid',
+      });
     });
 
     it('does not call api and does not throw error when monitors.length === 0', async () => {
@@ -264,14 +277,21 @@ describe('SyntheticsService', () => {
 
       expect(axios).not.toHaveBeenCalled();
 
-      expect(serverMock.logger.error).not.toBeCalledWith(
+      expect(serverMock.logger.error).not.toHaveBeenCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
+      expect(sendErrorTelemetryEventsSpy).not.toHaveBeenCalled();
     });
 
-    it('throws error when api key is invalid and monitors.length > 0', async () => {
+    it('emits structured invalidApiKey telemetry when api key is invalid', async () => {
       const { service, locations } = getMockedService();
       jest.spyOn(service, 'getOutput').mockRestore();
+      jest.spyOn(apiKeys, 'getAPIKeyForSyntheticsService').mockResolvedValue({
+        apiKey: { id: 'key-id', apiKey: 'secret', name: 'service-api-key' },
+        isValid: false,
+        reason: 'insufficient_privileges',
+        missingPrivileges: ['read'],
+      });
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         monitors: [
@@ -285,8 +305,20 @@ describe('SyntheticsService', () => {
 
       await service.pushConfigs(ALL_SPACES_ID);
 
-      expect(serverMock.logger.debug).toBeCalledWith(
+      expect(serverMock.logger.debug).toHaveBeenCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
+      );
+      expect(sendErrorTelemetryEventsSpy).toHaveBeenCalledWith(
+        serverMock.logger,
+        telemetry,
+        expect.objectContaining({
+          type: 'invalidApiKey',
+          code: 'insufficient_privileges',
+          reason: 'API key is missing required index privileges.',
+          message:
+            'Failed to push configs. API key is missing required index privileges. Missing privileges: read.',
+          stackVersion: '9.5.0',
+        })
       );
     });
   });
@@ -540,7 +572,9 @@ describe('SyntheticsService', () => {
     });
     service.apiClient.locations = locations;
     service.locations = locations;
-    jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+    jest.spyOn(service, 'getOutput').mockResolvedValue({
+      output: { hosts: ['es'], api_key: 'i:k' },
+    });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
     service.getMaintenanceWindows = jest.fn();

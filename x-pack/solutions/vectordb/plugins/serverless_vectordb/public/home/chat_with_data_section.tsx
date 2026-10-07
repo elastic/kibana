@@ -21,6 +21,8 @@ const ADD_SKILLS_PROMPT = [
   'Help me get started with my Elastic Vector Database',
 ].join('\n');
 
+const AGENT_ONBOARDING_MESSAGE = '/elasticsearch-onboarding';
+
 const BRAND_ICONS = [
   {
     key: 'anthropic',
@@ -106,7 +108,14 @@ export const ChatWithYourDataSection = () => {
           <AiButton
             variant="outlined"
             iconType="productAgent"
-            onClick={() => agentBuilder.toggleChat()}
+            onClick={() =>
+              agentBuilder.openChat({
+                initialMessage: AGENT_ONBOARDING_MESSAGE,
+                autoSendInitialMessage: true,
+                newConversation: true,
+                sessionTag: 'vectordb-home',
+              })
+            }
             data-test-subj="openElasticAgentButton"
             data-telemetry-id="serverlessVectordb-home-chat-openElasticAgent"
           >

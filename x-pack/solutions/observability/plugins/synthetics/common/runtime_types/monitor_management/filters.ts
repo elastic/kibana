@@ -5,30 +5,15 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SchemaOutput } from '../schema_output';
+import type {
+  FieldSuggestionsResultCodec,
+  MonitorFilterCodec,
+  MonitorFiltersResultCodec,
+} from '../schemas/filters';
 
-const MonitorFilterCodec = t.interface({
-  label: t.string,
-  count: t.number,
-});
+export type MonitorFilter = SchemaOutput<typeof MonitorFilterCodec>;
 
-export type MonitorFilter = t.TypeOf<typeof MonitorFilterCodec>;
+export type MonitorFiltersResult = SchemaOutput<typeof MonitorFiltersResultCodec>;
 
-export const MonitorFiltersResultCodec = t.interface({
-  monitorTypes: t.array(MonitorFilterCodec),
-  tags: t.array(MonitorFilterCodec),
-  locations: t.array(MonitorFilterCodec),
-  projects: t.array(MonitorFilterCodec),
-  schedules: t.array(MonitorFilterCodec),
-});
-
-export type MonitorFiltersResult = t.TypeOf<typeof MonitorFiltersResultCodec>;
-
-// Type-ahead values for bulk edit fields that are not indexed on the monitor
-// saved objects (service.name and label keys), sourced from ping documents.
-export const FieldSuggestionsResultCodec = t.interface({
-  serviceNames: t.array(t.string),
-  labelKeys: t.array(t.string),
-});
-
-export type FieldSuggestionsResult = t.TypeOf<typeof FieldSuggestionsResultCodec>;
+export type FieldSuggestionsResult = SchemaOutput<typeof FieldSuggestionsResultCodec>;

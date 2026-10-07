@@ -71,6 +71,21 @@ describe('SearchRow', () => {
     expect(mockDispatch).toHaveBeenCalled();
   });
 
+  it('should not dispatch when the search query contains invalid syntax', async () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <SearchRow />
+      </TestProviders>
+    );
+
+    const searchBox = getByTestId(SEARCH_BAR_TEST_ID);
+
+    await userEvent.type(searchBox, ';');
+    await userEvent.keyboard('{enter}');
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
   it('should call the correct action when select a value in the associated note dropdown', async () => {
     const { getByTestId } = render(
       <TestProviders>

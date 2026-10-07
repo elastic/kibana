@@ -10,6 +10,8 @@
 import './use_workflow_change_history_preview_validation.test_mocks';
 
 import { act, renderHook, type RenderHookResult, waitFor } from '@testing-library/react';
+import type { MutableRefObject } from 'react';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   applyValidationHighlightsToEditor,
   applyWorkflowYamlValidationToEditor,
@@ -31,10 +33,17 @@ import {
   setPreviewValidationMockModelYaml,
 } from './use_workflow_change_history_preview_validation_test_harness';
 import { waitForPreviewYamlSchemaMarkers } from './wait_for_yaml_schema_markers_after_update';
+import { createMockWorkflowContextRegistry } from '../../../common/lib/create_workflow_context_registry.mock';
 import { useAvailableConnectors } from '../../entities/connectors/model/use_available_connectors';
 import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
+import type { WorkflowYamlValidationContext } from '../validate_workflow_yaml/lib/collect_full_workflow_yaml_validation_results';
+import {
+  getWorkflowYamlValidationContextError,
+  useWorkflowYamlValidationContextRef,
+} from '../validate_workflow_yaml/lib/use_workflow_yaml_validation_context';
 import { useWorkflowJsonSchema } from '../validate_workflow_yaml/model/use_workflow_json_schema';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 const mockApplyValidation = applyWorkflowYamlValidationToEditor as jest.Mock;
 const mockApplyHighlights = applyValidationHighlightsToEditor as jest.Mock;
@@ -42,6 +51,8 @@ const mockCollectYamlResults = collectYamlSchemaValidationResults as jest.Mock;
 const mockUseWorkflowJsonSchema = useWorkflowJsonSchema as jest.Mock;
 const mockUseAvailableConnectors = useAvailableConnectors as jest.Mock;
 const mockWaitForPreviewYamlSchemaMarkers = waitForPreviewYamlSchemaMarkers as jest.Mock;
+const mockGetValidationContextError = getWorkflowYamlValidationContextError as jest.Mock;
+const mockUseValidationContextRef = useWorkflowYamlValidationContextRef as jest.Mock;
 
 const { monaco: mockMonaco } = jest.requireMock('@kbn/code-editor') as {
   monaco: { editor: { getModelMarkers: jest.Mock } };
@@ -50,8 +61,19 @@ const mockGetModelMarkers = mockMonaco.editor.getModelMarkers;
 
 const stableWorkflowJsonSchema = { type: 'object' };
 const stableConnectorsData = { connectorTypes: {} };
+const createValidationContextRef = (): MutableRefObject<WorkflowYamlValidationContext> => ({
+  current: {
+    registry: emptyRegistry,
+    connectorTypes: { status: 'ready', value: {} },
+    connectorsManagementUrl: 'http://test/connectors',
+    workflows: { workflows: {}, totalWorkflows: 0 },
+    getPropertyHandler: () => null,
+    esqlCallbacks: {},
+  },
+});
 
 let unmountHook: (() => void) | undefined;
+let validationContextRef = createValidationContextRef();
 
 type PreviewValidationHookResult = RenderHookResult<
   UseWorkflowChangeHistoryPreviewValidationResult,
@@ -100,6 +122,9 @@ describe('useWorkflowChangeHistoryPreviewValidation', () => {
       yamlDocument: null,
     });
     mockCollectYamlResults.mockReturnValue([]);
+    mockGetValidationContextError.mockReturnValue(null);
+    validationContextRef = createValidationContextRef();
+    mockUseValidationContextRef.mockReturnValue(validationContextRef);
   });
 
   afterEach(() => {
@@ -129,7 +154,9 @@ describe('useWorkflowChangeHistoryPreviewValidation', () => {
       params.validationDecorationsRef,
       undefined,
       expect.objectContaining({
-        validationContext: expect.objectContaining({ connectorTypes: {} }),
+        validationContext: expect.objectContaining({
+          connectorTypes: { status: 'ready', value: {} },
+        }),
       })
     );
   });
@@ -156,6 +183,90 @@ describe('useWorkflowChangeHistoryPreviewValidation', () => {
     );
 
     expect(mockApplyHighlights).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for connector metadata before running validation', async () => {
+    validationContextRef.current = {
+      ...validationContextRef.current,
+      connectorTypes: { status: 'loading' },
+    };
+    const params = createPreviewValidationHookParams({ highlightValidationErrors: true });
+    const { result, rerender } = mountPreviewValidationHook(
+      (props) => useWorkflowChangeHistoryPreviewValidation(props),
+      { initialProps: params }
+    );
+
+    await flushMicrotasks();
+
+    expect(result.current.isValidationLoading).toBe(true);
+    expect(result.current.validationResults).toEqual([]);
+    expect(mockApplyValidation).not.toHaveBeenCalled();
+
+    validationContextRef.current = {
+      ...validationContextRef.current,
+      connectorTypes: { status: 'ready', value: {} },
+    };
+    rerender(params);
+
+    await waitFor(() => {
+      expect(mockApplyValidation).toHaveBeenCalledTimes(1);
+      expect(result.current.isValidationLoading).toBe(false);
+      expect(result.current.validationResults).toEqual([samplePreviewCustomError]);
+    });
+
+    expect(mockApplyValidation).toHaveBeenCalledWith(
+      previewValidationMockEditor,
+      'name: test\n',
+      true,
+      params.validationDecorationsRef,
+      expect.any(AbortSignal),
+      expect.objectContaining({
+        validationContext: expect.objectContaining({
+          connectorTypes: { status: 'ready', value: {} },
+        }),
+      })
+    );
+  });
+
+  it('runs validation and publishes the prerequisite failure when connector loading fails', async () => {
+    validationContextRef.current = {
+      ...validationContextRef.current,
+      connectorTypes: { status: 'loading' },
+    };
+    mockGetValidationContextError.mockReturnValue(new Error('Connector metadata is unavailable'));
+    const params = createPreviewValidationHookParams({ highlightValidationErrors: true });
+    const { result, rerender } = mountPreviewValidationHook(
+      (props) => useWorkflowChangeHistoryPreviewValidation(props),
+      { initialProps: params }
+    );
+
+    await flushMicrotasks();
+
+    expect(mockApplyValidation).not.toHaveBeenCalled();
+
+    validationContextRef.current = {
+      ...validationContextRef.current,
+      connectorTypes: { status: 'failed', error: 'Failed to fetch' },
+    };
+    rerender(params);
+
+    await waitFor(() => {
+      expect(result.current.validationError?.message).toBe('Connector metadata is unavailable');
+      expect(result.current.validationResults).toEqual([samplePreviewCustomError]);
+    });
+
+    expect(mockApplyValidation).toHaveBeenCalledWith(
+      previewValidationMockEditor,
+      'name: test\n',
+      true,
+      params.validationDecorationsRef,
+      expect.any(AbortSignal),
+      expect.objectContaining({
+        validationContext: expect.objectContaining({
+          connectorTypes: { status: 'failed', error: 'Failed to fetch' },
+        }),
+      })
+    );
   });
 
   it('does not re-run validation when highlight stays enabled and editor remounts', async () => {

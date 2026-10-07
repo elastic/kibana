@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PropsWithChildren, ReactNode } from 'react';
-import React, { memo, useMemo } from 'react';
+import type { KeyboardEventHandler, PropsWithChildren, ReactNode } from 'react';
+import React, { useRef, useCallback, memo, useMemo } from 'react';
 import type { EuiPanelProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -66,6 +66,7 @@ export const PageLayout = memo<PageLayoutProps>(
     const hideHeader = !pageTitle && !pageDescription && !actions && !headerBackComponent;
 
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const panelRef = useRef<HTMLDivElement>(null);
 
     const headerRightSideItems = useMemo(() => {
       return Array.isArray(actions) ? actions : actions ? [actions] : undefined;
@@ -105,6 +106,17 @@ export const PageLayout = memo<PageLayoutProps>(
       );
     }, [getTestId, headerBackComponent, hideHeader, pageTitle]);
 
+    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback((event) => {
+      // We prevent the response console - which is currently displayed in a full page overlay - from
+      // closing if the user hits `esc` while focus is on the console overlay.
+      // However, there are still issues when closing Flyouts and certain popup (ex. argument selectors)
+      // where the entire response action may be closed when user hits `ESC`.
+      if (event.key === 'Escape' && panelRef.current?.contains(event.target as Node)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, []);
+
     return (
       <EuiPanelStyled
         hasShadow={false}
@@ -112,6 +124,8 @@ export const PageLayout = memo<PageLayoutProps>(
         data-test-subj={dataTestSubj}
         className="full-height"
         color="transparent"
+        onKeyDown={handleKeyDown}
+        panelRef={panelRef}
       >
         <EuiFlexGroup
           direction="column"

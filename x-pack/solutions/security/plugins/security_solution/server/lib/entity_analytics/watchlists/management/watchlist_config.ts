@@ -123,15 +123,26 @@ export class WatchlistConfigClient {
       throw new Error('internalEsClient is required to create a watchlist index');
     }
 
-    await createOrUpdateIndex({
-      esClient: this.deps.internalEsClient,
-      logger: this.deps.logger,
-      options: {
-        index: getIndexForWatchlist(this.deps.namespace),
-        mappings: generateWatchlistEntityIndexMappings(),
-        settings: { hidden: true, auto_expand_replicas: '0-1' },
-      },
-    });
+    try {
+      await createOrUpdateIndex({
+        esClient: this.deps.internalEsClient,
+        logger: this.deps.logger,
+        options: {
+          index: getIndexForWatchlist(this.deps.namespace),
+          mappings: generateWatchlistEntityIndexMappings(),
+          settings: { hidden: true, auto_expand_replicas: '0-1' },
+        },
+      });
+    } catch (err) {
+      await this.deps.soClient
+        .delete(watchlistConfigTypeName, so.id, { refresh: 'wait_for' })
+        .catch((deleteErr) =>
+          this.deps.logger.error(
+            `Failed to roll back watchlist saved object '${so.id}' after index creation failed: ${deleteErr.message}`
+          )
+        );
+      throw err;
+    }
 
     return toWatchlistObject(so);
   }

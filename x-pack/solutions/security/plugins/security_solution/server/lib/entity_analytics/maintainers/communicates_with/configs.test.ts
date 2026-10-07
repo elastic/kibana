@@ -16,9 +16,10 @@ const standardConfigs = COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.filte
 );
 
 describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the five expected integrations', () => {
+  it('ships exactly the six expected integrations', () => {
     expect(COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'aws_cloudtrail',
+      'crowdstrike_fdr',
       'elastic_defend',
       'jamf_pro',
       'system_auth',
@@ -69,6 +70,7 @@ describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     it('all configs are host-targeted', () => {
       expect(hostTargeted.map((c) => c.id).sort()).toEqual([
         'aws_cloudtrail',
+        'crowdstrike_fdr',
         'elastic_defend',
         'jamf_pro',
         'system_auth',
@@ -176,6 +178,13 @@ describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
         (c) => c.id === 'elastic_defend'
       );
       expect(cfg?.hostScopedUsersOnly).toBeUndefined();
+    });
+
+    it('crowdstrike_fdr has hostScopedUsersOnly: true', () => {
+      const cfg = COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.find(
+        (c) => c.id === 'crowdstrike_fdr'
+      );
+      expect(cfg?.hostScopedUsersOnly).toBe(true);
     });
   });
 });

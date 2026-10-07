@@ -68,7 +68,8 @@ export const useDataVisualizerGridData = (
   input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
-  onUpdate?: (params: Dictionary<unknown>) => void
+  onUpdate?: (params: Dictionary<unknown>) => void,
+  projectRouting?: string
 ) => {
   const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
   const { services } = useDataVisualizerKibana();
@@ -287,7 +288,7 @@ export const useDataVisualizerGridData = (
         searchQuery,
         sessionId: searchSessionId,
         index: currentDataView.title,
-        projectRouting: cps?.cpsManager?.getProjectRouting(),
+        projectRouting: projectRouting ?? cps?.cpsManager?.getProjectRouting(),
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
@@ -307,6 +308,7 @@ export const useDataVisualizerGridData = (
       browserSessionSeed,
       input.timeRange?.from,
       input.timeRange?.to,
+      projectRouting,
       cps,
     ]
   );

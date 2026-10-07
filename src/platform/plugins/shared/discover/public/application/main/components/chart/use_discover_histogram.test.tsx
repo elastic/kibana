@@ -31,6 +31,9 @@ import type { UnifiedHistogramCustomization } from '../../../../customizations/c
 import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverLatestFetchDetails } from '../../state_management/discover_data_state_container';
@@ -489,6 +492,31 @@ describe('useDiscoverHistogram', () => {
         })
       );
     });
+
+    it('should pass esqlApproximation from the app state to the histogram as isApproximate', async () => {
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      const { toolkit } = await setup();
+      const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+      dataStateContainer.fetchChart$ = fetch$;
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { esql: 'from *' }, esqlApproximation: true },
+        })
+      );
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      act(() => {
+        fetch$.next({});
+      });
+      expect(api.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isApproximate: true,
+        })
+      );
+    });
   });
 
   describe('fetching', () => {
@@ -518,6 +546,61 @@ describe('useDiscoverHistogram', () => {
     it('should call fetch when fetchChart$ is triggered', async () => {
       const { toolkit } = await setup();
       await setupFetching({ toolkit });
+    });
+
+    it('omits the previous documents table on fetchChart$ and reuses it for a breakdown change', async () => {
+      const { toolkit } = await setup();
+      const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+      const { currentDataSource$ } = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        toolkit.getCurrentTab().id
+      );
+      const esqlSource = createMockEsqlSource(
+        [{ name: 'message', type: 'string', source: 'index' }],
+        [{ id: 'message', name: 'message', meta: { type: 'string' } }],
+        '@timestamp'
+      );
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      dataStateContainer.fetchChart$ = fetch$;
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      act(() => {
+        currentDataSource$.next(esqlSource);
+        dataStateContainer.data$.documents$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          result: [{ raw: { message: 'old' } } as unknown as DataTableRecord],
+        });
+      });
+      act(() => {
+        fetch$.next({ abortController: new AbortController() });
+      });
+
+      expect(api.fetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          columns: esqlSource.resultColumns,
+          table: undefined,
+        })
+      );
+
+      act(() => {
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { breakdownField: 'host.name' },
+          })
+        );
+      });
+
+      expect(api.fetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          breakdownField: 'host.name',
+          table: expect.objectContaining({
+            rows: [{ message: 'old' }],
+          }),
+        })
+      );
     });
 
     it('should call fetch when only visContext changes', async () => {
@@ -584,6 +667,47 @@ describe('useDiscoverHistogram', () => {
       });
       expect(api.fetch).toHaveBeenCalledTimes(2);
       expect(api.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ timeInterval }));
+    });
+
+    it('should fetch when breakdownField changes even if DataViewSource is a new wrapper', async () => {
+      const { toolkit } = await setup();
+      const { api } = await setupFetching({ toolkit });
+      const tabId = toolkit.getCurrentTab().id;
+      const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        tabId
+      );
+      const dataView = currentDataView$.getValue();
+      const breakdownField = 'host.name';
+
+      act(() => {
+        currentDataSource$.next(new DataViewSource(dataView!));
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { breakdownField },
+          })
+        );
+      });
+
+      expect(api.fetch).toHaveBeenCalledTimes(2);
+      expect(api.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ breakdownField }));
+    });
+
+    it('should not fetch when only the DataViewSource wrapper identity changes', async () => {
+      const { toolkit } = await setup();
+      const { api } = await setupFetching({ toolkit });
+      const tabId = toolkit.getCurrentTab().id;
+      const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        tabId
+      );
+      const dataView = currentDataView$.getValue();
+
+      act(() => {
+        currentDataSource$.next(new DataViewSource(dataView!));
+      });
+
+      expect(api.fetch).toHaveBeenCalledTimes(1);
     });
   });
 

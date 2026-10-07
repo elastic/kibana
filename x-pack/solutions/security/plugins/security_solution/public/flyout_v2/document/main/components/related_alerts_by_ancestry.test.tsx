@@ -35,11 +35,12 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(
   CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID
 );
 
-const renderRelatedAlertsByAncestry = () =>
+const renderRelatedAlertsByAncestry = (documentIndex?: string) =>
   render(
     <TestProviders>
       <RelatedAlertsByAncestry
         documentId={documentId}
+        documentIndex={documentIndex}
         onShowCorrelationsDetails={mockOnShowCorrelationsDetails}
       />
     </TestProviders>
@@ -127,6 +128,36 @@ describe('<RelatedAlertsByAncestry />', () => {
     expect(useFetchRelatedAlertsByAncestry).toHaveBeenCalledWith(
       expect.objectContaining({
         interval: { from: 'now-1d', to: 'now' },
+      })
+    );
+  });
+
+  it('passes the default patterns unchanged when no document index is provided', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      dataCount: 0,
+    });
+
+    renderRelatedAlertsByAncestry();
+
+    expect(useFetchRelatedAlertsByAncestry).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: ['index'] })
+    );
+  });
+
+  it('prepends the project-qualified document index to the ancestry search indices', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      dataCount: 0,
+    });
+
+    renderRelatedAlertsByAncestry('linked_local_project:.ds-logs-endpoint.events-default');
+
+    expect(useFetchRelatedAlertsByAncestry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indices: ['linked_local_project:.ds-logs-endpoint.events-default', 'index'],
       })
     );
   });

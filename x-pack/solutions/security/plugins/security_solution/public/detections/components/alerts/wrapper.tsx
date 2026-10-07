@@ -6,23 +6,13 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import {
-  EuiCode,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSkeletonLoading,
-  EuiSkeletonRectangle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonLoading, EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { HeaderPage } from '../../../common/components/header_page';
+import { AppHeaderLoading } from '@kbn/app-header';
+import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { AlertsPageContent } from './content';
-import { PAGE_TITLE } from '../../pages/alerts/translations';
 
 export const DATA_VIEW_LOADING_PROMPT_TEST_ID = 'alerts-page-data-view-loading-prompt';
 export const DATA_VIEW_ERROR_TEST_ID = 'alerts-page-data-view-error';
@@ -32,11 +22,6 @@ export const SKELETON_TEST_ID = 'alerts-page-skeleton';
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertsPage.dataViewError', {
   defaultMessage: 'Unable to retrieve the data view',
 });
-
-const DATAVIEW_DEGRADED_TITLE = i18n.translate(
-  'xpack.securitySolution.alertsPage.dataViewDegraded.title',
-  { defaultMessage: 'Some alert data view fields are unavailable' }
-);
 
 interface WrapperProps {
   /** the alerts data view, retrieved once by the parent via useDataView(PageScope.alerts) */
@@ -78,18 +63,15 @@ export const Wrapper = memo(({ dataView, status }: WrapperProps) => {
       <>
         {isDataViewDegraded && (
           <>
-            <KbnWarningCallout
+            <DataViewDegradedCallout
+              dataView={dataView}
               data-test-subj={DATA_VIEW_DEGRADED_TEST_ID}
-              title={DATAVIEW_DEGRADED_TITLE}
             >
               <FormattedMessage
-                id="xpack.securitySolution.alertsPage.dataViewDegraded.body"
-                defaultMessage="Index pattern {indexPattern} matched no indices. Alerts are still listed below, but field-dependent features such as search suggestions, the fields browser and grouping options may be limited."
-                values={{
-                  indexPattern: <EuiCode>{dataView.getIndexPattern()}</EuiCode>,
-                }}
+                id="xpack.securitySolution.alertsPage.dataViewDegradedDetailsDescription"
+                defaultMessage="Alerts are still listed below, but field-dependent features such as search suggestions, the fields browser and grouping options may be limited."
               />
-            </KbnWarningCallout>
+            </DataViewDegradedCallout>
             <EuiSpacer size="m" />
           </>
         )}
@@ -104,22 +86,12 @@ export const Wrapper = memo(({ dataView, status }: WrapperProps) => {
       isLoading={isLoading}
       loadingContent={
         <div data-test-subj={SKELETON_TEST_ID}>
-          <EuiSkeletonRectangle height={40} width="100%" />
-          <EuiSpacer />
-          <HeaderPage title={PAGE_TITLE}>
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <EuiSkeletonRectangle height={40} width={110} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSkeletonRectangle height={40} width={110} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </HeaderPage>
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="l" />
+          <AppHeaderLoading spacing="largeBleed" />
+          <EuiSpacer size="s" />
           <EuiSkeletonRectangle height={32} width="100%" />
-          <EuiSpacer />
+          <EuiSpacer size="s" />
+          <EuiSkeletonRectangle height={32} width="100%" />
+          <EuiSpacer size="l" />
           <EuiSkeletonRectangle height={375} width="100%" />
           <EuiSpacer />
           <EuiSkeletonRectangle height={600} width="100%" />

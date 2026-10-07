@@ -33,7 +33,8 @@ const maintenanceWindowClientFactoryParams: jest.Mocked<MaintenanceWindowClientF
 };
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
+  uiSettings.asScopedToClient.mockReturnValue({} as any);
 });
 
 test('creates a maintenance window client with proper constructor arguments when security is enabled', async () => {
@@ -54,6 +55,8 @@ test('creates a maintenance window client with proper constructor arguments when
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
+    uiSettings: expect.anything(),
+    notifyChange: undefined,
     getUserName: expect.any(Function),
   });
 });
@@ -76,6 +79,8 @@ test('creates a maintenance window client with proper constructor arguments', as
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
+    uiSettings: expect.anything(),
+    notifyChange: undefined,
     getUserName: expect.any(Function),
   });
 });
@@ -99,6 +104,8 @@ test('creates an unauthorized maintenance window client', async () => {
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
+    uiSettings: expect.anything(),
+    notifyChange: undefined,
     getUserName: expect.any(Function),
   });
 });
@@ -107,9 +114,7 @@ test('creates an internal maintenance window client', async () => {
   const factory = new MaintenanceWindowClientFactory();
   factory.initialize(maintenanceWindowClientFactoryParams);
   const request = mockRouter.createKibanaRequest();
-  const mockRepository = savedObjectsService.createInternalRepository([
-    MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-  ]);
+  const mockRepository = {} as ReturnType<typeof savedObjectsService.createInternalRepository>;
   savedObjectsService.createInternalRepository.mockReturnValue(mockRepository);
 
   factory.createInternal(request);
@@ -123,8 +128,23 @@ test('creates an internal maintenance window client', async () => {
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient: mockRepository,
+    uiSettings: expect.anything(),
+    notifyChange: undefined,
     getUserName: expect.any(Function),
   });
+});
+
+test('passes notifyChange through to the client', async () => {
+  const notifyChange = jest.fn();
+  const factory = new MaintenanceWindowClientFactory();
+  factory.initialize({ ...maintenanceWindowClientFactoryParams, notifyChange });
+  const request = mockRouter.createKibanaRequest();
+
+  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+  factory.createWithAuthorization(request);
+
+  const { MaintenanceWindowClient } = jest.requireMock('./client');
+  expect(MaintenanceWindowClient).toHaveBeenCalledWith(expect.objectContaining({ notifyChange }));
 });
 
 test('getUserName() returns null when security is disabled', async () => {

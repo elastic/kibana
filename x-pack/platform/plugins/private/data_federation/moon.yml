@@ -28,7 +28,19 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/app-header'
   - '@kbn/core-doc-links-browser'
+  - '@kbn/core-ui-settings-server'
+  - '@kbn/management-settings-ids'
   - '@kbn/ui-callout'
+  - '@kbn/storybook'
+  - '@kbn/i18n-react'
+  - '@kbn/utility-types'
+  - '@kbn/share-plugin'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
+  - '@kbn/license-api-guard-plugin'
+  - '@kbn/esql-language'
+  - '@kbn/esql-utils'
 tags:
   - plugin
   - prod
@@ -40,6 +52,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - .storybook/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

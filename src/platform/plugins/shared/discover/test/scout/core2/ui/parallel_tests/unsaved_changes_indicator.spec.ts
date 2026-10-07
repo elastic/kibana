@@ -9,7 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { ApiServicesFixture, PageObjects } from '@kbn/scout';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { spaceTest, tags, testData, type DiscoverScoutSpace } from '../fixtures';
 
@@ -41,7 +41,6 @@ const createSavedSearch = async (
           view_mode: VIEW_MODE.DOCUMENT_LEVEL,
           hide_chart: false,
           hide_table: false,
-          time_restore: false,
         },
       ],
     } satisfies DiscoverSessionApiDataInput,
@@ -111,7 +110,7 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
       await pageObjects.discover.loadSavedSearch('ES|QL Discover Session');
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
 
-      await pageObjects.discover.codeEditor.setCodeEditorValue('from logstash-* | limit 100');
+      await pageObjects.esqlEditor.setQuery('from logstash-* | limit 100');
       await pageObjects.discover.submitQuery();
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
     }

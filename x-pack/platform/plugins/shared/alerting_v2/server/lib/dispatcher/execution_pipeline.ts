@@ -6,6 +6,7 @@
  */
 
 import { injectable, multiInject } from 'inversify';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { type LoggerServiceContract } from '../services/logger_service/logger_service';
 import { DispatcherExecutionStepsToken } from './steps/tokens';
 import type {
@@ -41,33 +42,35 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
       const logger = parentLogger.withLabels({ step: step.name });
 
       if (input.signal.aborted) {
-        logger.debug({
-          message: `Pipeline aborted before step: ${step.name}`,
-        });
+        logger.debug({ message: 'Pipeline aborted before step' });
         return { completed: false, haltReason: 'aborted', finalState: pipelineState };
       }
 
-      logger.debug({ message: `Executing step: ${step.name}` });
+      logger.debug({ message: 'Executing pipeline step' });
 
       let output: Awaited<ReturnType<DispatcherStep['execute']>>;
       try {
         output = await withDispatcherSpan(step.name, () => step.execute(pipelineState, logger));
-      } catch (err) {
+      } catch (error) {
         // If the tick signal fired while the step had an in-flight request (e.g.
         // RequestAbortedError from ES|QL), convert to a clean aborted halt so
         // dispatcher.run() can persist the watermark rather than throwing.
         if (input.signal.aborted) {
-          logger.debug({
-            message: `step ${step.name} threw while signal was aborted; treating as abort.`,
-          });
+          logger.debug({ message: 'Step threw while signal was aborted; treating as abort' });
           return { completed: false, haltReason: 'aborted', finalState: pipelineState };
         }
-        throw err;
+
+        logger.error({
+          error,
+          code: ALERTING_LOG_CODES.DISPATCH_STEP_FAILED,
+        });
+        throw error;
       }
 
       if (output.type === 'halt') {
         logger.debug({
-          message: `Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
+          message: 'Pipeline halted',
+          labels: { resource: output.reason },
         });
 
         return {

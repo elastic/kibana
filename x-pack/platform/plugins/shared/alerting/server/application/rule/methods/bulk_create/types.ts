@@ -13,6 +13,7 @@ import type { CreateRuleData } from '../create/types';
 import type { CreateRuleOptions } from '../create/create_rule';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RawRule } from '../../../../types';
+import type { ApiKeyEntry } from '../common_utils/invalidate_keys';
 
 export interface PreparedRule {
   id: string;
@@ -28,16 +29,11 @@ export interface PreparedRule {
   templateId?: string;
 }
 
-export interface ApiKeyEntry {
-  apiKey: string | null;
-  uiamApiKey: string | null;
-  apiKeyCreatedByUser: boolean | null;
-}
-
 export interface PrepareRuleArgs<Params extends RuleParams> {
   context: RulesClientContext;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   username: string | null;
+  profileUid: string | null;
   id: string;
   rule: BulkCreateRulesItem<Params>;
   apiKeys: Map<string, ApiKeyEntry>;

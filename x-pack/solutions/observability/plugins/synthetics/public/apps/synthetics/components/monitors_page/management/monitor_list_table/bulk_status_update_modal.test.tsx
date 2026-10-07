@@ -13,10 +13,16 @@ import { render } from '../../../../utils/testing/rtl_helpers';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
 
 jest.mock('../../../../../../hooks/use_kibana_space', () => ({
   useKibanaSpace: jest.fn(),
+}));
+
+jest.mock('../../../../../../hooks/use_capabilities', () => ({
+  ...jest.requireActual('../../../../../../hooks/use_capabilities'),
+  useCanUsePublicLocationsPermission: jest.fn(),
 }));
 
 jest.mock('../../../../state', () => ({
@@ -25,6 +31,10 @@ jest.mock('../../../../state', () => ({
 }));
 
 const useKibanaSpaceMock = useKibanaSpace as jest.MockedFunction<typeof useKibanaSpace>;
+const useCanUsePublicLocationsPermissionMock =
+  useCanUsePublicLocationsPermission as jest.MockedFunction<
+    typeof useCanUsePublicLocationsPermission
+  >;
 const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as jest.MockedFunction<
   typeof fetchBulkUpdateMonitors
 >;
@@ -36,13 +46,20 @@ const makeMonitor = (
     origin = SourceType.UI,
     enabled = true,
     spaces,
-  }: { origin?: SourceType; enabled?: boolean; spaces?: string[] } = {}
+    serviceManaged = false,
+  }: {
+    origin?: SourceType;
+    enabled?: boolean;
+    spaces?: string[];
+    serviceManaged?: boolean;
+  } = {}
 ): EncryptedSyntheticsSavedMonitor =>
   ({
     [ConfigKey.CONFIG_ID]: id,
     [ConfigKey.NAME]: name,
     [ConfigKey.ENABLED]: enabled,
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
+    [ConfigKey.LOCATIONS]: [{ id: 'loc', isServiceManaged: serviceManaged }],
     ...(spaces ? { [ConfigKey.KIBANA_SPACES]: spaces } : {}),
   } as unknown as EncryptedSyntheticsSavedMonitor);
 
@@ -55,6 +72,7 @@ describe('<BulkStatusUpdateModal />', () => {
     useKibanaSpaceMock.mockReturnValue({ space: { id: 'default' } } as ReturnType<
       typeof useKibanaSpace
     >);
+    useCanUsePublicLocationsPermissionMock.mockReturnValue(true);
     fetchBulkUpdateMonitorsMock.mockResolvedValue({ result: [] });
   });
 
@@ -62,7 +80,7 @@ describe('<BulkStatusUpdateModal />', () => {
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
   };
 
-  it('splits eligible vs. skipped monitors and only patches the eligible ones', async () => {
+  it('patches ui and project monitors alike (project enable/disable is allowed)', async () => {
     const monitors = [
       makeMonitor('ui-1', 'UI monitor 1', { enabled: false }),
       makeMonitor('ui-2', 'UI monitor 2', { enabled: false }),
@@ -72,7 +90,47 @@ describe('<BulkStatusUpdateModal />', () => {
       result: [
         { id: 'ui-1', updated: true },
         { id: 'ui-2', updated: true },
+        { id: 'project-1', updated: true },
       ],
+    });
+
+    const { getByText, getByTestId, queryByText } = render(
+      <BulkStatusUpdateModal
+        monitors={monitors}
+        enabled={true}
+        onClose={onClose}
+        reloadPage={reloadPage}
+      />
+    );
+
+    // Project monitors are no longer excluded, so all three are eligible.
+    expect(getByText('Enable 3 monitors?')).toBeInTheDocument();
+    expect(queryByText(/will not be updated/)).not.toBeInTheDocument();
+
+    clickConfirm(getByTestId);
+
+    await waitFor(() => {
+      expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledWith({
+        spaceId: undefined,
+        updates: [
+          { id: 'ui-1', attributes: { [ConfigKey.ENABLED]: true } },
+          { id: 'ui-2', attributes: { [ConfigKey.ENABLED]: true } },
+          { id: 'project-1', attributes: { [ConfigKey.ENABLED]: true } },
+        ],
+      });
+    });
+    expect(reloadPage).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces public-location monitors the user cannot access as skipped', async () => {
+    useCanUsePublicLocationsPermissionMock.mockReturnValue(false);
+    const monitors = [
+      makeMonitor('private-1', 'Private monitor', { enabled: false }),
+      makeMonitor('public-1', 'Public monitor', { enabled: false, serviceManaged: true }),
+    ];
+    fetchBulkUpdateMonitorsMock.mockResolvedValue({
+      result: [{ id: 'private-1', updated: true }],
     });
 
     const { getByText, getByTestId } = render(
@@ -84,25 +142,18 @@ describe('<BulkStatusUpdateModal />', () => {
       />
     );
 
-    // Title reflects only the 2 eligible (ui) monitors, not the skipped project one.
-    expect(getByText('Enable 2 monitors?')).toBeInTheDocument();
-    // Skipped project/terraform monitors are surfaced in a warning.
+    expect(getByText('Enable 1 monitor?')).toBeInTheDocument();
     expect(getByText('1 monitor will not be updated')).toBeInTheDocument();
-    expect(getByText('Project monitor')).toBeInTheDocument();
+    expect(getByText('Public monitor')).toBeInTheDocument();
 
     clickConfirm(getByTestId);
 
     await waitFor(() => {
       expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledWith({
         spaceId: undefined,
-        updates: [
-          { id: 'ui-1', attributes: { [ConfigKey.ENABLED]: true } },
-          { id: 'ui-2', attributes: { [ConfigKey.ENABLED]: true } },
-        ],
+        updates: [{ id: 'private-1', attributes: { [ConfigKey.ENABLED]: true } }],
       });
     });
-    expect(reloadPage).toHaveBeenCalledTimes(1);
-    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('groups monitors by space and issues one request per space', async () => {
@@ -147,7 +198,10 @@ describe('<BulkStatusUpdateModal />', () => {
   });
 
   it('disables the confirm button when every selected monitor is skipped', () => {
-    const monitors = [makeMonitor('project-1', 'Project monitor', { origin: SourceType.PROJECT })];
+    // Project monitors are eligible now; the remaining skip reason is a
+    // public-location monitor the user lacks permission to change.
+    useCanUsePublicLocationsPermissionMock.mockReturnValue(false);
+    const monitors = [makeMonitor('public-1', 'Public monitor', { serviceManaged: true })];
 
     const { getByTestId } = render(
       <BulkStatusUpdateModal

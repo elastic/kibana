@@ -239,9 +239,11 @@ apiTest.describe(
       }
     );
 
-    apiTest('rejects project-origin monitors with an origin error', async ({ apiClient }) => {
+    const pushProjectMonitorForBulkTest = async (
+      apiClient: ApiClientFixture,
+      journeyId: string
+    ): Promise<string> => {
       const projectName = `bulk-patch-project-${uuidv4()}`;
-      const journeyId = `bulk-patch-journey-${uuidv4()}`;
 
       await pushProjectMonitors(apiClient, editorHeaders, projectName, [
         {
@@ -257,21 +259,49 @@ apiTest.describe(
 
       const projectMonitorId = await findByJourneyId(apiClient, journeyId);
       expect(projectMonitorId).toBeDefined();
+      return projectMonitorId!;
+    };
+
+    apiTest('allows an enabled-only patch on a project-origin monitor', async ({ apiClient }) => {
+      const journeyId = `bulk-patch-journey-${uuidv4()}`;
+      const projectMonitorId = await pushProjectMonitorForBulkTest(apiClient, journeyId);
 
       const res = await bulkUpdateMonitors(
         apiClient,
         editorHeaders,
-        uniform([projectMonitorId!], { enabled: false })
+        uniform([projectMonitorId], { enabled: false })
       );
 
-      const results = res.body.result as BulkUpdateResult[];
-      expect(results).toHaveLength(1);
-      expect(results[0].updated).toBe(false);
-      expect(results[0].error).toMatch(/origin/i);
+      expect(res.body.result).toStrictEqual([{ id: projectMonitorId, updated: true }]);
 
-      const refreshed = await getMonitor(apiClient, editorHeaders, projectMonitorId!);
-      expect((refreshed.body as { enabled: boolean }).enabled).toBe(true);
+      const refreshed = await getMonitor(apiClient, editorHeaders, projectMonitorId);
+      expect((refreshed.body as { enabled: boolean }).enabled).toBe(false);
     });
+
+    apiTest(
+      'rejects non-enabled patches on project-origin monitors with an origin error',
+      async ({ apiClient }) => {
+        const journeyId = `bulk-patch-journey-${uuidv4()}`;
+        const projectMonitorId = await pushProjectMonitorForBulkTest(apiClient, journeyId);
+        const { body: beforePatch } = await getMonitor(apiClient, editorHeaders, projectMonitorId);
+
+        const res = await bulkUpdateMonitors(
+          apiClient,
+          editorHeaders,
+          uniform([projectMonitorId], { tags: ['bulk-patch-tag'] })
+        );
+
+        const results = res.body.result as BulkUpdateResult[];
+        expect(results).toHaveLength(1);
+        expect(results[0].updated).toBe(false);
+        expect(results[0].error).toMatch(/origin/i);
+
+        const refreshed = await getMonitor(apiClient, editorHeaders, projectMonitorId);
+        expect((refreshed.body as { tags: string[] }).tags).toStrictEqual(
+          (beforePatch as { tags: string[] }).tags
+        );
+      }
+    );
 
     apiTest(
       'rejects schedules outside the allowed set with a validation error',

@@ -60,6 +60,7 @@ const evaluatorRegistry = createEvaluatorRegistryMock([
     kind: 'llm',
     origin: 'built_in',
     description: 'Built-in correctness evaluator',
+    direction: 'maximize',
     evaluate: jest.fn(),
   },
 ]);
@@ -251,7 +252,7 @@ describe('evaluator CRUD routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual({ message: 'Failed to create evaluator' });
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to create evaluator: sensitive storage failure'
+        expect.stringContaining('Failed to create evaluator: Error: sensitive storage failure')
       );
     });
 
@@ -429,7 +430,7 @@ describe('evaluator CRUD routes', () => {
         kibanaResponseFactory
       );
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(client.update).not.toHaveBeenCalled();
     });
 
@@ -500,7 +501,7 @@ describe('evaluator CRUD routes', () => {
         kibanaResponseFactory
       );
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(client.delete).not.toHaveBeenCalled();
     });
 

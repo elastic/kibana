@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/language-documentation",
   "owner": [
-    "@elastic/kibana-esql"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "private"

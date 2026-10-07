@@ -6,14 +6,10 @@
  */
 
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { RequestHeadersOptions } from './role_scoped_supertest';
 import { SupertestWithRoleScope } from './role_scoped_supertest';
 
-export interface RequestHeadersOptions {
-  useCookieHeader?: boolean;
-  withInternalHeaders?: boolean;
-  withCommonHeaders?: boolean;
-  withCustomHeaders?: Record<string, string>;
-}
+export type { RequestHeadersOptions } from './role_scoped_supertest';
 
 /**
  * Provides a customized 'supertest' instance that is authenticated using the custom role-based API key
@@ -32,6 +28,8 @@ export function CustomRoleScopedSupertestProvider({
 }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
+  const config = getService('config');
+  const defaultRequestTimeout = config.get('timeouts.request');
 
   return {
     async getSupertestWithCustomRoleScope(
@@ -41,15 +39,25 @@ export function CustomRoleScopedSupertestProvider({
         withInternalHeaders: false,
       }
     ) {
+      const withTimeout: RequestHeadersOptions = {
+        requestTimeout: defaultRequestTimeout,
+        ...options,
+      };
+
       // if 'useCookieHeader' set to 'true', HTTP requests will be called with cookie Header (like in browser)
-      if (options.useCookieHeader) {
+      if (withTimeout.useCookieHeader) {
         const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithCustomRoleScope();
-        return new SupertestWithRoleScope(cookieHeader, supertestWithoutAuth, samlAuth, options);
+        return new SupertestWithRoleScope(
+          cookieHeader,
+          supertestWithoutAuth,
+          samlAuth,
+          withTimeout
+        );
       }
 
       // HTTP requests will be called with API key in header by default
       const roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
-      return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, options);
+      return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, withTimeout);
     },
   };
 }

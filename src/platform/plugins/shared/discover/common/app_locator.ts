@@ -18,6 +18,7 @@ import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ProfileStateMap } from './context_awareness';
 import type { VIEW_MODE, NEW_TAB_ID } from './constants';
+import type { ExpandedDocRef } from '../public';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -156,6 +157,10 @@ export type DiscoverAppLocatorParams = AsSerializableRecord<{
    * are carried in the navigation state.
    */
   profileState?: ProfileStateMap;
+  /**
+   * The document to expand in the doc viewer flyout on load.
+   */
+  expandedDoc?: ExpandedDocRef;
 }>;
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
