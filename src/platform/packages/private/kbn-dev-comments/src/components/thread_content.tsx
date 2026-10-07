@@ -334,10 +334,10 @@ export const ThreadContent = ({ comment, onClose, showScreenshot = false }: Thre
         padding-bottom: ${euiTheme.size.xs};
       `}
     >
+      <EuiFlexItem />
       <EuiFlexItem grow={false}>
         <RefreshButton id={comment.id} />
       </EuiFlexItem>
-      <EuiFlexItem />
       <EuiFlexItem grow={false}>
         <ResolveButton comment={comment} />
       </EuiFlexItem>

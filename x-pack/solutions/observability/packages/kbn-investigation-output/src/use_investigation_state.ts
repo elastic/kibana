@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { defer } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { buildPath } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { isToolUiEvent } from '@kbn/agent-builder-common';
@@ -58,6 +59,45 @@ const FAILED_WITHOUT_DETAILS_MESSAGE = i18n.translate(
   'xpack.investigationOutput.failedWithoutDetailsErrorMessage',
   { defaultMessage: 'The investigation did not complete.' }
 );
+
+const LEGACY_SEVERITY_VALUES: Record<string, string> = {
+  '80-critical': 'critical',
+  '60-high': 'high',
+  '40-medium': 'medium',
+  '20-low': 'low',
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Preserves completed investigations produced before Significant Events adopted Alerting v2
+ * severity and hypothesis-status vocabularies.
+ */
+const normalizeLegacyInvestigationState = (state: unknown): unknown => {
+  if (!isRecord(state)) {
+    return state;
+  }
+
+  const severity =
+    typeof state.severity === 'string'
+      ? LEGACY_SEVERITY_VALUES[state.severity] ?? state.severity
+      : undefined;
+  const hypotheses = Array.isArray(state.hypotheses)
+    ? state.hypotheses.map((hypothesis) => {
+        if (!isRecord(hypothesis) || hypothesis.status !== 'rejected') {
+          return hypothesis;
+        }
+        return { ...hypothesis, status: 'dismissed' };
+      })
+    : undefined;
+
+  return {
+    ...state,
+    ...(severity !== undefined && { severity }),
+    ...(hypotheses !== undefined && { hypotheses }),
+  };
+};
 
 const httpErrorMessage = (err: Error): string => {
   const fetchError = err as IHttpFetchError<ResponseErrorBody>;
@@ -210,7 +250,9 @@ export function useInvestigationState({
         if (output?.conversation_id) {
           setConversationId(output.conversation_id);
         }
-        const parsed = investigationStateSchema.safeParse(output?.structured_output);
+        const parsed = investigationStateSchema.safeParse(
+          normalizeLegacyInvestigationState(output?.structured_output)
+        );
 
         if (parsed.success) {
           applySettled({ status: 'complete', state: parsed.data });
@@ -273,11 +315,16 @@ export function useInvestigationState({
       }
 
       subscription = defer(() =>
-        http.get(`/internal/agent_builder/executions/${agentExecutionId}/follow`, {
-          signal: abortController.signal,
-          asResponse: true,
-          rawResponse: true,
-        })
+        http.get(
+          buildPath('/internal/agent_builder/executions/{executionId}/follow', {
+            executionId: agentExecutionId,
+          }),
+          {
+            signal: abortController.signal,
+            asResponse: true,
+            rawResponse: true,
+          }
+        )
       )
         .pipe(
           /** `ChatEvent` doesn't satisfy the SSE event mixin constraint, and only `tool_ui`
@@ -287,7 +334,9 @@ export function useInvestigationState({
         .subscribe({
           next: (event) => {
             if (isToolUiEvent(event, INVESTIGATION_PROGRESS_UI_EVENT)) {
-              const parsed = investigationStateSchema.safeParse(event.data.data);
+              const parsed = investigationStateSchema.safeParse(
+                normalizeLegacyInvestigationState(event.data.data)
+              );
               if (parsed.success) {
                 setState(parsed.data);
               }
