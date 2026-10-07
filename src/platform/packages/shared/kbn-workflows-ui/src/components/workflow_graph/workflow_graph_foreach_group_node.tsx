@@ -20,14 +20,15 @@ import {
 } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
-import React, { memo, useCallback, useRef, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { i18n } from '@kbn/i18n';
 import { deslugifyStepName } from './deslugify_step_name';
+import { errorHandleStyle } from './port_geometry';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
-import { getStepIconType } from '../step_icons';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
+import { getStepIconType } from '../step_icons';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -272,7 +273,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
         type="source"
         id="fallback"
         position={Position.Bottom}
-        style={{ opacity: 0, right: 24, left: 'auto', transform: 'none' }}
+        style={{ opacity: 0, ...errorHandleStyle() }}
       />
     </>
   );

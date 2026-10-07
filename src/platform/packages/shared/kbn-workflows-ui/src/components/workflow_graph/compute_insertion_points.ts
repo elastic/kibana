@@ -141,8 +141,16 @@ export function computeInsertionPoints(
     let hasBranches = false;
 
     visitStepChildSlots(step, (slot, childSteps) => {
-      // Fallback slots are not branch ports — they map to the red error port.
-      if (slot.kind === 'fallback' || slot.kind === 'iteration-fallback') return;
+      // Fallback slots are not branch ports — they map to the red error port,
+      // not a new fork port on the owner. Their children are ordinary steps
+      // (own `step`/`fallbackTarget` ports), so recurse without setting
+      // `hasBranches` — the owner keeps its single flow port.
+      if (slot.kind === 'fallback' || slot.kind === 'iteration-fallback') {
+        childSteps.forEach((child, idx) => {
+          walkStep(child, idx === childSteps.length - 1);
+        });
+        return;
+      }
 
       hasBranches = true;
       branches.set(slotKey(slot), {

@@ -10,6 +10,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
+import { ERROR_PORT_ALONG } from './port_geometry';
 import {
   type WorkflowGraphActions,
   WorkflowGraphActionsContext,
@@ -22,9 +23,13 @@ import {
 
 // Stub @xyflow/react's Handle — it requires an internal React Flow context that
 // isn't available in unit tests, and we're not testing connection logic here.
+// Renders its id/style as a queryable element so geometry (e.g. the fallback
+// port's along-edge position) can still be asserted without the real context.
 jest.mock('@xyflow/react', () => ({
   ...jest.requireActual('@xyflow/react'),
-  Handle: () => null,
+  Handle: ({ id, style }: { id?: string; style?: React.CSSProperties }) => (
+    <div data-testid={`handle-${id ?? 'default'}`} style={style} />
+  ),
   Position: { Top: 'top', Bottom: 'bottom' },
 }));
 
@@ -402,6 +407,17 @@ describe('WorkflowGraphNode — edit mode', () => {
     fireEvent.click(screen.getByTestId('workflowGraphNodeMenuButton'));
     expect(screen.getByTestId('workflowGraphNodeMenuPanel')).toBeInTheDocument();
     expect(screen.queryByTestId('workflowGraphNodeContextMenuAnchor')).not.toBeInTheDocument();
+  });
+
+  it('positions the fallback source handle at ERROR_PORT_ALONG, matching the red anchor', () => {
+    const { container } = renderNode({
+      step: { 'on-failure': { fallback: [{ name: 'fb', type: 'console' }] } },
+    });
+    // `data-testid` here (not Kibana's `data-test-subj`) — see the Handle mock above.
+    const handle = container.querySelector('[data-testid="handle-fallback"]') as HTMLElement;
+    expect(handle).toBeInTheDocument();
+    expect(handle).toHaveStyle({ left: ERROR_PORT_ALONG });
+    expect(handle.style.right).toBe('');
   });
 
   it('draws a solid border for fallback nodes (no dashed styling)', () => {

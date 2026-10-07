@@ -13,9 +13,10 @@ import type { Node, NodeProps } from '@xyflow/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
+import { ERROR_PORT_ALONG } from './port_geometry';
 import { WorkflowGraphActionsContext } from './workflow_graph_actions_context';
 import type { WorkflowGraphEditActions } from './workflow_graph_actions_context';
+import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 
 // Stub @xyflow/react's Handle as a spy — records calls so handle ids can be
 // asserted, but has no React Flow context requirements.
@@ -104,6 +105,15 @@ describe('WorkflowGraphForeachGroupNode', () => {
     renderGroup();
     const ids = mockHandle.mock.calls.map((args: [{ id?: string }]) => args[0]?.id).filter(Boolean);
     expect(ids).toContain('fallback');
+  });
+
+  it('positions the fallback handle at ERROR_PORT_ALONG, matching the red anchor', () => {
+    renderGroup();
+    const fallbackCall = mockHandle.mock.calls.find(
+      (args: [{ id?: string }]) => args[0]?.id === 'fallback'
+    );
+    expect(fallbackCall?.[0].style).toMatchObject({ left: ERROR_PORT_ALONG });
+    expect(fallbackCall?.[0].style.right).toBeUndefined();
   });
 
   describe('execution outcome colours', () => {

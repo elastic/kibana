@@ -32,7 +32,7 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import { aiIconTileCss } from './ai_icon_tile';
 import { deslugifyStepName } from './deslugify_step_name';
-import { handleAlongStyle, STEP_PORT } from './port_geometry';
+import { errorHandleStyle, handleAlongStyle, STEP_PORT } from './port_geometry';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
 import { INSERT_FLASH_MS } from './use_insert_layout_animation';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
@@ -43,9 +43,6 @@ import type {
 } from './workflow_graph_actions_context';
 import { WorkflowGraphConnectionPorts } from './workflow_graph_connection_ports';
 import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
-
-/** Inset from the node's right edge where spec 07's fork port (failure anchor) sits. */
-const FAILURE_PORT_RIGHT_INSET = 24;
 
 export interface WorkflowGraphNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -349,18 +346,18 @@ function NodePreviewCard({
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
       {/* Secondary source handle for the fallback edge — always on the bottom
-          edge, inset from the right corner. `Position.Bottom` is unconditional:
-          in LR the fallback margin is below the spine, so the route must leave
-          the bottom edge rather than the right centre. `transform: 'none'`
-          overrides React Flow's `.react-flow__handle-bottom` default of
-          `translate(-50%, 0)` so that `right` + `left: auto` places the handle
-          precisely. The visible port is spec 07's; React Flow reads
-          sourceHandle="fallback" on the edge to pick these coordinates. */}
+          edge. `Position.Bottom` is unconditional: in LR the fallback margin
+          is below the spine, so the route must leave the bottom edge rather
+          than the right centre. `errorHandleStyle()` places it at
+          `ERROR_PORT_ALONG`, the same along-edge fraction as the visible
+          red port (`ConnectedErrorPort` / `PortButton`), so the edge and its
+          anchor line up. React Flow reads sourceHandle="fallback" on the edge
+          to pick these coordinates. */}
       <Handle
         type="source"
         id="fallback"
         position={Position.Bottom}
-        style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
+        style={{ opacity: 0, ...errorHandleStyle() }}
       />
     </>
   );
@@ -1042,12 +1039,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               type="source"
               id="fallback"
               position={Position.Bottom}
-              style={{
-                opacity: 0,
-                right: FAILURE_PORT_RIGHT_INSET,
-                left: 'auto',
-                transform: 'none',
-              }}
+              style={{ opacity: 0, ...errorHandleStyle() }}
             />
           )}
         </>
@@ -1063,7 +1055,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             type="source"
             id="fallback"
             position={Position.Bottom}
-            style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
+            style={{ opacity: 0, ...errorHandleStyle() }}
           />
         </>
       ) : (

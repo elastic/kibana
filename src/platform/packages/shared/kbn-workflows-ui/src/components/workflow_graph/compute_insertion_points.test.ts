@@ -76,6 +76,59 @@ describe('computeInsertionPoints', () => {
     expect(points.byNodeId.get('a')?.fallbackConnected).toBeUndefined();
   });
 
+  it('recurses into a fallback lane so lane steps get their own ports (not a branch port on the owner)', () => {
+    const workflow = wf([
+      {
+        name: 'a',
+        type: 'console',
+        'on-failure': {
+          fallback: [
+            {
+              name: 'fb1',
+              type: 'console',
+              'on-failure': { fallback: [{ name: 'fb2', type: 'console' }] },
+            },
+            { name: 'fb3', type: 'console' },
+          ],
+        },
+      },
+    ]);
+    const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
+
+    // Owner keeps its single flow port and fallbackConnected — no branches map.
+    expect(points.byNodeId.get('a')?.branches).toBeUndefined();
+    expect(points.byNodeId.get('a')?.fallbackConnected).toBe(true);
+    expect(points.byNodeId.get('a')?.step).toMatchObject({
+      sourceNodeId: 'a',
+      stepName: 'a',
+      isTerminal: true,
+    });
+
+    // fb1: not last in the lane, has its own fallback (fallbackConnected), own nested fallback target.
+    expect(points.byNodeId.get('fb1')?.step).toMatchObject({
+      sourceNodeId: 'fb1',
+      stepName: 'fb1',
+      isTerminal: false,
+    });
+    expect(points.byNodeId.get('fb1')?.fallbackConnected).toBe(true);
+
+    // fb2: nested fallback leaf, gets its own fallbackTarget.
+    expect(points.byNodeId.get('fb2')?.step).toMatchObject({
+      sourceNodeId: 'fb2',
+      stepName: 'fb2',
+      isTerminal: true,
+    });
+    expect(points.byNodeId.get('fb2')?.fallbackTarget).toEqual({ stepName: 'fb2', nodeId: 'fb2' });
+
+    // fb3: last in the lane, no fallback of its own — gets a fallbackTarget port.
+    expect(points.byNodeId.get('fb3')?.step).toMatchObject({
+      sourceNodeId: 'fb3',
+      stepName: 'fb3',
+      isTerminal: true,
+    });
+    expect(points.byNodeId.get('fb3')?.fallbackTarget).toEqual({ stepName: 'fb3', nodeId: 'fb3' });
+  });
+
   it('gives if-nodes a branches map (then/else) keyed by slot', () => {
     const workflow = wf([
       {
