@@ -8,12 +8,15 @@
 import { z } from '@kbn/zod/v4';
 import {
   ACCEPT_BREAKING_CHANGE_COMMAND,
-  ACCEPT_BREAKING_CHANGE_FLAG,
-  GENERATE_SETTINGS_CONTRACT_SNAPSHOT,
+  ACCEPT_BREAKING_CHANGE_ENV,
+  UPDATE_SETTINGS_CONTRACT_COMMAND,
+  assertComparableValidation,
   assertSchemaDefaultsDeclared,
+  buildSharedSettingsContract,
   buildWorkerSettingsContracts,
   describeContractChanges,
   describeBaseBranchFailure,
+  diffSettingsContracts,
   diffWorkerSettingsContracts,
   nextSettingsContractSnapshot,
   normalizeSettingsSchema,
@@ -21,7 +24,10 @@ import {
   parseSettingsContractSnapshot,
   toInputJsonSchema,
   type AcceptedBreakingChange,
+  type SettingsContract,
   type SettingsContractSnapshot,
+  type SettingsObjectContract,
+  type SharedSettingsContract,
   type WorkerSettingsContracts,
 } from './settings_contract';
 
@@ -109,8 +115,8 @@ describe('Worker settings contract', () => {
       const message = contractChangeMessage(withField(field, defaultValue));
       expect(message).toContain('This change is safe for stored Worker settings.');
       expect(message).toContain('[safe] added rule-tuning.extras.field with a default');
-      expect(message).toContain(GENERATE_SETTINGS_CONTRACT_SNAPSHOT);
-      expect(message).not.toContain(ACCEPT_BREAKING_CHANGE_FLAG);
+      expect(message).toContain(UPDATE_SETTINGS_CONTRACT_COMMAND);
+      expect(message).not.toContain(ACCEPT_BREAKING_CHANGE_ENV);
     });
 
     it.each([
@@ -270,7 +276,9 @@ describe('Worker settings contract', () => {
       ['a removed Worker', {} as WorkerSettingsContracts, '[breaking] removed Worker rule-tuning'],
     ])('%s', (_label, next, expected) => {
       const message = contractChangeMessage(next);
-      expect(message).toContain('This change breaks stored Worker settings.');
+      expect(message).toContain(
+        'This change breaks stored Worker settings or the saves that change them.'
+      );
       expect(message).toContain(expected);
       expect(message).toContain('https://github.com/elastic/security-team/issues/19312');
       expect(message).toContain(ACCEPT_BREAKING_CHANGE_COMMAND);
@@ -402,6 +410,142 @@ describe('Worker settings contract', () => {
     expect(() => assertSchemaDefaultsDeclared('x', jsonSchema, { extras: { a: 1 } })).not.toThrow();
   });
 
+  describe('the shared schemas every stored document and save goes through', () => {
+    const SHARED_NOW = buildSharedSettingsContract();
+
+    const objectNode = (schema: z.ZodType, label: string): SettingsObjectContract => {
+      const node = normalizeSettingsSchema(schema, label);
+      if (node.kind !== 'object') {
+        throw new Error('expected an object contract');
+      }
+      return node;
+    };
+
+    const accountField = (field: z.ZodType, label: string) =>
+      objectNode(z.object({ serviceAccountId: field }).strict(), label);
+
+    const sharedChangeMessage = (
+      previous: Partial<SharedSettingsContract>,
+      next: Partial<SharedSettingsContract>
+    ): string =>
+      describeContractChanges(
+        diffSettingsContracts(
+          { shared: { ...SHARED_NOW, ...previous }, workers: {} },
+          { shared: { ...SHARED_NOW, ...next }, workers: {} }
+        )
+      );
+
+    it('records WorkerSettings and WorkerSettingsWrite, including the null a save sends to clear the account', () => {
+      expect(SHARED_NOW.settingsWrite.fields.serviceAccountId).toMatchObject({
+        nullable: true,
+        maxLength: 1024,
+      });
+      expect(SHARED_NOW.storedSettings.fields.serviceAccountId).toMatchObject({ maxLength: 1024 });
+    });
+
+    it('reports a save body that stops accepting null for serviceAccountId as breaking', () => {
+      const write = (field: z.ZodType) => accountField(field, 'WorkerSettingsWrite');
+      expect(
+        sharedChangeMessage(
+          { settingsWrite: write(z.string().min(1).max(1024).nullable().optional()) },
+          { settingsWrite: write(z.string().min(1).max(1024).optional()) }
+        )
+      ).toContain('[breaking] stopped allowing null on WorkerSettingsWrite.serviceAccountId');
+    });
+
+    it('reports a lower maximum on the save body alone as breaking', () => {
+      const write = (max: number) =>
+        accountField(z.string().min(1).max(max).nullable().optional(), 'WorkerSettingsWrite');
+      expect(
+        sharedChangeMessage({ settingsWrite: write(1024) }, { settingsWrite: write(512) })
+      ).toContain(
+        '[breaking] tightened WorkerSettingsWrite.serviceAccountId maxLength from 1024 to 512'
+      );
+    });
+
+    it('reports a tighter second stage as breaking, which the first-stage JSON Schema cannot show', () => {
+      const firstStage = z.object({ serviceAccountId: z.string().optional() }).strict();
+      const secondStage = z.object({ serviceAccountId: z.string().max(512).optional() }).strict();
+      expect(normalizeSettingsSchema(firstStage.pipe(secondStage), 'x')).toEqual(
+        normalizeSettingsSchema(firstStage, 'x')
+      );
+
+      const stored = (max: number) =>
+        accountField(z.string().min(1).max(max).optional(), 'WorkerSettings');
+      expect(
+        sharedChangeMessage({ storedSettings: stored(1024) }, { storedSettings: stored(512) })
+      ).toContain(
+        '[breaking] tightened WorkerSettings.serviceAccountId maxLength from 1024 to 512'
+      );
+    });
+
+    it('records the shared schemas once when a snapshot predates them', () => {
+      expect(
+        describeContractChanges(
+          diffSettingsContracts({ workers: {} }, { shared: SHARED_NOW, workers: {} })
+        )
+      ).toContain('[safe] recorded the shared WorkerSettings and WorkerSettingsWrite schemas');
+    });
+  });
+
+  describe('validation JSON Schema cannot express', () => {
+    it('drops a refinement from the JSON Schema form, which is why it is checked separately', () => {
+      expect(toInputJsonSchema(z.number().refine((value) => value !== 13))).toEqual(
+        toInputJsonSchema(z.number())
+      );
+    });
+
+    it.each([
+      ['a refinement', z.number().refine((value) => value !== 13), /a refinement/],
+      ['a superRefine', z.number().superRefine(() => undefined), /a refinement/],
+      [
+        'a transform',
+        z.string().transform((value) => value.length),
+        /a transform, preprocess or pipe/,
+      ],
+      [
+        'a preprocess',
+        z.preprocess((value) => value, z.number()),
+        /a transform, preprocess or pipe/,
+      ],
+      ['an overwrite', z.string().overwrite((value) => value.trim()), /overwrite check/],
+      ['a catch', z.number().catch(1), /a catch schema/],
+    ])('fails explicitly on %s instead of comparing without it', (_label, field, reason) => {
+      const check = () => assertComparableValidation(z.object({ field }).strict(), 'x');
+      expect(check).toThrow(/Cannot establish settings compatibility at x\.field/);
+      expect(check).toThrow(reason);
+      expect(check).toThrow(/This is not a breaking change and cannot be accepted/);
+    });
+
+    it('accepts the constraints the classifier compares', () => {
+      expect(() =>
+        assertComparableValidation(
+          z
+            .object({
+              bounded: z.number().int().min(1).max(30),
+              patterned: z
+                .string()
+                .max(6)
+                .regex(/^[1-9][0-9]*[mhd]$/),
+              list: z
+                .array(z.enum(['a', 'b']))
+                .max(3)
+                .nullable()
+                .optional(),
+              open: z.object({}).catchall(z.unknown()),
+            })
+            .strict(),
+          'x'
+        )
+      ).not.toThrow();
+    });
+
+    it('finds nothing it cannot compare in the real schemas', () => {
+      expect(() => buildWorkerSettingsContracts()).not.toThrow();
+      expect(() => buildSharedSettingsContract()).not.toThrow();
+    });
+  });
+
   it('rejects a file that is not a settings contract snapshot', () => {
     expect(() => parseSettingsContractSnapshot('{"workers":{}}')).toThrow(
       /is not a settings contract snapshot/
@@ -418,17 +562,24 @@ describe('Worker settings contract', () => {
     changes,
   });
 
+  const SHARED = buildSharedSettingsContract();
+
+  const contractOf = (workers: WorkerSettingsContracts): SettingsContract => ({
+    shared: SHARED,
+    workers,
+  });
+
   const snapshot = (
     workers: WorkerSettingsContracts,
     acceptedBreakingChanges: AcceptedBreakingChange[] = []
-  ): SettingsContractSnapshot => ({ acceptedBreakingChanges, workers });
+  ): SettingsContractSnapshot => ({ acceptedBreakingChanges, shared: SHARED, workers });
 
   describe('against the base branch', () => {
     it('stays red when the snapshot was regenerated without accepting the breaking change', () => {
       const message = describeBaseBranchFailure(
         snapshot(baseContract()),
         snapshot(tightened()),
-        tightened()
+        contractOf(tightened())
       );
       expect(message).toContain('it was not accepted');
       expect(message).toContain(TIGHTENED_TEXT);
@@ -439,7 +590,7 @@ describe('Worker settings contract', () => {
         describeBaseBranchFailure(
           snapshot(baseContract()),
           snapshot(tightened(), [accepted(1)]),
-          tightened()
+          contractOf(tightened())
         )
       ).toBeUndefined();
     });
@@ -450,14 +601,14 @@ describe('Worker settings contract', () => {
         describeBaseBranchFailure(
           snapshot(baseContract(), [earlier]),
           snapshot(tightened(), [earlier]),
-          tightened()
+          contractOf(tightened())
         )
       ).toContain('it was not accepted');
       expect(
         describeBaseBranchFailure(
           snapshot(baseContract(), [earlier]),
           snapshot(tightened(), [earlier, accepted(2)]),
-          tightened()
+          contractOf(tightened())
         )
       ).toBeUndefined();
     });
@@ -468,7 +619,7 @@ describe('Worker settings contract', () => {
         describeBaseBranchFailure(
           snapshot(baseContract(), [earlier]),
           snapshot(baseContract(), [accepted(2)]),
-          baseContract()
+          contractOf(baseContract())
         )
       ).toContain('must start with every entry the base branch has');
     });
@@ -476,17 +627,20 @@ describe('Worker settings contract', () => {
     it('passes a safe change without accepting anything', () => {
       const added = withField(z.boolean(), false);
       expect(
-        describeBaseBranchFailure(snapshot(baseContract()), snapshot(added), added)
+        describeBaseBranchFailure(snapshot(baseContract()), snapshot(added), contractOf(added))
       ).toBeUndefined();
     });
   });
 
-  describe('the next snapshot the generator writes', () => {
+  describe('the next snapshot update mode writes', () => {
     const ISSUE = 'https://github.com/elastic/security-team/issues/5';
 
     it('refuses a breaking change without an accepted issue', () => {
       expect(() =>
-        nextSettingsContractSnapshot({ committed: snapshot(baseContract()), current: tightened() })
+        nextSettingsContractSnapshot({
+          committed: snapshot(baseContract()),
+          current: contractOf(tightened()),
+        })
       ).toThrow(/Refusing to update the snapshot/);
     });
 
@@ -495,17 +649,17 @@ describe('Worker settings contract', () => {
       expect(
         nextSettingsContractSnapshot({
           committed: snapshot(baseContract(), [earlier]),
-          current: tightened(),
+          current: contractOf(tightened()),
           acceptedIssue: ISSUE,
         })
       ).toEqual(snapshot(tightened(), [earlier, { issue: ISSUE, changes: [TIGHTENED_TEXT] }]));
     });
 
-    it('refuses the flag when nothing breaks', () => {
+    it('refuses an accepted issue when nothing breaks', () => {
       expect(() =>
         nextSettingsContractSnapshot({
           committed: snapshot(baseContract()),
-          current: baseContract(),
+          current: contractOf(baseContract()),
           acceptedIssue: ISSUE,
         })
       ).toThrow(/nothing in this change breaks/);
@@ -515,19 +669,19 @@ describe('Worker settings contract', () => {
       expect(
         nextSettingsContractSnapshot({
           committed: snapshot(tightened()),
-          current: tightened(),
+          current: contractOf(tightened()),
           base: snapshot(baseContract()),
           acceptedIssue: ISSUE,
         })
       ).toEqual(snapshot(tightened(), [{ issue: ISSUE, changes: [TIGHTENED_TEXT] }]));
     });
 
-    it('does not ask for the flag again once this branch accepted the break', () => {
+    it('does not ask for acceptance again once this branch accepted the break', () => {
       const done = snapshot(tightened(), [accepted(5)]);
       expect(
         nextSettingsContractSnapshot({
           committed: done,
-          current: tightened(),
+          current: contractOf(tightened()),
           base: snapshot(baseContract()),
         })
       ).toEqual(done);
@@ -539,19 +693,20 @@ describe('Worker settings contract', () => {
       'https://github.com/elastic/security-team/issues/123',
       'https://github.com/elastic/kibana/pull/456',
     ])('accepts %s', (url) => {
-      expect(parseAcceptedIssue([ACCEPT_BREAKING_CHANGE_FLAG, url])).toBe(url);
+      expect(parseAcceptedIssue(url)).toBe(url);
     });
 
     it.each([
-      [[ACCEPT_BREAKING_CHANGE_FLAG]],
-      [[ACCEPT_BREAKING_CHANGE_FLAG, 'https://github.com/elastic/kibana/issues/1#issuecomment-2']],
-      [[ACCEPT_BREAKING_CHANGE_FLAG, 'https://github.com/other/repo/issues/1']],
-    ])('rejects %j', (argv) => {
-      expect(() => parseAcceptedIssue(argv)).toThrow(/needs the GitHub issue/);
+      'https://github.com/elastic/kibana/issues/1#issuecomment-2',
+      'https://github.com/other/repo/issues/1',
+      'yes',
+    ])('rejects %s', (value) => {
+      expect(() => parseAcceptedIssue(value)).toThrow(/must be the GitHub issue/);
     });
 
-    it('returns undefined without the flag', () => {
-      expect(parseAcceptedIssue([])).toBeUndefined();
+    it('returns undefined when the variable is not set', () => {
+      expect(parseAcceptedIssue(undefined)).toBeUndefined();
+      expect(parseAcceptedIssue('')).toBeUndefined();
     });
   });
 });

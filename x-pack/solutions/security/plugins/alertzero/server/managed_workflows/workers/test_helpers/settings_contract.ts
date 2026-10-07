@@ -6,12 +6,11 @@
  */
 
 /**
- * The Worker settings contract is the input side of each Worker's complete settings schema plus
- * its declaration defaults, committed as `settings_contract.snapshot.json`.
- *
- * Zod refinements (`.refine`, `.superRefine`, which the OpenAPI generator emits for the
- * `nonempty` and `date-math` formats) have no JSON Schema form and are not part of the contract.
- * Neither is the output side of the pipe into `WorkerSettings`.
+ * The Worker settings contract, committed as `settings_contract.snapshot.json`: each Worker's own
+ * settings schema and defaults, plus the two shared schemas every stored document and save goes
+ * through (`WorkerSettings`, the second stage of every complete schema, and `WorkerSettingsWrite`,
+ * the save request body). Validation JSON Schema cannot express (refinements, transforms) is
+ * rejected when the contract is built, because a change to it could not be compared.
  */
 
 import { isEqual } from 'lodash';
@@ -22,6 +21,8 @@ import {
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
   nearestLowerAutonomyLevel,
+  WorkerSettings,
+  WorkerSettingsWrite,
   type WatchAutonomyLevel,
 } from '@kbn/alertzero-common';
 import { z } from '@kbn/zod/v4';
@@ -32,13 +33,18 @@ export const BREAKING_CHANGE_REMEDIES = `a migration under ${MIGRATION_ISSUE} (n
 
 export const SETTINGS_CONTRACT_SNAPSHOT_FILE = 'settings_contract.snapshot.json';
 
-export const GENERATE_SETTINGS_CONTRACT_SNAPSHOT =
-  'node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js';
+const COMPAT_TEST =
+  'x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts';
+
+/** Set to `true` to make the compatibility test rewrite the snapshot instead of comparing it. */
+export const UPDATE_SETTINGS_CONTRACT_ENV = 'UPDATE_WORKER_SETTINGS_CONTRACT';
 
 /** Accepts a breaking change and records the issue where the coordinated reset was agreed. */
-export const ACCEPT_BREAKING_CHANGE_FLAG = '--accept-breaking-change';
+export const ACCEPT_BREAKING_CHANGE_ENV = 'ACCEPT_WORKER_SETTINGS_BREAKING_CHANGE';
 
-export const ACCEPT_BREAKING_CHANGE_COMMAND = `${GENERATE_SETTINGS_CONTRACT_SNAPSHOT} ${ACCEPT_BREAKING_CHANGE_FLAG} <issue-url>`;
+export const UPDATE_SETTINGS_CONTRACT_COMMAND = `${UPDATE_SETTINGS_CONTRACT_ENV}=true node scripts/jest ${COMPAT_TEST}`;
+
+export const ACCEPT_BREAKING_CHANGE_COMMAND = `${UPDATE_SETTINGS_CONTRACT_ENV}=true ${ACCEPT_BREAKING_CHANGE_ENV}=<issue-url> node scripts/jest ${COMPAT_TEST}`;
 
 const ACCEPT_BREAKING_CHANGE_INSTRUCTIONS = `Before customers exist, a breaking change can go in only with a coordinated reset of the affected environments. Agree it with the Common Worker Layer team on an issue, then run:\n${ACCEPT_BREAKING_CHANGE_COMMAND}`;
 
@@ -113,6 +119,18 @@ export interface WorkerSettingsContract {
 
 export type WorkerSettingsContracts = Readonly<Record<string, WorkerSettingsContract>>;
 
+export interface SharedSettingsContract {
+  /** The second stage of every complete schema, so it validates every stored document too. */
+  storedSettings: SettingsObjectContract;
+  /** The `settings` body of a save request, validated before the patch is applied. */
+  settingsWrite: SettingsObjectContract;
+}
+
+export interface SettingsContract {
+  shared: SharedSettingsContract;
+  workers: WorkerSettingsContracts;
+}
+
 export interface AcceptedBreakingChange {
   /** The issue where the reset was agreed and the affected environments are listed. */
   issue: string;
@@ -122,6 +140,8 @@ export interface AcceptedBreakingChange {
 export interface SettingsContractSnapshot {
   /** Append-only; the base-branch check requires the base branch's entries as a prefix. */
   acceptedBreakingChanges: readonly AcceptedBreakingChange[];
+  /** Absent only in snapshots written before the shared schemas were recorded. */
+  shared?: SharedSettingsContract;
   workers: WorkerSettingsContracts;
 }
 
@@ -147,6 +167,111 @@ const unclassified = (what: string, path: string): Error =>
     `Unclassified ${what} at ${path}. Teach the Worker settings contract check about it before snapshotting.`
   );
 
+interface ZodDefinition {
+  type: string;
+  checks?: ReadonlyArray<{ _zod: { def: { check: string; format?: string } } }>;
+  [key: string]: unknown;
+}
+
+const zodDefinition = (schema: unknown): ZodDefinition =>
+  (schema as { _zod: { def: ZodDefinition } })._zod.def;
+
+/** Checks `z.toJSONSchema` turns into keywords the classifier compares, or rejects loudly. */
+const COMPARABLE_CHECKS = new Set([
+  'min_length',
+  'max_length',
+  'length_equals',
+  'greater_than',
+  'less_than',
+  'number_format',
+  'multiple_of',
+]);
+
+const LEAF_TYPES = new Set(['string', 'number', 'boolean', 'enum', 'literal', 'unknown', 'never']);
+
+const WRAPPER_TYPES = new Set(['optional', 'nullable', 'default']);
+
+const cannotCompare = (what: string, path: string): Error =>
+  new Error(
+    `Cannot establish settings compatibility at ${path}: it uses ${what}, which JSON Schema cannot express, so a change to it would pass unnoticed. This is not a breaking change and cannot be accepted. Express the constraint as a bound, an enum or a pattern, or teach test_helpers/settings_contract.ts to compare it.`
+  );
+
+/**
+ * `z.toJSONSchema` silently drops refinements, transforms and pipes, so every validation a stored
+ * document or a save goes through must be one the JSON Schema form carries.
+ */
+export const assertComparableValidation = (schema: unknown, path: string): void => {
+  const definition = zodDefinition(schema);
+  for (const check of definition.checks ?? []) {
+    const { check: kind, format } = check._zod.def;
+    if (kind === 'string_format' ? format !== 'regex' : !COMPARABLE_CHECKS.has(kind)) {
+      throw cannotCompare(
+        kind === 'custom'
+          ? 'a refinement (.refine, .superRefine or .check)'
+          : `a ${kind}${format ? ` (${format})` : ''} check`,
+        path
+      );
+    }
+  }
+  const { type } = definition;
+  if (LEAF_TYPES.has(type)) {
+    return;
+  }
+  if (WRAPPER_TYPES.has(type)) {
+    assertComparableValidation(definition.innerType, path);
+    return;
+  }
+  if (type === 'array') {
+    assertComparableValidation(definition.element, `${path}[]`);
+    return;
+  }
+  if (type === 'union' && Array.isArray(definition.options)) {
+    definition.options.forEach((option) => assertComparableValidation(option, path));
+    return;
+  }
+  if (type === 'object' && isRecord(definition.shape)) {
+    for (const [key, child] of Object.entries(definition.shape)) {
+      assertComparableValidation(child, `${path}.${key}`);
+    }
+    if (definition.catchall !== undefined) {
+      assertComparableValidation(definition.catchall, `${path}.*`);
+    }
+    return;
+  }
+  throw cannotCompare(
+    type === 'pipe' || type === 'transform'
+      ? 'a transform, preprocess or pipe'
+      : `a ${type} schema`,
+    path
+  );
+};
+
+/** The Worker's own stage of its complete schema; the second stage must be the shared schema. */
+const workerStageOf = (workerId: string, complete: z.ZodType): z.ZodType => {
+  const definition = zodDefinition(complete);
+  if (definition.type !== 'pipe' || definition.out !== WorkerSettings) {
+    throw cannotCompare(
+      'a complete schema that is not its own object piped into WorkerSettings',
+      workerId
+    );
+  }
+  return definition.in as z.ZodType;
+};
+
+const normalizeObject = (schema: z.ZodType, label: string): SettingsObjectContract => {
+  assertComparableValidation(schema, label);
+  const node = normalizeSettingsSchema(schema, label);
+  if (node.kind !== 'object') {
+    throw new Error(`Settings schema ${label} did not convert as an object`);
+  }
+  return node;
+};
+
+export const buildSharedSettingsContract = (): SharedSettingsContract => ({
+  storedSettings: normalizeObject(WorkerSettings, 'WorkerSettings'),
+  settingsWrite: normalizeObject(WorkerSettingsWrite, 'WorkerSettingsWrite'),
+});
+
 const withNullable = <T extends SettingsNode>(node: T, nullable: boolean): T =>
   nullable ? { ...node, nullable: true } : node;
 
@@ -156,7 +281,9 @@ const normalizeNode = (value: unknown, path: string): SettingsNode => {
   }
   if (Array.isArray(value.anyOf)) {
     const branches = value.anyOf.filter((branch) => !(isRecord(branch) && branch.type === 'null'));
-    const rest = Object.keys(value).filter((key) => key !== 'anyOf' && key !== 'default');
+    const rest = Object.keys(value).filter(
+      (key) => !['anyOf', 'default', 'description', 'title'].includes(key)
+    );
     if (value.anyOf.length !== 2 || branches.length !== 1 || rest.length > 0) {
       throw unclassified('anyOf', path);
     }
@@ -186,7 +313,10 @@ const normalizeNode = (value: unknown, path: string): SettingsNode => {
   }
 
   if (value.type === 'object' || isRecord(value.properties)) {
-    if (!isRecord(value.properties) || isRecord(value.additionalProperties)) {
+    // `additionalProperties: {}` is an open object (any extra key), as in the shared `extras`.
+    const openToAnything =
+      isRecord(value.additionalProperties) && Object.keys(value.additionalProperties).length === 0;
+    if (!isRecord(value.properties) || (isRecord(value.additionalProperties) && !openToAnything)) {
       throw unclassified('object without fixed properties', path);
     }
     const fields: Record<string, SettingsNode> = {};
@@ -281,7 +411,9 @@ export const assertSchemaDefaultsDeclared = (
 export const buildWorkerSettingsContracts = (): WorkerSettingsContracts => {
   const contracts: Record<string, WorkerSettingsContract> = {};
   for (const workerId of [...SYSTEM_SECURITY_WORKER_IDS].sort()) {
-    const jsonSchema = toInputJsonSchema(getCompleteWorkerSettingsSchema(workerId));
+    const complete = getCompleteWorkerSettingsSchema(workerId);
+    assertComparableValidation(workerStageOf(workerId, complete), workerId);
+    const jsonSchema = toInputJsonSchema(complete);
     const defaults = { ...createDefaultWorkerSettings(workerId) };
     assertSchemaDefaultsDeclared(workerId, jsonSchema, defaults);
     const schema = normalizeNode(jsonSchema, workerId);
@@ -305,6 +437,11 @@ export const buildWorkerSettingsContracts = (): WorkerSettingsContracts => {
   }
   return contracts;
 };
+
+export const buildSettingsContract = (): SettingsContract => ({
+  shared: buildSharedSettingsContract(),
+  workers: buildWorkerSettingsContracts(),
+});
 
 /** Must match the keys `upgradeStoredWorkerSettings` fills in `worker_settings_defaults.ts`. */
 const isFilledFromDefaults = (path: readonly string[]): boolean =>
@@ -609,6 +746,44 @@ export const diffWorkerSettingsContracts = (
   return changes;
 };
 
+const diffSharedSettingsContracts = (
+  previous: SharedSettingsContract | undefined,
+  next: SharedSettingsContract
+): ContractChange[] => {
+  if (previous === undefined) {
+    return [
+      { kind: 'safe', text: 'recorded the shared WorkerSettings and WorkerSettingsWrite schemas' },
+    ];
+  }
+  const changes: ContractChange[] = [];
+  diffNodes(
+    previous.storedSettings,
+    next.storedSettings,
+    'WorkerSettings',
+    ['WorkerSettings'],
+    undefined,
+    changes
+  );
+  diffNodes(
+    previous.settingsWrite,
+    next.settingsWrite,
+    'WorkerSettingsWrite',
+    ['WorkerSettingsWrite'],
+    undefined,
+    changes
+  );
+  return changes;
+};
+
+/** The shared schemas first, then each Worker's own. */
+export const diffSettingsContracts = (
+  previous: Pick<SettingsContractSnapshot, 'shared' | 'workers'>,
+  next: SettingsContract
+): ContractChange[] => [
+  ...diffSharedSettingsContracts(previous.shared, next.shared),
+  ...diffWorkerSettingsContracts(previous.workers, next.workers),
+];
+
 export const breakingChanges = (changes: readonly ContractChange[]): ContractChange[] =>
   changes.filter((change) => change.kind === 'breaking');
 
@@ -617,21 +792,21 @@ export const describeContractChanges = (changes: readonly ContractChange[]): str
   const breaking = breakingChanges(changes).length > 0;
   const lines = [
     breaking
-      ? 'This change breaks stored Worker settings.'
+      ? 'This change breaks stored Worker settings or the saves that change them.'
       : 'This change is safe for stored Worker settings.',
     ...changes.map((change) => `- [${change.kind}] ${change.text}`),
     '',
   ];
   if (breaking) {
     lines.push(
-      `Configured Workers that stored the old shape will show as unavailable. It needs ${BREAKING_CHANGE_REMEDIES}.`
+      `Configured Workers that stored the old shape will show as unavailable, or settings saves that used to pass are rejected. It needs ${BREAKING_CHANGE_REMEDIES}.`
     );
     if (changes.some((change) => change.kind === 'breaking' && change.mayBeLabelChange)) {
       lines.push('If only the label on the page should change, keep the stored key and value.');
     }
     lines.push(ACCEPT_BREAKING_CHANGE_INSTRUCTIONS);
   } else {
-    lines.push(`Update the snapshot with:\n${GENERATE_SETTINGS_CONTRACT_SNAPSHOT}`);
+    lines.push(`Update the snapshot with:\n${UPDATE_SETTINGS_CONTRACT_COMMAND}`);
   }
   lines.push(...new Set(changes.flatMap((change) => (change.note ? [change.note] : []))));
   return lines.join('\n');
@@ -650,11 +825,11 @@ const keepsBaseEntries = (
 const unacceptedAtBase = (
   base: SettingsContractSnapshot,
   committed: SettingsContractSnapshot,
-  current: WorkerSettingsContracts
+  current: SettingsContract
 ): ContractChange[] =>
   committed.acceptedBreakingChanges.length > base.acceptedBreakingChanges.length
     ? []
-    : breakingChanges(diffWorkerSettingsContracts(base.workers, current));
+    : breakingChanges(diffSettingsContracts(base, current));
 
 /**
  * Against the base branch: accepted entries stay append-only, and a breaking diff comes with a
@@ -664,7 +839,7 @@ const unacceptedAtBase = (
 export const describeBaseBranchFailure = (
   base: SettingsContractSnapshot,
   committed: SettingsContractSnapshot,
-  current: WorkerSettingsContracts
+  current: SettingsContract
 ): string | undefined => {
   if (!keepsBaseEntries(base, committed)) {
     return `acceptedBreakingChanges in ${SETTINGS_CONTRACT_SNAPSHOT_FILE} must start with every entry the base branch has, unchanged. Restore them from the base branch.`;
@@ -684,23 +859,21 @@ export const describeBaseBranchFailure = (
 
 const ELASTIC_ISSUE_OR_PR_URL = /^https:\/\/github\.com\/elastic\/[\w.-]+\/(issues|pull)\/\d+$/;
 
-/** The issue URL passed with the accept flag, or undefined when the flag is absent. */
-export const parseAcceptedIssue = (argv: readonly string[]): string | undefined => {
-  const index = argv.indexOf(ACCEPT_BREAKING_CHANGE_FLAG);
-  if (index === -1) {
+/** The issue URL set in the accept variable, or undefined when it is not set. */
+export const parseAcceptedIssue = (value: string | undefined): string | undefined => {
+  if (value === undefined || value === '') {
     return undefined;
   }
-  const url = argv[index + 1];
-  if (url === undefined || !ELASTIC_ISSUE_OR_PR_URL.test(url)) {
+  if (!ELASTIC_ISSUE_OR_PR_URL.test(value)) {
     throw new Error(
-      `${ACCEPT_BREAKING_CHANGE_FLAG} needs the GitHub issue where the reset was agreed, for example https://github.com/elastic/security-team/issues/12345`
+      `${ACCEPT_BREAKING_CHANGE_ENV} must be the GitHub issue where the reset was agreed, for example https://github.com/elastic/security-team/issues/12345`
     );
   }
-  return url;
+  return value;
 };
 
 /**
- * The snapshot the generator writes. A breaking change against the committed snapshot is refused
+ * The snapshot the compatibility test writes in update mode. A breaking change against the committed snapshot is refused
  * without an accepted issue. The base snapshot matters only while this branch has accepted nothing,
  * so a branch whose committed snapshot already matches the code can still accept a break of main.
  */
@@ -711,15 +884,15 @@ export const nextSettingsContractSnapshot = ({
   acceptedIssue,
 }: {
   committed: SettingsContractSnapshot;
-  current: WorkerSettingsContracts;
+  current: SettingsContract;
   base?: SettingsContractSnapshot;
   acceptedIssue?: string;
 }): SettingsContractSnapshot => {
-  const breaking = breakingChanges(diffWorkerSettingsContracts(committed.workers, current));
+  const breaking = breakingChanges(diffSettingsContracts(committed, current));
   if (breaking.length > 0 && acceptedIssue === undefined) {
     throw new Error(
       [
-        'Refusing to update the snapshot: this change breaks stored Worker settings.',
+        'Refusing to update the snapshot: this change breaks stored Worker settings or the saves that change them.',
         ...breaking.map((change) => `- ${change.text}`),
         '',
         `It needs ${BREAKING_CHANGE_REMEDIES}. For a reset, agree it on an issue and run:`,
@@ -733,7 +906,7 @@ export const nextSettingsContractSnapshot = ({
       : unacceptedAtBase(base, committed, current);
   if (acceptedIssue !== undefined && accepted.length === 0) {
     throw new Error(
-      `${ACCEPT_BREAKING_CHANGE_FLAG} was passed, but nothing in this change breaks stored Worker settings.`
+      `${ACCEPT_BREAKING_CHANGE_ENV} was set, but nothing in this change breaks stored Worker settings.`
     );
   }
   return {
@@ -743,7 +916,8 @@ export const nextSettingsContractSnapshot = ({
         ? []
         : [{ issue: acceptedIssue, changes: accepted.map((change) => change.text) }]),
     ],
-    workers: current,
+    shared: current.shared,
+    workers: current.workers,
   };
 };
 
@@ -755,7 +929,7 @@ export const parseSettingsContractSnapshot = (text: string): SettingsContractSna
     !isRecord(parsed.workers)
   ) {
     throw new Error(
-      `${SETTINGS_CONTRACT_SNAPSHOT_FILE} is not a settings contract snapshot. Regenerate it with:\n${GENERATE_SETTINGS_CONTRACT_SNAPSHOT}`
+      `${SETTINGS_CONTRACT_SNAPSHOT_FILE} is not a settings contract snapshot. Regenerate it with:\n${UPDATE_SETTINGS_CONTRACT_COMMAND}`
     );
   }
   return parsed as unknown as SettingsContractSnapshot;

@@ -1,3 +1,0 @@
-every: "2h"
-"analysisWindowDays":14
-run_as: "kibana/az-worker-1"

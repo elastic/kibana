@@ -14,7 +14,7 @@ import {
 } from '@kbn/alertzero-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { workerRegistry } from './worker_registry';
-import { workflowSchemaFailure } from './workers/test_helpers/workflow_schema';
+import { workflowSchemaFailure } from './test_helpers/workflow_schema';
 
 type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
 

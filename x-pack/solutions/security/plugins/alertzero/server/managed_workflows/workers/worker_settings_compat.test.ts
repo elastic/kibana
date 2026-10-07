@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { isEqual } from 'lodash';
 import {
@@ -17,23 +17,25 @@ import {
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { readTestHelperFileAt, resolveBaseCommit } from './test_helpers/merge_base';
 import {
+  ACCEPT_BREAKING_CHANGE_ENV,
   BREAKING_CHANGE_REMEDIES,
   SETTINGS_CONTRACT_SNAPSHOT_FILE,
-  buildWorkerSettingsContracts,
-  describeContractChanges,
+  UPDATE_SETTINGS_CONTRACT_COMMAND,
+  UPDATE_SETTINGS_CONTRACT_ENV,
+  buildSettingsContract,
   describeBaseBranchFailure,
-  diffWorkerSettingsContracts,
+  describeContractChanges,
+  diffSettingsContracts,
+  nextSettingsContractSnapshot,
+  parseAcceptedIssue,
   parseSettingsContractSnapshot,
+  type SettingsContractSnapshot,
 } from './test_helpers/settings_contract';
-import { workflowSchemaFailure } from './test_helpers/workflow_schema';
 import { createWorkerSettingsRegistration, toTemplateValues } from './worker_settings';
 
 type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
 
-const TEST_HELPERS_DIR = resolve(__dirname, 'test_helpers');
-
-/** Matches the `__SCREAMING_SNAKE__` placeholders that yamlTemplate definitions substitute. */
-const UNREPLACED_TOKEN_PATTERN = /__[A-Z][A-Z0-9_]*__/g;
+const SNAPSHOT_PATH = resolve(__dirname, 'test_helpers', SETTINGS_CONTRACT_SNAPSHOT_FILE);
 
 const FIXTURE_FAILURE_HINT = `Each fixture is a document a configured Worker stores. A change that stops one from reading needs ${BREAKING_CHANGE_REMEDIES}, recorded through the settings contract snapshot. Edit the fixture only after a reset, because the old shape then no longer exists.`;
 
@@ -45,14 +47,7 @@ interface StoredFixture {
   workerId: RegisteredWorkerId;
   name: string;
   values: Record<string, unknown>;
-  /**
-   * Lines of `<name>.expected.txt`. Literals, not imported defaults, so a renderer and read path
-   * wrong in the same way still fail.
-   */
-  expectedInRender: readonly string[] | undefined;
 }
-
-const EXPECTED_SUFFIX = '.expected.txt';
 
 // Worker ids stay hyphenated. Fixture paths are snake_case so the file-casing check passes.
 const fixtureDirectory = (workerId: RegisteredWorkerId): string =>
@@ -66,22 +61,17 @@ const loadFixtures = (workerId: RegisteredWorkerId): StoredFixture[] => {
   return readdirSync(dir)
     .filter((name) => name.endsWith('.json'))
     .sort()
-    .map((name) => {
-      const expectedPath = resolve(dir, name.replace(/\.json$/, EXPECTED_SUFFIX));
-      return {
-        workerId,
-        name,
-        values: JSON.parse(readFileSync(resolve(dir, name), 'utf8')) as Record<string, unknown>,
-        expectedInRender: existsSync(expectedPath)
-          ? readFileSync(expectedPath, 'utf8')
-              .split('\n')
-              .filter((line) => line.length > 0)
-          : undefined,
-      };
-    });
+    .map((name) => ({
+      workerId,
+      name,
+      values: JSON.parse(readFileSync(resolve(dir, name), 'utf8')) as Record<string, unknown>,
+    }));
 };
 
 const ALL_FIXTURES = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => loadFixtures(workerId));
+
+const currentFixture = (workerId: RegisteredWorkerId): StoredFixture | undefined =>
+  ALL_FIXTURES.find((fixture) => fixture.workerId === workerId && fixture.name === 'current.json');
 
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {
   const definition = getManagedWorkflowDefinition(workerId);
@@ -93,23 +83,6 @@ const getYamlTemplate = (workerId: RegisteredWorkerId) => {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
-
-/** A number literal must not be followed by another digit, so `"fpCountThreshold":10` does not match 100. */
-const containsLiteral = (rendered: string, literal: string): boolean => {
-  if (!/\d$/.test(literal)) {
-    return rendered.includes(literal);
-  }
-  for (
-    let index = rendered.indexOf(literal);
-    index !== -1;
-    index = rendered.indexOf(literal, index + 1)
-  ) {
-    if (!/\d/.test(rendered.charAt(index + literal.length))) {
-      return true;
-    }
-  }
-  return false;
-};
 
 /**
  * The stored values as the Worker is expected to run them: identical, except that an autonomy
@@ -188,195 +161,44 @@ const deepFreeze = <T>(value: T): T => {
   return value;
 };
 
-const storedKeyPaths = (values: Record<string, unknown>): string[][] => {
-  const paths: string[][] = [];
-  for (const [key, value] of Object.entries(values)) {
-    if (key === 'extras' && isRecord(value)) {
-      for (const extraKey of Object.keys(value)) {
-        paths.push(['extras', extraKey]);
-      }
-      continue;
-    }
-    paths.push([key]);
-  }
-  return paths;
-};
-
-/** Any different value of the same kind. The render test needs a change, not a valid setting. */
-const alternateStoredValue = (value: unknown): unknown => {
-  if (typeof value === 'number') {
-    return value + 1;
-  }
-  if (typeof value === 'boolean') {
-    return !value;
-  }
-  if (value === 'manual' || value === 'supervised') {
-    return 'assisted';
-  }
-  if (value === 'assisted') {
-    return 'manual';
-  }
-  if (typeof value === 'string') {
-    return `${value}-changed`;
-  }
-  if (Array.isArray(value)) {
-    return value.length > 0 ? value.slice(1) : ['changed'];
-  }
-  if (isRecord(value)) {
-    return { ...value, changed: true };
-  }
-  return 'changed';
-};
-
-const withStoredKeyChanged = (
-  values: Record<string, unknown>,
-  path: readonly string[]
-): Record<string, unknown> => {
-  const next = structuredClone(values);
-  let cursor = next;
-  for (const key of path.slice(0, -1)) {
-    const child = cursor[key];
-    if (!isRecord(child)) {
-      throw new Error(`Cannot change stored key ${path.join('.')}`);
-    }
-    cursor = child;
-  }
-  const leaf = path[path.length - 1];
-  cursor[leaf] = alternateStoredValue(cursor[leaf]);
-  return next;
+const readBaseSnapshot = (): SettingsContractSnapshot | undefined => {
+  const baseCommit = resolveBaseCommit();
+  const text =
+    baseCommit === undefined
+      ? undefined
+      : readTestHelperFileAt(baseCommit, SETTINGS_CONTRACT_SNAPSHOT_FILE);
+  return text === undefined ? undefined : parseSettingsContractSnapshot(text);
 };
 
 describe('stored Worker settings compatibility', () => {
-  it.each([...SYSTEM_SECURITY_WORKER_IDS])(
-    '%s has a current.json fixture with expected rendered values',
-    (workerId) => {
-      const dir = fixtureDirectory(workerId);
-      const current = loadFixtures(workerId).find(({ name }) => name === 'current.json');
-      if (current === undefined) {
-        throw new Error(
-          `Worker "${workerId}" has no current.json fixture. Add ${dir}/current.json with the settings a configured space stores for it today, and ${dir}/current${EXPECTED_SUFFIX} with lines its rendered workflow must contain (plugin README, "Changing Worker settings safely").`
-        );
-      }
-      if (current.expectedInRender === undefined) {
-        throw new Error(
-          `Worker "${workerId}" has no ${dir}/current${EXPECTED_SUFFIX}. Add lines its rendered workflow must contain, such as autonomy: "assisted".`
-        );
-      }
-    }
-  );
-
-  it.each([...SYSTEM_SECURITY_WORKER_IDS])(
-    '%s has no expected values without a fixture',
-    (workerId) => {
-      const dir = fixtureDirectory(workerId);
-      const orphans = existsSync(dir)
-        ? readdirSync(dir).filter(
-            (name) =>
-              name.endsWith(EXPECTED_SUFFIX) &&
-              !existsSync(resolve(dir, name.replace(EXPECTED_SUFFIX, '.json')))
-          )
-        : [];
-      expect(orphans).toEqual([]);
-    }
-  );
-
-  it.each(ALL_FIXTURES)(
-    '$workerId $name parses, and renders without undefined or leftover tokens',
-    ({ workerId, name, values, expectedInRender }) => {
-      const registration = createWorkerSettingsRegistration(workerId);
-      try {
-        registration.toSettings(values);
-      } catch (error) {
-        const detail = error instanceof Error ? error.message : String(error);
-        throw new Error(
-          `toSettings rejected the fixture "${name}" for "${workerId}": ${detail}\n\n${FIXTURE_FAILURE_HINT}`
-        );
-      }
-
-      const yamlTemplate = getYamlTemplate(workerId);
-      let rendered: string;
-      try {
-        rendered = yamlTemplate(values);
-      } catch (error) {
-        const detail = error instanceof Error ? error.message : String(error);
-        throw new Error(
-          `yamlTemplate threw for the fixture "${name}" of "${workerId}": ${detail}\n\n${FIXTURE_FAILURE_HINT}`
-        );
-      }
-
-      if (rendered.includes('undefined')) {
-        throw new Error(
-          `Rendered YAML for "${workerId}" fixture "${name}" contains "undefined".\n\n${FIXTURE_FAILURE_HINT}\n\n${rendered}`
-        );
-      }
-
-      const leftoverTokens = rendered.match(UNREPLACED_TOKEN_PATTERN) ?? [];
-      if (leftoverTokens.length > 0) {
-        throw new Error(
-          `Rendered YAML for "${workerId}" fixture "${name}" still has unreplaced tokens: ${leftoverTokens.join(
-            ', '
-          )}.\n\n${FIXTURE_FAILURE_HINT}\n\n${rendered}`
-        );
-      }
-
-      if (expectedInRender) {
-        const { autonomyLevel: runsAt } = expectedAfterUpgrade(workerId, values);
-        const expected = expectedInRender.map((literal) =>
-          literal === `autonomy: "${String(values.autonomyLevel)}"`
-            ? `autonomy: "${String(runsAt)}"`
-            : literal
-        );
-        const missing = expected.filter((literal) => !containsLiteral(rendered, literal));
-        if (missing.length > 0) {
-          throw new Error(
-            `Rendered YAML for "${workerId}" fixture "${name}" is missing ${missing.join(
-              ', '
-            )}.\n\n${FIXTURE_FAILURE_HINT}\n\n${rendered}`
-          );
-        }
-      }
-    }
-  );
-
-  it.each(ALL_FIXTURES)(
-    '$workerId $name renders a workflow that passes the workflow schema',
-    ({ workerId, name, values }) => {
-      const invalid = workflowSchemaFailure(getYamlTemplate(workerId)(values));
-      if (invalid) {
-        throw new Error(
-          `This stored shape renders a workflow that fails the workflow schema (${workerId} ${name}): ${invalid}\n\n${FIXTURE_FAILURE_HINT}`
-        );
-      }
-    }
-  );
-
-  it.each(ALL_FIXTURES)(
-    '$workerId $name: changing any single stored key changes the rendered YAML',
-    ({ workerId, name, values }) => {
-      const yamlTemplate = getYamlTemplate(workerId);
-      const baseline = yamlTemplate(values);
-      // A disallowed level renders as a lower allowed one, so the changed level must be allowed.
-      const otherAllowedLevel = getAllowedAutonomyLevels(workerId).find(
-        (level) => level !== expectedAfterUpgrade(workerId, values).autonomyLevel
+  it.each([...SYSTEM_SECURITY_WORKER_IDS])('%s has a current.json fixture', (workerId) => {
+    if (currentFixture(workerId) === undefined) {
+      throw new Error(
+        `Worker "${workerId}" has no current.json fixture. Add ${fixtureDirectory(
+          workerId
+        )}/current.json with the settings a configured space stores for it today (plugin README, "Changing Worker settings safely").`
       );
-      const changed = (path: readonly string[]) =>
-        path.join('.') === 'autonomyLevel'
-          ? withStoredKey(values, path, otherAllowedLevel)
-          : withStoredKeyChanged(values, path);
-      const unchanged = storedKeyPaths(values).filter(
-        (path) => yamlTemplate(changed(path)) === baseline
-      );
-      if (unchanged.length > 0) {
-        throw new Error(
-          `Changing ${unchanged
-            .map((path) => path.join('.'))
-            .join(
-              ', '
-            )} on "${workerId}" fixture "${name}" left the rendered YAML unchanged, so the running workflow never sees it. Forward the key in the Worker's yamlTemplate and bump the definition version, or stop storing it.`
-        );
-      }
     }
-  );
+  });
+
+  it.each(ALL_FIXTURES)('$workerId $name reads and renders', ({ workerId, name, values }) => {
+    try {
+      createWorkerSettingsRegistration(workerId).toSettings(values);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `toSettings rejected the fixture "${name}" for "${workerId}": ${detail}\n\n${FIXTURE_FAILURE_HINT}`
+      );
+    }
+    try {
+      getYamlTemplate(workerId)(values);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `yamlTemplate threw for the fixture "${name}" of "${workerId}": ${detail}\n\n${FIXTURE_FAILURE_HINT}`
+      );
+    }
+  });
 
   it.each(ALL_FIXTURES)(
     '$workerId $name: a read returns the stored value',
@@ -405,36 +227,35 @@ describe('stored Worker settings compatibility', () => {
   );
 
   const DISALLOWED_LEVEL_DOCUMENTS = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => {
-    const current = ALL_FIXTURES.find(
-      (fixture) => fixture.workerId === workerId && fixture.name === 'current.json'
-    );
+    const current = currentFixture(workerId);
     const allowed = getAllowedAutonomyLevels(workerId);
     return current === undefined
       ? []
-      : WATCH_AUTONOMY_LEVELS.filter((level) => !allowed.includes(level)).map((level) => ({
-          workerId,
-          level,
-          lowered: nearestLowerAutonomyLevel(allowed, level),
-          values: { ...current.values, autonomyLevel: level },
-        }));
+      : WATCH_AUTONOMY_LEVELS.filter((level) => !allowed.includes(level)).map((level) => {
+          const lowered = nearestLowerAutonomyLevel(allowed, level);
+          return {
+            workerId,
+            level,
+            lowered,
+            stored: { ...current.values, autonomyLevel: level },
+            storedLowered: { ...current.values, autonomyLevel: lowered },
+          };
+        });
   });
 
   it.each(DISALLOWED_LEVEL_DOCUMENTS)(
     '$workerId: a stored $level is read and rendered as the same lower level',
-    ({ workerId, level, lowered, values }) => {
+    ({ workerId, level, lowered, stored, storedLowered }) => {
       const registration = createWorkerSettingsRegistration(workerId);
       if (lowered === undefined) {
-        expect(() => registration.toSettings(values)).toThrow(/settings are invalid: autonomy/);
+        expect(() => registration.toSettings(stored)).toThrow(/settings are invalid: autonomy/);
         return;
       }
-      expect(registration.toSettings(values).autonomy).toBe(lowered);
-      const rendered = getYamlTemplate(workerId)(values);
-      if (
-        !rendered.includes(`autonomy: "${lowered}"`) ||
-        rendered.includes(`autonomy: "${level}"`)
-      ) {
+      expect(registration.toSettings(stored).autonomy).toBe(lowered);
+      const yamlTemplate = getYamlTemplate(workerId);
+      if (yamlTemplate(stored) !== yamlTemplate(storedLowered)) {
         throw new Error(
-          `The workflow for "${workerId}" rendered from a stored "${level}" does not run at "${lowered}", so the settings page and the running workflow disagree.`
+          `The workflow for "${workerId}" rendered from a stored "${level}" differs from one rendered from "${lowered}", so the settings page and the running workflow disagree.`
         );
       }
     }
@@ -442,9 +263,7 @@ describe('stored Worker settings compatibility', () => {
 
   /** Each key a Worker fills from its defaults, removed from its current.json. */
   const MISSING_DEFAULT_DOCUMENTS = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => {
-    const current = ALL_FIXTURES.find(
-      (fixture) => fixture.workerId === workerId && fixture.name === 'current.json'
-    );
+    const current = currentFixture(workerId);
     const defaults = createWorkerSettingsRegistration(workerId).createDefaultValues();
     return current === undefined
       ? []
@@ -482,32 +301,53 @@ describe('stored Worker settings compatibility', () => {
   );
 
   describe('settings contract', () => {
-    const committed = parseSettingsContractSnapshot(
-      readFileSync(resolve(TEST_HELPERS_DIR, SETTINGS_CONTRACT_SNAPSHOT_FILE), 'utf8')
-    );
-    const current = buildWorkerSettingsContracts();
+    const current = buildSettingsContract();
+    const acceptedIssue = process.env[ACCEPT_BREAKING_CHANGE_ENV];
+
+    if (process.env[UPDATE_SETTINGS_CONTRACT_ENV] === 'true') {
+      it('updates the committed snapshot', () => {
+        if (process.env.CI) {
+          throw new Error(
+            `${UPDATE_SETTINGS_CONTRACT_ENV} rewrites ${SETTINGS_CONTRACT_SNAPSHOT_FILE}; run it locally and commit the result.`
+          );
+        }
+        const committed: SettingsContractSnapshot = existsSync(SNAPSHOT_PATH)
+          ? parseSettingsContractSnapshot(readFileSync(SNAPSHOT_PATH, 'utf8'))
+          : { acceptedBreakingChanges: [], shared: current.shared, workers: {} };
+        const next = nextSettingsContractSnapshot({
+          committed,
+          current,
+          base: readBaseSnapshot(),
+          acceptedIssue: parseAcceptedIssue(acceptedIssue),
+        });
+        writeFileSync(SNAPSHOT_PATH, `${JSON.stringify(next, null, 2)}\n`);
+      });
+      return;
+    }
+
+    const committed = parseSettingsContractSnapshot(readFileSync(SNAPSHOT_PATH, 'utf8'));
+
+    it(`ignores ${ACCEPT_BREAKING_CHANGE_ENV} unless the snapshot is being updated`, () => {
+      if (acceptedIssue) {
+        throw new Error(
+          `${ACCEPT_BREAKING_CHANGE_ENV} only takes effect together with ${UPDATE_SETTINGS_CONTRACT_ENV}=true:\n${UPDATE_SETTINGS_CONTRACT_COMMAND}`
+        );
+      }
+    });
 
     it('matches the committed snapshot', () => {
-      const changes = diffWorkerSettingsContracts(committed.workers, current);
+      const changes = diffSettingsContracts(committed, current);
       if (changes.length > 0) {
         throw new Error(describeContractChanges(changes));
       }
     });
 
     it('records a decision for any change that breaks documents stored by the base branch', () => {
-      const baseCommit = resolveBaseCommit();
-      const baseText =
-        baseCommit === undefined
-          ? undefined
-          : readTestHelperFileAt(baseCommit, SETTINGS_CONTRACT_SNAPSHOT_FILE);
-      if (baseText === undefined) {
+      const base = readBaseSnapshot();
+      if (base === undefined) {
         return;
       }
-      const failure = describeBaseBranchFailure(
-        parseSettingsContractSnapshot(baseText),
-        committed,
-        current
-      );
+      const failure = describeBaseBranchFailure(base, committed, current);
       if (failure) {
         throw new Error(failure);
       }

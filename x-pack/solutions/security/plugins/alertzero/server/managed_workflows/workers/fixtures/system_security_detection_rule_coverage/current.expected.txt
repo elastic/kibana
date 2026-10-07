@@ -1,5 +1,0 @@
-every: "6h"
-autonomy: "assisted"
-"lookbackDays":30
-"maxGapsPerRun":10
-run_as: "kibana/az-worker-1"

@@ -125,8 +125,8 @@ so a breaking change has nowhere safe to go. It must at least fail loudly in CI.
 | Part | What it catches | Kind of change |
 |---|---|---|
 | Render-time upgrade of stored settings | A settings page and a running workflow that disagree after a setting is added or levels are narrowed | Runtime |
-| Stored fixtures with expected output | A stored shape that no longer reads, renders or installs | Test |
-| Settings contract snapshot and generator | Any schema or default change, classified safe or breaking | Test, one committed JSON file, a script |
+| Stored fixtures | A stored shape that no longer reads, or reads and renders differently from its upgraded form | Test |
+| Settings contract snapshot, with an update mode in the test | Any schema or default change, on the Worker's own schema, the shared `WorkerSettings` stage and the save body, classified safe or breaking | Test, one committed JSON file |
 | Comparison with the base branch | Regenerating the snapshot to hide a breaking change | Test |
 
 ### 1. The one runtime change: stored settings are upgraded at render time
@@ -205,37 +205,30 @@ is what every configured space looks like after a Watch team adds a setting. Rul
 | `partial_extras.json` | Some extras keys, not all |
 | `current.json` | Today's full shape |
 
-Next to a fixture, `<name>.expected.txt` lists lines the rendered workflow must contain, one per
-line, only for values the fixture stores:
+For every fixture, `worker_settings_compat.test.ts` checks that it reads without error, renders
+without throwing, and reads back exactly as stored (which catches any read that rewrites a value).
+From each Worker's `current.json` it also checks the render boundary: a document missing a defaulted
+key reads and renders exactly like one that stores the default, a no-longer-allowed autonomy level
+exactly like the level it is lowered to, and rendering a frozen copy leaves it unchanged.
 
-```text
-every: "6h"
-autonomy: "assisted"
-"analysisWindowDays":21
-```
+These checks compare renders with each other and never assert what the rendered workflow contains.
+Rules about workflow content (no `undefined`, required YAML fragments, every stored setting changing
+the YAML) would also fail valid Watch-owned changes such as a prompt edit, moving a value within the
+YAML, or retiring a setting from execution while keeping it readable, and clearing those false
+alarms would mean editing a CWL-owned test. Workflow content stays with the Watch teams' managed
+definition and registry tests.
 
-For every fixture, `worker_settings_compat.test.ts` checks that it:
-
-1. reads without error,
-2. renders YAML with no `undefined` and no leftover `__WORKER_…__` placeholder,
-3. renders every line in its `.expected.txt`,
-4. renders a workflow that passes the generic workflow schema (managed install stores an invalid
-   workflow with `valid: false` instead of throwing; install also checks connectors and trigger
-   definitions, which this does not),
-5. reads back exactly as stored, which catches any read that rewrites a value,
-6. changes the rendered YAML when any single stored key changes, so every stored setting reaches
-   the workflow.
-
-A registered Worker without `current.json` fails with a message naming the two files to add.
-Adding a Worker never means editing the test file.
+A registered Worker without `current.json` fails with a message naming the file to add. Adding a
+Worker never means editing the test file.
 
 ### 3. The settings contract snapshot
 
 `test_helpers/settings_contract.snapshot.json` records, for every Worker, the schema a stored
-document must satisfy and the declaration defaults. It is generated from the code:
+document must satisfy and the declaration defaults, plus the shared schemas described below. A normal
+test run only compares; the test's update mode rewrites it:
 
 ```bash
-node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js
+UPDATE_WORKER_SETTINGS_CONTRACT=true node scripts/jest x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts
 ```
 
 An excerpt:
@@ -264,6 +257,29 @@ The schema part is the zod schema converted to JSON Schema, from the input side.
 matters: it is what a stored document has to pass, including each Worker's own allowed autonomy
 levels and bounds.
 
+Two more validations sit on the same paths and are recorded once, under `shared`:
+
+- **`WorkerSettings`.** Every Worker's complete schema is its own object piped into this shared
+  schema, and the JSON Schema of a pipe shows only the first stage. Tightening `WorkerSettings`
+  (say, `serviceAccountId` down to 512 characters) rejects stored documents without changing any
+  Worker's entry, so it is snapshotted on its own. The contract build fails if a Worker's complete
+  schema pipes into anything else.
+- **`WorkerSettingsWrite`.** The `settings` body of a save is validated before the patch is applied.
+  Dropping `nullable` from its `serviceAccountId` breaks the save that clears an account, and a lower
+  maximum on the body alone rejects saves that used to pass, while stored documents stay readable.
+
+Both are compared with the same rules, so `[breaking] stopped allowing null on
+WorkerSettingsWrite.serviceAccountId` reads like any other line.
+
+Validation JSON Schema cannot express is the remaining hole: `z.toJSONSchema` silently drops
+`.refine`, `.superRefine`, `.check`, transforms, preprocess and pipes, so
+`z.number().refine((value) => value !== 13)` converts exactly like `z.number()`. Before converting,
+the contract walks each schema and fails on any of those with "Cannot establish settings
+compatibility at …". That is reported as "cannot assess", not as a breaking change, and it fails
+while the contract is built, so update mode cannot write and a breaking-change acceptance cannot
+cover it. The owner either expresses the constraint as a bound, an enum or a pattern, or CWL teaches
+the contract to compare it.
+
 The test compares the live code with this file. Each difference is labelled:
 
 | Change | Classified as | Why |
@@ -287,11 +303,11 @@ This change is safe for stored Worker settings.
 - [safe] added system-security-detection-rule-tuning.extras.maxGaps with a default
 
 Update the snapshot with:
-node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js
+UPDATE_WORKER_SETTINGS_CONTRACT=true node scripts/jest x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts
 ```
 
-A breaking change fails the test with this message, and the generator refuses to write the
-snapshot without the flag:
+A breaking change fails the test with this message, and update mode refuses to write the snapshot
+without an accepted issue:
 
 ```text
 This change breaks stored Worker settings.
@@ -303,7 +319,7 @@ a coordinated reset (plugin README, "Pre-customer state").
 If only the label on the page should change, keep the stored key and value.
 Before customers exist, a breaking change can go in only with a coordinated reset of the affected
 environments. Agree it with the Common Worker Layer team on an issue, then run:
-node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js --accept-breaking-change <issue-url>
+UPDATE_WORKER_SETTINGS_CONTRACT=true ACCEPT_WORKER_SETTINGS_BREAKING_CHANGE=<issue-url> node scripts/jest x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts
 ```
 
 JSON Schema keywords the classifier does not understand fail the build with "Unclassified … Teach
@@ -321,7 +337,7 @@ that hold old documents, which is only possible while AlertZero has no customers
    the settings page shows.
 2. If the change is really needed, they open an issue describing it and the environments to reset,
    and agree it with CWL.
-3. They run the generator with `--accept-breaking-change <issue-url>`. It records the change and
+3. They run update mode with `ACCEPT_WORKER_SETTINGS_BREAKING_CHANGE=<issue-url>`. It records the change and
    the issue in the snapshot:
 
    ```json
@@ -338,7 +354,7 @@ that hold old documents, which is only possible while AlertZero has no customers
 
 The list is append-only: the base-branch check fails when an entry the base branch has is dropped
 or edited. If the committed snapshot already matches the code (after a merge conflict, say) but
-the base branch's does not, the generator still accepts the flag and records the break against
+the base branch's does not, update mode still accepts the issue and records the break against
 the base branch.
 
 Once customers store settings, a reset is not an option. The PR that lands the migration flow
@@ -347,7 +363,7 @@ and a migration step for it. Until then, a breaking change with customers stays 
 
 ### 5. Comparison with the base branch
 
-The generator refuses to write a breaking change. A developer could still delete the snapshot and
+Update mode refuses to write a breaking change. A developer could still delete the snapshot and
 regenerate it. A second test closes that: it compares the current schemas with the snapshot as it is
 on the base branch, and requires a new `acceptedBreakingChanges` entry for any breaking difference.
 
@@ -382,7 +398,7 @@ states that a render-helper change needs a definition version bump.
 
 | Goal | How |
 |---|---|
-| 1. Breaking changes cannot ship by mistake | The contract test classifies every change. The generator refuses a breaking one without `--accept-breaking-change`. The base-branch comparison keeps a deleted-and-regenerated snapshot red. CODEOWNERS routes `fixtures/`, `test_helpers/` and `worker_settings_compat.test.ts` to `@elastic/alertzero-common-layer`; once that team has write access to the repository, an accepted breaking change needs its review |
+| 1. Breaking changes cannot ship by mistake | The contract test classifies every change. Update mode refuses a breaking one without an accepted issue. Validation the contract cannot compare fails explicitly and cannot be accepted. The base-branch comparison keeps a deleted-and-regenerated snapshot red. CODEOWNERS routes `fixtures/`, `test_helpers/` and `worker_settings_compat.test.ts` to `@elastic/alertzero-common-layer`; once that team has write access to the repository, an accepted breaking change needs its review |
 | 2. Does not depend on documentation | The tests fire on the change itself, and each message names the next command |
 | 3. Customers are never affected | The guard is unit tests only. Test helpers and snapshots live in `test_helpers/`, which the distributable build excludes. The one runtime change renders stored settings through the same upgrade the read path applies, never writes a stored document without a user request, and never raises autonomy |
 | 4. Adding a setting never strands configured Workers | The read path and every renderer fill a missing key from its default, so a Worker bound to a service account runs the new setting after the version bump re-renders it. An added field with a default, including a boolean or an array, produces only a `[safe]` line |
@@ -406,12 +422,12 @@ export const RULE_TUNING_WORKER_SETTINGS_DEFAULTS = {
 ```
 
 Use it in the YAML and bump the definition version. CI then reports
-`[safe] added …extras.maxGaps with a default`; run the generator and push. After the upgrade,
+`[safe] added …extras.maxGaps with a default`; run update mode and push. After the upgrade,
 `ready()` re-renders every configured space with `maxGaps: 3`, the settings page shows 3, and values
 a space already stores stay as they are. No stored document is rewritten.
 
 **Change a default.** Reported as `[safe]`. Bump the definition version, which the fingerprint row
-asks for, and run the generator. The
+asks for, and run update mode. The
 new default reaches fresh installs and every space that does not store the field; a stored value
 wins.
 
@@ -421,17 +437,16 @@ definition version, as `main` already requires. Nothing in the settings guard ch
 **Remove an allowed autonomy level.** When a lower allowed level remains, for example Attack
 Discovery moving from `manual`/`supervised` to `manual`/`assisted`, CI reports
 `[safe] removed supervised … A stored supervised is read and rendered as assisted`. Bump the
-definition version (the fingerprint row asks for it) and run the generator; configured spaces run
+definition version (the fingerprint row asks for it) and run update mode; configured spaces run
 at the lower level once `ready()`
 re-renders them. Removing the lowest allowed level is breaking.
 
 **Rename, remove or retype a field, tighten a bound.** Reported as
 `[breaking]`. Prefer keeping the stored key and changing only the label. Otherwise, before
-customers, agree a reset on an issue and use `--accept-breaking-change`. After that, only a migration.
+customers, agree a reset on an issue and accept it in update mode. After that, only a migration.
 
 **Add a Worker.** Add `fixtures/<worker_id_in_snake_case>/current.json` with the settings a
-configured space would store and `current.expected.txt` with lines its rendered workflow must
-contain, then run the generator. The contract test reports `[safe] added Worker …`.
+configured space would store, then run update mode. The contract test reports `[safe] added Worker …`.
 
 ## What the Common Worker Layer team does
 
@@ -443,12 +458,16 @@ contain, then run the generator. The contract test reports `[safe] added Worker 
 
 ## Limitations and follow-ups
 
-- **Zod refinements are not in the contract.** The OpenAPI generator emits the `nonempty` and
-  `date-math` formats as `.superRefine`, which JSON Schema cannot express, so tightening one is not
-  caught. No settings field uses them today.
-- **Only the input side of the pipe is in the contract.** Each Worker's schema is piped into the
-  generated `WorkerSettings`. Tightening `WorkerSettings` itself fails stored documents with no
-  snapshot diff; type coupling catches most enum narrowing, not added bounds or patterns.
+- **Validation JSON Schema cannot express fails the build rather than being compared.** The OpenAPI
+  generator emits the `nonempty` and `date-math` formats as `.superRefine`; a settings field using
+  one would stop the contract until the constraint is rewritten or the contract learns it. No
+  settings field uses them today.
+- **Outside the contract:** the rest of the save request (`enabled`, `settingsRevision`) and the
+  rules the Workers service adds on save, such as requiring a service account to enable a Worker.
+- **Rendered workflow content is not asserted.** If real incidents show a setting stopped reaching
+  the workflow input it is meant for, the owning Watch team can add a targeted test for that
+  setting. Generic content rules should become mandatory only with an agreed ownership boundary and
+  an exception process.
 - **Scheduled tasks are not re-synced by a re-render.** A trigger that depends on the level, or a
   new schedule, changes on the next save or enable in each space.
 - **`ready()` re-renders at most 1000 managed workflow documents across spaces**, a platform limit

@@ -1,3 +1,0 @@
-settingsVersion: 1
-autonomy: "assisted"
-run_as: "kibana/az-worker-1"

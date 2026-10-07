@@ -1,4 +1,0 @@
-settingsVersion: 1
-autonomy: "supervised"
-autoCloseConfidenceScoreMinThreshold: 0.9
-run_as: "kibana/az-worker-1"
