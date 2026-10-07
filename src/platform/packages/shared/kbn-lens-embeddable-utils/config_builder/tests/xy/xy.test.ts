@@ -39,7 +39,6 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING } from '../../transforms/charts/xy/defaults';
-import { xyConfigSchema } from '../../schema/charts/xy';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
