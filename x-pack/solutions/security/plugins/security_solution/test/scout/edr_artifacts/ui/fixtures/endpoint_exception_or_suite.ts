@@ -30,6 +30,11 @@ const CARD_CONDITIONS = [
  * Request counts for that split live in `use_artifact_update_or_create.test.ts`.
  * These tests stay in the endpoint exceptions spec: they mutate the same
  * agnostic list as the policy-tab suite.
+ *
+ * Tags are `ARTIFACT_LIST_PAGE_TAGS`, not the local-only default. This suite
+ * does not call the per-policy opt-in route, which is why the list-page
+ * factory keeps endpoint exceptions on `ARTIFACT_LIST_PAGE_LOCAL_TAGS`. Do not
+ * copy these tags into a suite that opts in.
  */
 export const describeEndpointExceptionOrOperator = (artifact: ArtifactTabCase): void => {
   const { pagePrefix, listId, listType, urlPath, osTypes } = artifact;
