@@ -178,7 +178,7 @@ describe('EventLogService', () => {
       expect(boolClause.bool.minimum_should_match).toBe(1);
     });
 
-    it('forwards alertIds as an alert id filter to the ES query', async () => {
+    it('forwards alertIds as an alert_ids terms filter to the ES query', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
@@ -191,15 +191,7 @@ describe('EventLogService', () => {
       const [args] = mockEsClient.search.mock.calls[0] as [any];
       expect(args.query.bool.filter).toEqual(
         expect.arrayContaining([
-          {
-            bool: {
-              should: [
-                { terms: { 'kibana.alerting_v2.dispatcher.alert_ids': ['alert-1', 'alert-2'] } },
-                { terms: { 'kibana.alerting_v2.dispatcher.episode_ids': ['alert-1', 'alert-2'] } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
+          { terms: { 'kibana.alerting_v2.dispatcher.alert_ids': ['alert-1', 'alert-2'] } },
         ])
       );
     });

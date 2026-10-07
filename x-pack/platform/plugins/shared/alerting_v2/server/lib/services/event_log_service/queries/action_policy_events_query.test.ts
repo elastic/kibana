@@ -266,23 +266,11 @@ describe('action policy events queries', () => {
     });
 
     describe('alertIds', () => {
-      it('adds an AND clause matching alert_ids or the legacy episode_ids when alertIds are provided', () => {
+      it('adds an AND terms filter on alert_ids when alertIds are provided', () => {
         const filters = filtersOf(buildShared({ alertIds: ['alert-1', 'alert-2'] }));
         expect(filters).toEqual(
           expect.arrayContaining([
-            {
-              bool: {
-                should: [
-                  {
-                    terms: { 'kibana.alerting_v2.dispatcher.alert_ids': ['alert-1', 'alert-2'] },
-                  },
-                  {
-                    terms: { 'kibana.alerting_v2.dispatcher.episode_ids': ['alert-1', 'alert-2'] },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
+            { terms: { 'kibana.alerting_v2.dispatcher.alert_ids': ['alert-1', 'alert-2'] } },
           ])
         );
       });

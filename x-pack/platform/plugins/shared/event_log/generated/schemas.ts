@@ -331,8 +331,6 @@ export const EventSchema = schema.maybe(
                 failure_reason: ecsString(),
                 alert_count: ecsStringOrNumber(),
                 alert_ids: ecsStringMulti(),
-                episode_count: ecsStringOrNumber(),
-                episode_ids: ecsStringMulti(),
                 rule_count: ecsStringOrNumber(),
                 rule_ids: ecsStringMulti(),
                 action_group_count: ecsStringOrNumber(),

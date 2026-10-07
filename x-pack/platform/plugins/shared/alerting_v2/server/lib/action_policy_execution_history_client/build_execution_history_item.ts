@@ -153,8 +153,7 @@ export function buildExecutionHistoryItem(
     .filter(isString)
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
-  // Events written before the alert rename store `episode_ids` and `episode_count`.
-  const alertIds = (dispatcher.alert_ids ?? dispatcher.episode_ids ?? []).filter(isString);
+  const alertIds = (dispatcher.alert_ids ?? []).filter(isString);
   const alerts = alertIds.slice(0, MAX_EMBEDDED_ALERTS_PER_ITEM).map((id) => ({ id }));
 
   const failureReason = dispatcher.failure_reason;
@@ -164,7 +163,7 @@ export function buildExecutionHistoryItem(
     dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
     outcome: toPolicyExecutionOutcome(action),
-    alert_count: Number(dispatcher.alert_count ?? dispatcher.episode_count ?? 0),
+    alert_count: Number(dispatcher.alert_count ?? 0),
     alerts,
     action_group_count: Number(dispatcher.action_group_count ?? 0),
     rules,

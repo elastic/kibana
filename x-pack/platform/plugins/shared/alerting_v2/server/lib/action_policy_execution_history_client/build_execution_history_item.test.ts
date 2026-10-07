@@ -302,17 +302,11 @@ describe('buildExecutionHistoryItem', () => {
     expect(historyItem?.workflows).toEqual([]);
   });
 
-  it.each([
-    ['alert_ids and alert_count', { alert_ids: ['alert-1', 'alert-2'], alert_count: 2 }],
-    [
-      'legacy episode_ids and episode_count',
-      { episode_ids: ['alert-1', 'alert-2'], episode_count: 2 },
-    ],
-  ])('reads the alerts from %s', (_, dispatcher) => {
+  it('reads the alerts from alert_ids and alert_count', () => {
     const event = buildEvent({
       kibana: {
         saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
-        alerting_v2: { dispatcher },
+        alerting_v2: { dispatcher: { alert_ids: ['alert-1', 'alert-2'], alert_count: 2 } },
       },
     });
 

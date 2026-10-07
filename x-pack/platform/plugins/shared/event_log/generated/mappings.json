@@ -732,16 +732,6 @@
                                         "isArray": "true"
                                     }
                                 },
-                                "episode_count": {
-                                    "type": "long"
-                                },
-                                "episode_ids": {
-                                    "type": "keyword",
-                                    "ignore_above": 1024,
-                                    "meta": {
-                                        "isArray": "true"
-                                    }
-                                },
                                 "rule_count": {
                                     "type": "long"
                                 },
