@@ -7,7 +7,7 @@
 
 require('@kbn/swc-register').install();
 const { getCommand, getVaultPath } = require('./manage_secrets');
-const { KBN_EVALS_VAULT_TYPES } = require('../../src/cli/utils');
+const { KBN_EVALS_VAULT_TYPES, getKbnEvalsVaultAddr } = require('../../src/cli/utils');
 const minimist = require('minimist');
 
 async function run() {
@@ -28,7 +28,7 @@ async function run() {
   }
 
   // eslint-disable-next-line no-console
-  console.log(`Using ${vault} vault (${getVaultPath(vault)})...`);
+  console.log(`Using ${vault} vault (${getKbnEvalsVaultAddr(vault)}, ${getVaultPath(vault)})...`);
   const cmd = await getCommand(format, vault);
   // eslint-disable-next-line no-console
   console.log(cmd);
