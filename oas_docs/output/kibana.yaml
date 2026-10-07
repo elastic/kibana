@@ -38973,7 +38973,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: When false, exclude agentless policies from the results. Agentless policies are managed with the managed integrations APIs.
+        - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
           in: query
           name: showAgentless
           required: false
