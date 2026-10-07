@@ -90,6 +90,15 @@ const apiVersionOf = ({ info }: OpenApiDocument): string | undefined => {
   return typeof version === 'string' ? version : undefined;
 };
 
+const matchesPathTemplate = (template: string, requestPath: string): boolean => {
+  const expected = template.split('/');
+  const actual = requestPath.split('/');
+  return (
+    expected.length === actual.length &&
+    expected.every((segment, index) => segment === actual[index] || /^\{[^/{}]+\}$/.test(segment))
+  );
+};
+
 const listSnapshots = async (directory: string): Promise<string[]> => {
   try {
     return (await fs.readdir(path.join(directory, 'snapshots'))).map((file) =>
@@ -264,10 +273,12 @@ export const updateVendorApi = async ({
   for (const [action, requests] of Object.entries(recording.unmatched)) {
     for (const { method, path: requestPath } of requests) {
       const acknowledged = previous?.unmatched?.[action]?.find(
-        (entry) => entry.method === method && entry.path === requestPath
+        (entry) => entry.method === method && matchesPathTemplate(entry.path, requestPath)
       );
       if (acknowledged) {
-        unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
+        if (!unmatched[action]?.includes(acknowledged)) {
+          unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
+        }
       } else {
         const refreshHint = fetchAll ? '' : '; if it is new to the connector, rerun with --refresh';
         problems.add(
