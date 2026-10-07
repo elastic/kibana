@@ -68,6 +68,11 @@ const runSuccessfulCase = (conversionCase: SuccessfulEsqlConversionCase) => {
   for (const [columnName, labels] of Object.entries(conversionCase.expected.expectedLabels ?? {})) {
     expect(result.esAggsIdMap[columnName].map(({ label }) => label)).toEqual(labels);
   }
+  for (const [columnName, dropPartials] of Object.entries(
+    conversionCase.expected.expectedDropPartials ?? {}
+  )) {
+    expect(result.esAggsIdMap[columnName][0]).toHaveProperty('dropPartials', dropPartials);
+  }
 };
 
 const runFailedCase = (conversionCase: FailedEsqlConversionCase) => {
