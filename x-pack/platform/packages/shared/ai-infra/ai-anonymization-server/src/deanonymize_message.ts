@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { Message, ChatCompletionEvent, AnonymizationOutput } from '@kbn/inference-common';
+import type {
+  Message,
+  ChatCompletionChunkEvent,
+  ChatCompletionEvent,
+  AnonymizationOutput,
+} from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import { MessageRole } from '@kbn/inference-common';
-import type { ChatCompletionChunkEvent } from '@kbn/inference-common/src/chat_complete/events';
-import { ChatCompletionEventType } from '@kbn/inference-common/src/chat_complete/events';
+import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { OperatorFunction } from 'rxjs';
 import { mergeMap, of, identity, map, EMPTY } from 'rxjs';
 import { deanonymize, indexEntitiesByMask, replaceMasks } from './deanonymize';

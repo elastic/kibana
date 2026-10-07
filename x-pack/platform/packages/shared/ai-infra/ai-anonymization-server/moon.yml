@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/inference-tracing'
   - '@kbn/logging'
   - '@kbn/logging-mocks'
+  - '@kbn/setup-node-env'
 tags:
   - shared-server
   - package

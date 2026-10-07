@@ -15,7 +15,7 @@ import type {
 } from '@kbn/inference-common';
 import { ChatCompletionEventType } from '@kbn/inference-common';
 import { deanonymizeMessage } from '@kbn/ai-anonymization-server';
-import { chunkEvent, createMask, messageEvent } from '../test_utils';
+import { chunkEvent, messageEvent } from '../test_utils';
 import { mergeChunks } from './utils/merge_chunks';
 
 function concatenateChunkContent(events: ChatCompletionEvent[]): string {
@@ -30,7 +30,7 @@ function concatenateChunkContent(events: ChatCompletionEvent[]): string {
 
 describe('deanonymizeMessage output merged by inference', () => {
   const value = 'jorge@gmail.com';
-  const mask = createMask('EMAIL', value);
+  const mask = `EMAIL_${Buffer.from(value).toString('hex').slice(0, 40)}`;
   const anonymizations: Anonymization[] = [
     { entity: { class_name: 'EMAIL', value, mask }, rule: { type: 'RegExp' } },
   ];
