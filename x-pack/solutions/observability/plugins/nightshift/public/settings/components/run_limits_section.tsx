@@ -53,8 +53,10 @@ const hasSaveWarnings = ({
 
 export const RunLimitsSection = ({
   groups = RUN_QUOTA_GROUPS,
+  onUnsavedChangesChange,
 }: {
   groups?: readonly RunQuotaGroup[];
+  onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void;
 }) => {
   const quotas = useRunQuotas();
   const { save, isSaving } = useUpdateRunQuotas();
@@ -173,6 +175,10 @@ export const RunLimitsSection = ({
   const isDirty = draftState ? hasRunQuotaDraftChanges(draftState) : false;
   const response = quotas.data;
 
+  useEffect(() => {
+    onUnsavedChangesChange?.(isDirty);
+  }, [isDirty, onUnsavedChangesChange]);
+
   const confirmationTitle = warnings.disabling
     ? i18n.translate('xpack.nightshift.settings.runLimits.disableConfirmTitle', {
         defaultMessage: 'Disable daily run limits?',
@@ -207,7 +213,7 @@ export const RunLimitsSection = ({
           <p>
             {i18n.translate('xpack.nightshift.settings.runLimits.sectionDescription', {
               defaultMessage:
-                'These limits apply only to scheduled detection. Manual runs are not limited. When a limit is reached, new scheduled runs are blocked until it resets.',
+                'Daily limits apply only to scheduled activity. Manual runs are not limited. Enforcement applies deployment-wide to all Nightshift categories, including categories not shown on this tab. When a limit is reached, new scheduled runs are blocked until it resets.',
             })}
           </p>
         }
@@ -221,7 +227,7 @@ export const RunLimitsSection = ({
                 label={i18n.translate(
                   'xpack.nightshift.settings.runLimits.enforcementSwitchLabel',
                   {
-                    defaultMessage: 'Enforce daily limits',
+                    defaultMessage: 'Enforce daily limits across Nightshift',
                   }
                 )}
                 checked={draftState.draft.enabled}

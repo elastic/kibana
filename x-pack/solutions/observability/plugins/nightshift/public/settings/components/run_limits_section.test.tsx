@@ -54,14 +54,18 @@ const setQueryResponse = (data: RunQuotasResponse) => {
   } as unknown as ReturnType<typeof useRunQuotas>);
 };
 
-const setup = (data: RunQuotasResponse = response(), groups?: readonly RunQuotaGroup[]) => {
+const setup = (
+  data: RunQuotasResponse = response(),
+  groups?: readonly RunQuotaGroup[],
+  onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
+) => {
   setQueryResponse(data);
   mockUseUpdateRunQuotas.mockReturnValue({ save, isSaving: false });
   save.mockResolvedValue(data);
 
   return render(
     <I18nProvider>
-      <RunLimitsSection groups={groups} />
+      <RunLimitsSection groups={groups} onUnsavedChangesChange={onUnsavedChangesChange} />
     </I18nProvider>
   );
 };
@@ -132,6 +136,26 @@ describe('RunLimitsSection', () => {
     expect(
       screen.queryByText('Knowledge indicator extraction daily limit')
     ).not.toBeInTheDocument();
+    expect(screen.getByText('0 means unlimited.')).toBeInTheDocument();
+    expect(screen.getByText('Enforce daily limits across Nightshift')).toBeInTheDocument();
+    expect(screen.getByText(/Enforcement applies deployment-wide/)).toBeInTheDocument();
+  });
+
+  it('reports unsaved limit changes to the owning settings tab', () => {
+    const onUnsavedChangesChange = jest.fn();
+    setup(response(), ['investigation'], onUnsavedChangesChange);
+
+    expect(onUnsavedChangesChange).toHaveBeenLastCalledWith(false);
+
+    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {
+      target: { value: '20' },
+    });
+
+    expect(onUnsavedChangesChange).toHaveBeenLastCalledWith(true);
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsSectionCancelButton'));
+
+    expect(onUnsavedChangesChange).toHaveBeenLastCalledWith(false);
   });
 
   it('warns about exhausted groups hidden from the tab when enabling global enforcement', async () => {

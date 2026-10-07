@@ -16,16 +16,10 @@ import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_rel
 // isolated so we can drive its UI purely through controlled bindings.
 jest.mock('./use_relay_app_bindings');
 const mockDisconnectWorkspace = jest.fn().mockResolvedValue(undefined);
+const mockConnectWorkspace = jest.fn().mockResolvedValue(undefined);
+const mockUseRelayAppConnection = jest.fn();
 jest.mock('./use_relay_app_connection', () => ({
-  useRelayAppConnection: () => ({
-    isLoading: false,
-    available: true,
-    status: 'connected',
-    error: undefined,
-    isMutating: false,
-    connect: jest.fn(),
-    disconnect: mockDisconnectWorkspace,
-  }),
+  useRelayAppConnection: () => mockUseRelayAppConnection(),
   RELAY_APP_CONNECTION_STATUS_QUERY_KEY: ['relayAppConnectionStatus'],
 }));
 
@@ -73,6 +67,36 @@ const revealChannels = () =>
 describe('AppsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseRelayAppConnection.mockReturnValue({
+      isLoading: false,
+      available: true,
+      status: 'connected',
+      error: undefined,
+      isMutating: false,
+      connect: mockConnectWorkspace,
+      disconnect: mockDisconnectWorkspace,
+    });
+  });
+
+  it('explains when apps are unavailable in this deployment', () => {
+    mockUseRelayAppConnection.mockReturnValue({
+      isLoading: false,
+      available: false,
+      status: 'not_connected',
+      error: undefined,
+      isMutating: false,
+      connect: mockConnectWorkspace,
+      disconnect: mockDisconnectWorkspace,
+    });
+
+    setup();
+
+    expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
+      'Apps are unavailable'
+    );
+    expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
+      'Apps require Agent Builder and a configured Relay service.'
+    );
   });
 
   it('binds a channel by entering an id and clicking the Bind button', async () => {

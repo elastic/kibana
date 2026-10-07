@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiCard,
   EuiConfirmModal,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -39,16 +40,41 @@ interface AppsSectionProps {
  * "Apps" section under Significant Events settings. Surfaces the Elastic
  * Slack App connect/disconnect flow for a single workspace.
  * Only rendered by the caller (`tab.tsx`) when the
- * `streams.significantEventsAppsEnabled` feature flag is on; additionally
- * renders nothing here when the Slack App is not available on this deployment
- * (`xpack.actions.relay` unset, or Agent Builder absent).
+ * `streams.significantEventsAppsEnabled` feature flag is on.
  */
 export function AppsSection({ canEdit }: AppsSectionProps) {
   const { isLoading, available, status, error, isMutating, connect, disconnect } =
     useRelayAppConnection();
 
-  if (isLoading || !available) {
+  if (isLoading) {
     return null;
+  }
+
+  if (!available) {
+    return (
+      <>
+        <EuiSpacer />
+        <EuiEmptyPrompt
+          data-test-subj="nightshiftAppsUnavailable"
+          iconType="info"
+          title={
+            <h2>
+              {i18n.translate('xpack.nightshift.settings.apps.unavailableTitle', {
+                defaultMessage: 'Apps are unavailable',
+              })}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate('xpack.nightshift.settings.apps.unavailableDescription', {
+                defaultMessage:
+                  'No Nightshift apps are available in this deployment. Apps require Agent Builder and a configured Relay service.',
+              })}
+            </p>
+          }
+        />
+      </>
+    );
   }
 
   return (

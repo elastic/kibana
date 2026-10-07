@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../hooks/use_kibana';
 import { DetectionsSettingsTab } from './detections_settings_tab';
 import { useDeveloperMode } from './hooks/use_developer_mode';
@@ -65,7 +66,18 @@ jest.mock('./components/cost_estimate', () => ({
   CostEstimate: () => <div data-test-subj="cost-estimate" />,
 }));
 jest.mock('./components/run_limits_section', () => ({
-  RunLimitsSection: () => null,
+  RunLimitsSection: ({
+    onUnsavedChangesChange,
+  }: {
+    onUnsavedChangesChange: (hasUnsavedChanges: boolean) => void;
+  }) => (
+    <button
+      data-test-subj="runLimitsUnsavedChangesStub"
+      onClick={() => onUnsavedChangesChange(true)}
+    >
+      Change run limits
+    </button>
+  ),
 }));
 jest.mock('./components/significant_events_tuning_config_editor', () => ({
   configToAnnotatedYaml: (config: unknown) => JSON.stringify(config),
@@ -89,6 +101,9 @@ jest.mock('./components/significant_events_tuning_config_editor', () => ({
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
+const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as jest.MockedFunction<
+  typeof useUnsavedChangesPrompt
+>;
 
 const setDeveloperMode = jest.fn();
 const settingsGlobalClientSet = jest.fn();
@@ -171,6 +186,16 @@ describe('DetectionsSettingsTab developer mode', () => {
     fireEvent.click(screen.getByTestId('nightshiftDeveloperModeSwitch'));
 
     expect(setDeveloperMode).toHaveBeenCalledWith(true);
+  });
+
+  it('includes run-limit drafts in the unsaved-changes prompt', () => {
+    setup();
+
+    fireEvent.click(screen.getByTestId('runLimitsUnsavedChangesStub'));
+
+    expect(mockUseUnsavedChangesPrompt).toHaveBeenLastCalledWith(
+      expect.objectContaining({ hasUnsavedChanges: true })
+    );
   });
 
   it('hides the tuning YAML panel by default', () => {

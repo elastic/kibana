@@ -49,13 +49,20 @@ export const RunLimitRow = ({ group, count, limit, disabled, onChange }: RunLimi
         values: { group: RUN_QUOTA_GROUP_LABELS[group] },
       })}
       helpText={
-        <span data-test-subj={`nightshiftRunLimitCount-${group}`}>
-          {i18n.translate('xpack.nightshift.settings.runLimits.countDescription', {
-            defaultMessage:
-              '{count, plural, one {# counted scheduled admission today} other {# counted scheduled admissions today}}',
-            values: { count },
-          })}
-        </span>
+        <>
+          <span data-test-subj={`nightshiftRunLimitCount-${group}`}>
+            {i18n.translate('xpack.nightshift.settings.runLimits.countDescription', {
+              defaultMessage:
+                '{count, plural, one {# counted scheduled admission today} other {# counted scheduled admissions today}}',
+              values: { count },
+            })}
+          </span>{' '}
+          <span>
+            {i18n.translate('xpack.nightshift.settings.runLimits.unlimitedHelpText', {
+              defaultMessage: '0 means unlimited.',
+            })}
+          </span>
+        </>
       }
       isInvalid={invalid}
       error={

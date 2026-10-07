@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -27,9 +27,10 @@ import { useDetectionSettingsForm } from './components/use_detection_settings_fo
 export const DetectionsSettingsTab = () => {
   const { appParams, application, http, overlays } = useKibana().services;
   const form = useDetectionSettingsForm();
+  const [hasRunLimitChanges, setHasRunLimitChanges] = useState(false);
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: form.hasChanges,
+    hasUnsavedChanges: form.hasChanges || hasRunLimitChanges,
     http,
     openConfirm: overlays.openConfirm,
     navigateToUrl: application.navigateToUrl,
@@ -60,7 +61,10 @@ export const DetectionsSettingsTab = () => {
 
         <EuiHorizontalRule margin="l" />
 
-        <RunLimitsSection groups={['detection', 'ki_extraction']} />
+        <RunLimitsSection
+          groups={['detection', 'ki_extraction']}
+          onUnsavedChangesChange={setHasRunLimitChanges}
+        />
       </SettingsSection>
 
       <EuiSpacer />
