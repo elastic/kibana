@@ -235,6 +235,12 @@ describe('When using the ArtifactListPage component', () => {
         );
         expect(getByTestId('testPage-viewFlyout-definitionTitle')).toHaveTextContent('Definition');
         expect(getByTestId('viewModeComponent')).toBeInTheDocument();
+        expect(getByTestId('testPage-viewFlyout-policyAssignmentTitle')).toHaveTextContent(
+          'Policy assignment'
+        );
+        expect(getByTestId('testPage-viewFlyout-policyAssignment-global')).toHaveTextContent(
+          'Applied globally.'
+        );
       });
 
       it('should open the view flyout from the show=view URL without the edit form', async () => {

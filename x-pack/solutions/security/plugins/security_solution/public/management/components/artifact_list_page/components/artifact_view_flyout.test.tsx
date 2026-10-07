@@ -20,6 +20,11 @@ import {
 } from '../../../hooks/artifacts';
 import { artifactListPageLabels } from '../translations';
 import { useWithArtifactEnableDisable as _useWithArtifactEnableDisable } from '../hooks/use_with_artifact_enable_disable';
+import { useArtifactAssignedPolicies as _useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
+import type { MenuItemPropsByPolicyId } from '../../artifact_entry_card';
 import type { ArtifactViewModeComponentProps } from '../types';
 import { ArtifactViewFlyout, type ArtifactViewFlyoutProps } from './artifact_view_flyout';
 import {
@@ -36,10 +41,14 @@ jest.mock('../hooks/use_with_artifact_enable_disable', () => ({
   ...jest.requireActual('../hooks/use_with_artifact_enable_disable'),
   useWithArtifactEnableDisable: jest.fn(),
 }));
+jest.mock('../hooks/use_artifact_assigned_policies');
+jest.mock('../../../../common/components/user_privileges');
 
 const useGetArtifactMock = _useGetArtifact as jest.Mock;
 const useArtifactActionsDisabledMock = _useArtifactActionsDisabled as jest.Mock;
 const useWithArtifactEnableDisableMock = _useWithArtifactEnableDisable as jest.Mock;
+const useArtifactAssignedPoliciesMock = _useArtifactAssignedPolicies as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 type ArtifactViewFlyoutRenderProps =
   | {
@@ -89,6 +98,13 @@ describe('ArtifactViewFlyout', () => {
       setArtifactEnabled,
       isLoading: false,
     });
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointAuthzInitialStateMock(),
+    });
+    useArtifactAssignedPoliciesMock.mockReturnValue({
+      policies: {},
+      isLoading: false,
+    });
 
     const ViewModeComponent = ({ item: viewedItem }: ArtifactViewModeComponentProps) => (
       <div data-test-subj="viewModeComponent">{viewedItem.name}</div>
@@ -135,6 +151,12 @@ describe('ArtifactViewFlyout', () => {
     expect(renderResult.getByTestId('viewFlyout-definitionTitle')).toHaveTextContent('Definition');
     expect(renderResult.getByTestId('viewModeComponent')).toHaveTextContent('Signature one');
     expect(renderResult.queryByTestId('viewFlyout-enabledSwitch')).not.toBeInTheDocument();
+    expect(renderResult.getByTestId('viewFlyout-policyAssignmentTitle')).toHaveTextContent(
+      'Policy assignment'
+    );
+    expect(renderResult.getByTestId('viewFlyout-policyAssignment-global')).toHaveTextContent(
+      'Applied globally.'
+    );
   });
 
   it('shows the enabled switch before Updated by when showEnabledColumn is true', () => {
@@ -248,6 +270,80 @@ describe('ArtifactViewFlyout', () => {
     expect(onClose).not.toHaveBeenCalled();
     expect(mockedContext.coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
     expect(renderResult.getByTestId('viewFlyout-title')).toHaveTextContent('Signature one');
+  });
+
+  it('shows applied to 0 policies when the artifact is not assigned', () => {
+    item.tags = [];
+    useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+
+    render();
+
+    expect(renderResult.getByTestId('viewFlyout-policyAssignment-none')).toHaveTextContent(
+      'Applied to 0 policies.'
+    );
+    expect(renderResult.queryByTestId('viewFlyout-policyAssignment-list')).not.toBeInTheDocument();
+  });
+
+  it('lists assigned policies as links when the user can read policies', () => {
+    const policies: MenuItemPropsByPolicyId = {
+      'policy-1': {
+        children: 'Policy one',
+        href: 'http://example/policy-1',
+        target: '_blank',
+      },
+      'policy-2': {
+        children: 'Policy two',
+        href: 'http://example/policy-2',
+        target: '_blank',
+      },
+    };
+    item.tags = [buildPerPolicyTag('policy-1'), buildPerPolicyTag('policy-2')];
+    useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+    useArtifactAssignedPoliciesMock.mockReturnValue({ policies, isLoading: false });
+
+    render();
+
+    const firstPolicy = renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-1');
+    const secondPolicy = renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-2');
+    expect(firstPolicy).toHaveTextContent('Policy one');
+    expect(firstPolicy).toHaveAttribute('href', 'http://example/policy-1');
+    expect(secondPolicy).toHaveTextContent('Policy two');
+    expect(secondPolicy).toHaveAttribute('href', 'http://example/policy-2');
+  });
+
+  it('lists assigned policies as text when the user cannot read policies', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadPolicyManagement: false }),
+    });
+    item.tags = [buildPerPolicyTag('policy-1')];
+    useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+    useArtifactAssignedPoliciesMock.mockReturnValue({
+      policies: {
+        'policy-1': {
+          children: 'Policy one',
+          href: 'http://example/policy-1',
+          target: '_blank',
+        },
+      },
+      isLoading: false,
+    });
+
+    render();
+
+    const policy = renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-1');
+    expect(policy).toHaveTextContent('Policy one');
+    expect(policy).not.toHaveAttribute('href');
+  });
+
+  it('shows the policy id when the policy is not in the policies map', () => {
+    item.tags = [buildPerPolicyTag('policy-unknown')];
+    useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+
+    render();
+
+    expect(
+      renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-unknown')
+    ).toHaveTextContent('policy-unknown');
   });
 
   it('shows a dash when the artifact has no description', () => {

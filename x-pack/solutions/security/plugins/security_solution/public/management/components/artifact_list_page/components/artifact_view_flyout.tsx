@@ -39,6 +39,7 @@ import {
   type ArtifactEnabledSwitchProps,
 } from './artifact_enabled_switch';
 import { ArtifactOperatingSystemBadges } from './artifact_os_badges';
+import { ArtifactViewPolicyAssignment } from './artifact_view_policy_assignment';
 
 export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
   viewFlyoutLastUpdatedFieldLabel: i18n.translate(
@@ -56,6 +57,18 @@ export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
   viewFlyoutDefinitionTitle: i18n.translate(
     'xpack.securitySolution.artifactListPage.viewFlyoutDefinitionTitle',
     { defaultMessage: 'Definition' }
+  ),
+  viewFlyoutPolicyAssignmentTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.viewFlyoutPolicyAssignmentTitle',
+    { defaultMessage: 'Policy assignment' }
+  ),
+  viewFlyoutPolicyAssignmentGlobalLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.viewFlyoutPolicyAssignmentGlobalLabel',
+    { defaultMessage: 'Applied globally.' }
+  ),
+  viewFlyoutPolicyAssignmentNoneLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.viewFlyoutPolicyAssignmentNoneLabel',
+    { defaultMessage: 'Applied to 0 policies.' }
   ),
   viewFlyoutEmptyDescription: i18n.translate(
     'xpack.securitySolution.artifactListPage.viewFlyoutEmptyDescription',
@@ -340,6 +353,19 @@ const ArtifactViewFlyoutBody = memo<{
         </EuiTitle>
         <EuiSpacer size="s" />
         <ViewModeComponent item={item} />
+
+        <EuiSpacer size="l" />
+        <EuiTitle size="xs">
+          <h3 data-test-subj={getTestId('policyAssignmentTitle')}>
+            {labels.viewFlyoutPolicyAssignmentTitle}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <ArtifactViewPolicyAssignment
+          item={item}
+          labels={labels}
+          data-test-subj={getTestId('policyAssignment')}
+        />
       </>
     );
   }
