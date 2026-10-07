@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Navigate to the "API key" tab.
         await PageObjects.common.clickAndValidate(
           'connectionDetailsTabBtn-apiKeys',
-          'connectionDetailsApiKeyForm'
+          'connectionDetailsApiKeyConfigForm'
         );
 
         // Select the input form.

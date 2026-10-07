@@ -64,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esql.waitESQLEditorLoaded('InlineEditingESQLEditor');
 
       await retry.waitFor('control flyout to open', async () => {
+        if (await testSubjects.exists('create_esql_control_flyout')) return true;
         await esql.typeEsqlEditorQuery(
           'FROM logstash* | STATS COUNT(*) BY ',
           'InlineEditingESQLEditor'
