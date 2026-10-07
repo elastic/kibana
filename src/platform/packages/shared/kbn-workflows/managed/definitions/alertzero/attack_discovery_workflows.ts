@@ -41,17 +41,22 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
 } as const satisfies ManagedWorkflowDefinition;
 
 /**
- * The version carries the switch from the `run_fp_tp_analysis` console stub to the
- * FP/TP analysis workflow below. Without the bump an existing install keeps calling
- * the stub and takes its verdict from a `stub_verdict` input this version no longer
- * declares.
+ * Version 7 carries the `resolve_display_text` step, which reads the discovery from
+ * the Attack Discovery find API so the Investigation title, its summary, the journal
+ * and the proposal's title and comment show its text with field tokens rendered and
+ * original values restored. Bumped as a deliberate rollout signal for that step; the YAML
+ * change alone already rolls out through `definitionHash`.
+ *
+ * Version 8 carries the impact steps, which record the hosts and users an attack
+ * touched on its Investigation, so the landing page's Impact pills match Attack
+ * Discovery proposals.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 5,
+  version: 8,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -61,16 +66,17 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * uses the internal-workflow management profile: enablement is enforced rather
  * than restorable.
  *
- * The version carries the YAML's new `discoveries_generated` output. Without the
- * bump an existing install keeps the old definition and the runner's
- * `attacks_generated` reads nothing.
+ * The version carries the YAML's switch to a per-batch ES|QL retrieval, which lets
+ * each batch persist the replacements its discoveries use. Bumped as a deliberate
+ * rollout signal for that switch; the YAML change alone already rolls out through
+ * `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -80,12 +86,15 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
  * internal-workflow management profile: enablement is enforced rather than
  * restorable, because a disabled analysis would leave the review recording every
  * attack as a failure.
+ *
+ * The version is the prompt version. Execution output echoes it as
+ * `workflow_version`, so a result traces back to the prompt that produced it.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

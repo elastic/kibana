@@ -1,7 +1,7 @@
 ---
 navigation_title: "Slack (v2)"
 type: reference
-description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send messages, create channels, and invite users to Slack channels using the Slack Web API."
+description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -31,6 +31,48 @@ Bot Token
 ::::{note}
 The **Search messages** action requires a user token and is not available when using Bot Token authentication. Use **Get conversation history** to read messages from a specific channel instead.
 ::::
+
+## Receive Slack events [slack-v2-inbound-events]
+```{applies_to}
+serverless: unavailable
+stack: preview 9.6+
+```
+
+The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector.
+
+| Workflow event | Slack `event.type` | Fields |
+| --- | --- | --- |
+| `slack2.message` | `message` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text`, `subtype`, `botId` |
+| `slack2.app_mention` | `app_mention` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text` |
+| `slack2.reaction_added` | `reaction_added` | `channel`, `messageId`, `fileId`, `fileCommentId`, `itemType`, `user`, `reaction` |
+| `slack2.file_shared` | `file_shared` | `fileId`, `user`, `channel` |
+| `slack2.file_public` | `file_public` | `fileId`, `userId` |
+| `slack2.channel_created` | `channel_created` | `channelId`, `name`, `creator` |
+| `slack2.team_join` | `team_join` | `userId`, `name`, `realName`, `displayName`, `email` |
+| `slack2.member_joined_channel` | `member_joined_channel` | `userId`, `channelId`, `inviter` |
+
+`threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. An event type that is not in this table does not start a workflow.
+
+Slack's Request URL check sends `url_verification`. The connector responds with HTTP 200 and `{ "challenge": "<value>" }` and does not start a workflow.
+
+Example `app_mention` body:
+
+```json
+{
+  "type": "event_callback",
+  "team_id": "T123",
+  "event_id": "Ev123",
+  "event": {
+    "type": "app_mention",
+    "user": "U123",
+    "text": "<@UAPP> hello",
+    "ts": "1515449522.000016",
+    "channel": "C123"
+  }
+}
+```
+
+That payload emits `slack2.app_mention` with `workspace`, `channel`, `messageId`, `sender`, and `text`.
 
 ## Test connectors [slack-v2-action-configuration]
 
@@ -148,6 +190,12 @@ Send message
     - `unfurlLinks` (optional): Turn on unfurling of primarily text-based content.
     - `unfurlMedia` (optional): Turn on unfurling of media content.
 
+Update message {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
+:   Edit a message the connector posted earlier, using Slack `chat.update`. The new text replaces the old text, and Slack removes any blocks the message had, so a Block Kit or richly formatted message comes back as plain text.
+    - `channel` (required): Conversation ID that holds the message (for example, `C123...`). Slack does not accept a channel name here.
+    - `messageTs` (required): Timestamp of the message to edit, as returned in `ts` by **Send message**.
+    - `text` (required): New message text, at most 4,000 characters.
+
 ## Connector networking configuration [slack-v2-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list.
@@ -161,7 +209,7 @@ To use OAuth Authorization Code authentication, you need a Slack app configured 
 3. Under **OAuth & Permissions**, add the following **User Token Scopes**:
    - `channels:read` — list and resolve public channel IDs
    - `channels:history` — read public channel history (for **Get conversation history**)
-   - `chat:write` — send messages
+   - `chat:write` — send messages and edit the messages you sent
    - `files:read` — access shared files (for **Get file info**, **List files**)
    - `groups:read` — list private channels (including for **List channels** when `types` includes `private_channel`)
    - `groups:history` — read private channel history (for **Get conversation history** on private channels)
@@ -193,7 +241,7 @@ To use Bot Token authentication, you need a Slack app with a bot token.
 3. Under **OAuth & Permissions**, add the following **Bot Token Scopes**:
    - `channels:read` — list public channels
    - `channels:history` — read public channel message history
-   - `chat:write` — send messages as the bot
+   - `chat:write` — send messages as the bot and edit the messages it sent
    - `files:read` — access file metadata
    - `groups:read` — list private channels the bot is a member of
    - `groups:history` — read private channel history

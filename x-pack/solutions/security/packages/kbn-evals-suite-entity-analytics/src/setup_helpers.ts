@@ -7,7 +7,7 @@
 
 import type { Client as ElasticsearchClient } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
-import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
+import { getEntitiesAlias, ENTITY_LATEST, ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import type { AssetCriticalityLevel, EntityRiskLevels } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { ScoutLogger } from '@kbn/scout';
@@ -68,6 +68,7 @@ interface SeedEntity {
   riskLevel?: EntityRiskLevels;
   riskScoreNorm?: number;
   assetCriticality?: AssetCriticalityLevel;
+  extraFields?: Record<string, unknown>;
 }
 
 export async function bulkIndexEntities({
@@ -84,28 +85,30 @@ export async function bulkIndexEntities({
   const latestAlias = getEntitiesAlias(ENTITY_LATEST, namespace);
   const now = new Date().toISOString();
 
-  const operations = entities.flatMap(({ euid, riskLevel, riskScoreNorm, assetCriticality }) => {
-    const [type, displayName] = euid.split(':');
+  const operations = entities.flatMap(
+    ({ euid, riskLevel, riskScoreNorm, assetCriticality, extraFields }) => {
+      const [type, displayName] = euid.split(':');
 
-    const hasRisk = riskLevel !== undefined || riskScoreNorm !== undefined;
-    const doc: Record<string, unknown> = {
-      '@timestamp': now,
-      entity: {
-        id: euid,
-        EngineMetadata: { Type: type },
-        ...(hasRisk && {
-          risk: {
-            ...(riskLevel !== undefined && { calculated_level: riskLevel }),
-            ...(riskScoreNorm !== undefined && { calculated_score_norm: riskScoreNorm }),
-          },
-        }),
-      },
-      [type]: { name: displayName },
-      ...(assetCriticality !== undefined && { asset: { criticality: assetCriticality } }),
-    };
+      const hasRisk = riskLevel !== undefined || riskScoreNorm !== undefined;
+      const doc: Record<string, unknown> = {
+        '@timestamp': now,
+        entity: {
+          id: euid,
+          EngineMetadata: { Type: type },
+          ...(hasRisk && {
+            risk: {
+              ...(riskLevel !== undefined && { calculated_level: riskLevel }),
+              ...(riskScoreNorm !== undefined && { calculated_score_norm: riskScoreNorm }),
+            },
+          }),
+        },
+        [type]: { name: displayName, ...extraFields },
+        ...(assetCriticality !== undefined && { asset: { criticality: assetCriticality } }),
+      };
 
-    return [{ index: { _index: latestAlias, _id: hashEuid(euid) } }, doc];
-  });
+      return [{ index: { _index: latestAlias, _id: hashEuid(euid) } }, doc];
+    }
+  );
 
   await esClient.bulk({ refresh: true, operations });
 }
@@ -151,6 +154,37 @@ export async function createWatchlist({
   return { id };
 }
 
+export async function createWatchlistEntitySource({
+  supertest,
+  watchlistId,
+  source,
+}: {
+  supertest: SuperTest.Agent;
+  watchlistId: string;
+  source: { name: string; queryRule: string };
+}): Promise<{ id: string }> {
+  const res = await supertest
+    .post(`/api/entity_analytics/watchlists/${watchlistId}/entity_source`)
+    .set(MUTATING_HEADERS)
+    .send({ type: 'store', enabled: true, ...source });
+  if (res.status !== 200 && res.status !== 201) {
+    throw new Error(
+      `Failed to create entity source "${source.name}" on watchlist ${watchlistId} (${
+        res.status
+      }): ${JSON.stringify(res.body)}`
+    );
+  }
+  const id = (res.body as { id?: string }).id;
+  if (!id) {
+    throw new Error(
+      `Create entity source response for "${source.name}" did not include an id: ${JSON.stringify(
+        res.body
+      )}`
+    );
+  }
+  return { id };
+}
+
 export async function assignEntitiesToWatchlist({
   supertest,
   watchlistId,
@@ -174,6 +208,51 @@ export async function assignEntitiesToWatchlist({
   }
 }
 
+export async function linkEntitiesForResolution({
+  supertest,
+  targetId,
+  entityIds,
+}: {
+  supertest: SuperTest.Agent;
+  targetId: string;
+  entityIds: readonly string[];
+}): Promise<void> {
+  const res = await supertest
+    .post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK)
+    .set(MUTATING_HEADERS)
+    .send({ target_id: targetId, entity_ids: entityIds });
+  if (res.status !== 200) {
+    throw new Error(
+      `Failed to link entities [${entityIds.join(', ')}] to "${targetId}" (${
+        res.status
+      }): ${JSON.stringify(res.body)}`
+    );
+  }
+}
+
+export async function setResolutionRuleEnabled({
+  supertest,
+  ruleId,
+  enabled,
+}: {
+  supertest: SuperTest.Agent;
+  ruleId: string;
+  enabled: boolean;
+}): Promise<void> {
+  const path = ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE.replace('{id}', ruleId).replace(
+    '/enable',
+    enabled ? '/enable' : '/disable'
+  );
+  const res = await supertest.put(path).set(MUTATING_HEADERS);
+  if (res.status !== 200) {
+    throw new Error(
+      `Failed to set resolution rule "${ruleId}" enabled=${enabled} (${
+        res.status
+      }): ${JSON.stringify(res.body)}`
+    );
+  }
+}
+
 /**
  * Uninstalls the entity store v2 for teardown.
  * Failures are logged as warnings rather than thrown.
@@ -193,4 +272,59 @@ export async function deleteEntityEngines({
   } catch (err) {
     log.warning(`deleteEntityEngines failed during teardown: ${(err as Error).message}`);
   }
+}
+
+/**
+ * Creates a source index for index-type watchlist entity source evals and loads documents into it.
+ *
+ * The mapping requirements are load-bearing: index sources always range-filter on `@timestamp`,
+ * and the sync aggregates the identifier field with a composite `terms` agg, so a missing
+ * `@timestamp` or a `text`-mapped identifier field yields zero matches with no error.
+ */
+export async function createSourceIndex({
+  esClient,
+  index,
+  identifierField,
+  properties,
+  documents,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  identifierField: string;
+  properties: Record<string, unknown>;
+  documents: Array<Record<string, unknown>>;
+}): Promise<void> {
+  await deleteSourceIndex({ esClient, index });
+  await esClient.indices.create({
+    index,
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        [identifierField]: { type: 'keyword' },
+        ...properties,
+      } as never,
+    },
+  });
+
+  if (documents.length === 0) return;
+
+  const now = new Date().toISOString();
+  await esClient.bulk({
+    refresh: true,
+    operations: documents.flatMap((doc) => [
+      { index: { _index: index } },
+      { '@timestamp': now, ...doc },
+    ]),
+  });
+}
+
+/** Best-effort teardown for {@link createSourceIndex}. */
+export async function deleteSourceIndex({
+  esClient,
+  index,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+}): Promise<void> {
+  await esClient.indices.delete({ index }, { ignore: [404] });
 }

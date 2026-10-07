@@ -346,7 +346,7 @@ export function DiscoverBadgeButton({
       <EuiButtonIcon
         data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
         href={discoverLink}
-        iconType="discoverApp"
+        iconType="productDiscover"
         size="xs"
         aria-label={ariaLabel}
       />

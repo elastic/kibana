@@ -6,8 +6,6 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import { StateEndsCodec, ErrorStateCodec } from '../zod/ping';
-
-export { StateEndsCodec, ErrorStateCodec };
+import type { ErrorStateCodec } from '../schemas/ping';
 
 export type ErrorState = SchemaOutput<typeof ErrorStateCodec>;

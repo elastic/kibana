@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-// This bit of hackiness is required because this isn't part of the main kibana bundle
-import 'jquery';
-
+import $ from '@kbn/flot-charts';
+import type { FlotPlot } from '@kbn/flot-charts';
 import { debounce, includes } from 'lodash';
 import { RendererStrings } from '../../../i18n';
 import type { RendererFactory, RendererSpec } from '../../../types';
@@ -27,7 +26,7 @@ const render: RendererSpec<any>['render'] = async (domNode, config, handlers) =>
     $.plot.plugins.push(text);
   }
 
-  let plot: jquery.flot.plot;
+  let plot: FlotPlot;
   function draw() {
     if (domNode.clientHeight < 1 || domNode.clientWidth < 1) {
       return;

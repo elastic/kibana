@@ -36,11 +36,23 @@ export const CONFIDENCE_RANK: Record<ProposalConfidence, number> = {
   low: 2,
 };
 
-/** The sort fields derived from a proposal's snapshotted enums. */
+/**
+ * The sort fields derived from a proposal's snapshotted enums.
+ *
+ * Nested under one key so the document shape says which fields are computed
+ * rather than authored, and so stripping them before the proposal leaves the
+ * service stays a single deletion however many ranks are added.
+ */
 export interface ProposalSortRanks {
-  impactRank: number;
-  confidenceRank: number;
+  ranks: {
+    impact: number;
+    confidence: number;
+  };
 }
+
+/** Sort clauses for the two ranks, in the order the decision queue applies them. */
+export const IMPACT_RANK_FIELD = 'ranks.impact' as const;
+export const CONFIDENCE_RANK_FIELD = 'ranks.confidence' as const;
 
 export const toSortRanks = ({
   impact,
@@ -49,6 +61,8 @@ export const toSortRanks = ({
   impact: ProposalImpact;
   confidence: ProposalConfidence;
 }): ProposalSortRanks => ({
-  impactRank: IMPACT_RANK[impact],
-  confidenceRank: CONFIDENCE_RANK[confidence],
+  ranks: {
+    impact: IMPACT_RANK[impact],
+    confidence: CONFIDENCE_RANK[confidence],
+  },
 });

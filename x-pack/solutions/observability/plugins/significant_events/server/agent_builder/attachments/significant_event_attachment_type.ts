@@ -35,7 +35,6 @@ export const formatSignificantEventAsText = (event: SignificantEvent): string =>
   return [
     `Significant Event "${event.title}"`,
     `Event ID: ${event.event_id}`,
-    `Event UUID: ${event.event_uuid}`,
     `Status: ${event.status}`,
     `Severity: ${getSeverityLabel(event.severity)}`,
     `Confidence: ${event.confidence}`,
@@ -58,11 +57,10 @@ export const createSignificantEventAttachmentType = ({
     eventId: string,
     context: AttachmentResolveContext
   ): Promise<SignificantEvent | undefined> => {
-    const { getEventClient } = await getScopedClients({ request: context.request });
-    const eventClient = await getEventClient();
-    const { hits } = await eventClient.findByEventId(eventId);
+    const { getEventSearchClient } = await getScopedClients({ request: context.request });
+    const eventClient = await getEventSearchClient();
 
-    return hits.at(-1);
+    return eventClient.findLatestByEventId(eventId);
   };
 
   return {
@@ -100,11 +98,9 @@ export const createSignificantEventAttachmentType = ({
 
       try {
         const latestEvent = await fetchByEventId(attachment.origin, context);
-        return (
-          !latestEvent ||
-          latestVersion.data.event_uuid !== latestEvent.event_uuid ||
-          latestVersion.data['@timestamp'] !== latestEvent['@timestamp']
-        );
+        // Compare @timestamp only: it reflects the latest write regardless of how `.rule-events`
+        // identifies a version (group_hash rather than a stored version id).
+        return !latestEvent || latestVersion.data['@timestamp'] !== latestEvent['@timestamp'];
       } catch (error) {
         logger.warn(
           `Failed to check staleness for significant event attachment "${attachment.origin}": ${error}`

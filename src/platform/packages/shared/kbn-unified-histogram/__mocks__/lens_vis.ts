@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { ChartType } from '@kbn/visualization-utils';
+import { DataViewSource, type DataSource } from '@kbn/data-source';
 import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
@@ -61,6 +62,7 @@ export const getLensVisMock = async ({
   timeRange,
   breakdownField,
   dataView,
+  dataSource,
   allSuggestions,
   isTransformationalESQL,
   table,
@@ -70,7 +72,9 @@ export const getLensVisMock = async ({
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
-  dataView: QueryParams['dataView'];
+  dataView: DataView;
+  /** Defaults to a `DataViewSource` of `dataView`. */
+  dataSource?: DataSource;
   columns: DatatableColumn[];
   isPlainRecord: boolean;
   timeInterval: string;
@@ -81,7 +85,10 @@ export const getLensVisMock = async ({
   table?: Datatable;
   externalVisContext?: UnifiedHistogramVisContext;
   getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
-  onLensSuggestionsApiCall?: (preferredChartType: ChartType | undefined) => void;
+  onLensSuggestionsApiCall?: (
+    preferredChartType: ChartType | undefined,
+    preferredVisAttributes: unknown
+  ) => void;
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -94,7 +101,8 @@ export const getLensVisMock = async ({
       ? (...params) => {
           const context = params[0];
           const preferredChartType = params[3];
-          onLensSuggestionsApiCall?.(preferredChartType);
+          const preferredVisAttributes = params[4];
+          onLensSuggestionsApiCall?.(preferredChartType, preferredVisAttributes);
           if ('query' in context && context.query === query) {
             return allSuggestions;
           }
@@ -119,9 +127,9 @@ export const getLensVisMock = async ({
 
   lensService.update({
     queryParams: {
+      dataSource: dataSource ?? new DataViewSource(dataView),
       query,
       filters,
-      dataView,
       timeRange: timeRange ?? TIME_RANGE,
       columns,
       isPlainRecord,
