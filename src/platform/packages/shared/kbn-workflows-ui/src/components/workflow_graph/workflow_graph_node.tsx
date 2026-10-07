@@ -22,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { keyframes } from '@emotion/react';
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -780,6 +780,17 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const hasFallback = getStepHasFallback(step);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
+
+  // The `fallback` Handle below is only mounted once `hasFallback` becomes
+  // true — React Flow measures a node's handles once and doesn't notice ones
+  // added later without a resize, so a freshly-added fallback edge fails to
+  // resolve its source handle ("Couldn't create edge for source handle id:
+  // fallback") until something else forces a re-measure. Telling React Flow
+  // about the change here keeps the edge rendering immediately.
+  const updateNodeInternals = useUpdateNodeInternals();
+  useEffect(() => {
+    updateNodeInternals(node.id);
+  }, [node.id, hasFallback, updateNodeInternals]);
 
   const isActive = node.selected;
   const [isHovered, setIsHovered] = useState(false);

@@ -25,12 +25,15 @@ import {
 // isn't available in unit tests, and we're not testing connection logic here.
 // Renders its id/style as a queryable element so geometry (e.g. the fallback
 // port's along-edge position) can still be asserted without the real context.
+const mockUpdateNodeInternals = jest.fn();
 jest.mock('@xyflow/react', () => ({
   ...jest.requireActual('@xyflow/react'),
   Handle: ({ id, style }: { id?: string; style?: React.CSSProperties }) => (
     <div data-testid={`handle-${id ?? 'default'}`} style={style} />
   ),
   Position: { Top: 'top', Bottom: 'bottom' },
+  // Real impl needs a ReactFlowProvider the unit test doesn't set up.
+  useUpdateNodeInternals: () => mockUpdateNodeInternals,
 }));
 
 // Minimal NodeProps-shaped object for `WorkflowGraphNode`.
@@ -418,6 +421,28 @@ describe('WorkflowGraphNode — edit mode', () => {
     expect(handle).toBeInTheDocument();
     expect(handle).toHaveStyle({ left: ERROR_PORT_ALONG });
     expect(handle.style.right).toBe('');
+  });
+
+  it('tells React Flow to re-measure the node when a fallback is added', () => {
+    // The `fallback` Handle only mounts once `hasFallback` is true. React Flow
+    // measures a node's handles once and won't notice one added later without
+    // a resize — so a freshly-added fallback edge fails to resolve its source
+    // handle until something calls `updateNodeInternals` for this node.
+    mockUpdateNodeInternals.mockClear();
+    const { rerender } = renderNode({});
+    expect(mockUpdateNodeInternals).toHaveBeenCalledWith('node-1');
+    mockUpdateNodeInternals.mockClear();
+
+    rerender(
+      <WorkflowGraphActionsContext.Provider value={{}}>
+        <WorkflowGraphNode
+          {...makeNodeProps({
+            step: { 'on-failure': { fallback: [{ name: 'fb', type: 'console' }] } },
+          })}
+        />
+      </WorkflowGraphActionsContext.Provider>
+    );
+    expect(mockUpdateNodeInternals).toHaveBeenCalledWith('node-1');
   });
 
   it('draws a solid border for fallback nodes (no dashed styling)', () => {

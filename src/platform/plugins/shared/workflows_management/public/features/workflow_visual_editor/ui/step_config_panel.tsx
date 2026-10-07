@@ -964,7 +964,7 @@ export function StepConfigPanel({
               </EuiButtonEmpty>
             ) : (
               <EuiButtonEmpty
-                iconType="editorUndo"
+                iconType="undo"
                 onClick={onRevert}
                 isDisabled={!isDraftDirty(fragment, initialFragment)}
                 data-test-subj="workflowStepConfigPanelResetNode"
