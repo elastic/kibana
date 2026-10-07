@@ -476,7 +476,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             <ArtifactViewFlyout
               apiClient={apiClient}
               labels={labels}
-              showEnabledColumn
+              showEnabledSwitch={showEnabledColumn}
               allowCardEditAction={allowCardEditAction}
               allowCardDeleteAction={allowCardDeleteAction}
               onTakeAction={handleOnCardActionClick}

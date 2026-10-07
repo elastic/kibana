@@ -123,29 +123,29 @@ interface ArtifactViewFlyoutBaseProps {
   'data-test-subj'?: string;
 }
 
-interface ArtifactViewFlyoutWithoutEnabledColumnProps {
+interface ArtifactViewFlyoutWithoutEnabledSwitchProps {
   /** When omitted, the info block does not include the enable/disable switch. */
-  showEnabledColumn?: false;
+  showEnabledSwitch?: false;
 }
 
-interface ArtifactViewFlyoutWithEnabledColumnProps {
+interface ArtifactViewFlyoutWithEnabledSwitchProps {
   /**
    * When true, the info block leads with the same enable/disable switch as the simple table.
    */
-  showEnabledColumn: true;
+  showEnabledSwitch: true;
   /** Reloads the list after a successful enable/disable or a 409 conflict. */
   onEnabledChangeRefresh: () => Promise<void>;
 }
 
 export type ArtifactViewFlyoutProps = ArtifactViewFlyoutBaseProps &
-  XOR<ArtifactViewFlyoutWithoutEnabledColumnProps, ArtifactViewFlyoutWithEnabledColumnProps>;
+  XOR<ArtifactViewFlyoutWithoutEnabledSwitchProps, ArtifactViewFlyoutWithEnabledSwitchProps>;
 
 export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
   ({
     apiClient,
     labels: _labels,
     ViewModeComponent,
-    showEnabledColumn = false,
+    showEnabledSwitch = false,
     allowCardEditAction = true,
     allowCardDeleteAction = true,
     onTakeAction,
@@ -222,7 +222,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
               item={item}
               apiClient={apiClient}
               labels={labels}
-              showEnabledColumn={showEnabledColumn}
+              showEnabledSwitch={showEnabledSwitch}
               allowCardEditAction={allowCardEditAction}
               onEnabledChangeRefresh={handleEnabledChangeRefresh}
               ViewModeComponent={ViewModeComponent}
@@ -294,7 +294,7 @@ const ArtifactViewFlyoutBody = memo<{
   item: ExceptionListItemSchema;
   apiClient: ExceptionsListApiClient;
   labels: ArtifactViewFlyoutLabels;
-  showEnabledColumn: boolean;
+  showEnabledSwitch: boolean;
   allowCardEditAction: boolean;
   onEnabledChangeRefresh?: () => Promise<void>;
   ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
@@ -304,7 +304,7 @@ const ArtifactViewFlyoutBody = memo<{
     item,
     apiClient,
     labels,
-    showEnabledColumn,
+    showEnabledSwitch,
     allowCardEditAction,
     onEnabledChangeRefresh,
     ViewModeComponent,
@@ -318,7 +318,7 @@ const ArtifactViewFlyoutBody = memo<{
 
     const infoBlockCss = css`
       display: grid;
-      grid-template-columns: ${showEnabledColumn
+      grid-template-columns: ${showEnabledSwitch
         ? 'minmax(0, 1fr) auto minmax(0, 1fr)'
         : 'repeat(2, minmax(0, 1fr))'};
       column-gap: ${euiTheme.size.s};
@@ -341,7 +341,7 @@ const ArtifactViewFlyoutBody = memo<{
           css={infoBlockCss}
           data-test-subj={getTestId('infoBlock')}
         >
-          {showEnabledColumn && (
+          {showEnabledSwitch && (
             <>
               <div>
                 <EuiText size="xs" color="subdued" data-test-subj={getTestId('enabledLabel')}>

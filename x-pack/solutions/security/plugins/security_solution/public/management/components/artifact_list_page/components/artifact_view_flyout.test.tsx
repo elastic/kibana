@@ -61,10 +61,10 @@ type ArtifactViewFlyoutRenderProps = {
   onTakeAction?: ArtifactViewFlyoutTakeAction;
 } & (
   | {
-      showEnabledColumn?: false;
+      showEnabledSwitch?: false;
     }
   | {
-      showEnabledColumn: true;
+      showEnabledSwitch: true;
       onEnabledChangeRefresh: () => Promise<void>;
     }
 );
@@ -131,10 +131,10 @@ describe('ArtifactViewFlyout', () => {
       };
 
       renderResult = mockedContext.render(
-        props.showEnabledColumn ? (
+        props.showEnabledSwitch ? (
           <ArtifactViewFlyout
             {...sharedProps}
-            showEnabledColumn
+            showEnabledSwitch
             allowCardEditAction={props.allowCardEditAction ?? true}
             onEnabledChangeRefresh={props.onEnabledChangeRefresh}
           />
@@ -175,9 +175,9 @@ describe('ArtifactViewFlyout', () => {
     );
   });
 
-  it('shows the enabled switch before Updated by when showEnabledColumn is true', () => {
+  it('shows the enabled switch before Updated by when showEnabledSwitch is true', () => {
     render({
-      showEnabledColumn: true,
+      showEnabledSwitch: true,
       allowCardEditAction: true,
       onEnabledChangeRefresh,
       labels: artifactListPageLabels,
@@ -200,7 +200,7 @@ describe('ArtifactViewFlyout', () => {
     useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
 
     render({
-      showEnabledColumn: true,
+      showEnabledSwitch: true,
       allowCardEditAction: true,
       onEnabledChangeRefresh,
       labels: artifactListPageLabels,
@@ -211,7 +211,7 @@ describe('ArtifactViewFlyout', () => {
 
   it('disables the enabled switch when edit is not allowed', () => {
     render({
-      showEnabledColumn: true,
+      showEnabledSwitch: true,
       allowCardEditAction: false,
       onEnabledChangeRefresh,
       labels: artifactListPageLabels,
@@ -228,7 +228,7 @@ describe('ArtifactViewFlyout', () => {
       })
     );
     render({
-      showEnabledColumn: true,
+      showEnabledSwitch: true,
       allowCardEditAction: true,
       labels: artifactListPageLabels,
       onEnabledChangeRefresh,
@@ -259,7 +259,7 @@ describe('ArtifactViewFlyout', () => {
       message: 'conflict',
     });
     render({
-      showEnabledColumn: true,
+      showEnabledSwitch: true,
       allowCardEditAction: true,
       labels: artifactListPageLabels,
       onEnabledChangeRefresh,
