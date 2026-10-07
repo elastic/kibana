@@ -77,11 +77,14 @@ export const ConversationCard = memo<ConversationCardProps>(
         aria-current={isSelected || undefined}
         borderRadius="none"
         css={{
-          // Asymmetric by design — off EUI's padding scale, which has no 20px step.
-          padding: '20px 16px 24px 24px',
+          padding: euiTheme.size.l,
           cursor: 'pointer',
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
+          // The last row rounds to the queue panel's corners so the hover fill does not
+          // square them off.
+          borderRadius: hasBorder
+            ? 'none'
+            : `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
           boxSizing: 'border-box',
           backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
           '&:hover': {
@@ -118,7 +121,13 @@ export const ConversationCard = memo<ConversationCardProps>(
                   inFlightStatus={renderInFlightStatus?.(investigation)}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem
+                grow={false}
+                // The 32px icon buttons would otherwise set the row height and centre
+                // the 16px age text 8px below the padding line. Let them overhang the
+                // padding instead so the text (and the icon glyphs) sit at the 24px inset.
+                css={{ marginBlock: `-${euiTheme.size.s}` }}
+              >
                 <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                   {/*
                    * Stop propagation so interacting with the assignee picker

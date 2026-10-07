@@ -275,10 +275,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
 
     return (
       <EuiPanel
-        borderRadius="none"
         css={{
           cursor: 'pointer',
-          borderRadius: euiTheme.size.s,
         }}
         paddingSize="none"
         hasBorder
