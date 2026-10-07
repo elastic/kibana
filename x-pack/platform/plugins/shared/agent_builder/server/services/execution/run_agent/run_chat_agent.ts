@@ -73,7 +73,7 @@ import type { StateUpdate } from './state';
 import {
   eventsForContext,
   groupTimelineEntries,
-  isTimelineCustomEvent,
+  isTimelineStandaloneEvent,
   isTimelineRound,
   lastExecutionTerminal,
   roundResponse,
@@ -246,7 +246,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
             recentContext: buildRecentContext(
               groupTimelineEntries(processedConversation.timeline).flatMap((entry) => {
                 // Custom events carry no user input to match skills against.
-                if (isTimelineCustomEvent(entry)) {
+                if (isTimelineStandaloneEvent(entry)) {
                   return [];
                 }
                 return isTimelineRound(entry)

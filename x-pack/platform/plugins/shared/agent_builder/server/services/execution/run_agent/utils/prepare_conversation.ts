@@ -30,14 +30,14 @@ import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type {
   ContextTimelineEvent,
-  ProcessedCustomEvent,
+  ProcessedStandaloneEvent,
   ProcessedTimelineEvent,
   ProcessedUserMessageEvent,
 } from './context_timeline';
 import {
   groupTimelineRounds,
   groupTimelineEntries,
-  isTimelineCustomEvent,
+  isTimelineStandaloneEvent,
   isTimelineRound,
 } from './context_timeline';
 
@@ -97,7 +97,7 @@ export const prepareConversation = async ({
   const processedTimeline: ProcessedTimelineEvent[] = [];
   const includedRounds = new Set(effectiveRounds.map((round) => round.id));
   for (const round of groupTimelineEntries(timeline)) {
-    if (isTimelineCustomEvent(round)) {
+    if (isTimelineStandaloneEvent(round)) {
       const processedEvent = await processCustomEvent({ event: round.event, context });
       if (processedEvent) {
         processedTimeline.push(processedEvent);
@@ -217,7 +217,7 @@ const processCustomEvent = async ({
 }: {
   event: ConversationEvent;
   context: AgentHandlerContext;
-}): Promise<ProcessedCustomEvent | undefined> => {
+}): Promise<ProcessedStandaloneEvent | undefined> => {
   const definition = context.conversationEvents?.getDefinition(event.type);
   if (!definition) {
     context.logger.debug(

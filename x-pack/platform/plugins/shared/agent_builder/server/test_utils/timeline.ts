@@ -28,7 +28,7 @@ import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import { eventsToRounds } from '../services/conversation/client/events_to_rounds';
 import { roundsToEvents } from '../services/conversation/client/rounds_to_events';
 import type {
-  ProcessedCustomEvent,
+  ProcessedStandaloneEvent,
   ProcessedTimelineEvent,
 } from '../services/execution/run_agent/utils/context_timeline';
 
@@ -397,7 +397,7 @@ export const processedCustomEventFixture = ({
   ...event
 }: Parameters<typeof customEventFixture>[0] & {
   representation?: string;
-}): ProcessedCustomEvent => {
+}): ProcessedStandaloneEvent => {
   const data = event.data ?? { text: `${event.id} note` };
   return {
     ...customEventFixture({ ...event, data }),

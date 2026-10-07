@@ -7,7 +7,7 @@
 
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { formatDate } from '../prompts/utils/helpers';
-import type { ProcessedCustomEvent } from './context_timeline';
+import type { ProcessedStandaloneEvent } from './context_timeline';
 
 /**
  * Renders a custom conversation event for the LLM as a `<conversation_event>` block.
@@ -16,7 +16,7 @@ import type { ProcessedCustomEvent } from './context_timeline';
  * XML-escaped by `generateXmlTree`. The event id is deliberately not exposed: it is a
  * Kibana-internal identifier no tool consumes.
  */
-export const formatConversationEvent = (event: ProcessedCustomEvent): string =>
+export const formatConversationEvent = (event: ProcessedStandaloneEvent): string =>
   generateXmlTree({
     tagName: 'conversation_event',
     attributes: { type: event.type, timestamp: formatDate(event.created_at) },

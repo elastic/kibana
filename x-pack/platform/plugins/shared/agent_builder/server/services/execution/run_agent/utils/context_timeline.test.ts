@@ -24,13 +24,13 @@ import {
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
 import {
-  customEvents,
+  standaloneEvents,
   eventsForContext,
   groupTimelineEntries,
   groupTimelineRounds,
   isAwaitingPrompt,
   isInterruptedRound,
-  isTimelineCustomEvent,
+  isTimelineStandaloneEvent,
   isTimelineRound,
   isTimelineStandaloneUserMessage,
   lastExecutionTerminal,
@@ -45,7 +45,7 @@ const agentActor = { type: EventActorType.agent, id: 'agent-1' };
 
 /** The id of the event an entry is ordered by. */
 const entryId = (entry: TimelineEntry<ContextTimelineEvent>): string =>
-  isTimelineCustomEvent(entry) ? entry.event.id : entry.userMessage.id;
+  isTimelineStandaloneEvent(entry) ? entry.event.id : entry.userMessage.id;
 
 /** A completed round's raw timeline events (alias for readability). */
 const completedRoundEvents = completedRoundTimeline;
@@ -229,7 +229,7 @@ describe('groupTimelineEntries with custom events', () => {
     const entries = groupTimelineEntries(timeline);
 
     expect(entries.map(entryId)).toEqual(['a::user_message', 'note', 'b::user_message']);
-    expect(isTimelineCustomEvent(entries[1])).toBe(true);
+    expect(isTimelineStandaloneEvent(entries[1])).toBe(true);
     expect(isTimelineRound(entries[1])).toBe(false);
     expect(isTimelineStandaloneUserMessage(entries[1])).toBe(false);
   });
@@ -245,14 +245,13 @@ describe('groupTimelineEntries with custom events', () => {
       ...completedRoundEvents('a', sameInstant),
     ];
 
-    expect(groupTimelineEntries(stored).map((entry) => isTimelineCustomEvent(entry))).toEqual([
+    expect(groupTimelineEntries(stored).map((entry) => isTimelineStandaloneEvent(entry))).toEqual([
       false,
       true,
     ]);
-    expect(groupTimelineEntries(reversed).map((entry) => isTimelineCustomEvent(entry))).toEqual([
-      true,
-      false,
-    ]);
+    expect(groupTimelineEntries(reversed).map((entry) => isTimelineStandaloneEvent(entry))).toEqual(
+      [true, false]
+    );
   });
 
   it('breaks a timestamp tie with a failed execution and a standalone message by stored position', () => {
@@ -318,7 +317,7 @@ describe('groupTimelineEntries with custom events', () => {
       'c::user_message',
       'n7',
     ]);
-    expect(entries.map((entry) => isTimelineCustomEvent(entry))).toEqual([
+    expect(entries.map((entry) => isTimelineStandaloneEvent(entry))).toEqual([
       false,
       true,
       false,
@@ -331,8 +330,8 @@ describe('groupTimelineEntries with custom events', () => {
     expect(groupTimelineRounds(stored).map((round) => round.id)).toEqual(['a', 'f', 'b', 'c']);
   });
 
-  it('is ignored by groupTimelineRounds and selected by customEvents', () => {
+  it('is ignored by groupTimelineRounds and selected by standaloneEvents', () => {
     expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['a', 'b']);
-    expect(customEvents(timeline).map((event) => event.id)).toEqual(['note']);
+    expect(standaloneEvents(timeline).map((event) => event.id)).toEqual(['note']);
   });
 });

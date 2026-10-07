@@ -21,11 +21,11 @@ import { formatInterruptionNotice, formatSubagentRosterNotice } from '../prompts
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
-  isTimelineCustomEvent,
+  isTimelineStandaloneEvent,
   isTimelineRound,
   roundInterruption,
   roundResponse,
-  type ProcessedCustomEvent,
+  type ProcessedStandaloneEvent,
   type ProcessedTimelineEvent,
   type TimelineRound,
 } from './context_timeline';
@@ -102,8 +102,8 @@ export const prepareMessages = async ({
       );
       continue;
     }
-    if (isTimelineCustomEvent(entry)) {
-      messages.push(customEventToLangchain(entry.event));
+    if (isTimelineStandaloneEvent(entry)) {
+      messages.push(standaloneEventToLangchain(entry.event));
       continue;
     }
     // a standalone user message: no execution to render
@@ -209,7 +209,7 @@ export const roundOutcomeMessage = (round: TimelineRound<ProcessedTimelineEvent>
  * The message a custom conversation event contributes to the history: a user-role message
  * carrying the event's LLM representation, like the other system notices.
  */
-export const customEventToLangchain = (event: ProcessedCustomEvent): HumanMessage =>
+export const standaloneEventToLangchain = (event: ProcessedStandaloneEvent): HumanMessage =>
   createUserMessage(formatConversationEvent(event));
 
 export const formatUserInput = ({

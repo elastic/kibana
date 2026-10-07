@@ -27,7 +27,7 @@ import {
   substituteToolCallResults,
 } from './filestore_substitution';
 import {
-  customEventToLangchain,
+  standaloneEventToLangchain,
   formatUserInput,
   prepareMessages,
   roundOutcomeMessage,
@@ -162,8 +162,8 @@ export const renderUnit = async (
       }),
     ];
   }
-  if (unit.kind === 'custom_event') {
-    return [customEventToLangchain(unit.entry.event)];
+  if (unit.kind === 'standalone_event') {
+    return [standaloneEventToLangchain(unit.entry.event)];
   }
   if (unit.kind === 'current_cycle') {
     return renderCurrentRun({
