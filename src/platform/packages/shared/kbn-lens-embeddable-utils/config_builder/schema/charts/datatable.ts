@@ -86,65 +86,69 @@ const sortingSchema = lazySchema(() =>
     })
 );
 
+const visDatatableDensitySchema = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Density mode
+       */
+      mode: z
+        .union([z.literal('compact'), z.literal('default'), z.literal('expanded')])
+        .default('default')
+        .optional()
+        .meta({ description: 'Display density mode.' }),
+      /**
+       * Height configuration
+       */
+      height: z
+        .object({
+          header: z
+            .union([
+              z.object({ type: z.literal('auto') }).strict(),
+              z
+                .object({
+                  type: z.literal('custom'),
+                  max_lines: z.number().min(1).max(5).default(DEFAULT_HEADER_ROW_HEIGHT_LINES),
+                })
+                .strict(),
+            ])
+            .optional()
+            .meta({
+              description: 'Number of lines before the header is truncated.',
+            }),
+          value: z
+            .union([
+              z.object({ type: z.literal('auto') }).strict(),
+              z
+                .object({
+                  type: z.literal('custom'),
+                  lines: z.number().min(1).max(20).default(DEFAULT_ROW_HEIGHT_LINES),
+                })
+                .strict(),
+            ])
+            .optional()
+            .meta({
+              description: 'Number of lines to display per table body cell.',
+            }),
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visDatatableDensity',
+      description: 'Density configuration for the datatable.',
+    })
+);
+
 const datatableStylingSchema = lazySchema(() =>
   z
     .object({
       /**
        * Density  configuration
        */
-      density: z
-        .object({
-          /**
-           * Density mode
-           */
-          mode: z
-            .union([z.literal('compact'), z.literal('default'), z.literal('expanded')])
-            .default('default')
-            .optional()
-            .meta({ description: 'Display density mode.' }),
-          /**
-           * Height configuration
-           */
-          height: z
-            .object({
-              header: z
-                .union([
-                  z.object({ type: z.literal('auto') }).strict(),
-                  z
-                    .object({
-                      type: z.literal('custom'),
-                      max_lines: z.number().min(1).max(5).default(DEFAULT_HEADER_ROW_HEIGHT_LINES),
-                    })
-                    .strict(),
-                ])
-                .optional()
-                .meta({
-                  description: 'Number of lines before the header is truncated.',
-                }),
-              value: z
-                .union([
-                  z.object({ type: z.literal('auto') }).strict(),
-                  z
-                    .object({
-                      type: z.literal('custom'),
-                      lines: z.number().min(1).max(20).default(DEFAULT_ROW_HEIGHT_LINES),
-                    })
-                    .strict(),
-                ])
-                .optional()
-                .meta({
-                  description: 'Number of lines to display per table body cell.',
-                }),
-            })
-            .strict()
-            .optional(),
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visDatatableDensity',
-          description: 'Density configuration for the datatable.',
-        }),
+      density: visDatatableDensitySchema,
       /**
        * Paging configuration
        */
@@ -404,6 +408,13 @@ export const datatableConfigSchemaNoESQL = lazySchema(() =>
     })
 );
 
+const visDatatableESQLMetricSchema = lazySchema(() =>
+  esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).meta({
+    id: 'visDatatableESQLMetric',
+    title: 'Datatable Metric (ES|QL)',
+  })
+);
+
 export const datatableConfigSchemaESQL = lazySchema(() =>
   z
     .object({
@@ -416,12 +427,7 @@ export const datatableConfigSchemaESQL = lazySchema(() =>
        * Metric columns configuration, must define operation.
        */
       metrics: z
-        .array(
-          esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).meta({
-            id: 'visDatatableESQLMetric',
-            title: 'Datatable Metric (ES|QL)',
-          })
-        )
+        .array(visDatatableESQLMetricSchema)
         .min(1)
         .max(1000)
         .optional()

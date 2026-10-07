@@ -59,25 +59,25 @@ const heatmapSortPredicateSchema = lazySchema(() =>
     .meta({ description: 'Axis sort order; omit or use undefined for no sorting' })
 );
 
+const visHeatmapCellsSchema = lazySchema(() =>
+  z
+    .object({
+      labels: z
+        .object({
+          visible: z.boolean().default(false).optional().meta({ description: 'Show cell labels' }),
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+    .optional()
+    .meta({ id: 'visHeatmapCells', title: 'Cells', description: 'Cells configuration' })
+);
+
 const heatmapStylingSchema = lazySchema(() =>
   z
     .object({
-      cells: z
-        .object({
-          labels: z
-            .object({
-              visible: z
-                .boolean()
-                .default(false)
-                .optional()
-                .meta({ description: 'Show cell labels' }),
-            })
-            .strict()
-            .optional(),
-        })
-        .strict()
-        .optional()
-        .meta({ id: 'visHeatmapCells', title: 'Cells', description: 'Cells configuration' }),
+      cells: visHeatmapCellsSchema,
     })
     .strict()
     .meta({
@@ -87,53 +87,69 @@ const heatmapStylingSchema = lazySchema(() =>
     })
 );
 
+const visHeatmapLegendSchema = lazySchema(() =>
+  legendSchema.optional().meta({
+    id: 'visHeatmapLegend',
+    title: 'Legend',
+    description: 'Legend configuration',
+  })
+);
+
+const visHeatmapXAxisSchema = lazySchema(() =>
+  z
+    .object({
+      title: axisTitleSchema.optional(),
+      labels: labelsSchema.optional(),
+      sort: heatmapSortPredicateSchema.optional(),
+      scale: xScaleSchema,
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visHeatmapXAxis',
+      title: 'X Axis',
+      description: 'X axis configuration',
+    })
+);
+
+const visHeatmapYAxisSchema = lazySchema(() =>
+  z
+    .object({
+      title: axisTitleSchema.optional(),
+      labels: simpleLabelsSchema.optional(),
+      sort: heatmapSortPredicateSchema.optional(),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visHeatmapYAxis',
+      title: 'Y Axis',
+      description: 'Y axis configuration',
+    })
+);
+
+const visHeatmapAxesSchema = lazySchema(() =>
+  z
+    .object({
+      x: visHeatmapXAxisSchema,
+      y: visHeatmapYAxisSchema,
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visHeatmapAxes',
+      title: 'Axes',
+      description: 'Axis configuration for X and Y axes',
+    })
+);
+
 const heatmapSharedConfigSchema = lazySchema(() =>
   z.object({
     type: z.literal('heatmap'),
-    legend: legendSchema.optional().meta({
-      id: 'visHeatmapLegend',
-      title: 'Legend',
-      description: 'Legend configuration',
-    }),
+    legend: visHeatmapLegendSchema,
     ...sharedPanelInfoSchema.shape,
     ...layerSettingsSchema.shape,
-    axis: z
-      .object({
-        x: z
-          .object({
-            title: axisTitleSchema.optional(),
-            labels: labelsSchema.optional(),
-            sort: heatmapSortPredicateSchema.optional(),
-            scale: xScaleSchema,
-          })
-          .strict()
-          .optional()
-          .meta({
-            id: 'visHeatmapXAxis',
-            title: 'X Axis',
-            description: 'X axis configuration',
-          }),
-        y: z
-          .object({
-            title: axisTitleSchema.optional(),
-            labels: simpleLabelsSchema.optional(),
-            sort: heatmapSortPredicateSchema.optional(),
-          })
-          .strict()
-          .optional()
-          .meta({
-            id: 'visHeatmapYAxis',
-            title: 'Y Axis',
-            description: 'Y axis configuration',
-          }),
-      })
-      .strict()
-      .optional()
-      .meta({
-        id: 'visHeatmapAxes',
-        title: 'Axes',
-        description: 'Axis configuration for X and Y axes',
-      }),
+    axis: visHeatmapAxesSchema,
   })
 );
 

@@ -74,6 +74,13 @@ export const bucketDateHistogramOperationSchema = lazySchema(() =>
     })
     .meta({ id: 'visDateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram })
 );
+const visTermsRankByCustomDirectionSchema = lazySchema(() =>
+  directionSchema.meta({
+    id: 'visTermsRankByCustomDirection',
+    description: 'Sort direction for custom ranking.',
+  })
+);
+
 const bucketTermsRankByCustomSharedSchema = lazySchema(() =>
   z
     .object({
@@ -87,10 +94,7 @@ const bucketTermsRankByCustomSharedSchema = lazySchema(() =>
       /**
        * Direction of the custom operation
        */
-      direction: directionSchema.meta({
-        id: 'visTermsRankByCustomDirection',
-        description: 'Sort direction for custom ranking.',
-      }),
+      direction: visTermsRankByCustomDirectionSchema,
     })
     .strip()
 );
@@ -161,6 +165,87 @@ const bucketTermsRankByPercentileRankOperationSchema = lazySchema(() =>
       title: 'Terms Rank By Percentile Rank Operation',
       description:
         'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.',
+    })
+);
+
+const visTermsRankByAlphabeticalDirectionSchema = lazySchema(() =>
+  directionSchema.meta({
+    id: 'visTermsRankByAlphabeticalDirection',
+    description: 'Sort direction for alphabetical ranking.',
+  })
+);
+
+const visTermsRankByAlphabeticalSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('alphabetical'),
+      /**
+       * Direction of the alphabetical order
+       */
+      direction: visTermsRankByAlphabeticalDirectionSchema,
+    })
+    .strip()
+    .meta({
+      id: 'visTermsRankByAlphabetical',
+      title: 'Terms Rank By Alphabetical',
+      description: 'Terms ranked alphabetically.',
+    })
+);
+
+const visTermsRankByRareSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('rare'),
+      /**
+       * Maximum number of rare terms
+       */
+      max: z.number().meta({
+        description: 'Maximum number of rare terms to include.',
+      }),
+    })
+    .strip()
+    .meta({
+      id: 'visTermsRankByRare',
+      title: 'Terms Rank By Rarity',
+      description: 'Terms ranked by rarity.',
+    })
+);
+
+const visTermsRankBySignificantSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('significant'),
+    })
+    .strip()
+    .meta({
+      id: 'visTermsRankBySignificant',
+      title: 'Terms Rank By Significance',
+      description: 'Terms ranked by significance.',
+    })
+);
+
+const visTermsRankByMetricDirectionSchema = lazySchema(() =>
+  directionSchema.meta({
+    id: 'visTermsRankByMetricDirection',
+    description: 'Sort direction for metric-based ranking.',
+  })
+);
+
+const visTermsRankByMetricSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('metric'),
+      metric_index: z.number().min(0).default(0).meta({
+        description: 'Zero-based index into the metrics array identifying which metric to rank by.',
+      }),
+
+      direction: visTermsRankByMetricDirectionSchema,
+    })
+    .strip()
+    .meta({
+      id: 'visTermsRankByMetric',
+      title: 'Terms Rank By Metric',
+      description: 'Terms ranked by a linked metric.',
     })
 );
 
@@ -240,68 +325,10 @@ export const bucketTermsOperationSchema = lazySchema(() =>
        */
       rank_by: z
         .union([
-          z
-            .object({
-              type: z.literal('alphabetical'),
-              /**
-               * Direction of the alphabetical order
-               */
-              direction: directionSchema.meta({
-                id: 'visTermsRankByAlphabeticalDirection',
-                description: 'Sort direction for alphabetical ranking.',
-              }),
-            })
-            .strip()
-            .meta({
-              id: 'visTermsRankByAlphabetical',
-              title: 'Terms Rank By Alphabetical',
-              description: 'Terms ranked alphabetically.',
-            }),
-          z
-            .object({
-              type: z.literal('rare'),
-              /**
-               * Maximum number of rare terms
-               */
-              max: z.number().meta({
-                description: 'Maximum number of rare terms to include.',
-              }),
-            })
-            .strip()
-            .meta({
-              id: 'visTermsRankByRare',
-              title: 'Terms Rank By Rarity',
-              description: 'Terms ranked by rarity.',
-            }),
-          z
-            .object({
-              type: z.literal('significant'),
-            })
-            .strip()
-            .meta({
-              id: 'visTermsRankBySignificant',
-              title: 'Terms Rank By Significance',
-              description: 'Terms ranked by significance.',
-            }),
-          z
-            .object({
-              type: z.literal('metric'),
-              metric_index: z.number().min(0).default(0).meta({
-                description:
-                  'Zero-based index into the metrics array identifying which metric to rank by.',
-              }),
-
-              direction: directionSchema.meta({
-                id: 'visTermsRankByMetricDirection',
-                description: 'Sort direction for metric-based ranking.',
-              }),
-            })
-            .strip()
-            .meta({
-              id: 'visTermsRankByMetric',
-              title: 'Terms Rank By Metric',
-              description: 'Terms ranked by a linked metric.',
-            }),
+          visTermsRankByAlphabeticalSchema,
+          visTermsRankByRareSchema,
+          visTermsRankBySignificantSchema,
+          visTermsRankByMetricSchema,
           bucketTermsRankByCustomOperationSchema,
           bucketTermsRankByCustomCountOperationSchema,
           bucketTermsRankByPercentileOperationSchema,

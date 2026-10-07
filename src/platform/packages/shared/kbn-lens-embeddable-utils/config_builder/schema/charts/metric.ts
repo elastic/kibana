@@ -122,28 +122,31 @@ export const complementaryVizSchemaNoESQL = lazySchema(() =>
     })
 );
 
-export const complementaryVizSchemaESQL = lazySchema(() =>
-  z
-    .union([
-      barBackgroundChartSchema
-        .extend({
-          /**
-           * Max value
-           */
-          max_value: esqlColumnSchema,
-        })
-        .meta({ id: 'visMetricComplementaryBar', title: 'Complementary Bar' }),
-      z
-        .object({
-          type: z.literal('trend'),
-        })
-        .meta({ id: 'visMetricComplementaryTrend', title: 'Complementary Trend' }),
-    ])
-    .meta({
-      id: 'visMetricComplementaryVizESQL',
-      title: 'Complementary Visualization',
-      description: 'Bar chart or trendline shown behind the primary metric value.',
+const visMetricComplementaryBarSchema = lazySchema(() =>
+  barBackgroundChartSchema
+    .extend({
+      /**
+       * Max value
+       */
+      max_value: esqlColumnSchema,
     })
+    .meta({ id: 'visMetricComplementaryBar', title: 'Complementary Bar' })
+);
+
+const visMetricComplementaryTrendSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('trend'),
+    })
+    .meta({ id: 'visMetricComplementaryTrend', title: 'Complementary Trend' })
+);
+
+export const complementaryVizSchemaESQL = lazySchema(() =>
+  z.union([visMetricComplementaryBarSchema, visMetricComplementaryTrendSchema]).meta({
+    id: 'visMetricComplementaryVizESQL',
+    title: 'Complementary Visualization',
+    description: 'Bar chart or trendline shown behind the primary metric value.',
+  })
 );
 
 const metricConfigBackgroundChartShapeNoESQL = {
@@ -159,6 +162,51 @@ const metricConfigBackgroundChartShapeESQL = {
    */
   background_chart: complementaryVizSchemaESQL.optional(),
 };
+
+const visMetricIconConfigSchema = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Icon name
+       */
+      name: z
+        .union([
+          z.literal('alert'),
+          z.literal('asterisk'),
+          z.literal('bell'),
+          z.literal('bolt'),
+          z.literal('bug'),
+          z.literal('compute'),
+          z.literal('editor_comment'),
+          z.literal('flag'),
+          z.literal('globe'),
+          z.literal('heart'),
+          z.literal('map_marker'),
+          z.literal('pin'),
+          z.literal('sort_down'),
+          z.literal('sort_up'),
+          z.literal('star_empty'),
+          z.literal('tag'),
+          z.literal('temperature'),
+        ])
+        .meta({ description: 'Icon name' }),
+      /**
+       * Icon alignment. Possible values:
+       * - 'right': Icon is aligned to the right
+       * - 'left': Icon is aligned to the left
+       */
+      alignment: leftRightAlignmentSchema.default(DEFAULT_PRIMARY_ICON_ALIGNMENT).optional().meta({
+        description: 'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.',
+      }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visMetricIconConfig',
+      title: 'Icon Configuration',
+      description: 'Icon configuration for the metric chart',
+    })
+);
 
 const metricStylingSchema = lazySchema(() =>
   z
@@ -180,51 +228,7 @@ const metricStylingSchema = lazySchema(() =>
       /**
        * Icon configuration
        */
-      icon: z
-        .object({
-          /**
-           * Icon name
-           */
-          name: z
-            .union([
-              z.literal('alert'),
-              z.literal('asterisk'),
-              z.literal('bell'),
-              z.literal('bolt'),
-              z.literal('bug'),
-              z.literal('compute'),
-              z.literal('editor_comment'),
-              z.literal('flag'),
-              z.literal('globe'),
-              z.literal('heart'),
-              z.literal('map_marker'),
-              z.literal('pin'),
-              z.literal('sort_down'),
-              z.literal('sort_up'),
-              z.literal('star_empty'),
-              z.literal('tag'),
-              z.literal('temperature'),
-            ])
-            .meta({ description: 'Icon name' }),
-          /**
-           * Icon alignment. Possible values:
-           * - 'right': Icon is aligned to the right
-           * - 'left': Icon is aligned to the left
-           */
-          alignment: leftRightAlignmentSchema
-            .default(DEFAULT_PRIMARY_ICON_ALIGNMENT)
-            .optional()
-            .meta({
-              description: 'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.',
-            }),
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visMetricIconConfig',
-          title: 'Icon Configuration',
-          description: 'Icon configuration for the metric chart',
-        }),
+      icon: visMetricIconConfigSchema,
       primary: z
         .object({
           /**

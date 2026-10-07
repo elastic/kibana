@@ -311,72 +311,156 @@ const XY_API_LINE_INTERPOLATION = {
 
 export type XYApiLineInterpolation = typeof XY_API_LINE_INTERPOLATION;
 
+const visXyStylingOverlaysSchema = lazySchema(() =>
+  z
+    .object({
+      partial_buckets: z
+        .object({
+          visible: z
+            .boolean()
+            .default(DEFAULT_PARTIAL_BUCKETS_VISIBLE)
+            .meta({ description: 'Show partial bucket indicators at time range edges' }),
+        })
+        .strict()
+        .optional()
+        .meta({ description: 'Partial (incomplete) bucket indicator configuration' }),
+      current_time_marker: z
+        .object({
+          visible: z
+            .boolean()
+            .default(DEFAULT_CURRENT_TIME_MARKER_VISIBLE)
+            .meta({ description: 'Show current time marker line' }),
+        })
+        .strict()
+        .optional()
+        .meta({ description: 'Current time marker configuration' }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visXyStylingOverlays',
+      description: 'Visual overlays drawn on top of the chart canvas',
+    })
+);
+
+const visXyFittingSchema = lazySchema(() =>
+  z
+    .object({
+      type: z
+        .union([
+          z.literal('none'),
+          z.literal('zero'),
+          z.literal('linear'),
+          z.literal('carry'),
+          z.literal('lookahead'),
+          z.literal('average'),
+          z.literal('nearest'),
+        ])
+        .meta({ description: 'Fitting function type for missing data' }),
+      emphasize: z.boolean().optional().meta({
+        description:
+          'Visually distinguish fitted segments with a dashed line style and reduced area opacity',
+      }),
+      extend: z
+        .union([z.literal('none'), z.literal('zero'), z.literal('nearest')])
+        .optional()
+        .meta({
+          description:
+            'How to render line and area edges when data does not cover the full X domain',
+        }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visXyFitting',
+      description: 'Missing data interpolation configuration for line and area series',
+    })
+);
+
+const visXyStylingPointsSchema = lazySchema(() =>
+  z
+    .object({
+      visibility: z
+        .union([z.literal('auto'), z.literal('visible'), z.literal('hidden')])
+        .default(DEFAULT_POINTS_VISIBILITY)
+        .optional()
+        .meta({ description: 'Data point marker visibility on line and area series' }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visXyStylingPoints',
+      description: 'Data point marker settings for line and area series',
+    })
+);
+
+const visXyStylingAreasSchema = lazySchema(() =>
+  z
+    .object({
+      fill_opacity: z
+        .number()
+        .min(0)
+        .max(2)
+        .default(DEFAULT_AREAS_FILL_OPACITY)
+        .optional()
+        .meta({ description: 'Area fill opacity (0-1 typical, max 2 for legacy)' }),
+      fill: z
+        .enum(['solid', 'gradient'])
+        .default(DEFAULT_AREAS_FILL)
+        .optional()
+        .meta({
+          description: 'Area fill type: solid or gradient. Defaults to solid.',
+          openapi: {
+            availability: {
+              since: '9.6.0',
+            },
+          },
+        }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visXyStylingAreas',
+      description: 'Area-specific rendering settings',
+    })
+);
+
+const visXyStylingBarsSchema = lazySchema(() =>
+  z
+    .object({
+      minimum_height: z
+        .number()
+        .min(0)
+        .default(DEFAULT_BARS_MINIMUM_HEIGHT)
+        .optional()
+        .meta({ description: 'Minimum bar height in pixels' }),
+      data_labels: z
+        .object({
+          visible: z
+            .boolean()
+            .default(DEFAULT_DATA_LABELS_VISIBLE)
+            .meta({ description: 'Display value labels on bar data points' }),
+        })
+        .strict()
+        .optional()
+        .meta({ description: 'Data label configuration for bar series' }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visXyStylingBars',
+      description: 'Bar-specific rendering settings',
+    })
+);
+
 const xyStylingSchema = lazySchema(() =>
   z
     .object({
       // Chart-level (always present)
-      overlays: z
-        .object({
-          partial_buckets: z
-            .object({
-              visible: z
-                .boolean()
-                .default(DEFAULT_PARTIAL_BUCKETS_VISIBLE)
-                .meta({ description: 'Show partial bucket indicators at time range edges' }),
-            })
-            .strict()
-            .optional()
-            .meta({ description: 'Partial (incomplete) bucket indicator configuration' }),
-          current_time_marker: z
-            .object({
-              visible: z
-                .boolean()
-                .default(DEFAULT_CURRENT_TIME_MARKER_VISIBLE)
-                .meta({ description: 'Show current time marker line' }),
-            })
-            .strict()
-            .optional()
-            .meta({ description: 'Current time marker configuration' }),
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visXyStylingOverlays',
-          description: 'Visual overlays drawn on top of the chart canvas',
-        }),
+      overlays: visXyStylingOverlaysSchema,
 
       // Lines + areas shared (alphabetical)
-      fitting: z
-        .object({
-          type: z
-            .union([
-              z.literal('none'),
-              z.literal('zero'),
-              z.literal('linear'),
-              z.literal('carry'),
-              z.literal('lookahead'),
-              z.literal('average'),
-              z.literal('nearest'),
-            ])
-            .meta({ description: 'Fitting function type for missing data' }),
-          emphasize: z.boolean().optional().meta({
-            description:
-              'Visually distinguish fitted segments with a dashed line style and reduced area opacity',
-          }),
-          extend: z
-            .union([z.literal('none'), z.literal('zero'), z.literal('nearest')])
-            .optional()
-            .meta({
-              description:
-                'How to render line and area edges when data does not cover the full X domain',
-            }),
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visXyFitting',
-          description: 'Missing data interpolation configuration for line and area series',
-        }),
+      fitting: visXyFittingSchema,
       interpolation: z
         .union([
           z.literal(XY_API_LINE_INTERPOLATION.LINEAR),
@@ -386,75 +470,11 @@ const xyStylingSchema = lazySchema(() =>
         .default(DEFAULT_LINES_INTERPOLATION)
         .optional()
         .meta({ description: 'Curve interpolation method for line and area series' }),
-      points: z
-        .object({
-          visibility: z
-            .union([z.literal('auto'), z.literal('visible'), z.literal('hidden')])
-            .default(DEFAULT_POINTS_VISIBILITY)
-            .optional()
-            .meta({ description: 'Data point marker visibility on line and area series' }),
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visXyStylingPoints',
-          description: 'Data point marker settings for line and area series',
-        }),
+      points: visXyStylingPointsSchema,
 
       // Series-type specific (alphabetical)
-      areas: z
-        .object({
-          fill_opacity: z
-            .number()
-            .min(0)
-            .max(2)
-            .default(DEFAULT_AREAS_FILL_OPACITY)
-            .optional()
-            .meta({ description: 'Area fill opacity (0-1 typical, max 2 for legacy)' }),
-          fill: z
-            .enum(['solid', 'gradient'])
-            .default(DEFAULT_AREAS_FILL)
-            .optional()
-            .meta({
-              description: 'Area fill type: solid or gradient. Defaults to solid.',
-              openapi: {
-                availability: {
-                  since: '9.6.0',
-                },
-              },
-            }),
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visXyStylingAreas',
-          description: 'Area-specific rendering settings',
-        }),
-      bars: z
-        .object({
-          minimum_height: z
-            .number()
-            .min(0)
-            .default(DEFAULT_BARS_MINIMUM_HEIGHT)
-            .optional()
-            .meta({ description: 'Minimum bar height in pixels' }),
-          data_labels: z
-            .object({
-              visible: z
-                .boolean()
-                .default(DEFAULT_DATA_LABELS_VISIBLE)
-                .meta({ description: 'Display value labels on bar data points' }),
-            })
-            .strict()
-            .optional()
-            .meta({ description: 'Data label configuration for bar series' }),
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visXyStylingBars',
-          description: 'Bar-specific rendering settings',
-        }),
+      areas: visXyStylingAreasSchema,
+      bars: visXyStylingBarsSchema,
     })
     .strict()
     .meta({
