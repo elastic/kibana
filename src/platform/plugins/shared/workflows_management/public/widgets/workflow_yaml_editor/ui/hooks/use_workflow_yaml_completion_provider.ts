@@ -58,16 +58,9 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
       () => editorStateRef.current,
       getKqlServices,
       getPropertyHandler,
-      getEsqlServices,
-      () => services.security.serviceAccounts.isEnabled()
+      getEsqlServices
     );
-  }, [
-    getPropertyHandler,
-    registry,
-    services.fieldFormats,
-    services.kql,
-    services.security.serviceAccounts,
-  ]);
+  }, [getPropertyHandler, registry, services.fieldFormats, services.kql]);
 
   return completionProvider;
 };

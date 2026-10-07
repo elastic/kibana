@@ -18,7 +18,7 @@
 
 The child ID and identity mode must be literal values in the saved parent definition, including calls in workflow-level `settings.on-failure.fallback` steps. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
 
-The YAML editor suggests identity fields only when SAs are enabled. Editor validation rejects inheritance on unmanaged parents and flags templated child IDs and known unmanaged targets. Managed definitions remain read-only in the editor and are configured by their publisher. Whether a child already has its own SA is checked at execution time.
+The YAML editor does not suggest `run-as-mode`: managed workflows are read-only, and editable unmanaged workflows cannot inherit identities. The schema still accepts the field in managed definitions. Editor validation rejects inheritance on unmanaged parents and flags templated child IDs and known unmanaged targets. Managed definitions remain read-only in the editor and are configured by their publisher. Whether a child already has its own SA is checked at execution time.
 
 ## Authorization and lifetime
 
@@ -44,3 +44,5 @@ Enable SAs and load `examples/developer_examples` and `examples/workflows_extens
 - `POST .../{suffix}/run` executes the example; `DELETE .../{suffix}` uninstalls it.
 
 The Scout `service_account_inheritance.spec.ts` suite covers these paths using real plugin installation and scoped execution credentials.
+
+The inheritance Scout suite currently targets local stateful Kibana + Elasticsearch, as requested for this implementation. Serverless/UIAM delegation and resume need a separate validation run with that backend and its authorization setup; stateful results do not establish serverless compatibility.

@@ -79,58 +79,49 @@ describe('getCompletionItemProvider', () => {
     clearAllYamlProviders();
   });
 
-  it.each([
-    [false, false],
-    [false, true],
-    [true, false],
-    [true, true],
-  ])(
-    'gates typed identity values by feature flag regardless of managed status (managed=%s, SA=%s)',
-    async (managed, enabled) => {
-      for (const stepType of ['workflow.execute', 'workflow.executeAsync']) {
-        const field = 'run-as-mode';
-        jest.mocked(buildContext).mockReturnValueOnce({
-          path: ['steps', 0, 'with', field],
-          focusedStepInfo: createStepInfo({ stepType }),
-          focusedYamlPair: {
-            path: ['with', field],
-            keyNode: new Scalar(field),
-            valueNode: new Scalar(''),
-          },
-          isCurrentWorkflowManaged: managed,
-        } as ExtendedAutocompleteContext);
-        const yamlProvider = {
-          provideCompletionItems: jest.fn().mockResolvedValue({
-            suggestions: [
-              {
-                label: 'inherit',
-                insertText: 'inherit',
-                kind: monaco.languages.CompletionItemKind.EnumMember,
-                range: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 },
-              },
-            ],
-          }),
-        };
-        clearAllYamlProviders();
-        monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
-        const provider = getCompletionItemProvider(
-          emptyRegistry,
-          getState,
-          undefined,
-          undefined,
-          undefined,
-          () => enabled
-        );
-        const result = await provider.provideCompletionItems?.(
-          mockModel,
-          mockPosition,
-          mockCompletionContext,
-          {} as monaco.CancellationToken
-        );
-        expect(result?.suggestions.map(({ label }) => label)).toEqual(enabled ? ['inherit'] : []);
-      }
+  it.each([false, true])('never suggests identity values (managed=%s)', async (managed) => {
+    for (const stepType of ['workflow.execute', 'workflow.executeAsync']) {
+      const field = 'run-as-mode';
+      jest.mocked(buildContext).mockReturnValueOnce({
+        path: ['steps', 0, 'with', field],
+        focusedStepInfo: createStepInfo({ stepType }),
+        focusedYamlPair: {
+          path: ['with', field],
+          keyNode: new Scalar(field),
+          valueNode: new Scalar(''),
+        },
+        isCurrentWorkflowManaged: managed,
+      } as ExtendedAutocompleteContext);
+      const yamlProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'inherit',
+              insertText: 'inherit',
+              kind: monaco.languages.CompletionItemKind.EnumMember,
+              range: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 },
+            },
+          ],
+        }),
+      };
+      clearAllYamlProviders();
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+      const provider = getCompletionItemProvider(
+        emptyRegistry,
+        getState,
+        undefined,
+        undefined,
+        undefined
+      );
+      const result = await provider.provideCompletionItems?.(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+      expect(result?.suggestions.map(({ label }) => label)).toEqual([]);
     }
-  );
+  });
 
   describe('provider structure', () => {
     it('should have correct provider ID', () => {

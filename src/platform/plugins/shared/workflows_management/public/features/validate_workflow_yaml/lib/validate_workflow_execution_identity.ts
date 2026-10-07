@@ -63,7 +63,7 @@ export const validateWorkflowExecutionIdentity = (
   lookup: WorkflowLookup,
   workflows: WorkflowsResponse | null,
   lineCounter: LineCounter,
-  isManaged = false
+  isManaged: boolean
 ): YamlValidationResult[] =>
   Object.values(lookup.steps).flatMap((step) => {
     if (step.stepType !== 'workflow.execute' && step.stepType !== 'workflow.executeAsync')

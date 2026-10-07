@@ -149,8 +149,7 @@ export function getCompletionItemProvider(
   getState: () => WorkflowDetailState,
   getKqlServices?: () => WorkflowKqlCompletionServices,
   getPropertyHandler?: GetStepPropertyHandler,
-  getEsqlServices?: () => WorkflowEsqlCompletionServices,
-  areServiceAccountsEnabled: () => boolean = () => false
+  getEsqlServices?: () => WorkflowEsqlCompletionServices
 ): monaco.languages.CompletionItemProvider {
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
@@ -175,7 +174,6 @@ export function getCompletionItemProvider(
       const { focusedStepInfo, focusedYamlPair } = autocompleteContext;
       const identityField = focusedYamlPair?.path;
       if (
-        !areServiceAccountsEnabled() &&
         (focusedStepInfo?.stepType === 'workflow.execute' ||
           focusedStepInfo?.stepType === 'workflow.executeAsync') &&
         identityField?.length === 2 &&

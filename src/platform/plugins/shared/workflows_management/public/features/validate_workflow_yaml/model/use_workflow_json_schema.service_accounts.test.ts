@@ -118,18 +118,14 @@ steps:
       jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
     });
 
-    it.each([false, true])('gates identity fields (SA=%s)', async (enabled) => {
+    it.each([false, true])('never suggests identity fields (SA=%s)', async (enabled) => {
       services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
       const { result } = renderHook(() => useWorkflowJsonSchema());
       const completions = await complete(result.current.jsonSchema, `${yaml}      `);
       const labels = completions?.items.map(({ label }) => label);
       expect(labels).toContain('inputs');
       expect(labels).not.toContain('inheritRunAs');
-      if (enabled) {
-        expect(labels).toContain('run-as-mode');
-      } else {
-        expect(labels).not.toContain('run-as-mode');
-      }
+      expect(labels).not.toContain('run-as-mode');
     });
 
     it('rejects the removed inheritRunAs YAML property', async () => {
@@ -146,7 +142,7 @@ steps:
       expect(diagnostics.some(({ message }) => message.includes('inheritRunAs'))).toBe(true);
     });
 
-    it.each([false, true])('gates nested step suggestions (SA=%s)', async (enabled) => {
+    it.each([false, true])('never suggests nested identity fields (SA=%s)', async (enabled) => {
       services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
       const { result } = renderHook(() => useWorkflowJsonSchema());
       const nestedYaml = yaml
@@ -161,7 +157,7 @@ steps:
       const completions = await complete(result.current.jsonSchema, `${nestedYaml}          `);
       const labels = completions?.items.map(({ label }) => label);
       expect(labels).toContain('inputs');
-      expect(labels?.includes('run-as-mode')).toBe(enabled);
+      expect(labels).not.toContain('run-as-mode');
       expect(labels).not.toContain('inheritRunAs');
     });
 

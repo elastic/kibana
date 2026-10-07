@@ -105,7 +105,7 @@ export const useWorkflowJsonSchema = ({
         }
       }
 
-      if (jsonSchema && !serviceAccountsEnabled) {
+      if (jsonSchema) {
         hideChildIdentitySuggestions(jsonSchema);
       }
 

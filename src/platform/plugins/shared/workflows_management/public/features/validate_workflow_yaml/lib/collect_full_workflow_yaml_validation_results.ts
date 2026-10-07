@@ -42,7 +42,7 @@ export interface WorkflowYamlValidationContext {
   esqlCallbacks: ESQLCallbacks;
   signal?: AbortSignal;
   warnIgnoredKibanaFetcher?: boolean;
-  isManaged?: boolean;
+  isManaged: boolean;
 }
 
 export interface CollectFullWorkflowYamlValidationResultsParams {

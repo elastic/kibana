@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { StorageClientBulkIndexOccMetadata } from '@kbn/storage-adapter';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
-import { buildWorkflowFilters } from '@kbn/workflows/server';
+import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -46,7 +46,7 @@ const hasRunningExecutions = async (
     ) => Promise<WorkflowExecutionListDto>;
   }
 ): Promise<boolean> => {
-  if (document?.managed === true && document.spaceId === '*') {
+  if (document?.managed === true && document.spaceId === GLOBAL_WORKFLOW_SPACE_ID) {
     // Global definitions execute in callers' concrete spaces; deletion must check every space.
     const executions = await deps.workflowExecutionsDataClient.search({
       query: {
