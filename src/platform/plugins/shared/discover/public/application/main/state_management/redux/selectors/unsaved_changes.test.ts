@@ -16,7 +16,8 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { internalStateActions } from '..';
-import { selectHasUnsavedChanges } from './unsaved_changes';
+import { FilterStateStore, type Filter } from '@kbn/es-query';
+import { searchSourceComparator, selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createContextAwarenessMocks } from '../../../../../context_awareness/__mocks__/context_awareness';
@@ -496,6 +497,45 @@ describe('selectHasUnsavedChanges', () => {
       expect(
         selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
       ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+    });
+  });
+
+  describe('searchSourceComparator', () => {
+    const phraseMeta = {
+      index: 'data-view-id',
+      key: 'response',
+      field: 'response',
+      type: 'phrase',
+      params: { query: '200' },
+    };
+    const query = { match_phrase: { response: '200' } };
+    const uiFilter: Filter = {
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: { ...phraseMeta, alias: null, negate: false, disabled: false },
+      query,
+    };
+
+    it('does not detect changes when the filter only went through the HTTP API conversion', () => {
+      const apiFilter: Filter = { meta: { ...phraseMeta, disabled: false }, query };
+
+      expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [apiFilter] })).toBe(true);
+    });
+
+    it('does not detect changes when a filter is pinned', () => {
+      const pinnedFilter: Filter = {
+        ...uiFilter,
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+
+      expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [pinnedFilter] })).toBe(true);
+    });
+
+    it('detects a negated filter', () => {
+      const negatedFilter: Filter = { ...uiFilter, meta: { ...uiFilter.meta, negate: true } };
+
+      expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [negatedFilter] })).toBe(
+        false
+      );
     });
   });
 });
