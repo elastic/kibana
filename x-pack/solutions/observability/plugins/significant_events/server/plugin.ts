@@ -416,10 +416,18 @@ export class SignificantEventsPlugin
     core.pricing.registerProductFeatures(SIGNIFICANT_EVENT_TIERED_FEATURES);
     registerFeatureFlags(core, this.logger, plugins.cloud);
 
+    const listRuleBackedRuleIdsInternally = async (): Promise<string[]> => {
+      const [coreStart] = await core.getStartServices();
+      return knowledgeIndicatorService.listRuleBackedRuleIds(
+        coreStart.elasticsearch.client.asInternalUser
+      );
+    };
+
     this.maintenanceService = createSignificantEventsMaintenanceService({
       logger: this.logger,
       server: this.server,
       getScopedClients: this.getScopedClients,
+      listRuleBackedRuleIdsInternally,
     });
 
     const priceService = createPriceService({
@@ -470,6 +478,7 @@ export class SignificantEventsPlugin
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
       this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
+      this.server.alertingVTwo = plugins.alertingVTwo;
 
       this.server.relayClient = plugins.actions.getRelayClient();
 

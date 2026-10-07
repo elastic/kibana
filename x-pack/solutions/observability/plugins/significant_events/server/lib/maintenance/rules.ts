@@ -5,28 +5,27 @@
  * 2.0.
  */
 
+import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import { toMessage } from './to_message';
 
-/**
- * Toggle `enabled` on a set of alerting v2 signal rules. Returns the
- * ids that were actually toggled (no error), the ids that failed for a non-not-found
- * reason, and one failure entry per fatal id. A missing rule is treated as
- * "already gone" and reported as neither toggled nor failed.
- */
-export const setV2RulesEnabled = async (
-  rulesClient: RulesClientApi,
-  ids: string[],
-  enabled: boolean
-): Promise<{
+export interface RulesToggleResult {
   toggledIds: string[];
   failedIds: string[];
   failures: SignificantEventsMaintenanceFailure[];
-}> => {
-  const { errors } = enabled
-    ? await rulesClient.bulkEnableRules({ ids })
-    : await rulesClient.bulkDisableRules({ ids });
+}
+
+/**
+ * Classify an alerting v2 bulk toggle response. Returns the ids that were
+ * actually toggled (no error), the ids that failed for a non-not-found reason,
+ * and one failure entry per fatal id. A missing rule is treated as "already
+ * gone" and reported as neither toggled nor failed.
+ */
+export const toRulesToggleResult = (
+  ids: string[],
+  { errors }: Awaited<ReturnType<RulesClientApi['bulkDisableRules']>>
+): RulesToggleResult => {
   const fatalErrors = errors.filter(
     (error) => error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
   );
@@ -40,6 +39,48 @@ export const setV2RulesEnabled = async (
     })),
   };
 };
+
+type BulkDisableResponse = Awaited<ReturnType<RulesClientApi['bulkDisableRules']>>;
+
+/**
+ * Disable rules in batches the internal rules client accepts. One failing
+ * batch does not stop the rest.
+ */
+export const disableRulesInBatches = async (
+  ids: string[],
+  disable: (ids: string[]) => Promise<BulkDisableResponse>
+): Promise<RulesToggleResult> => {
+  const toggledIds: string[] = [];
+  const failedIds: string[] = [];
+  const failures: SignificantEventsMaintenanceFailure[] = [];
+  for (let offset = 0; offset < ids.length; offset += MAX_BULK_ITEMS) {
+    const chunk = ids.slice(offset, offset + MAX_BULK_ITEMS);
+    try {
+      const result = toRulesToggleResult(chunk, await disable(chunk));
+      toggledIds.push(...result.toggledIds);
+      failedIds.push(...result.failedIds);
+      failures.push(...result.failures);
+    } catch (error) {
+      const message = toMessage(error);
+      failedIds.push(...chunk);
+      failures.push(...chunk.map((id) => ({ target: `rule:${id}`, error: message })));
+    }
+  }
+  return { toggledIds, failedIds, failures };
+};
+
+/** Toggle `enabled` on a set of alerting v2 signal rules as the caller. */
+export const setV2RulesEnabled = async (
+  rulesClient: RulesClientApi,
+  ids: string[],
+  enabled: boolean
+): Promise<RulesToggleResult> =>
+  toRulesToggleResult(
+    ids,
+    enabled
+      ? await rulesClient.bulkEnableRules({ ids })
+      : await rulesClient.bulkDisableRules({ ids })
+  );
 
 const RULE_BULK_SIZE = 100;
 

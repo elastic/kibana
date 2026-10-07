@@ -22,10 +22,13 @@ import {
   type StoredKnowledgeIndicator,
   type knowledgeIndicatorsMappings,
 } from './data_stream';
+import { IndicatorReader } from './knowledge_indicator_client/indicator_reader';
+import { RevisionReader } from './knowledge_indicator_client/revision_reader';
 import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorDataStreamClient,
 } from './knowledge_indicator_client';
+import { ruleIdsFromQueryLinks } from './rule_ids_from_query_links';
 import type { SignificantEventsAlertingContext } from '../significant_events/alerting/significant_events_alerting_context';
 
 export class KnowledgeIndicatorService {
@@ -70,5 +73,13 @@ export class KnowledgeIndicatorService {
       context,
       config
     );
+  }
+
+  /** Rule ids of queries backed by an alerting rule, read without a rules client. */
+  async listRuleBackedRuleIds(esClient: ElasticsearchClient): Promise<string[]> {
+    const links = await new IndicatorReader(
+      new RevisionReader(esClient, this.logger.get('knowledge_indicators'))
+    ).getRuleBackedQueryLinks();
+    return ruleIdsFromQueryLinks(links);
   }
 }

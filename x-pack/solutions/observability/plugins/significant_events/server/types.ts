@@ -99,4 +99,6 @@ export interface SignificantEventsServer {
   /** Singleton client for the Relay service, owned by the Actions plugin. */
   relayClient?: RelayClientContract;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
+  /** Set at start. Used by system maintenance sweeps to disable rules without a user. */
+  alertingVTwo?: AlertingV2ServerStart;
 }

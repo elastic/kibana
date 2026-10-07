@@ -60,7 +60,7 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
         <p>
           <FormattedMessage
             id="xpack.significantEventsApp.settings.maintenance.pausedByFeatureFlag"
-            defaultMessage="Paused automatically because Nightshift was turned off. Activity stays paused until you resume it. The alerting rules backing knowledge indicator queries were left running."
+            defaultMessage="Paused automatically because Nightshift was turned off. Activity stays paused until you resume it."
           />
         </p>
       )}
