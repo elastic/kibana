@@ -162,20 +162,19 @@ export const EscalationQueue = memo<EscalationQueueProps>(
         return (
           <>
             <EuiFlexGroup direction="column" gutterSize="none">
-              {escalations.map((escalation, i) => (
-                <EuiFlexItem key={escalation.id} grow={false}>
-                  <EscalationCard
-                    escalation={escalation}
-                    hasBorder={i < escalations.length - 1 || showLoadMore}
-                    renderAssignees={renderAssignees}
-                    onClickCard={onClickCard}
-                    isSelected={escalation.id === selectedConversationId}
-                    href={getHref?.(escalation)}
-                  />
-                </EuiFlexItem>
+              {escalations.map((escalation) => (
+                <EscalationCard
+                  key={escalation.id}
+                  escalation={escalation}
+                  renderAssignees={renderAssignees}
+                  onClickCard={onClickCard}
+                  isSelected={escalation.id === selectedConversationId}
+                  href={getHref?.(escalation)}
+                />
               ))}
+              {/* Sibling of the cards so the last card keeps its divider above it. */}
+              {loadMoreButton}
             </EuiFlexGroup>
-            {loadMoreButton}
           </>
         );
       }

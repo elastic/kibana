@@ -26,7 +26,6 @@ import { createCardLinkClickHandler } from '../actions/card_link_click';
 
 interface EscalationCardProps {
   escalation: EscalationQueueItem;
-  hasBorder: boolean;
   /** Render the assignee widget. Supplied by the page so hook calls stay outside the package. */
   renderAssignees: (escalation: EscalationQueueItem) => React.ReactNode;
   /**
@@ -51,7 +50,7 @@ interface EscalationCardProps {
  * One row in the escalation queue.
  */
 export const EscalationCard = memo<EscalationCardProps>(
-  ({ escalation, hasBorder, renderAssignees, onClickCard, isSelected = false, href }) => {
+  ({ escalation, renderAssignees, onClickCard, isSelected = false, href }) => {
     const { euiTheme } = useEuiTheme();
     const isClosed = escalation.status === 'closed';
     const isClickable = onClickCard !== undefined;
@@ -99,10 +98,15 @@ export const EscalationCard = memo<EscalationCardProps>(
         onClick={isClickable ? handleClick : undefined}
         onKeyDown={isClickable && !hasLink ? handleKeyDown : undefined}
         css={{
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder
-            ? 'none'
-            : `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+          borderRadius: 0,
+          '&:not(:last-child)': {
+            borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+          },
+          // The last row rounds to the queue panel's corners so the hover fill does not
+          // square them off. A footer after the rows keeps it from being the last child.
+          '&:last-child': {
+            borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+          },
           boxSizing: 'border-box',
           boxShadow: 'none',
           cursor: isClickable ? 'pointer' : undefined,

@@ -32,7 +32,6 @@ const renderCard = (
   renderWithKibanaRenderContext(
     <ConversationCard
       investigation={investigation}
-      hasBorder={false}
       isSelected={isSelected}
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
@@ -83,7 +82,6 @@ describe('ConversationCard', () => {
     renderWithKibanaRenderContext(
       <ConversationCard
         investigation={{ ...investigation, createdAt, updatedAt: new Date().toISOString() }}
-        hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
         onCopyLink={jest.fn()}
@@ -101,7 +99,6 @@ describe('ConversationCard', () => {
     renderWithKibanaRenderContext(
       <ConversationCard
         investigation={{ ...investigation, createdAt: '2024-03-05T14:30:00.000Z' }}
-        hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
         onCopyLink={jest.fn()}

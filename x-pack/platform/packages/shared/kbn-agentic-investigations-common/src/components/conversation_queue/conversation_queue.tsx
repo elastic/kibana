@@ -175,17 +175,59 @@ export const ConversationQueue = memo<ConversationQueueProps>(
       </EuiFlexGroup>
     );
 
-    const hasFooter = loadingRows === 0 && isOpen && remaining > 0 && onShowMore !== undefined;
+    const hasMoreToShow = loadingRows === 0 && isOpen && remaining > 0 && onShowMore !== undefined;
+
+    // A sibling of the cards in the same group, so the last card is no longer the last
+    // child: it keeps its divider and square corners, with no flag passed down.
+    const showMoreButton = hasMoreToShow ? (
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        responsive={false}
+        gutterSize="none"
+        css={{
+          // The row above draws the divider.
+          // Keeps the hover fill and focus ring off the row's borders.
+          padding: euiTheme.size.xs,
+          cursor: 'default',
+        }}
+      >
+        {/* The rows that did load stay put; only this says the click failed,
+            and the control below it is the retry. */}
+        {hasLoadMoreError ? (
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="xs"
+              color="danger"
+              role="alert"
+              data-test-subj={`conversationQueueLoadMoreError-${briefingType}`}
+            >
+              {CONVERSATION_QUEUE_ERROR.loadMore}
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            color={hasLoadMoreError ? 'danger' : 'text'}
+            iconType={hasLoadMoreError ? 'refresh' : 'chevronSingleDown'}
+            isLoading={isLoadingMore}
+            onClick={onShowMore}
+            aria-label={showMoreAriaLabel(CONVERSATION_QUEUE_LABELS[briefingType], remaining)}
+            data-test-subj={`conversationQueueShowMore-${briefingType}`}
+          >
+            {hasLoadMoreError ? CONVERSATION_QUEUE_ERROR.retry : showMoreLabel(remaining)}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : null;
 
     const rowList = (
       <EuiFlexGroup direction="column" gutterSize="none">
-        {rows.map((investigation, i) => {
+        {rows.map((investigation) => {
           // Props shared by both card variants (closed compact + open full).
           const sharedProps = {
             investigation,
-            // The last row only rounds its corners when it is the panel's bottom edge;
-            // with the footer below it, it keeps the divider instead.
-            hasBorder: i < rows.length - 1 || hasFooter,
             isSelected: selectedIds?.includes(investigation.id),
             onClickAction,
             onClickCard,
@@ -197,25 +239,24 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             onCopyLink,
           };
 
-          return (
-            <EuiFlexItem key={investigation.id} grow={false}>
-              {isClosedBucket ? (
-                <ConversationCardCompact
-                  {...sharedProps}
-                  outcome={getOutcomeLabel?.(investigation.id)}
-                />
-              ) : (
-                // renderAssignees is only passed to the full card — decided rows (compact)
-                // do not expose the assignee widget.
-                <ConversationCard
-                  {...sharedProps}
-                  renderAssignees={renderAssignees}
-                  renderInFlightStatus={renderInFlightStatus}
-                />
-              )}
-            </EuiFlexItem>
+          return isClosedBucket ? (
+            <ConversationCardCompact
+              key={investigation.id}
+              {...sharedProps}
+              outcome={getOutcomeLabel?.(investigation.id)}
+            />
+          ) : (
+            // renderAssignees is only passed to the full card — decided rows (compact)
+            // do not expose the assignee widget.
+            <ConversationCard
+              key={investigation.id}
+              {...sharedProps}
+              renderAssignees={renderAssignees}
+              renderInFlightStatus={renderInFlightStatus}
+            />
           );
         })}
+        {showMoreButton}
       </EuiFlexGroup>
     );
 
@@ -300,51 +341,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           }}
         >
           {renderBody()}
-
-          {/* Sits below the rows rather than replacing them, and EuiAccordion has no
-              footer slot, so it is the last child. */}
-          {hasFooter ? (
-            <EuiFlexGroup
-              direction="column"
-              alignItems="center"
-              responsive={false}
-              gutterSize="none"
-              css={{
-                // The row above draws the divider.
-                // Keeps the hover fill and focus ring off the row's borders.
-                padding: euiTheme.size.xs,
-                cursor: 'default',
-              }}
-            >
-              {/* The rows that did load stay put; only this says the click failed,
-                  and the control below it is the retry. */}
-              {hasLoadMoreError ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText
-                    size="xs"
-                    color="danger"
-                    role="alert"
-                    data-test-subj={`conversationQueueLoadMoreError-${briefingType}`}
-                  >
-                    {CONVERSATION_QUEUE_ERROR.loadMore}
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  color={hasLoadMoreError ? 'danger' : 'text'}
-                  iconType={hasLoadMoreError ? 'refresh' : 'chevronSingleDown'}
-                  isLoading={isLoadingMore}
-                  onClick={onShowMore}
-                  aria-label={showMoreAriaLabel(CONVERSATION_QUEUE_LABELS[briefingType], remaining)}
-                  data-test-subj={`conversationQueueShowMore-${briefingType}`}
-                >
-                  {hasLoadMoreError ? CONVERSATION_QUEUE_ERROR.retry : showMoreLabel(remaining)}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
         </StyledAccordion>
       </EuiPanel>
     );

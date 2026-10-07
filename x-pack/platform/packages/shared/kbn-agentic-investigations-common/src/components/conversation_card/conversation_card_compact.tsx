@@ -24,7 +24,6 @@ const AGE_COLUMN_WIDTH = '6.5rem';
 
 interface ConversationCardCompactProps {
   investigation: Investigation;
-  hasBorder: boolean;
   isSelected?: boolean;
   /** Resolved by the caller: `Investigation` carries no decision fields. */
   outcome?: string;
@@ -43,7 +42,6 @@ interface ConversationCardCompactProps {
 export const ConversationCardCompact = memo<ConversationCardCompactProps>(
   ({
     investigation,
-    hasBorder,
     isSelected = false,
     outcome,
     onClickRecommendedAction,
@@ -66,10 +64,15 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
         css={{
           padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
           cursor: 'pointer',
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder
-            ? 'none'
-            : `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+          borderRadius: 0,
+          '&:not(:last-child)': {
+            borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+          },
+          // The last row rounds to the queue panel's corners so the hover fill does not
+          // square them off. A footer after the rows keeps it from being the last child.
+          '&:last-child': {
+            borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+          },
           boxSizing: 'border-box',
           backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
           '&:hover': {

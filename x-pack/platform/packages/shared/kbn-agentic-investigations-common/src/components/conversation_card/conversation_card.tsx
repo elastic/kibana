@@ -22,7 +22,6 @@ import { ConversationMetaInfo } from './conversation_meta_info';
 
 interface ConversationCardProps {
   investigation: Investigation;
-  hasBorder: boolean;
   /** Marks the card whose details flyout is currently open. */
   isSelected?: boolean;
   onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
@@ -53,7 +52,6 @@ interface ConversationCardProps {
 export const ConversationCard = memo<ConversationCardProps>(
   ({
     investigation,
-    hasBorder,
     isSelected = false,
     onClickRecommendedAction,
     onClickAction,
@@ -81,12 +79,15 @@ export const ConversationCard = memo<ConversationCardProps>(
           // so their glyphs land at 24px from the edge like the text on the left.
           padding: `${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l}`,
           cursor: 'pointer',
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
+          borderRadius: 0,
+          '&:not(:last-child)': {
+            borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+          },
           // The last row rounds to the queue panel's corners so the hover fill does not
-          // square them off.
-          borderRadius: hasBorder
-            ? 'none'
-            : `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+          // square them off. A footer after the rows keeps it from being the last child.
+          '&:last-child': {
+            borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+          },
           boxSizing: 'border-box',
           backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
           '&:hover': {
