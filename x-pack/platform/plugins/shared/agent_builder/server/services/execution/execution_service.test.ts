@@ -92,6 +92,7 @@ jest.mock('./task/heartbeat_reporter', () => ({
 
 const mockTaskManagerSchedule = jest.fn();
 const mockTaskManagerEnsureScheduled = jest.fn();
+const mockTaskManagerRunSoon = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
@@ -102,6 +103,7 @@ describe('AgentExecutionService', () => {
   const taskManager = {
     schedule: mockTaskManagerSchedule,
     ensureScheduled: mockTaskManagerEnsureScheduled,
+    runSoon: mockTaskManagerRunSoon,
   } as any;
 
   const uiSettings = {
@@ -236,6 +238,50 @@ describe('AgentExecutionService', () => {
           scope: ['agent-builder'],
         }),
         { request, cloneApiKey: true }
+      );
+      expect(mockTaskManagerRunSoon).not.toHaveBeenCalled();
+    });
+
+    it('requests an immediate claim of the scheduled task when asked to', async () => {
+      mockTaskManagerRunSoon.mockResolvedValue({ id: 'task-id' });
+
+      const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+        requestImmediateClaim: true,
+      });
+
+      expect(mockTaskManagerRunSoon).toHaveBeenCalledWith(`agent-${result.executionId}`, {
+        requestImmediateClaim: true,
+      });
+      expect(mockTaskManagerRunSoon.mock.invocationCallOrder[0]).toBeGreaterThan(
+        mockTaskManagerEnsureScheduled.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not fail the execution when the immediate claim request fails', async () => {
+      mockTaskManagerRunSoon.mockRejectedValue(new Error('task is already running'));
+
+      const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+        requestImmediateClaim: true,
+      });
+      await new Promise(process.nextTick);
+
+      expect(result.executionId).toBeDefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Could not request an immediate claim')
       );
     });
   });
@@ -1272,6 +1318,13 @@ describe('AgentExecutionService', () => {
       expect(events[0].id).toBe(`${roundId}::user_message`);
     });
 
+    it('writes the opening user message without waiting for a refresh', async () => {
+      await converse();
+
+      const [, options] = conversationClient.appendEvents.mock.calls[0];
+      expect(options).toMatchObject({ refresh: false });
+    });
+
     it('falls back to the conversation owner when the requester has no author, as the round rewrite does', async () => {
       await converse();
 
@@ -1430,6 +1483,8 @@ describe('AgentExecutionService', () => {
       expect(events[0]).toMatchObject({ data: { message: 'Pool limit is now 200' } });
       // A standalone message must not look round-derived, or a round write would drop it.
       expect(events[0].id).not.toContain('::user_message');
+      // The caller refreshes its conversation list from the response, so the write waits for it.
+      expect(conversationClient.appendEvents.mock.calls[0][1]).not.toHaveProperty('refresh');
 
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();

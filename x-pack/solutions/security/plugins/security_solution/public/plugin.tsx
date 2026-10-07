@@ -97,6 +97,7 @@ import {
   registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerSiemMigrationRuleItemsAttachment,
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
@@ -372,7 +373,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         throw new Error('Security Solution setup contract is required to register attachments');
       }
 
-      registerAttachmentUiDefinitions({ attachments: plugins.agentBuilder.attachments });
+      registerAttachmentUiDefinitions({
+        attachments: plugins.agentBuilder.attachments,
+        resolveSecurityCanvasContext: () =>
+          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
+        getSpaceId: () => plugins.spaces.getActiveSpace().then((s) => s.id),
+        data: plugins.data,
+      });
+      registerSiemMigrationRuleItemsAttachment(plugins.agentBuilder.attachments);
       this.registerFlyoutGroupedAttachments(core, plugins);
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
