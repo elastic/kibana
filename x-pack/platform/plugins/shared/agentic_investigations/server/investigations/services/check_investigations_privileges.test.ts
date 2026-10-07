@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import {
@@ -15,7 +16,11 @@ import {
   INVESTIGATIONS_API_PRIVILEGE_MANAGE,
   INVESTIGATIONS_API_PRIVILEGE_READ,
 } from '../constants';
-import { createInvestigationsPrivilegesReader } from './check_investigations_privileges';
+import {
+  createInvestigationsPrivilegesChecker,
+  createInvestigationsPrivilegesReader,
+} from './check_investigations_privileges';
+import { InvestigationsForbiddenError } from './investigations_forbidden_error';
 
 const request = httpServerMock.createKibanaRequest();
 
@@ -114,5 +119,77 @@ describe('createInvestigationsPrivilegesReader', () => {
     expect(checkPrivileges).toHaveBeenCalledWith({
       kibana: [INVESTIGATIONS_READ, INVESTIGATIONS_MANAGE],
     });
+  });
+});
+
+const createChecker = (security?: SecurityPluginStart) => {
+  const logger = loggerMock.create();
+  return {
+    checker: createInvestigationsPrivilegesChecker({
+      getSecurity: async () => security,
+      logger,
+    }),
+    logger,
+  };
+};
+
+const READ = `api:${INVESTIGATIONS_API_PRIVILEGE_READ}`;
+const MANAGE = `api:${INVESTIGATIONS_API_PRIVILEGE_MANAGE}`;
+
+describe('createInvestigationsPrivilegesChecker', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should resolve a read when the principal holds only the read privilege', async () => {
+    const { security, checkPrivileges } = createSecurity({ [READ]: true });
+    const { checker } = createChecker(security);
+
+    await expect(checker.assertCanRead(request)).resolves.toBeUndefined();
+
+    expect(checkPrivileges).toHaveBeenCalledWith({ kibana: [READ, MANAGE] });
+  });
+
+  it('should resolve a read when the principal holds only the manage privilege', async () => {
+    const { security } = createSecurity({ [MANAGE]: true });
+    const { checker } = createChecker(security);
+
+    await expect(checker.assertCanRead(request)).resolves.toBeUndefined();
+  });
+
+  it('should throw on a read when the principal holds neither privilege', async () => {
+    const { security } = createSecurity({});
+    const { checker } = createChecker(security);
+
+    await expect(checker.assertCanRead(request)).rejects.toBeInstanceOf(
+      InvestigationsForbiddenError
+    );
+  });
+
+  it('should deny the check when security is unavailable', async () => {
+    const { checker, logger } = createChecker(undefined);
+
+    await expect(checker.assertCanRead(request)).rejects.toBeInstanceOf(
+      InvestigationsForbiddenError
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fails closed'));
+  });
+
+  it('should resolve a write when the principal can manage investigations', async () => {
+    const { security, checkPrivileges } = createSecurity({ [MANAGE]: true });
+    const { checker } = createChecker(security);
+
+    await expect(checker.assertCanManage(request)).resolves.toBeUndefined();
+
+    expect(checkPrivileges).toHaveBeenCalledWith({ kibana: [MANAGE] });
+  });
+
+  it('should throw on a write when the principal holds only the read privilege', async () => {
+    const { security } = createSecurity({ [READ]: true });
+    const { checker } = createChecker(security);
+
+    await expect(checker.assertCanManage(request)).rejects.toBeInstanceOf(
+      InvestigationsForbiddenError
+    );
   });
 });

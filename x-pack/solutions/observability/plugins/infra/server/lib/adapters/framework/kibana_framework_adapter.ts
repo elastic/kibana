@@ -151,6 +151,12 @@ export class KibanaFramework {
   ): Promise<InfraDatabaseGetIndicesAliasResponse>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
+    method: 'indices.resolveCluster',
+    options?: CallWithRequestParams,
+    request?: KibanaRequest
+  ): Promise<estypes.IndicesResolveClusterResponse>;
+  callWithRequest(
+    requestContext: InfraPluginRequestHandlerContext,
     method: 'indices.get' | 'ml.getBuckets',
     options?: object,
     request?: KibanaRequest
@@ -245,6 +251,18 @@ export class KibanaFramework {
         });
 
         break;
+      case 'indices.resolveCluster':
+        apiResult = callWrapper({
+          makeRequestWithSignal: (signal) =>
+            elasticsearch.client.asCurrentUser.indices.resolveCluster(
+              {
+                ...params,
+              } as estypes.IndicesResolveClusterRequest,
+              { signal, ...(requestTimeout ? { requestTimeout } : {}) }
+            ),
+        });
+
+        break;
       case 'indices.existsAlias':
         apiResult = callWrapper({
           makeRequestWithSignal: (signal) =>
@@ -263,7 +281,7 @@ export class KibanaFramework {
             elasticsearch.client.asCurrentUser.indices.getAlias(
               {
                 ...params,
-              },
+              } as estypes.IndicesGetAliasRequest,
               { signal }
             ),
         });
