@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Metadata } from './metadata';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -108,6 +108,25 @@ const mockDataViews = () => {
   } as unknown as ReturnType<typeof useDataViewsContext>);
 };
 
+const LOCAL_STORAGE_PINNED_METADATA_ROWS = 'hostsView:pinnedMetadataRows';
+
+const hostMetadataWithFields = {
+  id: 'host-1',
+  name: 'host-1',
+  features: [],
+  info: {
+    host: {
+      os: {
+        name: 'Ubuntu',
+      },
+      hostname: 'host-1',
+    },
+    cloud: {
+      provider: 'aws',
+    },
+  },
+};
+
 const renderHostMetadata = () =>
   render(
     <I18nProvider>
@@ -121,6 +140,7 @@ describe('Single Host Metadata (Hosts View)', () => {
   });
 
   beforeEach(() => {
+    localStorage.clear();
     mockRenderPropsContext();
     mockUrlState();
     mockMetadataState();
@@ -184,6 +204,35 @@ describe('Single Host Metadata (Hosts View)', () => {
     expect(result.queryByTestId('infraAssetDetailsMetadataLoading')).toBeInTheDocument();
   });
 
+  it('should label the pin, field and value columns', async () => {
+    mockMetadataState({ metadata: hostMetadataWithFields });
+    const result = await waitFor(() => renderHostMetadata());
+
+    await waitFor(() => {
+      expect(result.queryByTestId('infraAssetDetailsMetadataTable')).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('columnheader', { name: 'Pin fields' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Field' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Value' })).toBeInTheDocument();
+  });
+
+  it('should restore pinned fields from local storage and list them first', async () => {
+    localStorage.setItem(LOCAL_STORAGE_PINNED_METADATA_ROWS, JSON.stringify(['host.hostname']));
+    mockMetadataState({ metadata: hostMetadataWithFields });
+    const result = await waitFor(() => renderHostMetadata());
+
+    await waitFor(() => {
+      expect(result.queryByTestId('infraAssetDetailsMetadataTable')).toBeInTheDocument();
+    });
+
+    expect(screen.getByLabelText('Pinned host.hostname')).toBeInTheDocument();
+
+    // The header occupies the first row, so the first pinned field is the one right after it.
+    const [, firstBodyRow] = screen.getAllByRole('row');
+    expect(within(firstBodyRow).getByText('host.hostname')).toBeInTheDocument();
+  });
+
   it('should pin and unpin metadata field', async () => {
     mockMetadataState({
       metadata: {
@@ -216,6 +265,10 @@ describe('Single Host Metadata (Hosts View)', () => {
       expect(removePinButtons.length).toBeGreaterThan(0);
     });
 
+    expect(
+      JSON.parse(localStorage.getItem(LOCAL_STORAGE_PINNED_METADATA_ROWS) ?? '[]')
+    ).toHaveLength(1);
+
     const removePinButton = result.getAllByTestId('infraAssetDetailsMetadataRemovePin')[0];
     removePinButton.click();
 
@@ -223,6 +276,10 @@ describe('Single Host Metadata (Hosts View)', () => {
       const addPinButtonsAfterUnpin = result.getAllByTestId('infraAssetDetailsMetadataAddPin');
       expect(addPinButtonsAfterUnpin.length).toBeGreaterThan(0);
     });
+
+    expect(
+      JSON.parse(localStorage.getItem(LOCAL_STORAGE_PINNED_METADATA_ROWS) ?? '[]')
+    ).toHaveLength(0);
   });
 
   it('should filter metadata rows when metadataSearch is set in url state', async () => {
@@ -273,6 +330,18 @@ describe('Single Host Metadata (Hosts View)', () => {
     ).not.toBeInTheDocument();
     expect(
       result.queryByTestId('infraAssetDetailsMetadataField.host.hostname')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should show the no data message when the search matches no field', async () => {
+    mockMetadataState({ metadata: hostMetadataWithFields });
+    mockUrlState({ metadataSearch: 'there-is-no-such-field' });
+
+    const result = await waitFor(() => renderHostMetadata());
+
+    expect(result.queryByTestId('infraAssetDetailsMetadataNoData')).toBeInTheDocument();
+    expect(
+      result.queryByTestId('infraAssetDetailsMetadataField.cloud.provider')
     ).not.toBeInTheDocument();
   });
 });

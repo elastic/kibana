@@ -453,8 +453,8 @@
       }
     },
     {
-      "id": "5e38f34b5515120-206368a2dde7fc8",
-      "title": "Infrastructure Inventory - Container Asset Details Flyout Overview Tab",
+      "id": "5e38f34b5515120-c70e653cc32ffdb",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout opens on the overview tab with the container KPIs, metadata and metrics sections",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -464,109 +464,77 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 48,
+        "column": 26
+      }
+    },
+    {
+      "id": "5e38f34b5515120-1f1c68c740a152b",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout opens the filtered container logs query in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 55,
+        "column": 66
+      }
+    },
+    {
+      "id": "5e38f34b5515120-bc075233cb49b13",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout opens the flyout as a full page and returns to it keeping the selected tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 80,
+        "column": 11
+      }
+    },
+    {
+      "id": "36d755278d33c00-2690bccffa11807",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout opens on the overview tab with the host KPIs, metadata and metrics sections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
+        "line": 43,
+        "column": 26
+      }
+    },
+    {
+      "id": "36d755278d33c00-0d316f41ac9ab69",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout opens the filtered host logs query in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
         "line": 50,
-        "column": 26
+        "column": 66
       }
     },
     {
-      "id": "5e38f34b5515120-6e381623a016832",
-      "title": "Infrastructure Inventory - Container Asset Details Flyout Metadata Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 158,
-        "column": 15
-      }
-    },
-    {
-      "id": "5e38f34b5515120-f69934a00916c14",
-      "title": "Infrastructure Inventory - Container Asset Details Flyout Metadata Tab - Is accessible from overview tab section show all",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 200,
-        "column": 15
-      }
-    },
-    {
-      "id": "5e38f34b5515120-1b63fa121e7d932",
-      "title": "Infrastructure Inventory - Container Asset Details Flyout Metrics Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 209,
-        "column": 9
-      }
-    },
-    {
-      "id": "5e38f34b5515120-ca3eba215d3909f",
-      "title": "Infrastructure Inventory - Container Asset Details Flyout Metrics Tab - Sections are accessible from overview tab section show all",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 252,
-        "column": 15
-      }
-    },
-    {
-      "id": "5e38f34b5515120-18dcb0fd2be32ae",
-      "title": "Infrastructure Inventory - Container Asset Details Flyout Logs Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 307,
-        "column": 15
-      }
-    },
-    {
-      "id": "5e38f34b5515120-fc5dd8af89f3a37",
-      "title": "Infrastructure Inventory - Container Asset Details Flyout Open as page and return to flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 347,
-        "column": 9
-      }
-    },
-    {
-      "id": "36d755278d33c00-c8e20be5abd8e78",
-      "title": "Infrastructure Inventory - Host Asset Details Flyout Overview Tab",
+      "id": "36d755278d33c00-f52368ff19e87b6",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout opens the flyout as a full page and returns to it keeping the selected tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -576,104 +544,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 45,
-        "column": 26
-      }
-    },
-    {
-      "id": "36d755278d33c00-469ff7d8d0bf19c",
-      "title": "Infrastructure Inventory - Host Asset Details Flyout Metadata Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 176,
-        "column": 15
-      }
-    },
-    {
-      "id": "36d755278d33c00-5fa9e52b3d43c86",
-      "title": "Infrastructure Inventory - Host Asset Details Flyout Metadata Tab - Is accessible from overview tab section show all",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 214,
-        "column": 15
-      }
-    },
-    {
-      "id": "36d755278d33c00-26196539e673891",
-      "title": "Infrastructure Inventory - Host Asset Details Flyout Metrics Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 219,
-        "column": 25
-      }
-    },
-    {
-      "id": "36d755278d33c00-bc798ba5304790c",
-      "title": "Infrastructure Inventory - Host Asset Details Flyout Metrics Tab - Sections are accessible from overview tab section show all",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 276,
-        "column": 15
-      }
-    },
-    {
-      "id": "36d755278d33c00-1af8d1fefe82665",
-      "title": "Infrastructure Inventory - Host Asset Details Flyout Logs Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 317,
-        "column": 15
-      }
-    },
-    {
-      "id": "36d755278d33c00-d11360011449561",
-      "title": "Infrastructure Inventory - Host Asset Details Flyout Open as page and return to flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 344,
-        "column": 15
+        "line": 70,
+        "column": 20
       }
     },
     {
@@ -706,22 +578,6 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_integration_links.spec.ts",
         "line": 39,
         "column": 37
-      }
-    },
-    {
-      "id": "446ba8748acaf8f-32af48c416a35ef",
-      "title": "Infrastructure Inventory - K8s Tour Render and dismiss k8s tour",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_tour.spec.ts",
-        "line": 24,
-        "column": 29
       }
     },
     {
@@ -1209,56 +1065,8 @@
       }
     },
     {
-      "id": "270dac3dc7dc448-520018ed67055b4",
-      "title": "Node Details: host with kubernetes section Overview Tab validates all KPIs and charts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_with_kubernetes.spec.ts",
-        "line": 32,
-        "column": 7
-      }
-    },
-    {
-      "id": "270dac3dc7dc448-8a9cb5affab0300",
-      "title": "Node Details: host with kubernetes section Metrics Tab validates all charts and quick access",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_with_kubernetes.spec.ts",
-        "line": 64,
-        "column": 23
-      }
-    },
-    {
-      "id": "f99b488a0e6019e-b6ddb921df7e2cd",
-      "title": "Node Details: host without metrics Overview Tab - KPI tiles show N/A",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_without_metrics.spec.ts",
-        "line": 18,
-        "column": 25
-      }
-    },
-    {
-      "id": "992d39c263d731e-a72b272d0977ff3",
-      "title": "Node Details: host preserves selected tab between page reloads",
+      "id": "992d39c263d731e-dd466abfe41ff36",
+      "title": "Node Details: host preserves the selected tab between page reloads",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1273,8 +1081,8 @@
       }
     },
     {
-      "id": "992d39c263d731e-7f79f309b15190b",
-      "title": "Node Details: host Date picker: host - preserves date range across tabs",
+      "id": "992d39c263d731e-d01b7b7a0c1caf4",
+      "title": "Node Details: host preserves the selected date range across tabs and page reloads",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1286,262 +1094,6 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
         "line": 48,
         "column": 13
-      }
-    },
-    {
-      "id": "992d39c263d731e-7d1e6d6429e1a95",
-      "title": "Node Details: host Date picker: host - preserves selected date range between page reloads",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 77,
-        "column": 17
-      }
-    },
-    {
-      "id": "992d39c263d731e-528209bce8c610d",
-      "title": "Node Details: host Overview Tab - KPI tiles show correct values",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 87,
-        "column": 11
-      }
-    },
-    {
-      "id": "992d39c263d731e-bd1a29ee5040b38",
-      "title": "Node Details: host Overview Tab - renders metric charts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 110,
-        "column": 9
-      }
-    },
-    {
-      "id": "992d39c263d731e-37cd8581a79597a",
-      "title": "Node Details: host Overview Tab - shows all sections as collapsible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 127,
-        "column": 13
-      }
-    },
-    {
-      "id": "992d39c263d731e-dea7e0102986aef",
-      "title": "Node Details: host Overview Tab - shows alerts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 139,
-        "column": 13
-      }
-    },
-    {
-      "id": "992d39c263d731e-4fb0d91c535b76d",
-      "title": "Node Details: host Overview Tab - shows / hides alerts section with no alerts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 147,
-        "column": 13
-      }
-    },
-    {
-      "id": "992d39c263d731e-f82241f4d64419f",
-      "title": "Node Details: host Metadata Tab - shows metadata table",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 160,
-        "column": 15
-      }
-    },
-    {
-      "id": "992d39c263d731e-cc924821cb71d9c",
-      "title": "Node Details: host Metadata Tab - pin and unpin table row",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 165,
-        "column": 65
-      }
-    },
-    {
-      "id": "992d39c263d731e-c2628c417b26208",
-      "title": "Node Details: host Metadata Tab - preserves search term between page reloads",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 183,
-        "column": 15
-      }
-    },
-    {
-      "id": "992d39c263d731e-c75727c6beb8118",
-      "title": "Node Details: host Metrics Tab - renders quick access items",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 206,
-        "column": 7
-      }
-    },
-    {
-      "id": "992d39c263d731e-c5d7693f6c92d1e",
-      "title": "Node Details: host Legacy alert metric callout - shows for cpu",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 222,
-        "column": 15
-      }
-    },
-    {
-      "id": "992d39c263d731e-4fa7228cf9d5d36",
-      "title": "Node Details: host Legacy alert metric callout - shows for rx",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 234,
-        "column": 26
-      }
-    },
-    {
-      "id": "992d39c263d731e-c78d7ebab1a5ed2",
-      "title": "Node Details: host Legacy alert metric callout - shows for tx",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 250,
-        "column": 16
-      }
-    },
-    {
-      "id": "992d39c263d731e-dba87ff5548f5c0",
-      "title": "Node Details: host Legacy alert metric callout - does not show for cpuV2",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 263,
-        "column": 24
-      }
-    },
-    {
-      "id": "992d39c263d731e-7624ac9afaa9409",
-      "title": "Node Details: host Legacy alert metric callout - does not show for rxV2",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 276,
-        "column": 13
-      }
-    },
-    {
-      "id": "992d39c263d731e-d12ae3a801710eb",
-      "title": "Node Details: host Legacy alert metric callout - does not show for txV2",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 290,
-        "column": 20
       }
     },
     {

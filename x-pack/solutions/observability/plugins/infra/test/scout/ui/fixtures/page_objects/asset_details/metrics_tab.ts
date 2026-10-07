@@ -9,15 +9,11 @@ import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import type { AssetDetailsPageTabName } from './asset_details_tab';
 import { AssetDetailsTab } from './asset_details_tab';
 
-export type MetricsTabQuickAccessItem = 'CPU' | 'Memory' | 'Network' | 'Disk' | 'Log Rate';
-
 export class MetricsTab extends AssetDetailsTab {
   public readonly tabName: AssetDetailsPageTabName = 'Metrics';
   public readonly tab: Locator;
 
   public readonly chartsContent: Locator;
-
-  public readonly quickAccessItems: Locator;
 
   public readonly cpuSection: Locator;
   public readonly cpuSectionTitle: Locator;
@@ -50,11 +46,6 @@ export class MetricsTab extends AssetDetailsTab {
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 
     this.chartsContent = this.page.getByTestId('infraAssetDetailsMetricChartsContent');
-
-    this.quickAccessItems = this.chartsContent
-      .getByRole('list')
-      .filter({ has: this.page.getByTestId('infraMetricsQuickAccessItemcpu') })
-      .locator('li');
 
     this.cpuSection = this.chartsContent.getByTestId(
       `infraAssetDetails${this.assetType}ChartsSectioncpu`
@@ -115,10 +106,5 @@ export class MetricsTab extends AssetDetailsTab {
       `infraAssetDetails${this.assetType}ChartsSectionlogTitle`
     );
     this.logRateChart = this.logSection.getByTestId('infraAssetDetailsMetricChartlogRate');
-  }
-
-  public async clickQuickAccessItem(itemName: MetricsTabQuickAccessItem) {
-    const item = this.quickAccessItems.filter({ hasText: itemName });
-    await item.click();
   }
 }

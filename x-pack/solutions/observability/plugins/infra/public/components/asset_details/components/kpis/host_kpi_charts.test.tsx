@@ -28,16 +28,15 @@ const dateRange: TimeRange = {
   to: '2023-03-28T18:21:00.000Z',
 };
 
+const KPI_IDS = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'] as const;
+
 const renderWithI18n = (node: React.ReactElement) => render(<I18nProvider>{node}</I18nProvider>);
 
 describe('HostKpiCharts', () => {
   beforeEach(() => {
-    useHostKpiChartsMock.mockReturnValue([
-      { id: 'cpuUsage' },
-      { id: 'normalizedLoad1m' },
-      { id: 'memoryUsage' },
-      { id: 'diskUsage' },
-    ] as any);
+    useHostKpiChartsMock.mockReturnValue(
+      KPI_IDS.map((id) => ({ id })) as unknown as ReturnType<typeof useHostKpiCharts>
+    );
   });
 
   afterEach(() => {

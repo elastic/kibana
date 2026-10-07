@@ -16,8 +16,6 @@ export class MetadataTab extends AssetDetailsTab {
   public readonly searchBar: Locator;
 
   public readonly table: Locator;
-  public readonly tableHeader: Locator;
-  public readonly tableRows: Locator;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl) {
     super(page, kbnUrl);
@@ -26,35 +24,6 @@ export class MetadataTab extends AssetDetailsTab {
     this.searchBar = this.page.getByTestId('infraAssetDetailsMetadataSearchBarInput');
 
     this.table = this.page.getByTestId('infraAssetDetailsMetadataTable');
-    this.tableHeader = this.table.locator('thead tr');
-    this.tableRows = this.table.locator('tbody tr');
-  }
-
-  public getRowForField(fieldName: string) {
-    return this.tableRows.filter({ hasText: fieldName });
-  }
-
-  public getPinButtonsForField(fieldName: string) {
-    const row = this.getRowForField(fieldName);
-
-    const pin = row.getByTestId('infraAssetDetailsMetadataAddPin');
-    const unpin = row.getByTestId('infraAssetDetailsMetadataRemovePin');
-
-    return { pin, unpin };
-  }
-
-  public async pinField(fieldName: string) {
-    const pinButtons = this.getPinButtonsForField(fieldName);
-
-    await pinButtons.pin.click();
-    await pinButtons.unpin.focus();
-  }
-
-  public async unpinField(fieldName: string) {
-    const pinButtons = this.getPinButtonsForField(fieldName);
-
-    await pinButtons.unpin.click();
-    await pinButtons.pin.focus();
   }
 
   public async filterField(fieldName: string) {
