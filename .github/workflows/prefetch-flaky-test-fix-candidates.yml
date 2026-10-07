@@ -1,7 +1,7 @@
 name: Prefetch flaky-test fix candidates
 
 # Shortlist other flaky-test-fixer PRs that may fix the same failure.
-# The verifier checks their diffs to confirm whether the fixes overlap.
+# The flaky fix verifier checks their diffs to confirm whether the fixes overlap.
 
 on:
   workflow_call:
