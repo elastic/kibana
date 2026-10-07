@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dateMath from '@kbn/datemath';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -40,9 +40,10 @@ const RULE_PREVIEW_SHARED_DEFAULTS = {
   severity: 'low',
 } as const;
 
-const runRulePreviewSchema = z.object({
-  command: z.string().describe(
-    `CLI-style command for previewing a detection rule. The first word is the rule type subcommand.
+const runRulePreviewSchema = lazySchema(() =>
+  z.object({
+    command: z.string().describe(
+      `CLI-style command for previewing a detection rule. The first word is the rule type subcommand.
 
 Supported types: esql, eql, query, saved_query, threshold, threat_match, machine_learning, new_terms
 
@@ -59,8 +60,9 @@ Schedule flags (optional, all commands):
 Help:
   --help                   list all rule types
   <rule_type> --help       type-specific options and examples`
-  ),
-});
+    ),
+  })
+);
 
 export function runRulePreviewTool(
   deps: RunRulePreviewDeps
