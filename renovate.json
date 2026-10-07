@@ -2463,7 +2463,7 @@
     },
     {
       "groupName": "@swc/core",
-      "matchDepNames": ["@swc/core"],
+      "matchDepNames": ["@swc/core", "@swc/plugin-emotion"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
