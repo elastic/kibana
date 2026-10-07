@@ -46,7 +46,7 @@ const NightshiftLandingStory = ({
           onManagementClick={noop}
           managementHref="/app/significant_events/streams"
           onSettingsClick={noop}
-          settingsHref="/app/significant_events/settings"
+          settingsHref="/app/nightshift/settings"
         />
         <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
           <NightshiftApp />
