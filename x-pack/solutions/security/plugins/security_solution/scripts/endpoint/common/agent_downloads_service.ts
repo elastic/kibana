@@ -22,12 +22,66 @@ import { SettingsStorage } from './settings_storage';
 const DOWNLOAD_LOCK_WAIT_MS = 10 * 60 * 1000;
 
 const isProcessAlive = (pid: number): boolean => {
+  if (!Number.isInteger(pid) || pid <= 0) {
+    return false;
+  }
+
   try {
     process.kill(pid, 0);
     return true;
   } catch (error) {
     return (error as NodeJS.ErrnoException).code === 'EPERM';
   }
+};
+
+const isEnoent = (error: unknown): boolean => (error as NodeJS.ErrnoException).code === 'ENOENT';
+
+/** `undefined` means the lock disappeared and the caller should try to create it again. */
+const readDownloadLock = (lockPath: string): string | undefined => {
+  try {
+    return fs.readFileSync(lockPath, 'utf8');
+  } catch (error) {
+    if (isEnoent(error)) {
+      return undefined;
+    }
+    throw error;
+  }
+};
+
+/**
+ * Take the lock file aside and delete it only when it still names `expectedOwner`.
+ * A replacement created by another worker stays at `lockPath`.
+ */
+const removeStaleDownloadLock = (lockPath: string, expectedOwner: string): void => {
+  const heldAside = `${lockPath}.${process.pid}.${Date.now()}.stale`;
+
+  try {
+    fs.renameSync(lockPath, heldAside);
+  } catch (error) {
+    if (isEnoent(error)) {
+      return;
+    }
+    throw error;
+  }
+
+  const contents = readDownloadLock(heldAside);
+  if (contents === undefined || contents === expectedOwner) {
+    fs.rmSync(heldAside, { force: true });
+    return;
+  }
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      fs.renameSync(heldAside, lockPath);
+      return;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error(`Displaced agent download lock could not be restored to [${lockPath}]`);
 };
 
 /**
@@ -51,10 +105,11 @@ const withDownloadLock = async <T>(
         throw error;
       }
 
-      const owner = Number(fs.readFileSync(lockPath, 'utf8'));
-      if (!Number.isFinite(owner) || !isProcessAlive(owner)) {
-        fs.rmSync(lockPath, { force: true });
-      } else {
+      const ownerText = readDownloadLock(lockPath);
+      const owner = Number(ownerText);
+      if (ownerText !== undefined && !isProcessAlive(owner)) {
+        removeStaleDownloadLock(lockPath, ownerText);
+      } else if (ownerText !== undefined) {
         if (!reportedWait) {
           reportedWait = true;
           log.info(`Waiting for agent download lock held by pid ${owner}`);
