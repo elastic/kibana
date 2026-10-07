@@ -34,6 +34,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User sees a loading indicator in the MITRE section while data is being fetched**](#scenario-user-sees-a-loading-indicator-in-the-mitre-section-while-data-is-being-fetched)
     - [**Scenario: User can select a tactic and technique and save the rule**](#scenario-user-can-select-a-tactic-and-technique-and-save-the-rule)
     - [**Scenario: The technique picker shows an error state when MITRE data fails to load**](#scenario-the-technique-picker-shows-an-error-state-when-mitre-data-fails-to-load)
+    - [**Scenario: The picker renders tactics, techniques, and subtechniques in the order returned by the MITRE configuration**](#scenario-the-picker-renders-tactics-techniques-and-subtechniques-in-the-order-returned-by-the-mitre-configuration)
   - [Coverage overview](#coverage-overview)
     - [**Scenario: Tactics are ordered by the `position` field from the managed data source**](#scenario-tactics-are-ordered-by-the-position-field-from-the-managed-data-source)
     - [**Scenario: Techniques are associated with their correct tactics**](#scenario-techniques-are-associated-with-their-correct-tactics)
@@ -69,7 +70,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Common product requirements](./mitre_common_info.md#common-product-requirements).
 - User opening the rule create/edit page sees the MITRE technique picker populated with the same set of active tactics and techniques whether the flag is on or off (parity with the legacy path).
-- User viewing the coverage overview sees tactics ordered by their `position` field; no hardcoded ordering is consulted.
+- User viewing the coverage overview sees tactics ordered by their `position` field; no hardcoded ordering is consulted, and the ordering comes from the data source rather than the UI.
 - A new MITRE version added to the artifact produces correct coverage overview ordering without any code change.
 - Revoked and deprecated MITRE entities are excluded from the technique picker and coverage overview by default.
 
@@ -207,6 +208,17 @@ When a user opens the rule create/edit page
 Then an error toast should appear in kibana
 And an error message should appear in the MITRE ATT&CK form section
 And the rest of the form should remain interactive
+```
+
+#### **Scenario: The picker renders tactics, techniques, and subtechniques in the order returned by the MITRE configuration**
+
+**Automation**: 1 React unit test.
+
+```Gherkin
+Given the MITRE configuration returns tactics in matrix position order and techniques and subtechniques alphabetically
+When user opens the MITRE ATT&CK pickers on the rule create/edit page
+Then the options should appear in exactly that order
+And the picker should not re-sort them
 ```
 
 ### Coverage overview
