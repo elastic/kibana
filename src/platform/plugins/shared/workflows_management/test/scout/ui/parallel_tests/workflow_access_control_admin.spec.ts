@@ -11,15 +11,19 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { spaceTest as test } from '../fixtures';
+import type { ResolvedUser } from '../fixtures/resolve_user';
+import { resolveUser } from '../fixtures/resolve_user';
 import { getDummyWorkflowYaml } from '../fixtures/workflows';
 
 test.describe('Workflow administrator sharing', { tag: tags.stateful.classic }, () => {
   let workflowId: string;
   let ownerId: string;
   let ownerHeaders: Record<string, string>;
+  let admin: ResolvedUser;
 
   test.beforeAll(async ({ apiClient, scoutSpace, samlAuth }) => {
     await scoutSpace.uiSettings.set({ [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: true });
+    admin = await resolveUser(samlAuth, 'admin');
     ownerHeaders = {
       ...(await samlAuth.asInteractiveUser('editor')).cookieHeader,
       'kbn-xsrf': 'scout',
@@ -66,8 +70,8 @@ test.describe('Workflow administrator sharing', { tag: tags.stateful.classic }, 
     await editor.openAccessDialog();
     await expect(page.getByRole('heading', { name: 'Access control', exact: true })).toBeVisible();
     await expect(page.getByText("You are editing another user's access settings")).toBeVisible();
-    await editor.addAccessUser('test admin');
-    await editor.setAccessRole('elastic_admin', 'executor');
+    await editor.addAccessUser(admin.displayName);
+    await editor.setAccessRole(admin.username, 'executor');
     await page.screenshot({
       path: testInfo.outputPath('administrator_sharing.png'),
       animations: 'disabled',
