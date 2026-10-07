@@ -10,11 +10,11 @@
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';
 import path from 'path';
-import { getKibanaDir } from '../utils';
+import { getKibanaDir } from '../utils.ts';
 
 const REPO_ROOT = getKibanaDir();
 
-/** Resolves `moon`'s absolute path — run via `ts-node`, not yarn, so it's not on `PATH`. */
+/** Resolves `moon`'s absolute path — run via `node`, not yarn, so it's not on `PATH`. */
 function getMoonBinPath(): string {
   const moonBinPath = path.resolve(REPO_ROOT, 'node_modules/.bin/moon');
   if (existsSync(moonBinPath)) {
