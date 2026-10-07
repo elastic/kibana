@@ -216,8 +216,11 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     updatedBy: RuleSavedObjectAttributes['updatedBy'];
     updatedAt: string;
     version: number;
+    template?: RuleSavedObjectAttributes['metadata']['template'];
   }
 ): RuleSavedObjectAttributes {
+  const { template, ...fields } = serverFields;
+
   return {
     kind: data.kind,
     metadata: {
@@ -226,6 +229,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       tags: data.metadata.tags,
       routing_tags: data.metadata.routing_tags,
       builder_type: data.metadata.builder?.type,
+      template,
     },
     time_field: data.time_field,
     schedule: {
@@ -237,7 +241,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     state_transition: data.state_transition ?? undefined,
     grouping: data.grouping,
     artifacts: data.artifacts,
-    ...serverFields,
+    ...fields,
   };
 }
 
@@ -435,6 +439,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       tags: attrs.metadata.tags,
       routing_tags: attrs.metadata.routing_tags,
       builder: attrs.metadata.builder_type ? { type: attrs.metadata.builder_type } : undefined,
+      template: attrs.metadata.template,
     },
     time_field: attrs.time_field,
     schedule: {

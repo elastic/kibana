@@ -825,6 +825,17 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema
   .extend({
+    // `template` is server-managed: it is returned but not accepted on write.
+    metadata: metadataSchema
+      .extend({
+        template: z
+          .object({ id: z.string().describe('Id of the rule template.') })
+          .strict()
+          .optional()
+          .describe('The rule template this rule was created from.'),
+      })
+      .describe('Rule metadata.')
+      .meta({ id: 'alerting_rule_response_metadata' }),
     // `null` clears the field on write; the server stores that as absent, so a
     // response never carries it.
     state_transition: stateTransitionSchema.optional(),

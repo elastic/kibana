@@ -14,6 +14,7 @@ import {
   ruleSavedObjectAttributesSchemaV5,
   ruleSavedObjectAttributesSchemaV6,
   ruleSavedObjectAttributesSchemaV7,
+  ruleSavedObjectAttributesSchemaV8,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -215,6 +216,29 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV7.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV7,
+    },
+  },
+  '10': {
+    /*
+     * Adds and indexes `metadata.template.id`, the id of the rule template a
+     * rule was created from. Optional, so existing rules need no backfill.
+     * Nothing filters on it yet, so this stays rollback-compatible.
+     */
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              template: { properties: { id: { type: 'keyword', ignore_above: 256 } } },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV8,
     },
   },
 };
