@@ -176,6 +176,7 @@ describe('investigation impact routes', () => {
       type: 'investigation_impact',
       origin: 'impact-1',
       data: impact,
+      hidden: true,
     });
     expect(attach.mock.invocationCallOrder[0]).toBeLessThan(create.mock.invocationCallOrder[0]);
     expect(response.ok).toHaveBeenCalledWith({ body: impact });

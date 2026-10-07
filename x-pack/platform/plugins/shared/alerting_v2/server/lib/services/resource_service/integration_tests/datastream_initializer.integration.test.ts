@@ -336,6 +336,30 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
     forceReset: undefined,
   };
 
+  // The v7 mapping stored the alert id and status as episode_id and episode_status.
+  const v7ActionsDefinition: ResourceDefinition = {
+    ...currentActionsDefinition,
+    version: 7,
+    mappings: {
+      dynamic: false,
+      properties: {
+        '@timestamp': { type: 'date' },
+        actor: {
+          type: 'object',
+          properties: {
+            type: { type: 'keyword' },
+            profile_uid: { type: 'keyword' },
+          },
+        },
+        action_type: { type: 'keyword' },
+        episode_id: { type: 'keyword' },
+        episode_status: { type: 'keyword' },
+        space_id: { type: 'keyword' },
+      },
+    },
+    forceReset: undefined,
+  };
+
   let esServer: EsTestCluster;
   let logger: MockedLogger;
 
@@ -344,6 +368,25 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
 
   const writeDocument = (id: string, document: Record<string, unknown>) =>
     esServer.getClient().create({ index: TEST_ACTIONS_DATA_STREAM, id, document, refresh: true });
+
+  const countDocuments = async () => {
+    const { count } = await esServer.getClient().count({ index: TEST_ACTIONS_DATA_STREAM });
+    return count;
+  };
+
+  const getDataStreamVersion = async () => {
+    const {
+      data_streams: [dataStream],
+    } = await esServer.getClient().indices.getDataStream({ name: TEST_ACTIONS_DATA_STREAM });
+    return dataStream._meta?.version;
+  };
+
+  const getBackingIndicesProperties = async () => {
+    const response = await esServer
+      .getClient()
+      .indices.getMapping({ index: TEST_ACTIONS_DATA_STREAM });
+    return Object.values(response).map(({ mappings }) => mappings.properties);
+  };
 
   beforeAll(async () => {
     esServer = createTestEsCluster({
@@ -384,17 +427,10 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
 
     await initialize(currentActionsDefinition);
 
-    const esClient = esServer.getClient();
-    const { count } = await esClient.count({ index: TEST_ACTIONS_DATA_STREAM });
-    expect(count).toBe(0);
+    expect(await countDocuments()).toBe(0);
+    expect(await getDataStreamVersion()).toBe(currentActionsDefinition.version);
 
-    const {
-      data_streams: [dataStream],
-    } = await esClient.indices.getDataStream({ name: TEST_ACTIONS_DATA_STREAM });
-    expect(dataStream._meta?.version).toBe(currentActionsDefinition.version);
-
-    const mappings = await esClient.indices.getMapping({ index: TEST_ACTIONS_DATA_STREAM });
-    const [properties] = Object.values(mappings).map((index) => index.mappings.properties);
+    const [properties] = await getBackingIndicesProperties();
     expect(properties).toMatchObject({
       actor: {
         properties: {
@@ -404,7 +440,7 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
       },
     });
 
-    await writeDocument('v7-doc', {
+    await writeDocument('object-actor-doc', {
       actor: { type: 'user', profile_uid: 'u_profile_1' },
       action_type: 'ack',
       space_id: 'default',
@@ -418,6 +454,73 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
     ).rejects.toThrow(/object mapping for \[actor\]/);
   });
 
+  it('recreates a data stream created from v7 with alert_id and alert_status instead of the episode_* fields', async () => {
+    await initialize(v7ActionsDefinition);
+    await writeDocument('v7-doc', {
+      '@timestamp': new Date().toISOString(),
+      actor: { type: 'internal' },
+      action_type: 'notified',
+      episode_id: 'episode-1',
+      episode_status: 'active',
+      space_id: 'default',
+    });
+
+    await initialize(currentActionsDefinition);
+
+    expect(await countDocuments()).toBe(0);
+    expect(await getDataStreamVersion()).toBe(currentActionsDefinition.version);
+
+    const properties = await getBackingIndicesProperties();
+    expect(properties).toHaveLength(1);
+    expect(properties[0]).toMatchObject({
+      alert_id: { type: 'keyword' },
+      alert_status: { type: 'keyword' },
+    });
+    expect(properties[0]).not.toHaveProperty('episode_id');
+    expect(properties[0]).not.toHaveProperty('episode_status');
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`Deleting data stream ${TEST_ACTIONS_DATA_STREAM}`)
+    );
+  });
+
+  it('indexes alert_id and alert_status and leaves the episode_* fields of v7 writes unmapped after the reset', async () => {
+    await initialize(v7ActionsDefinition);
+    await initialize(currentActionsDefinition);
+
+    // No @timestamp: the final pipeline of the recreated data stream sets it.
+    await writeDocument('alert-doc', {
+      actor: { type: 'internal' },
+      action_type: 'notified',
+      alert_id: 'alert-1',
+      alert_status: 'active',
+      space_id: 'default',
+    });
+
+    // A node still on v7 keeps writing the old field names. `dynamic: false` accepts the
+    // document but does not index them, and no alias resolves them.
+    await writeDocument('episode-doc', {
+      actor: { type: 'internal' },
+      action_type: 'notified',
+      episode_id: 'episode-1',
+      episode_status: 'active',
+      space_id: 'default',
+    });
+
+    const esClient = esServer.getClient();
+    const byAlertId = await esClient.esql.query({
+      query: `FROM ${TEST_ACTIONS_DATA_STREAM}
+        | WHERE alert_id IS NOT NULL
+        | STATS alert_status = LAST(alert_status, @timestamp) BY alert_id`,
+    });
+    expect(byAlertId.values).toEqual([['active', 'alert-1']]);
+
+    await expect(
+      esClient.esql.query({
+        query: `FROM ${TEST_ACTIONS_DATA_STREAM} | WHERE episode_id == "episode-1"`,
+      })
+    ).rejects.toThrow(/Unknown column \[episode_id\]/);
+  });
+
   it('reads actor.type and actor.profile_uid through ES|QL like the actions history and attribution queries', async () => {
     await initialize(currentActionsDefinition);
 
@@ -426,7 +529,7 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
       '@timestamp': '2026-01-01T00:00:00.000Z',
       actor: { type: 'user', profile_uid: 'u_profile_1' },
       action_type: 'ack',
-      episode_id: 'episode-1',
+      alert_id: 'alert-1',
       space_id: 'default',
     });
 
@@ -434,7 +537,7 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
       '@timestamp': '2026-01-01T00:01:00.000Z',
       actor: { type: 'internal' },
       action_type: 'suppress',
-      episode_id: 'episode-1',
+      alert_id: 'alert-1',
       space_id: 'default',
     });
 
@@ -463,9 +566,9 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
       query: `FROM ${TEST_ACTIONS_DATA_STREAM}
         | STATS last_ack_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "ack",
                 internal_actions = COUNT(*) WHERE actor.type == "internal"
-          BY episode_id`,
+          BY alert_id`,
     });
 
-    expect(attribution.values).toEqual([['u_profile_1', 1, 'episode-1']]);
+    expect(attribution.values).toEqual([['u_profile_1', 1, 'alert-1']]);
   });
 });

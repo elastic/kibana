@@ -112,10 +112,17 @@ export {
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
   type EsqlViewsClient,
+  MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
+  MAX_ESQL_VIEW_NAME_LENGTH,
+  MAX_ESQL_VIEW_QUERY_LENGTH,
+  validateEsqlViewName,
+  type EsqlViewNameValidationError,
+  getViewEsqlQuery,
   getESQLSourceInfo,
   type ESQLSourceInfo,
   type ESQLSourceInfoColumn,
   clearESQLSourceInfoCache,
+  ESQL_SOURCE_INFO_CACHE_TTL,
   buildEsqlSourceCacheKey,
 } from './src';
 
