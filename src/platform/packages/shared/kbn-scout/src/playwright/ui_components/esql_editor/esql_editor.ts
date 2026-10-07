@@ -67,7 +67,7 @@ export class EsqlEditor {
 
     this.editor = this.scope.getByTestId('ESQLEditor');
     this.content = this.editor.locator('.view-lines');
-    this.input = this.editor.locator('textarea');
+    this.input = this.editor.locator(this.codeEditor.editorInputLocator);
     this.runButton = this.scope.getByTestId('ESQLEditor-run-query-button');
     this.queryStatsTotalDocumentsProcessed = this.scope.getByTestId(
       'ESQLEditor-queryStats-totalDocumentsProcessed'
@@ -139,7 +139,7 @@ export class EsqlEditor {
   async selectSuggestion(query: string, label: string): Promise<void> {
     await this.setQuery(query);
 
-    const suggestion = this.getSuggestWidget().locator('.monaco-list-row', { hasText: label });
+    const suggestion = await this.codeEditor.getCodeEditorSuggestionItem(label);
     const deadline = Date.now() + SELECT_SUGGESTION_TIMEOUT_MS;
     for (;;) {
       await this.triggerSuggest(query);
