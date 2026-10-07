@@ -99,7 +99,6 @@ export {
   isLegacyAttachmentRequest,
   isUnifiedEventAttachment,
   isUnifiedAlertAttachment,
-  isUnifiedAttackAttachment,
   isIndexMetadata,
   toStringArray,
   toStringOrStringArray,

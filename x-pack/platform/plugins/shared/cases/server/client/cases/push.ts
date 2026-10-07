@@ -81,7 +81,7 @@ const changeAlertsStatusToClose = async (
     AttachmentType.alert
   );
 
-  const alertFilter = combineFilters(
+  const syncFilter = combineFilters(
     [
       legacyAlertFilter,
       buildFilter({
@@ -94,14 +94,14 @@ const changeAlertsStatusToClose = async (
     NodeBuilderOperators.or
   );
 
-  const alertAttachments = await caseService.getAllCaseComments({
+  const syncableAttachments = await caseService.getAllCaseComments({
     id: [caseId],
     options: {
-      filter: alertFilter,
+      filter: syncFilter,
     },
   });
 
-  const documentsToClose = alertAttachments.saved_objects.flatMap((attachment) => [
+  const documentsToClose = syncableAttachments.saved_objects.flatMap((attachment) => [
     ...createAlertUpdateStatusRequest({
       comment: attachment.attributes,
       status: CaseStatuses.closed,

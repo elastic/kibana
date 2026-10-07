@@ -341,6 +341,31 @@ describe('bulk_delete', () => {
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalled();
       });
 
+      it('builds the user action payloads before deleting, so a malformed attachment is not lost', async () => {
+        const malformedAttachment = {
+          ...userComment,
+          id: 'mock-malformed-1',
+          attributes: { ...userComment.attributes, type: 'not-a-valid-type' },
+        } as unknown as (typeof mockCaseComments)[number];
+
+        clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+          saved_objects: [malformedAttachment],
+        });
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-1', savedObjectIds: ['mock-malformed-1'] },
+            clientArgs
+          )
+        ).rejects.toThrow('Failed to bulk delete attachments for case: mock-id-1');
+
+        expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
+        expect(clientArgs.services.caseService.patchCase).not.toHaveBeenCalled();
+        expect(
+          clientArgs.services.userActionService.creator.bulkCreateAttachmentDeletion
+        ).not.toHaveBeenCalled();
+      });
+
       it('does not delete anything when the user is not authorized', async () => {
         clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
@@ -354,6 +379,38 @@ describe('bulk_delete', () => {
         );
 
         expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
+      });
+
+      it('authorizes before disclosing which case an attachment belongs to', async () => {
+        clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+          saved_objects: [alertAttachment],
+        });
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-1', savedObjectIds: ['mock-comment-4'] },
+            clientArgs
+          )
+        ).rejects.toThrow(
+          'Failed to bulk delete attachments for case: mock-id-1: Error: Unauthorized'
+        );
+      });
+
+      it('authorizes before disclosing that an attachment is a file', async () => {
+        clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+          saved_objects: [fileAttachment],
+        });
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-1', savedObjectIds: ['mock-file-attachment-1'] },
+            clientArgs
+          )
+        ).rejects.toThrow(
+          'Failed to bulk delete attachments for case: mock-id-1: Error: Unauthorized'
+        );
       });
     });
   });

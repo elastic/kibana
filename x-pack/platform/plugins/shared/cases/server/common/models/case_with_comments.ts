@@ -314,6 +314,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments([attachment]),
+        commentableCase.handleAttackComments([attachment]),
         this.createCommentUserAction(comment, attachment),
       ]);
 
@@ -546,8 +547,6 @@ export class CaseCommentModel {
         await this.updateAlertsStatus(alerts);
       }
     }
-
-    await this.handleAttackComments(attachments);
   }
 
   /**
@@ -725,6 +724,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),
+        commentableCase.handleAttackComments(attachmentsWithoutErrors),
         this.bulkCreateCommentUserAction(attachmentsWithoutErrors),
       ]);
 

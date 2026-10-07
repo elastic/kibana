@@ -260,16 +260,16 @@ async function getSyncableComments({
 }
 
 /**
- * Returns what status the alert comment should have based on whether it is associated to a case.
+ * Returns what status the attachment should have based on whether it is associated to a case.
  */
 function getSyncStatusForComment({
-  alertComment,
+  attachment,
   casesToSyncToStatus,
 }: {
-  alertComment: SavedObjectsFindResult<AttachmentAttributes>;
+  attachment: SavedObjectsFindResult<AttachmentAttributes>;
   casesToSyncToStatus: Map<string, [CaseStatuses, string?]>;
 }): [CaseStatuses, string?] {
-  const id = getID(alertComment, CASE_SAVED_OBJECT);
+  const id = getID(attachment, CASE_SAVED_OBJECT);
 
   if (!id) {
     return [CaseStatuses.open, undefined];
@@ -340,7 +340,7 @@ async function updateAlerts({
       }
 
       const [status, closingReason] = getSyncStatusForComment({
-        alertComment: attachment,
+        attachment,
         casesToSyncToStatus,
       });
 

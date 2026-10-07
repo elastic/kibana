@@ -33,8 +33,7 @@ export const MAX_ATTACK_RISK_SCORE = 100;
  *
  * Metadata is stored in the saved object `_source` but is never indexed
  * (`cases-attachments` mappings are `dynamic: false`), so it is not searchable and
- * fields added in a later release cannot be backfilled — every renderer must degrade
- * gracefully when an optional field is absent.
+ * every renderer must degrade gracefully when an optional field is absent.
  */
 const AttackAttachmentMetadataSchema = z
   .object({
@@ -55,8 +54,7 @@ const AttackAttachmentMetadataSchema = z
      * Truncated attack details markdown captured at attach time, rendered as the activity
      * card's "Details" section.
      *
-     * De-anonymised at attach time, unlike `AttackDiscoveryAlert.detailsMarkdown`. Optional
-     * because attachments written before this field existed cannot be backfilled.
+     * De-anonymised at attach time, unlike `AttackDiscoveryAlert.detailsMarkdown`.
      */
     detailsMarkdown: z.string().max(MAX_ATTACK_DETAILS_MARKDOWN_LENGTH).optional(),
     /**
@@ -92,7 +90,7 @@ const AttackAttachmentMetadataSchema = z
      * Required here (unlike `security.alert`) because there is no legacy attachment
      * shape to stay compatible with.
      */
-    index: z.string().max(MAX_ATTACK_INDEX_LENGTH),
+    index: z.string().min(1).max(MAX_ATTACK_INDEX_LENGTH),
   })
   .strict();
 
@@ -100,8 +98,12 @@ export const AttackAttachmentPayloadSchema = z
   .object({
     type: z.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
     owner: z.string().max(MAX_ATTACK_OWNER_LENGTH),
-    /** The attack document `_id`, resolved against `metadata.index`. */
-    attachmentId: z.string().max(MAX_ATTACK_ATTACHMENT_ID_LENGTH),
+    /**
+     * The attack document `_id`, resolved against `metadata.index`. Both are bounded below as well
+     * as above: `ensureAttacksAuthorized` skips pairs with an empty id or index, so an empty string
+     * would be persisted without ever being authorized.
+     */
+    attachmentId: z.string().min(1).max(MAX_ATTACK_ATTACHMENT_ID_LENGTH),
     metadata: AttackAttachmentMetadataSchema,
   })
   .strict();

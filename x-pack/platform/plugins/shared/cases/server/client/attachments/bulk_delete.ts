@@ -35,6 +35,7 @@ import type { AttachmentSavedObjectType } from '../../services/user_actions/type
 
 interface BulkDeleteClassification {
   missingIds: string[];
+  foundAttachments: Array<SavedObject<AttachmentAttributesV2>>;
   attachmentsNotInCase: Array<SavedObject<AttachmentAttributesV2>>;
   fileAttachments: Array<SavedObject<AttachmentAttributesV2>>;
   attachmentsInCase: Array<SavedObject<AttachmentAttributesV2>>;
@@ -75,35 +76,58 @@ export const bulkDeleteAttachments = async (
 
     const { saved_objects: soAttachments } = await attachmentService.getter.bulkGet(uniqueIds);
 
-    const { missingIds, attachmentsNotInCase, fileAttachments, attachmentsInCase } =
-      soAttachments.reduce<BulkDeleteClassification>(
-        (acc, attachment) => {
-          if (attachment.error != null || attachment.attributes == null) {
-            acc.missingIds.push(attachment.id);
-            return acc;
-          }
-
-          const found = attachment as SavedObject<AttachmentAttributesV2>;
-
-          if (!isAssociatedToCase(caseId, found)) {
-            acc.attachmentsNotInCase.push(found);
-            return acc;
-          }
-
-          if (found.attributes.type === FILE_ATTACHMENT_TYPE) {
-            acc.fileAttachments.push(found);
-            return acc;
-          }
-
-          acc.attachmentsInCase.push(found);
+    const {
+      missingIds,
+      foundAttachments,
+      attachmentsNotInCase,
+      fileAttachments,
+      attachmentsInCase,
+    } = soAttachments.reduce<BulkDeleteClassification>(
+      (acc, attachment) => {
+        if (attachment.error != null || attachment.attributes == null) {
+          acc.missingIds.push(attachment.id);
           return acc;
-        },
-        { missingIds: [], attachmentsNotInCase: [], fileAttachments: [], attachmentsInCase: [] }
-      );
+        }
+
+        const found = attachment as SavedObject<AttachmentAttributesV2>;
+
+        acc.foundAttachments.push(found);
+
+        if (!isAssociatedToCase(caseId, found)) {
+          acc.attachmentsNotInCase.push(found);
+          return acc;
+        }
+
+        if (found.attributes.type === FILE_ATTACHMENT_TYPE) {
+          acc.fileAttachments.push(found);
+          return acc;
+        }
+
+        acc.attachmentsInCase.push(found);
+        return acc;
+      },
+      {
+        missingIds: [],
+        foundAttachments: [],
+        attachmentsNotInCase: [],
+        fileAttachments: [],
+        attachmentsInCase: [],
+      }
+    );
 
     if (missingIds.length > 0) {
       throw Boom.notFound(doNotExistOnCaseMessage(missingIds, caseId));
     }
+
+    // Authorized before the case and file checks below, so their error messages cannot tell an
+    // unauthorized caller which case an attachment belongs to, or what type it is.
+    await authorization.ensureAuthorized({
+      entities: foundAttachments.map((attachment) => ({
+        id: attachment.id,
+        owner: attachment.attributes.owner,
+      })),
+      operation: Operations.deleteComment,
+    });
 
     if (attachmentsNotInCase.length > 0) {
       throw Boom.notFound(
@@ -123,13 +147,15 @@ export const bulkDeleteAttachments = async (
       );
     }
 
-    await authorization.ensureAuthorized({
-      entities: attachmentsInCase.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-      })),
-      operation: Operations.deleteComment,
-    });
+    // Built before anything is deleted: the decode strips the non request fields (created_at etc.)
+    // the same way the single delete does, and it throws on an attachment it cannot represent. If
+    // that happened after the delete, the attachments would be gone with no user action recording it.
+    const attachmentDeletions = attachmentsInCase.map((attachment) => ({
+      id: attachment.id,
+      owner: attachment.attributes.owner,
+      attachment: decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes),
+      savedObjectType: attachment.type as AttachmentSavedObjectType,
+    }));
 
     const failedIds = await attachmentService.bulkDelete({
       savedObjectIds: uniqueIds,
@@ -151,13 +177,7 @@ export const bulkDeleteAttachments = async (
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId,
-      attachments: attachmentsInCase.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-        // strip the non request fields (created_at etc.) the same way the single delete does
-        attachment: decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes),
-        savedObjectType: attachment.type as AttachmentSavedObjectType,
-      })),
+      attachments: attachmentDeletions,
       user,
     });
 

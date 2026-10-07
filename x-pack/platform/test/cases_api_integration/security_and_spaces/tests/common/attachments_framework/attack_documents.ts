@@ -17,11 +17,16 @@ import {
 /**
  * Stand-ins for `.alerts-security.attack.discovery.alerts-default` and
  * `.alerts-security.alerts-default`. Attaching and status syncing are index-agnostic — both read
- * the attachment's `metadata.index` — so plain test indices exercise the same code paths without
- * depending on the detection engine's or the attack discovery schedule's index templates.
+ * the attachment's `metadata.index` — so dedicated test indices exercise the same code paths
+ * without depending on the detection engine's or the attack discovery schedule's index templates.
+ *
+ * The `.alerts` prefix is load bearing: alerting RBAC reads the referenced documents as the
+ * internal `kibana_system` user, which is only privileged on `.alerts*`. An ordinary index name
+ * makes that read return no `_source`, and the authorization check then has no rule type or
+ * consumer to assert on and silently passes.
  */
-export const ATTACK_INDEX = 'test-cases-attack-discovery-alerts';
-export const ALERT_INDEX = 'test-cases-attack-constituent-alerts';
+export const ATTACK_INDEX = '.alerts-test-cases-attack-discovery';
+export const ALERT_INDEX = '.alerts-test-cases-attack-constituent';
 
 /**
  * The fields the Cases platform requires of an attack reference before it will persist the

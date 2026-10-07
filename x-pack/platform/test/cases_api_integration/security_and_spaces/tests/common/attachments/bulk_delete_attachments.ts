@@ -59,10 +59,10 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentAlertReq,
       });
 
-      const attachmentIds = theCase.comments!.map((comment) => comment.id);
-      expect(attachmentIds.length).to.eql(2);
+      const savedObjectIds = theCase.comments!.map((comment) => comment.id);
+      expect(savedObjectIds.length).to.eql(2);
 
-      await bulkDeleteAttachments({ supertest, caseId: postedCase.id, attachmentIds });
+      await bulkDeleteAttachments({ supertest, caseId: postedCase.id, savedObjectIds });
 
       const comments = await getAllComments({ supertest, caseId: postedCase.id });
       expect(comments.length).to.eql(0);
@@ -82,9 +82,9 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentAlertReq,
       });
 
-      const attachmentIds = theCase.comments!.map((comment) => comment.id);
+      const savedObjectIds = theCase.comments!.map((comment) => comment.id);
 
-      await bulkDeleteAttachments({ supertest, caseId: postedCase.id, attachmentIds });
+      await bulkDeleteAttachments({ supertest, caseId: postedCase.id, savedObjectIds });
 
       const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
       const deletions = userActions.filter(
@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await bulkDeleteAttachments({
         supertest,
         caseId: postedCase.id,
-        attachmentIds: theCase.comments!.map((comment) => comment.id),
+        savedObjectIds: theCase.comments!.map((comment) => comment.id),
       });
 
       const updatedCase = await getCase({ supertest, caseId: postedCase.id });
@@ -132,7 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId: postedCase.id,
-          attachmentIds: [theCase.comments![0].id, 'does-not-exist'],
+          savedObjectIds: [theCase.comments![0].id, 'does-not-exist'],
           expectedHttpCode: 404,
         });
 
@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId: firstCase.id,
-          attachmentIds: [
+          savedObjectIds: [
             firstCaseWithComment.comments![0].id,
             secondCaseWithComment.comments![0].id,
           ],
@@ -195,7 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId: postedCase.id,
-          attachmentIds: [userCommentId, fileAttachmentId],
+          savedObjectIds: [userCommentId, fileAttachmentId],
           expectedHttpCode: 400,
         });
 
@@ -209,7 +209,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId: postedCase.id,
-          attachmentIds: [],
+          savedObjectIds: [],
           expectedHttpCode: 400,
         });
       });
@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId: postedCase.id,
-          attachmentIds: new Array(MAX_BULK_DELETE_ATTACHMENTS + 1)
+          savedObjectIds: new Array(MAX_BULK_DELETE_ATTACHMENTS + 1)
             .fill('id')
             .map((id, index) => `${id}-${index}`),
           expectedHttpCode: 400,
@@ -249,7 +249,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          attachmentIds: [theCase.comments![0].id],
+          savedObjectIds: [theCase.comments![0].id],
           auth: { user: secOnly, space: 'space1' },
         });
 
@@ -280,7 +280,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          attachmentIds: [theCase.comments![0].id],
+          savedObjectIds: [theCase.comments![0].id],
           auth: { user: obsOnly, space: 'space1' },
           expectedHttpCode: 403,
         });
@@ -315,7 +315,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkDeleteAttachments({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            attachmentIds: [theCase.comments![0].id],
+            savedObjectIds: [theCase.comments![0].id],
             auth: { user, space: 'space1' },
             expectedHttpCode: 403,
           });
@@ -340,7 +340,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          attachmentIds: [theCase.comments![0].id],
+          savedObjectIds: [theCase.comments![0].id],
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
