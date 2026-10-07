@@ -271,36 +271,24 @@ const requeueConflicts = <TExecution extends { id: string }>(
     };
   };
 
-  // - updater-origin: re-queue original BulkUpdaterItem so the next iteration re-mgets
-  // - plain non-OCC (no seqNo, using retry_on_conflict): re-queue unchanged
-  // - plain OCC (seqNo set) and create 409s always settle.
-  const conflictingUpdaters: Array<QueueItem<TExecution>> = [];
+  // Updater items re-queue so the next iteration re-mgets and re-runs the callback.
+  // Plain items settle. retry_on_conflict is Elasticsearch's budget and is not also retried here.
+  // Caller-supplied seqNo is compare-and-set: a 409 must surface, never be retried.
   const nextQueue: Array<QueueItem<TExecution>> = [];
   const settled: Settled[] = [];
 
   esResponse.items.forEach((esItem, idx) => {
-    const { qi, plainItem } = toSend[idx];
+    const { qi } = toSend[idx];
     const responseItem = toBulkItemResponse(esItem);
     const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
-    // Caller-supplied seqNo is compare-and-set: a 409 must surface, never be retried.
-    const canRetryConflict =
-      isConflict &&
-      qi.remainingRetries > 0 &&
-      plainItem.operation !== 'create' &&
-      (isBulkUpdaterItem(qi.item) || plainItem.seqNo === undefined);
+    const canRetryConflict = isConflict && qi.remainingRetries > 0 && isBulkUpdaterItem(qi.item);
 
     if (canRetryConflict) {
-      if (isBulkUpdaterItem(qi.item)) {
-        conflictingUpdaters.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
-      } else {
-        nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
-      }
+      nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
     } else {
       settled.push({ originalIndex: qi.originalIndex, response: responseItem });
     }
   });
-
-  nextQueue.push(...conflictingUpdaters);
 
   return { nextQueue, settled };
 };
@@ -334,7 +322,7 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
   let queuedItems: Array<QueueItem<TExecution>> = request.items.map((item, index) => ({
     item,
     originalIndex: index,
-    remainingRetries: item.operation === 'create' ? 0 : item.retryOnConflict ?? 0,
+    remainingRetries: isBulkUpdaterItem(item) ? item.retryOnConflict ?? 0 : 0,
   }));
 
   const result = new Array<BulkItemResponse>(request.items.length);

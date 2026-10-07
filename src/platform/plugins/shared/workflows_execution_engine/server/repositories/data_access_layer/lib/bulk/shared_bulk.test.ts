@@ -299,6 +299,47 @@ describe('sharedBulk', () => {
     expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: [INDEX] });
   });
 
+  it('sends retry_on_conflict once and does not requeue a plain upsert conflict', async () => {
+    const { esClient, logger } = createSetup();
+    esClient.bulk.mockResolvedValue({
+      errors: true,
+      items: [
+        {
+          update: {
+            _id: 'a',
+            _index: INDEX,
+            error: { type: 'version_conflict_engine_exception', reason: 'version conflict' },
+          },
+        },
+      ],
+    } as never);
+
+    const result = await sharedBulk<{ id: string; status: string }>({
+      esClient,
+      request: {
+        items: [
+          {
+            operation: 'upsert',
+            document: { id: 'a', status: 'completed' },
+            index: INDEX,
+            retryOnConflict: 3,
+          },
+        ],
+      },
+      logger,
+      fallbackIndexes: [INDEX],
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    expect(esClient.mget).not.toHaveBeenCalled();
+    expect(esClient.bulk.mock.calls[0][0].operations).toEqual([
+      { update: { _id: 'a', _index: INDEX, retry_on_conflict: 3 } },
+      { doc: { id: 'a', status: 'completed' }, doc_as_upsert: true },
+    ]);
+    expect(result.errors).toBe(true);
+    expect(result.items[0].error?.type).toBe('version_conflict_engine_exception');
+  });
+
   it('stamps id from _id when updater source projection omits it', async () => {
     const { esClient, logger } = createSetup();
     const updater = jest.fn((current: { id: string; status: string }) =>
