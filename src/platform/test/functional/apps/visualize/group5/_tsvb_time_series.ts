@@ -215,6 +215,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await act('viz_1', { x: 143, y: 123 });
             const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
             expect(hasMachineRawFilter).to.be(true);
+            await filterBar.removeFilter('machine.os.raw');
           });
 
           it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
