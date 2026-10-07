@@ -54,6 +54,11 @@ jest.mock('./use_scheduled_discovery_settings', () => ({
 jest.mock('./maintenance_section', () => ({
   MaintenanceSection: () => <div data-test-subj="maintenance-section" />,
 }));
+jest.mock('./reset_section', () => ({
+  ResetSection: ({ canManage }: { canManage: boolean }) => (
+    <div data-test-subj="reset-section" data-can-manage={canManage} />
+  ),
+}));
 jest.mock('./stale_event_cleanup_section', () => ({
   StaleEventCleanupSection: () => <div data-test-subj="stale-event-cleanup-section" />,
 }));
@@ -97,10 +102,16 @@ const setup = ({
   isDeveloperMode = false,
   isSaving = false,
   canSaveAdvancedSettings = true,
+  canManage = true,
+  canConfigure = true,
+  canManageStreams = true,
 }: {
   isDeveloperMode?: boolean;
   isSaving?: boolean;
   canSaveAdvancedSettings?: boolean;
+  canManage?: boolean;
+  canConfigure?: boolean;
+  canManageStreams?: boolean;
 } = {}) => {
   mockUseDeveloperMode.mockReturnValue({
     isDeveloperMode,
@@ -113,14 +124,14 @@ const setup = ({
         capabilities: {
           nightshift: {
             show: true,
-            manage: true,
-            configure: true,
+            manage: canManage,
+            configure: canConfigure,
           },
           advancedSettings: {
             save: canSaveAdvancedSettings,
           },
           streams: {
-            manage: true,
+            manage: canManageStreams,
           },
         },
       },
@@ -179,6 +190,25 @@ describe('SettingsTab developer mode', () => {
 
     expect(screen.queryByTestId('stale-event-cleanup-section')).not.toBeInTheDocument();
     expect(screen.queryByTestId('cost-estimate')).not.toBeInTheDocument();
+  });
+
+  it('keeps reset hidden by default without hiding Pause/Resume', () => {
+    setup();
+    expect(screen.queryByTestId('reset-section')).not.toBeInTheDocument();
+    expect(screen.getByTestId('maintenance-section')).toBeInTheDocument();
+  });
+
+  it('shows reset in developer mode without requiring Streams manage', () => {
+    setup({ isDeveloperMode: true, canManageStreams: false });
+    expect(screen.getByTestId('reset-section')).toHaveAttribute('data-can-manage', 'true');
+  });
+
+  it.each([
+    { canManage: false, canConfigure: true },
+    { canManage: true, canConfigure: false },
+  ])('requires both Nightshift capabilities for reset: %o', (capabilities) => {
+    setup({ isDeveloperMode: true, ...capabilities });
+    expect(screen.getByTestId('reset-section')).toHaveAttribute('data-can-manage', 'false');
   });
 
   it('shows stale event cleanup and the cost estimate when developer mode is on', () => {

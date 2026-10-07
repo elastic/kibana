@@ -97,11 +97,10 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
 
 export function MaintenanceSection({ canManage }: { canManage: boolean }) {
   const { data: status, isLoading, isError, refetch } = useMaintenanceStatus();
-  const { pause, resume, isPausing, isResuming } = useSignificantEventsMaintenanceActions();
+  const { pause, resume, isMutating } = useSignificantEventsMaintenanceActions();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const paused = status?.state === 'paused';
-  const isMutating = isPausing || isResuming;
   const statusReady = !isLoading && !isError && status !== undefined;
 
   const onConfirm = () => {
@@ -270,6 +269,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                 )
           }
           buttonColor={paused ? 'primary' : 'warning'}
+          confirmButtonDisabled={!canManage || isMutating}
           defaultFocusedButton="confirm"
         >
           <p>
