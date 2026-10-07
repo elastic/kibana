@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import { actionPolicyResponseSchema } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
-import { validateDateString } from './utils';
+import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
+import {
+  buildCreateActionPolicyAttributes,
+  buildUpdateActionPolicyAttributes,
+  toPatchableActionPolicyData,
+  transformActionPolicySoAttributesToApiResponse,
+  validateDateString,
+} from './utils';
 
 describe('validateDateString', () => {
   it('does not throw for a valid ISO 8601 datetime', () => {
@@ -65,5 +73,102 @@ describe('validateDateString', () => {
         details: { value: '' },
       },
     });
+  });
+});
+
+const storedAttributes = (
+  overrides: Partial<ActionPolicySavedObjectAttributes> = {}
+): ActionPolicySavedObjectAttributes => ({
+  name: 'policy',
+  description: 'desc',
+  enabled: true,
+  destinations: [{ type: 'workflow', id: 'wf-1' }],
+  apiKey: 'key',
+  apiKeyOwner: 'elastic',
+  apiKeyCreatedByUser: false,
+  createdBy: null,
+  createdAt: '2026-10-07T00:00:00.000Z',
+  updatedBy: null,
+  updatedAt: '2026-10-07T00:00:00.000Z',
+  ...overrides,
+});
+
+/**
+ * Documents written before the API rejected empty sentinels must still satisfy the response schema,
+ * whose optional fields are now either absent or non-empty.
+ */
+describe('reading legacy empty sentinels', () => {
+  const read = (overrides: Partial<ActionPolicySavedObjectAttributes>) =>
+    transformActionPolicySoAttributesToApiResponse({
+      id: 'policy-1',
+      attributes: storedAttributes(overrides),
+    });
+
+  it('projects an empty description as absent', () => {
+    const result = read({ description: '' });
+    expect(result.description).toBeUndefined();
+    expect(() => actionPolicyResponseSchema.parse(result)).not.toThrow();
+  });
+
+  it('projects an empty groupBy as absent', () => {
+    const result = read({ groupBy: [] });
+    expect(result.group_by).toBeUndefined();
+    expect(() => actionPolicyResponseSchema.parse(result)).not.toThrow();
+  });
+
+  it('projects a throttle without a strategy as absent', () => {
+    const result = read({ throttle: { interval: '5m' } });
+    expect(result.throttle).toBeUndefined();
+    expect(() => actionPolicyResponseSchema.parse(result)).not.toThrow();
+  });
+
+  it('drops an interval the strategy cannot use', () => {
+    const result = read({ throttle: { strategy: 'on_status_change', interval: '5m' } });
+    expect(result.throttle).toStrictEqual({ strategy: 'on_status_change' });
+  });
+
+  it('offers the same normalised view to a patch merge', () => {
+    const patchable = toPatchableActionPolicyData(
+      storedAttributes({ description: '', groupBy: [], throttle: { interval: '5m' } })
+    );
+
+    expect(patchable.description).toBeUndefined();
+    expect(patchable.group_by).toBeUndefined();
+    expect(patchable.throttle).toBeUndefined();
+  });
+});
+
+describe('writing optional fields', () => {
+  const auth = { apiKey: 'key', owner: 'elastic', createdByUser: false };
+  const data = {
+    name: 'policy',
+    destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
+  };
+
+  it('stores an empty description as an absent key', () => {
+    const attrs = buildCreateActionPolicyAttributes({
+      data: { ...data, description: '' },
+      enabled: true,
+      auth,
+      createdBy: null,
+      createdAt: '2026-10-07T00:00:00.000Z',
+      updatedBy: null,
+      updatedAt: '2026-10-07T00:00:00.000Z',
+    });
+
+    // Serialized, because an `undefined` property never reaches Elasticsearch.
+    expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('description');
+  });
+
+  it('stores a cleared description as an absent key on update', () => {
+    const attrs = buildUpdateActionPolicyAttributes({
+      existing: storedAttributes(),
+      data,
+      auth,
+      updatedBy: null,
+      updatedAt: '2026-10-07T00:00:01.000Z',
+    });
+
+    expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('description');
   });
 });

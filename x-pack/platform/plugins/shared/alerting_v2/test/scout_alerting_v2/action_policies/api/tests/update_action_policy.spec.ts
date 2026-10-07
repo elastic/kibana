@@ -47,7 +47,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
         matcher: { expression: "env == 'production' && region == 'us-east-1'" },
         group_by: ['service.name'],
-        throttle: { interval: '1m' },
+        throttle: { strategy: 'per_status_interval', interval: '1m' },
       })
     );
 
@@ -90,7 +90,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: { expression: "env == 'production' && region == 'us-east-1'" },
           group_by: ['service.name'],
-          throttle: { interval: '1m' },
+          throttle: { strategy: 'per_status_interval', interval: '1m' },
         })
       );
 
@@ -123,7 +123,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: { expression: "env == 'production'" },
           group_by: ['service.name'],
-          throttle: { interval: '1m' },
+          throttle: { strategy: 'per_status_interval', interval: '1m' },
         })
       );
 
@@ -154,7 +154,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: { expression: "env == 'production' && region == 'us-east-1'" },
           group_by: ['service.name'],
-          throttle: { interval: '1m' },
+          throttle: { strategy: 'per_status_interval', interval: '1m' },
         })
       );
 
@@ -191,7 +191,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           destinations: [{ type: 'workflow', id: 'original-dest-workflow' }],
           matcher: { expression: "env == 'staging'" },
           group_by: ['host.name'],
-          throttle: { interval: '2m' },
+          throttle: { strategy: 'per_status_interval', interval: '2m' },
         })
       );
 
@@ -314,7 +314,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           destinations: [{ type: 'workflow', id: 'nullable-workflow-id' }],
           matcher: { expression: "env == 'production'" },
           group_by: ['service.name'],
-          throttle: { interval: '5m' },
+          throttle: { strategy: 'per_status_interval', interval: '5m' },
         })
       );
 

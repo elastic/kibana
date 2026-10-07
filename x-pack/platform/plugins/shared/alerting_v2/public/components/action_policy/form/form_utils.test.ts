@@ -45,7 +45,7 @@ describe('action policy form utils', () => {
         name: 'Policy',
         description: 'Description',
         grouping_mode: 'per_alert',
-        throttle: { strategy: 'on_status_change', interval: null },
+        throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -69,23 +69,24 @@ describe('action policy form utils', () => {
       });
     });
 
-    it('emits interval: null for strategies that do not require it', () => {
+    // `null` is only a clear signal on PATCH, so a create omits an interval it cannot use.
+    it('omits the interval for strategies that do not require it', () => {
       const payload = toCreatePayload({
         ...state,
         throttleStrategy: 'every_time',
       });
 
-      expect(payload.throttle).toEqual({ strategy: 'every_time', interval: null });
+      expect(payload.throttle).toEqual({ strategy: 'every_time' });
     });
 
-    it('emits interval: null when strategy does not need interval, even if state holds a stale value', () => {
+    it('omits the interval when the strategy does not need it, even if state holds a stale value', () => {
       const payload = toCreatePayload({
         ...state,
         throttleStrategy: 'on_status_change',
         throttleInterval: '5m',
       });
 
-      expect(payload.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+      expect(payload.throttle).toEqual({ strategy: 'on_status_change' });
     });
 
     it('includes structured matcher when present', () => {
@@ -110,6 +111,10 @@ describe('action policy form utils', () => {
     it('omits matcher when tags array is empty and expression is unset', () => {
       expect(toCreatePayload({ ...state, matcher: { tags: [] } })).not.toHaveProperty('matcher');
     });
+
+    it('omits an empty description rather than sending an empty string', () => {
+      expect(toCreatePayload({ ...state, description: '' })).not.toHaveProperty('description');
+    });
   });
 
   describe('toUpdatePayload', () => {
@@ -128,6 +133,10 @@ describe('action policy form utils', () => {
     it('normalizes an empty matcher object to null', () => {
       const payload = toUpdatePayload({ ...state, matcher: {} });
       expect(payload.matcher).toBeNull();
+    });
+
+    it('clears an emptied description with null', () => {
+      expect(toUpdatePayload({ ...state, description: '' }).description).toBeNull();
     });
 
     it('preserves concrete nullable values', () => {

@@ -228,9 +228,10 @@ describe('ActionPolicyClient', () => {
       expect(res.destinations).toEqual([{ type: 'workflow', id: 'my-workflow' }]);
     });
 
-    it('creates a disabled policy when options.enabled is false', async () => {
+    // Only `_enable`/`_disable` move lifecycle state, so a create always lands enabled.
+    it('creates an enabled policy at a caller-chosen id', async () => {
       mockSavedObjectsClient.create.mockResolvedValueOnce({
-        id: 'policy-id-disabled',
+        id: 'policy-id-chosen',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {} as ActionPolicySavedObjectAttributes,
         references: [],
@@ -243,15 +244,15 @@ describe('ActionPolicyClient', () => {
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
         },
-        options: { id: 'policy-id-disabled', enabled: false },
+        options: { id: 'policy-id-chosen' },
       });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
-        expect.objectContaining({ enabled: false }),
-        { id: 'policy-id-disabled', overwrite: false }
+        expect.objectContaining({ enabled: true }),
+        { id: 'policy-id-chosen', overwrite: false }
       );
-      expect(res).toEqual(expect.objectContaining({ id: 'policy-id-disabled', enabled: false }));
+      expect(res).toEqual(expect.objectContaining({ id: 'policy-id-chosen', enabled: true }));
     });
 
     it('defaults to an enabled policy when options.enabled is omitted', async () => {
@@ -1595,7 +1596,8 @@ describe('ActionPolicyClient', () => {
         expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
       });
 
-      it('creates the policy with enabled=false when the body disables it', async () => {
+      // A replace cannot carry lifecycle state, so creating through PUT lands enabled like a POST.
+      it('creates the policy enabled', async () => {
         mockSavedObjectsClient.create.mockResolvedValueOnce({
           id: 'policy-id-upsert-new',
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -1606,17 +1608,17 @@ describe('ActionPolicyClient', () => {
 
         const res = await client.upsertActionPolicy({
           id: 'policy-id-upsert-new',
-          data: { ...baseUpsertData, enabled: false },
+          data: baseUpsertData,
         });
 
         expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
           ACTION_POLICY_SAVED_OBJECT_TYPE,
-          expect.objectContaining({ enabled: false }),
+          expect.objectContaining({ enabled: true }),
           { id: 'policy-id-upsert-new', overwrite: false }
         );
         expect(res).toEqual({
           created: true,
-          policy: expect.objectContaining({ id: 'policy-id-upsert-new', enabled: false }),
+          policy: expect.objectContaining({ id: 'policy-id-upsert-new', enabled: true }),
         });
       });
 
@@ -1722,7 +1724,8 @@ describe('ActionPolicyClient', () => {
         expect(res.created).toBe(false);
       });
 
-      it('enables the policy when the body sets enabled=true on a disabled policy', async () => {
+      // A replace never resurrects a disabled policy: `_enable` is the only way back on.
+      it('leaves a disabled policy disabled', async () => {
         mockSavedObjectsClient.update.mockResolvedValueOnce({
           id: 'policy-id-update-1',
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -1733,19 +1736,19 @@ describe('ActionPolicyClient', () => {
 
         const res = await client.upsertActionPolicy({
           id: 'policy-id-update-1',
-          data: { ...baseUpsertData, enabled: true },
+          data: baseUpsertData,
         });
 
         expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
           ACTION_POLICY_SAVED_OBJECT_TYPE,
           'policy-id-update-1',
-          expect.objectContaining({ enabled: true }),
+          expect.objectContaining({ enabled: false }),
           { version: 'WzEsMV0=', mergeAttributes: false }
         );
-        expect(res.policy.enabled).toBe(true);
+        expect(res.policy.enabled).toBe(false);
       });
 
-      it('disables the policy when the body sets enabled=false on an enabled policy', async () => {
+      it('leaves an enabled policy enabled', async () => {
         const enabledExistingDoc = {
           id: 'policy-id-update-enabled',
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -1767,16 +1770,16 @@ describe('ActionPolicyClient', () => {
 
         const res = await client.upsertActionPolicy({
           id: 'policy-id-update-enabled',
-          data: { ...baseUpsertData, enabled: false },
+          data: baseUpsertData,
         });
 
         expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
           ACTION_POLICY_SAVED_OBJECT_TYPE,
           'policy-id-update-enabled',
-          expect.objectContaining({ enabled: false }),
+          expect.objectContaining({ enabled: true }),
           { version: 'WzEsMV0=', mergeAttributes: false }
         );
-        expect(res.policy.enabled).toBe(false);
+        expect(res.policy.enabled).toBe(true);
       });
 
       it('preserves the existing enabled value when the body omits enabled', async () => {

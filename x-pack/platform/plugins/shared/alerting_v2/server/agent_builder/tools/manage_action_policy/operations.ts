@@ -180,11 +180,17 @@ export const executeActionPolicyOperations = (
       }
 
       case 'set_throttle': {
+        // A throttle configures nothing without a strategy, so there is no partial block to build.
         const strategy = op.strategy ?? next.throttle?.strategy;
+        if (strategy === undefined) {
+          throw new ActionPolicyOperationValidationError(
+            'strategy is required when the policy has no throttle yet.'
+          );
+        }
         next = {
           ...next,
           throttle: {
-            ...(strategy !== undefined ? { strategy } : {}),
+            strategy,
             ...(op.interval !== undefined ? { interval: op.interval } : {}),
           },
         };

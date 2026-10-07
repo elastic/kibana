@@ -82,21 +82,22 @@ export const throttleStrategySchema = z
 
 export type ThrottleStrategy = z.infer<typeof throttleStrategySchema>;
 
-const THROTTLE_STRATEGY_DESCRIPTION = 'The throttle strategy.';
+const THROTTLE_STRATEGY_DESCRIPTION =
+  'The throttle strategy. Required whenever `throttle` is present: clear the whole block with `throttle: null` on PATCH rather than clearing this field on its own.';
 const THROTTLE_INTERVAL_DESCRIPTION =
-  'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.';
+  'The throttle interval duration (e.g. 5m, 1h). Required by the `per_status_interval` and `time_interval` strategies, and absent for the intervalless ones. Omit it on create; send `null` on PATCH to clear it.';
 
 const throttleSchema = z
   .object({
-    strategy: throttleStrategySchema.optional().describe(THROTTLE_STRATEGY_DESCRIPTION),
-    interval: durationSchema.nullish().describe(THROTTLE_INTERVAL_DESCRIPTION),
+    strategy: throttleStrategySchema.describe(THROTTLE_STRATEGY_DESCRIPTION),
+    interval: durationSchema.optional().describe(THROTTLE_INTERVAL_DESCRIPTION),
   })
   .strict()
   .meta({ id: 'alerting_action_policy_throttle' });
 
 const throttlePatchSchema = z
   .object({
-    strategy: throttleStrategySchema.nullable().optional().describe(THROTTLE_STRATEGY_DESCRIPTION),
+    strategy: throttleStrategySchema.optional().describe(THROTTLE_STRATEGY_DESCRIPTION),
     interval: durationSchema.nullable().optional().describe(THROTTLE_INTERVAL_DESCRIPTION),
   })
   .strict()
@@ -119,17 +120,16 @@ export const needsInterval = (strategy: string | undefined): boolean =>
 export interface ValidationPayload {
   value: {
     grouping_mode?: string | null;
-    throttle?: { strategy?: string; interval?: string | null } | null;
+    throttle?: { strategy?: string; interval?: string } | null;
   };
   issues: z.core.$ZodRawIssue[];
 }
 
 const validateStrategyInterval = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
-  const strategy = data.throttle?.strategy;
-  if (!strategy) return;
+  const { strategy, interval } = data.throttle ?? {};
 
-  if (needsInterval(strategy) && !data.throttle?.interval) {
+  if (needsInterval(strategy) && !interval) {
     issues.push({
       code: 'custom',
       message: `Strategy "${strategy}" requires an interval to be defined`,
@@ -139,14 +139,19 @@ const validateStrategyInterval = (payload: ValidationPayload) => {
   }
 };
 
+/**
+ * Runs on the create shape and on the merged PATCH document, where `strategy` is required whenever
+ * `throttle` is present — so a `throttle` reaching here without one is rejected rather than skipped.
+ */
 const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
-  const mode = data.grouping_mode ?? 'per_alert';
-  const strategy = data.throttle?.strategy;
-  if (!strategy) return;
+  if (data.throttle == null) return;
 
+  const mode = data.grouping_mode ?? 'per_alert';
+  const { strategy } = data.throttle;
   const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
-  if (!allowed.has(strategy)) {
+
+  if (strategy === undefined || !allowed.has(strategy)) {
     issues.push({
       code: 'custom',
       message: `Strategy "${strategy}" is not valid for grouping mode "${mode}"`,
@@ -194,28 +199,42 @@ const actionPolicyNameSchema = z
   .min(1)
   .describe('The name of the action policy.');
 
+const ACTION_POLICY_DESCRIPTION_DESCRIPTION =
+  'A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.';
+
+const GROUP_BY_DESCRIPTION =
+  'The fields used to group alerts, read by the `per_field` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send `null` on PATCH to clear it.';
+
+const GROUPING_MODE_DESCRIPTION =
+  'The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.';
+
+const THROTTLE_DESCRIPTION =
+  'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it.';
+
+const actionPolicyDescriptionSchema = z
+  .string()
+  .max(MAX_DESCRIPTION_LENGTH)
+  .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION);
+
+const actionPolicyGroupBySchema = z
+  .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+  .min(1)
+  .max(MAX_GROUPING_FIELDS)
+  .describe(GROUP_BY_DESCRIPTION);
+
 const createActionPolicyDataBaseSchema = z
   .object({
     name: actionPolicyNameSchema,
-    description: z
-      .string()
-      .max(MAX_DESCRIPTION_LENGTH)
-      .describe('A description of the action policy.'),
+    description: actionPolicyDescriptionSchema.optional(),
     destinations: z
       .array(actionPolicyDestinationSchema)
       .min(1, 'At least one destination must be provided')
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .describe('The list of destinations. At least one is required.'),
     matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
-    group_by: z
-      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-      .max(MAX_GROUPING_FIELDS)
-      .optional()
-      .describe('The fields used to group alerts.'),
-    grouping_mode: groupingModeSchema
-      .optional()
-      .describe('The grouping mode for alert notifications.'),
-    throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
+    group_by: actionPolicyGroupBySchema.optional(),
+    grouping_mode: groupingModeSchema.optional().describe(GROUPING_MODE_DESCRIPTION),
+    throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
   })
   .strict();
 
@@ -227,22 +246,11 @@ export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema
 export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataSchema>;
 
 /**
- * Request body schema for `PUT /api/alerting/v2/action_policies/{id}`. Adds
- * an optional `enabled` on top of the create-action-policy data. Left as a
- * plain optional (no schema-level default) because the meaning of "omitted"
- * differs by outcome: on create it defaults to `true`, on replace it
- * preserves the existing stored value — both handled in application code,
- * not here.
+ * Request body schema for `PUT /api/alerting/v2/action_policies/{id}`: the create-action-policy
+ * data, unchanged. Lifecycle state is not part of any write body — a replace creates the policy
+ * enabled and otherwise preserves the stored value, and `_enable`/`_disable` own the transition.
  */
 export const putActionPolicyDataSchema = createActionPolicyDataBaseSchema
-  .extend({
-    enabled: z
-      .boolean()
-      .optional()
-      .describe(
-        'Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.'
-      ),
-  })
   .check(validateGroupingModeAndStrategy)
   .meta({ id: 'alerting_put_action_policy' });
 
@@ -260,11 +268,7 @@ export type PutActionPolicyDataInput = z.input<typeof putActionPolicyDataSchema>
 export const updateActionPolicyDataSchema = z
   .object({
     name: actionPolicyNameSchema.optional(),
-    description: z
-      .string()
-      .max(MAX_DESCRIPTION_LENGTH)
-      .optional()
-      .describe('A description of the action policy.'),
+    description: actionPolicyDescriptionSchema.nullable().optional(),
     destinations: z
       .array(actionPolicyDestinationSchema)
       .min(1, 'At least one destination must be provided')
@@ -275,20 +279,9 @@ export const updateActionPolicyDataSchema = z
       .nullable()
       .optional()
       .describe(POLICY_MATCHER_PATCH_DESCRIPTION),
-    group_by: z
-      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-      .max(MAX_GROUPING_FIELDS)
-      .nullable()
-      .optional()
-      .describe('The fields used to group alerts.'),
-    grouping_mode: groupingModeSchema
-      .nullable()
-      .optional()
-      .describe('The grouping mode for alert notifications.'),
-    throttle: throttlePatchSchema
-      .nullable()
-      .optional()
-      .describe('The throttle configuration for notifications.'),
+    group_by: actionPolicyGroupBySchema.nullable().optional(),
+    grouping_mode: groupingModeSchema.nullable().optional().describe(GROUPING_MODE_DESCRIPTION),
+    throttle: throttlePatchSchema.nullable().optional().describe(THROTTLE_DESCRIPTION),
   })
   .strict()
   .meta({ id: 'alerting_update_action_policy' });

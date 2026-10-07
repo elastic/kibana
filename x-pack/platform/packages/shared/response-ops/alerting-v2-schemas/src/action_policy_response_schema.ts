@@ -18,7 +18,10 @@ export const actionPolicyResponseSchema = z
   .object({
     id: z.string().describe('The unique identifier for the action policy.'),
     name: z.string().describe('The name of the action policy.'),
-    description: z.string().describe('A description of the action policy.'),
+    description: z
+      .string()
+      .optional()
+      .describe('A description of the action policy. Omitted when the policy has none.'),
     enabled: z.boolean().describe('Whether the action policy is enabled.'),
     destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
     matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
@@ -31,9 +34,7 @@ export const actionPolicyResponseSchema = z
       .describe('The grouping mode for alert notifications. Omitted when none is set.'),
     throttle: z
       .object({
-        strategy: throttleStrategySchema
-          .optional()
-          .describe('The throttle strategy. Omitted when none is set.'),
+        strategy: throttleStrategySchema.describe('The throttle strategy.'),
         interval: durationSchema
           .optional()
           .describe(

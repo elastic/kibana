@@ -72,7 +72,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
           destinations: [{ type: 'workflow', id: 'preserve-workflow-id' }],
           matcher: { expression: "env == 'production' && region == 'us-east-1'" },
           group_by: ['service.name'],
-          throttle: { interval: '5m' },
+          throttle: { strategy: 'per_status_interval', interval: '5m' },
         })
       );
 

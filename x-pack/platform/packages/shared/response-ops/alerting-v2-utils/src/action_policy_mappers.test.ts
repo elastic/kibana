@@ -12,9 +12,9 @@ describe('attachmentDataToActionPolicyPayload', () => {
   it('fills required defaults for empty data', () => {
     const result = attachmentDataToActionPolicyPayload({});
 
+    // `description` is optional, so an absent one stays absent rather than becoming `''`.
     expect(result).toEqual({
       name: '',
-      description: '',
       destinations: [],
     });
   });

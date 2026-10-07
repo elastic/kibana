@@ -109,13 +109,9 @@ describe('createActionPolicyDataSchema', () => {
       expect(result.throttle?.strategy).toBe('every_time');
     });
 
-    it('accepts empty throttle object (no strategy)', () => {
-      const result = createActionPolicyDataSchema.parse({
-        ...base,
-        throttle: {},
-      });
-
-      expect(result.throttle).toEqual({});
+    // A throttle without a strategy configures nothing: omit the block instead.
+    it('rejects an empty throttle object', () => {
+      expect(createActionPolicyDataSchema.safeParse({ ...base, throttle: {} }).success).toBe(false);
     });
 
     it('accepts no grouping_mode with per_alert-compatible strategy', () => {
@@ -269,29 +265,27 @@ describe('createActionPolicyDataSchema', () => {
 describe('putActionPolicyDataSchema', () => {
   const base = { name: 'Test', description: 'Desc', destinations: DESTINATIONS };
 
-  it('leaves enabled undefined when omitted', () => {
-    const result = putActionPolicyDataSchema.parse(base);
-    expect(result.enabled).toBeUndefined();
+  it('accepts the create-action-policy body unchanged', () => {
+    expect(putActionPolicyDataSchema.parse(base)).toEqual(base);
   });
 
-  it('accepts an explicit enabled: true', () => {
-    const result = putActionPolicyDataSchema.parse({ ...base, enabled: true });
-    expect(result.enabled).toBe(true);
+  // Lifecycle state belongs to `_enable`/`_disable`, so a write body may not carry it.
+  it('rejects enabled', () => {
+    expect(putActionPolicyDataSchema.safeParse({ ...base, enabled: true }).success).toBe(false);
+    expect(putActionPolicyDataSchema.safeParse({ ...base, enabled: false }).success).toBe(false);
   });
 
-  it('accepts an explicit enabled: false', () => {
-    const result = putActionPolicyDataSchema.parse({ ...base, enabled: false });
-    expect(result.enabled).toBe(false);
+  it('rejects enabled on createActionPolicyDataSchema too', () => {
+    expect(createActionPolicyDataSchema.safeParse({ ...base, enabled: true }).success).toBe(false);
   });
 
-  it('rejects a non-boolean enabled', () => {
-    const result = putActionPolicyDataSchema.safeParse({ ...base, enabled: 'true' });
-    expect(result.success).toBe(false);
-  });
-
-  it('does not add enabled to createActionPolicyDataSchema', () => {
-    const result = createActionPolicyDataSchema.safeParse({ ...base, enabled: true });
-    expect(result.success).toBe(false);
+  it('rejects snoozed_until', () => {
+    expect(
+      putActionPolicyDataSchema.safeParse({
+        ...base,
+        snoozed_until: '2026-10-07T00:00:00.000Z',
+      }).success
+    ).toBe(false);
   });
 });
 
@@ -472,6 +466,104 @@ describe('updateActionPolicyDataSchema', () => {
       ['time_interval without an interval', { throttle: { strategy: 'time_interval' } }],
     ])('accepts %s', (_label, body) => {
       expect(updateActionPolicyDataSchema.safeParse(body).success).toBe(true);
+    });
+  });
+});
+
+describe('action policy optional fields are never empty', () => {
+  const base = { name: 'Test', description: 'Desc', destinations: DESTINATIONS };
+  const writeSchemas: Array<[string, typeof createActionPolicyDataSchema]> = [
+    ['create', createActionPolicyDataSchema],
+    ['replace', putActionPolicyDataSchema],
+  ];
+
+  describe('group_by', () => {
+    it.each(writeSchemas)('rejects an empty array on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, grouping_mode: 'per_field', group_by: [] }).success).toBe(
+        false
+      );
+    });
+
+    it.each(writeSchemas)('rejects null on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, group_by: null }).success).toBe(false);
+    });
+
+    it.each(writeSchemas)('accepts a one-item array on %s', (_label, schema) => {
+      expect(
+        schema.safeParse({ ...base, grouping_mode: 'per_field', group_by: ['host.name'] }).success
+      ).toBe(true);
+    });
+
+    it('rejects an empty array on patch', () => {
+      expect(updateActionPolicyDataSchema.safeParse({ group_by: [] }).success).toBe(false);
+    });
+
+    it('accepts null on patch, which clears it', () => {
+      expect(updateActionPolicyDataSchema.parse({ group_by: null })).toEqual({ group_by: null });
+    });
+  });
+
+  describe('throttle', () => {
+    it.each(writeSchemas)('rejects an empty object on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, throttle: {} }).success).toBe(false);
+    });
+
+    it.each(writeSchemas)('rejects an interval without a strategy on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, throttle: { interval: '5m' } }).success).toBe(false);
+    });
+
+    it.each(writeSchemas)('rejects a null interval on %s', (_label, schema) => {
+      expect(
+        schema.safeParse({ ...base, throttle: { strategy: 'on_status_change', interval: null } })
+          .success
+      ).toBe(false);
+    });
+
+    it.each(writeSchemas)('rejects null on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, throttle: null }).success).toBe(false);
+    });
+
+    it.each(writeSchemas)('accepts an intervalless strategy alone on %s', (_label, schema) => {
+      expect(
+        schema.safeParse({ ...base, throttle: { strategy: 'on_status_change' } }).success
+      ).toBe(true);
+    });
+
+    it('accepts an interval-only patch, which merges onto the stored strategy', () => {
+      expect(updateActionPolicyDataSchema.parse({ throttle: { interval: '10m' } })).toEqual({
+        throttle: { interval: '10m' },
+      });
+    });
+
+    // The strategy is what makes a throttle meaningful: clear the block, not the leaf.
+    it('rejects a null strategy on patch', () => {
+      expect(updateActionPolicyDataSchema.safeParse({ throttle: { strategy: null } }).success).toBe(
+        false
+      );
+    });
+
+    it('accepts null on patch, which clears the whole block', () => {
+      expect(updateActionPolicyDataSchema.parse({ throttle: null })).toEqual({ throttle: null });
+    });
+  });
+
+  describe('description', () => {
+    const { description, ...withoutDescription } = base;
+
+    it.each(writeSchemas)('accepts an omitted description on %s', (_label, schema) => {
+      const result = schema.safeParse(withoutDescription);
+      expect(result.success).toBe(true);
+      expect(result.data).not.toHaveProperty('description');
+    });
+
+    it.each(writeSchemas)('rejects null on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, description: null }).success).toBe(false);
+    });
+
+    it('accepts null on patch, which clears it', () => {
+      expect(updateActionPolicyDataSchema.parse({ description: null })).toEqual({
+        description: null,
+      });
     });
   });
 });

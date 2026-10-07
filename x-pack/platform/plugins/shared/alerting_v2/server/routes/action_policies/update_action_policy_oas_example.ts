@@ -32,7 +32,7 @@ export const updateActionPolicyOasExamples = (): AlertingOasOperationObject =>
     responses: {
       200: actionPolicyResponseExample('updateActionPolicyResponse', 'Updated action policy', {
         name: UPDATE_ACTION_POLICY_REQUEST.name,
-        description: UPDATE_ACTION_POLICY_REQUEST.description,
+        description: UPDATE_ACTION_POLICY_REQUEST.description ?? undefined,
         matcher: { tags: ['production'] },
       }),
       400: invalidActionPolicyDataResponse('update'),

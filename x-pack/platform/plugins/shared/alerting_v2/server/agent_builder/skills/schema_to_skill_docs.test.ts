@@ -498,14 +498,14 @@ describe('schema_to_skill_docs', () => {
         '| `grouping` | object | optional | Grouping configuration. |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
-        '| `throttle` | object | optional | The throttle configuration for notifications. |'
+        '| `throttle` | object | optional | The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. |'
       );
     });
 
     it('keeps the referencing field description when the definition also has one', () => {
       const doc = generateActionPolicySchemaDoc();
       expect(doc).toContain(
-        '| `grouping_mode` | "per_alert" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
+        '| `grouping_mode` | "per_alert" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. |'
       );
       expect(doc).not.toContain('per_alert groups by alert lifecycle');
     });

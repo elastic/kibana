@@ -25,7 +25,14 @@ export { needsInterval };
 const normalizeMatcher = (matcher: PolicyMatcher | null): PolicyMatcher | null =>
   matcher && (matcher.tags?.length || matcher.expression?.trim()) ? matcher : null;
 
-const buildThrottle = (state: ActionPolicyFormState) => ({
+/** An interval the strategy cannot use is omitted on create, where `null` is not a clear signal. */
+const buildThrottle = (state: ActionPolicyFormState): CreateActionPolicyData['throttle'] => ({
+  strategy: state.throttleStrategy,
+  ...(needsInterval(state.throttleStrategy) ? { interval: state.throttleInterval } : {}),
+});
+
+/** The form always submits the throttle in full, so an unusable interval is cleared rather than kept. */
+const buildThrottlePatch = (state: ActionPolicyFormState): UpdateActionPolicyData['throttle'] => ({
   strategy: state.throttleStrategy,
   interval: needsInterval(state.throttleStrategy) ? state.throttleInterval : null,
 });
@@ -35,7 +42,7 @@ export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormSta
 
   return {
     name: response.name,
-    description: response.description,
+    description: response.description ?? '',
     matcher: response.matcher ?? null,
     groupingMode,
     groupBy: response.group_by ?? [],
@@ -50,7 +57,7 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   const matcher = normalizeMatcher(state.matcher);
   return {
     name: state.name,
-    description: state.description,
+    ...(state.description ? { description: state.description } : {}),
     grouping_mode: state.groupingMode,
     ...(matcher ? { matcher } : {}),
     ...(state.groupingMode === 'per_field' && state.groupBy.length > 0
@@ -80,11 +87,11 @@ const toMatcherPatch = (
 export const toUpdatePayload = (state: ActionPolicyFormState): UpdateActionPolicyData => {
   return {
     name: state.name,
-    description: state.description,
+    description: state.description || null,
     grouping_mode: state.groupingMode,
     matcher: toMatcherPatch(state.matcher),
     group_by: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
-    throttle: buildThrottle(state),
+    throttle: buildThrottlePatch(state),
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };
 };

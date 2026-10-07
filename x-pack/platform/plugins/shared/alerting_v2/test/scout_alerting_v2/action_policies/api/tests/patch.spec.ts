@@ -181,6 +181,56 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     }
   );
 
+  apiTest('clears the description by removing its key', async ({ apiServices }) => {
+    const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
+    const created = await actionPolicies.create(
+      buildCreateActionPolicyData({ name: 'patch-clear-description', description: 'original' })
+    );
+
+    await actionPolicies.patch(created.id, { description: null });
+
+    const after = await actionPolicySavedObject.getAttributes(created.id);
+    expect(Object.keys(after)).not.toContain('description');
+    expect(findNullPaths(after)).toStrictEqual([]);
+
+    const fetched = await actionPolicies.get(created.id);
+    expect(Object.keys(fetched)).not.toContain('description');
+  });
+
+  apiTest(
+    'rejects empty optional collections with a 400 rather than failing in storage',
+    async ({ apiClient, apiServices, requestAuth }) => {
+      const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
+      const created = await actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'patch-empty-sentinels',
+          group_by: ['service.name'],
+          grouping_mode: 'per_field',
+          throttle: { strategy: 'time_interval', interval: '5m' },
+        })
+      );
+
+      const before = await actionPolicySavedObject.getAttributes(created.id);
+
+      const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
+      );
+      const patch = (body: Record<string, unknown>) =>
+        apiClient.patch(getActionPolicyUrl(created.id), {
+          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+          body,
+        });
+
+      // An empty array used to reach the saved object schema's `minSize: 1` and surface as a 500.
+      expect(await patch({ group_by: [] })).toHaveStatusCode(400);
+      expect(await patch({ throttle: {} })).toHaveStatusCode(400);
+      expect(await patch({ throttle: { strategy: null } })).toHaveStatusCode(400);
+
+      const after = await actionPolicySavedObject.getAttributes(created.id);
+      expect(after).toStrictEqual(before);
+    }
+  );
+
   apiTest('never writes enabled or the snooze state', async ({ apiServices }) => {
     const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
     const created = await actionPolicies.create(

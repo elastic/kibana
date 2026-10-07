@@ -32,20 +32,28 @@ export function validateDateString(dateString: string): void {
 
 /**
  * The single throttle representation, shared by storage and the API: an interval the strategy
- * cannot use is dropped rather than carried. Legacy documents may hold `null`, which reads the same
- * as absent.
+ * cannot use is dropped rather than carried. A strategy is what makes a throttle meaningful, so a
+ * legacy document holding `null` or a strategyless block reads the same as no throttle at all.
  */
 const normalizeThrottle = (
   throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
 ): ActionPolicyResponse['throttle'] => {
-  if (throttle == null) return undefined;
-  const { strategy, interval } = throttle;
-  const keepInterval = strategy == null || needsInterval(strategy);
-  return {
-    strategy,
-    interval: keepInterval ? interval ?? undefined : undefined,
-  };
+  const strategy = throttle?.strategy;
+  if (strategy == null) return undefined;
+
+  const interval = needsInterval(strategy) ? throttle?.interval : undefined;
+  return { strategy, ...(interval ? { interval } : {}) };
 };
+
+/** Policies stored before the API rejected empty sentinels can hold `groupBy: []`, meaning "not grouped by field". */
+const toApiGroupBy = (
+  groupBy: ActionPolicySavedObjectAttributes['groupBy']
+): ActionPolicyResponse['group_by'] => (groupBy?.length ? groupBy : undefined);
+
+/** Policies stored before `description` was optional can hold `''`, meaning "no description". */
+const toApiDescription = (
+  description: ActionPolicySavedObjectAttributes['description']
+): ActionPolicyResponse['description'] => description || undefined;
 
 /** Policies stored before the API rejected empty sentinels can hold `tags: []` or `expression: ''`, both meaning "no constraint". */
 const toApiMatcher = (
@@ -75,10 +83,10 @@ export const toPatchableActionPolicyData = (
   attributes: ActionPolicySavedObjectAttributes
 ): CreateActionPolicyDataInput => ({
   name: attributes.name,
-  description: attributes.description,
+  description: toApiDescription(attributes.description),
   destinations: attributes.destinations,
   matcher: toApiMatcher(attributes.matcher),
-  group_by: attributes.groupBy ?? undefined,
+  group_by: toApiGroupBy(attributes.groupBy),
   grouping_mode: attributes.groupingMode ?? undefined,
   throttle: normalizeThrottle(attributes.throttle),
 });
@@ -92,7 +100,7 @@ export const toPatchableActionPolicyData = (
  */
 const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
   name: data.name,
-  description: data.description,
+  description: data.description || undefined,
   destinations: data.destinations,
   matcher: data.matcher,
   groupBy: data.group_by,
@@ -168,11 +176,11 @@ export const transformActionPolicySoAttributesToApiResponse = ({
   return {
     id,
     name: attributes.name,
-    description: attributes.description,
+    description: toApiDescription(attributes.description),
     enabled: attributes.enabled,
     destinations: attributes.destinations,
     matcher: toApiMatcher(attributes.matcher),
-    group_by: attributes.groupBy ?? undefined,
+    group_by: toApiGroupBy(attributes.groupBy),
     grouping_mode: attributes.groupingMode ?? undefined,
     throttle: normalizeThrottle(attributes.throttle),
     snoozed_until: attributes.snoozedUntil ?? undefined,

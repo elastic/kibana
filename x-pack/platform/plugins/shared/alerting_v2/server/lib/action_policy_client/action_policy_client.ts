@@ -268,7 +268,7 @@ export class ActionPolicyClient {
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
-      enabled: params.options?.enabled ?? true,
+      enabled: true,
       auth: apiKeyAttrs,
       createdBy: actor,
       createdAt: now,
@@ -935,8 +935,7 @@ export class ActionPolicyClient {
     const exists = await this.actionPolicyExists({ id });
 
     if (!exists) {
-      const { enabled, ...createData } = parsed;
-      const policy = await this.createActionPolicy({ data: createData, options: { id, enabled } });
+      const policy = await this.createActionPolicy({ data: parsed, options: { id } });
       return { policy, created: true };
     }
 
@@ -953,27 +952,23 @@ export class ActionPolicyClient {
     const oldAuth = await this.getDecryptedAuth(id);
     const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
-    // PUT replaces every field accepted by createActionPolicyDataSchema, plus
-    // the optional `enabled`: omitted preserves the existing stored value,
-    // otherwise it becomes the new value. Audit metadata (createdBy/createdAt)
-    // and other operational state (snoozedUntil) are not part of the create
-    // schema and are preserved here. Tags are also preserved: they are no
-    // longer part of the API contract but remain in the saved object so they
-    // can be re-exposed later.
-    const nextEnabled = parsed.enabled ?? existingAttrs.enabled;
+    // PUT replaces every field accepted by createActionPolicyDataSchema. Lifecycle state
+    // (`enabled`, `snoozedUntil`) and audit metadata are not part of that schema, so they are
+    // preserved from storage; only `_enable`/`_disable` and `_snooze`/`_unsnooze` move them. Tags
+    // are preserved too: they are no longer part of the API contract but remain in the saved
+    // object so they can be re-exposed later.
     const replacementAttrs: ActionPolicySavedObjectAttributes = {
       ...buildCreateActionPolicyAttributes({
         data: parsed,
-        enabled: nextEnabled,
+        enabled: existingAttrs.enabled,
         auth: apiKeyAttrs,
         createdBy: existingAttrs.createdBy,
         createdAt: existingAttrs.createdAt,
         updatedBy: actor,
         updatedAt: now,
       }),
-      enabled: nextEnabled,
-      snoozedUntil: existingAttrs.snoozedUntil,
-      tags: existingAttrs.tags,
+      snoozedUntil: existingAttrs.snoozedUntil ?? undefined,
+      tags: existingAttrs.tags ?? undefined,
     };
 
     try {

@@ -55,7 +55,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
         destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
         matcher: { expression: "env == 'production' && region == 'us-east-1'" },
         group_by: ['service.name', 'environment'],
-        throttle: { interval: '1m' },
+        throttle: { strategy: 'per_status_interval', interval: '1m' },
       });
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
@@ -396,12 +396,57 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        throttle: { interval: 'not-a-duration' },
+        throttle: { strategy: 'per_status_interval', interval: 'not-a-duration' },
       }),
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  // An optional collection is absent or non-empty: an empty one used to reach storage and 500.
+  apiTest('validation: rejects an empty group_by', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: { ...buildCreateActionPolicyData({ grouping_mode: 'per_field' }), group_by: [] },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects an empty throttle object', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: { ...buildCreateActionPolicyData({}), throttle: {} },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects a null throttle interval', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: {
+        ...buildCreateActionPolicyData({}),
+        throttle: { strategy: 'on_status_change', interval: null },
+      },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('creates a policy with no description', async ({ apiClient }) => {
+    const { description, ...body } = buildCreateActionPolicyData({ name: 'no-description' });
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body,
+    });
+
+    expect(response).toHaveStatusCode(201);
+    expect(Object.keys(response.body)).not.toContain('description');
   });
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {

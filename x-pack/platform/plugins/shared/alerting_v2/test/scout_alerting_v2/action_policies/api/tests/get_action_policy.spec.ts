@@ -46,7 +46,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
           destinations: [{ type: 'workflow', id: 'policy-workflow-id' }],
           matcher: { expression: "env == 'production' && region == 'us-east-1'" },
           group_by: ['service.name'],
-          throttle: { interval: '10m' },
+          throttle: { strategy: 'per_status_interval', interval: '10m' },
         })
       );
 
