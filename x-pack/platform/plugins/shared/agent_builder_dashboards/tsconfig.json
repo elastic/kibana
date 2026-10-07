@@ -27,6 +27,7 @@
     "@kbn/css-utils",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-common",
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-query",

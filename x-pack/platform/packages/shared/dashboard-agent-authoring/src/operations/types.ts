@@ -36,8 +36,8 @@ export type ControlFieldCapability =
 export type ControlFieldCapabilities = Map<string, ControlFieldCapability>;
 
 /**
- * Loads the capabilities of the given fields on an index. Injected like the other resolvers; the
- * default implementation lives in `control_field_capabilities_resolver.ts`.
+ * Loads the capabilities of the given fields on an index. Injected like the other resolvers so
+ * dashboard authoring stays free of Elasticsearch access.
  */
 export type ResolveControlFieldCapabilities = (params: {
   index: string;

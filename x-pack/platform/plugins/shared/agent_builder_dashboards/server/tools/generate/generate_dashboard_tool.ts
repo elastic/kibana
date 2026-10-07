@@ -18,7 +18,6 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import {
-  createControlFieldCapabilitiesResolver,
   executeDashboardOperations,
   getErrorMessage,
   hasValidCreateMetadataOperations,
@@ -31,6 +30,7 @@ import {
 } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
+import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 

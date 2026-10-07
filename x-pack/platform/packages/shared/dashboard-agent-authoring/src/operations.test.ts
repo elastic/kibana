@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { Logger } from '@kbn/logging';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -26,34 +25,18 @@ import {
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
-import { createControlFieldCapabilitiesResolver } from './control_field_capabilities_resolver';
+import type { ControlFieldCapability, ResolveControlFieldCapabilities } from './operations/types';
 
-type FieldCapsMapping = string | { readonly type: string; readonly aggregatable: boolean };
+const usable = (type: string): ControlFieldCapability => ({ status: 'usable', type });
+const NOT_AGGREGATABLE: ControlFieldCapability = { status: 'not_aggregatable' };
+const CONFLICTING: ControlFieldCapability = { status: 'conflicting' };
 
-/** Mock `_field_caps`. A plain `text` mapping is not aggregatable; list several mappings for a conflict. */
-const createFieldCapsEsClient = (
-  fields: Readonly<Record<string, FieldCapsMapping | readonly FieldCapsMapping[]>>
-) => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  esClient.fieldCaps.mockResolvedValue({
-    indices: ['kibana_sample_data_logs'],
-    fields: Object.fromEntries(
-      Object.entries(fields).map(([fieldName, mappings]) => [
-        fieldName,
-        Object.fromEntries(
-          [mappings].flat().map((mapping) => {
-            const { type, aggregatable } =
-              typeof mapping === 'string'
-                ? { type: mapping, aggregatable: mapping !== 'text' }
-                : mapping;
-            return [type, { type, aggregatable, searchable: true, metadata_field: false }];
-          })
-        ),
-      ])
-    ),
-  });
-  return esClient;
-};
+const createFieldCapabilitiesResolver = (
+  fields: Readonly<Record<string, ControlFieldCapability>>
+) =>
+  jest.fn<ReturnType<ResolveControlFieldCapabilities>, Parameters<ResolveControlFieldCapabilities>>(
+    async () => new Map(Object.entries(fields))
+  );
 
 const createMockLogger = (): Logger =>
   ({
@@ -2807,14 +2790,14 @@ describe('add_controls / remove_controls operations', () => {
 
     const addControls = (
       controls: ControlsInput,
-      esClient: ReturnType<typeof createFieldCapsEsClient>,
+      resolveControlFieldCapabilities: ResolveControlFieldCapabilities,
       dashboardData: DashboardAttachmentData = emptyDashboard
     ) =>
       executeDashboardOperations({
         dashboardData,
         operations: [{ operation: 'add_controls', controls }],
         logger,
-        resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({ esClient }),
+        resolveControlFieldCapabilities,
       });
 
     const getEsqlQueries = ({ pinned_panels: pinnedPanels = [] }: DashboardAttachmentData) =>
@@ -2829,7 +2812,11 @@ describe('add_controls / remove_controls operations', () => {
           { type: 'options_list_control', field_name: 'status', index },
           { type: 'range_slider_control', field_name: 'bytes', index },
         ],
-        createFieldCapsEsClient({ 'client.ip': 'ip', status: 'keyword', bytes: 'long' })
+        createFieldCapabilitiesResolver({
+          'client.ip': usable('ip'),
+          status: usable('keyword'),
+          bytes: usable('long'),
+        })
       );
 
       expect(failures).toEqual([]);
@@ -2841,12 +2828,12 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     it.each([
-      ['a non-aggregatable text field', 'text'],
-      ['an aggregatable text field', { type: 'text', aggregatable: true }],
-    ] as const)('uses the keyword sibling of %s', async (_, hostMapping) => {
+      ['a non-aggregatable text field', NOT_AGGREGATABLE],
+      ['an aggregatable text field', usable('text')],
+    ])('uses the keyword sibling of %s', async (_, hostCapability) => {
       const { dashboardData, failures } = await addControls(
         [{ type: 'options_list_control', field_name: 'host', index }],
-        createFieldCapsEsClient({ host: hostMapping, 'host.keyword': 'keyword' })
+        createFieldCapabilitiesResolver({ host: hostCapability, 'host.keyword': usable('keyword') })
       );
 
       expect(failures).toEqual([]);
@@ -2864,39 +2851,29 @@ describe('add_controls / remove_controls operations', () => {
       [
         'options_list_control',
         'is text without a keyword sibling',
-        { field: 'text' },
+        { field: NOT_AGGREGATABLE },
         notAggregatable,
       ],
-      [
-        'options_list_control',
-        'is keyword and text across indices',
-        { field: ['keyword', 'text'] },
-        conflicting,
-      ],
-      [
-        'range_slider_control',
-        'is long and integer across indices',
-        { field: ['long', 'integer'] },
-        conflicting,
-      ],
+      ['options_list_control', 'has conflicting mappings', { field: CONFLICTING }, conflicting],
+      ['range_slider_control', 'has conflicting mappings', { field: CONFLICTING }, conflicting],
       [
         'options_list_control',
         'is aggregate_metric_double',
-        { field: 'aggregate_metric_double' },
+        { field: usable('aggregate_metric_double') },
         optionsListType,
       ],
-      ['options_list_control', 'is geo_point', { field: 'geo_point' }, optionsListType],
-      ['range_slider_control', 'is keyword', { field: 'keyword' }, rangeSliderType],
+      ['options_list_control', 'is geo_point', { field: usable('geo_point') }, optionsListType],
+      ['range_slider_control', 'is keyword', { field: usable('keyword') }, rangeSliderType],
       [
         'range_slider_control',
         'is aggregate_metric_double',
-        { field: 'aggregate_metric_double' },
+        { field: usable('aggregate_metric_double') },
         rangeSliderType,
       ],
     ] as const)('reports a user-requested %s whose field %s', async (type, _, fields, error) => {
       const { dashboardData, failures } = await addControls(
         [{ type, field_name: 'field', index, user_requested: true }],
-        createFieldCapsEsClient(fields)
+        createFieldCapabilitiesResolver(fields)
       );
 
       expect(getEsqlQueries(dashboardData)).toEqual([]);
@@ -2908,7 +2885,7 @@ describe('add_controls / remove_controls operations', () => {
     it('silently leaves out an unresolved control the user did not request', async () => {
       const { dashboardData, failures } = await addControls(
         [{ type: 'options_list_control', field_name: 'method', index }],
-        createFieldCapsEsClient({})
+        createFieldCapabilitiesResolver({})
       );
 
       expect(getEsqlQueries(dashboardData)).toEqual([]);
@@ -2923,7 +2900,7 @@ describe('add_controls / remove_controls operations', () => {
           index,
           user_requested: true,
         })),
-        createFieldCapsEsClient({})
+        createFieldCapabilitiesResolver({})
       );
 
       expect(failures).toEqual([
@@ -2936,34 +2913,32 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     it('requests only candidate fields, once per index, with the dashboard project routing', async () => {
-      const esClient = createFieldCapsEsClient({ host: 'keyword' });
+      const resolveFieldCapabilities = createFieldCapabilitiesResolver({ host: usable('keyword') });
 
       await addControls(
         [
           { type: 'options_list_control', field_name: 'host', index },
           { type: 'options_list_control', field_name: 'service.name', index },
         ],
-        esClient,
+        resolveFieldCapabilities,
         { ...emptyDashboard, project_routing: '_alias:*' }
       );
 
-      expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
-      expect(esClient.fieldCaps).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index,
-          fields: ['host', 'host.keyword', 'service.name', 'service.name.keyword'],
-          project_routing: '_alias:*',
-        })
-      );
+      expect(resolveFieldCapabilities).toHaveBeenCalledTimes(1);
+      expect(resolveFieldCapabilities).toHaveBeenCalledWith({
+        index,
+        fieldNames: ['host', 'host.keyword', 'service.name', 'service.name.keyword'],
+        projectRouting: '_alias:*',
+      });
     });
 
     it('keeps controls unvalidated when field loading fails', async () => {
-      const esClient = createFieldCapsEsClient({});
-      esClient.fieldCaps.mockRejectedValue(new Error('field caps unavailable'));
+      const resolveFieldCapabilities = createFieldCapabilitiesResolver({});
+      resolveFieldCapabilities.mockRejectedValue(new Error('field caps unavailable'));
 
       const { dashboardData, failures } = await addControls(
         [{ type: 'options_list_control', field_name: 'host', index, user_requested: true }],
-        esClient
+        resolveFieldCapabilities
       );
 
       expect(failures).toEqual([]);

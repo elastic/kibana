@@ -23,6 +23,8 @@ jest.mock('@kbn/dashboard-agent-authoring', () => ({
   ...jest.requireActual('@kbn/dashboard-agent-authoring'),
   executeDashboardOperations: jest.fn(),
   hasValidCreateMetadataOperations: jest.fn(),
+}));
+jest.mock('./resolvers/control_field_capabilities_resolver', () => ({
   createControlFieldCapabilitiesResolver: jest.fn(),
 }));
 jest.mock('./resolvers/panel_resolver', () => ({ createPanelResolver: jest.fn() }));

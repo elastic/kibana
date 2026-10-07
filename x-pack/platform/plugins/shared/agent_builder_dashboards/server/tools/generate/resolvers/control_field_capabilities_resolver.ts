@@ -7,7 +7,10 @@
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ControlFieldCapability, ResolveControlFieldCapabilities } from './operations/types';
+import type {
+  ControlFieldCapability,
+  ResolveControlFieldCapabilities,
+} from '@kbn/dashboard-agent-authoring';
 
 /**
  * A field is usable only with one ES type across the matching indices that is aggregatable in
@@ -30,7 +33,7 @@ const toControlFieldCapability = ([
 
 /**
  * Loads the capabilities of the requested fields in one `_field_caps` request. Injected like the
- * other resolvers so dashboard authoring never talks to Elasticsearch directly.
+ * other resolvers so dashboard authoring stays free of Elasticsearch access.
  */
 export const createControlFieldCapabilitiesResolver = ({
   esClient,

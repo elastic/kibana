@@ -29,5 +29,8 @@ export {
   markdownPanelConfigSchema,
 } from './src/operations/panels/markdown';
 
-export type { ResolveAttachmentPanel } from './src/operations/types';
-export { createControlFieldCapabilitiesResolver } from './src/control_field_capabilities_resolver';
+export type {
+  ControlFieldCapability,
+  ResolveAttachmentPanel,
+  ResolveControlFieldCapabilities,
+} from './src/operations/types';

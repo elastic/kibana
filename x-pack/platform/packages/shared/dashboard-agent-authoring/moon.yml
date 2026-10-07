@@ -22,8 +22,6 @@ dependsOn:
   - '@kbn/agent-builder-visualizations-common'
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/controls-constants'
-  - '@kbn/core-elasticsearch-server'
-  - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/custom-content-common'
   - '@kbn/esql-utils'
   - '@kbn/field-types'
