@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/292738
+issues:
+- https://github.com/elastic/kibana/issues/175645
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Search and data
+title: Disable "Use without saving" when a custom data view ID is set
+description: Fixes an issue where two ad hoc (unsaved) data views could be created with the same custom ID, causing unpredictable behavior. Use without saving is now disabled when a custom data view ID is entered — save the data view instead to use a custom ID.
