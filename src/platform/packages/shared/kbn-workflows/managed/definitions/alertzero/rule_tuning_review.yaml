@@ -689,7 +689,8 @@ steps:
       continue: true
 
   # Preview verdicts come from the worker's outputs; a failed or skipped child
-  # leaves both verdicts false so apply_query_tuning skips the update.
+  # leaves both verdicts false, so compose_proposal reports the backtest as
+  # inconclusive. The proposed action is offered either way.
   - name: record_preview_outcome
     type: data.set
     with:

@@ -150,6 +150,18 @@ steps:
   # next-noisiest one; the empty-array `terms` matches nothing, which makes that
   # `must_not` a no-op — the fail-open path when the lookup errored, the parse was
   # inconsistent, or no review is pending.
+  # Counts, FP rate and alert_ids are grouped per rule revision, so a review only
+  # ever sees alerts the rule's current logic produced; resolve_fanout_rows keeps
+  # the group matching the rule's live revision, read from the rules API because
+  # the newest alert still carries the old revision when an edit stopped the noise.
+  # Trade-off: `revision` moves on any content edit, cosmetic ones (description,
+  # tags) included, so such an edit drops the rule's evidence and the next review
+  # waits for min_fp_count new false positives. That beats diagnosing the current
+  # rule with alerts an older version produced. An older revision that still
+  # qualifies can hold a candidate slot until it ages out of the window; the
+  # overscan beyond the launch cap absorbs that. The reviewed watermark stays
+  # per rule: a review of any revision retires the false positives before it.
+  # `rule_revision_key` is comma-delimited so revision 3 never matches 31.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
@@ -180,7 +192,7 @@ steps:
             fp_count = COUNT(*) WHERE is_unreviewed_fp,
             last_fp_at = MAX(@timestamp) WHERE is_unreviewed_fp,
             recent_keys = TOP(fp_recency_key, {{ consts.max_diagnosis_ids }}, "desc") WHERE is_unreviewed_fp
-          BY `kibana.alert.rule.uuid`
+          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
         | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
         | SORT fp_count DESC
@@ -192,9 +204,10 @@ steps:
             alert_ids = VALUES(alert_id),
             total_count = MAX(total_count),
             fp_rate_count = MAX(fp_rate_count)
-          BY `kibana.alert.rule.uuid`
+          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
+        | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
         | SORT fp_count DESC
-        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids, total_count, fp_rate_count
+        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids, total_count, fp_rate_count, rule_revision_key
     on-failure:
       continue: true
 
@@ -217,18 +230,21 @@ steps:
     on-failure:
       continue: true
 
-  - name: resolve_enabled_rules
+  # The live revision of every enabled candidate, in the harvest's
+  # `,uuid@revision,` key format.
+  - name: resolve_current_revisions
     type: data.set
-    if: "${{ steps.list_enabled_candidates.output.data != null }}"
     with:
-      enabled_rule_ids: "${{ steps.list_enabled_candidates.output.data | map: 'id' | join: ',' | prepend: 'enabled:' }}"
+      rule_revision_keys: ",{% for rule in steps.list_enabled_candidates.output.data %}{{ rule.id }}@{{ rule.revision }},{% endfor %}"
 
-  # Only enabled rules are included in the fan-out.
+  # Only harvest rows of an enabled rule's current revision are included in the
+  # fan-out. Fails closed: without the rule lookup no revision is known, so no
+  # rule is reviewed.
   - name: resolve_fanout_rows
     type: data.set
     with:
-      enabled_rule_ids: "${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}"
-      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
+      rule_revision_keys: "${{ steps.resolve_current_revisions.output.rule_revision_keys }}"
+      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
 
   # One review execution per rule, launched synchronously inside a parallel
   # branch so this sweep joins once every gate has settled. The gate itself cannot
@@ -289,4 +305,5 @@ steps:
       reviews_approved: "${{ steps.summarize_decisions.output.reviews_approved }}"
       reviews_failed: "${{ steps.summarize_decisions.output.reviews_failed }}"
       rules_applied: "${{ steps.summarize_decisions.output.rules_applied }}"
-      harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"
+      # The rule lookup is part of the harvest: without it no rule is reviewed.
+      harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null }}"
