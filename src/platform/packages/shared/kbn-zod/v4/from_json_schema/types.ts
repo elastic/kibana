@@ -14,15 +14,7 @@
  * It intentionally omits advanced features like $ref, allOf, if/then/else that are not used.
  */
 export interface JsonSchema {
-  type?:
-    | 'string'
-    | 'number'
-    | 'integer'
-    | 'boolean'
-    | 'object'
-    | 'array'
-    | 'null'
-    | Array<'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null'>;
+  type?: 'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 
   minLength?: number;
   maxLength?: number;
