@@ -115,22 +115,28 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
               ) : null}
             </EuiText>
           </EuiFlexItem>
-          {outcome ? (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
-                {outcome}
-              </EuiText>
-            </EuiFlexItem>
-          ) : null}
           <EuiFlexItem grow={false}>
-            <ConversationsActionsGroup
-              investigation={investigation}
-              onClickRecommendedAction={onClickRecommendedAction}
-              onClickAction={onClickAction}
-              onOpenChat={() => onOpenChat(investigation.id)}
-              chatHref={chatHref}
-              onCopyLink={onCopyLink}
-            />
+            {/* Tighter gutter than the row: with the divider's own margin, the outcome
+                sits as far from the line as the agent icon glyph does on the other side. */}
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {outcome ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
+                    {outcome}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <ConversationsActionsGroup
+                  investigation={investigation}
+                  onClickRecommendedAction={onClickRecommendedAction}
+                  onClickAction={onClickAction}
+                  onOpenChat={() => onOpenChat(investigation.id)}
+                  chatHref={chatHref}
+                  onCopyLink={onCopyLink}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
