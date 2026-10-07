@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
+import { assertNever } from '@kbn/std';
 
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
@@ -87,41 +88,47 @@ export const serviceAccountsManagementApp = Object.freeze({
                       )
                     );
                   }}
-                  onDeleted={({ name }, warnings) => {
-                    if (warnings.length === 0) {
-                      coreStart.notifications.toasts.addSuccess(
-                        i18n.translate(
-                          'xpack.security.management.serviceAccounts.delete.successTitle',
-                          {
-                            defaultMessage: 'Deleted service account "{name}"',
-                            values: { name },
-                          }
-                        )
-                      );
-                      return;
+                  onDeleted={({ name }, outcome) => {
+                    const { toasts } = coreStart.notifications;
+                    switch (outcome.status) {
+                      case 'already_deleted':
+                        toasts.addInfo(
+                          i18n.translate(
+                            'xpack.security.management.serviceAccounts.delete.alreadyDeletedTitle',
+                            {
+                              defaultMessage: 'Service account "{name}" was already deleted',
+                              values: { name },
+                            }
+                          )
+                        );
+                        return;
+                      case 'deleted':
+                        if (outcome.warnings.length === 0) {
+                          toasts.addSuccess(
+                            i18n.translate(
+                              'xpack.security.management.serviceAccounts.delete.successTitle',
+                              {
+                                defaultMessage: 'Deleted service account "{name}"',
+                                values: { name },
+                              }
+                            )
+                          );
+                          return;
+                        }
+                        toasts.addWarning({
+                          title: i18n.translate(
+                            'xpack.security.management.serviceAccounts.delete.warningTitle',
+                            {
+                              defaultMessage: 'Deleted service account "{name}" with warnings',
+                              values: { name },
+                            }
+                          ),
+                          text: outcome.warnings.join(' '),
+                        });
+                        return;
+                      default:
+                        assertNever(outcome);
                     }
-
-                    coreStart.notifications.toasts.addWarning({
-                      title: i18n.translate(
-                        'xpack.security.management.serviceAccounts.delete.warningTitle',
-                        {
-                          defaultMessage: 'Deleted service account "{name}" with warnings',
-                          values: { name },
-                        }
-                      ),
-                      text: warnings.join(' '),
-                    });
-                  }}
-                  onAlreadyDeleted={({ name }) => {
-                    coreStart.notifications.toasts.addInfo(
-                      i18n.translate(
-                        'xpack.security.management.serviceAccounts.delete.alreadyDeletedTitle',
-                        {
-                          defaultMessage: 'Service account "{name}" was already deleted',
-                          values: { name },
-                        }
-                      )
-                    );
                   }}
                   onDeleteError={(error, errorTitle) => {
                     coreStart.notifications.toasts.addError(error, { title: errorTitle });

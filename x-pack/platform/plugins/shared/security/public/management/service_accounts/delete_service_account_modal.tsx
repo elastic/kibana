@@ -41,6 +41,14 @@ import type {
 
 const WORKLOADS_PAGE_SIZE = 5;
 
+/**
+ * What came of a confirmed delete. An account deleted from somewhere else in the meantime is
+ * already gone, which is what the user asked for.
+ */
+export type DeleteServiceAccountOutcome =
+  | { status: 'deleted'; warnings: string[] }
+  | { status: 'already_deleted' };
+
 export interface DeleteServiceAccountModalProps {
   serviceAccount: Pick<ServiceAccountDirectoryEntry, 'id' | 'name'>;
   serviceAccountsAPIClient: Pick<
@@ -48,10 +56,8 @@ export interface DeleteServiceAccountModalProps {
     'delete' | 'listWorkloads'
   >;
   onClose: () => void;
-  /** Called once the account is deleted, with anything the delete could not clean up. */
-  onDeleted: (warnings: string[]) => void;
-  /** Called instead when the account turns out to be gone already, deleted from somewhere else. */
-  onAlreadyDeleted: () => void;
+  /** Called once the account is gone, with any warnings about what the delete left behind. */
+  onDeleted: (outcome: DeleteServiceAccountOutcome) => void;
   onError: (error: Error, title: string) => void;
 }
 
@@ -116,7 +122,6 @@ export const DeleteServiceAccountModal = ({
   serviceAccountsAPIClient,
   onClose,
   onDeleted,
-  onAlreadyDeleted,
   onError,
 }: DeleteServiceAccountModalProps) => {
   const [state, setState] = useState<ModalState>({ status: 'loading' });
@@ -167,7 +172,7 @@ export const DeleteServiceAccountModal = ({
       }
 
       if (isHttpFetchError(error) && error.response?.status === 404) {
-        onAlreadyDeleted();
+        onDeleted({ status: 'already_deleted' });
         return;
       }
 
@@ -181,7 +186,7 @@ export const DeleteServiceAccountModal = ({
       return;
     }
 
-    if (isMounted()) onDeleted(warnings);
+    if (isMounted()) onDeleted({ status: 'deleted', warnings });
   };
 
   if (state.status === 'loading') {

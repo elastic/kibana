@@ -39,7 +39,6 @@ describe('DeleteServiceAccountModal', () => {
   }: { listWorkloads?: jest.Mock; deleteAccount?: jest.Mock } = {}) => {
     const onClose = jest.fn();
     const onDeleted = jest.fn();
-    const onAlreadyDeleted = jest.fn();
     const onError = jest.fn();
 
     renderWithI18n(
@@ -49,13 +48,12 @@ describe('DeleteServiceAccountModal', () => {
           serviceAccountsAPIClient={{ listWorkloads, delete: deleteAccount }}
           onClose={onClose}
           onDeleted={onDeleted}
-          onAlreadyDeleted={onAlreadyDeleted}
           onError={onError}
         />
       </EuiProvider>
     );
 
-    return { listWorkloads, deleteAccount, onClose, onDeleted, onAlreadyDeleted, onError };
+    return { listWorkloads, deleteAccount, onClose, onDeleted, onError };
   };
 
   it('asks to confirm an unbound account, then deletes it', async () => {
@@ -71,7 +69,12 @@ describe('DeleteServiceAccountModal', () => {
 
     fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
 
-    await waitFor(() => expect(onDeleted).toHaveBeenCalledWith(['a token was left behind']));
+    await waitFor(() =>
+      expect(onDeleted).toHaveBeenCalledWith({
+        status: 'deleted',
+        warnings: ['a token was left behind'],
+      })
+    );
     expect(deleteAccount).toHaveBeenCalledWith(serviceAccount.id, { force: false });
   });
 
@@ -132,7 +135,9 @@ describe('DeleteServiceAccountModal', () => {
       )
     );
 
-    await waitFor(() => expect(onDeleted).toHaveBeenCalledWith([]));
+    await waitFor(() =>
+      expect(onDeleted).toHaveBeenCalledWith({ status: 'deleted', warnings: [] })
+    );
     expect(deleteAccount).toHaveBeenCalledTimes(1);
     expect(deleteAccount).toHaveBeenCalledWith(serviceAccount.id, { force: true });
   });
@@ -201,7 +206,9 @@ describe('DeleteServiceAccountModal', () => {
 
     fireEvent.click(within(modal).getByTestId('serviceAccountForceDeleteButton'));
 
-    await waitFor(() => expect(onDeleted).toHaveBeenCalledWith([]));
+    await waitFor(() =>
+      expect(onDeleted).toHaveBeenCalledWith({ status: 'deleted', warnings: [] })
+    );
     expect(deleteAccount).toHaveBeenNthCalledWith(1, serviceAccount.id, { force: false });
     expect(deleteAccount).toHaveBeenNthCalledWith(2, serviceAccount.id, { force: true });
   });
@@ -212,15 +219,15 @@ describe('DeleteServiceAccountModal', () => {
   ])(
     'reports an account that was already deleted elsewhere, for %s, instead of an error',
     async (_, workloads, buttonTestSubj) => {
-      const { onAlreadyDeleted, onDeleted, onError } = renderModal({
+      const { onDeleted, onError } = renderModal({
         listWorkloads: jest.fn().mockResolvedValue({ workloads }),
         deleteAccount: jest.fn().mockRejectedValue(httpError(404, { message: 'Not Found' })),
       });
 
       fireEvent.click(await screen.findByTestId(buttonTestSubj));
 
-      await waitFor(() => expect(onAlreadyDeleted).toHaveBeenCalledTimes(1));
-      expect(onDeleted).not.toHaveBeenCalled();
+      await waitFor(() => expect(onDeleted).toHaveBeenCalledWith({ status: 'already_deleted' }));
+      expect(onDeleted).toHaveBeenCalledTimes(1);
       expect(onError).not.toHaveBeenCalled();
     }
   );

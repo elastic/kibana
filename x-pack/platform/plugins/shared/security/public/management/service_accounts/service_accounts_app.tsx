@@ -13,6 +13,7 @@ import type { ServiceAccount } from '@kbn/core-security-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { CreateServiceAccountFlyout } from './create_service_account_flyout';
+import type { DeleteServiceAccountOutcome } from './delete_service_account_modal';
 import { DeleteServiceAccountModal } from './delete_service_account_modal';
 import { ServiceAccountsPage } from './service_accounts_page';
 import type { ServiceAccountTableItem } from './service_accounts_table';
@@ -29,8 +30,7 @@ interface Props {
   rolesAPIClient: Pick<PublicMethodsOf<RolesAPIClient>, 'getRoles'>;
   createRoleUrl?: string;
   onCreated: (account: ServiceAccount) => void;
-  onDeleted: (account: ServiceAccountTableItem, warnings: string[]) => void;
-  onAlreadyDeleted: (account: ServiceAccountTableItem) => void;
+  onDeleted: (account: ServiceAccountTableItem, outcome: DeleteServiceAccountOutcome) => void;
   onDeleteError: (error: Error, title: string) => void;
 }
 
@@ -42,7 +42,6 @@ export const ServiceAccountsApp = ({
   createRoleUrl,
   onCreated,
   onDeleted,
-  onAlreadyDeleted,
   onDeleteError,
 }: Props) => {
   const history = useHistory();
@@ -80,15 +79,10 @@ export const ServiceAccountsApp = ({
           serviceAccount={accountToDelete}
           serviceAccountsAPIClient={serviceAccountsAPIClient}
           onClose={() => setAccountToDelete(undefined)}
-          onDeleted={(warnings) => {
+          onDeleted={(outcome) => {
             setAccountToDelete(undefined);
             setRefreshKey((value) => value + 1);
-            onDeleted(accountToDelete, warnings);
-          }}
-          onAlreadyDeleted={() => {
-            setAccountToDelete(undefined);
-            setRefreshKey((value) => value + 1);
-            onAlreadyDeleted(accountToDelete);
+            onDeleted(accountToDelete, outcome);
           }}
           onError={onDeleteError}
         />

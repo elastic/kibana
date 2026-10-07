@@ -60,7 +60,6 @@ const renderApp = async ({
   const getRoles = jest.fn().mockResolvedValue(roleOptions);
   const onCreated = jest.fn();
   const onDeleted = jest.fn();
-  const onAlreadyDeleted = jest.fn();
   const onDeleteError = jest.fn();
   const view = renderWithI18n(
     <EuiProvider>
@@ -74,7 +73,6 @@ const renderApp = async ({
             createRoleUrl={canCreateRole ? '/app/management/security/roles/edit' : undefined}
             onCreated={onCreated}
             onDeleted={onDeleted}
-            onAlreadyDeleted={onAlreadyDeleted}
             onDeleteError={onDeleteError}
           />
         </Router>
@@ -91,7 +89,6 @@ const renderApp = async ({
     getRoles,
     onCreated,
     onDeleted,
-    onAlreadyDeleted,
     onDeleteError,
     unmount: view.unmount,
   };
@@ -474,7 +471,9 @@ describe('ServiceAccountsApp', () => {
       fireEvent.click(await screen.findByTestId('serviceAccountsDeleteAction'));
       fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
-      await waitFor(() => expect(onDeleted).toHaveBeenCalledWith(directoryEntry, []));
+      await waitFor(() =>
+        expect(onDeleted).toHaveBeenCalledWith(directoryEntry, { status: 'deleted', warnings: [] })
+      );
       expect(listWorkloads).toHaveBeenCalledWith(directoryEntry.id);
       expect(deleteAccount).toHaveBeenCalledWith(directoryEntry.id, { force: false });
       expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
@@ -482,7 +481,7 @@ describe('ServiceAccountsApp', () => {
     });
 
     it('refreshes the directory when the account was already deleted elsewhere', async () => {
-      const { list, deleteAccount, onAlreadyDeleted, onDeleteError } = await renderApp({
+      const { list, deleteAccount, onDeleted, onDeleteError } = await renderApp({
         pathname: '/',
         serviceAccounts: [directoryEntry],
       });
@@ -498,7 +497,9 @@ describe('ServiceAccountsApp', () => {
       fireEvent.click(await screen.findByTestId('serviceAccountsDeleteAction'));
       fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
-      await waitFor(() => expect(onAlreadyDeleted).toHaveBeenCalledWith(directoryEntry));
+      await waitFor(() =>
+        expect(onDeleted).toHaveBeenCalledWith(directoryEntry, { status: 'already_deleted' })
+      );
       expect(onDeleteError).not.toHaveBeenCalled();
       expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
       await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
