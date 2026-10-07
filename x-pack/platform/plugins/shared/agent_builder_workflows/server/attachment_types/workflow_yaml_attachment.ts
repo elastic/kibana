@@ -69,7 +69,9 @@ const areWorkflowYamlsEquivalent = (left: string, right: string): boolean => {
 
 const READ_ONLY_REASON_MESSAGES: Record<WorkflowEditorReadOnlyReason, string> = {
   executions_tab:
-    'The user is on the Executions tab. This YAML is a read-only snapshot of a past execution. ' +
+    'The user is viewing a past execution on the Executions tab; its id is in the page URL. ' +
+    'The YAML above is the current workflow definition, which can differ from the version that ran. ' +
+    `Call \`${platformCoreTools.getWorkflowExecutionStatus}\` with the execution id to inspect the run. ` +
     'When you propose a change, the editor opens the Workflow tab, where the user can review and save it.',
   managed:
     'This workflow is managed by Elastic. The user cannot edit or save it. Explain the fix, but do not claim it can be applied.',

@@ -356,6 +356,21 @@ steps:
       expect(result.value).toContain('Workflow tab');
     });
 
+    it('tells the agent the Executions tab shows the current workflow YAML', async () => {
+      const type = registerAndCapture({
+        validateWorkflow: jest.fn().mockResolvedValue({ valid: true, diagnostics: [] }),
+      });
+
+      const { getRepresentation } = type.format(
+        { data: { yaml: 'version: "1"', readOnlyReason: 'executions_tab' } },
+        { spaceId: 'default', request: {} }
+      );
+      const result = await getRepresentation();
+
+      expect(result.value).toContain('current workflow definition');
+      expect(result.value).toContain(platformCoreTools.getWorkflowExecutionStatus);
+    });
+
     it('omits the read-only note when the editor is editable', async () => {
       const type = registerAndCapture({
         validateWorkflow: jest.fn().mockResolvedValue({ valid: true, diagnostics: [] }),

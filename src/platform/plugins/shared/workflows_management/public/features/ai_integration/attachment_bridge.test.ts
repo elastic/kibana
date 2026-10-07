@@ -723,6 +723,7 @@ describe('AttachmentBridge: read-only editor', () => {
     events.emit(yamlChange('p-1', 'yaml: fixed'));
 
     expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+    expect(bridge.hasDeferred()).toBe(true);
     expect(tracker.getAllRecords()).toHaveLength(0);
     expect(onProposalDeferred).toHaveBeenCalledTimes(1);
     expect(onProposalReceived).not.toHaveBeenCalled();

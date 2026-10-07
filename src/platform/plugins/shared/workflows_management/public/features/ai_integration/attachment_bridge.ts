@@ -157,6 +157,11 @@ export class AttachmentBridge {
     });
   }
 
+  /** True while the bridge holds a proposal for a read-only editor. */
+  hasDeferred(): boolean {
+    return this.deferredPayload !== null;
+  }
+
   /** Shows the proposal held while the editor was read-only. */
   applyDeferred(): void {
     const payload = this.deferredPayload;

@@ -69,6 +69,7 @@ import {
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
@@ -374,6 +375,8 @@ export const WorkflowYAMLEditor = ({
 
   const onExecutionsTabProposal = useCallback(() => setActiveTab('workflow'), [setActiveTab]);
 
+  const workflowTabYaml = useSelector(selectYamlString);
+
   // Agent Builder integration for AI-assisted editing
   const { isAgentBuilderAvailable, openAgentChat } = useAgentBuilderIntegration({
     editorRef,
@@ -382,12 +385,10 @@ export const WorkflowYAMLEditor = ({
     workflowName: getWorkflowName(workflow, workflowDefinition),
     validationErrors,
     readOnlyReason,
-    // The store shows the workflow YAML only after it catches up with the URL
-    // tab, so proposals wait for both.
+    // The store catches up with the URL tab one render later, so wait for both.
     canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
-    // The user asked the agent for a fix, so open the tab where they can
-    // review and save it. The held proposal shows once the editor is editable.
     onProposalDeferred: readOnlyReason === 'executions_tab' ? onExecutionsTabProposal : undefined,
+    workflowTabYaml,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {

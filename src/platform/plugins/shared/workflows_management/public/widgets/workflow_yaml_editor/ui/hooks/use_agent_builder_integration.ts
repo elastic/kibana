@@ -48,6 +48,12 @@ interface UseAgentBuilderIntegrationParams {
   canApplyProposals?: boolean;
   /** Called when a proposal arrives while `canApplyProposals` is false. */
   onProposalDeferred?: () => void;
+  /**
+   * YAML of the Workflow tab. On the Executions tab the agent gets it instead of
+   * the past run's YAML, because proposals apply there. Held proposals wait
+   * until the editor shows it.
+   */
+  workflowTabYaml?: string;
 }
 
 export interface OpenAgentChatOptions {
@@ -86,6 +92,7 @@ export const useAgentBuilderIntegration = ({
   readOnlyReason,
   canApplyProposals = true,
   onProposalDeferred,
+  workflowTabYaml,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement, application } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
@@ -109,6 +116,9 @@ export const useAgentBuilderIntegration = ({
   canApplyProposalsRef.current = canApplyProposals;
   const onProposalDeferredRef = useRef(onProposalDeferred);
   onProposalDeferredRef.current = onProposalDeferred;
+  const executionsTabYaml = readOnlyReason === 'executions_tab' ? workflowTabYaml : undefined;
+  const executionsTabYamlRef = useRef(executionsTabYaml);
+  executionsTabYamlRef.current = executionsTabYaml;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
   const hasAutoOpenedRef = useRef(false);
   const unsavedWorkflowIdRef = useRef<string>(v4());
@@ -274,9 +284,9 @@ export const useAgentBuilderIntegration = ({
       },
     };
 
-    const buildAttachment = (yaml: string) =>
+    const buildAttachment = (editorYaml: string) =>
       buildWorkflowAttachment({
-        yaml,
+        yaml: executionsTabYamlRef.current ?? editorYaml,
         attachmentId: syncAttachmentIdRef.current ?? attachmentId,
         workflowId,
         workflowName: workflowNameRef.current,
@@ -429,8 +439,23 @@ export const useAgentBuilderIntegration = ({
   ]);
 
   useEffect(() => {
-    if (canApplyProposals) attachmentBridgeRef.current?.applyDeferred();
-  }, [canApplyProposals]);
+    const bridge = attachmentBridgeRef.current;
+    const model = editorRef.current?.getModel();
+    if (!canApplyProposals || !bridge?.hasDeferred() || !model) return;
+
+    // A proposal shown before the model holds the workflow YAML would be
+    // diffed against the execution YAML, then lost when the model updates.
+    if (workflowTabYaml === undefined || model.getValue() === workflowTabYaml) {
+      bridge.applyDeferred();
+      return;
+    }
+    const listener = model.onDidChangeContent(() => {
+      if (model.getValue() !== workflowTabYaml) return;
+      listener.dispose();
+      bridge.applyDeferred();
+    });
+    return () => listener.dispose();
+  }, [canApplyProposals, workflowTabYaml, editorRef]);
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
@@ -438,7 +463,7 @@ export const useAgentBuilderIntegration = ({
         return;
       }
 
-      const currentYaml = editorRef.current?.getModel()?.getValue() ?? '';
+      const currentYaml = executionsTabYaml ?? editorRef.current?.getModel()?.getValue() ?? '';
       // A new conversation has no restored attachment to wait for, so attach the YAML now.
       // Otherwise the active-conversation subscription adds it once it knows which
       // conversation this session shares.
@@ -489,19 +514,22 @@ export const useAgentBuilderIntegration = ({
       workflowName,
       validationErrors,
       readOnlyReason,
+      executionsTabYaml,
       telemetry,
     ]
   );
 
-  // Switching tabs does not always change the YAML, so the model listener can
-  // miss it. Re-sync so the agent sees the current read-only state.
-  const syncedReadOnlyReasonRef = useRef(readOnlyReason);
+  // The model listener misses changes that leave the editor content as is, such
+  // as a tab switch. Re-sync so the agent sees the current state.
+  const isFirstStateSyncRef = useRef(true);
   useEffect(() => {
-    if (syncedReadOnlyReasonRef.current === readOnlyReason) return;
-    syncedReadOnlyReasonRef.current = readOnlyReason;
+    if (isFirstStateSyncRef.current) {
+      isFirstStateSyncRef.current = false;
+      return;
+    }
     const yaml = editorRef.current?.getModel()?.getValue();
     if (yaml !== undefined) syncAttachmentRef.current?.(yaml);
-  }, [readOnlyReason, editorRef]);
+  }, [readOnlyReason, executionsTabYaml, editorRef]);
 
   // Auto-open only on /workflows/create, or on a saved workflow whose sidebar
   // the save thunk requested we restore. Never on an existing workflow the

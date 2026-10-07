@@ -43,6 +43,7 @@ jest.mock('../../../../features/ai_integration', () => ({
     stop: jest.fn(),
     setAttachmentId: jest.fn(),
     applyDeferred: jest.fn(),
+    hasDeferred: jest.fn().mockReturnValue(true),
   })),
   ProposalManager: jest.fn().mockImplementation(() => ({
     initialize: jest.fn(),
@@ -1441,6 +1442,61 @@ describe('useAgentBuilderIntegration', () => {
       });
 
       expect(startOptions.isReadOnly()).toBe(false);
+      expect(bridge.applyDeferred).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends the Workflow tab YAML while the user is on the Executions tab', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef,
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+          readOnlyReason: 'executions_tab',
+          workflowTabYaml: 'name: current',
+        } as Parameters<typeof useAgentBuilderIntegration>[0],
+      });
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.addAttachment).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ yaml: 'name: current' }),
+        })
+      );
+
+      agentBuilder.addAttachment.mockClear();
+      rerender({
+        editorRef,
+        isEditorMounted: true,
+        workflowId: 'workflow-a',
+        workflowTabYaml: 'name: current',
+      });
+
+      expect(agentBuilder.addAttachment.mock.calls[0][0].data.yaml).toBe(INITIAL_YAML);
+    });
+
+    it('waits for the editor to show the workflow YAML before it shows a held proposal', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      const baseProps = { editorRef, isEditorMounted: true, workflowId: 'workflow-a' };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: { ...baseProps, canApplyProposals: false, workflowTabYaml: 'name: workflow' },
+      });
+      await flushChatAccessCheck();
+      const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
+
+      // The editor model still holds the execution YAML for one render.
+      rerender({ ...baseProps, canApplyProposals: true, workflowTabYaml: 'name: workflow' });
+      expect(bridge.applyDeferred).not.toHaveBeenCalled();
+
+      act(() => {
+        mockModel.simulateContentChange('name: workflow');
+      });
       expect(bridge.applyDeferred).toHaveBeenCalledTimes(1);
     });
   });
