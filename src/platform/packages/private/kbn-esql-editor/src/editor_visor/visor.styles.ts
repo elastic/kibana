@@ -25,6 +25,9 @@ export const visorStyles = (
 
   return {
     visorContainer: css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
       background-color: ${euiTheme.colors.backgroundBasePlain};
       width: 100%;
       position: relative;
@@ -41,14 +44,12 @@ export const visorStyles = (
         `
         : `min-height: ${euiTheme.size.xl};`}
     `,
-    visorWrapper: css`
-      width: 100%;
+    inputSlot: css`
+      flex: 1;
+      min-width: 0;
+      position: relative;
     `,
     searchWrapper: css`
-      justify-content: center;
-      position: relative;
-      min-width: 0;
-
       .euiFormControlLayout--group {
         border-radius: ${euiTheme.border.radius.control};
       }
@@ -66,25 +67,21 @@ export const visorStyles = (
         padding-top: ${euiTheme.size.s} !important;
       }
     `,
-    searchInner: css`
-      width: 100%;
-    `,
-    submitButtonWrapper: css`
-      padding-left: ${euiTheme.size.xs};
-      flex-shrink: 0;
-    `,
-    modeToggleWrapper: css`
-      padding-left: ${euiTheme.size.xs};
-      flex-shrink: 0;
+    generating: css`
       display: flex;
       align-items: center;
+      gap: ${euiTheme.size.xs};
+      flex-shrink: 0;
+      padding-inline-start: ${euiTheme.size.xs};
     `,
     modeToggle: css`
       position: relative;
       display: inline-flex;
       align-items: center;
+      flex-shrink: 0;
       box-sizing: border-box;
       gap: ${euiTheme.size.xs};
+      margin-inline-start: ${euiTheme.size.xs};
       block-size: ${euiTheme.size.xl};
       max-block-size: ${euiTheme.size.xl};
       padding: ${euiTheme.size.xs};
@@ -106,14 +103,9 @@ export const visorStyles = (
       }
     `,
     modeIconButton: css`
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      inline-size: ${euiTheme.size.l};
-      block-size: ${euiTheme.size.l};
-      border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
-
-      .euiButtonIcon {
+      &.euiButtonIcon {
+        inline-size: ${euiTheme.size.l};
+        block-size: ${euiTheme.size.l};
         border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
         background-color: transparent;
 
@@ -125,10 +117,10 @@ export const visorStyles = (
       }
     `,
     modeIconButtonActive: css`
-      .euiButtonIcon,
-      .euiButtonIcon:hover,
-      .euiButtonIcon:focus,
-      .euiButtonIcon:focus-visible {
+      &.euiButtonIcon,
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus,
+      &.euiButtonIcon:focus-visible {
         background-color: ${euiTheme.colors.backgroundLightText};
       }
     `,
@@ -185,9 +177,6 @@ export const visorStyles = (
         ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
         ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
       ) !important;
-    `,
-    nlInputWrapper: css`
-      min-width: 0;
     `,
     nlInput: css`
       position: relative;

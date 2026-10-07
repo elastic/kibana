@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { ReactNode } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -45,6 +38,165 @@ import { SparklesIcon } from './sparkles_icon';
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+
+type VisorStyles = ReturnType<typeof visorStyles>;
+
+function AskAiButton({
+  isSelected,
+  onSelect,
+  styles,
+}: {
+  isSelected: boolean;
+  onSelect: () => void;
+  styles: VisorStyles;
+}) {
+  if (isSelected) {
+    return (
+      <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
+        <AiButtonIcon
+          iconType={SparklesIcon as unknown as 'sparkles'}
+          size="xs"
+          iconSize="m"
+          variant="outlined"
+          aria-label={aiModeTooltip}
+          aria-pressed
+          isSelected
+          onClick={onSelect}
+          data-test-subj="esqlVisorAskAiButton"
+          css={[styles.modeIconButton, styles.aiButtonSparkleHover, styles.aiButtonSelected]}
+        />
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType={SparklesIcon}
+        size="xs"
+        iconSize="m"
+        color="text"
+        display="empty"
+        aria-label={aiModeTooltip}
+        aria-pressed={false}
+        isSelected={false}
+        onClick={onSelect}
+        data-test-subj="esqlVisorAskAiButton"
+        css={styles.modeIconButton}
+      />
+    </EuiToolTip>
+  );
+}
+
+function VisorModeToggle({
+  isKqlMode,
+  onModeChange,
+  styles,
+}: {
+  isKqlMode: boolean;
+  onModeChange: (mode: VisorMode) => void;
+  styles: VisorStyles;
+}) {
+  return (
+    <div role="group" aria-label={visorModeLegend} css={styles.modeToggle}>
+      <EuiToolTip content={kqlModeLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="magnify"
+          size="xs"
+          iconSize="m"
+          color="text"
+          display="empty"
+          aria-label={kqlModeLabel}
+          aria-pressed={isKqlMode}
+          isSelected={isKqlMode}
+          onClick={() => onModeChange(VisorMode.KQL)}
+          data-test-subj="esqlVisorModeKql"
+          css={[styles.modeIconButton, isKqlMode && styles.modeIconButtonActive]}
+        />
+      </EuiToolTip>
+      <AskAiButton
+        isSelected={!isKqlMode}
+        onSelect={() => onModeChange(VisorMode.NaturalLanguage)}
+        styles={styles}
+      />
+    </div>
+  );
+}
+
+function VisorLayout({
+  showModeToggle,
+  isKqlMode,
+  onModeChange,
+  styles,
+  isVisible,
+  children,
+}: {
+  showModeToggle: boolean;
+  isKqlMode: boolean;
+  onModeChange: (mode: VisorMode) => void;
+  styles: VisorStyles;
+  isVisible: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      css={styles.visorContainer}
+      data-test-subj="ESQLEditor-quick-search-visor"
+      {...(!isVisible && { inert: '' })}
+    >
+      {showModeToggle && (
+        <VisorModeToggle isKqlMode={isKqlMode} onModeChange={onModeChange} styles={styles} />
+      )}
+      {children}
+    </div>
+  );
+}
+
+function NlVisorActions({
+  isLoading,
+  value,
+  onSubmit,
+  onStop,
+  styles,
+}: {
+  isLoading: boolean;
+  value: string;
+  onSubmit: () => void;
+  onStop: () => void;
+  styles: VisorStyles;
+}) {
+  if (isLoading) {
+    return (
+      <div css={styles.generating}>
+        <EuiText size="xs" color="subdued">
+          {generatingLabel}
+        </EuiText>
+        <EuiButtonEmpty
+          size="s"
+          color="primary"
+          iconType="stop"
+          iconSide="left"
+          onClick={onStop}
+          data-test-subj="esqlVisorStopGeneration"
+        >
+          {stopLabel}
+        </EuiButtonEmpty>
+      </div>
+    );
+  }
+
+  if (!value.trim()) {
+    return null;
+  }
+
+  return (
+    <SubmitButton
+      tooltip={enterHintGenerateLabel}
+      onClick={onSubmit}
+      data-test-subj="esqlVisorNLSubmit"
+    />
+  );
+}
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -199,162 +351,69 @@ export function QuickSearchVisor({
     return null;
   }
 
+  if (isKqlMode) {
+    return (
+      <VisorLayout
+        showModeToggle={showAskAiButton}
+        isKqlMode
+        onModeChange={onVisorModeChange}
+        styles={styles}
+        isVisible={isVisible}
+      >
+        <div css={[styles.inputSlot, styles.searchWrapper]}>
+          <KQLComponent
+            iconType=""
+            disableLanguageSwitcher={true}
+            indexPatterns={kqlDataView ? [kqlDataView.dataView] : []}
+            bubbleSubmitEvent={false}
+            query={{ query: searchValue, language: 'kuery' }}
+            disableAutoFocus={true}
+            placeholder={searchPlaceholder}
+            onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
+            onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
+            appName="esqlEditorVisor"
+            dataTestSubj="esqlVisorKQLQueryInput"
+            onChangeQueryInputFocus={setIsKqlFocused}
+            size="s"
+            isClearable={false}
+          />
+        </div>
+        {searchValue.trim() && (
+          <SubmitButton
+            tooltip={enterHintFilterLabel}
+            onClick={() => onKqlSubmit(searchValue)}
+            data-test-subj="esqlVisorKQLSubmit"
+          />
+        )}
+      </VisorLayout>
+    );
+  }
+
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="center"
-      responsive={false}
-      css={styles.visorContainer}
-      data-test-subj="ESQLEditor-quick-search-visor"
-      {...(!isVisible && { inert: '' })}
+    <VisorLayout
+      showModeToggle={showAskAiButton}
+      isKqlMode={false}
+      onModeChange={onVisorModeChange}
+      styles={styles}
+      isVisible={isVisible}
     >
-      <EuiFlexItem css={styles.visorWrapper}>
-        <EuiFlexGroup
-          gutterSize="none"
-          alignItems="center"
-          justifyContent="flexStart"
-          responsive={false}
-        >
-          <EuiFlexItem css={isKqlMode ? styles.searchWrapper : styles.nlInputWrapper}>
-            <EuiFlexGroup
-              gutterSize="xs"
-              alignItems="center"
-              responsive={false}
-              css={styles.searchInner}
-            >
-              {showAskAiButton && (
-                <EuiFlexItem grow={false} css={styles.modeToggleWrapper}>
-                  <div role="group" aria-label={visorModeLegend} css={styles.modeToggle}>
-                    <span css={[styles.modeIconButton, isKqlMode && styles.modeIconButtonActive]}>
-                      <EuiToolTip content={kqlModeLabel} disableScreenReaderOutput>
-                        <EuiButtonIcon
-                          iconType="magnify"
-                          size="xs"
-                          iconSize="m"
-                          color="text"
-                          display="empty"
-                          aria-label={kqlModeLabel}
-                          aria-pressed={isKqlMode}
-                          isSelected={isKqlMode}
-                          onClick={() => onVisorModeChange(VisorMode.KQL)}
-                          data-test-subj="esqlVisorModeKql"
-                        />
-                      </EuiToolTip>
-                    </span>
-                    {isKqlMode ? (
-                      <span css={styles.modeIconButton}>
-                        <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            iconType={SparklesIcon}
-                            size="xs"
-                            iconSize="m"
-                            color="text"
-                            display="empty"
-                            aria-label={aiModeTooltip}
-                            aria-pressed={false}
-                            isSelected={false}
-                            onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
-                            data-test-subj="esqlVisorAskAiButton"
-                          />
-                        </EuiToolTip>
-                      </span>
-                    ) : (
-                      <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
-                        <AiButtonIcon
-                          iconType={SparklesIcon as unknown as 'sparkles'}
-                          size="xs"
-                          iconSize="m"
-                          variant="outlined"
-                          aria-label={aiModeTooltip}
-                          aria-pressed
-                          isSelected
-                          onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
-                          data-test-subj="esqlVisorAskAiButton"
-                          css={[styles.aiButtonSparkleHover, styles.aiButtonSelected]}
-                        />
-                      </EuiToolTip>
-                    )}
-                  </div>
-                </EuiFlexItem>
-              )}
-              {isKqlMode ? (
-                <>
-                  <EuiFlexItem>
-                    <KQLComponent
-                      iconType=""
-                      disableLanguageSwitcher={true}
-                      indexPatterns={kqlDataView ? [kqlDataView.dataView] : []}
-                      bubbleSubmitEvent={false}
-                      query={{ query: searchValue, language: 'kuery' }}
-                      disableAutoFocus={true}
-                      placeholder={searchPlaceholder}
-                      onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
-                      onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
-                      appName="esqlEditorVisor"
-                      dataTestSubj="esqlVisorKQLQueryInput"
-                      onChangeQueryInputFocus={setIsKqlFocused}
-                      size="s"
-                      isClearable={false}
-                    />
-                  </EuiFlexItem>
-                  {searchValue.trim() && (
-                    <SubmitButton
-                      tooltip={enterHintFilterLabel}
-                      onClick={() => onKqlSubmit(searchValue)}
-                      data-test-subj="esqlVisorKQLSubmit"
-                    />
-                  )}
-                </>
-              ) : (
-                <>
-                  <EuiFlexItem>
-                    <NLInput
-                      value={nlValue}
-                      placeholder={nlPlaceholder}
-                      disabled={isNlLoading}
-                      onChange={setNlValue}
-                      onSubmit={onNlSubmit}
-                      inputStyles={styles.nlInput}
-                    />
-                  </EuiFlexItem>
-                  {isNlLoading ? (
-                    <EuiFlexItem grow={false} css={styles.submitButtonWrapper}>
-                      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="xs" color="subdued">
-                            {generatingLabel}
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            size="s"
-                            color="primary"
-                            iconType="stop"
-                            iconSide="left"
-                            onClick={onStopGeneration}
-                            data-test-subj="esqlVisorStopGeneration"
-                          >
-                            {stopLabel}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  ) : (
-                    nlValue.trim() && (
-                      <SubmitButton
-                        tooltip={enterHintGenerateLabel}
-                        onClick={onNlSubmit}
-                        data-test-subj="esqlVisorNLSubmit"
-                      />
-                    )
-                  )}
-                </>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <div css={styles.inputSlot}>
+        <NLInput
+          value={nlValue}
+          placeholder={nlPlaceholder}
+          disabled={isNlLoading}
+          onChange={setNlValue}
+          onSubmit={onNlSubmit}
+          inputStyles={styles.nlInput}
+        />
+      </div>
+      <NlVisorActions
+        isLoading={isNlLoading}
+        value={nlValue}
+        onSubmit={onNlSubmit}
+        onStop={onStopGeneration}
+        styles={styles}
+      />
+    </VisorLayout>
   );
 }
