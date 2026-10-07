@@ -394,25 +394,8 @@ export const SEVERITY_OPTIONS = [
   'low',
 ] as const satisfies readonly AlertEventSeverity[];
 
-/**
- * Severity field contract — single source of truth for schema `.describe()` and eval judges.
- * Order of `SEVERITY_OPTIONS` is part of this contract (most-severe first).
- */
-export const SEVERITY_CONTRACT_RULE = dedent`
-    Severity keyword. Choose the tier from confirmed grounding rows: whether the affected operation fails, degrades, or still completes on the verified path, and how broad that impact is. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; assess that event only from the row’s error signature and impact.
-
-    Decide in order — stop at the first match:
-    1. "critical" when ANY of these hold:
-      - a site-wide/global outage affecting all or most customers;
-      - multiple current rows confirming blocked paths for distinct core operations (for example balance, history, and payment together);
-      - a confirmed failure that fully blocks a mandatory service, job, or platform-critical operation end-to-end so the component can no longer perform its primary function, even when no downstream customer journey is mapped in topology — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high";
-      - or confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
-    2. "high" when grounding confirms the rule's target operation fails or is blocked on the verified path, or is broadly degraded / intermittent / partially failing for a significant subset — and no "critical" criterion above holds. A single endpoint or lookup path that blocks only that operation (even for every caller who reaches it) stays here.
-    3. "medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.
-    4. "low" for recovery, noise, false alarm, or non-issue.
-
-    Tie-break: when two adjacent tiers both match the same grounding evidence, choose the lower only when rows leave whether the operation still completes on the affected path genuinely unresolved.
-  `;
+export const SEVERITY_CONTRACT_RULE =
+  "Computed severity tier, derived from each signal's effect and outage_paths, the KI severity_score, and the event's stored topology. Never written or inferred by agents.";
 /** Canonical severity used by storage, APIs, and tools. */
 export const severitySchema = lazySchema(() =>
   alertEventSeveritySchema.exclude(['info']).describe(SEVERITY_CONTRACT_RULE)
