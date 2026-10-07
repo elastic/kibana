@@ -182,7 +182,7 @@ export class PluginsService
 
     const config = await firstValueFrom(this.config$);
 
-    // Always-available core endpoint the initializing UI polls for deferred-init state.
+    // Always-available core endpoint the initializing UI polls for plugin initialization status.
     // Registered on a core router so it is never gated while a plugin is initializing.
     registerDeferredInitStatusRoute(deps.http.createRouter(''), this.deferredInitEngine);
 
@@ -215,6 +215,7 @@ export class PluginsService
     await this.prebootPluginsSystem.stopPlugins();
     this.arePrebootPluginsStopped = true;
 
+    this.standardPluginsSystem.setInitializeOnBoot(config.initializeOnBoot);
     const contracts = await this.standardPluginsSystem.startPlugins(deps);
     return { contracts };
   }
