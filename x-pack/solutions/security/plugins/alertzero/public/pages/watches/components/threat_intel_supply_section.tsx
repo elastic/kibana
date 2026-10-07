@@ -63,6 +63,7 @@ const hardGateMessage = (reasonCodes: string[]): string => {
 interface ThreatIntelSupplySectionViewProps {
   status: HuntThreatIntelSupplyStatus | undefined;
   isLoading: boolean;
+  isError: boolean;
   canWrite: boolean;
   isSaving: boolean;
   isRestoring: boolean;
@@ -72,18 +73,39 @@ interface ThreatIntelSupplySectionViewProps {
 const ThreatIntelSupplySectionViewComponent: React.FC<ThreatIntelSupplySectionViewProps> = ({
   status,
   isLoading,
+  isError,
   canWrite,
   isSaving,
   isRestoring,
   onRestore,
 }) => {
-  if (isLoading && !status) {
+  if (isLoading && !status && !isError) {
     return (
       <SettingRow
         label={settingsI18n.THREAT_INTEL_SUPPLY_SECTION_TITLE}
         data-test-subj="alertZeroThreatIntelSupplySection"
       >
         <EuiLoadingSpinner size="m" data-test-subj="alertZeroThreatIntelSupplyLoading" />
+      </SettingRow>
+    );
+  }
+
+  if (isError && !status) {
+    return (
+      <SettingRow
+        label={settingsI18n.THREAT_INTEL_SUPPLY_SECTION_TITLE}
+        labelHelp={settingsI18n.THREAT_INTEL_SUPPLY_SECTION_SUBTITLE}
+        data-test-subj="alertZeroThreatIntelSupplySection"
+      >
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          color="danger"
+          iconType="warning"
+          data-test-subj="alertZeroThreatIntelSupplyStatusErrorCallout"
+        >
+          {settingsI18n.THREAT_INTEL_SUPPLY_STATUS_ERROR}
+        </EuiCallOut>
       </SettingRow>
     );
   }
@@ -98,6 +120,20 @@ const ThreatIntelSupplySectionViewComponent: React.FC<ThreatIntelSupplySectionVi
       labelHelp={settingsI18n.THREAT_INTEL_SUPPLY_SECTION_SUBTITLE}
       data-test-subj="alertZeroThreatIntelSupplySection"
     >
+      {isError ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="danger"
+            iconType="warning"
+            data-test-subj="alertZeroThreatIntelSupplyStatusErrorCallout"
+          >
+            {settingsI18n.THREAT_INTEL_SUPPLY_STATUS_ERROR}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {!status.hardGate.ok ? (
         <>
           <EuiCallOut
@@ -190,15 +226,23 @@ const ThreatIntelSupplySectionComponent: React.FC<ThreatIntelSupplySectionProps>
   isSaving,
   onHardGateChange,
 }) => {
-  const { data, isLoading } = useHuntThreatIntelSupplyStatus(true);
+  const { data, isLoading, isError } = useHuntThreatIntelSupplyStatus(true);
   const restore = useRestoreHuntThreatIntelSupply();
 
   useEffect(() => {
-    if (!data || !onHardGateChange) {
+    if (!onHardGateChange) {
+      return;
+    }
+    // Treat a failed status fetch like a failed hard-gate: do not allow enable.
+    if (isError) {
+      onHardGateChange(false);
+      return;
+    }
+    if (!data) {
       return;
     }
     onHardGateChange(data.hardGate.ok);
-  }, [data, onHardGateChange]);
+  }, [data, isError, onHardGateChange]);
 
   const handleRestore = useCallback(() => {
     restore.mutate();
@@ -208,6 +252,7 @@ const ThreatIntelSupplySectionComponent: React.FC<ThreatIntelSupplySectionProps>
     <ThreatIntelSupplySectionView
       status={data}
       isLoading={isLoading}
+      isError={isError}
       canWrite={canWrite}
       isSaving={isSaving}
       isRestoring={restore.isLoading}

@@ -34,36 +34,3 @@ export interface ThreatIntelSupplyStatus {
   drift: boolean;
   huntEnabled: boolean;
 }
-
-export class ThreatIntelSupplyNotInstalledError extends Error {
-  public readonly code = 'supply_not_installed' as const;
-
-  constructor(workflowId: string) {
-    super(`Threat intel supply workflow "${workflowId}" is not installed`);
-    this.name = 'ThreatIntelSupplyNotInstalledError';
-  }
-}
-
-export class ThreatIntelSupplyHardGateError extends Error {
-  public readonly code = 'hunt_supply_prerequisites_unmet' as const;
-  public readonly reasonCodes: string[];
-
-  constructor(reasonCodes: string[]) {
-    super(
-      `Hunt Watch supply prerequisites unmet: ${
-        reasonCodes.length > 0 ? reasonCodes.join(', ') : 'unknown'
-      }`
-    );
-    this.name = 'ThreatIntelSupplyHardGateError';
-    this.reasonCodes = reasonCodes;
-  }
-}
-
-export class ThreatIntelSupplyHuntDisabledError extends Error {
-  public readonly code = 'hunt_not_enabled' as const;
-
-  constructor() {
-    super('Threat intel supply Restore requires Continuous Threat Hunt to be enabled');
-    this.name = 'ThreatIntelSupplyHuntDisabledError';
-  }
-}

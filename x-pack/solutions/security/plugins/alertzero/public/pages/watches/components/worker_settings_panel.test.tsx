@@ -53,6 +53,7 @@ jest.mock('../../../hooks/use_hunt_threat_intel_supply', () => ({
       ],
     },
     isLoading: false,
+    isError: false,
   })),
   useRestoreHuntThreatIntelSupply: jest.fn(() => ({
     mutate: jest.fn(),
@@ -353,11 +354,25 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
         workflows: [],
       },
       isLoading: false,
+      isError: false,
     });
     renderHuntPanel();
     await waitFor(() => {
       expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${HUNT_WORKER_ID}`)).toBeDisabled();
     });
+  });
+
+  it('disables Enabled when the supply status request fails', async () => {
+    useHuntThreatIntelSupplyStatus.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
+    renderHuntPanel();
+    await waitFor(() => {
+      expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${HUNT_WORKER_ID}`)).toBeDisabled();
+    });
+    expect(screen.getByTestId('alertZeroThreatIntelSupplyStatusErrorCallout')).toBeInTheDocument();
   });
 
   it('shows fixed Manual autonomy rather than a multi-level control', () => {

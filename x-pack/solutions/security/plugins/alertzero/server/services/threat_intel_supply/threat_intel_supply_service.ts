@@ -17,13 +17,13 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import type { ThreatIntelSupplyWorkflowInstaller } from '../../types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { evaluateHuntSupplyHardGate } from './hard_gate';
-import {
-  ThreatIntelSupplyHardGateError,
-  ThreatIntelSupplyHuntDisabledError,
-  ThreatIntelSupplyNotInstalledError,
-  type ThreatIntelSupplyHardGate,
-  type ThreatIntelSupplyStatus,
-  type ThreatIntelSupplyWorkflowStatus,
+import { ThreatIntelSupplyHardGateError } from './threat_intel_supply_hard_gate_error';
+import { ThreatIntelSupplyHuntDisabledError } from './threat_intel_supply_hunt_disabled_error';
+import { ThreatIntelSupplyNotInstalledError } from './threat_intel_supply_not_installed_error';
+import type {
+  ThreatIntelSupplyHardGate,
+  ThreatIntelSupplyStatus,
+  ThreatIntelSupplyWorkflowStatus,
 } from './types';
 
 const attributeWorkflowIdForSpace = (spaceId: string): string =>
@@ -107,8 +107,9 @@ export class ThreatIntelSupplyService {
       installIfMissing: false,
     });
 
-    const otherSpaceStillHunting = await this.isHuntEnabledInOtherSpace(spaceId);
-    if (otherSpaceStillHunting) {
+    // Re-check immediately before touching globals so a concurrent Hunt enable in
+    // another space is less likely to lose ingest/enrich after its ensure ran.
+    if (await this.isHuntEnabledInOtherSpace(spaceId)) {
       return;
     }
 
@@ -217,6 +218,10 @@ export class ThreatIntelSupplyService {
       }
     }
     if (!existing) {
+      // Disable/teardown: missing doc is already off. Enable still needs install.
+      if (!enabled) {
+        return;
+      }
       throw new ThreatIntelSupplyNotInstalledError(workflowId);
     }
     if (existing.enabled === enabled) {

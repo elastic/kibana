@@ -42,13 +42,18 @@ const baseStatus = (): HuntThreatIntelSupplyStatus => ({
 
 const renderView = (
   status: HuntThreatIntelSupplyStatus | undefined,
-  { isLoading = false, onRestore = jest.fn() }: { isLoading?: boolean; onRestore?: () => void } = {}
+  {
+    isLoading = false,
+    isError = false,
+    onRestore = jest.fn(),
+  }: { isLoading?: boolean; isError?: boolean; onRestore?: () => void } = {}
 ) => {
   render(
     <I18nProvider>
       <ThreatIntelSupplySectionView
         status={status}
         isLoading={isLoading}
+        isError={isError}
         canWrite
         isSaving={false}
         isRestoring={false}
@@ -96,5 +101,10 @@ describe('ThreatIntelSupplySectionView', () => {
     expect(
       screen.getByTestId('alertZeroThreatIntelSupplyInUseElsewhere-ingest')
     ).toBeInTheDocument();
+  });
+
+  it('shows a status-error callout when the supply status request fails', () => {
+    renderView(undefined, { isError: true });
+    expect(screen.getByTestId('alertZeroThreatIntelSupplyStatusErrorCallout')).toBeInTheDocument();
   });
 });

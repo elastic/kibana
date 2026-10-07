@@ -21,7 +21,7 @@ import {
   ThreatIntelSupplyHardGateError,
   ThreatIntelSupplyHuntDisabledError,
   ThreatIntelSupplyNotInstalledError,
-} from './types';
+} from './index';
 
 const SPACE_A = 'space-a';
 const SPACE_B = 'space-b';
@@ -229,6 +229,49 @@ describe('ThreatIntelSupplyService', () => {
       expect.anything(),
       expect.anything()
     );
+  });
+
+  it('continues teardown when the attribute workflow is already missing', async () => {
+    seedAllTiWorkflows(true);
+    workflows.delete(ATTR_A);
+    huntEnabledBySpace.set(SPACE_A, false);
+    huntEnabledBySpace.set(SPACE_B, false);
+    await createService().teardownSupplyForSpace(SPACE_A, request);
+    expect(updateWorkflow).toHaveBeenCalledWith(
+      THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+      { enabled: false },
+      GLOBAL_WORKFLOW_SPACE_ID,
+      request
+    );
+  });
+
+  it('re-checks other spaces before disabling globals during teardown', async () => {
+    seedAllTiWorkflows(true);
+    huntEnabledBySpace.set(SPACE_A, false);
+    huntEnabledBySpace.set(SPACE_B, false);
+    const defaultUpdate = updateWorkflow.getMockImplementation()!;
+    let attributeDisabled = false;
+    updateWorkflow.mockImplementation(async (id: string, patch: { enabled: boolean }) => {
+      const result = await defaultUpdate(id, patch);
+      if (id === ATTR_A && patch.enabled === false) {
+        attributeDisabled = true;
+        // Concurrent enable in SPACE_B between attribute teardown and globals.
+        huntEnabledBySpace.set(SPACE_B, true);
+      }
+      return result;
+    });
+    try {
+      await createService().teardownSupplyForSpace(SPACE_A, request);
+      expect(attributeDisabled).toBe(true);
+      expect(updateWorkflow).not.toHaveBeenCalledWith(
+        THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    } finally {
+      updateWorkflow.mockImplementation(defaultUpdate);
+    }
   });
 
   it('marks ingest inUseElsewhere when Hunt is off here but on elsewhere', async () => {

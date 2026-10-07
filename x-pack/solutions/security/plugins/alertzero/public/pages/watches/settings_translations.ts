@@ -111,6 +111,14 @@ export const THREAT_INTEL_SUPPLY_HARD_GATE_BLOCKED = i18n.translate(
   }
 );
 
+export const THREAT_INTEL_SUPPLY_STATUS_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.statusError',
+  {
+    defaultMessage:
+      'Unable to check threat intel supply readiness. Retry later, or refresh the page before turning Hunt on.',
+  }
+);
+
 export const VIEW_EXECUTIONS = i18n.translate('xpack.alertzero.watches.settings.viewExecutions', {
   defaultMessage: 'View executions',
 });

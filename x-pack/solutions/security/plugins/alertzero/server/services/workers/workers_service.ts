@@ -305,23 +305,6 @@ export class WorkersService {
       }
     }
 
-    // Hunt supply: hard-gate + ensure TI before enabling CTH so a failed ensure never
-    // leaves Hunt on without reports. Disable path tears down after CTH is off.
-    if (isHuntWorker && patch.enabled === true && this.threatIntelSupply) {
-      try {
-        await this.threatIntelSupply.assertHardGate(request);
-        await this.threatIntelSupply.ensureSupplyForSpace(spaceId, request);
-      } catch (err) {
-        if (err instanceof ThreatIntelSupplyHardGateError) {
-          return { outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' };
-        }
-        if (err instanceof ThreatIntelSupplyNotInstalledError) {
-          return { outcome: 'blocked', reason: 'huntSupplyNotInstalled' };
-        }
-        throw err;
-      }
-    }
-
     const currentState = status.installed
       ? await managedWorkflows.getInstalledWorkflowState(status.workflowId, spaceId)
       : null;
@@ -336,6 +319,9 @@ export class WorkersService {
       return { outcome: 'rejected', what: 'a worker that is enabled without a service account' };
     }
 
+    // Validate settings (revision + patch) before Hunt supply ensure so a rejected
+    // account/settings update cannot leave ingest/enrich/attribute already on.
+    let pendingSettingsValues: ManagedWorkflowTemplateValues | null = null;
     if (touchesSettings) {
       if (patch.settingsRevision === undefined) {
         return { outcome: 'rejected', what: 'a settings update without its revision' };
@@ -353,11 +339,32 @@ export class WorkersService {
       if ('invalid' in applied) {
         return { outcome: 'invalid', message: applied.invalid };
       }
+      pendingSettingsValues = applied.values;
+    }
 
+    // Hunt supply: hard-gate + ensure TI after request validation and before enabling
+    // CTH so a failed ensure never leaves Hunt on without reports. Disable path tears
+    // down after CTH is off.
+    if (isHuntWorker && patch.enabled === true && this.threatIntelSupply) {
+      try {
+        await this.threatIntelSupply.assertHardGate(request);
+        await this.threatIntelSupply.ensureSupplyForSpace(spaceId, request);
+      } catch (err) {
+        if (err instanceof ThreatIntelSupplyHardGateError) {
+          return { outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' };
+        }
+        if (err instanceof ThreatIntelSupplyNotInstalledError) {
+          return { outcome: 'blocked', reason: 'huntSupplyNotInstalled' };
+        }
+        throw err;
+      }
+    }
+
+    if (pendingSettingsValues) {
       await this.persistWorker(request, registration, {
         spaceId,
         workflowIdSuffix: spaceId,
-        values: applied.values,
+        values: pendingSettingsValues,
       });
       status = await managedWorkflows.getWorkflowStatus(registration.id, {
         spaceId,
@@ -368,7 +375,7 @@ export class WorkersService {
         status.workflowId,
         spaceId
       );
-      if (!persisted || !templateValuesEqual(persisted.templateValues, applied.values)) {
+      if (!persisted || !templateValuesEqual(persisted.templateValues, pendingSettingsValues)) {
         this.logger.error(
           `Worker "${registration.id}" settings write could not be confirmed after save`
         );

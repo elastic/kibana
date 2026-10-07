@@ -7,11 +7,9 @@
 
 export { ThreatIntelSupplyService } from './threat_intel_supply_service';
 export type { ThreatIntelSupplyServiceDeps } from './threat_intel_supply_service';
-export {
-  ThreatIntelSupplyHardGateError,
-  ThreatIntelSupplyHuntDisabledError,
-  ThreatIntelSupplyNotInstalledError,
-} from './types';
+export { ThreatIntelSupplyHardGateError } from './threat_intel_supply_hard_gate_error';
+export { ThreatIntelSupplyHuntDisabledError } from './threat_intel_supply_hunt_disabled_error';
+export { ThreatIntelSupplyNotInstalledError } from './threat_intel_supply_not_installed_error';
 export type {
   ThreatIntelSupplyHardGate,
   ThreatIntelSupplyStatus,
