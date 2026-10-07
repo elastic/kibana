@@ -581,7 +581,7 @@ describe('Worker settings contract', () => {
         snapshot(tightened()),
         contractOf(tightened())
       );
-      expect(message).toContain('it was not accepted');
+      expect(message).toContain('no entry this branch added to acceptedBreakingChanges lists it');
       expect(message).toContain(TIGHTENED_TEXT);
     });
 
@@ -603,7 +603,7 @@ describe('Worker settings contract', () => {
           snapshot(tightened(), [earlier]),
           contractOf(tightened())
         )
-      ).toContain('it was not accepted');
+      ).toContain('no entry this branch added to acceptedBreakingChanges lists it');
       expect(
         describeBaseBranchFailure(
           snapshot(baseContract(), [earlier]),
@@ -611,6 +611,33 @@ describe('Worker settings contract', () => {
           contractOf(tightened())
         )
       ).toBeUndefined();
+    });
+
+    it('stays red when a new entry does not list the breaking change', () => {
+      const unlisted = { issue: 'https://github.com/elastic/security-team/issues/9', changes: [] };
+      const message = describeBaseBranchFailure(
+        snapshot(baseContract()),
+        snapshot(tightened(), [unlisted]),
+        contractOf(tightened())
+      );
+      expect(message).toContain('no entry this branch added to acceptedBreakingChanges lists it');
+      expect(message).toContain(TIGHTENED_TEXT);
+    });
+
+    it('stays red for the breaking lines a new entry leaves out', () => {
+      const both = contractFor(
+        { analysisWindowDays: z.number().int().min(3).max(20) },
+        { analysisWindowDays: 7 }
+      );
+      const message = describeBaseBranchFailure(
+        snapshot(baseContract()),
+        snapshot(both, [accepted(1)]),
+        contractOf(both)
+      );
+      expect(message).toContain(
+        'tightened rule-tuning.extras.analysisWindowDays maximum from 30 to 20'
+      );
+      expect(message).not.toContain(TIGHTENED_TEXT);
     });
 
     it('fails when entries from the base branch were dropped or changed', () => {
@@ -674,6 +701,53 @@ describe('Worker settings contract', () => {
           acceptedIssue: ISSUE,
         })
       ).toEqual(snapshot(tightened(), [{ issue: ISSUE, changes: [TIGHTENED_TEXT] }]));
+    });
+
+    it('records lines against the base branch, so a second tightening is listed as one change from it', () => {
+      const tightenedTo = (minimum: number) =>
+        contractFor(
+          { analysisWindowDays: z.number().int().min(minimum).max(30) },
+          { analysisWindowDays: 7 }
+        );
+      const base = snapshot(baseContract());
+      const first = nextSettingsContractSnapshot({
+        committed: base,
+        current: contractOf(tightenedTo(3)),
+        base,
+        acceptedIssue: ISSUE,
+      });
+      expect(() =>
+        nextSettingsContractSnapshot({
+          committed: first,
+          current: contractOf(tightenedTo(5)),
+          base,
+        })
+      ).toThrow(/Refusing to update the snapshot/);
+      const second = nextSettingsContractSnapshot({
+        committed: first,
+        current: contractOf(tightenedTo(5)),
+        base,
+        acceptedIssue: 'https://github.com/elastic/security-team/issues/6',
+      });
+      expect(second.acceptedBreakingChanges.map(({ changes }) => changes)).toEqual([
+        [TIGHTENED_TEXT],
+        ['tightened rule-tuning.extras.analysisWindowDays minimum from 1 to 5'],
+      ]);
+      expect(describeBaseBranchFailure(base, second, contractOf(tightenedTo(5)))).toBeUndefined();
+    });
+
+    it('writes without acceptance when a change on this branch is undone back to the base', () => {
+      const loosened = contractFor(
+        { analysisWindowDays: z.number().int().min(0).max(30) },
+        { analysisWindowDays: 7 }
+      );
+      expect(
+        nextSettingsContractSnapshot({
+          committed: snapshot(loosened),
+          current: contractOf(baseContract()),
+          base: snapshot(baseContract()),
+        })
+      ).toEqual(snapshot(baseContract()));
     });
 
     it('does not ask for acceptance again once this branch accepted the break', () => {

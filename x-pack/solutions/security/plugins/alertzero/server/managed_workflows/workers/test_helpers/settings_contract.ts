@@ -821,20 +821,29 @@ const keepsBaseEntries = (
     base.acceptedBreakingChanges
   );
 
-/** Breaking changes against the base branch that this branch has not accepted yet. */
+/**
+ * Breaking changes against the base branch that no entry this branch added lists. An entry covers a
+ * change only by naming it, so an empty or partial entry does not hide a break.
+ */
 const unacceptedAtBase = (
   base: SettingsContractSnapshot,
   committed: SettingsContractSnapshot,
   current: SettingsContract
-): ContractChange[] =>
-  committed.acceptedBreakingChanges.length > base.acceptedBreakingChanges.length
-    ? []
-    : breakingChanges(diffSettingsContracts(base, current));
+): ContractChange[] => {
+  const accepted = new Set(
+    committed.acceptedBreakingChanges
+      .slice(base.acceptedBreakingChanges.length)
+      .flatMap((entry) => entry.changes)
+  );
+  return breakingChanges(diffSettingsContracts(base, current)).filter(
+    (change) => !accepted.has(change.text)
+  );
+};
 
 /**
- * Against the base branch: accepted entries stay append-only, and a breaking diff comes with a
- * newly accepted breaking change. Regenerating the snapshot without the flag does not add one, so
- * the reflexive fix stays red.
+ * Against the base branch: accepted entries stay append-only, and every breaking change is listed in
+ * an entry this branch added. Regenerating the snapshot without accepting does not add one, so the
+ * reflexive fix stays red.
  */
 export const describeBaseBranchFailure = (
   base: SettingsContractSnapshot,
@@ -849,7 +858,7 @@ export const describeBaseBranchFailure = (
     return undefined;
   }
   return [
-    'This change breaks Worker settings stored by the base branch, and it was not accepted.',
+    'This change breaks Worker settings stored by the base branch, and no entry this branch added to acceptedBreakingChanges lists it.',
     ...breaking.map((change) => `- ${change.text}`),
     '',
     `It needs ${BREAKING_CHANGE_REMEDIES}.`,
@@ -873,9 +882,9 @@ export const parseAcceptedIssue = (value: string | undefined): string | undefine
 };
 
 /**
- * The snapshot the compatibility test writes in update mode. A breaking change against the committed snapshot is refused
- * without an accepted issue. The base snapshot matters only while this branch has accepted nothing,
- * so a branch whose committed snapshot already matches the code can still accept a break of main.
+ * The snapshot the compatibility test writes in update mode. Breaking changes are computed against
+ * the base branch when it is available, so the recorded lines are the ones the base-branch check
+ * requires; otherwise against the committed snapshot. They are refused without an accepted issue.
  */
 export const nextSettingsContractSnapshot = ({
   committed,
@@ -888,7 +897,10 @@ export const nextSettingsContractSnapshot = ({
   base?: SettingsContractSnapshot;
   acceptedIssue?: string;
 }): SettingsContractSnapshot => {
-  const breaking = breakingChanges(diffSettingsContracts(committed, current));
+  const breaking =
+    base === undefined
+      ? breakingChanges(diffSettingsContracts(committed, current))
+      : unacceptedAtBase(base, committed, current);
   if (breaking.length > 0 && acceptedIssue === undefined) {
     throw new Error(
       [
@@ -900,11 +912,7 @@ export const nextSettingsContractSnapshot = ({
       ].join('\n')
     );
   }
-  const accepted =
-    breaking.length > 0 || base === undefined
-      ? breaking
-      : unacceptedAtBase(base, committed, current);
-  if (acceptedIssue !== undefined && accepted.length === 0) {
+  if (acceptedIssue !== undefined && breaking.length === 0) {
     throw new Error(
       `${ACCEPT_BREAKING_CHANGE_ENV} was set, but nothing in this change breaks stored Worker settings.`
     );
@@ -914,7 +922,7 @@ export const nextSettingsContractSnapshot = ({
       ...committed.acceptedBreakingChanges,
       ...(acceptedIssue === undefined
         ? []
-        : [{ issue: acceptedIssue, changes: accepted.map((change) => change.text) }]),
+        : [{ issue: acceptedIssue, changes: breaking.map((change) => change.text) }]),
     ],
     shared: current.shared,
     workers: current.workers,

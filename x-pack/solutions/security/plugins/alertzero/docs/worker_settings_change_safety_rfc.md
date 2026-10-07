@@ -353,7 +353,10 @@ that hold old documents, which is only possible while AlertZero has no customers
 5. After merge, the affected environments are reset.
 
 The list is append-only: the base-branch check fails when an entry the base branch has is dropped
-or edited. If the committed snapshot already matches the code (after a merge conflict, say) but
+or edited. Every breaking change against the base branch must be named in an entry this branch
+added, so a hand-written `{ "issue": "…", "changes": [] }` does not hide a break. Update mode records
+the lines against the base branch for that reason: tightening a bound from 1 to 3 and later to 5 in
+the same PR records "1 to 5", the line the check computes. If the committed snapshot already matches the code (after a merge conflict, say) but
 the base branch's does not, update mode still accepts the issue and records the break against
 the base branch.
 
@@ -365,7 +368,7 @@ and a migration step for it. Until then, a breaking change with customers stays 
 
 Update mode refuses to write a breaking change. A developer could still delete the snapshot and
 regenerate it. A second test closes that: it compares the current schemas with the snapshot as it is
-on the base branch, and requires a new `acceptedBreakingChanges` entry for any breaking difference.
+on the base branch, and requires every breaking difference to be listed in an `acceptedBreakingChanges` entry the PR added.
 
 The test does not check out another branch. Git keeps every version of every file, and
 `git show <commit>:<path>` prints a file as it was at that commit, from the local `.git`. A PR's
