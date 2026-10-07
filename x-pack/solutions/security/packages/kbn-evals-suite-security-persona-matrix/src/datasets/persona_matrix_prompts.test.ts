@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  attachmentTools,
+  platformCoreCasesTools,
+  platformCoreTools,
+} from '@kbn/agent-builder-common';
 import { PERSONA_MATRIX_EXAMPLES } from './persona_matrix_prompts';
 import {
   PERSONA_MATRIX_TOOL_IDS,
@@ -55,17 +60,7 @@ describe('PERSONA_MATRIX_EXAMPLES prompt/annotation parity', () => {
     expect(byId(id).output.reference).toContain('virustotal_lookup');
   });
 
-  it('only annotates seeded or registered tools that the suite can actually provide', () => {
-    const seeded = new Set<string>(PERSONA_MATRIX_TOOL_IDS);
-    for (const id of ['multi-step-a', 'multi-step-b', 'multi-step-c']) {
-      const custom = (byId(id).metadata.expectedTools ?? []).filter((tool) => !tool.includes('.'));
-      for (const tool of custom) {
-        expect(seeded.has(tool)).toBe(true);
-      }
-    }
-  });
-
-  // Byte-identical snapshots of the question wording: reference/expectedTools
+  // Exact-match assertions on the question wording: reference/expectedTools
   // fixes must never alter the prompts (parity with the published matrix).
   it.each([
     [
@@ -95,52 +90,68 @@ describe('PERSONA_MATRIX_EXAMPLES prompt/annotation parity', () => {
     }
   );
 
-  it('every expectedTools entry is a seeded suite tool or a registered builtin tool id', () => {
-    const seeded = new Set<string>([...PERSONA_MATRIX_TOOL_IDS, ...PERSONA_MATRIX_PARITY_TOOL_IDS]);
-    const unregistered = PERSONA_MATRIX_EXAMPLES.flatMap((example) =>
+  // The default SEED_PROFILE is `minimal`, which seeds only PERSONA_MATRIX_TOOL_IDS, so an
+  // example may only annotate those plus registered builtins; parity-only shims would be
+  // impossible to satisfy under the default run.
+  it('every expectedTools entry is a minimal-profile seeded tool or a registered builtin tool id', () => {
+    const available = new Set<string>([...PERSONA_MATRIX_TOOL_IDS, ...BUILTIN_TOOL_IDS]);
+    const unavailable = PERSONA_MATRIX_EXAMPLES.flatMap((example) =>
       (example.metadata.expectedTools ?? [])
-        .filter((tool) => !seeded.has(tool) && !BUILTIN_TOOL_IDS.includes(tool as never))
+        .filter((tool) => !available.has(tool))
         .map((tool) => `${example.id}: ${tool}`)
     );
-    expect(unregistered).toEqual([]);
+    expect(unavailable).toEqual([]);
+  });
+
+  it('no example annotates a parity-only seeded tool', () => {
+    const parityOnly = new Set<string>(PERSONA_MATRIX_PARITY_TOOL_IDS);
+    const used = PERSONA_MATRIX_EXAMPLES.flatMap((example) =>
+      (example.metadata.expectedTools ?? [])
+        .filter((tool) => parityOnly.has(tool))
+        .map((tool) => `${example.id}: ${tool}`)
+    );
+    expect(used).toEqual([]);
+  });
+
+  describe('references only demand what the seeded environment can do', () => {
+    const ref = (id: string) => byId(id).output.reference;
+
+    // No Slack tool/connector is seeded: the reference must score the honest fallback.
+    it.each(['multi-step-a', 'multi-step-b'])('%s scores the no-Slack-tool fallback', (id) => {
+      expect(ref(id)).toMatch(/if none is exposed, states that Slack is unavailable/i);
+      expect(ref(id)).toMatch(/attempts the Slack step/i);
+      expect(ref(id)).not.toMatch(/then creates a Slack|and creates a Slack channel/i);
+    });
+
+    // Opening a case needs the case-management tool; platform.core.cases is the read-only search.
+    it('multi-step-b annotates and describes the case-management tool', () => {
+      expect(byId('multi-step-b').metadata.expectedTools).toContain(platformCoreCasesTools.manage);
+      expect(ref('multi-step-b')).toContain('via the case-management tool');
+    });
+
+    // Security Labs content is never installed: the tool tells the agent to stop, so the
+    // reference accepts stopping or a rule grounded in the attachment, never fabricated research.
+    it('detection-rule-edit-c scores the no-Security-Labs fallback', () => {
+      expect(ref('detection-rule-edit-c')).toMatch(/If no Security Labs research is/);
+      expect(ref('detection-rule-edit-c')).toMatch(/without fabricating/);
+      expect(ref('detection-rule-edit-c')).toMatch(/stops as the tool instructs/);
+      expect(ref('detection-rule-edit-c')).toMatch(/details from the attachment/);
+    });
   });
 });
 
-// Registered builtin tool ids (union of platform.core.* / platform.workflows.* /
-// platform.core.cases.* constants and the security namespaced builtins). Cross-
-// referenced against agent-builder-common tool constants and the security
-// solution / cases agent_builder tool registries.
-const BUILTIN_TOOL_IDS = [
-  'platform.core.index_explorer',
-  'platform.core.search',
-  'platform.core.list_indices',
-  'platform.core.get_index_mapping',
-  'platform.core.get_document_by_id',
-  'platform.core.generate_esql',
-  'platform.core.generate_workflow',
-  'platform.core.execute_esql',
-  'platform.core.execute_workflow',
-  'platform.core.create_visualization',
-  'platform.core.get_workflow_execution_status',
-  'platform.core.resume_workflow_execution',
-  'platform.core.list_workflow_executions',
-  'platform.core.product_documentation',
-  'platform.core.cases',
-  'platform.core.integration_knowledge',
-  'platform.core.sml_search',
-  'platform.core.sml_attach',
-  'platform.core.execute_connector_sub_action',
-  'platform.core.list_inference_endpoints',
-  'platform.core.cases.manage',
-  'platform.core.cases.get_attachments',
-  'platform.core.cases.manage_attachments',
-  'platform.core.cases.observables',
+// Registered builtin tool ids. The platform.core.*, platform.core.cases.* and attachments.*
+// ids come from agent-builder-common so they cannot drift; plugin-owned ids cannot be
+// imported here and stay hardcoded.
+const BUILTIN_TOOL_IDS: readonly string[] = [
+  ...Object.values(platformCoreTools),
+  ...Object.values(platformCoreCasesTools),
+  ...Object.values(attachmentTools),
   'platform.workflows.validate_workflow',
-  'attachments.read',
   'security.alerts',
   'security.security_labs_search',
   'security.create_detection_rule',
   'security.get_entity',
   'security.entity_risk_score',
   'security.search_entities',
-] as const;
+];
