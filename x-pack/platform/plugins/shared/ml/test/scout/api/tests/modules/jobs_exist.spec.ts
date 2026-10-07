@@ -110,16 +110,27 @@ apiTest.describe(
         const prefix = 'pf1_';
 
         // Install module into SPACE_ID (not default space)
-        await apiClient.post(`s/${SPACE_ID}/internal/ml/modules/setup/${MODULE_ID}`, {
-          headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
-          responseType: 'json',
-          body: {
-            prefix,
-            indexPatternName: DATA_VIEW.name,
-            startDatafeed: false,
-            estimateModelMemory: false,
-          },
-        });
+        const setupRes = await apiClient.post(
+          `s/${SPACE_ID}/internal/ml/modules/setup/${MODULE_ID}`,
+          {
+            headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+            responseType: 'json',
+            body: {
+              prefix,
+              indexPatternName: DATA_VIEW.name,
+              startDatafeed: false,
+              estimateModelMemory: false,
+            },
+          }
+        );
+
+        expect(setupRes).toHaveStatusCode(200);
+        const setupJobs = setupRes.body.jobs as Array<{ id: string; success: boolean }>;
+        const actualSetupJobs = setupJobs
+          .map(({ id, success }) => ({ id, success }))
+          .sort((a, b) => a.id.localeCompare(b.id));
+        const expectedSetupJobs = JOB_IDS.map((j) => ({ id: `${prefix}${j}`, success: true }));
+        expect(actualSetupJobs).toStrictEqual(expectedSetupJobs);
 
         // Query from the default space — should not see jobs installed in SPACE_ID
         const res = await apiClient.get(`internal/ml/modules/jobs_exist/${MODULE_ID}`, {
