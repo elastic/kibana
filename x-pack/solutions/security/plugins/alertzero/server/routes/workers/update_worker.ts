@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -20,6 +20,7 @@ import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
 import type { AlertTriageEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import { hasManageSecurity } from './has_manage_security';
 
 const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReason, () => string> = {
   alertAnalysisWorkflowDisabled: () =>
@@ -39,9 +40,11 @@ const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReaso
     }),
 };
 
-const UpdateWorkerRequestParams = z.object({
-  workerId: z.string().min(1).max(128),
-});
+const UpdateWorkerRequestParams = lazySchema(() =>
+  z.object({
+    workerId: z.string().min(1).max(128),
+  })
+);
 
 const hasManagedWorkflowUpdatePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.updateManaged.every(
@@ -76,8 +79,19 @@ export const registerUpdateWorkerRoute = ({
           },
         },
       },
-      withAlertZeroEnabled(async (_context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
+          if (!(await hasManageSecurity(context))) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.alertzero.workerModifyForbiddenErrorMessage', {
+                  defaultMessage:
+                    'Modifying a worker requires the manage_security cluster privilege',
+                }),
+              },
+            });
+          }
+
           if (request.body.enabled !== undefined && !hasManagedWorkflowUpdatePrivilege(request)) {
             return response.forbidden({
               body: {

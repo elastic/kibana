@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/nightshift-shared'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/nightshift-context-and-research-team'
+  defaultOwner: '@elastic/nightshift'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/nightshift-shared'
   description: Moon project for @kbn/nightshift-shared
   channel: ''
-  owner: '@elastic/nightshift-context-and-research-team'
+  owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/packages/kbn-nightshift-shared
 dependsOn:
   - '@kbn/std'

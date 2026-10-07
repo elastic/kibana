@@ -29,7 +29,6 @@ exports[`AnnotationsTable Minimal initialization without props. 1`] = `
   class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
   data-size="m"
   role="alert"
-  style="--euiCallOutTypeColor: #0B64DD;"
 >
   <div
     class="css-1slkmya-wrapper"

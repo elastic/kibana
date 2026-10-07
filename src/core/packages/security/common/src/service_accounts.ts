@@ -14,7 +14,10 @@
  */
 export interface CreateServiceAccountParams {
   name: string;
-  /** Optional description, supported by Elasticsearch service accounts. */
+  /**
+   * Free text of up to 1,000 characters that describes the account. Kibana trims leading and
+   * trailing whitespace, and treats a blank description as no description.
+   */
   description?: string;
   /**
    * Role names that bound the new account's privileges. Required and non-empty: an account is
@@ -115,7 +118,7 @@ export interface ServiceAccount {
   id: string;
   /** The name the account was created with. */
   name: string;
-  /** Optional description, supported by Elasticsearch service accounts. */
+  /** The description the account was created with. It is absent when the account has none. */
   description?: string;
   /** The role names the account was created with. See {@link CreateServiceAccountParams.roles}. */
   roles: string[];

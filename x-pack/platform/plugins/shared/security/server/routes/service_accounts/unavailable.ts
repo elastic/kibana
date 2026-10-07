@@ -7,7 +7,7 @@
 
 /**
  * The body every service accounts route answers with when the feature is not there to serve the
- * request. Shared, so the three routes cannot drift into three different messages for it.
+ * request. Shared, so the routes cannot drift into different messages for it.
  */
 export const serviceAccountsUnavailable = (reason: string) => ({
   body: { message: `Service accounts are not available: ${reason}` },

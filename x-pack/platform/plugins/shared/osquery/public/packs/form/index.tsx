@@ -6,7 +6,7 @@
  */
 
 import { filter, isEmpty, map, omit, reduce } from 'lodash';
-import type { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps, EuiStepsProps } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -15,10 +15,12 @@ import {
   EuiButton,
   EuiSpacer,
   EuiBottomBar,
-  EuiHorizontalRule,
   EuiAccordion,
+  EuiSteps,
+  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
@@ -67,6 +69,31 @@ const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiAccordion__button': {
     color: euiTheme.colors.primary,
   },
+});
+
+// Tighter step padding, following Fleet's single-page package policy layout.
+const packFormStepsCss = ({ euiTheme }: UseEuiTheme) => ({
+  '.euiStep__content': {
+    paddingBlockStart: euiTheme.size.xs,
+    paddingBlockEnd: euiTheme.size.m,
+  },
+});
+
+const DEFINITION_STEP_TITLE = i18n.translate('xpack.osquery.pack.form.definitionStepTitle', {
+  defaultMessage: 'Definition',
+});
+const SCHEDULE_STEP_TITLE = i18n.translate('xpack.osquery.pack.form.scheduleStepTitle', {
+  defaultMessage: 'Schedule',
+});
+const QUERIES_STEP_TITLE = i18n.translate('xpack.osquery.pack.form.queriesStepTitle', {
+  defaultMessage: 'Queries',
+});
+const POLICY_ASSIGNMENT_STEP_TITLE = i18n.translate(
+  'xpack.osquery.pack.form.policyAssignmentStepTitle',
+  { defaultMessage: 'Policy assignment' }
+);
+const SHARDS_ACCORDION_LABEL = i18n.translate('xpack.osquery.pack.form.shardsAccordionLabel', {
+  defaultMessage: 'Partial deployments (shards)',
 });
 
 interface PackFormProps {
@@ -537,109 +564,164 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     return options.filter(({ key }) => !currentValues.includes(key));
   }, [shards, policyIds, options]);
 
-  return (
-    <>
-      <FormProvider {...hooksForm}>
-        {showMigrationAdvisory && defaultValue?.saved_object_id && (
-          <PackMigrationAdvisory packId={defaultValue.saved_object_id} />
-        )}
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <NameField euiFieldProps={euiFieldProps} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-
-        {/* Pack-level OS default sits between Name and Description, per the
-            Definition mock. It is a default that fans out onto queries which
-            do not set their own platform — not a pack-level gate. */}
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <PackPlatformField euiFieldProps={euiFieldProps} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <DescriptionField euiFieldProps={euiFieldProps} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup alignItems="flexStart">
-          <EuiFlexItem>
-            <PackVersionField euiFieldProps={euiFieldProps} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <PackResultTypeField euiFieldProps={euiFieldProps} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup>
-          <PackTypeSelectable
-            packType={packType}
-            setPackType={changePackType}
-            isDisabled={isReadOnly}
-          />
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-
-        {packType === 'policy' && (
+  // Steps are presentational only: none carries a `status`, so no step gates
+  // another and an existing pack stays editable from any step. With the
+  // rruleScheduling flag off the Schedule step is omitted, not rendered empty.
+  const steps = useMemo<EuiStepsProps['steps']>(
+    () => [
+      {
+        title: DEFINITION_STEP_TITLE,
+        'data-test-subj': 'osqueryPackFormStep-definition',
+        children: (
           <>
-            <EuiFlexGroup>
-              <EuiFlexItem css={overflowCss}>
-                {/* Scheduled agent policies / shards / Type stay editable for prebuilt
-                    packs (a writePacks user may re-target them) — only a fully read-only
-                    user is blocked. Matches the prebuiltPackModeDescription callout. */}
-                <PolicyAssignmentList isReadOnly={isReadOnly} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-
-            <EuiFlexGroup>
-              <EuiFlexItem css={overflowCss}>
-                <EuiAccordion
-                  css={euiAccordionCss}
-                  id="shardsToggle"
-                  forceState={shardsToggleState}
-                  onToggle={handleToggle}
-                  buttonContent="Partial deployment (shards)"
-                >
-                  <EuiSpacer size="xs" />
-                  <PackShardsField options={availableOptions} isDisabled={isReadOnly} />
-                </EuiAccordion>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-          </>
-        )}
-
-        {isRruleSchedulingEnabled && schedule ? (
-          <>
+            {showMigrationAdvisory && defaultValue?.saved_object_id && (
+              <PackMigrationAdvisory packId={defaultValue.saved_object_id} />
+            )}
             <EuiFlexGroup>
               <EuiFlexItem>
+                <NameField euiFieldProps={euiFieldProps} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+
+            {/* Pack-level OS default sits between Name and Description, per the
+                Definition mock. It is a default that fans out onto queries which
+                do not set their own platform — not a pack-level gate. */}
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <PackPlatformField euiFieldProps={euiFieldProps} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <DescriptionField euiFieldProps={euiFieldProps} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup alignItems="flexStart">
+              <EuiFlexItem>
+                <PackVersionField euiFieldProps={euiFieldProps} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <PackResultTypeField euiFieldProps={euiFieldProps} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        ),
+      },
+      ...(isRruleSchedulingEnabled && schedule
+        ? [
+            {
+              title: SCHEDULE_STEP_TITLE,
+              'data-test-subj': 'osqueryPackFormStep-schedule',
+              children: (
+                // `title={null}`: the step owns the heading. ScheduleSection
+                // defaults its title to "Schedule", which would render twice.
                 <ScheduleSection
+                  title={null}
                   value={schedule}
                   onChange={handleScheduleChange}
                   disabled={isContentDisabled}
                   showErrors={showScheduleErrors || scheduleErrors.length > 0}
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              ),
+            },
+          ]
+        : []),
+      {
+        title: QUERIES_STEP_TITLE,
+        'data-test-subj': 'osqueryPackFormStep-queries',
+        children: (
+          <>
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.osquery.pack.form.queriesStepDescription"
+                  defaultMessage="These queries inherit the pack's settings, but you can customize the defaults by editing them individually."
+                />
+              </p>
+            </EuiText>
             <EuiSpacer size="m" />
+            <QueriesField
+              euiFieldProps={euiFieldProps}
+              packHasExplicitSchedule={packHasExplicitSchedule}
+            />
           </>
-        ) : null}
+        ),
+      },
+      {
+        title: POLICY_ASSIGNMENT_STEP_TITLE,
+        'data-test-subj': 'osqueryPackFormStep-policyAssignment',
+        children: (
+          <>
+            <EuiFlexGroup>
+              <PackTypeSelectable
+                packType={packType}
+                setPackType={changePackType}
+                isDisabled={isReadOnly}
+              />
+            </EuiFlexGroup>
 
-        <EuiSpacer size="xl" />
+            {packType === 'policy' && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup>
+                  <EuiFlexItem css={overflowCss}>
+                    {/* Scheduled agent policies / shards / Type stay editable for prebuilt
+                        packs (a writePacks user may re-target them) — only a fully read-only
+                        user is blocked. Matches the prebuiltPackModeDescription callout. */}
+                    <PolicyAssignmentList isReadOnly={isReadOnly} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
 
-        <EuiHorizontalRule />
+                <EuiFlexGroup>
+                  <EuiFlexItem css={overflowCss}>
+                    <EuiAccordion
+                      css={euiAccordionCss}
+                      id="shardsToggle"
+                      forceState={shardsToggleState}
+                      onToggle={handleToggle}
+                      buttonContent={SHARDS_ACCORDION_LABEL}
+                    >
+                      <EuiSpacer size="xs" />
+                      <PackShardsField options={availableOptions} isDisabled={isReadOnly} />
+                    </EuiAccordion>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
+          </>
+        ),
+      },
+    ],
+    [
+      availableOptions,
+      changePackType,
+      defaultValue?.saved_object_id,
+      euiFieldProps,
+      handleScheduleChange,
+      handleToggle,
+      isContentDisabled,
+      isReadOnly,
+      isRruleSchedulingEnabled,
+      packHasExplicitSchedule,
+      packType,
+      schedule,
+      scheduleErrors.length,
+      shardsToggleState,
+      showMigrationAdvisory,
+      showScheduleErrors,
+    ]
+  );
 
-        <QueriesField
-          euiFieldProps={euiFieldProps}
-          packHasExplicitSchedule={packHasExplicitSchedule}
-        />
+  return (
+    <>
+      <FormProvider {...hooksForm}>
+        <EuiSteps css={packFormStepsCss} steps={steps} headingElement="h2" titleSize="xs" />
       </FormProvider>
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
@@ -677,8 +759,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.osquery.pack.form.savePackButtonLabel"
-                      defaultMessage="Save pack"
+                      id="xpack.osquery.pack.form.createPackButtonLabel"
+                      defaultMessage="Create pack"
                     />
                   )}
                 </EuiButton>

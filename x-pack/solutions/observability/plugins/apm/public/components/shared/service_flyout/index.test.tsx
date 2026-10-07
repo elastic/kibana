@@ -14,7 +14,7 @@ jest.mock('../../../plugin', () => ({
   getApmInternalServices: () => ({ callApmApi: jest.fn() }),
 }));
 
-jest.mock('./hooks/use_apm_indices', () => ({
+jest.mock('../../../hooks/use_apm_indices', () => ({
   useApmIndices: () => ({ indices: undefined, loading: false }),
 }));
 

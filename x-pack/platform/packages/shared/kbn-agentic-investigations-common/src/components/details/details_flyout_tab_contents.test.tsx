@@ -18,8 +18,7 @@ const investigation = {
   title: 'Impossible travel',
   createdAt: '2026-09-01T10:00:00.000Z',
   updatedAt: '2026-09-01T10:00:00.000Z',
-  watch_id: '',
-  watch_execution_id: '',
+  worker_execution_ids: [],
   pendingProposalCount: 0,
   assignees: [],
   summary: 'A second sign-in replayed the same session cookie.',
@@ -47,19 +46,44 @@ const attachmentsService = {
 const renderTab = ({
   attachments,
   investigationOverrides,
+  proposedActionsContent,
+  proposedActionsCount,
 }: {
   attachments?: VersionedAttachment[];
   investigationOverrides?: Partial<Investigation>;
+  proposedActionsContent?: React.ReactNode;
+  proposedActionsCount?: React.ReactNode;
 } = {}) =>
   render(
     <OverviewTab
       investigation={{ ...investigation, ...investigationOverrides }}
       attachments={attachments}
       attachmentsService={attachmentsService}
+      proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
     />
   );
 
 describe('OverviewTab', () => {
+  it('shows the host-supplied count of proposals beside the "Proposed actions" heading', () => {
+    renderTab({
+      proposedActionsContent: <div>Rows</div>,
+      proposedActionsCount: <span data-test-subj="count">3</span>,
+    });
+
+    const heading = screen.getByRole('heading', { name: 'Proposed actions' });
+    expect(heading.closest('[class*="euiFlexGroup"]')).toContainElement(
+      screen.getByTestId('count')
+    );
+  });
+
+  it('renders the heading without a count when the host supplies none', () => {
+    renderTab({ proposedActionsContent: <div>Rows</div> });
+
+    expect(screen.getByRole('heading', { name: 'Proposed actions' })).toBeInTheDocument();
+    expect(screen.queryByTestId('count')).not.toBeInTheDocument();
+  });
+
   it('no longer renders the Impact table', () => {
     renderTab({ attachments: [attachment] });
 
