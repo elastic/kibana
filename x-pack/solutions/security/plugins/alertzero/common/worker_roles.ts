@@ -105,8 +105,9 @@ const buildRole = (
 
 /**
  * The prebuilt role and service account for each worker, covering the worker, its child workflows
- * and its approved actions in every space. Mirrors "AlertZero prebuilt service accounts — Minimum
- * privileges", including its conditional rows.
+ * and the actions it can auto-approve, in every space. Actions that always need a human
+ * (`approvalPolicy: always-gate`) run as the approver, so their privileges are left out. Mirrors
+ * "AlertZero prebuilt service accounts — Minimum privileges", including its conditional rows.
  */
 export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefinition>> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: {
@@ -184,7 +185,8 @@ export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefiniti
       'Rule Tuning',
       {
         workflowsManagement: ['read'],
-        securitySolutionRulesV4: ['all'],
+        // Editing a rule and adding an exception are approver-run actions.
+        securitySolutionRulesV4: ['read'],
         securitySolutionAlertsV1: ['all'],
       },
       [
@@ -204,8 +206,9 @@ export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefiniti
       'Rule Coverage',
       {
         workflowsManagement: ['read'],
+        // The rule-drafting tool checks rule-edit as the worker. Installing and enabling rules are
+        // approver-run actions, so the endpoint exceptions grant they need is left out.
         securitySolutionRulesV4: ['all'],
-        siemV5: ['minimal_read', 'endpoint_exceptions_all'],
         fleet: ['read'],
       },
       [

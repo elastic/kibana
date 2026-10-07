@@ -69,6 +69,15 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
     });
   });
 
+  it('leaves out privileges only needed by approver-run rule actions', () => {
+    const tuning = WORKER_ROLE_DEFINITIONS[SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID];
+    const coverage = WORKER_ROLE_DEFINITIONS[SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID];
+
+    expect(tuning.role.kibana[0].feature.securitySolutionRulesV4).toEqual(['read']);
+    expect(coverage.role.kibana[0].feature.securitySolutionRulesV4).toEqual(['all']);
+    expect(coverage.role.kibana[0].feature).not.toHaveProperty('siemV5');
+  });
+
   it('encodes the role name in the role URL', () => {
     expect(buildSecurityRoleUrl('a/b')).toBe('/api/security/role/a%2Fb');
   });
