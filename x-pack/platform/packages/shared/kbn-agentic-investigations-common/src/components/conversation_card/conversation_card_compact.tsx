@@ -93,10 +93,12 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
         }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false} css={{ inlineSize: AGE_COLUMN_WIDTH }}>
+          <EuiFlexItem grow={false} css={{ inlineSize: AGE_COLUMN_WIDTH, flexShrink: 0 }}>
             <ConversationMetaInfo createdAt={investigation.createdAt} />
           </EuiFlexItem>
-          <EuiFlexItem grow={true}>
+          {/* `minInlineSize: 0` lets the item shrink below its text, so the title
+              truncates instead of squeezing the age and outcome onto two lines. */}
+          <EuiFlexItem grow={true} css={{ minInlineSize: 0 }}>
             {/* Truncate together, so the outcome and controls keep their place. */}
             <EuiText
               size="s"
@@ -115,7 +117,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
           </EuiFlexItem>
           {outcome ? (
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
+              <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
                 {outcome}
               </EuiText>
             </EuiFlexItem>
