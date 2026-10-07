@@ -50,7 +50,7 @@ test.describe(
 
       await test.step('open the seeded episode flyout from the inbox', async () => {
         await alerting.gotoInboxFilteredByRule(ruleId);
-        await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+        await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
         await expect(alerting.expandRowButton).toHaveCount(1);
         await alerting.openEpisodeFlyout();
       });
@@ -78,7 +78,7 @@ test.describe(
 
       await test.step('open the seeded episode flyout from the inbox', async () => {
         await alerting.gotoInboxFilteredByRule(ruleId);
-        await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+        await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
         await expect(alerting.expandRowButton).toHaveCount(1);
         await alerting.openEpisodeFlyout();
       });

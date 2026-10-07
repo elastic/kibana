@@ -34,10 +34,10 @@ import {
 
 /**
  * FF-OFF byte-clean coverage for persistable-state attachments, exercised through the
- * migrated `lens` type (`persistableStateAttachment` posts `persistableStateAttachmentTypeId: '.lens'`).
+ * mapped `lens` type (`persistableStateAttachment` posts `persistableStateAttachmentTypeId: '.lens'`).
  * The legacy wire shape is routed to the unified lens validator and stored byte-clean, so the
  * legacy round-trip must stay lossless. Ports the coverage of the former `.test`-based
- * `persistable_state.ts` onto a real migrated type.
+ * `persistable_state.ts` onto a real mapped type.
  */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
