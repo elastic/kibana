@@ -150,7 +150,6 @@ const GROUP_BY_OPTIONS = [
   },
 ] as const;
 
-
 const GROUP_BY_SELECTOR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.groupBySelector.title',
   { defaultMessage: 'Group by' }
@@ -827,8 +826,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [dataView, isDataViewLoading]
   );
 
-  if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling)
-    return <PageLoader />;
+  if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling) return <PageLoader />;
   if (isDataViewError) return <DataViewErrorComponent />;
   if (entityStoreDisabled) return <EntityStoreDisabledEmptyPrompt />;
 
