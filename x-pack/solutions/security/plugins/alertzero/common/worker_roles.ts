@@ -58,6 +58,16 @@ const PREVIEW_ALERTS = [
   '.preview.alerts-security.alerts-*',
   '.internal.preview.alerts-security.alerts-*',
 ];
+/**
+ * Backing indices of the alert aliases above. Update-by-query writes to the concrete backing
+ * indices, so writes need these patterns too; the alias patterns only cover reads.
+ */
+const SECURITY_ALERTS_BACKING = ['.internal.alerts-security.alerts-*'];
+const ATTACK_DISCOVERY_ALERTS_BACKING = [
+  '.internal.alerts-security.attack.discovery.alerts-*',
+  '.internal.adhoc.alerts-security.attack.discovery.alerts-*',
+];
+const WRITE_BY_QUERY = ['index', 'maintenance'];
 
 const COMMON_FEATURES: Record<string, string[]> = {
   [ALERTZERO_FEATURE_ID]: ['all'],
@@ -108,7 +118,10 @@ export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefiniti
         securitySolutionNotes: ['all'],
         securitySolutionAlertsV1: ['all'],
       },
-      [{ names: SECURITY_ALERTS, privileges: ['read', 'index', 'maintenance'] }]
+      [
+        { names: SECURITY_ALERTS, privileges: ['read', 'index', 'maintenance'] },
+        { names: SECURITY_ALERTS_BACKING, privileges: WRITE_BY_QUERY },
+      ]
     ),
   },
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: {
@@ -132,6 +145,7 @@ export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefiniti
           names: ATTACK_DISCOVERY_ALERTS,
           privileges: ['read', 'view_index_metadata', 'index', 'maintenance'],
         },
+        { names: ATTACK_DISCOVERY_ALERTS_BACKING, privileges: WRITE_BY_QUERY },
         { names: SECURITY_ALERTS, privileges: ['read', 'view_index_metadata'] },
         {
           names: ['.kibana-elastic-ai-assistant-anonymization-fields-*'],
@@ -178,6 +192,7 @@ export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefiniti
           names: SECURITY_ALERTS,
           privileges: ['read', 'index', 'maintenance', 'view_index_metadata'],
         },
+        { names: SECURITY_ALERTS_BACKING, privileges: WRITE_BY_QUERY },
         { names: PREVIEW_ALERTS, privileges: ['read'] },
         { names: SECURITY_DATA_PATTERNS, privileges: ['read', 'view_index_metadata'] },
       ]

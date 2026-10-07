@@ -52,6 +52,23 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
     }
   );
 
+  it.each([
+    [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, ['.internal.alerts-security.alerts-*']],
+    [
+      SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+      [
+        '.internal.alerts-security.attack.discovery.alerts-*',
+        '.internal.adhoc.alerts-security.attack.discovery.alerts-*',
+      ],
+    ],
+    [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID, ['.internal.alerts-security.alerts-*']],
+  ])('lets %s write to the backing indices of the alerts it updates by query', (id, names) => {
+    expect(WORKER_ROLE_DEFINITIONS[id].role.elasticsearch.indices).toContainEqual({
+      names,
+      privileges: ['index', 'maintenance'],
+    });
+  });
+
   it('encodes the role name in the role URL', () => {
     expect(buildSecurityRoleUrl('a/b')).toBe('/api/security/role/a%2Fb');
   });
