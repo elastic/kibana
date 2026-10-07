@@ -286,6 +286,46 @@ describe('threat intel wiring', () => {
       expect(installThreatIntelManagedWorkflowsForSpaces).toHaveBeenCalled();
       jest.useRealTimers();
     });
+
+    it('retries TI managed-workflow install when post-recovery install fails', async () => {
+      jest.useFakeTimers();
+      (ensureThreatIntelBootstrap as jest.Mock)
+        .mockRejectedValueOnce(new Error('elser not ready'))
+        .mockResolvedValue(undefined);
+      (installThreatIntelManagedWorkflowsForSpaces as jest.Mock)
+        .mockRejectedValueOnce(new Error('workflows unavailable'))
+        .mockResolvedValueOnce(undefined);
+      const runtime = createThreatIntelRuntime();
+      runtime.bootstrapBackgroundRetryMs = 5_000;
+
+      startThreatIntel({
+        alertZeroEnabled: true,
+        plugins: { taskManager: taskManager(), workflowsExtensions: {} } as never,
+        core: coreMock.createStart() as never,
+        logger: loggingSystemMock.createLogger(),
+        runtime,
+      });
+
+      await runtime.bootstrapReady.catch(() => undefined);
+      await Promise.resolve();
+
+      await jest.advanceTimersByTimeAsync(5_000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      await expect(runtime.bootstrapReady).resolves.toBeUndefined();
+      expect(schedulePromoteThreatIndicatorsTask).toHaveBeenCalledTimes(1);
+      expect(installThreatIntelManagedWorkflowsForSpaces).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(5_000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(installThreatIntelManagedWorkflowsForSpaces).toHaveBeenCalledTimes(2);
+      // Bootstrap already recovered; do not re-run ensure on the install-only retry.
+      expect(ensureThreatIntelBootstrap).toHaveBeenCalledTimes(2);
+      jest.useRealTimers();
+    });
   });
 
   // ALL_REGISTRATIONS is hand-written, so it drifts the moment wiring.ts gains a

@@ -280,20 +280,28 @@ export const startThreatIntel = ({
         'Threat intel tasks were not scheduled because bootstrap did not complete; retrying bootstrap in the background'
       );
       void (async () => {
+        let bootstrapRecovered = false;
         for (;;) {
           await sleep(retryDelayMs);
           try {
-            await ensureThreatIntelBootstrap({ esClient, logger: tiLogger });
-            runtime.bootstrapReady = Promise.resolve();
-            tiLogger.info(
-              'Threat intel bootstrap recovered after a late retry; installing managed workflows and scheduling tasks'
-            );
-            await scheduleThreatIntelTasks();
+            if (!bootstrapRecovered) {
+              await ensureThreatIntelBootstrap({ esClient, logger: tiLogger });
+              runtime.bootstrapReady = Promise.resolve();
+              bootstrapRecovered = true;
+              tiLogger.info(
+                'Threat intel bootstrap recovered after a late retry; installing managed workflows and scheduling tasks'
+              );
+              await scheduleThreatIntelTasks();
+            }
             await installThreatIntelWorkflowsAfterRecovery();
             return;
           } catch (err) {
             tiLogger.warn(
-              `Threat intel background bootstrap retry failed: ${(err as Error).message}`
+              bootstrapRecovered
+                ? `Threat intel managed-workflow install after recovery failed; will retry: ${
+                    (err as Error).message
+                  }`
+                : `Threat intel background bootstrap retry failed: ${(err as Error).message}`
             );
           }
         }

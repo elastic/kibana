@@ -146,6 +146,9 @@ export const installThreatIntelManagedWorkflowsForSpaces = async ({
         error,
       }
     );
+    // Rethrow so the background recovery loop can retry. Swallowing here left TI
+    // workflows missing until restart after a transient install failure.
+    throw error;
   }
 };
 

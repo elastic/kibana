@@ -196,6 +196,21 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     });
   });
 
+  it('installThreatIntelManagedWorkflowsForSpaces rethrows after logging so recovery can retry', async () => {
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockRejectedValue(new Error('no client'));
+    const logger = loggerMock.create();
+
+    await expect(
+      installThreatIntelManagedWorkflowsForSpaces({
+        workflowsExtensions,
+        logger,
+        core: coreMock.createStart(),
+      })
+    ).rejects.toThrow('no client');
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
   it('installs alert analysis in the global space via the shared client', async () => {
     const managed = createManagedClient();
     const workflowsExtensions = workflowsExtensionsMock.createStart();
