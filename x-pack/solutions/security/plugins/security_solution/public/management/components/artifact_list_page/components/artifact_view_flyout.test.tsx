@@ -26,7 +26,11 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
 import type { MenuItemPropsByPolicyId } from '../../artifact_entry_card';
 import type { ArtifactViewModeComponentProps } from '../types';
-import { ArtifactViewFlyout, type ArtifactViewFlyoutProps } from './artifact_view_flyout';
+import {
+  ArtifactViewFlyout,
+  type ArtifactViewFlyoutProps,
+  type ArtifactViewFlyoutTakeAction,
+} from './artifact_view_flyout';
 import {
   DISABLED_ARTIFACT_TAG,
   GLOBAL_ARTIFACT_TAG,
@@ -50,17 +54,20 @@ const useWithArtifactEnableDisableMock = _useWithArtifactEnableDisable as jest.M
 const useArtifactAssignedPoliciesMock = _useArtifactAssignedPolicies as jest.Mock;
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-type ArtifactViewFlyoutRenderProps =
+type ArtifactViewFlyoutRenderProps = {
+  labels?: ArtifactViewFlyoutProps['labels'];
+  allowCardEditAction?: boolean;
+  allowCardDeleteAction?: boolean;
+  onTakeAction?: ArtifactViewFlyoutTakeAction;
+} & (
   | {
-      labels?: ArtifactViewFlyoutProps['labels'];
       showEnabledColumn?: false;
     }
   | {
-      labels?: ArtifactViewFlyoutProps['labels'];
       showEnabledColumn: true;
-      allowCardEditAction: boolean;
       onEnabledChangeRefresh: () => Promise<void>;
-    };
+    }
+);
 
 describe('ArtifactViewFlyout', () => {
   const generator = new ExceptionsListItemGenerator('seed');
@@ -117,6 +124,10 @@ describe('ArtifactViewFlyout', () => {
         ViewModeComponent,
         'data-test-subj': 'viewFlyout',
         ...(props.labels ? { labels: props.labels } : {}),
+        ...(props.allowCardDeleteAction !== undefined
+          ? { allowCardDeleteAction: props.allowCardDeleteAction }
+          : {}),
+        ...(props.onTakeAction ? { onTakeAction: props.onTakeAction } : {}),
       };
 
       renderResult = mockedContext.render(
@@ -124,11 +135,16 @@ describe('ArtifactViewFlyout', () => {
           <ArtifactViewFlyout
             {...sharedProps}
             showEnabledColumn
-            allowCardEditAction={props.allowCardEditAction}
+            allowCardEditAction={props.allowCardEditAction ?? true}
             onEnabledChangeRefresh={props.onEnabledChangeRefresh}
           />
         ) : (
-          <ArtifactViewFlyout {...sharedProps} />
+          <ArtifactViewFlyout
+            {...sharedProps}
+            {...(props.allowCardEditAction !== undefined
+              ? { allowCardEditAction: props.allowCardEditAction }
+              : {})}
+          />
         )
       );
       return renderResult;
@@ -344,6 +360,44 @@ describe('ArtifactViewFlyout', () => {
     expect(
       renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-unknown')
     ).toHaveTextContent('policy-unknown');
+  });
+
+  it('opens edit and delete from the take action menu', () => {
+    const onTakeAction = jest.fn();
+    render({ labels: artifactListPageLabels, onTakeAction });
+
+    fireEvent.click(renderResult.getByTestId('viewFlyout-takeActionButton'));
+
+    expect(renderResult.getByTestId('viewFlyout-cardEditAction')).toHaveTextContent(
+      'Edit artifact'
+    );
+    expect(renderResult.getByTestId('viewFlyout-cardDeleteAction')).toHaveTextContent(
+      'Delete artifact'
+    );
+
+    fireEvent.click(renderResult.getByTestId('viewFlyout-cardEditAction'));
+    expect(onTakeAction).toHaveBeenCalledWith({ type: 'edit', item });
+
+    fireEvent.click(renderResult.getByTestId('viewFlyout-takeActionButton'));
+    fireEvent.click(renderResult.getByTestId('viewFlyout-cardDeleteAction'));
+    expect(onTakeAction).toHaveBeenCalledWith({ type: 'delete', item });
+  });
+
+  it('hides take action when edit and delete are not allowed', () => {
+    render({ allowCardEditAction: false, allowCardDeleteAction: false });
+
+    expect(renderResult.queryByTestId('viewFlyout-takeActionButton')).not.toBeInTheDocument();
+  });
+
+  it('disables take action when artifact actions are disabled', () => {
+    useArtifactActionsDisabledMock.mockReturnValue({
+      isDisabled: true,
+      disabledTooltip: 'Not allowed',
+    });
+
+    render({ labels: artifactListPageLabels });
+
+    expect(renderResult.getByTestId('viewFlyout-takeActionButton')).toBeDisabled();
   });
 
   it('shows a dash when the artifact has no description', () => {

@@ -330,9 +330,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {
       if (isMounted()) {
         setSelectedItemForDelete(undefined);
+        if (isViewFlyoutOpened) {
+          setUrlParams({ show: undefined, itemId: undefined });
+        }
         refetchListData();
       }
-    }, [isMounted, refetchListData]);
+    }, [isMounted, isViewFlyoutOpened, refetchListData, setUrlParams]);
 
     const handleArtifactDeleteModalOnCancel = useCallback(() => {
       setSelectedItemForDelete(undefined);
@@ -475,6 +478,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               labels={labels}
               showEnabledColumn
               allowCardEditAction={allowCardEditAction}
+              allowCardDeleteAction={allowCardDeleteAction}
+              onTakeAction={handleOnCardActionClick}
               onEnabledChangeRefresh={handleEnabledChangeRefresh}
               onClose={handleArtifactViewFlyoutOnClose}
               ViewModeComponent={ViewModeComponent}
@@ -484,6 +489,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             <ArtifactViewFlyout
               apiClient={apiClient}
               labels={labels}
+              allowCardEditAction={allowCardEditAction}
+              allowCardDeleteAction={allowCardDeleteAction}
+              onTakeAction={handleOnCardActionClick}
               onClose={handleArtifactViewFlyoutOnClose}
               ViewModeComponent={ViewModeComponent}
               data-test-subj={getTestId('viewFlyout')}

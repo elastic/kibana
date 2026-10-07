@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAvatar,
+  EuiButton,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -25,7 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useUrlParams } from '../../../hooks/use_url_params';
-import { useGetArtifact } from '../../../hooks/artifacts';
+import { useArtifactActionsDisabled, useGetArtifact } from '../../../hooks/artifacts';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useToasts } from '../../../../common/lib/kibana';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
@@ -38,6 +44,10 @@ import {
   ArtifactEnabledSwitch,
   type ArtifactEnabledSwitchProps,
 } from './artifact_enabled_switch';
+import {
+  ContextMenuItemNavByRouter,
+  type ContextMenuItemNavByRouterProps,
+} from '../../context_menu_with_router_support';
 import { ArtifactOperatingSystemBadges } from './artifact_os_badges';
 import { ArtifactViewPolicyAssignment } from './artifact_view_policy_assignment';
 
@@ -70,6 +80,10 @@ export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
     'xpack.securitySolution.artifactListPage.viewFlyoutPolicyAssignmentNoneLabel',
     { defaultMessage: 'Applied to 0 policies.' }
   ),
+  viewFlyoutTakeActionButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.viewFlyoutTakeActionButtonLabel',
+    { defaultMessage: 'Take action' }
+  ),
   viewFlyoutEmptyDescription: i18n.translate(
     'xpack.securitySolution.artifactListPage.viewFlyoutEmptyDescription',
     { defaultMessage: '-' }
@@ -82,7 +96,16 @@ export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
 });
 
 type ArtifactViewFlyoutLabels = typeof ARTIFACT_VIEW_FLYOUT_LABELS &
-  ArtifactEnabledSwitchProps['labels'];
+  ArtifactEnabledSwitchProps['labels'] & {
+    /** Same strings as the simple table edit and delete actions. */
+    cardActionEditLabel?: string;
+    cardActionDeleteLabel?: string;
+  };
+
+export type ArtifactViewFlyoutTakeAction = (action: {
+  type: 'edit' | 'delete';
+  item: ExceptionListItemSchema;
+}) => void;
 
 interface ArtifactViewFlyoutBaseProps {
   apiClient: ExceptionsListApiClient;
@@ -90,6 +113,12 @@ interface ArtifactViewFlyoutBaseProps {
   labels?: Partial<ArtifactViewFlyoutLabels>;
   /** Renders the artifact-specific definition. Receives the full artifact item. */
   ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
+  /** When false, no edit actions can be taken. Defaults to true. */
+  allowCardEditAction: boolean;
+  /** When false, the footer omits Delete. Defaults to true. */
+  allowCardDeleteAction?: boolean;
+  /** Opens edit or delete the same way the simple table does. */
+  onTakeAction?: ArtifactViewFlyoutTakeAction;
   onClose: () => void;
   'data-test-subj'?: string;
 }
@@ -104,8 +133,6 @@ interface ArtifactViewFlyoutWithEnabledColumnProps {
    * When true, the info block leads with the same enable/disable switch as the simple table.
    */
   showEnabledColumn: true;
-  /** When false, the enabled switch is shown read-only. */
-  allowCardEditAction: boolean;
   /** Reloads the list after a successful enable/disable or a 409 conflict. */
   onEnabledChangeRefresh: () => Promise<void>;
 }
@@ -120,6 +147,8 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
     ViewModeComponent,
     showEnabledColumn = false,
     allowCardEditAction = true,
+    allowCardDeleteAction = true,
+    onTakeAction,
     onEnabledChangeRefresh,
     onClose,
     'data-test-subj': dataTestSubj,
@@ -201,6 +230,18 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
             />
           )}
         </EuiFlyoutBody>
+        {item && (allowCardEditAction || allowCardDeleteAction) && (
+          <EuiFlyoutFooter>
+            <ArtifactViewFlyoutTakeAction
+              item={item}
+              labels={labels}
+              allowCardEditAction={allowCardEditAction}
+              allowCardDeleteAction={allowCardDeleteAction}
+              onTakeAction={onTakeAction}
+              data-test-subj={dataTestSubj}
+            />
+          </EuiFlyoutFooter>
+        )}
       </EuiFlyout>
     );
   }
@@ -371,3 +412,112 @@ const ArtifactViewFlyoutBody = memo<{
   }
 );
 ArtifactViewFlyoutBody.displayName = 'ArtifactViewFlyoutBody';
+
+const ArtifactViewFlyoutTakeAction = memo<{
+  item: ExceptionListItemSchema;
+  labels: ArtifactViewFlyoutLabels;
+  allowCardEditAction: boolean;
+  allowCardDeleteAction: boolean;
+  onTakeAction?: ArtifactViewFlyoutTakeAction;
+  'data-test-subj'?: string;
+}>(
+  ({
+    item,
+    labels,
+    allowCardEditAction,
+    allowCardDeleteAction,
+    onTakeAction,
+    'data-test-subj': dataTestSubj,
+  }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const { isDisabled, disabledTooltip } = useArtifactActionsDisabled(item);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+    const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
+
+    const actionItems = useMemo<ContextMenuItemNavByRouterProps[]>(() => {
+      const items: ContextMenuItemNavByRouterProps[] = [];
+
+      if (allowCardEditAction && labels.cardActionEditLabel) {
+        items.push({
+          icon: 'controls',
+          onClick: () => onTakeAction?.({ type: 'edit', item }),
+          'data-test-subj': getTestId('cardEditAction'),
+          children: labels.cardActionEditLabel,
+        });
+      }
+
+      if (allowCardDeleteAction && labels.cardActionDeleteLabel) {
+        items.push({
+          icon: 'trash',
+          onClick: () => onTakeAction?.({ type: 'delete', item }),
+          'data-test-subj': getTestId('cardDeleteAction'),
+          children: labels.cardActionDeleteLabel,
+        });
+      }
+
+      return items;
+    }, [
+      allowCardDeleteAction,
+      allowCardEditAction,
+      getTestId,
+      item,
+      labels.cardActionDeleteLabel,
+      labels.cardActionEditLabel,
+      onTakeAction,
+    ]);
+
+    const menuItems = useMemo(
+      () =>
+        actionItems.map((action) => (
+          <ContextMenuItemNavByRouter
+            {...action}
+            key={action['data-test-subj']}
+            onClick={(event) => {
+              closePopover();
+              return action.onClick?.(event);
+            }}
+          />
+        )),
+      [actionItems, closePopover]
+    );
+
+    const button = (
+      <EuiButton
+        fill
+        iconSide="right"
+        iconType="chevronSingleDown"
+        onClick={togglePopover}
+        isDisabled={isDisabled}
+        data-test-subj={getTestId('takeActionButton')}
+      >
+        {labels.viewFlyoutTakeActionButtonLabel}
+      </EuiButton>
+    );
+
+    return (
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={
+              isDisabled && disabledTooltip ? (
+                <EuiToolTip content={disabledTooltip}>{button}</EuiToolTip>
+              ) : (
+                button
+              )
+            }
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="upRight"
+            repositionOnScroll
+            aria-label={labels.viewFlyoutTakeActionButtonLabel}
+          >
+            <EuiContextMenuPanel items={menuItems} data-test-subj={getTestId('takeActionMenu')} />
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+ArtifactViewFlyoutTakeAction.displayName = 'ArtifactViewFlyoutTakeAction';

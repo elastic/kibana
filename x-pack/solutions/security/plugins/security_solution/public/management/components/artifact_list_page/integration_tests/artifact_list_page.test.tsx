@@ -325,6 +325,34 @@ describe('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-flyout')).toBeTruthy();
       });
 
+      it('should close the view flyout when delete succeeds', async () => {
+        const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        });
+
+        await userEvent.click(getByTestId('testPage-viewFlyout-takeActionButton'));
+        await userEvent.click(getByTestId('testPage-viewFlyout-cardDeleteAction'));
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeInTheDocument();
+        });
+
+        await userEvent.click(getByTestId('testPage-deleteModal-submitButton'));
+
+        await waitFor(() => {
+          expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+          expect(queryByTestId('testPage-deleteModal')).not.toBeInTheDocument();
+        });
+        expect(history.location.search).not.toMatch(/show=view/);
+        expect(history.location.search).not.toMatch(/itemId=/);
+      });
+
       it('should display the Delete modal when table delete action is clicked', async () => {
         const { getByTestId, getAllByTestId } = await renderWithListData({
           showAsSimpleTable: true,
