@@ -43,7 +43,6 @@ async function waitForIndexToBeEmpty<T>({
       }
       return response;
     },
-    retryCount: 10,
   });
 }
 
