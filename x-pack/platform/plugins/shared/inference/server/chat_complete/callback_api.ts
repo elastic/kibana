@@ -243,20 +243,19 @@ function createChatCompletePipeline({
           usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
           requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
           saltPromise: anonymization?.saltPromise,
-          resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
           metadata,
           system,
           messages,
         })
       ).pipe(
-        switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
+        switchMap(({ anonymization: preparedAnonymization, replacementsId }) => {
           // Gate on whether anything was actually masked this turn, not on whether a system
           // prompt happens to exist — a request with no system prompt can still anonymize
           // entities in its messages, and the model still needs to be told what the
           // placeholder tokens mean.
           const baseSystem = preparedAnonymization.system ?? system;
           const systemWithAnonymizationInstructions = preparedAnonymization.anonymizations.length
-            ? addAnonymizationInstruction(baseSystem ?? '', anonymizationRules, effectivePolicy)
+            ? addAnonymizationInstruction(baseSystem ?? '', anonymizationRules)
             : baseSystem;
 
           const spanModel = getSpanModel(modelName);

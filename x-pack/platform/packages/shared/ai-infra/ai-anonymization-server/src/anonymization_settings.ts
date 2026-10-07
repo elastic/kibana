@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { NER_MODEL_ID } from '@kbn/anonymization-common';
+import { NER_MODEL_ID } from '@kbn/ai-anonymization-common';
 import type { AnonymizationSettings } from '@kbn/ai-anonymization-common';
 
 const baseRuleSchema = schema.object({

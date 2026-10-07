@@ -6,7 +6,7 @@
  */
 
 import objectHash from 'object-hash';
-import { generateToken } from '@kbn/anonymization-common';
+import { generateToken } from './generate_token';
 
 /**
  * Generates a deterministic mask/token for an anonymized entity.

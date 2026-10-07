@@ -15,7 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/ai-anonymization-common",
-    "@kbn/anonymization-common",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/core-ui-settings-common",

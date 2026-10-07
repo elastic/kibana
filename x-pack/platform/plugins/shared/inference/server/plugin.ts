@@ -8,11 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type {
-  BoundInferenceClient,
-  InferenceClient,
-  ChatCompleteAnonymizationTarget,
-} from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
 import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
 import type { AnonymizationRule, AnonymizationSettings } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -128,8 +124,9 @@ export class InferencePlugin
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     // Two anonymization implementations coexist here:
     //  - Legacy (live): rules from the `ai:anonymizationSettings` uiSetting, no persisted replacements.
-    //  - Policy-service (dormant): profiles, field policies, per-space salt and persistent
-    //    replacements from the `anonymization` plugin, awaiting removal.
+    //  - Policy-service (dormant): profiles, per-space salt and persistent replacements from the
+    //    `anonymization` plugin, awaiting removal. The pipeline no longer applies that plugin's
+    //    field policies, so re-activating it would NOT mask fields it is configured to mask.
     // `anonymization.isEnabled()` is backed by the hard-coded `ANONYMIZATION_FEATURE_ACTIVE = false`,
     // so this is always false and every `anonymizationEnabled` branch below is dead code. Treat the
     // uiSetting path as the only real one.
@@ -226,15 +223,6 @@ export class InferencePlugin
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
           saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
-          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
-            if (!anonymizationEnabled || !policyService || !target) {
-              return undefined;
-            }
-            return policyService.resolveEffectivePolicy(namespace, {
-              type: target.targetType,
-              id: target.targetId,
-            });
-          },
           replacements: {
             esClient: core.elasticsearch.client.asInternalUser,
             encryptionKeyPromise: replacementsEncryptionKeyPromise,

@@ -64,7 +64,6 @@ export {
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
   type ChatCompleteAnonymizationMetadata,
-  type ChatCompleteAnonymizationTarget,
   type AnonymizationEntity,
   type Anonymization,
   type Deanonymization,

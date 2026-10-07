@@ -12,7 +12,7 @@ import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
-import { NER_MODEL_ID } from '@kbn/anonymization-common';
+import { NER_MODEL_ID } from '@kbn/ai-anonymization-common';
 import type { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 

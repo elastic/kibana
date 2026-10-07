@@ -12,4 +12,4 @@ export type {
   NamedEntityRecognitionRule,
   RegexAnonymizationRule,
 } from './src/types';
-export { aiAnonymizationSettings } from './src/constants';
+export { NER_MODEL_ID, aiAnonymizationSettings } from './src/constants';

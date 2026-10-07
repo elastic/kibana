@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationOutput, Message } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
-import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { anonymizeRecords } from './anonymize_records';
 import { messageFromAnonymizationRecords } from './message_from_anonymization_records';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
@@ -21,7 +20,6 @@ export async function anonymizeMessages({
   regexWorker,
   esClient,
   salt,
-  effectivePolicy,
   knownReplacements,
 }: {
   system?: string | undefined;
@@ -30,14 +28,12 @@ export async function anonymizeMessages({
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   salt?: string;
-  effectivePolicy?: EffectivePolicy;
   knownReplacements?: Array<{ anonymized: string; original: string }>;
 }): Promise<AnonymizationOutput> {
   const rules = anonymizationRules.filter((rule) => rule.enabled);
-  const hasEffectivePolicy = Boolean(effectivePolicy && Object.keys(effectivePolicy).length > 0);
   const hasKnownReplacements = Boolean(knownReplacements?.length);
 
-  if (!rules.length && !hasEffectivePolicy && !hasKnownReplacements) {
+  if (!rules.length && !hasKnownReplacements) {
     return {
       messages,
       anonymizations: [],
@@ -57,7 +53,6 @@ export async function anonymizeMessages({
     regexWorker,
     esClient,
     salt,
-    effectivePolicy,
     knownReplacements,
   });
 
