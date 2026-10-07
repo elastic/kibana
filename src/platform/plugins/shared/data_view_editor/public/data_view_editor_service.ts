@@ -381,7 +381,9 @@ export class DataViewEditorService {
 
   private loadTimestampFields = async () => {
     const currentState = this.state$.getValue();
+    const currentLoadingTimestampFieldsIdx = ++this.currentLoadingTimestampFields;
     if (currentState.matchedIndices.exactMatchedIndices.length === 0) {
+      // the increment above invalidates in-flight requests, so their results can't overwrite this reset
       this.updateState({
         timestampFieldOptions: [],
         timestampFieldsError: undefined,
@@ -389,7 +391,6 @@ export class DataViewEditorService {
       });
       return;
     }
-    const currentLoadingTimestampFieldsIdx = ++this.currentLoadingTimestampFields;
 
     const getFieldsOptions: GetFieldsOptions = {
       pattern: this.indexPattern,

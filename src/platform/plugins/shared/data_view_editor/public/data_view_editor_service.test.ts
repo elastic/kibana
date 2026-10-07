@@ -102,5 +102,41 @@ describe('DataViewEditorService', () => {
 
       service.destroy();
     });
+
+    it('should ignore a failure of a superseded request once no indices match', async () => {
+      let rejectFieldsRequest: (error: Error) => void = () => {};
+      const service = createService({
+        getIndices: jest.fn(async ({ pattern }: { pattern: string }) =>
+          pattern === '*' || pattern.startsWith('tracks') ? [{ name: 'tracks', item: {} }] : []
+        ),
+        getFieldsForWildcard: jest.fn(
+          () =>
+            new Promise((_resolve, reject) => {
+              rejectFieldsRequest = reject;
+            })
+        ),
+      } as unknown as Partial<DataViewsServicePublic>);
+
+      service.setIndexPattern('tracks*');
+      await firstValueFrom(
+        service.matchedIndices$.pipe(
+          first(({ exactMatchedIndices }) => exactMatchedIndices.length > 0)
+        )
+      );
+
+      service.setIndexPattern('zzz');
+      await firstValueFrom(
+        service.matchedIndices$.pipe(
+          first(({ exactMatchedIndices }) => exactMatchedIndices.length === 0)
+        )
+      );
+
+      rejectFieldsRequest(new Error('Fields API is unavailable'));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(await firstValueFrom(service.timestampFieldsError$)).toBeUndefined();
+
+      service.destroy();
+    });
   });
 });
