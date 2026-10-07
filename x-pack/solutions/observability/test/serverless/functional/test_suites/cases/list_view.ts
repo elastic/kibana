@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const cases = getService('cases');
   const svlCases = getService('svlCases');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -72,8 +73,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('change the severity of cases to medium correctly', async () => {
           await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('case-severity-badge-low');
+          // existOrFail retries until the refetched list renders; missingOrFail alone waits only ~2.5s.
           await testSubjects.existOrFail('case-severity-badge-medium');
+          await testSubjects.missingOrFail('case-severity-badge-low');
         });
       });
 
@@ -123,28 +125,32 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
            */
           await cases.casesTable.bulkEditTags([0, 1], ['two', 'three', 'five']);
           await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForTableToFinishLoading();
-          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
-          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
-          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
 
-          expect(case3.tags).eql(['five', 'three']);
-          expect(case2.tags).eql(['four', 'five', 'three']);
-          expect(case1.tags).eql(['one', 'three']);
+          // The flyout closes before the bulk update request settles, so retry the reads.
+          await retry.try(async () => {
+            const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+            const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+            const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+            expect(case3.tags).eql(['five', 'three']);
+            expect(case2.tags).eql(['four', 'five', 'three']);
+            expect(case1.tags).eql(['one', 'three']);
+          });
         });
 
         it('adds a new tag', async () => {
           await cases.casesTable.bulkAddNewTag([0, 1], 'tw');
           await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForTableToFinishLoading();
 
-          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
-          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
-          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+          await retry.try(async () => {
+            const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+            const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+            const case3 = await cases.api.getCase({ caseId: caseIds[2] });
 
-          expect(case3.tags).eql(['two', 'five', 'tw']);
-          expect(case2.tags).eql(['two', 'four', 'tw']);
-          expect(case1.tags).eql(['one', 'three']);
+            expect(case3.tags).eql(['two', 'five', 'tw']);
+            expect(case2.tags).eql(['two', 'four', 'tw']);
+            expect(case1.tags).eql(['one', 'three']);
+          });
         });
       });
     });
