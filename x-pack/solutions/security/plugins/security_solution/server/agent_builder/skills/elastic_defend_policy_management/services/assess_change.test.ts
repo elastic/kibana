@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers, type StartServicesAccessor } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -88,14 +88,10 @@ const createCountAccess = async () => {
     getHostMetadataList,
   } as unknown as ReturnType<typeof endpointAppContextService.getEndpointMetadataService>);
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-  ]) as unknown as StartServicesAccessor;
   const access = await createPolicyAccessContext(
     endpointAppContextService,
     { request, spaceId: SPACE_ID },
-    ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ,
-    getStartServices
+    ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ
   );
   const licenseService = endpointAppContextService.getLicenseService();
   licenseService.getLicenseType = jest.fn(() => 'enterprise');

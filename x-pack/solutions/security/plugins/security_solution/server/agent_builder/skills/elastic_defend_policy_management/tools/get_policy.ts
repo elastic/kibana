@@ -7,7 +7,6 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { policyReferenceInputSchema, toPolicyRef } from '../domain/input_schemas';
 import type { EndpointPolicyBaselinePreset } from '../domain/input_schemas';
@@ -147,14 +146,11 @@ const presentGetPolicyBaseline = (
 
 export const createGetPolicyTool = ({
   endpointAppContextService,
-  getStartServices,
 }: {
   endpointAppContextService: EndpointAppContextService;
-  getStartServices: StartServicesAccessor;
 }): BuiltinSkillBoundedTool<typeof getPolicySchema> =>
   createPolicyTool({
     endpointAppContextService,
-    getStartServices,
     id: GET_POLICY_TOOL_ID,
     description:
       'Get one Elastic Defend endpoint policy. Pass exactly one required selector object. ' +

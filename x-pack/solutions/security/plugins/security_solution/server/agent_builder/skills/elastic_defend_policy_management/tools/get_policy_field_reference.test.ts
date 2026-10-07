@@ -9,7 +9,6 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { z } from '@kbn/zod/v4';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
@@ -26,13 +25,8 @@ const createContext = (): ToolHandlerContext =>
     loggingSystemMock.createLogger(),
     { spaceId: 'space-marketing' }
   );
-const createGetStartServices = (): StartServicesAccessor =>
-  jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-  ]) as unknown as StartServicesAccessor;
 const createTool = () => {
   const endpointAppContextService = createMockEndpointAppContextService();
-  const getStartServices = createGetStartServices();
   endpointAppContextService.getEndpointAuthz.mockResolvedValue(
     getEndpointAuthzInitialStateMock({
       canReadPolicyManagement: true,
@@ -40,7 +34,7 @@ const createTool = () => {
       canWritePolicyManagement: false,
     })
   );
-  return createGetPolicyFieldReferenceTool({ endpointAppContextService, getStartServices });
+  return createGetPolicyFieldReferenceTool({ endpointAppContextService });
 };
 const search = async (keywords: string[], os?: 'windows' | 'mac' | 'linux') => {
   const selector = os === undefined ? { keywords } : { keywords, os };

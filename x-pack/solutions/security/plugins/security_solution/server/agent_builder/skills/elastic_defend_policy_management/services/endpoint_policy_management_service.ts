@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { EndpointAuthorizationError } from '../../../../endpoint/errors';
 import {
@@ -73,7 +73,6 @@ export type PolicyComparison = Readonly<{
 
 export interface EndpointPolicyManagementServiceDependencies {
   readonly endpointAppContextService: EndpointAppContextService;
-  readonly getStartServices: StartServicesAccessor;
   readonly request: KibanaRequest;
   readonly spaceId: string;
 }
@@ -141,19 +140,13 @@ const toDeniedUsageItem = (item: ListPolicyItem): ListedPolicyItem => ({
 
 export const createEndpointPolicyManagementService = ({
   endpointAppContextService,
-  getStartServices,
   request,
   spaceId,
 }: EndpointPolicyManagementServiceDependencies): EndpointPolicyManagementService => {
   const requireAccess = async (
     requiredAuthz: EndpointAuthzRequirement
   ): Promise<PolicyAccessContext> =>
-    createPolicyAccessContext(
-      endpointAppContextService,
-      { request, spaceId },
-      requiredAuthz,
-      getStartServices
-    );
+    createPolicyAccessContext(endpointAppContextService, { request, spaceId }, requiredAuthz);
 
   return {
     listPolicies: async ({ page, perPage, includeEndpointUsage }) => {
@@ -230,16 +223,9 @@ export const createEndpointPolicyManagementService = ({
     },
 
     previewApplyPolicyChange: (rawParams) =>
-      previewApplyPolicyChangeService(
-        { endpointAppContextService, getStartServices, request, spaceId },
-        rawParams
-      ),
+      previewApplyPolicyChangeService({ endpointAppContextService, request, spaceId }, rawParams),
 
     applyPolicyChange: (rawParams, input) =>
-      applyPolicyChangeService(
-        { endpointAppContextService, getStartServices, request, spaceId },
-        rawParams,
-        input
-      ),
+      applyPolicyChangeService({ endpointAppContextService, request, spaceId }, rawParams, input),
   };
 };

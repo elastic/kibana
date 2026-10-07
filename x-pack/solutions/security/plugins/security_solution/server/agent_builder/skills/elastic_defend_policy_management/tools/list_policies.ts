@@ -6,7 +6,6 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { createPolicyTool } from './create_policy_tool';
@@ -78,14 +77,11 @@ const presentListPolicies = (dto: ListPoliciesResult): PresentedListPolicies => 
 
 export const createListPoliciesTool = ({
   endpointAppContextService,
-  getStartServices,
 }: {
   endpointAppContextService: EndpointAppContextService;
-  getStartServices: StartServicesAccessor;
 }): BuiltinSkillBoundedTool<typeof listPoliciesSchema> =>
   createPolicyTool({
     endpointAppContextService,
-    getStartServices,
     id: LIST_POLICIES_TOOL_ID,
     description:
       'List Elastic Defend endpoint policies in the current space as a bounded page of identity, ' +

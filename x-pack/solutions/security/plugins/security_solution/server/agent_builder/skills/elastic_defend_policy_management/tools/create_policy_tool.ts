@@ -12,7 +12,6 @@ import type {
   BuiltInToolConfirmationPolicy,
   ToolHandlerContext,
 } from '@kbn/agent-builder-server/tools';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
@@ -74,7 +73,6 @@ interface CreatePolicyToolOptions<
   TResult extends Record<string, unknown>
 > {
   endpointAppContextService: EndpointAppContextService;
-  getStartServices: StartServicesAccessor;
   id: string;
   description: string;
   schema: TSchema;
@@ -278,7 +276,6 @@ export const createPolicyTool = <
   TResult extends Record<string, unknown>
 >({
   endpointAppContextService,
-  getStartServices,
   id,
   description,
   schema,
@@ -296,7 +293,6 @@ export const createPolicyTool = <
     try {
       const service = createEndpointPolicyManagementService({
         endpointAppContextService,
-        getStartServices,
         request: ctx.request,
         spaceId: ctx.spaceId,
       });

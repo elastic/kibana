@@ -140,7 +140,6 @@ export const registerSkills = async ({
     await agentBuilder.skills.register(
       createElasticDefendPolicyManagementSkill({
         endpointAppContextService: options.endpointAppContextService,
-        getStartServices,
       })
     );
   }

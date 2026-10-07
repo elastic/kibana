@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { z } from '@kbn/zod/v4';
@@ -50,7 +50,6 @@ export type ApplyPolicyCallSource = 'agent' | 'user' | 'mcp' | 'unknown';
 
 export interface ApplyPolicyChangeDependencies {
   readonly endpointAppContextService: EndpointAppContextService;
-  readonly getStartServices: StartServicesAccessor;
   readonly request: KibanaRequest;
   readonly spaceId: string;
 }
@@ -187,7 +186,7 @@ export const prepareApplyPolicyChange = async (
   rawParams: unknown,
   options?: Readonly<{ callSource?: ApplyPolicyCallSource }>
 ): Promise<PreparedApplyPolicyChange> => {
-  const { endpointAppContextService, getStartServices, request, spaceId } = deps;
+  const { endpointAppContextService, request, spaceId } = deps;
   assertParameterBounds(rawParams);
   const params = parseApplyPolicyChangeParams(rawParams);
 
@@ -199,7 +198,6 @@ export const prepareApplyPolicyChange = async (
     endpointAppContextService,
     { request, spaceId },
     ENDPOINT_POLICY_WRITE_REQUIRED_AUTHZ,
-    getStartServices,
     'write'
   );
   const user = currentUser(endpointAppContextService, request);
