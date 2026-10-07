@@ -660,9 +660,8 @@ describe('deleteWorkflows', () => {
         );
         const persistentVersionConflict =
           !(response instanceof Error) &&
-          Boolean(response.version_conflicts) &&
-          !response.timed_out &&
-          !response.failures?.length;
+          'version_conflicts' in response &&
+          Boolean(response.version_conflicts);
         if (response instanceof Error) {
           deleteByQuery.mockRejectedValueOnce(response);
         } else if (persistentVersionConflict) {
@@ -834,7 +833,14 @@ describe('deleteWorkflows', () => {
         const { client, deleteByQuery, run } = privateForceDelete();
         deleteByQuery.mockResolvedValue({
           version_conflicts: 1,
-          failures: [{ cause: { type: 'index_not_found_exception', reason: 'missing' } }],
+          failures: [
+            {
+              id: 'step-1',
+              index: '.workflows-step-executions',
+              status: 500,
+              cause: { type: 'index_not_found_exception', reason: 'missing' },
+            },
+          ],
         });
 
         await expect(run()).rejects.toThrow('failures=1');
