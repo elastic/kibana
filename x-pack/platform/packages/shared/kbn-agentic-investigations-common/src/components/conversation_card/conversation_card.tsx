@@ -107,7 +107,9 @@ export const ConversationCard = memo<ConversationCardProps>(
         {/* The age and the actions share the top row, which leaves the title and
             summary the full width of the card rather than the actions' leftovers. */}
         <EuiFlexGroup gutterSize="xs" responsive direction="column">
-          <EuiFlexItem grow={false}>
+          {/* The controls below overhang the row by 8px on each side; give the 8px
+              back under the row so the age-to-title gap stays where it was. */}
+          <EuiFlexItem grow={false} css={{ paddingBlockEnd: euiTheme.size.s }}>
             <EuiFlexGroup
               alignItems="center"
               gutterSize="l"
