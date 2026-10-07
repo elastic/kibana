@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -22,16 +22,25 @@ import {
   resolveExtractionMode,
 } from '../../../common/domain/definitions/registry';
 
-const paramsSchema = z.object({
-  entityType: EntityType,
-});
+const ALL_PROCESSES = 'all';
 
-const bodySchema = z.object({
-  fromDateISO: z.string().datetime(),
-  toDateISO: z.string().datetime(),
-  /** Which extraction process to run as. Defaults to the one this deployment actually runs. */
-  process: ExtractionMode.optional(),
-});
+const paramsSchema = lazySchema(() =>
+  z.object({
+    entityType: EntityType,
+  })
+);
+
+const bodySchema = lazySchema(() =>
+  z.object({
+    fromDateISO: z.string().datetime(),
+    toDateISO: z.string().datetime(),
+    /**
+     * Which extraction process to run as. Defaults to the one this deployment actually runs.
+     * `all` runs priority and non-priority at the same time, the way their tasks overlap.
+     */
+    process: z.union([ExtractionMode, z.literal(ALL_PROCESSES)]).optional(),
+  })
+);
 
 export function registerForceLogExtraction(router: EntityStorePluginRouter) {
   router.versioned
@@ -77,6 +86,19 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
               message: `Entity type ${entityType} only runs the single extraction process`,
             },
           });
+        }
+
+        if (process === ALL_PROCESSES) {
+          logger.debug(`Force log extraction API called for entity type ${entityType} as all`);
+          const extract = (mode: ExtractionMode) =>
+            logsExtractionClient
+              .withExtractionMode(mode)
+              .extractLogs(entityType, { specificWindow: { fromDateISO, toDateISO } });
+          const [priority, nonPriority] = await Promise.all([
+            extract(EXTRACTION_MODE.priority),
+            extract(EXTRACTION_MODE.nonPriority),
+          ]);
+          return res.ok({ body: { priority, nonPriority } });
         }
 
         // Without an explicit process, run as whichever mode this deployment actually uses:

@@ -273,6 +273,46 @@ apiTest.describe(
       }
     });
 
+    apiTest('runs both processes in one forced extraction', async ({ apiClient }) => {
+      await startNonPriority(apiClient);
+
+      const toDateISO = new Date().toISOString();
+      const fromDateISO = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+      const response = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'user',
+        fromDateISO,
+        toDateISO,
+        'all'
+      );
+
+      expect(response.statusCode).toBe(200);
+      const { priority, nonPriority } = response.body as {
+        priority: { success: boolean };
+        nonPriority: { success: boolean };
+      };
+      expect(priority.success).toBe(true);
+      expect(nonPriority.success).toBe(true);
+    });
+
+    apiTest('rejects running all processes for a type with one', async ({ apiClient }) => {
+      const toDateISO = new Date().toISOString();
+      const fromDateISO = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+      const response = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'host',
+        fromDateISO,
+        toDateISO,
+        'all'
+      );
+
+      expect(response.statusCode).toBe(400);
+    });
+
     // `host` runs one process, so naming a dual-process one is rejected rather than run as a
     // failed extraction that writes an error onto a healthy engine.
     apiTest('rejects a forced extraction process the type does not run', async ({ apiClient }) => {

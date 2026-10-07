@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -69,18 +69,22 @@ type StatusEngine = Omit<
 export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
   engines: StatusEngine[];
+  excludedUserNames?: string[];
 }
 
-const querySchema = z.object({
-  include_components: BooleanFromString.optional()
-    .default(false)
-    .describe('If true, returns a detailed status of each engine including all its components.'),
-});
+const querySchema = lazySchema(() =>
+  z.object({
+    include_components: BooleanFromString.optional()
+      .default(false)
+      .describe('If true, returns a detailed status of each engine including all its components.'),
+  })
+);
 export type StatusRequestQuery = z.infer<typeof querySchema>;
 
 function toPublicEngine(
   engine: GetStatusSuccessResult['engines'][number],
-  logsExtractionConfig: LogExtractionConfig
+  logsExtractionConfig: LogExtractionConfig,
+  dualProcess: boolean
 ): StatusEngine {
   const {
     versionState,
@@ -124,7 +128,9 @@ function toPublicEngine(
     maxPageSearchSize: 10000,
     lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
     // Only types with a priority gate run a second process; for the rest there is nothing to report.
-    ...(hasPriorityExtractionGate(engine.type)
+    // With the flag off the non-priority task skips every run without updating its stored status,
+    // so reporting it would show a stale `started`.
+    ...(dualProcess && hasPriorityExtractionGate(engine.type)
       ? {
           nonPriority: {
             status: nonPriorityStatus ?? null,
@@ -171,10 +177,13 @@ export function registerStatus(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
           const entityStoreCtx = await ctx.entityStore;
-          const { logger, assetManagerClient: assetManager } = entityStoreCtx;
+          const { logger, assetManagerClient: assetManager, isDualProcessEnabled } = entityStoreCtx;
           logger.debug('Status API invoked');
           const withComponents = req.query.include_components;
-          const { status, engines, ...rest } = await assetManager.getStatus(withComponents);
+          const [{ status, engines, ...rest }, dualProcess] = await Promise.all([
+            assetManager.getStatus(withComponents),
+            isDualProcessEnabled(),
+          ]);
 
           if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
             return res.ok({
@@ -182,7 +191,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
             });
           }
 
-          const { logsExtractionConfig, logsExtractionConfigByType } =
+          const { logsExtractionConfig, logsExtractionConfigByType, excludedUserNames } =
             rest as GetStatusSuccessResult;
 
           return res.ok({
@@ -191,9 +200,11 @@ export function registerStatus(router: EntityStorePluginRouter) {
               engines: engines.map((engine) =>
                 toPublicEngine(
                   engine,
-                  logsExtractionConfigByType[engine.type] ?? logsExtractionConfig
+                  logsExtractionConfigByType[engine.type] ?? logsExtractionConfig,
+                  dualProcess
                 )
               ),
+              excludedUserNames,
             },
           });
         }

@@ -279,34 +279,6 @@ describe('FeatureFlagsService Browser', () => {
       apmSpy = jest.spyOn(apm, 'addLabels');
     });
 
-    // We don't need to test the client, just our APIs, so testing that it returns the fallback value should be enough.
-    test('get boolean flag', () => {
-      const value = false;
-      expect(startContract.getBooleanValue('my-flag', value)).toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
-      expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-        body: JSON.stringify({ value }),
-      });
-    });
-
-    test('get string flag', () => {
-      const value = 'my-default';
-      expect(startContract.getStringValue('my-flag', value)).toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
-      expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-        body: JSON.stringify({ value }),
-      });
-    });
-
-    test('get number flag', () => {
-      const value = 42;
-      expect(startContract.getNumberValue('my-flag', value)).toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
-      expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-        body: JSON.stringify({ value }),
-      });
-    });
-
     test('getBooleanValue$ delivers the current evaluation before subscribe returns', () => {
       jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(true);
 
@@ -493,7 +465,9 @@ describe('FeatureFlagsService Browser', () => {
 
     test('with overrides', async () => {
       const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
-      expect(startContract.getBooleanValue('my-overridden-flag', false)).toEqual(true);
+      await expect(
+        firstValueFrom(startContract.getBooleanValue$('my-overridden-flag', false))
+      ).resolves.toEqual(true);
       expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
       expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-overridden-flag/counter', {
         body: JSON.stringify({ value: true }),
@@ -501,7 +475,9 @@ describe('FeatureFlagsService Browser', () => {
       expect(getBooleanValueSpy).not.toHaveBeenCalled();
 
       // Only to prove the spy works
-      expect(startContract.getBooleanValue('another-flag', false)).toEqual(false);
+      await expect(
+        firstValueFrom(startContract.getBooleanValue$('another-flag', false))
+      ).resolves.toEqual(false);
       expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
       expect(getBooleanValueSpy).toHaveBeenCalledWith('another-flag', false);
       expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/another-flag/counter', {
@@ -511,18 +487,22 @@ describe('FeatureFlagsService Browser', () => {
 
     test('overrides with dotted names', async () => {
       const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
-      expect(startContract.getBooleanValue('myPlugin.myOverriddenFlag', false)).toEqual(true);
-      expect(
-        startContract.getBooleanValue('myDestructuredObjPlugin.myOverriddenFlag', false)
-      ).toEqual(true);
+      await expect(
+        firstValueFrom(startContract.getBooleanValue$('myPlugin.myOverriddenFlag', false))
+      ).resolves.toEqual(true);
+      await expect(
+        firstValueFrom(
+          startContract.getBooleanValue$('myDestructuredObjPlugin.myOverriddenFlag', false)
+        )
+      ).resolves.toEqual(true);
       expect(getBooleanValueSpy).not.toHaveBeenCalled();
     });
 
     describe('usage counter reporting', () => {
-      test('does not report repeated evaluations of the same value', () => {
-        startContract.getBooleanValue('my-flag', false);
-        startContract.getBooleanValue('my-flag', false);
-        startContract.getBooleanValue('my-flag', false);
+      test('does not report repeated evaluations of the same value', async () => {
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
@@ -530,11 +510,11 @@ describe('FeatureFlagsService Browser', () => {
         });
       });
 
-      test('does not retry the same value after a failed best-effort report', () => {
+      test('does not retry the same value after a failed best-effort report', async () => {
         http.post.mockRejectedValueOnce(new Error('Counter request failed'));
 
-        startContract.getBooleanValue('my-flag', false);
-        startContract.getBooleanValue('my-flag', false);
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
@@ -542,9 +522,9 @@ describe('FeatureFlagsService Browser', () => {
         });
       });
 
-      test('does not report repeated NaN evaluations', () => {
-        startContract.getNumberValue('my-flag', NaN);
-        startContract.getNumberValue('my-flag', NaN);
+      test('does not report repeated NaN evaluations', async () => {
+        await firstValueFrom(startContract.getNumberValue$('my-flag', NaN));
+        await firstValueFrom(startContract.getNumberValue$('my-flag', NaN));
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
@@ -552,26 +532,30 @@ describe('FeatureFlagsService Browser', () => {
         });
       });
 
-      test('reports again when the evaluated value changes', () => {
+      test('reports again when the evaluated value changes', async () => {
         const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
         getBooleanValueSpy.mockReturnValueOnce(true).mockReturnValueOnce(false);
 
-        expect(startContract.getBooleanValue('my-flag', false)).toEqual(true);
+        await expect(
+          firstValueFrom(startContract.getBooleanValue$('my-flag', false))
+        ).resolves.toEqual(true);
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
           body: JSON.stringify({ value: true }),
         });
 
-        expect(startContract.getBooleanValue('my-flag', false)).toEqual(false);
+        await expect(
+          firstValueFrom(startContract.getBooleanValue$('my-flag', false))
+        ).resolves.toEqual(false);
         expect(http.post).toHaveBeenCalledTimes(2);
         expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
           body: JSON.stringify({ value: false }),
         });
       });
 
-      test('does not report repeated evaluations of the same override value', () => {
-        startContract.getBooleanValue('my-overridden-flag', false);
-        startContract.getBooleanValue('my-overridden-flag', false);
+      test('does not report repeated evaluations of the same override value', async () => {
+        await firstValueFrom(startContract.getBooleanValue$('my-overridden-flag', false));
+        await firstValueFrom(startContract.getBooleanValue$('my-overridden-flag', false));
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith(
@@ -582,9 +566,9 @@ describe('FeatureFlagsService Browser', () => {
         );
       });
 
-      test('treats values of different types as distinct for the same flag name', () => {
-        startContract.getStringValue('my-flag', '1');
-        startContract.getNumberValue('my-flag', 1);
+      test('treats values of different types as distinct for the same flag name', async () => {
+        await firstValueFrom(startContract.getStringValue$('my-flag', '1'));
+        await firstValueFrom(startContract.getNumberValue$('my-flag', 1));
 
         expect(http.post).toHaveBeenCalledTimes(2);
         expect(http.post).toHaveBeenNthCalledWith(1, '/internal/feature-flags/my-flag/counter', {

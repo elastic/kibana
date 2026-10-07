@@ -29,6 +29,8 @@ import {
  *
  * - `assigneeUids`: user profile uids stored as a string array in `metadata.assignees`.
  *   Missing or non-array values default to an empty list.
+ *
+ * - `entityIds`: hydrated by the server from the linked investigations' Impact; absent when none has any.
  */
 export const escalationToQueueItem = (
   escalation: EscalationConversationSummary
@@ -48,11 +50,13 @@ export const escalationToQueueItem = (
 
   return {
     id: escalation.id,
+    agentId: escalation.agent_id,
     title: escalation.title,
     status,
     createdAt: escalation.created_at,
     updatedAt: escalation.updated_at,
     linkedInvestigationCount,
     assigneeUids,
+    entityIds: escalation.entity_ids,
   };
 };

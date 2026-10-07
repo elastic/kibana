@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -17,13 +17,15 @@ import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions
 import { ENGINE_STATUS } from '../../domain/constants';
 import { pairedQualifies } from './utils/process_status';
 
-const bodySchema = z.object({
-  entityTypes: z
-    .array(EntityType)
-    .optional()
-    .default(ALL_ENTITY_TYPES)
-    .describe('Entity types to start. Defaults to all installed types.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entityTypes: z
+      .array(EntityType)
+      .optional()
+      .default(ALL_ENTITY_TYPES)
+      .describe('Entity types to start. Defaults to all installed types.'),
+  })
+);
 
 type StartRequestBody = z.infer<typeof bodySchema>;
 

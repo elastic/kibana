@@ -6,7 +6,10 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
-import type { ServiceInstance } from '../../service_settings_step/use_service_settings';
+import type {
+  ServiceInstance,
+  ServiceVars,
+} from '../../service_settings_step/use_service_settings';
 import type { DeployGroup } from '../deploy_groups';
 import { reconcileInstances, groupByPackage } from '../deploy_group_helpers';
 
@@ -32,7 +35,8 @@ export interface AgentBasedTarget {
 export function buildAgentBasedTargets(
   instances: ServiceInstance[],
   selectedServiceIds: string[],
-  servicesMap: Map<string, AwsServiceMatrixEntry>
+  servicesMap: Map<string, AwsServiceMatrixEntry>,
+  storedServiceVars: Record<string, ServiceVars> = {}
 ): DeployGroup[] {
   const resolved: ServiceInstance[] = reconcileInstances(
     instances,
@@ -53,5 +57,5 @@ export function buildAgentBasedTargets(
     }
   }
 
-  return groupByPackage(originals, duplicates);
+  return groupByPackage(originals, duplicates, storedServiceVars);
 }

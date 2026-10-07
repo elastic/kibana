@@ -20,8 +20,8 @@ describe('searchEventsToolHandler', () => {
     title: 'Checkout — payment failure',
     symptom_hypothesis: 'Payment calls are failing',
     summary: 'Checkout payment calls fail.',
-    status: 'open',
-    severity: '60-high',
+    status: 'active',
+    severity: 'high',
     confidence: 0.8,
     stream_names: ['logs.checkout'],
     signals: [
@@ -63,7 +63,7 @@ describe('searchEventsToolHandler', () => {
 
   it('returns a bounded compact routing projection with complete signal state', async () => {
     const result = await searchEventsToolHandler({
-      eventClient: makeClient() as never,
+      eventSearchClient: makeClient() as never,
       params: { rule_uuids: ['rule-active'] },
     });
 
@@ -90,7 +90,7 @@ describe('searchEventsToolHandler', () => {
 
   it('does not hide inconclusive signals from closure routing', async () => {
     const result = await searchEventsToolHandler({
-      eventClient: makeClient([{ ...event, signals: [event.signals[2]] }]) as never,
+      eventSearchClient: makeClient([{ ...event, signals: [event.signals[2]] }]) as never,
       params: { event_ids: ['checkout-failure'] },
     });
 
@@ -111,7 +111,7 @@ describe('searchEventsToolHandler', () => {
 
   it('reports off-topic rules without making their authored rule unresolved', async () => {
     const result = await searchEventsToolHandler({
-      eventClient: makeClient([
+      eventSearchClient: makeClient([
         {
           ...event,
           signals: [
@@ -149,10 +149,10 @@ describe('searchEventsToolHandler', () => {
       collected_at: `2026-07-${String(index + 1).padStart(2, '0')}T08:00:00.000Z`,
       metadata: { rule_uuid: `rule-${index}`, rule_name: `Rule ${index}` },
     }));
-    const eventClient = makeClient([{ ...event, signals }]);
+    const eventSearchClient = makeClient([{ ...event, signals }]);
 
     const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
+      eventSearchClient: eventSearchClient as never,
       params: {
         view: 'full',
         event_ids: ['checkout-failure'],
@@ -162,7 +162,7 @@ describe('searchEventsToolHandler', () => {
       },
     });
 
-    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith(
+    expect(eventSearchClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith(
       expect.objectContaining({ eventIds: ['checkout-failure'], page: 1, perPage: 1 })
     );
     expect(result.events[0]).toEqual(
@@ -180,7 +180,7 @@ describe('searchEventsToolHandler', () => {
   });
 
   it('returns the final signal page without unrelated events', async () => {
-    const eventClient = makeClient([
+    const eventSearchClient = makeClient([
       {
         ...event,
         signals: Array.from({ length: 12 }, (_, index) => ({
@@ -191,7 +191,7 @@ describe('searchEventsToolHandler', () => {
     ]);
 
     const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
+      eventSearchClient: eventSearchClient as never,
       params: {
         view: 'full',
         event_ids: ['checkout-failure'],
@@ -209,14 +209,17 @@ describe('searchEventsToolHandler', () => {
 
   it('rejects full search without exactly one event ID', async () => {
     await expect(
-      searchEventsToolHandler({ eventClient: makeClient() as never, params: { view: 'full' } })
+      searchEventsToolHandler({
+        eventSearchClient: makeClient() as never,
+        params: { view: 'full' },
+      })
     ).rejects.toThrow('Full event search requires exactly one event ID');
   });
 
   it('leaves max-length full-view signal descriptions unchanged', async () => {
     const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH);
     const result = await searchEventsToolHandler({
-      eventClient: makeClient([
+      eventSearchClient: makeClient([
         {
           ...event,
           signals: [{ ...event.signals[0], description }],
@@ -231,7 +234,7 @@ describe('searchEventsToolHandler', () => {
   it('truncates oversized full-view signal descriptions', async () => {
     const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1);
     const result = await searchEventsToolHandler({
-      eventClient: makeClient([
+      eventSearchClient: makeClient([
         {
           ...event,
           signals: [{ ...event.signals[0], description }],
