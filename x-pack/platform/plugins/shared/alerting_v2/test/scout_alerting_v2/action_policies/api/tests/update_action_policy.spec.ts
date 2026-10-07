@@ -628,6 +628,41 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
+  apiTest(
+    'validation: rejects the empty collections that would otherwise reach storage',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'empty-sentinels-policy',
+          group_by: ['service.name'],
+          grouping_mode: 'per_field',
+          throttle: { strategy: 'time_interval', interval: '5m' },
+        })
+      );
+
+      const patch = (body: Record<string, unknown>) =>
+        apiClient.patch(getActionPolicyUrl(created.id), {
+          headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+          body,
+        });
+
+      // An empty array used to reach the saved object schema's `minSize: 1` and surface as a 500.
+      const emptyGroupBy = await patch({ group_by: [] });
+      expect(emptyGroupBy).toHaveStatusCode(400);
+      expect(emptyGroupBy.body.code).toBe('BAD_REQUEST');
+
+      // A throttle is cleared whole, with `throttle: null`, never by nulling its strategy.
+      const nulledStrategy = await patch({ throttle: { strategy: null } });
+      expect(nulledStrategy).toHaveStatusCode(400);
+      expect(nulledStrategy.body.code).toBe('BAD_REQUEST');
+
+      // A matcher that constrains nothing is spelled `matcher: null`, not `{}`.
+      const emptyMatcher = await patch({ matcher: {} });
+      expect(emptyMatcher).toHaveStatusCode(400);
+      expect(emptyMatcher.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.patch(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },

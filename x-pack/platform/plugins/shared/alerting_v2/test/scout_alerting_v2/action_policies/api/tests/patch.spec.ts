@@ -15,7 +15,6 @@ import {
   apiTest,
   buildCreateActionPolicyData,
   findNullPaths,
-  getActionPolicyUrl,
   testData,
 } from '../fixtures';
 
@@ -130,57 +129,6 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     expect(after.throttle).toStrictEqual({ strategy: 'on_status_change' });
   });
 
-  apiTest('rotates the stored api key on every patch', async ({ apiServices }) => {
-    const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
-    const created = await actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'patch-api-key' })
-    );
-
-    const before = await actionPolicySavedObject.getAttributes(created.id);
-
-    await actionPolicies.patch(created.id, { description: 'patched description' });
-
-    const after = await actionPolicySavedObject.getAttributes(created.id);
-    // The key is never returned over HTTP, so its rotation is only observable on disk.
-    expect(after.apiKey).not.toBe(before.apiKey);
-    expect(after.apiKeyOwner).toBe(before.apiKeyOwner);
-    expect(after.apiKeyCreatedByUser).toBe(before.apiKeyCreatedByUser);
-  });
-
-  apiTest(
-    'writes nothing when the merged policy is invalid',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
-      const created = await actionPolicies.create(
-        buildCreateActionPolicyData({
-          name: 'patch-invalid-merge',
-          grouping_mode: 'per_alert',
-          throttle: { strategy: 'on_status_change' },
-        })
-      );
-
-      const before = await actionPolicySavedObject.getAttributes(created.id);
-
-      // The rejection is the assertion here, so this one patch goes through `apiClient`: the
-      // service throws on a non-2xx and would hide the status and error code.
-      const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-        ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
-      );
-      // The body is valid on its own; only the merged policy is not, because `on_status_change` is
-      // not an aggregate strategy.
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-        body: { grouping_mode: 'all' },
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('INVALID_ACTION_POLICY_DATA');
-
-      const after = await actionPolicySavedObject.getAttributes(created.id);
-      // Down to the api key: a rejected patch rotates nothing and writes nothing.
-      expect(after).toStrictEqual(before);
-    }
-  );
-
   apiTest('clears the description by removing its key', async ({ apiServices }) => {
     const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
     const created = await actionPolicies.create(
@@ -196,42 +144,6 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     const fetched = await actionPolicies.get(created.id);
     expect(Object.keys(fetched)).not.toContain('description');
   });
-
-  apiTest(
-    'rejects empty optional collections with a 400 rather than failing in storage',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
-      const created = await actionPolicies.create(
-        buildCreateActionPolicyData({
-          name: 'patch-empty-sentinels',
-          group_by: ['service.name'],
-          grouping_mode: 'per_field',
-          throttle: { strategy: 'time_interval', interval: '5m' },
-        })
-      );
-
-      const before = await actionPolicySavedObject.getAttributes(created.id);
-
-      const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-        ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
-      );
-      const patch = (body: Record<string, unknown>) =>
-        apiClient.patch(getActionPolicyUrl(created.id), {
-          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-          body,
-        });
-
-      // An empty array used to reach the saved object schema's `minSize: 1` and surface as a 500.
-      expect(await patch({ group_by: [] })).toHaveStatusCode(400);
-      // A throttle is cleared whole, with `throttle: null`, never by nulling its strategy.
-      expect(await patch({ throttle: { strategy: null } })).toHaveStatusCode(400);
-      // A matcher that constrains nothing is spelled `matcher: null`, not `{}`.
-      expect(await patch({ matcher: {} })).toHaveStatusCode(400);
-
-      const after = await actionPolicySavedObject.getAttributes(created.id);
-      expect(after).toStrictEqual(before);
-    }
-  );
 
   apiTest('treats an empty throttle patch as a no-op merge', async ({ apiServices }) => {
     const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;

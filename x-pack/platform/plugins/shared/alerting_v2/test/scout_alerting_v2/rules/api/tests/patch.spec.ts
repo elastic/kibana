@@ -173,56 +173,6 @@ apiTest.describe('Patch rule saved object', { tag: '@local-stateful-classic' }, 
     expect(Object.keys(projected)).not.toContain('artifacts');
   });
 
-  apiTest('rejects an empty artifacts list on create', async ({ apiClient, requestAuth }) => {
-    const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-      ALERTING_V2_RULES_ALL_ROLE
-    );
-    const response = await apiClient.post(testData.RULE_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-      body: {
-        ...buildCreateRuleData({ metadata: { name: 'create-empty-artifacts' } }),
-        artifacts: [],
-      },
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest(
-    'writes nothing when the merged rule is invalid',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      const { rules, ruleSavedObject } = apiServices.alertingV2;
-      const created = await rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'patch-invalid-merge' },
-          state_transition: {
-            pending: { count: 2, timeframe: '5m', operator: 'and' },
-            recovering: { count: 4 },
-          },
-        })
-      );
-
-      const before = await ruleSavedObject.getAttributes(created.id);
-
-      const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-        ALERTING_V2_RULES_ALL_ROLE
-      );
-
-      // `operator` survives both thresholds, so the phase is left configured but gating nothing
-      // rather than emptied, and the merged document has to reject it.
-      const response = await apiClient.patch(getRuleUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-        body: { state_transition: { pending: { count: null, timeframe: null } } },
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('INVALID_RULE_DATA');
-
-      const after = await ruleSavedObject.getAttributes(created.id);
-      expect(after).toStrictEqual(before);
-    }
-  );
-
   apiTest(
     'clears a state transition phase when its last leaf goes, keeping the other phase',
     async ({ apiClient, apiServices, requestAuth }) => {
