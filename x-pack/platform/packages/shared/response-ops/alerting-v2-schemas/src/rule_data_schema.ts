@@ -85,14 +85,16 @@ const METADATA_DESCRIPTION_DESCRIPTION = 'Human-readable description of the rule
 const METADATA_TAGS_DESCRIPTION = 'Tags for categorization, e.g. ["production", "infra"].';
 const METADATA_ROUTING_TAGS_DESCRIPTION =
   'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".';
-const METADATA_BUILDER_TYPE_DESCRIPTION =
+const METADATA_BUILDER_DESCRIPTION =
   'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.';
 
 const metadataNameSchema = z.string().min(1).max(MAX_NAME_LENGTH);
 const metadataDescriptionSchema = z.string().max(MAX_DESCRIPTION_LENGTH);
 const metadataTagsSchema = tagsSchema.min(1);
 const metadataRoutingTagsSchema = tagsSchema.min(1);
-const metadataBuilderTypeSchema = z.string().max(64);
+const metadataBuilderSchema = z
+  .object({ type: z.string().max(64).describe('Rule builder type.') })
+  .strict();
 
 export const metadataSchema = z
   .object({
@@ -100,7 +102,7 @@ export const metadataSchema = z
     description: metadataDescriptionSchema.optional().describe(METADATA_DESCRIPTION_DESCRIPTION),
     tags: metadataTagsSchema.optional().describe(METADATA_TAGS_DESCRIPTION),
     routing_tags: metadataRoutingTagsSchema.optional().describe(METADATA_ROUTING_TAGS_DESCRIPTION),
-    builder_type: metadataBuilderTypeSchema.optional().describe(METADATA_BUILDER_TYPE_DESCRIPTION),
+    builder: metadataBuilderSchema.optional().describe(METADATA_BUILDER_DESCRIPTION),
   })
   .strict()
   .describe(METADATA_DESCRIPTION)
@@ -119,10 +121,7 @@ const metadataPatchSchema = z
       .nullable()
       .optional()
       .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
-    builder_type: metadataBuilderTypeSchema
-      .nullable()
-      .optional()
-      .describe(METADATA_BUILDER_TYPE_DESCRIPTION),
+    builder: metadataBuilderSchema.nullable().optional().describe(METADATA_BUILDER_DESCRIPTION),
   })
   .strict()
   .meta({ id: 'alerting_rule_metadata_patch', description: METADATA_DESCRIPTION });

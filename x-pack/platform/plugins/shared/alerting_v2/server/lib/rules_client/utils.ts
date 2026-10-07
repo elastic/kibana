@@ -235,7 +235,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       description: data.metadata.description,
       tags: data.metadata.tags,
       routing_tags: data.metadata.routing_tags,
-      builder_type: data.metadata.builder_type,
+      builder_type: data.metadata.builder?.type,
     },
     time_field: data.time_field,
     schedule: {
@@ -252,17 +252,17 @@ export function transformCreateRuleBodyToRuleSoAttributes(
 }
 
 /**
- * Resolves `metadata.builder_type` for an update.
+ * Resolves `metadata.builder` for an update.
  *
- * Builder rules require an explicit `metadata.builder_type: null` in the request
+ * Builder rules require an explicit `metadata.builder: null` in the request
  * to clear the field when the query changes.
  */
 function resolveBuilderType(
   updateData: UpdateRuleData,
   existingAttrs: RuleSavedObjectAttributes
 ): string | undefined {
-  if (updateData.metadata?.builder_type !== undefined) {
-    return updateData.metadata.builder_type ?? undefined;
+  if (updateData.metadata?.builder !== undefined) {
+    return updateData.metadata.builder?.type;
   }
 
   const queryChanged =
@@ -271,7 +271,7 @@ function resolveBuilderType(
   if (queryChanged && existingAttrs.metadata.builder_type) {
     throw Boom.badRequest(
       'Cannot update the query on a builder rule without explicitly clearing ' +
-        'metadata.builder_type. Send metadata.builder_type: null to confirm the transition to ES|QL mode.',
+        'metadata.builder. Send metadata.builder: null to confirm the transition to ES|QL mode.',
       { code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED }
     );
   }
@@ -294,7 +294,7 @@ const toPatchableRuleData = (attrs: RuleSavedObjectAttributes): CreateRuleDataIn
     description: attrs.metadata.description,
     tags: attrs.metadata.tags,
     routing_tags: attrs.metadata.routing_tags,
-    builder_type: attrs.metadata.builder_type,
+    builder: attrs.metadata.builder_type ? { type: attrs.metadata.builder_type } : undefined,
   },
   time_field: attrs.time_field,
   schedule: { every: attrs.schedule.every, lookback: attrs.schedule.lookback },
@@ -331,7 +331,7 @@ export function buildUpdateRuleAttributes(
 
   const merged = applyPatch(createRuleDataBaseSchema, toPatchableRuleData(existingAttrs), {
     ...updateData,
-    metadata: { ...updateData.metadata, builder_type: builderType ?? null },
+    metadata: { ...updateData.metadata, builder: builderType ? { type: builderType } : null },
   });
 
   const parsed = createRuleDataBaseSchema.safeParse(merged);
@@ -350,7 +350,7 @@ export function buildUpdateRuleAttributes(
       description: next.metadata.description,
       tags: next.metadata.tags,
       routing_tags: next.metadata.routing_tags,
-      builder_type: next.metadata.builder_type,
+      builder_type: next.metadata.builder?.type,
     },
     time_field: next.time_field,
     schedule: { every: next.schedule.every, lookback: next.schedule.lookback },
@@ -471,7 +471,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       description: attrs.metadata.description,
       tags: attrs.metadata.tags,
       routing_tags: attrs.metadata.routing_tags,
-      builder_type: attrs.metadata.builder_type,
+      builder: attrs.metadata.builder_type ? { type: attrs.metadata.builder_type } : undefined,
     },
     time_field: attrs.time_field,
     schedule: {

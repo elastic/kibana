@@ -155,6 +155,7 @@
     "@kbn/core-ui-settings-server",
     "@kbn/licensing-plugin",
     "@kbn/licensing-types",
+    "@kbn/workflows-yaml",
     "@kbn/tooling-log",
     "@kbn/test"
   ],

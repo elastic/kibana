@@ -55,7 +55,7 @@ export const ALERTING_ERROR_CODES = {
   BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
   /**
    * A builder rule's query was changed without explicitly clearing
-   * `metadata.builder_type`. The transition to ES|QL mode must be explicit.
+   * `metadata.builder`. The transition to ES|QL mode must be explicit.
    */
   BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
@@ -281,6 +281,11 @@ export const ALERTING_LOG_CODES = {
    * succeeded; only the workflow fan-out for this event was lost.
    */
   EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED: 'EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED',
+  /**
+   * Releasing a per-space DI scope after an internal disable failed. The
+   * disable itself already succeeded; only the scope cleanup was lost.
+   */
+  INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED: 'INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED',
   /**
    * The alert-action → workflow subscriber failed to emit a workflow event
    * for an alert-action domain event. The originating action already
@@ -580,6 +585,9 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+  /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
+  AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED:
+    'AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED',
   /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 

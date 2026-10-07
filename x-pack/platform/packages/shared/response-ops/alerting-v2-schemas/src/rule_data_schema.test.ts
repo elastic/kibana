@@ -83,6 +83,15 @@ describe('createRuleDataSchema', () => {
       });
     });
 
+    it('accepts builder metadata', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', builder: { type: 'threshold' } },
+      });
+
+      expect(result.metadata.builder).toEqual({ type: 'threshold' });
+    });
+
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,

@@ -46,6 +46,11 @@ responses:
                   timestampField: "@timestamp"
                   maxPageSearchSize: 10000
                   lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+                  nonPriority:
+                    status: started
+                    error: null
+                    lastExecutionTimestamp: "2026-04-10T08:26:00.000Z"
+                    samplingRate: null
           notInstalledExample:
             summary: "Entity Store not installed"
             description: "The Entity Store has not been installed."
