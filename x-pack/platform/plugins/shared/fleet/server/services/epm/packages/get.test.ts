@@ -1142,6 +1142,26 @@ owner: elastic`,
       expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(1);
     });
 
+    it('should not remember a transient failure within a cache session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockRejectedValue(new Error('registry down'));
+
+      const lookup = () =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'flaky-package',
+          pkgVersion: '1.0.0',
+        });
+
+      await runWithCache(async () => {
+        await expect(lookup()).rejects.toThrow('registry down');
+        await expect(lookup()).rejects.toThrow('registry down');
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(2);
+    });
+
     it('should retry a failed package info lookup in the next cache session', async () => {
       const soClient = savedObjectsClientMock.create();
       soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());

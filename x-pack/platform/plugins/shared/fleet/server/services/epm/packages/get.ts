@@ -538,9 +538,10 @@ export async function getPackageInfo({
       prerelease,
     });
   } catch (error) {
-    // Remember the failure for this request so a missing package is not fetched again
-    // for every package policy in the same cache session.
-    setPackageInfoCacheError(pkgName, pkgVersion, error);
+    // Only "not found" is remembered: transient registry/ES errors must stay retryable.
+    if (error instanceof PackageNotFoundError) {
+      setPackageInfoCacheError(pkgName, pkgVersion, error);
+    }
     throw error;
   }
 }
