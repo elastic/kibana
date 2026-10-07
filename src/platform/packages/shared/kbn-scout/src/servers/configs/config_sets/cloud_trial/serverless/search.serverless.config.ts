@@ -21,8 +21,6 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.cloud.serverless.in_trial=true',
-      '--xpack.cloud.base_url=https://cloud.elastic.co',
-      '--xpack.cloud.billing_url=/billing/overview/',
       '--xpack.cloud.csp=aws',
       '--xpack.cloud.region=us-east-1',
     ],
