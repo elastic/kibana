@@ -40,11 +40,13 @@ describe('ProposedActionsCount', () => {
 
     render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
 
-    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent('7');
+    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
+      '0 of 7 applied'
+    );
     expect(mockUseConversationProposals).toHaveBeenCalledWith('conv-1');
   });
 
-  it('counts decided proposals on the first page and follows data updates', () => {
+  it('counts approved proposals on the first page and follows data updates', () => {
     mockUseConversationProposals.mockReturnValue(
       withPages([{ total: 3, proposals: [{ decision: 'approved' }, {}, {}] }])
     );
@@ -62,22 +64,23 @@ describe('ProposedActionsCount', () => {
     );
   });
 
-  it('does not count failed proposals as decided', () => {
+  it('does not count declined or failed proposals as applied', () => {
     mockUseConversationProposals.mockReturnValue(
       withPages([
         {
-          total: 3,
+          total: 4,
           proposals: [
             { decision: 'approved' },
             { decision: 'dismissed' },
-            { decision: 'dismissed', status: 'failed' },
+            { decision: 'approved', status: 'failed' },
+            {},
           ],
         },
       ])
     );
     render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
     expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
-      '2 of 3 applied'
+      '1 of 4 applied'
     );
   });
 
@@ -88,7 +91,10 @@ describe('ProposedActionsCount', () => {
       'a single proposal',
       { data: { pages: [{ total: 1, proposals: [{ decision: 'approved' }] }] } },
     ],
-    ['failed to load', { data: undefined, isError: true }],
+    [
+      'failed to load',
+      { data: { pages: [{ total: 3, proposals: [] }] }, error: new Error('boom') },
+    ],
   ])('renders nothing when %s', (_state, result) => {
     mockUseConversationProposals.mockReturnValue(
       result as unknown as ReturnType<typeof useConversationProposals>

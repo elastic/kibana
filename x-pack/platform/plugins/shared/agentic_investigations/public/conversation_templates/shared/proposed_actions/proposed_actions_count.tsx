@@ -20,18 +20,19 @@ export interface ProposedActionsCountProps {
  * nothing while loading, on error and when empty: the list below already owns those states.
  */
 export const ProposedActionsCount = ({ conversationId }: ProposedActionsCountProps) => {
-  const { data } = useConversationProposals(conversationId);
+  const { data, error } = useConversationProposals(conversationId);
   const total = data?.pages[0]?.total ?? 0;
-  const decidedCount = useMemo(
+  const appliedCount = useMemo(
     () =>
       (data?.pages[0].proposals ?? []).reduce<number>(
-        (count, proposal) => count + (proposal.decision && proposal.status !== 'failed' ? 1 : 0),
+        (count, proposal) =>
+          count + (proposal.decision === 'approved' && proposal.status !== 'failed' ? 1 : 0),
         0
       ),
     [data]
   );
 
-  if (total <= 1) {
+  if (error || total <= 1) {
     return null;
   }
 
@@ -42,9 +43,9 @@ export const ProposedActionsCount = ({ conversationId }: ProposedActionsCountPro
       data-test-subj="investigationFlyoutProposedActionsCount"
     >
       <FormattedMessage
-        id="xpack.investigationOutput.proposedActionsCount"
-        defaultMessage="{decidedCount} of {total} applied"
-        values={{ total, decidedCount }}
+        id="xpack.agenticInvestigations.proposedActionsCount"
+        defaultMessage="{appliedCount} of {total} applied"
+        values={{ total, appliedCount }}
       />
     </EuiText>
   );
