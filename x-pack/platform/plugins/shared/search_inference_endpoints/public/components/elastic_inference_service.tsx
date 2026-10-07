@@ -13,10 +13,13 @@ import { ElasticInferenceServiceModelsHeader } from './elastic_inference_service
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service/elastic_inference_service_models_page';
 import { ManageRegionsModal } from './elastic_inference_service/manage_regions_modal';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { useEisPageState } from '../hooks/use_eis_page_state';
 import { ELASTIC_INFERENCE_SERVICE_BREADCRUMB } from '../translations';
 
 export const ElasticInferenceService = () => {
   useBreadcrumbs(ELASTIC_INFERENCE_SERVICE_BREADCRUMB);
+  const { pageState, isCloudConnectPromoVisible } = useEisPageState();
+  const isCenteredPrompt = pageState === 'selfManagedEmpty' || pageState === 'unavailable';
 
   const [isManageRegionsOpen, setIsManageRegionsOpen] = useState(false);
   const openManageRegions = useCallback(() => {
@@ -30,12 +33,23 @@ export const ElasticInferenceService = () => {
     <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
-      grow={false}
+      grow={isCenteredPrompt}
       data-test-subj="eisModelsPage"
     >
-      <ElasticInferenceServiceModelsHeader onManageRegions={openManageRegions} />
-      <EuiPageTemplate.Section data-test-subj="eisModelsPageMain" paddingSize="none">
-        <ElasticInferenceServiceModelsPage onManageRegions={openManageRegions} />
+      {!isCenteredPrompt && (
+        <ElasticInferenceServiceModelsHeader onManageRegions={openManageRegions} />
+      )}
+      <EuiPageTemplate.Section
+        data-test-subj="eisModelsPageMain"
+        paddingSize="none"
+        grow={isCenteredPrompt}
+        alignment={isCenteredPrompt ? 'center' : 'top'}
+      >
+        <ElasticInferenceServiceModelsPage
+          pageState={pageState}
+          isCloudConnectPromoVisible={isCloudConnectPromoVisible}
+          onManageRegions={openManageRegions}
+        />
       </EuiPageTemplate.Section>
       {isManageRegionsOpen && <ManageRegionsModal onClose={closeManageRegions} />}
     </KibanaPageTemplate>
