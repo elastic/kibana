@@ -23,6 +23,7 @@ import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
 import { registerImpactStepDefinitions } from './impact/step_types';
 import { registerInvestigationStepDefinitions } from './investigations/step_types';
+import { registerWorkflowExecutionStepDefinitions } from './workflow_execution/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { createSetImpactTool } from './impact/tools/set_impact_tool';
 import { registerSubjectAttachment, subjectAttachment } from './subjects/attachments';
@@ -36,6 +37,7 @@ import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
+import { registerEscalationConversationEvents } from './escalations/conversation_events';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
@@ -81,6 +83,10 @@ export class AgenticInvestigationsPlugin
     { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
+
+    if (this.escalationsEnabled) {
+      registerEscalationConversationEvents(agentBuilder);
+    }
 
     // Attachment types, steps and tools register during setup but only run once Kibana has
     // started, so the authorization service is resolved per call rather than
@@ -168,6 +174,11 @@ export class AgenticInvestigationsPlugin
     registerInvestigationStepDefinitions({
       workflowsExtensions,
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
+    registerWorkflowExecutionStepDefinitions({
+      workflowsExtensions,
       getConversationClient: (request) => this.getConversationClient(request),
     });
 
