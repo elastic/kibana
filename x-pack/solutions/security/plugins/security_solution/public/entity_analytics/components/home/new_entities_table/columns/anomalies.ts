@@ -13,13 +13,24 @@ import {
   ANOMALY_COUNT_FIELD,
   ML_ANOMALY_INDICES,
   buildEuidStages,
+  buildEntitiesInViewConditions,
   buildEntitiesInViewCountQuery,
+  buildKeepClause,
+  buildLookupJoinClause,
   buildMergedForeignSortQuery,
   lookbackCutoff,
   nullOnFailure,
   toList,
 } from '../common';
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
+import {
+  MAX_VALUE_ROWS,
+  buildValueCursorClause,
+  buildValueSortSuffix,
+  runEmptyRowsExcludingValueIds,
+  runSplitSortPage,
+} from './split_sort';
+import type { SplitSortPlan } from './split_sort';
 
 /** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
 const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
@@ -49,6 +60,46 @@ const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
     mergeAggregations: [`${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`],
     sortField: ANOMALY_COUNT_FIELD,
   });
+
+// ── split sort (see split_sort.ts) ───────────────────────────────────────────
+
+/** Entities in view with anomalies, with their entity docs. */
+const buildAnomalousEntitiesInView = (args: QueryArgs, stats: string): string[] => [
+  SET_UNMAPPED_NULLIFY,
+  ...buildAnomalyEntityRows(args),
+  stats,
+  buildLookupJoinClause(args.concreteEntityIndexName),
+  ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
+];
+
+export const anomalySplitSortPlan: SplitSortPlan = {
+  sortField: ANOMALY_COUNT_FIELD,
+  emptyValue: null,
+  buildValueRowsQuery: (args, limit) =>
+    [
+      ...buildAnomalousEntitiesInView(
+        args,
+        `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``
+      ),
+      ...buildValueCursorClause(args.cursor),
+      ...buildValueSortSuffix(args, ANOMALY_COUNT_FIELD, limit),
+      buildKeepClause(args, ANOMALY_COUNT_FIELD),
+    ].join('\n'),
+  runEmptyRows: (args, runQuery, afterId, limit) =>
+    runEmptyRowsExcludingValueIds(
+      args,
+      runQuery,
+      [
+        ...buildAnomalousEntitiesInView(args, '| STATS BY `entity.id`'),
+        '| KEEP `entity.id`',
+        `| LIMIT ${MAX_VALUE_ROWS + 1}`,
+      ].join('\n'),
+      { emptyColumns: `${ANOMALY_COUNT_FIELD} = TO_LONG(null)`, columns: [ANOMALY_COUNT_FIELD] },
+      afterId,
+      limit
+    ),
+  buildSortQuery: buildAnomalyCountSortQuery,
+};
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
@@ -90,5 +141,6 @@ export const anomalyCountColumn = {
   isExpandable: false,
   buildSortQuery: buildAnomalyCountSortQuery,
   buildCountQuery: buildEntitiesInViewCountQuery,
+  runSortPage: (args, ctx) => runSplitSortPage(anomalySplitSortPlan, args, ctx),
   enrichPage: enrichAnomalyCount,
 } as const satisfies ColumnDescriptor;

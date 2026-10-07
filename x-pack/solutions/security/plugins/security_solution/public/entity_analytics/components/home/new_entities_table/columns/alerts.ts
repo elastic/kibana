@@ -19,6 +19,8 @@ import {
   buildEntitiesInViewConditions,
   buildEntitiesInViewCountQuery,
   buildForeignSortPageSteps,
+  buildKeepClause,
+  buildLookupJoinClause,
   entityAliasOf,
   IN_VIEW_FIELD,
   lookbackCutoff,
@@ -26,6 +28,14 @@ import {
   toList,
 } from '../common';
 import type { QueryArgs, Row, RunContext, ColumnDescriptor } from '../common';
+import {
+  MAX_VALUE_ROWS,
+  buildValueCursorClause,
+  buildValueSortSuffix,
+  runEmptyRowsExcludingValueIds,
+  runSplitSortPage,
+} from './split_sort';
+import type { SplitSortPlan } from './split_sort';
 
 const ALERT_OPEN_STATUS_FILTER =
   'kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != "closed"';
@@ -135,6 +145,57 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   ].join('\n');
 };
 
+// ── split sort (see split_sort.ts) ───────────────────────────────────────────
+
+/** Open alerts in the time range, mapped to `entity.id`, without entity docs. */
+const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[] => [
+  `FROM ${alertsIndexOf(namespace)}`,
+  `| WHERE \`@timestamp\` >= "${lookbackCutoff(timeRange)}" AND (${ALERT_OPEN_STATUS_FILTER})`,
+  ...buildAlertEuidPipeline(),
+];
+
+/** Entities in view with open alerts, with their entity docs. */
+const buildAlertedEntitiesInView = (args: QueryArgs, aggregations: string[]): string[] => [
+  ...buildOpenAlertEntityRows(args),
+  `| STATS ${aggregations.join(', ')} BY \`entity.id\``,
+  buildLookupJoinClause(args.concreteEntityIndexName),
+  ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
+];
+
+const ALERT_EMPTY_COLUMNS = [
+  ...ALERT_COUNT_FIELDS.map((field) => `${field} = TO_LONG(0)`),
+  `${LAST_SEEN_ALERT_FIELD} = TO_DATETIME(null)`,
+].join(', ');
+
+export const alertSplitSortPlan = (sortField: string): SplitSortPlan => ({
+  sortField,
+  // Entities without alerts count 0, so they sort first ascending; their last alert is null.
+  emptyValue: sortField === ALERT_COUNT_FIELD ? 0 : null,
+  buildValueRowsQuery: (args, limit) =>
+    [
+      ...buildAlertedEntitiesInView(args, buildAlertAggregations()),
+      ...buildValueCursorClause(args.cursor),
+      ...buildValueSortSuffix(args, sortField, limit),
+      buildKeepClause(args, sortField, ...ALERT_FIELDS),
+    ].join('\n'),
+  runEmptyRows: (args, runQuery, afterId, limit) =>
+    runEmptyRowsExcludingValueIds(
+      args,
+      runQuery,
+      [
+        ...buildAlertedEntitiesInView(args, []).map((line) =>
+          line.startsWith('| STATS') ? '| STATS BY `entity.id`' : line
+        ),
+        '| KEEP `entity.id`',
+        `| LIMIT ${MAX_VALUE_ROWS + 1}`,
+      ].join('\n'),
+      { emptyColumns: ALERT_EMPTY_COLUMNS, columns: [sortField, ...ALERT_FIELDS] },
+      afterId,
+      limit
+    ),
+  buildSortQuery: (args) => buildAlertSortQuery(args, sortField),
+});
+
 // ── enrichment ────────────────────────────────────────────────────────────────
 
 const buildAlertsEnrichQuery = (
@@ -194,6 +255,7 @@ export const alertCountColumn = {
   // Entities without alerts count 0, so they sort first in ascending order.
   buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD),
   buildCountQuery: buildEntitiesInViewCountQuery,
+  runSortPage: (args, ctx) => runSplitSortPage(alertSplitSortPlan(ALERT_COUNT_FIELD), args, ctx),
   enrichPage: enrichAlerts,
 } as const satisfies ColumnDescriptor;
 
@@ -206,6 +268,8 @@ export const lastSeenAlertColumn = {
   isExpandable: false,
   buildSortQuery: (args) => buildAlertSortQuery(args, LAST_SEEN_ALERT_FIELD),
   buildCountQuery: buildEntitiesInViewCountQuery,
+  runSortPage: (args, ctx) =>
+    runSplitSortPage(alertSplitSortPlan(LAST_SEEN_ALERT_FIELD), args, ctx),
   // No enrichPage: enrichAlerts on alertCountColumn also fills this field.
   // The registry runs each enrichPage function once.
 } as const satisfies ColumnDescriptor;

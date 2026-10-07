@@ -29,6 +29,7 @@ import {
   GROUP_SIZE_FIELD,
   enrichEntityRows,
   createEsqlRunner,
+  nullOnFailure,
   toSortValue,
 } from './common';
 import { ENRICH_FNS, findSortableColumn } from './columns/registry';
@@ -201,6 +202,18 @@ export const useEntityGridData = ({
         null;
   const cursor: PageCursor | null = cursorStr ? decodeCursor(cursorStr) : null;
 
+  const countEsql =
+    concreteEntityIndexName && sortColumn
+      ? sortColumn.buildCountQuery(buildArgs(concreteEntityIndexName, null))
+      : null;
+  const countKey = entityGridKeys.count(spaceId, countEsql);
+  const fetchCount = async ({ signal }: { signal?: AbortSignal }): Promise<number> => {
+    if (!countEsql) throw new Error(`Column ${sortField} is not sortable`);
+
+    const [countRow] = await createEsqlRunner(searchService, signal)(countEsql);
+    return (countRow && getNumber(countRow, 'total')) ?? 0;
+  };
+
   const shellQuery = useQuery(
     shellKey(fetchPageIndex),
     async ({ signal }): Promise<EntityGridResponse> => {
@@ -208,10 +221,23 @@ export const useEntityGridData = ({
       if (!sortColumn) throw new Error(`Column ${sortField} is not sortable`);
 
       const args = buildArgs(concreteEntityIndexName, cursor);
-      const allRows = await createEsqlRunner(
-        searchService,
-        signal
-      )(sortColumn.buildSortQuery(args));
+      const runQuery = createEsqlRunner(searchService, signal);
+      // A column that reads its page with several queries picks them by the view size,
+      // from the count query that runs for the grid anyway. Without a count it keeps its
+      // general sort query (view size 0).
+      const allRows = sortColumn.runSortPage
+        ? await sortColumn.runSortPage(args, {
+            runQuery,
+            viewSize:
+              (await nullOnFailure(
+                queryClient.fetchQuery({
+                  queryKey: countKey,
+                  queryFn: fetchCount,
+                  staleTime: Infinity,
+                })
+              )) ?? 0,
+          })
+        : await runQuery(sortColumn.buildSortQuery(args));
       const hasNextPage = allRows.length > pageSize;
       const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
 
@@ -229,26 +255,12 @@ export const useEntityGridData = ({
     }
   );
 
-  const countEsql =
-    concreteEntityIndexName && sortColumn
-      ? sortColumn.buildCountQuery(buildArgs(concreteEntityIndexName, null))
-      : null;
-
-  const countQuery = useQuery(
-    entityGridKeys.count(spaceId, countEsql),
-    async ({ signal }): Promise<number> => {
-      if (!countEsql) throw new Error(`Column ${sortField} is not sortable`);
-
-      const [countRow] = await createEsqlRunner(searchService, signal)(countEsql);
-      return (countRow && getNumber(countRow, 'total')) ?? 0;
-    },
-    {
-      enabled: countEsql != null,
-      // No keepPreviousData: a stale unfiltered total invents phantom pages after a
-      // tile/filter. `total` below falls back to the painted page so rowCount does
-      // not snap to 0 and collapse the grid.
-    }
-  );
+  const countQuery = useQuery(countKey, fetchCount, {
+    enabled: countEsql != null,
+    // No keepPreviousData: a stale unfiltered total invents phantom pages after a
+    // tile/filter. `total` below falls back to the painted page so rowCount does
+    // not snap to 0 and collapse the grid.
+  });
 
   const isCurrentPage = fetchPageIndex === pageIndex;
   const shellRows = isCurrentPage ? shellQuery.data?.entities : undefined;

@@ -129,6 +129,12 @@ interface ColumnBase extends EuiDataGridColumn {
   enrichPage?: EnrichFn;
 }
 
+export interface SortPageContext {
+  runQuery: EsqlRunner;
+  /** Number of entities in view, from the count query. */
+  viewSize: number;
+}
+
 export interface SortableColumn extends ColumnBase {
   isSortable: true;
   /** `native`: the sort field is on the entity doc. `foreign`: STATS computes the sort value. */
@@ -137,6 +143,11 @@ export interface SortableColumn extends ColumnBase {
   buildSortQuery: (args: QueryArgs) => string;
   /** Builds the query for the total row count when this column is the sort. */
   buildCountQuery: (args: QueryArgs) => string;
+  /**
+   * Loads one page of rows plus one with more than one query, for views where that is
+   * cheaper than `buildSortQuery`. Returns the same rows as `buildSortQuery`.
+   */
+  runSortPage?: (args: QueryArgs, ctx: SortPageContext) => Promise<Row[]>;
 }
 
 export interface UnsortableColumn extends ColumnBase {
@@ -377,53 +388,69 @@ export const buildForeignSortPageSteps = (
   buildSortSuffix(sortField, args.sort.direction, args.pageSize),
 ];
 
-interface MergedForeignSortOptions {
+export interface MergedForeignRowsOptions {
   /** Statements that go before the query, for example `SET …;`. */
   settings?: readonly string[];
   /** Pipeline over the foreign index that ends in `STATS … BY entity.id`. */
   foreignRows: readonly string[];
   /** Entity doc fields the merge needs besides `entity.id`. */
   entityFields?: readonly string[];
+  /** Conditions on the entities side besides being in view. */
+  entityConditions?: readonly string[];
   /** Merge aggregations that carry the foreign columns, e.g. `x = MAX(x)`. */
   mergeAggregations: readonly string[];
   /** Steps after the merge that compute the sort column. */
   afterMerge?: readonly string[];
+}
+
+interface MergedForeignSortOptions extends MergedForeignRowsOptions {
   sortField: string;
 }
 
 /**
- * Sort query for a foreign column that keeps every entity in view: the foreign
- * aggregation and the entities in view are read side by side and merged by `entity.id`,
- * so entities without foreign data stay as rows, sorted last. Filters apply to the
- * entities side, so the result matches the native sorts' rows and their count.
+ * One row per entity in view with its foreign columns: the foreign aggregation and the
+ * entities in view are read side by side and merged by `entity.id`, so entities without
+ * foreign data stay as rows. Filters apply to the entities side.
  */
-export const buildMergedForeignSortQuery = (
+export const buildMergedForeignRows = (
   args: QueryArgs,
   {
     settings = [],
     foreignRows,
     entityFields = [],
+    entityConditions = [],
     mergeAggregations,
     afterMerge = [],
-    sortField,
-  }: MergedForeignSortOptions
+  }: MergedForeignRowsOptions
+): string[] => [
+  ...settings,
+  'FROM (',
+  ...foreignRows,
+  '), (',
+  ...buildEntitiesInViewSteps(args),
+  ...entityConditions.map((condition) => `| WHERE ${condition}`),
+  `| EVAL ${IN_VIEW_FIELD} = 1`,
+  `| KEEP ${[`\`${ENTITY_ID_FIELD}\``, IN_VIEW_FIELD, ...entityFields].join(', ')}`,
+  ')',
+  `| STATS ${[...mergeAggregations, `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`].join(
+    ', '
+  )} BY \`${ENTITY_ID_FIELD}\``,
+  `| WHERE ${IN_VIEW_FIELD} == 1`,
+  ...afterMerge,
+];
+
+/**
+ * Sort query for a foreign column that keeps every entity in view (see
+ * {@link buildMergedForeignRows}): entities without foreign data sort last, so the
+ * result matches the native sorts' rows and their count.
+ */
+export const buildMergedForeignSortQuery = (
+  args: QueryArgs,
+  { sortField, ...options }: MergedForeignSortOptions
 ): string =>
-  [
-    ...settings,
-    'FROM (',
-    ...foreignRows,
-    '), (',
-    ...buildEntitiesInViewSteps(args),
-    `| EVAL ${IN_VIEW_FIELD} = 1`,
-    `| KEEP ${[`\`${ENTITY_ID_FIELD}\``, IN_VIEW_FIELD, ...entityFields].join(', ')}`,
-    ')',
-    `| STATS ${[...mergeAggregations, `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`].join(
-      ', '
-    )} BY \`${ENTITY_ID_FIELD}\``,
-    `| WHERE ${IN_VIEW_FIELD} == 1`,
-    ...afterMerge,
-    ...buildForeignSortPageSteps(args, sortField),
-  ].join('\n');
+  [...buildMergedForeignRows(args, options), ...buildForeignSortPageSteps(args, sortField)].join(
+    '\n'
+  );
 
 // ── EUID query pipeline builders ─────────────────────────────────────────────
 

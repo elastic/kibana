@@ -14,12 +14,29 @@ import {
   RISK_SCORE_NORM_FIELD,
   TIME_RANGE_DAYS,
   buildEntitiesInViewCountQuery,
+  buildKeepClause,
+  buildLookupJoinClause,
+  buildMergedForeignRows,
   buildMergedForeignSortQuery,
+  esc,
   nullOnFailure,
   riskScoreIndexOf,
   toList,
 } from '../common';
-import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
+import type {
+  QueryArgs,
+  RunContext,
+  Row,
+  ColumnDescriptor,
+  MergedForeignRowsOptions,
+} from '../common';
+import {
+  buildEmptyRowsQuery,
+  buildValueCursorClause,
+  buildValueSortSuffix,
+  runSplitSortPage,
+} from './split_sort';
+import type { SplitSortPlan } from './split_sort';
 
 /** Width of the reference window before the time range, as in the risk movers tile. */
 const REFERENCE_WINDOW_HOURS = 2;
@@ -48,23 +65,89 @@ const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] 
 
 // ── sort queries ──────────────────────────────────────────────────────────────
 
+/** Reference and current scores merged per entity in view, with the change. */
+const riskScoreChangeRows = (args: QueryArgs): MergedForeignRowsOptions => ({
+  foreignRows: [
+    ...buildReferenceScoreDocs(args),
+    `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
+    `| EVAL \`entity.id\` = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
+    `| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\``,
+  ],
+  entityFields: [RISK_SCORE_NORM_FIELD],
+  mergeAggregations: [
+    'reference_score = MAX(reference_score)',
+    `current_score = MAX(${RISK_SCORE_NORM_FIELD})`,
+  ],
+  afterMerge: [`| EVAL ${RISK_SCORE_CHANGE_FIELD} = current_score - reference_score`],
+});
+
 /** Entities without a reference or a current score have no change and sort last. */
 const buildRiskScoreChangeSortQuery = (args: QueryArgs): string =>
   buildMergedForeignSortQuery(args, {
-    foreignRows: [
-      ...buildReferenceScoreDocs(args),
-      `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
-      `| EVAL \`entity.id\` = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
-      `| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\``,
-    ],
-    entityFields: [RISK_SCORE_NORM_FIELD],
-    mergeAggregations: [
-      'reference_score = MAX(reference_score)',
-      `current_score = MAX(${RISK_SCORE_NORM_FIELD})`,
-    ],
-    afterMerge: [`| EVAL ${RISK_SCORE_CHANGE_FIELD} = current_score - reference_score`],
+    ...riskScoreChangeRows(args),
     sortField: RISK_SCORE_CHANGE_FIELD,
   });
+
+// ── split sort (see split_sort.ts) ───────────────────────────────────────────
+
+/**
+ * Only scored entities can have a change, and there are few of them, so the merge reads
+ * only scored entity docs. Its rows are the value rows (with a reference score) and the
+ * scored entities without one, which are empty rows.
+ */
+const buildScoredEntityRows = (args: QueryArgs): string[] =>
+  buildMergedForeignRows(args, {
+    ...riskScoreChangeRows(args),
+    entityConditions: [`${RISK_SCORE_NORM_FIELD} IS NOT NULL`],
+  });
+
+export const riskScoreChangeSplitSortPlan: SplitSortPlan = {
+  sortField: RISK_SCORE_CHANGE_FIELD,
+  emptyValue: null,
+  buildValueRowsQuery: (args, limit) =>
+    [
+      ...buildScoredEntityRows(args),
+      `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NOT NULL`,
+      ...buildValueCursorClause(args.cursor),
+      ...buildValueSortSuffix(args, RISK_SCORE_CHANGE_FIELD, limit),
+      buildLookupJoinClause(args.concreteEntityIndexName),
+      buildKeepClause(args, RISK_SCORE_CHANGE_FIELD),
+      // LOOKUP JOIN may not keep the input order.
+      ...buildValueSortSuffix(args, RISK_SCORE_CHANGE_FIELD, limit),
+    ].join('\n'),
+  // Empty rows: unscored entities, plus scored entities without a reference score.
+  runEmptyRows: async (args, runQuery, afterId, limit) => {
+    const [unscored, unreferenced] = await Promise.all([
+      runQuery(
+        buildEmptyRowsQuery(
+          args,
+          {
+            conditions: [`${RISK_SCORE_NORM_FIELD} IS NULL`],
+            emptyColumns: `${RISK_SCORE_CHANGE_FIELD} = TO_DOUBLE(null)`,
+            columns: [RISK_SCORE_CHANGE_FIELD],
+          },
+          afterId,
+          limit
+        )
+      ),
+      runQuery(
+        [
+          ...buildScoredEntityRows(args),
+          `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NULL`,
+          ...(afterId != null ? [`| WHERE \`entity.id\` > ${esc(afterId)}`] : []),
+          '| SORT `entity.id` ASC',
+          `| LIMIT ${limit}`,
+          buildLookupJoinClause(args.concreteEntityIndexName),
+          buildKeepClause(args, RISK_SCORE_CHANGE_FIELD),
+        ].join('\n')
+      ),
+    ]);
+    return [...unscored, ...unreferenced]
+      .sort((a, b) => ((getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1))
+      .slice(0, limit);
+  },
+  buildSortQuery: buildRiskScoreChangeSortQuery,
+};
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
@@ -117,5 +200,6 @@ export const riskScoreChangeColumn = {
   isExpandable: false,
   buildSortQuery: buildRiskScoreChangeSortQuery,
   buildCountQuery: buildEntitiesInViewCountQuery,
+  runSortPage: (args, ctx) => runSplitSortPage(riskScoreChangeSplitSortPlan, args, ctx),
   enrichPage: enrichRiskScoreChange,
 } as const satisfies ColumnDescriptor;
