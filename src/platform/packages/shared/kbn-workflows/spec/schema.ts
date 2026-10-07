@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isSchemaValuedAdditionalProperties } from './schema/common/json_model_shape_schema';
 import { TriggerSchema } from './schema/triggers';
 import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
 import {
@@ -376,11 +377,35 @@ export const HitlEmailChannelSchema = z.object({
     .describe('Email subject. Defaults to a built-in subject when omitted.'),
 });
 
+export const HitlSlack2ChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Slack (v2) connector saved object id or name'),
+  channels: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+        .describe(
+          'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
+        )
+    )
+    .min(1)
+    .describe(
+      'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
+    ),
+});
+
 const hitlChannelDescriptions = {
   slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
   slack_api:
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
   email: 'Notify via an Email connector. Requires connector-id and at least one `to` recipient.',
+  slack2:
+    'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
 } as const;
 
 export const WaitForInputChannelsSchema = z
@@ -394,6 +419,9 @@ export const WaitForInputChannelsSchema = z
     email: HitlEmailChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.email),
+    slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack2),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -405,6 +433,7 @@ export const WaitForApprovalChannelsSchema = z
       .optional()
       .describe(hitlChannelDescriptions.slack_api),
     email: HitlEmailChannelSchema.loose().optional().describe(hitlChannelDescriptions.email),
+    slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -1143,6 +1172,16 @@ const WorkflowSchemaBase = z.object({
 function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
   if (!value) return undefined;
   if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
+  if (
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    'additionalProperties' in value &&
+    isSchemaValuedAdditionalProperties(
+      (value as { additionalProperties?: unknown }).additionalProperties
+    )
+  ) {
     return value as z.infer<typeof JsonModelSchema>;
   }
   if (Array.isArray(value)) {

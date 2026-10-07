@@ -7,7 +7,7 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { StartServicesAccessor } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { policyIdentifierInputSchema } from '../domain/input_schemas';
 import type { PolicyRolloutStatus } from '../services/read_policy_rollout_status';
@@ -23,11 +23,13 @@ export const GET_POLICY_ROLLOUT_STATUS_TOOL_ID =
 
 const GET_POLICY_ROLLOUT_STATUS_MAX_RESULT_TOKENS = 8_000;
 
-export const getPolicyRolloutStatusSchema = z.object({
-  idOrName: policyIdentifierInputSchema.describe(
-    'Saved-object id or exact endpoint policy name in the current space.'
-  ),
-});
+export const getPolicyRolloutStatusSchema = lazySchema(() =>
+  z.object({
+    idOrName: policyIdentifierInputSchema.describe(
+      'Saved-object id or exact endpoint policy name in the current space.'
+    ),
+  })
+);
 
 export interface PolicyRolloutStatusResult extends Record<string, unknown> {
   policy: PresentedPolicyIdentity<PolicyRolloutStatus['policy']>;

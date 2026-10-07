@@ -57,7 +57,7 @@ export interface ListExecutionHistoryArgs {
   search?: string;
   ruleIds?: string[];
   outcomes?: PolicyExecutionOutcomeFilter;
-  episodeIds?: string[];
+  alertIds?: string[];
   /**
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
    * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
@@ -107,7 +107,7 @@ export class ActionPolicyExecutionHistoryClient {
     search,
     ruleIds,
     outcomes,
-    episodeIds,
+    alertIds,
     from,
     to,
     sortOrder,
@@ -140,7 +140,7 @@ export class ActionPolicyExecutionHistoryClient {
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,
-      episodeIds,
+      alertIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId, request);

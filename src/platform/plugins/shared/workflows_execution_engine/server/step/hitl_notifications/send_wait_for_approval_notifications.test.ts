@@ -50,6 +50,14 @@ describe('send_wait_for_approval_notifications', () => {
         })
       ).toBe(false);
     });
+
+    it('returns true when slack2 channel config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123'] },
+        })
+      ).toBe(true);
+    });
   });
 
   describe('buildWaitForApprovalResumeLinks', () => {
@@ -204,6 +212,38 @@ describe('send_wait_for_approval_notifications', () => {
         },
         abortController: expect.any(AbortController),
       });
+    });
+
+    it('sends slack2 sendMessage notifications to every configured channel', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123', 'C0456'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          connectorType: 'slack2',
+          input: {
+            subAction: 'sendMessage',
+            subActionParams: {
+              channel: 'C0123',
+              text: 'Approve change?\n\n<https://kibana.example/approve|Approve>  <https://kibana.example/reject|Decline>',
+              unfurlLinks: false,
+              unfurlMedia: false,
+            },
+          },
+        })
+      );
+      expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
     });
 
     it('throws when a configured connector fails', async () => {
