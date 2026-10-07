@@ -20,6 +20,8 @@ export interface CloudOnboardingEcfStack {
   stackName: string;
   /** ECF template semantic version resolved at launch time, e.g. "1.10.0". */
   templateVersion: string;
+  /** CloudFormation stack ARN (StackId) pasted by the user after launch. Used to build the AWS Console update link when services change. */
+  stackArn?: string;
 }
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';

@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +36,8 @@ import {
   buildEcfUnifiedCloudFormationUrl,
   buildEcfOtelCloudFormationUrl,
   buildEcfCrowdstrikeCloudFormationUrl,
+  buildEcfStackConsoleUrl,
+  isEcfStackArnValid,
   ECF_UNIFIED_STACK_NAME,
   ECF_OTEL_STACK_NAME,
   ECF_CROWDSTRIKE_STACK_NAME,
@@ -74,6 +77,17 @@ export interface PersistedEcfLaunchStep {
    * Stored so the summary step can display it after navigating away and back.
    */
   stackVersions?: Partial<Record<EcfTemplateFamily, string>>;
+  /**
+   * Sorted service IDs per family at the time of last launch or acknowledged update.
+   * Compared against the current selection to detect when the stack is out of sync.
+   * Absent for sessions started before this field was added — treated as not stale.
+   */
+  launchedServiceIds?: Partial<Record<EcfTemplateFamily, string[]>>;
+  /**
+   * CloudFormation stack ARN (StackId) per family, pasted by the user after launch.
+   * Used to build the AWS Console view/update link. Written to the onboarding SO on Next.
+   */
+  stackArns?: Partial<Record<EcfTemplateFamily, string>>;
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -95,6 +109,8 @@ interface UseEcfDeploymentResult {
   isDone: boolean;
   /** Props to spread onto <EcfDeploymentSection />. */
   sectionProps: EcfDeploymentSectionProps;
+  /** Stack ARNs per family, for the parent to include in the onboarding SO on Next. */
+  stackArns: Partial<Record<EcfTemplateFamily, string>>;
 }
 
 /** Encapsulates all ECF-related state and URL derivation for the Authenticate & Deploy step. */
@@ -113,23 +129,10 @@ export const useEcfDeployment = ({
   const launchedFamilies: EcfTemplateFamily[] = persistedLaunchStep?.launchedFamilies ?? [];
   const stackNames = persistedLaunchStep?.stackNames ?? {};
   const stackVersions = persistedLaunchStep?.stackVersions ?? {};
+  const launchedServiceIds = persistedLaunchStep?.launchedServiceIds ?? {};
+  const stackArns = persistedLaunchStep?.stackArns ?? {};
 
   const { version: templateVersion } = useEcfTemplateVersion();
-
-  const onLaunch = (family: EcfTemplateFamily) => {
-    setPersistedLaunchStep({
-      ...persistedLaunchStep,
-      launchedFamilies: [...new Set([...launchedFamilies, family])],
-      stackVersions: { ...stackVersions, [family]: templateVersion },
-    });
-  };
-
-  const onStackNameChange = (family: EcfTemplateFamily, name: string) => {
-    setPersistedLaunchStep({
-      ...persistedLaunchStep,
-      stackNames: { ...stackNames, [family]: name },
-    });
-  };
 
   const allEcfConfigs = useMemo(
     () => getEcfServiceConfigs(instances, serviceVars),
@@ -250,10 +253,72 @@ export const useEcfDeployment = ({
     ]
   );
 
+  // Sorted service IDs per family at the current moment — compared against the snapshot taken
+  // at launch time to decide whether the family's stack is out of sync.
+  const currentServiceIdsByFamily = useMemo(
+    () => ({
+      unified: [...new Set(ecfUnifiedConfigs.map((c) => c.serviceId))].sort(),
+      otel: [...new Set(ecfOtelConfigs.map((c) => c.serviceId))].sort(),
+      crowdstrike: [...ecfCrowdstrikeServices].sort(),
+    }),
+    [ecfUnifiedConfigs, ecfOtelConfigs, ecfCrowdstrikeServices]
+  );
+
+  // A family is stale when it was launched AND a service-ID snapshot exists AND the current
+  // set differs from the snapshot. Old sessions without a snapshot are never considered stale.
+  const isStaleByFamily = useMemo(() => {
+    const check = (family: EcfTemplateFamily): boolean => {
+      if (!launchedFamilies.includes(family)) return false;
+      const snapshot = launchedServiceIds[family];
+      if (snapshot === undefined) return false;
+      return JSON.stringify(snapshot) !== JSON.stringify(currentServiceIdsByFamily[family]);
+    };
+    return { unified: check('unified'), otel: check('otel'), crowdstrike: check('crowdstrike') };
+  }, [launchedFamilies, launchedServiceIds, currentServiceIdsByFamily]);
+
+  const onLaunch = (family: EcfTemplateFamily) => {
+    setPersistedLaunchStep({
+      ...persistedLaunchStep,
+      launchedFamilies: [...new Set([...launchedFamilies, family])],
+      stackVersions: { ...stackVersions, [family]: templateVersion },
+      launchedServiceIds: {
+        ...launchedServiceIds,
+        [family]: currentServiceIdsByFamily[family],
+      },
+    });
+  };
+
+  const onStackNameChange = (family: EcfTemplateFamily, name: string) => {
+    setPersistedLaunchStep({
+      ...persistedLaunchStep,
+      stackNames: { ...stackNames, [family]: name },
+    });
+  };
+
+  const onStackArnChange = (family: EcfTemplateFamily, arn: string) => {
+    setPersistedLaunchStep({
+      ...persistedLaunchStep,
+      stackArns: { ...stackArns, [family]: arn },
+    });
+  };
+
+  // Called when the user clicks "Update stack" — records the current service IDs as
+  // acknowledged so the stale callout clears for this session.
+  const onUpdateStack = (family: EcfTemplateFamily) => {
+    setPersistedLaunchStep({
+      ...persistedLaunchStep,
+      launchedServiceIds: {
+        ...launchedServiceIds,
+        [family]: currentServiceIdsByFamily[family],
+      },
+    });
+  };
+
   return {
     hasAnyEcf,
     ecfServiceIds,
     isDone,
+    stackArns,
     sectionProps: {
       ecfUnifiedConfigs,
       ecfOtelConfigs,
@@ -265,8 +330,12 @@ export const useEcfDeployment = ({
       launchedFamilies,
       stackNames,
       stackVersions,
+      stackArns,
+      isStaleByFamily,
       onLaunch,
       onStackNameChange,
+      onStackArnChange,
+      onUpdateStack,
     },
   };
 };
@@ -291,6 +360,14 @@ interface EcfFamilyPanelProps {
   defaultStackName: string;
   /** Called whenever the user edits the stack name field. */
   onStackNameChange: (name: string) => void;
+  /** CloudFormation stack ARN pasted by the user (empty string when not yet provided). */
+  stackArn: string;
+  /** True when the current service selection differs from what was last launched. */
+  isStale: boolean;
+  /** Called whenever the user edits the stack ARN field. */
+  onStackArnChange: (arn: string) => void;
+  /** Called when the user clicks "Update stack" — clears the stale state for this session. */
+  onUpdateStack: () => void;
 }
 
 interface EcfFamilyPanelPostLaunchProps {
@@ -300,9 +377,13 @@ interface EcfFamilyPanelPostLaunchProps {
   defaultStackName: string;
   onStackNameChange: (name: string) => void;
   testSubjPrefix: string;
+  stackArn: string;
+  isStale: boolean;
+  onStackArnChange: (arn: string) => void;
+  onUpdateStack: () => void;
 }
 
-/** Post-launch content for one ECF template family: confirmation, stack name field, version, reopen. */
+/** Post-launch content for one ECF template family: confirmation, stack name field, version, reopen, ARN, stale callout. */
 const EcfFamilyPanelPostLaunch = ({
   launchUrl,
   stackName,
@@ -310,6 +391,10 @@ const EcfFamilyPanelPostLaunch = ({
   defaultStackName,
   onStackNameChange,
   testSubjPrefix,
+  stackArn,
+  isStale,
+  onStackArnChange,
+  onUpdateStack,
 }: EcfFamilyPanelPostLaunchProps) => {
   const [showReopen, setShowReopen] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -326,6 +411,10 @@ const EcfFamilyPanelPostLaunch = ({
   // not prevent navigation (the field is optional throughout).
   const isStackNameValid = stackName === '' || STACK_NAME_REGEX.test(stackName);
 
+  const stackArnTrimmed = stackArn.trim();
+  const isArnValid = isEcfStackArnValid(stackArnTrimmed);
+  const stackConsoleUrl = isArnValid ? buildEcfStackConsoleUrl(stackArnTrimmed) : undefined;
+
   useEffect(() => {
     const timer = window.setTimeout(() => setShowReopen(true), REOPEN_LINK_DELAY_MS);
     return () => window.clearTimeout(timer);
@@ -333,6 +422,58 @@ const EcfFamilyPanelPostLaunch = ({
 
   return (
     <>
+      {/* Stale callout — shown when the current service selection differs from last launch */}
+      {isStale && (
+        <>
+          <EuiCallOut
+            color="warning"
+            iconType="warning"
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.staleCallout.title"
+                defaultMessage="Services changed — update your CloudFormation stack"
+              />
+            }
+            data-test-subj={`${testSubjPrefix}-staleCallout`}
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.staleCallout.body"
+                defaultMessage="Your service selection has changed since this stack was last launched. Update the stack in AWS to apply the new parameters."
+              />
+            </p>
+            <EuiButton
+              href={stackConsoleUrl}
+              target="_blank"
+              isDisabled={!stackConsoleUrl}
+              color="warning"
+              onClick={onUpdateStack}
+              iconType="external"
+              iconSide="right"
+              size="s"
+              data-test-subj={`${testSubjPrefix}-updateStackButton`}
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.staleCallout.updateButton"
+                defaultMessage="Update stack"
+              />
+            </EuiButton>
+            {!stackConsoleUrl && (
+              <>
+                <EuiSpacer size="xs" />
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.staleCallout.arnHint"
+                    defaultMessage="Paste your stack ARN below to enable this link."
+                  />
+                </EuiText>
+              </>
+            )}
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       <EuiText size="s">
         <p>
           <FormattedMessage
@@ -404,6 +545,52 @@ const EcfFamilyPanelPostLaunch = ({
         </>
       )}
 
+      {/* Stack ARN field — always editable so the user can correct a mis-paste */}
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackArnLabel',
+          { defaultMessage: 'Stack ARN' }
+        )}
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackArnHelp"
+            defaultMessage="Copy the Stack ID from the AWS CloudFormation console and paste it here to enable the View and Update stack links."
+          />
+        }
+        data-test-subj={`${testSubjPrefix}-stackArnRow`}
+      >
+        <EuiFieldText
+          value={stackArn}
+          placeholder="arn:aws:cloudformation:us-east-1:123456789012:stack/..."
+          append={
+            isArnValid ? <EuiIcon type="check" color="success" aria-label="valid ARN" /> : undefined
+          }
+          onChange={(e) => onStackArnChange(e.target.value)}
+          data-test-subj={`${testSubjPrefix}-stackArnField`}
+        />
+      </EuiFormRow>
+
+      {/* View stack link — shown when a valid ARN is stored and not stale (stale state shows Update stack instead) */}
+      {stackConsoleUrl && !isStale && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            href={stackConsoleUrl}
+            target="_blank"
+            iconType="external"
+            iconSide="right"
+            size="s"
+            data-test-subj={`${testSubjPrefix}-viewStack`}
+          >
+            <FormattedMessage
+              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.viewStackButton"
+              defaultMessage="View stack in AWS Console"
+            />
+          </EuiButtonEmpty>
+        </>
+      )}
+
       {/* Reopen link (shown after 5s) */}
       {showReopen && (
         <>
@@ -438,6 +625,10 @@ const EcfFamilyPanel = ({
   stackVersion,
   defaultStackName,
   onStackNameChange,
+  stackArn,
+  isStale,
+  onStackArnChange,
+  onUpdateStack,
 }: EcfFamilyPanelProps) => {
   return (
     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
@@ -475,6 +666,10 @@ const EcfFamilyPanel = ({
           defaultStackName={defaultStackName}
           onStackNameChange={onStackNameChange}
           testSubjPrefix={launchButtonTestSubj}
+          stackArn={stackArn}
+          isStale={isStale}
+          onStackArnChange={onStackArnChange}
+          onUpdateStack={onUpdateStack}
         />
       )}
     </EuiPanel>
@@ -494,8 +689,12 @@ interface EcfDeploymentSectionProps {
   launchedFamilies: EcfTemplateFamily[];
   stackNames: Partial<Record<EcfTemplateFamily, string>>;
   stackVersions: Partial<Record<EcfTemplateFamily, string>>;
+  stackArns: Partial<Record<EcfTemplateFamily, string>>;
+  isStaleByFamily: Record<EcfTemplateFamily, boolean>;
   onLaunch: (family: EcfTemplateFamily) => void;
   onStackNameChange: (family: EcfTemplateFamily, name: string) => void;
+  onStackArnChange: (family: EcfTemplateFamily, arn: string) => void;
+  onUpdateStack: (family: EcfTemplateFamily) => void;
 }
 
 /** Collapsible accordion for all Elastic Cloud Forwarder template families in Step 3. */
@@ -510,8 +709,12 @@ export const EcfDeploymentSection = ({
   launchedFamilies,
   stackNames,
   stackVersions,
+  stackArns,
+  isStaleByFamily,
   onLaunch,
   onStackNameChange,
+  onStackArnChange,
+  onUpdateStack,
 }: EcfDeploymentSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'ecfContent' });
@@ -614,6 +817,10 @@ export const EcfDeploymentSection = ({
               stackVersion={stackVersions.unified}
               defaultStackName={ECF_UNIFIED_STACK_NAME}
               onStackNameChange={(name) => onStackNameChange('unified', name)}
+              stackArn={stackArns.unified ?? ''}
+              isStale={isStaleByFamily.unified}
+              onStackArnChange={(arn) => onStackArnChange('unified', arn)}
+              onUpdateStack={() => onUpdateStack('unified')}
             />
           )}
 
@@ -636,6 +843,10 @@ export const EcfDeploymentSection = ({
                 stackVersion={stackVersions.otel}
                 defaultStackName={ECF_OTEL_STACK_NAME}
                 onStackNameChange={(name) => onStackNameChange('otel', name)}
+                stackArn={stackArns.otel ?? ''}
+                isStale={isStaleByFamily.otel}
+                onStackArnChange={(arn) => onStackArnChange('otel', arn)}
+                onUpdateStack={() => onUpdateStack('otel')}
               />
             </>
           )}
@@ -658,6 +869,10 @@ export const EcfDeploymentSection = ({
                 stackVersion={stackVersions.crowdstrike}
                 defaultStackName={ECF_CROWDSTRIKE_STACK_NAME}
                 onStackNameChange={(name) => onStackNameChange('crowdstrike', name)}
+                stackArn={stackArns.crowdstrike ?? ''}
+                isStale={isStaleByFamily.crowdstrike}
+                onStackArnChange={(arn) => onStackArnChange('crowdstrike', arn)}
+                onUpdateStack={() => onUpdateStack('crowdstrike')}
               />
             </>
           )}

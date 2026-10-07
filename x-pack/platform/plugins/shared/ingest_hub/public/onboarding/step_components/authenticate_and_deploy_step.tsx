@@ -282,14 +282,21 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       .map((family) => {
         const version = ecfSectionProps.stackVersions[family];
         if (!version) return null;
+        const stackArn = ecfSectionProps.stackArns[family];
         return {
           family,
           stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
           templateVersion: version,
+          ...(stackArn ? { stackArn } : {}),
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
-  }, [ecfSectionProps.launchedFamilies, ecfSectionProps.stackVersions, ecfSectionProps.stackNames]);
+  }, [
+    ecfSectionProps.launchedFamilies,
+    ecfSectionProps.stackVersions,
+    ecfSectionProps.stackNames,
+    ecfSectionProps.stackArns,
+  ]);
 
   const ecfStacksUnchanged = useMemo(
     () =>
