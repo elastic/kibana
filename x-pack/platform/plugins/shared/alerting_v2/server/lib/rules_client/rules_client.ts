@@ -1024,6 +1024,15 @@ export class RulesClient {
   }
 
   @withApm
+  public async getRoutingTags(params: { search?: string; size?: number } = {}): Promise<string[]> {
+    return this.rulesSavedObjectService.findTags({
+      search: params.search,
+      size: params.size,
+      field: 'routing_tags',
+    });
+  }
+
+  @withApm
   public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? FIND_DEFAULT_PER_PAGE;
@@ -1056,8 +1065,9 @@ export class RulesClient {
   }
 
   /**
-   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags, or every
-   * alert rule when it has no tags. Signal rules never create alerts, so no policy applies to them.
+   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags in
+   * `metadata.routing_tags`, or every alert rule when it has no tags. Signal rules never create
+   * alerts, so no policy applies to them.
    * The matcher expression runs against alerts, so it can't narrow rules down.
    */
   @withApm

@@ -10,6 +10,7 @@ import { useConversationContext } from '../context/conversation/conversation_con
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId } from './use_conversation';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
+import { useAgentModel } from './agents/use_agent_model';
 import { useSubmitMessage } from './use_submit_message';
 
 /**
@@ -30,11 +31,18 @@ export const useSendPredefinedInitialMessage = () => {
   const agentId = useAgentId();
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
+  const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
   const { submitMessage } = useSubmitMessage();
   const isNewConversation = !conversationId;
 
   useEffect(() => {
-    if (initialMessage && isNewConversation && autoSendInitialMessage && isAgentIdValid) {
+    if (
+      initialMessage &&
+      isNewConversation &&
+      autoSendInitialMessage &&
+      isAgentIdValid &&
+      !isAgentModelLoading
+    ) {
       submitMessage(initialMessage);
       resetInitialMessage?.();
     }
@@ -43,6 +51,7 @@ export const useSendPredefinedInitialMessage = () => {
     autoSendInitialMessage,
     isNewConversation,
     isAgentIdValid,
+    isAgentModelLoading,
     submitMessage,
     resetInitialMessage,
   ]);

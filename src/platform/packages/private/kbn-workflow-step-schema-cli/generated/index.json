@@ -17,6 +17,7 @@
     ".datadog",
     ".dropbox",
     ".dynatrace",
+    ".elasticsearch",
     ".email",
     ".figma",
     ".firecrawl",
@@ -70,6 +71,7 @@
     ".slack2",
     ".slack_api",
     ".snowflake",
+    ".solarwinds_platform",
     ".sublime_security",
     ".swimlane",
     ".tavily_mcp",
@@ -281,11 +283,15 @@
     "dynatrace.listProblems",
     "dynatrace.queryMetrics",
     "elasticsearch.bulk",
+    "elasticsearch.esql",
     "elasticsearch.esql.query",
+    "elasticsearch.getClusterInfo",
+    "elasticsearch.getMapping",
     "elasticsearch.index",
     "elasticsearch.indices.create",
     "elasticsearch.indices.delete",
     "elasticsearch.indices.exists",
+    "elasticsearch.listIndices",
     "elasticsearch.request",
     "elasticsearch.search",
     "elasticsearch.update",
@@ -605,6 +611,9 @@
     "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
+    "nightshift.decisionTreeHydrate",
+    "nightshift.decisionTreePrepare",
+    "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
@@ -719,6 +728,7 @@
     "security.attack-discovery.persistDiscoveries",
     "security.attack-discovery.run",
     "security.buildAlertEntityGraph",
+    "security.buildExceptionEntriesFilter",
     "security.createExceptionListItem",
     "security.createNote",
     "security.createRule",
@@ -726,6 +736,7 @@
     "security.deleteNote",
     "security.disableRule",
     "security.enableRule",
+    "security.getAlertEntities",
     "security.getNotes",
     "security.patchRule",
     "security.renderAlertNarrative",
@@ -816,6 +827,7 @@
     "slack2.resolveChannelId",
     "slack2.searchMessages",
     "slack2.sendMessage",
+    "slack2.updateMessage",
     "slack2.whoAmI",
     "slack_api.postBlockkit",
     "slack_api.postMessage",
@@ -832,6 +844,12 @@
     "snowflake.listTables",
     "snowflake.listViews",
     "snowflake.runQuery",
+    "solarwinds_platform.acknowledgeAlert",
+    "solarwinds_platform.getAlert",
+    "solarwinds_platform.getNode",
+    "solarwinds_platform.listActiveAlerts",
+    "solarwinds_platform.query",
+    "solarwinds_platform.searchNodes",
     "sublime_security.getAsaVerdict",
     "sublime_security.getAttackScore",
     "sublime_security.getMessage",
@@ -943,6 +961,7 @@
     "ai.attachmentDeleted",
     "ai.attachmentUpdated",
     "ai.conversation.metadataUpdated",
+    "ai.conversation.updated",
     "alert",
     "alerting.actions.alertAcked",
     "alerting.actions.alertActivated",
@@ -989,11 +1008,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "59212037792fb6747a7d7052ea6159c5003ccebf12abee3e4fc2786c92f130f2"
+      "sha256": "bcd9fa7cfc2caa7c1f0501d8b224111ce1da261200415958d50d7402febe976f"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "ff2ab28c2f78c0b04cb97f53104d2618c4e2163f477accde130a3b15d6ddda0a"
+      "sha256": "490d640dd0bbb2459d1f50e21e3e9092fef1ce7d46e39d5398f163677439247d"
     }
   }
 }
