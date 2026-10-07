@@ -908,6 +908,28 @@ export const ruleTagsResponseSchema = tagsResponseSchema
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
+/** Query parameters for the rule routing tags API. */
+export const ruleRoutingTagsParamsSchema = z
+  .object({
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Prefix to filter routing tags by. Returns all most-used routing tags when omitted.'
+      ),
+  })
+  .strict();
+
+export type RuleRoutingTagsParams = z.infer<typeof ruleRoutingTagsParamsSchema>;
+
+/** Rule routing tags response schema. */
+export const ruleRoutingTagsResponseSchema = tagsResponseSchema
+  .describe('All unique routing tags across rules.')
+  .meta({ id: 'alerting_rule_routing_tags_response' });
+
+export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
+
 export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 
 /**

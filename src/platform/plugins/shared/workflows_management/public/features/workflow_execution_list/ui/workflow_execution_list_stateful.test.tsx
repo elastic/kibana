@@ -22,6 +22,7 @@ import { createUseKibanaMockValue } from '../../../mocks';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 
 const mockSetSelectedExecution = jest.fn();
+const mockUpdateUrlState = jest.fn();
 const mockRefetch = jest.fn().mockResolvedValue(undefined);
 
 const mockWorkflowApi = createMockWorkflowApi();
@@ -59,6 +60,7 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => ({
     selectedExecutionId: null,
     setSelectedExecution: mockSetSelectedExecution,
+    updateUrlState: mockUpdateUrlState,
   }),
 }));
 
@@ -216,10 +218,18 @@ describe('WorkflowExecutionList (stateful)', () => {
     expect(intervalMs()).toBe(WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS);
   });
 
-  it('calls setSelectedExecution when an execution item is clicked', () => {
+  it('opens the execution on the executions tab when an item is clicked', () => {
     renderComponent();
     fireEvent.click(screen.getByTestId('workflowExecutionListItem'));
-    expect(mockSetSelectedExecution).toHaveBeenCalledWith('exec-1');
+    expect(mockUpdateUrlState).toHaveBeenCalledWith(
+      {
+        tab: 'executions',
+        executionId: 'exec-1',
+        stepExecutionId: undefined,
+        stepId: undefined,
+      },
+      { replace: false }
+    );
   });
 
   it('footer cancel calls the bulk cancel API and refetches executions', async () => {

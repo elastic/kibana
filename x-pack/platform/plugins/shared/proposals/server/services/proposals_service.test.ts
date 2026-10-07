@@ -2359,6 +2359,45 @@ describe('ProposalsService', () => {
       expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 1, 0, 0]);
     });
 
+    it('should report what is open now, not what was open at any point, in the current bucket', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        anchor: byCategory('anchor', [['contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets.map((b) => b.counts.contain)).toEqual([1, 1, 1, 1, 0]);
+    });
+
+    it('should not count a proposal that opened and closed within the current bucket', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        opens: byIdxAndCategory('opens', [[4, 'contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 0, 0, 0]);
+    });
+
+    it('should keep a category in the current bucket once it has closed down to zero', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        anchor: byCategory('anchor', [['contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets[4].counts).toEqual({ contain: 0 });
+    });
+
     it('should report currentOpen from the scalar query', async () => {
       const storage = createStorage();
       mockEsql(storage, { currentOpen: scalar('currentOpen', 7) });
