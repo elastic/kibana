@@ -374,7 +374,7 @@ export function AddCisIntegrationFormPageProvider({
     testSubjects.existOrFail(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE, { timeout: 20000 });
 
   const waitUntilLaunchCloudFormationButtonAppears = async () =>
-    testSubjects.existOrFail(TEST_IDS.LAUNCH_CLOUD_FORMATION_AGENTLESS_BUTTON, {
+    testSubjects.existOrFail('confirmCloudFormationModalConfirmButton', {
       timeout: 20000,
     });
 
