@@ -25,7 +25,7 @@ spaceTest.describe('Data views list spaces column', { tag: tags.deploymentAgnost
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {

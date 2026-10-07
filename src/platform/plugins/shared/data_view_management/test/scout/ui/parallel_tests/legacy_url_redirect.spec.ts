@@ -25,7 +25,7 @@ spaceTest.describe('Data views legacy URL redirects', { tag: tags.deploymentAgno
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {

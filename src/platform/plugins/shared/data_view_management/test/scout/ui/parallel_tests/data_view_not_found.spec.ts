@@ -15,7 +15,7 @@ const MISSING_DATA_VIEW_ID = '111111111111';
 
 spaceTest.describe('Data view not found', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest(

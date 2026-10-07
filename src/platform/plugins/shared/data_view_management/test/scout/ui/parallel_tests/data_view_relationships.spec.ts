@@ -27,7 +27,7 @@ spaceTest.describe('Data view relationships', { tag: tags.deploymentAgnostic }, 
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
