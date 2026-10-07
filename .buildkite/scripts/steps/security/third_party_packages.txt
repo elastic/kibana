@@ -76,3 +76,4 @@ bump-cli
 @oxlint/plugins
 @types/mssql
 monaco-marker-data-provider
+@aws-sdk/client-cloudformation
