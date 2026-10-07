@@ -35,7 +35,7 @@ interface ParsedStep {
 
 interface ParsedActionWorkflow {
   tags?: string[];
-  consts?: { actionMetadata?: unknown };
+  consts?: { actionMetadata?: { approvalPolicy?: string } };
   triggers?: Array<{
     type?: string;
     inputs?: { properties?: Record<string, { type?: string }>; required?: string[] };
@@ -93,6 +93,16 @@ describe('action workflow contract', () => {
         const allSteps = flattenSteps(workflow.steps ?? []);
 
         expect(allSteps.map(({ type }) => type)).toContain('workflow.output');
+      });
+
+      // The tag lets an auto-approved proposal run the action as the worker's service
+      // account, so it must match the action's own approval policy exactly: never on an
+      // action that always needs a human, and never missing from one that does not.
+      it('is tagged auto-approvable exactly when its approval policy is autonomy-dependent', () => {
+        const isAutoApprovable =
+          workflow.consts?.actionMetadata?.approvalPolicy === 'autonomy-dependent';
+
+        expect(workflow.tags?.includes('auto-approvable') ?? false).toBe(isAutoApprovable);
       });
     }
   );

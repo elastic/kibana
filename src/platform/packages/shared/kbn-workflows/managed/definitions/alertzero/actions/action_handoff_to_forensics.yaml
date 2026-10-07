@@ -12,6 +12,10 @@ tags:
   # discovered by tag rather than a hardcoded list.
   - action
   - alertzero
+  # Lets an auto-approved proposal run this action as the worker's service
+  # account (`allowed-workflow-tags` in the proposal workflow). Only for
+  # `approvalPolicy: autonomy-dependent`.
+  - auto-approvable
 consts:
   # Self-describing catalog metadata, read back by the proposals service when a
   # proposal referencing this workflow is created or rendered. Metadata has to
