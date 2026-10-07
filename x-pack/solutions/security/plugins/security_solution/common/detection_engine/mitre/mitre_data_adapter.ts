@@ -101,6 +101,11 @@ export const transformLegacyMitreData = ({
     };
   });
 
+  // The legacy blob lists tactics alphabetically. The coverage overview used to sort them by
+  // position itself; that sort now lives in the data source, so apply it here for the flag-off
+  // path. Techniques and subtechniques are already alphabetical in the blob.
+  resolvedTactics.sort((a, b) => a.position - b.position);
+
   return {
     tactics: resolvedTactics,
     techniques: resolvedTechniques,

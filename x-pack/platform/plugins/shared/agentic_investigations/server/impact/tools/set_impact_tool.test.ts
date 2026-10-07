@@ -56,7 +56,11 @@ const setup = ({
   const registerType = jest.fn();
   registerImpactAttachment(
     { attachments: { registerType } } as unknown as AgentBuilderPluginSetup,
-    { getImpactService: () => service, logger: loggerMock.create() }
+    {
+      getImpactService: () => service,
+      privileges: { assertCanManage: jest.fn(), assertCanRead: jest.fn() },
+      logger: loggerMock.create(),
+    }
   );
   const definition = registerType.mock.calls[0][0] as AttachmentTypeDefinition;
   const attachments = createAttachmentStateManager([], {
