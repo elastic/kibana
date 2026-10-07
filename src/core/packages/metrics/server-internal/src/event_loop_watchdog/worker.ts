@@ -159,7 +159,10 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     );
     const phase = largest?.phase ?? currentPhase();
     let outcome: ProfileOutcome = { notWritten: 'no diagnostic directory' };
-    if (diagnosticDir) {
+    if (windowBlocks.length === 0) {
+      // e.g. the window was flagged by a worker that has since been replaced: nothing to rank on
+      outcome = { notWritten: 'no block recorded for this window' };
+    } else if (diagnosticDir) {
       const admitted = admissions[phase].admit(maxBlockedMs);
       if (admitted.write) {
         // Without samples in blocks, the whole window is the only evidence: keep it.
