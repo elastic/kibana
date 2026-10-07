@@ -197,8 +197,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  // Failing: See https://github.com/elastic/kibana/issues/291927
-  describe.skip('fleet_outputs_crud', function () {
+  describe('fleet_outputs_crud', function () {
     let defaultOutputId: string;
     let ESOutputId: string;
     let fleetServerPolicyId: string;
@@ -851,10 +850,8 @@ export default function (providerContext: FtrProviderContext) {
 
         // Create package policies with default output under agent policies not using default output
         // to ensure that those agent policies still get bumped
-        await Promise.all([
-          createPackagePolicy([policy2.item.id], undefined, defaultOutputId),
-          createPackagePolicy([policy4.item.id], TEST_SPACE_ID, defaultOutputId),
-        ]);
+        await createPackagePolicy([policy2.item.id], undefined, defaultOutputId);
+        await createPackagePolicy([policy4.item.id], TEST_SPACE_ID, defaultOutputId);
 
         await supertest
           .put(`/api/fleet/outputs/${defaultOutputId}`)
@@ -906,10 +903,8 @@ export default function (providerContext: FtrProviderContext) {
 
         // Create package policies under agent policies using default output to ensure those
         // agent policies still get bumped
-        await Promise.all([
-          createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
-          createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
-        ]);
+        await createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id);
+        await createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id);
 
         await supertest
           .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)
@@ -990,10 +985,8 @@ export default function (providerContext: FtrProviderContext) {
 
           // Create package policies under agent policies using default output to ensure those
           // agent policies still get bumped
-          await Promise.all([
-            createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
-            createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
-          ]);
+          await createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id);
+          await createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id);
 
           await supertest
             .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)
