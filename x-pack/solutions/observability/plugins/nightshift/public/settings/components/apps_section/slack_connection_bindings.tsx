@@ -136,14 +136,13 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
           <EuiTitle size="xxs">
             <h5>
               {i18n.translate('xpack.nightshift.settings.apps.slackChannelsTitle', {
-                defaultMessage: 'Channels connected to this project',
+                defaultMessage: 'Connected channels',
               })}
             </h5>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.nightshift.settings.apps.slackChannelsDescription', {
-              defaultMessage:
-                "@Elastic answers only in channels connected to this project. In any other channel, it replies that the channel isn't connected.",
+              defaultMessage: '@Elastic only answers in these channels.',
             })}
           </EuiText>
         </EuiFlexItem>
@@ -201,7 +200,7 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.nightshift.settings.apps.slackNoChannels', {
               defaultMessage:
-                'No channels yet. Invite @Elastic to a channel in Slack, then enter its channel ID and select Connect channel.',
+                'Invite @Elastic to a Slack channel, enter the channel ID, and connect.',
             })}
           </EuiText>
         }

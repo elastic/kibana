@@ -145,7 +145,7 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.nightshift.settings.apps.slackCardDescription', {
                     defaultMessage:
-                      "Ask @Elastic questions in connected Slack channels and send automation results there. This is separate from the Slack connector in Agent Builder and Workflows, which can search, read, and post to Slack with a token you provide, but doesn't add @Elastic to your channels.",
+                      'Ask @Elastic questions in connected Slack channels and send automation results there.',
                   })}
                 </EuiText>
               </EuiFlexItem>
@@ -366,35 +366,44 @@ function ConfirmWorkspaceCallout({
   return (
     <KbnWarningCallout
       size="s"
+      css={{ maxWidth: '50%', minWidth: 360 }}
       data-test-subj="streamsSlackAppConfirmWorkspace"
       title={i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceTitle', {
-        defaultMessage: 'Is this the right Slack workspace?',
+        defaultMessage: 'Is this the right workspace?',
       })}
-      text={i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceDescription', {
-        defaultMessage:
-          'Check that the workspace URL is the one you meant to connect. Workspace names are not unique, so go by the URL.',
-      })}
-      actionProps={{
-        primary: {
-          children: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceConfirm', {
-            defaultMessage: 'Connect workspace',
-          }),
-          // Failures are surfaced via a toast in useRelayAppConnection.
-          onClick: () => void onConfirm(tenantKey).catch(() => undefined),
-          isDisabled: !canEdit || isMutating,
-          'data-test-subj': 'streamsSlackAppConfirmWorkspaceButton',
-        },
-        secondary: {
-          children: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceReject', {
-            defaultMessage: 'Wrong workspace, disconnect',
-          }),
-          onClick: () => void onReject().catch(() => undefined),
-          isDisabled: !canEdit || isMutating,
-          'data-test-subj': 'streamsSlackAppRejectWorkspaceButton',
-        },
-      }}
     >
       <EuiDescriptionList type="column" compressed listItems={listItems} />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            color="warning"
+            fill
+            // Failures are surfaced via a toast in useRelayAppConnection.
+            onClick={() => void onConfirm(tenantKey).catch(() => undefined)}
+            isDisabled={!canEdit || isMutating}
+            data-test-subj="streamsSlackAppConfirmWorkspaceButton"
+          >
+            {i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceConfirm', {
+              defaultMessage: 'Yes',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            color="warning"
+            onClick={() => void onReject().catch(() => undefined)}
+            isDisabled={!canEdit || isMutating}
+            data-test-subj="streamsSlackAppRejectWorkspaceButton"
+          >
+            {i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceReject', {
+              defaultMessage: 'No',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </KbnWarningCallout>
   );
 }
