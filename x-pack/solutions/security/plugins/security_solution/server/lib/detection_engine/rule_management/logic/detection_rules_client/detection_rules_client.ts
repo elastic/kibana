@@ -22,7 +22,10 @@ import type { DetectionRulesAuthz } from '../../../../../../common/detection_eng
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { SecuritySolutionEventBus } from '../../../../../events/event_bus';
-import type { DetectionRulesCreatedSource } from '../../../../../../common/workflows/triggers';
+import {
+  DetectionRulesCreatedSourceEnum,
+  type DetectionRulesCreatedSource,
+} from '../../../../../../common/workflows/triggers';
 import {
   emitDetectionRulesCreatedInChunks,
   toCreatedRuleSummary,
@@ -173,7 +176,7 @@ export const createDetectionRulesClient = ({
         });
 
         if (!args.suppressCreatedEvent) {
-          emitRulesCreated([toCreatedRuleSummary(rule)], 'api');
+          emitRulesCreated([toCreatedRuleSummary(rule)], DetectionRulesCreatedSourceEnum.api);
         }
 
         return rule;
@@ -201,7 +204,10 @@ export const createDetectionRulesClient = ({
         }
 
         if (!args.suppressCreatedEvent) {
-          emitRulesCreated([toCreatedRuleSummary(rule)], 'prebuilt_install');
+          emitRulesCreated(
+            [toCreatedRuleSummary(rule)],
+            DetectionRulesCreatedSourceEnum.prebuilt_install
+          );
         }
 
         return rule;
@@ -399,7 +405,10 @@ export const createDetectionRulesClient = ({
 
           // A deleted rule is created again, so it needs the same follow-up as any new rule.
           if (recreated) {
-            emitRulesCreated([toCreatedRuleSummary(response.rule)], 'restore');
+            emitRulesCreated(
+              [toCreatedRuleSummary(response.rule)],
+              DetectionRulesCreatedSourceEnum.restore
+            );
           }
 
           return response;

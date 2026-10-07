@@ -26,16 +26,17 @@ import {
 
 export const DetectionRulesCreatedTriggerId = 'security.detectionRulesCreated' as const;
 
-export const DETECTION_RULES_CREATED_SOURCE_VALUES = [
-  'api',
-  'import',
-  'prebuilt_install',
-  'duplicate',
-  'siem_migration',
-  'restore',
-] as const;
+export const DetectionRulesCreatedSourceEnum = {
+  api: 'api',
+  import: 'import',
+  prebuilt_install: 'prebuilt_install',
+  duplicate: 'duplicate',
+  siem_migration: 'siem_migration',
+  restore: 'restore',
+} as const;
 
-export type DetectionRulesCreatedSource = (typeof DETECTION_RULES_CREATED_SOURCE_VALUES)[number];
+export type DetectionRulesCreatedSource =
+  (typeof DetectionRulesCreatedSourceEnum)[keyof typeof DetectionRulesCreatedSourceEnum];
 
 const documentationExample1 = `## Run when a batch of created rules includes a machine learning rule
 # event.types and event.tags describe the whole batch, so this runs for the batch even if only
@@ -87,7 +88,7 @@ const detectionRulesCreatedEventSchema = z.object({
     .min(1)
     .meta({ description: DETECTION_RULES_CREATED_SCHEMA_TOTAL_COUNT_DESCRIPTION }),
   source: z
-    .enum(DETECTION_RULES_CREATED_SOURCE_VALUES)
+    .enum(DetectionRulesCreatedSourceEnum)
     .optional()
     .meta({ description: DETECTION_RULES_CREATED_SCHEMA_SOURCE_DESCRIPTION }),
 });

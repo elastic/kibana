@@ -18,6 +18,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { emitDetectionRulesCreatedInChunks } from '../../../../../../workflows/triggers/emit_rules_created';
+import { DetectionRulesCreatedSourceEnum } from '../../../../../../../common/workflows/triggers';
 import type { SecuritySolutionEventBus } from '../../../../../../events/event_bus';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
@@ -428,7 +429,7 @@ export const performBulkActionRoute = (
                     type: params.type,
                     tags,
                   })),
-                  source: 'duplicate',
+                  source: DetectionRulesCreatedSourceEnum.duplicate,
                   isEnabled: ctx.securitySolution.isRulesCreatedTriggerEnabled,
                   logger,
                 });

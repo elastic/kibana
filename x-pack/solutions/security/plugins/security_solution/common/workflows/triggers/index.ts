@@ -42,6 +42,6 @@ export { NoteUpdatedTriggerId, noteUpdatedTriggerDef } from './notes/note_update
 export {
   DetectionRulesCreatedTriggerId,
   detectionRulesCreatedTriggerDef,
-  DETECTION_RULES_CREATED_SOURCE_VALUES,
+  DetectionRulesCreatedSourceEnum,
 } from './rules/detection_rules_created';
 export type { DetectionRulesCreatedSource } from './rules/detection_rules_created';
