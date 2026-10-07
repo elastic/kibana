@@ -114,6 +114,10 @@ describe('scrub_report_content task', () => {
 
     const { source } = lastQuery(esClient).script;
     expect(source).toContain("remove('body_text')");
+    // Retained RSS / Jina copies are third-party content too; scrubbing only
+    // body_text would leave them past the retention window.
+    expect(source).toContain("remove('rss_body_text')");
+    expect(source).toContain("remove('rendered_body_text')");
     expect(source).not.toContain("remove('body_html')");
     expect(source).toContain('lineage.content_scrubbed_at');
     // Ranking and the hunt-once candidate pool depend on these surviving past retention.

@@ -40,6 +40,33 @@ const candidate = (value: string, overrides: Partial<ExtractedIoc> = {}): Extrac
 });
 
 describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
+  it('sends Markdown link destinations to semantic review', () => {
+    // Jina renders attacker payload URLs as Markdown links too. Auto-downgrading
+    // every `](url)` destination would drop real IOCs before the model sees them.
+    const payload = 'https://evil.example/payload';
+    const citation = 'https://attack.mitre.org/techniques/T1059/';
+    const prepared = prepareIocAdjudication({
+      article_url: 'https://www.elastic.co/security-labs/example',
+      iocs: [
+        candidate(payload, { context: `The attacker downloaded [the payload](${payload}).` }),
+        candidate(citation, { context: `See [ATT&CK](${citation}) for background.` }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set([0]));
+
+    expect(prepared.reviewable).toHaveLength(2);
+    expect(result.iocs[0]).toEqual(
+      expect.objectContaining({
+        tier: 'uncertain',
+        tier_basis: 'semantic_indicator:uncertain_default',
+      })
+    );
+    expect(result.iocs[1]).toEqual(
+      expect.objectContaining({ tier: 'reference', tier_basis: 'semantic_reference' })
+    );
+    expect(result.promotable_count).toBe(1);
+  });
+
   it('downgrades same-origin article links without semantic review', () => {
     const prepared = prepareIocAdjudication({
       article_url: 'https://research.example/current-post',

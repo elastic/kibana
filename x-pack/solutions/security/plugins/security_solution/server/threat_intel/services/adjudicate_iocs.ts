@@ -171,7 +171,7 @@ export const prepareIocAdjudication = (
     .filter(({ ioc }) => isSemanticCandidate(ioc))
     .filter(({ ioc, originalIndex }) => {
       // Same-origin article links are citations. Markdown link destinations are
-      // not: rendered pages also use `[label](url)` for payload URLs, so leave those for
+      // not: Jina renders payload URLs as `[label](url)` too, so leave those for
       // semantic review instead of discarding them before the model sees them.
       if (isSameOrigin(ioc, params.article_url)) {
         output[originalIndex] = downgrade(ioc, 'semantic_reference_deterministic');
