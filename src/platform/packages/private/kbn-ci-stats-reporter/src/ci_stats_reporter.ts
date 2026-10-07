@@ -403,6 +403,7 @@ export class CiStatsReporter {
   private async req<T>({ auth, body, bodyDesc, path, query, timeout = 60 * SECOND }: ReqOptions) {
     let attempt = 0;
     const maxAttempts = 5;
+    let refreshedRejectedToken = false;
 
     while (true) {
       attempt += 1;
@@ -435,6 +436,20 @@ export class CiStatsReporter {
           throw error;
         }
 
+        if (
+          error?.response?.status === 401 &&
+          this.config?.authType === 'buildkite_oidc' &&
+          !refreshedRejectedToken
+        ) {
+          // the broker rejected the cached token, so mint a new one and retry once
+          refreshedRejectedToken = true;
+          this.oidcAuthorization = undefined;
+          this.log.warning(
+            `CI Stats OIDC token was rejected, retrying ${bodyDesc} with a new token`
+          );
+          continue;
+        }
+
         if (error?.response && error.response.status < 500) {
           // error response from service was received so warn the user and move on
           this.log.warning(
@@ -448,7 +463,7 @@ export class CiStatsReporter {
         const failure = mintingOidcToken
           ? 'failed to mint CI Stats OIDC token'
           : 'failed to reach ci-stats service';
-        if (attempt === maxAttempts) {
+        if (attempt >= maxAttempts) {
           this.log.warning(
             `unable to report ${bodyDesc}, ${failure} too many times [error=${error.message}]`
           );

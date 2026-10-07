@@ -88,6 +88,23 @@ printf '%s\\n' mock-oidc-token
     );
   });
 
+  it('retries test group scheduling and mints a new token after a rejected token', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    const realSetTimeout = global.setTimeout;
+    jest
+      .spyOn(global, 'setTimeout')
+      .mockImplementation(((callback: () => void, ms?: number) =>
+        realSetTimeout(callback, ms === 3000 ? 0 : ms)) as typeof setTimeout);
+    request.mockRejectedValueOnce({ response: { status: 401, data: {} } });
+
+    await expect(
+      brokerClient().pickTestGroupRunOrder({ sources: [], groups: [] })
+    ).resolves.toEqual({ id: 'build-id' });
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(Fs.readFileSync(Path.join(root, 'calls'), 'utf8').trim().split('\n')).toHaveLength(2);
+  });
+
   it('preserves legacy hostname and token configuration', async () => {
     await new CiStatsClient({ baseUrl: 'ci-stats.example', token: 'upstream-token' }).createBuild();
     expect(request).toHaveBeenCalledWith(

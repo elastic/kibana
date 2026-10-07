@@ -244,13 +244,10 @@ export class CiStatsClient {
     console.log('requesting test group run order from ci-stats:');
     console.log(JSON.stringify(body, null, 2));
 
-    const resp = await axios.request<TestGroupRunOrderResponse>({
+    const resp = await this.request<TestGroupRunOrderResponse>({
       method: 'POST',
-      baseURL: this.baseUrl,
-      headers: await this.getHeaders(),
-      url: '/v2/_pick_test_group_run_order',
-      allowAbsoluteUrls: false,
-      data: body,
+      path: '/v2/_pick_test_group_run_order',
+      body,
     });
 
     return resp.data;
@@ -273,6 +270,11 @@ export class CiStatsClient {
         });
       } catch (error) {
         console.error('CI Stats request error:', error?.response?.data?.message ?? error?.message);
+
+        if (error?.response?.status === 401) {
+          // the broker rejected the token, so mint a new one for the next attempt
+          this.oidcAuthorization = undefined;
+        }
 
         if (attempt < maxAttempts) {
           const sec = attempt * 3;

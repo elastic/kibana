@@ -139,7 +139,7 @@ jq -cn \\
     expect(calls).not.toContain('oidc request-token');
   });
 
-  it('requests a short-lived token for the broker audience with job identity claims', () => {
+  it('requests a short-lived token for the broker audience with cluster and queue claims', () => {
     const result = spawnSync('bash', [tokenScript], {
       encoding: 'utf8',
       env: {
@@ -151,8 +151,7 @@ jq -cn \\
     expect(result.status).toBe(0);
     expect(result.stdout).toBe('mock-oidc-token');
     expect(Fs.readFileSync(Path.join(root, 'calls'), 'utf8')).toBe(
-      'oidc request-token --audience elastic-access-broker --lifetime 300 --claim ' +
-        'organization_slug,pipeline_id,build_id,build_commit,cluster_id,queue_id,queue_key,step_key,job_id\n'
+      'oidc request-token --audience elastic-access-broker --lifetime 300 --claim cluster_id,queue_id,queue_key\n'
     );
   });
 });

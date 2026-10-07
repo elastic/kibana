@@ -158,6 +158,40 @@ describe('CiStatsReporter authentication', () => {
     );
   });
 
+  it('mints a new token and retries once when the broker rejects the token', async () => {
+    const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
+    const unauthorized = Object.assign(new Error('Unauthorized'), {
+      request: {},
+      response: { status: 401, data: 'rejected' },
+    });
+    mint
+      .mockResolvedValueOnce({ stdout: 'stale-token' })
+      .mockResolvedValueOnce({ stdout: 'fresh-token' });
+    request.mockRejectedValueOnce(unauthorized);
+
+    await expect(brokerReporter().metrics([])).resolves.toBe(true);
+    expect(mint).toHaveBeenCalledTimes(2);
+    expect(request).toHaveBeenLastCalledWith(
+      expect.objectContaining({ headers: { Authorization: 'Bearer fresh-token' } })
+    );
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('OIDC token was rejected'));
+  });
+
+  it('does not retry a rejected token more than once', async () => {
+    const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
+    request.mockRejectedValue(
+      Object.assign(new Error('Unauthorized'), {
+        request: {},
+        response: { status: 401, data: 'rejected' },
+      })
+    );
+
+    await expect(brokerReporter().metrics([])).resolves.toBe(false);
+    expect(mint).toHaveBeenCalledTimes(2);
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('[status=401]'));
+  });
+
   it('preserves direct authentication and the default endpoint', async () => {
     const reporter = new CiStatsReporter({ buildId: 'build-id', apiToken: 'upstream-token' }, log);
     await reporter.metrics([]);
