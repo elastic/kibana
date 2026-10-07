@@ -129,7 +129,7 @@ export const RunWorkflowPanel = ({
   } = useKibana<RunWorkflowPanelServices>();
   const { euiTheme } = useEuiTheme();
 
-  const { mutate: runDefaultWorkflow } = useRunWorkflow();
+  const { mutateAsync: runDefaultWorkflow } = useRunWorkflow();
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
@@ -224,17 +224,13 @@ export const RunWorkflowPanel = ({
         onClose();
       };
 
-      if (runWorkflowExecutor) {
-        void Promise.resolve()
-          .then(() => runWorkflowExecutor({ workflowId: selectedId, inputs: mergedInputs }))
-          .then(onSuccess, onError)
-          .finally(onSettled);
-      } else {
-        runDefaultWorkflow(
-          { id: selectedId, inputs: mergedInputs },
-          { onSuccess, onError, onSettled }
-        );
-      }
+      // Chained on the returned promise rather than `mutate` callbacks, which are dropped once the panel unmounts.
+      const run = () =>
+        runWorkflowExecutor
+          ? runWorkflowExecutor({ workflowId: selectedId, inputs: mergedInputs })
+          : runDefaultWorkflow({ id: selectedId, inputs: mergedInputs });
+
+      void Promise.resolve().then(run).then(onSuccess, onError).finally(onSettled);
     },
     [
       analytics,
