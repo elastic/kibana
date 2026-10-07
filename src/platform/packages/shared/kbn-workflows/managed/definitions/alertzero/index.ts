@@ -38,6 +38,7 @@ import { ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
 import { ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID } from './hunt_package_report';
 import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID } from './hunt_proposal_gate';
+import { ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_ID } from './investigation_summary';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID } from './journal_note';
 import {
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
@@ -114,6 +115,10 @@ export {
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
 } from './journal_note';
+export {
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW,
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_ID,
+} from './investigation_summary';
 export { ALERTZERO_HUNT_WORKFLOW, ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
 export {
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
@@ -261,3 +266,11 @@ export const ALERTZERO_ACTION_WORKFLOW_IDS = [
  * globally because both the rule tuning and attack discovery reviews invoke it.
  */
 export const ALERTZERO_PROPOSAL_WORKFLOW_IDS = [ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID] as const;
+
+/**
+ * Card summary for investigation and escalation conversations. Installed globally
+ * and shipped disabled; enabling it turns the reader on in every space.
+ */
+export const ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS = [
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_ID,
+] as const;
