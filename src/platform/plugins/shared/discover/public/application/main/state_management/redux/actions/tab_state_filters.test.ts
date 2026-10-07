@@ -8,6 +8,8 @@
  */
 
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import type { CombinedFilter, Filter } from '@kbn/es-query';
+import { BooleanRelation, isCombinedFilter } from '@kbn/es-query';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
@@ -177,6 +179,41 @@ describe('tab_state_filters actions', () => {
     expect(trackFilterAdditionSpy).toHaveBeenCalledWith(
       expect.objectContaining({ fieldName: 'status', filterOperation: '+' })
     );
+  });
+
+  it('should add a single combined filter for a multi-value field in non-ES|QL mode', async () => {
+    const { internalState, tabId, services } = await setup();
+    const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');
+
+    internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId,
+        appState: {
+          query: { language: 'kuery', query: '' },
+          dataSource: {
+            type: DataSourceType.DataView,
+            dataViewId: dataViewMockWithTimeField.id ?? 'test-data-view-id',
+          },
+        },
+      })
+    );
+
+    internalState.dispatch(
+      internalStateActions.addFilter({
+        tabId,
+        field: 'extension',
+        value: ['jpg', 'png'],
+        mode: '+',
+      })
+    );
+
+    const [addedFilters] = addFiltersSpy.mock.calls[0] as [Filter[]];
+    expect(addedFilters).toHaveLength(1);
+    expect(isCombinedFilter(addedFilters[0])).toBe(true);
+    expect((addedFilters[0] as CombinedFilter).meta).toEqual(
+      expect.objectContaining({ key: 'extension', relation: BooleanRelation.AND })
+    );
+    expect((addedFilters[0] as CombinedFilter).meta.params).toHaveLength(2);
   });
 
   it('should not add a filter when field is undefined', async () => {
