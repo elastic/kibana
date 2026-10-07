@@ -307,6 +307,17 @@ export type CasesTelemetryConnectorKeys =
   | 'thehive'
   | 'caseswebhook';
 
+/** Workflow runs per origin type, keyed without the `cases.` prefix. */
+export interface WorkflowOriginTypeCounts {
+  case: number;
+  observable: number;
+  observables: number;
+  attachment: number;
+  attachments: number;
+  /** Runs with no origin (cases-list bulk runs). */
+  unattributed: number;
+}
+
 export interface WorkflowsSolutionTelemetry {
   /** Total and time-bucketed workflow run counts (one per case per execution). */
   runs: Count;
@@ -314,12 +325,8 @@ export interface WorkflowsSolutionTelemetry {
   totalCasesWithRuns: number;
   /** Cardinality of distinct usernames that have triggered a workflow from a case. */
   totalUniqueUsers: number;
-  /**
-   * Runs keyed by origin type without its `cases.` prefix (e.g. `cases.observable` becomes
-   * `observable`). Known origins are always present; `unattributed` counts runs with no origin
-   * (cases-list bulk runs).
-   */
-  byOriginType: Record<string, number>;
+  /** Runs by origin type (e.g. `cases.observable` is reported as `observable`). */
+  byOriginType: WorkflowOriginTypeCounts;
   /**
    * Attachment-origin runs keyed by sanitized attachment type (e.g. `security.alert` becomes
    * `security_alert`). Only types that have been run against appear.
