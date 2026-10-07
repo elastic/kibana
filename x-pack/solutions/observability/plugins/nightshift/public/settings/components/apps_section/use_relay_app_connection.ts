@@ -10,10 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   RELAY_APP_CONNECTION_STATUS,
+  type SlackAppConfirmResponse,
   type SlackAppConnectResponse,
   type RelayAppConnectionStatus,
   type SlackAppDisconnectResponse,
   type SlackAppStatusResponse,
+  type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../utils/errors';
@@ -21,6 +23,7 @@ import { RELAY_APP_BINDINGS_QUERY_KEY } from './use_relay_app_bindings';
 
 const STATUS_ROUTE = '/internal/significant_events/apps/slack/status';
 const CONNECT_ROUTE = '/internal/significant_events/apps/slack/connect';
+const CONFIRM_ROUTE = '/internal/significant_events/apps/slack/confirm';
 const DISCONNECT_ROUTE = '/internal/significant_events/apps/slack/disconnect';
 const POLL_INTERVAL_MS = 3_000;
 const POLL_TIMEOUT_MS = 2 * 60 * 1_000;
@@ -33,9 +36,12 @@ export interface UseRelayAppConnection {
   available: boolean;
   status: RelayAppConnectionStatus;
   error?: string;
+  workspace?: SlackAppWorkspace;
   isMutating: boolean;
   retryStatusRequest: () => void;
   connect: () => Promise<void>;
+  /** Accepts the workspace awaiting confirmation; rejecting it is `disconnect`. */
+  confirm: (tenantKey: string) => Promise<void>;
   disconnect: () => Promise<void>;
 }
 
@@ -83,6 +89,21 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     },
   });
 
+  const confirmMutation = useMutation<SlackAppConfirmResponse, Error, string>({
+    mutationFn: (tenantKey) =>
+      http.post<SlackAppConfirmResponse>(CONFIRM_ROUTE, { body: JSON.stringify({ tenantKey }) }),
+    onError: (error) => {
+      notifications.toasts.addError(getFormattedError(error), {
+        title: i18n.translate('xpack.nightshift.settings.apps.confirmError', {
+          defaultMessage: 'Failed to confirm the Slack workspace',
+        }),
+      });
+    },
+    onSettled: () => {
+      return queryClient.invalidateQueries({ queryKey: RELAY_APP_CONNECTION_STATUS_QUERY_KEY });
+    },
+  });
+
   const disconnectMutation = useMutation<SlackAppDisconnectResponse, Error>({
     mutationFn: () => {
       pollDeadlineRef.current = 0;
@@ -111,7 +132,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     available: statusQuery.data?.available ?? false,
     status: statusQuery.data?.status ?? RELAY_APP_CONNECTION_STATUS.notConnected,
     error: statusQuery.data?.error,
-    isMutating: connectMutation.isLoading || disconnectMutation.isLoading,
+    workspace: statusQuery.data?.workspace,
+    isMutating:
+      connectMutation.isLoading || confirmMutation.isLoading || disconnectMutation.isLoading,
     retryStatusRequest: () => {
       void statusQuery.refetch();
     },
@@ -137,6 +160,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
         authWindow?.close();
         throw error;
       }
+    },
+    confirm: async (tenantKey) => {
+      await confirmMutation.mutateAsync(tenantKey);
     },
     disconnect: async () => {
       await disconnectMutation.mutateAsync();

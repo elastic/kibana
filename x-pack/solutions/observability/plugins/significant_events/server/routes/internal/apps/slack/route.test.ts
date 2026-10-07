@@ -13,6 +13,7 @@ const { read, manage, configure } = NIGHTSHIFT_API_PRIVILEGES;
 describe('Slack app route privileges', () => {
   it.each([
     'POST /internal/significant_events/apps/slack/connect',
+    'POST /internal/significant_events/apps/slack/confirm',
     'POST /internal/significant_events/apps/slack/disconnect',
     'POST /internal/significant_events/apps/slack/bindings/{channelId}/bind',
     'POST /internal/significant_events/apps/slack/bindings/{channelId}/unbind',

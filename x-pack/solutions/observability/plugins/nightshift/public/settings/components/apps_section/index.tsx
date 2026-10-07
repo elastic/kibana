@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiCard,
   EuiConfirmModal,
+  EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,10 +25,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   RELAY_APP_CONNECTION_STATUS,
   type RelayAppConnectionStatus,
+  type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';
@@ -43,9 +45,11 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
     available,
     status,
     error,
+    workspace,
     isMutating,
     retryStatusRequest,
     connect,
+    confirm,
     disconnect,
   } = useRelayAppConnection();
 
@@ -141,9 +145,11 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
                   <SlackCardFooter
                     status={status}
                     error={error}
+                    workspace={workspace}
                     canEdit={canEdit}
                     isMutating={isMutating}
                     onConnect={connect}
+                    onConfirm={confirm}
                     onDisconnect={disconnect}
                   />
                 }
@@ -159,21 +165,37 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
 interface SlackCardFooterProps {
   status: RelayAppConnectionStatus;
   error?: string;
+  workspace?: SlackAppWorkspace;
   canEdit: boolean;
   isMutating: boolean;
   onConnect: () => void;
+  onConfirm: (tenantKey: string) => Promise<void>;
   onDisconnect: () => Promise<void>;
 }
 
 function SlackCardFooter({
   status,
   error,
+  workspace,
   canEdit,
   isMutating,
   onConnect,
+  onConfirm,
   onDisconnect,
 }: SlackCardFooterProps) {
   const [showChannels, setShowChannels] = useState(false);
+
+  if (status === RELAY_APP_CONNECTION_STATUS.pendingConfirmation && workspace) {
+    return (
+      <ConfirmWorkspaceCallout
+        workspace={workspace}
+        canEdit={canEdit}
+        isMutating={isMutating}
+        onConfirm={onConfirm}
+        onReject={onDisconnect}
+      />
+    );
+  }
 
   if (status === RELAY_APP_CONNECTION_STATUS.oauthInProgress) {
     return (
@@ -288,6 +310,86 @@ function SlackCardFooter({
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+}
+
+interface ConfirmWorkspaceCalloutProps {
+  workspace: SlackAppWorkspace;
+  canEdit: boolean;
+  isMutating: boolean;
+  onConfirm: (tenantKey: string) => Promise<void>;
+  onReject: () => Promise<void>;
+}
+
+function ConfirmWorkspaceCallout({
+  workspace: { tenantKey, name, url },
+  canEdit,
+  isMutating,
+  onConfirm,
+  onReject,
+}: ConfirmWorkspaceCalloutProps) {
+  const listItems = [
+    ...(url
+      ? [
+          {
+            title: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceUrl', {
+              defaultMessage: 'Workspace URL',
+            }),
+            description: url,
+          },
+        ]
+      : []),
+    ...(name
+      ? [
+          {
+            title: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceName', {
+              defaultMessage: 'Workspace name',
+            }),
+            description: name,
+          },
+        ]
+      : []),
+    {
+      title: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceTeamId', {
+        defaultMessage: 'Team ID',
+      }),
+      description: tenantKey,
+    },
+  ];
+
+  return (
+    <KbnWarningCallout
+      size="s"
+      data-test-subj="streamsSlackAppConfirmWorkspace"
+      title={i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceTitle', {
+        defaultMessage: 'Confirm the Slack workspace',
+      })}
+      text={i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceDescription', {
+        defaultMessage:
+          'Slack authorized the workspace below. Check the workspace URL, since anyone can choose a workspace name. Confirm only if this is the workspace you meant to connect.',
+      })}
+      actionProps={{
+        primary: {
+          children: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceConfirm', {
+            defaultMessage: 'Confirm workspace',
+          }),
+          // Failures are surfaced via a toast in useRelayAppConnection.
+          onClick: () => void onConfirm(tenantKey).catch(() => undefined),
+          isDisabled: !canEdit || isMutating,
+          'data-test-subj': 'streamsSlackAppConfirmWorkspaceButton',
+        },
+        secondary: {
+          children: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceReject', {
+            defaultMessage: 'Not my workspace',
+          }),
+          onClick: () => void onReject().catch(() => undefined),
+          isDisabled: !canEdit || isMutating,
+          'data-test-subj': 'streamsSlackAppRejectWorkspaceButton',
+        },
+      }}
+    >
+      <EuiDescriptionList type="column" compressed listItems={listItems} />
+    </KbnWarningCallout>
   );
 }
 

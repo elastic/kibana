@@ -17,6 +17,7 @@ import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_rel
 jest.mock('./use_relay_app_bindings');
 const mockDisconnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConnectWorkspace = jest.fn().mockResolvedValue(undefined);
+const mockConfirmWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockRetryStatusRequest = jest.fn();
 const mockUseRelayAppConnection = jest.fn();
 jest.mock('./use_relay_app_connection', () => ({
@@ -77,7 +78,75 @@ describe('AppsSection', () => {
       isMutating: false,
       retryStatusRequest: mockRetryStatusRequest,
       connect: mockConnectWorkspace,
+      confirm: mockConfirmWorkspace,
       disconnect: mockDisconnectWorkspace,
+    });
+  });
+
+  describe('when a workspace is awaiting confirmation', () => {
+    const mockPendingConfirmation = (workspace: {
+      tenantKey: string;
+      name?: string;
+      url?: string;
+    }) =>
+      mockUseRelayAppConnection.mockReturnValue({
+        isLoading: false,
+        hasStatusRequestError: false,
+        available: true,
+        status: 'pending_confirmation',
+        workspace,
+        isMutating: false,
+        retryStatusRequest: mockRetryStatusRequest,
+        connect: mockConnectWorkspace,
+        confirm: mockConfirmWorkspace,
+        disconnect: mockDisconnectWorkspace,
+      });
+
+    it('shows the workspace URL, name, and team ID, and hides the channel controls', () => {
+      mockPendingConfirmation({
+        tenantKey: 'T0123ABC',
+        name: 'Acme',
+        url: 'https://acme.slack.com/',
+      });
+      setup();
+
+      const callout = screen.getByTestId('streamsSlackAppConfirmWorkspace');
+      expect(callout).toHaveTextContent('https://acme.slack.com/');
+      expect(callout).toHaveTextContent('Acme');
+      expect(callout).toHaveTextContent('T0123ABC');
+      expect(screen.queryByTestId('streamsSlackAppToggleChannelsButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows the team ID when the Relay reports no name or URL', () => {
+      mockPendingConfirmation({ tenantKey: 'T0123ABC' });
+      setup();
+
+      expect(screen.getByTestId('streamsSlackAppConfirmWorkspace')).toHaveTextContent('T0123ABC');
+    });
+
+    it('confirms the workspace that was shown', () => {
+      mockPendingConfirmation({ tenantKey: 'T0123ABC', url: 'https://acme.slack.com/' });
+      setup();
+
+      fireEvent.click(screen.getByTestId('streamsSlackAppConfirmWorkspaceButton'));
+      expect(mockConfirmWorkspace).toHaveBeenCalledWith('T0123ABC');
+    });
+
+    it('rejects the workspace by disconnecting it', () => {
+      mockPendingConfirmation({ tenantKey: 'T0123ABC', url: 'https://acme.slack.com/' });
+      setup();
+
+      fireEvent.click(screen.getByTestId('streamsSlackAppRejectWorkspaceButton'));
+      expect(mockDisconnectWorkspace).toHaveBeenCalledTimes(1);
+      expect(mockConfirmWorkspace).not.toHaveBeenCalled();
+    });
+
+    it('disables confirm and reject when canEdit is false', () => {
+      mockPendingConfirmation({ tenantKey: 'T0123ABC' });
+      setup(false);
+
+      expect(screen.getByTestId('streamsSlackAppConfirmWorkspaceButton')).toBeDisabled();
+      expect(screen.getByTestId('streamsSlackAppRejectWorkspaceButton')).toBeDisabled();
     });
   });
 
