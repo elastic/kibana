@@ -119,11 +119,10 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   });
 
   // Free text searches can't be combined with the OpAMP exclusion, so hide it from the results
+  // The total is kept as returned by the server so that no page becomes unreachable
   const visiblePolicies = (agentPolicyData?.items ?? []).filter(
     (policy) => policy.name !== OPAMP_POLICY_NAME
   );
-  const visibleTotal =
-    (agentPolicyData?.total ?? 0) - ((agentPolicyData?.items.length ?? 0) - visiblePolicies.length);
 
   // Some policies retrieved, set up table props
   const columns = useMemo(() => {
@@ -410,7 +409,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: visibleTotal,
+          totalItemCount: agentPolicyData ? agentPolicyData.total : 0,
           pageSizeOptions,
         }}
         sorting={{ sort: sorting }}
