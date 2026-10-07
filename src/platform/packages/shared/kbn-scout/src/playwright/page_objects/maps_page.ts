@@ -118,6 +118,14 @@ export class MapsPage {
     return this.page.testSubj.locator(`layerTocActionsPanelToggleButton${escapedName}`);
   }
 
+  async selectFileUploadCard() {
+    await this.page.testSubj.click('uploadFile');
+  }
+
+  async getNumberOfLayers() {
+    return this.page.locator('.mapTocEntry').count();
+  }
+
   async openAddLayerFlyout() {
     await this.addLayerButton.click();
     await this.layerAddForm.waitFor({ state: 'visible' });
