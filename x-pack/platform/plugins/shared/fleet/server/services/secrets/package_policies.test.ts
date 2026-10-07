@@ -2170,6 +2170,51 @@ describe('Package policy secrets', () => {
       );
     });
 
+    it('looks for referencing package policies in every Space when asked to', async () => {
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['some-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+        checkAllSpaces: true,
+      });
+      expect(mockedPackagePolicyService.list).toHaveBeenCalledWith(
+        soClientMock,
+        expect.objectContaining({ spaceId: '*' })
+      );
+    });
+
+    it('keeps a secret that only a package policy in another Space references', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({
+        total: 1,
+        items: [
+          {
+            id: 'policy-in-other-space',
+            secret_references: [{ id: 'shared-secret' }],
+            policy_ids: ['agent-policy-other-space'],
+          },
+        ],
+      } as any);
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['shared-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+        checkAllSpaces: true,
+      });
+      expect(esClientMock.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('only looks in the client Space by default', async () => {
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['some-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+      expect(mockedPackagePolicyService.list.mock.calls[0][1]).not.toHaveProperty('spaceId');
+    });
+
     it('skips deletion when the secret is still referenced by a package policy SO', async () => {
       mockedPackagePolicyService.list.mockResolvedValue({
         total: 1,

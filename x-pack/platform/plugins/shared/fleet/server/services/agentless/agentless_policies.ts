@@ -640,7 +640,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
    * `bumpRevision: false`, so while it runs the compiled policy still references the old secrets
    * and Fleet keeps them (it never deletes a secret a compiled policy references). Once the agent
    * policy update has written the new revision they are unreferenced, so they are removed here.
-   * Secrets another package policy still uses are kept by `deleteSecretsIfNotReferenced`.
+   * Secrets another package policy still uses (in any Space) are kept by
+   * `deleteSecretsIfNotReferenced`.
    * Best-effort: a failed cleanup leaves a secret behind but must not fail the update.
    */
   private async deleteReplacedSecrets({
@@ -665,7 +666,10 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     try {
       await deleteSecretsIfNotReferenced({
         esClient: this.esClient,
-        soClient: this.soClient,
+        // Secrets are global: a package policy in another Space can reference one of them, and
+        // the request-scoped client only sees its own Space. Check every Space before deleting.
+        soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+        checkAllSpaces: true,
         ids: replaced,
         agentPolicyIds: [agentPolicyId],
       });

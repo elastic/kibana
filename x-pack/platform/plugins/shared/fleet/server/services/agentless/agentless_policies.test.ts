@@ -373,6 +373,8 @@ describe('AgentlessPoliciesService', () => {
           expect.objectContaining({
             ids: ['old-access-key', 'old-secret-key'],
             agentPolicyIds: ['agentless-policy-id'],
+            // Secrets are global: a policy in another Space may still reference one.
+            checkAllSpaces: true,
           })
         );
         // Only after the agent policy bump and deploy: before that the compiled policy still

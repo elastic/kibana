@@ -223,13 +223,17 @@ export async function deleteSecretsIfNotReferenced(opts: {
   // When true, skip the compiled .fleet-policies check (the caller guarantees those docs are
   // already removed). The package-policy SO check still runs to guard against shared secrets.
   skipCompiledPolicyCheck?: boolean;
+  // When true, look for package policies referencing the secrets in every Space. Secrets are
+  // global, so a policy in another Space can reference one; `soClient` must then be unscoped.
+  checkAllSpaces?: boolean;
 }): Promise<void> {
-  const { esClient, soClient, ids, agentPolicyIds, skipCompiledPolicyCheck } = opts;
+  const { esClient, soClient, ids, agentPolicyIds, skipCompiledPolicyCheck, checkAllSpaces } = opts;
   const logger = appContextService.getLogger();
 
   const packagePoliciesUsingSecrets = await findPackagePoliciesUsingSecrets({
     soClient,
     ids,
+    ...(checkAllSpaces ? { spaceId: '*' } : {}),
   });
 
   if (packagePoliciesUsingSecrets.length) {
@@ -300,14 +304,17 @@ export async function deleteSecretsIfNotReferenced(opts: {
 export async function findPackagePoliciesUsingSecrets(opts: {
   soClient: SavedObjectsClientContract;
   ids: string[];
+  /** Pass '*' with an unscoped client to look across all Spaces; defaults to the client's Space. */
+  spaceId?: string;
 }): Promise<Array<{ id: string; policyIds: string[] }>> {
-  const { soClient, ids } = opts;
+  const { soClient, ids, spaceId } = opts;
   const packagePolicies = await packagePolicyService.list(soClient, {
     kuery: `ingest-package-policies.secret_references.id: (${ids
       .map((id) => `"${escapeQuotes(id)}"`)
       .join(' or ')})`,
     perPage: SO_SEARCH_LIMIT,
     page: 1,
+    ...(spaceId ? { spaceId } : {}),
   });
 
   if (!packagePolicies.total) {
