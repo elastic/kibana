@@ -206,14 +206,37 @@ describe('useWorkflowEditorReadOnlyReason', () => {
     expect(result.current).toBeUndefined();
   });
 
-  it('returns executions_tab on the executions tab, even for a managed workflow', () => {
+  it('returns executions_tab on the executions tab', () => {
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
+      search: '?tab=executions',
+      activeTab: 'executions',
+    });
+
+    expect(result.current).toBe('executions_tab');
+  });
+
+  it('returns managed on the executions tab, because the Workflow tab is read-only too', () => {
     const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
       search: '?tab=executions',
       activeTab: 'executions',
       workflow: { ...baseWorkflow, managed: true },
     });
 
-    expect(result.current).toBe('executions_tab');
+    expect(result.current).toBe('managed');
+  });
+
+  it('returns no_permission on the executions tab when the user cannot edit', () => {
+    useWorkflowsCapabilities.mockReturnValue({
+      canCreateWorkflow: false,
+      canUpdateWorkflow: false,
+    });
+
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
+      search: '?tab=executions',
+      activeTab: 'executions',
+    });
+
+    expect(result.current).toBe('no_permission');
   });
 
   it('returns managed for a managed workflow', () => {

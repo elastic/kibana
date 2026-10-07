@@ -27,9 +27,10 @@ export const useWorkflowEditorReadOnlyReason = (): WorkflowEditorReadOnlyReason 
   // The executions tab shows past execution snapshots, so editing is never meaningful there. The URL
   // is the source of truth so the editor is read-only right away, before the store catches up.
   // Running a test from the workflow tab also puts an executionId in the URL, but stays editable.
-  if (activeTab === 'executions') return 'executions_tab';
+  // Managed and permission reasons come first: they also block the Workflow tab.
   if (workflow?.managed === true) return 'managed';
   if (!canEditWorkflow) return 'no_permission';
+  if (activeTab === 'executions') return 'executions_tab';
   return undefined;
 };
 

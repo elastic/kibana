@@ -1532,5 +1532,41 @@ describe('useAgentBuilderIntegration', () => {
       rerender({ ...baseProps, canApplyProposals: true });
       expect(manager.resume).toHaveBeenCalledTimes(1);
     });
+
+    it('does not send diagnostics of the past run with the Workflow tab YAML', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: createMockEditor(mockModel) },
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+          readOnlyReason: 'executions_tab',
+          workflowTabYaml: 'name: current',
+          validationErrors: [
+            {
+              id: 'schema-1',
+              owner: 'yaml',
+              ruleId: 'schemaViolation',
+              severity: 'error',
+              message: 'Error in the past run',
+              startLineNumber: 1,
+              startColumn: 1,
+              endLineNumber: 1,
+              endColumn: 2,
+              hoverMessage: null,
+            },
+          ],
+        })
+      );
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.addAttachment).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ yaml: 'name: current', clientDiagnostics: undefined }),
+        })
+      );
+    });
   });
 });

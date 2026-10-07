@@ -290,7 +290,11 @@ export const useAgentBuilderIntegration = ({
         attachmentId: syncAttachmentIdRef.current ?? attachmentId,
         workflowId,
         workflowName: workflowNameRef.current,
-        diagnostics: serializeClientDiagnostics(validationErrorsRef.current),
+        // Editor diagnostics describe the past run's YAML, not the one sent here.
+        diagnostics:
+          executionsTabYamlRef.current === undefined
+            ? serializeClientDiagnostics(validationErrorsRef.current)
+            : undefined,
         readOnlyReason: readOnlyReasonRef.current,
       });
 
@@ -500,7 +504,10 @@ export const useAgentBuilderIntegration = ({
                 attachmentId: syncAttachmentIdRef.current ?? attachmentId,
                 workflowId,
                 workflowName,
-                diagnostics: serializeClientDiagnostics(validationErrors),
+                diagnostics:
+                  executionsTabYaml === undefined
+                    ? serializeClientDiagnostics(validationErrors)
+                    : undefined,
                 readOnlyReason,
               }),
             ]
