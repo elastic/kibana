@@ -7,49 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { z } from '@kbn/zod';
+import {
+  asCodeMetaSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 
-const MAX_PER_PAGE = 10000;
-
-export const searchRequestQuerySchema = schema.object({
-  query: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'An Elasticsearch simple_query_string query that filters markdown library items by "title" and "description"',
-      },
-    })
-  ),
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The search page to return',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of items to return per page',
-      },
-      max: MAX_PER_PAGE,
-    })
-  ),
-});
-
-export const searchResponseBodySchema = schema.object({
-  markdowns: schema.arrayOf(
-    schema.object({
-      id: schema.string(),
-      data: schema.object({
-        description: schema.maybe(schema.string()),
-        title: schema.string(),
-      }),
-      meta: asCodeMetaSchema,
-    }),
-    { minSize: 0, maxSize: MAX_PER_PAGE }
-  ),
-  total: schema.number(),
-  page: schema.number(),
-});
+export const searchResponseBodySchema = z
+  .object({
+    data: z
+      .array(
+        z
+          .object({
+            id: z.string().meta({ description: 'The markdown library item ID.' }),
+            data: z
+              .object({
+                description: z
+                  .string()
+                  .optional()
+                  .meta({ description: 'A short description of the markdown library item.' }),
+                title: z.string().meta({ description: 'The markdown library item title.' }),
+              })
+              .strict(),
+            meta: asCodeMetaSchema,
+          })
+          .strict()
+      )
+      .min(0)
+      .max(PAGINATION_MAX_SIZE)
+      .meta({ description: 'List of markdown library items matching the query.' }),
+    meta: asCodePaginationResponseMetaSchema,
+  })
+  .strict();

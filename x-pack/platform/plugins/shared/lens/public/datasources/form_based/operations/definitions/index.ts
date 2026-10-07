@@ -17,6 +17,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type {
   BaseIndexPatternColumn,
+  ColumnBuildHints,
+  ESQLExpressionWithParams,
   DateRange,
   FormBasedLayer,
   GenericIndexPatternColumn,
@@ -71,16 +73,6 @@ import { rangeOperation } from './ranges';
 import type { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
 import type { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
-
-/**
- * Represents an ES|QL expression with parameterized values.
- * Use ??paramName for field/column identifiers (esql-composer will escape properly)
- * Use ?paramName for literal values (strings, numbers)
- */
-export interface ESQLExpressionWithParams {
-  template: string;
-  params?: Record<string, string | number>;
-}
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -194,6 +186,8 @@ export interface FieldInputProps<C> {
   operationSupportMatrix: OperationSupportMatrix;
   helpMessage?: React.ReactNode;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  /** Active visualization type id, used to derive new-column defaults. */
+  activeVisualizationTypeId?: string;
 }
 
 export interface HelpProps<C> {
@@ -478,7 +472,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: P
   ) => C;
@@ -519,7 +513,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: P & {
       shift?: string;
@@ -617,7 +611,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       referenceIds: string[];
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
       shift?: string;
@@ -645,7 +639,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] &
       FilterParams & { reducedTimeRange?: string },

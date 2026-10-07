@@ -13,7 +13,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { resolveModelsForFeature } from './resolve_models_for_feature';
-import type { ResolvedInferenceEndpoints } from '../types';
+import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from '../types';
 
 const inferenceConnector = (connectorId: string): InferenceConnector => ({
   type: InferenceConnectorType.Inference,
@@ -57,13 +57,20 @@ describe('resolveModelsForFeature', () => {
     getConnectorById = jest.fn();
   });
 
-  const resolve = (uiSettings: UiSettings = {}, featureId = 'my_feature') =>
+  const resolve = (
+    uiSettings: UiSettings = {},
+    featureId = 'my_feature',
+    ignoreGlobalDefault = false,
+    opts?: GetForFeatureOptions
+  ) =>
     resolveModelsForFeature({
       getForFeature,
       getConnectorList,
       getConnectorById,
       uiSettingsClient: createUiSettingsClient(uiSettings),
       featureId,
+      ignoreGlobalDefault,
+      opts,
       logger,
     });
 
@@ -336,6 +343,49 @@ describe('resolveModelsForFeature', () => {
     });
   });
 
+  describe('ignoreGlobalDefault', () => {
+    it('still returns only the default connector when ignoreGlobalDefault is true and defaultConnectorOnly is set', async () => {
+      const defaultConnector = inferenceConnector('default-id');
+      getConnectorById.mockResolvedValue(defaultConnector);
+
+      const result = await resolve(
+        { defaultConnectorId: 'default-id', defaultConnectorOnly: true },
+        'my_feature',
+        true
+      );
+
+      expect(getForFeature).not.toHaveBeenCalled();
+      expect(getConnectorList).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        connectors: [defaultConnector],
+        warnings: [],
+        soEntryFound: false,
+      });
+    });
+
+    it('does not prepend the global default when ignoreGlobalDefault is true and soEntryFound is false', async () => {
+      const recommended = inferenceConnector('rec');
+      const other = inferenceConnector('other');
+      const defaultConnector = inferenceConnector('default');
+      getForFeature.mockResolvedValue({
+        endpoints: [recommended],
+        warnings: [],
+        soEntryFound: false,
+      });
+      getConnectorList.mockResolvedValue([recommended, other]);
+      getConnectorById.mockResolvedValue(defaultConnector);
+
+      const result = await resolve({ defaultConnectorId: 'default' }, 'my_feature', true);
+
+      expect(getConnectorById).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        connectors: [{ ...recommended, isRecommended: true }, other],
+        warnings: [],
+        soEntryFound: false,
+      });
+    });
+  });
+
   it('propagates warnings from getForFeature', async () => {
     const recommended = inferenceConnector('rec');
     getForFeature.mockResolvedValue({
@@ -350,5 +400,107 @@ describe('resolveModelsForFeature', () => {
     expect(result.warnings).toEqual([
       'Inference endpoint "missing-ep" was not found in Elasticsearch.',
     ]);
+  });
+
+  describe('onlyReturnConfigured option', () => {
+    it('returns empty list when no SO override and no recommendedEndpoints', async () => {
+      getForFeature.mockResolvedValue({
+        endpoints: [],
+        warnings: [],
+        soEntryFound: false,
+      });
+
+      const result = await resolve({}, 'my_feature', false, { onlyReturnConfigured: true });
+
+      expect(getConnectorList).not.toHaveBeenCalled();
+      expect(getConnectorById).not.toHaveBeenCalled();
+      expect(result).toEqual({ connectors: [], warnings: [], soEntryFound: false });
+    });
+
+    it('sets isRecommended on recommendedEndpoints (soEntryFound=false)', async () => {
+      const recommended = inferenceConnector('rec');
+      getForFeature.mockResolvedValue({
+        endpoints: [recommended],
+        warnings: [],
+        soEntryFound: false,
+      });
+
+      const result = await resolve({}, 'my_feature', false, { onlyReturnConfigured: true });
+
+      expect(getConnectorList).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        connectors: [{ ...recommended, isRecommended: true }],
+        warnings: [],
+        soEntryFound: false,
+      });
+    });
+
+    it('does not set isRecommended on SO override endpoints (soEntryFound=true)', async () => {
+      const soEndpoint = inferenceConnector('so-ep');
+      getForFeature.mockResolvedValue({
+        endpoints: [soEndpoint],
+        warnings: [],
+        soEntryFound: true,
+      });
+
+      const result = await resolve({}, 'my_feature', false, { onlyReturnConfigured: true });
+
+      expect(getConnectorList).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        connectors: [soEndpoint],
+        warnings: [],
+        soEntryFound: true,
+      });
+      expect(result.connectors[0]).not.toHaveProperty('isRecommended');
+    });
+
+    it('does not prepend global default even when one is configured', async () => {
+      const recommended = inferenceConnector('rec');
+      getForFeature.mockResolvedValue({
+        endpoints: [recommended],
+        warnings: [],
+        soEntryFound: false,
+      });
+
+      const result = await resolve({ defaultConnectorId: 'global-default' }, 'my_feature', false, {
+        onlyReturnConfigured: true,
+      });
+
+      expect(getConnectorById).not.toHaveBeenCalled();
+      expect(result.connectors).toHaveLength(1);
+      expect(result.connectors[0].connectorId).toBe('rec');
+    });
+
+    it('still enforces defaultConnectorOnly policy before the onlyReturnConfigured path', async () => {
+      const defaultConnector = inferenceConnector('admin-default');
+      getConnectorById.mockResolvedValue(defaultConnector);
+
+      const result = await resolve(
+        { defaultConnectorId: 'admin-default', defaultConnectorOnly: true },
+        'my_feature',
+        false,
+        { onlyReturnConfigured: true }
+      );
+
+      expect(getForFeature).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        connectors: [defaultConnector],
+        warnings: [],
+        soEntryFound: false,
+      });
+    });
+
+    it('propagates warnings from getForFeature', async () => {
+      const recommended = inferenceConnector('rec');
+      getForFeature.mockResolvedValue({
+        endpoints: [recommended],
+        warnings: ['Endpoint "missing" was not found.'],
+        soEntryFound: false,
+      });
+
+      const result = await resolve({}, 'my_feature', false, { onlyReturnConfigured: true });
+
+      expect(result.warnings).toEqual(['Endpoint "missing" was not found.']);
+    });
   });
 });

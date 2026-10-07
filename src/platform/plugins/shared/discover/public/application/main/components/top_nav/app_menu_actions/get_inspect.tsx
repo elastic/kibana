@@ -18,9 +18,9 @@ export const getInspectAppMenuItem = ({
   return {
     id: AppMenuActionId.inspect,
     iconType: 'inspect',
-    order: 7,
+    order: 9,
     label: i18n.translate('discover.localMenu.inspectTitle', {
-      defaultMessage: 'Inspect',
+      defaultMessage: 'Inspect tab',
     }),
     testId: 'openInspectorButton',
     run: ({ context: { onFinishAction } }) => {

@@ -6,13 +6,8 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiConfirmModal,
-  EuiSpacer,
-  EuiIconTip,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -24,7 +19,7 @@ import {
   useDeletePackagePolicyMutation,
   sendDeletePackageDatastreamAssets,
 } from '../hooks';
-import { AGENTS_PREFIX } from '../../common/constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../common/constants';
 import type { AgentPolicy, PackagePolicyPackage } from '../types';
 import { sendDeleteAgentlessPolicy } from '../hooks/use_request/agentless_policy';
 
@@ -75,6 +70,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
   const hasMultipleAgentPolicies =
     canUseMultipleAgentPolicies && agentPolicies && agentPolicies.length > 1;
+
+  const isDeletingFleetServer = packagePolicyPackage?.name === FLEET_SERVER_PACKAGE;
 
   const fetchAgentsCount = useMemo(
     () => async () => {
@@ -268,12 +265,31 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
+        {isDeletingFleetServer && (
+          <>
+            <KbnDangerCallout
+              announceOnMount={false}
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningTitle"
+                  defaultMessage="This may disconnect agents from Fleet"
+                />
+              }
+              data-test-subj="fleetServerDeleteCallOut"
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningMessage"
+                  defaultMessage="If this policy is assigned to any Fleet Servers, deleting the Fleet Server integration will stop them from running. Agents that depend on those Fleet Servers will lose their connection to Fleet — you won't be able to manage them or send policy updates until you re-enroll each agent individually."
+                />
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {packagePolicyPackage?.type === 'input' && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
-              color="warning"
-              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.inputPackage.message"
@@ -287,10 +303,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         )}
         {(hasMultipleAgentPolicies || isShared) && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
-              color="warning"
-              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
@@ -310,9 +324,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount && agentPolicies ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
-              color="danger"
               data-test-subj="affectedAgentsCallOut"
               title={
                 !isAgentlessAgentPolicy && (
@@ -366,7 +379,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   }}
                 />
               )}
-            </EuiCallOut>
+            </KbnDangerCallout>
             <EuiSpacer size="l" />
           </>
         ) : null}

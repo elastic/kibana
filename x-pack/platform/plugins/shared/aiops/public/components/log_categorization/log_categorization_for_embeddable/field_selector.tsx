@@ -69,6 +69,12 @@ export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedFie
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.aiops.logCategorization.embeddableMenu.fieldSelectionPopoverAriaLabel',
+        {
+          defaultMessage: 'Field selection',
+        }
+      )}
       closePopover={() => setShowPopover(false)}
       isOpen={showPopover}
       button={button}

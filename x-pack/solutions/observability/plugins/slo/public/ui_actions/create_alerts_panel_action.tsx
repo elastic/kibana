@@ -20,6 +20,7 @@ import {
 } from '../../common/embeddables/alerts/constants';
 import type { SLORepositoryClient } from '../types';
 import { openSloConfiguration } from '../embeddable/slo/alerts/slo_alerts_open_configuration';
+import { isValidLicense } from './is_valid_license';
 
 export function createAddAlertsPanelAction(
   coreStart: CoreStart,
@@ -29,10 +30,10 @@ export function createAddAlertsPanelAction(
   return {
     id: ADD_SLO_ALERTS_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
-    getIconType: () => 'alert',
+    getIconType: () => 'warning',
     order: 10,
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return (await isValidLicense(pluginsStart)) && apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();

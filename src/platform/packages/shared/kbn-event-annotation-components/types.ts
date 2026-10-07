@@ -21,9 +21,18 @@ export interface EventAnnotationServiceType {
   annotationGroupUpdated$: Observable<string>;
   loadAnnotationGroup: (savedObjectId: string) => Promise<EventAnnotationGroupConfig>;
   groupExistsWithTitle: (title: string) => Promise<boolean>;
+  /**
+   * Searches `event-annotation-group` saved objects.
+   *
+   * When `pageSize` is omitted the underlying Content Management / Saved Objects
+   * client falls back to its built-in `perPage` default — it is not an
+   * unbounded fetch. Callers wired up to `ContentListClientProvider` should
+   * forward `options.listingLimit` (resolved from the
+   * `savedObjects:listingLimit` UI setting) instead of duplicating that lookup.
+   */
   findAnnotationGroupContent: (
     searchTerm: string,
-    pageSize: number,
+    pageSize?: number,
     tagsToInclude?: string[],
     tagsToExclude?: string[]
   ) => Promise<{ total: number; hits: EventAnnotationGroupContent[] }>;

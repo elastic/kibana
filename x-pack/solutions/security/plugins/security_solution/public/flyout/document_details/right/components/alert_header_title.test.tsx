@@ -25,16 +25,16 @@ import {
   STATUS_BUTTON_TEST_ID,
   STATUS_TITLE_TEST_ID,
   TITLE_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+} from '../../../../flyout_v2/document/main/components/test_ids';
 import {
   ALERT_SUMMARY_PANEL_TEST_ID,
   NOTES_TITLE_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
-import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
+import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use_refetch_by_scope';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../flyout_v2/document/hooks/use_refetch_by_scope');
-jest.mock('../../../../flyout_v2/document/components/status', () => ({
+jest.mock('../../../../flyout_v2/document/main/hooks/use_refetch_by_scope');
+jest.mock('../../../../flyout_v2/document/main/components/status', () => ({
   Status: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
     <>
       <div data-test-subj="securitySolutionFlyoutHeaderStatusTitle">{'Status'}</div>

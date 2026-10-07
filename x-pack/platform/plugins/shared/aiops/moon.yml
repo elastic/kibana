@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aiops-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/aiops-plugin'
   description: Moon project for @kbn/aiops-plugin
   channel: ''
-  owner: '@elastic/ml-ui'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/plugins/shared/aiops
 dependsOn:
   - '@kbn/aiops-change-point-detection'
@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/aiops-components'
   - '@kbn/aiops-log-pattern-analysis'
   - '@kbn/aiops-log-rate-analysis'
+  - '@kbn/aiops-server-schemas'
   - '@kbn/aiops-test-utils'
   - '@kbn/analytics'
   - '@kbn/cases-plugin'
@@ -34,7 +35,11 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-service'
+  - '@kbn/content-management-plugin'
+  - '@kbn/data-view-editor-plugin'
+  - '@kbn/data-view-field-editor-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/saved-objects-finder-plugin'
   - '@kbn/datemath'
   - '@kbn/ebt-tools'
   - '@kbn/embeddable-plugin'
@@ -86,8 +91,9 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/licensing-types'
   - '@kbn/unified-data-table'
-  - '@kbn/presentation-publishing-schemas'
   - '@kbn/cps'
+  - '@kbn/zod'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

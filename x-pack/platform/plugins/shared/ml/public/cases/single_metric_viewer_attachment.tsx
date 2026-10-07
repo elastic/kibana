@@ -6,17 +6,21 @@
  */
 
 import { EuiDescriptionList } from '@elastic/eui';
-import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import moment from 'moment';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import { transformOut } from '../../common/embeddables/single_metric_viewer/transform_out';
+import type { SingleMetricViewerAttachmentData } from '../../common/util/cases_utils';
 import type { SingleMetricViewerSharedComponent } from '../shared_components/single_metric_viewer';
+
+type SingleMetricViewerViewProps =
+  UnifiedValueAttachmentViewProps<SingleMetricViewerAttachmentData>;
 
 export const initComponent = memoize(
   (
@@ -24,17 +28,27 @@ export const initComponent = memoize(
     SingleMetricViewerComponent: SingleMetricViewerSharedComponent
   ) => {
     return React.memo(
-      (props: UnifiedValueAttachmentViewProps) => {
+      (props: SingleMetricViewerViewProps) => {
         const { caseData } = props;
-        const attachmentState = props.data.state as Record<string, unknown>;
+        const attachmentState = props.data.state;
 
-        const inputProps = transformTimeRangeOut(
+        const embeddableState = transformOut(
           attachmentState as unknown as SingleMetricViewerEmbeddableState
         );
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
+
+        const {
+          job_ids: jobIds,
+          time_range: timeRange,
+          selected_detector_index: selectedDetectorIndex,
+          selected_entities: selectedEntities,
+          function_description: functionDescription,
+          forecast_id: forecastId,
+        } = embeddableState;
+        const selectedJobId = jobIds[0];
 
         const listItems = [
           {
@@ -44,7 +58,7 @@ export const initComponent = memoize(
                 defaultMessage="Job ID"
               />
             ),
-            description: inputProps.jobIds.join(', '),
+            description: jobIds.join(', '),
           },
           {
             title: (
@@ -53,26 +67,11 @@ export const initComponent = memoize(
                 defaultMessage="Time range"
               />
             ),
-            description: `${dataFormatter.convert(
-              inputProps.time_range!.from
-            )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
+            description: `${dataFormatter.convertToText(
+              timeRange!.from
+            )} - ${dataFormatter.convertToText(timeRange!.to)}`,
           },
         ];
-
-        if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
-          listItems.push({
-            title: (
-              <FormattedMessage
-                id="xpack.ml.cases.singleMetricViewer.description.queryLabel"
-                defaultMessage="Query"
-              />
-            ),
-            description: inputProps.query?.query,
-          });
-        }
-
-        const { jobIds, time_range: timeRange, ...rest } = inputProps;
-        const selectedJobId = jobIds[0];
 
         return (
           <>
@@ -82,7 +81,10 @@ export const initComponent = memoize(
               lastRefresh={Date.now()}
               selectedJobId={selectedJobId}
               uuid={caseData.id}
-              {...rest}
+              forecastId={forecastId}
+              selectedDetectorIndex={selectedDetectorIndex}
+              selectedEntities={selectedEntities}
+              functionDescription={functionDescription}
             />
           </>
         );

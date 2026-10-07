@@ -6,11 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, isBuiltInRootStreamField } from '@kbn/streams-schema';
 import { StreamsAppContextProvider } from '../../../streams_app_context_provider';
 import { SchemaEditorFlyout } from './flyout';
 import { useSchemaEditorContext } from './schema_editor_context';
@@ -42,8 +48,16 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
 
     let actions = [];
 
+    const isBuiltInRootField =
+      Streams.WiredStream.Definition.is(stream) &&
+      isBuiltInRootStreamField(stream.name, field.name);
+
     const openFlyout = (
-      props: { isEditingByDefault?: boolean; applyGeoPointSuggestion?: boolean } = {},
+      props: {
+        isEditingByDefault?: boolean;
+        applyGeoPointSuggestion?: boolean;
+        isDescriptionOnlyMode?: boolean;
+      } = {},
       targetField: SchemaField = field
     ) => {
       if (!Streams.ingest.all.Definition.is(stream)) {
@@ -70,6 +84,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
               fields={fields}
               enableGeoPointSuggestions={enableGeoPointSuggestions}
               onGoToField={handleGoToField}
+              isDescriptionOnlyMode={isBuiltInRootField}
               {...props}
             />
           </StreamsAppContextProvider>,
@@ -126,7 +141,8 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         // Don't show "Unmap field" for:
         // - Fields inherited from parent (the parent's mapping or documentation still applies)
         // - Documentation-only fields (no type) since there's nothing to unmap
-        if (!isInheritedFromParent && field.type) {
+        // - Built-in default mappings on root streams (additive-only)
+        if (!isInheritedFromParent && !isBuiltInRootField && field.type) {
           actions.push({
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
@@ -213,16 +229,28 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   return (
     <EuiPopover
       id={contextMenuPopoverId}
+      aria-label={i18n.translate(
+        'xpack.streams.streamDetailSchemaEditorFieldsTableActionsPopoverAriaLabel',
+        { defaultMessage: 'Field actions' }
+      )}
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
             { defaultMessage: 'Open actions menu' }
           )}
-          data-test-subj="streamsAppActionsButton"
-          iconType="boxesVertical"
-          onClick={toggle}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
+              { defaultMessage: 'Open actions menu' }
+            )}
+            data-test-subj="streamsAppActionsButton"
+            iconType="boxesVertical"
+            onClick={toggle}
+          />
+        </EuiToolTip>
       }
       isOpen={popoverIsOpen}
       closePopover={closePopover}

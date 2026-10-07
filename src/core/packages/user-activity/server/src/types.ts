@@ -49,14 +49,39 @@ export type UserActivityEventType =
   | 'user';
 
 /**
+ * ECS `event.outcome` allowed values for user activity events.
+ * @see https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-outcome
+ * @public
+ */
+export type UserActivityEventOutcome = 'success' | 'failure' | 'unknown';
+
+/**
+ * ECS `error.*` fields supported on user activity log entries (subset).
+ * @see https://www.elastic.co/guide/en/ecs/current/ecs-error.html
+ * @public
+ */
+export interface UserActivityError {
+  /** The kind of error (for example, exception class name). */
+  type?: string;
+  /** Error message. */
+  message?: string;
+  /** Stack trace as a string. */
+  stack_trace?: string;
+  /** Optional error code. */
+  code?: string;
+}
+
+/**
  * Information about the event being performed by the user.
  * @public
  */
 export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
   action: UserActivityActionId;
-  /** Event type {@link UserActivityEventType}. */
-  type: UserActivityEventType;
+  /** Event types {@link UserActivityEventType}. ECS defines `event.type` as an array. */
+  type: readonly UserActivityEventType[];
+  /** ECS event outcome; use with {@link UserActivityEventOutcome}. Defaults to `'unknown'` when omitted. */
+  outcome?: UserActivityEventOutcome;
   /** ISO8601 timestamp of the event start time. */
   start?: string;
   /** ISO8601 timestamp of the event end time. */
@@ -71,6 +96,16 @@ export interface UserActivityEvent {
  */
 export type UserActivityMetadata = Record<string, unknown>;
 
+/**
+ * Caller-provided metadata buckets logged under the entry's `kibana.*` fields, one per producer.
+ * New buckets must be declared here, just so we have a record of what fields we can have.
+ * @public
+ */
+export interface UserActivityKibanaMetadata {
+  dashboard?: UserActivityMetadata;
+  security?: UserActivityMetadata;
+}
+
 /** @public */
 export interface TrackUserActionParams {
   /** Custom log message. If omitted, a default message is generated. */
@@ -79,8 +114,10 @@ export interface TrackUserActionParams {
   event: UserActivityEvent;
   /** Object attributes written to the log entry. */
   object: UserActivityObject;
-  /** Additional bucket of non-standard metadata. */
-  metadata?: UserActivityMetadata;
+  /** ECS error fields written at the top level of the log entry when provided. */
+  error?: UserActivityError;
+  /** Metadata buckets merged into the log entry's `kibana.*` fields; see {@link UserActivityKibanaMetadata}. */
+  kibana?: UserActivityKibanaMetadata;
 }
 
 /**
@@ -90,7 +127,7 @@ export interface TrackUserActionParams {
  * @example
  * ```ts
  * core.userActivity.trackUserAction({
- *   event: { action: 'edit_dashboard', type: 'change' },
+ *   event: { action: 'edit_dashboard', type: ['change'] },
  *   object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: [] },
  * });
  * ```

@@ -85,7 +85,7 @@ export const managementSidebarNav = ({
       id: item.id,
       name: item.tip ? <HeaderWrapper text={item.title} tip={item.tip} /> : item.title,
       isSelected: item.id === selectedId,
-      icon: iconType ? <EuiIcon type={iconType} size="m" /> : undefined,
+      icon: iconType ? <EuiIcon type={iconType} size="m" aria-hidden={true} /> : undefined,
       'data-test-subj': item.id,
       ...customParams,
     };

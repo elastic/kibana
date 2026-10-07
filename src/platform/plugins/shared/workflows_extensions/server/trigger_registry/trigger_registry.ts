@@ -10,8 +10,8 @@
 import type { z } from '@kbn/zod/v4';
 import type { ServerTriggerDefinition } from '../types';
 
-/** Id must be <domain>.<event> (e.g. cases.updated, alerts.recovered) */
-const TRIGGER_ID_REGEX = /^[a-zA-Z0-9_]+\.[a-zA-Z0-9_.]+$/;
+/** Id must be <namespace>.<event> (kebab-case namespace, camelCase event; e.g. my-namespace.customTrigger) */
+const TRIGGER_ID_REGEX = /^[a-zA-Z0-9-]+\.[a-zA-Z0-9.]+$/;
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return typeof schema === 'object' && schema !== null && 'shape' in schema;
@@ -23,9 +23,9 @@ function validateDefinition(definition: ServerTriggerDefinition): void {
   if (typeof id !== 'string' || id.length === 0) {
     throw new Error('Trigger definition "id" must be a non-empty string.');
   }
-  if (!TRIGGER_ID_REGEX.test(id)) {
+  if (definition.requiresConnectorId !== true && !TRIGGER_ID_REGEX.test(id)) {
     throw new Error(
-      `Trigger id "${id}" must follow namespaced format <domain>.<event> (e.g. cases.updated).`
+      `Trigger id "${id}" must follow namespaced format <namespace>.<event> (e.g. my-namespace.customTrigger).`
     );
   }
   if (!eventSchema || typeof eventSchema.safeParse !== 'function') {

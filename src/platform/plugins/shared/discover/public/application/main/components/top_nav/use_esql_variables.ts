@@ -50,9 +50,10 @@ export const useESQLVariables = ({
   getActivePanels: () => ControlPanelsState<OptionsListESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
-  const fetchData = useCurrentTabAction(internalStateActions.fetchData);
   const updateAttributes = useCurrentTabAction(internalStateActions.updateAttributes);
-  const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
+  const applyEsqlControlVariables = useCurrentTabAction(
+    internalStateActions.applyEsqlControlVariables
+  );
   const currentControlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const previousControlGroupStateRef = useRef(currentControlGroupState);
   const pendingQueryUpdate = useRef<string>();
@@ -99,28 +100,35 @@ export const useESQLVariables = ({
       }
     });
 
+    return () => {
+      inputSubscription.unsubscribe();
+    };
+  }, [controlGroupApi, dispatch, isEsqlMode, onUpdateESQLQuery, updateAttributes]);
+
+  useEffect(() => {
+    // Only proceed if in ESQL mode and controlGroupApi is available
+    if (!controlGroupApi || !isEsqlMode) {
+      return;
+    }
+
     const variablesSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
-      if (!isEqual(newVariables, currentEsqlVariables)) {
-        // Update the ESQL variables in the internal state
-        dispatch(setEsqlVariables({ esqlVariables: newVariables }));
-        dispatch(fetchData({}));
+      if (isEqual(newVariables, currentEsqlVariables)) {
+        return;
       }
+
+      // The control group publishes [] before its saved value is ready.
+      // Resolving that would replace the source init built with the saved control.
+      if (newVariables.length === 0 && (currentEsqlVariables?.length ?? 0) > 0) {
+        return;
+      }
+
+      dispatch(applyEsqlControlVariables({ esqlVariables: newVariables }));
     });
 
     return () => {
-      inputSubscription.unsubscribe();
-      variablesSubscription?.unsubscribe();
+      variablesSubscription.unsubscribe();
     };
-  }, [
-    controlGroupApi,
-    currentEsqlVariables,
-    dispatch,
-    isEsqlMode,
-    onUpdateESQLQuery,
-    updateAttributes,
-    setEsqlVariables,
-    fetchData,
-  ]);
+  }, [applyEsqlControlVariables, controlGroupApi, currentEsqlVariables, dispatch, isEsqlMode]);
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {

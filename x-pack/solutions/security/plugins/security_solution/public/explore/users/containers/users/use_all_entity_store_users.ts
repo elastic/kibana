@@ -10,8 +10,7 @@ import { noop } from 'lodash/fp';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 
-import type { UserEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import type { ListEntitiesResponse } from '../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import type { Entity, ListEntitiesResponse } from '@kbn/entity-store/common';
 import type { User } from '../../../../../common/search_strategy/security_solution/users/all';
 import { UsersFields } from '../../../../../common/search_strategy/security_solution/users/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy/security_solution/risk_score/all';
@@ -21,6 +20,10 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { inputsModel, State } from '../../../../common/store';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { getLimitedPaginationTotalCount } from '../../../components/paginated_table/helpers';
 import { usersSelectors } from '../../store';
 import type { InspectResponse } from '../../../../types';
@@ -30,37 +33,42 @@ import * as i18n from './translations';
 
 const ENTITY_STORE_USERS_LIST_QUERY_KEY = 'ENTITY_STORE_USERS_LIST';
 
-const isUserEntityRecord = (
-  record: ListEntitiesResponse['records'][number]
-): record is UserEntity => 'user' in record && record.user != null;
+const USERS_ENTITY_STORE_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_entity_store_list'
+);
 
-const mapUserEntityRecordToUser = (record: UserEntity): User | null => {
-  const userName = record.user?.name;
-  if (userName == null || userName === '') {
+export const mapUserEntityRecordToUser = (record: Entity): User | null => {
+  if ('user' in record && record.user != null) {
+    const userName = record.user?.name;
+    if (userName == null || userName === '') {
+      return null;
+    }
+
+    const lastSeenIso = record.entity?.lifecycle?.last_seen;
+    const domainValues = record.user?.domain as string[] | string | undefined;
+    const domain = Array.isArray(domainValues) ? domainValues?.[0] ?? '' : domainValues ?? '';
+    const riskLevel = record.entity?.risk?.calculated_level as RiskSeverity | undefined;
+
+    const identityFields: Record<string, string> = {
+      'user.name': userName,
+    };
+    if (domain !== '') {
+      identityFields['user.domain'] = domain;
+    }
+
+    return {
+      name: userName,
+      lastSeen: lastSeenIso ?? '',
+      domain,
+      risk: riskLevel,
+      criticality: record.asset?.criticality,
+      entityId: record.entity?.id,
+      identityFields,
+    };
+  } else {
     return null;
   }
-
-  const lastSeenIso = record.entity.lifecycle?.last_seen;
-  const domainValues = record.user?.domain;
-  const domain = domainValues != null && domainValues.length > 0 ? domainValues[0] : '';
-  const riskLevel = record.user?.risk?.calculated_level as RiskSeverity | undefined;
-
-  const identityFields: Record<string, string> = {
-    'user.name': userName,
-  };
-  if (domain !== '') {
-    identityFields['user.domain'] = domain;
-  }
-
-  return {
-    name: userName,
-    lastSeen: lastSeenIso ?? '',
-    domain,
-    risk: riskLevel,
-    criticality: record.asset?.criticality,
-    entityId: record.entity.id,
-    identityFields,
-  };
 };
 
 const parseFilterClauses = (filterQuery?: ESTermQuery | string): object[] => {
@@ -163,6 +171,7 @@ export const useAllEntityStoreUsers = (
           sortField: sortFieldForApi,
           sortOrder: direction,
         },
+        context: USERS_ENTITY_STORE_LIST_CONTEXT,
       }),
     enabled: !skip,
     cacheTime: 0,
@@ -181,10 +190,7 @@ export const useAllEntityStoreUsers = (
       return [];
     }
     return data.records.flatMap((record) => {
-      if (!isUserEntityRecord(record)) {
-        return [];
-      }
-      const user = mapUserEntityRecordToUser(record);
+      const user = mapUserEntityRecordToUser(record as Entity);
       return user != null ? [user] : [];
     });
   }, [data?.records]);

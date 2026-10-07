@@ -20,7 +20,6 @@
     "@kbn/scout",
     "@kbn/i18n",
     "@kbn/inference-plugin",
-    "@kbn/inference-common",
     "@kbn/actions-plugin",
     "@kbn/utility-types",
     "@kbn/spaces-plugin",

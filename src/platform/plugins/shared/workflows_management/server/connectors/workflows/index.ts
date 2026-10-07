@@ -16,6 +16,7 @@ import type {
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TriggerType, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { validateWorkflowForExecution } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import { api } from './api';
@@ -96,16 +97,10 @@ function getWorkflowsConnectorTypeArgs(
     // Return a function that will be called by the connector
     return async (workflowId: string, spaceId: string, inputs: Record<string, unknown>) => {
       // Get the workflow and validate it is in a runnable state
-      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
       validateWorkflowForExecution(workflow, workflowId);
 
-      const workflowToRun: WorkflowExecutionEngineModel = {
-        id: workflow.id,
-        name: workflow.name,
-        enabled: workflow.enabled,
-        definition: workflow.definition,
-        yaml: workflow.yaml,
-      };
+      const workflowToRun: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel(workflow);
 
       // Run the workflow, @tb: maybe switch to scheduler?
       return workflowsManagementApi.runWorkflow(workflowToRun, spaceId, inputs, request);
@@ -125,16 +120,11 @@ function getWorkflowsConnectorTypeArgs(
       }
 
       // Get the workflow and validate it is in a runnable state
-      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
       validateWorkflowForExecution(workflow, workflowId);
 
-      const workflowToSchedule: WorkflowExecutionEngineModel = {
-        id: workflow.id,
-        name: workflow.name,
-        enabled: workflow.enabled,
-        definition: workflow.definition,
-        yaml: workflow.yaml,
-      };
+      const workflowToSchedule: WorkflowExecutionEngineModel =
+        toWorkflowExecutionEngineModel(workflow);
 
       return workflowsManagementApi.scheduleWorkflow(
         workflowToSchedule,

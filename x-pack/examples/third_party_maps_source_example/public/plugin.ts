@@ -55,7 +55,6 @@ export class MapsCustomRasterSourcePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_maps_source_example',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

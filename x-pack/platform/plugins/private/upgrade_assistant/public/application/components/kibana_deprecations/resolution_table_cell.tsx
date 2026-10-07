@@ -136,7 +136,7 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="warningFill" color="danger" />
+                <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">{resolutionI18nTexts.resolutionFailedCellLabel}</EuiText>
@@ -148,7 +148,7 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="checkCircleFill" color="success" />
+                <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">{resolutionI18nTexts.resolutionCompleteCellLabel}</EuiText>
@@ -167,7 +167,7 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
           data-test-subj="resolutionStatusCell"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type={euiIconType} />
+            <EuiIcon type={euiIconType} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{resolutionI18nTexts.resolutionTypeCellLabel}</EuiText>

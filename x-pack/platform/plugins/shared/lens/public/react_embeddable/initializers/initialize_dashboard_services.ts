@@ -16,7 +16,7 @@ import type {
 import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
   LensComponentProps,
   LensPanelProps,
@@ -54,6 +54,7 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
   className: 'skip',
   forceDSL: 'skip',
   esqlVariables: 'skip',
+  isApproximate: 'skip',
 };
 
 export interface DashboardServicesConfig {
@@ -64,8 +65,15 @@ export interface DashboardServicesConfig {
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   anyStateChange$: Observable<void>;
   getLatestState: () => SerializedProps;
-  reinitializeState: (lastSaved?: LensWireAPIConfig) => void;
+  reinitializeState: (runtimeState: LensRuntimeState) => void;
 }
+
+const getDefaultDescription = ({
+  ref_id,
+  attributes,
+  description,
+}: LensRuntimeState): string | undefined =>
+  ref_id ? attributes.description || description : description;
 
 /**
  * Everything about panel and library services
@@ -83,9 +91,7 @@ export function initializeDashboardServices(
   // ( based on existing FTR tests ).
   const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState.attributes.title);
   const defaultDescription$ = new BehaviorSubject<string | undefined>(
-    initialState.ref_id
-      ? internalApi.attributes$.getValue().description || initialState.description
-      : initialState.description
+    getDefaultDescription(initialState)
   );
 
   return {
@@ -111,22 +117,7 @@ export function initializeDashboardServices(
         stateConfig.api.updateRefId(savedObjectId);
         return savedObjectId;
       },
-      checkForDuplicateTitle: async (
-        newTitle: string,
-        isTitleDuplicateConfirmed: boolean,
-        onTitleDuplicate: () => void
-      ) => {
-        await attributeService.checkForDuplicateTitle({
-          newTitle,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-          newCopyOnSave: false,
-          newDescription: '',
-          displayName: '',
-          lastSavedTitle: '',
-          copyOnSave: false,
-        });
-      },
+      hasLibraryItemWithTitle: attributeService.hasLibraryItemWithTitle,
       canLinkToLibrary: async () =>
         !getLatestState().ref_id && !isTextBasedLanguage(getLatestState()),
       canUnlinkFromLibrary: async () => Boolean(getLatestState().ref_id),
@@ -144,9 +135,15 @@ export function initializeDashboardServices(
     },
     anyStateChange$: merge(
       titleManager.anyStateChange$,
-      internalApi.overrides$,
-      internalApi.disableTriggers$
-    ).pipe(map(() => undefined)),
+      internalApi.overrides$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      internalApi.disableTriggers$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getLatestState: () => {
       const { style, className } = apiHasLensComponentProps(parentApi)
         ? parentApi
@@ -168,8 +165,10 @@ export function initializeDashboardServices(
         disableTriggers: internalApi.disableTriggers$.getValue(),
       };
     },
-    reinitializeState: (lastSaved?: LensWireAPIConfig) => {
-      titleManager.reinitializeState(lastSaved);
+    reinitializeState: (runtimeState: LensRuntimeState) => {
+      defaultTitle$.next(runtimeState.attributes.title);
+      defaultDescription$.next(getDefaultDescription(runtimeState));
+      titleManager.reinitializeState(runtimeState);
     },
   };
 }

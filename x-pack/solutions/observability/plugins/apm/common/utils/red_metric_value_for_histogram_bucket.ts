@@ -12,39 +12,21 @@ export interface RedMetricHistogramPoint {
 }
 
 /**
- * For RED series from `date_histogram`: empty buckets at the **start or end** of the
- * selected range are often incomplete (no observation), not a measured zero — those
- * become `null` so charts do not dip to zero at the edges. Empty buckets **between**
- * non-empty buckets keep their computed values (e.g. true zero throughput).
- * Invalid values (`null`, `NaN`) are always dropped to `null`.
+ * For RED series from `date_histogram`:
  *
+ * - Empty buckets (`docCount === 0`) become `null` so charts render a dotted
+ *   line instead of dipping to zero when there is no data.
+ * - Invalid values (`null`, `NaN`) are also dropped to `null`.
  */
-export function nullifyLeadingTrailingEmptyRedMetricPoints(
+export function nullifyEmptyRedMetricPoints(
   points: ReadonlyArray<RedMetricHistogramPoint>
 ): Array<{ x: number; y: number | null }> {
-  if (points.length === 0) {
-    return [];
-  }
-
-  let firstNonEmpty = 0;
-  while (firstNonEmpty < points.length && points[firstNonEmpty].docCount === 0) {
-    firstNonEmpty++;
-  }
-
-  let lastNonEmpty = points.length - 1;
-  while (lastNonEmpty >= 0 && points[lastNonEmpty].docCount === 0) {
-    lastNonEmpty--;
-  }
-
-  return points.map((point, index) => {
-    const isLeadingOrTrailingEmpty =
-      point.docCount === 0 && (index < firstNonEmpty || index > lastNonEmpty);
-
-    if (isLeadingOrTrailingEmpty) {
+  return points.map((point) => {
+    if (point.docCount === 0) {
       return { x: point.x, y: null };
     }
 
-    const y = point.y;
+    const { y } = point;
     if (y == null || Number.isNaN(y)) {
       return { x: point.x, y: null };
     }

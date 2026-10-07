@@ -437,30 +437,6 @@ export class DataGridService extends FtrService {
     return (await this.getBodyRows(options, selector))[options.rowIndex || 0];
   }
 
-  public async clickQualityIssueLeadingControl(rowIndex: number) {
-    const buttons = await this.testSubjects.findAll('docTableDegradedDocExist');
-    const selectedButton = rowIndex < buttons.length ? buttons[rowIndex] : undefined;
-
-    if (selectedButton) {
-      await selectedButton.moveMouseTo();
-      await selectedButton.click();
-    } else {
-      throw new Error(`Unable to find quality issue leading control for row index ${rowIndex}`);
-    }
-  }
-
-  public async clickStacktraceLeadingControl(rowIndex: number) {
-    const buttons = await this.testSubjects.findAll('docTableStacktraceExist');
-    const selectedButton = rowIndex < buttons.length ? buttons[rowIndex] : undefined;
-
-    if (selectedButton) {
-      await selectedButton.moveMouseTo();
-      await selectedButton.click();
-    } else {
-      throw new Error(`Unable to find stacktrace leading control for row index ${rowIndex}`);
-    }
-  }
-
   public async clickRowToggle(
     { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string | false } = {
       isAnchorRow: false,
@@ -503,6 +479,10 @@ export class DataGridService extends FtrService {
     return await this.testSubjects.exists('kbnDocViewer');
   }
 
+  public async isDocViewerNavigationVisible() {
+    return await this.testSubjects.exists('docViewerFlyoutNavigation');
+  }
+
   public async clickDocViewerTab(id: string) {
     return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${id}`);
   }
@@ -519,6 +499,30 @@ export class DataGridService extends FtrService {
 
   public async closeFlyout() {
     await this.testSubjects.click('euiFlyoutCloseButton');
+  }
+
+  public async waitForDocViewerFieldsToRender() {
+    await this.retry.waitFor('doc viewer fields to render', async () => {
+      return (await this.find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+    });
+  }
+
+  public async getDocViewerFieldValue(fieldName: string) {
+    return await this.testSubjects.getVisibleText(`tableDocViewRow-${fieldName}-value`);
+  }
+
+  public async getDocViewerActivePage() {
+    const activePage = await this.find.byCssSelector(
+      '[data-test-subj^="docViewerFlyoutNavigationPage-"]'
+    );
+    const dataTestSubj = await activePage.getAttribute('data-test-subj');
+    const match = dataTestSubj?.match(/docViewerFlyoutNavigationPage-(\d+)/);
+
+    if (!match) {
+      throw new Error(`Unable to parse active flyout page from "${dataTestSubj}"`);
+    }
+
+    return Number(match[1]);
   }
 
   public async getHeaderFields(): Promise<string[]> {

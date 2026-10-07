@@ -50,9 +50,7 @@ describe('update_objects_spaces', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup({
-      basePath: httpService.basePath,
-    });
+    service.setup();
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
@@ -63,7 +61,6 @@ describe('update_objects_spaces', () => {
     );
 
     const spacesServiceStart = service.start({
-      basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
     initUpdateObjectsSpacesApi({
@@ -152,10 +149,10 @@ describe('update_objects_spaces', () => {
 
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
-      ).not.toThrowError();
+      ).not.toThrow();
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
-      ).not.toThrowError();
+      ).not.toThrow();
     });
 
     it('passes arguments to the saved objects client and returns the result', async () => {

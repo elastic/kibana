@@ -8,7 +8,6 @@
  */
 
 import { GeoPointFormat } from './geo_point';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
 describe('GeoPoint Format', () => {
@@ -20,13 +19,10 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(
-        geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] }, TEXT_CONTEXT_TYPE)
-      ).toBe('10.1,125.6');
-      expect(
-        geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] }, HTML_CONTEXT_TYPE)
-      ).toBe('10.1,125.6');
-      expect(geoPointFormat.reactConvert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+      expect(geoPointFormat.convertToText({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+        '10.1,125.6'
+      );
+      expect(geoPointFormat.convertToReact({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
         '10.1,125.6'
       );
     });
@@ -38,13 +34,10 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(
-        geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] }, TEXT_CONTEXT_TYPE)
-      ).toBe('POINT (125.6 10.1)');
-      expect(
-        geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] }, HTML_CONTEXT_TYPE)
-      ).toBe('POINT (125.6 10.1)');
-      expect(geoPointFormat.reactConvert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+      expect(geoPointFormat.convertToText({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+        'POINT (125.6 10.1)'
+      );
+      expect(geoPointFormat.convertToReact({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
         'POINT (125.6 10.1)'
       );
     });
@@ -58,13 +51,10 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(
-        geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] }, TEXT_CONTEXT_TYPE)
-      ).toBe('10.1,125.6');
-      expect(
-        geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] }, HTML_CONTEXT_TYPE)
-      ).toBe('10.1,125.6');
-      expect(geoPointFormat.reactConvert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+      expect(geoPointFormat.convertToText({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+        '10.1,125.6'
+      );
+      expect(geoPointFormat.convertToReact({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
         '10.1,125.6'
       );
     });
@@ -76,13 +66,8 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert({ lat: 10.1, lon: 125.6 }, TEXT_CONTEXT_TYPE)).toBe(
-        '10.1,125.6'
-      );
-      expect(geoPointFormat.convert({ lat: 10.1, lon: 125.6 }, HTML_CONTEXT_TYPE)).toBe(
-        '10.1,125.6'
-      );
-      expect(geoPointFormat.reactConvert({ lat: 10.1, lon: 125.6 })).toBe('10.1,125.6');
+      expect(geoPointFormat.convertToText({ lat: 10.1, lon: 125.6 })).toBe('10.1,125.6');
+      expect(geoPointFormat.convertToReact({ lat: 10.1, lon: 125.6 })).toBe('10.1,125.6');
     });
 
     test('Geopoint expressed as a string with the format: "lat,lon"', () => {
@@ -92,9 +77,8 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert('10.1,125.6', TEXT_CONTEXT_TYPE)).toBe('10.1,125.6');
-      expect(geoPointFormat.convert('10.1,125.6', HTML_CONTEXT_TYPE)).toBe('10.1,125.6');
-      expect(geoPointFormat.reactConvert('10.1,125.6')).toBe('10.1,125.6');
+      expect(geoPointFormat.convertToText('10.1,125.6')).toBe('10.1,125.6');
+      expect(geoPointFormat.convertToReact('10.1,125.6')).toBe('10.1,125.6');
     });
 
     test('Geopoint expressed as a Well-Known Text POINT with the format: "POINT (lon lat)"', () => {
@@ -104,9 +88,8 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert('POINT (125.6 10.1)', TEXT_CONTEXT_TYPE)).toBe('10.1,125.6');
-      expect(geoPointFormat.convert('POINT (125.6 10.1)', HTML_CONTEXT_TYPE)).toBe('10.1,125.6');
-      expect(geoPointFormat.reactConvert('POINT (125.6 10.1)')).toBe('10.1,125.6');
+      expect(geoPointFormat.convertToText('POINT (125.6 10.1)')).toBe('10.1,125.6');
+      expect(geoPointFormat.convertToReact('POINT (125.6 10.1)')).toBe('10.1,125.6');
     });
 
     test('non-geopoint', () => {
@@ -116,9 +99,8 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert('notgeopoint', TEXT_CONTEXT_TYPE)).toBe('notgeopoint');
-      expect(geoPointFormat.convert('notgeopoint', HTML_CONTEXT_TYPE)).toBe('notgeopoint');
-      expect(geoPointFormat.reactConvert('notgeopoint')).toBe('notgeopoint');
+      expect(geoPointFormat.convertToText('notgeopoint')).toBe('notgeopoint');
+      expect(geoPointFormat.convertToReact('notgeopoint')).toBe('notgeopoint');
     });
 
     test('missing value', () => {
@@ -128,29 +110,20 @@ describe('GeoPoint Format', () => {
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
-      expect(geoPointFormat.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-      expect(geoPointFormat.convert(null, HTML_CONTEXT_TYPE)).toBe(
-        '<span class="ffString__emptyValue">(null)</span>'
-      );
-      expect(geoPointFormat.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-        '<span class="ffString__emptyValue">(null)</span>'
-      );
-      expectReactElementWithNull(geoPointFormat.reactConvert(null));
-      expectReactElementWithNull(geoPointFormat.reactConvert(undefined));
+      expect(geoPointFormat.convertToText(null)).toBe('(null)');
+      expect(geoPointFormat.convertToText(undefined)).toBe('(null)');
+      expectReactElementWithNull(geoPointFormat.convertToReact(null));
+      expectReactElementWithNull(geoPointFormat.convertToReact(undefined));
     });
 
-    test('escapes HTML characters in html context via fallback', () => {
+    test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'lat_lon_string',
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
-        '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
-      );
-      expect(geoPointFormat.reactConvert('<script>alert("test")</script>')).toBe(
+      expect(geoPointFormat.convertToReact('<script>alert("test")</script>')).toBe(
         '<script>alert("test")</script>'
       );
     });
@@ -159,27 +132,13 @@ describe('GeoPoint Format', () => {
       const geoPointFormat = new GeoPointFormat({ transform: 'lat_lon_string' }, jest.fn());
 
       expect(
-        geoPointFormat.convert(
-          [
-            { type: 'Point', coordinates: [125.6, 10.1] },
-            { type: 'Point', coordinates: [0, 51.5] },
-          ],
-          TEXT_CONTEXT_TYPE
-        )
+        geoPointFormat.convertToText([
+          { type: 'Point', coordinates: [125.6, 10.1] },
+          { type: 'Point', coordinates: [0, 51.5] },
+        ])
       ).toBe('["10.1,125.6","51.5,0"]');
-      expect(
-        geoPointFormat.convert(
-          [
-            { type: 'Point', coordinates: [125.6, 10.1] },
-            { type: 'Point', coordinates: [0, 51.5] },
-          ],
-          HTML_CONTEXT_TYPE
-        )
-      ).toBe(
-        '<span class="ffArray__highlight">[</span>10.1,125.6<span class="ffArray__highlight">,</span> 51.5,0<span class="ffArray__highlight">]</span>'
-      );
       expectReactElementAsArray(
-        geoPointFormat.reactConvert([
+        geoPointFormat.convertToReact([
           { type: 'Point', coordinates: [125.6, 10.1] },
           { type: 'Point', coordinates: [0, 51.5] },
         ]),
@@ -190,13 +149,10 @@ describe('GeoPoint Format', () => {
     test('returns the single element without brackets for a one-element array', () => {
       const geoPointFormat = new GeoPointFormat({ transform: 'lat_lon_string' }, jest.fn());
 
-      expect(
-        geoPointFormat.convert([{ type: 'Point', coordinates: [125.6, 10.1] }], TEXT_CONTEXT_TYPE)
-      ).toBe('["10.1,125.6"]');
-      expect(
-        geoPointFormat.convert([{ type: 'Point', coordinates: [125.6, 10.1] }], HTML_CONTEXT_TYPE)
-      ).toBe('10.1,125.6');
-      expect(geoPointFormat.reactConvert([{ type: 'Point', coordinates: [125.6, 10.1] }])).toBe(
+      expect(geoPointFormat.convertToText([{ type: 'Point', coordinates: [125.6, 10.1] }])).toBe(
+        '["10.1,125.6"]'
+      );
+      expect(geoPointFormat.convertToReact([{ type: 'Point', coordinates: [125.6, 10.1] }])).toBe(
         '10.1,125.6'
       );
     });

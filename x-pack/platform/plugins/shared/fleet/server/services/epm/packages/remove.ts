@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  Logger,
+} from '@kbn/core/server';
 import { differenceBy, chunk } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
-import { SavedObjectsUtils, SavedObjectsErrorHelpers, SPACES_EXTENSION_ID } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  SavedObjectsUtils,
+  SavedObjectsErrorHelpers,
+  isSavedObjectErrorResult,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core/server';
 import minVersion from 'semver/ranges/min-version';
 
 import pMap from 'p-map';
@@ -50,6 +59,8 @@ import { FleetError, PackageRemovalError } from '../../../errors';
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
 import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 import type { PackageSpecConditions } from '../../../../common';
+
+import { assertUninstallAuthorizedForAffectedSpaces } from './uninstall_authz';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
@@ -115,7 +126,8 @@ export async function cleanupDependenciesStep(options: {
         continue;
       }
       appContextService.getLogger().info(`Removing dependency ${dep.name}@${dep.version}`);
-      // If this was the last dependency, remove the package
+      // If this was the last dependency, remove the package. No request is passed here —
+      // authz over the full dependency closure was already verified at the top-level call.
       await removeInstallation({
         savedObjectsClient,
         pkgName: dep.name,
@@ -135,11 +147,45 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
   installSource?: InstallSource;
+  request?: KibanaRequest;
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) {
     throw new PackageRemovalError(`${pkgName} is not installed`);
+  }
+
+  // Fetch package policies before cleanupDependenciesStep so we can run authz check
+  const { total, items } = await packagePolicyService.list(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      spaceId: '*',
+    }
+  );
+
+  // Check that the caller has privileges in all spaces affected by this uninstall,
+  // including the full dependency closure. collectSpacesForUninstallClosure walks
+  // the dependency tree before any removal starts, so a later authz failure cannot
+  // leave earlier dependencies already deleted.
+  if (options.request) {
+    // Fail closed if SO_SEARCH_LIMIT was reached for the root package — there may be
+    // policies in spaces we haven't enumerated yet. Dep truncation is handled inside
+    // collectSpacesForUninstallClosure.
+    if (items.length < total) {
+      throw new PackageRemovalError(
+        `Unable to verify uninstall authorization for package ${pkgName}: too many package policies to enumerate`
+      );
+    }
+    await assertUninstallAuthorizedForAffectedSpaces({
+      request: options.request,
+      pkgName,
+      installation,
+      packagePolicies: items,
+      savedObjectsClient,
+    });
   }
 
   await cleanupDependenciesStep({
@@ -150,16 +196,6 @@ export async function removeInstallation(options: {
     force: options.force,
     installSource: options.installSource,
   });
-
-  const { total, items } = await packagePolicyService.list(
-    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    {
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      spaceId: '*',
-    }
-  );
 
   if (!options.force) {
     await populatePackagePolicyAssignedAgentsCount(esClient, items);
@@ -271,7 +307,8 @@ export async function deleteKibanaAssets({
     }
 
     const foundObjects = resolvedObjects.filter(
-      ({ saved_object: savedObject }) => savedObject?.error?.statusCode !== 404
+      ({ saved_object: savedObject }) =>
+        !isSavedObjectErrorResult(savedObject) || savedObject.error.statusCode !== 404
     );
 
     // in the case of a partial install, it is expected that some assets will be not found

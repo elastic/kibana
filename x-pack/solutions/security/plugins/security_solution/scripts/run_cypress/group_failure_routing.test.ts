@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import { routeGroupFailure } from './group_failure_routing';
+import { hasUnresolvedFailures, routeGroupFailure } from './group_failure_routing';
+
+describe('hasUnresolvedFailures', () => {
+  it('fails when an initial failure remains after an unrelated successful retry', () => {
+    expect(hasUnresolvedFailures(['failed.cy.ts'], false)).toBe(true);
+  });
+  it('fails on retry failures even without tracked specs', () => {
+    expect(hasUnresolvedFailures([], true)).toBe(true);
+  });
+  it('passes when all specs and retries succeeded', () => {
+    expect(hasUnresolvedFailures([], false)).toBe(false);
+  });
+});
 
 const SPEC_A = '/kibana/x-pack/solutions/security/test/a.cy.ts';
 const SPEC_B = '/kibana/x-pack/solutions/security/test/b.cy.ts';
@@ -14,6 +26,21 @@ const UNRELATED_SPEC = '/kibana/x-pack/solutions/security/test/other-group.cy.ts
 const STARTUP_MESSAGE = 'Kibana failed to start on port 5620';
 
 describe('routeGroupFailure', () => {
+  it('does not requeue passed specs after a later group failure', () => {
+    const failedSpecFilePaths = [SPEC_B];
+    const infraFailedSpecFilePaths: string[] = [];
+    const records = routeGroupFailure({
+      specFilePaths: [SPEC_A, SPEC_B, SPEC_C],
+      completedSpecFilePaths: [SPEC_A],
+      failedSpecFilePaths,
+      infraFailedSpecFilePaths,
+      message: STARTUP_MESSAGE,
+      isRetryRun: false,
+    });
+    expect(failedSpecFilePaths).toEqual([SPEC_B, SPEC_C]);
+    expect(infraFailedSpecFilePaths).toEqual([SPEC_B, SPEC_C]);
+    expect(records.map(({ spec }) => spec)).toEqual([SPEC_B, SPEC_C]);
+  });
   it('seeds both failure lists and emits a record per spec when the throw precedes the per-spec loop', () => {
     // The startup-failure shape: `runElasticsearch` / `runKibanaServer` /
     // `providers.loadAll()` / `FunctionalTestRunner.run` threw, so nothing has

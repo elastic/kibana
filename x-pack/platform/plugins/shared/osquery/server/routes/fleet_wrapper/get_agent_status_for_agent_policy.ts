@@ -7,7 +7,7 @@
 
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   GetAgentStatusForAgentPolicyRequestParamsSchema,
   GetAgentStatusForAgentPolicyRequestQuerySchema,

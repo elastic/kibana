@@ -13,9 +13,8 @@ import {
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
   IntegrationCallbacks,
   LensInternalApi,
@@ -64,6 +63,11 @@ export function initializeStateManagement(
     return value;
   };
 
+  const publicRenderCount$ = new BehaviorSubject(internalApi.renderCount$.getValue() + 1);
+  const renderCountSubscription = internalApi.renderCount$.subscribe((count) =>
+    publicRenderCount$.next(count + 1)
+  );
+
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,
@@ -73,8 +77,14 @@ export function initializeStateManagement(
       dataLoading$: internalApi.dataLoading$,
       blockingError$: internalApi.blockingError$,
       rendered$: internalApi.hasRenderCompleted$,
+      renderCount$: publicRenderCount$,
     },
-    anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
+    anyStateChange$: merge(
+      internalApi.attributes$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getComparators: () => {
       return {
         attributes:
@@ -97,6 +107,8 @@ export function initializeStateManagement(
     reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => {
       internalApi.updateAttributes(lastSavedRuntimeState.attributes);
     },
-    cleanup: noop,
+    cleanup: () => {
+      renderCountSubscription.unsubscribe();
+    },
   };
 }

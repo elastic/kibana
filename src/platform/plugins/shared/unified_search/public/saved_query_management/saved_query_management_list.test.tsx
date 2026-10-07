@@ -218,8 +218,8 @@ describe('Saved query management list component', () => {
     expect(screen.getByLabelText('Load query')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeEnabled();
     await userEvent.click(screen.getByLabelText('Load query'));
-    expect(onLoadSpy).toBeCalled();
-    expect(onCloseSpy).toBeCalled();
+    expect(onLoadSpy).toHaveBeenCalled();
+    expect(onCloseSpy).toHaveBeenCalled();
   });
 
   it('should render the button with the correct text', async () => {
@@ -298,7 +298,7 @@ describe('Saved query management list component', () => {
     expect(screen.getByLabelText('Load query')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeDisabled();
     expect(deleteSavedQuerySpy).toHaveBeenLastCalledWith('8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9');
-    expect(onClearSavedQuerySpy).toBeCalled();
+    expect(onClearSavedQuerySpy).toHaveBeenCalled();
   });
 
   it('should not render pagination if there are less than 5 saved queries', async () => {
@@ -379,9 +379,9 @@ describe('Saved query management list component', () => {
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
-    expect(screen.getByRole('option', { name: 'Test 0', checked: false })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Test 0', selected: false })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
-    expect(screen.getByRole('option', { name: 'Test 0', checked: true })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Test 0', selected: true })).toBeInTheDocument();
     findSavedQueriesSpy.mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(1),
@@ -398,7 +398,7 @@ describe('Saved query management list component', () => {
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
-    expect(screen.getByRole('option', { name: 'Test 0', checked: true })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Test 0', selected: true })).toBeInTheDocument();
   });
 
   it('should allow providing a search term', async () => {

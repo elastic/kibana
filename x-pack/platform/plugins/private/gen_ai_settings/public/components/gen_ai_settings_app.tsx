@@ -15,16 +15,16 @@ import {
   EuiTitle,
   EuiLink,
   EuiFlexItem,
-  useEuiTheme,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import {
   AI_CHAT_EXPERIENCE_TYPE,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
@@ -39,12 +39,17 @@ import { PrePromptWorkflowSection } from './pre_prompt_workflow_section';
 import { DocumentationSection } from './documentation';
 import { AnonymizationProfilesSection } from './anonymization_profiles_section';
 import { TokenUsageTracking } from './token_usage_tracking/token_usage_tracking';
+import { AgentBuilderTracingSection } from './agent_builder_tracing/agent_builder_tracing_section';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
 const TELEMETRY_SOURCE = 'stack_management' as const;
+
+const pageTitle = i18n.translate('xpack.genAiSettings.pageTitle', {
+  defaultMessage: 'GenAI Settings',
+});
 
 const isAIChatExperience = (value: unknown): value is AIChatExperience =>
   typeof value === 'string' &&
@@ -62,7 +67,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showChatExperienceSetting,
     showAnonymizationProfilesSection,
   } = useEnabledFeatures();
-  const { euiTheme } = useEuiTheme();
   const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
 
   // Determine current chat experience (including unsaved changes)
@@ -99,19 +103,20 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   }, [setBreadcrumbs, showAiBreadcrumb]);
 
   const handleNavigateToSpaces = useCallback(() => {
-    const basePath = http.basePath.get();
-    const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
-    const spacesPath = `/kibana/spaces/edit/${spaceId}${isPermissionsBased ? '/roles' : ''}`;
+    const spacesPath = `/kibana/spaces/edit/${http.spaceId}${isPermissionsBased ? '/roles' : ''}`;
 
     application.navigateToApp('management', {
       path: spacesPath,
       openInNewTab: true,
     });
-  }, [application, http.basePath, isPermissionsBased]);
+  }, [application, http.spaceId, isPermissionsBased]);
 
   async function handleSave() {
     const tokenUsageTrackingTurnedOn =
       unsavedChanges[GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]?.unsavedValue === true;
+
+    const tracingSettingChanged =
+      unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]?.unsavedValue !== undefined;
 
     const savedChatExperience = isAIChatExperience(chatExperienceField?.savedValue)
       ? chatExperienceField.savedValue
@@ -156,6 +161,28 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       }
     }
 
+    if (tracingSettingChanged) {
+      try {
+        await genAiSettingsApi('POST /internal/gen_ai_settings/agent_builder/tracing_dashboard', {
+          params: {
+            body: {
+              enabled: Boolean(
+                unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]?.unsavedValue
+              ),
+            },
+          },
+          signal: null,
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.gen_ai_settings.agentBuilderTracing.syncFeaturesError', {
+            defaultMessage: 'Failed to sync Agent Builder tracing features',
+          }),
+          text: error?.body?.message ?? error?.message,
+        });
+      }
+    }
+
     if (shouldTrackOptInConfirmed) {
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'confirmed',
@@ -191,18 +218,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   return (
     <>
       <div data-test-subj="genAiSettingsPage">
-        <EuiTitle size="l">
-          <h2 data-test-subj="genAiSettingsTitle">
-            <FormattedMessage id="xpack.genAiSettings.pageTitle" defaultMessage="GenAI Settings" />
-          </h2>
-        </EuiTitle>
+        <AppHeader title={pageTitle} spacing="bleed" />
+        <EuiSpacer size="l" />
 
-        <EuiPageSection
-          paddingSize="none"
-          css={{
-            paddingTop: euiTheme.size.l,
-          }}
-        >
+        <EuiPageSection paddingSize="none">
           <EuiSplitPanel.Outer hasBorder grow={false}>
             <EuiSplitPanel.Inner color="subdued">
               <EuiTitle size="s">
@@ -305,6 +324,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
           </EuiSplitPanel.Outer>
 
           <PrePromptWorkflowSection />
+
+          {hasAgentBuilderPrivileges && <AgentBuilderTracingSection />}
 
           {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
             <>

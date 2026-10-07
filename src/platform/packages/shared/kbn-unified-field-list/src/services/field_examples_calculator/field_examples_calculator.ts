@@ -91,7 +91,7 @@ export function groupValues(
     }
 
     values.forEach((v) => {
-      const value = formatter ? formatter.convert(v) : v;
+      const value = formatter ? formatter.convertToText(v) : v;
 
       if (visitedValuesMap[value]) {
         // already counted in groups

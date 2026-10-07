@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -110,6 +110,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[0].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[0].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -129,6 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
                       status: 'pending',
                     },
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                 ],
                 errors: [],
@@ -164,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -208,6 +212,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[0].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[0].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -233,6 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                 ],
               });
@@ -267,7 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -300,6 +308,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[0].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[0].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -325,6 +336,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                 ],
               });
@@ -360,7 +372,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -393,6 +405,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[0].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[0].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -418,6 +433,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                   {
                     id: response.body.rules[1].id,
@@ -431,6 +447,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[1].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[1].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -456,6 +475,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[1].next_run }
                       : {}),
                     monitoring: response.body.rules[1].monitoring,
+                    is_snoozed_until: response.body.rules[1].is_snoozed_until,
                   },
                   {
                     id: response.body.rules[2].id,
@@ -469,6 +489,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[2].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[2].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -494,6 +517,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[2].next_run }
                       : {}),
                     monitoring: response.body.rules[2].monitoring,
+                    is_snoozed_until: response.body.rules[2].is_snoozed_until,
                   },
                 ],
                 total: 3,
@@ -530,7 +554,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -564,6 +588,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[0].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[0].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -589,6 +616,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                   {
                     id: response.body.rules[1].id,
@@ -602,6 +630,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[1].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[1].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -627,6 +658,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[1].next_run }
                       : {}),
                     monitoring: response.body.rules[1].monitoring,
+                    is_snoozed_until: response.body.rules[1].is_snoozed_until,
                   },
                   {
                     id: response.body.rules[2].id,
@@ -640,6 +672,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[2].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[2].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -665,6 +700,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[2].next_run }
                       : {}),
                     monitoring: response.body.rules[2].monitoring,
+                    is_snoozed_until: response.body.rules[2].is_snoozed_until,
                   },
                 ],
               });
@@ -707,6 +743,9 @@ export default ({ getService }: FtrProviderContext) => {
                     api_key_created_by_user: false,
                     api_key_owner: response.body.rules[0].api_key_owner,
                     created_by: 'elastic',
+                    created_by_profile_uid: null,
+                    updated_by_profile_uid: null,
+                    api_key_owner_profile_uid: null,
                     updated_by: response.body.rules[0].updated_by,
                     mute_all: false,
                     muted_alert_ids: [],
@@ -732,6 +771,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                 ],
               });
@@ -754,7 +794,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);

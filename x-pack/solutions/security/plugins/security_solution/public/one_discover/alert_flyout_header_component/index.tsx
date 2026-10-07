@@ -13,16 +13,29 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
-import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
+import { useDefaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { RemoteDocumentCallout } from '../../flyout_v2/document/main/components/remote_document_callout';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
-import { Header } from '../../flyout_v2/document/header';
-import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
-import { NotesDetails } from '../../flyout_v2/notes';
+import { Header } from '../../flyout_v2/document/main/header';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
+import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DiscoverCellActions } from '../cell_actions';
+import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
+import { getDocumentTitle } from '../../flyout_v2/document/main/utils/get_header_title';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import {
+  trackFlyoutMounted,
+  trackFlyoutOpen,
+} from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export const MISSING_METADATA_CALLOUT = i18n.translate(
   'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
@@ -81,7 +94,8 @@ export const AlertFlyoutHeader = ({
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
   const isSecurityApp = useIsInSecurityApp();
-  const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const renderCellActions = useCallback<CellActionRenderer>(
     (props) => (
       <DiscoverCellActions
@@ -100,7 +114,7 @@ export const AlertFlyoutHeader = ({
       return;
     }
 
-    services.overlays?.openSystemFlyout(
+    const ref = services.overlays?.openSystemFlyout(
       flyoutProviders({
         services,
         store,
@@ -110,9 +124,33 @@ export const AlertFlyoutHeader = ({
       {
         ...defaultToolsFlyoutProperties,
         historyKey,
+        session: FLYOUT_SESSION_KIND.START,
+        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
       }
     );
-  }, [history, historyKey, hit, services, store]);
+    if (ref) {
+      trackFlyoutOpen(services.telemetry, ref, {
+        surface: FLYOUT_SURFACE.TOOL,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: FLYOUT_TOOL.NOTES,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    }
+  }, [defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
+
+  useEffect(() => {
+    if (!services) {
+      return;
+    }
+
+    return trackFlyoutMounted(services.telemetry, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.DISCOVER_TABLE,
+    });
+  }, [hit.id, services]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -138,43 +176,35 @@ export const AlertFlyoutHeader = ({
     };
   }, [servicesPromise, storePromise]);
 
-  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
-
-  const metadataCallout = isMissingMetadata ? (
-    <>
-      <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
-      <EuiSpacer size="s" />
-    </>
-  ) : null;
-  const remoteDocumentCallout = (
-    <RemoteDocumentCallout hit={hit}>
-      <EuiSpacer size="s" />
-    </RemoteDocumentCallout>
-  );
-
   if (!services || !store) {
-    return (
-      <>
-        {metadataCallout}
-        {remoteDocumentCallout}
-      </>
-    );
+    return null;
   }
+
+  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
 
   return (
     <>
-      {metadataCallout}
-      {remoteDocumentCallout}
+      {isMissingMetadata ? (
+        <>
+          <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {flyoutProviders({
         services,
         store,
         children: (
-          <Header
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-            onShowNotes={openNotesFlyout}
-          />
+          <>
+            <RemoteDocumentCallout hit={hit}>
+              <EuiSpacer size="s" />
+            </RemoteDocumentCallout>
+            <Header
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+              onShowNotes={openNotesFlyout}
+            />
+          </>
         ),
       })}
     </>

@@ -15,27 +15,22 @@ import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
 // Mock CodeEditor
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: (props: any) => (
-    <textarea
-      data-test-subj={props.dataTestSubj || 'code-editor'}
-      value={props.value}
-      onChange={(e) => props.onChange?.(e.target.value)}
-      readOnly={props.options?.readOnly}
-      aria-label={props['aria-label']}
-    />
-  ),
-  monaco: {
-    languages: {
-      json: {
-        jsonDefaults: {
-          setDiagnosticsOptions: jest.fn(),
-        },
-      },
-    },
-    editor: {},
-  },
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: (props: any) => (
+      <textarea
+        data-test-subj={props.dataTestSubj || 'code-editor'}
+        value={props.value}
+        onChange={(e) => props.onChange?.(e.target.value)}
+        readOnly={props.options?.readOnly}
+        aria-label={props['aria-label']}
+      />
+    ),
+  };
+});
 
 // Mock input validation callout
 jest.mock('./input_validation_callout', () => ({
@@ -52,7 +47,8 @@ jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
 }));
 
 // Mock theme constant
-jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
 }));
 
@@ -232,6 +228,54 @@ describe('WorkflowExecuteManualForm', () => {
       ).toEqual({
         streamName: INPUT_STRING_PLACEHOLDER,
         owner: { name: 'Jane Doe' },
+      });
+    });
+
+    it('prefills optional built-in #/kibana/definitions $ref with structural defaults from applyInputDefaults', () => {
+      expect(
+        getInitialJson({
+          properties: {
+            notificationGroup: { $ref: '#/kibana/definitions/alertingV2NotificationGroup' },
+          },
+        } as JsonModelSchemaType)
+      ).toEqual({
+        notificationGroup: {
+          alerts: [],
+        },
+      });
+    });
+
+    it('prefills required unknown built-in $ref with an empty object so the field is editable', () => {
+      expect(
+        getInitialJson({
+          properties: {
+            payload: { $ref: '#/kibana/definitions/DoesNotExist' },
+          },
+          required: ['payload'],
+        } as JsonModelSchemaType)
+      ).toEqual({ payload: {} });
+    });
+
+    it('prefills required built-in #/kibana/definitions $ref using generated samples', () => {
+      const initial = getInitialJson({
+        properties: {
+          notificationGroup: { $ref: '#/kibana/definitions/alertingV2NotificationGroup' },
+        },
+        required: ['notificationGroup'],
+      } as JsonModelSchemaType);
+      expect(initial.notificationGroup).toMatchObject({
+        id: INPUT_STRING_PLACEHOLDER,
+        policyId: INPUT_STRING_PLACEHOLDER,
+        groupKey: {},
+        alerts: [
+          {
+            last_event_timestamp: INPUT_STRING_PLACEHOLDER,
+            rule_id: INPUT_STRING_PLACEHOLDER,
+            group_hash: INPUT_STRING_PLACEHOLDER,
+            alert_id: INPUT_STRING_PLACEHOLDER,
+            alert_status: INPUT_STRING_PLACEHOLDER,
+          },
+        ],
       });
     });
   });

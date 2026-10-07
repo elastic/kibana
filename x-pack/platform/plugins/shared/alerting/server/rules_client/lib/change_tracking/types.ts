@@ -10,34 +10,42 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
 } from '@kbn/core/server';
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { RuleTypeSolution, SanitizedRule } from '@kbn/alerting-types';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type {
   ObjectChange,
   GetHistoryResult,
   LogChangeHistoryOptions,
-  ChangeHistoryDocument,
   GetChangeHistoryOptions,
 } from '@kbn/change-history';
-import type { RawRule } from '../../../types';
+import type { RuleDomain } from '../../../application/rule/types';
 
-export interface RuleSnapshot {
-  attributes: RawRule;
-  references: SavedObjectReference[];
-}
+/**
+ * The rule state captured at each change event. Contains only user-controlled configuration
+ * fields from {@link RuleDomain} — runtime fields (execution status, scheduling state, snooze,
+ * monitoring) are excluded because they change autonomously and do not represent user intent.
+ * `createdAt`/`updatedAt` are re-typed as `string` for serialization stability.
+ */
+export type RuleChangeHistorySnapshot = Omit<
+  RuleDomain,
+  | 'monitoring'
+  | 'executionStatus'
+  | 'lastRun'
+  | 'nextRun'
+  | 'running'
+  | 'lastEnabledAt'
+  | 'activeSnoozes'
+  | 'isSnoozedUntil'
+  | 'viewInAppRelativeUrl'
+  | 'scheduledTaskId'
+  | 'mutedInstanceIds'
+  | 'createdAt'
+  | 'updatedAt'
+> & { createdAt: string; updatedAt: string };
 
 export interface RuleChange extends Omit<ObjectChange, 'snapshot'> {
   module: RuleTypeSolution;
   /** Post-change rule state; persisted as `object.snapshot` by @kbn/change-history. */
-  snapshot: RuleSnapshot;
-}
-
-export interface RuleChangeHistoryDocument extends ChangeHistoryDocument {
-  rule: SanitizedRule;
-}
-
-export interface GetRuleHistoryResult extends GetHistoryResult {
-  items: RuleChangeHistoryDocument[];
+  snapshot: RuleChangeHistorySnapshot;
 }
 
 export interface ChangeTrackingServiceInitializeParams {
@@ -56,16 +64,17 @@ export interface IScopedChangeTrackingService {
     module: RuleTypeSolution,
     spaceId: string,
     ruleId: string,
-    opts: GetChangeHistoryOptions
+    opts: Omit<GetChangeHistoryOptions, 'spanLabels'>
   ): Promise<GetHistoryResult>;
 }
 
 /**
  * Per-call options for a request-scoped change tracking client. The wrapper
- * resolves `username`, `userProfileId` from the bound request,
- * so callers must not provide them.
+ * resolves `username`, `userProfileId` from the bound request, and always
+ * sets `spanLabels` itself based on the target module, so callers must not
+ * provide any of them.
  */
 export type ScopedLogChangeHistoryOptions = Omit<
   LogChangeHistoryOptions,
-  'username' | 'userProfileId'
+  'username' | 'userProfileId' | 'spanLabels'
 >;

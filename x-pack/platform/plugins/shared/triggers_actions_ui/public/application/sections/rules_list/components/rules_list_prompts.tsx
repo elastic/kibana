@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
@@ -27,7 +28,17 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
     showCreateFirstRulePrompt,
     onCreateRulesClick,
   } = props;
-  if (showNoAuthPrompt) return <NoPermissionPrompt />;
+  if (showNoAuthPrompt)
+    return (
+      <NoPermissionPrompt
+        title={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.noPermissionToReadRulesTitle"
+            defaultMessage="No permissions to read rules"
+          />
+        }
+      />
+    );
 
   if (showCreateFirstRulePrompt) {
     return (

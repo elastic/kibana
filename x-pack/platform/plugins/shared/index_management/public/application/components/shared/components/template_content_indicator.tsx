@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface Props {
   mappings: boolean;
@@ -26,6 +27,10 @@ export const TemplateContentIndicator = ({
   contentWhenEmpty = null,
   isDisabled = false,
 }: Props) => {
+  const dimmedOpacity = css`
+    opacity: 0.5;
+    filter: grayscale(1);
+  `;
   if (!mappings && !settings && !aliases) {
     return contentWhenEmpty;
   }
@@ -64,18 +69,33 @@ export const TemplateContentIndicator = ({
 
   return (
     <>
-      <EuiToolTip content={mappingsText}>
-        <EuiBadge tabIndex={tabIndex} color={getColor(mappings)} aria-label={mappingsText}>
+      <EuiToolTip content={mappingsText} disableScreenReaderOutput>
+        <EuiBadge
+          tabIndex={tabIndex}
+          color={getColor(mappings)}
+          aria-label={mappingsText}
+          css={isDisabled ? dimmedOpacity : undefined}
+        >
           M
         </EuiBadge>
       </EuiToolTip>{' '}
-      <EuiToolTip content={settingsText}>
-        <EuiBadge tabIndex={tabIndex} color={getColor(settings)} aria-label={settingsText}>
+      <EuiToolTip content={settingsText} disableScreenReaderOutput>
+        <EuiBadge
+          tabIndex={tabIndex}
+          color={getColor(settings)}
+          aria-label={settingsText}
+          css={isDisabled ? dimmedOpacity : undefined}
+        >
           S
         </EuiBadge>
       </EuiToolTip>{' '}
-      <EuiToolTip content={aliasesText}>
-        <EuiBadge tabIndex={tabIndex} color={getColor(aliases)} aria-label={aliasesText}>
+      <EuiToolTip content={aliasesText} disableScreenReaderOutput>
+        <EuiBadge
+          tabIndex={tabIndex}
+          color={getColor(aliases)}
+          aria-label={aliasesText}
+          css={isDisabled ? dimmedOpacity : undefined}
+        >
           A
         </EuiBadge>
       </EuiToolTip>

@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { canUpdateWatchlistField } from '../../../../common/api/entity_analytics/watchlists/management';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import type { MonitoringEntitySource } from '../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import {
   WATCHLIST_DESCRIPTION_LABEL,
   WATCHLIST_NAME_LABEL,
@@ -30,13 +31,18 @@ import {
   WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION,
 } from './translations';
 import { RuleBasedSourceInput } from './rule_based_source_input';
+import type { useRuleBasedSourceState } from './hooks/use_rule_based_source_state';
 import { WatchlistCsvUpload } from './csv_upload';
 import { ManagedWatchlistSourceInput } from './managed_watchlist_source_input';
-import { MAX_WATCHLIST_DESCRIPTION_LENGTH, MAX_WATCHLIST_NAME_LENGTH } from './constants';
+import {
+  MAX_WATCHLIST_DESCRIPTION_LENGTH,
+  MAX_WATCHLIST_NAME_LENGTH,
+} from '../../../../common/entity_analytics/watchlists/constants';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
   watchlistId?: string;
+  indexSourceWithMissingApiKey?: MonitoringEntitySource;
   isEditMode: boolean;
   isNameTooLong: boolean;
   isDescriptionTooLong: boolean;
@@ -45,7 +51,7 @@ export interface WatchlistFormProps {
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
-  onSourceValidationChange: (valid: boolean) => void;
+  ruleBasedSource: ReturnType<typeof useRuleBasedSourceState>;
 }
 
 const getTooLongError = (isTooLong: boolean, maxLength: number, fieldId: string) =>
@@ -61,12 +67,13 @@ const getTooLongError = (isTooLong: boolean, maxLength: number, fieldId: string)
 export const WatchlistForm = ({
   watchlist,
   watchlistId,
+  indexSourceWithMissingApiKey,
   isEditMode,
   isNameTooLong,
   isDescriptionTooLong,
   isRiskModifierInvalid,
   onFieldChange,
-  onSourceValidationChange,
+  ruleBasedSource,
 }: WatchlistFormProps) => {
   const isManaged = watchlist.managed === true;
   const isNameDisabled = isEditMode && !canUpdateWatchlistField('name', isManaged);
@@ -158,12 +165,9 @@ export const WatchlistForm = ({
         </Suspense>
       )}
       <RuleBasedSourceInput
-        watchlistName={watchlist.name}
-        isEditMode={isEditMode}
-        isManaged={watchlist.managed}
-        onFieldChange={onFieldChange}
-        initialEntitySources={watchlist.entitySources}
-        onSourceValidationChange={onSourceValidationChange}
+        watchlistId={watchlistId}
+        indexSourceWithMissingApiKey={indexSourceWithMissingApiKey}
+        ruleBasedSource={ruleBasedSource}
       />
     </EuiForm>
   );

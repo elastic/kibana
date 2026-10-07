@@ -60,12 +60,17 @@ export class ScoutFailureReport extends ScoutReport {
       throw new ScoutReportError(`Save destination path '${destination}' already exists`);
     }
 
-    const testFailures: TestFailure[] = this.readFailuresFromNDJSON();
+    const allFailures: TestFailure[] = this.readFailuresFromNDJSON();
 
-    if (testFailures.length === 0) {
+    if (allFailures.length === 0) {
       this.log.info('No test failures to report');
       return;
     }
+
+    // A test retried on CI logs one entry per failing attempt, all sharing the same id; keep
+    // only the last (Playwright never has a passing attempt sandwiched between two failing
+    // ones), so each test gets one HTML report and one summary row, not one per attempt.
+    const testFailures = [...new Map(allFailures.map((f) => [f.id, f])).values()];
 
     // Create the destination directory
     this.log.info(

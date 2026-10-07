@@ -57,12 +57,21 @@ const classicStreamDef = (
   },
 });
 
-const queryStreamDef = (name: string): Streams.QueryStream.Definition => ({
+const queryStreamDef = (
+  name: string,
+  overrides: Partial<Streams.QueryStream.Definition> = {}
+): Streams.QueryStream.Definition => ({
   type: 'query',
   name,
   description: 'test',
   updated_at: '2026-04-10T00:00:00.000Z',
-  query: { esql: 'FROM logs', view: '' },
+  // The stored definition only keeps the view reference; the actual esql lives in the view.
+  query: { esql: '', view: `view-${name}` },
+  ...overrides,
+});
+
+const mockEsqlViewResponse = (query: string) => ({
+  views: [{ name: 'view', query }],
 });
 
 const mockFieldCapsResponse = (
@@ -143,6 +152,31 @@ describe('createInspectStreamsTool handler', () => {
     expect(data.streams['logs-nginx.data-default'].type).toBe('classic');
   });
 
+  it('includes query streams when resolving ["*"] despite their lack of a backing data stream', async () => {
+    const { tool, context, streamsClient, esClient } = setup();
+
+    // Query streams are ES|QL views with no data stream, so listStreamsWithDataStreamExistence
+    // reports them with exists: false. They must still be surfaced to the agent.
+    streamsClient.listStreamsWithDataStreamExistence.mockResolvedValue([
+      { exists: true, stream: wiredStreamDef('logs.ecs.a') },
+      { exists: false, stream: queryStreamDef('logs.ecs.a.errors') },
+      { exists: false, stream: wiredStreamDef('logs.ecs.missing') },
+    ]);
+
+    streamsClient.getStream
+      .mockResolvedValueOnce(wiredStreamDef('logs.ecs.a'))
+      .mockResolvedValueOnce(queryStreamDef('logs.ecs.a.errors'));
+    streamsClient.getAncestors.mockResolvedValue([]);
+    mockEsMethodResolvedValue(esClient.transport.request, mockEsqlViewResponse('FROM logs.ecs.a'));
+
+    const result = await tool.handler({ names: ['*'], aspects: ['overview'] }, context);
+
+    const data = getData(result);
+    // The query stream is included; the wired stream without a materialized data stream is not.
+    expect(Object.keys(data.streams)).toEqual(['logs.ecs.a', 'logs.ecs.a.errors']);
+    expect(data.streams['logs.ecs.a.errors'].type).toBe('query');
+  });
+
   it('returns processing_chain with source attribution for wired streams', async () => {
     const { tool, context, streamsClient } = setup();
 
@@ -219,15 +253,81 @@ describe('createInspectStreamsTool handler', () => {
   });
 
   it('includes type_context per stream type', async () => {
-    const { tool, context, streamsClient } = setup();
+    const { tool, context, streamsClient, esClient } = setup();
 
     streamsClient.getStream.mockResolvedValue(queryStreamDef('query.test'));
+    mockEsMethodResolvedValue(esClient.transport.request, mockEsqlViewResponse('FROM logs'));
 
     const result = await tool.handler({ names: ['query.test'], aspects: ['overview'] }, context);
 
     const data = getData(result);
     expect(data.streams['query.test'].type).toBe('query');
     expect(data.streams['query.test'].type_context).toContain('Read-only');
+  });
+
+  it('surfaces the resolved ES|QL query (from the view) and field_descriptions for query streams', async () => {
+    const { tool, context, streamsClient, esClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(
+      queryStreamDef('logs.ecs.errors', {
+        query: { esql: '', view: 'view-logs.ecs.errors' },
+        field_descriptions: { 'error.message': 'The human-readable error text' },
+      })
+    );
+    // The esql comes from the view, not the stored definition.
+    mockEsMethodResolvedValue(
+      esClient.transport.request,
+      mockEsqlViewResponse('FROM logs.ecs | WHERE log.level == "error"')
+    );
+
+    const result = await tool.handler(
+      { names: ['logs.ecs.errors'], aspects: ['overview'] },
+      context
+    );
+
+    const data = getData(result);
+    const query = data.streams['logs.ecs.errors'].query as Record<string, unknown>;
+    expect(query.view).toBe('view-logs.ecs.errors');
+    expect(query.esql).toBe('FROM logs.ecs | WHERE log.level == "error"');
+    expect(query.field_descriptions).toEqual({
+      'error.message': 'The human-readable error text',
+    });
+    expect(esClient.transport.request).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/_query/view/view-logs.ecs.errors',
+    });
+  });
+
+  it('degrades gracefully with esql_error when the ES|QL view cannot be resolved', async () => {
+    const { tool, context, streamsClient, esClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(queryStreamDef('logs.ecs.errors'));
+    esClient.transport.request.mockRejectedValue(new Error('view not found'));
+
+    const result = await tool.handler(
+      { names: ['logs.ecs.errors'], aspects: ['overview'] },
+      context
+    );
+
+    const data = getData(result);
+    const query = data.streams['logs.ecs.errors'].query as Record<string, unknown>;
+    expect(query.esql).toBeUndefined();
+    expect(query.esql_error).toContain('view not found');
+  });
+
+  it('omits the query block for query streams when overview is not requested', async () => {
+    const { tool, context, streamsClient, esClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(queryStreamDef('logs.ecs.errors'));
+
+    const result = await tool.handler(
+      { names: ['logs.ecs.errors'], aspects: ['processing'] },
+      context
+    );
+
+    const data = getData(result);
+    expect(data.streams['logs.ecs.errors'].query).toBeUndefined();
+    expect(esClient.transport.request).not.toHaveBeenCalled();
   });
 
   it('handles errors for individual streams gracefully', async () => {
@@ -685,5 +785,137 @@ describe('createInspectStreamsTool handler', () => {
 
     const data = getData(result);
     expect(data.streams['logs.ecs.nginx'].type_context).toContain('dynamic: false');
+  });
+
+  describe('lifecycle aspect', () => {
+    const wiredStreamWithIlm = (name: string): Streams.WiredStream.Definition => ({
+      type: 'wired',
+      name,
+      description: `${name} stream`,
+      updated_at: '2026-04-10T00:00:00.000Z',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: { steps: [], updated_at: '2026-04-10T00:00:00.000Z' },
+        lifecycle: { ilm: { policy: 'my-logs-policy' } },
+        failure_store: { inherit: {} },
+        settings: {},
+      },
+    });
+
+    const wiredStreamWithDsl = (name: string): Streams.WiredStream.Definition => ({
+      type: 'wired',
+      name,
+      description: `${name} stream`,
+      updated_at: '2026-04-10T00:00:00.000Z',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: { steps: [], updated_at: '2026-04-10T00:00:00.000Z' },
+        lifecycle: { dsl: { data_retention: '30d' } },
+        failure_store: { inherit: {} },
+        settings: {},
+      },
+    });
+
+    const mockDataStreamValue = (name: string) => ({
+      name,
+      timestamp_field: { name: '@timestamp' },
+      indices: [
+        {
+          index_name: `.ds-${name}-000001`,
+          index_uuid: 'uuid1',
+          managed_by: 'Data stream lifecycle',
+        },
+      ],
+      generation: 1,
+      status: 'GREEN',
+      next_generation_managed_by: 'Data stream lifecycle',
+    });
+
+    const mockStatsResponse = {
+      _all: {
+        primaries: {
+          store: { size_in_bytes: 1024000 },
+          docs: { count: 5000 },
+        },
+      },
+    };
+
+    interface LifecycleResult {
+      retention: Record<string, unknown>;
+      storage_size_bytes: number;
+      storage_size_human: string;
+      document_count: number;
+      error?: string;
+    }
+
+    const getLifecycle = (result: ToolHandlerReturn, streamName: string): LifecycleResult => {
+      const data = getData(result);
+      return data.streams[streamName].lifecycle as unknown as LifecycleResult;
+    };
+
+    it('includes policy_phases for ILM streams', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(wiredStreamWithIlm('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(streamsClient.getDataStream, mockDataStreamValue('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(esClient.indices.stats, mockStatsResponse);
+      mockEsMethodResolvedValue(esClient.ilm.getLifecycle, {
+        'my-logs-policy': {
+          policy: {
+            phases: {
+              hot: { min_age: '0ms', actions: {} },
+              warm: { min_age: '7d', actions: {} },
+              delete: { min_age: '90d', actions: { delete: {} } },
+            },
+          },
+        },
+      });
+
+      const result = await tool.handler(
+        { names: ['logs.ecs.nginx'], aspects: ['lifecycle'] },
+        context
+      );
+
+      const lifecycle = getLifecycle(result, 'logs.ecs.nginx');
+      expect(lifecycle.retention.type).toBe('ilm');
+      expect(lifecycle.retention.policy_name).toBe('my-logs-policy');
+      expect(lifecycle.retention.policy_phases).toEqual(['hot', 'warm', 'delete']);
+    });
+
+    it('does not include policy_phases for DSL streams', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(wiredStreamWithDsl('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(streamsClient.getDataStream, mockDataStreamValue('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(esClient.indices.stats, mockStatsResponse);
+
+      const result = await tool.handler(
+        { names: ['logs.ecs.nginx'], aspects: ['lifecycle'] },
+        context
+      );
+
+      const lifecycle = getLifecycle(result, 'logs.ecs.nginx');
+      expect(lifecycle.retention.type).toBe('dsl');
+      expect(lifecycle.retention.data_retention).toBe('30d');
+      expect(lifecycle.retention.policy_phases).toBeUndefined();
+      expect(esClient.ilm.getLifecycle).not.toHaveBeenCalled();
+    });
+
+    it('gracefully degrades when ILM policy fetch fails', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(wiredStreamWithIlm('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(streamsClient.getDataStream, mockDataStreamValue('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(esClient.indices.stats, mockStatsResponse);
+      esClient.ilm.getLifecycle.mockRejectedValue(new Error('policy not found'));
+
+      const result = await tool.handler(
+        { names: ['logs.ecs.nginx'], aspects: ['lifecycle'] },
+        context
+      );
+
+      const lifecycle = getLifecycle(result, 'logs.ecs.nginx');
+      expect(lifecycle.retention.type).toBe('ilm');
+      expect(lifecycle.retention.policy_name).toBe('my-logs-policy');
+      expect(lifecycle.retention.policy_phases).toBeUndefined();
+      expect(lifecycle.storage_size_bytes).toBe(1024000);
+    });
   });
 });

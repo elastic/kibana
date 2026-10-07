@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
+import {
+  buildDataTableRecord,
+  type DataTableColumnsMeta,
+  type DataTableRecord,
+} from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import type { DataSource } from '@kbn/data-source';
 import type { AggregateQuery } from '@kbn/es-query';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import { apm } from '@elastic/apm-rum';
+import { BehaviorSubject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
 import type {
   CascadedDocumentsStateManager,
   FetchCascadedDocumentsParams,
@@ -42,30 +50,60 @@ jest.mock('@elastic/apm-rum', () => ({
 const mockFetchEsql = jest.mocked(fetchEsql);
 const mockConstructCascadeQuery = jest.mocked(constructCascadeQuery);
 const mockApmCaptureError = jest.mocked(apm.captureError);
+const columnsMeta: DataTableColumnsMeta = {
+  extension: {
+    type: 'string',
+    isComputedColumn: true,
+  },
+};
 
-const createStateManager = (): CascadedDocumentsStateManager => {
+const leafColumnsMeta: DataTableColumnsMeta = {
+  message: {
+    type: 'string',
+    isComputedColumn: false,
+  },
+};
+
+const createStateManager = (
+  initialColumnsMeta: DataTableColumnsMeta = {}
+): CascadedDocumentsStateManager => {
   const recordsById = new Map<string, DataTableRecord[]>();
+  let currentColumnsMeta = initialColumnsMeta;
   return {
     getIsActiveInstance: jest.fn(() => true),
     getCascadedDocuments: jest.fn((nodeId: string) => recordsById.get(nodeId)),
+    getColumnsMeta: jest.fn(() => currentColumnsMeta),
     setCascadedDocuments: jest.fn((nodeId: string, records: DataTableRecord[]) => {
       recordsById.set(nodeId, records);
+    }),
+    setColumnsMeta: jest.fn((nextColumnsMeta: DataTableColumnsMeta) => {
+      currentColumnsMeta = nextColumnsMeta;
     }),
   };
 };
 
-const createFetcher = () => {
+const createFetcher = (initialColumnsMeta?: DataTableColumnsMeta, currentSource?: DataSource) => {
   const discoverServices = createDiscoverServicesMock();
   const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),
+    toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
-  const stateManager = createStateManager();
+  const stateManager = createStateManager(initialColumnsMeta);
+  const currentDataSource$ = new BehaviorSubject<DataSource | undefined>(
+    currentSource ?? createMockEsqlSource([], [], '@timestamp')
+  );
 
   return {
     stateManager,
-    fetcher: new CascadedDocumentsFetcher(discoverServices, scopedProfilesManager, stateManager),
+    fetcher: new CascadedDocumentsFetcher(
+      discoverServices,
+      scopedProfilesManager,
+      stateManager,
+      currentDataSource$
+    ),
     scopedProfilesManager,
     discoverServices,
+    currentDataSource$,
   };
 };
 
@@ -81,6 +119,7 @@ const createFetchParams = (
     esqlVariables: undefined,
     dataView: dataViewWithTimefieldMock,
     timeRange: { from: 'now-15m', to: 'now' },
+    esqlApproximation: false,
     ...overrides,
   };
 };
@@ -101,15 +140,29 @@ describe('CascadedDocumentsFetcher', () => {
     expect(result).toBe(cached);
     expect(mockFetchEsql).not.toHaveBeenCalled();
     expect(mockConstructCascadeQuery).not.toHaveBeenCalled();
+    expect(stateManager.setColumnsMeta).not.toHaveBeenCalled();
   });
 
   it('constructs a cascade query, fetches records, and caches them', async () => {
-    const { stateManager, fetcher, scopedProfilesManager, discoverServices } = createFetcher();
+    const extensionSource = createMockEsqlSource(
+      [{ name: 'extension', type: 'string', source: 'esql-result' }],
+      [],
+      '@timestamp'
+    );
+    const { stateManager, fetcher, scopedProfilesManager, discoverServices } = createFetcher(
+      undefined,
+      extensionSource
+    );
     const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
     const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+    const leafSource = createMockEsqlSource(
+      [{ name: 'message', type: 'string', source: 'index' }],
+      [],
+      '@timestamp'
+    );
 
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
-    mockFetchEsql.mockResolvedValue({ records });
+    mockFetchEsql.mockResolvedValue({ records, dataSource: leafSource });
 
     const params = createFetchParams({ nodeId: 'node-2' });
     const result = await fetcher.fetchCascadedDocuments(params);
@@ -127,7 +180,7 @@ describe('CascadedDocumentsFetcher', () => {
       expect.objectContaining({
         query: cascadeQuery,
         esqlVariables: params.esqlVariables,
-        dataView: params.dataView,
+        esqlSource: extensionSource,
         data: discoverServices.data,
         expressions: discoverServices.expressions,
         timeRange: params.timeRange,
@@ -142,7 +195,46 @@ describe('CascadedDocumentsFetcher', () => {
         },
       })
     );
+    expect(stateManager.setColumnsMeta).toHaveBeenCalledWith(leafColumnsMeta);
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
+  });
+
+  it('forwards esqlApproximation to fetchEsql so cascade drill-downs match the active search mode', async () => {
+    const { fetcher } = createFetcher();
+    const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+
+    mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
+    mockFetchEsql.mockResolvedValue({ records: [], dataSource: undefined });
+
+    await fetcher.fetchCascadedDocuments(
+      createFetchParams({ nodeId: 'node-approx', esqlApproximation: true })
+    );
+
+    expect(mockFetchEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlApproximation: true,
+      })
+    );
+  });
+
+  it('skips updating columns meta when the fetched value is unchanged', async () => {
+    const extensionSource = createMockEsqlSource(
+      [{ name: 'extension', type: 'string', source: 'esql-result' }],
+      [],
+      '@timestamp'
+    );
+    const { stateManager, fetcher } = createFetcher(columnsMeta, extensionSource);
+    const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
+    const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+
+    mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
+    mockFetchEsql.mockResolvedValue({ records, dataSource: extensionSource });
+
+    await fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-same-meta' }));
+
+    expect(stateManager.getColumnsMeta).toHaveBeenCalled();
+    expect(stateManager.setColumnsMeta).not.toHaveBeenCalled();
+    expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith('node-same-meta', records);
   });
 
   it('captures an error when the cascade query cannot be constructed', async () => {
@@ -154,6 +246,7 @@ describe('CascadedDocumentsFetcher', () => {
 
     expect(result).toEqual([]);
     expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(stateManager.setColumnsMeta).not.toHaveBeenCalled();
     expect(stateManager.setCascadedDocuments).not.toHaveBeenCalled();
     expect(mockApmCaptureError).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Failed to construct cascade query' })

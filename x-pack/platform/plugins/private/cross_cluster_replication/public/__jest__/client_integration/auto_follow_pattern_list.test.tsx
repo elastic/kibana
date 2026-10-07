@@ -77,8 +77,10 @@ describe('<AutoFollowPatternList />', () => {
       expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
     });
 
-    test('should have a button to create a follower index', () => {
-      expect(screen.getByTestId('createAutoFollowPatternButton')).toBeInTheDocument();
+    test('should have a button to create an auto-follow pattern in the empty prompt', () => {
+      expect(
+        within(screen.getByTestId('emptyPrompt')).getByTestId('createAutoFollowPatternButton')
+      ).toBeInTheDocument();
     });
   });
 
@@ -153,8 +155,8 @@ describe('<AutoFollowPatternList />', () => {
       expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
     });
 
-    test('should have a button to create an auto-follow pattern', () => {
-      expect(screen.getByTestId('createAutoFollowPatternButton')).toBeInTheDocument();
+    test('should not render a table create button; that action lives on the home header', () => {
+      expect(screen.queryByTestId('createAutoFollowPatternButton')).not.toBeInTheDocument();
     });
 
     test('should list the auto-follow patterns in the table', () => {
@@ -336,7 +338,7 @@ describe('<AutoFollowPatternList />', () => {
         await user.click(actionMenuButton);
 
         const contextMenu = screen.getByTestId('autoFollowPatternActionContextMenu');
-        const menuButtons = within(contextMenu).getAllByRole('button');
+        const menuButtons = within(contextMenu).getAllByRole('menuitem');
 
         expect(menuButtons[0].textContent).toEqual('Resume replication');
         expect(menuButtons[1].textContent).toEqual('Edit pattern');
@@ -361,7 +363,7 @@ describe('<AutoFollowPatternList />', () => {
         await user.click(actionMenuButton);
 
         const contextMenu = screen.getByTestId('autoFollowPatternActionContextMenu');
-        const deleteButton = within(contextMenu).getAllByRole('button')[2];
+        const deleteButton = within(contextMenu).getAllByRole('menuitem')[2];
         await user.click(deleteButton);
 
         expect(screen.getByTestId('deleteAutoFollowPatternConfirmation')).toBeInTheDocument();

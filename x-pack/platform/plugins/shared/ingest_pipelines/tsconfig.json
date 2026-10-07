@@ -7,10 +7,12 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "__jest__/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/licensing-plugin",
     "@kbn/features-plugin",
@@ -43,7 +45,9 @@
     "@kbn/ingest-pipelines-shared",
     "@kbn/licensing-types",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/code-editor-mock"
+    "@kbn/code-editor-mock",
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

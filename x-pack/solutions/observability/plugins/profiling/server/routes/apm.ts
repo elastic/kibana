@@ -7,19 +7,21 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
-import { getRoutePaths } from '../../common';
+import { getRoutePaths, MAX_NAME_LENGTH } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
+import { PROFILING_API_PRIVILEGE } from '../feature';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
   timeTo: schema.number(),
-  functionName: schema.string(),
-  serviceNames: schema.arrayOf(schema.string(), { maxSize: 10 }),
+  functionName: schema.string({ maxLength: MAX_NAME_LENGTH }),
+  serviceNames: schema.arrayOf(schema.string({ maxLength: MAX_NAME_LENGTH }), { maxSize: 10 }),
 });
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
@@ -38,7 +40,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
       path: paths.APMTransactions,
       security: {
         authz: {
-          requiredPrivileges: ['profiling', 'apm'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE, 'apm'],
         },
       },
       options: {
@@ -59,6 +61,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
         );
 
         const esClient = await getClient(context);
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         const { timeFrom, timeTo, functionName, serviceNames }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
@@ -69,6 +72,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
             const apmFunctions = await profilingDataAccess.services.fetchESFunctions({
               core,
               esClient,
+              abortSignal,
               query: {
                 bool: {
                   filter: [

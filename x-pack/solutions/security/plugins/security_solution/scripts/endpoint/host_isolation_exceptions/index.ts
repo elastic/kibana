@@ -8,16 +8,11 @@
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { KbnClient } from '@kbn/test';
-import type { AxiosError } from 'axios';
 import { HostIsolationExceptionGenerator } from '../../../common/endpoint/data_generators/host_isolation_exception_generator';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
+import { ensureArtifactListExists } from '../common/endpoint_artifact_services';
 
 export const cli = () => {
   run(
@@ -53,15 +48,8 @@ class HostIsolationExceptionDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
-  let message = err.message;
-
-  if (err.response) {
-    message = `[${err.response.status}] ${err.response.data.message ?? err.message} [ ${String(
-      err.response.config.method
-    ).toUpperCase()} ${err.response.config.url} ]`;
-  }
-  throw new HostIsolationExceptionDataLoaderError(message, err.toJSON());
+const handleThrowHttpError = (err: Error): never => {
+  throw new HostIsolationExceptionDataLoaderError(err.message, err);
 };
 
 const createHostIsolationException: RunFn = async ({ flags, log }) => {
@@ -69,7 +57,7 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
   log.info('Creating Host isolation exceptions list');
-  await ensureCreateEndpointHostIsolationExceptionList(kbn);
+  await ensureArtifactListExists(kbn, 'hostIsolationExceptions');
 
   const randomPolicyId = await randomPolicyIdGenerator(kbn, log);
 
@@ -90,35 +78,9 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
           body,
         });
       } catch (e) {
-        return handleThrowAxiosHttpError(e);
+        return handleThrowHttpError(e);
       }
     })
   );
   log.info('Finished.');
-};
-
-const ensureCreateEndpointHostIsolationExceptionList = async (kbn: KbnClient) => {
-  const newListDefinition: CreateExceptionListSchema = {
-    description: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.description,
-    list_id: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
-    meta: undefined,
-    name: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.name,
-    os_types: [],
-    tags: [],
-    type: 'endpoint',
-    namespace_type: 'agnostic',
-  };
-
-  await kbn
-    .request({
-      method: 'POST',
-      path: EXCEPTION_LIST_URL,
-      body: newListDefinition,
-    })
-    .catch((e) => {
-      // Ignore if list was already created
-      if (e.response.status !== 409) {
-        handleThrowAxiosHttpError(e);
-      }
-    });
 };

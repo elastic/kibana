@@ -26,8 +26,9 @@ import type {
   User,
   CaseAssignees,
   CaseCustomFields,
+  ActionSource,
 } from '../../../common/types/domain';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -37,9 +38,18 @@ import type { PatchCasesArgs } from '../cases/types';
 import type {
   AttachmentRequestV2,
   CasePostRequest,
-  UserActionFindRequest,
+  UserActionInternalFindRequest,
 } from '../../../common/types/api';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
+import type { WorkflowUserActionPayload } from '../../../common/types/domain/user_action/workflow/v1';
+import type {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '../../../common/constants';
+
+export type AttachmentSavedObjectType =
+  | typeof CASE_COMMENT_SAVED_OBJECT
+  | typeof CASE_ATTACHMENT_SAVED_OBJECT;
 
 export interface BuilderParameters {
   title: {
@@ -116,6 +126,9 @@ export interface BuilderParameters {
   template: {
     parameters: { payload: { template: { id: string; version: number } | null } };
   };
+  workflow: {
+    parameters: { payload: WorkflowUserActionPayload };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -131,6 +144,7 @@ export interface CommonArguments {
   caseId: string;
   owner: string;
   savedObjectId?: string;
+  savedObjectType?: AttachmentSavedObjectType;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -169,17 +183,19 @@ export type CommonBuilderArguments = CommonArguments & {
   valueKey: string;
 };
 
-export interface BuilderDeps {
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-}
-
 export interface ServiceContext {
   log: Logger;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
-  isCasesAttachmentsEnabled?: boolean;
+  /**
+   * Cases-analytics v2 activity writer. Real implementation when v2 is
+   * enabled, `V2_NOOP_ACTIVITY_WRITER` otherwise — every call site stays
+   * unconditional (no `if (writer)` guards). Captured at factory time so
+   * the user-actions service is oblivious to v2's start lifecycle.
+   */
+  analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  actionSource?: ActionSource;
 }
 
 export interface PushTimeFrameInfo {
@@ -279,28 +295,33 @@ export interface UserActionsStatsAggsResult {
   nonDeletedCommentUpdates: {
     doc_count: number;
     comments: {
-      doc_count: number;
-      byCommentId: {
-        buckets: Array<{
-          key: string;
+      buckets: Record<
+        string,
+        {
           doc_count: number;
-          reverse: {
-            doc_count: number;
-            hasDelete: {
+          byCommentId: {
+            buckets: Array<{
+              key: string;
               doc_count: number;
-            };
-            updates: {
-              doc_count: number;
-              byCommentType: {
-                buckets: Array<{
-                  key: string;
+              reverse: {
+                doc_count: number;
+                hasDelete: {
                   doc_count: number;
-                }>;
+                };
+                updates: {
+                  doc_count: number;
+                  byCommentType: {
+                    buckets: Array<{
+                      key: string;
+                      doc_count: number;
+                    }>;
+                  };
+                };
               };
-            };
+            }>;
           };
-        }>;
-      };
+        }
+      >;
     };
   };
 }
@@ -339,7 +360,7 @@ export interface GetUsersResponse {
   assignedAndUnassignedUsers: Set<string>;
 }
 
-export interface FindOptions extends UserActionFindRequest {
+export interface FindOptions extends UserActionInternalFindRequest {
   caseId: string;
   filter?: KueryNode;
 }
@@ -350,6 +371,14 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
   field: string;
   originalValue: unknown;
   newValue: unknown;
+  /** Resolved name of a newly-applied template, recorded on the template user-action payload. */
+  templateName?: string;
+  /**
+   * customFields keys whose edit is already recorded by the canonical
+   * `extended_fields` user action of the same update — their duplicate legacy
+   * `customFields` user actions are suppressed (#282474).
+   */
+  suppressedCustomFieldKeys?: Set<string>;
 }
 
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
@@ -369,6 +398,12 @@ export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
 export interface BuildUserActionsDictParams {
   updatedCases: PatchCasesArgs;
   user: User;
+  /**
+   * Map of applied-template `id@version` → name, used to record the template name on its user
+   * action. Keyed by version (not just id) so the recorded name matches the exact version applied,
+   * since template names can change across versions.
+   */
+  templateNamesByKey?: Map<string, string>;
 }
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;
@@ -385,7 +420,12 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequestV2 }>;
+  attachments: Array<{
+    id: string;
+    owner: string;
+    attachment: AttachmentRequestV2;
+    savedObjectType?: AttachmentSavedObjectType;
+  }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
@@ -394,6 +434,11 @@ export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
 
 export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
   userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+  /**
+   * Throw when Saved Objects returns an error for any individual user action.
+   * Successful items are not rolled back.
+   */
+  throwOnItemError?: boolean;
 } & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {

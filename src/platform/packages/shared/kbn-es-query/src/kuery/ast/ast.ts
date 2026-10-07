@@ -42,6 +42,9 @@ export const fromLiteralExpression = (
   );
 };
 
+/**
+ * @throws an exception is thrown when this function receives malformed input.
+ */
 export const fromKueryExpression = (
   expression: string | NonNullable<estypes.QueryDslQueryContainer>,
   parseOptions: Partial<KueryParseOptions> = {}

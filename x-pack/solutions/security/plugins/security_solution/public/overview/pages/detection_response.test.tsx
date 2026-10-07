@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';
 import { noCasesPermissions, readCasesPermissions } from '../../cases_test_utils';
@@ -44,21 +45,7 @@ jest.mock('../../common/components/search_bar', () => ({
   SiemSearchBar: () => <div data-test-subj="mock_globalSearchBar" />,
 }));
 
-jest.mock('../../common/components/filters_global', () => ({
-  FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
 jest.mock('../../common/components/empty_prompt');
-
-const defaultUseSourcererReturn = {
-  indicesExist: true,
-  loading: false,
-  indexPattern: '',
-};
-const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: () => mockUseSourcererDataView(),
-}));
 
 const defaultUseAlertsPrivilegesReturn = {
   hasAlertsRead: true,
@@ -103,7 +90,6 @@ jest.mock('../../common/lib/kibana', () => {
 describe('DetectionResponse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
     mockCanUseCases.mockReturnValue(defaultUseCasesPermissionsReturn);
@@ -121,18 +107,16 @@ describe('DetectionResponse', () => {
       </TestProviders>
     );
 
-    expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_globalSearchBar')).toBeInTheDocument();
+    const page = result.getByTestId('detectionResponsePage');
+    expect(within(page).getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Detection & Response'
+    );
+    expect(within(page).getByTestId('mock_globalSearchBar')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).not.toBeInTheDocument();
-    expect(result.getByText('Detection & Response')).toBeInTheDocument();
   });
 
   it('should render landing page if index not exist', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      ...defaultUseSourcererReturn,
-      indicesExist: false,
-    });
     jest.mocked(useDataView).mockImplementation(defaultImplementation);
 
     const result = render(
@@ -148,11 +132,7 @@ describe('DetectionResponse', () => {
     expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
   });
 
-  it('should render loader if sourcerer is loading', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      ...defaultUseSourcererReturn,
-      loading: true,
-    });
+  it('should render loader if dataview is loading', () => {
     jest
       .mocked(useDataView)
       .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'loading' });
@@ -166,7 +146,8 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_globalSearchBar')).toBeInTheDocument();
+    expect(result.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).not.toBeInTheDocument();
   });

@@ -7,23 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError } from 'axios';
 import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 describe('KbnClientRequesterError', () => {
-  it('preserves status when cleaning axios errors (even after stripping response)', () => {
-    const original = new AxiosError('Not Found', 'ERR_BAD_REQUEST', undefined, undefined, {
-      status: 404,
-      statusText: 'Not Found',
-      headers: {},
-      config: {} as any,
-      data: { statusCode: 404 },
-    });
+  it('exposes status and cause directly', () => {
+    const cause = new Error('Not Found');
+    const wrapped = new KbnClientRequesterError('wrapper message', { status: 404, cause });
 
-    const wrapped = new KbnClientRequesterError('wrapper message', original);
+    expect(wrapped.status).toBe(404);
+    expect(wrapped.cause).toBe(cause);
+    expect(wrapped.name).toBe('KbnClientRequesterError');
+    expect(wrapped.message).toBe('wrapper message');
+  });
 
-    expect(wrapped.axiosError).toBeDefined();
-    expect(wrapped.axiosError!.status).toBe(404);
-    expect((wrapped.axiosError as any).response).toBeUndefined();
+  it('works without status or cause', () => {
+    const wrapped = new KbnClientRequesterError('plain message');
+
+    expect(wrapped.status).toBeUndefined();
+    expect(wrapped.cause).toBeUndefined();
+    expect(wrapped.message).toBe('plain message');
   });
 });

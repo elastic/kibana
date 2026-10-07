@@ -138,85 +138,7 @@ describe('Inference Settings API', () => {
       const error = new Error('Unexpected error');
       mockSOClient.get.mockRejectedValue(error);
 
-      await expect(mockRouter.callRoute({})).rejects.toThrowError(error);
-    });
-
-    it('should return empty defaults when SO returns .error with 404', async () => {
-      mockSOClient.get.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Saved object not found',
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({});
-
-      expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {
-          _meta: { id: INFERENCE_SETTINGS_ID },
-          data: { features: [] },
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    });
-
-    it('should return customError when SO returns .error with non-404', async () => {
-      mockSOClient.get.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 403,
-          error: 'Forbidden',
-          message: 'Access denied',
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({});
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 403,
-        body: {
-          message: 'Access denied',
-          attributes: {
-            error: 'Forbidden',
-          },
-        },
-      });
-    });
-
-    it('should include metadata in .error response', async () => {
-      mockSOClient.get.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'Something went wrong',
-          metadata: { cause: 'index_not_found' },
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({});
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: {
-          message: 'Something went wrong',
-          attributes: {
-            error: 'Internal Server Error',
-            cause: 'index_not_found',
-          },
-        },
-      });
+      await expect(mockRouter.callRoute({})).rejects.toThrow(error);
     });
 
     it('should use hidden types client', async () => {
@@ -432,72 +354,6 @@ describe('Inference Settings API', () => {
       });
     });
 
-    it('should return customError when SO create returns .error', async () => {
-      mockSOClient.create.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 409,
-          error: 'Conflict',
-          message: 'Version conflict',
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({
-        body: {
-          features: [
-            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
-          ],
-        },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 409,
-        body: {
-          message: 'Version conflict',
-          attributes: {
-            error: 'Conflict',
-          },
-        },
-      });
-    });
-
-    it('should include metadata in .error response', async () => {
-      mockSOClient.create.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'Something went wrong',
-          metadata: { cause: 'mapper_parsing_exception' },
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({
-        body: {
-          features: [
-            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
-          ],
-        },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: {
-          message: 'Something went wrong',
-          attributes: {
-            error: 'Internal Server Error',
-            cause: 'mapper_parsing_exception',
-          },
-        },
-      });
-    });
-
     it('should use hidden types client', async () => {
       const settingsAttrs = {
         features: [
@@ -552,7 +408,7 @@ describe('Inference Settings API', () => {
             ],
           },
         })
-      ).rejects.toThrowError(error);
+      ).rejects.toThrow(error);
     });
   });
 });

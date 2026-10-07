@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -24,27 +25,44 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
 import {
+  isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
+  isReasoningEffortLevel,
 } from '../../../common/type_guards';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
+import {
+  getModelEOLDate,
+  getModelReleaseDate,
+  getModelStatus,
+  getRegionOptions,
+} from '../../utils/eis_utils';
+import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
+import { ModelEolCallout } from './model_eol_callout';
+import { ModelInfoCallout } from './model_info_callout';
+import { ModelUnavailableCallout } from './model_unavailable_callout';
+import { RegionOptions } from './region_options';
+import type { EisInferenceEndpoint } from '../../../common/types';
+import { EisModelStatus } from '../../types';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
-  allEndpoints: InferenceAPIConfigResponse[];
+  allEndpoints: EisInferenceEndpoint[];
   onClose: () => void;
   onSaveEndpoint: () => void;
-  onDeleteEndpoint: (endpoint: InferenceAPIConfigResponse) => void;
+  onDeleteEndpoint?: (endpoint: EisInferenceEndpoint) => void;
   onCopyEndpointId: (id: string) => void;
+  canManage?: boolean;
+  onManageRegions?: () => void;
 }
 
 export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
@@ -54,23 +72,33 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   onSaveEndpoint,
   onDeleteEndpoint,
   onCopyEndpointId,
+  canManage = true,
+  onManageRegions,
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
+  const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
     usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
   }, [usageTracker, modelId]);
 
-  const { endpoints, displayName, modelAuthor } = useMemo(() => {
+  const {
+    endpoints,
+    displayName,
+    modelAuthor,
+    modelStatus,
+    modelMetadata,
+    modelReleaseDate,
+    modelEOLDate,
+    regionOptions,
+  } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
-    const endpointWithName = filtered.find((ep) => isInferenceEndpointWithDisplayNameMetadata(ep));
-    const endpointWithCreator = filtered.find((ep) =>
-      isInferenceEndpointWithDisplayCreatorMetadata(ep)
-    );
+    const endpointWithName = filtered.find(isInferenceEndpointWithDisplayNameMetadata);
+    const endpointWithCreator = filtered.find(isInferenceEndpointWithDisplayCreatorMetadata);
+    const endpointModelMetadata = filtered.find(isInferenceEndpointWithMetadata)?.metadata;
 
     return {
       endpoints: filtered,
@@ -80,6 +108,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
             defaultMessage: 'Unknown',
           }),
+      modelStatus: getModelStatus(endpointModelMetadata),
+      modelMetadata: endpointModelMetadata,
+      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
+      modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
+      regionOptions: getRegionOptions(filtered),
     };
   }, [allEndpoints, modelId]);
 
@@ -102,7 +135,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   }, [usageTracker]);
 
   const handleOpenEditModal = useCallback(
-    (endpoint: InferenceAPIConfigResponse) => {
+    (endpoint: EisInferenceEndpoint) => {
       usageTracker.count([EventType.MODAL_OPENED, `${EventType.MODAL_OPENED}_edit_endpoint`]);
       setEditingEndpoint(endpoint);
       setIsModalOpen(true);
@@ -117,12 +150,36 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     setEditingEndpoint(undefined);
   }, [usageTracker, editingEndpoint]);
 
+  const isBlocked = isModelUnavailableUnderRegionPolicy(endpoints, modelId);
+  const canShowLifecycleCallout = !isBlocked;
+  const showEolCallout = canShowLifecycleCallout && modelStatus === EisModelStatus.DeprecatedEOL;
+  const showPreviewCallout = canShowLifecycleCallout && modelStatus === EisModelStatus.Preview;
+  const showLifecycleCallout = showEolCallout || showPreviewCallout;
+  const showCalloutSpacer = isBlocked || showLifecycleCallout;
+
+  const initialReasoningEffort = useMemo(() => {
+    const effort = editingEndpoint?.task_settings?.reasoning?.effort;
+    return isReasoningEffortLevel(effort) ? effort : undefined;
+  }, [editingEndpoint]);
+
   const descriptionListItems = [
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelAuthorLabel', {
         defaultMessage: 'Model author',
       }),
       description: modelAuthor,
+    },
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelReleaseDate', {
+        defaultMessage: 'Release date',
+      }),
+      description: modelReleaseDate,
+    },
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelEndOfLifeDate', {
+        defaultMessage: 'End-of-life date',
+      }),
+      description: modelEOLDate,
     },
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
@@ -156,14 +213,21 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           <h2 id={flyoutTitleId}>{displayName}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <span data-test-subj="flyoutTaskBadges">
+        <EuiBadgeGroup data-test-subj="flyoutTaskBadges">
+          <ModelStatusBadge id={modelId} status={modelStatus} metadata={modelMetadata} />
           {uniqueTaskTypes.map((taskType) => (
             <EuiBadge key={taskType}>{taskType}</EuiBadge>
           ))}
-        </span>
+        </EuiBadgeGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {isBlocked && (
+          <ModelUnavailableCallout onManageRegions={canManage ? onManageRegions : undefined} />
+        )}
+        {showEolCallout && <ModelEolCallout eolDate={modelEOLDate} />}
+        {showPreviewCallout && <ModelInfoCallout />}
+        {showCalloutSpacer && <EuiSpacer size="m" />}
         <EuiDescriptionList
           type="column"
           compressed
@@ -171,6 +235,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           listItems={descriptionListItems}
           data-test-subj="flyoutModelDetails"
         />
+        <RegionOptions options={regionOptions} />
 
         <EuiHorizontalRule margin="xxl" />
 
@@ -187,20 +252,23 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="plusInCircle"
-                  color="text"
-                  onClick={handleOpenAddModal}
-                  data-test-subj="modelDetailFlyoutAddEndpointButton"
-                >
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.addEndpointButton',
-                    { defaultMessage: 'Add endpoint' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              {canManage && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="plusCircle"
+                    color="text"
+                    onClick={handleOpenAddModal}
+                    disabled={modelStatus === EisModelStatus.DeprecatedEOL}
+                    data-test-subj="modelDetailFlyoutAddEndpointButton"
+                  >
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.modelDetailFlyout.addEndpointButton',
+                      { defaultMessage: 'Add endpoint' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
 
@@ -212,7 +280,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                     endpoint={endpoint}
                     onView={handleOpenEditModal}
                     onCopy={onCopyEndpointId}
-                    onDelete={onDeleteEndpoint}
+                    onDelete={canManage ? onDeleteEndpoint : undefined}
                   />
                   {index !== endpoints.length - 1 && <EuiHorizontalRule margin="none" />}
                 </React.Fragment>
@@ -240,6 +308,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           taskTypes={taskTypeOptions}
           initialEndpointId={editingEndpoint?.inference_id}
           initialTaskType={editingEndpoint?.task_type}
+          initialReasoningEffort={initialReasoningEffort}
           onSave={onSaveEndpoint}
           onCancel={handleCloseModal}
         />

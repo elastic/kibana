@@ -29,7 +29,7 @@ function SwitchParamEditor({
 }: SwitchParamEditorProps) {
   return (
     <EuiFormRow fullWidth={true}>
-      <EuiToolTip content={displayToolTip} delay="long" position="right">
+      <EuiToolTip content={displayToolTip} position="right">
         <EuiSwitch
           compressed={true}
           label={displayLabel}

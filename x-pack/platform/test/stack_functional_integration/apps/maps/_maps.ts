@@ -17,6 +17,11 @@ export default function ({
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'maps']);
 
+  /**
+   * Purpose: Tests EMS server integration with Kibana
+   *
+   * Migration: Migrate to Scout.
+   */
   describe('check Elastic Maps Server', function () {
     before(async function () {
       await PageObjects.maps.loadSavedMap('EMS Test');

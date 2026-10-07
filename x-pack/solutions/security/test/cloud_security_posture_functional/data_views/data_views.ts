@@ -173,6 +173,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
+      // Park the browser off CSP so its status polling stops recreating the CDR data views (via the onPostAuth hook) during the next test's delete-and-confirm loop.
+      await pageObjects.common.navigateToApp('home');
+
       await kibanaServer.savedObjects.clean({
         types: ['index-pattern'],
         space: 'default',

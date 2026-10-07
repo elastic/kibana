@@ -6,9 +6,9 @@
  */
 
 import { resolve } from 'path';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
@@ -39,8 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const cookies = response.headers['set-cookie'];
-      expect(cookies).to.have.length(1);
-      const sessionCookie = parseCookie(cookies[0])!;
+      const sessionCookie = findSessionCookie(cookies);
 
       // Accessing Kibana again using the same session should not create another `user_login` event.
       await supertest
@@ -54,8 +53,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', sessionCookie.cookieString())
         .expect(302);
 
-      await logFile.isWritten();
-      const auditEvents = await logFile.readJSON();
+      const auditEvents = await logFile.waitForAuditEvents([
+        { event: { action: 'user_login', outcome: 'success' } },
+        { event: { action: 'user_logout', outcome: 'unknown' } },
+      ]);
 
       expect(auditEvents).to.have.length(2);
 
@@ -86,8 +87,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(401);
 
-      await logFile.isWritten();
-      const auditEvents = await logFile.readJSON();
+      const auditEvents = await logFile.waitForAuditEvents([
+        { event: { action: 'user_login', outcome: 'failure' } },
+      ]);
 
       expect(auditEvents).to.have.length(1);
       expect(auditEvents[0]).to.be.ok();

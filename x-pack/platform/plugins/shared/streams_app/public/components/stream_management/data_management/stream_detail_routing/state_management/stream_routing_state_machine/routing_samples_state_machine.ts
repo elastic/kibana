@@ -9,7 +9,14 @@ import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xst
 import { setup, assign, fromObservable, fromEventObservable } from 'xstate';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError, of, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import { Streams } from '@kbn/streams-schema';
+import {
+  mergeSourceIntoDocuments,
+  Streams,
+  stripOtelAliases,
+  getEsqlViewName,
+  isDraftGetResponse,
+  withUnmappedFieldsDirective,
+} from '@kbn/streams-schema';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { isEmpty, isNumber } from 'lodash';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -18,8 +25,11 @@ import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/us
 import { i18n } from '@kbn/i18n';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
+import { conditionToESQLAst, conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
+import { BasicPrettyPrinter, Builder } from '@elastic/esql';
+import { getESQLResults } from '@kbn/esql-utils';
 import { processCondition } from '../../utils';
+import { esqlResultToPlainObjects } from '../../../../../../util/esql_result_to_plain_objects';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
 import type { PartitionableDefinition } from './types';
 
@@ -350,6 +360,12 @@ function collectDocuments({
   input,
   telemetryClient,
 }: CollectorParams): Observable<SampleDocument[]> {
+  const isDraft = isDraftGetResponse(input.definition);
+
+  if (isDraft) {
+    return collectDocumentsFromView({ data, input, telemetryClient });
+  }
+
   const abortController = new AbortController();
 
   const { start, end } = getAbsoluteTimestamps(data);
@@ -390,10 +406,111 @@ function collectDocuments({
   });
 }
 
+function collectDocumentsFromView({
+  data,
+  input,
+  telemetryClient,
+}: CollectorParams): Observable<SampleDocument[]> {
+  const abortController = new AbortController();
+  const viewName = getEsqlViewName(input.definition.stream.name);
+
+  const finalCondition = processCondition(input.condition);
+
+  const commands: Array<ReturnType<typeof Builder.command>> = [
+    Builder.command({ name: 'from', args: [Builder.expression.source.index(viewName)] }),
+  ];
+
+  if (finalCondition) {
+    const conditionAst = conditionToESQLAst(finalCondition);
+    const whereExpr =
+      input.documentMatchFilter === 'unmatched'
+        ? Builder.expression.func.unary('NOT', conditionAst)
+        : conditionAst;
+    commands.push(Builder.command({ name: 'where', args: [whereExpr] }));
+  } else if (input.documentMatchFilter === 'unmatched') {
+    commands.push(
+      Builder.command({
+        name: 'where',
+        args: [Builder.expression.literal.boolean(false)],
+      })
+    );
+  }
+
+  commands.push(
+    Builder.command({
+      name: 'sort',
+      args: [
+        Builder.expression.order(Builder.expression.column('@timestamp'), {
+          order: 'DESC',
+          nulls: '',
+        }),
+      ],
+    }),
+    Builder.command({
+      name: 'limit',
+      args: [Builder.expression.literal.integer(SAMPLES_SIZE)],
+    })
+  );
+
+  const queryBody = BasicPrettyPrinter.multiline(Builder.expression.query(commands), {
+    pipeTab: '',
+  });
+
+  const esqlQuery = withUnmappedFieldsDirective(queryBody);
+
+  const { start, end } = getAbsoluteTimestamps(data);
+  const hasTimeRange = isFinite(start) && isFinite(end);
+
+  const docFilter = hasTimeRange
+    ? { bool: { filter: [createTimestampRangeQuery(start, end)] } }
+    : undefined;
+
+  return new Observable<SampleDocument[]>((observer) => {
+    let registerFetchLatency: () => void = () => {};
+
+    if (telemetryClient) {
+      registerFetchLatency = telemetryClient.startTrackingPartitioningSamplesFetchLatency({
+        stream_name: input.definition.stream.name,
+        stream_type: 'wired',
+      });
+    }
+
+    getESQLResults({
+      esqlQuery,
+      search: data.search.search,
+      signal: abortController.signal,
+      filter: docFilter,
+    })
+      .then(({ response }) => {
+        const docs = stripOtelAliases(
+          mergeSourceIntoDocuments(esqlResultToPlainObjects(response) as SampleDocument[])
+        );
+        observer.next(docs);
+        observer.complete();
+      })
+      .catch((err) => {
+        if (!abortController.signal.aborted) {
+          observer.error(err);
+        }
+      })
+      .finally(() => {
+        registerFetchLatency();
+      });
+
+    return () => abortController.abort();
+  }).pipe(timeout(SEARCH_TIMEOUT_MS), catchError(handleTimeoutError));
+}
+
 function collectDocumentCounts({
   data,
   input,
 }: CollectorParams): Observable<number | null | undefined> {
+  const isDraft = isDraftGetResponse(input.definition);
+
+  if (isDraft) {
+    return of(null);
+  }
+
   const abortController = new AbortController();
 
   const { start, end } = getAbsoluteTimestamps(data);

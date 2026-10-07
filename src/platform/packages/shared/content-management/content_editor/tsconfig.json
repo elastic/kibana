@@ -31,6 +31,7 @@
     "@kbn/content-management-user-profiles",
     "@kbn/core-user-profile-browser",
     "@kbn/react-query",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*"

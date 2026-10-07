@@ -7,248 +7,357 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IndexedFieldItem } from '../../types';
-import {
-  TableWithoutPersist as Table,
-  renderFieldName,
-  getConflictModalContent,
-  showDelete,
-} from './table';
+import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
+import {
+  getConflictModalContent,
+  renderFieldName,
+  showDelete,
+  Table as PersistedTable,
+  TableWithoutPersist as Table,
+} from './table';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, within } from '@testing-library/react';
 
 const coreStart = coreMock.createStart();
 
-const indexPattern = {
-  timeFieldName: 'timestamp',
-} as DataView;
+const indexPattern = createStubDataView({
+  spec: {
+    timeFieldName: 'timestamp',
+    title: 'test-data-view',
+  },
+});
 
-const items: IndexedFieldItem[] = [
-  {
+const createIndexedField = ({
+  name,
+  ...field
+}: Pick<IndexedFieldItem, 'name'> & Partial<IndexedFieldItem>): IndexedFieldItem => ({
+  displayName: name,
+  excluded: false,
+  hasRuntime: false,
+  info: [],
+  isMapped: true,
+  isUserEditable: true,
+  kbnType: 'string',
+  name,
+  type: 'keyword',
+  ...field,
+});
+
+const items = [
+  createIndexedField({
     name: 'Elastic',
-    displayName: 'Elastic',
     searchable: true,
-    info: [],
     type: 'name',
-    kbnType: 'string',
-    excluded: false,
-    isMapped: true,
-    isUserEditable: true,
-    hasRuntime: false,
-  },
-  {
-    name: 'timestamp',
-    displayName: 'timestamp',
-    type: 'date',
+  }),
+  createIndexedField({
     kbnType: 'date',
-    info: [],
-    excluded: false,
-    isMapped: true,
-    isUserEditable: true,
-    hasRuntime: false,
-  },
-  {
-    name: 'conflictingField',
-    displayName: 'conflictingField',
+    name: 'timestamp',
+    type: 'date',
+  }),
+  createIndexedField({
     conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
-    type: 'text, long',
     kbnType: 'conflict',
-    info: [],
-    excluded: false,
-    isMapped: true,
-    isUserEditable: true,
-    hasRuntime: false,
-  },
-  {
-    name: 'customer',
-    displayName: 'customer',
-    type: 'keyword',
-    kbnType: 'text',
-    info: [],
-    excluded: false,
-    isMapped: false,
-    isUserEditable: true,
+    name: 'conflictingField',
+    type: 'text, long',
+  }),
+  createIndexedField({
     hasRuntime: true,
-  },
-  {
-    name: 'noedit',
-    displayName: 'noedit',
-    type: 'keyword',
+    isMapped: false,
     kbnType: 'text',
-    info: [],
-    excluded: false,
+    name: 'customer',
+    type: 'keyword',
+  }),
+  createIndexedField({
+    hasRuntime: true,
     isMapped: false,
     isUserEditable: false,
-    hasRuntime: true,
-  },
+    kbnType: 'text',
+    name: 'noedit',
+    type: 'keyword',
+  }),
 ];
 
-const baseProps = {
+const mixedTypeItem = createIndexedField({
+  name: 'mixedType',
+  type: 'keyword, constant_keyword',
+});
+
+const primitiveRuntimeField = createIndexedField({
+  hasRuntime: true,
+  isMapped: false,
+  name: 'runtimePrimitive',
+  runtimeField: {
+    type: 'keyword',
+  },
+});
+
+const compositeRuntimeField = createIndexedField({
+  hasRuntime: true,
+  isMapped: false,
+  name: 'runtimeComposite',
+  runtimeField: {
+    type: 'composite',
+  },
+});
+
+const compositeRuntimeDefinition = createIndexedField({
+  hasRuntime: true,
+  isMapped: false,
+  name: 'runtimeCompositeDefinition',
+  runtimeField: {
+    type: 'composite',
+  },
+  type: 'composite',
+});
+
+const baseProps: Pick<React.ComponentProps<typeof Table>, 'euiTablePersist'> = {
   euiTablePersist: {
+    onTableChange: jest.fn(),
     pageSize: 10,
-    onTableChange: () => {},
-    sorting: { sort: { direction: 'asc' as const, field: 'name' as const } },
+    sorting: { sort: { direction: 'asc', field: 'name' } },
   },
 };
 
-const renderTable = (
-  { editField } = {
-    editField: () => {},
-  }
-) =>
-  shallow(
+const renderTable = ({
+  deleteField = jest.fn(),
+  editField = jest.fn(),
+  tableItems = items,
+}: {
+  deleteField?: React.ComponentProps<typeof Table>['deleteField'];
+  editField?: React.ComponentProps<typeof Table>['editField'];
+  tableItems?: IndexedFieldItem[];
+} = {}) =>
+  renderWithI18n(
     <Table
       {...baseProps}
-      indexPattern={indexPattern}
-      items={items}
+      deleteField={deleteField}
       editField={editField}
-      deleteField={() => {}}
+      indexPattern={indexPattern}
+      items={tableItems}
       openModal={overlayServiceMock.createStartContract().openModal}
       startServices={coreStart}
     />
   );
 
 describe('Table', () => {
-  test('should render normally', () => {
-    expect(renderTable()).toMatchSnapshot();
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
-  test('should render normal field name', () => {
-    const tableCell = shallow(renderTable().prop('columns')[0].render('Elastic', items[0]));
-    expect(tableCell).toMatchSnapshot();
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  test('should render timestamp field name', () => {
-    const tableCell = shallow(renderTable().prop('columns')[0].render('timestamp', items[1]));
-    expect(tableCell).toMatchSnapshot();
+  it('should render normally', async () => {
+    renderTable();
+
+    expect(await screen.findByText('Elastic')).toBeVisible();
+    expect(screen.getByText('timestamp')).toBeVisible();
+    expect(screen.getByText('conflictingField')).toBeVisible();
+    expect(screen.getByText('customer')).toBeVisible();
+    expect(screen.getByText('noedit')).toBeVisible();
   });
 
-  test('should render the boolean template (true)', () => {
-    const tableCell = shallow(renderTable().prop('columns')[3].render(true));
-    expect(tableCell).toMatchSnapshot();
+  it('should render normal field name', async () => {
+    renderWithI18n(renderFieldName(items[0]));
+
+    expect(await screen.findByText('String')).toBeVisible();
+    expect(screen.getByTestId('field-name-Elastic')).toHaveTextContent('Elastic');
   });
 
-  test('should render the boolean template (false)', () => {
-    const tableCell = shallow(renderTable().prop('columns')[3].render(false, items[2]));
-    expect(tableCell).toMatchSnapshot();
+  it('should render timestamp field name', async () => {
+    renderWithI18n(renderFieldName(items[1], indexPattern.timeFieldName));
+
+    expect(await screen.findByText('Date')).toBeVisible();
+    expect(screen.getByTestId('field-name-timestamp')).toHaveTextContent('timestamp');
+    expect(screen.getByText('Primary time field')).toBeVisible();
   });
 
-  test('should render normal type', () => {
-    const tableCell = shallow(renderTable().prop('columns')[1].render('string', {}));
-    expect(tableCell).toMatchSnapshot();
+  it('should render the boolean template (true)', async () => {
+    renderTable();
+
+    expect(await screen.findByText('Is searchable')).toBeVisible();
   });
 
-  test('should render conflicting type', () => {
-    const tableCell = shallow(
-      renderTable()
-        .prop('columns')[1]
-        .render('text, long', {
-          kbnType: 'conflict',
-          conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
-        })
+  it('should render the boolean template (false)', async () => {
+    renderTable();
+
+    expect((await screen.findByText('conflictingField')).closest('tr')).not.toHaveTextContent(
+      'Is searchable'
     );
-    expect(tableCell).toMatchSnapshot();
   });
 
-  test('should render mixed, non-conflicting type', () => {
-    const tableCell = shallow(
-      renderTable().prop('columns')[1].render('keyword, constant_keyword', {
-        kbnType: 'string',
-      })
-    );
-    expect(tableCell).toMatchSnapshot();
+  it('should render normal type', async () => {
+    renderTable();
+
+    expect((await screen.findByText('Elastic')).closest('tr')).toHaveTextContent('name');
   });
 
-  test('should allow edits', () => {
+  it('should render conflicting type', async () => {
+    renderTable();
+
+    const conflictingFieldRow = (await screen.findByText('conflictingField')).closest('tr');
+    expect(conflictingFieldRow).toHaveTextContent('text, long');
+    expect(conflictingFieldRow).toHaveTextContent('Conflict');
+  });
+
+  it('should render mixed, non-conflicting type', async () => {
+    renderTable({ tableItems: [mixedTypeItem] });
+
+    const mixedTypeRow = (await screen.findByText('mixedType')).closest('tr');
+    expect(mixedTypeRow).toHaveTextContent('keyword, constant_keyword');
+    expect(mixedTypeRow).not.toHaveTextContent('Conflict');
+  });
+
+  it('should allow edits', async () => {
+    const user = userEvent.setup();
     const editField = jest.fn();
 
-    // Click the edit button
-    renderTable({ editField }).prop('columns')[6].actions[0].onClick();
-    expect(editField).toBeCalled();
+    renderTable({ editField });
+
+    await user.click(screen.getAllByTestId('editFieldFormat')[0]);
+
+    expect(editField).toHaveBeenCalled();
   });
 
-  test('should not allow edit or deletion for user with only read access', () => {
-    const editAvailable = renderTable().prop('columns')[6].actions[0].available(items[4]);
-    const deleteAvailable = renderTable().prop('columns')[6].actions[1].available(items[4]);
-    expect(editAvailable).toBeFalsy();
-    expect(deleteAvailable).toBeFalsy();
+  it('should not allow edit or deletion for user with only read access', async () => {
+    renderTable({ tableItems: [items[4]] });
+
+    const noEditRow = (await screen.findByText('noedit')).closest('tr');
+    expect(noEditRow).toBeVisible();
+    expect(screen.queryByTestId('editFieldFormat')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('deleteField')).not.toBeInTheDocument();
   });
 
-  test('render name', () => {
-    const mappedField = {
-      name: 'customer',
-      info: [],
-      excluded: false,
-      kbnType: 'string',
-      type: 'keyword',
-      isMapped: true,
-      isUserEditable: true,
-      hasRuntime: false,
-    };
+  it('renders mapped field name', async () => {
+    const mappedField = createIndexedField({ name: 'customer' });
 
-    expect(renderFieldName(mappedField)).toMatchSnapshot();
+    renderWithI18n(renderFieldName(mappedField));
 
-    const runtimeField = {
-      name: 'customer',
-      info: [],
-      excluded: false,
-      kbnType: 'string',
-      type: 'keyword',
-      isMapped: false,
-      isUserEditable: true,
+    expect(await screen.findByText('String')).toBeVisible();
+    expect(screen.getByTestId('field-name-customer')).toHaveTextContent('customer');
+  });
+
+  it('renders runtime field name with runtime info', async () => {
+    const runtimeField = createIndexedField({
       hasRuntime: true,
-    };
+      isMapped: false,
+      name: 'customer',
+    });
 
-    expect(renderFieldName(runtimeField)).toMatchSnapshot();
+    renderWithI18n(renderFieldName(runtimeField));
+
+    expect(await screen.findByText('String')).toBeVisible();
+    expect(screen.getByTestId('field-name-customer')).toHaveTextContent('customer');
+    expect(screen.getByText('Info')).toBeVisible();
   });
 
-  test('render conflict summary modal ', () => {
-    expect(
+  it('render conflict summary modal ', () => {
+    renderWithI18n(
       getConflictModalContent({
         closeFn: () => {},
-        fieldName: 'message',
         conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
+        fieldName: 'message',
       })
-    ).toMatchSnapshot();
+    );
+
+    expect(screen.getByText('This field has a type conflict')).toBeVisible();
+    expect(screen.getByText(/The type of the/)).toHaveTextContent('message');
+    expect(screen.getByText('keyword')).toBeVisible();
+    expect(screen.getByText('index_a')).toBeVisible();
+    expect(screen.getByText('long')).toBeVisible();
+    expect(screen.getByText('index_b')).toBeVisible();
+    expect(screen.getByText('Close')).toBeVisible();
   });
 
-  test('showDelete', () => {
-    const runtimeFields = [
-      {
-        name: 'customer',
-        info: [],
-        excluded: false,
-        kbnType: 'string',
-        type: 'keyword',
-        isMapped: false,
-        isUserEditable: true,
-        hasRuntime: true,
-        runtimeField: {
-          type: 'keyword',
-        },
-      },
-      {
-        name: 'thing',
-        info: [],
-        excluded: false,
-        kbnType: 'string',
-        type: 'keyword',
-        isMapped: false,
-        isUserEditable: true,
-        hasRuntime: true,
-        runtimeField: {
-          type: 'composite',
-        },
-      },
-    ] as IndexedFieldItem[];
-
+  it('showDelete', () => {
     // indexed field
     expect(showDelete(items[0])).toBe(false);
     // runtime field - primitive type
-    expect(showDelete(runtimeFields[0])).toBe(true);
-    // runtime field - composite type
-    expect(showDelete(runtimeFields[1])).toBe(false);
+    expect(showDelete(primitiveRuntimeField)).toBe(true);
+    // runtime field - composite subfield
+    expect(showDelete(compositeRuntimeField)).toBe(false);
+    // runtime field - composite definition
+    expect(showDelete(compositeRuntimeDefinition)).toBe(true);
+  });
+
+  // Migrated from: src/platform/test/functional/apps/management/group1/_data_view_create_delete.ts
+  // ('should have expected table headers')
+  describe('column headers', () => {
+    it('should render all 7 expected column headers', async () => {
+      renderTable();
+      await screen.findByText('Elastic');
+      const expectedHeaders = [
+        'Name',
+        'Type',
+        'Format',
+        'Searchable',
+        'Aggregatable',
+        'Excluded',
+        'Actions',
+      ];
+      expect(screen.getAllByRole('columnheader')).toHaveLength(expectedHeaders.length);
+      for (const header of expectedHeaders) {
+        expect(
+          screen.getByRole('columnheader', { name: new RegExp(header, 'i') })
+        ).toBeInTheDocument();
+      }
+    });
+  });
+
+  // Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_results_sort.ts
+  describe('sort order', () => {
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
+    const renderPersistedTable = () =>
+      renderWithI18n(
+        <PersistedTable
+          deleteField={jest.fn()}
+          editField={jest.fn()}
+          indexPattern={indexPattern}
+          items={items}
+          openModal={overlayServiceMock.createStartContract().openModal}
+          startServices={coreStart}
+        />
+      );
+
+    const clickHeader = async (user: ReturnType<typeof userEvent.setup>, testSubj: string) => {
+      await user.click(within(screen.getByTestId(testSubj)).getByRole('button'));
+    };
+
+    const firstCell = (testSubj: string) => screen.getAllByTestId(testSubj)[0];
+
+    it('sorts by Name ascending by default and toggles to descending on header click', async () => {
+      const user = userEvent.setup();
+      renderPersistedTable();
+
+      const initialCells = await screen.findAllByTestId('indexedFieldName');
+      expect(initialCells[0]).toHaveTextContent('Elastic');
+      expect(initialCells[initialCells.length - 1]).toHaveTextContent('timestamp');
+
+      await clickHeader(user, 'tableHeaderCell_displayName_0');
+
+      const descCells = screen.getAllByTestId('indexedFieldName');
+      expect(descCells[0]).toHaveTextContent('timestamp');
+      expect(descCells[descCells.length - 1]).toHaveTextContent('Elastic');
+    });
+
+    it('sorts by Type ascending then descending on repeated header clicks', async () => {
+      const user = userEvent.setup();
+      renderPersistedTable();
+      await screen.findAllByTestId('indexedFieldType');
+
+      await clickHeader(user, 'tableHeaderCell_type_1');
+      expect(firstCell('indexedFieldType')).toHaveTextContent('date');
+
+      await clickHeader(user, 'tableHeaderCell_type_1');
+      expect(firstCell('indexedFieldType')).toHaveTextContent('text, long');
+    });
   });
 });

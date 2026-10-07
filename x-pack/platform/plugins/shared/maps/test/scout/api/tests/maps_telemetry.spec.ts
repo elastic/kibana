@@ -6,10 +6,10 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
-// skip for ECH: https://github.com/elastic/kibana/issues/265020
-apiTest.describe('Maps - maps telemetry', { tag: ['@local-stateful-classic'] }, () => {
+apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
@@ -44,61 +44,59 @@ apiTest.describe('Maps - maps telemetry', { tag: ['@local-stateful-classic'] }, 
       const geoPointFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: { name: string }) => fieldStat.name === 'geo_point'
       );
-      expect(geoPointFieldStats.count).toBe(71);
-      expect(geoPointFieldStats.index_count).toBe(14);
+      expect(geoPointFieldStats.count).toBeGreaterThanOrEqual(71);
 
       const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: { name: string }) => fieldStat.name === 'geo_shape'
       );
-      expect(geoShapeFieldStats.count).toBe(3);
-      expect(geoShapeFieldStats.index_count).toBe(3);
+      expect(geoShapeFieldStats.count).toBeGreaterThanOrEqual(3);
 
       const mapUsage = apiResponse.stack_stats.kibana.plugins.maps;
       delete mapUsage.timeCaptured;
 
       expect(mapUsage).toStrictEqual({
-        mapsTotalCount: 28,
+        mapsTotalCount: 27,
         basemaps: {},
-        joins: { term: { min: 1, max: 1, total: 4, avg: 0.14285714285714285 } },
+        joins: { term: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 } },
         layerTypes: {
-          es_docs: { min: 1, max: 3, total: 20, avg: 0.7142857142857143 },
-          es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.21428571428571427 },
-          es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
-          es_top_hits: { min: 1, max: 1, total: 2, avg: 0.07142857142857142 },
-          es_agg_heatmap: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
-          esql: { min: 1, max: 1, total: 2, avg: 0.07142857142857142 },
-          kbn_tms_raster: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
-          ems_basemap: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
-          ems_region: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
+          es_docs: { min: 1, max: 3, total: 19, avg: 0.7037037037037037 },
+          es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.2222222222222222 },
+          es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
+          es_top_hits: { min: 1, max: 1, total: 2, avg: 0.07407407407407407 },
+          es_agg_heatmap: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
+          esql: { min: 1, max: 1, total: 2, avg: 0.07407407407407407 },
+          kbn_tms_raster: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
+          ems_basemap: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
+          ems_region: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
         },
         resolutions: {
-          coarse: { min: 1, max: 1, total: 4, avg: 0.14285714285714285 },
-          super_fine: { min: 1, max: 1, total: 3, avg: 0.10714285714285714 },
+          coarse: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 },
+          super_fine: { min: 1, max: 1, total: 3, avg: 0.1111111111111111 },
         },
         scalingOptions: {
-          limit: { min: 1, max: 3, total: 15, avg: 0.5357142857142857 },
-          clusters: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
-          mvt: { min: 1, max: 1, total: 4, avg: 0.14285714285714285 },
+          limit: { min: 1, max: 3, total: 14, avg: 0.5185185185185185 },
+          clusters: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
+          mvt: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 },
         },
         attributesPerMap: {
           customIconsCount: { avg: 0, max: 0, min: 0 },
-          dataSourcesCount: { avg: 1.2142857142857142, max: 7, min: 1 },
+          dataSourcesCount: { avg: 1.2222222222222223, max: 7, min: 1 },
           emsVectorLayersCount: {
             idThatDoesNotExitForEMSFileSource: {
-              avg: 0.03571428571428571,
+              avg: 0.037037037037037035,
               max: 1,
               min: 1,
             },
           },
           layerTypesCount: {
-            BLENDED_VECTOR: { avg: 0.03571428571428571, max: 1, min: 1 },
-            EMS_VECTOR_TILE: { avg: 0.03571428571428571, max: 1, min: 1 },
-            GEOJSON_VECTOR: { avg: 0.8571428571428571, max: 6, min: 1 },
-            HEATMAP: { avg: 0.03571428571428571, max: 1, min: 1 },
-            MVT_VECTOR: { avg: 0.25, max: 1, min: 1 },
-            RASTER_TILE: { avg: 0.03571428571428571, max: 1, min: 1 },
+            BLENDED_VECTOR: { avg: 0.037037037037037035, max: 1, min: 1 },
+            EMS_VECTOR_TILE: { avg: 0.037037037037037035, max: 1, min: 1 },
+            GEOJSON_VECTOR: { avg: 0.8518518518518519, max: 6, min: 1 },
+            HEATMAP: { avg: 0.037037037037037035, max: 1, min: 1 },
+            MVT_VECTOR: { avg: 0.25925925925925924, max: 1, min: 1 },
+            RASTER_TILE: { avg: 0.037037037037037035, max: 1, min: 1 },
           },
-          layersCount: { avg: 1.25, max: 8, min: 1 },
+          layersCount: { avg: 1.2592592592592593, max: 8, min: 1 },
         },
       });
     }

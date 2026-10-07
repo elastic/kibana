@@ -8,7 +8,7 @@
  */
 
 import * as fs from 'fs';
-import * as yaml from 'js-yaml';
+import * as yaml from 'yaml';
 import { getHardcodedMappings } from './hardcoded_mappings';
 import { sortObjectByKeys } from './sorting_utils';
 import type {
@@ -254,7 +254,7 @@ function processMetricGroups(
 function loadYamlFile(filePath: string): ResolvedSemconvYaml {
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
-    const parsed = yaml.load(fileContent) as ResolvedSemconvYaml;
+    const parsed = yaml.parse(fileContent) as ResolvedSemconvYaml;
 
     if (!parsed || !parsed.groups || !Array.isArray(parsed.groups)) {
       throw new Error('Invalid YAML structure: missing or invalid "groups" property');

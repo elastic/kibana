@@ -9,23 +9,24 @@ import type { FC } from 'react';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  useEuiTheme,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroupItem,
   EuiListGroup,
+  EuiListGroupItem,
   EuiPopover,
   EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 
 const getJobTypeList = () => (
-  <EuiListGroup flush>
-    <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" size="xs" />
-    <EuiListGroupItem iconType="regressionJob" label="Regression" size="xs" />
-    <EuiListGroupItem iconType="classificationJob" label="Classification" size="xs" />
+  <EuiListGroup>
+    <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" />
+    <EuiListGroupItem iconType="regressionJob" label="Regression" />
+    <EuiListGroupItem iconType="classificationJob" label="Classification" />
   </EuiListGroup>
 );
 
@@ -223,18 +224,34 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   ownFocus
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analyticsMap.legend.jobTypesPopoverAriaLabel',
+                    {
+                      defaultMessage: 'Job types legend',
+                    }
+                  )}
                   button={
-                    <EuiButtonIcon
-                      iconSize="s"
-                      onClick={() => setShowJobTypes(!showJobTypes)}
-                      iconType={showJobTypes ? 'chevronSingleUp' : 'chevronSingleDown'}
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.ml.dataframe.analyticsMap.legend.showJobTypesAriaLabel',
                         {
                           defaultMessage: 'Show job types',
                         }
                       )}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconSize="s"
+                        onClick={() => setShowJobTypes(!showJobTypes)}
+                        iconType={showJobTypes ? 'chevronSingleUp' : 'chevronSingleDown'}
+                        aria-label={i18n.translate(
+                          'xpack.ml.dataframe.analyticsMap.legend.showJobTypesAriaLabel',
+                          {
+                            defaultMessage: 'Show job types',
+                          }
+                        )}
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={showJobTypes}
                   closePopover={() => setShowJobTypes(false)}

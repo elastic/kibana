@@ -6,86 +6,287 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import type { EuiSwitchEvent, UseEuiTheme } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { PlatformIcons } from './queries/platforms';
-import type { PackQueryFormData } from './queries/use_pack_query_form';
+import type { PackQueryFormData, UsePackQueryFormProps } from './queries/use_pack_query_form';
+import { resolveInheritedScheduleInput } from './queries/use_pack_query_form';
+import { OS_LABELS, PLATFORM_IDS, isPlatformId } from './queries/platforms';
+import { formatQuerySchedule } from './format_query_schedule';
+import { isAllPlatforms } from '../../common/platform';
 
 export interface PackQueriesTableProps {
   data: PackQueryFormData[];
   isReadOnly?: boolean;
   onDeleteClick?: (item: PackQueryFormData) => void;
   onEditClick?: (item: PackQueryFormData) => void;
+  onToggleEnabled?: (item: PackQueryFormData, enabled: boolean) => void;
   selectedItems?: PackQueryFormData[];
   setSelectedItems?: (selection: PackQueryFormData[]) => void;
+  packSchedule?: UsePackQueryFormProps['packSchedule'];
+  /**
+   * Pack-level min osquery version default. A query with no `version` of its
+   * own is gated at this floor on the agent, so the column has to fall back to
+   * it rather than claiming "All".
+   */
+  packMinOsqueryVersion?: string;
+  /**
+   * Pack-level OS default, same reasoning as `packMinOsqueryVersion`: a query
+   * with no `platform` of its own is narrowed to these OSes on the agent, so
+   * showing all three badges would overstate where it runs.
+   */
+  packPlatform?: string;
 }
+
+const disabledRowCss = ({ euiTheme }: UseEuiTheme) => ({
+  color: euiTheme.colors.textDisabled,
+});
+
+const QueryEnabledSwitch: React.FC<{
+  item: PackQueryFormData;
+  isReadOnly?: boolean;
+  onToggleEnabled?: (item: PackQueryFormData, enabled: boolean) => void;
+}> = ({ item, isReadOnly, onToggleEnabled }) => {
+  const handleChange = useCallback(
+    (e: EuiSwitchEvent) => {
+      onToggleEnabled?.(item, e.target.checked);
+    },
+    [item, onToggleEnabled]
+  );
+
+  return (
+    <EuiSwitch
+      label=""
+      checked={item.enabled !== false}
+      onChange={handleChange}
+      disabled={isReadOnly || !onToggleEnabled}
+      compressed
+      data-test-subj={`query-enabled-switch-${item.id}`}
+      aria-label={i18n.translate('xpack.osquery.pack.queriesTable.enabledSwitchAriaLabel', {
+        defaultMessage: 'Toggle query {queryId} enabled',
+        values: { queryId: item.id },
+      })}
+    />
+  );
+};
+
+/**
+ * Character budget for the Schedule cell before it truncates behind a tooltip.
+ * The longest untruncated output today is a six-weekday custom rule
+ * (`Every week on Sun, Mon, Tue, Wed, Thu, Fri`, 42 chars), so 48 leaves the
+ * common cases intact while still catching a full seven-day list or a
+ * large-interval variant.
+ */
+const SCHEDULE_TEXT_MAX_LENGTH = 48;
+
+/**
+ * Render schedule text, truncating behind an `EuiToolTip` when it exceeds
+ * {@link SCHEDULE_TEXT_MAX_LENGTH}. The tooltip carries the full string so the
+ * cell never hides information outright.
+ */
+const renderScheduleText = (text: string) => {
+  if (text.length <= SCHEDULE_TEXT_MAX_LENGTH) {
+    return text;
+  }
+
+  return (
+    <EuiToolTip content={text} disableScreenReaderOutput>
+      {/* tabIndex makes the truncated anchor keyboard-reachable, so the tooltip
+          is not mouse-only. `aria-label` carries the untruncated text. */}
+      <span tabIndex={0} aria-label={text}>
+        {`${text.slice(0, SCHEDULE_TEXT_MAX_LENGTH - 1).trimEnd()}…`}
+      </span>
+    </EuiToolTip>
+  );
+};
 
 const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   data,
   isReadOnly,
   onDeleteClick,
   onEditClick,
+  onToggleEnabled,
   selectedItems,
   setSelectedItems,
+  packSchedule,
+  packMinOsqueryVersion,
+  packPlatform,
 }) => {
+  const renderScheduleColumn = useCallback(
+    (_: unknown, item: PackQueryFormData) => {
+      if (item.schedule_type) {
+        return renderScheduleText(
+          formatQuerySchedule({
+            schedule_type: item.schedule_type,
+            interval: item.interval,
+            rrule_schedule: item.rrule_schedule,
+          })
+        );
+      }
+
+      // A non-override query resolves its effective schedule through the shared
+      // helper — the single source of truth (shared with the flyout and the
+      // form hook) for whether it inherits a real pack schedule (recurrence, or
+      // an explicitly persisted interval) or falls back to its own interval. A
+      // legacy pack with no real pack-level schedule synthesizes an interval
+      // default that must not shadow the query's own interval.
+      return renderScheduleText(
+        formatQuerySchedule(resolveInheritedScheduleInput(packSchedule, item.interval))
+      );
+    },
+    [packSchedule]
+  );
   const renderDeleteAction = useCallback(
     (item: PackQueryFormData) => (
-      <EuiButtonIcon
-        color="danger"
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onDeleteClick && onDeleteClick(item)}
-        iconType="trash"
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
           defaultMessage: 'Delete {queryName}',
           values: {
             queryName: item.id,
           },
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          color="danger"
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          onClick={() => onDeleteClick && onDeleteClick(item)}
+          iconType="trash"
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
+            defaultMessage: 'Delete {queryName}',
+            values: {
+              queryName: item.id,
+            },
+          })}
+        />
+      </EuiToolTip>
     ),
     [onDeleteClick]
   );
 
   const renderEditAction = useCallback(
     (item: PackQueryFormData) => (
-      <EuiButtonIcon
-        color="primary"
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onEditClick && onEditClick(item)}
-        iconType="pencil"
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
           defaultMessage: 'Edit {queryName}',
           values: {
             queryName: item.id,
           },
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          color="primary"
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          onClick={() => onEditClick && onEditClick(item)}
+          iconType="pencil"
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
+            defaultMessage: 'Edit {queryName}',
+            values: {
+              queryName: item.id,
+            },
+          })}
+        />
+      </EuiToolTip>
     ),
     [onEditClick]
   );
 
-  const renderQueryColumn = useCallback(
-    (query: string) => (
-      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {query}
-      </EuiCodeBlock>
-    ),
-    []
-  );
-
+  // A query with no `platform` of its own inherits the pack-level default, so
+  // falling back to all three badges would overstate where it runs — the same
+  // display dishonesty the Min version column below avoids. Inherited badges
+  // are marked so they stay distinguishable from a per-query platform.
   const renderPlatformColumn = useCallback(
-    (platform: string) => <PlatformIcons platform={platform} />,
-    []
+    (platform: string) => {
+      const hasOwnPlatform = !!platform && !isAllPlatforms(platform);
+      const effectivePlatform = hasOwnPlatform ? platform : packPlatform;
+      const inherited = !hasOwnPlatform && !!packPlatform;
+      const ids = effectivePlatform
+        ? effectivePlatform
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [...PLATFORM_IDS];
+
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap alignItems="center">
+          {ids.map((id) => (
+            <EuiFlexItem key={id} grow={false}>
+              <EuiBadge color="hollow">{isPlatformId(id) ? OS_LABELS[id] : id}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+          {inherited ? (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.osquery.pack.queriesTable.osInheritedLabel', {
+                  defaultMessage: '(pack default)',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      );
+    },
+    [packPlatform]
   );
 
+  // A query with no `version` of its own inherits the pack-level floor, so
+  // rendering "All" for it would misreport what actually runs on the agent —
+  // the same class of display dishonesty this table's Schedule column fixes.
+  // The inherited value is marked as such so it stays distinguishable from a
+  // version the query sets itself.
   const renderVersionColumn = useCallback(
-    (version: string) =>
-      version
-        ? `${version}`
-        : i18n.translate('xpack.osquery.pack.queriesTable.osqueryVersionAllLabel', {
-            defaultMessage: 'ALL',
-          }),
+    (version: string) => {
+      if (version) {
+        return `${version}`;
+      }
+
+      if (packMinOsqueryVersion) {
+        return i18n.translate('xpack.osquery.pack.queriesTable.osqueryVersionInheritedLabel', {
+          defaultMessage: '{version} (pack default)',
+          values: { version: packMinOsqueryVersion },
+        });
+      }
+
+      return i18n.translate('xpack.osquery.pack.queriesTable.versionAllLabel', {
+        defaultMessage: 'All',
+      });
+    },
+    [packMinOsqueryVersion]
+  );
+
+  const renderEnabledColumn = useCallback(
+    (_: unknown, item: PackQueryFormData) => (
+      <QueryEnabledSwitch item={item} isReadOnly={isReadOnly} onToggleEnabled={onToggleEnabled} />
+    ),
+    [isReadOnly, onToggleEnabled]
+  );
+
+  const renderIdColumn = useCallback(
+    (id: string, item: PackQueryFormData) =>
+      item.enabled === false ? (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
+          <EuiFlexItem grow={false}>{id}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="default" data-test-subj={`query-disabled-badge-${id}`}>
+              {i18n.translate('xpack.osquery.pack.queriesTable.disabledBadgeLabel', {
+                defaultMessage: 'Disabled',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>{id}</>
+      ),
     []
   );
 
@@ -97,34 +298,40 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
           defaultMessage: 'ID',
         }),
         width: '20%',
-      },
-      {
-        field: 'interval',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.intervalColumnTitle', {
-          defaultMessage: 'Interval (s)',
-        }),
-        width: '100px',
-      },
-      {
-        field: 'query',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.queryColumnTitle', {
-          defaultMessage: 'Query',
-        }),
-        render: renderQueryColumn,
+        render: renderIdColumn,
       },
       {
         field: 'platform',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.platformColumnTitle', {
-          defaultMessage: 'Platform',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.osColumnTitle', {
+          defaultMessage: 'Operating systems',
         }),
         render: renderPlatformColumn,
       },
       {
         field: 'version',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.versionColumnTitle', {
-          defaultMessage: 'Min Osquery version',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.minVersionColumnTitle', {
+          defaultMessage: 'Min version',
         }),
         render: renderVersionColumn,
+      },
+      // The Schedule column is not gated on `rruleScheduling`: with the flag
+      // off every query is interval-mode, and `formatQuerySchedule` renders
+      // that as `"{n}s"` — the same value the old "Interval (s)" column showed,
+      // just labelled honestly. One column, one i18n key, one order.
+      {
+        field: 'interval',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.scheduleColumnTitle', {
+          defaultMessage: 'Schedule',
+        }),
+        render: renderScheduleColumn,
+      },
+      {
+        field: 'enabled',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.enabledColumnTitle', {
+          defaultMessage: 'Enabled',
+        }),
+        width: '80px',
+        render: renderEnabledColumn,
       },
       ...(!isReadOnly
         ? [
@@ -149,10 +356,20 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       isReadOnly,
       renderDeleteAction,
       renderEditAction,
+      renderEnabledColumn,
+      renderIdColumn,
       renderPlatformColumn,
-      renderQueryColumn,
+      renderScheduleColumn,
       renderVersionColumn,
     ]
+  );
+
+  const rowProps = useCallback(
+    (item: PackQueryFormData) =>
+      item.enabled === false
+        ? { css: disabledRowCss, 'data-test-subj': `pack-query-row-disabled-${item.id}` }
+        : {},
+    []
   );
 
   const sorting = useMemo(
@@ -177,11 +394,13 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
 
   return (
     <EuiBasicTable<PackQueryFormData>
+      data-test-subj="packQueriesTable"
       items={data}
       itemId={itemId}
       columns={columns}
       sorting={sorting}
       selection={isReadOnly ? undefined : selection}
+      rowProps={rowProps}
       tableCaption={i18n.translate('xpack.osquery.pack.queriesTable.tableCaption', {
         defaultMessage: 'Pack queries',
       })}

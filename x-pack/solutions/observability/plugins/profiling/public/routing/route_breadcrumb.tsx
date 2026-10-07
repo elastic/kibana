@@ -20,7 +20,11 @@ export const RouteBreadcrumb = ({
   const {
     start: { core },
   } = useProfilingDependencies();
-  useRouteBreadcrumb({ title, href: core.http.basePath.prepend('/app/profiling/' + href) });
+
+  useRouteBreadcrumb({
+    title,
+    href: core.http.basePath.prepend('/app/profiling' + href),
+  });
 
   return children;
 };

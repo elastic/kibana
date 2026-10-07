@@ -41,7 +41,7 @@ export const SummaryPanel = ({
       <EuiFlexGroup gutterSize="m" wrap={true}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
-            <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
+            <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
               <AvailabilityPanel from={from} to={to} id="availabilityPercentageSummary" />
             </EuiFlexItem>
             <EuiFlexItem css={{ minWidth: 100 }}>
@@ -51,7 +51,7 @@ export const SummaryPanel = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
-            <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
+            <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
               <DurationPanel from={from} to={to} id="durationAvgValueSummary" />
             </EuiFlexItem>
             <EuiFlexItem css={{ minWidth: 100 }}>
@@ -61,7 +61,7 @@ export const SummaryPanel = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
-            <EuiFlexItem grow={false} css={{ minWidth: 80 }}>
+            <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
               <MonitorErrorsCount from={from} to={to} id="monitorErrorsCountSummary" />
             </EuiFlexItem>
             <EuiFlexItem css={{ minWidth: 100 }}>

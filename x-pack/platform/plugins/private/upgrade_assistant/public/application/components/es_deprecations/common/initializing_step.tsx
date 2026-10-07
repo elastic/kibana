@@ -46,7 +46,7 @@ export const InitializingStep: React.FunctionComponent<InitializingStepProps> = 
       <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
         <EuiFlexItem>
           {hasInitializingError ? (
-            <EuiIcon type="warning" size="xl" color="danger" />
+            <EuiIcon type="warning" size="xl" color="danger" aria-hidden={true} />
           ) : (
             <EuiLoadingSpinner size="xl" />
           )}

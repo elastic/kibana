@@ -11,12 +11,9 @@ import type { Alert } from '@kbn/alerting-types';
 import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionType } from '../../../app/actions/constants';
-import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
-import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 import type {
   GetSecurityAlertsTableProp,
   SecurityAlertsTableContext,
@@ -30,8 +27,7 @@ export const useCellActionsOptions = (
     'columns' | 'alerts' | 'pageIndex' | 'pageSize' | 'dataGridRef'
   >
 ) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView } = useDataView(PageScope.alerts);
 
   const {
     columns = [],
@@ -40,9 +36,7 @@ export const useCellActionsOptions = (
     pageSize = 0,
     dataGridRef,
   } = context ?? {};
-  const oldGetFieldSpec = useGetFieldSpec(PageScope.alerts);
-  const oldDataViewId = useDataViewId(PageScope.alerts);
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
+  const dataViewId = dataView.id;
 
   const cellActionsMetadata = useMemo(
     () => ({ scopeId: tableId, dataViewId }),
@@ -52,16 +46,14 @@ export const useCellActionsOptions = (
     () =>
       columns.map(
         (column) =>
-          (newDataViewPickerEnabled
-            ? experimentalDataView.fields?.getByName(column.id)?.toSpec()
-            : oldGetFieldSpec(column.id)) ?? {
+          dataView.fields?.getByName(column.id)?.toSpec() ?? {
             name: '',
-            type: '', // When type is an empty string all cell actions are incompatible
+            type: '',
             aggregatable: false,
             searchable: false,
           }
       ),
-    [columns, experimentalDataView.fields, oldGetFieldSpec, newDataViewPickerEnabled]
+    [columns, dataView.fields]
   );
 
   const finalData = useMemo(

@@ -21,7 +21,7 @@ import { Description } from './description';
 export const GroupsInput: FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const { existingJobsAndGroups } = useContext(JobCreatorContext);
   const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
@@ -83,6 +83,13 @@ export const GroupsInput: FC = () => {
 
     setSelectedGroups([...selectedOptions, newGroup].map((g) => g.label));
   }
+
+  useEffect(() => {
+    if (jobCreator.groups.join() !== selectedGroups.join()) {
+      setSelectedGroups(jobCreator.groups);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
 
   return (
     <Description validation={validation} titleId={titleId}>

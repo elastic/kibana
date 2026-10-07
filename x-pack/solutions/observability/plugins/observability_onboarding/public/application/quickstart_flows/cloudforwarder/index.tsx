@@ -46,14 +46,12 @@ const FETCH_INTERVAL = 5000;
 const SHOW_TROUBLESHOOTING_DELAY = 300_000;
 
 export function CloudForwarderPanel() {
-  useFlowBreadcrumb({
-    text: i18n.translate(
+  useFlowBreadcrumb(
+    i18n.translate(
       'xpack.observability_onboarding.cloudforwarderPanel.breadcrumbs.cloudforwarder',
-      {
-        defaultMessage: 'EDOT Cloud Forwarder',
-      }
-    ),
-  });
+      { defaultMessage: 'EDOT Cloud Forwarder' }
+    )
+  );
 
   const {
     services: {
@@ -379,7 +377,7 @@ export function CloudForwarderPanel() {
                       { defaultMessage: 'Waiting for data from EDOT Cloud Forwarder' }
                     )
               }
-              iconType="checkInCircleFilled"
+              iconType="checkCircleFill"
               isLoading={!hasData}
               css={css`
                 max-width: 40%;

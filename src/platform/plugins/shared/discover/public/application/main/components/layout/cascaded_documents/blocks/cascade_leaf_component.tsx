@@ -40,7 +40,7 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      'virtualizerController'
+      'virtualizerController' | 'nodePath' | 'nodePathMap'
     > {
   cellData: DataTableRecord[];
   cellId: string;
@@ -162,14 +162,16 @@ export const ESQLDataCascadeLeafCell = React.memo(
     dataGridDensityState,
     showTimeCol,
     dataView,
-    showKeyboardShortcuts,
     externalCustomRenderers,
     virtualizerController,
     rowIndex,
     onUpdateDataGridDensity,
+    nodePath,
+    nodePathMap,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
+      cascadedColumnsMeta,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
@@ -178,8 +180,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
     const expandedDocOwner = useObservable(expandedDocOwner$, expandedDocOwner$.getValue());
     const setExpandedDoc = useMemo(
-      () => getExpandedDocSetter(cellId),
-      [cellId, getExpandedDocSetter]
+      () => getExpandedDocSetter(cellId, { nodePath, nodePathMap }),
+      [cellId, getExpandedDocSetter, nodePath, nodePathMap]
     );
     const setRenderDocumentViewMeta = useMemo(
       () => getRenderDocumentViewMetaSetter(cellId),
@@ -266,7 +268,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
       ),
       [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
-
     return (
       <UnifiedDataTable
         isPlainRecord
@@ -281,6 +282,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
+        columnsMeta={cascadedColumnsMeta}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
         expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}

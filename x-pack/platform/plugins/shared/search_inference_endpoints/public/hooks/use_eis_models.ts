@@ -6,7 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { isEisEndpoint, isHiddenEisEndpoint } from '../utils/eis_utils';
+import { isEisEndpoint } from '../../common/type_guards';
+import { isHiddenEisEndpoint } from '../utils/eis_utils';
 import { useQueryInferenceEndpoints } from './use_inference_endpoints';
 
 export const useEisModels = () => {

@@ -13,7 +13,7 @@ import { PanelHeader } from './header';
 import type { LeftPanelTabType } from './tabs';
 import { INSIGHTS_TAB_ID, NOTES_TAB_ID } from '../constants/left_panel_paths';
 import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
-import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/notes/test_ids';
+import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 
 jest.mock('../../shared/components/flyout_header', () => ({
   FlyoutHeader: ({ children }: { children: React.ReactNode }) => (

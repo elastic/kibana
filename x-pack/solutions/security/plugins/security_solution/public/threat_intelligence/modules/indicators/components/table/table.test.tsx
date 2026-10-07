@@ -13,7 +13,7 @@ import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { generateMockIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
-import { INDICATORS_FLYOUT_TITLE_TEST_ID } from '../../../../../flyout/ioc_details/header';
+import { IOC_DETAILS_TITLE_TEST_ID } from '../../../../../flyout_v2/ioc/main/test_ids';
 
 jest.mock('../../../../hooks/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: jest.fn(() => ({ investigateInTimelineFn: jest.fn() })),
@@ -61,15 +61,16 @@ const indicatorsFixture: Indicator[] = [
 
 describe('<IndicatorsTable />', () => {
   it('should render loading spinner when doing initial loading', async () => {
+    let container: HTMLElement;
     await act(async () => {
-      render(
+      container = render(
         <TestProvidersComponent>
           <IndicatorsTable {...tableProps} isLoading={true} />
         </TestProvidersComponent>
-      );
+      ).container;
     });
 
-    expect(screen.queryByRole('progressbar')).toBeInTheDocument();
+    expect(container!.querySelector('[role="progressbar"]')).toBeInTheDocument();
   });
 
   it('should render loading indicator when doing data update', async () => {
@@ -91,8 +92,9 @@ describe('<IndicatorsTable />', () => {
 
   // TODO enable back before merging
   it.skip('should render datagrid when loading is done', async () => {
+    let container: HTMLElement;
     await act(async () => {
-      render(
+      container = render(
         <TestProvidersComponent>
           <IndicatorsTable
             {...tableProps}
@@ -102,10 +104,10 @@ describe('<IndicatorsTable />', () => {
             indicators={indicatorsFixture}
           />
         </TestProvidersComponent>
-      );
+      ).container;
     });
 
-    expect(screen.queryByRole('grid')).toBeInTheDocument();
+    expect(screen.queryByTestId('euiDataGridBody')).toBeInTheDocument();
 
     // Two rows should be rendered
     expect(screen.queryAllByTestId(BUTTON_TEST_ID).length).toEqual(2);
@@ -114,9 +116,9 @@ describe('<IndicatorsTable />', () => {
       screen.getAllByTestId(BUTTON_TEST_ID)[0].click();
     });
 
-    expect(screen.queryByTestId(INDICATORS_FLYOUT_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(IOC_DETAILS_TITLE_TEST_ID)).toBeInTheDocument();
 
-    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(container!.querySelector('[role="progressbar"]')).not.toBeInTheDocument();
     expect(screen.queryByTestId(TABLE_UPDATE_PROGRESS_TEST_ID)).not.toBeInTheDocument();
   });
 });

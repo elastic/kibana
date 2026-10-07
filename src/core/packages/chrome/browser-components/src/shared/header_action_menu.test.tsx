@@ -13,6 +13,8 @@ import { mount } from 'enzyme';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { ChromeComponentsProvider } from '../context';
 import { createMockChromeComponentsDeps } from '../test_helpers';
 import { HeaderActionMenu } from './header_action_menu';
@@ -60,7 +62,19 @@ describe('HeaderActionMenu', () => {
   const renderWithProvider = (ui: React.ReactElement) => {
     const deps = createMockChromeComponentsDeps();
     deps.application = { ...deps.application, currentActionMenu$: menuMount$ };
-    return mount(<ChromeComponentsProvider value={deps}>{ui}</ChromeComponentsProvider>);
+    const chromeMock = chromeServiceMock.createStartContract();
+    const chrome = {
+      ...chromeMock,
+      componentDeps: {
+        ...chromeMock.componentDeps,
+        legacyActionMenu$: menuMount$,
+      },
+    };
+    return mount(
+      <ChromeServiceProvider value={{ chrome }}>
+        <ChromeComponentsProvider value={deps}>{ui}</ChromeComponentsProvider>
+      </ChromeServiceProvider>
+    );
   };
 
   it('mounts the current value of the provided observable', () => {

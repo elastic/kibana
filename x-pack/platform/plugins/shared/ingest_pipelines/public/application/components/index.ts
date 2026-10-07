@@ -6,3 +6,4 @@
  */
 
 export { PipelineForm } from './pipeline_form';
+export { PipelineAppHeader, ingestPipelinesListTitle } from './pipeline_app_header';

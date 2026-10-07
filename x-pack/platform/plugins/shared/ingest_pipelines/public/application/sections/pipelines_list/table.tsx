@@ -11,7 +11,6 @@ import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { parse } from 'query-string';
 
 import type {
   EuiInMemoryTableProps,
@@ -190,7 +189,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
     const isDefaultFilterConfiguration = isQueryEmpty && isDefaultFilters;
 
     if (!isDefaultFilterConfiguration) {
-      const { pipeline } = parse(location.search.substring(1));
+      const { pipeline } = qs.parse(location.search.substring(1));
       history.push({
         pathname: '',
         search:
@@ -237,8 +236,14 @@ export const PipelineTable: FunctionComponent<Props> = ({
     </EuiFilterButton>
   );
 
+  const reloadButtonLabel = i18n.translate(
+    'xpack.ingestPipelines.list.table.reloadButtonAriaLabel',
+    { defaultMessage: 'Refresh' }
+  );
+
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     'data-test-subj': 'pipelinesTable',
+    itemId: 'name',
     sorting,
     selection: {
       onSelectionChange: setSelection,
@@ -279,18 +284,17 @@ export const PipelineTable: FunctionComponent<Props> = ({
           </EuiButton>
         ) : undefined,
       toolsRight: [
-        <EuiButtonIcon
-          key="reloadButton"
-          iconType="refresh"
-          color="success"
-          aria-label={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
-            defaultMessage: 'refresh',
-          })}
-          data-test-subj="reloadButton"
-          size="m"
-          display="base"
-          onClick={onReloadClick}
-        />,
+        <EuiToolTip content={reloadButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            key="reloadButton"
+            iconType="refresh"
+            aria-label={reloadButtonLabel}
+            data-test-subj="reloadButton"
+            size="m"
+            display="base"
+            onClick={onReloadClick}
+          />
+        </EuiToolTip>,
       ],
       box: {
         incremental: true,
@@ -311,7 +315,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
                   button={button}
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
-                  panelPaddingSize="none"
+                  panelPaddingSize="s"
                 >
                   <EuiSelectable
                     allowExclusions

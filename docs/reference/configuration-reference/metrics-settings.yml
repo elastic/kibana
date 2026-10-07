@@ -29,7 +29,7 @@ groups:
         description: |
           Controls the size of the composite aggregations used by the Inventory Threshold to retrieve all the hosts.
         datatype: int
-        default: 10000
+        default: 5000
         applies_to:
           stack: ga
           self: ga

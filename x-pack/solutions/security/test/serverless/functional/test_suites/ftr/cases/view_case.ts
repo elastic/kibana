@@ -31,8 +31,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const config = getService('config');
   const retry = getService('retry');
+  const browser = getService('browser');
   const comboBox = getService('comboBox');
-  const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Case View', function () {
@@ -48,8 +48,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('should show the case view page correctly', async () => {
-        await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('header-page-supplements');
+        await testSubjects.existOrFail('appHeaderTitle');
 
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-attachments');
@@ -57,13 +56,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('case-view-activity');
 
-        await testSubjects.existOrFail('case-view-assignees');
+        await testSubjects.existOrFail('case-view-assignees-field-panel');
         await testSubjects.existOrFail('sidebar-severity');
-        await testSubjects.existOrFail('case-view-user-list-reporter');
-        await testSubjects.existOrFail('case-view-user-list-participants');
-        await testSubjects.existOrFail('case-view-tag-list');
+        await testSubjects.existOrFail('case-view-participants-field-panel');
+        await testSubjects.existOrFail('case-tags');
         await testSubjects.existOrFail('cases-categories');
-        await testSubjects.existOrFail('sidebar-connectors');
+        await testSubjects.existOrFail('case-view-sidebar-connectors');
       });
     });
 
@@ -73,15 +71,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('edits a case title from the case view page', async () => {
         const newTitle = `test-${uuidv4()}`;
 
-        await testSubjects.click('editable-title-header-value');
-        await testSubjects.setValue('editable-title-input-field', newTitle);
-        await testSubjects.click('editable-title-submit-btn');
-
-        // wait for backend response
-        await retry.tryForTime(5000, async () => {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).equal(newTitle);
-        });
+        await cases.common.editCaseTitle(newTitle);
+        await cases.common.assertCaseTitle(newTitle);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="title-update-action"]');
@@ -105,46 +96,31 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('adds a category to a case', async () => {
         const category = uuidv4();
-        await testSubjects.click('category-edit-button');
-        await comboBox.setCustom('comboBoxInput', category);
-        await testSubjects.click('edit-category-submit');
-
-        // validate category was added
-        await testSubjects.existOrFail('category-viewer-' + category);
+        await cases.common.addCategory(category);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-update-action"]');
       });
 
       it('deletes a category from a case', async () => {
-        await find.byCssSelector('[data-test-subj*="category-viewer-"]');
+        await cases.common.removeCategory();
 
-        await testSubjects.click('category-remove-button');
-
-        await testSubjects.existOrFail('no-categories');
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
 
       it('adds a tag to a case', async () => {
         const tag = uuidv4();
-        await testSubjects.click('tag-list-edit-button');
-        await comboBox.setCustom('comboBoxInput', tag);
-        await testSubjects.click('edit-tags-submit');
-
-        // validate tag was added
-        await testSubjects.existOrFail('tag-' + tag);
+        await cases.common.addTag(tag);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-add-action"]');
       });
 
       it('deletes a tag from a case', async () => {
-        await testSubjects.click('tag-list-edit-button');
-        // find the tag button and click the close button
-        const button = await find.byCssSelector('[data-test-subj="comboBoxInput"] button');
-        await button.click();
-        await testSubjects.click('edit-tags-submit');
+        // Clearing the combo box persists the removal immediately; there is no confirm step.
+        await comboBox.clear('case-tags');
+        await header.waitUntilLoadingHasFinished();
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
@@ -156,10 +132,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           // validate user action
           await find.byCssSelector(
             '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
-          );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
           );
         });
       });
@@ -196,20 +168,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('filters by all by default', async () => {
-        const allBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
-        );
-
-        expect(await allBadge.getAttribute('aria-label')).equal('1 active filters');
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('All');
       });
 
       it('filters by comment successfully', async () => {
-        const commentBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
-        );
-
-        expect(await commentBadge.getAttribute('aria-label')).equal('0 available filters');
-
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -219,18 +182,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('user-actions-filter-activity-button-comments');
+        await testSubjects.click('user-actions-filter-bar-type-button');
+        await testSubjects.click('user-actions-filter-bar-type-option-comments');
 
-        expect(await commentBadge.getAttribute('aria-label')).equal('1 active filters');
+        await header.waitUntilLoadingHasFinished();
+
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('Comments');
       });
 
       it('filters by history successfully', async () => {
-        const historyBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
-        );
-
-        expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
-
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
         await header.waitUntilLoadingHasFinished();
@@ -239,25 +200,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('user-actions-filter-activity-button-history');
+        await testSubjects.click('user-actions-filter-bar-type-button');
+        await testSubjects.click('user-actions-filter-bar-type-option-history');
 
-        expect(await historyBadge.getAttribute('aria-label')).equal('3 active filters');
+        await header.waitUntilLoadingHasFinished();
+
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('History');
       });
 
       it('sorts by newest first successfully', async () => {
-        await testSubjects.click('user-actions-filter-activity-button-all');
-
-        const AllBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
-        );
-
-        expect(await AllBadge.getVisibleText()).equal('4');
-
-        const sortDesc = await find.byCssSelector(
-          '[data-test-subj="user-actions-sort-select"] [value="desc"]'
-        );
-
-        await sortDesc.click();
+        await testSubjects.click('user-actions-filter-bar-sort-button');
+        await testSubjects.click('user-actions-filter-bar-sort-option-desc');
 
         await header.waitUntilLoadingHasFinished();
 
@@ -271,7 +225,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY
+    // FLAKY: https://github.com/elastic/kibana/issues/288565
     describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
@@ -353,23 +307,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
+        // show-more button appears inside the single list when there are more items than the page size
         await testSubjects.existOrFail('cases-show-more-user-actions');
 
-        const userActionsLists = await find.allByCssSelector(
-          '[data-test-subj="user-actions-list"]'
-        );
-
-        expect(userActionsLists).length(2);
-
-        expect(await userActionsLists[0].findAllByCssSelector('li')).length(10);
-
-        expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
+        const countBefore = (
+          await (
+            await find.byCssSelector('[data-test-subj="user-actions-list"]')
+          ).findAllByCssSelector('li')
+        ).length;
 
         await testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await userActionsLists[0].findAllByCssSelector('li')).length(20);
+        // more items are loaded into the same single list
+        const countAfter = (
+          await (
+            await find.byCssSelector('[data-test-subj="user-actions-list"]')
+          ).findAllByCssSelector('li')
+        ).length;
+
+        expect(countAfter).to.be.greaterThan(countBefore);
       });
     });
 
@@ -394,9 +352,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('case-view-tab-title-attachments');
       });
       it('adds a file to the case', async () => {
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
-
         await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
         const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
@@ -417,7 +372,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesFilesTable.emptyOrFail();
       });
 
-      describe('Files User Activity', () => {
+      describe('Files User Activity', function () {
         it('file user action is displayed correctly', async () => {
           await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
@@ -430,7 +385,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('breadcrumbs', () => {
+    describe('page title', () => {
       let createdCase: any;
 
       before(async () => {
@@ -442,8 +397,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should set the cases title', async () => {
-        await svlCommonNavigation.breadcrumbs.expectExists();
-        await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
+        await cases.common.assertCaseTitle(createdCase.title);
       });
     });
 
@@ -451,11 +405,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('should render the reporter correctly', async () => {
-        const reporter = await cases.singleCase.getReporter();
-
-        const reporterText = await reporter.getVisibleText();
-
-        expect(reporterText).to.be(config.get('servers.kibana.username'));
+        expect(await cases.singleCase.getReporterName()).to.be(
+          config.get('servers.kibana.username')
+        );
       });
     });
 
@@ -477,8 +429,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         },
       ];
 
-      before(async () => {
+      before(async function () {
         await navigateToCasesApp(getPageObject, getService, owner);
+        // showLegacyCustomFields requires the Cases app origin to be loaded first.
+        await cases.common.showLegacyCustomFields(owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({
           customFields: [
@@ -497,6 +451,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         await cases.casesTable.waitForCasesToBeListed();
+        // Pre-open the accordion so it is ready when the case view loads.
+        await cases.common.openLegacyCustomFieldsAccordion(owner);
         await cases.casesTable.goToFirstListedCase();
         await header.waitUntilLoadingHasFinished();
       });
@@ -506,15 +462,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
-        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
-        expect(await textField.getVisibleText()).equal('this is a text field value');
+        // Section starts in view mode — use view-mode selectors to read initial values.
+        const textViewEl = await testSubjects.find(`text-custom-field-view-${customFields[0].key}`);
+        expect(await textViewEl.getVisibleText()).equal('this is a text field value');
 
-        const toggle = await testSubjects.find(
-          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        const toggleViewEl = await testSubjects.find(
+          `toggle-custom-field-view-${customFields[1].key}`
         );
-        expect(await toggle.getAttribute('aria-checked')).equal('true');
+        expect(await toggleViewEl.getAttribute('aria-label')).equal('On');
 
-        await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
+        // Enter section edit mode by clicking the text field row.
+        await testSubjects.click(`template-field-edit-${customFields[0].key}`);
 
         await retry.waitFor('custom field edit form to exist', async () => {
           return await testSubjects.exists(
@@ -528,26 +486,30 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await inputField.type(' edited!!');
 
-        await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
+        // Toggle the toggle field while in section edit mode.
+        await testSubjects.click(`case-toggle-custom-field-form-field-${customFields[1].key}`);
 
-        await header.waitUntilLoadingHasFinished();
-
-        await toggle.click({
-          bottomOffset: 100 /* account for fixed footer when deciding if toggle is visible */,
-        });
-
-        await header.waitUntilLoadingHasFinished();
-
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
-
-        expect(await toggle.getAttribute('aria-checked')).equal('false');
-
-        // validate user action
-        const userActions = await find.allByCssSelector(
-          '[data-test-subj*="customFields-update-action"]'
+        // Save all pending changes. The save button lives in the pinned accordion header which can
+        // sit behind the sticky app header — scroll it into the viewport center first.
+        const saveBtn = await testSubjects.find('section-edit-save');
+        await browser.execute(
+          'arguments[0].scrollIntoView({behavior:"instant",block:"center"})',
+          saveBtn
         );
+        await saveBtn.click();
 
-        expect(userActions).length(2);
+        await header.waitUntilLoadingHasFinished();
+
+        // Back in view mode: verify the updated values.
+        const updatedText = await testSubjects.find(
+          `text-custom-field-view-${customFields[0].key}`
+        );
+        expect(await updatedText.getVisibleText()).equal('this is a text field value edited!!');
+
+        const updatedToggle = await testSubjects.find(
+          `toggle-custom-field-view-${customFields[1].key}`
+        );
+        expect(await updatedToggle.getAttribute('aria-label')).equal('Off');
       });
     });
   });

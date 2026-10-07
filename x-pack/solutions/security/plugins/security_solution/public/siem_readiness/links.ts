@@ -8,12 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 import { SIEM_READINESS } from '../app/translations';
-import { SIEM_READINESS_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
+import {
+  SIEM_READINESS_PATH,
+  SecurityPageName,
+  SECURITY_FEATURE_ID,
+  ENABLE_SIEM_READINESS_SETTING,
+} from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 
 export const siemReadinessLinks: LinkItem = {
   capabilities: [[`${SECURITY_FEATURE_ID}.show`]],
-  globalNavPosition: 13,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.siem_readiness', {
       defaultMessage: 'SIEM Readiness',
@@ -24,4 +28,5 @@ export const siemReadinessLinks: LinkItem = {
   id: SecurityPageName.siemReadiness,
   path: SIEM_READINESS_PATH,
   title: SIEM_READINESS,
+  uiSettingRequired: ENABLE_SIEM_READINESS_SETTING,
 };

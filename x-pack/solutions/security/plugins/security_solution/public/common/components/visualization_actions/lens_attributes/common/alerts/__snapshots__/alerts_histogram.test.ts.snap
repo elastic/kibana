@@ -3,15 +3,22 @@
 exports[`getAlertsHistogramLensAttributes should render with extra options - filters 1`] = `
 Object {
   "description": "",
-  "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
-    "adHocDataViews": Object {},
+    "adHocDataViews": Object {
+      "security-solution-my-test": Object {
+        "allowHidden": false,
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "security-solution-my-test",
+        "managed": false,
+        "name": "Default Security Data View",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "title": "signal-index",
+      },
+    },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
@@ -106,6 +113,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -116,6 +124,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -140,7 +153,13 @@ Object {
         },
       },
     ],
-    "internalReferences": Array [],
+    "internalReferences": Array [
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
+        "type": "index-pattern",
+      },
+    ],
     "query": Object {
       "language": "kql",
       "query": "host.name: *",
@@ -194,15 +213,22 @@ Object {
 exports[`getAlertsHistogramLensAttributes should render without extra options 1`] = `
 Object {
   "description": "",
-  "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
-    "adHocDataViews": Object {},
+    "adHocDataViews": Object {
+      "security-solution-my-test": Object {
+        "allowHidden": false,
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "security-solution-my-test",
+        "managed": false,
+        "name": "Default Security Data View",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "title": "signal-index",
+      },
+    },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
@@ -273,6 +299,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -283,6 +310,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -307,7 +339,13 @@ Object {
         },
       },
     ],
-    "internalReferences": Array [],
+    "internalReferences": Array [
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
+        "type": "index-pattern",
+      },
+    ],
     "query": Object {
       "language": "kql",
       "query": "host.name: *",

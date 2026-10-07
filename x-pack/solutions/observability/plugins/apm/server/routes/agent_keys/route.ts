@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import {
+  routeDefinitions,
+  type AgentKeysResponse,
+  type AgentKeysPrivilegesResponse,
+  type InvalidateAgentKeyResponse,
+  type CreateAgentKeyResponse,
+} from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import type { AgentKeysResponse } from './get_agent_keys';
 import { getAgentKeys } from './get_agent_keys';
-import type { AgentKeysPrivilegesResponse } from './get_agent_keys_privileges';
 import { getAgentKeysPrivileges } from './get_agent_keys_privileges';
-import type { InvalidateAgentKeyResponse } from './invalidate_agent_key';
 import { invalidateAgentKey } from './invalidate_agent_key';
-import type { CreateAgentKeyResponse } from './create_agent_key';
 import { createAgentKey } from './create_agent_key';
-import { privilegesTypeRt } from '../../../common/privilege_type';
 
 const agentKeysRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/agent_keys',
+  endpoint: routeDefinitions.agentKeys.agentKeys.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
 
   handler: async (resources): Promise<AgentKeysResponse> => {
@@ -32,7 +33,7 @@ const agentKeysRoute = createApmServerRoute({
 });
 
 const agentKeysPrivilegesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/agent_keys/privileges',
+  endpoint: routeDefinitions.agentKeys.agentKeysPrivileges.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<AgentKeysPrivilegesResponse> => {
     const { context, core } = resources;
@@ -48,15 +49,13 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
 });
 
 const invalidateAgentKeyRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/api_key/invalidate',
+  endpoint: routeDefinitions.agentKeys.invalidateAgentKey.endpoint,
+  params: routeDefinitions.agentKeys.invalidateAgentKey.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write'],
     },
   },
-  params: t.type({
-    body: t.type({ id: t.string }),
-  }),
   handler: async (resources): Promise<InvalidateAgentKeyResponse> => {
     const { context, params, core } = resources;
     const {
@@ -80,19 +79,14 @@ const invalidateAgentKeyRoute = createApmServerRoute({
 });
 
 const createAgentKeyRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/agent_keys 2023-10-31',
+  endpoint: routeDefinitions.agentKeys.createAgentKey.endpoint,
+  params: routeDefinitions.agentKeys.createAgentKey.params,
   options: { tags: ['oas-tag:APM agent keys'] },
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write'],
     },
   },
-  params: t.type({
-    body: t.type({
-      name: t.string,
-      privileges: privilegesTypeRt,
-    }),
-  }),
   handler: async (resources): Promise<CreateAgentKeyResponse> => {
     const { context, params } = resources;
 

@@ -13,7 +13,7 @@ import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 
 export const IgnoreUnavailableSwitch: FC = () => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [ignoreUnavailable, setIgnoreUnavailable] = useState(jobCreator.ignoreUnavailable);
 
   useEffect(() => {
@@ -21,6 +21,13 @@ export const IgnoreUnavailableSwitch: FC = () => {
     jobCreatorUpdate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ignoreUnavailable]);
+
+  useEffect(() => {
+    if (jobCreator.ignoreUnavailable !== ignoreUnavailable) {
+      setIgnoreUnavailable(jobCreator.ignoreUnavailable);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
 
   function toggleIgnoreUnavailable() {
     setIgnoreUnavailable(!ignoreUnavailable);

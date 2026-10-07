@@ -30,7 +30,9 @@ export const FrequencyInput: FC = () => {
   }, [frequency]);
 
   useEffect(() => {
-    setFrequency(jobCreator.frequency);
+    if (jobCreator.frequency !== frequency) {
+      setFrequency(jobCreator.frequency);
+    }
 
     const df = createDefaultFrequency();
     setDefaultFrequency(df);

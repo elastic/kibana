@@ -5,6 +5,7 @@
   },
   "include": ["server/**/*", "public/**/*", "common/**/*"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/security-plugin",
     "@kbn/licensing-plugin",
@@ -24,8 +25,8 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/features-plugin",
     "@kbn/lazy-object",
-    "@kbn/datemath",
     "@kbn/task-manager-plugin",
+    "@kbn/ui-callout",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
@@ -39,12 +40,17 @@
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/response-ops-schedule-schema",
     "@kbn/react-query",
     "@kbn/shared-ux-router",
     "@kbn/response-ops-rules-apis",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/rule-data-utils",
-    "@kbn/alerts-as-data-utils"
+    "@kbn/alerts-as-data-utils",
+    "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-constants",
+    "@kbn/kql",
+    "@kbn/data-views-plugin"
   ],
   "exclude": ["target/**/*"]
 }

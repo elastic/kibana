@@ -239,7 +239,7 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
     expect(closePopover).toHaveBeenCalledTimes(1);
     expect(reportAddToChatClick).toHaveBeenCalledWith({
       pathway: 'attacks_page_group_take_action',
-      attachments: ['alert'],
+      attachments: ['attack_discovery'],
     });
     expect(openAgentBuilderFlyout).toHaveBeenCalledTimes(1);
     expect(reportAddToChatClick.mock.invocationCallOrder[0]).toBeLessThan(
@@ -288,6 +288,27 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
     );
 
     expect(result.current.items[0]?.disabled).toBe(true);
+  });
+
+  it('should return empty items when AI Assistant is not visible', () => {
+    mockUseAssistantAvailability.mockReturnValue({
+      hasAssistantPrivilege: true,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      hasManageGlobalKnowledgeBase: true,
+      hasSearchAILakeConfigurations: true,
+      hasUpdateAIAssistantAnonymization: true,
+      isAssistantEnabled: true,
+      isAssistantVisible: false,
+    });
+
+    const { result } = renderHook(() =>
+      useAttackViewInAiAssistantContextMenuItems({
+        attack: mockAttack,
+      })
+    );
+
+    expect(result.current.items).toEqual([]);
   });
 
   it('registers prompt context with markdown getter and replacements', async () => {

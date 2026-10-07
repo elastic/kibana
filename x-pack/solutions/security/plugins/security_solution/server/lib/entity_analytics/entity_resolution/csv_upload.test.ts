@@ -314,6 +314,7 @@ describe('processResolutionCsvUpload', () => {
         linked: ['alias:1', 'alias:2'],
         skipped: [],
         target_id: 'target:golden',
+        entity_type: 'user',
       });
 
       const csv = 'type,user.email,resolved_to\nuser,shared@test.com,target:golden';
@@ -345,6 +346,7 @@ describe('processResolutionCsvUpload', () => {
         linked: ['alias:1'],
         skipped: [],
         target_id: 'target:golden',
+        entity_type: 'user',
       });
 
       const csv = 'type,user.email,resolved_to\nuser,alias@test.com,target:golden';
@@ -358,6 +360,7 @@ describe('processResolutionCsvUpload', () => {
         linked: [],
         skipped: ['alias:1'],
         target_id: 'target:golden',
+        entity_type: 'user',
       });
 
       const csv = 'type,user.email,resolved_to\nuser,alias@test.com,target:golden';
@@ -453,6 +456,7 @@ describe('processResolutionCsvUpload', () => {
         linked: ['alias:1'],
         skipped: [],
         target_id: 'target:1',
+        entity_type: 'user',
       });
 
       const csv = [
@@ -471,6 +475,175 @@ describe('processResolutionCsvUpload', () => {
       expect(result.items[0].status).toBe('success');
       expect(result.items[1].status).toBe('error');
       expect(result.items[2].status).toBe('unmatched');
+    });
+  });
+
+  describe('errorCounts', () => {
+    it('returns empty errorCounts for zero-error upload', async () => {
+      mockCrudClient.listEntities.mockResolvedValue({
+        entities: [createMockEntity('target:1')],
+        nextSearchAfter: undefined,
+      });
+
+      mockResolutionClient.linkEntities.mockResolvedValue({
+        linked: ['alias:1'],
+        skipped: [],
+        target_id: 'target:1',
+        entity_type: 'user',
+      });
+
+      mockCrudClient.listEntities
+        .mockReset()
+        .mockResolvedValueOnce({
+          entities: [createMockEntity('target:1')],
+          nextSearchAfter: undefined,
+        })
+        .mockResolvedValueOnce({
+          entities: [createMockEntity('alias:1')],
+          nextSearchAfter: undefined,
+        });
+
+      const csv = 'type,user.email,resolved_to\nuser,alias@test.com,target:1';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({});
+    });
+
+    it('counts invalid_entity_type errors', async () => {
+      const csv = 'type,user.email,resolved_to\ninvalid,test@example.com,target:1';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ invalid_entity_type: 1 });
+    });
+
+    it('counts missing_resolved_to errors', async () => {
+      const csv = 'type,user.email,resolved_to\nuser,test@example.com,';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ missing_resolved_to: 1 });
+    });
+
+    it('counts no_identifying_fields errors', async () => {
+      const csv = 'type,resolved_to\nuser,target:1';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ no_identifying_fields: 1 });
+    });
+
+    it('counts target_not_found errors', async () => {
+      const csv = 'type,user.email,resolved_to\nuser,test@example.com,target:missing';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ target_not_found: 1 });
+    });
+
+    it('counts target_is_alias errors', async () => {
+      mockCrudClient.listEntities.mockResolvedValue({
+        entities: [createMockEntity('target:alias', 'target:golden')],
+        nextSearchAfter: undefined,
+      });
+
+      const csv = 'type,user.email,resolved_to\nuser,test@example.com,target:alias';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ target_is_alias: 1 });
+    });
+
+    it('counts too_many_matches errors', async () => {
+      const pageSize = 100;
+      const pages = 11;
+
+      mockCrudClient.listEntities.mockReset();
+      mockCrudClient.listEntities.mockResolvedValueOnce({
+        entities: [createMockEntity('target:golden')],
+        nextSearchAfter: undefined,
+      });
+      for (let page = 0; page < pages; page++) {
+        const entities = Array.from({ length: pageSize }, (_, i) =>
+          createMockEntity(`alias:${page * pageSize + i}`)
+        );
+        mockCrudClient.listEntities.mockResolvedValueOnce({
+          entities,
+          nextSearchAfter: [page + 1, 0],
+        });
+      }
+
+      const csv = 'type,user.email,resolved_to\nuser,common@test.com,target:golden';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ too_many_matches: 1 });
+      expect(result.items[0].error).toContain('Matched more than 1000 entities');
+    });
+
+    it('counts matching_error for non-limit listEntities failures', async () => {
+      mockCrudClient.listEntities
+        .mockResolvedValueOnce({
+          entities: [createMockEntity('target:golden')],
+          nextSearchAfter: undefined,
+        })
+        .mockRejectedValueOnce(new Error('Elasticsearch cluster unavailable'));
+
+      const csv = 'type,user.email,resolved_to\nuser,test@example.com,target:golden';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ matching_error: 1 });
+    });
+
+    it('counts link_error errors', async () => {
+      mockCrudClient.listEntities
+        .mockResolvedValueOnce({
+          entities: [createMockEntity('target:golden')],
+          nextSearchAfter: undefined,
+        })
+        .mockResolvedValueOnce({
+          entities: [createMockEntity('alias:1')],
+          nextSearchAfter: undefined,
+        });
+
+      mockResolutionClient.linkEntities.mockRejectedValue(
+        new Error('Chain resolution not allowed')
+      );
+
+      const csv = 'type,user.email,resolved_to\nuser,alias@test.com,target:golden';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ link_error: 1 });
+    });
+
+    it('increments the same error category across multiple rows', async () => {
+      const csv = [
+        'type,user.email,resolved_to',
+        'invalid,foo@test.com,target:1',
+        'invalid,bar@test.com,target:1',
+      ].join('\n');
+
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({ invalid_entity_type: 2 });
+    });
+
+    it('aggregates mixed error categories across rows', async () => {
+      mockCrudClient.listEntities.mockResolvedValue({
+        entities: [],
+        nextSearchAfter: undefined,
+      });
+
+      const csv = [
+        'type,user.email,resolved_to',
+        'invalid,foo@test.com,target:1',
+        'user,bar@test.com,',
+        'user,,target:1',
+        'user,baz@test.com,target:missing',
+      ].join('\n');
+
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.errorCounts).toEqual({
+        invalid_entity_type: 1,
+        missing_resolved_to: 1,
+        no_identifying_fields: 1,
+        target_not_found: 1,
+      });
     });
   });
 });

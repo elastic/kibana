@@ -7,26 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BehaviorSubject } from 'rxjs';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { apm } from '@elastic/apm-rum';
 import { i18n } from '@kbn/i18n';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { isEqual } from 'lodash';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DataSource } from '@kbn/data-source';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
+import { columnsToColumnsMeta } from '../../../utils/columns_to_columns_meta';
 
 export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
   nodeId: string;
   timeRange: TimeRange | undefined;
+  esqlApproximation: boolean;
 }
 
 export interface CascadedDocumentsStateManager {
   getIsActiveInstance(): boolean;
   getCascadedDocuments(nodeId: string): DataTableRecord[] | undefined;
+  getColumnsMeta(): DataTableColumnsMeta;
   setCascadedDocuments(nodeId: string, records: DataTableRecord[]): void;
+  setColumnsMeta(columnsMeta: DataTableColumnsMeta): void;
 }
 
 export class CascadedDocumentsFetcher {
@@ -36,7 +43,8 @@ export class CascadedDocumentsFetcher {
   constructor(
     private readonly services: DiscoverServices,
     private readonly scopedProfilesManager: ScopedProfilesManager,
-    private readonly stateManager: CascadedDocumentsStateManager
+    private readonly stateManager: CascadedDocumentsStateManager,
+    private readonly currentDataSource$: BehaviorSubject<DataSource | undefined>
   ) {}
 
   getRequestAdapter(): RequestAdapter {
@@ -52,6 +60,7 @@ export class CascadedDocumentsFetcher {
     esqlVariables,
     dataView,
     timeRange,
+    esqlApproximation,
   }: FetchCascadedDocumentsParams) {
     this.cancelFetch(nodeId);
 
@@ -83,16 +92,23 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
-      ({ records } = await fetchEsql({
+      const currentEsqlSource = this.currentDataSource$.getValue();
+
+      if (currentEsqlSource?.kind !== 'esql') {
+        return [];
+      }
+
+      const { records: fetchedRecords, dataSource: leafDataSource } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
-        dataView,
+        esqlSource: currentEsqlSource,
         data: this.services.data,
         expressions: this.services.expressions,
         abortSignal: abortController.signal,
         timeRange,
         scopedProfilesManager: this.scopedProfilesManager,
         inspectorAdapters: { requests: this.requestAdapter },
+        esqlApproximation,
         inspectorConfig: {
           title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
             defaultMessage: 'Cascade Row Data Query',
@@ -102,9 +118,20 @@ export class CascadedDocumentsFetcher {
               'This request queries Elasticsearch to fetch the documents matching the value of the expanded cascade row.',
           }),
         },
-      }));
+      });
 
+      records = fetchedRecords;
       this.stateManager.setCascadedDocuments(nodeId, records);
+
+      // The leaf query drops STATS, so its columns differ from the parent source.
+      // That source keeps the parent id and must not be published.
+      if (leafDataSource) {
+        const columnsMeta = columnsToColumnsMeta(leafDataSource.getColumns());
+        const previousColumnsMeta = this.stateManager.getColumnsMeta();
+        if (!isEqual(previousColumnsMeta, columnsMeta)) {
+          this.stateManager.setColumnsMeta(columnsMeta);
+        }
+      }
     } finally {
       this.abortControllers.delete(nodeId);
     }

@@ -17,15 +17,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type {
   IngestHubSetup,
   IngestHubStart,
   IngestHubStartDependencies,
   IngestFlow,
 } from './types';
-import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
+import { INGEST_HUB_ENABLED_FLAG } from '../common/core/constants';
+import { registerOnboardingApp } from './onboarding';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
@@ -60,13 +62,17 @@ const createNavigationAvailable$ = (
 };
 
 export class IngestHubPlugin
-  implements Plugin<IngestHubSetup, IngestHubStart, object, IngestHubStartDependencies>
+  implements
+    Plugin<IngestHubSetup, IngestHubStart, { cloud?: CloudSetup }, IngestHubStartDependencies>
 {
   private readonly ingestFlows: IngestFlow[] = [];
 
   constructor(private readonly context: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup<IngestHubStartDependencies>): IngestHubSetup {
+  setup(
+    coreSetup: CoreSetup<IngestHubStartDependencies>,
+    deps: { cloud?: CloudSetup } = {}
+  ): IngestHubSetup {
     const startServicesPromise = coreSetup.getStartServices();
 
     coreSetup.application.register({
@@ -74,7 +80,7 @@ export class IngestHubPlugin
       title: i18n.translate('xpack.ingestHub.appTitle', {
         defaultMessage: 'Ingest Hub',
       }),
-      euiIconType: 'launch',
+      euiIconType: 'rocket',
       appRoute: '/app/ingest-hub',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: from(startServicesPromise).pipe(
@@ -82,7 +88,7 @@ export class IngestHubPlugin
           coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
             map((enabled): AppUpdater => {
               return () => ({
-                visibleIn: enabled ? ['sideNav', 'globalSearch'] : [],
+                visibleIn: enabled ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
               });
             })
           )
@@ -90,7 +96,9 @@ export class IngestHubPlugin
       ),
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await startServicesPromise;
-        const isEnabled = coreStart.featureFlags.getBooleanValue(INGEST_HUB_ENABLED_FLAG, false);
+        const isEnabled = await firstValueFrom(
+          coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false)
+        );
         const { element, history } = params;
 
         if (!isEnabled) {
@@ -107,6 +115,13 @@ export class IngestHubPlugin
         return () => root.unmount();
       },
     });
+
+    registerOnboardingApp(
+      coreSetup,
+      startServicesPromise,
+      this.context.env.packageInfo.version,
+      deps.cloud
+    );
 
     return {};
   }

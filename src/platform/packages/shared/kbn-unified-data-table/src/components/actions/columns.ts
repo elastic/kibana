@@ -45,21 +45,39 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumn(columnName: string) {
-    popularizeField(dataView, columnName, dataViews, capabilities);
+    onRemoveColumns([columnName]);
+  }
 
-    const nextColumns = removeColumn(columns || [], columnName);
+  function onRemoveColumns(columnNames: string[]): string[] {
+    const namesToRemove = new Set(columnNames);
+    if (namesToRemove.size === 0) {
+      return [];
+    }
+
+    const currentColumns = columns || [];
+    const nextColumns: string[] = [];
+    const removedColumnNames: string[] = [];
+    for (const col of currentColumns) {
+      if (namesToRemove.has(col)) {
+        removedColumnNames.push(col);
+      } else {
+        nextColumns.push(col);
+      }
+    }
     // The state's sort property is an array of [sortByColumn,sortDirection]
-    const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
+    const nextSort =
+      sort && sort.length ? sort.filter((subArr) => !namesToRemove.has(subArr[0])) : [];
 
     let nextSettings = cleanColumnSettings(nextColumns, settings);
 
     // When columns are removed, reset the last column to auto width if only absolute
     // width columns remain, to ensure the columns fill the available grid space
-    if (nextColumns.length < (columns?.length ?? 0)) {
+    if (nextColumns.length < currentColumns.length) {
       nextSettings = adjustLastColumnWidth(nextColumns, nextSettings);
     }
 
     setAppState({ columns: nextColumns, sort: nextSort, settings: nextSettings });
+    return removedColumnNames;
   }
 
   function onMoveColumn(columnName: string, newIndex: number) {
@@ -69,11 +87,12 @@ export function getStateColumnActions({
 
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
     // The next line should be gone when classic table will be removed
+    // Strip display-only prepended time field before persisting
     const actualColumns =
       !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
         ? (nextColumns || []).slice(1)
         : nextColumns;
-
+    // Clean against nextColumns so display-only prepended time field width is preserved
     let nextSettings = cleanColumnSettings(nextColumns, settings);
 
     // When columns are removed, reset the last column to auto width if only absolute
@@ -87,37 +106,17 @@ export function getStateColumnActions({
   return {
     onAddColumn,
     onRemoveColumn,
+    onRemoveColumns,
     onMoveColumn,
     onSetColumns,
   };
-}
-
-/**
- * Helper function to provide a fallback to a single _source column if the given array of columns
- * is empty, and removes _source if there are more than 1 columns given
- * @param columns
- */
-function buildColumns(columns: string[]) {
-  if (columns.length > 1 && columns.indexOf('_source') !== -1) {
-    return columns.filter((col) => col !== '_source');
-  } else if (columns.length !== 0) {
-    return columns;
-  }
-  return [];
 }
 
 function addColumn(columns: string[], columnName: string) {
   if (columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns([...columns, columnName]);
-}
-
-function removeColumn(columns: string[], columnName: string) {
-  if (!columns.includes(columnName)) {
-    return columns;
-  }
-  return buildColumns(columns.filter((col) => col !== columnName));
+  return [...columns, columnName];
 }
 
 function moveColumn(columns: string[], columnName: string, newIndex: number) {

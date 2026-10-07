@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { ContentListProvider } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
+import type { ContentListItem } from '../../item';
 import { DeleteConfirmationModal } from './delete_confirmation';
 
 const mockFindItems = jest.fn(
@@ -24,21 +25,31 @@ const mockFindItems = jest.fn(
 
 const mockOnDelete = jest.fn(async () => {});
 
-const createWrapper =
-  (options?: { onDelete?: typeof mockOnDelete }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <ContentListProvider
-        id="test-list"
-        labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-        dataSource={{ findItems: mockFindItems }}
-        item={{ onDelete: options?.onDelete ?? mockOnDelete }}
-      >
-        {children}
-      </ContentListProvider>
-    );
+const createWrapper = (options?: {
+  onDelete?: typeof mockOnDelete;
+  getDeleteRestriction?: (item: ContentListItem) => string | undefined;
+}) => {
+  const item = {
+    actions: {
+      delete: {
+        onBulkAction: options?.onDelete ?? mockOnDelete,
+        ...(options?.getDeleteRestriction && { restriction: options.getDeleteRestriction }),
+      },
+    },
+  };
+  return ({ children }: { children: React.ReactNode }) => (
+    <ContentListProvider
+      id="test-list"
+      labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+      dataSource={{ findItems: mockFindItems }}
+      item={item}
+    >
+      {children}
+    </ContentListProvider>
+  );
+};
 
-const defaultItems = [{ id: '1', title: 'Item 1' }];
+const defaultItems: ContentListItem[] = [{ id: '1', title: 'Item 1' }];
 
 describe('DeleteConfirmationModal', () => {
   beforeEach(() => {
@@ -63,7 +74,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('uses plural entity label for multiple items', () => {
-      const items = [
+      const items: ContentListItem[] = [
         { id: '1', title: 'Item 1' },
         { id: '2', title: 'Item 2' },
         { id: '3', title: 'Item 3' },
@@ -182,6 +193,116 @@ describe('DeleteConfirmationModal', () => {
           )
         ).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('partition by delete restriction', () => {
+    const sampleItems: ContentListItem[] = [
+      { id: '1', title: 'Free 1', managed: false },
+      { id: '2', title: 'Managed 1', managed: true },
+      { id: '3', title: 'Free 2', managed: false },
+      { id: '4', title: 'Managed 2', managed: true },
+    ];
+
+    const restrictManaged = (item: ContentListItem) =>
+      item.managed ? 'Managed dashboards cannot be deleted.' : undefined;
+
+    it('uses `permitted` count in the title when some items are skipped', () => {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+        wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
+      });
+
+      expect(screen.getByText(/Delete 2 dashboards\?/)).toBeInTheDocument();
+    });
+
+    it('renders a callout listing the skipped items and their reason', () => {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+        wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
+      });
+
+      const callout = screen.getByTestId('contentListDeleteConfirmation-skippedCallout');
+      expect(
+        within(callout).getByText("2 dashboards can't be deleted and will be skipped")
+      ).toBeInTheDocument();
+
+      const list = within(callout).getByTestId('contentListDeleteConfirmation-skippedList');
+      expect(within(list).getByText('Managed dashboards cannot be deleted.')).toBeInTheDocument();
+      expect(within(list).getByText('Managed 1')).toBeInTheDocument();
+      expect(within(list).getByText('Managed 2')).toBeInTheDocument();
+    });
+
+    it('itemises per-row when skipped reasons differ', () => {
+      const restrictMixed = (item: ContentListItem) => {
+        if (item.id === '2') {
+          return 'Managed';
+        }
+        if (item.id === '4') {
+          return 'In use';
+        }
+        return undefined;
+      };
+
+      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+        wrapper: createWrapper({ getDeleteRestriction: restrictMixed }),
+      });
+
+      const list = screen.getByTestId('contentListDeleteConfirmation-skippedList');
+      // Each itemised line includes both title and reason text.
+      expect(list).toHaveTextContent('Managed 1 - Managed');
+      expect(list).toHaveTextContent('Managed 2 - In use');
+    });
+
+    it('passes only `permitted` items to `onDelete` on confirm', async () => {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+        wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
+      });
+
+      await userEvent.click(screen.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(mockOnDelete).toHaveBeenCalledTimes(1);
+      });
+      expect(mockOnDelete).toHaveBeenCalledWith([sampleItems[0], sampleItems[2]]);
+    });
+
+    it('flips to informational mode when every selected item is restricted', () => {
+      const allManaged: ContentListItem[] = [
+        { id: '2', title: 'Managed 1', managed: true },
+        { id: '4', title: 'Managed 2', managed: true },
+      ];
+
+      render(<DeleteConfirmationModal items={allManaged} onClose={jest.fn()} />, {
+        wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
+      });
+
+      expect(screen.getByText(/2 dashboards can't be deleted/)).toBeInTheDocument();
+      expect(screen.getByTestId('contentListDeleteConfirmation-closeButton')).toBeInTheDocument();
+      expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+    });
+
+    it('closes via the informational `Close` button without invoking `onDelete`', async () => {
+      const onClose = jest.fn();
+      const allManaged: ContentListItem[] = [{ id: '2', title: 'Managed 1', managed: true }];
+
+      render(<DeleteConfirmationModal items={allManaged} onClose={onClose} />, {
+        wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
+      });
+
+      await userEvent.click(screen.getByTestId('contentListDeleteConfirmation-closeButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(mockOnDelete).not.toHaveBeenCalled();
+    });
+
+    it('renders without a skipped callout when no items are restricted', () => {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+        wrapper: createWrapper({ getDeleteRestriction: () => undefined }),
+      });
+
+      expect(
+        screen.queryByTestId('contentListDeleteConfirmation-skippedCallout')
+      ).not.toBeInTheDocument();
+      expect(screen.getByText(/Delete 4 dashboards\?/)).toBeInTheDocument();
     });
   });
 });

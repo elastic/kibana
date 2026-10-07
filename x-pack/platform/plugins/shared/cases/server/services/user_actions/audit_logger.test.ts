@@ -44,6 +44,6 @@ describe('UserActionAuditLogger', () => {
 
     logger.log();
 
-    expect(mockLogger.log).not.toBeCalled();
+    expect(mockLogger.log).not.toHaveBeenCalled();
   });
 });

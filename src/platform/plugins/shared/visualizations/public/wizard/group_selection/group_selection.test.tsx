@@ -14,7 +14,7 @@ import { VisGroups } from '../../vis_types';
 import type { GroupSelectionProps } from './group_selection';
 import { GroupSelection } from './group_selection';
 import type { DocLinksStart } from '@kbn/core/public';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { VisParams } from '@kbn/visualizations-common';
 
@@ -67,15 +67,15 @@ describe('GroupSelection', () => {
 
   const visTypesRegistry = (visTypes: BaseVisType[]): TypesStart => {
     return {
-      get<T extends VisParams>(id: string): BaseVisType<T> {
+      async get<T extends VisParams>(id: string) {
         return visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
       },
-      all: () => {
+      all: async () => {
         return visTypes as unknown as BaseVisType[];
       },
       getAliases: () => [],
       unRegisterAlias: () => [],
-      getByGroup: (group: VisGroups) => {
+      getByGroup: async (group: VisGroups) => {
         return visTypes.filter((type) => {
           return type.group === group;
         }) as unknown as BaseVisType[];
@@ -144,9 +144,11 @@ describe('GroupSelection', () => {
       tab: 'legacy',
     });
 
-    expect(screen.queryByRole('tab', { name: /legacy/i })).toBeInTheDocument();
-    expect(screen.queryByRole('tab', { name: /recommended/i })).toBeInTheDocument();
-    expect(screen.getByTestId('visType-aggbased')).toHaveTextContent('Aggregation-based');
+    await waitFor(() => {
+      expect(screen.queryByRole('tab', { name: /legacy/i })).toBeInTheDocument();
+      expect(screen.queryByRole('tab', { name: /recommended/i })).toBeInTheDocument();
+      expect(screen.getByTestId('visType-aggbased')).toHaveTextContent('Aggregation-based');
+    });
   });
 
   it('should call the showMainDialog if the aggBased group card is clicked', async () => {
@@ -164,20 +166,26 @@ describe('GroupSelection', () => {
       tab: 'legacy',
     });
 
+    await waitFor(() => {
+      expect(screen.getByTestId('visType-aggbased')).toHaveTextContent('Aggregation-based');
+    });
+
     await userEvent.click(screen.getByRole('button', { name: /Aggregation-based/i }));
     expect(showMainDialog).toHaveBeenCalledWith(false);
   });
 
-  it('should only show promoted visualizations in recommended tab', () => {
+  it('should only show promoted visualizations in recommended tab', async () => {
     renderGroupSelectionComponent();
 
-    const cards = screen.getAllByRole('button').map((el) => el.textContent);
+    await waitFor(() => {
+      const cards = screen.getAllByRole('button').map((el) => el.textContent);
 
-    expect(cards).toEqual([
-      'Vis alias with promotion',
-      'Vis Type 1',
-      'Vis Type 2',
-      'Vis with alias Url',
-    ]);
+      expect(cards).toEqual([
+        'Vis alias with promotion',
+        'Vis Type 1',
+        'Vis Type 2',
+        'Vis with alias Url',
+      ]);
+    });
   });
 });

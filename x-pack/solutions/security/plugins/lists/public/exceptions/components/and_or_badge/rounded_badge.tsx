@@ -7,7 +7,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import * as i18n from './translations';
 
@@ -18,12 +18,12 @@ const RoundBadge = styled(EuiBadge)`
   border-radius: 100%;
   display: inline-flex;
   font-size: 9px;
-  height: 34px;
   justify-content: center;
   margin: 0 5px 0 5px;
   padding: 7px 6px 4px 6px;
   user-select: none;
-  width: 34px;
+  width: 40px;
+  height: 40px;
   .euiBadge__content {
     position: relative;
     top: -1px;

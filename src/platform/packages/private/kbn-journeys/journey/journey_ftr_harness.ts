@@ -22,7 +22,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import type { AxiosError } from 'axios';
 import type { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
@@ -96,7 +95,7 @@ export class JourneyFtrHarness {
         body: { telemetry: { labels } },
       });
     } catch (error) {
-      const statusCode = (error as AxiosError).response?.status;
+      const statusCode = (error as { status?: number }).status;
       if (statusCode === 404) {
         throw new Error(
           `Failed to update labels, supported Kibana version is 8.11.0+ and must be started with "coreApp.allowDynamicConfigOverrides:true"`
@@ -369,7 +368,12 @@ export class JourneyFtrHarness {
     }
     return await this.withSpan('Browser creation', 'setup', async () => {
       const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
-      this.browser = await playwright.chromium.launch({ headless, timeout: 60_000 });
+      // Chrome needs this even though the agent maps localhost to ::1; see setup_ipv6_only.sh.
+      const args =
+        process.env.KIBANA_TEST_IPV6_ONLY === 'true'
+          ? ['--host-resolver-rules=MAP localhost [::1]']
+          : [];
+      this.browser = await playwright.chromium.launch({ headless, timeout: 60_000, args });
       return this.browser;
     });
   }

@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { MapCache } from 'lodash';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
+import { CACHE_INVALIDATE_DELAY, DATA_SOURCES_CACHE_KEY } from '../helpers';
 import { useEsqlCallbacks } from './use_esql_callbacks';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
 
@@ -32,6 +33,7 @@ const createDefaultParams = () => {
   const esqlFieldsCache = createMapCache();
   const dataSourcesCache = createMapCache();
   const historyStarredItemsCache = createMapCache();
+  const timeseriesIndicesCache = createMapCache();
 
   // memoizedFieldsFromESQL never resolves so getColumnsFor stays pending,
   // letting us assert on the AbortSignal that was passed in.
@@ -79,6 +81,11 @@ const createDefaultParams = () => {
     memoizedFieldsFromESQL,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices: jest.fn().mockReturnValue({
+      timestamp: Date.now(),
+      result: Promise.resolve({ indices: [] }),
+    }) as unknown as Parameters<typeof useEsqlCallbacks>[0]['memoizedTimeseriesIndices'],
     favoritesClient: {} as FavoritesClient<StarredQueryMetadata>,
     getJoinIndicesCallback: jest.fn(),
     enableResourceBrowser: false,
@@ -86,6 +93,96 @@ const createDefaultParams = () => {
 };
 
 describe('useEsqlCallbacks', () => {
+  describe('getSources', () => {
+    it('cleans correctly the dataSourcesCache when getSources is called after invalidate time', async () => {
+      const params = createDefaultParams();
+      const staleTimestamp = Date.now() - (CACHE_INVALIDATE_DELAY + 1);
+      params.dataSourcesCache.set(DATA_SOURCES_CACHE_KEY, {
+        timestamp: staleTimestamp,
+        result: Promise.resolve([]),
+      });
+
+      (params.memoizedSources as unknown as jest.Mock).mockReturnValue({
+        timestamp: Date.now(),
+        result: Promise.resolve([]),
+      });
+
+      const { result } = renderHook(() => useEsqlCallbacks(params));
+
+      await result.current.getSources!();
+
+      expect(params.dataSourcesCache.delete).toHaveBeenCalledWith(DATA_SOURCES_CACHE_KEY);
+      expect(params.dataSourcesCache.has(DATA_SOURCES_CACHE_KEY)).toBe(false);
+    });
+
+    it('do not clean the dataSourcesCache when getSources is called before invalidate time', async () => {
+      const params = createDefaultParams();
+      const cacheEntry = {
+        timestamp: Date.now(),
+        result: Promise.resolve([]),
+      };
+      params.dataSourcesCache.set(DATA_SOURCES_CACHE_KEY, cacheEntry);
+
+      (params.memoizedSources as unknown as jest.Mock).mockReturnValue({
+        timestamp: Date.now(),
+        result: Promise.resolve([]),
+      });
+
+      const { result } = renderHook(() => useEsqlCallbacks(params));
+
+      await result.current.getSources!();
+
+      expect(params.dataSourcesCache.delete).not.toHaveBeenCalled();
+      expect(params.dataSourcesCache.has(DATA_SOURCES_CACHE_KEY)).toBe(true);
+      expect(params.dataSourcesCache.get(DATA_SOURCES_CACHE_KEY)).toBe(cacheEntry);
+    });
+
+    it('aborts the in-flight sources request when the editor unmounts', async () => {
+      const params = createDefaultParams();
+
+      let capturedSignal: AbortSignal | undefined;
+      (params.memoizedSources as unknown as jest.Mock).mockImplementation(
+        (_core: unknown, _getLicense: unknown, _enrichSources: unknown, signal?: AbortSignal) => {
+          capturedSignal = signal;
+          return { timestamp: Date.now(), result: new Promise(() => {}) };
+        }
+      );
+
+      const { result, unmount } = renderHook(() => useEsqlCallbacks(params));
+
+      void result.current.getSources!();
+
+      expect(capturedSignal).toBeDefined();
+      expect(capturedSignal!.aborted).toBe(false);
+
+      unmount();
+
+      expect(capturedSignal!.aborted).toBe(true);
+    });
+
+    it('keeps sources requests alive when the fields cache is replaced', async () => {
+      const params = createDefaultParams();
+
+      let capturedSignal: AbortSignal | undefined;
+      (params.memoizedSources as unknown as jest.Mock).mockImplementation(
+        (_core: unknown, _getLicense: unknown, _enrichSources: unknown, signal?: AbortSignal) => {
+          capturedSignal = signal;
+          return { timestamp: Date.now(), result: new Promise(() => {}) };
+        }
+      );
+
+      const { result, rerender } = renderHook((props) => useEsqlCallbacks(props), {
+        initialProps: params,
+      });
+      // A project routing change recreates the fields cache.
+      rerender({ ...params, esqlFieldsCache: createMapCache() });
+
+      void result.current.getSources!();
+
+      expect(capturedSignal!.aborted).toBe(false);
+    });
+  });
+
   describe('getColumnsFor', () => {
     it('aborts the in-flight request when the editor unmounts', async () => {
       const params = createDefaultParams();
@@ -121,6 +218,25 @@ describe('useEsqlCallbacks', () => {
       expect(firstSignal.aborted).toBe(true);
       expect(secondSignal.aborted).toBe(false);
       expect(params.esqlFieldsCache.delete).toHaveBeenCalledWith('FROM logs | LIMIT 10');
+    });
+
+    it('restarts the columns request when the fields cache is replaced', async () => {
+      const params = createDefaultParams();
+      const { result, rerender } = renderHook((props) => useEsqlCallbacks(props), {
+        initialProps: params,
+      });
+
+      void result.current.getColumnsFor!({ query: 'FROM logs | LIMIT 10' });
+      const memoized = params.memoizedFieldsFromESQL as unknown as jest.Mock;
+      const firstSignal = memoized.mock.calls[0][0].signal as AbortSignal;
+
+      // A project routing change recreates the fields cache.
+      rerender({ ...params, esqlFieldsCache: createMapCache() });
+      void result.current.getColumnsFor!({ query: 'FROM logs | LIMIT 10' });
+      const secondSignal = memoized.mock.calls[1][0].signal as AbortSignal;
+
+      expect(firstSignal.aborted).toBe(true);
+      expect(secondSignal.aborted).toBe(false);
     });
 
     it('does not abort when the same query is requested again', async () => {

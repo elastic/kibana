@@ -323,7 +323,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
         id: searchInputId,
       }}
       isPreFiltered
-      listProps={{ onFocusBadge: false, rowHeight: 48 }}
+      listProps={{ onFocusBadge: false, rowHeight: 48, paddingSize: 's' }}
       loadingMessage={loadingMessage}
       noMatchesMessage={noMatchesMessage}
       emptyMessage={emptyMessage}
@@ -357,7 +357,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
     >
       {(list, search) => (
         <>
-          <EuiPanel hasShadow={false} paddingSize="s">
+          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
             {search}
             {!singleSelection ? (
               <>

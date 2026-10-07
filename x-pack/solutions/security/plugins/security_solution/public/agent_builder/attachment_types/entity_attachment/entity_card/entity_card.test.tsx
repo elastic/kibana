@@ -10,16 +10,15 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { useEntityForAttachment, type EntityForAttachment } from '../use_entity_for_attachment';
+import { useEntityAnalyticsAgentNavigation } from '../../entity_analytics_agent_navigation_context';
 import { EntityCard } from './entity_card';
 
 jest.mock('../use_entity_for_attachment', () => ({
   useEntityForAttachment: jest.fn(),
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: { application: { navigateToApp: jest.fn() } },
-  }),
+jest.mock('../../entity_analytics_agent_navigation_context', () => ({
+  useEntityAnalyticsAgentNavigation: jest.fn(),
 }));
 
 jest.mock('./resolution_mini', () => ({
@@ -62,6 +61,7 @@ jest.mock('./risk_summary_mini', () => ({
 }));
 
 const mockedUseEntityForAttachment = useEntityForAttachment as jest.Mock;
+const mockedUseEntityAnalyticsAgentNavigation = useEntityAnalyticsAgentNavigation as jest.Mock;
 
 const baseEntity = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.user,
@@ -110,6 +110,11 @@ const renderCard = (props: Partial<React.ComponentProps<typeof EntityCard>> = {}
 describe('EntityCard', () => {
   beforeEach(() => {
     mockedUseEntityForAttachment.mockReset();
+    mockedUseEntityAnalyticsAgentNavigation.mockReturnValue({
+      canNavigate: true,
+      navigateWithFlyout: jest.fn(),
+      navigateToHome: jest.fn(),
+    });
   });
 
   it('renders a skeleton while loading', () => {
@@ -127,6 +132,22 @@ describe('EntityCard', () => {
     renderCard();
     expect(screen.getByTestId('entityAttachmentCardError')).toBeInTheDocument();
     expect(screen.getByTestId('entityAttachmentCardActions')).toBeInTheDocument();
+  });
+
+  it('omits the actions button in the error case when navigation is not available', () => {
+    mockedUseEntityForAttachment.mockReturnValue({
+      isLoading: false,
+      error: new Error('boom'),
+      data: undefined,
+    });
+    mockedUseEntityAnalyticsAgentNavigation.mockReturnValueOnce({
+      canNavigate: false,
+      navigateWithFlyout: jest.fn(),
+      navigateToHome: jest.fn(),
+    });
+    renderCard();
+    expect(screen.getByTestId('entityAttachmentCardError')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityAttachmentCardActions')).not.toBeInTheDocument();
   });
 
   it('renders the rich layout for an entity that is in the store', () => {

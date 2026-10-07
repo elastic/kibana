@@ -62,6 +62,8 @@ export * from './src/functional_test_runner';
 
 export { getUrl } from './src/jest/get_url';
 
+export { getCallsites } from './src/callsites';
+
 export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
 export { runJest } from './src/jest/run';
@@ -75,6 +77,13 @@ export {
 export type { JestConfigResult, JestValidationResult } from './src/jest/run_contract';
 
 export { runJestAll } from './src/jest/run_all';
+
+export { runJestNegative, NEGATIVE_SCENARIOS, evaluateScenario } from './src/jest/run_negative';
+export type {
+  NegativeScenario,
+  ScenarioEvaluation,
+  ScenarioOutcome,
+} from './src/jest/run_negative';
 
 export {
   runJestViaMoon,

@@ -30,12 +30,6 @@ export const isIndexMetadata = (
   return typeof candidate.index === 'string' || isStringArray(candidate.index);
 };
 
-export const assertValidIndexMetadata = (metadata: unknown): void => {
-  if (!isIndexMetadata(metadata)) {
-    throw new Error('metadata.index must be a string or an array of strings');
-  }
-};
-
 export const getIndexFromMetadata = (metadata: unknown): string | string[] | undefined => {
   if (metadata == null || !isIndexMetadata(metadata)) {
     return undefined;

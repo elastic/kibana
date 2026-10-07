@@ -56,6 +56,7 @@ export interface ForkStreamInput {
   where: Condition;
   status: RoutingStatus;
   destination: string;
+  draft?: boolean;
 }
 export function createForkStreamActor({
   streamsRepositoryClient,
@@ -70,6 +71,7 @@ export function createForkStreamActor({
       where: input.where,
       status: input.status,
       destination: input.destination,
+      ...(input.draft ? { draft: true } : {}),
     });
 
     const response = await streamsRepositoryClient.fetch(

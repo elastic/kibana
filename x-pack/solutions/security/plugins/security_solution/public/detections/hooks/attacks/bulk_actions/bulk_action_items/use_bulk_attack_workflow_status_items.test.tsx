@@ -211,5 +211,38 @@ describe('useBulkAttackWorkflowStatusItems', () => {
         })
       );
     });
+
+    it('should close the popover when the closing-reason form is submitted', async () => {
+      renderHook(
+        () =>
+          useBulkAttackWorkflowStatusItems({
+            telemetrySource: 'attacks_page_group_take_action',
+            currentStatus: 'open',
+          }),
+        { wrapper }
+      );
+
+      const onSubmitCloseReason =
+        mockUseBulkClosingReasonItems.mock.calls[0][0]?.onSubmitCloseReason;
+      const closePopoverMenu = jest.fn();
+      const callOrder: string[] = [];
+      closePopoverMenu.mockImplementation(() => callOrder.push('closePopoverMenu'));
+      mockApplyWorkflowStatus.mockImplementation(async () => {
+        callOrder.push('applyWorkflowStatus');
+      });
+
+      if (onSubmitCloseReason) {
+        await onSubmitCloseReason({
+          alertItems: [{ _id: '1', data: [], ecs: { _id: '1' } }],
+          reason: 'other',
+          setIsBulkActionsLoading: jest.fn(),
+          closePopoverMenu,
+        });
+      }
+
+      expect(closePopoverMenu).toHaveBeenCalledTimes(1);
+      // Popover should close synchronously on submit, before the in-flight request resolves.
+      expect(callOrder).toEqual(['closePopoverMenu', 'applyWorkflowStatus']);
+    });
   });
 });

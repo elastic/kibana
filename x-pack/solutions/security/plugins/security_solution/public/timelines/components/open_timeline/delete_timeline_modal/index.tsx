@@ -70,7 +70,11 @@ export const DeleteTimelineModalOverlay = React.memo<Props>(
       <>
         {isModalOpen && <RemovePopover data-test-subj="remove-popover" />}
         {isModalOpen ? (
-          <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={internalCloseModal}>
+          <EuiModal
+            aria-label={i18n.DELETE_TIMELINE_MODAL_ARIA_LABEL}
+            maxWidth={DELETE_TIMELINE_MODAL_WIDTH}
+            onClose={internalCloseModal}
+          >
             <DeleteTimelineModal
               data-test-subj="delete-timeline-modal"
               onDelete={onDelete}

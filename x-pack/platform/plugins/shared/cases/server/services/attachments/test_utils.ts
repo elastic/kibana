@@ -17,7 +17,7 @@ import type {
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  FILE_ATTACHMENT_TYPE,
+  LEGACY_FILE_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { CASE_REF_NAME, EXTERNAL_REFERENCE_REF_NAME } from '../../common/constants';
@@ -106,7 +106,7 @@ const getFilesAttachmentReq = (): ExternalReferenceWithoutRefsAttachmentPayload 
       type: ExternalReferenceStorageType.savedObject as const,
       soType: FILE_SO_TYPE,
     },
-    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
     externalReferenceMetadata: { ...fileAttachmentMetadata },
   };
 };

@@ -11,6 +11,7 @@ import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensPartitionVisualizationState } from '@kbn/lens-common';
 
 import type { LensApiConfigChartType } from '../../schema';
+import type { MosaicConfig } from '../../schema/charts/mosaic';
 import type { PieConfig } from '../../schema/charts/pie';
 import type { TreemapConfig } from '../../schema/charts/treemap';
 import type { WaffleConfig } from '../../schema/charts/waffle';
@@ -33,6 +34,7 @@ import {
 } from './lens_state_config.mock';
 import { validator } from '../utils/validator';
 import type { LensAttributes } from '../../types';
+import type { PartitionConfig } from '../../schema/charts/partition';
 
 describe('Partition', () => {
   describe('state transform validation', () => {
@@ -201,6 +203,188 @@ describe('Partition', () => {
       const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
 
       expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+    });
+  });
+
+  describe('API to state colorsByDimension index preservation', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const RED = '#ff0000';
+    const BLUE = '#0000ff';
+
+    it('should preserve sparse static colors across metric positions', () => {
+      // Four metrics, with static colors on positions 1, 3 and 4 only.
+      const config = {
+        type: 'pie',
+        title: 'colorsByDimension sparse test',
+        data_source: baseDataSource,
+        metrics: [
+          { operation: 'count', empty_as_null: false },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: RED } },
+          { operation: 'count', empty_as_null: false },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: BLUE } },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: BLUE } },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(vizState.layers[0].colorsByDimension).toEqual({
+        partition_value_accessor_metric_1: RED,
+        partition_value_accessor_metric_3: BLUE,
+        partition_value_accessor_metric_4: BLUE,
+      });
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics[1].color).toEqual({ type: 'static', color: RED });
+      expect(apiOutput.metrics[2].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics[3].color).toEqual({ type: 'static', color: BLUE });
+      expect(apiOutput.metrics[4].color).toEqual({ type: 'static', color: BLUE });
+    });
+  });
+
+  describe('waffle legend values', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const baseWaffleConfig = {
+      type: 'waffle',
+      title: 'Waffle legend test',
+      data_source: baseDataSource,
+      metrics: [{ operation: 'count', empty_as_null: false }],
+      group_by: [
+        {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 3,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies WaffleConfig;
+
+    it('should map legend.values: ["absolute"] to legendStats: ["value"] in state', () => {
+      const config = {
+        ...baseWaffleConfig,
+        legend: { values: ['absolute'] as ['absolute'] },
+      } satisfies WaffleConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].legendStats).toEqual(['value']);
+    });
+
+    it('should map omitted legend.values to legendStats: [] in state', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseWaffleConfig);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].legendStats).toEqual([]);
+    });
+
+    it('should roundtrip legend.values: ["absolute"] correctly', () => {
+      const config = {
+        ...baseWaffleConfig,
+        legend: { values: ['absolute'] as ['absolute'] },
+      } satisfies WaffleConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
+
+    it('should roundtrip omitted legend.values correctly', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseWaffleConfig);
+      const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toBeUndefined();
+    });
+
+    it('should serialize existing waffle state without legendStats as legend.values: ["absolute"]', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(waffleLegacyBasicState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
+  });
+
+  describe('legend position', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const basePartitionConfig = {
+      title: 'Partition legend position test',
+      data_source: baseDataSource,
+      group_by: [
+        {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 3,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies Omit<PartitionConfig, 'type'>;
+
+    const basePieConfig = {
+      ...basePartitionConfig,
+      type: 'pie',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies PieConfig;
+
+    const baseTreemapConfig = {
+      ...basePieConfig,
+      type: 'treemap',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies TreemapConfig;
+
+    const baseWaffleConfig = {
+      ...basePieConfig,
+      type: 'waffle',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies WaffleConfig;
+
+    const baseMosaicConfig = {
+      ...basePieConfig,
+      type: 'mosaic',
+      metric: { operation: 'count', empty_as_null: false },
+    } satisfies MosaicConfig;
+
+    it.each<[string, PieConfig | TreemapConfig | WaffleConfig | MosaicConfig]>([
+      ['pie', basePieConfig],
+      ['treemap', baseTreemapConfig],
+      ['waffle', baseWaffleConfig],
+      ['mosaic', baseMosaicConfig],
+    ])('should roundtrip for %s chart', (_name, config) => {
+      const partitionConfig = {
+        ...config,
+        legend: { position: 'bottom' },
+      } satisfies PartitionConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(partitionConfig);
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(apiOutput.legend?.position).toBe('bottom');
     });
   });
 });

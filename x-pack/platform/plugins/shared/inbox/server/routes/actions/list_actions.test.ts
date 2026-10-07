@@ -16,10 +16,34 @@ import {
   type ListInboxActionsRequestQueryInput,
 } from '@kbn/inbox-common';
 import { registerListInboxActionsRoute } from './list_actions';
-import { STUB_INBOX_ACTIONS } from './stub_actions';
-import { PLUGIN_ID } from '../../../common';
+import { InboxActionRegistry } from '../../services/inbox_action_registry';
+import type { InboxActionProvider } from '../../services/inbox_action_provider';
+import {
+  createStubInboxAction,
+  createStubInboxActions,
+} from '../../../common/test_helpers/create_stub_inbox_action';
+import { INBOX_API_PRIVILEGE_READ } from '../../../common';
+
+const getSpaceId = () => 'default';
 
 type Router = ReturnType<typeof httpServiceMock.createRouter>;
+
+const fakeProvider = (
+  sourceApp: string,
+  actions = createStubInboxActions(3, { source_app: sourceApp })
+): jest.Mocked<InboxActionProvider> => ({
+  sourceApp,
+  list: jest.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
+    async ({ status }) => {
+      const filtered = actions.filter((action) => !status || action.status === status);
+      return { actions: filtered, total: filtered.length };
+    }
+  ),
+  respond: jest.fn<
+    ReturnType<InboxActionProvider['respond']>,
+    Parameters<InboxActionProvider['respond']>
+  >(async () => {}),
+});
 
 const getHandler = (router: Router) => {
   const route = router.versioned.getRoute('get', INBOX_ACTIONS_URL);
@@ -30,9 +54,6 @@ const getHandler = (router: Router) => {
   return version.handler;
 };
 
-// Invoke the handler with query params that have been parsed through the same
-// Zod schema the framework would apply, so defaults (page/per_page) are
-// populated and coerced exactly as they would be in production.
 const invokeHandler = async (router: Router, query: ListInboxActionsRequestQueryInput = {}) => {
   const handler = getHandler(router);
   const parsedQuery = ListInboxActionsRequestQuery.parse(query);
@@ -42,7 +63,6 @@ const invokeHandler = async (router: Router, query: ListInboxActionsRequestQuery
     query: parsedQuery,
   });
   const response = httpServerMock.createResponseFactory();
-  // The request handler context is unused by this handler.
   await handler({} as never, request, response);
   return response;
 };
@@ -55,11 +75,13 @@ const getOkBody = (response: ReturnType<typeof httpServerMock.createResponseFact
 describe('GET /internal/inbox/actions', () => {
   let router: Router;
   let logger: ReturnType<typeof loggerMock.create>;
+  let registry: InboxActionRegistry;
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
     logger = loggerMock.create();
-    registerListInboxActionsRoute({ router, logger });
+    registry = new InboxActionRegistry(logger);
+    registerListInboxActionsRoute({ router, logger, registry, getSpaceId });
   });
 
   describe('route registration', () => {
@@ -69,96 +91,180 @@ describe('GET /internal/inbox/actions', () => {
       expect(config).toMatchObject({
         path: INBOX_ACTIONS_URL,
         access: INTERNAL_API_ACCESS,
-        security: { authz: { requiredPrivileges: [PLUGIN_ID] } },
+        // Read-only privilege so the list endpoint stays reachable under the
+        // `read` feature privilege; the respond endpoint uses a separate
+        // `inbox_respond` privilege.
+        security: { authz: { requiredPrivileges: [INBOX_API_PRIVILEGE_READ] } },
       });
     });
 
     it('registers the handler under the v1 internal API version', () => {
-      // Will throw if the version is missing.
       expect(() => getHandler(router)).not.toThrow();
     });
   });
 
-  describe('response shape', () => {
-    it('returns all stub actions under default pagination', async () => {
-      const response = await invokeHandler(router);
-      const body = getOkBody(response);
-
-      expect(body.total).toBe(STUB_INBOX_ACTIONS.length);
-      expect(body.actions).toEqual(STUB_INBOX_ACTIONS);
-    });
-
-    it('produces a response that conforms to ListInboxActionsResponse', async () => {
-      const response = await invokeHandler(router);
-      const body = getOkBody(response);
-
-      // Shape validation — will throw with a clear error if handler output
-      // drifts from the OpenAPI-generated schema.
-      expect(() => ListInboxActionsResponse.parse(body)).not.toThrow();
+  describe('with no providers registered', () => {
+    it('returns an empty list and zero total', async () => {
+      const body = getOkBody(await invokeHandler(router));
+      expect(body).toEqual({ actions: [], total: 0 });
     });
   });
 
-  describe('filtering', () => {
-    it('filters by status', async () => {
+  describe('space scoping', () => {
+    it('forwards the active space id from the resolver into the registry context', async () => {
+      // Regression guard: the route used to hardcode `'default'`, which
+      // silently leaked cross-space rows from every provider. The resolver
+      // returns the active space id for the current request.
+      const captured: string[] = [];
+      const capturingProvider: InboxActionProvider = {
+        sourceApp: 'workflows',
+        list: jest.fn(async (_params, ctx) => {
+          captured.push(ctx.spaceId);
+          return { actions: [], total: 0 };
+        }),
+        respond: jest.fn(async () => {}),
+      };
+      const dedicatedRouter = httpServiceMock.createRouter();
+      const dedicatedRegistry = new InboxActionRegistry(logger);
+      dedicatedRegistry.register(capturingProvider);
+      registerListInboxActionsRoute({
+        router: dedicatedRouter,
+        logger,
+        registry: dedicatedRegistry,
+        getSpaceId: () => 'security-team',
+      });
+      const handler = dedicatedRouter.versioned.getRoute('get', INBOX_ACTIONS_URL).versions[
+        API_VERSIONS.internal.v1
+      ].handler;
+      const req = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: INBOX_ACTIONS_URL,
+        query: ListInboxActionsRequestQuery.parse({}),
+      });
+      await handler({} as never, req, httpServerMock.createResponseFactory());
+      expect(captured).toEqual(['security-team']);
+    });
+  });
+
+  describe('with a single provider', () => {
+    beforeEach(() => {
+      registry.register(fakeProvider('workflows'));
+    });
+
+    it('returns all actions from the provider under default pagination', async () => {
+      const body = getOkBody(await invokeHandler(router));
+      expect(body.total).toBe(3);
+      expect(body.actions).toHaveLength(3);
+      expect(body.actions.every((action) => action.source_app === 'workflows')).toBe(true);
+    });
+
+    it('produces a response that conforms to ListInboxActionsResponse', async () => {
+      const body = getOkBody(await invokeHandler(router));
+      expect(() => ListInboxActionsResponse.parse(body)).not.toThrow();
+    });
+
+    it('forwards the status filter to the provider', async () => {
       const body = getOkBody(await invokeHandler(router, { status: 'approved' }));
-
-      expect(body.actions.map((action) => action.status)).toEqual(['approved']);
-      expect(body.total).toBe(body.actions.length);
+      expect(body.actions.every((action) => action.status === 'approved')).toBe(true);
     });
+  });
 
-    it('filters by source_app', async () => {
-      const body = getOkBody(await invokeHandler(router, { source_app: 'evals' }));
-
-      expect(body.actions.every((action) => action.source_app === 'evals')).toBe(true);
-      expect(body.total).toBe(body.actions.length);
-    });
-
-    it('combines status and source_app filters', async () => {
-      const body = getOkBody(
-        await invokeHandler(router, { status: 'approved', source_app: 'evals' })
+  describe('with multiple providers', () => {
+    beforeEach(() => {
+      registry.register(
+        fakeProvider('workflows', [
+          createStubInboxAction({
+            id: 'w-1',
+            source_app: 'workflows',
+            created_at: '2026-04-24T12:00:00.000Z',
+          }),
+          createStubInboxAction({
+            id: 'w-2',
+            source_app: 'workflows',
+            created_at: '2026-04-24T10:00:00.000Z',
+          }),
+        ])
       );
-
-      expect(
-        body.actions.every(
-          (action) => action.status === 'approved' && action.source_app === 'evals'
-        )
-      ).toBe(true);
+      registry.register(
+        fakeProvider('evals', [
+          createStubInboxAction({
+            id: 'e-1',
+            source_app: 'evals',
+            created_at: '2026-04-24T11:00:00.000Z',
+          }),
+        ])
+      );
     });
 
-    it('returns an empty list when no actions match', async () => {
-      const body = getOkBody(await invokeHandler(router, { source_app: 'does-not-exist' }));
+    it('merge-sorts across sources by created_at desc', async () => {
+      const body = getOkBody(await invokeHandler(router));
+      expect(body.actions.map((action) => action.id)).toEqual(['w-1', 'e-1', 'w-2']);
+      expect(body.total).toBe(3);
+    });
 
-      expect(body.actions).toEqual([]);
-      expect(body.total).toBe(0);
+    it('scopes to a single provider when source_app is provided', async () => {
+      const body = getOkBody(await invokeHandler(router, { source_app: 'evals' }));
+      expect(body.actions.map((action) => action.source_app)).toEqual(['evals']);
+      expect(body.total).toBe(1);
     });
   });
 
   describe('pagination', () => {
-    it('honors page and per_page and reports the pre-pagination total', async () => {
-      const body = getOkBody(await invokeHandler(router, { page: 2, per_page: 2 }));
-
-      expect(body.total).toBe(STUB_INBOX_ACTIONS.length);
-      expect(body.actions).toEqual(STUB_INBOX_ACTIONS.slice(2, 4));
-    });
-
-    it('returns an empty page when page is past the last record but keeps total accurate', async () => {
-      const body = getOkBody(await invokeHandler(router, { page: 99, per_page: 2 }));
-
-      expect(body.actions).toEqual([]);
-      expect(body.total).toBe(STUB_INBOX_ACTIONS.length);
-    });
-
-    it('applies pagination after filtering so total reflects the filtered set', async () => {
-      const body = getOkBody(
-        await invokeHandler(router, { status: 'pending', page: 1, per_page: 2 })
+    beforeEach(() => {
+      const actions = Array.from({ length: 5 }, (_, i) =>
+        createStubInboxAction({
+          id: `a-${i}`,
+          source_app: 'workflows',
+          created_at: new Date(Date.UTC(2026, 3, 24, 12, i)).toISOString(),
+        })
       );
+      registry.register(fakeProvider('workflows', actions));
+    });
 
-      const pendingCount = STUB_INBOX_ACTIONS.filter(
-        (action) => action.status === 'pending'
-      ).length;
-      expect(body.total).toBe(pendingCount);
-      expect(body.actions).toHaveLength(Math.min(2, pendingCount));
-      expect(body.actions.every((action) => action.status === 'pending')).toBe(true);
+    it('honors page and per_page', async () => {
+      const body = getOkBody(await invokeHandler(router, { page: 2, per_page: 2 }));
+      expect(body.total).toBe(5);
+      expect(body.actions).toHaveLength(2);
+    });
+
+    it('returns an empty page past the last record while preserving total', async () => {
+      const body = getOkBody(await invokeHandler(router, { page: 99, per_page: 2 }));
+      expect(body.actions).toEqual([]);
+      expect(body.total).toBe(5);
+    });
+  });
+
+  describe('error handling', () => {
+    it('returns a 500 when the registry throws unexpectedly', async () => {
+      const broken = fakeProvider('workflows');
+      // list() errors are swallowed inside the registry; force the registry
+      // itself to throw so we can exercise the route's catch branch.
+      const registryThatThrows = new InboxActionRegistry(logger);
+      jest.spyOn(registryThatThrows, 'list').mockRejectedValueOnce(new Error('boom'));
+      registryThatThrows.register(broken);
+
+      const dedicatedRouter = httpServiceMock.createRouter();
+      registerListInboxActionsRoute({
+        router: dedicatedRouter,
+        logger,
+        registry: registryThatThrows,
+        getSpaceId,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: INBOX_ACTIONS_URL,
+        query: ListInboxActionsRequestQuery.parse({}),
+      });
+      const response = httpServerMock.createResponseFactory();
+      const handler = dedicatedRouter.versioned.getRoute('get', INBOX_ACTIONS_URL).versions[
+        API_VERSIONS.internal.v1
+      ].handler;
+      await handler({} as never, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
     });
   });
 });

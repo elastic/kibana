@@ -118,7 +118,7 @@ export function TileErrorsList(props: Props) {
           defaultMessage: 'Tile errors',
         })}
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+        <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
       {renderError(selectedTileError)}
     </>

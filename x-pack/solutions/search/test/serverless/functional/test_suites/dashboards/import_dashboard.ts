@@ -27,6 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
   ]);
 
+  /**
+   * Purpose: Serverless dashboard import smoke test
+   *
+   * Migration: Migrate to Scout.
+   */
   describe('Importing an existing dashboard', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('developer');

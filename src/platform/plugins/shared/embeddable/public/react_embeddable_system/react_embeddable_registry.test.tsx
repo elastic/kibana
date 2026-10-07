@@ -9,16 +9,16 @@
 
 import {
   registerEmbeddablePublicDefinition,
-  getReactEmbeddableFactory,
+  getEmbeddableDefinition,
 } from './react_embeddable_registry';
-import type { EmbeddableFactory } from './types';
+import type { EmbeddablePublicDefinition } from './types';
 
 describe('embeddable registry', () => {
   const getTestEmbeddableFactory = () =>
     Promise.resolve({
       type: 'test',
       buildEmbeddable: jest.fn(),
-    } as EmbeddableFactory);
+    } as EmbeddablePublicDefinition);
 
   it('throws an error if type is not lower case', () => {
     expect(() => registerEmbeddablePublicDefinition('FOO_BAR', getTestEmbeddableFactory)).toThrow();
@@ -27,6 +27,6 @@ describe('embeddable registry', () => {
   it('can register and get an embeddable factory', () => {
     const returnedFactory = getTestEmbeddableFactory();
     registerEmbeddablePublicDefinition('test', getTestEmbeddableFactory);
-    expect(getReactEmbeddableFactory('test')).toEqual(returnedFactory);
+    expect(getEmbeddableDefinition('test')).toEqual(returnedFactory);
   });
 });

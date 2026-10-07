@@ -49,6 +49,13 @@ const VIEW_VALUE_ALL = i18n.translate('xpack.csp.dataTable.fieldsModal.viewAll',
   defaultMessage: 'all',
 });
 
+const VIEW_SELECTOR_ARIA_LABEL = i18n.translate(
+  'xpack.csp.dataTable.fieldsModal.viewSelectorAriaLabel',
+  {
+    defaultMessage: 'Field view options',
+  }
+);
+
 export interface FieldsSelectorTableProps {
   dataView: DataView;
   columns: string[];
@@ -203,6 +210,7 @@ export const FieldsSelectorTable = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={VIEW_SELECTOR_ARIA_LABEL}
             panelPaddingSize="none"
             anchorPosition="downRight"
             isOpen={isPopoverOpen}
@@ -221,7 +229,6 @@ export const FieldsSelectorTable = ({
           >
             <EuiContextMenuPanel
               data-test-subj="viewSelectorMenu"
-              size="s"
               items={[
                 <EuiContextMenuItem
                   data-test-subj="viewSelectorOption-all"

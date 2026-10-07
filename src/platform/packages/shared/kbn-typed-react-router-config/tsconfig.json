@@ -17,6 +17,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core",
     "@kbn/kibana-react-plugin",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",

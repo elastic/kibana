@@ -9,15 +9,20 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { z } from '@kbn/zod';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import type {
+  DashboardState,
+  DashboardPanel,
+  DashboardSection,
+} from '@kbn/as-code-dashboard-schema';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
   SavedDashboardSection,
 } from '../../../dashboard_saved_object';
-import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService } from '../../../kibana_services';
 import { TransformPanelsInError, TransformPanelInError } from './transform_panels_in_error';
 
@@ -94,10 +99,10 @@ function transformPanelIn(
   // Instead, panel.config must be validated in the handler
   const panelSchema = transforms?.schema;
   if (isDashboardAppRequest && panelSchema) {
-    try {
-      panelSchema.validate(config);
-    } catch (error) {
-      throw new Error(`Validation error: ${error.message}`);
+    const result = panelSchema.safeParse(config);
+    if (!result.success) {
+      const message = z.prettifyError(result.error);
+      throw new Error(`Validation error: ${message}`);
     }
   }
 
@@ -106,7 +111,7 @@ function transformPanelIn(
   try {
     if (transforms?.transformIn) {
       const transformed = transforms.transformIn(config);
-      transformedPanelConfig = transformed.state;
+      transformedPanelConfig = transformed.state as Record<string, unknown>;
       references = transformed.references;
     }
   } catch (transformInError) {

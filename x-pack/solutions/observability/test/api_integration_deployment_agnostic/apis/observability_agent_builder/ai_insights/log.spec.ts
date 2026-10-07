@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   setupLlmProxy,

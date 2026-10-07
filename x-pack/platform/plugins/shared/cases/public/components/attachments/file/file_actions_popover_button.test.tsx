@@ -139,10 +139,16 @@ describe('FileActionsPopoverButton', () => {
     expect(
       (
         await within(await screen.findByTestId('cases-files-popover-context-menu')).findAllByRole(
-          'button'
+          'menuitem'
         )
       ).length
-    ).toBe(7);
+    ).toBe(6);
+
+    expect(
+      await within(await screen.findByTestId('cases-files-popover-context-menu')).findByTestId(
+        'contextMenuPanelTitleButton'
+      )
+    ).toBeInTheDocument();
   });
 
   describe('copy file hashes', () => {
@@ -308,7 +314,7 @@ describe('FileActionsPopoverButton', () => {
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect(filesClient.getDownloadHref).toBeCalled();
+        expect(filesClient.getDownloadHref).toHaveBeenCalled();
       });
 
       expect(filesClient.getDownloadHref).toHaveBeenCalledWith({

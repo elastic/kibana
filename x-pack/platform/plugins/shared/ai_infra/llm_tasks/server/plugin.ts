@@ -45,17 +45,21 @@ export class LlmTasksPlugin
         inferenceId: string;
         resourceType?: ResourceType;
       }) => {
-        const resourceType = options.resourceType ?? ResourceTypes.productDoc;
-        if (resourceType === ResourceTypes.securityLabs) {
-          const status = await startDependencies.productDocBase.management.getSecurityLabsStatus({
+        try {
+          const resourceType = options.resourceType ?? ResourceTypes.productDoc;
+          if (resourceType === ResourceTypes.securityLabs) {
+            const status = await startDependencies.productDocBase.management.getSecurityLabsStatus({
+              inferenceId: options.inferenceId,
+            });
+            return status.status === 'installed';
+          }
+          const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
             inferenceId: options.inferenceId,
           });
-          return status.status === 'installed';
+          return docBaseStatus.status === 'installed';
+        } catch {
+          return false;
         }
-        const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
-          inferenceId: options.inferenceId,
-        });
-        return docBaseStatus.status === 'installed';
       },
       retrieveDocumentation: (options) => {
         return retrieveDocumentation({

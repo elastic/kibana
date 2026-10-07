@@ -6,8 +6,7 @@
  */
 
 import React, { createContext, useContext, useEffect } from 'react';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 const ActiveSpaceContext = createContext<string>(DEFAULT_SPACE_ID);
 
 let resolvedSpaceId: string = DEFAULT_SPACE_ID;

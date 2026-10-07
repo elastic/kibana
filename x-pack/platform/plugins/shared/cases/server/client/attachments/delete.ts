@@ -7,18 +7,17 @@
 
 import Boom from '@hapi/boom';
 
-import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
-import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
+import { getAlertInfoFromComments } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import { AttachmentRequestRtV2 } from '../../../common/types/api';
+import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 
 /**
  * Delete all comments for a case.
@@ -37,7 +36,6 @@ export async function deleteAll(
   try {
     const comments = await caseService.getAllCaseComments({
       id: caseID,
-      mode: 'legacy',
     });
 
     if (comments.total <= 0) {
@@ -70,6 +68,7 @@ export async function deleteAll(
         id: comment.id,
         owner: comment.attributes.owner,
         attachment: comment.attributes,
+        savedObjectType: comment.type as AttachmentSavedObjectType,
       })),
       user,
     });
@@ -103,7 +102,6 @@ export async function deleteComment(
   try {
     const attachment = await attachmentService.getter.get({
       savedObjectId,
-      mode: 'legacy',
     });
 
     if (attachment == null) {
@@ -146,6 +144,7 @@ export async function deleteComment(
         action: UserActionActions.delete,
         caseId: id,
         savedObjectId,
+        savedObjectType: attachment.type as AttachmentSavedObjectType,
         payload: { attachment: attachmentRequestAttributes },
         user,
         owner: attachment.attributes.owner,
@@ -169,16 +168,12 @@ interface HandleAlertsArgs {
 }
 
 const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
-  const alertAttachments = attachments.filter(
-    (attachment): attachment is AlertAttachmentPayload =>
-      isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)
-  );
+  const alerts = getAlertInfoFromComments(attachments);
 
-  if (alertAttachments.length === 0) {
+  if (alerts.length === 0) {
     return;
   }
 
-  const alerts = getAlertInfoFromComments(alertAttachments);
   await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
 };
 

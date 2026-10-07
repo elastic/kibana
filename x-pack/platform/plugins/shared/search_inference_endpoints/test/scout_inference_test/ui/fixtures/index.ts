@@ -5,15 +5,36 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { FeatureSettingsPage, EisModelsPage, ExternalInferencePage } from './page_objects';
+import type {
+  PageObjects,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout';
+import { test as baseTest, spaceTest as spaceBase, createLazyPageObject } from '@kbn/scout';
+import {
+  FeatureSettingsPage,
+  EisModelsPage,
+  ExternalInferencePage,
+  PageNavigation,
+} from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     featureSettings: FeatureSettingsPage;
     eisModels: EisModelsPage;
     externalInference: ExternalInferencePage;
+    navigation: PageNavigation;
+  };
+}
+
+export interface ExtScoutParallelTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: ScoutParallelTestFixtures['pageObjects'] & {
+    featureSettings: FeatureSettingsPage;
+    eisModels: EisModelsPage;
+    externalInference: ExternalInferencePage;
+    navigation: PageNavigation;
   };
 }
 
@@ -33,6 +54,33 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
       featureSettings: createLazyPageObject(FeatureSettingsPage, page),
       eisModels: createLazyPageObject(EisModelsPage, page),
       externalInference: createLazyPageObject(ExternalInferencePage, page),
+      navigation: createLazyPageObject(PageNavigation, page),
+    };
+
+    await use(extendedPageObjects);
+  },
+});
+
+export const spaceTest = spaceBase.extend<
+  ExtScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: ExtScoutParallelTestFixtures['pageObjects'];
+      page: ExtScoutParallelTestFixtures['page'];
+    },
+    use: (pageObjects: ExtScoutParallelTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...pageObjects,
+      featureSettings: createLazyPageObject(FeatureSettingsPage, page),
+      eisModels: createLazyPageObject(EisModelsPage, page),
+      externalInference: createLazyPageObject(ExternalInferencePage, page),
+      navigation: createLazyPageObject(PageNavigation, page),
     };
 
     await use(extendedPageObjects);

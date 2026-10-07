@@ -10,7 +10,12 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
-import { WORKFLOW_INDEX_NAME } from '../constants';
+import { storedWorkflowAccessControlSchema } from '../../common/access_control';
+import { pickWorkflowDocumentVersion } from '../../common/utils';
+import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
+import { buildWorkflowFilters } from '../lib/workflow_filters';
+import type { ManagedFilter } from '../lib/workflow_filters';
+
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -20,6 +25,11 @@ export interface WorkflowRepositoryOptions {
 export type WorkflowRepositoryParams = Omit<WorkflowRepositoryOptions, 'indexName'> & {
   indexName?: string;
 };
+
+export interface WorkflowLookupOptions {
+  includeGlobal?: boolean;
+  managedFilter?: ManagedFilter;
+}
 
 export class WorkflowRepository {
   private options: WorkflowRepositoryOptions;
@@ -31,22 +41,38 @@ export class WorkflowRepository {
   /**
    * Get a workflow by ID and space ID
    */
-  async getWorkflow(workflowId: string, spaceId: string): Promise<EsWorkflow | null> {
+  async getWorkflow(
+    workflowId: string,
+    spaceId: string,
+    options?: WorkflowLookupOptions & { includeDeleted?: boolean }
+  ): Promise<EsWorkflow | null> {
     try {
+      const { must, must_not } = buildWorkflowFilters({
+        ids: [workflowId],
+        space: {
+          id: spaceId,
+          includeGlobal: options?.includeGlobal ?? false,
+        },
+        deleted: options?.includeDeleted ? 'all' : 'not_deleted',
+        managed: options?.managedFilter,
+      });
+
       const response = await this.options.esClient.search({
         index: this.options.indexName,
+        allow_partial_search_results: false,
         query: {
           bool: {
-            must: [{ ids: { values: [workflowId] } }, { term: { spaceId } }],
-            must_not: {
-              exists: { field: 'deleted_at' },
-            },
+            must,
+            must_not,
           },
         },
         size: 1,
         track_total_hits: false,
       });
 
+      if (response.timed_out || response._shards.failed > 0) {
+        throw new Error('Could not load workflow access from incomplete search results.');
+      }
       if (response.hits.hits.length === 0) {
         return null;
       }
@@ -58,8 +84,20 @@ export class WorkflowRepository {
 
       // Map index _source → EsWorkflow (read created_at / updated_at; EsWorkflow uses createdAt / lastUpdatedAt).
       const source = document._source as Record<string, unknown>;
+      const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
+      const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
+      const managedBy = typeof source.managedBy === 'string' ? source.managedBy : undefined;
+      const billable = typeof source.billable === 'boolean' ? source.billable : undefined;
+      const originManagedWorkflowId =
+        typeof source.originManagedWorkflowId === 'string'
+          ? source.originManagedWorkflowId
+          : undefined;
+      const managedVersion =
+        typeof source.managedVersion === 'number' ? source.managedVersion : undefined;
       return {
         id: workflowId,
+        ...(source.owner_id ? { owner_id: source.owner_id as string } : {}),
+        ...(accessControl ? { access_control: accessControl } : {}),
         name: source.name as string,
         description: source.description as string | undefined,
         enabled: source.enabled as boolean,
@@ -72,6 +110,12 @@ export class WorkflowRepository {
         definition: source.definition as EsWorkflow['definition'],
         deleted_at: source.deleted_at ? new Date(source.deleted_at as string) : null,
         yaml: source.yaml as string,
+        ...(managed !== undefined ? { managed } : {}),
+        ...(managedBy !== undefined ? { managedBy } : {}),
+        ...(billable !== undefined ? { billable } : {}),
+        ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
+        ...(managedVersion !== undefined ? { managedVersion } : {}),
+        ...pickWorkflowDocumentVersion(source),
       };
     } catch (error) {
       if (error.statusCode === 404) {
@@ -85,9 +129,34 @@ export class WorkflowRepository {
   /**
    * Check if a workflow is enabled by ID and space ID
    */
-  async isWorkflowEnabled(workflowId: string, spaceId: string): Promise<boolean> {
-    const map = await this.areWorkflowsEnabled([{ workflowId, spaceId }]);
+  async isWorkflowEnabled(
+    workflowId: string,
+    spaceId: string,
+    options?: WorkflowLookupOptions
+  ): Promise<boolean> {
+    const map = await this.areWorkflowsEnabled([{ workflowId, spaceId }], options);
     return map.get(`${spaceId}:${workflowId}`) ?? false;
+  }
+
+  /** Reads the enabled state from the translog after an execution becomes searchable. */
+  async isWorkflowEnabledRealtime(workflowId: string, spaceId: string): Promise<boolean> {
+    try {
+      const response = await this.options.esClient.get<{
+        enabled?: boolean;
+        spaceId?: string;
+        deleted_at?: string | null;
+      }>({
+        index: this.options.indexName,
+        id: workflowId,
+        _source_includes: ['enabled', 'spaceId', 'deleted_at'],
+        realtime: true,
+      });
+      const source = response._source;
+      return source?.spaceId === spaceId && source.enabled === true && !source.deleted_at;
+    } catch (error) {
+      if (error.statusCode === 404) return false;
+      throw error;
+    }
   }
 
   /**
@@ -95,13 +164,27 @@ export class WorkflowRepository {
    * non-soft-deleted workflows. Runs a single `_search` fetching only the
    * `enabled` field across all requested ids.
    *
+   * When `options.includeGlobal` is `true`, a workflow stored in the global
+   * space (`*`) is considered visible for each requested space and contributes
+   * to that `${spaceId}:${workflowId}` result.
+   *
    * The returned map is keyed by `${spaceId}:${workflowId}`. Missing docs and
    * soft-deleted docs (`deleted_at` present) resolve to `false`.
    */
   async areWorkflowsEnabled(
-    refs: Array<{ workflowId: string; spaceId: string }>
+    refs: Array<{ workflowId: string; spaceId: string }>,
+    options?: WorkflowLookupOptions
   ): Promise<Map<string, boolean>> {
-    const result = new Map<string, boolean>();
+    const states = await this.getWorkflowExecutionStates(refs, options);
+    return new Map([...states].map(([key, state]) => [key, state.enabled]));
+  }
+
+  /** Loads current enabled state and ACLs in one query, with missing and deleted workflows disabled. */
+  async getWorkflowExecutionStates(
+    refs: Array<{ workflowId: string; spaceId: string }>,
+    options?: WorkflowLookupOptions
+  ): Promise<Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'>>> {
+    const result = new Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'>>();
     if (refs.length === 0) {
       return result;
     }
@@ -121,32 +204,66 @@ export class WorkflowRepository {
       }
     }
 
-    const should = Array.from(bySpace.entries()).map(([spaceId, ids]) => ({
-      bool: {
-        must: [{ ids: { values: Array.from(ids) } }, { term: { spaceId } }],
-      },
-    }));
+    const should = Array.from(bySpace.entries()).map(([spaceId, ids]) => {
+      const filter = buildWorkflowFilters({
+        ids: Array.from(ids),
+        space: {
+          id: spaceId,
+          includeGlobal: options?.includeGlobal ?? false,
+        },
+        managed: options?.managedFilter,
+      });
+
+      return {
+        bool: filter,
+      };
+    });
 
     try {
       const response = await this.options.esClient.search({
         index: this.options.indexName,
-        _source: ['enabled', 'spaceId'],
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
+        allow_partial_search_results: false,
         size: uniqueKeys.size,
         track_total_hits: false,
         query: {
           bool: {
             should,
             minimum_should_match: 1,
-            must_not: { exists: { field: 'deleted_at' } },
+            ...buildWorkflowFilters({ deleted: 'not_deleted' }),
           },
         },
       });
 
+      if (response.timed_out || response._shards.failed > 0) {
+        throw new Error('Could not load workflow access from incomplete search results.');
+      }
+      const requestedSpacesByWorkflowId = refs.reduce<Map<string, Set<string>>>((acc, ref) => {
+        const existing = acc.get(ref.workflowId) ?? new Set<string>();
+        existing.add(ref.spaceId);
+        acc.set(ref.workflowId, existing);
+        return acc;
+      }, new Map<string, Set<string>>());
+
       for (const hit of response.hits.hits) {
-        const source = hit._source as { enabled?: boolean; spaceId?: string } | undefined;
+        const source = hit._source as
+          | (Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'> & { spaceId?: string })
+          | undefined;
         if (source) {
-          const key = `${source.spaceId}:${hit._id}`;
-          result.set(key, source.enabled ?? false);
+          const state = {
+            enabled: source.enabled ?? false,
+            owner_id: source.owner_id,
+            access_control: storedWorkflowAccessControlSchema.parse(source.access_control),
+          };
+          if (source.spaceId === GLOBAL_WORKFLOW_SPACE_ID && options?.includeGlobal) {
+            const requestedSpaces = requestedSpacesByWorkflowId.get(hit._id ?? '');
+            requestedSpaces?.forEach((requestedSpaceId) => {
+              result.set(`${requestedSpaceId}:${hit._id}`, state);
+            });
+          } else {
+            const key = `${source.spaceId}:${hit._id}`;
+            result.set(key, state);
+          }
         }
       }
     } catch (error) {
@@ -159,7 +276,7 @@ export class WorkflowRepository {
 
     for (const key of uniqueKeys) {
       if (!result.has(key)) {
-        result.set(key, false);
+        result.set(key, { enabled: false });
       }
     }
 
@@ -178,14 +295,18 @@ export class WorkflowRepository {
     const MAX_PAGES = 50;
     const keepAlive = '1m';
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
+    const workflowFilters = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+    });
     const query = {
       bool: {
         must: [
-          { term: { spaceId } },
+          ...workflowFilters.must,
           { term: { enabled: true } },
           { term: { triggerTypes: triggerId } },
         ],
-        must_not: [{ exists: { field: 'deleted_at' } }],
+        must_not: workflowFilters.must_not,
       },
     };
     const _source = [
@@ -199,6 +320,11 @@ export class WorkflowRepository {
       'valid',
       'created_at',
       'updated_at',
+      'managed',
+      'managedBy',
+      'originManagedWorkflowId',
+      'managedVersion',
+      'version',
     ];
 
     const pitResponse = await this.options.esClient.openPointInTime({
@@ -266,6 +392,15 @@ export class WorkflowRepository {
         valid: source.valid as boolean,
         createdAt: source.created_at as string,
         lastUpdatedAt: source.updated_at as string,
+        ...(source.managed === true ? { managed: true } : {}),
+        ...(typeof source.managedBy === 'string' ? { managedBy: source.managedBy } : {}),
+        ...(typeof source.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: source.originManagedWorkflowId }
+          : {}),
+        ...(typeof source.managedVersion === 'number'
+          ? { managedVersion: source.managedVersion }
+          : {}),
+        ...pickWorkflowDocumentVersion(source),
       }));
     } finally {
       try {

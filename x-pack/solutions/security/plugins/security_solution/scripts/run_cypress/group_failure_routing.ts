@@ -7,6 +7,11 @@
 
 import type { CypressResultRecord } from './cypress_result_report';
 
+export const hasUnresolvedFailures = (
+  failedSpecFilePaths: readonly string[],
+  hasFailedRetryTests: boolean
+): boolean => failedSpecFilePaths.length > 0 || hasFailedRetryTests;
+
 export interface RouteGroupFailureParams {
   /** Every spec belonging to the group whose setup/run threw. */
   specFilePaths: string[];
@@ -17,36 +22,21 @@ export interface RouteGroupFailureParams {
   /** Normalized message of the throw. */
   message: string;
   isRetryRun: boolean;
+  completedSpecFilePaths?: string[];
 }
 
-/**
- * Route a group-level throw to per-spec failure state.
- *
- * Everything that can throw before the per-spec loop seeds
- * `failedSpecFilePaths` lands here: `runElasticsearch`, `runKibanaServer`,
- * `startFleetServer`, `providers.loadAll()`, `FunctionalTestRunner.run`.
- *
- * Seeding is UNCONDITIONAL on purpose. Gating it on prior membership of
- * `failedSpecFilePaths` collapses to a no-op for exactly those throws (the
- * array is still empty at that point), which leaves both arrays empty, writes
- * no `runner_failure` record, and reports the job green — the false-green
- * pathway this script exists to close. Pushes are idempotent so a partially
- * seeded group (throw inside the per-spec loop) and the infra-retry pass cannot
- * double-add.
- *
- * Mutates `failedSpecFilePaths` / `infraFailedSpecFilePaths` in place and
- * returns one `runner_failure` record per spec for the caller to persist.
- */
+/** Seed unresolved specs even when setup threw before the per-spec loop. */
 export const routeGroupFailure = ({
   specFilePaths,
   failedSpecFilePaths,
   infraFailedSpecFilePaths,
   message,
   isRetryRun,
+  completedSpecFilePaths = [],
 }: RouteGroupFailureParams): CypressResultRecord[] => {
   const records: CypressResultRecord[] = [];
 
-  for (const filePath of specFilePaths) {
+  for (const filePath of specFilePaths.filter((spec) => !completedSpecFilePaths.includes(spec))) {
     if (!failedSpecFilePaths.includes(filePath)) {
       failedSpecFilePaths.push(filePath);
     }

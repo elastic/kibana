@@ -19,7 +19,7 @@ export const getNodeLabel = (
 ): string => {
   const formatter = getAvailableFormatter(column, formatters, defaultFormatFactory);
   if (formatter) {
-    return formatter.convert(nodeName) ?? '';
+    return formatter.convertToText(nodeName) ?? '';
   }
 
   return String(nodeName);

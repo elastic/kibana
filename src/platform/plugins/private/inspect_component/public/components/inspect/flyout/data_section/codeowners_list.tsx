@@ -26,7 +26,6 @@ export const CodeownersList = ({ codeowners }: Props) => {
 
   const listItems: EuiListGroupItemProps[] = codeowners.map((codeowner) => ({
     label: codeowner,
-    size: 's',
     href: `https://github.com/orgs/elastic/teams/${codeowner.slice('@elastic/'.length)}`,
     target: '_blank',
     css: css`
@@ -49,8 +48,6 @@ export const CodeownersList = ({ codeowners }: Props) => {
       <EuiListGroup
         listItems={listItems}
         color="primary"
-        size="s"
-        flush={true}
         data-test-subj="inspectFlyoutCodeownersList"
       />
       <EuiSpacer size="m" />

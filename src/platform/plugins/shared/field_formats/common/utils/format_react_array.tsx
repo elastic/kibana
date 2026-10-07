@@ -9,16 +9,16 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
+import { arrayHighlightStyles } from '../field_format_styles';
 
 /**
- * Formats an array value as React nodes with bracket/comma notation,
- * mirroring the HTML content type's array rendering.
+ * Formats an array value as React nodes with bracket/comma notation.
  *
  * Single-element and empty arrays are passed through without brackets.
  *
- * This should be applied at the call site (e.g. inside reactConvert)
- * rather than inside individual formatter's reactConvertSingle, so that formatters which
- * override reactConvertSingle get correct array rendering for free.
+ * This should be applied at the call site (e.g. inside convertToReact)
+ * rather than inside individual formatter's reactConvert, so that formatters which
+ * override reactConvert get correct array rendering for free.
  */
 export function formatReactArray(
   val: unknown[],
@@ -54,7 +54,7 @@ export function formatReactArray(
 }
 
 const withArrayStyles = (text: string, key?: string) => (
-  <span key={key ?? text} className="ffArray__highlight">
+  <span css={arrayHighlightStyles} key={key ?? text}>
     {text}
   </span>
 );
@@ -76,8 +76,7 @@ function hasNewline(node: ReactNode): boolean {
 }
 
 /**
- * Recursively adds two-space indentation after every newline run in a ReactNode tree,
- * mirroring html_content_type's replaceAll(/(\n+)/g, '$1  ') but for arbitrary React nodes.
+ * Recursively adds two-space indentation after every newline run in a ReactNode tree.
  * Using a regex that captures the full newline run preserves blank lines (consecutive newlines)
  * by appending the indent only once after the entire run, not after each individual newline.
  */

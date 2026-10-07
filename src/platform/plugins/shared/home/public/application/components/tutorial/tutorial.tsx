@@ -418,6 +418,11 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
             isBeta={this.state.tutorial.isBeta}
             notices={this.renderModuleNotices()}
             basePath={getServices().http.basePath}
+            hash={
+              getServices().history.location.hash ||
+              (typeof window !== 'undefined' ? window.location.hash : '')
+            }
+            getUrlForApp={getServices().application.getUrlForApp}
           />
 
           {this.renderInstructionSetsToggle()}

@@ -15,19 +15,20 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { waitFor } from '@testing-library/dom';
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLEditor } from './esql_editor';
+import { VALIDATION_DEBOUNCE_MS } from './hooks/use_query_validation';
 import type { ESQLEditorProps } from './types';
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
-jest.mock('@kbn/monaco', () => ({
-  ...jest.requireActual('@kbn/monaco'),
+
+jest.mock('@kbn/code-editor', () => ({
+  ...jest.requireActual('@kbn/code-editor'),
   ESQLLang: {
-    ...jest.requireActual('@kbn/monaco').ESQLLang,
+    ...jest.requireActual('@kbn/code-editor').ESQLLang,
     getEsqlLanguage: jest.fn(() => ({
       id: 'esql',
       name: 'ESQL',
@@ -169,14 +170,21 @@ describe('ESQLEditor', () => {
   });
 
   it('should render correctly if editorIsInline prop is set to true', async () => {
+    const onTextLangQuerySubmit = jest.fn();
     const newProps = {
       ...props,
       editorIsInline: true,
+      onTextLangQuerySubmit,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
 
     const runQueryButton = queryByTestId('ESQLEditor-run-query-button');
     expect(runQueryButton).toBeInTheDocument(); // Assert it exists
+
+    if (runQueryButton) {
+      await userEvent.click(runQueryButton);
+      expect(onTextLangQuerySubmit).toHaveBeenCalledTimes(1);
+    }
   });
 
   it('should not render the run query button if the hideRunQueryButton prop is set to true and editorIsInline prop is set to true', async () => {
@@ -189,17 +197,60 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-run-query-button')).not.toBeInTheDocument();
   });
 
-  it('should render the visor by default', async () => {
+  it('should not render the visor in non-inline mode (handled by the parent)', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
+  });
+
+  it('should render the visor in inline mode by default', async () => {
+    const newProps = {
+      ...props,
+      editorIsInline: true,
+    };
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
     expect(queryByTestId('ESQLEditor-quick-search-visor')).toBeInTheDocument();
   });
 
-  it('should hide the visor by default if the hideQuickSearch prop is set to true', async () => {
+  it('should render the visor closed (inert) in inline mode until toggled', async () => {
     const newProps = {
       ...props,
-      hideQuickSearch: true,
+      editorIsInline: true,
+    };
+    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(getByTestId('ESQLEditor-quick-search-visor')).toHaveAttribute('inert');
+  });
+
+  it('should show the visor toggle button in inline mode', async () => {
+    const newProps = {
+      ...props,
+      editorIsInline: true,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(queryByTestId('esql-menu-button')).toBeInTheDocument();
+  });
+
+  it('should not show the visor toggle button in non-inline mode', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('esql-menu-button')).not.toBeInTheDocument();
+  });
+
+  it('should open the visor when the toggle button is clicked', async () => {
+    const newProps = {
+      ...props,
+      editorIsInline: true,
+    };
+    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(getByTestId('ESQLEditor-quick-search-visor')).toHaveAttribute('inert');
+    await act(async () => {
+      await userEvent.click(getByTestId('esql-menu-button'));
+    });
+    expect(getByTestId('ESQLEditor-quick-search-visor')).not.toHaveAttribute('inert');
+  });
+
+  it('should hide the visor if hideQuickSearch is true', async () => {
+    const { queryByTestId } = renderWithI18n(
+      renderESQLEditorComponent({ ...props, hideQuickSearch: true })
+    );
     expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
   });
 
@@ -266,6 +317,128 @@ describe('ESQLEditor', () => {
       });
       expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).not.toBeInTheDocument();
     });
+  });
+
+  it('displays server errors when query is submitted from editors parent', async () => {
+    jest.useFakeTimers();
+
+    const executedQuery = 'FROM logs | COMPLETION "prompt" WITH { "inference_id": "bad" }';
+    const serverErrorMessage = 'Unknown inference_id [bad]';
+
+    const { rerender } = renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        isLoading: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
+    });
+
+    // Simulate query bar Search: parent sets loading true.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: true,
+        })
+      );
+    });
+
+    // Query failed: parent passes server errors and clears loading.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: false,
+          errors: [new Error(serverErrorMessage)],
+        })
+      );
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 error')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .click(screen.getByText('1 error'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('displays server warnings when query is submitted from editors parent', async () => {
+    jest.useFakeTimers();
+
+    const executedQuery = 'FROM logs';
+    const serverWarningMessage = 'No limit defined, adding default limit of [1000].';
+
+    const { rerender } = renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        isLoading: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
+    });
+
+    // Simulate query bar Search: parent sets loading true.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: true,
+        })
+      );
+    });
+
+    // Query succeeded with warning: parent passes server warning and clears loading.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: false,
+          warning: serverWarningMessage,
+        })
+      );
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 warning')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .click(screen.getByText('1 warning'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(serverWarningMessage)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
   });
 
   it('should render warning if the warning and mergeExternalMessages props are set', async () => {

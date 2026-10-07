@@ -138,10 +138,10 @@ export const configSchema = schema.object({
    * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
    * will be used (if fleet is available or not within an airgapped environment).
    *
-   * Note: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`
-   * hook when navigating to a Security Solution page. The package version specified in
-   * `fleet_packages.json` in project root will always be installed first on Kibana start if
-   * the package is not already installed.
+   * Note: This is for `upgrade only`, which occurs as part of the Security Solution
+   * initialization flow triggered via `POST /api/security_solution/initialize`. The package
+   * version specified in `fleet_packages.json` in project root will always be installed first
+   * on Kibana start if the package is not already installed.
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
@@ -151,8 +151,8 @@ export const configSchema = schema.object({
    * The Max number of Bytes allowed for the `upload` endpoint response action
    */
   maxUploadResponseActionFileBytes: schema.number({
-    defaultValue: 26214400, // 25MB,
-    max: 104857600, // 100MB,
+    defaultValue: 200 * 2 ** 20, // 200MiB
+    max: Number.MAX_SAFE_INTEGER,
   }),
 
   /**

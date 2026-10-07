@@ -6,12 +6,14 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   AGENTS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  FLEET_SYNTHETICS_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
@@ -88,6 +90,20 @@ export async function updateAgentPolicySpaces({
     // @ts-expect-error upgrade typescript v5.9.3
     existingPolicy?.space_ids?.filter((spaceId) => !newSpaceIds.includes(spaceId) ?? true) ?? [];
 
+  // Synthetics resolves monitor package policies in the private location's space,
+  // so removing that space from the agent policy orphans them.
+  if (
+    spacesToRemove.length > 0 &&
+    !options?.force &&
+    existingPackagePolicies.some(
+      (packagePolicy) => packagePolicy.package?.name === FLEET_SYNTHETICS_PACKAGE
+    )
+  ) {
+    throw new FleetError(
+      'Agent policies used by Synthetics private locations cannot be moved to a different space.'
+    );
+  }
+
   // Privileges check
   for (const spaceId of spacesToAdd) {
     if (!authorizedSpaces.includes(spaceId)) {
@@ -130,7 +146,9 @@ export async function updateAgentPolicySpaces({
   const uninstallTokensRes = await soClient.find<UninstallTokenSOAttributes>({
     perPage: SO_SEARCH_LIMIT,
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${agentPolicyId}"`,
+    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${escapeQuotes(
+      agentPolicyId
+    )}"`,
   });
 
   if (uninstallTokensRes.total > 0) {
@@ -175,7 +193,7 @@ export async function updateAgentPolicySpaces({
       let searchAfter: SortResults | undefined;
       while (hasMore) {
         const { agents, pit } = await getAgentsByKuery(esClient, newSpaceSoClient, {
-          kuery: `policy_id:"${agentPolicyId}"`,
+          kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
           showInactive: true,
           perPage: UPDATE_AGENT_BATCH_SIZE,
           pitId,

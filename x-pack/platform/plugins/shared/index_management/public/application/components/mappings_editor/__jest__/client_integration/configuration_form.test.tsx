@@ -12,6 +12,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { AppDependencies } from '../../../..';
 import { ConfigurationForm } from '../../components/configuration_form';
 import { WithAppDependencies } from './helpers/setup_environment';
+import { loadSyntheticSourceStatus } from '../../../../services/api';
+
+jest.mock('../../../../services/api', () => ({
+  loadSyntheticSourceStatus: jest.fn(),
+}));
 
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/components', () => {
   const original = jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/components');
@@ -28,6 +33,7 @@ jest.mock('@kbn/es-ui-shared-plugin/static/forms/components', () => {
 });
 
 type ConfigurationFormProps = ComponentProps<typeof ConfigurationForm>;
+const loadSyntheticSourceStatusMock = jest.mocked(loadSyntheticSourceStatus);
 
 const setup = (
   props: Partial<ConfigurationFormProps> = { esNodesPlugins: [] },
@@ -41,15 +47,24 @@ const setup = (
   );
 };
 
-const getContext = (sourceFieldEnabled: boolean = true, canUseSyntheticSource: boolean = true) =>
+const getContext = (
+  sourceFieldEnabled: boolean = true,
+  hasAtLeastEnterpriseLicense: boolean = false
+) =>
   ({
     config: {
       enableMappingsSourceFieldSection: sourceFieldEnabled,
     },
-    canUseSyntheticSource,
+    hasAtLeastEnterpriseLicense,
   } as unknown as AppDependencies);
 
 describe('Mappings editor: configuration form', () => {
+  beforeEach(() => {
+    loadSyntheticSourceStatusMock.mockResolvedValue({
+      syntheticSourceFallbackToStoredSource: false,
+    });
+  });
+
   it('renders the form', () => {
     const ctx = {
       config: {
@@ -75,7 +90,7 @@ describe('Mappings editor: configuration form', () => {
       expect(screen.queryByTestId('sourceField')).not.toBeInTheDocument();
     });
 
-    it('has synthetic option if `canUseSyntheticSource` is set to true', async () => {
+    it('has synthetic option if the license allows it and fallback is disabled', async () => {
       setup({ esNodesPlugins: [] }, getContext(true, true));
 
       const sourceValueField = screen.getByTestId('sourceValueField');
@@ -84,8 +99,34 @@ describe('Mappings editor: configuration form', () => {
       expect(await screen.findByTestId('syntheticSourceFieldOption')).toBeInTheDocument();
     });
 
-    it("doesn't have synthetic option if `canUseSyntheticSource` is set to false", async () => {
+    it("doesn't have synthetic option if the license doesn't allow it", async () => {
       setup({ esNodesPlugins: [] }, getContext(true, false));
+
+      const sourceValueField = screen.getByTestId('sourceValueField');
+      fireEvent.click(sourceValueField);
+
+      await screen.findByTestId('storedSourceFieldOption');
+      expect(screen.queryByTestId('syntheticSourceFieldOption')).not.toBeInTheDocument();
+    });
+
+    it("doesn't have synthetic option if fallback to stored source is enabled", async () => {
+      loadSyntheticSourceStatusMock.mockResolvedValue({
+        syntheticSourceFallbackToStoredSource: true,
+      });
+
+      setup({ esNodesPlugins: [] }, getContext(true, true));
+
+      const sourceValueField = screen.getByTestId('sourceValueField');
+      fireEvent.click(sourceValueField);
+
+      await screen.findByTestId('storedSourceFieldOption');
+      expect(screen.queryByTestId('syntheticSourceFieldOption')).not.toBeInTheDocument();
+    });
+
+    it("doesn't have synthetic option if fallback status fails to load", async () => {
+      loadSyntheticSourceStatusMock.mockRejectedValue(new Error('Unable to load fallback status'));
+
+      setup({ esNodesPlugins: [] }, getContext(true, true));
 
       const sourceValueField = screen.getByTestId('sourceValueField');
       fireEvent.click(sourceValueField);

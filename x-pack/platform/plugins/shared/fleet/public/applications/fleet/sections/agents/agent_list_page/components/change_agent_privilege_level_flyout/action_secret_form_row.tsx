@@ -29,7 +29,7 @@ export const SecretFormRow: React.FC<{
 }) => {
   const secretLabel = (
     <>
-      <EuiIcon type="lock" data-test-subj="lockIcon" />
+      <EuiIcon type="lock" data-test-subj="lockIcon" aria-hidden={true} />
       &nbsp;
       {secretLabelTitle}
       &nbsp;

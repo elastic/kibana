@@ -37,6 +37,7 @@ import { DashboardsButtons } from './dashboards_buttons';
 import { AgentPolicyFilter } from './filter_bar/agent_policy_filter';
 import { TagsFilter } from './filter_bar/tags_filter';
 import { AgentActivityBadge } from './agent_activity_badge';
+import { ScheduledActionsBadge } from './scheduled_actions_badge';
 
 export interface SearchAndFilterBarProps {
   agentPolicies: AgentPolicy[];
@@ -66,6 +67,8 @@ export interface SearchAndFilterBarProps {
   onClickAgentActivity: () => void;
   shouldShowAgentActivityTour?: boolean;
   latestAgentActionErrors: number;
+  scheduledActionsCount: number;
+  scheduledActionsCapped: boolean;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   unsupportedMigrateAgents: Agent[];
@@ -100,6 +103,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAgentActivity,
   shouldShowAgentActivityTour,
   latestAgentActionErrors,
+  scheduledActionsCount,
+  scheduledActionsCapped,
   sortField,
   sortOrder,
   unsupportedMigrateAgents,
@@ -174,7 +179,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   ]);
 
   const NO_TAGS_VALUE = i18n.translate('xpack.fleet.agentList.noTagsValue', {
-    defaultMessage: 'No Tags',
+    defaultMessage: 'No tags',
   });
   const tagsWithNoTagsIncluded = [...tags, NO_TAGS_VALUE];
   const hasAddOptions = addMenuItems.length > 0;
@@ -187,6 +192,13 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             {!isFirstTimeAgentUserLoading && !isFirstTimeAgentUser && <DashboardsButtons />}
           </EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <ScheduledActionsBadge
+                scheduledActionsCount={scheduledActionsCount}
+                isCapped={scheduledActionsCapped}
+                onClick={onClickAgentActivity}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AgentActivityBadge
                 recentErrors={latestAgentActionErrors}
@@ -204,6 +216,9 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 {hasAddOptions ? (
                   <EuiFlexItem grow={false}>
                     <EuiPopover
+                      aria-label={i18n.translate('xpack.fleet.agentList.addMenuAriaLabel', {
+                        defaultMessage: 'Add menu',
+                      })}
                       anchorPosition="downRight"
                       panelPaddingSize="none"
                       button={
@@ -223,7 +238,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                       isOpen={isAddMenuOpen}
                       closePopover={closeAddMenu}
                     >
-                      <EuiContextMenuPanel size="s" items={addMenuItems} />
+                      <EuiContextMenuPanel items={addMenuItems} />
                     </EuiPopover>
                   </EuiFlexItem>
                 ) : null}

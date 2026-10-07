@@ -116,6 +116,9 @@ export const ContentListProvider = ({
       sorting: features.sorting !== false,
       pagination: features.pagination !== false,
       search: features.search !== false,
+      // `selection` accepts `boolean | SelectionConfig`; only `false` disables
+      // it. A `SelectionConfig` object still keeps selection enabled (and the
+      // table reads its `selectable`/`selectableMessage` from `features`).
       selection: features.selection !== false && !isReadOnly,
       tags: supportsTags,
       starred: supportsStarred,

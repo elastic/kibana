@@ -19,6 +19,7 @@
         - ROW: produces a row with one or more columns with values that you specify.
         - SHOW: returns information about the deployment.
         - TS: selects one or multiple data streams with support for time series semantics and time series aggregation functions
+        - PROMQL: queries time series indices using Prometheus Query Language (PromQL)
     </source-commands>
 
     <processing-commands>
@@ -115,6 +116,7 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         ENDS_WITH: Returns a boolean that indicates whether a keyword string ends with another string.
         FROM_BASE64: Decode a base64 string.
         HASH: Computes the hash of the input using various algorithms such as MD5, SHA, SHA-224, SHA-256, SHA-384, SHA-512.
+        JSON_EXTRACT: Extracts a value from a JSON string using a subset of JSONPath syntax.
         LEFT: Returns the substring that extracts *length* chars from *string* starting from the left.
         LENGTH: Returns the character length of a string
         LOCATE: Returns an integer that indicates the position of a keyword substring within another string

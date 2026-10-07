@@ -401,7 +401,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           defaultMessage: 'Export options',
         })}
       >
-        <EuiListGroup flush>
+        <EuiListGroup>
           {exportIntegrations.map((menuItem) => (
             <EuiToolTip
               position="left"

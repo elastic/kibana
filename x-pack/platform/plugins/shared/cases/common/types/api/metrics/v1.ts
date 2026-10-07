@@ -19,7 +19,6 @@ export enum CaseMetricsFeature {
   ALERTS_COUNT = 'alerts.count',
   ALERTS_USERS = 'alerts.users',
   ALERTS_HOSTS = 'alerts.hosts',
-  ACTIONS_ISOLATE_HOST = 'actions.isolateHost',
   CONNECTORS = 'connectors',
   LIFESPAN = 'lifespan',
   MTTR = 'mttr',
@@ -30,7 +29,6 @@ export const SingleCaseMetricsFeatureFieldRt = rt.union([
   rt.literal(CaseMetricsFeature.ALERTS_COUNT),
   rt.literal(CaseMetricsFeature.ALERTS_USERS),
   rt.literal(CaseMetricsFeature.ALERTS_HOSTS),
-  rt.literal(CaseMetricsFeature.ACTIONS_ISOLATE_HOST),
   rt.literal(CaseMetricsFeature.CONNECTORS),
   rt.literal(CaseMetricsFeature.LIFESPAN),
 ]);
@@ -159,33 +157,6 @@ export const SingleCaseMetricsResponseRt = rt.exact(
        */
       total: rt.number,
     }),
-    /**
-     * Actions taken within the case
-     */
-    actions: rt.exact(
-      rt.partial({
-        isolateHost: rt.strict({
-          /**
-           * Isolate host action information
-           */
-          isolate: rt.strict({
-            /**
-             * Total times the isolate host action has been performed
-             */
-            total: rt.number,
-          }),
-          /**
-           * Unisolate host action information
-           */
-          unisolate: rt.strict({
-            /**
-             * Total times the unisolate host action has been performed
-             */
-            total: rt.number,
-          }),
-        }),
-      })
-    ),
     /**
      * The case's open,close,in-progress details
      */

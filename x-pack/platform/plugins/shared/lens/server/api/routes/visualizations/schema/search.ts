@@ -5,54 +5,38 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { searchOptionsSchemas } from '@kbn/content-management-utils';
+import { z } from '@kbn/zod';
 
-import { lensCMSearchOptionsSchema } from '../../../../content_management';
+import {
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 import { lensResponseItemSchema } from './common';
 
-export const lensSearchRequestQuerySchema = schema.object({
-  fields: lensCMSearchOptionsSchema.getPropSchemas().fields,
-  search_fields: lensCMSearchOptionsSchema.getPropSchemas().searchFields,
-  query: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Text to match against `search_fields`.',
-      },
-    })
-  ),
-  page: schema.number({
-    meta: {
-      description: 'Page number.',
-    },
-    min: 1,
-    defaultValue: 1,
-  }),
-  per_page: schema.number({
-    meta: {
-      description: 'Results per page.',
-    },
-    defaultValue: 20,
-    min: 1,
-    max: 1000,
-  }),
-});
-
-const lensSearchResponseMetaSchema = schema.object(
-  {
-    page: searchOptionsSchemas.page,
-    per_page: searchOptionsSchemas.perPage,
-    total: schema.number({
-      meta: { description: 'Total number of matching visualizations.' },
+export const lensSearchRequestQuerySchema = z
+  .object({
+    fields: z.array(z.string()).max(100).optional().meta({
+      description:
+        'The saved object fields to include in each result. When omitted, all fields are returned.',
     }),
-  },
-  { unknowns: 'forbid' }
-);
+    search_fields: z
+      .union([z.string(), z.array(z.string()).max(100)])
+      .optional()
+      .meta({
+        description:
+          'The fields to match the `query` text against. Defaults to `title` when omitted.',
+      }),
+    query: z.string().optional().meta({
+      description: 'Text to match against `search_fields`.',
+    }),
+    ...asCodePaginationParamsSchema.shape,
+  })
+  .strict();
 
-export const lensSearchResponseBodySchema = schema.object(
-  {
-    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 100 }),
-    meta: lensSearchResponseMetaSchema,
-  },
-  { unknowns: 'forbid' }
-);
+export const lensSearchResponseBodySchema = z
+  .object({
+    data: z.array(lensResponseItemSchema).max(PAGINATION_MAX_SIZE),
+    meta: asCodePaginationResponseMetaSchema,
+  })
+  .strict();

@@ -12,8 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/232404
-  describe.skip('Trained models list', function () {
+  describe('Trained models list', function () {
     const tinyElser = SUPPORTED_TRAINED_MODELS.TINY_ELSER;
 
     before(async () => {
@@ -34,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await svlMl.navigation.security.navigateToTrainedModels();
 
         await ml.testExecution.logTestStep(
-          'should display the stats bar and the analytics table with one trained model'
+          'should display the stats bar and the analytics table with two trained models'
         );
         await ml.trainedModels.assertStats(2);
         await ml.trainedModelsTable.assertTableIsPopulated();

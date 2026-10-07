@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-// currentTags starts as [] for bulk selection, matching BulkTagsModal which always starts empty
-// (the user is replacing tags across multiple episodes, so no single "current" set exists).
+// For a single episode, seed the flyout from `last_tags`. For multiple selections, start empty
+// (no single "current" set when replacing tags across episodes).
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import type { BulkTagEpisodeActionItem } from '@kbn/alerting-v2-schemas';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { bulkTagEpisodeActions } from './bulk_create_alert_actions';
+import { executeCompositeAction } from './execute_composite_action';
 import * as i18n from './translations';
 import { openTagsFlyout } from '../components/tags_flyout';
 
@@ -27,33 +29,50 @@ export interface EditTagsActionDeps {
   notifications: NotificationsStart;
   rendering: CoreStart['rendering'];
   expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
   queryClient: QueryClient;
+  fetchAdditionalTagSuggestions?: () => Promise<string[]>;
 }
 
-export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction => ({
-  id: 'ALERTING_V2_EDIT_EPISODE_TAGS',
+export const EDIT_TAGS_ACTION_ID = 'ALERTING_V2_EDIT_EPISODE_TAGS';
+
+export const createEditTagsAction = (
+  deps: EditTagsActionDeps,
+  extension?: EpisodeActionExtension<{ tags: string[] }>
+): EpisodeAction => ({
+  id: EDIT_TAGS_ACTION_ID,
   order: 40,
   displayName: i18n.EDIT_TAGS,
   iconType: 'tag',
-  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
+  isCompatible: ({ episodes }: EpisodeActionContext) =>
+    episodes.some((ep) => (ep.source_id == null ? true : extension?.isCompatible(ep) ?? false)),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const tags = await openTagsFlyout(deps.overlays, deps.rendering, [], {
-      http: deps.http,
+    const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
+    const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       expressions: deps.expressions,
+      spaces: deps.spaces,
       queryClient: deps.queryClient,
+      fetchAdditionalSuggestions: deps.fetchAdditionalTagSuggestions,
     });
     if (tags == null) return;
 
-    const items = uniqueByGroup(episodes).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
-      tags,
-    }));
-    if (!items.length) return;
-
     try {
-      const { processed, total } = await bulkCreateAlertActions(deps.http, items as any);
-      deps.notifications.toasts.add(successOrPartialToast(processed, total));
+      await executeCompositeAction<{ tags: string[] }>({
+        episodes,
+        nativeExecute: (eps, http) =>
+          bulkTagEpisodeActions(
+            http,
+            eps.map(
+              (ep): BulkTagEpisodeActionItem => ({
+                alert_id: ep['episode.id'],
+                tags,
+              })
+            )
+          ),
+        extension,
+        extensionContext: { tags },
+        deps,
+      });
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);

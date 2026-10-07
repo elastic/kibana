@@ -8,30 +8,37 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { useSendMessage } from '../../../../../context/send_message/send_message_context';
+import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useAgentId } from '../../../../../hooks/use_conversation';
+import { useAgentModel } from '../../../../../hooks/agents/use_agent_model';
 import {
   getMaxListHeight,
   selectorPopoverPanelStyles,
   useSelectorListStyles,
 } from '../input_actions.styles';
-import { InputPopoverButton } from '../input_popover_button';
+import { InputPopoverButton, type ToolTipAnchorProps } from '../input_popover_button';
 import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
+import { isNearingEndOfLife, ModelRetirementIcon } from './model_badges';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
@@ -85,23 +92,56 @@ const defaultConnectorButtonLabel = i18n.translate(
   { defaultMessage: 'LLM' }
 );
 
-const ConnectorPopoverButton: React.FC<{
+const modelSetByAgentTooltip = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.modelSetByAgentTooltip',
+  { defaultMessage: 'This agent uses a preconfigured model, so it cannot be changed here.' }
+);
+
+export interface ConnectorPopoverButtonProps extends ToolTipAnchorProps {
   isPopoverOpen: boolean;
-  onClick: () => void;
+  onClick?: () => void;
   disabled: boolean;
+  hasAriaDisabled?: boolean;
   selectedConnectorName?: string;
-}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName }) => {
+  isRetiring?: boolean;
+}
+
+const ConnectorPopoverButton: React.FC<ConnectorPopoverButtonProps> = ({
+  isPopoverOpen,
+  onClick,
+  disabled,
+  hasAriaDisabled,
+  selectedConnectorName,
+  isRetiring,
+  ...toolTipAnchorProps
+}) => {
   const connectorDisplayName = selectedConnectorName ?? defaultConnectorButtonLabel;
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={disabled}
+      hasAriaDisabled={hasAriaDisabled}
       iconType={() => <ConnectorIcon connectorName={selectedConnectorName} />}
       onClick={onClick}
       aria-label={getConnectorButtonAriaLabel(connectorDisplayName)}
       data-test-subj="agentBuilderConnectorSelectorButton"
+      {...toolTipAnchorProps}
+      ebtProps={getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_CONNECTOR_SELECTOR,
+        detail: 'connector',
+      })}
     >
-      {connectorDisplayName}
+      {isRetiring ? (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="warning" size="s" color="warning" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{connectorDisplayName}</EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        connectorDisplayName
+      )}
     </InputPopoverButton>
   );
 };
@@ -135,23 +175,36 @@ const manageConnectorsAriaLabel = i18n.translate(
 const ConnectorListFooter: React.FC = () => {
   const { manageConnectorsUrl } = useNavigation();
   const { write: hasWritePrivilege } = useUiPrivileges();
+  const manageButtonProps = {
+    size: 's' as const,
+    iconType: 'gear',
+    color: 'text' as const,
+    'aria-label': manageConnectorsAriaLabel,
+    ...getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.MANAGE_CONNECTORS,
+      detail: 'connector',
+    }),
+  };
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            size="s"
-            iconType="gear"
-            color="text"
-            aria-label={manageConnectorsAriaLabel}
-            href={manageConnectorsUrl}
-            disabled={!hasWritePrivilege}
-          >
-            <FormattedMessage
-              id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
-              defaultMessage="Manage"
-            />
-          </EuiButtonEmpty>
+          {hasWritePrivilege ? (
+            <EuiButton {...manageButtonProps} href={manageConnectorsUrl}>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+                defaultMessage="Manage"
+              />
+            </EuiButton>
+          ) : (
+            <EuiButton {...manageButtonProps} disabled>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+                defaultMessage="Manage"
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverFooter>
@@ -160,18 +213,16 @@ const ConnectorListFooter: React.FC = () => {
 
 type ConnectorOptionData = EuiSelectableOption<{}>;
 
-export const ConnectorSelector: React.FC<{}> = () => {
+const SelectableConnectorSelector: React.FC<{}> = () => {
   const {
     services: { http, settings },
   } = useKibana();
   const {
-    connectorSelection: {
-      selectConnector: onSelectConnector,
-      selectedConnector: selectedConnectorId,
-      defaultConnectorId,
-      defaultConnectorOnly,
-    },
-  } = useSendMessage();
+    selectConnector: onSelectConnector,
+    selectedConnector: selectedConnectorId,
+    defaultConnectorId,
+    defaultConnectorOnly,
+  } = useConnectorSelection();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data: aiConnectors, isLoading } = useLoadConnectors({
@@ -212,7 +263,12 @@ export const ConnectorSelector: React.FC<{}> = () => {
       label: connector.name,
       checked: connector.id === selectedConnectorId ? 'on' : undefined,
       prepend: <ConnectorIcon connectorName={connector.name} />,
-      append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
+      append: (
+        <>
+          <ModelRetirementIcon metadata={connector.metadata} />
+          {connector.id === defaultConnectorId && <DefaultConnectorBadge />}
+        </>
+      ),
     });
     const groupLabel = (label: string, dataTestSubj: string): ConnectorOptionData =>
       ({
@@ -259,14 +315,9 @@ export const ConnectorSelector: React.FC<{}> = () => {
   });
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
+  const isRetiring = isNearingEndOfLife(selectedConnector?.metadata);
 
-  // Track the previously-observed default so we can detect admin-initiated changes.
-  // Seeded with the current value on first render and updated on every effect run
-  // (including early returns) so the ref stays aligned with the observable even
-  // while connectors are still loading. That way, once we proceed past the early
-  // return, `previousDefault` reflects the last observed value — not a mount-time
-  // baseline — and the first real emission is not mistaken for a change.
-  const previousDefaultRef = useRef(defaultConnectorId);
+  const previousDefaultRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const previousDefault = previousDefaultRef.current;
@@ -294,9 +345,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
       return;
     }
 
-    // Admin-initiated change of the default-model setting to a valid connector.
+    // Admin-initiated change: only fire once we've seen a previous real value so the
+    // initial settings resolution isn't mistaken for a change.
     if (
       defaultConnectorId &&
+      previousDefault !== undefined &&
       defaultConnectorId !== previousDefault &&
       defaultConnectorId !== selectedConnectorId &&
       connectors.some((c) => c.id === defaultConnectorId)
@@ -321,6 +374,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   return (
     <EuiPopover
+      aria-label={selectableAriaLabel}
       panelProps={{ css: selectorPopoverPanelStyles }}
       button={
         <ConnectorPopoverButton
@@ -328,12 +382,13 @@ export const ConnectorSelector: React.FC<{}> = () => {
           onClick={togglePopover}
           disabled={isLoading || connectors.length === 0 || defaultConnectorOnly}
           selectedConnectorName={selectedConnector?.name}
+          isRetiring={isRetiring}
         />
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="upCenter"
+      anchorPosition="upLeft"
     >
       <EuiSelectable
         id={connectorSelectId}
@@ -367,6 +422,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
           css: selectorListStyles,
           rowHeight: CONNECTOR_OPTION_ROW_HEIGHT,
           onFocusBadge: false,
+          paddingSize: 's',
         }}
       >
         {(list) => (
@@ -378,4 +434,26 @@ export const ConnectorSelector: React.FC<{}> = () => {
       </EuiSelectable>
     </EuiPopover>
   );
+};
+
+export const ConnectorSelector = () => {
+  const agentId = useAgentId();
+  const { isLoading, isLocked, connectorName } = useAgentModel(agentId);
+
+  if (isLoading) {
+    return <ConnectorPopoverButton isPopoverOpen={false} disabled />;
+  }
+  if (isLocked) {
+    return (
+      <EuiToolTip content={modelSetByAgentTooltip}>
+        <ConnectorPopoverButton
+          isPopoverOpen={false}
+          disabled
+          hasAriaDisabled
+          selectedConnectorName={connectorName}
+        />
+      </EuiToolTip>
+    );
+  }
+  return <SelectableConnectorSelector />;
 };

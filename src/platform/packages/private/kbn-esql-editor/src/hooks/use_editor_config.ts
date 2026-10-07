@@ -9,10 +9,13 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ESQLCallbacks, ESQLTelemetryCallbacks } from '@kbn/esql-types';
-import type { monaco } from '@kbn/monaco';
-import { ESQLLang, ESQL_LANG_ID } from '@kbn/monaco';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
-import type { CodeEditorProps } from '@kbn/code-editor';
+import {
+  ESQLLang,
+  ESQL_LANG_ID,
+  type CodeEditorProps,
+  type MonacoMessage,
+  monaco,
+} from '@kbn/code-editor';
 import type { EsqlLanguageDeps } from '../types';
 
 // Module-level singleton: maps each Monaco model URI to its ES|QL language
@@ -32,6 +35,14 @@ const sharedEsqlCodeActionProvider = ESQLLang.getCodeActionProvider?.({
   getModelDependencies,
 });
 
+// This provider depends on isSuggestFixEnabled, which resolves asynchronously (a license
+// check) after the editor mounts. `monaco.languages.onLanguage` — used to register this
+// provider — only fires once per language, so a value closed over at registration time can
+// never pick up a later change; it must be resolved per-model, at call time, instead.
+const sharedEsqlHoverProvider = ESQLLang.getHoverProvider?.({
+  getModelDependencies,
+});
+
 interface UseEditorConfigParams {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>;
@@ -41,6 +52,7 @@ interface UseEditorConfigParams {
   >;
   esqlCallbacks: ESQLCallbacks;
   telemetryCallbacks: ESQLTelemetryCallbacks;
+  isSuggestFixEnabled: boolean;
   isDisabled: boolean | undefined;
   measuredEditorWidth: number;
   setMeasuredEditorWidth: (width: number) => void;
@@ -58,6 +70,7 @@ export const useEditorConfig = ({
   editorCommandDisposables,
   esqlCallbacks,
   telemetryCallbacks,
+  isSuggestFixEnabled,
   isDisabled,
   measuredEditorWidth,
   setMeasuredEditorWidth,
@@ -66,6 +79,7 @@ export const useEditorConfig = ({
 }: UseEditorConfigParams) => {
   const suggestionProvider = sharedEsqlSuggestionProvider;
   const codeActionsProvider = sharedEsqlCodeActionProvider;
+  const codeEditorHoverProvider = sharedEsqlHoverProvider;
 
   useEffect(() => {
     const modelUri = editorModelUriRef.current;
@@ -73,19 +87,17 @@ export const useEditorConfig = ({
       esqlDepsByModelUri.set(modelUri, {
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
+        isSuggestFixEnabled,
         getEditorMessages: () => editorMessagesRef.current,
       });
     }
-  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef, editorMessagesRef]);
-
-  const hoverProvider = useMemo(
-    () =>
-      ESQLLang.getHoverProvider?.({
-        ...esqlCallbacks,
-        telemetry: telemetryCallbacks,
-      }),
-    [esqlCallbacks, telemetryCallbacks]
-  );
+  }, [
+    esqlCallbacks,
+    telemetryCallbacks,
+    isSuggestFixEnabled,
+    editorModelUriRef,
+    editorMessagesRef,
+  ]);
 
   const signatureProvider = useMemo(() => {
     return ESQLLang.getSignatureProvider?.(esqlCallbacks);
@@ -96,17 +108,6 @@ export const useEditorConfig = ({
   }, [esqlCallbacks]);
 
   const documentHighlightProvider = useMemo(() => ESQLLang.getDocumentHighlightProvider?.(), []);
-
-  const codeEditorHoverProvider = useMemo(
-    () => ({
-      provideHover: (
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        token: monaco.CancellationToken
-      ) => hoverProvider?.provideHover?.(model, position, token) ?? { contents: [] },
-    }),
-    [hoverProvider]
-  );
 
   const onErrorClick = useCallback(
     ({ startLineNumber, startColumn }: MonacoMessage) => {
@@ -186,7 +187,7 @@ export const useEditorConfig = ({
       fontSize: 14,
       hideCursorInOverviewRuler: true,
       lightbulb: {
-        enabled: false,
+        enabled: monaco.editor.ShowLightbulbIconMode.Off,
       },
       lineDecorationsWidth: 20,
       lineNumbers: 'on',
@@ -204,6 +205,7 @@ export const useEditorConfig = ({
         showToolbar: 'onHover',
         suppressSuggestions: false,
         keepOnBlur: false,
+        syntaxHighlightingEnabled: false,
       },
       readOnly: isDisabled,
       renderLineHighlight: 'line',
@@ -214,8 +216,10 @@ export const useEditorConfig = ({
         horizontalScrollbarSize: 6,
         vertical: 'auto',
         verticalScrollbarSize: 6,
+        alwaysConsumeMouseWheel: false,
       },
       scrollBeyondLastLine: false,
+      acceptSuggestionOnTab: 'off',
       tabSize: 2,
       theme: ESQL_LANG_ID,
       wordWrap: 'on',

@@ -270,7 +270,7 @@ describe('index table', () => {
 
     const menu = await screen.findByTestId('indexContextMenu');
     const items = within(menu)
-      .getAllByRole('button')
+      .getAllByRole('menuitem')
       .map((btn) => (btn.textContent || '').trim())
       .filter((t) => t.length > 0);
 
@@ -288,7 +288,7 @@ describe('index table', () => {
 
     const menu = await screen.findByTestId('indexContextMenu');
     const items = within(menu)
-      .getAllByRole('button')
+      .getAllByRole('menuitem')
       .map((btn) => (btn.textContent || '').trim())
       .filter((t) => t.length > 0);
 
@@ -315,7 +315,7 @@ describe('index table', () => {
 
     const menu = await screen.findByTestId('indexContextMenu');
     const items = within(menu)
-      .getAllByRole('button')
+      .getAllByRole('menuitem')
       .map((btn) => (btn.textContent || '').trim())
       .filter((t) => t.length > 0);
 

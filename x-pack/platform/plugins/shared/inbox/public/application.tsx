@@ -14,13 +14,15 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PLUGIN_NAME } from '../common';
-import type { InboxStartDependencies } from './types';
+import type { InboxActionDetailRendererLoader, InboxStartDependencies } from './types';
 import { InboxActionsPage } from './pages/inbox_actions';
+import { InboxDetailRendererProvider } from './hooks/use_action_detail_renderer';
 
 interface RenderAppParams {
   coreStart: CoreStart;
   startDeps: InboxStartDependencies;
   params: AppMountParameters;
+  detailRenderers: Map<string, InboxActionDetailRendererLoader>;
 }
 
 const rootStyle: React.CSSProperties = {
@@ -30,13 +32,25 @@ const rootStyle: React.CSSProperties = {
   minHeight: 0,
 };
 
-export const renderApp = ({ coreStart, startDeps, params }: RenderAppParams) => {
+export const renderApp = ({ coreStart, startDeps, params, detailRenderers }: RenderAppParams) => {
   coreStart.chrome.docTitle.change(PLUGIN_NAME);
 
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
+        // Action state is driven by external writers (Workflows, other
+        // providers), so we bias toward freshness over cache stickiness:
+        //   - `staleTime: 30s` dedupes rapid-fire reads within a single
+        //     render pass but still lets the 'always' triggers below win.
+        //   - `refetchOnWindowFocus: 'always'` forces a refetch every time
+        //     the tab regains focus, even if the query is within staleTime.
+        //   - `refetchOnMount: 'always'` does the same when the user
+        //     navigates back to /app/inbox.
+        // Together these keep the list reliably current without the user
+        // having to hit a refresh button.
         staleTime: 30_000,
+        refetchOnWindowFocus: 'always',
+        refetchOnMount: 'always',
       },
     },
   });
@@ -46,11 +60,13 @@ export const renderApp = ({ coreStart, startDeps, params }: RenderAppParams) => 
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
           <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
-            <Router history={params.history}>
-              <Routes>
-                <Route path="/" component={InboxActionsPage} />
-              </Routes>
-            </Router>
+            <InboxDetailRendererProvider renderers={detailRenderers}>
+              <Router history={params.history}>
+                <Routes>
+                  <Route path="/" component={InboxActionsPage} />
+                </Routes>
+              </Router>
+            </InboxDetailRendererProvider>
           </KibanaContextProvider>
         </I18nProvider>
       </QueryClientProvider>

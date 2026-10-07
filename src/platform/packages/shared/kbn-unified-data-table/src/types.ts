@@ -16,6 +16,7 @@ import type {
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 export type { DataGridDensity } from './constants';
 
@@ -65,6 +66,18 @@ export type CustomGridColumnsConfiguration = Record<
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
+export type DocumentsDisplayMode = 'table' | 'json';
+
+/**
+ * Settings that only apply while the source column is rendered in JSON mode.
+ */
+export interface JsonModeSettings extends SerializableRecord {
+  hideNulls?: boolean;
+  wrapLines?: boolean;
+  /** How many nodes each JSON cell renders by default (≈ one line each); seeds the initial expansion. */
+  defaultRenderedNodes?: number;
+}
+
 export type CustomBulkActions = Array<
   Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
     onClick: (payload: { selectedDocIds: string[] }) => void;
@@ -78,3 +91,5 @@ export type CustomBulkActions = Array<
     key: string;
   }
 >;
+
+export type DocMap = Map<string, { doc: DataTableRecord; docIndex: number }>;

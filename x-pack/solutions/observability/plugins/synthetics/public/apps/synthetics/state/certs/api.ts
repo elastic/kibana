@@ -6,19 +6,59 @@
  */
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import type { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
+import type { CertFacets, CertResult, GetCertsParams } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 
+const toParam = (values?: string[]) => (values && values.length > 0 ? values.join(',') : undefined);
+
 export const getCertsList = async (queryParams: GetCertsParams): Promise<CertResult> => {
-  const { pageIndex, size, search, sortBy, direction } = queryParams;
+  const {
+    pageIndex,
+    size,
+    search,
+    sortBy,
+    direction,
+    monitorTypes,
+    browserResourceTypes,
+    certOrigin,
+    tags,
+    issuers,
+    notValidAfter,
+    remoteNames,
+    showFromAllSpaces,
+  } = queryParams;
   const result = (await apiService.get(SYNTHETICS_API_URLS.CERTS, {
     pageIndex,
     size,
     search,
     sortBy,
     direction,
+    monitorTypes: toParam(monitorTypes),
+    browserResourceTypes: toParam(browserResourceTypes),
+    certOrigin: toParam(certOrigin),
+    tags: toParam(tags),
+    issuers: toParam(issuers),
+    notValidAfter,
+    remoteNames: toParam(remoteNames),
+    showFromAllSpaces,
   })) as {
     data: CertResult;
+  };
+  return result.data;
+};
+
+export const getCertFacets = async ({
+  remoteNames,
+  showFromAllSpaces,
+}: {
+  remoteNames?: string[];
+  showFromAllSpaces?: boolean;
+} = {}): Promise<CertFacets> => {
+  const result = (await apiService.get(SYNTHETICS_API_URLS.CERTS_FACETS, {
+    remoteNames: toParam(remoteNames),
+    showFromAllSpaces,
+  })) as {
+    data: CertFacets;
   };
   return result.data;
 };

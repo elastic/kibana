@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/home-sample-data-tab'
   - '@kbn/agent-builder-browser'
   - '@kbn/controls-constants'
+  - '@kbn/apm-types'
 tags:
   - plugin
   - prod

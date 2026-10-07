@@ -13,18 +13,17 @@ import styled from '@emotion/styled';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
-import { FiltersGlobal } from '../../../common/components/filters_global';
-import { HeaderPage } from '../../../common/components/header_page';
-import { LastEventTime } from '../../../common/components/last_event_time';
+import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { NetworkKpiComponent } from '../components/kpi_network';
-import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SearchWithDataView } from '../../components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
@@ -41,7 +40,6 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
@@ -74,11 +72,12 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const { to, from, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useGlobalFullScreen();
+    const hasFullScreenContent = useHasFullScreenContent();
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
 
     const canUseMaps = kibana.services.application.capabilities.maps_v2.show;
-    const { uiSettings } = kibana.services;
+    const { uiSettings, docLinks } = kibana.services;
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.events) {
@@ -87,21 +86,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       return globalFilters;
     }, [tabName, globalFilters]);
 
-    const {
-      indicesExist: oldIndicesExist,
-      selectedPatterns: oldSelectedPatterns,
-      sourcererDataView: oldSourcererDataViewSpec,
-    } = useSourcererDataView();
-
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
     const { dataView, status } = useDataView(PageScope.explore);
-    const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
-
-    const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
-    const selectedPatterns = newDataViewPickerEnabled
-      ? experimentalSelectedPatterns
-      : oldSelectedPatterns;
+    const selectedPatterns = useSelectedPatterns(dataView);
+    const indicesExist = dataView.hasMatchedIndices();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -131,29 +118,27 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       () =>
         convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
-          dataViewSpec: oldSourcererDataViewSpec,
           dataView,
           queries: [query],
           filters: globalFilters,
         }),
-      [uiSettings, oldSourcererDataViewSpec, dataView, query, globalFilters]
+      [uiSettings, dataView, query, globalFilters]
     );
 
     const [tabsFilterQuery] = useMemo(
       () =>
         convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
-          dataViewSpec: oldSourcererDataViewSpec,
           dataView,
           queries: [query],
           filters: tabsFilters,
         }),
-      [uiSettings, oldSourcererDataViewSpec, dataView, query, tabsFilters]
+      [uiSettings, dataView, query, tabsFilters]
     );
 
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
-    if (newDataViewPickerEnabled && status === 'pristine') {
+    if (status === 'pristine') {
       return <PageLoader />;
     }
 
@@ -162,26 +147,21 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         {indicesExist ? (
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal>
-              <SiemSearchBar
-                dataView={dataView}
-                id={InputsModelId.global}
-                sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-              />
-            </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-              <Display show={!globalFullScreen}>
-                <HeaderPage
-                  subtitle={
-                    <LastEventTime
-                      indexKey={LastEventIndexKey.network}
-                      indexNames={selectedPatterns}
-                    />
-                  }
+              {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+              {!hasFullScreenContent && (
+                <LastEventTimeHeader
                   title={i18n.PAGE_TITLE}
-                  border
+                  docLink={docLinks.links.securitySolution.entityAnalytics.explore.networkPage}
+                  indexKey={LastEventIndexKey.network}
+                  indexNames={selectedPatterns}
                 />
+              )}
+              <Display show={!hasFullScreenContent}>
+                <SearchWithDataView dataView={dataView} />
+
+                <EuiSpacer size="l" />
 
                 {canUseMaps && (
                   <>
@@ -205,9 +185,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <NetworkKpiComponent from={from} to={to} />
               </Display>
 
-              {capabilitiesFetched && !isInitializing && oldSourcererDataViewSpec ? (
+              {capabilitiesFetched && !isInitializing ? (
                 <>
-                  <Display show={!globalFullScreen}>
+                  <Display show={!hasFullScreenContent}>
                     <EuiSpacer />
                     <TabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
                     <EuiSpacer />

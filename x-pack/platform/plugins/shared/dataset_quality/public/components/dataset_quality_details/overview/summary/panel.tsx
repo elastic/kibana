@@ -107,7 +107,13 @@ export function PanelIndicator({
             <EuiToolTip content={tooltip}>
               <EuiText size="xs" color="subdued" tabIndex={0}>
                 {`${label} `}
-                <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="question"
+                  className="eui-alignTop"
+                  aria-hidden={true}
+                />
               </EuiText>
             </EuiToolTip>
           ) : (

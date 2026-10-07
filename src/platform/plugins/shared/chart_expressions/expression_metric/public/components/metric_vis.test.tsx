@@ -27,13 +27,15 @@ import {
   renderChart,
   waitForRenderComplete,
 } from '@kbn/chart-test-jest-helpers';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import * as secondaryMetricInfoModule from './secondary_metric_info';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
-  return { getConverterFor: () => convertFn };
+  return { convertToText: convertFn };
 });
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
@@ -85,13 +87,14 @@ const defaultMetricParams: MetricVisParam = {
   secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
+  density: 'compact',
   secondaryTrend: {
     visuals: undefined,
     baseline: undefined,
     palette: undefined,
   },
   primaryPosition: 'bottom',
-  secondaryLabelPosition: 'before',
+  secondaryNameVisibility: 'before',
   applyColorTo: 'background',
 };
 
@@ -312,14 +315,14 @@ describe('MetricVisComponent', function () {
       const { rerender } = await renderMetricChart({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: undefined },
+          metric: { ...config.metric, subtitle: 'subtitle' },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
 
       expect(spy).toHaveBeenCalled();
 
-      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name; // TODO: extract this
       expect(screen.getByText(secondaryLabel)).toBeInTheDocument();
 
       const secondaryValue = `number-${table.rows[0][minPriceColumnId]}`;
@@ -328,13 +331,33 @@ describe('MetricVisComponent', function () {
       await rerender({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: 'secondary label' },
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryNameVisibility: 'hidden' },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
 
       expect(screen.queryByText(secondaryLabel)).not.toBeInTheDocument();
-      expect(screen.getByText(/secondary label/)).toBeInTheDocument();
+      expect(screen.getByText(secondaryValue)).toBeInTheDocument();
+    });
+
+    it('should show the secondary metric name on hover when the name is displayed as a tooltip', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await renderMetricChart({
+        config: {
+          ...config,
+          metric: { ...config.metric, secondaryNameVisibility: 'tooltip' },
+          dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+        },
+      });
+
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+      const secondaryValue = screen.getByText(`number-${table.rows[0][minPriceColumnId]}`);
+
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+      await user.hover(secondaryValue);
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(secondaryLabel);
     });
 
     it('should display progress bar if min and max provided', async () => {
@@ -590,38 +613,40 @@ describe('MetricVisComponent', function () {
       }
     });
 
-    it('should display secondary label or secondary metric', async () => {
+    it('should display the secondary metric name only when it is visible', async () => {
       const { rerender } = await renderMetricChart({
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryLabel: 'howdy' },
+          metric: { ...config.metric, secondaryNameVisibility: 'before' },
         },
       });
 
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+
       let charts = screen.getAllByRole('listitem');
       for (const row of table.rows) {
-        const regExp = new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i');
+        const regExp = new RegExp(`${secondaryLabel}number-${row[minPriceColumnId]}`, 'i');
         // Check that at least one listitem contains the expected text
         expect(charts.some((chart) => regExp.test(chart.textContent ?? ''))).toBe(true);
       }
 
-      // Now remove the prefix and check the secondary label is there
+      // Now hide the name and check only the value is there
       await rerender({
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryLabel: undefined },
+          metric: { ...config.metric, secondaryNameVisibility: 'hidden' },
         },
       });
 
       charts = screen.getAllByRole('listitem');
 
-      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       for (const row of table.rows) {
-        const regExp = new RegExp(`${secondaryLabel}*number-${row[minPriceColumnId]}`, 'i');
+        const regExp = new RegExp(`number-${row[minPriceColumnId]}`, 'i');
         expect(charts.some((chart) => regExp.test(chart.textContent ?? ''))).toBe(true);
       }
+      expect(screen.queryByText(secondaryLabel)).not.toBeInTheDocument();
     });
 
     it('should respect maxCols and minTiles', async () => {
@@ -638,7 +663,7 @@ describe('MetricVisComponent', function () {
       // 5 columns x 2 rows by default
       expect(screen.getByRole('list')).toHaveStyle({
         'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
       });
 
       // now configure maxCols: 2
@@ -655,7 +680,7 @@ describe('MetricVisComponent', function () {
       // changed to 2 columns x 3 rows now
       expect(screen.getByRole('list')).toHaveStyle({
         'grid-template-columns': 'repeat(2, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(3, minmax(64px, 1fr)',
+        'grid-template-rows': 'repeat(3, minmax(80px, 1fr)',
       });
 
       // now configure maxCols: 5 and minTiles: 10
@@ -673,7 +698,7 @@ describe('MetricVisComponent', function () {
       // changed to 5 columns x 2 rows now
       expect(screen.getByRole('list')).toHaveStyle({
         'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
       });
     });
 
@@ -770,7 +795,7 @@ describe('MetricVisComponent', function () {
       expect(screen.getAllByRole('presentation')).toHaveLength(10);
       expect(screen.getByRole('list')).toHaveStyle({
         'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
       });
     });
   });
@@ -795,11 +820,11 @@ describe('MetricVisComponent', function () {
         maxDimensions: {
           x: {
             unit: 'pixels',
-            value: 310,
+            value: 300,
           },
           y: {
             unit: 'pixels',
-            value: 310,
+            value: 160,
           },
         },
       },
@@ -950,6 +975,44 @@ describe('MetricVisComponent', function () {
         expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: colorFromPalette });
       });
 
+      it('applies no value color when applyColorTo is "value" and the value is outside the palette range', async () => {
+        // a value outside the palette range yields no color, so the palette color falls back to the default
+        mockGetColorForValue.mockReturnValue(undefined);
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              applyColorTo: 'value',
+              color: undefined,
+              palette: {
+                type: 'palette',
+                name: 'default',
+                params: {
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
+              },
+            },
+          },
+        });
+
+        // background stays the default and the value text has no explicit (custom) color
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+        const valueEl = container.querySelector<HTMLElement>('.echMetricText__value');
+        expect(valueEl).not.toBeNull();
+        expect(valueEl?.style.color).toBe('');
+      });
+
       describe('percent-based', () => {
         const renderWithPalette = async (
           palette: PaletteOutput<CustomPaletteState>,
@@ -1021,6 +1084,27 @@ describe('MetricVisComponent', function () {
     });
 
     describe('by static color', () => {
+      it('uses the default when applyColorTo and color is not set', async () => {
+        const colorFromPalette = faker.color.rgb();
+        mockGetColorForValue.mockReturnValue(colorFromPalette);
+        const { applyColorTo, ...metricWithoutApplyColorTo } = defaultMetricParams;
+        await renderMetricChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...metricWithoutApplyColorTo,
+              color: undefined,
+            } as unknown as MetricVisParam,
+          },
+        });
+        expect(mockGetColorForValue).not.toHaveBeenCalled();
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+      });
+
       it('uses static color if no palette', async () => {
         const staticColor = faker.color.rgb();
 
@@ -1243,6 +1327,7 @@ describe('MetricVisComponent', function () {
             maxCols: 3,
             titlesTextAlign: 'left',
             valueFontSize: 'default',
+            density: 'compact',
             primaryAlign: 'right',
             secondaryAlign: 'right',
             primaryPosition: 'bottom',
@@ -1251,7 +1336,7 @@ describe('MetricVisComponent', function () {
               baseline: undefined,
               palette: undefined,
             },
-            secondaryLabelPosition: 'before',
+            secondaryNameVisibility: 'before',
             applyColorTo: 'background',
           },
         },

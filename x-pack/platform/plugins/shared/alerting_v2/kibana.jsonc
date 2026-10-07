@@ -21,6 +21,7 @@
       "security",
       "encryptedSavedObjects",
       "workflowsManagement",
+      "workflowsExtensions",
       "expressions",
       "uiActions",
       "fieldFormats",
@@ -28,11 +29,14 @@
       "management",
       "kibanaUtils",
       "share",
+      "unifiedDocViewer",
+      "maintenanceWindows",
       "eventLog",
-      "unifiedDocViewer"
+      "triggersActionsUi",
+      "licensing"
     ],
-    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
-    "requiredBundles": ["alerting", "kibanaReact"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "agentBuilderSml", "dashboard", "cps"],
+    "requiredBundles": ["alerting", "kibanaReact", "agentBuilder", "esql"],
     "extraPublicDirs": []
   }
 }

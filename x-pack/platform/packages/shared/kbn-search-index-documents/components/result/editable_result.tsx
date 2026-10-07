@@ -18,6 +18,7 @@ import {
   EuiLoadingSpinner,
   EuiSplitPanel,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -61,6 +62,19 @@ export const EditableResult: React.FC<EditableResultProps> = ({
     {
       defaultMessage: 'Select index',
     }
+  );
+  const toggleFieldsLabel = isExpanded
+    ? i18n.translate(
+        'xpack.sharedKbnSearchIndexDocuments.editableResult.collapseFieldsButtonAriaLabel',
+        { defaultMessage: 'Collapse fields' }
+      )
+    : i18n.translate(
+        'xpack.sharedKbnSearchIndexDocuments.editableResult.expandFieldsButtonAriaLabel',
+        { defaultMessage: 'Expand fields' }
+      );
+  const deleteDocumentLabel = i18n.translate(
+    'xpack.sharedKbnSearchIndexDocuments.editableResult.deleteDocumentButtonAriaLabel',
+    { defaultMessage: 'Delete document' }
   );
   return (
     <EuiSplitPanel.Outer hasBorder={true}>
@@ -120,53 +134,47 @@ export const EditableResult: React.FC<EditableResultProps> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                {error && <EuiIcon type="warning" color="danger" />}
+                {error && (
+                  <EuiIcon
+                    type="warning"
+                    color="danger"
+                    aria-label={i18n.translate(
+                      'xpack.sharedKbnSearchIndexDocuments.editableResult.warningIconAriaLabel',
+                      { defaultMessage: 'Error' }
+                    )}
+                  />
+                )}
                 {!error &&
                   hasIndexSelector &&
                   (isLoading ? (
                     <EuiLoadingSpinner />
                   ) : (
-                    <EuiButtonIcon
-                      size="xs"
-                      iconType={isExpanded ? 'fold' : 'unfold'}
-                      color="primary"
-                      aria-label={
-                        isExpanded
-                          ? i18n.translate(
-                              'xpack.sharedKbnSearchIndexDocuments.editableResult.collapseFieldsButtonAriaLabel',
-                              {
-                                defaultMessage: 'Collapse fields',
-                              }
-                            )
-                          : i18n.translate(
-                              'xpack.sharedKbnSearchIndexDocuments.editableResult.expandFieldsButtonAriaLabel',
-                              {
-                                defaultMessage: 'Expand fields',
-                              }
-                            )
-                      }
-                      onClick={() => {
-                        if (onExpand && !isExpanded) {
-                          onExpand();
-                        }
-                        setIsExpanded(!isExpanded);
-                      }}
-                    />
+                    <EuiToolTip content={toggleFieldsLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        size="xs"
+                        iconType={isExpanded ? 'fold' : 'unfold'}
+                        color="primary"
+                        aria-label={toggleFieldsLabel}
+                        onClick={() => {
+                          if (onExpand && !isExpanded) {
+                            onExpand();
+                          }
+                          setIsExpanded(!isExpanded);
+                        }}
+                      />
+                    </EuiToolTip>
                   ))}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  onClick={onDeleteDocument}
-                  aria-label={i18n.translate(
-                    'xpack.sharedKbnSearchIndexDocuments.editableResult.deleteDocumentButtonAriaLabel',
-                    {
-                      defaultMessage: 'Delete document',
-                    }
-                  )}
-                  data-test-subj="editableResultDeleteButton"
-                />
+                <EuiToolTip content={deleteDocumentLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    onClick={onDeleteDocument}
+                    aria-label={deleteDocumentLabel}
+                    data-test-subj="editableResultDeleteButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -185,7 +193,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiText color="danger" size="xs">
-                <EuiIcon type="warning" />
+                <EuiIcon type="warning" aria-hidden={true} />
                 &nbsp;
                 {error}
               </EuiText>

@@ -348,7 +348,13 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                severity: {
+                  type: 'keyword',
+                },
                 severity_improving: {
+                  type: 'boolean',
+                },
+                snoozed: {
                   type: 'boolean',
                 },
                 start: {
@@ -360,6 +366,9 @@ describe('mappingFromFieldMap', () => {
                 time_range: {
                   type: 'date_range',
                   format: 'epoch_millis||strict_date_optional_time',
+                },
+                tracked: {
+                  type: 'boolean',
                 },
                 updated_at: {
                   type: 'date',
@@ -394,6 +403,16 @@ describe('mappingFromFieldMap', () => {
                 },
                 workflow_assignee_ids: {
                   type: 'keyword',
+                },
+              },
+            },
+            cps_scope: {
+              properties: {
+                expression: {
+                  type: 'keyword',
+                },
+                linked_projects: {
+                  type: 'flattened',
                 },
               },
             },

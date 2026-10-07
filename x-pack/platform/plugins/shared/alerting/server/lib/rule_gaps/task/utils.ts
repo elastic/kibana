@@ -110,8 +110,8 @@ export function getGapAutoFillRunOutcome(consolidated: AggregatedByRuleEntry[]):
   };
 }
 
-export function isCancelled(abortController: AbortController): boolean {
-  return abortController.signal.aborted;
+export function isCancelled(signal: AbortSignal): boolean {
+  return signal.aborted;
 }
 
 export async function filterGapsWithOverlappingBackfills(

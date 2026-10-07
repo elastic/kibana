@@ -26,7 +26,8 @@ import { withMinimumLicense } from '../../../utils/with_minimum_license';
 export const uploadUsersCSVRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  config: ConfigType
+  config: ConfigType,
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .post({
@@ -55,6 +56,17 @@ export const uploadUsersCSVRoute = (
             }),
           },
         },
+        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(
         async (

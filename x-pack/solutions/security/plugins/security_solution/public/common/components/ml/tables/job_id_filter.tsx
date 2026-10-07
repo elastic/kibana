@@ -64,6 +64,7 @@ export const JobIdFilter: React.FC<{
   return (
     <EuiFilterGroup>
       <EuiPopover
+        aria-label={title}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}

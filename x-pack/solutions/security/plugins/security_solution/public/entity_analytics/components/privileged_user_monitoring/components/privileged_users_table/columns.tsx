@@ -11,14 +11,15 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiLink,
-  EuiFlexItem,
-  useEuiTheme,
   EuiBadge,
-  EuiText,
-  EuiLoadingSpinner,
   EuiButtonIcon,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { encode } from '@kbn/rison';
@@ -46,7 +47,7 @@ import {
 } from '../../../../../overview/components/detection_response/translations';
 import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../../../common/types';
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import { getFormattedAlertStats } from '../../../../../flyout/document_details/shared/components/alert_count_insight';
+import { getFormattedAlertStats } from '../../../../../flyout_v2/document/main/components/alert_count_insight';
 import { SCOPE_ID } from '../../constants';
 
 const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };
@@ -81,18 +82,28 @@ const getActionsColumn = (openUserFlyout: (userName: string) => void) => ({
   ),
   render: (record: { 'user.name': string }) => {
     return (
-      <EuiButtonIcon
-        iconType="maximize"
-        onClick={() => {
-          openUserFlyout(record['user.name']);
-        }}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.expand.ariaLabel',
           {
             defaultMessage: 'Open user flyout',
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="maximize"
+          onClick={() => {
+            openUserFlyout(record['user.name']);
+          }}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.expand.ariaLabel',
+            {
+              defaultMessage: 'Open user flyout',
+            }
+          )}
+        />
+      </EuiToolTip>
     );
   },
   width: COLUMN_WIDTHS.actions,

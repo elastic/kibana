@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type EuiThemeColorModeStandard, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
+import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
+import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
+import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -17,9 +22,10 @@ import {
   type GetIconBase64Params,
   getTriggerBoltFallbackDataUrl,
 } from '../../../shared/ui/step_icons/get_icon_base64';
-import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
 import { triggerSchemas } from '../../../trigger_schemas';
+import { collectTechPreviewSuggestAriaPrefixes } from '../lib/autocomplete/suggestions/collect_tech_preview_suggest_aria_prefixes';
+import { setStabilityBadgeThemeContext } from '../lib/get_stability_note';
 import {
   CUSTOM_TRIGGER_INLINE_CLASS,
   triggerTypeToCssClass,
@@ -77,6 +83,10 @@ export const predefinedStepTypes = [
     displayName: 'Wait For Input',
   },
   {
+    actionTypeId: 'waitForApproval',
+    displayName: 'Wait For Approval',
+  },
+  {
     actionTypeId: 'data.set',
     displayName: 'Set Variables',
   },
@@ -126,6 +136,55 @@ export const predefinedStepTypes = [
 export const FALLBACK_BOLT_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEzIDFMOS45OTkwNSA1SDEzQzEzLjQxNTIgNSAxMy43ODcgNS4yNTY1MiAxMy45MzQ2IDUuNjQ0NTNDMTQuMDgyMSA2LjAzMjYxIDEzLjk3NDQgNi40NzEyNCAxMy42NjQxIDYuNzQ3MDdMNC42NjQwOCAxNC43NDcxQzQuMzA1ODEgMTUuMDY1NSAzLjc3MjEgMTUuMDg1NSAzLjM5MTYyIDE0Ljc5MzlDMy4wMTExNCAxNC41MDI0IDIuODkxMTEgMTMuOTgxNSAzLjEwNTQ5IDEzLjU1MjdMNS4zODE4NiA5SDMuMDAwMDJDMi42MzEyMyA5IDIuMjkyMjEgOC43OTY4NCAyLjExODE5IDguNDcxNjhDMS45NDQyOSA4LjE0NjU2IDEuOTYzNDYgNy43NTIxIDIuMTY3OTkgNy40NDUzMUw2LjQ2NDg3IDFIMTMWk0zLjAwMDAyIDhINy4wMDAwMkw0LjAwMDAyIDE0TDEzIDZIOi4wMDAwMkwxMSAySDcuMDAwMDJMMy4wMDAwMiA4WiIvPgo8L3N2Zz4=';
 
+function isValidDataUrl(url: string): boolean {
+  return url.length > 50 && url.startsWith('data:') && url.includes('base64,');
+}
+
+function isFallbackBoltDataUrl(url: string, boltUrl: string): boolean {
+  return (
+    url === boltUrl || url === FALLBACK_BOLT_DATA_URL || url === getTriggerBoltFallbackDataUrl()
+  );
+}
+
+/** Bolt fallback and connector events with no brand icon (the plugs glyph) stay masked. */
+function keepsTriggerGlyphMask(actionTypeId: string, iconBase64: string, boltUrl: string): boolean {
+  if (isMonochromeActionType(actionTypeId) || isFallbackBoltDataUrl(iconBase64, boltUrl)) {
+    return true;
+  }
+  const connectorTypeId = getConnectorTypeIdForTriggerEventId(actionTypeId);
+  return connectorTypeId !== undefined && !ConnectorIconsMap.has(connectorTypeId);
+}
+
+/**
+ * Background declarations for a custom trigger inline icon. A branded mark clears
+ * the shared bolt mask. Fallback and unbranded glyphs keep the currentColor mask.
+ */
+function getTriggerInlineIconBackground({
+  iconBase64,
+  monochromeBackground,
+  boltUrl,
+  isMonochrome,
+}: {
+  iconBase64: string;
+  monochromeBackground: string;
+  boltUrl: string;
+  isMonochrome: boolean;
+}): string {
+  const hasBrandIcon = isValidDataUrl(iconBase64) && !isMonochrome;
+  if (isMonochrome && isValidDataUrl(iconBase64)) {
+    return monochromeBackground;
+  }
+  if (hasBrandIcon) {
+    return `
+    background-image: url("${iconBase64}") !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    background-color: transparent !important;
+  `;
+  }
+  return `background-image: url("${boltUrl || FALLBACK_BOLT_DATA_URL}") !important;`;
+}
+
 function appendStyleToEditorScope(
   style: HTMLStyleElement,
   styleId: string,
@@ -170,6 +229,7 @@ export function useDynamicTypeIcons(
   onShadowIconsCssReady?: (css: string) => void
 ) {
   const { triggersActionsUi, workflowsExtensions } = useKibana().services;
+  const euiThemeContext = useEuiTheme();
   const { actionTypeRegistry } = triggersActionsUi;
   // Refs so we don't re-run the effect when only these references change (e.g. when opening the
   // actions menu / trigger submenu re-renders the tree). Re-running would re-inject CSS and
@@ -210,45 +270,59 @@ export function useDynamicTypeIcons(
     if (!hasConnectorTypes && !hasTriggerDefinitions && !hasEditorMounted) {
       return;
     }
-    const registry = actionTypeRegistryRef.current;
-    const connectorTypes = Object.values(connectorTypesData ?? {}).map((connector) => {
-      const actionType = registry.get(connector.actionTypeId);
-      return {
-        actionTypeId: connector.actionTypeId,
-        displayName: connector.displayName,
-        icon: actionType.iconClass,
-      };
-    });
+    const getAllTypes = (): ConnectorTypeInfoMinimal[] => {
+      const registry = actionTypeRegistryRef.current;
+      const connectorTypes = Object.values(connectorsDataRef.current?.connectorTypes ?? {}).map(
+        (connector) => {
+          // API can list types not registered in the UI registry => get() throws if missing.
+          const icon = registry.has(connector.actionTypeId)
+            ? registry.get(connector.actionTypeId)?.iconClass
+            : undefined;
+          return {
+            actionTypeId: connector.actionTypeId,
+            displayName: connector.displayName,
+            ...(icon !== undefined && { icon }),
+          };
+        }
+      );
 
-    const registeredTypes = workflowsExtensionsRef.current.getAllStepDefinitions().map((step) => ({
-      actionTypeId: step.id,
-      displayName: step.label,
-      fromRegistry: true,
-      icon: step.icon,
-    }));
+      const registeredTypes = workflowsExtensionsRef.current
+        .getAllStepDefinitions()
+        .map((step) => ({
+          actionTypeId: step.id,
+          displayName: step.label,
+          fromRegistry: true,
+          icon: step.icon,
+        }));
 
-    const registeredTriggerTypes = triggerSchemas.getTriggerDefinitions().map((t) => ({
-      actionTypeId: t.id,
-      displayName: t.title ?? t.id,
-      isTrigger: true,
-      ...(t.icon !== undefined && { icon: t.icon }),
-    }));
+      const registeredTriggerTypes = triggerSchemas.getTriggerDefinitions().map((t) => ({
+        actionTypeId: t.id,
+        displayName: t.title ?? t.id,
+        isTrigger: true,
+        ...(t.icon !== undefined && { icon: t.icon }),
+      }));
 
-    const allTypes = [
-      ...predefinedStepTypes,
-      ...connectorTypes,
-      ...registeredTypes,
-      ...registeredTriggerTypes,
-    ];
+      return [
+        ...predefinedStepTypes,
+        ...connectorTypes,
+        ...registeredTypes,
+        ...registeredTriggerTypes,
+      ];
+    };
 
     const runInjection = async () => {
       const myRunId = ++injectionRunIdRef.current;
+      setStabilityBadgeThemeContext(euiThemeContext);
       // Use ref at injection time so retries (150ms, 500ms, etc.) see the current DOM and find the iframe if it appeared.
       const editorContainer = editorContainerRef?.current ?? undefined;
-      await injectDynamicConnectorIcons(allTypes, editorContainer);
+      const allTypes = getAllTypes();
+      const { colorMode } = euiThemeContext;
+      await injectDynamicConnectorIcons(allTypes, editorContainer, colorMode);
+      injectSuggestTechPreviewBadges(editorContainer, euiThemeContext);
       await injectDynamicShadowIcons(
         allTypes,
         editorContainer,
+        colorMode,
         () => myRunId !== injectionRunIdRef.current,
         (css) => onShadowIconsCssReadyRef.current?.(css),
         lastInjectedShadowCssRef
@@ -282,8 +356,18 @@ export function useDynamicTypeIcons(
     contentHasCustomTrigger,
     editorValue,
     editorContainerRef,
+    euiThemeContext,
   ]);
 }
+
+// Step type prefixes whose icons are monochrome glyphs (EUI icons rendered to SVG
+// with black default fill). Prefix matching avoids enumerating every member of
+// large extension families (data.*, ai.*, cases.*, security.*).
+const MONOCHROME_PREFIXES = ['data.', 'ai.', 'cases.', 'security.', 'search.'];
+
+export const isMonochromeActionType = (actionTypeId: string): boolean =>
+  MonochromeIcons.has(actionTypeId) ||
+  MONOCHROME_PREFIXES.some((prefix) => actionTypeId.startsWith(prefix));
 
 /**
  * Inject dynamic CSS for connector icons in Monaco autocompletion.
@@ -291,7 +375,8 @@ export function useDynamicTypeIcons(
  */
 async function injectDynamicConnectorIcons(
   connectorTypes: ConnectorTypeInfoMinimal[],
-  editorContainer: HTMLElement | undefined
+  editorContainer: HTMLElement | undefined,
+  colorMode: EuiThemeColorModeStandard
 ) {
   const styleId = 'dynamic-connector-icons';
   const targetDoc = editorContainer?.ownerDocument ?? document;
@@ -313,6 +398,7 @@ async function injectDynamicConnectorIcons(
       iconBase64 = await getIconBase64({
         ...connector,
         kind: isTrigger ? 'trigger' : 'step',
+        colorMode,
       });
     } catch {
       if (isTrigger) {
@@ -338,7 +424,7 @@ async function injectDynamicConnectorIcons(
       }
 
       let cssProperties = '';
-      if (MonochromeIcons.has(connector.actionTypeId)) {
+      if (isMonochromeActionType(connector.actionTypeId)) {
         cssProperties = `
         mask-image: url("${iconBase64}");
         mask-size: contain;
@@ -371,10 +457,30 @@ async function injectDynamicConnectorIcons(
   }
 }
 
+function injectSuggestTechPreviewBadges(
+  editorContainer: HTMLElement | undefined,
+  euiThemeContext: UseEuiTheme
+): void {
+  const styleId = 'dynamic-suggest-tech-preview-badges';
+  const targetDoc = editorContainer?.ownerDocument ?? document;
+  const ariaLabelPrefixes = collectTechPreviewSuggestAriaPrefixes();
+  const cssToInject = buildSuggestTechPreviewBadgeRules(ariaLabelPrefixes, euiThemeContext);
+
+  if (!cssToInject) {
+    return;
+  }
+
+  const style = targetDoc.createElement('style');
+  style.id = styleId;
+  style.textContent = cssToInject;
+  appendStyleToEditorScope(style, styleId, editorContainer, targetDoc);
+}
+
 /* eslint-disable-next-line complexity */
 async function injectDynamicShadowIcons(
   connectorTypes: ConnectorTypeInfoMinimal[],
   editorContainer: HTMLElement | undefined,
+  colorMode: EuiThemeColorModeStandard,
   isStale?: () => boolean,
   onCssReady?: (css: string) => void,
   lastInjectedCssRef?: React.MutableRefObject<string | null>
@@ -383,6 +489,9 @@ async function injectDynamicShadowIcons(
   const targetDoc = editorContainer?.ownerDocument ?? document;
   const boltUrl = getTriggerBoltFallbackDataUrl() || FALLBACK_BOLT_DATA_URL;
 
+  // `background-position`/`mask-position` are explicit because non-square marks (box is
+  // 41x22, monday_com 77.8x46.9) only fill part of the 12px box under `contain`, and the
+  // CSS default of top-left leaves them riding high next to the square ones.
   const baseRule = `
     content: "" !important;
     display: inline-block !important;
@@ -395,6 +504,8 @@ async function injectDynamicShadowIcons(
     color: inherit !important;
     background-size: contain !important;
     background-repeat: no-repeat !important;
+    background-position: center !important;
+    mask-position: center !important;
   `;
   const inlineScope = '.monaco-editor .view-line span';
   const glyphBaseRule = `
@@ -404,13 +515,17 @@ async function injectDynamicShadowIcons(
     height: 14px !important;
     background-size: contain !important;
     background-repeat: no-repeat !important;
+    background-position: center !important;
+    mask-position: center !important;
   `;
   const glyphDefault =
     boltUrl !== ''
       ? `
   [class^="trigger-type-glyph"]::before {
     ${glyphBaseRule}
-    background-image: url("${boltUrl}") !important;
+    mask-image: url("${boltUrl}");
+    mask-size: contain;
+    background-color: currentColor;
   }
   `
       : '';
@@ -421,7 +536,10 @@ async function injectDynamicShadowIcons(
   [class^="trigger-inline-icon-"]::before {
     content: '' !important; display: inline-block !important; width: 12px !important; height: 12px !important;
     margin-left: 4px !important; vertical-align: middle !important; background-size: contain !important; background-repeat: no-repeat !important;
-    background-image: url("${boltUrl}") !important;
+    background-position: center !important; mask-position: center !important;
+    mask-image: url("${boltUrl}");
+    mask-size: contain;
+    background-color: currentColor;
   }
   `
       : '';
@@ -439,27 +557,25 @@ async function injectDynamicShadowIcons(
   ${inlineScope}.type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}::after,
   span.type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}::after {
     ${baseRule}
-    background-image: url("${boltUrl}") !important;
+    mask-image: url("${boltUrl}");
+    mask-size: contain;
+    background-color: currentColor;
   }
   `;
   }
 
   for (const triggerId of TriggerTypes) {
-    const iconUrl = HardcodedIcons[triggerId] || boltUrl || FALLBACK_BOLT_DATA_URL;
+    const iconUrl = HardcodedIconDataUrls[triggerId] || boltUrl || FALLBACK_BOLT_DATA_URL;
     const notCustom = ':not([class*="type-ct-"])';
     cssToInject += `
   ${inlineScope}.type-inline-highlight.type-${triggerId}${notCustom}::after {
     ${baseRule}
-    background-image: url("${iconUrl}") !important;
+    mask-image: url("${iconUrl}");
+    mask-size: contain;
+    background-color: currentColor;
   }
   `;
   }
-
-  const isValidDataUrl = (url: string) =>
-    typeof url === 'string' &&
-    url.length > 50 &&
-    url.startsWith('data:') &&
-    url.includes('base64,');
 
   for (const connector of connectorTypes) {
     const isTriggerConnector = 'isTrigger' in connector && connector.isTrigger;
@@ -470,12 +586,14 @@ async function injectDynamicShadowIcons(
       iconBase64 = await getIconBase64({
         ...connector,
         kind: isTriggerConnector ? 'trigger' : 'step',
+        colorMode,
       });
     } catch {
       if (isTriggerConnector && boltUrl) {
         iconBase64 = boltUrl;
       } else if (isBuiltInTriggerId) {
-        iconBase64 = HardcodedIcons[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
+        iconBase64 =
+          HardcodedIconDataUrls[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
       }
     }
     if (isTriggerConnector && iconBase64 !== undefined && !isValidDataUrl(iconBase64) && boltUrl) {
@@ -501,25 +619,24 @@ async function injectDynamicShadowIcons(
         className = connectorType;
       }
 
-      let bgProp: string;
-      if (MonochromeIcons.has(connector.actionTypeId)) {
-        bgProp = `
+      const keepGlyphMask = isTriggerConnector
+        ? keepsTriggerGlyphMask(connector.actionTypeId, iconBase64, boltUrl)
+        : isMonochromeActionType(connector.actionTypeId);
+      const bgProp = keepGlyphMask
+        ? `
         mask-image: url("${iconBase64}");
         mask-size: contain;
         background-color: currentColor;
-      `;
-      } else {
-        bgProp = `background-image: url("${iconBase64}") !important;`;
-      }
+      `
+        : `background-image: url("${iconBase64}") !important;`;
 
       if (isTriggerConnector) {
-        const triggerIconUrl = isValidDataUrl(iconBase64)
-          ? iconBase64
-          : boltUrl || FALLBACK_BOLT_DATA_URL;
-        const triggerBgProp =
-          MonochromeIcons.has(connector.actionTypeId) && isValidDataUrl(iconBase64)
-            ? bgProp
-            : `background-image: url("${triggerIconUrl}") !important;`;
+        const triggerBgProp = getTriggerInlineIconBackground({
+          iconBase64,
+          monochromeBackground: bgProp,
+          boltUrl,
+          isMonochrome: keepGlyphMask,
+        });
         cssToInject += `
   .monaco-editor .type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}.${className}::after,
   ${inlineScope}.type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}.${className}::after,

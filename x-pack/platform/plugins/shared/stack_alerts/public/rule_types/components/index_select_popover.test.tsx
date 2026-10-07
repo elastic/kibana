@@ -13,12 +13,20 @@ import { IndexSelectPopover } from './index_select_popover';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
-// EuiComboBox uses FixedSizeList from react-window for virtualized rendering.
-// In jsdom the container has zero height so FixedSizeList renders no items.
+// EuiComboBox uses VariableSizeList from react-window for virtualized rendering.
+// In jsdom the container has zero height so the list renders no items.
 // Mock it to render all items directly so options appear in the DOM.
 jest.mock('react-window', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   FixedSizeList: ({ children, itemCount, itemData }: any) => (
+    <div>
+      {Array.from({ length: itemCount }, (_, index) =>
+        children({ index, style: {}, data: itemData })
+      )}
+    </div>
+  ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  VariableSizeList: ({ children, itemCount, itemData }: any) => (
     <div>
       {Array.from({ length: itemCount }, (_, index) =>
         children({ index, style: {}, data: itemData })

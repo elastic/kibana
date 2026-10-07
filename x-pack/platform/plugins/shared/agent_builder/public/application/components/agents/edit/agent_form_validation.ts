@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { agentIdRegexp, agentIdMaxLength } from '@kbn/agent-builder-common/agents';
+import {
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  agentIdRegexp,
+  agentIdMaxLength,
+} from '@kbn/agent-builder-common/agents';
 import {
   isInProtectedNamespace,
   hasNamespaceName,
@@ -92,7 +96,21 @@ export const agentFormSchema = z.object({
       defaultMessage: 'Agent description is required.',
     }),
   }),
-  visibility: z.enum(['private', 'public', 'shared']),
+  access_control: z.object({
+    access_mode: z.enum(['private', 'public', 'shared']),
+    entries: z.array(
+      z
+        .object({
+          type: z.literal('user'),
+          id: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH).optional(),
+          name: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH).optional(),
+          role: z.enum(['user', 'editor', 'manager']),
+        })
+        .refine((entry) => entry.id !== undefined || entry.name !== undefined, {
+          message: 'Access-control entry requires either `id` or `name`.',
+        })
+    ),
+  }),
   labels: z.array(z.string()).optional(),
   avatar_color: z
     .string()
@@ -127,6 +145,10 @@ export const agentFormSchema = z.object({
     skill_ids: z.array(z.string()).optional(),
     enable_elastic_capabilities: z.boolean().optional(),
     workflow_ids: z.array(z.string()).optional(),
+    post_execution_workflow_ids: z.array(z.string()).optional(),
     plugin_ids: z.array(z.string()).optional(),
+    connector_ids: z.array(z.string()).optional(),
+    ai_indices: z.array(z.string()).optional(),
+    subagent_ids: z.array(z.string()).default([]),
   }),
 });

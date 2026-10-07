@@ -51,14 +51,6 @@ const getTestUtils = (
           scheduled_task_id: response.body.scheduled_task_id,
           updated_by: null,
           api_key_owner: null,
-          ...(describeType === 'internal'
-            ? {
-                artifacts: {
-                  dashboards: [],
-                  investigation_guide: { blob: '' },
-                },
-              }
-            : {}),
           api_key_created_by_user: null,
           throttle: '1m',
           notify_when: 'onThrottleInterval',
@@ -74,6 +66,9 @@ const getTestUtils = (
                 monitoring: response.body.monitoring,
                 snooze_schedule: response.body.snooze_schedule,
                 is_snoozed_until: response.body.is_snoozed_until,
+                created_by_profile_uid: null,
+                updated_by_profile_uid: null,
+                api_key_owner_profile_uid: null,
               }
             : {}),
         });

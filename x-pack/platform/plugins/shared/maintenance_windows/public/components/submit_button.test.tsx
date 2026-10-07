@@ -56,7 +56,7 @@ describe('SubmitButton', () => {
     );
 
     fireEvent.click(result.getByTestId('create-submit'));
-    await waitFor(() => expect(onSubmit).toBeCalled());
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
   });
 
   it('it disables when submitting', async () => {

@@ -89,6 +89,7 @@ describe('actionTypeRegistry', () => {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
+              taskTypeGroup: 'actions',
               title: 'My connector type',
             },
           },
@@ -141,6 +142,19 @@ describe('actionTypeRegistry', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid feature ids \\"foo\\" for connector type \\"my-connector-type\\"."`
+      );
+    });
+
+    test('throws if a supported feature id exceeds the max length', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            supportedFeatureIds: ['a'.repeat(101)],
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature IDs for connector type \\"my-connector-type\\" must not exceed 100 characters."`
       );
     });
 
@@ -236,6 +250,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -294,6 +309,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -307,6 +323,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
 
@@ -445,6 +462,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -478,6 +496,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: true,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -512,6 +531,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['siem'],
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });

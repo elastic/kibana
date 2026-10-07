@@ -1,9 +1,6 @@
 {
   "slm.put_lifecycle": {
     "data_autocomplete_rules": {
-      "schedule": "",
-      "name": "",
-      "repository": "",
       "config": {
         "expanded_wildcards": {
           "__one_of": [

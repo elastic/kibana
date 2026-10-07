@@ -7,10 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { connectorsSpecs } from '@kbn/connector-specs';
+import {
+  PostBlockkitSubActionParamsSchema as SlackApiPostBlockkitParamsSchema,
+  PostMessageSubActionParamsSchema as SlackApiPostMessageParamsSchema,
+  ValidChannelIdSubActionParamsSchema as SlackApiValidChannelIdParamsSchema,
+} from '@kbn/connector-schemas/slack_api';
+import {
+  XSOARPlaybooksActionResponseSchema,
+  XSOARRunActionParamsSchema,
+  XSOARRunActionResponseSchema,
+} from '@kbn/connector-schemas/xsoar';
+import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
-import { FetcherConfigSchema, KibanaStepMetaSchema } from '@kbn/workflows';
+import {
+  KibanaFetcherConfigSchema,
+  KibanaHttpMethodSchema,
+  KibanaStepMetaSchema,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -95,9 +109,6 @@ import {
   ServiceNowGetIncidentParamsSchema,
   ServiceNowIncidentResponseSchema,
   ServiceNowUpdateIncidentParamsSchema,
-  SlackApiGetChannelsParamsSchema,
-  SlackApiGetUsersParamsSchema,
-  SlackApiPostMessageParamsSchema,
   SlackApiResponseSchema,
   SlackParamsSchema,
   SlackResponseSchema,
@@ -132,6 +143,12 @@ export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSc
       ])
     ),
   ])
+);
+
+export const inboundOnlyConnectorTypeIds = new Set(
+  Object.values(connectorsSpecs)
+    .filter(isInboundOnlyConnectorSpec)
+    .map((spec) => spec.metadata.id)
 );
 
 export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([
@@ -231,9 +248,9 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
   [
     '.slack_api',
     {
+      validChannelId: SlackApiValidChannelIdParamsSchema,
       postMessage: SlackApiPostMessageParamsSchema,
-      getChannels: SlackApiGetChannelsParamsSchema,
-      getUsers: SlackApiGetUsersParamsSchema,
+      postBlockkit: SlackApiPostBlockkitParamsSchema,
     },
   ],
   [
@@ -243,6 +260,13 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
       webhooks: TinesWebhooksParamsSchema,
       run: TinesRunParamsSchema,
       test: TinesTestParamsSchema,
+    },
+  ],
+  [
+    '.xsoar',
+    {
+      getPlaybooks: z.object({}),
+      run: XSOARRunActionParamsSchema,
     },
   ],
   [
@@ -389,9 +413,9 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
   [
     '.slack_api',
     {
+      validChannelId: SlackApiResponseSchema,
       postMessage: SlackApiResponseSchema,
-      getChannels: SlackApiResponseSchema,
-      getUsers: SlackApiResponseSchema,
+      postBlockkit: SlackApiResponseSchema,
     },
   ],
   [
@@ -401,6 +425,13 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
       webhooks: TinesResponseSchema,
       run: TinesResponseSchema,
       test: TinesResponseSchema,
+    },
+  ],
+  [
+    '.xsoar',
+    {
+      getPlaybooks: XSOARPlaybooksActionResponseSchema,
+      run: XSOARRunActionResponseSchema,
     },
   ],
   [
@@ -486,7 +517,7 @@ export const staticConnectors: BaseConnectorContract[] = [
     type: 'kibana.request',
     summary: 'Kibana Request',
     paramsSchema: z.object({
-      method: z.string().optional(),
+      method: KibanaHttpMethodSchema.optional().describe('The HTTP method to use for the request.'),
       path: z.string(),
       body: z.any().optional(),
       headers: z.any().optional(),
@@ -507,7 +538,7 @@ export const staticConnectors: BaseConnectorContract[] = [
         .describe(
           'Multipart form-data fields. Use instead of body for APIs that require file uploads (e.g. /api/saved_objects/_import). Mutually exclusive with body.'
         ),
-      fetcher: FetcherConfigSchema,
+      fetcher: KibanaFetcherConfigSchema,
       ...KibanaStepMetaSchema,
     }),
     outputSchema: z

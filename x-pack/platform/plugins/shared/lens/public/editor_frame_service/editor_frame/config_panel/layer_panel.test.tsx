@@ -9,11 +9,14 @@ import React from 'react';
 import { screen, fireEvent, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { faker } from '@faker-js/faker';
+import { BehaviorSubject } from 'rxjs';
 
 import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import type { ProviderProps } from '@kbn/dom-drag-drop/src';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { generateId } from '../../../id_generator';
 import {
@@ -27,14 +30,21 @@ import { createIndexPatternServiceMock } from '../../../mocks/data_views_service
 import type {
   LensAppState,
   FramePublicAPI,
+  LensInspector,
   Visualization,
   VisualizationConfigProps,
 } from '@kbn/lens-common';
 import { LayerPanel } from './layer_panel';
+import { ESQLEditor } from './esql_editor';
 import type { LayerPanelProps } from './types';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
+import { onActiveDataChange } from '../../../state_management';
 
 jest.mock('../../../id_generator');
+
+jest.mock('./esql_editor', () => ({
+  ESQLEditor: jest.fn(() => <div data-test-subj="mockESQLEditor" />),
+}));
 
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
@@ -89,6 +99,9 @@ describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
 
   let mockDatasource = createMockDatasource('formBased');
+  let mockTextBasedDatasource = createMockDatasource('textBased', {
+    isTextBasedLanguage: jest.fn(() => true),
+  });
 
   function getDefaultProps(): LayerPanelProps {
     return {
@@ -144,6 +157,7 @@ describe('LayerPanel', () => {
               }}
               datasourceMap={{
                 formBased: mockDatasource,
+                textBased: mockTextBasedDatasource,
               }}
             >
               {children}
@@ -164,6 +178,9 @@ describe('LayerPanel', () => {
     mockVisualization = createMockVisualization(faker.string.alphanumeric());
     mockVisualization.getLayerIds.mockReturnValue(['first']);
     mockDatasource = createMockDatasource();
+    mockTextBasedDatasource = createMockDatasource('textBased', {
+      isTextBasedLanguage: jest.fn(() => true),
+    });
   });
 
   afterEach(() => {
@@ -386,6 +403,10 @@ describe('LayerPanel', () => {
       renderLayerPanel();
       await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).toBeInTheDocument();
+      expect(mockVisualization.DimensionEditorComponent).toHaveBeenCalledWith(
+        expect.objectContaining({ datasource: mockDatasource.publicAPIMock }),
+        {}
+      );
     });
 
     it('should not render visualization dimension editor when clicking on empty dimension', async () => {
@@ -1119,6 +1140,635 @@ describe('LayerPanel', () => {
       const droppable = within(dimensionGroups[1]).getAllByTestId('lnsDragDrop-domDroppable')[0];
       fireEvent.dragOver(droppable);
       fireEvent.drop(droppable);
+    });
+  });
+
+  describe('ES|QL editor visibility', () => {
+    const esqlQuery = { esql: 'FROM test-index | LIMIT 10' };
+
+    const makeMixedDatasourceFrameAPI = (): FramePublicAPI => ({
+      ...createMockFramePublicAPI(),
+      datasourceLayers: {
+        data: mockTextBasedDatasource.publicAPIMock,
+        annotation: mockDatasource.publicAPIMock,
+      },
+    });
+
+    const mixedDatasourceState: Partial<LensAppState> = {
+      query: esqlQuery,
+      datasourceStates: {
+        textBased: {
+          isLoading: false,
+          state: { layers: { data: { query: esqlQuery } } },
+        },
+        formBased: {
+          isLoading: false,
+          state: { layers: { annotation: {} } },
+        },
+      },
+    };
+
+    // the ES|QL editor only renders for text-based documents (see `isTextBasedAttributes`)
+    const makeTextBasedAttributes = (layers: Record<string, unknown>) =>
+      ({
+        state: { datasourceStates: { textBased: { layers } } },
+      } as unknown as LayerPanelProps['attributes']);
+
+    it('renders the editor for the selected text-based layer', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['data', 'annotation']);
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'data',
+          isOnlyLayer: false,
+          framePublicAPI: makeMixedDatasourceFrameAPI(),
+          attributes: makeTextBasedAttributes({ data: { query: esqlQuery } }),
+        },
+        preloadedState: mixedDatasourceState,
+      });
+
+      expect(screen.getByTestId('mockESQLEditor')).toBeInTheDocument();
+      expect(jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({ onLayerQuerySubmit: expect.any(Function) })
+      );
+    });
+
+    it('uses the global query path when the only additional layer is a hidden trendline', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['data', 'trendline']);
+      const framePublicAPI = {
+        ...createMockFramePublicAPI(),
+        datasourceLayers: {
+          data: mockTextBasedDatasource.publicAPIMock,
+          trendline: mockTextBasedDatasource.publicAPIMock,
+        },
+      };
+      const textBasedState = {
+        query: esqlQuery,
+        datasourceStates: {
+          textBased: {
+            isLoading: false,
+            state: {
+              layers: {
+                data: { query: esqlQuery },
+                trendline: { query: esqlQuery },
+              },
+            },
+          },
+        },
+      };
+
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'data',
+          isOnlyLayer: true,
+          framePublicAPI,
+          attributes: makeTextBasedAttributes(
+            textBasedState.datasourceStates.textBased.state.layers
+          ),
+        },
+        preloadedState: textBasedState,
+      });
+
+      expect(jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0].onLayerQuerySubmit).toBeUndefined();
+    });
+
+    it('does not render the editor for a selected static annotation layer', () => {
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'annotation',
+          framePublicAPI: makeMixedDatasourceFrameAPI(),
+        },
+        preloadedState: mixedDatasourceState,
+      });
+
+      expect(screen.queryByTestId('mockESQLEditor')).not.toBeInTheDocument();
+    });
+
+    it('updates and reconciles only the selected text-based layer query', async () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      const firstQuery = { esql: 'FROM first-index | LIMIT 10' };
+      const secondQuery = { esql: 'FROM second-index | STATS COUNT(*)' };
+      const newSecondQuery = { esql: 'FROM second-index | STATS MAX(bytes)' };
+      const queryColumns: DatatableColumn[] = [
+        { id: 'MAX(bytes)', name: 'MAX(bytes)', meta: { type: 'number' } },
+      ];
+      const updateDatasource = jest.fn();
+      const textBasedState = {
+        layers: {
+          first: { index: 'index-a', columns: [], query: firstQuery },
+          second: {
+            columns: [
+              {
+                columnId: 'second-metric',
+                fieldName: 'COUNT(*)',
+                label: 'Count of records',
+                customLabel: true,
+                meta: { type: 'number' as const },
+              },
+            ],
+            query: secondQuery,
+          },
+        },
+        indexPatternRefs: [{ id: 'index-a', title: 'index-a', timeField: '@timestamp' }],
+      };
+
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'second',
+          isOnlyLayer: false,
+          dimensionGroups: [
+            {
+              groupId: 'metric',
+              groupLabel: 'Metric',
+              accessors: [{ columnId: 'second-metric' }],
+              supportsMoreColumns: true,
+              filterOperations: () => true,
+              dataTestSubj: 'metric',
+            },
+          ],
+          updateDatasource,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              first: mockTextBasedDatasource.publicAPIMock,
+              second: mockTextBasedDatasource.publicAPIMock,
+            },
+          },
+          attributes: makeTextBasedAttributes(textBasedState.layers),
+        },
+        preloadedState: {
+          query: firstQuery,
+          datasourceStates: {
+            textBased: { isLoading: false, state: textBasedState },
+          },
+        },
+      });
+
+      const editorProps = jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0];
+      expect(editorProps).toEqual(
+        expect.objectContaining({
+          layerId: 'second',
+          layerQuery: secondQuery,
+          onLayerQuerySubmit: expect.any(Function),
+        })
+      );
+
+      await act(async () =>
+        editorProps?.onLayerQuerySubmit?.(newSecondQuery, queryColumns, {
+          toSpec: () => ({ id: 'index-b', title: 'index-b', timeFieldName: '@timestamp' }),
+        } as DataView)
+      );
+
+      expect(updateDatasource).toHaveBeenCalledWith('textBased', {
+        ...textBasedState,
+        indexPatternRefs: [
+          { id: 'index-a', title: 'index-a', timeField: '@timestamp' },
+          { id: 'index-b', title: 'index-b', timeField: '@timestamp' },
+        ],
+        layers: {
+          first: textBasedState.layers.first,
+          second: {
+            ...textBasedState.layers.second,
+            index: 'index-b',
+            timeField: '@timestamp',
+            query: newSecondQuery,
+            columns: [
+              {
+                columnId: 'second-metric',
+                fieldName: 'MAX(bytes)',
+                label: 'Count of records',
+                customLabel: true,
+                meta: { type: 'number' },
+              },
+            ],
+            errors: undefined,
+          },
+        },
+      });
+
+      updateDatasource.mockClear();
+      const incompatibleQuery = { esql: 'FROM second-index | KEEP message' };
+      const incompatibleColumns: DatatableColumn[] = [
+        { id: 'message', name: 'message', meta: { type: 'string' } },
+      ];
+
+      await expect(
+        editorProps?.onLayerQuerySubmit?.(incompatibleQuery, incompatibleColumns, {
+          toSpec: () => ({ id: 'index-b', title: 'index-b', timeFieldName: '@timestamp' }),
+        } as DataView)
+      ).rejects.toThrow('does not contain compatible fields');
+      expect(updateDatasource).not.toHaveBeenCalled();
+    });
+
+    it('updates the selected layer source metadata when its query changes data views', async () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      const firstQuery = { esql: 'FROM first-index | LIMIT 10' };
+      const secondQuery = { esql: 'FROM old-index | STATS COUNT(*)' };
+      const newSecondQuery = { esql: 'FROM new-index | STATS COUNT(*)' };
+      const queryColumns: DatatableColumn[] = [
+        { id: 'COUNT(*)', name: 'COUNT(*)', meta: { type: 'number' } },
+      ];
+      const newDataView = {
+        id: 'new-index-id',
+        title: 'new-index',
+        timeFieldName: 'event.ingested',
+        toSpec: () => ({
+          id: 'new-index-id',
+          title: 'new-index',
+          timeFieldName: 'event.ingested',
+        }),
+      } as DataView;
+      const updateDatasource = jest.fn();
+      const textBasedState = {
+        layers: {
+          first: { index: 'first-index-id', columns: [], query: firstQuery },
+          second: {
+            index: 'old-index-id',
+            timeField: '@timestamp',
+            columns: [
+              {
+                columnId: 'second-metric',
+                fieldName: 'COUNT(*)',
+                meta: { type: 'number' as const },
+              },
+            ],
+            query: secondQuery,
+          },
+        },
+        indexPatternRefs: [
+          { id: 'first-index-id', title: 'first-index' },
+          { id: 'old-index-id', title: 'old-index', timeField: '@timestamp' },
+        ],
+      };
+
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'second',
+          isOnlyLayer: false,
+          dimensionGroups: [
+            {
+              groupId: 'metric',
+              groupLabel: 'Metric',
+              accessors: [{ columnId: 'second-metric' }],
+              supportsMoreColumns: true,
+              filterOperations: () => true,
+              dataTestSubj: 'metric',
+            },
+          ],
+          updateDatasource,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              first: mockTextBasedDatasource.publicAPIMock,
+              second: mockTextBasedDatasource.publicAPIMock,
+            },
+          },
+          attributes: makeTextBasedAttributes(textBasedState.layers),
+        },
+        preloadedState: {
+          query: firstQuery,
+          datasourceStates: {
+            textBased: { isLoading: false, state: textBasedState },
+          },
+        },
+      });
+
+      const onLayerQuerySubmit = jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0].onLayerQuerySubmit;
+      expect(onLayerQuerySubmit).toBeDefined();
+      await act(async () => {
+        await Reflect.apply(onLayerQuerySubmit!, undefined, [
+          newSecondQuery,
+          queryColumns,
+          newDataView,
+        ]);
+      });
+
+      expect(updateDatasource).toHaveBeenCalledWith(
+        'textBased',
+        expect.objectContaining({
+          indexPatternRefs: [
+            { id: 'first-index-id', title: 'first-index' },
+            { id: 'new-index-id', title: 'new-index', timeField: 'event.ingested' },
+          ],
+          layers: expect.objectContaining({
+            second: expect.objectContaining({
+              index: 'new-index-id',
+              timeField: 'event.ingested',
+              query: newSecondQuery,
+            }),
+          }),
+        })
+      );
+    });
+
+    // Regression test for duplicate-field columns: a previous reconcile can leave
+    // an orphan column (columnId === query column id) alongside a dimension-bound
+    // column with the same fieldName. Reconciliation must keep the dimension-bound
+    // column instead of letting the orphan shadow it, which surfaced as a
+    // persistent "does not contain compatible fields" error on every submit.
+    it('preserves dimensions bound to duplicate-field columns when the layer query changes', async () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      const bucketField = 'BUCKET(@timestamp, 50, ?_tstart, ?_tend)';
+      const updateDatasource = jest.fn();
+      const textBasedState = {
+        layers: {
+          first: { columns: [], query: { esql: 'FROM first-index | LIMIT 10' } },
+          second: {
+            columns: [
+              // orphan created by a previous reconcile, not referenced by any dimension
+              {
+                columnId: bucketField,
+                fieldName: bucketField,
+                label: bucketField,
+                meta: { type: 'date' as const },
+              },
+              // column created by the dimension editor for the same field,
+              // referenced by the horizontal axis accessor
+              {
+                columnId: 'col-bucket',
+                fieldName: bucketField,
+                label: bucketField,
+                meta: { type: 'date' as const },
+              },
+              {
+                columnId: 'col-metric',
+                fieldName: 'count',
+                label: 'count',
+                meta: { type: 'number' as const },
+              },
+            ],
+            query: { esql: `FROM index | STATS count = COUNT() BY ${bucketField}` },
+          },
+        },
+        indexPatternRefs: [],
+      };
+
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'second',
+          isOnlyLayer: false,
+          dimensionGroups: [
+            {
+              groupId: 'x',
+              groupLabel: 'Horizontal axis',
+              accessors: [{ columnId: 'col-bucket' }],
+              supportsMoreColumns: true,
+              filterOperations: () => true,
+              dataTestSubj: 'x',
+            },
+            {
+              groupId: 'metric',
+              groupLabel: 'Vertical axis',
+              accessors: [{ columnId: 'col-metric' }],
+              supportsMoreColumns: true,
+              filterOperations: () => true,
+              dataTestSubj: 'metric',
+            },
+          ],
+          updateDatasource,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              first: mockTextBasedDatasource.publicAPIMock,
+              second: mockTextBasedDatasource.publicAPIMock,
+            },
+          },
+          attributes: makeTextBasedAttributes(textBasedState.layers),
+        },
+        preloadedState: {
+          query: { esql: 'FROM first-index | LIMIT 10' },
+          datasourceStates: {
+            textBased: { isLoading: false, state: textBasedState },
+          },
+        },
+      });
+
+      const editorProps = jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0];
+      const newQuery = { esql: `FROM index | STATS meow = AVG(bytes) BY ${bucketField}` };
+      const queryColumns: DatatableColumn[] = [
+        { id: 'meow', name: 'meow', meta: { type: 'number' } },
+        { id: bucketField, name: bucketField, meta: { type: 'date' } },
+      ];
+
+      await act(async () =>
+        editorProps?.onLayerQuerySubmit?.(newQuery, queryColumns, {
+          toSpec: () => ({ id: 'index-b', title: 'index-b', timeFieldName: '@timestamp' }),
+        } as DataView)
+      );
+
+      expect(updateDatasource).toHaveBeenCalledTimes(1);
+      const nextColumns = updateDatasource.mock.calls[0][1].layers.second.columns;
+      expect(nextColumns.map((c: { columnId: string }) => c.columnId)).toEqual(
+        expect.arrayContaining(['col-bucket', 'col-metric'])
+      );
+    });
+  });
+
+  describe('layer data view picker visibility', () => {
+    // On ES|QL charts, form-based reference line layers must not expose the
+    // data view switcher (rendered via the datasource LayerPanelComponent).
+    const referenceLineState: Partial<LensAppState> = {
+      datasourceStates: {
+        formBased: {
+          isLoading: false,
+          state: { layers: { referenceLine: {} } },
+        },
+      },
+    };
+
+    it('hides the data view picker for a reference line layer on an ES|QL chart', () => {
+      mockVisualization.getLayerType.mockReturnValue('referenceLine');
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'referenceLine',
+          isOnlyLayer: false,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              data: mockTextBasedDatasource.publicAPIMock,
+              referenceLine: mockDatasource.publicAPIMock,
+            },
+          } as FramePublicAPI,
+        },
+        preloadedState: referenceLineState,
+      });
+
+      expect(mockDatasource.LayerPanelComponent).not.toHaveBeenCalled();
+    });
+
+    it('renders the data view picker for a reference line layer on a form-based chart', () => {
+      mockVisualization.getLayerType.mockReturnValue('referenceLine');
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'referenceLine',
+          isOnlyLayer: false,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              data: mockDatasource.publicAPIMock,
+              referenceLine: mockDatasource.publicAPIMock,
+            },
+          } as FramePublicAPI,
+        },
+        preloadedState: referenceLineState,
+      });
+
+      expect(mockDatasource.LayerPanelComponent).toHaveBeenCalled();
+    });
+  });
+
+  describe('activeData sync', () => {
+    const makeTable = (rows: Datatable['rows'] = []): Datatable =>
+      ({
+        type: 'datatable',
+        columns: [],
+        rows,
+        meta: { type: 'esql' },
+      } as unknown as Datatable);
+
+    const makeLensAdapters = (tables: Record<string, Datatable>) =>
+      ({
+        tables: { tables },
+      } as unknown as ReturnType<LensInspector['getInspectorAdapters']>);
+
+    const makeMultiLayerFrameAPI = (): FramePublicAPI => {
+      const secondDatasource = createMockDatasource('formBased');
+      return {
+        ...createMockFramePublicAPI(),
+        datasourceLayers: {
+          first: mockDatasource.publicAPIMock,
+          second: secondDatasource.publicAPIMock,
+        },
+      } as FramePublicAPI;
+    };
+
+    const lastDispatchedActiveData = (store: { dispatch: jest.Mock }) => {
+      const activeDataCalls = store.dispatch.mock.calls.filter(
+        ([action]) => action?.type === onActiveDataChange.type
+      );
+      return activeDataCalls.at(-1)?.[0].payload.activeData as
+        | Record<string, Datatable>
+        | undefined;
+    };
+
+    const countActiveDataDispatches = (store: { dispatch: jest.Mock }) =>
+      store.dispatch.mock.calls.filter(([action]) => action?.type === onActiveDataChange.type)
+        .length;
+
+    it('does not dispatch onActiveDataChange while dataLoading$ is still emitting true', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      mockVisualization.getConfiguration.mockReturnValue({ groups: [defaultGroup] });
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const table = makeTable();
+
+      const { store } = renderLayerPanel({
+        propsOverrides: {
+          layerId: 'first',
+          framePublicAPI: makeMultiLayerFrameAPI(),
+          dataLoading$,
+          lensAdapters: makeLensAdapters({ default: table }),
+        },
+      });
+
+      expect(countActiveDataDispatches(store)).toBe(0);
+    });
+
+    it('dispatches onActiveDataChange keyed by the first datasourceLayers id once data finishes loading', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      mockVisualization.getConfiguration.mockReturnValue({ groups: [defaultGroup] });
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const table = makeTable();
+
+      const { store } = renderLayerPanel({
+        propsOverrides: {
+          layerId: 'first',
+          framePublicAPI: makeMultiLayerFrameAPI(),
+          dataLoading$,
+          // Inspector adapter often emits a single table under a generic key (e.g. "default"),
+          // which the helper re-keys under the default layer id.
+          lensAdapters: makeLensAdapters({ default: table }),
+        },
+      });
+
+      act(() => {
+        dataLoading$.next(false);
+      });
+
+      const activeData = lastDispatchedActiveData(store);
+      expect(activeData).toBeDefined();
+      // Must be keyed by the first datasourceLayers entry (matching WorkspacePanel#onData$),
+      // NOT by the currently selected tab if that happens to differ.
+      expect(Object.keys(activeData ?? {})).toEqual(['first']);
+      expect(activeData?.first).toBe(table);
+    });
+
+    it('does not re-dispatch onActiveDataChange when the selected layer tab changes after data has loaded', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      mockVisualization.getConfiguration.mockReturnValue({ groups: [defaultGroup] });
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const table = makeTable();
+      const framePublicAPI = makeMultiLayerFrameAPI();
+      const lensAdapters = makeLensAdapters({ default: table });
+      const baseProps: Partial<LayerPanelProps> = {
+        framePublicAPI,
+        dataLoading$,
+        lensAdapters,
+      };
+
+      const { store, rerender } = renderLayerPanel({
+        propsOverrides: { layerId: 'first', ...baseProps },
+      });
+
+      act(() => {
+        dataLoading$.next(false);
+      });
+
+      const dispatchesAfterLoad = countActiveDataDispatches(store);
+      expect(dispatchesAfterLoad).toBe(1);
+      expect(lastDispatchedActiveData(store)).toEqual({ first: table });
+
+      // Simulate the user clicking the "second" layer tab in the config panel.
+      // The activeData in Redux must keep its first-layer key — otherwise the previously
+      // produced table would silently be re-attributed to the newly selected layer.
+      rerender(
+        <LayerPanel
+          {...(props as LayerPanelProps)}
+          {...baseProps}
+          layerId="second"
+          layerIndex={1}
+        />
+      );
+
+      expect(countActiveDataDispatches(store)).toBe(dispatchesAfterLoad);
+    });
+
+    it('preserves per-layer keys when the adapter has multiple tables', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      mockVisualization.getConfiguration.mockReturnValue({ groups: [defaultGroup] });
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const firstTable = makeTable([{ a: 1 }]);
+      const secondTable = makeTable([{ a: 2 }]);
+
+      const { store } = renderLayerPanel({
+        propsOverrides: {
+          layerId: 'first',
+          framePublicAPI: makeMultiLayerFrameAPI(),
+          dataLoading$,
+          lensAdapters: makeLensAdapters({ first: firstTable, second: secondTable }),
+        },
+      });
+
+      act(() => {
+        dataLoading$.next(false);
+      });
+
+      expect(lastDispatchedActiveData(store)).toEqual({
+        first: firstTable,
+        second: secondTable,
+      });
     });
   });
   // TODO - test user message display

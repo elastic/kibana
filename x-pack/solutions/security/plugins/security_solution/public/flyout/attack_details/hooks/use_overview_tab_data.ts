@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useAttackDetailsContext } from '../context';
 import { getField } from '../../document_details/shared/utils';
+import { getOriginalAlertIds } from '../../../attack_discovery/helpers';
 
 const FIELD_SUMMARY_MARKDOWN = 'kibana.alert.attack_discovery.summary_markdown' as const;
 const FIELD_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
@@ -16,11 +17,8 @@ const FIELD_DETAILS_MARKDOWN = 'kibana.alert.attack_discovery.details_markdown' 
 const FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS =
   'kibana.alert.attack_discovery.details_markdown_with_replacements' as const;
 
-/**
- * Centralized hook for Attack overview tab only
- */
 export const useOverviewTabData = () => {
-  const { getFieldsData } = useAttackDetailsContext();
+  const { getFieldsData, attack } = useAttackDetailsContext();
 
   const summaryMarkdown = useMemo(
     () => getField(getFieldsData(FIELD_SUMMARY_MARKDOWN)) ?? '',
@@ -39,18 +37,25 @@ export const useOverviewTabData = () => {
     [getFieldsData]
   );
 
+  const originalAlertIds = useMemo(
+    () => (attack ? getOriginalAlertIds(attack.alertIds, attack.replacements) : []),
+    [attack]
+  );
+
   return useMemo(
     () => ({
       summaryMarkdown,
       summaryMarkdownWithReplacements,
       detailsMarkdown,
       detailsMarkdownWithReplacements,
+      originalAlertIds,
     }),
     [
       detailsMarkdown,
       detailsMarkdownWithReplacements,
       summaryMarkdown,
       summaryMarkdownWithReplacements,
+      originalAlertIds,
     ]
   );
 };

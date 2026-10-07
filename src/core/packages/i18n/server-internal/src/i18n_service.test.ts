@@ -9,6 +9,8 @@
 
 import {
   getAllKibanaTranslationFilesMock,
+  groupFilesByLocaleMock,
+  computeLocaleFileHashMock,
   initTranslationsMock,
   registerRoutesMock,
 } from './i18n_service.test.mocks';
@@ -22,7 +24,8 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 const getConfigService = (
   defaultLocale = 'en',
-  locales: string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE']
+  locales: string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR'],
+  { allowLocaleCookie = true, detectBrowserLocale = true } = {}
 ) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
@@ -30,6 +33,8 @@ const getConfigService = (
       return new BehaviorSubject({
         defaultLocale,
         locales,
+        allowLocaleCookie,
+        detectBrowserLocale,
       });
     }
     return new BehaviorSubject({});
@@ -46,6 +51,8 @@ describe('I18nService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    groupFilesByLocaleMock.mockReturnValue({});
+    computeLocaleFileHashMock.mockResolvedValue('mock-file-hash');
     configService = getConfigService();
 
     coreContext = mockCoreContext.create({ configService });
@@ -72,6 +79,7 @@ describe('I18nService', () => {
         'ja-JP',
         'zh-CN',
         'de-DE',
+        'pt-BR',
       ]);
     });
 
@@ -94,6 +102,7 @@ describe('I18nService', () => {
         router: expect.any(Object),
         isDist: coreContext.env.packageInfo.dist,
         translationHashes: expect.any(Object),
+        localeFileMap: expect.any(Object),
       });
     });
   });
@@ -121,6 +130,7 @@ describe('I18nService', () => {
         'ja-JP',
         'zh-CN',
         'de-DE',
+        'pt-BR',
       ]);
     });
 
@@ -143,6 +153,7 @@ describe('I18nService', () => {
         router: expect.any(Object),
         isDist: coreContext.env.packageInfo.dist,
         translationHashes: expect.any(Object),
+        localeFileMap: expect.any(Object),
       });
     });
 
@@ -157,7 +168,7 @@ describe('I18nService', () => {
         });
 
       expect(getLocale()).toEqual('en');
-      expect(getLocales()).toEqual(['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE']);
+      expect(getLocales()).toEqual(['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR']);
       // Labels come from Intl.DisplayNames in the endonym pattern. Each
       // language's own orthographic convention applies — French does not
       // capitalise language names, hence "français" (lowercase).
@@ -167,9 +178,25 @@ describe('I18nService', () => {
         { id: 'ja-JP', label: '日本語' },
         { id: 'zh-CN', label: '中文' },
         { id: 'de-DE', label: 'Deutsch' },
+        { id: 'pt-BR', label: 'português' },
       ]);
       expect(getTranslationFiles()).toEqual(translationFiles);
     });
+
+    it.each([true, false])(
+      'exposes i18n.detectBrowserLocale: %s on the preboot and setup contracts',
+      async (detectBrowserLocale) => {
+        configService = getConfigService(undefined, undefined, { detectBrowserLocale });
+        coreContext = mockCoreContext.create({ configService });
+        service = new I18nService(coreContext);
+
+        const preboot = await service.preboot({ pluginPaths: [], http: httpPreboot });
+        const setup = await service.setup({ pluginPaths: [], http: httpSetup });
+
+        expect(preboot.detectBrowserLocale).toBe(detectBrowserLocale);
+        expect(setup.detectBrowserLocale).toBe(detectBrowserLocale);
+      }
+    );
 
     it('hashes the defaultLocale even when i18n.locales is empty', async () => {
       configService = getConfigService('en', []);
@@ -190,6 +217,7 @@ describe('I18nService', () => {
         router: expect.any(Object),
         isDist: coreContext.env.packageInfo.dist,
         translationHashes: expect.objectContaining({ en: expect.any(String) }),
+        localeFileMap: expect.any(Object),
       });
     });
   });

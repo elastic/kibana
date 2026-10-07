@@ -15,11 +15,15 @@ import type {
 } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { parseDuration } from '../../../utils';
+import type {
+  OutputSizeStats,
+  OutputSizeTelemetryFields,
+} from '../events/workflows_execution/types';
 
 /**
  * Metadata extracted from a workflow execution for telemetry purposes
  */
-export interface WorkflowExecutionTelemetryMetadata {
+export interface WorkflowExecutionTelemetryMetadata extends OutputSizeTelemetryFields {
   /**
    * Number of steps that were executed
    */
@@ -179,7 +183,8 @@ function extractTimeoutInfo(
  */
 export function extractExecutionMetadata(
   workflowExecution: EsWorkflowExecution,
-  stepExecutions: EsWorkflowStepExecution[]
+  stepExecutions: EsWorkflowStepExecution[],
+  outputSizeStats?: OutputSizeStats
 ): WorkflowExecutionTelemetryMetadata {
   const executedStepCount = stepExecutions.length;
   const successfulStepCount = stepExecutions.filter((step) => step.status === 'completed').length;
@@ -268,6 +273,11 @@ export function extractExecutionMetadata(
     }),
     ...(stepDurations.length > 0 && { stepDurations }),
     ...(Object.keys(stepAvgDurationsByType).length > 0 && { stepAvgDurationsByType }),
+    ...(outputSizeStats &&
+      outputSizeStats.stepCount > 0 && {
+        totalOutputSizeBytes: outputSizeStats.totalBytes,
+        averageOutputSizeBytes: Math.round(outputSizeStats.totalBytes / outputSizeStats.stepCount),
+      }),
   };
 }
 

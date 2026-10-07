@@ -23,7 +23,7 @@ export const ListPrivMonUsersRequestQuery = lazySchema(() =>
     /**
      * KQL query to filter the list of monitored users
      */
-    kql: z.string().optional(),
+    kql: z.string().optional().describe('KQL query to filter the list of monitored users'),
   })
 );
 export type ListPrivMonUsersRequestQuery = z.infer<typeof ListPrivMonUsersRequestQuery>;

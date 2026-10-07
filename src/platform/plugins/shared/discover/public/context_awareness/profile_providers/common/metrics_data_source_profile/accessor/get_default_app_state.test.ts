@@ -8,6 +8,7 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../..';
 import { DataSourceCategory } from '../../../../profiles';
 import type { DefaultAppStateExtension, DefaultAppStateExtensionParams } from '../../../../types';
 import { getDefaultAppState } from './get_default_app_state';
@@ -17,6 +18,7 @@ const createGetDefaultAppState = (prevAppState: DefaultAppStateExtension) =>
     context: {
       category: DataSourceCategory.Metrics,
     },
+    toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
 
 describe('getDefaultAppState', () => {
@@ -34,6 +36,7 @@ describe('getDefaultAppState', () => {
       ...prevAppState,
       hideChart: false,
       hideTable: true,
+      hideSidebar: true,
     });
   });
 
@@ -42,6 +45,7 @@ describe('getDefaultAppState', () => {
     const prevAppState: DefaultAppStateExtension = {
       hideChart: true,
       hideTable: false,
+      hideSidebar: false,
     };
 
     const appState = createGetDefaultAppState(prevAppState)(params);
@@ -49,6 +53,7 @@ describe('getDefaultAppState', () => {
     expect(appState).toEqual({
       hideChart: false,
       hideTable: true,
+      hideSidebar: true,
     });
   });
 });

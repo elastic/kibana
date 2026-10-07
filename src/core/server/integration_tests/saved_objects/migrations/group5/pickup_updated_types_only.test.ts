@@ -16,7 +16,6 @@ import {
   createBaseline,
   getCompatibleMigratorTestKit,
   getUpToDateMigratorTestKit,
-  getReindexingMigratorTestKit,
 } from '@kbn/migrator-test-kit/fixtures';
 import '../jest_matchers';
 import { parseLogFile } from '../test_utils';
@@ -33,23 +32,6 @@ describe('pickupUpdatedMappings', () => {
   beforeEach(async () => {
     await createBaseline();
     await clearLog(logFilePath);
-  });
-
-  describe('when performing a reindexing migration', () => {
-    it('should pickup all documents from the index', async () => {
-      const { runMigrations } = await getReindexingMigratorTestKit({ logFilePath });
-
-      await runMigrations();
-
-      const logs = await parseLogFile(logFilePath);
-
-      expect(logs).not.toContainLogEntry(
-        `[${defaultKibanaIndex}] Documents of the following SO types will be updated`
-      );
-      expect(logs).not.toContainLogEntry(
-        `[${defaultKibanaIndex}] There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.`
-      );
-    });
   });
 
   describe('when performing a compatible migration', () => {

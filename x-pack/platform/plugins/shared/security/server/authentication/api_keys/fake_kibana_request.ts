@@ -17,7 +17,6 @@ export function getFakeKibanaRequest(apiKey: { id: string; api_key: string }) {
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    path: '/',
   };
 
   return kibanaRequestFactory(fakeRawRequest);

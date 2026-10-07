@@ -28,10 +28,9 @@ apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: tags.serverless.all
     [string, { accessToken: string; refreshToken: string }]
   >;
 
-  apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
+  apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
     userSessionCookieFactory = async () => {
       const samlResponse = await createSAMLResponse({
-        kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
         username: '1234567890',
         email: 'elastic_viewer@elastic.co',
         roles: ['viewer'],

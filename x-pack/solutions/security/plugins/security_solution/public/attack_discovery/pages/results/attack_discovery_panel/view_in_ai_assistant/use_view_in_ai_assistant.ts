@@ -25,7 +25,8 @@ export const useViewInAiAssistant = ({
   attackDiscovery: AttackDiscovery | undefined;
   replacements?: Replacements;
 }) => {
-  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
+    useAssistantAvailability();
 
   // the prompt context for this insight:
   const getPromptContext = useCallback(
@@ -60,7 +61,7 @@ export const useViewInAiAssistant = ({
   const disabled = attackDiscovery == null || !hasAssistantPrivilege || promptContextId == null;
 
   return useMemo(
-    () => ({ promptContextId, disabled, showAssistantOverlay }),
-    [promptContextId, disabled, showAssistantOverlay]
+    () => ({ promptContextId, disabled, showAssistantOverlay, isAssistantVisible }),
+    [promptContextId, disabled, showAssistantOverlay, isAssistantVisible]
   );
 };

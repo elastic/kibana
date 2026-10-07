@@ -100,6 +100,15 @@ function validateOAuth2(
   configObject: ConnectorTypeConfigType,
   configurationUtilities: ActionsConfigurationUtilities
 ) {
+  if (configObject.authType === AuthType.OAuth2Password) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.webhook.oauth2PasswordNotSupportedError', {
+        defaultMessage:
+          'error validation webhook action config: OAuth2 password grant authentication is not supported',
+      })
+    );
+  }
+
   if (configObject.authType !== AuthType.OAuth2ClientCredentials) {
     return;
   }

@@ -58,7 +58,7 @@ module_data=""
 SCHEDULED_MANIFEST="scout_playwright_configs_scheduled.json"
 if [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- Downloading Scout Test Configuration"
-  download_artifact "$SCHEDULED_MANIFEST" .
+  download_tmp_artifact "$SCHEDULED_MANIFEST" . "$BUILDKITE_BUILD_ID"
 
   # Extract module and its configs
   module_data=$(jq -c ".[] | select(.name == env.SCOUT_CONFIG_GROUP_KEY)" "$SCHEDULED_MANIFEST")

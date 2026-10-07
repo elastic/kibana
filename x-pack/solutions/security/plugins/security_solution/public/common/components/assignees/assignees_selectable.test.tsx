@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { UserProfilesSelectable } from '@kbn/user-profile-components';
 
 import { AssigneesSelectable } from './assignees_selectable';
 
@@ -21,6 +22,16 @@ import { mockUserProfiles } from './mocks';
 jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_profiles/use_suggest_users');
+
+// Spied rather than stubbed: the option list is virtualised, so the rows it is asked to render
+// are only observable as props, while the tests below this one still need the real component.
+jest.mock('@kbn/user-profile-components', () => {
+  const actual = jest.requireActual('@kbn/user-profile-components');
+  return {
+    ...actual,
+    UserProfilesSelectable: jest.fn((props) => actual.UserProfilesSelectable(props)),
+  };
+});
 
 const renderAssigneesSelectable = (
   {
@@ -48,6 +59,49 @@ const renderAssigneesSelectable = (
     </TestProviders>
   );
 };
+
+const lastSelectableProps = () => {
+  const { calls } = (UserProfilesSelectable as unknown as jest.Mock).mock;
+  return calls[calls.length - 1][0];
+};
+
+describe('<AssigneesSelectable /> option ordering', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useSuggestUsers as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles,
+    });
+  });
+
+  it('should withhold the options until the current user profile has resolved', () => {
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+      isLoading: true,
+      data: undefined,
+    });
+
+    renderAssigneesSelectable({ assignedUserIds: [] });
+
+    expect(lastSelectableProps().options).toEqual([]);
+    expect(lastSelectableProps().isLoading).toBe(true);
+  });
+
+  it('should bring the current user to the front once their profile has resolved', () => {
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles[2],
+    });
+
+    renderAssigneesSelectable({ assignedUserIds: [] });
+
+    expect(lastSelectableProps().options).toEqual([
+      mockUserProfiles[2],
+      mockUserProfiles[0],
+      mockUserProfiles[1],
+    ]);
+    expect(lastSelectableProps().isLoading).toBe(false);
+  });
+});
 
 // Failing: See https://github.com/elastic/kibana/issues/260306
 describe.skip('<AssigneesSelectable />', () => {

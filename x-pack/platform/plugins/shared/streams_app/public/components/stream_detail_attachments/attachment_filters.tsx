@@ -134,6 +134,10 @@ export function AttachmentFilters({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.streams.attachmentFilters.typeFilterPopoverAriaLabel',
+              { defaultMessage: 'Attachment type filter options' }
+            )}
             id={typePopoverId}
             button={typeFilterButton}
             isOpen={isTypePopoverOpen}
@@ -154,6 +158,7 @@ export function AttachmentFilters({
                 checked: filters.types.includes(option.value) ? 'on' : undefined,
                 value: option.value,
               }))}
+              listProps={{ paddingSize: 's' }}
               onChange={(newOptions) => {
                 onFiltersChange((prev) => ({
                   ...prev,
@@ -176,6 +181,10 @@ export function AttachmentFilters({
             </EuiSelectable>
           </EuiPopover>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.streams.attachmentFilters.tagsFilterPopoverAriaLabel',
+              { defaultMessage: 'Attachment tag filter options' }
+            )}
             id={tagsPopoverId}
             button={tagsFilterButton}
             isOpen={isTagsPopoverOpen}
@@ -196,6 +205,7 @@ export function AttachmentFilters({
                 checked: filters.tags.includes(tag.id) ? 'on' : undefined,
                 tagId: tag.id,
               }))}
+              listProps={{ paddingSize: 's' }}
               onChange={(newOptions) => {
                 onFiltersChange((prev) => ({
                   ...prev,

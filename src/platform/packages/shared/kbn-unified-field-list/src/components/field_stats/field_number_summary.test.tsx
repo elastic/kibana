@@ -9,57 +9,62 @@
 
 import React from 'react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FieldNumberSummary } from './field_number_summary';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, within } from '@testing-library/react';
 
 const dataView = createStubDataView({
   spec: {
-    id: 'test',
-    title: 'test',
     fields: {
       bytes_counter: {
-        timeSeriesMetric: 'counter',
-        name: 'bytes_counter',
-        type: 'number',
-        esTypes: ['long'],
         aggregatable: true,
-        searchable: true,
         count: 10,
+        esTypes: ['long'],
+        isMapped: true,
+        name: 'bytes_counter',
         readFromDocValues: true,
         scripted: false,
-        isMapped: true,
+        searchable: true,
+        timeSeriesMetric: 'counter',
+        type: 'number',
       },
     },
+    id: 'test',
+    title: 'test',
   },
 });
 
 describe('UnifiedFieldList <FieldNumberSummary />', () => {
-  it('should render min and max correctly', async () => {
-    const wrapper = mountWithIntl(
+  it('should render min and max correctly', () => {
+    renderWithI18n(
       <FieldNumberSummary
+        data-test-subj="test-subj"
         dataView={dataView}
         field={dataView.getFieldByName('bytes_counter')!}
         numberSummary={{
-          minValue: 45,
           maxValue: 12345,
+          minValue: 45,
         }}
-        data-test-subj="test-subj"
       />
     );
 
-    expect(wrapper.text()).toBe('min45max12345');
+    const summary = screen.getByTestId('test-subj-numberSummary');
+    expect(within(summary).getByText('min')).toBeVisible();
+    expect(within(summary).getByText('45')).toBeVisible();
+    expect(within(summary).getByText('max')).toBeVisible();
+    expect(within(summary).getByText('12345')).toBeVisible();
   });
 
-  it('should not fail if data is invalid', async () => {
-    const wrapper = mountWithIntl(
+  it('should not fail if data is invalid', () => {
+    renderWithI18n(
       <FieldNumberSummary
+        data-test-subj="test-subj"
         dataView={dataView}
         field={dataView.getFieldByName('bytes_counter')!}
         numberSummary={undefined}
-        data-test-subj="test-subj"
       />
     );
 
-    expect(wrapper.isEmptyRender()).toBe(true);
+    expect(screen.queryByTestId('test-subj-numberSummary')).not.toBeInTheDocument();
   });
 });

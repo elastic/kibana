@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -17,25 +18,34 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { QueryClient } from '@kbn/react-query';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type {
+  WorkflowsExtensionsPublicPluginSetup,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
 import type {
   AvailabilityService,
   ServerlessTierRequiredProducts,
 } from './common/lib/availability';
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
+import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPublicPluginSetup {}
 
 export interface WorkflowsPublicPluginSetupDependencies {
+  actions: ActionsPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface WorkflowsPublicPluginStart {
@@ -48,9 +58,25 @@ export interface WorkflowsPublicPluginStart {
   setUnavailableInServerlessTier: (options: {
     requiredProducts: ServerlessTierRequiredProducts;
   }) => void;
+  /**
+   * Lazily resolves the shared workflow-domain telemetry singleton. Sibling
+   * plugins that emit workflow-related EBT events should use this instance so
+   * events are reported by a single owner. The factory is lazy so that the
+   * heavy telemetry module stays out of the page-load bundle.
+   */
+  getTelemetry: () => Promise<WorkflowsBaseTelemetry>;
+  /**
+   * Lazily resolves the shared React Query client used by the workflows UI.
+   * Sibling plugins that mutate workflows from outside the workflows app must
+   * use this client so workflows_management's cached queries get invalidated.
+   * The factory is lazy so that @kbn/react-query stays out of the page-load
+   * bundle.
+   */
+  getQueryClient: () => Promise<QueryClient>;
 }
 
 export interface WorkflowsPublicPluginStartDependencies {
+  security: SecurityPluginStart;
   navigation: NavigationPublicPluginStart;
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -62,10 +88,12 @@ export interface WorkflowsPublicPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart;
   licensing: LicensingPluginStart;
+  uiActions: UiActionsStart;
   cloud?: CloudStart;
 }
 
 export interface WorkflowsPublicPluginStartAdditionalServices {
+  securityUi: SecurityPluginStart['uiApi'];
   storage: Storage;
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
@@ -75,5 +103,5 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
 }
 
 export type WorkflowsServices = CoreStart &
-  WorkflowsPublicPluginStartDependencies &
+  Omit<WorkflowsPublicPluginStartDependencies, 'security'> &
   WorkflowsPublicPluginStartAdditionalServices;

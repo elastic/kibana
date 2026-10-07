@@ -16,7 +16,7 @@ import {
   EuiSelectable,
   EuiText,
 } from '@elastic/eui';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import type { UrlTemplateEditorVariable } from '../url_template_editor';
 import {
   txtAddVariableButtonTitle,
   txtUrlTemplateVariablesHelpLinkText,
@@ -51,7 +51,7 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
       }
       isOpen={isVariablesPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       anchorPosition="downLeft"
       aria-label={txtVariablePopoverAriaLabel}
     >

@@ -96,7 +96,7 @@ export function getConnectorType(
 ): ConnectorTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   return {
     id: CONNECTOR_ID,
-    iconClass: 'email',
+    iconClass: 'mail',
     selectMessage: i18n.translate('xpack.stackConnectors.components.email.selectMessageText', {
       defaultMessage: 'Send email from your server.',
     }),

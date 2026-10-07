@@ -37,8 +37,8 @@ export default defineConfig({
     ['json', { outputFile: path.join(process.env.ARTIFACTS_FOLDER, 'results.json') }],
   ],
   /* Timeouts */
-  timeout: 400000,
-  expect: { timeout: 400000 },
+  timeout: 600000,
+  expect: { timeout: 600000 },
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {

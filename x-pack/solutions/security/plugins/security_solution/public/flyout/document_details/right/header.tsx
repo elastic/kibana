@@ -18,7 +18,7 @@ import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
 import { useDocumentDetailsContext } from '../shared/context';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
-import { RemoteDocumentCallout } from '../../../flyout_v2/document/components/remote_document_callout';
+import { RemoteDocumentCallout } from '../../../flyout_v2/document/main/components/remote_document_callout';
 
 export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   /**

@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { useTraceWaterfallContext } from '@kbn/apm-ui-shared';
+import { Router } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { Router } from '@kbn/shared-ux-router';
+import React from 'react';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { UnifiedWaterfallFlyout } from './unified_waterfall_flyout';
-import { useTraceWaterfallContext } from '../../../../shared/trace_waterfall/trace_waterfall_context';
 
-jest.mock('../../../../shared/trace_waterfall/trace_waterfall_context', () => ({
+jest.mock('@kbn/apm-ui-shared', () => ({
   useTraceWaterfallContext: jest.fn(),
 }));
 
@@ -58,7 +58,10 @@ const ROOT_TRANSACTION: TraceItem = {
   timestampUs: 1_737_000_000_000_000,
   traceId: 'trace-abc',
   duration: 2_000_000,
-  errors: [{ errorDocId: 'err-1' }, { errorDocId: 'err-2' }],
+  errors: [
+    { errorDocId: 'err-1', source: 'apm' },
+    { errorDocId: 'err-2', source: 'apm' },
+  ],
   serviceName: 'products-service',
   spanLinksCount: { incoming: 3, outgoing: 1 },
   docType: 'transaction',

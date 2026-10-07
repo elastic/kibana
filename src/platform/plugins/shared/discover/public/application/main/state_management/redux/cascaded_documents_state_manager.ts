@@ -26,6 +26,10 @@ export const createCascadedDocumentsStateManager = ({
     const currentTab = selectTab(internalState.getState(), tabId);
     return currentTab.cascadedDocumentsState.cascadedDocumentsMap[nodeId];
   },
+  getColumnsMeta() {
+    const currentTab = selectTab(internalState.getState(), tabId);
+    return currentTab.cascadedDocumentsState.columnsMeta;
+  },
   setCascadedDocuments(nodeId, records) {
     const currentTab = selectTab(internalState.getState(), tabId);
     const cascadedDocumentsState = currentTab.cascadedDocumentsState;
@@ -38,6 +42,19 @@ export const createCascadedDocumentsStateManager = ({
             ...cascadedDocumentsState.cascadedDocumentsMap,
             [nodeId]: records,
           },
+        },
+      })
+    );
+  },
+  setColumnsMeta(columnsMeta) {
+    const currentTab = selectTab(internalState.getState(), tabId);
+    const cascadedDocumentsState = currentTab.cascadedDocumentsState;
+    internalState.dispatch(
+      internalStateSlice.actions.setCascadedDocumentsState({
+        tabId,
+        cascadedDocumentsState: {
+          ...cascadedDocumentsState,
+          columnsMeta,
         },
       })
     );

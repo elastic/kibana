@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import { QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -17,8 +17,8 @@ import { AlertEpisodeTagsFlyout } from './actions/edit_episode_tags_flyout';
 
 interface TagsFlyoutInnerProps {
   currentTags: string[];
-  http: HttpStart;
-  expressions: ExpressionsStart;
+  fetchAdditionalSuggestions?: () => Promise<string[]>;
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   onConfirm: (tags: string[]) => void;
   onCancel: () => void;
 }
@@ -27,19 +27,26 @@ interface TagsFlyoutInnerProps {
 // mount the content-only variant here to avoid nesting two flyouts.
 export const TagsFlyoutInner = ({
   currentTags,
-  http,
-  expressions,
+  fetchAdditionalSuggestions,
+  services,
   onConfirm,
   onCancel,
 }: TagsFlyoutInnerProps) => {
+  const [additionalSuggestions, setAdditionalSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchAdditionalSuggestions?.()
+      .then(setAdditionalSuggestions)
+      .catch(() => setAdditionalSuggestions([]));
+  }, [fetchAdditionalSuggestions]);
+
   return (
     <AlertEpisodeTagsFlyout
       embedded
       onClose={onCancel}
-      groupHash=""
       currentTags={currentTags}
-      http={http}
-      services={{ expressions }}
+      additionalSuggestions={additionalSuggestions}
+      services={services}
       onSave={onConfirm}
     />
   );
@@ -49,7 +56,12 @@ export const openTagsFlyout = (
   overlays: OverlayStart,
   rendering: CoreStart['rendering'],
   currentTags: string[],
-  deps: { http: HttpStart; expressions: ExpressionsStart; queryClient: QueryClient }
+  deps: {
+    expressions: ExpressionsStart;
+    spaces: SpacesPluginStart;
+    queryClient: QueryClient;
+    fetchAdditionalSuggestions?: () => Promise<string[]>;
+  }
 ): Promise<string[] | undefined> => {
   return new Promise<string[] | undefined>((resolve) => {
     const ref = overlays.openFlyout(
@@ -61,8 +73,8 @@ export const openTagsFlyout = (
         <QueryClientProvider client={deps.queryClient}>
           <TagsFlyoutInner
             currentTags={currentTags}
-            http={deps.http}
-            expressions={deps.expressions}
+            fetchAdditionalSuggestions={deps.fetchAdditionalSuggestions}
+            services={{ expressions: deps.expressions, spaces: deps.spaces }}
             onConfirm={(tags) => {
               ref.close();
               resolve(tags);

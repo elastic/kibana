@@ -53,6 +53,7 @@ export const GroupsFilterPopoverComponent = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.GROUPS}
       ownFocus
       button={
         <EuiFilterButton
@@ -84,7 +85,7 @@ export const GroupsFilterPopoverComponent = ({
       {uniqueGroups.length === 0 && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
           <EuiFlexItem grow={true}>
-            <EuiIcon type="minusCircle" />
+            <EuiIcon type="minusCircle" aria-hidden={true} />
             <EuiSpacer size="xs" />
             <p>{i18n.NO_GROUPS_AVAILABLE}</p>
           </EuiFlexItem>

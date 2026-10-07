@@ -8,7 +8,7 @@
  */
 
 import invariant from 'node:assert';
-import type api from '@elastic/elasticsearch/lib/api/types';
+import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { prettyPrintAndSortKeys } from '@kbn/utils';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -125,8 +125,10 @@ export async function initializeDataStream({
       `Datastream ${dataStream.name} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
     );
 
-    if (deployedVersion >= version) {
-      // index already applied and updated.
+    // Only short-circuit when the data stream itself already exists. If the template was
+    // installed earlier (e.g. via `initializeTemplate`) but the data stream was never
+    // created, we still need to fall through to the creation path below.
+    if (existingDataStream && deployedVersion >= version) {
       logger.debug(`Deployed ${dataStream.name} v${deployedVersion} already applied and updated.`);
       return { uptoDate: true };
     }

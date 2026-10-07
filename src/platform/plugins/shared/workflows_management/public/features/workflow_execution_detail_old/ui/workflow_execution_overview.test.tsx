@@ -1,0 +1,389 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
+import { WorkflowExecutionOverview } from './workflow_execution_overview';
+import { useKibana } from '../../../hooks/use_kibana';
+import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
+import { createQueryClientWrapper } from '../../../shared/test_utils/query_client_wrapper';
+import { buildOverviewStepExecutionFromContext } from '../../workflow_execution_detail/ui/workflow_pseudo_step_context';
+
+jest.mock('../../../hooks/use_kibana');
+
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(<I18nProvider>{component}</I18nProvider>, { wrapper: createQueryClientWrapper() });
+};
+
+jest.mock('./step_execution_data_view', () => ({
+  StepExecutionDataView: ({ stepExecution, mode }: any) => (
+    <div data-test-subj="mocked-step-execution-data-view">
+      {`Mode: ${mode}, Step: ${stepExecution.stepId}`}
+    </div>
+  ),
+}));
+
+jest.mock('../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => ({
+  FormattedRelativeEnhanced: ({ value }: { value: string }) => (
+    <span data-test-subj="formatted-relative">{value}</span>
+  ),
+}));
+
+const createMockStepExecution = (
+  overrides?: Partial<WorkflowStepExecutionDto>
+): WorkflowStepExecutionDto => ({
+  id: '__overview',
+  stepId: 'Overview',
+  stepType: '__overview',
+  status: ExecutionStatus.COMPLETED,
+  stepExecutionIndex: 0,
+  startedAt: '2024-01-15T10:30:45.123Z',
+  input: {
+    execution: {
+      id: 'exec-123',
+      isTestRun: false,
+      startedAt: '2024-01-15T10:30:45.123Z',
+      url: 'http://localhost',
+    },
+    now: '2024-01-15T10:35:50.456Z',
+    workflow: {
+      id: 'workflow-1',
+      name: 'Test Workflow',
+      enabled: true,
+      spaceId: 'default',
+    },
+    kibanaUrl: 'http://localhost',
+  },
+  scopeStack: [],
+  workflowRunId: 'run-123',
+  workflowId: 'workflow-1',
+  topologicalIndex: -1,
+  globalExecutionIndex: -1,
+  ...overrides,
+});
+
+describe('WorkflowExecutionOverview', () => {
+  beforeEach(() => {
+    jest.mocked(useKibana).mockImplementation(() => createUseKibanaMockValue());
+  });
+
+  it('resolves the execution identity rather than a workflow definition account', async () => {
+    const services = createStartServicesMock();
+    services.security.serviceAccounts.isEnabled.mockReturnValue(true);
+    services.http.get.mockResolvedValue({ id: 'original-account', name: 'Original reader' });
+    jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
+    const stepExecution = createMockStepExecution({
+      input: {
+        execution: { effectiveIdentity: { type: 'service_account', id: 'original-account' } },
+        workflow: { settings: { run_as: 'replacement-account' } },
+      },
+    });
+    renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+    expect(await screen.findByText('Original reader')).toBeInTheDocument();
+    expect(services.http.get).toHaveBeenCalledWith(
+      '/internal/security/service_account/original-account'
+    );
+  });
+
+  it('renders persisted identity when credential validation failed before runtime setup', () => {
+    const execution: WorkflowExecutionDto = {
+      id: 'run-failed',
+      workflowId: 'workflow',
+      spaceId: 'default',
+      status: ExecutionStatus.FAILED,
+      isTestRun: false,
+      startedAt: '2026-09-27T10:00:00Z',
+      finishedAt: '2026-09-27T10:00:01Z',
+      executedBy: 'alice',
+      effectiveIdentity: { type: 'service_account', id: 'sa-proof' },
+      error: { type: 'ServiceAccountExecutionError', message: 'Binding changed' },
+      context: {},
+      stepExecutions: [],
+      duration: 1000,
+      yaml: '',
+      workflowDefinition: {
+        version: '1',
+        name: 'Identity test',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+      },
+    };
+    renderWithIntl(
+      <WorkflowExecutionOverview stepExecution={buildOverviewStepExecutionFromContext(execution)} />
+    );
+    expect(screen.getByText('Triggered by')).toBeInTheDocument();
+    expect(screen.getByText('alice')).toBeInTheDocument();
+    expect(screen.getByText('Run as')).toBeInTheDocument();
+    expect(screen.getByText('sa-proof')).toBeInTheDocument();
+  });
+
+  it('separates the triggering user from the service account identity', () => {
+    const stepExecution = createMockStepExecution({
+      input: {
+        execution: {
+          executedBy: 'alice',
+          effectiveIdentity: { type: 'service_account', id: 'sa-proof' },
+        },
+      },
+    });
+    renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+    expect(screen.getByText('Triggered by')).toBeInTheDocument();
+    expect(screen.getByText('alice')).toBeInTheDocument();
+    expect(screen.getByText('Run as')).toBeInTheDocument();
+    expect(screen.getByText('sa-proof')).toBeInTheDocument();
+  });
+
+  describe('rendering', () => {
+    it('should render the component with execution data', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByText('Success')).toBeInTheDocument();
+      expect(screen.getByTestId('mocked-step-execution-data-view')).toBeInTheDocument();
+    });
+
+    it('should render StepExecutionDataView with correct props', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      const dataView = screen.getByTestId('mocked-step-execution-data-view');
+      expect(dataView.textContent).toContain('Mode: input');
+      expect(dataView.textContent).toContain('Step: Overview');
+    });
+  });
+
+  describe('status display', () => {
+    it.each([
+      [ExecutionStatus.COMPLETED, 'Success'],
+      [ExecutionStatus.RUNNING, 'Running'],
+      [ExecutionStatus.FAILED, 'Failed'],
+      [ExecutionStatus.PENDING, 'Pending'],
+      [ExecutionStatus.CANCELLED, 'Canceled'],
+    ])('should display correct status label for %s', (status, expectedLabel) => {
+      const stepExecution = createMockStepExecution({ status });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+    });
+  });
+
+  describe('test run badge', () => {
+    it('should display test run badge when isTestRun is true', () => {
+      const stepExecution = createMockStepExecution({
+        input: {
+          execution: {
+            id: 'exec-123',
+            isTestRun: true,
+            startedAt: '2024-01-15T10:30:45.123Z',
+            url: 'http://localhost',
+          },
+        },
+      });
+      const { container } = renderWithIntl(
+        <WorkflowExecutionOverview stepExecution={stepExecution} />
+      );
+
+      const beakerIcon = container.querySelector('[data-euiicon-type="flask"]');
+      expect(beakerIcon).toBeInTheDocument();
+    });
+
+    it('should not display test run badge when isTestRun is false', () => {
+      const stepExecution = createMockStepExecution({
+        input: {
+          execution: {
+            id: 'exec-123',
+            isTestRun: false,
+            startedAt: '2024-01-15T10:30:45.123Z',
+            url: 'http://localhost',
+          },
+        },
+      });
+      const { container } = renderWithIntl(
+        <WorkflowExecutionOverview stepExecution={stepExecution} />
+      );
+
+      const beakerIcon = container.querySelector('[data-euiicon-type="flask"]');
+      expect(beakerIcon).not.toBeInTheDocument();
+    });
+
+    it('should not display test run badge when execution context is missing', () => {
+      const stepExecution = createMockStepExecution({
+        input: undefined,
+      });
+      const { container } = renderWithIntl(
+        <WorkflowExecutionOverview stepExecution={stepExecution} />
+      );
+
+      const beakerIcon = container.querySelector('[data-euiicon-type="flask"]');
+      expect(beakerIcon).not.toBeInTheDocument();
+    });
+  });
+
+  describe('duration display', () => {
+    it('should display duration when provided', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(
+        <WorkflowExecutionOverview stepExecution={stepExecution} workflowExecutionDuration={5000} />
+      );
+
+      expect(screen.getByText('5s')).toBeInTheDocument();
+    });
+
+    it('should display duration in milliseconds for short durations', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(
+        <WorkflowExecutionOverview stepExecution={stepExecution} workflowExecutionDuration={500} />
+      );
+
+      expect(screen.getByText('500ms')).toBeInTheDocument();
+    });
+
+    it('should not display duration when not provided', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      const clockIcons = screen.queryAllByTestId('euiIcon').filter((icon) => {
+        return icon.getAttribute('data-euiicon-type') === 'clock';
+      });
+      expect(clockIcons).toHaveLength(0);
+    });
+
+    it('should not display duration when zero', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(
+        <WorkflowExecutionOverview stepExecution={stepExecution} workflowExecutionDuration={0} />
+      );
+
+      const clockIcons = screen.queryAllByTestId('euiIcon').filter((icon) => {
+        return icon.getAttribute('data-euiicon-type') === 'clock';
+      });
+      expect(clockIcons).toHaveLength(0);
+    });
+  });
+
+  describe('date formatting', () => {
+    it('should format execution started date with milliseconds', () => {
+      const stepExecution = createMockStepExecution({
+        startedAt: '2024-01-15T10:30:45.123Z',
+      });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      const dateText = screen.getByText(/.*15.*2024.*45\.123/);
+      expect(dateText).toBeInTheDocument();
+    });
+
+    it('should format execution ended date with milliseconds', () => {
+      const stepExecution = createMockStepExecution({
+        input: {
+          now: '2024-01-15T10:35:50.456Z',
+        },
+      });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      const dateText = screen.getByText(/.*15.*2024.*50\.456/);
+      expect(dateText).toBeInTheDocument();
+    });
+
+    it('should display relative time for started date', () => {
+      const stepExecution = createMockStepExecution({
+        startedAt: '2024-01-15T10:30:45.123Z',
+      });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      const relativeTime = screen.getByTestId('formatted-relative');
+      expect(relativeTime).toHaveTextContent('2024-01-15T10:30:45.123Z');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle missing startedAt gracefully', () => {
+      const stepExecution = createMockStepExecution({
+        startedAt: '',
+      });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByText('Execution started')).toBeInTheDocument();
+      expect(
+        screen.getByText((content, element) => {
+          return element?.tagName === 'STRONG' && content === '-';
+        })
+      ).toBeInTheDocument();
+    });
+
+    it('should handle missing execution ended date gracefully', () => {
+      const stepExecution = createMockStepExecution({
+        input: {
+          execution: {
+            id: 'exec-123',
+            isTestRun: false,
+            startedAt: '2024-01-15T10:30:45.123Z',
+            url: 'http://localhost',
+          },
+        },
+      });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByText('Execution ended')).toBeInTheDocument();
+      const strongElements = screen.getAllByText((content, element) => {
+        return element?.tagName === 'STRONG' && content === '-';
+      });
+      expect(strongElements.length).toBeGreaterThan(0);
+    });
+
+    it('should handle missing input context', () => {
+      const stepExecution = createMockStepExecution({
+        input: undefined,
+      });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByTestId('mocked-step-execution-data-view')).toBeInTheDocument();
+    });
+
+    it('should handle missing execution context within input', () => {
+      const stepExecution = createMockStepExecution({
+        input: {
+          someOtherField: 'value',
+        },
+      });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByTestId('mocked-step-execution-data-view')).toBeInTheDocument();
+    });
+
+    it('should handle undefined values in context', () => {
+      const stepExecution = createMockStepExecution({
+        input: {},
+      });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByTestId('mocked-step-execution-data-view')).toBeInTheDocument();
+    });
+  });
+
+  describe('i18n labels', () => {
+    it('should display execution started label', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByText('Execution started')).toBeInTheDocument();
+    });
+
+    it('should display execution ended label', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.getByText('Execution ended')).toBeInTheDocument();
+    });
+  });
+});

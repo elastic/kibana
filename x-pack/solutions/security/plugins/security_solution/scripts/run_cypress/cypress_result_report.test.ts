@@ -96,7 +96,7 @@ describe('cypress_result_report', () => {
 
     it('writes a single NDJSON record with normalized spec path and buildkite metadata', () => {
       recordCypressResult({
-        spec: '/opt/buildkite-agent/builds/bk-agent-prod-gcp-123/elastic/kibana-pull-request/kibana/x-pack/test/spec.cy.ts',
+        spec: '/repo-root/x-pack/test/spec.cy.ts',
         kind: 'success',
         totalFailed: 0,
         isRetryRun: false,

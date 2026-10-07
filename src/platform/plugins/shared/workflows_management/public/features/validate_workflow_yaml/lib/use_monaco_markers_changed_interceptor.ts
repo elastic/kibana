@@ -11,17 +11,13 @@ import { useCallback, useRef, useState } from 'react';
 import type YAML from 'yaml';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import { validationResultFingerprint, type YamlValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
+import { getYamlMarkerRuleId } from './get_yaml_marker_rule_id';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import {
-  BATCHED_CUSTOM_MARKER_OWNER,
-  isYamlValidationMarkerOwner,
-  validationResultFingerprint,
-  type YamlValidationResult,
-} from '../model/types';
 
 export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (
@@ -42,12 +38,43 @@ interface UseMonacoMarkersChangedInterceptorProps {
   workflowYamlSchema: z.ZodSchema;
 }
 
+function formattedMarkerKey(marker: monaco.editor.IMarkerData): string {
+  return [
+    marker.startLineNumber,
+    marker.startColumn,
+    marker.endLineNumber,
+    marker.endColumn,
+    marker.severity,
+    marker.source ?? '',
+    typeof marker.code === 'string' ? marker.code : marker.code?.value ?? '',
+    marker.message ?? '',
+  ].join('|');
+}
+
 export function useMonacoMarkersChangedInterceptor({
   yamlDocumentRef,
   workflowYamlSchema,
 }: UseMonacoMarkersChangedInterceptorProps): UseMonacoMarkersChangedInterceptorResult {
   const [validationErrors, setValidationErrors] = useState<YamlValidationResult[]>([]);
   const lastFingerprintRef = useRef<string>('');
+  // yamlDocumentRef lags the model by the 500ms Redux compute debounce, so formatMonacoYamlMarker
+  // needs a parse matching the current model. Cache by (modelId, versionId) so repeated
+  // setModelMarkers bursts on the same model version share one parse; modelId guards against
+  // collisions when the editor swaps to a different model whose versionId starts over.
+  const freshYamlDocCacheRef = useRef<{
+    modelId: string;
+    versionId: number;
+    doc: YAML.Document;
+  } | null>(null);
+
+  // Memoize per-marker formatting output for the current model version. monaco-yaml's worker
+  // can re-emit the same marker set across multiple setModelMarkers callbacks (same model
+  // version, same markers); caching the formatted output collapses those into a Map lookup.
+  const formattedMarkerCacheRef = useRef<{
+    modelId: string;
+    versionId: number;
+    entries: Map<string, monaco.editor.IMarkerData>;
+  } | null>(null);
 
   const transformMonacoMarkers = useCallback(
     (
@@ -61,13 +88,42 @@ export function useMonacoMarkersChangedInterceptor({
         return filtered;
       }
 
-      // we absolutely need to have up to date yaml document to format the error message, not the one from the ref object (which is debounced)
-      // the monaco-yaml validation is already debounced, so this won't be run every key stroke
-      const freshYamlDocument = parseDocument(editorModel.getValue());
+      const modelId = editorModel.id;
+      const versionId = editorModel.getVersionId();
 
-      return filtered.map((marker) =>
-        formatMonacoYamlMarker(marker, editorModel, workflowYamlSchema, freshYamlDocument)
-      );
+      const docCached = freshYamlDocCacheRef.current;
+      const freshYamlDocument =
+        docCached && docCached.modelId === modelId && docCached.versionId === versionId
+          ? docCached.doc
+          : parseDocument(editorModel.getValue());
+      if (!docCached || docCached.modelId !== modelId || docCached.versionId !== versionId) {
+        freshYamlDocCacheRef.current = { modelId, versionId, doc: freshYamlDocument };
+      }
+
+      const formatCached = formattedMarkerCacheRef.current;
+      const entries =
+        formatCached && formatCached.modelId === modelId && formatCached.versionId === versionId
+          ? formatCached.entries
+          : new Map<string, monaco.editor.IMarkerData>();
+      if (entries !== formatCached?.entries) {
+        formattedMarkerCacheRef.current = { modelId, versionId, entries };
+      }
+
+      return filtered.map((marker) => {
+        const cacheKey = formattedMarkerKey(marker);
+        const hit = entries.get(cacheKey);
+        if (hit) {
+          return hit;
+        }
+        const formatted = formatMonacoYamlMarker(
+          marker,
+          editorModel,
+          workflowYamlSchema,
+          freshYamlDocument
+        );
+        entries.set(cacheKey, formatted);
+        return formatted;
+      });
     },
     [workflowYamlSchema, yamlDocumentRef]
   );
@@ -78,14 +134,11 @@ export function useMonacoMarkersChangedInterceptor({
       owner: string,
       markers: monaco.editor.IMarkerData[]
     ) => {
-      const isBatched = owner === BATCHED_CUSTOM_MARKER_OWNER;
-      if (!isBatched && !isYamlValidationMarkerOwner(owner)) {
+      if (owner !== 'yaml') {
         return;
       }
 
       const errors: YamlValidationResult[] = markers.map((marker) => {
-        const effectiveOwner = isBatched && marker.source ? marker.source : owner;
-
         return {
           message: marker.message,
           severity: getSeverityString(marker.severity as MarkerSeverity),
@@ -93,29 +146,21 @@ export function useMonacoMarkersChangedInterceptor({
           startColumn: marker.startColumn,
           endLineNumber: marker.endLineNumber,
           endColumn: marker.endColumn,
-          id: `${effectiveOwner}-${marker.startLineNumber}-${marker.startColumn}-${marker.endLineNumber}-${marker.endColumn}`,
-          owner: effectiveOwner,
+          id: `yaml-${marker.startLineNumber}-${marker.startColumn}-${marker.endLineNumber}-${marker.endColumn}`,
+          owner: 'yaml',
+          ruleId: getYamlMarkerRuleId(marker.source),
           source: marker.source,
           hoverMessage: null,
-        } as YamlValidationResult;
+        };
       });
 
       setValidationErrors((prevErrors) => {
-        let nextErrors: YamlValidationResult[];
-        if (isBatched) {
-          const prevYamlOnly = prevErrors?.filter((e) => e.owner === 'yaml');
-          nextErrors = [...(prevYamlOnly ?? []), ...errors];
-        } else {
-          const prevOtherOwners = prevErrors?.filter((e) => e.owner !== owner);
-          nextErrors = [...(prevOtherOwners ?? []), ...errors];
-        }
-
-        const fingerprint = nextErrors.map(validationResultFingerprint).sort().join('\n');
+        const fingerprint = errors.map(validationResultFingerprint).sort().join('\n');
         if (fingerprint === lastFingerprintRef.current) {
           return prevErrors;
         }
         lastFingerprintRef.current = fingerprint;
-        return nextErrors;
+        return errors;
       });
     },
     // the yamlDocumentRef is not needed here because it's a ref object and not a dependency

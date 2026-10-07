@@ -12,7 +12,6 @@ import {
   getBuiltInStepStability,
   isBuiltInStepProperty,
   isBuiltInStepType,
-  isCancelableStatus,
   isDangerousStatus,
   isDynamicConnector,
   isElasticsearchStep,
@@ -32,7 +31,7 @@ import {
   isWhileStep,
   transformWorkflowYamlJsontoEsWorkflow,
 } from './utils';
-import { ExecutionStatus } from './v1';
+import { ConcurrencySlotOccupyingExecutionStatuses, ExecutionStatus } from './v1';
 import type { ConnectorContractUnion, WorkflowStepExecutionDto } from './v1';
 import type { Step, WorkflowYaml } from '../spec/schema';
 
@@ -95,8 +94,10 @@ describe('types/utils', () => {
       const inProgress = new Set([
         ExecutionStatus.RUNNING,
         ExecutionStatus.PENDING,
+        ExecutionStatus.QUEUED,
         ExecutionStatus.WAITING,
         ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.WAITING_FOR_CHILD,
       ]);
 
       it.each(allStatuses)('returns %s for status "%s"', (status) => {
@@ -109,6 +110,18 @@ describe('types/utils', () => {
 
       it.each(allStatuses)('returns %s for status "%s"', (status) => {
         expect(isDangerousStatus(status)).toBe(dangerous.has(status));
+      });
+    });
+
+    describe('ConcurrencySlotOccupyingExecutionStatuses', () => {
+      it('includes idle non-terminal waits that still own the execution, but not queued backlog', () => {
+        expect(ConcurrencySlotOccupyingExecutionStatuses).toEqual(
+          expect.arrayContaining([
+            ExecutionStatus.WAITING_FOR_INPUT,
+            ExecutionStatus.WAITING_FOR_CHILD,
+          ])
+        );
+        expect(ConcurrencySlotOccupyingExecutionStatuses).not.toContain(ExecutionStatus.QUEUED);
       });
     });
 
@@ -126,26 +139,11 @@ describe('types/utils', () => {
       });
     });
 
-    describe('isCancelableStatus', () => {
-      const cancelable = new Set([
-        ExecutionStatus.RUNNING,
-        ExecutionStatus.WAITING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.PENDING,
-      ]);
-
-      it.each(allStatuses)('returns %s for status "%s"', (status) => {
-        expect(isCancelableStatus(status)).toBe(cancelable.has(status));
-      });
-    });
-
-    it('TIMED_OUT is terminal but NOT cancelable', () => {
+    it('TIMED_OUT is terminal', () => {
       expect(isTerminalStatus(ExecutionStatus.TIMED_OUT)).toBe(true);
-      expect(isCancelableStatus(ExecutionStatus.TIMED_OUT)).toBe(false);
     });
 
-    it('WAITING_FOR_INPUT is cancelable but NOT terminal', () => {
-      expect(isCancelableStatus(ExecutionStatus.WAITING_FOR_INPUT)).toBe(true);
+    it('WAITING_FOR_INPUT is not terminal', () => {
       expect(isTerminalStatus(ExecutionStatus.WAITING_FOR_INPUT)).toBe(false);
     });
   });
@@ -265,6 +263,7 @@ describe('types/utils', () => {
       summary: 'HTTP',
       description: 'HTTP connector',
       actionTypeId: '.http',
+      displayName: 'HTTP',
       instances: [],
     };
 

@@ -21,6 +21,7 @@ import React from 'react';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 import { AlertActions } from './alert_actions';
 
 const MONITOR_STATUS_RULE = {
@@ -44,6 +45,7 @@ export const MonitorAlerts = ({
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const selectedLocation = useSelectedLocation();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   if (!selectedLocation || !queryIdFilter) {
     return <EuiSkeletonText />;
@@ -64,6 +66,7 @@ export const MonitorAlerts = ({
                   withActions={false}
                   customHeight={'27px'}
                   reportType="single-metric"
+                  dataTypesIndexPatterns={dataTypesIndexPatterns}
                   attributes={[
                     {
                       dataType: 'alerts',
@@ -101,6 +104,7 @@ export const MonitorAlerts = ({
             dataTestSubj="monitorActiveAlertsCount"
             customHeight={'120px'}
             reportType="single-metric"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 dataType: 'alerts',
@@ -127,6 +131,7 @@ export const MonitorAlerts = ({
             sparklineMode
             customHeight="100px"
             reportType="kpi-over-time"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 seriesType: 'area',
@@ -154,6 +159,7 @@ export const MonitorAlerts = ({
           <ExploratoryViewEmbeddable
             customHeight={'120px'}
             reportType="single-metric"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 dataType: 'alerts',
@@ -180,6 +186,7 @@ export const MonitorAlerts = ({
             sparklineMode
             customHeight="100px"
             reportType="kpi-over-time"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 seriesType: 'area',

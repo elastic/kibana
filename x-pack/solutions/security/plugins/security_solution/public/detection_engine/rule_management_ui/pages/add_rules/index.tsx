@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -28,12 +26,11 @@ import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/compo
 import { getDetectionEngineUrl } from '../../../../common/components/link_to';
 
 const AddRulesPageComponent: React.FC = () => {
-  const { application, cps } = useKibana().services;
+  const { application } = useKibana().services;
   const { navigateToApp } = application;
 
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey }] = useUserData();
   const { needsConfiguration: needsListsConfiguration } = useListsConfig();
-  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
   if (
     redirectToDetections(

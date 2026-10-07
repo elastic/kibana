@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Dagre from '@dagrejs/dagre';
+import { graphlib, layout } from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { getStackNodeStyle } from '../node/styles';
@@ -35,7 +35,7 @@ export const layoutGraph = (
     directed: true,
   };
 
-  const g = new Dagre.graphlib.Graph(graphOpts)
+  const g = new graphlib.Graph(graphOpts)
     .setGraph({
       rankdir: 'LR',
       align: 'UL',
@@ -82,6 +82,8 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
+      // Reserve the full expanded height so nodes never overlap neighbours
+      // once the metadata panel (always visible) is taken into account.
       size.height = ENTITY_NODE_TOTAL_HEIGHT;
     }
 
@@ -99,7 +101,7 @@ export const layoutGraph = (
     });
   });
 
-  Dagre.layout(g);
+  layout(g);
 
   alignNodesCenterInPlace(
     g,
@@ -138,6 +140,11 @@ export const layoutGraph = (
 
     if (isEntityNode(node.data)) {
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
+      // Place the entity card so its visual centre aligns with the Dagre Y.
+      // NODE_HEIGHT ≈ actual rendered card height (card is flex-centred inside
+      // NodeShapeContainer which has height NODE_HEIGHT), so NODE_HEIGHT / 2
+      // puts the card's midpoint at dagreNode.y — exactly where relationship/
+      // event nodes (also centred at Y) are positioned by the layout algorithm.
       const y = Math.round(dagreNode.y - NODE_HEIGHT / 2);
 
       return {
@@ -200,13 +207,29 @@ const layoutStackedLabels = (
 };
 
 /**
+ * Position/size of a node after `layout()` has run.
+ *
+ * Mirrors the shape this file previously cast to (dagre v2's `Dagre.Node`, removed in v3).
+ * dagre v3's `NodeLabel` marks x/y optional (unset pre-layout) and `graphlib.Graph` now
+ * defaults its generics to `any`, so `g.node(id)` is `any` and this cast is unchecked.
+ * Kept as a local mirror to keep the v3 migration minimal; properly typing the graph is
+ * left to the owning team.
+ */
+interface DagrePositionedNode {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
  * Shared context for graph alignment operations.
  * - Y/Height/setY: accessors for node vertical position and height in Dagre
  * - prevNodeY: tracks original Y positions before adjustments for cascading calculations
  * - nodesById: map of node ID to node data for accessing node properties
  */
 interface GraphHelpers {
-  g: Dagre.graphlib.Graph;
+  g: graphlib.Graph;
   filter: (node: string) => boolean;
   Y: (id: string) => number;
   Height: (id: string) => number;
@@ -217,7 +240,7 @@ interface GraphHelpers {
 
 /** Returns child nodes (successors) that pass the filter. */
 const getFilteredSuccessors = (
-  g: Dagre.graphlib.Graph,
+  g: graphlib.Graph,
   node: string,
   filter: (n: string) => boolean
 ): string[] =>
@@ -225,7 +248,7 @@ const getFilteredSuccessors = (
 
 /** Returns parent nodes (predecessors) that pass the filter. */
 const getFilteredPredecessors = (
-  g: Dagre.graphlib.Graph,
+  g: graphlib.Graph,
   node: string,
   filter: (n: string) => boolean
 ): string[] =>
@@ -425,16 +448,16 @@ const handleSingleParent = (helpers: GraphHelpers, currNode: string, parent: str
  * Mutates the Dagre graph in place.
  */
 const alignNodesCenterInPlace = (
-  g: Dagre.graphlib.Graph,
+  g: graphlib.Graph,
   filter: (node: string) => boolean,
   nodesById: Record<string, Node<NodeViewModel>>
 ) => {
   const helpers: GraphHelpers = {
     g,
     filter,
-    Y: (id: string) => (g.node(id) as Dagre.Node).y,
-    Height: (id: string) => (g.node(id) as Dagre.Node).height,
-    setY: (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y),
+    Y: (id: string) => (g.node(id) as DagrePositionedNode).y,
+    Height: (id: string) => (g.node(id) as DagrePositionedNode).height,
+    setY: (id: string, y: number) => ((g.node(id) as DagrePositionedNode).y = y),
     prevNodeY: {},
     nodesById,
   };
@@ -454,7 +477,7 @@ const alignNodesCenterInPlace = (
   }
 };
 
-const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): string[] => {
+const topsort = (g: graphlib.Graph, filter: (node: string) => boolean): string[] => {
   const visited: Record<string, boolean> = {};
   const stack: Record<string, boolean> = {};
   const results: string[] = [];

@@ -66,12 +66,11 @@ export const ExportReferencesModal: React.FC<ExportReferencesModalProps> = ({
             })}
           </p>
         </EuiText>
-        <EuiListGroup flush maxWidth={false} gutterSize="none">
+        <EuiListGroup maxWidth={false}>
           {missingWorkflows.map((w) => (
             <EuiListGroupItem
               key={w.id}
               label={w.name}
-              size="s"
               data-test-subj={`export-references-workflow-${w.id}`}
             />
           ))}

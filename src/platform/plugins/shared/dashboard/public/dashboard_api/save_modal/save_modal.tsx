@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SaveResult } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { AccessModeContainer } from '@kbn/content-management-access-control-public';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
@@ -31,6 +31,7 @@ import {
   spacesService,
 } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
+import { hasLibraryItemWithTitle } from '../../dashboard_client';
 
 interface DashboardSaveModalProps {
   onSave: ({
@@ -40,11 +41,10 @@ interface DashboardSaveModalProps {
     newTags,
     newTimeRestore,
     newProjectRoutingRestore,
-    isTitleDuplicateConfirmed,
     newAccessMode,
-    onTitleDuplicate,
-  }: DashboardSaveOptions) => Promise<SaveResult>;
+  }: DashboardSaveOptions) => Promise<void>;
   onClose: () => void;
+  lastSavedTitle: string;
   title: string;
   description: string;
   tags?: string[];
@@ -56,15 +56,8 @@ interface DashboardSaveModalProps {
   customModalTitle?: string;
   accessControl?: Partial<SavedObjectAccessControl>;
   showAccessContainer?: boolean;
+  modalTitleId: string;
 }
-
-type SaveDashboardHandler = (args: {
-  newTitle: string;
-  newDescription: string;
-  newCopyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
-}) => ReturnType<DashboardSaveModalProps['onSave']>;
 
 export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   customModalTitle,
@@ -75,11 +68,13 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   showStoreTimeOnSave = true,
   showStoreProjectRoutingOnSave = true,
   tags,
+  lastSavedTitle,
   title,
   timeRestore,
   projectRoutingRestore,
   accessControl,
   showAccessContainer,
+  modalTitleId,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
@@ -89,22 +84,14 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
     accessControl?.accessMode ?? 'default'
   );
 
-  const saveDashboard = React.useCallback<SaveDashboardHandler>(
-    async ({
-      newTitle,
-      newDescription,
-      newCopyOnSave,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-    }) =>
+  const saveDashboard = React.useCallback<(props: OnSaveProps) => Promise<void>>(
+    async ({ newTitle, newDescription, newCopyOnSave }) =>
       onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
         newProjectRoutingRestore: persistSelectedProjectRouting,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
         newTags: selectedTags,
         newAccessMode: selectedAccessMode,
       }),
@@ -222,9 +209,12 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   ]);
 
   return (
-    <SavedObjectSaveModalWithSaveResult
+    <SavedObjectSaveModal
+      disableModal
+      hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={saveDashboard}
       onClose={onClose}
+      lastSavedTitle={lastSavedTitle}
       title={title}
       description={description}
       showDescription
@@ -235,6 +225,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       })}
       customModalTitle={customModalTitle}
       options={renderDashboardSaveOptions()}
+      modalTitleId={modalTitleId}
     />
   );
 };

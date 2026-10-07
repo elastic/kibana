@@ -16,12 +16,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  useSiemReadinessApi,
-  useMitreAttackIndicesDocCounts,
-  useIntegrationDisplayNames,
-  useDetectionRulesByIntegration,
-} from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../../hooks/use_siem_readiness_api';
+import { useMitreAttackIndicesDocCounts } from '../../../../hooks/use_mitre_attack_indices_doc_counts';
+import { useIntegrationDisplayNames } from '../../../../hooks/use_integration_display_names';
+import { useDetectionRulesByIntegration } from '../../../../hooks/use_get_detection_rules_by_integration';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
@@ -287,6 +285,12 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
           {tacticCoverageMap.map((tactic) => (
             <EuiPopover
               key={tactic.tacticId}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.missingIntegrationsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Missing or disabled integrations for this tactic',
+                }
+              )}
               isOpen={activeTacticPopover === tactic.tacticId}
               closePopover={() => setActiveTacticPopover(null)}
               button={
@@ -367,10 +371,11 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                   .map((pkg) => ({
                     label: integrationDisplayNames.data?.get(pkg) || pkg,
                     key: pkg,
-                    isDisabled: disabledPackagesSet.has(pkg),
                   }))
                   .sort((a, b) => {
-                    if (a.isDisabled !== b.isDisabled) return a.isDisabled ? -1 : 1;
+                    const aDisabled = disabledPackagesSet.has(a.key as string);
+                    const bDisabled = disabledPackagesSet.has(b.key as string);
+                    if (aDisabled !== bDisabled) return aDisabled ? -1 : 1;
                     return a.label.localeCompare(b.label);
                   })}
                 statusMap={createIntegrationStatusMapFromSets(

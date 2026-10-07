@@ -7,32 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
-import type {
   CoreSetup,
   CoreStart,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
-import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
+
+import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { defineRoutes } from './api/routes';
+import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
-import { createWorkflowsClientProvider } from './client/workflows_client';
+import {
+  createManagedWorkflowsSystemApiProvider,
+  createWorkflowsClientProvider,
+} from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
+import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
-import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
+import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
-  AgentBuilderPluginSetup,
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
@@ -52,14 +53,19 @@ export class WorkflowsPlugin
     >
 {
   private readonly logger: Logger;
-  private aiTelemetryClient: WorkflowsAiTelemetryClient | null = null;
   private config: WorkflowsManagementConfig;
+  private readonly kibanaVersion: string;
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private workflowsService: WorkflowsService | null = null;
+  private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
+  private audit: WorkflowManagementAuditLog | null = null;
+  private unregisterHitlLifecycleAuditor: (() => void) | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsManagementConfig>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(
@@ -68,42 +74,88 @@ export class WorkflowsPlugin
   ) {
     this.logger.debug('Workflows Management: Setup');
 
-    this.aiTelemetryClient = new WorkflowsAiTelemetryClient(core.analytics, this.logger);
-
     registerUISettings(core, plugins);
 
-    // Register the workflows management feature and its privileges
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    const workflowsService = new WorkflowsService(core.getStartServices, this.logger);
+    const workflowsService = new WorkflowsService(core, plugins, this.logger, this.kibanaVersion);
+    this.workflowsService = workflowsService;
 
-    const api = new WorkflowsManagementApi(workflowsService, this.config.available);
+    const api = new WorkflowsManagementApi(workflowsService, this.config.available, this.logger);
     this.api = api;
 
-    // Register workflows connector if actions plugin is available
     if (plugins.actions) {
-      // Register the workflows connector
       plugins.actions.registerType(getWorkflowsConnectorType(api));
 
-      // Register connector adapter for alerting if available
       if (plugins.alerting) {
         plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
       }
+
+      registerConnectorEventTriggers({
+        inboundEventsEnabled: plugins.actions
+          .getActionsConfigurationUtilities()
+          .isInboundEventsEnabled(),
+        registerTriggerDefinition: (definition) =>
+          plugins.workflowsExtensions.registerTriggerDefinition(definition),
+      });
     }
 
-    // Register public workflows client provider to allow any external plugin use it via the workflowsExtensions plugin
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
       createWorkflowsClientProvider(workflowsService, this.config, this.logger)
+    );
+    plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
+      createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
     );
 
     const spaces = plugins.spaces.spacesService;
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
-    defineRoutes(router, api, this.logger, spaces, workflowsService);
+    const audit = new WorkflowManagementAuditLog({ service: workflowsService });
+    this.audit = audit;
+    api.setAuditLog(audit);
 
-    this.setupAiIntegration(core, api, this.aiTelemetryClient);
+    defineRoutes({
+      router,
+      config: this.config,
+      logger: this.logger,
+      api,
+      spaces,
+      workflowsService,
+      audit,
+    });
+
+    core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
+      'workflowsManagement',
+      async (_context, request) => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        if (this.executionDataViewsBootstrap === null) {
+          this.executionDataViewsBootstrap = new ExecutionDataViewsBootstrap(
+            startPlugins.dataViews,
+            this.logger.get('executionDataViewsBootstrap')
+          );
+        }
+
+        const spaceId = spaces.getSpaceId(request);
+        const savedObjectsClient = coreStart.savedObjects
+          .getUnsafeInternalClient()
+          .asScopedToNamespace(spaceId);
+
+        this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
+          spaceId,
+          savedObjectsClient,
+          coreStart.elasticsearch.client.asInternalUser
+        );
+      }
+    );
+
+    if (plugins.inbox) {
+      this.logger.debug('Workflows Management: registering inbox provider');
+      plugins.inbox.registerActionProvider(
+        createWorkflowsInboxProvider({ api, logger: this.logger })
+      );
+    }
 
     return {
       management: api,
@@ -112,6 +164,7 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
+    this.workflowsService?.setStopping(false);
 
     stepSchemas.initialize(plugins.workflowsExtensions);
 
@@ -124,80 +177,64 @@ export class WorkflowsPlugin
       });
     }
 
+    if (this.audit) {
+      const audit = this.audit;
+      this.unregisterHitlLifecycleAuditor = registerHitlLifecycleAuditor((event) => {
+        switch (event.type) {
+          case 'waiting':
+            audit.logHitlWaiting(undefined, {
+              executionId: event.executionId,
+              stepExecutionId: event.stepExecutionId,
+              stepType: event.stepType,
+            });
+            break;
+          case 'timed_out':
+            audit.logHitlTimedOut(undefined, {
+              executionId: event.executionId,
+              stepExecutionId: event.stepExecutionId,
+              stepType: event.stepType,
+            });
+            break;
+          case 'canceled':
+            audit.logExecutionCanceled(undefined, {
+              executionId: event.executionId,
+              channel: 'system',
+            });
+            break;
+        }
+      });
+    }
+
+    if (this.workflowsService) {
+      // Managed workflow owners register through workflows_extensions because owner
+      // plugins cannot depend on workflows_management. Pass the setup-time owner
+      // snapshot into workflows_management for storage reconciliation.
+      const registeredOwnerPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
+      // Safe to run in the background: this cleanup only removes docs for owners
+      // missing from the setup-time registry, so it cannot race valid start installs.
+      void this.runGlobalOrphanCleanup(registeredOwnerPluginIds);
+    }
+
     this.logger.debug('Workflows Management: Started');
+
     return {};
   }
 
-  private setupAiIntegration(
-    core: CoreSetup<WorkflowsServerPluginStartDeps>,
-    api: WorkflowsManagementApi,
-    aiTelemetryClient: WorkflowsAiTelemetryClient
-  ): void {
-    void core.plugins
-      .onSetup<{ agentBuilder: AgentBuilderPluginSetup }>('agentBuilder')
-      .then(({ agentBuilder }) => {
-        if (agentBuilder.found) {
-          this.logger.debug(
-            'Workflows Management: Agent Builder found, registering AI integration'
-          );
-          registerWorkflowAgentBuilderIntegration({
-            agentBuilder: agentBuilder.contract,
-            logger: this.logger,
-            api,
-            aiTelemetryClient,
-          });
-        }
-      })
-      .catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        this.logger.warn(
-          `Workflows Management: Failed to register AI integration with Agent Builder: ${message}`
-        );
-      });
-
-    void core.plugins
-      .onSetup<{
-        agentContextLayer: AgentContextLayerPluginSetup;
-      }>('agentContextLayer')
-      .then(({ agentContextLayer }) => {
-        if (agentContextLayer.found) {
-          agentContextLayer.contract.registerType(createWorkflowSmlType(api));
-          this.logger.debug(
-            'Workflows Management: Workflow SML type registered with Agent Context Layer'
-          );
-        } else {
-          this.logger.warn(
-            'Workflows Management: agentContextLayer not available — workflow SML type not registered'
-          );
-        }
-      })
-      .catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        this.logger.warn(`Workflows Management: Failed to register workflow SML type: ${message}`);
-      });
-
-    void core.plugins
-      .onStart<{ agentContextLayer: AgentContextLayerPluginStart }>('agentContextLayer')
-      .then(({ agentContextLayer }) => {
-        if (agentContextLayer.found) {
-          api.setSmlIndexAttachment(
-            agentContextLayer.contract.indexAttachment,
-            this.logger.get('sml')
-          );
-          this.logger.debug(
-            'Workflows Management: SML event-driven indexing wired to workflow CRUD'
-          );
-        }
-      })
-      .catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        this.logger.warn(
-          `Workflows Management: Failed to wire SML indexing with Agent Context Layer: ${message}`
-        );
-      });
+  private async runGlobalOrphanCleanup(registeredOwnerPluginIds: string[]): Promise<void> {
+    try {
+      await this.workflowsService?.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
+    } catch (error) {
+      this.logger.error(
+        'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
+        { error }
+      );
+    }
   }
 
   public stop() {
+    this.unregisterHitlLifecycleAuditor?.();
+    this.unregisterHitlLifecycleAuditor = null;
+    this.workflowsService?.setStopping(true);
     this.availabilityUpdater?.stop();
   }
 }

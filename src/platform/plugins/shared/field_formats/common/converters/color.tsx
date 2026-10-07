@@ -12,7 +12,7 @@ import React from 'react';
 import { findLast, cloneDeep } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
+import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
@@ -43,13 +43,18 @@ export class ColorFormat extends FieldFormat {
           }
         });
 
-      case 'number':
+      case 'number': {
+        const numericVal = Number(val);
+        if (Number.isNaN(numericVal)) {
+          return null;
+        }
+
         return findLast(this.param('colors'), ({ range }) => {
           if (!range) return;
           const [start, end] = range.split(':');
-          // @ts-expect-error upgrade typescript v5.1.6
-          return val >= Number(start) && val <= Number(end);
+          return numericVal >= Number(start) && numericVal <= Number(end);
         });
+      }
 
       case 'boolean':
         return findLast(this.param('colors'), ({ boolean }) => {
@@ -70,7 +75,7 @@ export class ColorFormat extends FieldFormat {
     return asPrettyString(val, options);
   };
 
-  reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
+  reactConvert: ReactConvertFunction = (val, options) => {
     const missing = this.checkForMissingValueReact(val);
     if (missing) {
       return missing;

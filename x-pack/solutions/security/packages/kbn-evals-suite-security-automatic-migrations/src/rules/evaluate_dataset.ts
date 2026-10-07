@@ -20,6 +20,7 @@ import {
   createEsqlValidityEvaluator,
   createIntegrationMatchEvaluator,
   createPrebuiltRuleMatchEvaluator,
+  createPrebuiltRuleMatchJustificationEvaluator,
   createUnsupportedPatternDetectionEvaluator,
   createHallucinationDetectionEvaluator,
   createTranslationResultEvaluator,
@@ -102,6 +103,7 @@ export function createRuleEvaluateDataset({
     createEsqlValidityEvaluator(),
     createIntegrationMatchEvaluator(),
     createPrebuiltRuleMatchEvaluator(),
+    createPrebuiltRuleMatchJustificationEvaluator(evaluators),
     createUnsupportedPatternDetectionEvaluator(),
     createTranslationResultEvaluator(),
     createHallucinationDetectionEvaluator(evaluators),
@@ -128,7 +130,7 @@ export function createRuleEvaluateDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         concurrency: 3,
         task: async ({ input }) => {
           if (!input) throw new Error('Missing input for task');

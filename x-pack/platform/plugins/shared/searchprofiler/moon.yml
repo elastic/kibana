@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -45,6 +47,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

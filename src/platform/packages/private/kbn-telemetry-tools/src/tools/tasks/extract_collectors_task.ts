@@ -10,39 +10,65 @@
 import ts from 'typescript';
 import * as path from 'path';
 import type { TaskContext } from './task_context';
-import { extractCollectors, getProgramPaths } from '../extract_collectors';
+import {
+  extractCollectorsWithProgram,
+  filterCollectorPaths,
+  getProgramPaths,
+} from '../extract_collectors';
+import { createKibanaProgram } from '../ts_program';
 
 export function extractCollectorsTask(
   { roots }: TaskContext,
   restrictProgramToPath?: string | string[]
 ) {
-  return roots.map((root) => ({
-    task: async () => {
-      const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
-      if (!tsConfig) {
-        throw new Error('Could not find a valid tsconfig.json.');
-      }
-      const programPaths = await getProgramPaths(root.config);
-
-      if (typeof restrictProgramToPath !== 'undefined') {
-        const restrictProgramToPaths = Array.isArray(restrictProgramToPath)
-          ? restrictProgramToPath
-          : [restrictProgramToPath];
-
-        const fullRestrictedPaths = restrictProgramToPaths.map((collectorPath) =>
-          path.resolve(process.cwd(), collectorPath)
-        );
-        const restrictedProgramPaths = programPaths.filter((programPath) =>
-          fullRestrictedPaths.includes(programPath)
-        );
-        if (restrictedProgramPaths.length) {
-          root.parsedCollections = [...extractCollectors(restrictedProgramPaths, tsConfig)];
+  return [
+    {
+      task: async () => {
+        const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
+        if (!tsConfig) {
+          throw new Error('Could not find a valid tsconfig.json.');
         }
-        return;
-      }
 
-      root.parsedCollections = [...extractCollectors(programPaths, tsConfig)];
+        const rootPathsMap = new Map<number, string[]>();
+        await Promise.all(
+          roots.map(async (root, idx) => {
+            const programPaths = await getProgramPaths(root.config);
+            rootPathsMap.set(idx, programPaths);
+          })
+        );
+
+        const rootCollectorMap = new Map<number, string[]>();
+        let allCollectorPaths: string[] = [];
+
+        for (const [idx, programPaths] of rootPathsMap) {
+          let paths = programPaths;
+
+          if (typeof restrictProgramToPath !== 'undefined') {
+            const restrictProgramToPaths = Array.isArray(restrictProgramToPath)
+              ? restrictProgramToPath
+              : [restrictProgramToPath];
+            const fullRestrictedPaths = restrictProgramToPaths.map((collectorPath) =>
+              path.resolve(process.cwd(), collectorPath)
+            );
+            paths = paths.filter((p) => fullRestrictedPaths.includes(p));
+          }
+
+          const collectorPaths = filterCollectorPaths(paths);
+          rootCollectorMap.set(idx, collectorPaths);
+          allCollectorPaths = allCollectorPaths.concat(collectorPaths);
+        }
+
+        if (allCollectorPaths.length === 0) {
+          return;
+        }
+
+        const program = createKibanaProgram(allCollectorPaths, tsConfig);
+
+        for (const [idx, collectorPaths] of rootCollectorMap) {
+          roots[idx].parsedCollections = [...extractCollectorsWithProgram(collectorPaths, program)];
+        }
+      },
+      title: 'Extracting collectors across all roots',
     },
-    title: `Extracting collectors in ${root.config.root}`,
-  }));
+  ];
 }

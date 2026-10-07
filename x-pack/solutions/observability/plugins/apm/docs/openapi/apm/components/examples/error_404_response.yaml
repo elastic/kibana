@@ -1,0 +1,5 @@
+description: An example of a 404 Not Found response, returned when the requested resource does not exist or the feature is not available on the current deployment.
+value:
+  statusCode: 404
+  error: Not Found
+  message: "Not Found"

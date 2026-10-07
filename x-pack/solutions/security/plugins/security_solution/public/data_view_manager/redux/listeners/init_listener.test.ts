@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -62,7 +61,6 @@ const mockListenerApi = {
   getState: mockGetState,
 } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
-const mockLogger = loggingSystemMock.createLogger();
 describe('createInitListener', () => {
   let listener: ReturnType<typeof createInitListener>;
 
@@ -76,28 +74,24 @@ describe('createInitListener', () => {
       kibanaDataViews: [],
     } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
 
-    listener = createInitListener(
-      {
-        dataViews: mockDataViewsService,
-        logger: mockLogger,
-        http,
-        application,
-        uiSettings,
-        notifications: {
-          toasts: {
-            addDanger: mockToastsDanger,
-          },
-        } as unknown as CoreStart['notifications'],
-        spaces,
-        storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-          remove: jest.fn(),
-          clear: jest.fn(),
-        } as unknown as Storage,
-      },
-      false
-    );
+    listener = createInitListener({
+      dataViews: mockDataViewsService,
+      http,
+      application,
+      uiSettings,
+      notifications: {
+        toasts: {
+          addDanger: mockToastsDanger,
+        },
+      } as unknown as CoreStart['notifications'],
+      spaces,
+      storage: {
+        get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+        clear: jest.fn(),
+      } as unknown as Storage,
+    });
   });
 
   it('should load the data views from getIdsWithTitle and dispatch further actions', async () => {
@@ -116,7 +110,7 @@ describe('createInitListener', () => {
 
     expect(jest.mocked(mockDataViewsService.getIdsWithTitle)).toHaveBeenCalled();
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       sharedDataViewManagerSlice.actions.setDataViews([
         {
           id: 'logs-*',
@@ -129,38 +123,38 @@ describe('createInitListener', () => {
         },
       ])
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       sharedDataViewManagerSlice.actions.setDataViewId({
         defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
       })
     );
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.default,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.timeline,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.alerts,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_ATTACK_DATA_VIEW_ID,
         scope: PageScope.attacks,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.analyzer,
@@ -179,7 +173,7 @@ describe('createInitListener', () => {
     it('should dispatch error correctly', async () => {
       await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
-      expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
         sharedDataViewManagerSlice.actions.error()
       );
       expect(mockToastsDanger).toHaveBeenCalledWith({

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { usePhaseColors, PHASE_DESCRIPTIONS } from '@kbn/data-lifecycle-phases';
 
 export const useIlmPhasesColorAndDescription = () => {
   const phaseColors = usePhaseColors();
 
-  return {
-    ilmPhases: {
+  const ilmPhases = useMemo(
+    () => ({
       hot: {
         color: phaseColors.hot,
         description: PHASE_DESCRIPTIONS.hot,
@@ -32,6 +33,9 @@ export const useIlmPhasesColorAndDescription = () => {
         color: phaseColors.delete,
         description: PHASE_DESCRIPTIONS.delete,
       },
-    },
-  };
+    }),
+    [phaseColors]
+  );
+
+  return { ilmPhases };
 };

@@ -116,8 +116,8 @@ const orderSchema = s.oneOf([
 const termsSchema = s.object({
   field: s.maybe(s.string()),
   collect_mode: s.maybe(s.string()),
-  exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string(), { maxSize: 100 })])),
-  include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string(), { maxSize: 100 })])),
+  exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string(), { maxSize: 10000 })])),
+  include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string(), { maxSize: 10000 })])),
   execution_hint: s.maybe(s.string()),
   missing: s.maybe(s.oneOf([s.number(), s.string(), s.boolean()])),
   min_doc_count: s.maybe(s.number({ min: 1 })),

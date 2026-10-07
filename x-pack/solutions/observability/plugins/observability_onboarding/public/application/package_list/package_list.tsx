@@ -18,9 +18,10 @@ interface Props {
   list: IntegrationCardItem[];
   searchTerm?: string;
   showCardLabels?: boolean;
+  backgroundColor?: 'plain' | 'transparent';
 }
 
-export function PackageList({ list, searchTerm = '', showCardLabels }: Props) {
+export function PackageList({ list, searchTerm = '', showCardLabels, backgroundColor }: Props) {
   return (
     /**
      * Suspense wrapper is required by PackageListGrid, but
@@ -43,6 +44,7 @@ export function PackageList({ list, searchTerm = '', showCardLabels }: Props) {
         setUrlandPushHistory={() => {}}
         showCardLabels={showCardLabels}
         sortByFeaturedIntegrations={false}
+        backgroundColor={backgroundColor}
       />
     </Suspense>
   );

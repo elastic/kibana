@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export type { OpenConversationSidebarOptions } from '@kbn/agent-builder-browser';
+import type { OpenConversationSidebarOptions } from '@kbn/agent-builder-browser';
+
+export type { OpenConversationSidebarOptions };
+
+export type OpenSidebarInternalOptions = OpenConversationSidebarOptions;

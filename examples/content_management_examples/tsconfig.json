@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout_examples/**/*",
     "../../typings/**/*"
   ],
   "exclude": [
@@ -28,5 +29,6 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/content-management-table-list-view-common",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/scout"
   ]
 }

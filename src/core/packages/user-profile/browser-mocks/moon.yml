@@ -18,6 +18,7 @@ project:
   sourceRoot: src/core/packages/user-profile/browser-mocks
 dependsOn:
   - '@kbn/core-user-profile-browser'
+  - '@kbn/core-user-profile-browser-hooks'
   - '@kbn/core-user-profile-browser-internal'
   - '@kbn/lazy-object'
 tags:

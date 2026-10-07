@@ -18,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomScriptsRequestQueryParams } from '../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
@@ -208,6 +209,10 @@ export const CustomScriptSelector = memo<
       closePopover={handleClosePopover}
       panelProps={{ 'data-test-subj': testId('popoverPanel') }}
       panelPaddingSize="s"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.endpoint.customScriptSelector.popover.ariaLabel',
+        { defaultMessage: 'Select script' }
+      )}
       button={
         <EuiToolTip content={CUSTOM_SCRIPTS_CONFIG.tooltipText} position="top" display="block">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none" tabIndex={0}>
@@ -258,7 +263,7 @@ export const CustomScriptSelector = memo<
     </EuiPopover>
   ) : (
     <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
-      <EuiIcon type="warning" size="s" color="subdued" />{' '}
+      <EuiIcon type="warning" size="s" color="subdued" aria-hidden={true} />{' '}
       <FormattedMessage
         id="xpack.securitySolution.endpoint.customScriptSelector.noMultipleArgs"
         defaultMessage="Argument is only supported once per command"

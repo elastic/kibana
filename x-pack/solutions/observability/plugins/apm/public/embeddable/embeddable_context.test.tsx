@@ -6,13 +6,24 @@
  */
 
 import React, { useContext } from 'react';
-import { render, screen } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { act, render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
+import { useLocation } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from '@kbn/apm-shared/public';
 import { ApmEmbeddableContext } from './embeddable_context';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import * as urlParamHelpers from '../context/url_params_context/helpers';
+import * as apmPluginModule from '../plugin';
 import * as createCallApmApiModule from '../services/rest/create_call_apm_api';
 
 jest.mock('../context/time_range_metadata/time_range_metadata_context', () => ({
@@ -86,9 +97,22 @@ function ContextConsumer() {
   );
 }
 
+/** Probe that surfaces the in-memory router URL so we can assert what gets seeded. */
+function LocationProbe() {
+  const location = useLocation();
+  return (
+    <div
+      data-test-subj="location-probe"
+      data-path={location.pathname}
+      data-search={location.search}
+    />
+  );
+}
+
 describe('ApmEmbeddableContext', () => {
   const mockGetDateRange = jest.spyOn(urlParamHelpers, 'getDateRange');
   const mockCreateCallApmApi = jest.spyOn(createCallApmApiModule, 'createCallApmApi');
+  const mockSetApmInternalServices = jest.spyOn(apmPluginModule, 'setApmInternalServices');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -129,6 +153,128 @@ describe('ApmEmbeddableContext', () => {
     );
 
     expect(mockCreateCallApmApi).toHaveBeenCalledWith(mockDeps.coreStart);
+  });
+
+  describe('CPS feature flag', () => {
+    const createFlaggedDeps = (isCpsEnabled$: Observable<boolean>) => {
+      const cps = cpsPluginMock.createStartContract();
+
+      // Stand-in for `core.featureFlags.useBooleanValue`, which seeds the first render from the
+      // synchronous evaluation before following later changes.
+      let latest: boolean | undefined;
+      isCpsEnabled$.subscribe((enabled) => {
+        latest = enabled;
+      });
+      const useBooleanValue = jest.fn((_flagName: string, fallback: boolean) =>
+        useObservable(isCpsEnabled$, latest ?? fallback)
+      );
+
+      return {
+        cps,
+        useBooleanValue,
+        deps: {
+          ...mockDeps,
+          coreStart: {
+            ...mockCore,
+            featureFlags: { ...mockCore.featureFlags, useBooleanValue },
+          },
+          pluginsStart: { ...mockDeps.pluginsStart, cps },
+        } as unknown as Parameters<typeof ApmEmbeddableContext>[0]['deps'],
+      };
+    };
+
+    it('observes the flag with the shared default as fallback', () => {
+      const { deps, useBooleanValue } = createFlaggedDeps(of(true));
+
+      render(
+        <ApmEmbeddableContext deps={deps}>
+          <div>Test</div>
+        </ApmEmbeddableContext>
+      );
+
+      expect(useBooleanValue).toHaveBeenCalledWith(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      );
+    });
+
+    it('wires the CPS manager into the internal services when the flag is enabled', () => {
+      const { deps, cps } = createFlaggedDeps(of(true));
+
+      render(
+        <ApmEmbeddableContext deps={deps}>
+          <div>Test</div>
+        </ApmEmbeddableContext>
+      );
+
+      expect(mockSetApmInternalServices).toHaveBeenLastCalledWith(
+        expect.objectContaining({ cpsManager: cps.cpsManager })
+      );
+    });
+
+    it('leaves the CPS manager out of the internal services when the flag is disabled', () => {
+      const { deps, cps } = createFlaggedDeps(of(false));
+
+      render(
+        <ApmEmbeddableContext deps={deps}>
+          <div>Test</div>
+        </ApmEmbeddableContext>
+      );
+
+      // Never, not just last: seeding the hook with the `true` default would install the manager on
+      // the first render, before the subscription lands.
+      expect(mockSetApmInternalServices).not.toHaveBeenCalledWith(
+        expect.objectContaining({ cpsManager: cps.cpsManager })
+      );
+      expect(mockSetApmInternalServices).toHaveBeenCalledWith(
+        expect.objectContaining({ cpsManager: undefined })
+      );
+    });
+
+    it('resolves the flag before descendants render', () => {
+      const { deps } = createFlaggedDeps(of(false));
+      const seenByChild: Array<ReturnType<typeof apmPluginModule.getApmInternalServices>> = [];
+
+      function ServicesProbe() {
+        seenByChild.push(apmPluginModule.getApmInternalServices());
+        return null;
+      }
+
+      render(
+        <ApmEmbeddableContext deps={deps}>
+          <ServicesProbe />
+        </ApmEmbeddableContext>
+      );
+
+      // Descendants read the services while rendering, so they must already exist by then, and
+      // already reflect the real flag rather than the fallback.
+      expect(mockSetApmInternalServices).toHaveBeenCalledTimes(1);
+      expect(seenByChild[0]).toBe(mockSetApmInternalServices.mock.calls[0][0]);
+      expect(seenByChild[0]).toEqual(expect.objectContaining({ cpsManager: undefined }));
+    });
+
+    it('re-wires the internal services when the flag emits a new value', () => {
+      const isCpsEnabled$ = new BehaviorSubject(false);
+      const { deps, cps } = createFlaggedDeps(isCpsEnabled$);
+
+      render(
+        <ApmEmbeddableContext deps={deps}>
+          <div>Test</div>
+        </ApmEmbeddableContext>
+      );
+
+      expect(mockSetApmInternalServices).toHaveBeenLastCalledWith(
+        expect.objectContaining({ cpsManager: undefined })
+      );
+
+      act(() => {
+        isCpsEnabled$.next(true);
+      });
+
+      expect(mockSetApmInternalServices).toHaveBeenLastCalledWith(
+        expect.objectContaining({ cpsManager: cps.cpsManager })
+      );
+    });
   });
 
   describe('date range handling', () => {
@@ -254,6 +400,87 @@ describe('ApmEmbeddableContext', () => {
         rangeFrom: 'now-15m',
         rangeTo: 'now-5m',
       });
+    });
+  });
+
+  describe('environment seeding into the in-memory router URL', () => {
+    it('defaults to ENVIRONMENT_ALL when no environment prop is provided', () => {
+      render(
+        <ApmEmbeddableContext deps={mockDeps}>
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      const search = screen.getByTestId('location-probe').getAttribute('data-search') ?? '';
+      const params = new URLSearchParams(search);
+      expect(params.get('environment')).toBeTruthy();
+    });
+
+    it('passes the provided environment through to the in-memory URL', () => {
+      render(
+        <ApmEmbeddableContext deps={mockDeps} environment="otel-demo">
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      const search = screen.getByTestId('location-probe').getAttribute('data-search') ?? '';
+      const params = new URLSearchParams(search);
+      expect(params.get('environment')).toBe('otel-demo');
+    });
+
+    it('URL-encodes environment values that contain special characters', () => {
+      render(
+        <ApmEmbeddableContext deps={mockDeps} environment="my env / prod">
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      const search = screen.getByTestId('location-probe').getAttribute('data-search') ?? '';
+      const params = new URLSearchParams(search);
+      expect(params.get('environment')).toBe('my env / prod');
+    });
+
+    it('updates the in-memory URL when the environment prop changes', () => {
+      const { rerender } = render(
+        <ApmEmbeddableContext deps={mockDeps} environment="staging">
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      expect(
+        new URLSearchParams(
+          screen.getByTestId('location-probe').getAttribute('data-search') ?? ''
+        ).get('environment')
+      ).toBe('staging');
+
+      rerender(
+        <ApmEmbeddableContext deps={mockDeps} environment="production">
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      expect(
+        new URLSearchParams(
+          screen.getByTestId('location-probe').getAttribute('data-search') ?? ''
+        ).get('environment')
+      ).toBe('production');
+    });
+  });
+
+  describe('nested router context', () => {
+    it('renders without crashing when mounted inside a page that already has a router context', () => {
+      const outerHistory = createMemoryHistory();
+
+      render(
+        <Router history={outerHistory}>
+          <ApmEmbeddableContext deps={mockDeps}>
+            <div data-test-subj="nested-child">Nested Content</div>
+          </ApmEmbeddableContext>
+        </Router>
+      );
+
+      expect(screen.getByTestId('nested-child')).toBeInTheDocument();
+      expect(screen.getByText('Nested Content')).toBeInTheDocument();
     });
   });
 });

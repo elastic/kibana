@@ -14,7 +14,7 @@ import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { appContextService } from './app_context';
 
-import { deleteFleetProxy } from './fleet_proxies';
+import { createFleetProxy, deleteFleetProxy, bulkCreateFleetProxies } from './fleet_proxies';
 import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
@@ -146,11 +146,51 @@ describe('Fleet proxies service', () => {
     });
   });
 
+  describe('bulkCreateFleetProxies', () => {
+    it('should return empty array without calling soClient when given no proxies', async () => {
+      const result = await bulkCreateFleetProxies(soClientMock, []);
+      expect(result).toEqual([]);
+      expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('should throw if any item in the bulk response has an error', async () => {
+      soClientMock.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'proxy-1',
+            type: FLEET_PROXY_SAVED_OBJECT_TYPE,
+            attributes: { name: 'proxy-1', url: 'http://proxy.fr', is_preconfigured: false },
+            references: [],
+            error: { statusCode: 409, error: 'Conflict', message: 'Document already exists' },
+          },
+        ],
+      } as any);
+
+      await expect(() =>
+        bulkCreateFleetProxies(soClientMock, [
+          { name: 'proxy-1', url: 'http://proxy.fr', is_preconfigured: false },
+        ])
+      ).rejects.toMatchObject({ statusCode: 409 });
+    });
+  });
+
+  describe('create', () => {
+    it('should throw FleetError when given an invalid id', async () => {
+      await expect(
+        createFleetProxy(
+          soClientMock,
+          { name: 'Test', url: 'http://proxy.co', is_preconfigured: false },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
+    });
+  });
+
   describe('delete', () => {
     it('should not allow to delete preconfigured proxy', async () => {
       await expect(() =>
         deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.PRECONFIGURED)
-      ).rejects.toThrowError(/Cannot delete test-preconfigured preconfigured proxy/);
+      ).rejects.toThrow(/Cannot delete test-preconfigured preconfigured proxy/);
     });
 
     it('should allow to delete preconfigured proxy with option fromPreconfiguration:true', async () => {
@@ -158,13 +198,13 @@ describe('Fleet proxies service', () => {
         fromPreconfiguration: true,
       });
 
-      expect(soClientMock.delete).toBeCalled();
+      expect(soClientMock.delete).toHaveBeenCalled();
     });
 
     it('should not allow to delete proxy with related preconfigured saved object', async () => {
       await expect(() =>
         deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.RELATED_PRECONFIGURED)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         /Cannot delete a proxy used in a preconfigured fleet server hosts or output./
       );
     });
@@ -173,9 +213,9 @@ describe('Fleet proxies service', () => {
       await deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.RELATED_PRECONFIGURED, {
         fromPreconfiguration: true,
       });
-      expect(mockedOutputService.update).toBeCalled();
-      expect(mockedFleetServerHostService.update).toBeCalled();
-      expect(soClientMock.delete).toBeCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(mockedFleetServerHostService.update).toHaveBeenCalled();
+      expect(soClientMock.delete).toHaveBeenCalled();
     });
   });
 });

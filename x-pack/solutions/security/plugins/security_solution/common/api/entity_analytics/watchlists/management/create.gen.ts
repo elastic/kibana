@@ -30,19 +30,23 @@ export const CreateWatchlistRequestBody = lazySchema(() =>
     /**
      * Unique name for the watchlist
      */
-    name: z.string(),
+    name: z.string().max(256).describe('Unique name for the watchlist'),
     /**
      * Description of the watchlist
      */
-    description: z.string().optional(),
+    description: z.string().max(1000).optional().describe('Description of the watchlist'),
     /**
      * Risk score modifier associated with the watchlist
      */
-    riskModifier: z.number().min(0).max(2),
+    riskModifier: z
+      .number()
+      .min(0)
+      .max(2)
+      .describe('Risk score modifier associated with the watchlist'),
     /**
      * Indicates if the watchlist is managed by the system
      */
-    managed: z.boolean().optional(),
+    managed: z.boolean().optional().describe('Indicates if the watchlist is managed by the system'),
     /**
      * Optional entity sources to create and link to the watchlist
      */
@@ -51,28 +55,44 @@ export const CreateWatchlistRequestBody = lazySchema(() =>
         z
           .object({
             type: EntitySourceType,
-            name: z.string(),
-            indexPattern: z.string().optional(),
+            name: z.string().max(256),
+            indexPattern: z.string().max(1000).optional(),
             /**
              * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
              */
-            integrationName: z.string().optional(),
+            integrationName: z
+              .string()
+              .max(256)
+              .optional()
+              .describe(
+                'Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.'
+              ),
             enabled: z.boolean().optional(),
             /**
              * Field used to query the entity store for index-type sources
              */
-            identifierField: z.string().optional(),
+            identifierField: z
+              .string()
+              .max(256)
+              .optional()
+              .describe('Field used to query the entity store for index-type sources'),
             /**
              * KQL query used to filter data from the provided index patterns
              */
-            queryRule: z.string().optional(),
-            matchers: z.array(Matcher).optional(),
+            queryRule: z
+              .string()
+              .max(4096)
+              .optional()
+              .describe('KQL query used to filter data from the provided index patterns'),
+            matchers: z.array(Matcher).max(100).optional(),
             filter: Filter.optional(),
             range: DateRange.optional(),
           })
           .strict()
       )
-      .optional(),
+      .max(100)
+      .optional()
+      .describe('Optional entity sources to create and link to the watchlist'),
   })
 );
 export type CreateWatchlistRequestBody = z.infer<typeof CreateWatchlistRequestBody>;

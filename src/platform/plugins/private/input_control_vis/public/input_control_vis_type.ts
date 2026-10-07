@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { VisGroups } from '@kbn/visualizations-plugin/public';
 import { getControlsTab, OptionsTabLazy } from './components/editor';
 import type { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
@@ -29,7 +28,6 @@ export function createInputControlVisTypeDefinition(
       defaultMessage: 'Input controls',
     }),
     icon: 'controls',
-    group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),

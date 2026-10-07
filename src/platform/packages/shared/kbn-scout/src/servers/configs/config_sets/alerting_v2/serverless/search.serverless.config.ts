@@ -17,7 +17,11 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.alerting_v2.enabled=true',
-      '--uiSettings.overrides.alerting:v2:experimentalFeatures=true',
+      // Relax the schedule guardrails so functional tests can run rules every few seconds
+      // without tripping the minimum-interval or per-minute limits.
+      '--xpack.alerting_v2.rules.minimumScheduleInterval=5s',
+      '--xpack.alerting_v2.rules.maxScheduledPerMinute=32000',
+      '--uiSettings.globalOverrides.alerting:v2:enabled=true',
     ],
   },
 };

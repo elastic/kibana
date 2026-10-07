@@ -18,10 +18,16 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeHelpMenuLink,
+  ChromeAiButton,
+  ChromeNewsfeedHandler,
+  GlobalSearchConfig,
   ChromeNavLink,
   ChromeUserBanner,
+  ChromeAppHeaderConfig,
 } from '@kbn/core-chrome-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { InlineAppHeaderState } from '@kbn/core-chrome-browser-internal-types';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
 import {
   createState,
@@ -62,15 +68,30 @@ export interface ChromeState {
   /** UI elements */
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
+  aiButton: State<ReadonlySet<ChromeAiButton>>;
+  globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
+  projectPicker: State<ReactNode>;
+  inlineAppHeader: State<InlineAppHeaderState | undefined>;
+  inlineAppHeaderOwnerId: number;
+  appHeader: State<ChromeAppHeaderConfig | undefined>;
+  userMenu: State<ReactNode>;
 
   /** Help system */
   help: {
     extension: State<ChromeHelpExtension | undefined>;
     supportUrl: State<string>;
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
+    menuLinks: State<ChromeHelpMenuLink[]>;
   };
+
+  /** Feedback handler registered by the feedback plugin */
+  feedbackHandler: State<(() => void) | undefined>;
+
+  /** Newsfeed handler registered by the newsfeed plugin */
+  newsfeedHandler: State<ChromeNewsfeedHandler | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -107,12 +128,26 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
+  const aiButton = createState<ReadonlySet<ChromeAiButton>>(new Set());
+  const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
+  const contextSwitcher = createState<ReactNode>(null);
+  const projectPicker = createState<ReactNode>(null);
+  const inlineAppHeader = createState<InlineAppHeaderState | undefined>(undefined);
+  const appHeader = createState<ChromeAppHeaderConfig | undefined>(undefined);
+  const userMenu = createState<ReactNode>(null);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
+  const helpMenuLinks = createState<ChromeHelpMenuLink[]>([]);
+
+  // Feedback
+  const feedbackHandler = createState<(() => void) | undefined>(undefined);
+
+  // Newsfeed
+  const newsfeedHandler = createState<ChromeNewsfeedHandler | undefined>(undefined);
 
   return {
     visibility,
@@ -130,12 +165,23 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     },
     headerBanner,
     globalFooter,
+    aiButton,
+    globalSearch,
     customNavLink,
     appMenu,
+    inlineAppHeader,
+    inlineAppHeaderOwnerId: 0,
+    appHeader,
     help: {
       extension: helpExtension,
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
+      menuLinks: helpMenuLinks,
     },
+    contextSwitcher,
+    projectPicker,
+    userMenu,
+    feedbackHandler,
+    newsfeedHandler,
   };
 }

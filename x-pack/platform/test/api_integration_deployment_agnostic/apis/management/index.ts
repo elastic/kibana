@@ -8,7 +8,5 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Management', () => {
-    loadTestFile(require.resolve('./ingest_pipelines'));
-  });
+  describe('Management', () => {});
 }

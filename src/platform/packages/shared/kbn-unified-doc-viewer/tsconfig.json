@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/discover-utils",
+    "@kbn/ebt-click",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
     "@kbn/data-plugin",
@@ -22,6 +23,7 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/shared-ux-error-boundary",
     "@kbn/restorable-state",
+    "@kbn/scout",
     "@kbn/core",
   ]
 }

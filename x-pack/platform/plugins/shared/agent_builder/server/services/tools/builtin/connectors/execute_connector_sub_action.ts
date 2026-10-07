@@ -7,31 +7,51 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import {
+  getConnectorSpec,
+  isSelectedActionEnabled,
+  isToolAction,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
-const executeConnectorSubActionSchema = z.object({
-  connectorId: z.string().min(1).describe('The ID of the connector instance to execute against'),
-  subAction: z
-    .string()
-    .min(1)
-    .describe(
-      'The exact name of the sub-action to execute. ' +
-        'Must match one of the sub-action names listed in the connector attachment (e.g. searchMessages, sendMessage). ' +
-        'Do not guess — read the connector attachment first.'
-    ),
-  params: z
-    .record(z.string(), z.any())
-    .optional()
-    .describe(
-      'Parameters for the sub-action. Must include all required parameters as described in the connector attachment. ' +
-        'Read the connector attachment to see which parameters are required vs optional.'
-    ),
-});
+const connectorIdValidationMessage =
+  'connectorId must be at the root of the arguments (copy the value labeled Connector ID from the connector attachment). ' +
+  'Do not send only sub-action fields at the root; include connectorId and subAction together.';
+
+const subActionValidationMessage =
+  'subAction must be at the root — use the exact name from the connector attachment (for example searchMessages). ' +
+  'It is not inferred from params or other fields.';
+
+export const executeConnectorSubActionArgsSchema = z
+  .object({
+    connectorId: z
+      .string()
+      .min(1, connectorIdValidationMessage)
+      .describe(
+        'Connector instance ID at the **root** of the arguments object (not inside params). ' +
+          'Must match the Connector ID line on the connector attachment.'
+      ),
+    subAction: z
+      .string()
+      .min(1, subActionValidationMessage)
+      .describe(
+        'Exact sub-action name at the **root** (must match a name listed under Available sub-actions on the attachment). ' +
+          'Do not guess or infer from params.'
+      ),
+    params: z
+      .record(z.string(), z.any())
+      .optional()
+      .describe(
+        'Parameters for the chosen sub-action only — include each field the sub-action expects. ' +
+          'Do not put those fields next to connectorId at the root; they belong in params.'
+      ),
+  })
+  .strict();
 
 /**
  * Creates the execute_connector_sub_action tool.
@@ -41,37 +61,57 @@ const executeConnectorSubActionSchema = z.object({
  */
 export const createExecuteConnectorSubActionTool = ({
   getActions,
-}: ConnectorToolsOptions): BuiltinToolDefinition<typeof executeConnectorSubActionSchema> => ({
+}: ConnectorToolsOptions): BuiltinToolDefinition<typeof executeConnectorSubActionArgsSchema> => ({
   id: platformCoreTools.executeConnectorSubAction,
   type: ToolType.builtin,
   description:
-    'Execute a sub-action on a connector instance. ' +
-    'IMPORTANT: Before calling this tool, you MUST read the connector attachment to find the exact sub-action names, ' +
-    'required parameters, and the connectorId. Do not guess sub-action names or parameters. ' +
-    'The connector attachment lists all available sub-actions with their parameter schemas.',
-  schema: executeConnectorSubActionSchema,
+    'Runs one sub-action on a saved connector. ' +
+    'Arguments must look like: {"connectorId":"<id>","subAction":"<name>","params":{...}}. ' +
+    'Keep connectorId and subAction at the root; put every argument for the sub-action inside params, not at the root. ' +
+    'Use the connector attachment for the Connector ID, allowed sub-action names, and parameter definitions. ' +
+    'Do not invent names or parameters. ' +
+    'Connectors API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors — ' +
+    'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
+  schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
-  availability: {
-    cacheMode: 'global',
-    handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-      return enabled
-        ? { status: 'available' }
-        : {
-            status: 'unavailable',
-            reason: 'Connector tools require the connectors feature to be enabled',
-          };
-    },
+  excludeFromMcp: true,
+  annotations: {
+    title: 'Execute Connector Sub-Action',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
   },
   handler: async ({ connectorId, subAction, params }, context) => {
+    const { agentConfiguration } = context;
+    // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
+    // configuration. When an agent configuration is present, undefined/null connector_ids
+    // means no connectors are assigned; scoping is skipped only when there is no agent
+    // context at all (mirrors sml_search.ts).
+    if (agentConfiguration) {
+      const allowedIds = agentConfiguration.connector_ids ?? [];
+      if (!allowedIds.includes(connectorId)) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Connector '${connectorId}' is not available to this agent. Use list_connectors to see available connectors.`,
+              metadata: { connectorId, subAction },
+            }),
+          ],
+        };
+      }
+    }
+
     const actions = await getActions();
     const actionsClient = await actions.getActionsClientWithRequest(context.request);
 
     // Resolve the connector type from the connector ID
     let connectorType: string;
+    let selectedActions: SelectedActions;
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
+      selectedActions = connector.config?.selectedActions as SelectedActions;
     } catch (error) {
       return {
         results: [
@@ -98,19 +138,74 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
-    // Validate that the sub-action is marked as a tool in the connector spec
+    // Reject workflow-only actions — isTool: false actions are not callable by agents.
     if (!isToolAction(spec, subAction)) {
       return {
         results: [
           createErrorResult({
             message:
-              `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
-              'Read the connector attachment to find the correct sub-action names.',
+              `Sub-action '${subAction}' is not available as an agent tool for connector '${connectorId}'. ` +
+              'It can only be called from a workflow.',
             metadata: { connectorId, connectorType, subAction },
           }),
         ],
       };
     }
+
+    // Enforce instance allowlist / recommended-mode rules.
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Sub-action '${subAction}' is not enabled for connector '${connectorId}'. ` +
+              'Read the connector attachment to find the allowed sub-action names.',
+            metadata: { connectorId, connectorType, subAction },
+          }),
+        ],
+      };
+    }
+
+    const resolveAuthorizationResult = ({
+      authMethod,
+      connectorName,
+    }: {
+      authMethod: unknown;
+      connectorName?: string;
+    }) => {
+      if (!isAuthorizationMethod(authMethod)) {
+        return undefined;
+      }
+      const promptId = `tools.${context.callContext.toolId}.authorization.${connectorId}`;
+      const { status } = context.prompts.checkAuthorizationStatus(promptId);
+      const resolvedConnectorName = connectorName ?? connectorId;
+
+      if (status === AuthorizationStatus.unprompted) {
+        return context.prompts.askForAuthorization({
+          id: promptId,
+          connector_id: connectorId,
+          connector_name: resolvedConnectorName,
+          connector_type: connectorType,
+          auth_method: authMethod,
+        });
+      }
+
+      if (status === AuthorizationStatus.declined) {
+        return {
+          results: [
+            createErrorResult({
+              message:
+                `The user declined to authorize the '${resolvedConnectorName}' connector, so the '${subAction}' sub-action cannot run. ` +
+                'Do not retry this sub-action and do not instruct the user to authorize the connector themselves. ' +
+                'Briefly let the user know the request was not completed because authorization was declined.',
+              metadata: { connectorId, connectorType, subAction, authorizationStatus: status },
+            }),
+          ],
+        };
+      }
+
+      return undefined;
+    };
 
     let executeResult;
     try {
@@ -137,6 +232,18 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     if (executeResult.status === 'error') {
+      if (executeResult.errorName === 'ConnectorAuthorizationError') {
+        const { errorMeta } = executeResult;
+        const connectorName =
+          typeof errorMeta?.connectorName === 'string' ? errorMeta.connectorName : undefined;
+        const authResult = resolveAuthorizationResult({
+          authMethod: errorMeta?.authMethod,
+          connectorName,
+        });
+        if (authResult) {
+          return authResult;
+        }
+      }
       return {
         results: [
           createErrorResult({

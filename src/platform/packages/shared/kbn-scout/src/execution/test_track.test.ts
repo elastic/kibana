@@ -19,6 +19,16 @@ describe('TestTrack', () => {
     expect(track.leastLoadedOpenLane).toBe(undefined);
   });
 
+  it('should produce valid stats for an empty track specification', () => {
+    const track = new TestTrack({ runtimeTarget: 10 });
+    const spec = track.specification;
+
+    expect(spec.stats.lane.count).toBe(0);
+    expect(spec.stats.lane.saturationPercent).toBe(0);
+    expect(spec.stats.combinedRuntime.target).toBe(0);
+    expect(spec.lanes).toEqual([]);
+  });
+
   it('closes the lane when one load fills it entirely', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
 
@@ -445,7 +455,7 @@ describe('TestTrack', () => {
       metadata: {},
     };
 
-    expect(() => track.addLoadToLeastCongestedLane(load, false)).toThrowError(
+    expect(() => track.addLoadToLeastCongestedLane(load, false)).toThrow(
       "Track doesn't have any lanes"
     );
   });

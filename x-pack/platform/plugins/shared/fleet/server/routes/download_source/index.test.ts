@@ -16,6 +16,7 @@ import {
   GetDownloadSourceResponseSchema,
 } from '../../types';
 import { downloadSourceService } from '../../services/download_source';
+import { agentPolicyService } from '../../services';
 
 import {
   getDownloadSourcesHandler,
@@ -30,7 +31,7 @@ jest.mock('../../services', () => ({
     getLogger: jest.fn().mockReturnValue({ error: jest.fn() } as any),
   },
   agentPolicyService: {
-    bumpAllAgentPolicies: jest.fn().mockResolvedValue({}),
+    bumpAllAgentPoliciesForDownloadSource: jest.fn().mockResolvedValue({}),
   },
 }));
 
@@ -173,5 +174,116 @@ describe('schema validation', () => {
     });
     const validationResp = DeleteDownloadSourcesResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('put should call bumpAllAgentPoliciesForDownloadSource with isDefault flag', async () => {
+    (downloadSourceService.get as jest.Mock).mockResolvedValue({
+      id: 'source1',
+      is_default: true,
+    });
+
+    await putDownloadSourcesHandler(
+      context,
+      { body: {}, params: { sourceId: 'source1' } } as any,
+      response
+    );
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForDownloadSource).toHaveBeenLastCalledWith(
+      expect.any(Object),
+      'source1',
+      { isDefault: true }
+    );
+  });
+
+  it('post should call bumpAllAgentPoliciesForDownloadSource with isDefault flag', async () => {
+    (downloadSourceService.create as jest.Mock).mockResolvedValue({
+      id: 'source1',
+      is_default: false,
+    });
+
+    await postDownloadSourcesHandler(context, { body: { id: 'source1' } } as any, response);
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForDownloadSource).toHaveBeenLastCalledWith(
+      expect.any(Object),
+      'source1',
+      { isDefault: false }
+    );
+  });
+
+  describe('putDownloadSourcesHandler ID immutability', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (downloadSourceService.update as jest.Mock).mockResolvedValue({});
+      (downloadSourceService.get as jest.Mock).mockResolvedValue({
+        id: 'source1',
+        is_default: false,
+      });
+      (agentPolicyService.bumpAllAgentPoliciesForDownloadSource as jest.Mock).mockResolvedValue({});
+    });
+
+    it('should return badRequest when body id does not match path sourceId', async () => {
+      await putDownloadSourcesHandler(
+        context,
+        {
+          body: {
+            id: '../../../api/spaces/space/admin-space',
+            name: 'Test',
+            host: 'http://test.co',
+          },
+          params: { sourceId: 'source1' },
+        } as any,
+        response
+      );
+
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('Cannot change download source ID'),
+          }),
+        })
+      );
+      expect(downloadSourceService.update).not.toHaveBeenCalled();
+    });
+
+    it('should return ok when body id matches path sourceId', async () => {
+      await putDownloadSourcesHandler(
+        context,
+        {
+          body: { id: 'source1', name: 'Updated', host: 'http://test.co' },
+          params: { sourceId: 'source1' },
+        } as any,
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should return ok when body has no id field', async () => {
+      await putDownloadSourcesHandler(
+        context,
+        {
+          body: { name: 'Updated', host: 'http://test.co' },
+          params: { sourceId: 'source1' },
+        } as any,
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should not pass id to downloadSourceService.update', async () => {
+      await putDownloadSourcesHandler(
+        context,
+        {
+          body: { id: 'source1', name: 'Updated', host: 'http://test.co' },
+          params: { sourceId: 'source1' },
+        } as any,
+        response
+      );
+
+      const updateCallArgs = (downloadSourceService.update as jest.Mock).mock.calls[0];
+      expect(updateCallArgs[2]).toBe('source1');
+      expect(updateCallArgs[3]).not.toHaveProperty('id');
+    });
   });
 });

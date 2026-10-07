@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -821,9 +822,7 @@ describe('ruleType', () => {
         ],
         values: [],
       };
-      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
-        searchResult
-      );
+      ruleServices.scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
       expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
@@ -843,9 +842,7 @@ describe('ruleType', () => {
           ['timestamp', 'message'],
         ],
       };
-      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
-        searchResult
-      );
+      ruleServices.scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
 
@@ -933,7 +930,7 @@ async function invokeExecutor({
       latestTimestamp: undefined,
       ...state,
     },
-    spaceId: uuidv4(),
+    spaceId: asSpaceId(uuidv4()),
     rule: {
       id: uuidv4(),
       name: 'rule-name',

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiDescriptionList, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiText, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 
@@ -80,6 +80,18 @@ export const ComponentHealthTab: React.FunctionComponent<ComponentHealthTabProps
             '-'
           ),
         },
+        ...(componentHealth.last_error
+          ? [
+              {
+                title: i18n.translate('xpack.fleet.otelUi.componentDetail.health.lastErrorLabel', {
+                  defaultMessage: 'Last error',
+                }),
+                description: (
+                  <EuiTextColor color="danger">{componentHealth.last_error}</EuiTextColor>
+                ),
+              },
+            ]
+          : []),
       ]}
     />
   );

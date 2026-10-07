@@ -18,6 +18,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
+  ALERT_SNOOZED,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_TAGS,
@@ -27,6 +28,7 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  ALERT_TRACKED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -43,6 +45,7 @@ import {
 } from '../format_alert';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
+import { getAlertSnoozedStatus } from '../get_alert_snoozed_status';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -107,6 +110,7 @@ export const buildOngoingAlert = <
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isSnoozed = getAlertSnoozedStatus(alertInstanceId, ruleData);
 
   const alertUpdates = {
     // Set latest rule configuration
@@ -135,6 +139,9 @@ export const buildOngoingAlert = <
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set muted state
     [ALERT_MUTED]: isMuted,
+    // Set per-alert snooze state
+    [ALERT_SNOOZED]: isSnoozed,
+    [ALERT_TRACKED]: true,
     // Set the time range
     ...(alertState.start
       ? {

@@ -34,6 +34,7 @@ const SectionPanelTitle = ({
               <EuiIcon
                 type={iconType}
                 size={'xl'}
+                aria-hidden={true}
                 css={css`
                   vertical-align: text-bottom;
                   margin-right: ${euiTheme.size.s};

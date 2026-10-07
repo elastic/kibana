@@ -18,8 +18,10 @@ export interface ArtifactListPageUrlParams {
   pageSize?: number;
   filter?: string;
   includedPolicies?: string;
-  show?: 'create' | 'edit' | 'import';
+  show?: 'create' | 'edit' | 'view' | 'import';
   itemId?: string;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ArtifactFormComponentProps {
@@ -47,7 +49,9 @@ export interface ArtifactFormComponentOnChangeCallbackProps {
 
 export interface ArtifactConfirmModalLabelProps {
   title: string;
-  body: string;
+  warningsHeader: string;
+  listOfWarnings: Array<React.ReactNode>;
+  warningsFooter: string;
   confirmButton: string;
   cancelButton: string;
 }

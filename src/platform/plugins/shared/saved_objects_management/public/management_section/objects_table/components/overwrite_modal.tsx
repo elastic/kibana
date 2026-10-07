@@ -82,7 +82,6 @@ export const OverwriteModal = ({ conflict, onFinish, allowedTypes }: OverwriteMo
         onChange={selectProps.onChange}
         prepend={selectControlLabel}
         aria-label={selectControlLabel}
-        hasDividers
         fullWidth
         compressed
       />

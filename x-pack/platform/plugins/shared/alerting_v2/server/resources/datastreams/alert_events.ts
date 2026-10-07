@@ -5,29 +5,16 @@
  * 2.0.
  */
 
-import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
 import type { MappingsDefinition } from '@kbn/es-mappings';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
+import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
+import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 2;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 8;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
-export const ALERT_EVENTS_ILM_POLICY_NAME = '.rule-events-ilm-policy';
-
-export const ALERT_EVENTS_ILM_POLICY: IlmPolicy = {
-  _meta: { managed: true },
-  phases: {
-    hot: {
-      actions: {
-        rollover: {
-          max_age: '30d',
-          max_primary_shard_size: '50gb',
-        },
-      },
-    },
-  },
-};
+export const ALERT_EVENTS_RESOURCE_KEY = `data_stream:${ALERT_EVENTS_DATA_STREAM}`;
 
 const mappings: MappingsDefinition = {
   dynamic: false,
@@ -47,7 +34,10 @@ const mappings: MappingsDefinition = {
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert
-    episode: {
+    // Renamed from `episode` in v8. New documents are written with `alert.*`.
+    // The `episode.*` aliases allow existing ES|QL queries to keep using the old names
+    // during the transition; they resolve to `alert.*` at query time.
+    alert: {
       type: 'object',
       properties: {
         id: { type: 'keyword' },
@@ -55,7 +45,16 @@ const mappings: MappingsDefinition = {
         status_count: { type: 'long' }, // only set for pending and recovering
       },
     },
+    episode: {
+      type: 'object',
+      properties: {
+        id: { type: 'alias', path: 'alert.id' },
+        status: { type: 'alias', path: 'alert.status' },
+        status_count: { type: 'alias', path: 'alert.status_count' },
+      },
+    },
     space_id: { type: 'keyword' },
+    severity: { type: 'keyword' }, // info | low | medium | high | critical
   },
 };
 
@@ -71,16 +70,14 @@ export const alertEpisodeStatus = alertEpisodeStatusSchema.enum;
 export const alertEventSchema = z.object({
   '@timestamp': z.string(),
   scheduled_timestamp: z.string().optional(),
-  rule: z.object({
-    id: z.string(),
-    version: z.number(),
-  }),
+  rule: z.object({ id: z.string().optional(), version: z.number().optional() }).optional(),
   group_hash: z.string(),
-  data: z.record(z.string(), z.any()),
+  data: z.record(z.string(), z.unknown()),
   status: alertEventStatusSchema,
   source: z.string(),
   type: alertEventTypeSchema,
-  episode: z
+  // Matches the `alert` mapping field (renamed from `episode` in v8).
+  alert: z
     .object({
       id: z.string(),
       status: alertEpisodeStatusSchema,
@@ -88,17 +85,51 @@ export const alertEventSchema = z.object({
     })
     .optional(),
   space_id: z.string(),
+  severity: alertEventSeveritySchema.optional(),
 });
 
 export type AlertEvent = z.infer<typeof alertEventSchema>;
+/**
+ * Write shape: `@timestamp` is set by the data stream's ingest pipeline at index time.
+ * Only the public alert events API sets it, when the caller supplies a timestamp.
+ */
+export type AlertEventDocument = Omit<AlertEvent, '@timestamp'> & { '@timestamp'?: string };
 export type AlertEventStatus = z.infer<typeof alertEventStatusSchema>;
 export type AlertEventType = z.infer<typeof alertEventTypeSchema>;
 export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 
+export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDocument => {
+  const { scheduled_timestamp, alert, severity, ...required } = params;
+
+  const doc: AlertEventDocument = { ...required };
+
+  if (scheduled_timestamp !== undefined) {
+    doc.scheduled_timestamp = scheduled_timestamp;
+  }
+
+  if (alert !== undefined) {
+    doc.alert = {
+      id: alert.id,
+      status: alert.status,
+      ...(alert.status_count != null ? { status_count: alert.status_count } : {}),
+    };
+  }
+
+  if (severity !== undefined) {
+    doc.severity = severity;
+  }
+
+  return doc;
+};
+
 export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
-  key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,
+  key: ALERT_EVENTS_RESOURCE_KEY,
   dataStreamName: ALERT_EVENTS_DATA_STREAM,
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
-  ilmPolicy: { name: ALERT_EVENTS_ILM_POLICY_NAME, policy: ALERT_EVENTS_ILM_POLICY },
+  lifecycle: {},
+  finalPipeline: getIngestTimestampPipeline(ALERT_EVENTS_DATA_STREAM),
+  // Data streams created from v7 or below map `episode.*` as concrete fields, which cannot be
+  // turned into aliases in place. Keep this at 7 when bumping the version.
+  forceReset: { version: 7 },
 });

@@ -12,6 +12,7 @@ import { createIsNarrowSchema } from '../../../shared/type_guards';
 export interface IngestStreamLifecycleDSL {
   dsl: {
     data_retention?: string;
+    frozen_after?: string;
     downsample?: DownsampleStep[];
   };
 }
@@ -68,6 +69,7 @@ const downsampleStepSchema = z.object({
 const dslLifecycleSchema = z.object({
   dsl: z.object({
     data_retention: z.optional(NonEmptyString),
+    frozen_after: z.optional(NonEmptyString),
     downsample: z.optional(z.array(downsampleStepSchema)),
   }),
 });
@@ -136,6 +138,12 @@ export const isDisabledLifecycle = createIsNarrowSchema(
 );
 
 export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
+
+// Maps Elasticsearch `_tier` field values to lifecycle phase names. DSL only allocates to hot or frozen.
+export const TIER_TO_PHASE: Record<string, Extract<PhaseName, 'hot' | 'frozen'>> = {
+  data_hot: 'hot',
+  data_frozen: 'frozen',
+};
 
 export interface DownsampleStep {
   after: string;

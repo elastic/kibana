@@ -102,7 +102,7 @@ export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: numbe
                       id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
                       defaultMessage="Learn how to create a snapshot"
                     />{' '}
-                    <EuiIcon type="link" />
+                    <EuiIcon type="link" aria-hidden={true} />
                   </EuiLink>
                 </p>
               </Fragment>

@@ -46,6 +46,10 @@ const DIRECTION_OPTIONS = [
   },
 ];
 
+const LIST_PROPS = {
+  paddingSize: 's' as const,
+};
+
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortFieldConfig {
@@ -150,6 +154,7 @@ const SortFieldsPopoverComponent: React.FC<SortFieldsPopoverProps> = ({
           options={selectableOptions}
           onChange={handleFieldChange}
           singleSelection
+          listProps={LIST_PROPS}
         >
           {(list) => list}
         </EuiSelectable>

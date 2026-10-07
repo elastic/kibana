@@ -18,7 +18,6 @@ export const EndpointListNavLink = memo<{
   const clickHandler = useNavigateByRouterEventHandler(route);
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
       data-test-subj={dataTestSubj}
       className="eui-displayInline eui-textTruncate"

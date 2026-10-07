@@ -1,0 +1,229 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import {
+  createRuleDataSchema,
+  updateRuleDataSchema,
+  ruleResponseSchema,
+  findRulesResponseSchema,
+  ruleRoutingTagsResponseSchema,
+  ruleTagsResponseSchema,
+  bulkGetRulesResponseSchema,
+  bulkCreateRuleItemSchema,
+  bulkCreateRulesRequestSchema,
+  bulkCreateRulesResponseSchema,
+  querySchema,
+  recoverySchema,
+  noDataSchema,
+  stateTransitionSchema,
+  scheduleSchema,
+  metadataSchema,
+  groupingSchema,
+} from './rule_data_schema';
+import {
+  createActionPolicyDataSchema,
+  updateActionPolicyDataSchema,
+  bulkSnoozeActionPoliciesBodySchema,
+  snoozeActionPolicyBodySchema,
+  actionPolicyDestinationSchema,
+  groupingModeSchema,
+} from './action_policy_data_schema';
+import {
+  actionPolicyResponseSchema,
+  findActionPoliciesResponseSchema,
+} from './action_policy_response_schema';
+import {
+  createAckEpisodeActionBodySchema,
+  createUnackEpisodeActionBodySchema,
+  createAssignEpisodeActionBodySchema,
+  createTagEpisodeActionBodySchema,
+  createSnoozeSeriesActionBodySchema,
+  createUnsnoozeSeriesActionBodySchema,
+  createActivateEpisodeActionBodySchema,
+  createDeactivateEpisodeActionBodySchema,
+  createSeriesAlertActionBodySchema,
+  createEpisodeAlertActionBodySchema,
+  bulkTagEpisodeActionItemSchema,
+  bulkTagEpisodeActionBodySchema,
+  bulkSnoozeSeriesActionItemSchema,
+  bulkSnoozeSeriesActionBodySchema,
+  bulkUnsnoozeSeriesActionItemSchema,
+  bulkUnsnoozeSeriesActionBodySchema,
+  bulkAckEpisodeActionItemSchema,
+  bulkAckEpisodeActionBodySchema,
+  bulkUnackEpisodeActionItemSchema,
+  bulkUnackEpisodeActionBodySchema,
+  bulkAssignEpisodeActionItemSchema,
+  bulkAssignEpisodeActionBodySchema,
+  bulkActivateEpisodeActionItemSchema,
+  bulkActivateEpisodeActionBodySchema,
+  bulkDeactivateEpisodeActionItemSchema,
+  bulkDeactivateEpisodeActionBodySchema,
+} from './alert_action_schema';
+import {
+  matchActionPoliciesBodySchema,
+  matchedActionPolicySchema,
+  matchActionPoliciesResponseSchema,
+} from './match_action_policies_schema';
+import { actionPolicyRoutingTagsResponseSchema } from './action_policy_routing_tags_schema';
+import { matchRulesBodySchema } from './match_rules_schema';
+import {
+  ruleExecutionViewSchema,
+  listRuleExecutionsResponseSchema,
+} from './rule_execution_history_schema';
+import {
+  policyExecutionHistoryItemSchema,
+  listPolicyExecutionHistoryResponseSchema,
+} from './policy_execution_history_schema';
+import {
+  bulkByIdsSchema,
+  bulkByQuerySchema,
+  bulkResponseSchema,
+  dryRunResponseSchema,
+} from './bulk_operation_schema';
+import { errorResponseSchema } from './error_response_schema';
+
+/**
+ * These tests guard the OAS component naming contract (rna-program#375):
+ * every public request/response schema — and the nested schemas they reuse —
+ * must carry a stable `.meta({ id })` so Kibana's OAS emits named `$ref`
+ * components (consumed by the Terraform provider) instead of anonymous inline
+ * objects. Every id is namespaced with `alerting_` to stay unique across the
+ * shared OAS document (alerting v1 already claims ids like `rule_response`).
+ */
+const getMeta = (schema: z.ZodType): { id?: string; description?: string } =>
+  (z.globalRegistry.get(schema) as { id?: string; description?: string } | undefined) ?? {};
+
+const getMetaId = (schema: z.ZodType): string | undefined => getMeta(schema).id;
+
+const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
+  // rules
+  [createRuleDataSchema, 'alerting_new_rule'],
+  [updateRuleDataSchema, 'alerting_update_rule'],
+  [ruleResponseSchema, 'alerting_rule_response'],
+  [findRulesResponseSchema, 'alerting_rule_list_response'],
+  [ruleTagsResponseSchema, 'alerting_rule_tags_response'],
+  [ruleRoutingTagsResponseSchema, 'alerting_rule_routing_tags_response'],
+  [bulkGetRulesResponseSchema, 'alerting_bulk_get_rules_response'],
+  [bulkCreateRuleItemSchema, 'alerting_bulk_create_rule_item'],
+  [bulkCreateRulesRequestSchema, 'alerting_bulk_create_rules_request'],
+  [bulkCreateRulesResponseSchema, 'alerting_bulk_create_rules_response'],
+  [querySchema, 'alerting_rule_query'],
+  [recoverySchema, 'alerting_rule_recovery'],
+  [noDataSchema, 'alerting_rule_no_data'],
+  [stateTransitionSchema, 'alerting_rule_state_transition'],
+  [scheduleSchema, 'alerting_rule_schedule'],
+  [metadataSchema, 'alerting_rule_metadata'],
+  [groupingSchema, 'alerting_rule_grouping'],
+  // action policies
+  [createActionPolicyDataSchema, 'alerting_new_action_policy'],
+  [updateActionPolicyDataSchema, 'alerting_update_action_policy'],
+  [bulkSnoozeActionPoliciesBodySchema, 'alerting_bulk_snooze_action_policies_request'],
+  [snoozeActionPolicyBodySchema, 'alerting_snooze_action_policy_request'],
+  [actionPolicyDestinationSchema, 'alerting_action_policy_destination'],
+  [groupingModeSchema, 'alerting_action_policy_grouping_mode'],
+  [actionPolicyResponseSchema, 'alerting_action_policy_response'],
+  [findActionPoliciesResponseSchema, 'alerting_action_policy_list_response'],
+  // alert actions
+  [createAckEpisodeActionBodySchema, 'alerting_new_ack_alert_action'],
+  [createUnackEpisodeActionBodySchema, 'alerting_new_unack_alert_action'],
+  [createAssignEpisodeActionBodySchema, 'alerting_new_assign_alert_action'],
+  [createTagEpisodeActionBodySchema, 'alerting_new_tag_alert_action'],
+  [createSnoozeSeriesActionBodySchema, 'alerting_new_snooze_series_action'],
+  [createUnsnoozeSeriesActionBodySchema, 'alerting_new_unsnooze_series_action'],
+  [createActivateEpisodeActionBodySchema, 'alerting_new_activate_alert_action'],
+  [createDeactivateEpisodeActionBodySchema, 'alerting_new_deactivate_alert_action'],
+  [createSeriesAlertActionBodySchema, 'alerting_series_alert_action'],
+  [createEpisodeAlertActionBodySchema, 'alerting_alert_action'],
+  [bulkTagEpisodeActionItemSchema, 'alerting_bulk_tag_alerts_item'],
+  [bulkTagEpisodeActionBodySchema, 'alerting_bulk_tag_alerts_request'],
+  [bulkSnoozeSeriesActionItemSchema, 'alerting_bulk_snooze_series_item'],
+  [bulkSnoozeSeriesActionBodySchema, 'alerting_bulk_snooze_series_request'],
+  [bulkUnsnoozeSeriesActionItemSchema, 'alerting_bulk_unsnooze_series_item'],
+  [bulkUnsnoozeSeriesActionBodySchema, 'alerting_bulk_unsnooze_series_request'],
+  [bulkAckEpisodeActionItemSchema, 'alerting_bulk_ack_alerts_item'],
+  [bulkAckEpisodeActionBodySchema, 'alerting_bulk_ack_alerts_request'],
+  [bulkUnackEpisodeActionItemSchema, 'alerting_bulk_unack_alerts_item'],
+  [bulkUnackEpisodeActionBodySchema, 'alerting_bulk_unack_alerts_request'],
+  [bulkAssignEpisodeActionItemSchema, 'alerting_bulk_assign_alerts_item'],
+  [bulkAssignEpisodeActionBodySchema, 'alerting_bulk_assign_alerts_request'],
+  [bulkActivateEpisodeActionItemSchema, 'alerting_bulk_activate_alerts_item'],
+  [bulkActivateEpisodeActionBodySchema, 'alerting_bulk_activate_alerts_request'],
+  [bulkDeactivateEpisodeActionItemSchema, 'alerting_bulk_deactivate_alerts_item'],
+  [bulkDeactivateEpisodeActionBodySchema, 'alerting_bulk_deactivate_alerts_request'],
+  // matched policies
+  [matchActionPoliciesBodySchema, 'alerting_match_action_policies_request'],
+  [matchedActionPolicySchema, 'alerting_matched_action_policy'],
+  [matchActionPoliciesResponseSchema, 'alerting_match_action_policies_response'],
+  [actionPolicyRoutingTagsResponseSchema, 'alerting_action_policy_routing_tags_response'],
+  // matched rules
+  [matchRulesBodySchema, 'alerting_match_rules_request'],
+  // execution history
+  [ruleExecutionViewSchema, 'alerting_rule_execution'],
+  [listRuleExecutionsResponseSchema, 'alerting_rule_executions_response'],
+  [policyExecutionHistoryItemSchema, 'alerting_policy_execution_history_item'],
+  [listPolicyExecutionHistoryResponseSchema, 'alerting_policy_execution_history_response'],
+  /* shared bulk primitives, reused by every by-ID / by-query bulk endpoint */
+  [bulkByIdsSchema, 'alerting_bulk_by_ids_request'],
+  [bulkByQuerySchema, 'alerting_bulk_by_query_request'],
+  [bulkResponseSchema, 'alerting_bulk_operation_response'],
+  [dryRunResponseSchema, 'alerting_bulk_dry_run_response'],
+  [errorResponseSchema, 'alerting_error_response'],
+];
+
+/** Discriminated unions whose every variant must be named for OAS to emit a discriminator mapping. */
+const DISCRIMINATED_UNIONS: ReadonlyArray<readonly [string, z.ZodType]> = [
+  ['recoverySchema', recoverySchema],
+  ['noDataSchema', noDataSchema],
+  ['actionPolicyDestinationSchema', actionPolicyDestinationSchema],
+  ['createSeriesAlertActionBodySchema', createSeriesAlertActionBodySchema],
+  ['createEpisodeAlertActionBodySchema', createEpisodeAlertActionBodySchema],
+];
+
+describe('alerting v2 OAS component ids', () => {
+  it('registers a stable, alerting-namespaced id on every public request/response schema', () => {
+    for (const [schema, expectedId] of EXPECTED_IDS) {
+      expect(getMetaId(schema)).toBe(expectedId);
+    }
+  });
+
+  it('namespaces every id under alerting_ so it stays unique in the shared OAS document', () => {
+    for (const [, expectedId] of EXPECTED_IDS) {
+      expect(expectedId.startsWith('alerting_')).toBe(true);
+    }
+  });
+
+  it('uses unique ids across all named schemas', () => {
+    const ids = EXPECTED_IDS.map(([, id]) => id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('retains .describe() metadata when chained with .meta({ id })', () => {
+    // querySchema is defined as `.describe(...).meta({ id })`; the description must survive
+    // the merge so the generated OAS component keeps its documentation.
+    const meta = getMeta(querySchema);
+    expect(meta.description).toBe(
+      'ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.'
+    );
+    expect(meta.id).toBe('alerting_rule_query');
+  });
+
+  it('names every variant of each discriminated union so a discriminator mapping is emitted', () => {
+    for (const [name, union] of DISCRIMINATED_UNIONS) {
+      const options = (union as unknown as { _zod: { def: { options?: z.ZodType[] } } })._zod.def
+        .options;
+      expect(Array.isArray(options)).toBe(true);
+      for (const option of options ?? []) {
+        expect({ union: name, id: getMetaId(option) }).toEqual({
+          union: name,
+          id: expect.stringMatching(/^alerting_/),
+        });
+      }
+    }
+  });
+});

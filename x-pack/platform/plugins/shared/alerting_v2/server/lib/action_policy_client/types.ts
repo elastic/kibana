@@ -6,20 +6,19 @@
  */
 
 import type {
-  ActionPolicyBulkAction,
   ActionPolicyResponse,
-  CreateActionPolicyData,
+  CreateActionPolicyDataInput,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 
 export interface UpdateActionPolicyParams {
   data: UpdateActionPolicyData;
-  options: { id: string; version: string };
+  options: { id: string };
 }
 
 export interface CreateActionPolicyParams {
-  data: CreateActionPolicyData;
-  options?: { id?: string };
+  data: CreateActionPolicyDataInput;
+  options?: { id?: string; enabled?: boolean };
 }
 
 export interface SnoozeActionPolicyParams {
@@ -31,30 +30,24 @@ export interface UpdateActionPolicyApiKeyParams {
   id: string;
 }
 
-export interface BulkActionActionPoliciesParams {
-  actions: ActionPolicyBulkAction[];
+/** Body shared by the by-ID action-policy bulk endpoints (delete/enable/disable/unsnooze/update_api_key). */
+export interface BulkActionPoliciesByIdsParams {
+  ids: string[];
 }
 
-export interface BulkActionActionPoliciesResponse {
-  processed: number;
-  total: number;
-  errors: Array<{ id: string; message: string }>;
+/** Body for the bulk snooze endpoint: the by-ID batch plus a shared expiry. */
+export interface BulkSnoozeActionPoliciesParams {
+  ids: string[];
+  snoozedUntil: string;
 }
-export type FindActionPoliciesSortField =
-  | 'name'
-  | 'createdAt'
-  | 'updatedAt'
-  | 'createdByUsername'
-  | 'updatedByUsername';
 
-export interface FindActionPoliciesParams {
+export type FindActionPoliciesSortField = 'name' | 'createdAt' | 'updatedAt';
+
+export interface FindActionPoliciesArgs {
   page?: number;
   perPage?: number;
+  filter?: string;
   search?: string;
-  destinationType?: string;
-  createdBy?: string;
-  enabled?: boolean;
-  tags?: string[];
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }
@@ -64,4 +57,13 @@ export interface FindActionPoliciesResponse {
   total: number;
   page: number;
   perPage: number;
+}
+
+export interface MatchActionPoliciesParams {
+  routingTags?: string[];
+}
+
+export interface GetRoutingTagsParams {
+  search?: string;
+  policiesPerTag: number;
 }

@@ -10,6 +10,7 @@ import { buildAlertActionTagSuggestionsQuery } from '../queries/alert_action_tag
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchAlertActionTagSuggestionsOptions {
+  spaceId: string;
   services: { expressions: ExpressionsStart };
   abortSignal?: AbortSignal;
 }
@@ -23,12 +24,13 @@ export interface AlertActionTagSuggestionRow {
  * (see {@link buildAlertActionTagSuggestionsQuery}).
  */
 export const fetchAlertActionTagSuggestions = async ({
+  spaceId,
   services: { expressions },
   abortSignal,
 }: FetchAlertActionTagSuggestionsOptions): Promise<AlertActionTagSuggestionRow[]> => {
   return executeEsqlQuery<AlertActionTagSuggestionRow>({
     expressions,
-    query: buildAlertActionTagSuggestionsQuery(),
+    query: buildAlertActionTagSuggestionsQuery(spaceId),
     input: null,
     abortSignal,
     noCache: true,

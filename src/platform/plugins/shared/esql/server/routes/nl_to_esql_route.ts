@@ -7,65 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import type {
-  CoreSetup,
-  IRouter,
-  IUiSettingsClient,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import type { ScopedModel } from '@kbn/agent-builder-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-
+import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { EsqlServerPluginStart } from '../types';
+import { createScopedModel, resolveConnectorId } from './helpers';
 
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
-const createScopedModel = async ({
-  inference,
-  request,
-  connectorId,
-}: {
-  inference: InferenceServerStart;
-  request: KibanaRequest;
-  connectorId: string;
-}): Promise<ScopedModel> => {
-  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions: {} });
-  const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
-  const connector = await inference.getConnectorById(connectorId, request);
+/**
+ * Builds additional context for {@link generateEsql} when the request is not a completion.
+ * Always includes index-selection guidance so that the index discovery LLM prioritizes
+ * explicitly named sources (e.g. "logstash", "nginx") over incidental field-name matches.
+ */
+const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
+  const parts: string[] = [
+    'Index selection guidance:',
+    '- If the instruction explicitly names a technology, product, or data source (e.g. "logstash", "nginx", "apache", "metrics"), prefer indices whose names contain that keyword over indices that merely have matching field names.',
+    '- Treat a bare word like "logstash" as an explicit index name hint: prefer indices whose names start with or contain that word.',
+    '- An ES|QL view is a valid source. If the instruction names a view, select that view rather than reporting that no index exists.',
+    '- An external ES|QL dataset is a valid source. If the instruction names a dataset, select that dataset rather than reporting that no index exists.',
+  ];
 
-  return { connector, chatModel, inferenceClient };
-};
-
-const resolveConnectorId = async ({
-  uiSettingsClient,
-  inference,
-  request,
-}: {
-  uiSettingsClient: IUiSettingsClient;
-  inference: InferenceServerStart;
-  request: KibanaRequest;
-}): Promise<string | undefined> => {
-  try {
-    const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-    if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
-      return defaultSetting;
-    }
-  } catch {
-    // UI setting may not be registered, fall through
+  if (currentQuery) {
+    parts.push(
+      '',
+      'The user is in the ES|QL editor. Below is their current query.',
+      'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
+      'If the request is for a new or unrelated query, you may produce a full replacement.',
+      '',
+      '<current_query>',
+      currentQuery,
+      '</current_query>'
+    );
   }
 
-  try {
-    const connector = await inference.getDefaultConnector(request);
-    return connector?.connectorId;
-  } catch {
-    // no connectors available
-  }
-
-  return undefined;
+  return parts.join('\n');
 };
 
 export const registerNLtoESQLRoute = (
@@ -78,8 +56,9 @@ export const registerNLtoESQLRoute = (
       path: NL_TO_ESQL_ROUTE,
       validate: {
         body: schema.object({
-          nlInstruction: schema.string(),
+          nlInstruction: schema.string({ maxLength: MAX_NL_INSTRUCTION_LENGTH }),
           currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
+          isCompletion: schema.maybe(schema.boolean()),
         }),
       },
       security: {
@@ -92,45 +71,55 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { nlInstruction, currentQuery } = request.body;
+        const { nlInstruction, currentQuery, isCompletion } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
-        const [, { inference }] = await getStartServices();
+        const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
         const connectorId = await resolveConnectorId({
-          uiSettingsClient: core.uiSettings.client,
           inference,
           request,
+          searchInferenceEndpoints,
         });
 
         if (!connectorId) {
           return response.badRequest({
             body: {
-              message: 'No AI connector configured. Please set up a connector to use this feature.',
+              message: 'No AI connector available.',
             },
           });
         }
 
         const model = await createScopedModel({ inference, request, connectorId });
         const trimmedCurrent = currentQuery?.trim();
-        const additionalContext = trimmedCurrent
-          ? [
-              'The user is in the ES|QL editor. Below is their current query.',
-              'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
-              'If the request is for a new or unrelated query, you may produce a full replacement.',
-              '',
-              '<current_query>',
-              trimmedCurrent,
-              '</current_query>',
-            ].join('\n')
-          : undefined;
+        const isCompletionRequest = Boolean(isCompletion && trimmedCurrent);
+        const signal = getRequestAbortedSignal(request.events.aborted$);
+
+        if (isCompletionRequest) {
+          const { content, replacesNext } = await generateEsqlCompletion({
+            model,
+            esClient: client,
+            logger,
+            nlInstruction,
+            currentQuery: trimmedCurrent ?? '',
+            signal,
+          });
+          return response.ok({
+            body: { content, replacesNext },
+          });
+        }
+
+        const additionalContext = buildNlToEsqlAdditionalContext(trimmedCurrent ?? '');
+
         const result = await generateEsql({
           model,
           esClient: client,
           logger,
           nlQuery: nlInstruction,
           additionalContext,
-          executeQuery: false,
+          execute: 'none',
+          includeDatasets: true,
+          includeViews: true,
         });
 
         return response.ok({

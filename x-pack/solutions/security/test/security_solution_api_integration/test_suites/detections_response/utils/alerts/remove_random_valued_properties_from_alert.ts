@@ -6,7 +6,14 @@
  */
 
 import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { ALERT_LAST_DETECTED, ALERT_START, ALERT_INTENDED_TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_LAST_DETECTED,
+  ALERT_START,
+  ALERT_INTENDED_TIMESTAMP,
+  CPS_SCOPE_EXPRESSION,
+  CPS_SCOPE_LINKED_PROJECTS,
+} from '@kbn/rule-data-utils';
+import { stripMissingUiamApiKeyTagFromAlert } from '../missing_uiam_api_key_tag';
 
 export const removeRandomValuedPropertiesFromAlert = (alert: DetectionAlert | undefined) => {
   if (!alert) {
@@ -25,7 +32,9 @@ export const removeRandomValuedPropertiesFromAlert = (alert: DetectionAlert | un
     [ALERT_START]: alertStart,
     [ALERT_LAST_DETECTED]: lastDetected,
     [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp,
+    [CPS_SCOPE_EXPRESSION]: cpsExpression,
+    [CPS_SCOPE_LINKED_PROJECTS]: cpsLinkedProjects,
     ...restOfAlert
-  } = alert;
+  } = stripMissingUiamApiKeyTagFromAlert(alert);
   return restOfAlert;
 };

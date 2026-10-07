@@ -12,6 +12,9 @@ import type { FindItemsParams } from '@kbn/content-list-provider';
 import { createClientStrategy } from './strategy';
 import type { ItemDecorator } from './strategy';
 import type { TableListViewFindItemsFn } from './types';
+import { defineContentListFilter, type ContentListFilterMap } from './filters';
+import type { ContentListSortField } from './sorting';
+import { defineContentListSortField } from './sorting';
 
 const createParams = (overrides?: Partial<FindItemsParams>): FindItemsParams => ({
   searchQuery: '',
@@ -38,6 +41,19 @@ describe('createClientStrategy', () => {
   ): jest.Mock<ReturnType<TableListViewFindItemsFn>> => {
     return jest.fn().mockResolvedValue({ hits: items, total: items.length });
   };
+
+  const createdByFilter = defineContentListFilter({
+    id: 'createdBy',
+    title: 'Created by',
+    getItemValue: (item: UserContentCommonSchema) => item.createdBy,
+  });
+
+  const tagFilter = defineContentListFilter({
+    id: 'tag',
+    title: 'Tags',
+    getItemValue: (item: UserContentCommonSchema) =>
+      item.references?.filter((ref) => ref.type === 'tag').map((ref) => ref.id) ?? [],
+  });
 
   describe('findItems', () => {
     it('calls the consumer with searchQuery and signal', async () => {
@@ -167,7 +183,9 @@ describe('createClientStrategy', () => {
       const item1: UserContentCommonSchema = { ...createMockItem('1'), createdBy: 'u_jane' };
       const item2: UserContentCommonSchema = { ...createMockItem('2'), createdBy: 'u_diego' };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        createdBy: createdByFilter,
+      });
 
       await findItems(createParams({ searchQuery: 'test' }));
       const result = await findItems(
@@ -180,6 +198,38 @@ describe('createClientStrategy', () => {
       expect(mockFindItems).toHaveBeenCalledTimes(1);
       expect(result.items).toHaveLength(1);
       expect(result.items[0].id).toBe('1');
+    });
+
+    it('keeps cached items when custom filter definitions change', async () => {
+      let customFilters: ContentListFilterMap = {};
+      const mockFindItems = createMockFindItems([
+        createMockItem('1'),
+        { ...createMockItem('2'), type: 'visualization' },
+      ]);
+      const { findItems } = createClientStrategy(
+        mockFindItems,
+        undefined,
+        undefined,
+        () => customFilters
+      );
+
+      await findItems(createParams({ searchQuery: 'ecommer' }));
+      customFilters = {
+        contentType: defineContentListFilter({
+          id: 'contentType',
+          title: 'Content type',
+          getItemValue: (item: UserContentCommonSchema) => item.type,
+        }),
+      };
+      const result = await findItems(
+        createParams({
+          searchQuery: 'ecommer',
+          filters: { contentType: { include: ['visualization'] } },
+        })
+      );
+
+      expect(mockFindItems).toHaveBeenCalledTimes(1);
+      expect(result.items.map(({ id }) => id)).toEqual(['2']);
     });
   });
 
@@ -225,7 +275,9 @@ describe('createClientStrategy', () => {
       const item1: UserContentCommonSchema = { ...createMockItem('1'), createdBy: 'u_jane' };
       const item2: UserContentCommonSchema = { ...createMockItem('2'), createdBy: 'u_diego' };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        createdBy: createdByFilter,
+      });
 
       const result = await findItems(
         createParams({ filters: { createdBy: { include: ['u_jane'] } } })
@@ -245,7 +297,9 @@ describe('createClientStrategy', () => {
         references: [{ type: 'tag', id: 'tag-2', name: 'tag-2' }],
       };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        tag: tagFilter,
+      });
 
       const result = await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
 
@@ -329,6 +383,98 @@ describe('createClientStrategy', () => {
         createParams({ sort: { field: 'updatedAt', direction: 'desc' } })
       );
       expect(resultDesc.items[resultDesc.items.length - 1].id).toBe('2');
+    });
+
+    describe('custom sort fields', () => {
+      const createDatedItem = (id: string, updatedAt: string): UserContentCommonSchema => ({
+        ...createMockItem(id),
+        updatedAt,
+      });
+      const items = [
+        createDatedItem('a', '2024-01-01T00:00:00.000Z'),
+        createDatedItem('b', '2024-01-02T00:00:00.000Z'),
+        createDatedItem('c', '2024-01-03T00:00:00.000Z'),
+        createDatedItem('d', '2024-01-04T00:00:00.000Z'),
+      ];
+      // `c` and `d` have no rank, like items outside the recently-accessed history.
+      const ranks: Record<string, number | null> = { a: 3, b: 1, c: null, d: null };
+      const rankField = defineContentListSortField({
+        id: 'rank',
+        title: 'Rank',
+        getValue: (item) => ranks[item.id] ?? null,
+        fallbackSort: { field: 'updatedAt', direction: 'desc' },
+      });
+      const sortIdsBy = async (
+        customSort: ContentListSortField,
+        sort: { field: string; direction: 'asc' | 'desc' }
+      ): Promise<string[]> => {
+        const { findItems } = createClientStrategy(
+          createMockFindItems(items),
+          undefined,
+          undefined,
+          undefined,
+          { [customSort.id]: customSort }
+        );
+        const result = await findItems(createParams({ sort }));
+        return result.items.map(({ id }) => id);
+      };
+
+      it('orders by the custom value, then by fallbackSort for items without a value', async () => {
+        const ids = await sortIdsBy(rankField, { field: 'rank', direction: 'desc' });
+        // a (3), b (1), then c and d (no rank) by updatedAt descending.
+
+        expect(ids).toEqual(['a', 'b', 'd', 'c']);
+      });
+
+      it('keeps items without a value last when sorting ascending', async () => {
+        const ids = await sortIdsBy(rankField, { field: 'rank', direction: 'asc' });
+
+        expect(ids).toEqual(['b', 'a', 'd', 'c']);
+      });
+
+      it('uses fallbackSort to break ties and does not flip its direction', async () => {
+        const tiedField = defineContentListSortField({
+          id: 'tied',
+          title: 'Tied',
+          getValue: () => 1,
+          fallbackSort: { field: 'updatedAt', direction: 'asc' },
+        });
+        const ids = await sortIdsBy(tiedField, { field: 'tied', direction: 'desc' });
+
+        expect(ids).toEqual(['a', 'b', 'c', 'd']);
+      });
+
+      it('keeps the original order for ties when there is no fallbackSort', async () => {
+        const ids = await sortIdsBy(
+          { ...rankField, fallbackSort: undefined },
+          { field: 'rank', direction: 'desc' }
+        );
+
+        expect(ids).toEqual(['a', 'b', 'c', 'd']);
+      });
+
+      it('does not fall back to the built-in resolver when getValue returns null', async () => {
+        const hideA = defineContentListSortField({
+          id: 'updatedAt',
+          title: 'Updated',
+          getValue: (item) => (item.id === 'a' ? null : undefined),
+        });
+        const ids = await sortIdsBy(hideA, { field: 'updatedAt', direction: 'asc' });
+
+        // `a` is the oldest, but `null` sorts it last instead of resolving updatedAt.
+        expect(ids).toEqual(['b', 'c', 'd', 'a']);
+      });
+
+      it('falls back to the built-in resolver when getValue returns undefined', async () => {
+        const passthrough = defineContentListSortField({
+          id: 'updatedAt',
+          title: 'Updated',
+          getValue: () => undefined,
+        });
+        const ids = await sortIdsBy(passthrough, { field: 'updatedAt', direction: 'asc' });
+
+        expect(ids).toEqual(['a', 'b', 'c', 'd']);
+      });
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { setSearchTextAction } from '../state/actions';
 import { searchTextSelector } from '../state/selectors';
 

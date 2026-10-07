@@ -122,6 +122,8 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
         scope: secret.scope,
         clientId: secret.clientId,
         clientSecret: secret.clientSecret,
+        tokenEndpointAuthMethod:
+          secret.useBasicAuth ?? true ? 'client_secret_basic' : 'client_secret_post',
         accessTokenPath: secret.accessTokenPath,
         tokenTypePath: secret.tokenTypePath,
         tokenType: secret.tokenType,

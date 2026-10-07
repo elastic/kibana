@@ -303,6 +303,8 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.click();
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
+    // close the combobox to ensure the listbox doesn't overlay the checkbox
+    await categoryInput.press('Escape');
 
     await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
 
@@ -440,6 +442,8 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.click();
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
+    // close the combobox to ensure the listbox doesn't overlay the checkbox
+    await categoryInput.press('Escape');
     await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
     await expect(
       pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox()
@@ -957,6 +961,8 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.click();
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
+    // close the combobox to ensure the listbox doesn't overlay the checkbox
+    await categoryInput.press('Escape');
 
     await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
     await pageObjects.manageIntegrationsTable.getReviewApproveInstallButton().click();

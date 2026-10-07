@@ -25,6 +25,11 @@ export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
+// Link rendered by the `security.timeline` case attachment (unified attachments flow).
+export const TIMELINE_CASE_ATTACHMENT_LINK = (timelineId: string) => {
+  return `[data-test-subj="timeline-attachment-link-${timelineId}"]`;
+};
+
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="timeline-modal-header-close-button"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
@@ -102,8 +107,6 @@ export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemAc
 export const TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN =
   '[data-test-subj="create-template-from-timeline"]';
 
-export const TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN = '[data-test-subj="create-from-template"]';
-
 export const TIMELINE_CORRELATION_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';
@@ -130,14 +133,15 @@ export const TIMELINE_EVENT = '[data-test-subj="event"]';
 export const TIMELINE_DISCOVER_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="dataView-add-field_btn"]';
 
-export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
+export const TIMELINE_FILTER_FIELD =
+  '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
 
 export const TIMELINE_TITLE_BY_ID = (id: string) => `[data-test-subj="timeline-title-${id}"]`;
 
-export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
+export const TIMELINE_FILTER_OPERATOR =
+  '[data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]';
 
-export const TIMELINE_FILTER_VALUE =
-  '[data-test-subj="filterParamsComboBox phraseParamsComboxBox"]';
+export const TIMELINE_FILTER_VALUE = '[data-test-subj="filterParams"] input';
 
 export const TIMELINE_FLYOUT = '[data-test-subj="timeline-container"]';
 
@@ -175,9 +179,6 @@ export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
 
 export const TIMELINE_SAVE_MODAL_SAVE_BUTTON = '[data-test-subj="save-timeline-modal-save-button"]';
 
-export const TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH =
-  '[data-test-subj="save-timeline-modal-save-as-new-switch"]';
-
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="timeline-portal-ref"]';
 
 export const TIMELINE_WRAPPER = '[data-test-subj="timeline-portal-overlay-mask"]';
@@ -196,7 +197,7 @@ export const TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX = `${TIMELINE_ROW_RENDE
 
 export const TIMELINE_ROW_RENDERERS_SEARCHBOX = `${TIMELINE_ROW_RENDERERS_MODAL} input[type="search"]`;
 
-export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE = `${TIMELINE_ROW_RENDERERS_MODAL} [data-test-subj="render-content-suricata.eve.alert.signature"]`;
+export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE = `[data-test-subj="render-content-suricata.eve.alert.signature"]`;
 
 export const TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP = `[data-test-subj="externalLinkTooltip"]`;
 
@@ -211,8 +212,6 @@ export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
 
 export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
 
-export const TIMELINE_STATUS = '[data-test-subj="timeline-save-status"]';
-
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
@@ -223,6 +222,8 @@ export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.ale
 export const ALERT_TABLE_FILE_NAME_VALUES = `${ALERT_TABLE_FILE_NAME_HEADER}[data-test-subj="dataGridRowCell"]`; // empty column for the test data
 
 export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
+
+export const TIMELINE_EVENT_COUNT_BADGE = '[data-test-subj="timeline-event-count-badge"]';
 
 // timeline table grid cell
 export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
@@ -259,10 +260,6 @@ export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector(
 
 export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('timeline-modal-save-timeline');
 export const SAVE_TIMELINE_ACTION_BTN = getDataTestSubjectSelector('timeline-modal-save-timeline');
-
-export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector(
-  'timeline-modal-save-timeline-tooltip'
-);
 
 export const TOGGLE_DATA_PROVIDER_BTN = getDataTestSubjectSelector('toggle-data-provider');
 

@@ -8,7 +8,6 @@
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { normalizeSpecPath } from './buildkite_checkpoint';
 
 /**
  * Describes the outcome of a single `cypress.run()` invocation for a spec.
@@ -102,7 +101,9 @@ export const recordCypressResult = (record: CypressResultRecord): void => {
 
     const persisted: PersistedRecord = {
       timestamp: new Date().toISOString(),
-      spec: normalizeSpecPath(record.spec),
+      spec: path.isAbsolute(record.spec)
+        ? path.relative(REPO_ROOT, record.spec).split(path.sep).join('/')
+        : record.spec,
       kind: record.kind,
       totalFailed: record.totalFailed,
       status: record.status,

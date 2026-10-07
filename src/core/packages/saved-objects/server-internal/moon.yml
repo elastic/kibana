@@ -63,6 +63,8 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - removed_types.json
+    - wip_types.json
     - '!target/**/*'
   jest-config:
     - jest.config.js

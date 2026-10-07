@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
+import { chunk, cloneDeep } from 'lodash';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
+import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import type {
   CreateV2EnrichmentFunction,
+  EnrichmentFunction,
   EventsForEnrichment,
   EventsMapByEnrichments,
 } from './types';
@@ -18,6 +20,53 @@ import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 
 const CHUNK_SIZE = 1000;
 
+/**
+ * Persists the EUID that was already computed to resolve this entity, so consumers don't have to
+ * re-derive it from the alert's identity fields at query time.
+ *
+ * Appends rather than overwrites: an alert can resolve to several entity types, and the risk and
+ * asset-criticality enrichments both run for each type, so this may be applied more than once for
+ * the same alert. Enrichment functions are reduced over the event in sequence, so each call sees
+ * what earlier ones wrote.
+ *
+ * `kibana.alert.*` fields are stored under their literal dotted key rather than nested (see
+ * `buildAlert`), so this assigns the key directly instead of going through a path-based set.
+ */
+const buildEuidStampEnrichment =
+  (entityId: string): EnrichmentFunction =>
+  (event) => {
+    const existing = event._source[ALERT_ENTITY_ID];
+    const euids = Array.isArray(existing) ? existing : [];
+    if (euids.includes(entityId)) {
+      return event;
+    }
+
+    const newEvent = cloneDeep(event);
+    newEvent._source[ALERT_ENTITY_ID] = [...euids, entityId];
+    return newEvent;
+  };
+
+interface ListEntitiesForEuidChunkOpts {
+  euids: string[];
+  entityStoreCrudClient: EntityStoreCRUDClient;
+  enrichmentFields: string[];
+}
+const listEntitiesForEuidChunk = async ({
+  euids,
+  entityStoreCrudClient,
+  enrichmentFields,
+}: ListEntitiesForEuidChunkOpts) => {
+  try {
+    return await entityStoreCrudClient.listEntities({
+      filter: { terms: { 'entity.id': euids } },
+      size: euids.length,
+      fields: ['entity.id', ...enrichmentFields],
+    });
+  } catch (e) {
+    // Swallow errors from the entity store and return an empty result, since enrichment failure shouldn't block the rule execution. The enrichment will simply be skipped for all events in this chunk.
+    return { entities: [], fields: [] };
+  }
+};
 /**
  * Enriches alert events with data from the entity store V2, using the EUID translation
  * layer to identify entities. Queries via the entity store's `listEntities` API with a
@@ -50,12 +99,15 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
   try {
     logger.debug(`Enrichment ${name}: started`);
 
-    // Compute the EUID for each event and group events by EUID.
+    // Compute the EUID for each event and group events by EUID. Stamp all events with a derivable
+    // EUID immediately — store membership is not required for the stamp.
     const eventsMapByEuid: Record<string, Array<EventsForEnrichment<T>>> = {};
+    const eventsMapById: EventsMapByEnrichments = {};
     for (const event of events) {
-      const computedEuid = euid.getEuidFromObject(entityType, event._source);
+      const computedEuid = euid.getEuidFromObjectForSearch(entityType, event._source);
       if (computedEuid) {
         (eventsMapByEuid[computedEuid] ??= []).push(event);
+        eventsMapById[event._id] = [buildEuidStampEnrichment(computedEuid)];
       }
     }
 
@@ -65,13 +117,11 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
       return {};
     }
 
-    const eventsMapById: EventsMapByEnrichments = {};
-
     for (const euidChunk of chunk(euids, CHUNK_SIZE)) {
-      const chunkResults = await entityStoreCrudClient.listEntities({
-        filter: { terms: { 'entity.id': euidChunk } },
-        size: euidChunk.length,
-        fields: ['entity.id', ...enrichmentFields],
+      const chunkResults = await listEntitiesForEuidChunk({
+        euids: euidChunk,
+        entityStoreCrudClient,
+        enrichmentFields,
       });
 
       const enrichableEntities: Array<{ entityId: string; fields: Record<string, unknown[]> }> =
@@ -85,10 +135,13 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
         .flatMap(({ entityId, fields }) => {
           const enrichmentFn = createEnrichmentFunction(fields);
           if (!enrichmentFn) return [];
-          return (eventsMapByEuid[entityId] ?? []).map((event) => ({ event, enrichmentFn }));
+          return (eventsMapByEuid[entityId] ?? []).map((event) => ({
+            event,
+            enrichmentFn,
+          }));
         })
         .forEach(({ event, enrichmentFn }) => {
-          eventsMapById[event._id] = [enrichmentFn];
+          eventsMapById[event._id] = [...(eventsMapById[event._id] ?? []), enrichmentFn];
         });
     }
 
@@ -97,7 +150,7 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     );
     return eventsMapById;
   } catch (error) {
-    logger.error(`Enrichment ${name} failed: ${error}`);
+    logger.info(`Enrichment ${name} failed: ${error}`);
     return {};
   }
 };

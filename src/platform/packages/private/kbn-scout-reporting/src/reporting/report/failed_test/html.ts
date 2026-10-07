@@ -22,10 +22,22 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
     duration,
     error,
     stdout,
+    consoleErrors,
     attachments,
+    attempt,
   } = testFailure;
 
   const testDuration = duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
+
+  // `attempt` is only > 0 once this failure has gone through at least one Playwright retry.
+  // Most failures never retry, so this row is omitted rather than always shown as "Attempt 1".
+  const retryRow =
+    attempt !== undefined && attempt > 0
+      ? `
+            <span class="info-label">Retries:</span>
+            <span class="info-value">Failed again on retry (attempt ${attempt + 1})</span>
+`
+      : '';
 
   const screenshots = attachments
     .filter((a) => a.contentType.startsWith('image/'))
@@ -149,6 +161,20 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
       .error-section pre {
         background-color: #fff5f5;
         border-color: #fecaca;
+      }
+
+      /* Console errors section */
+      .console-errors-section {
+        background-color: #fffbeb;
+      }
+
+      .console-errors-section pre {
+        background-color: #fffbeb;
+        border-color: #fcd34d;
+      }
+
+      .console-errors-section summary {
+        color: #92400e;
       }
 
       /* Details and summary */
@@ -349,6 +375,7 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
 
             <span class="info-label">Duration:</span>
             <span class="info-value">${testDuration}</span>
+${retryRow}
 
             <span class="info-label">Module:</span>
             <span class="info-value">${kibanaModule?.id} ${kibanaModule?.type}</span>
@@ -374,6 +401,23 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
             <h5>Error Details</h5>
             <pre>${errorStackTrace}</pre>
         </div>
+
+        ${
+          consoleErrors
+            ? `<div class="section console-errors-section">
+          <h5>Browser Console Errors</h5>
+          <details open>
+            <summary>${consoleErrors.split('\n').length} error(s) captured during test</summary>
+            <pre>${consoleErrors
+              .split('\n')
+              .map((line) =>
+                line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              )
+              .join('\n')}</pre>
+          </details>
+        </div>`
+            : ''
+        }
 
         <div class="section" id="tracked-branches-status">
           <strong>No failures found in tracked branches</strong>

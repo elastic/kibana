@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { useHistory } from 'react-router-dom';
 
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
@@ -57,6 +57,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) => {
     'data_output_id',
     'monitoring_output_id',
     'download_source_id',
+    'download_source_ids',
     'fleet_server_host_id',
     'agent_features',
     'is_protected',

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
-import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,

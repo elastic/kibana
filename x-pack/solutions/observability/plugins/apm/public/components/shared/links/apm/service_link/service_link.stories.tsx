@@ -6,25 +6,15 @@
  */
 
 import type { StoryObj } from '@storybook/react';
-import type { ComponentProps, ComponentType } from 'react';
+import type { ComponentProps } from 'react';
 import React from 'react';
 import { ServiceLink } from '.';
-import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 type Args = ComponentProps<typeof ServiceLink>;
 
 export default {
   title: 'shared/ServiceLink',
   component: ServiceLink,
-  decorators: [
-    (StoryComponent: ComponentType) => {
-      return (
-        <MockApmPluginStorybook>
-          <StoryComponent />
-        </MockApmPluginStorybook>
-      );
-    },
-  ],
 };
 
 export const Example: StoryObj<Args> = {

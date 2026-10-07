@@ -14,17 +14,18 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   useEuiFontSize,
   useEuiTheme,
-  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiButtonIcon,
   EuiIconTip,
-  EuiLink,
+  EuiToolTip,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
@@ -538,25 +539,31 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             )}
             {splom ? (
               <EuiFlexItem grow={false}>
-                <EuiLink
-                  onClick={async () => {
-                    const customVisLink = getCustomVisualizationLink();
-                    await application.navigateToApp('visualize#', {
-                      path: customVisLink.path,
-                      openInNewTab: false,
-                    });
-                  }}
-                  data-test-subj="mlSplomExploreInCustomVisualizationLink"
+                <EuiToolTip
+                  content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
+                    defaultMessage: 'Explore scatterplot charts in Vega based custom visualization',
+                  })}
                 >
-                  <EuiIconTip
-                    content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
-                      defaultMessage:
-                        'Explore scatterplot charts in Vega based custom visualization',
-                    })}
-                    type="code"
-                    size="l"
+                  <EuiButtonIcon
+                    role="link"
+                    iconType="code"
+                    iconSize="l"
+                    aria-label={i18n.translate(
+                      'xpack.ml.splom.exploreInCustomVisualizationAriaLabel',
+                      {
+                        defaultMessage: 'Explore scatterplot charts',
+                      }
+                    )}
+                    onClick={async () => {
+                      const customVisLink = getCustomVisualizationLink();
+                      await application.navigateToApp('visualize#', {
+                        path: customVisLink.path,
+                        openInNewTab: false,
+                      });
+                    }}
+                    data-test-subj="mlSplomExploreInCustomVisualizationLink"
                   />
-                </EuiLink>
+                </EuiToolTip>
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
@@ -564,14 +571,19 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           {splom.messages.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut announceOnMount color="warning">
+              <KbnWarningCallout
+                announceOnMount
+                title={i18n.translate('xpack.ml.splom.chartDataWarningTitle', {
+                  defaultMessage: 'Some documents cannot be visualized',
+                })}
+              >
                 {splom.messages.map((m) => (
                   <span key={stringHash(m)}>
                     {m}
                     <br />
                   </span>
                 ))}
-              </EuiCallOut>
+              </KbnWarningCallout>
             </>
           )}
 

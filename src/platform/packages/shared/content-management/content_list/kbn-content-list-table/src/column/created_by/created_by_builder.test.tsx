@@ -99,6 +99,28 @@ describe('created by column builder', () => {
     });
   });
 
+  it('uses the canonical "Created by" wording for the column header', () => {
+    // Regression guard: ContentList intentionally standardises on
+    // 'Created by' for both the column header and the filter button. Legacy
+    // `TableListView` used 'Creator' for its header but 'Created by' for
+    // its filter — switching this back to 'Creator' would re-introduce that
+    // inconsistency *and* require backfilling fresh `de`/`fr`/`ja`/`zh`
+    // translations. See the package README's "Naming and translation
+    // backfill" notes before changing this assertion.
+    const result = buildCreatedByColumn({}, defaultContext);
+    expect(result).toMatchObject({ name: 'Created by' });
+  });
+
+  it('applies the documented width / minWidth / maxWidth defaults when no props supplied', () => {
+    const result = buildCreatedByColumn({}, defaultContext);
+
+    expect(result).toMatchObject({
+      width: '88px',
+      minWidth: 'max-content',
+      maxWidth: '88px',
+    });
+  });
+
   it('returns undefined when user profiles are unsupported', () => {
     const result = buildCreatedByColumn(
       {},
@@ -130,6 +152,28 @@ describe('created by column builder', () => {
       maxWidth: '12em',
       truncateText: true,
     });
+  });
+
+  it('falls back maxWidth to the consumer-supplied width when only width is overridden', () => {
+    const result = buildCreatedByColumn({ width: '120px' }, defaultContext);
+
+    expect(result).toMatchObject({
+      width: '120px',
+      minWidth: 'max-content',
+      maxWidth: '120px',
+    });
+  });
+
+  it('treats explicit `undefined` as an opt-out — clears the cap so the column can absorb slack', () => {
+    // Same pattern as `Column.UpdatedAt`: explicit `undefined` skips the
+    // baked-in default and emits no `max-width` style at all.
+    const result = buildCreatedByColumn(
+      { maxWidth: undefined } satisfies CreatedByColumnProps,
+      defaultContext
+    );
+
+    expect(result).toMatchObject({ width: '88px', minWidth: 'max-content' });
+    expect(result).not.toHaveProperty('maxWidth');
   });
 
   it('renders a CreatedByCell for the item creator', async () => {

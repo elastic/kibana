@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -58,6 +59,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
   uniqueItemNames,
   onChange,
 }) => {
+  const popoverTitleId = useGeneratedHtmlId();
   const euiThemeContext = useEuiTheme();
   // Inspired by https://github.com/elastic/eui/blob/v94.0.0/src/components/datagrid/controls/_data_grid_column_selector.scss
   const itemSelectPopover = useMemo(
@@ -113,6 +115,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       anchorPosition="downLeft"
       panelPaddingSize="s"
       panelStyle={{ minWidth: '20%' }}
@@ -135,7 +138,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
     >
       <EuiPopoverTitle>
         <EuiText size="xs" color="subdued" style={{ maxWidth: '400px' }}>
-          {helpText}
+          <h4 id={popoverTitleId}>{helpText}</h4>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiFieldText

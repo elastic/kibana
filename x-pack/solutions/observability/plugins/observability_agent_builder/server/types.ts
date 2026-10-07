@@ -30,6 +30,7 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
 export interface ObservabilityAgentBuilderPluginSetup {
@@ -47,6 +48,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   ml?: MlPluginSetup;
   inference: InferenceServerSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {

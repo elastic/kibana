@@ -63,6 +63,7 @@ export type LensDataset = LensDataviewDataset | LensDatatableDataset | LensESQLD
 
 export interface LensBaseConfig {
   title: string;
+  description?: string;
   /** default data view id or index pattern to use, it can be overriden on each query */
   dataset?: LensDataset;
 }
@@ -150,6 +151,8 @@ export interface LensBreakdownTopValuesConfig {
   type: 'topValues';
   field: string;
   size?: number;
+  secondaryFields?: string[];
+  accuracyMode?: boolean;
   orderBy?: Pick<TermsIndexPatternColumn['params'], 'orderDirection' | 'orderBy' | 'orderAgg'>;
 }
 
@@ -302,6 +305,8 @@ export interface LensXYConfigBase {
   layers: Array<LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer>;
   legend?: Identity<LensLegendConfig>;
   axisTitleVisibility?: Identity<LensAxisTitleVisibilityConfig>;
+  xTitle?: string;
+  yTitle?: string;
   emphasizeFitting?: boolean;
   fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
   yBounds?: LensYBoundsConfig;

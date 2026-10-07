@@ -8,7 +8,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
@@ -45,7 +45,7 @@ import { getFTRConfig } from './get_ftr_config';
 import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
 import { recordCypressResult } from './cypress_result_report';
-import { routeGroupFailure } from './group_failure_routing';
+import { hasUnresolvedFailures, routeGroupFailure } from './group_failure_routing';
 
 const filterCompletedSpecs = async (
   specFiles: string[],
@@ -150,13 +150,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return;
       }
 
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern
-        : globby.sync(
+        : globbySync(
             specPattern,
             excludeSpecPattern
               ? {
@@ -209,8 +208,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (!files?.length) {
         log.info('No tests found');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return;
       }
 
       const esPorts: number[] = [9200, 9220];
@@ -273,6 +271,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const failedSpecFilePaths: string[] = [];
       const infraFailedSpecFilePaths: string[] = [];
 
+      const isCypressFailedRunResult = (
+        runResult:
+          | CypressCommandLine.CypressRunResult
+          | CypressCommandLine.CypressFailedRunResult
+          | undefined
+      ): runResult is CypressCommandLine.CypressFailedRunResult =>
+        Boolean(runResult && 'status' in runResult && runResult.status === 'failed');
+
       const isTestAssertionFailure = (
         runResult:
           | CypressCommandLine.CypressRunResult
@@ -324,6 +330,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           | undefined
         > = [];
 
+        const completedSpecFilePaths: string[] = [];
         const esPort: number = getEsPort();
         const kibanaPort: number = getKibanaPort();
         const fleetServerPort: number = getFleetServerPort();
@@ -607,11 +614,10 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   if (!infraFailedSpecFilePaths.includes(filePath)) {
                     infraFailedSpecFilePaths.push(filePath);
                   }
-                } else if (asFailed?.status === 'failed') {
-                  // CypressFailedRunResult: Cypress could not execute the spec.
-                  // Treat as a deterministic runner failure: keep it in
-                  // failedSpecFilePaths so the final exit check fires, do NOT
-                  // auto-retry in place, and do NOT checkpoint as completed.
+                } else if (isCypressFailedRunResult(runResult)) {
+                  if (!infraFailedSpecFilePaths.includes(filePath)) {
+                    infraFailedSpecFilePaths.push(filePath);
+                  }
                   log.error(
                     `Cypress failed to run ${filePath}: ${asFailed.message ?? 'no message'}`
                   );
@@ -638,6 +644,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                     durationMs,
                   });
                   _.pull(failedSpecFilePaths, filePath);
+                  completedSpecFilePaths.push(filePath);
                   if (!isOpen && isInBuildkite()) {
                     markSpecCompleted(filePath).catch(() => {});
                   }
@@ -665,6 +672,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             const message = error instanceof Error ? error.message : String(error);
             for (const record of routeGroupFailure({
               specFilePaths: group.specFilePaths,
+              completedSpecFilePaths,
               failedSpecFilePaths,
               infraFailedSpecFilePaths,
               message,
@@ -762,13 +770,8 @@ ${specGroups
 
         const hasFailedRetryTests = hasFailedTests(retryResults);
 
-        // Watertight invariant: if any spec is still listed as failed after
-        // initial + infra-retry passes, or if any infra-retry itself reported
-        // failures, the job must fail. Closes the false-green path where a
-        // CypressFailedRunResult in the initial pass could leak past the old
-        // `hasFailedInitialTests && !retryResults.length` clause the moment
-        // any unrelated spec went through an infra retry.
-        const stillFailing = failedSpecFilePaths.length > 0 || hasFailedRetryTests;
+        // Successful retries must not mask failures from other specs.
+        const stillFailing = hasUnresolvedFailures(failedSpecFilePaths, hasFailedRetryTests);
         if (stillFailing) {
           throw createFailError('Not all tests passed');
         }
@@ -840,13 +843,8 @@ ${specGroups
 
         const hasFailedRetryTests = hasFailedTests(retryResults);
 
-        // Watertight invariant: if any spec is still listed as failed after
-        // initial + infra-retry passes, or if any infra-retry itself reported
-        // failures, the job must fail. Closes the false-green path where a
-        // CypressFailedRunResult in the initial pass could leak past the old
-        // `hasFailedInitialTests && !retryResults.length` clause the moment
-        // any unrelated spec went through an infra retry.
-        const stillFailing = failedSpecFilePaths.length > 0 || hasFailedRetryTests;
+        // Successful retries must not mask failures from other specs.
+        const stillFailing = hasUnresolvedFailures(failedSpecFilePaths, hasFailedRetryTests);
         if (stillFailing) {
           throw createFailError('Not all tests passed');
         }

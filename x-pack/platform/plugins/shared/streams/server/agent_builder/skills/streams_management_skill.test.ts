@@ -13,6 +13,7 @@ import {
   STREAMS_DIAGNOSE_STREAM_TOOL_ID,
   STREAMS_QUERY_DOCUMENTS_TOOL_ID,
   STREAMS_DESIGN_PIPELINE_TOOL_ID,
+  STREAMS_LIST_ILM_POLICIES_TOOL_ID,
   STREAMS_UPDATE_STREAM_TOOL_ID,
   STREAMS_CREATE_PARTITION_TOOL_ID,
   STREAMS_DELETE_STREAM_TOOL_ID,
@@ -31,7 +32,7 @@ describe('streamsManagementSkill', () => {
 
   it('does not include sig events tools in getRegistryTools', async () => {
     const toolIds = await streamsManagementSkill.getRegistryTools!();
-    expect(toolIds.every((id: string) => !id.includes('sig_events'))).toBe(true);
+    expect(toolIds.every((id: string) => !id.includes('significant_events'))).toBe(true);
     expect(toolIds.every((id: string) => !id.includes('ki_search'))).toBe(true);
   });
 
@@ -43,6 +44,7 @@ describe('streamsManagementSkill', () => {
       STREAMS_DIAGNOSE_STREAM_TOOL_ID,
       STREAMS_QUERY_DOCUMENTS_TOOL_ID,
       STREAMS_DESIGN_PIPELINE_TOOL_ID,
+      STREAMS_LIST_ILM_POLICIES_TOOL_ID,
       STREAMS_UPDATE_STREAM_TOOL_ID,
       STREAMS_CREATE_PARTITION_TOOL_ID,
       STREAMS_DELETE_STREAM_TOOL_ID,

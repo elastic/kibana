@@ -7,9 +7,8 @@
 
 import { PluginStart } from '@kbn/core-di';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KueryNode } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
@@ -19,6 +18,7 @@ import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatc
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
+  ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectBulkDeleteItem,
   ActionPolicySavedObjectBulkGetItem,
   ActionPolicySavedObjectBulkUpdateItem,
@@ -26,13 +26,14 @@ import type {
 } from './types';
 
 export type {
+  ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectBulkDeleteItem,
   ActionPolicySavedObjectBulkGetItem,
   ActionPolicySavedObjectBulkUpdateItem,
   ActionPolicySavedObjectServiceContract,
 };
 
-const escapeRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const ROUTING_TAG_SOURCES_PER_PAGE = 1000;
 
 @injectable()
 export class ActionPolicySavedObjectService implements ActionPolicySavedObjectServiceContract {
@@ -122,7 +123,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     );
 
     return result.saved_objects.map((savedObject) => {
-      if ('error' in savedObject && savedObject.error) {
+      if (isSavedObjectErrorResult(savedObject)) {
         return { id: savedObject.id, error: savedObject.error };
       }
       return { id: savedObject.id, version: savedObject.version };
@@ -144,7 +145,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     );
 
     return result.saved_objects.map((savedObject) => {
-      if ('error' in savedObject && savedObject.error) {
+      if (isSavedObjectErrorResult(savedObject)) {
         return { id: savedObject.id, error: savedObject.error };
       }
 
@@ -178,7 +179,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
 
     for await (const response of finder.find()) {
       for (const doc of response.saved_objects) {
-        if (doc.error) {
+        if (isSavedObjectErrorResult(doc)) {
           results.push({ id: doc.id, error: doc.error });
         } else {
           results.push({ id: doc.id, attributes: doc.attributes, namespaces: doc.namespaces });
@@ -189,6 +190,42 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     await finder.close();
 
     return results;
+  }
+
+  public async findRoutingTagSources({ maxPolicies }: { maxPolicies: number }): Promise<{
+    policies: ActionPolicyRoutingTagSource[];
+    isTruncated: boolean;
+  }> {
+    const finder = await this.client.createPointInTimeFinder<ActionPolicySavedObjectAttributes>({
+      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+      perPage: ROUTING_TAG_SOURCES_PER_PAGE,
+      fields: ['name', 'enabled', 'matcher'],
+    });
+
+    const policies: ActionPolicyRoutingTagSource[] = [];
+    let isTruncated = false;
+
+    try {
+      for await (const { saved_objects: savedObjects, total } of finder.find()) {
+        for (const { id, attributes } of savedObjects) {
+          policies.push({
+            id,
+            name: attributes.name,
+            enabled: attributes.enabled,
+            matcher: attributes.matcher,
+          });
+        }
+
+        if (policies.length >= maxPolicies) {
+          isTruncated = total > maxPolicies;
+          break;
+        }
+      }
+    } finally {
+      await finder.close();
+    }
+
+    return { policies: policies.slice(0, maxPolicies), isTruncated };
   }
 
   public async delete({ id }: { id: string }): Promise<void> {
@@ -227,7 +264,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     page: number;
     perPage: number;
     search?: string;
-    filter?: KueryNode;
+    filter?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
@@ -235,38 +272,16 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       type: ACTION_POLICY_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      search,
-      searchFields: search ? ['name', 'description', 'destinations.id'] : undefined,
+      ...(search
+        ? {
+            search,
+            searchFields: ['name', 'description'],
+            defaultSearchOperator: 'AND' as const,
+          }
+        : {}),
       filter,
       sortField,
       sortOrder,
     });
-  }
-
-  public async getDistinctTags(params?: { search?: string }): Promise<string[]> {
-    const search = params?.search;
-    const result = await this.client.find<
-      ActionPolicySavedObjectAttributes,
-      { tags: { buckets: Array<{ key: string }> } }
-    >({
-      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-      perPage: 0,
-      aggs: {
-        tags: {
-          terms: {
-            field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-            size: 100,
-            order: { _key: 'asc' },
-            ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
-          },
-        },
-      },
-    });
-
-    return (
-      result.aggregations?.tags.buckets
-        .map((bucket) => bucket.key)
-        .filter((key) => key.length > 0) ?? []
-    );
   }
 }

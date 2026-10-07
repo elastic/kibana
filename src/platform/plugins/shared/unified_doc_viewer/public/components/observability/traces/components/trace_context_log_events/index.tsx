@@ -16,6 +16,9 @@ import { useLogsQuery } from '../../hooks/use_logs_query';
 import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
+
+const FETCH_TRACE_CONTEXT_LOGS_OPERATION_ID = 'fetch-trace-context-logs';
 
 const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.logs.title', {
   defaultMessage: 'Logs',
@@ -33,6 +36,7 @@ export interface TraceContextLogEventsProps {
   spanId?: string;
   transactionId?: string;
 }
+
 export function TraceContextLogEvents({
   traceId,
   transactionId,
@@ -43,7 +47,19 @@ export function TraceContextLogEvents({
   const { from, to } = dataService.query.timefilter.timefilter.getTime();
 
   const timeRange = useMemo(() => ({ from, to }), [from, to]);
-  const query = useLogsQuery({ traceId, spanId, transactionId });
+
+  // Flattened overview fields can be missing (e.g. partial/OTel docs). Guard before
+  // building ES|QL literals — `esqlString(undefined)` throws on `.replace`.
+  const resolvedTraceId = typeof traceId === 'string' && traceId.length > 0 ? traceId : undefined;
+  const resolvedSpanId = typeof spanId === 'string' && spanId.length > 0 ? spanId : undefined;
+  const resolvedTransactionId =
+    typeof transactionId === 'string' && transactionId.length > 0 ? transactionId : undefined;
+
+  const query = useLogsQuery({
+    traceId: resolvedTraceId ?? '',
+    spanId: resolvedSpanId,
+    transactionId: resolvedTransactionId,
+  });
 
   const savedSearchTimeRange = useMemo(
     () => ({
@@ -53,9 +69,21 @@ export function TraceContextLogEvents({
     [timeRange.from, timeRange.to]
   );
 
+  const whereClause = useMemo(() => {
+    if (!resolvedTraceId || !indexes.logs) {
+      return undefined;
+    }
+    return createTraceContextWhereClause({
+      traceId: resolvedTraceId,
+      spanId: resolvedSpanId,
+      transactionId: resolvedTransactionId,
+    });
+  }, [resolvedTraceId, resolvedSpanId, resolvedTransactionId, indexes.logs]);
+
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.logs,
-    whereClause: createTraceContextWhereClause({ traceId, spanId, transactionId }),
+    whereClause,
+    unmappedFieldsPolicy: 'NULLIFY',
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
@@ -63,6 +91,10 @@ export function TraceContextLogEvents({
     esql: esqlQueryString,
     tabLabel: logsTitle,
     dataTestSubj: 'unifiedDocViewerLogsOpenInDiscoverButton',
+    ebt: {
+      element: TRACES_DOC_VIEWER_EBT_ELEMENTS.LOGS,
+      detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+    },
   });
 
   const actions = useMemo(
@@ -72,7 +104,7 @@ export function TraceContextLogEvents({
 
   const LogEvents = discoverShared.features.registry.getById('observability-log-events');
 
-  if (!LogEvents || !indexes.logs) {
+  if (!LogEvents || !indexes.logs || !resolvedTraceId) {
     return null;
   }
 
@@ -92,6 +124,7 @@ export function TraceContextLogEvents({
           nonHighlightingQuery={query}
           timeRange={savedSearchTimeRange}
           index={indexes.logs}
+          executionContext={{ meta: { operation_id: FETCH_TRACE_CONTEXT_LOGS_OPERATION_ID } }}
         />
       </div>
     </ContentFrameworkSection>

@@ -58,7 +58,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
 
   async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
-    await this.stepExecutionRuntime.flushEventLogs();
 
     const step = this.node.configuration as WorkflowOutputStep;
     // Render template variables in the output values (with: may be omitted for workflow.fail)
@@ -96,7 +95,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
 
           // Fail the step with validation error (failStep also sets workflow-level error via updateWorkflowExecution)
           this.stepExecutionRuntime.failStep(validationError);
-          await this.stepExecutionRuntime.flushEventLogs();
 
           this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
           return;
@@ -168,8 +166,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
           this.stepExecutionRuntime.finishStep(outputValues);
       }
 
-      await this.stepExecutionRuntime.flushEventLogs();
-
       this.workflowLogger.logInfo(`Workflow terminated with status: ${stepStatus}`, {
         event: {
           action: 'workflow-terminated',
@@ -195,7 +191,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
 
       // failStep() sets workflow-level error via updateWorkflowExecution({ error })
       this.stepExecutionRuntime.failStep(errorObj);
-      await this.stepExecutionRuntime.flushEventLogs();
 
       this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
     }

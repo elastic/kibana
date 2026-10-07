@@ -17,6 +17,10 @@ import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_dis
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../constants/archiver';
 
+/** Inclusive bounds for fixed archiver runs; observed 373 vs 374 across serverless vs stateful CI. */
+const FIELD_VALUE_PAIRS_LENGTH_MIN = 370;
+const FIELD_VALUE_PAIRS_LENGTH_MAX = 380;
+
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -164,15 +168,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${fieldValuePairsResponse.status}'`
         );
 
-        // Identified 374 fieldValuePairs.
-        expect(fieldValuePairsResponse.body?.fieldValuePairs.length).to.eql(
-          374,
-          `Expected field value pairs length to be '374', got '${fieldValuePairsResponse.body?.fieldValuePairs.length}'`
+        // Field value pair count depends on field cap mappings and correlation candidate filters.
+        const fieldValuePairsLength = fieldValuePairsResponse.body?.fieldValuePairs.length;
+        expect(fieldValuePairsLength).to.be.within(
+          FIELD_VALUE_PAIRS_LENGTH_MIN,
+          FIELD_VALUE_PAIRS_LENGTH_MAX,
+          `Expected field value pairs length within [${FIELD_VALUE_PAIRS_LENGTH_MIN}, ${FIELD_VALUE_PAIRS_LENGTH_MAX}], got '${fieldValuePairsLength}'`
         );
 
         // This replicates the code used in the `useLatencyCorrelations` hook to chunk requests for correlation analysis.
         // Tests turned out to be flaky and occasionally overload ES with a `search_phase_execution_exception`
-        // when all 374 field value pairs from above are queried in parallel.
+        // when all field value pairs from above are queried in parallel.
         // The chunking sends 10 field value pairs with each request to the Kibana API endpoint.
         // Kibana itself will then run those 10 requests in parallel against ES.
         const latencyCorrelations: LatencyCorrelation[] = [];
@@ -233,7 +239,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram?.length).to.be(101);
 
-        // Identified 13 significant correlations out of 374 field/value pairs.
+        // Identified 13 significant correlations out of fetched field/value pairs.
         expect(finalRawResponse?.latencyCorrelations?.length).to.eql(
           13,
           `Expected 13 identified correlations, got ${finalRawResponse?.latencyCorrelations?.length}.`

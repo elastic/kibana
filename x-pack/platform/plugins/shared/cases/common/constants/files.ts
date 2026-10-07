@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const FILE_ATTACHMENT_TYPE = '.files';
-
 export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MiB
 export const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024; // 10 MiB
 export const MAX_FILES_PER_CASE = 100;

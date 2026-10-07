@@ -20,9 +20,11 @@ import { useEuiTheme } from '@elastic/eui';
 import { isAnomalyRuleType } from './helpers';
 
 interface UseGetChartAlertAnnotationsProps {
-  alert: TopAlert;
+  alert?: TopAlert;
   dateFormat: string;
   showAnnotations: boolean;
+  /** Include the threshold rect/line in the annotations. Defaults to `showAnnotations`. */
+  showThresholdAnnotation?: boolean;
   customAlertEvaluationThreshold?: number;
   normalizeThreshold?: (value: number) => number;
 }
@@ -31,14 +33,20 @@ export const useGetChartAlertAnnotations = ({
   alert,
   dateFormat,
   showAnnotations,
+  showThresholdAnnotation,
   customAlertEvaluationThreshold,
   normalizeThreshold,
 }: UseGetChartAlertAnnotationsProps): ReactElement[] | undefined => {
   const { euiTheme } = useEuiTheme();
 
-  if (!showAnnotations && customAlertEvaluationThreshold == null) return undefined;
+  if (!alert || (!showAnnotations && customAlertEvaluationThreshold == null)) return undefined;
+
+  const includeThreshold =
+    showThresholdAnnotation ?? (showAnnotations || customAlertEvaluationThreshold != null);
 
   const thresholdAnnotations = (() => {
+    if (!includeThreshold) return [];
+
     const alertEvalThreshold =
       customAlertEvaluationThreshold ?? alert.fields[ALERT_EVALUATION_THRESHOLD];
     const ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as ApmRuleType;

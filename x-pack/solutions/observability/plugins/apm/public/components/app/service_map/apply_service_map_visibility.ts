@@ -17,10 +17,19 @@ import type {
 } from '../../../../common/service_map';
 import { isServiceNode, isServiceNodeData } from '../../../../common/service_map';
 
+/**
+ * Connection-based filter values.
+ * - `orphaned`: show only nodes with 0 edges (no connections at all).
+ * - `connected`: show only nodes with ≥1 edge.
+ */
+export type ConnectionFilter = 'orphaned' | 'connected';
+
 export interface ServiceMapViewFilters {
   /** Empty = show all alert statuses. If non-empty, service must have ≥1 alert in any selected status. */
   alertStatusFilter: AlertStatus[];
   sloStatusFilter: SloStatus[];
+  /** Empty = show all. If non-empty, service must match at least one selected connection filter (OR). */
+  connectionFilter: ConnectionFilter[];
   /** Empty = show all. If non-empty, service ML severity (from anomaly score) must match one of the selected bands. */
   anomalySeverityFilter: ML_ANOMALY_SEVERITY[];
 }
@@ -28,8 +37,19 @@ export interface ServiceMapViewFilters {
 export const DEFAULT_SERVICE_MAP_VIEW_FILTERS: ServiceMapViewFilters = {
   alertStatusFilter: [],
   sloStatusFilter: [],
+  connectionFilter: [],
   anomalySeverityFilter: [],
 };
+
+/** Builds a Set of node IDs that appear on at least one edge (as source or target). */
+export function buildConnectedNodeIdSet(edges: ServiceMapEdgeType[]): Set<string> {
+  const connected = new Set<string>();
+  for (const edge of edges) {
+    connected.add(edge.source);
+    connected.add(edge.target);
+  }
+  return connected;
+}
 
 /**
  * SLO bucket for map filters and option counts: `undefined` or `noSLOs` (no SLO summary on the node)
@@ -58,12 +78,37 @@ export function getServiceNodeAlertCountForStatus(
   return 0;
 }
 
+function nodeMatchesConnectionFilter(
+  nodeId: string,
+  filter: ConnectionFilter,
+  connectedIds: Set<string>
+): boolean {
+  switch (filter) {
+    case 'orphaned':
+      return !connectedIds.has(nodeId);
+    case 'connected':
+      return connectedIds.has(nodeId);
+  }
+}
+
 /** ML severity band for map filters, derived from the same score → severity rules as service inventory. */
 export function getMlSeverityForServiceMapNode(data: ServiceNodeData): ML_ANOMALY_SEVERITY {
   return getSeverity(data.serviceAnomalyStats?.anomalyScore);
 }
 
-function serviceMatchesFilters(data: ServiceNodeData, filters: ServiceMapViewFilters): boolean {
+function serviceMatchesFilters(
+  data: ServiceNodeData,
+  nodeId: string,
+  connectedIds: Set<string>,
+  filters: ServiceMapViewFilters
+): boolean {
+  if (filters.connectionFilter.length > 0) {
+    const matchesAnyConnection = filters.connectionFilter.some((f) =>
+      nodeMatchesConnectionFilter(nodeId, f, connectedIds)
+    );
+    if (!matchesAnyConnection) return false;
+  }
+
   if (filters.alertStatusFilter.length > 0) {
     const matchesAny = filters.alertStatusFilter.some(
       (status) => getServiceNodeAlertCountForStatus(data, status) > 0
@@ -102,9 +147,13 @@ export function applyServiceMapVisibility(
 ): { nodes: ServiceMapNode[]; edges: ServiceMapEdgeType[] } {
   const visibleIds = new Set<string>();
   const nodeById = new Map(nodes.map((n) => [n.id, n] as const));
+  const connectedIds = buildConnectedNodeIdSet(edges);
 
   for (const node of nodes) {
-    if (isServiceNodeData(node.data) && serviceMatchesFilters(node.data, filters)) {
+    if (
+      isServiceNodeData(node.data) &&
+      serviceMatchesFilters(node.data, node.id, connectedIds, filters)
+    ) {
       visibleIds.add(node.id);
     }
   }

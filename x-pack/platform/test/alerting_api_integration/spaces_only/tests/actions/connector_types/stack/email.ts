@@ -198,6 +198,62 @@ export default function emailTest({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('rejects invalid email address formats', () => {
+      it('rejects addresses with leading hyphen in local part', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        const { status, body } = await runConnector(id, ['-user@' + EmailDomainAllowed], [], []);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('error');
+        expect(body?.message).to.match(/not valid emails/);
+      });
+
+      it('rejects addresses with leading hyphen in domain', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        const { status, body } = await runConnector(id, ['user@-example.com'], [], []);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('error');
+        expect(body?.message).to.match(/not valid emails/);
+      });
+
+      it('rejects addresses with trailing hyphen in domain', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        const { status, body } = await runConnector(id, ['user@example-.com'], [], []);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('error');
+        expect(body?.message).to.match(/not valid emails/);
+      });
+
+      it('rejects addresses with invalid format in cc and bcc', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        const validTo = [`jeb@${EmailDomainAllowed}`];
+        const { status, body } = await runConnector(
+          id,
+          validTo,
+          ['-cc@example.com'],
+          ['user@bad-.org']
+        );
+        expect(status).to.be(200);
+        expect(body?.status).to.be('error');
+        expect(body?.message).to.match(/not valid emails/);
+      });
+    });
+
     describe('export, import, then execute email connector', () => {
       afterEach(() => objectRemover.removeAll());
 

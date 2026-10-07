@@ -14,18 +14,15 @@ import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from '../../common/service/saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
-import type { SavedSearchAttributes } from '../../common';
+import type { DiscoverSessionAttributes } from '../../server';
 
 export interface SaveSavedSearchOptions {
-  onTitleDuplicate?: () => void;
-  isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
 
-export const saveSearchSavedObject = async (
+const saveSearchSavedObject = async (
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  attributes: DiscoverSessionAttributes,
   references: Reference[] | undefined,
   contentManagement: ContentManagementPublicStart['client']
 ) => {
@@ -64,27 +61,15 @@ export const saveSavedSearch = async (
 ): Promise<string | undefined> => {
   const isNew = options.copyOnSave || !savedSearch.id;
 
-  if (isNew) {
-    try {
-      await checkForDuplicateTitle({
-        title: savedSearch.title,
-        isTitleDuplicateConfirmed: options.isTitleDuplicateConfirmed,
-        onTitleDuplicate: options.onTitleDuplicate,
-        contentManagement,
-      });
-    } catch {
-      return;
-    }
-  }
-
   const { searchSourceJSON, references: originalReferences } = savedSearch.searchSource.serialize();
   const references = savedObjectsTagging
     ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
     : originalReferences;
+  const { title, description, tabs } = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   return saveSearchSavedObject(
     isNew ? undefined : savedSearch.id,
-    toSavedSearchAttributes(savedSearch, searchSourceJSON),
+    { title, description, tabs },
     references,
     contentManagement
   );

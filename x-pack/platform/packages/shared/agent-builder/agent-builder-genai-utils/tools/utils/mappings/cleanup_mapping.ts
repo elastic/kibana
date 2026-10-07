@@ -22,6 +22,8 @@ export const cleanupMapping = (mapping: MappingTypeMapping): MappingTypeMapping 
     'description',
     'index',
     'enabled',
+    'time_series_dimension',
+    'time_series_metric',
   ];
 
   function recursiveCleanup(obj: Record<string, any>): Record<string, any> {

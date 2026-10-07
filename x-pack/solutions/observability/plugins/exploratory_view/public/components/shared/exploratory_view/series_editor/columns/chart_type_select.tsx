@@ -36,6 +36,9 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.exploratoryView.seriesChartTypes.popoverAriaLabel', {
+        defaultMessage: 'Edit chart type for series',
+      })}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       button={
@@ -48,7 +51,11 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
             flush="both"
           >
             {icon && (
-              <EuiIcon type={(data ?? []).find(({ id }) => id === seriesType)?.icon!} size="l" />
+              <EuiIcon
+                type={(data ?? []).find(({ id }) => id === seriesType)?.icon!}
+                size="l"
+                aria-hidden={true}
+              />
             )}
           </EuiButtonEmpty>
         </EuiToolTip>

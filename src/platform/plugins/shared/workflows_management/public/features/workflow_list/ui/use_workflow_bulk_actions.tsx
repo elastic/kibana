@@ -69,15 +69,30 @@ export const useWorkflowBulkActions = ({
   const canReadWorkflow = application?.capabilities.workflowsManagement.readWorkflow;
 
   const isDisabled = selectedWorkflows.length === 0;
+  const hasManagedWorkflows = selectedWorkflows.some((workflow) => workflow.managed === true);
+  const canEditSelection = selectedWorkflows.every(
+    (workflow) => workflow.permissions?.edit !== false
+  );
+  const canDeleteSelectedWorkflows = canDeleteWorkflow && !hasManagedWorkflows && canEditSelection;
 
   const handleDeleteWorkflows = useCallback(() => {
+    if (!canDeleteSelectedWorkflows) {
+      return;
+    }
     onAction();
     setShowDeleteModal(true);
-  }, [onAction]);
+  }, [canDeleteSelectedWorkflows, onAction]);
 
   const confirmDelete = useCallback(() => {
-    const ids = selectedWorkflows.map((workflow) => workflow.id);
+    const ids = selectedWorkflows
+      .filter((workflow) => workflow.managed !== true)
+      .map((workflow) => workflow.id);
     const count = ids.length;
+    if (count === 0) {
+      setShowDeleteModal(false);
+      deselectWorkflows();
+      return;
+    }
 
     setShowDeleteModal(false);
     deselectWorkflows();
@@ -124,6 +139,7 @@ export const useWorkflowBulkActions = ({
           {
             id: workflow.id,
             workflow: updateData,
+            workflowDefinition: workflow.definition ?? undefined,
             isBulkAction: true,
             bulkActionCount: totalCount,
             skipRefetch: true,
@@ -191,7 +207,7 @@ export const useWorkflowBulkActions = ({
     const hasDisabledWorkflows = selectedWorkflows.some((workflow) => !workflow.enabled);
     const hasEnabledWorkflows = selectedWorkflows.some((workflow) => workflow.enabled);
 
-    if (canUpdateWorkflow && hasDisabledWorkflows) {
+    if (canUpdateWorkflow && canEditSelection && hasDisabledWorkflows) {
       mainPanelItems.push({
         name: i18n.translate('workflows.bulkActions.enable', {
           defaultMessage: 'Enable',
@@ -204,7 +220,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (canUpdateWorkflow && hasEnabledWorkflows) {
+    if (canUpdateWorkflow && canEditSelection && hasEnabledWorkflows) {
       mainPanelItems.push({
         name: i18n.translate('workflows.bulkActions.disable', {
           defaultMessage: 'Disable',
@@ -223,7 +239,7 @@ export const useWorkflowBulkActions = ({
         name: i18n.translate('workflows.bulkActions.export', {
           defaultMessage: 'Export',
         }),
-        icon: 'exportAction',
+        icon: 'upload',
         disabled: isDisabled,
         onClick: handleExportWorkflows,
         'data-test-subj': 'workflows-bulk-action-export',
@@ -231,7 +247,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (mainPanelItems.length > 0 && canDeleteWorkflow) {
+    if (mainPanelItems.length > 0 && canDeleteSelectedWorkflows) {
       mainPanelItems.push({
         isSeparator: true as const,
         key: 'bulk-actions-separator',
@@ -239,7 +255,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (canDeleteWorkflow) {
+    if (canDeleteSelectedWorkflows) {
       mainPanelItems.push({
         name: (
           <EuiTextColor color="danger">
@@ -268,7 +284,8 @@ export const useWorkflowBulkActions = ({
   }, [
     selectedWorkflows,
     canUpdateWorkflow,
-    canDeleteWorkflow,
+    canEditSelection,
+    canDeleteSelectedWorkflows,
     canReadWorkflow,
     isDisabled,
     handleEnableWorkflows,

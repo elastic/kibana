@@ -15,6 +15,7 @@ const triggerId = 'example.test_trigger';
 const eventSchema = z.object({ message: z.string() });
 const defaultDefinition: PublicTriggerDefinition<typeof eventSchema> = {
   id: triggerId,
+  stability: 'tech_preview',
   title: 'Test Trigger',
   description: 'A trigger for testing',
   eventSchema,
@@ -96,6 +97,7 @@ describe('PublicTriggerRegistry', () => {
     it('should return all registered trigger definitions', () => {
       const definition2: PublicTriggerDefinition = {
         id: 'other.trigger',
+        stability: 'tech_preview',
         title: 'Other',
         description: 'Another trigger',
         eventSchema: z.object({ id: z.string() }),
@@ -118,6 +120,18 @@ describe('PublicTriggerRegistry', () => {
       await registry.whenReady();
       expect(registry.has(triggerId)).toBe(true);
       expect(registry.get(triggerId)).toEqual(defaultDefinition);
+    });
+
+    it('should not resolve loader until whenReady is called', async () => {
+      const mockLoader = jest.fn().mockResolvedValue(defaultDefinition);
+      registry.register(mockLoader);
+
+      expect(registry.has(triggerId)).toBe(false);
+      expect(mockLoader).not.toHaveBeenCalled();
+
+      await registry.whenReady();
+      expect(registry.has(triggerId)).toBe(true);
+      expect(mockLoader).toHaveBeenCalled();
     });
 
     it('should throw when resolved definition duplicates an existing trigger id', async () => {

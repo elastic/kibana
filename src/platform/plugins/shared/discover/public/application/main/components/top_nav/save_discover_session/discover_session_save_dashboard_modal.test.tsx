@@ -33,6 +33,7 @@ const renderSaveModal = (
     <EuiProvider>
       <I18nProvider>
         <DiscoverSessionSaveDashboardModal
+          hasLibraryItemWithTitle={async () => false}
           hideDashboardOptions={true}
           initialTags={[]}
           initialTimeRestore={false}
@@ -58,6 +59,18 @@ const renderSaveModal = (
 describe('DiscoverSessionSaveDashboardModal', () => {
   beforeAll(() => {
     setStubKibanaServices();
+  });
+
+  it('shows the store time switch when isTimeBased is true', async () => {
+    renderSaveModal({ isTimeBased: true });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.getByTestId('storeTimeWithSearch')).toBeInTheDocument();
+  });
+
+  it('hides the store time switch when isTimeBased is false', async () => {
+    renderSaveModal({ isTimeBased: false });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.queryByTestId('storeTimeWithSearch')).not.toBeInTheDocument();
   });
 
   it('passes modal state to onSave', async () => {

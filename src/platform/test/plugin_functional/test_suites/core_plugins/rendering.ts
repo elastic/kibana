@@ -61,7 +61,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       }
       return JSON.parse(injectedMetadata.getAttribute('data')!);
     });
-  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
+  const exists = (selector: string) => testSubjects.exists(selector);
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
   const getRenderingSession = () =>
     browser.execute(() => {
@@ -253,11 +253,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplaceai?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplaceai?|vectordb?)',
         'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.serverless.in_trial (boolean?)',
         'xpack.cloud.onboarding.default_solution (string?)',
+        'xpack.cloud.managed_otlp.url (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean?)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean?)',
@@ -342,7 +343,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
         'xpack.searchAssistant.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
-        'xpack.searchPlayground.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',
         'xpack.security.sameSiteCookies (Strict?|Lax?|None?)',
         'xpack.security.showInsecureClusterWarning (boolean?)',
@@ -495,8 +495,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
       let loadingMessage: WebElementWrapper | null = null;
       await navigateTo('/render/core');
-      await retry.tryWithRetries(
-        'injectedMetadata',
+      await retry.try(
         async () => {
           await browser.refresh();
           [injectedMetadata, loadingMessage] = await Promise.all([
@@ -505,7 +504,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           ]);
           expect(injectedMetadata).to.not.be.empty();
         },
-        { retryCount: 5 }
+        { description: 'injectedMetadata' }
       );
       const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 
@@ -523,8 +522,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
       let loadingMessage: WebElementWrapper | null = null;
       await navigateTo('/render/core?isAnonymousPage=true');
-      await retry.tryWithRetries(
-        'injectedMetadata',
+      await retry.try(
         async () => {
           await browser.refresh();
           [injectedMetadata, loadingMessage] = await Promise.all([
@@ -533,7 +531,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           ]);
           expect(injectedMetadata).to.not.be.empty();
         },
-        { retryCount: 5 }
+        { description: 'injectedMetadata' }
       );
       const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 

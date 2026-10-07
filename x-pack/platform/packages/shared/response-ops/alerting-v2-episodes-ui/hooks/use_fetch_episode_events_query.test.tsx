@@ -9,8 +9,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { buildEpisodeEventsEsqlQuery } from '../queries/episode_events_query';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeEventsQuery } from './use_fetch_episode_events_query';
 
 jest.mock('../utils/run_esql_async_search');
@@ -22,6 +23,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchEpisodeEventsQuery', () => {
   const data = dataPluginMock.createStartContract();
+  const mockSpaces = createMockSpaces();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,7 +38,7 @@ describe('useFetchEpisodeEventsQuery', () => {
       () =>
         useFetchEpisodeEventsQuery({
           episodeId: undefined,
-          data,
+          services: { data, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -56,7 +58,7 @@ describe('useFetchEpisodeEventsQuery', () => {
       () =>
         useFetchEpisodeEventsQuery({
           episodeId,
-          data,
+          services: { data, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -67,7 +69,7 @@ describe('useFetchEpisodeEventsQuery', () => {
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeEventsEsqlQuery(episodeId).print('basic'),
+          query: buildEpisodeEventsEsqlQuery(DEFAULT_SPACE_ID, episodeId).print('basic'),
           time_zone: 'UTC',
         }),
       })

@@ -11,6 +11,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButton, EuiPageTemplate, EuiTitle, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
 import type { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
 import { ElasticAgentCardIllustration } from './elastic_agent_card_illustration';
@@ -94,7 +95,10 @@ export const NoDataCard = ({
               fill
               href={href}
               data-test-subj="noDataDefaultActionButton"
-              onClick={onClick}
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                if (hasActiveModifierKey(e)) return;
+                onClick?.(e);
+              }}
             >
               {buttonText || defaultButtonText}
             </EuiButton>

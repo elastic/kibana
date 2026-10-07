@@ -23,7 +23,7 @@ import {
 import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
-  it('installs the common resources when there is a version mismatch', async () => {
+  it('installs the common resources (including composite SLO) when there is a version mismatch', async () => {
     const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
     mockClusterClient.cluster.getComponentTemplate.mockResponse({
       component_templates: [

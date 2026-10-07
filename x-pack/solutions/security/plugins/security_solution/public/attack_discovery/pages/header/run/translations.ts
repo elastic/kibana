@@ -27,3 +27,11 @@ export const DISABLED_TOOLTIP = i18n.translate(
     defaultMessage: 'To run ad-hoc Attack discoveries, select a connector in settings',
   }
 );
+
+export const MISSING_WORKFLOWS_EXECUTE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.header.run.missingWorkflowsExecuteTooltip',
+  {
+    defaultMessage:
+      'You do not have the required privileges to run Attack discoveries. Contact your administrator for assistance.',
+  }
+);

@@ -6,6 +6,8 @@
  */
 
 export * from './routes';
+export { validateFleetSavedObjectId } from './validate_fleet_id';
+export { isValidDuration, isValidEnrollmentKeyExpiration } from './validate_duration';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
 export {
@@ -16,6 +18,7 @@ export {
   varsReducer,
   getInputEffectiveName,
   buildInputKey,
+  dataStreamUsesOtelInput,
 } from './package_to_package_policy';
 export type {
   DocumentationPageInput,
@@ -26,8 +29,11 @@ export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
 export {
   isValidDataset,
+  isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,
+  VALID_DATA_STREAM_TYPES,
 } from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
@@ -36,6 +42,10 @@ export {
   isAgentRequestDiagnosticsSupported,
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from './is_agent_request_diagnostics_supported';
+export {
+  isAgentRestartSupported,
+  MINIMUM_RESTART_AGENT_VERSION,
+} from './is_agent_restart_supported';
 export {
   isAgentMigrationSupported,
   MINIMUM_MIGRATE_AGENT_VERSION,
@@ -47,14 +57,25 @@ export {
   isAgentEligibleForPrivilegeLevelChange,
 } from './agent_privilege_level_change_helpers';
 export {
+  syncDataStreamTypeFromVar,
+  toNewAgentlessPolicy,
+  agentlessPolicyToPackagePolicy,
+} from './simplified_package_policy_helper';
+export {
   addUseAPMVarIfNotPresent,
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
+  addDataStreamTypeVarIfNotPresent,
+  DATA_STREAM_TYPE_VAR,
+  shouldIncludeDataStreamTypeVar,
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
+  getEnabledPolicyTemplates,
+  getEnabledInputsByPolicyTemplate,
   hasMultipleEnabledPolicyTemplates,
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
@@ -92,7 +113,10 @@ export {
   mapPackageReleaseToIntegrationCardRelease,
 } from './package_prerelease';
 
-export { getAllowedOutputTypesForAgentPolicy } from './output_helpers';
+export {
+  getAllowedOutputTypesForAgentPolicy,
+  getAllowedOutputTypesForMonitoring,
+} from './output_helpers';
 export { agentStatusesToSummary } from './agent_statuses_to_summary';
 
 export {
@@ -131,12 +155,18 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  inferVarGroupSelections,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module
 export * from './cloud_connectors';
 
 export { validateSslCertPath } from './ssl_validators';
+export { getOtelCollectorDisplayName, getOtelCollectorConfigName } from './otel_collector';
+
+export { isNamespaceAllowedByPrefixes } from './namespace_prefixes';
+
+export { getAgentlessThroughputIndexPatterns } from './agentless_throughput_helper';
 
 export type { YamlModule } from './yaml_utils';
 export { createYamlKeysSorter, toYaml } from './yaml_utils';
@@ -145,3 +175,12 @@ export {
   packagePolicyHasOtelInputs,
   OTEL_INPUTS_MINIMUM_VERSION,
 } from './otelcol_helpers';
+
+export {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
+} from './version_specific_policies_utils';

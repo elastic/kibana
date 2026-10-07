@@ -7,11 +7,12 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
 import {
   EuiHorizontalRule,
   EuiFlyoutBody,
   EuiTitle,
+  EuiFlexGroup,
   EuiFlyout,
   EuiSkeletonText,
   useGeneratedHtmlId,
@@ -27,12 +28,14 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
+  getMalformedMatchesFields,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import {
+  MalformedMatchesValueCallout,
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
 } from '@kbn/securitysolution-exception-list-components';
@@ -45,12 +48,15 @@ import {
   isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { ExceptionsLinkedToLists } from '../flyout_components/linked_to_list';
 import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
+import { useRuntimeFieldsForBulkClose } from '../flyout_components/alerts_actions/use_runtime_fields_for_bulk_close';
+import { useSignalIndexPatterns } from '../flyout_components/alerts_actions/use_signal_index_patterns';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
@@ -64,8 +70,10 @@ import { useEditExceptionItems } from './use_edit_exception';
 import * as i18n from './translations';
 import { RULE_EXCEPTION, ENDPOINT_EXCEPTION } from '../../utils/translations';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
-import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
-import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import {
+  ArtifactConfirmModal,
+  CONFIRM_WARNING_MODAL_LABELS,
+} from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
 import * as headerI18n from '../flyout_components/header/translations';
@@ -82,17 +90,13 @@ interface EditExceptionFlyoutProps {
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
-  ${() => css`
-    &.builder-section {
-      overflow-y: scroll;
-    }
-  `}
+  &.builder-section {
+    overflow-y: scroll;
+  }
 `;
 
 const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
 `;
 
 const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
@@ -104,6 +108,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   onCancel,
   onConfirm,
 }): JSX.Element => {
+  const {
+    docLinks: { links },
+  } = useKibana().services;
   const selectedOs = useMemo(() => itemToEdit.os_types, [itemToEdit]);
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
@@ -128,6 +135,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       expireErrorExists,
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
+      malformedMatchesValueExists,
+      malformedMatchesFields,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -143,6 +152,25 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     expireErrorExists: false,
     wildcardWarningExists: false,
     partialCodeSignatureWarningExists: false,
+    malformedMatchesValueExists: false,
+    malformedMatchesFields: [],
+  });
+
+  const {
+    isSignalIndexLoading,
+    signalIndexNames,
+    isSignalIndexPatternLoading,
+    signalIndexPatterns,
+    areSignalIndexPatternsReady,
+  } = useSignalIndexPatterns();
+
+  const runtimeFieldsResolution = useRuntimeFieldsForBulkClose({
+    exceptionListItems: exceptionItems,
+    shouldBulkCloseAlert: bulkCloseAlerts,
+    sourceIndexPatterns: indexPatterns,
+    isSourceIndexPatternsLoading: isLoading,
+    alertsIndexPatterns: signalIndexPatterns,
+    areAlertsIndexPatternsReady: areSignalIndexPatternsReady,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -187,6 +215,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
       });
+      const fields = getMalformedMatchesFields(items);
+      dispatch({ type: 'setMalformedMatchesValue', fields });
       dispatch({
         type: 'setExceptionItems',
         items,
@@ -323,7 +353,13 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           listType === ExceptionListTypeEnum.RULE_DEFAULT ? ruleDefaultRule : referencedRules;
 
         if (closeAlerts != null && !isEmpty(ruleIdsForBulkClose) && bulkCloseAlerts) {
-          await closeAlerts(ruleIdsForBulkClose, items, undefined, bulkCloseIndex);
+          await closeAlerts(
+            ruleIdsForBulkClose,
+            items,
+            undefined,
+            bulkCloseIndex,
+            runtimeFieldsResolution.runtimeFields
+          );
         }
 
         onConfirm(true);
@@ -346,17 +382,18 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
+    runtimeFieldsResolution.runtimeFields,
     onCancel,
     expireTime,
   ]);
 
   const handleOnSubmit = useCallback(() => {
-    if (wildcardWarningExists) {
+    if (wildcardWarningExists || malformedMatchesValueExists) {
       setShowConfirmModal(true);
     } else {
       return handleSubmitException();
     }
-  }, [wildcardWarningExists, handleSubmitException]);
+  }, [wildcardWarningExists, malformedMatchesValueExists, handleSubmitException]);
 
   const isSubmitButtonDisabled = useMemo(
     () =>
@@ -366,7 +403,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       isLoading ||
       entryErrorExists ||
       expireErrorExists ||
-      commentErrorExists,
+      commentErrorExists ||
+      // Bulk close sends the runtime-field map with the close-by-query
+      // request; hold submit until the map is resolved so alerts on runtime
+      // fields aren't silently skipped.
+      (bulkCloseAlerts && runtimeFieldsResolution.isResolving),
     [
       isLoading,
       entryErrorExists,
@@ -375,6 +416,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       isClosingAlerts,
       expireErrorExists,
       commentErrorExists,
+      bulkCloseAlerts,
+      runtimeFieldsResolution.isResolving,
     ]
   );
 
@@ -389,22 +432,24 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   }, [listType]);
 
   const confirmModal = useMemo(() => {
-    const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
-      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
+    const labels = CONFIRM_WARNING_MODAL_LABELS(
+      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
+      {
+        hasWildcardWithWrongOperator: wildcardWarningExists,
+        hasMalformedMatchesValue: malformedMatchesFields,
+      },
+      links
     );
 
     return (
       <ArtifactConfirmModal
-        title={title}
-        body={body}
-        confirmButton={confirmButton}
-        cancelButton={cancelButton}
+        labels={labels}
         onSuccess={handleSubmitException}
         onCancel={() => setShowConfirmModal(false)}
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, handleSubmitException]);
+  }, [listType, wildcardWarningExists, links, handleSubmitException, malformedMatchesFields]);
 
   return (
     <EuiFlyout
@@ -440,8 +485,15 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        {(wildcardWarningExists ||
+          malformedMatchesValueExists ||
+          partialCodeSignatureWarningExists) && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+            {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+            {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+          </EuiFlexGroup>
+        )}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
@@ -490,6 +542,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
               shouldBulkCloseAlert={bulkCloseAlerts}
               disableBulkClose={disableBulkClose}
               exceptionListItems={exceptionItems}
+              isSignalIndexLoading={isSignalIndexLoading}
+              signalIndexNames={signalIndexNames}
+              isSignalIndexPatternLoading={isSignalIndexPatternLoading}
+              signalIndexPatterns={signalIndexPatterns}
+              hasUntypedRuntimeFields={runtimeFieldsResolution.hasUntypedFields}
               onDisableBulkClose={setDisableBulkCloseAlerts}
               onUpdateBulkCloseIndex={setBulkCloseIndex}
               onBulkCloseCheckboxChange={setBulkCloseAlerts}

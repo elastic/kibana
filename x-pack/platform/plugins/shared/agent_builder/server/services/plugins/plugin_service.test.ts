@@ -160,6 +160,11 @@ describe('PluginsService', () => {
         enabled: true,
         githubBaseUrl: 'https://github.com',
         topSnippets: { numSnippets: 2, numWords: 750 },
+        tracing: {
+          exporters: [],
+          scheduledDelay: 1000,
+          opik_distributed_tracing: false,
+        },
       },
       analyticsService: mockAnalyticsService as unknown as AnalyticsService,
       trackingService: mockTrackingService as unknown as TrackingService,
@@ -556,6 +561,11 @@ describe('PluginsService', () => {
               enabled: true,
               githubBaseUrl: 'https://github.com',
               topSnippets: { numSnippets: 2, numWords: 750 },
+              tracing: {
+                exporters: [],
+                scheduledDelay: 1000,
+                opik_distributed_tracing: false,
+              },
             },
             analyticsService: mockAnalyticsService as unknown as AnalyticsService,
           });

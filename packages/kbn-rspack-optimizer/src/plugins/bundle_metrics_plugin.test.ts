@@ -98,7 +98,7 @@ function createMockCompiler() {
 }
 
 describe('buildMetrics', () => {
-  it('emits five metric groups per plugin in legacy order', () => {
+  it('emits five metric groups per plugin in a stable order', () => {
     const metrics = buildMetrics(
       [
         {
@@ -120,7 +120,7 @@ describe('buildMetrics', () => {
     const coreMetrics = metrics.filter((m) => m.id === 'core');
     expect(coreMetrics).toHaveLength(5);
     expect(coreMetrics.map((m) => m.group)).toEqual([
-      '@kbn/optimizer bundle module count',
+      '@kbn/rspack-optimizer bundle module count',
       'page load bundle size',
       'async chunks size',
       'async chunk count',
@@ -148,7 +148,7 @@ describe('buildMetrics', () => {
     );
 
     const coreModuleCount = metrics.find(
-      (m) => m.group === '@kbn/optimizer bundle module count' && m.id === 'core'
+      (m) => m.group === '@kbn/rspack-optimizer bundle module count' && m.id === 'core'
     );
     expect(coreModuleCount).toBeDefined();
     expect(coreModuleCount!.value).toBe(583);
@@ -278,7 +278,7 @@ describe('buildMetrics', () => {
     });
   });
 
-  it('uses module count group name "@kbn/optimizer bundle module count" (same as legacy)', () => {
+  it('uses module count group name "@kbn/rspack-optimizer bundle module count"', () => {
     const metrics = buildMetrics(
       [
         {
@@ -298,7 +298,7 @@ describe('buildMetrics', () => {
     );
 
     const moduleCountMetric = metrics.find((m) => m.id === 'core' && m.group.includes('module'));
-    expect(moduleCountMetric!.group).toBe('@kbn/optimizer bundle module count');
+    expect(moduleCountMetric!.group).toBe('@kbn/rspack-optimizer bundle module count');
   });
 
   it('aggregate metrics are ordered after all per-plugin metrics', () => {

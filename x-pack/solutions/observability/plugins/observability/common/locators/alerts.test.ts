@@ -11,7 +11,7 @@ import { ALERTS_PATH, AlertsLocatorDefinition } from './alerts';
 describe('RuleDetailsLocator', () => {
   const locator = new AlertsLocatorDefinition();
   const baseUrlMock = 'https://kibana.dev';
-  const spaceIdMock = 'mockedSpaceId';
+  const spaceIdMock = 'mocked-space-id';
 
   it('should return correct url when only baseUrl and spaceId are provided', async () => {
     const location = await locator.getLocation({ baseUrl: baseUrlMock, spaceId: spaceIdMock });

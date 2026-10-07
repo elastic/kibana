@@ -49,8 +49,7 @@ export const useStyles = () => {
       font-size: ${euiTheme.size.m};
 
       .euiDataGridRowCell__content {
-        display: flex;
-        align-items: center;
+        align-content: center;
       }
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
@@ -75,8 +74,6 @@ export const useStyles = () => {
 
     & .unifiedDataTable__cellValue {
       font-family: ${euiTheme.font.family};
-      display: flex;
-      width: 200px;
     }
     & .unifiedDataTable__inner .euiDataGrid__controls {
       border-top: none;

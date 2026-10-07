@@ -8,8 +8,10 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ALERT_RULE_TYPE_ID, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
 import type { ProfileProviderServices } from '../profile_provider_services';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../toolkit';
 import { DocumentType } from '../../profiles';
 import { createSecurityDocumentProfileProviders } from './security_profile_providers';
 
@@ -21,12 +23,18 @@ const createRecord = (flattened: DataTableRecord['flattened']): DataTableRecord 
     isAnchor: false,
   } as DataTableRecord);
 
-const getDocViewerResult = (record: DataTableRecord) => {
+const getDocViewerResult = (
+  record: DataTableRecord,
+  toolkitActions: {
+    refreshData?: () => void;
+  } = {}
+) => {
   const providerServices = {} as ProfileProviderServices;
   const [enhancedProvider] = createSecurityDocumentProfileProviders(providerServices);
   const prevRenderHeader = jest.fn();
   const prevRenderFooter = jest.fn();
   const prevDocViewer = {
+    title: 'test title' as string | undefined,
     renderHeader: prevRenderHeader,
     renderFooter: prevRenderFooter,
     docViewsRegistry: jest.fn((r) => r),
@@ -34,13 +42,39 @@ const getDocViewerResult = (record: DataTableRecord) => {
   const prev = jest.fn().mockReturnValue(prevDocViewer);
   const getDocViewer = enhancedProvider.profile.getDocViewer!(prev, {
     context: { type: DocumentType.Default },
+    toolkit: {
+      ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      actions: {
+        ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
+        ...toolkitActions,
+      },
+    },
   });
-  const result = getDocViewer({ actions: {}, record } as Parameters<typeof getDocViewer>[0]);
+  const result = getDocViewer({ record } as Parameters<typeof getDocViewer>[0]);
   return { result, prevRenderHeader, prevRenderFooter };
 };
 
 describe('createSecurityDocumentProfileProviders', () => {
   describe('getDocViewer', () => {
+    it('sets the flyout title to "Alert: <rule_name>" for alert documents', () => {
+      const { result } = getDocViewerResult(
+        createRecord({ 'event.kind': 'signal', 'kibana.alert.rule.name': 'My Detection Rule' })
+      );
+      expect(result.title).toBe('Alert: My Detection Rule');
+    });
+
+    it('falls back to the previous title when the alert has no rule name', () => {
+      const { result } = getDocViewerResult(createRecord({ 'event.kind': 'signal' }));
+      expect(result.title).toBe('test title');
+    });
+
+    it('does not override the title for non-alert event documents', () => {
+      const { result } = getDocViewerResult(
+        createRecord({ 'event.kind': 'event', 'kibana.alert.rule.name': 'Should Not Appear' })
+      );
+      expect(result.title).toBe('test title');
+    });
+
     it('overrides renderHeader for alert documents', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({ 'event.kind': 'signal' })
@@ -77,7 +111,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       expect(result.renderFooter).not.toBe(prevRenderFooter);
     });
 
-    it('does not override renderHeader for attack discovery alerts', () => {
+    it('overrides renderHeader for attack discovery alerts', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -85,10 +119,11 @@ describe('createSecurityDocumentProfileProviders', () => {
         })
       );
 
-      expect(result.renderHeader).toBe(prevRenderHeader);
+      expect(result.renderHeader).toBeDefined();
+      expect(result.renderHeader).not.toBe(prevRenderHeader);
     });
 
-    it('does not override renderFooter for attack discovery alerts', () => {
+    it('overrides renderFooter for attack discovery alerts', () => {
       const { result, prevRenderFooter } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -96,7 +131,8 @@ describe('createSecurityDocumentProfileProviders', () => {
         })
       );
 
-      expect(result.renderFooter).toBe(prevRenderFooter);
+      expect(result.renderFooter).toBeDefined();
+      expect(result.renderFooter).not.toBe(prevRenderFooter);
     });
 
     it('adds the overview tab to the registry for alert documents', () => {
@@ -119,7 +155,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       );
     });
 
-    it('does not add the overview tab to the registry for attack discovery alerts', () => {
+    it('adds the overview tab to the registry for attack discovery alerts', () => {
       const { result } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -129,7 +165,9 @@ describe('createSecurityDocumentProfileProviders', () => {
       const registry = { add: jest.fn() };
       result.docViewsRegistry(registry as never);
 
-      expect(registry.add).not.toHaveBeenCalled();
+      expect(registry.add).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'doc_view_attack_overview' })
+      );
     });
 
     it('does not override renderHeader when event.kind is absent', () => {
@@ -227,6 +265,74 @@ describe('createSecurityDocumentProfileProviders', () => {
 
       expect(registry.add).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'doc_view_alerts_overview' })
+      );
+    });
+
+    it('forwards refreshData action to enhanced flyout header', () => {
+      const refreshData = jest.fn();
+      const hit = createRecord({ 'event.kind': 'signal' });
+      const { result } = getDocViewerResult(hit, { refreshData });
+
+      const renderedHeader = result.renderHeader?.({ hit, dataView: dataViewMock });
+      expect(renderedHeader).toBeDefined();
+      expect((renderedHeader as { props: { refreshData: () => void } }).props.refreshData).toBe(
+        refreshData
+      );
+    });
+
+    it('forwards refreshData action to enhanced flyout footer', () => {
+      const refreshData = jest.fn();
+      const hit = createRecord({ 'event.kind': 'signal' });
+      const { result } = getDocViewerResult(hit, { refreshData });
+
+      const renderedFooter = result.renderFooter?.({ hit, dataView: dataViewMock });
+      expect(renderedFooter).toBeDefined();
+      expect((renderedFooter as { props: { refreshData: () => void } }).props.refreshData).toBe(
+        refreshData
+      );
+    });
+
+    it('forwards refreshData action to enhanced overview tab', () => {
+      const refreshData = jest.fn();
+      const hit = createRecord({ 'event.kind': 'signal' });
+      const { result } = getDocViewerResult(hit, { refreshData });
+      const registry = { add: jest.fn() };
+
+      result.docViewsRegistry(registry as never);
+      const addedOverviewTab = registry.add.mock.calls[0][0];
+
+      const renderedOverview = addedOverviewTab.render({ hit, dataView: dataViewMock });
+      expect(renderedOverview).toBeDefined();
+      expect((renderedOverview as { props: { refreshData: () => void } }).props.refreshData).toBe(
+        refreshData
+      );
+    });
+
+    it('overrides renderHeader for IOC documents', () => {
+      const { result, prevRenderHeader } = getDocViewerResult(
+        createRecord({ 'event.type': 'indicator' })
+      );
+
+      expect(result.renderHeader).toBeDefined();
+      expect(result.renderHeader).not.toBe(prevRenderHeader);
+    });
+
+    it('overrides renderFooter for IOC documents', () => {
+      const { result, prevRenderFooter } = getDocViewerResult(
+        createRecord({ 'event.type': 'indicator' })
+      );
+
+      expect(result.renderFooter).toBeDefined();
+      expect(result.renderFooter).not.toBe(prevRenderFooter);
+    });
+
+    it('adds the overview tab to the registry for IOC documents', () => {
+      const { result } = getDocViewerResult(createRecord({ 'event.type': 'indicator' }));
+      const registry = { add: jest.fn() };
+      result.docViewsRegistry(registry as never);
+
+      expect(registry.add).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'doc_view_ioc_overview' })
       );
     });
   });

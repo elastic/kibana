@@ -142,7 +142,7 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         aria-label={i18n.FILTER_OPTIONS_LABEL}
       >
         <div

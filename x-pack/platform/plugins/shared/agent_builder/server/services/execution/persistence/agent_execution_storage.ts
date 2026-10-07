@@ -12,7 +12,10 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type {
   ChatEvent,
   ExecutionStatus,
+  InteractivityConfig,
+  ExecutionAbortReason,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { AgentExecutionParams } from '@kbn/agent-builder-server/execution';
 
@@ -24,17 +27,44 @@ const storageSettings = {
     properties: {
       execution_id: types.keyword({}),
       '@timestamp': types.date({}),
+      last_heartbeat: types.date({}),
       status: types.keyword({}),
       agent_id: types.keyword({}),
       execution_mode: types.keyword({}),
+      interactivity: types.object({
+        dynamic: false,
+        properties: {
+          enabled: types.boolean({}),
+          auto_approved_apis: types.object({
+            dynamic: false,
+            properties: {
+              target: types.keyword({}),
+              api: types.keyword({}),
+            },
+          }),
+        },
+      }),
       parent_execution_id: types.keyword({}),
       space_id: types.keyword({}),
+      owner: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          username: types.keyword({}),
+        },
+      }),
       agent_params: types.object({ dynamic: false, properties: {} }),
       error: types.object({
         dynamic: false,
         properties: {
           code: types.keyword({}),
           message: types.text({}),
+        },
+      }),
+      abort_reason: types.object({
+        dynamic: false,
+        properties: {
+          source: types.keyword({}),
         },
       }),
       event_count: types.long({}),
@@ -47,13 +77,17 @@ const storageSettings = {
 export interface AgentExecutionProperties {
   execution_id: string;
   '@timestamp': string;
+  last_heartbeat?: string;
   status: ExecutionStatus;
   agent_id: string;
   execution_mode?: string;
+  interactivity?: InteractivityConfig;
   parent_execution_id?: string;
   space_id: string;
+  owner?: UserIdAndName;
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
+  abort_reason?: ExecutionAbortReason;
   event_count?: number;
   events?: ChatEvent[];
   metadata?: Record<string, string>;

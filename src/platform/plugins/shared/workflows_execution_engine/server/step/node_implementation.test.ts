@@ -71,7 +71,7 @@ describe('BaseAtomicNodeImplementation', () => {
     await impl.run();
 
     expect(runtime.startStep).toHaveBeenCalled();
-    expect(runtime.finishStep).toHaveBeenCalledWith({ data: 'ok' });
+    expect(runtime.finishStep).toHaveBeenCalledWith({ data: 'ok' }, expect.any(Number));
     expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
   });
 
@@ -158,6 +158,37 @@ describe('BaseAtomicNodeImplementation', () => {
     expect(runtime.finishStep).not.toHaveBeenCalled();
   });
 
+  it('includes actual serialized output size when output exceeds max-step-size', async () => {
+    const step: BaseStep = {
+      name: 'download_file',
+      stepId: 'download_file',
+      type: 'atomic',
+      'max-step-size': '10b',
+    };
+    const runtime = createStepExecutionRuntime();
+    const workflowRuntime = createWorkflowRuntime();
+
+    const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
+    impl.mockResult = {
+      input: {},
+      output: { content: 'larger than ten bytes' },
+      error: undefined,
+    };
+
+    await impl.run();
+
+    expect(runtime.finishStep).not.toHaveBeenCalled();
+    expect(runtime.failStep).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'StepSizeLimitExceeded',
+        details: expect.objectContaining({
+          actualBytes: expect.any(Number),
+          suggestedLimitBytes: expect.any(Number),
+        }),
+      })
+    );
+  });
+
   describe('getMaxResponseBytes', () => {
     it('uses step-level max-step-size', () => {
       const step = {
@@ -193,6 +224,40 @@ describe('BaseAtomicNodeImplementation', () => {
 
       const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
       expect((impl as any).getMaxResponseBytes()).toBe(10 * 1024 * 1024);
+    });
+  });
+
+  describe('output size enforcement', () => {
+    it('fails the step closed when output is non-serializable', async () => {
+      const step: BaseStep = { name: 'circular-step', stepId: 'circular-step', type: 'atomic' };
+      const runtime = createStepExecutionRuntime();
+      const workflowRuntime = createWorkflowRuntime();
+
+      const circular: Record<string, unknown> = { a: 1 };
+      circular.self = circular;
+      const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
+      impl.mockResult = { input: {}, output: circular, error: undefined };
+
+      await impl.run();
+
+      expect(runtime.failStep).toHaveBeenCalled();
+      expect(runtime.finishStep).not.toHaveBeenCalled();
+    });
+
+    it('forwards the measured size to finishStep on success', async () => {
+      const step: BaseStep = { name: 'sized-step', stepId: 'sized-step', type: 'atomic' };
+      const runtime = createStepExecutionRuntime();
+      const workflowRuntime = createWorkflowRuntime();
+
+      const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
+      impl.mockResult = { input: {}, output: { hello: 'world' }, error: undefined };
+
+      await impl.run();
+
+      expect(runtime.finishStep).toHaveBeenCalledTimes(1);
+      const [, sizeBytes] = (runtime.finishStep as jest.Mock).mock.calls[0];
+      expect(typeof sizeBytes).toBe('number');
+      expect(sizeBytes).toBeGreaterThan(0);
     });
   });
 

@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { EuiIcon, EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AuditMessageBase } from '@kbn/ml-common-types/audit_message';
 
 interface Props {
@@ -37,6 +38,15 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   if (showTooltip) {
     return <EuiIconTip content={message.text} position="bottom" type={icon} color={color} />;
   } else {
-    return <EuiIcon type={icon} color={color} />;
+    return (
+      <EuiIcon
+        type={icon}
+        color={color}
+        aria-label={i18n.translate('xpack.ml.jobMessageIcon.ariaLabel', {
+          defaultMessage: '{level} message',
+          values: { level: message.level },
+        })}
+      />
+    );
   }
 };

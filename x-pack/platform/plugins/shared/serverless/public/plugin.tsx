@@ -64,9 +64,6 @@ export class ServerlessPlugin
     });
 
     return {
-      initNavigation: (id, navigationTree$) => {
-        project.initNavigation(id, navigationTree$);
-      },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       getNavigationCards$: (roleManagementEnabled, extendCardNavDefinitions) => {
         return privilegedUrls$.pipe(
