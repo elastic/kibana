@@ -7,6 +7,7 @@
 
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
+import { sanitizeWithInlinedStyles } from './inline_svg_styles';
 
 export function isBase64Encoded(str: unknown): boolean {
   if (typeof str !== 'string' || str.length === 0) {
@@ -68,7 +69,10 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
     });
 
     // Sanitize and convert the result back to a Buffer
-    return Buffer.from(purify.sanitize(contentToSanitize), 'utf8');
+    return Buffer.from(
+      sanitizeWithInlinedStyles(contentToSanitize, window, (svg) => purify.sanitize(svg)),
+      'utf8'
+    );
   } catch (error) {
     throw new Error(`SVG sanitization failed: ${error.message}`);
   }

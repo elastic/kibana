@@ -37,6 +37,7 @@ const createStartMock = (): SecurityStartMock => {
   const mock = {
     authc: {
       getCurrentUser: jest.fn(),
+      getPrincipal: jest.fn(),
       apiKeys: apiKeysMock.create(),
     },
     audit: auditServiceMock.create(),
@@ -64,6 +65,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
   const mock = {
     authc: {
       getCurrentUser: jest.fn(),
+      getPrincipal: jest.fn(),
       apiKeys: apiKeysMock.create(),
     },
     audit: auditServiceMock.create(),
@@ -86,6 +88,7 @@ const createRequestHandlerContextMock = () => {
   const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = {
     authc: {
       getCurrentUser: jest.fn(),
+      getPrincipal: jest.fn(),
       apiKeys: {
         areAPIKeysEnabled: jest.fn(),
         create: jest.fn(),

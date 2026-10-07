@@ -645,6 +645,17 @@ export function TrainedModelsTableProvider(
     public async stopDeployment(modelId: string) {
       await this.clickStopDeploymentAction(modelId);
       await mlCommonUI.waitForRefreshButtonEnabled();
+      await this.waitForModelsToLoad();
+      // The row's action set, and so its collapsed/inline layout, settles only once the state does.
+      await retry.tryForTime(
+        30 * 1000,
+        async () => {
+          await this.assertModelState(modelId, 'Ready to deploy');
+        },
+        async () => {
+          await this.refreshModelsTable();
+        }
+      );
     }
 
     public async openStartDeploymentModal(modelId: string) {

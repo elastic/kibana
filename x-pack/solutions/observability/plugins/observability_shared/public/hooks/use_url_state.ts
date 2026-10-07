@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse, stringify } from 'query-string';
+import qs from 'query-string';
 import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from '@kbn/rison';
@@ -108,7 +108,7 @@ export const decodeRisonUrlState = (value: string | undefined | null): RisonValu
 const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 const getParamFromQueryString = (queryString: string, key: string) => {
-  const parsedQueryString = parse(queryString, { sort: false });
+  const parsedQueryString = qs.parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
@@ -130,7 +130,7 @@ const encodeRisonUrlState = (state: any) => encode(state);
 const replaceStateKeyInQueryString =
   <UrlState extends any>(stateKey: string, urlState: UrlState | undefined) =>
   (queryString: string) => {
-    const previousQueryValues = parse(queryString, { sort: false });
+    const previousQueryValues = qs.parse(queryString, { sort: false });
     const newValue =
       typeof urlState === 'undefined'
         ? previousQueryValues
@@ -138,5 +138,5 @@ const replaceStateKeyInQueryString =
             ...previousQueryValues,
             [stateKey]: encodeRisonUrlState(urlState),
           };
-    return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
+    return qs.stringify(url.encodeQuery(newValue), { sort: false, encode: false });
   };

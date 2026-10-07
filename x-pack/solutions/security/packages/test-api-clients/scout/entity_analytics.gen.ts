@@ -20,7 +20,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type { ApplyEntityEngineDataviewIndicesResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type { AssetCriticalityGetPrivilegesResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
@@ -309,7 +309,7 @@ If a record already exists for the specified entity, that record is overwritten 
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteAssetCriticalityRecordResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -334,7 +334,7 @@ If a record already exists for the specified entity, that record is overwritten 
     )}`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteEntityEngineResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -448,7 +448,7 @@ If a record already exists for the specified entity, that record is overwritten 
     const path = `${basePath}/api/asset_criticality/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindAssetCriticalityRecordsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -475,7 +475,7 @@ If a record already exists for the specified entity, that record is overwritten 
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetAssetCriticalityRecordResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -548,7 +548,7 @@ If a record already exists for the specified entity, that record is overwritten 
     const path = `${basePath}/api/entity_store/status`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetEntityStoreStatusResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -686,7 +686,7 @@ If a record already exists for the specified entity, that record is overwritten 
     const path = `${basePath}/api/entity_store/entities/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListEntitiesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
