@@ -24,13 +24,13 @@ export const CLOSE_INVESTIGATION_BUTTON = i18n.translate(
 export const CLOSE_INVESTIGATION_PROPOSALS_WARNING = (count: number) =>
   i18n.translate('xpack.agenticInvestigations.closeConfirmation.investigation.proposalsWarning', {
     defaultMessage:
-      '{count, plural, one {# pending proposal} other {# pending proposals}} will be dismissed.',
+      '{count, plural, one {# pending proposal} other {# pending proposals}} will be declined and moved to Closed.',
     values: { count },
   });
 
 export const DISMISS_REASON_LABEL = i18n.translate(
   'xpack.agenticInvestigations.closeConfirmation.investigation.dismissReasonLabel',
-  { defaultMessage: 'Reason for dismissing proposals' }
+  { defaultMessage: 'Reason for declining proposals' }
 );
 
 export const RATIONALE_LABEL = i18n.translate(
@@ -42,7 +42,7 @@ export const RATIONALE_LABEL = i18n.translate(
 
 export const RATIONALE_PLACEHOLDER = i18n.translate(
   'xpack.agenticInvestigations.closeConfirmation.rationale.placeholder',
-  { defaultMessage: 'Why are these proposals being dismissed?' }
+  { defaultMessage: 'Why are these proposals being declined?' }
 );
 
 // ---------------------------------------------------------------------------
@@ -67,7 +67,7 @@ export const CLOSE_ESCALATION_LINKED_INVESTIGATIONS_LABEL = i18n.translate(
 export const CLOSE_ESCALATION_PROPOSALS_WARNING = (count: number) =>
   i18n.translate('xpack.agenticInvestigations.closeConfirmation.escalation.proposalsWarning', {
     defaultMessage:
-      '{count, plural, one {# pending proposal} other {# pending proposals}} across linked investigations will be dismissed.',
+      '{count, plural, one {# pending proposal} other {# pending proposals}} across linked investigations will be declined.',
     values: { count },
   });
 
@@ -131,7 +131,7 @@ export const RETRY_BUTTON = i18n.translate(
 export const PROPOSAL_DISMISS_FAILED = (count: number) =>
   i18n.translate('xpack.agenticInvestigations.closeConfirmation.proposalDismissFailed', {
     defaultMessage:
-      '{count, plural, one {# proposal} other {# proposals}} could not be dismissed; the investigation is still open. Try again.',
+      '{count, plural, one {# proposal} other {# proposals}} could not be declined; the investigation is still open. Try again.',
     values: { count },
   });
 
@@ -177,7 +177,7 @@ export const PARTIAL_PROPOSAL_DISMISS_WARNING = i18n.translate(
   'xpack.agenticInvestigations.statusToggle.partialProposalDismiss',
   {
     defaultMessage:
-      'Some pending proposals could not be dismissed automatically. Check the proposals queue.',
+      'Some pending proposals could not be declined automatically. Check the proposals queue.',
   }
 );
 

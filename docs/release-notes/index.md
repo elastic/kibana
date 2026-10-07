@@ -26,6 +26,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.5.5 [kibana-9.5.5-release-notes]
 
+:::{important}
+The 9.5.5 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/t/kibana-9-4-8-9-5-5-security-update-esa-2026-193/390866) for more details.
+:::
+
 ### Fixes [kibana-9.5.5-fixes]
 
 **Elastic Agent Builder**:
@@ -119,6 +123,10 @@ For the {{elastic-sec}} 9.5.5 release information, refer to [{{elastic-sec}} Sol
 % * Fix a crash when opening the trigger tab in workflow step execution details [#282920]({{kib-pull}}282920).
 
 ## 9.5.4 [kibana-9.5.4-release-notes]
+
+:::{important}
+The 9.5.4 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/t/kibana-8-19-22-9-4-7-9-5-4-security-update-esa-2026-187/390860) for more details.
+:::
 
 ### Fixes [kibana-9.5.4-fixes]
 
@@ -932,6 +940,10 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 ## 9.4.8 [kibana-9.4.8-release-notes]
 
+:::{important}
+The 9.4.8 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/t/kibana-9-4-8-9-5-5-security-update-esa-2026-193/390866) for more details.
+:::
+
 ### Fixes [kibana-9.4.8-fixes]
 
 **Elastic Agent Builder**:
@@ -995,6 +1007,10 @@ For the {{elastic-sec}} 9.4.8 release information, refer to [{{elastic-sec}} Sol
 * Fix the field statistics flyout in the anomaly detection job wizard closing on its own while the wizard validates the job [#292297]({{kib-pull}}292297).
 
 ## 9.4.7 [kibana-9.4.7-release-notes]
+
+:::{important}
+The 9.4.7 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/t/kibana-8-19-22-9-4-7-9-5-4-security-update-esa-2026-187/390860) for more details.
+:::
 
 ### Fixes [kibana-9.4.7-fixes]
 

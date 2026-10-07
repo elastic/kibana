@@ -769,11 +769,11 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'builder_type: should reject query change on a builder rule without explicit builder_type clear',
+    'builder: should reject query change on a builder rule without explicit builder clear',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'builder-rule', builder_type: 'threshold' },
+          metadata: { name: 'builder-rule', builder: { type: 'threshold' } },
         })
       );
       const response = await apiClient.patch(getRuleUrl(created.id), {
@@ -786,27 +786,27 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.code).toBe('BUILDER_TYPE_NOT_CLEARED');
       // Rule should remain unchanged
       const stored = await apiServices.alertingV2.rules.get(created.id);
-      expect(stored.metadata.builder_type).toBe('threshold');
+      expect(stored.metadata.builder).toStrictEqual({ type: 'threshold' });
     }
   );
 
   apiTest(
-    'builder_type: should allow query change on a builder rule when builder_type is explicitly cleared',
+    'builder: should allow query change on a builder rule when builder is explicitly cleared',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'builder-rule-clear', builder_type: 'threshold' },
+          metadata: { name: 'builder-rule-clear', builder: { type: 'threshold' } },
         })
       );
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: {
           query: { base: 'FROM new-index | LIMIT 1' },
-          metadata: { builder_type: null },
+          metadata: { builder: null },
         },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata.builder_type).toBeUndefined();
+      expect(response.body.metadata.builder).toBeUndefined();
     }
   );
 });
