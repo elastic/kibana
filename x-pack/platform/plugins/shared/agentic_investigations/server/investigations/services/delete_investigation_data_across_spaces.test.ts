@@ -23,12 +23,14 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
     };
     const impact = { deleteByConversationIds: jest.fn().mockResolvedValue(1) };
     const hypotheses = { deleteByConversationIds: jest.fn().mockResolvedValue(0) };
-    const deleteAllClaims = jest.fn().mockResolvedValue(4);
+    const deleteClaims = jest.fn(async (ids: string[]) => ids.length);
+    const deleteAllClaims = jest.fn().mockResolvedValue(1);
 
     const result = await deleteInvestigationDataAcrossSpaces({
       subjects,
       impact,
       hypotheses,
+      deleteClaims,
       deleteAllClaims,
     });
 
@@ -36,14 +38,44 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
     expect(impact.deleteByConversationIds).toHaveBeenCalledWith(['b'], 'other');
     expect(hypotheses.deleteByConversationIds).toHaveBeenCalledWith(['a', 'c'], 'default');
     expect(subjects.deleteByConversationIds).toHaveBeenCalledWith(['b'], 'other');
+    expect(deleteClaims).toHaveBeenCalledWith(['a', 'c'], 'default');
+    expect(deleteClaims).toHaveBeenCalledWith(['b'], 'other');
     expect(findConversationsAcrossSpaces).toHaveBeenCalledTimes(2);
+    expect(deleteAllClaims).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       investigations: 3,
       subjects: 3,
       subjectClaims: 4,
       impact: 2,
       hypotheses: 0,
+      complete: true,
     });
+  });
+
+  it('keeps the claims of investigations it did not get to when it stops at the round bound', async () => {
+    // Subjects keep appearing, so every round finds another investigation.
+    let round = 0;
+    const findConversationsAcrossSpaces = jest.fn(async () => [
+      { spaceId: 'default', conversationId: `c${round++}` },
+    ]);
+    const deleteClaims = jest.fn(async (ids: string[]) => ids.length);
+    const deleteAllClaims = jest.fn();
+
+    const result = await deleteInvestigationDataAcrossSpaces({
+      subjects: {
+        findConversationsAcrossSpaces,
+        deleteByConversationIds: jest.fn(async (ids: string[]) => ids.length),
+      },
+      impact: { deleteByConversationIds: jest.fn().mockResolvedValue(0) },
+      hypotheses: { deleteByConversationIds: jest.fn().mockResolvedValue(0) },
+      deleteClaims,
+      deleteAllClaims,
+    });
+
+    expect(deleteAllClaims).not.toHaveBeenCalled();
+    expect(deleteClaims).toHaveBeenCalledTimes(100);
+    expect(deleteClaims).not.toHaveBeenCalledWith(['c100'], 'default');
+    expect(result).toMatchObject({ investigations: 100, subjectClaims: 100, complete: false });
   });
 
   it('only clears the claims when no investigation has subjects', async () => {
@@ -56,6 +88,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
       },
       impact,
       hypotheses: { deleteByConversationIds: jest.fn() },
+      deleteClaims: jest.fn(),
       deleteAllClaims: jest.fn().mockResolvedValue(0),
     });
 
@@ -66,6 +99,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
       subjectClaims: 0,
       impact: 0,
       hypotheses: 0,
+      complete: true,
     });
   });
 });
