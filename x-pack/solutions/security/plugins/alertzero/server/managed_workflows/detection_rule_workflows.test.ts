@@ -854,6 +854,87 @@ describe('detection rule workflows', () => {
         expect(metadata.approvalPolicy).toBe('always-gate');
       });
 
+      // A proposal can wait for approval while someone edits or deletes the rule.
+      // The action then fails with a message the analyst reads on the proposal card,
+      // instead of overwriting the newer rule.
+      describe('refusing a stale edit', () => {
+        const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
+        const actionSteps = flattenSteps(yaml.steps as unknown as NestedStep[]);
+        const guardNames = ['fail_rule_deleted', 'fail_rule_read', 'fail_rule_changed'];
+        const guards = guardNames.map((guardName) =>
+          actionSteps.find(({ name }) => name === guardName)
+        );
+
+        const firstFailingGuard = (context: Record<string, unknown>) =>
+          guards.find((guard) => resolveExpression(guard?.if, context) === true)?.name ?? null;
+
+        const renderMessage = (guardName: string, context: Record<string, unknown>) =>
+          createWorkflowLiquidEngine().parseAndRender(
+            String(actionSteps.find(({ name }) => name === guardName)?.with?.message),
+            context
+          );
+
+        it('always reads the rule, and checks it before patching', () => {
+          const names = actionSteps.map(({ name }) => name);
+          const fetchRule = actionSteps.find(({ name }) => name === 'fetch_rule');
+
+          expect(fetchRule?.if).toBeUndefined();
+          expect(fetchRule?.['on-failure']).toEqual({ continue: true });
+          expect(guards.map((guard) => guard?.type)).toEqual(guardNames.map(() => 'workflow.fail'));
+          expect(names.slice(0, 4)).toEqual(['fetch_rule', ...guardNames]);
+          expect(names.indexOf('patch_rule')).toBeGreaterThan(3);
+        });
+
+        it.each([
+          ['a deleted rule', { error: { message: 'HTTP 404: Not Found' } }, 0, 'fail_rule_deleted'],
+          [
+            'any other read failure',
+            { error: { message: 'HTTP 500: Internal Server Error' } },
+            0,
+            'fail_rule_read',
+          ],
+          ['a rule edited since', { output: { revision: 1 } }, 0, 'fail_rule_changed'],
+          ['an unchanged rule', { output: { revision: 0 } }, 0, null],
+          ['a proposal without a revision', { output: { revision: 3 } }, undefined, null],
+        ])('handles %s', (_, fetchRule, expectedRevision, expectedGuard) => {
+          expect(
+            firstFailingGuard({
+              inputs: { actionInput: { id: 'rule-1', expected_revision: expectedRevision } },
+              steps: { fetch_rule: fetchRule },
+            })
+          ).toBe(expectedGuard);
+        });
+
+        it('explains the failure in plain text', async () => {
+          const context = {
+            inputs: { actionInput: { id: 'rule-1', expected_revision: 0 } },
+            steps: {
+              fetch_rule: {
+                output: { revision: 1, updated_by: 'jane', updated_at: '2026-10-07T10:00:00Z' },
+                error: { message: 'HTTP 500: Internal Server Error' },
+              },
+            },
+          };
+          const changed = await renderMessage('fail_rule_changed', context);
+          const deleted = await renderMessage('fail_rule_deleted', context);
+
+          expect(changed).toBe(
+            'The rule was changed by "jane" after this proposal was created, so this change wasn\'t applied.'
+          );
+          expect(deleted).toBe(
+            "The rule was deleted after this proposal was created, so this change wasn't applied."
+          );
+          for (const message of [changed, deleted]) {
+            for (const token of ['[', ']', 'revision', 'updated_at', '2026']) {
+              expect(message).not.toContain(token);
+            }
+          }
+          expect(await renderMessage('fail_rule_read', context)).toBe(
+            'HTTP 500: Internal Server Error'
+          );
+        });
+      });
+
       // The gate validates actionInput against this schema at proposal creation.
       it('accepts any subset of editable fields but still checks their values', () => {
         const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;

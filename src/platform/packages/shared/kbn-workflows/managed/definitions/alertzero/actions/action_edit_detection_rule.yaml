@@ -128,10 +128,10 @@ outputs:
 steps:
   # `revision` is the rule's change counter: it moves on every content edit and
   # ignores enable/disable and run status. `version` does not move on custom
-  # rule edits, so it cannot detect one.
+  # rule edits, so it cannot detect one. Read failures are handled below, so a
+  # deleted rule gets a plain message instead of the raw HTTP error.
   - name: fetch_rule
     type: kibana.request
-    if: "${{ inputs.actionInput.expected_revision != nil }}"
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.actionInput.id | url_encode }}"
@@ -139,11 +139,26 @@ steps:
         kbn-xsrf: string
         elastic-api-version: "2023-10-31"
         Content-Type: application/json
+    on-failure:
+      continue: true
 
-  # Fails the action so the gate records the proposal `failed` and re-offers it
-  # with this message, instead of silently overwriting someone else's edit.
-  # Analysts read it on the proposal card, so it states the next step; the
-  # trailing code keeps the failure countable.
+  # The fail steps below make the gate record the proposal `failed` and re-offer
+  # it with the message, instead of silently overwriting someone else's edit.
+  # Analysts read the message on the proposal card, so it stays plain text.
+  # kibana.request reports a non-2xx response as an error whose message starts
+  # with `HTTP <status>:`.
+  - name: fail_rule_deleted
+    type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil and steps.fetch_rule.error.message contains 'HTTP 404' }}"
+    with:
+      message: The rule was deleted after this proposal was created, so this change wasn't applied.
+
+  - name: fail_rule_read
+    type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil }}"
+    with:
+      message: "{{ steps.fetch_rule.error.message }}"
+
   - name: fail_rule_changed
     type: workflow.fail
     if: >-
@@ -151,13 +166,8 @@ steps:
         and steps.fetch_rule.output.revision != inputs.actionInput.expected_revision }}
     with:
       message: >-
-        The rule was changed by {{ steps.fetch_rule.output.updated_by }} at
-        {{ steps.fetch_rule.output.updated_at }}, after this proposal was created,
-        so nothing was applied. Dismiss this proposal, and edit the rule yourself
-        if the change is still needed.
-        [RULE_CHANGED_SINCE_PROPOSAL: expected revision
-        {{ inputs.actionInput.expected_revision }}, current revision
-        {{ steps.fetch_rule.output.revision }}]
+        The rule was changed by "{{ steps.fetch_rule.output.updated_by }}" after this
+        proposal was created, so this change wasn't applied.
 
   # The API changes only the keys it receives. `pick` drops absent keys, so only
   # supplied fields are patched, and `expected_revision` never reaches the
