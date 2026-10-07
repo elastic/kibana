@@ -1,22 +1,22 @@
-name: Prefetch sibling fix PRs
+name: Prefetch same-team fix PRs
 
-# Shortlist sibling flaky-test-fixer PRs (same owning team) that may fix the same failure.
+# Shortlist flaky-test-fixer PRs owned by the same team that may fix the same failure.
 # The flaky fix verifier checks their diffs to confirm whether the fixes overlap.
 
 on:
   workflow_call:
     inputs:
       pr_number:
-        description: flaky-test-fixer PR to find sibling fix PRs for.
+        description: flaky-test-fixer PR to find same-team fix PRs for.
         required: true
         type: string
       artifact_name:
-        description: Artifact name for the sibling fix PRs.
+        description: Artifact name for the same-team fix PRs.
         required: true
         type: string
 
 jobs:
-  prefetch_sibling_fix_prs:
+  prefetch_same_team_fix_prs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,7 +29,7 @@ jobs:
           ref: main
           persist-credentials: false
 
-      - name: Find sibling fix PRs
+      - name: Find same-team fix PRs
         # Non-fatal: a lookup failure must not block verification. No file is written, and the
         # verifier treats a missing file as "no candidates".
         env:
@@ -43,16 +43,16 @@ jobs:
                 github,
                 core,
                 prNumber: Number(process.env.PR_NUMBER),
-                outputDir: '/tmp/sibling-fix-prs',
+                outputDir: '/tmp/same-team-fix-prs',
               });
             } catch (err) {
               core.warning(`Duplicate detection failed: ${err.message}`);
             }
 
-      - name: Upload sibling fix PRs
+      - name: Upload same-team fix PRs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ inputs.artifact_name }}
-          path: /tmp/sibling-fix-prs/duplicate-candidates.json
+          path: /tmp/same-team-fix-prs/duplicate-candidates.json
           if-no-files-found: ignore
           retention-days: 1
