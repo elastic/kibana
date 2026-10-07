@@ -16,7 +16,7 @@
 | `inherit` | Parent's SA; rejects a child with its own `settings.run_as`. |
 | `override` | Parent's SA for this execution, even when the child has its own SA. Its saved binding is unchanged. |
 
-`inheritRunAs: true` is shorthand for `runAsMode: inherit`. Combining the two fields is rejected. The child ID and identity mode must be literal values in the saved parent definition. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
+The child ID and identity mode must be literal values in the saved parent definition. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
 
 The YAML editor suggests identity fields only for managed workflows with SAs enabled. Inheritance modes filter the child picker to managed workflows. Editor validation flags conflicting identity options, templated child IDs, and known unmanaged targets before execution. Whether a child already has its own SA is checked at execution time.
 

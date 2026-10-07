@@ -81,7 +81,6 @@ export interface InheritedServiceAccountTemplateValues extends ManagedWorkflowTe
   serviceAccountId?: string;
   childWorkflowId?: string;
   runAsMode?: 'default' | 'inherit' | 'override';
-  inheritRunAs?: boolean;
   asynchronous?: boolean;
   waitForInput?: boolean;
   message?: string;
@@ -128,9 +127,7 @@ ${
     type: ${values.asynchronous ? 'workflow.executeAsync' : 'workflow.execute'}
     with:
       workflow-id: ${JSON.stringify(values.childWorkflowId)}
-${values.runAsMode !== undefined ? `      runAsMode: ${values.runAsMode}\n` : ''}${
-        values.inheritRunAs !== undefined ? `      inheritRunAs: ${values.inheritRunAs}\n` : ''
-      }`
+${values.runAsMode !== undefined ? `      runAsMode: ${values.runAsMode}\n` : ''}`
     : ''
 }  - name: message
     type: console

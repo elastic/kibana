@@ -23,21 +23,8 @@ const validateStepIdentity = (
   workflows: WorkflowsResponse | null
 ): { property: StepPropInfo; message: string } | undefined => {
   const modeProperty = step.propInfos['with.runAsMode'];
-  const inheritProperty = step.propInfos['with.inheritRunAs'];
-  if (modeProperty && inheritProperty) {
-    return {
-      property: modeProperty,
-      message: i18n.translate(
-        'workflows.validateExecutionIdentity.conflictingOptionsErrorMessage',
-        {
-          defaultMessage: 'Use either runAsMode or inheritRunAs, not both.',
-        }
-      ),
-    };
-  }
   const mode = modeProperty && getValueFromValueNode(modeProperty.valueNode);
-  const inherit = inheritProperty && getValueFromValueNode(inheritProperty.valueNode);
-  if (mode !== 'inherit' && mode !== 'override' && inherit !== true) return;
+  if (mode !== 'inherit' && mode !== 'override') return;
   const workflowIdProperty = step.propInfos['with.workflow-id'];
   if (!workflowIdProperty) return;
   const workflowId = getValueFromValueNode(workflowIdProperty.valueNode);

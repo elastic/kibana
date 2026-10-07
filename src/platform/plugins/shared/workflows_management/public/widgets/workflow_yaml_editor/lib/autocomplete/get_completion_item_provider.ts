@@ -180,7 +180,7 @@ export function getCompletionItemProvider(
           focusedStepInfo?.stepType === 'workflow.executeAsync') &&
         identityField?.length === 2 &&
         identityField[0] === 'with' &&
-        (identityField[1] === 'runAsMode' || identityField[1] === 'inheritRunAs')
+        identityField[1] === 'runAsMode'
       ) {
         return { suggestions: [], incomplete: false };
       }

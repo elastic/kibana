@@ -50,7 +50,6 @@ export const registerManagedIdentityRoutes = (
               schema.literal('override'),
             ])
           ),
-          inheritRunAs: schema.maybe(schema.boolean()),
           asynchronous: schema.maybe(schema.boolean()),
           waitForInput: schema.maybe(schema.boolean()),
           message: schema.maybe(schema.string({ maxLength: 1024 })),

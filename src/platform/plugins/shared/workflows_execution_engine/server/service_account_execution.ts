@@ -22,7 +22,6 @@ const originalRequests = new WeakMap<KibanaRequest, KibanaRequest>();
 const executingWorkflows = new WeakMap<KibanaRequest, IdentityExecution>();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
-  inheritRunAs: true,
   runAsMode: true,
 });
 
@@ -36,18 +35,20 @@ export const resolveInheritedWorkflowIdentity = (
   request: KibanaRequest,
   workflow: WorkflowExecutionEngineModel,
   context: {
-    inheritRunAs?: boolean;
+    inheritParentIdentity?: boolean;
     parentWorkflowId?: string;
     parentWorkflowExecutionId?: string;
     parentStepId?: string;
     spaceId?: string;
   }
 ): EsWorkflowExecution['effectiveIdentity'] => {
-  if (!context.inheritRunAs) return undefined;
+  if (!context.inheritParentIdentity) return undefined;
   const parent = executingWorkflows.get(request);
   const accountId = parent && getExecutionServiceAccountId(parent);
   if (!parent?.id || !accountId)
-    throw Boom.forbidden('inheritRunAs requires a parent executing as a service account.');
+    throw Boom.forbidden(
+      'Service account inheritance requires a parent executing as a service account.'
+    );
   if (
     parent.id !== context.parentWorkflowExecutionId ||
     parent.workflowId !== context.parentWorkflowId ||
@@ -66,14 +67,10 @@ export const resolveInheritedWorkflowIdentity = (
       identityChoice = inheritedIdentitySchema.safeParse(step.with);
     }
   });
-  const mode = identityChoice?.success
-    ? identityChoice.data.runAsMode ?? (identityChoice.data.inheritRunAs ? 'inherit' : 'default')
-    : 'default';
+  const mode = identityChoice?.success ? identityChoice.data.runAsMode ?? 'default' : 'default';
   if (
     !identityChoice?.success ||
     mode === 'default' ||
-    (identityChoice.data.runAsMode !== undefined &&
-      identityChoice.data.inheritRunAs !== undefined) ||
     identityChoice.data['workflow-id'] !== workflow.id
   ) {
     throw Boom.forbidden(

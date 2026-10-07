@@ -117,14 +117,8 @@ export async function getWorkflowSuggestions(
   }
 
   const identityMode = focusedStepInfo?.propInfos['with.runAsMode'];
-  const inheritRunAs = focusedStepInfo?.propInfos['with.inheritRunAs'];
   const mode = identityMode && getValueFromValueNode(identityMode.valueNode);
-  const inheritsIdentity =
-    mode === 'inherit' ||
-    mode === 'override' ||
-    (mode === undefined &&
-      !!inheritRunAs &&
-      getValueFromValueNode(inheritRunAs.valueNode) === true);
+  const inheritsIdentity = mode === 'inherit' || mode === 'override';
   const searchPrefix = lineParseResult.fullKey ?? '';
 
   const workflowSuggestions = getWorkflowsFromStore(

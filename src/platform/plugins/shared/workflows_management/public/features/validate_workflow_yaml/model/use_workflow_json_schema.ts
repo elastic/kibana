@@ -58,11 +58,9 @@ const hideChildIdentitySuggestions = (jsonSchema: z.core.JSONSchema.JSONSchema):
         step?.properties?.with,
         jsonSchema
       );
-      for (const field of ['runAsMode', 'inheritRunAs']) {
-        const property = inputs?.properties?.[field];
-        if (property && typeof property === 'object') {
-          property.doNotSuggest = true;
-        }
+      const property = inputs?.properties?.runAsMode;
+      if (property && typeof property === 'object') {
+        property.doNotSuggest = true;
       }
     }
   }

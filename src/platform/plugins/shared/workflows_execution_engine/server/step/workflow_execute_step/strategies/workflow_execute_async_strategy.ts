@@ -31,7 +31,7 @@ export class WorkflowExecuteAsyncStrategy {
     spaceId: string,
     request: KibanaRequest,
     parentDepth: number,
-    inheritRunAs = false
+    inheritParentIdentity = false
   ): Promise<StrategyResult> {
     try {
       // Execute workflow without waiting
@@ -48,7 +48,7 @@ export class WorkflowExecuteAsyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
-          ...(inheritRunAs ? { inheritRunAs: true } : {}),
+          ...(inheritParentIdentity ? { inheritParentIdentity: true } : {}),
         },
         request
       );

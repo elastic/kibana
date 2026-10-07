@@ -1305,7 +1305,7 @@ export class WorkflowsExecutionEnginePlugin
       await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
       const inheritedIdentity = resolveInheritedWorkflowIdentity(originalRequest, workflow, {
-        inheritRunAs: context.inheritRunAs === true,
+        inheritParentIdentity: context.inheritParentIdentity === true,
         parentWorkflowId:
           typeof context.parentWorkflowId === 'string' ? context.parentWorkflowId : undefined,
         parentWorkflowExecutionId:

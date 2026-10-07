@@ -200,9 +200,7 @@ describe.each(['workflow.execute', 'workflow.executeAsync'])(
     it.each([
       ['runAsMode: inherit', 1],
       ['runAsMode: override', 1],
-      ['inheritRunAs: true', 1],
       ['runAsMode: default', 2],
-      ['inheritRunAs: false', 2],
     ])('filters eligible children with %s', async (identityOption, count) => {
       const lineCounter = new LineCounter();
       const document = parseDocument(

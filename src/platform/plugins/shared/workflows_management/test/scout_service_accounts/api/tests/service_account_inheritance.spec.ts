@@ -20,7 +20,6 @@ interface ManagedOptions {
   serviceAccountId?: string;
   childWorkflowId?: string;
   runAsMode?: 'default' | 'inherit' | 'override';
-  inheritRunAs?: boolean;
   asynchronous?: boolean;
   waitForInput?: boolean;
   message?: string;
@@ -157,7 +156,7 @@ apiTest.describe(
           const parent = await install(apiClient, {
             serviceAccountId: readOnlyAccountId,
             childWorkflowId: workflowId(child),
-            inheritRunAs: true,
+            runAsMode: 'inherit',
             asynchronous,
           });
           const parentExecution = await wait(

@@ -48,7 +48,7 @@ export class WorkflowExecuteSyncStrategy {
     spaceId: string,
     request: KibanaRequest,
     parentDepth: number,
-    inheritRunAs = false
+    inheritParentIdentity = false
   ): Promise<StrategyResult> {
     const currentState = this.stepExecutionRuntime.getCurrentStepState() as
       | SubWorkflowWaitState
@@ -61,7 +61,7 @@ export class WorkflowExecuteSyncStrategy {
         spaceId,
         request,
         parentDepth,
-        inheritRunAs
+        inheritParentIdentity
       );
     }
 
@@ -106,7 +106,7 @@ export class WorkflowExecuteSyncStrategy {
     spaceId: string,
     request: KibanaRequest,
     parentDepth: number,
-    inheritRunAs = false
+    inheritParentIdentity = false
   ): Promise<StrategyResult> {
     try {
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
@@ -122,7 +122,7 @@ export class WorkflowExecuteSyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
-          ...(inheritRunAs ? { inheritRunAs: true } : {}),
+          ...(inheritParentIdentity ? { inheritParentIdentity: true } : {}),
         },
         request
       );

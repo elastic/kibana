@@ -72,7 +72,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   private getInput(): {
     workflowId: string;
     inputs: Record<string, unknown>;
-    inheritRunAs: boolean;
     runAsMode: 'default' | 'inherit' | 'override';
   } {
     const step = this.init.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
@@ -80,17 +79,13 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
         step.with || {}
       ) as Record<string, unknown>;
-    if (step.with.runAsMode !== undefined && step.with.inheritRunAs !== undefined) {
-      throw new Error('Use either runAsMode or inheritRunAs, not both.');
-    }
-    const runAsMode = step.with.runAsMode ?? (step.with.inheritRunAs ? 'inherit' : 'default');
+    const runAsMode = step.with.runAsMode ?? 'default';
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
     return {
       workflowId: String(workflowId ?? ''),
       inputs: mappedInputs,
-      inheritRunAs: runAsMode !== 'default',
       runAsMode,
     };
   }
@@ -142,13 +137,14 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     stepExecutionRuntime.startStep();
 
     try {
-      const { workflowId, inputs, inheritRunAs, runAsMode } = this.getInput();
+      const { workflowId, inputs, runAsMode } = this.getInput();
+      const inheritParentIdentity = runAsMode !== 'default';
 
       // Persist resolved inputs for observability in the execution UI
       stepExecutionRuntime.setInput({
         'workflow-id': workflowId,
         inputs,
-        ...(inheritRunAs ? { runAsMode } : {}),
+        ...(inheritParentIdentity ? { runAsMode } : {}),
       });
 
       // Select executor based on step type
@@ -192,7 +188,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         this.init.spaceId,
         this.init.request,
         currentDepth,
-        inheritRunAs
+        inheritParentIdentity
       );
 
       this.handleResult(result);

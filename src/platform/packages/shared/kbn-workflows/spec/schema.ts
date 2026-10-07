@@ -976,17 +976,11 @@ export const ConsoleStepInputSchema = z.object({
 export const WorkflowExecuteStepInputSchema = z.object({
   'workflow-id': z.string().min(1).max(1024),
   inputs: z.record(z.string(), z.unknown()).optional(),
-  inheritRunAs: z
-    .boolean()
-    .optional()
-    .describe(
-      'Execute a managed child as the parent service account; the child must not have its own run_as.'
-    ),
   runAsMode: z
     .enum(['default', 'inherit', 'override'])
     .optional()
     .describe(
-      'Use default identity, inherit the parent service account, or override the managed child service account for this execution. Do not combine with inheritRunAs.'
+      'Use default identity, inherit the parent service account, or override the managed child service account for this execution.'
     ),
 });
 

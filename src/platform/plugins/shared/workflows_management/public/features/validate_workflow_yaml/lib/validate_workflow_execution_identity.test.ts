@@ -45,14 +45,7 @@ describe.each(['workflow.execute', 'workflow.executeAsync'])(
       );
     };
 
-    it('flags conflicting options before workflows finish loading', () => {
-      const results = validate(['runAsMode: default', 'inheritRunAs: false'], null);
-      expect(results).toHaveLength(1);
-      expect(results[0]).toMatchObject({ severity: 'error', startLineNumber: 10 });
-      expect(results[0].message).toContain('not both');
-    });
-
-    it.each(['runAsMode: inherit', 'runAsMode: override', 'inheritRunAs: true'])(
+    it.each(['runAsMode: inherit', 'runAsMode: override'])(
       'rejects an unmanaged target with %s',
       (option) => {
         const results = validate(['workflow-id: ordinary', option]);
@@ -67,22 +60,13 @@ describe.each(['workflow.execute', 'workflow.executeAsync'])(
       expect(results[0].message).toContain('literal workflow-id');
     });
 
-    it.each(['runAsMode: default', 'inheritRunAs: false'])(
-      'preserves ordinary execution with %s',
-      (option) => {
-        expect(validate(['workflow-id: ordinary', option])).toEqual([]);
-      }
-    );
+    it.each(['runAsMode: default'])('preserves ordinary execution with %s', (option) => {
+      expect(validate(['workflow-id: ordinary', option])).toEqual([]);
+    });
 
     it('accepts a managed child and leaves input names alone', () => {
       expect(
-        validate([
-          'workflow-id: managed',
-          'runAsMode: inherit',
-          'inputs:',
-          '  runAsMode: default',
-          '  inheritRunAs: false',
-        ])
+        validate(['workflow-id: managed', 'runAsMode: inherit', 'inputs:', '  runAsMode: default'])
       ).toEqual([]);
     });
 

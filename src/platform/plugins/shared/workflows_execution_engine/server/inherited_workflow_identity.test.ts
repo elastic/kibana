@@ -38,7 +38,7 @@ const child = {
 const revision = createHash('sha256').update(child.yaml).digest('hex');
 const approval: WorkflowExecuteStep['with'] = {
   'workflow-id': child.id,
-  inheritRunAs: true,
+  runAsMode: 'inherit',
 };
 const parent = (
   withInput = approval,
@@ -60,7 +60,7 @@ const parent = (
   },
 });
 const context = {
-  inheritRunAs: true,
+  inheritParentIdentity: true,
   parentWorkflowId: 'parent',
   parentWorkflowExecutionId: 'parent-execution',
   parentStepId: 'child',
@@ -91,7 +91,10 @@ describe('inherited workflow execution identity', () => {
   it('does not inherit by default, even inside an SA execution', async () => {
     await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
       expect(
-        resolveInheritedWorkflowIdentity(request, child, { ...context, inheritRunAs: false })
+        resolveInheritedWorkflowIdentity(request, child, {
+          ...context,
+          inheritParentIdentity: false,
+        })
       ).toBeUndefined();
       expect(getWorkflowOriginalRequest(request)).toBe(caller);
     });
@@ -139,11 +142,11 @@ describe('inherited workflow execution identity', () => {
   });
 
   it.each([
-    { ...approval, inheritRunAs: false },
+    { ...approval, runAsMode: 'default' as const },
     { 'workflow-id': child.id },
     { ...approval, 'workflow-id': '{{ inputs.child }}' },
-    { ...approval, runAsMode: 'override' as const },
-  ])('rejects missing, conflicting, or dynamic identity choices: %j', async (withInput) => {
+    { 'workflow-id': child.id, inheritRunAs: true },
+  ])('rejects missing, unsupported, or dynamic identity choices: %j', async (withInput) => {
     await withWorkflowExecutionIdentity(core, parent(withInput), caller, async (request) => {
       expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
         'literal workflow-id and identity choice'

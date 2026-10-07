@@ -129,13 +129,26 @@ steps:
       const completions = await complete(result.current.jsonSchema, `${yaml}      `);
       const labels = completions?.items.map(({ label }) => label);
       expect(labels).toContain('inputs');
-      for (const field of ['runAsMode', 'inheritRunAs']) {
-        if (isManaged && enabled) {
-          expect(labels).toContain(field);
-        } else {
-          expect(labels).not.toContain(field);
-        }
+      expect(labels).not.toContain('inheritRunAs');
+      if (isManaged && enabled) {
+        expect(labels).toContain('runAsMode');
+      } else {
+        expect(labels).not.toContain('runAsMode');
       }
+    });
+
+    it('rejects the removed inheritRunAs YAML property', async () => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      const { result } = renderHook(() => useWorkflowJsonSchema({ isManaged: true }));
+      const service = createLanguageService(result.current.jsonSchema);
+      const document = TextDocument.create(
+        'file:///removed-alias.yaml',
+        'yaml',
+        ++documentVersion,
+        `${yaml}      inheritRunAs: true\n`
+      );
+      const diagnostics = await service.doValidation(document, false);
+      expect(diagnostics.some(({ message }) => message.includes('inheritRunAs'))).toBe(true);
     });
 
     it('defaults to hiding identity fields and updates when managed metadata changes', async () => {
@@ -169,7 +182,7 @@ steps:
       const labels = completions?.items.map(({ label }) => label);
       expect(labels).toContain('inputs');
       expect(labels?.includes('runAsMode')).toBe(isManaged);
-      expect(labels?.includes('inheritRunAs')).toBe(isManaged);
+      expect(labels).not.toContain('inheritRunAs');
     });
 
     it('preserves validation of saved identity fields when suggestions are hidden', async () => {
