@@ -80,6 +80,24 @@ describe('RelatedEpisodesGroupSubsection', () => {
     expect(screen.getByText('1 episodes')).toBeInTheDocument();
   });
 
+  it('keeps the subsection title as a heading when compressed', () => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesGroupSubsection
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          {...mockRuleProps}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+          compressed
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByRole('heading', { level: 4, name: 'Same alert group' })).toBeInTheDocument();
+  });
+
   it('shows a loading spinner while fetching', () => {
     mockUseFetch.mockReturnValue({ data: [], isLoading: true } as any);
 
@@ -116,6 +134,6 @@ describe('RelatedEpisodesGroupSubsection', () => {
     );
 
     expect(screen.getByTestId('alertingV2RelatedEpisodesGroupEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No other episodes in this group.')).toBeInTheDocument();
+    expect(screen.getByText('No other alerts in this group.')).toBeInTheDocument();
   });
 });

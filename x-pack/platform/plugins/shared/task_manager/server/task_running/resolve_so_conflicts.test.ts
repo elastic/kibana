@@ -187,7 +187,27 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(store.get).toHaveBeenCalledTimes(3);
     expect(store.partialUpdate).toHaveBeenCalledTimes(3);
     expect(logger.error).toHaveBeenCalledWith(
-      'Error resolving task document version conflict after task run: persistent conflict',
+      'Error resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": persistent conflict',
+      LOG_META
+    );
+  });
+
+  test('retries when partialUpdate rejects with a non-Error bulk update result', async () => {
+    const currentTask = createTask({ version: 'WzIsMV0=', startedAt: originalTask.startedAt });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockRejectedValue({
+      type: 'task',
+      id: originalTask.id,
+      status: 409,
+      error: { type: 'version_conflict_engine_exception' },
+    });
+
+    await resolve();
+
+    expect(store.get).toHaveBeenCalledTimes(3);
+    expect(store.partialUpdate).toHaveBeenCalledTimes(3);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": {"type":"task","id":"task-1","status":409,"error":{"type":"version_conflict_engine_exception"}}',
       LOG_META
     );
   });
@@ -220,20 +240,37 @@ describe('resolveTaskDocumentConflicts', () => {
     );
   });
 
-  test('does not retry when startedAt was updated by another worker', async () => {
-    store.get.mockResolvedValue(createTask({ startedAt: new Date('2020-01-01T00:00:30.000Z') }));
+  test('releases the task when only startedAt changed while the task was running', async () => {
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      startedAt: new Date('2020-01-01T00:00:30.000Z'),
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
 
     await resolve();
 
-    expect(store.get).toHaveBeenCalledTimes(1);
-    expect(store.partialUpdate).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenNthCalledWith(
-      1,
-      'Resolving task document version conflict after task run for task "bar:task-1"',
-      LOG_META
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      {
+        ...currentTask,
+        ...partialTask,
+        version: 'WzIsMV0=',
+      },
+      { validate: false, doc: currentTask }
     );
-    expect(logger.error).toHaveBeenCalledWith(
-      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": task startedAt has been updated by another worker',
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: TaskStatus.Idle,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      }),
+      expect.anything()
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenNthCalledWith(
+      2,
+      'Resolved task document version conflict after task run for task "bar:task-1"',
       LOG_META
     );
   });

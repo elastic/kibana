@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
-const BASE_URL = 'https://api.1password.com/v1beta1';
+const BASE_URL = 'https://api.1password.com/v1';
 
 // So we get something like: 1Password API error (403): {"code":7,"message":"no_owner_remain","details":[]}
 const throwWithApiError = (error: unknown): never => {
@@ -45,7 +45,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       {
         type: 'oauth_client_credentials',
         defaults: {
-          tokenUrl: `${BASE_URL}/users/oauth2/token`,
+          tokenUrl: `${BASE_URL}/oauth/token`,
           scope: 'openid',
           tokenEndpointAuthMethod: 'client_secret_basic',
         },
@@ -82,15 +82,30 @@ export const OnePasswordConnector: ConnectorSpec = {
   actions: {
     listUsers: {
       isTool: true,
+      scope: 'read',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.listUsers.description',
         { defaultMessage: 'List users in the 1Password account, optionally filtered by state' }
       ),
       input: lazySchema(() =>
         z.object({
-          filter: z.enum(['user.isActive()', 'user.isSuspended()']).optional(),
-          maxPageSize: z.number().optional(),
-          pageToken: z.string().optional(),
+          filter: z
+            .enum(['user.isActive()', 'user.isSuspended()'])
+            .optional()
+            .describe(
+              'Filter users by state: "user.isActive()" or "user.isSuspended()". Omit to list all users'
+            ),
+          maxPageSize: z
+            .number()
+            .optional()
+            .describe(
+              'Maximum number of users to return per page. Uses the API default if omitted'
+            ),
+          pageToken: z
+            .string()
+            .max(2048)
+            .optional()
+            .describe('Pagination token from a previous response to fetch the next page'),
         })
       ),
       handler: async (ctx, input) => {
@@ -118,13 +133,14 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     getUser: {
       isTool: true,
+      scope: 'read',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.getUser.description',
         { defaultMessage: 'Get details for a single user by their UUID' }
       ),
       input: lazySchema(() =>
         z.object({
-          uuid: z.string().min(1),
+          uuid: z.string().min(1).max(200).describe('UUID of the 1Password user to retrieve'),
         })
       ),
       handler: async (ctx, input) => {
@@ -154,7 +170,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       ),
       input: lazySchema(() =>
         z.object({
-          uuid: z.string().min(1),
+          uuid: z.string().min(1).max(200).describe('UUID of the active 1Password user to suspend'),
         })
       ),
       handler: async (ctx, input) => {
@@ -181,7 +197,11 @@ export const OnePasswordConnector: ConnectorSpec = {
       ),
       input: lazySchema(() =>
         z.object({
-          uuid: z.string().min(1),
+          uuid: z
+            .string()
+            .min(1)
+            .max(200)
+            .describe('UUID of the suspended 1Password user to reactivate'),
         })
       ),
       handler: async (ctx, input) => {

@@ -31,6 +31,7 @@ import { EndpointField } from './endpoint_field';
 import { MoreEndpointsPopover } from './more_endpoints_popover';
 import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
+import { useIngestReceiptToast } from './use_ingest_receipt_toast';
 import { SecurityCallout } from './security_callout';
 import { useSecurityCalloutDismissal } from './use_security_callout_dismissal';
 
@@ -52,8 +53,14 @@ export const ApiEndpoints = ({ titleTag: TitleTag = 'h3' }: ApiEndpointsProps) =
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const { endpoints, popoverEndpoints, isLoading, isError } = useApiEndpoints();
-  const { encodedApiKeys, keyCreatedBeforeByEndpointId, creatingEndpointId, createApiKey } =
-    useApiKeys();
+  const {
+    encodedApiKeys,
+    apiKeyIds,
+    keyCreatedBeforeByEndpointId,
+    creatingEndpointId,
+    createApiKey,
+  } = useApiKeys();
+  useIngestReceiptToast(apiKeyIds);
   const { dismissedByEndpointId, dismissCallout } = useSecurityCalloutDismissal();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);

@@ -24,7 +24,6 @@ import {
 import { expect } from 'expect';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import {
-  deleteAllCaseItems,
   findAttachments,
   findCaseUserActions,
   findCases,
@@ -65,7 +64,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const find = getService('find');
-  const es = getService('es');
   const common = getPageObject('common');
   const retry = getService('retry');
   const dashboard = getPageObject('dashboard');
@@ -253,7 +251,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         };
 
         after(async () => {
-          await deleteAllCaseItems(es);
+          await cases.api.deleteAllCases();
         });
 
         it('renders solutions selection', async () => {
@@ -289,13 +287,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/240166
-      describe.skip('Modal', () => {
+      describe('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
           await common.clickAndValidate('case-fixture-attach-to-existing-case', 'all-cases-modal');
-          await cases.casesTable.waitForTableToFinishLoading();
+          await cases.casesTable.waitForNthToBeListed(createdCases.size * 2);
         };
 
         const closeModal = async () => {
@@ -304,6 +301,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         };
 
         before(async () => {
+          await cases.api.deleteAllCases();
+
           for (const owner of TOTAL_OWNERS) {
             const theCase = await cases.api.createCase({ owner });
             createdCases.set(owner, theCase.id);
@@ -315,7 +314,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await deleteAllCaseItems(es);
+          await cases.api.deleteAllCases();
         });
 
         it('renders different solutions', async () => {
@@ -335,11 +334,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await openModal();
             await cases.casesTable.filterByOwner(owner);
             await cases.casesTable.getCaseById(currentCaseId);
-            /**
-             * The select button matched the query of the
-             * [data-test-subj*="cases-table-row-" query
-             */
-            await cases.casesTable.validateCasesTableHasNthRows(2);
             await closeModal();
           }
         });
@@ -351,13 +345,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await cases.casesTable.filterByOwner(owner);
           }
 
-          await cases.casesTable.waitForTableToFinishLoading();
-
-          /**
-           * The select button matched the query of the
-           * [data-test-subj*="cases-table-row-" query
-           */
-          await cases.casesTable.validateCasesTableHasNthRows(6);
+          // Each case contributes two matches to the row selector: the row itself and its select
+          // button (`cases-table-row-select-<id>`).
+          await cases.casesTable.waitForNthToBeListed(TOTAL_OWNERS.length * 2);
 
           for (const caseId of createdCases.values()) {
             await cases.casesTable.getCaseById(caseId);
@@ -370,7 +360,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();
 
-            await cases.casesTable.waitForTableToFinishLoading();
             await cases.casesTable.getCaseById(currentCaseId);
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
@@ -436,27 +425,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
         await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
-        await testSubjects.click('cases-table-add-case-filter-bar');
-
-        await cases.create.createCase({
+        await cases.create.createCaseFromModal({
           title: caseTitle,
           description: 'test description',
           owner: 'cases',
         });
-        await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`Case ${caseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
         await cases.common.waitForCaseViewToLoad();
-        if (await cases.common.isRedesignEnabled()) {
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).toContain(caseTitle);
-        } else {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).toEqual(caseTitle);
-        }
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(caseTitle);
 
         await testSubjects.existOrFail('comment-lens-lens');
       });
@@ -482,13 +463,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAllWithChecks();
 
         await cases.common.waitForCaseViewToLoad();
-        if (await cases.common.isRedesignEnabled()) {
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).toContain(theCaseTitle);
-        } else {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).toEqual(theCaseTitle);
-        }
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(theCaseTitle);
 
         await testSubjects.existOrFail('comment-lens-lens');
       });

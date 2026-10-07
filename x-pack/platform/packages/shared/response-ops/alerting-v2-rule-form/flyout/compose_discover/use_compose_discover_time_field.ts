@@ -33,13 +33,15 @@ export const useComposeDiscoverTimeField = (): ComposeDiscoverTimeFieldValue => 
   const { watch } = useFormContext<FormValues>();
   const query = watch('query');
   const timeField = watch('timeField');
-  const isAlert = watch('kind') === 'alert';
-  const { http, dataViews } = useRuleFormServices();
+  const { http, dataViews, data } = useRuleFormServices();
 
-  const resolutionQuery = useMemo(
-    () => getTimeFieldResolutionQuery(query, isAlert, true),
-    [query, isAlert]
-  );
+  const resolutionQuery = useMemo(() => getTimeFieldResolutionQuery(query, true), [query]);
 
-  return useResolveTimeField({ query: resolutionQuery, timeField, http, dataViews });
+  return useResolveTimeField({
+    query: resolutionQuery,
+    timeField,
+    http,
+    dataViews,
+    search: data.search.search,
+  });
 };

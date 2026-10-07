@@ -26,6 +26,7 @@ import {
   collectUniqueTags,
   getServerRunFlagsFromTags,
   getTestTagsForTarget,
+  isScoutTestFile,
 } from '../tests_discovery/tag_utils';
 import {
   countModulesByType,
@@ -49,9 +50,7 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
     group: module.group,
     type: module.type,
     configs: module.configs.map((config) => {
-      const runnableTest = config.manifest.tests.find(
-        (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
-      );
+      const runnableTest = config.manifest.tests.find((test) => isScoutTestFile(test));
 
       const usesParallelWorkers = config.type === 'parallel';
       const allTags = collectUniqueTags(config.manifest.tests);

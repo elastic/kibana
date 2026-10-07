@@ -37,10 +37,17 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type {
+  AlertingApiRequestHandlerContext,
+  AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
@@ -48,7 +55,9 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { CasesClient } from './client';
+import type { GetCasesClientOptions } from './client/types';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import type { ConfigType } from './config';
@@ -67,6 +76,7 @@ export interface CasesServerSetupDependencies {
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
 }
 
@@ -100,6 +110,8 @@ export interface CaseRequestContext {
 
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
   cases: CaseRequestContext;
+  alerting: AlertingApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
 }>;
 
 export type CasesRouter = IRouter<CasesRequestHandlerContext>;
@@ -123,7 +135,10 @@ export interface CasesServerStart {
    * @param request a KibanaRequest
    * @returns a {@link CasesClient}
    */
-  getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
+  getCasesClientWithRequest(
+    request: KibanaRequest,
+    options?: GetCasesClientOptions
+  ): Promise<CasesClient>;
   getUnifiedAttachmentTypeRegistry(): UnifiedAttachmentTypeRegistry;
   getCasesEventBus(): CasesEventBus;
   config: ConfigType;

@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import type { EuiPopoverProps } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
+  EuiTextColor,
   EuiToolTip,
+  EuiWrappingPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -29,6 +33,13 @@ export interface RuleActionsMenuProps {
   onRun?: (rule: RuleApiResponse) => void;
   /** When provided, adds a menu entry that opens change history for the rule. */
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
+  /** When provided, adds a leading "View details" read action linking to the rule details page. */
+  detailsHref?: string;
+  renderButton?: (args: { isOpen: boolean; toggle: () => void }) => React.ReactElement;
+  anchorId?: string;
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
+  anchorPosition?: EuiPopoverProps['anchorPosition'];
 }
 
 export const RuleActionsMenu = ({
@@ -41,191 +52,254 @@ export const RuleActionsMenu = ({
   onUpdateApiKey,
   onRun,
   onViewChangeHistory,
+  detailsHref,
+  renderButton,
+  anchorId,
+  isOpen: isOpenProp,
+  onOpenChange,
+  anchorPosition = 'downRight',
 }: RuleActionsMenuProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
+  const isControlled = isOpenProp !== undefined;
+  const isOpen = isControlled ? isOpenProp : uncontrolledIsOpen;
+  const setIsOpen = (next: boolean) => {
+    if (!isControlled) {
+      setUncontrolledIsOpen(next);
+    }
+    onOpenChange?.(next);
+  };
 
-  const viewChangeHistoryItems = onViewChangeHistory
-    ? [
-        <EuiContextMenuItem
-          key="viewChangeHistory"
-          icon={<EuiIcon type="clockCounter" size="m" aria-hidden={true} />}
-          onClick={() => {
-            setIsOpen(false);
-            onViewChangeHistory(rule);
-          }}
-          data-test-subj={`viewChangeHistoryRule-${rule.id}`}
-        >
-          {i18n.translate('xpack.alertingV2.rulesList.action.viewChangeHistory', {
-            defaultMessage: 'View change history',
-          })}
-        </EuiContextMenuItem>,
-      ]
-    : [];
+  // Each action is built once and then arranged into separated groups below. `null` entries
+  // (unavailable or write-gated actions) are filtered out before rendering.
+  const viewDetailsItem = detailsHref ? (
+    <EuiContextMenuItem
+      key="viewDetails"
+      icon={<EuiIcon type="eye" size="m" aria-hidden={true} />}
+      href={detailsHref}
+      onClick={() => setIsOpen(false)}
+      data-test-subj={`viewRuleDetails-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.viewDetails', {
+        defaultMessage: 'View details',
+      })}
+    </EuiContextMenuItem>
+  ) : null;
 
-  const menuItems = [
-    ...(canWrite
-      ? [
-          // Run
-          ...(onRun
-            ? [
-                <EuiContextMenuItem
-                  key="run"
-                  icon={<EuiIcon type="play" size="m" aria-hidden={true} />}
-                  disabled={!rule.enabled}
-                  toolTipContent={
-                    rule.enabled
-                      ? undefined
-                      : i18n.translate('xpack.alertingV2.rulesList.action.runDisabledTooltip', {
-                          defaultMessage: 'Enable the rule to run it',
-                        })
-                  }
-                  onClick={() => {
-                    setIsOpen(false);
-                    onRun(rule);
-                  }}
-                  data-test-subj={`runRule-${rule.id}`}
-                >
-                  {i18n.translate('xpack.alertingV2.rulesList.action.run', {
-                    defaultMessage: 'Run',
-                  })}
-                </EuiContextMenuItem>,
-              ]
-            : []),
-          // Edit
-          <EuiContextMenuItem
-            key="edit"
-            icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
-            onClick={() => {
-              setIsOpen(false);
-              onEdit(rule);
-            }}
-            data-test-subj={`editRule-${rule.id}`}
-          >
-            {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
-          </EuiContextMenuItem>,
-          // Clone
-          <EuiContextMenuItem
-            key="clone"
-            icon={<EuiIcon type="copy" size="m" aria-hidden={true} />}
-            onClick={() => {
-              setIsOpen(false);
-              onClone(rule);
-            }}
-            data-test-subj={`cloneRule-${rule.id}`}
-          >
-            {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
-          </EuiContextMenuItem>,
-          // View change history
-          ...viewChangeHistoryItems,
-          // Enable/disable
-          ...(onToggleEnabled
-            ? [
-                <EuiContextMenuItem
-                  key="toggleEnabled"
-                  icon={
-                    <EuiIcon
-                      type={rule.enabled ? 'bellSlash' : 'bell'}
-                      size="m"
-                      aria-hidden={true}
-                    />
-                  }
-                  onClick={() => {
-                    setIsOpen(false);
-                    onToggleEnabled(rule);
-                  }}
-                  data-test-subj={`toggleEnabledRule-${rule.id}`}
-                >
-                  {rule.enabled
-                    ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
-                        defaultMessage: 'Disable',
-                      })
-                    : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
-                        defaultMessage: 'Enable',
-                      })}
-                </EuiContextMenuItem>,
-              ]
-            : []),
-          // Update API key
-          ...(onUpdateApiKey
-            ? [
-                <EuiContextMenuItem
-                  key="updateApiKey"
-                  icon={<EuiIcon type="key" size="m" aria-hidden={true} />}
-                  disabled={!rule.enabled}
-                  toolTipContent={
-                    rule.enabled
-                      ? undefined
-                      : i18n.translate(
-                          'xpack.alertingV2.rulesList.action.updateApiKeyDisabledTooltip',
-                          {
-                            defaultMessage: 'Enable the rule to update its API key',
-                          }
-                        )
-                  }
-                  onClick={() => {
-                    setIsOpen(false);
-                    onUpdateApiKey(rule);
-                  }}
-                  data-test-subj={`updateRuleApiKey-${rule.id}`}
-                >
-                  {i18n.translate('xpack.alertingV2.rulesList.action.updateApiKey', {
-                    defaultMessage: 'Update API key',
-                  })}
-                </EuiContextMenuItem>,
-              ]
-            : []),
-          // Delete
-          <EuiContextMenuItem
-            key="delete"
-            icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
-            onClick={() => {
-              setIsOpen(false);
-              onDelete(rule);
-            }}
-            data-test-subj={`deleteRule-${rule.id}`}
-          >
-            {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-              defaultMessage: 'Delete',
+  const viewChangeHistoryItem = onViewChangeHistory ? (
+    <EuiContextMenuItem
+      key="viewChangeHistory"
+      icon={<EuiIcon type="clockCounter" size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onViewChangeHistory(rule);
+      }}
+      data-test-subj={`viewChangeHistoryRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.viewChangeHistory', {
+        defaultMessage: 'View change history',
+      })}
+    </EuiContextMenuItem>
+  ) : null;
+
+  const runItem =
+    canWrite && onRun ? (
+      <EuiContextMenuItem
+        key="run"
+        icon={<EuiIcon type="play" size="m" aria-hidden={true} />}
+        disabled={!rule.enabled}
+        toolTipContent={
+          rule.enabled
+            ? undefined
+            : i18n.translate('xpack.alertingV2.rulesList.action.runDisabledTooltip', {
+                defaultMessage: 'Enable the rule to run it',
+              })
+        }
+        onClick={() => {
+          setIsOpen(false);
+          onRun(rule);
+        }}
+        data-test-subj={`runRule-${rule.id}`}
+      >
+        {i18n.translate('xpack.alertingV2.rulesList.action.run', {
+          defaultMessage: 'Run',
+        })}
+      </EuiContextMenuItem>
+    ) : null;
+
+  const editItem = canWrite ? (
+    <EuiContextMenuItem
+      key="edit"
+      icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onEdit(rule);
+      }}
+      data-test-subj={`editRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.edit', {
+        defaultMessage: 'Edit',
+      })}
+    </EuiContextMenuItem>
+  ) : null;
+
+  const cloneItem = canWrite ? (
+    <EuiContextMenuItem
+      key="clone"
+      icon={<EuiIcon type="copy" size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onClone(rule);
+      }}
+      data-test-subj={`cloneRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.clone', {
+        defaultMessage: 'Clone',
+      })}
+    </EuiContextMenuItem>
+  ) : null;
+
+  const toggleEnabledItem =
+    canWrite && onToggleEnabled ? (
+      <EuiContextMenuItem
+        key="toggleEnabled"
+        icon={<EuiIcon type={rule.enabled ? 'bellSlash' : 'bell'} size="m" aria-hidden={true} />}
+        onClick={() => {
+          setIsOpen(false);
+          onToggleEnabled(rule);
+        }}
+        data-test-subj={`toggleEnabledRule-${rule.id}`}
+      >
+        {rule.enabled
+          ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
+              defaultMessage: 'Disable',
+            })
+          : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
+              defaultMessage: 'Enable',
             })}
-          </EuiContextMenuItem>,
-        ]
-      : [
-          // View change history
-          ...viewChangeHistoryItems,
-        ]),
-  ];
+      </EuiContextMenuItem>
+    ) : null;
+
+  const updateApiKeyItem =
+    canWrite && onUpdateApiKey ? (
+      <EuiContextMenuItem
+        key="updateApiKey"
+        icon={<EuiIcon type="key" size="m" aria-hidden={true} />}
+        disabled={!rule.enabled}
+        toolTipContent={
+          rule.enabled
+            ? undefined
+            : i18n.translate('xpack.alertingV2.rulesList.action.updateApiKeyDisabledTooltip', {
+                defaultMessage: 'Enable the rule to update its API key',
+              })
+        }
+        onClick={() => {
+          setIsOpen(false);
+          onUpdateApiKey(rule);
+        }}
+        data-test-subj={`updateRuleApiKey-${rule.id}`}
+      >
+        {i18n.translate('xpack.alertingV2.rulesList.action.updateApiKey', {
+          defaultMessage: 'Update API key',
+        })}
+      </EuiContextMenuItem>
+    ) : null;
+
+  const deleteItem = canWrite ? (
+    <EuiContextMenuItem
+      key="delete"
+      icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onDelete(rule);
+      }}
+      data-test-subj={`deleteRule-${rule.id}`}
+    >
+      <EuiTextColor color="danger">
+        {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
+          defaultMessage: 'Delete',
+        })}
+      </EuiTextColor>
+    </EuiContextMenuItem>
+  ) : null;
+
+  const isItem = (item: React.ReactElement | null): item is React.ReactElement => item !== null;
+
+  // Order: Run / Edit / Clone | View change history / Update API key | Delete.
+  // View details (flyout) leads the first group; Enable/Disable sits with API key.
+  // margin="xs" matches EuiContextMenu isSeparator so dividers stay visible.
+  const groups = [
+    [viewDetailsItem, runItem, editItem, cloneItem],
+    [viewChangeHistoryItem, toggleEnabledItem, updateApiKeyItem],
+    [deleteItem],
+  ]
+    .map((group) => group.filter(isItem))
+    .filter((group) => group.length > 0);
+
+  const menuItems = groups.flatMap((group, index) =>
+    index === 0
+      ? group
+      : [<EuiHorizontalRule key={`separator-${index}`} margin="xs" role="separator" />, ...group]
+  );
 
   if (menuItems.length === 0) {
     return null;
   }
 
+  const toggle = () => setIsOpen(!isOpen);
+  const closePopover = () => setIsOpen(false);
+  const menuAriaLabel = i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
+    defaultMessage: 'Rule actions',
+  });
+
+  if (anchorId) {
+    const anchor = document.getElementById(anchorId);
+    if (!anchor) {
+      return null;
+    }
+
+    return (
+      <EuiWrappingPopover
+        button={anchor}
+        isOpen={isOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition={anchorPosition}
+        aria-label={menuAriaLabel}
+      >
+        <EuiContextMenuPanel items={menuItems} />
+      </EuiWrappingPopover>
+    );
+  }
+
+  const button = renderButton ? (
+    renderButton({ isOpen, toggle })
+  ) : (
+    <EuiToolTip
+      content={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+        defaultMessage: 'More actions',
+      })}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="ellipsis"
+        aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+          defaultMessage: 'More actions',
+        })}
+        color="text"
+        onClick={toggle}
+        data-test-subj={`ruleActionsButton-${rule.id}`}
+      />
+    </EuiToolTip>
+  );
+
   return (
     <EuiPopover
-      button={
-        <EuiToolTip
-          content={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
-            defaultMessage: 'More actions',
-          })}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
-              defaultMessage: 'More actions',
-            })}
-            color="text"
-            onClick={() => setIsOpen((open) => !open)}
-            data-test-subj={`ruleActionsButton-${rule.id}`}
-          />
-        </EuiToolTip>
-      }
+      button={button}
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="downRight"
-      aria-label={i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
-        defaultMessage: 'Rule actions',
-      })}
+      anchorPosition={anchorPosition}
+      aria-label={menuAriaLabel}
     >
       <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>

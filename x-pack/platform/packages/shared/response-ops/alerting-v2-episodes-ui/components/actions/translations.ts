@@ -71,7 +71,7 @@ export const RESOLVE_ACTION_DEACTIVATE = i18n.translate(
 export const RESOLVE_ACTION_REASON = i18n.translate(
   'xpack.alertingV2.episodesUi.resolveAction.reason',
   {
-    defaultMessage: 'Updated from episodes actions UI',
+    defaultMessage: 'Updated from alerts actions UI',
   }
 );
 
@@ -116,14 +116,14 @@ export const TAGS_MORE_POPOVER_ARIA_LABEL = i18n.translate(
 export const TAGS_ACTION_EDIT_TAGS = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.editTags',
   {
-    defaultMessage: 'Edit Tags',
+    defaultMessage: 'Edit alert tags',
   }
 );
 
 export const TAGS_ACTION_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {
-    defaultMessage: 'Edit Tags',
+    defaultMessage: 'Edit alert tags',
   }
 );
 
@@ -177,7 +177,7 @@ export const TAGS_ACTION_TOO_MANY_TAGS_TITLE = i18n.translate(
 
 export const getTagsActionTooManyTagsBody = (maxTags: number) =>
   i18n.translate('xpack.alertingV2.episodesUi.tagsAction.tooManyTagsBody', {
-    defaultMessage: 'You can save at most {maxTags} tags per episode.',
+    defaultMessage: 'You can save at most {maxTags} tags per alert.',
     values: { maxTags },
   });
 
@@ -219,7 +219,7 @@ export const TAGS_ACTION_SELECT_NONE = i18n.translate(
 export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.bulkSnoozeModal.title',
   {
-    defaultMessage: 'Snooze selected episodes',
+    defaultMessage: 'Snooze selected alerts',
   }
 );
 
@@ -227,14 +227,14 @@ export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
 export const BULK_TAGS_MODAL_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.bulkTagsModal.title',
   {
-    defaultMessage: 'Set tags for selected episodes',
+    defaultMessage: 'Set alert tags for selected alerts',
   }
 );
 
 export const BULK_TAGS_MODAL_REPLACE_WARNING = i18n.translate(
   'xpack.alertingV2.episodesUi.bulkTagsModal.replaceWarning',
   {
-    defaultMessage: 'These tags will replace any existing tags on all selected episodes.',
+    defaultMessage: 'These alert tags will replace any existing alert tags on all selected alerts.',
   }
 );
 
@@ -259,87 +259,114 @@ export const BULK_TAGS_MODAL_SAVE = i18n.translate(
   }
 );
 
-/** --- Edit episode assignee flyout --- */
-export const ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE = (totalEpisodes: number) =>
-  i18n.translate('xpack.alertingV2.episodes.assignees.flyout.emptyListTitle', {
+/** --- Edit episode assignee panel --- */
+export const ASSIGNEE_PANEL_EMPTY_LIST_TITLE = (totalEpisodes: number) =>
+  i18n.translate('xpack.alertingV2.episodes.assignees.panel.emptyListTitle', {
     defaultMessage:
-      'The selected {totalEpisodes, plural, =1 {episode does} other {episodes do}} not have any assigned users',
+      'The selected {totalEpisodes, plural, =1 {alert does} other {alerts do}} not have any assigned users',
     values: { totalEpisodes },
   });
 
-export const ASSIGNEE_FLYOUT_EMPTY_LIST_HELP = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.emptyListHelp',
+export const ASSIGNEE_PANEL_EMPTY_LIST_HELP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.emptyListHelp',
   {
     defaultMessage: 'Search to assign users.',
   }
 );
 
-export const ASSIGNEE_FLYOUT_NO_MATCHES_USER_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.noMatchesUserTitle',
+export const ASSIGNEE_PANEL_NO_MATCHES_USER_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesUserTitle',
   {
     defaultMessage: "User doesn't exist or is unavailable",
   }
 );
 
-export const ASSIGNEE_FLYOUT_NO_MATCHES_MODIFY_SEARCH = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.noMatchesModifySearch',
+export const ASSIGNEE_PANEL_NO_MATCHES_MODIFY_SEARCH = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesModifySearch',
   {
     defaultMessage: "Modify your search or check the user's privileges.",
   }
 );
 
-export const ASSIGNEE_FLYOUT_NO_MATCHES_LEARN_PRIVILEGES = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.noMatchesLearnPrivileges',
+export const ASSIGNEE_PANEL_NO_MATCHES_LEARN_PRIVILEGES = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesLearnPrivileges',
   {
     defaultMessage: 'Learn what privileges grant access to cases.',
   }
 );
 
-export const ASSIGNEE_FLYOUT_CURRENT_PROFILE_ERROR_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.currentProfileErrorTitle',
+export const ASSIGNEE_PANEL_CURRENT_PROFILE_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.currentProfileErrorTitle',
   {
     defaultMessage: 'Could not load current assignee',
   }
 );
 
-export const ASSIGNEE_FLYOUT_SUGGEST_ERROR_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.suggestErrorTitle',
+export const ASSIGNEE_PANEL_SUGGEST_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.suggestErrorTitle',
   {
     defaultMessage: 'Could not search users',
   }
 );
 
-export const ASSIGNEE_FLYOUT_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.title',
+export const ASSIGNEE_PANEL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.title',
   {
     defaultMessage: 'Edit assignee',
   }
 );
 
-export const ASSIGNEE_FLYOUT_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.searchPlaceholder',
+export const ASSIGNEE_PANEL_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.searchPlaceholder',
   {
     defaultMessage: 'Search users',
   }
 );
 
-export const ASSIGNEE_FLYOUT_NO_ASSIGNEE_OPTION = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.noAssigneeOption',
+export const ASSIGNEE_PANEL_NO_ASSIGNEE_OPTION = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noAssigneeOption',
   {
     defaultMessage: 'No assignee',
   }
 );
 
-export const ASSIGNEE_FLYOUT_CANCEL = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.cancel',
+export const ASSIGNEE_PANEL_APPLY = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.apply',
   {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Apply',
   }
 );
 
-export const ASSIGNEE_FLYOUT_SAVE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.save',
+export const ASSIGNEE_PANEL_MODAL_ARIA_LABEL = (totalEpisodes: number) =>
+  i18n.translate('xpack.alertingV2.episodes.assignees.panel.modalAriaLabel', {
+    defaultMessage: 'Edit assignee of {totalEpisodes, plural, =1 {# alert} other {# alerts}}',
+    values: { totalEpisodes },
+  });
+
+export const ASSIGNEE_ADD_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.addButtonAriaLabel',
   {
-    defaultMessage: 'Save',
+    defaultMessage: 'Add assignee',
+  }
+);
+
+export const ASSIGNEE_ADD_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.addButtonTooltip',
+  {
+    defaultMessage: 'Assign this alert',
+  }
+);
+
+export const ASSIGNEE_CHANGE_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.changeButtonAriaLabel',
+  {
+    defaultMessage: 'Change assignee',
+  }
+);
+
+export const ASSIGNEE_CHANGE_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.changeButtonTooltip',
+  {
+    defaultMessage: 'Change or remove the assignee',
   }
 );

@@ -6,7 +6,7 @@
  */
 import type { ToolingLog } from '@kbn/tooling-log';
 import { promises as Fs } from 'fs';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 export async function ensureRepo({
   log,

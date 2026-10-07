@@ -15,11 +15,18 @@ import {
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
   AttachmentsAddedTriggerId,
+  AttachmentsDeletedTriggerId,
   CommentsAddedTriggerId,
   CaseStatusUpdatedTriggerId,
   ExtendedFieldsUpdatedTriggerId,
+  ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
 import { buildExtendedFieldsUpdatedPayload } from './extended_fields_updated_payload';
+
+// We want comment attachments to always be used with the `comment` type,
+// even for legacy `user` types
+const normalizeAttachmentType = (attachmentType: string): string =>
+  attachmentType === 'user' ? 'comment' : attachmentType;
 
 /**
  * Registers bridge listeners that forward Cases domain events to workflows_extensions.
@@ -73,11 +80,12 @@ export function registerCasesWorkflowEventBridge(
     }
   });
 
+  casesEventBus.onObservablesAdded((event) => {
+    void forward(ObservablesAddedTriggerId, event.payload, event.request);
+  });
+
   casesEventBus.onAttachmentsAdded((event) => {
-    // We want comment attachments to always be used with the `comment` type,
-    // even for legacy `user` types
-    const enhancedAttachmentType =
-      event.payload.attachmentType === 'user' ? 'comment' : event.payload.attachmentType;
+    const enhancedAttachmentType = normalizeAttachmentType(event.payload.attachmentType);
     void forward(
       AttachmentsAddedTriggerId,
       {
@@ -99,5 +107,16 @@ export function registerCasesWorkflowEventBridge(
         event.request
       );
     }
+  });
+
+  casesEventBus.onAttachmentsDeleted((event) => {
+    void forward(
+      AttachmentsDeletedTriggerId,
+      {
+        ...event.payload,
+        attachmentType: normalizeAttachmentType(event.payload.attachmentType),
+      },
+      event.request
+    );
   });
 }

@@ -37,6 +37,7 @@ import { schema } from '@kbn/config-schema';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -298,6 +299,114 @@ describe('TaskManagerRunner', () => {
       expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'framework-error']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
+    describe('task with a credential', () => {
+      const credential = {
+        type: 'service_account',
+        workloadType: 'workflow',
+        workloadId: 'workflow-1',
+        spaceId: 'default',
+        expectedServiceAccountId: null,
+      };
+
+      test('does not run a one-off task and retries it in 5 minutes without using up an attempt', async () => {
+        const createTaskRunner = jest.fn();
+        const onTaskEvent = jest.fn();
+        const { runner, logger, store, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: { attempts: 1, credential },
+          definitions: { bar: { title: 'Bar!', createTaskRunner } },
+        });
+
+        await runner.run();
+
+        expect(createTaskRunner).not.toHaveBeenCalled();
+        const loggerCall = logger.error.mock.calls[0][0];
+        const loggerMeta = logger.error.mock.calls[0][1];
+        expect(loggerCall as string).toMatchInlineSnapshot(
+          `"Task bar \\"foo\\" failed: Error: Task uses credential type \\"service_account\\", which this version of Kibana cannot run"`
+        );
+        expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'framework-error']);
+        expect(store.remove).not.toHaveBeenCalled();
+        expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+        expect(store.partialUpdate.mock.calls[0][0]).toMatchObject({
+          runAt: minutesFromNow(5),
+          attempts: 0,
+          status: TaskStatus.Idle,
+        });
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              instance.id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.Success,
+                error: new Error(
+                  'Task uses credential type "service_account", which this version of Kibana cannot run'
+                ),
+                isExpired: false,
+              })
+            )
+          )
+        );
+      });
+
+      test('keeps a one-off task that has used up its attempts', async () => {
+        const { runner, store } = await readyToRunStageSetup({
+          instance: { attempts: 5, credential },
+          definitions: { bar: { title: 'Bar!', maxAttempts: 5, createTaskRunner: jest.fn() } },
+        });
+
+        await runner.run();
+
+        expect(store.remove).not.toHaveBeenCalled();
+        expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+        expect(store.partialUpdate.mock.calls[0][0]).toMatchObject({
+          runAt: minutesFromNow(5),
+          attempts: 0,
+        });
+      });
+
+      test('does not run a recurring task and keeps its schedule', async () => {
+        const createTaskRunner = jest.fn();
+        const { runner, store } = await readyToRunStageSetup({
+          instance: { attempts: 1, credential, schedule: { interval: '10m' } },
+          definitions: { bar: { title: 'Bar!', createTaskRunner } },
+        });
+
+        await runner.run();
+
+        expect(createTaskRunner).not.toHaveBeenCalled();
+        expect(store.remove).not.toHaveBeenCalled();
+        expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+        expect(store.partialUpdate.mock.calls[0][0]).toMatchObject({
+          schedule: { interval: '10m' },
+          attempts: 0,
+          status: TaskStatus.Idle,
+        });
+      });
+
+      test('does not run a task with a credential type added in a later version', async () => {
+        const createTaskRunner = jest.fn();
+        const { runner, logger, store } = await readyToRunStageSetup({
+          instance: { attempts: 1, credential: { type: 'future_credential_type' } },
+          definitions: { bar: { title: 'Bar!', createTaskRunner } },
+        });
+
+        await runner.run();
+
+        expect(createTaskRunner).not.toHaveBeenCalled();
+        expect(logger.error.mock.calls[0][0] as string).toMatchInlineSnapshot(
+          `"Task bar \\"foo\\" failed: Error: Task uses credential type \\"future_credential_type\\", which this version of Kibana cannot run"`
+        );
+        expect(store.remove).not.toHaveBeenCalled();
+        expect(store.partialUpdate.mock.calls[0][0]).toMatchObject({
+          runAt: minutesFromNow(5),
+          attempts: 0,
+          status: TaskStatus.Idle,
+        });
+      });
+    });
     test('logs user errors as expected when task fails', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         instance: {
@@ -414,7 +523,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
           },
         },
@@ -440,7 +549,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -472,7 +581,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -502,7 +611,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
           },
         },
@@ -531,7 +640,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -566,7 +675,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -596,7 +705,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: true,
             userProfileId: 'u_profile_123',
           },
@@ -637,7 +746,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -2182,7 +2291,7 @@ describe('TaskManagerRunner', () => {
           throw error;
         });
 
-        await expect(runner.run()).rejects.toThrowError('fail');
+        await expect(runner.run()).rejects.toThrow('fail');
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -2227,7 +2336,7 @@ describe('TaskManagerRunner', () => {
           throw error;
         });
 
-        await expect(runner.run()).rejects.toThrowError('fail');
+        await expect(runner.run()).rejects.toThrow('fail');
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -3558,8 +3667,8 @@ describe('TaskManagerRunner', () => {
         }),
         expect.anything()
       );
-      expect(logger.warn).toBeCalledTimes(1);
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
         'Disabling task bar:foo as it indicated it should disable itself',
         { tags: ['bar'] }
       );

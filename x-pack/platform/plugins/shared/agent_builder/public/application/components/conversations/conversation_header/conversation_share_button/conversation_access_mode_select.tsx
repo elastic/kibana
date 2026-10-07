@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +14,7 @@ import {
   EuiSuperSelect,
   EuiText,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
@@ -43,6 +45,10 @@ const AccessModeOption: React.FC<AccessModeOptionProps> = ({ label, helpText }) 
   </EuiFlexGroup>
 );
 
+const generalAccessLabelStyle = ({ euiTheme }: UseEuiTheme) => css`
+  row-gap: ${euiTheme.size.s};
+`;
+
 const accessModeOptions = [
   {
     value: ConversationAccessControlMode.Private,
@@ -70,7 +76,7 @@ export const ConversationAccessModeSelect: React.FC<ConversationAccessModeSelect
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFormRow label={generalAccessLabel} fullWidth>
+    <EuiFormRow label={generalAccessLabel} fullWidth css={generalAccessLabelStyle}>
       <EuiSuperSelect<ConversationAccessControlMode>
         fullWidth
         valueOfSelected={accessMode}

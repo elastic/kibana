@@ -8,8 +8,8 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { assertContextEngineWriteAccess } from './assert_context_engine_write_access';
 
 describe('assertContextEngineWriteAccess', () => {
@@ -25,6 +25,7 @@ describe('assertContextEngineWriteAccess', () => {
     security.authz.checkPrivilegesWithRequest.mockReturnValue({
       atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
     });
+    security.authz.actions.api.get = jest.fn((privilege: string) => `api:${privilege}`);
     return security;
   };
 
@@ -81,20 +82,28 @@ describe('assertContextEngineWriteAccess', () => {
     };
     coreStart.uiSettings.asScopedToClient = jest.fn().mockReturnValue(uiSettingsClient);
     const security = createSecurityStart();
+    const marketingSpaceId = 'marketing';
 
     await expect(
       assertContextEngineWriteAccess({
         request,
-        spaceId,
+        spaceId: marketingSpaceId,
         getCoreStart: async () => coreStart,
         getSecurityStart: async () => security,
       })
     ).resolves.toBeUndefined();
 
+    expect(
+      coreStart.savedObjects.getUnsafeInternalClient().asScopedToNamespace
+    ).toHaveBeenCalledWith(marketingSpaceId);
     expect(uiSettingsClient.get).toHaveBeenCalledWith(CONTEXT_ENGINE_ENABLED_SETTING_ID);
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-    expect(security.authz.checkPrivilegesWithRequest().atSpace).toHaveBeenCalledWith(spaceId, {
-      kibana: [apiPrivileges.writeContextEngine],
-    });
+    expect(security.authz.actions.api.get).toHaveBeenCalledWith(apiPrivileges.writeContextEngine);
+    expect(security.authz.checkPrivilegesWithRequest().atSpace).toHaveBeenCalledWith(
+      marketingSpaceId,
+      {
+        kibana: [`api:${apiPrivileges.writeContextEngine}`],
+      }
+    );
   });
 });

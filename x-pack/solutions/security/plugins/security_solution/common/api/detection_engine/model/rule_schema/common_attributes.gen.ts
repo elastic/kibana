@@ -104,7 +104,7 @@ export const ExternalRuleCustomizedFields = lazySchema(() =>
       /**
        * Name of a user-modified field in the rule object.
        */
-      field_name: z.string(),
+      field_name: z.string().describe('Name of a user-modified field in the rule object.'),
     })
   )
 );
@@ -182,7 +182,7 @@ export const RiskScoreMapping = lazySchema(() =>
       /**
        * Source event field used to override the default `risk_score`.
        */
-      field: z.string(),
+      field: z.string().describe('Source event field used to override the default `risk_score`.'),
       operator: z.literal('equals'),
       value: z.string(),
       risk_score: RiskScore.optional(),
@@ -213,7 +213,7 @@ export const SeverityMapping = lazySchema(() =>
       /**
        * Source event field used to override the default `severity`.
        */
-      field: z.string(),
+      field: z.string().describe('Source event field used to override the default `severity`.'),
       operator: z.literal('equals'),
       severity: Severity,
       value: z.string(),
@@ -309,15 +309,15 @@ export const ThreatSubtechnique = lazySchema(() =>
     /**
      * Subtechnique ID
      */
-    id: z.string(),
+    id: z.string().describe('Subtechnique ID'),
     /**
      * Subtechnique name
      */
-    name: z.string(),
+    name: z.string().describe('Subtechnique name'),
     /**
      * Subtechnique reference
      */
-    reference: z.string(),
+    reference: z.string().describe('Subtechnique reference'),
   })
 );
 export type ThreatSubtechnique = z.infer<typeof ThreatSubtechnique>;
@@ -327,20 +327,23 @@ export const ThreatTechnique = lazySchema(() =>
     /**
      * Technique ID
      */
-    id: z.string(),
+    id: z.string().describe('Technique ID'),
     /**
      * Technique name
      */
-    name: z.string(),
+    name: z.string().describe('Technique name'),
     /**
      * Technique reference
      */
-    reference: z.string(),
+    reference: z.string().describe('Technique reference'),
     /**
       * Array containing more specific information on the attack technique.
 
       */
-    subtechnique: z.array(ThreatSubtechnique).optional(),
+    subtechnique: z
+      .array(ThreatSubtechnique)
+      .optional()
+      .describe('Array containing more specific information on the attack technique.\n'),
   })
 );
 export type ThreatTechnique = z.infer<typeof ThreatTechnique>;
@@ -354,15 +357,15 @@ export const ThreatTactic = lazySchema(() =>
     /**
      * Tactic ID
      */
-    id: z.string(),
+    id: z.string().describe('Tactic ID'),
     /**
      * Tactic name
      */
-    name: z.string(),
+    name: z.string().describe('Tactic name'),
     /**
      * Tactic reference
      */
-    reference: z.string(),
+    reference: z.string().describe('Tactic reference'),
   })
 );
 export type ThreatTactic = z.infer<typeof ThreatTactic>;
@@ -377,12 +380,15 @@ export const Threat = lazySchema(() =>
     /**
      * Relevant attack framework
      */
-    framework: z.string(),
+    framework: z.string().describe('Relevant attack framework'),
     tactic: ThreatTactic,
     /**
      * Array containing information on the attack techniques (optional)
      */
-    technique: z.array(ThreatTechnique).optional(),
+    technique: z
+      .array(ThreatTechnique)
+      .optional()
+      .describe('Array containing information on the attack techniques (optional)'),
   })
 );
 export type Threat = z.infer<typeof Threat>;
@@ -474,15 +480,27 @@ export const RequiredField = lazySchema(() =>
     /**
      * Name of an Elasticsearch field
      */
-    name: z.string().min(1).superRefine(isNonEmptyString),
+    name: z
+      .string()
+      .min(1)
+      .superRefine(isNonEmptyString)
+      .describe('Name of an Elasticsearch field'),
     /**
      * Type of the Elasticsearch field
      */
-    type: z.string().min(1).superRefine(isNonEmptyString),
+    type: z
+      .string()
+      .min(1)
+      .superRefine(isNonEmptyString)
+      .describe('Type of the Elasticsearch field'),
     /**
      * Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.
      */
-    ecs: z.boolean(),
+    ecs: z
+      .boolean()
+      .describe(
+        'Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.'
+      ),
   })
 );
 export type RequiredField = z.infer<typeof RequiredField>;
@@ -495,11 +513,19 @@ export const RequiredFieldInput = lazySchema(() =>
     /**
      * Name of an Elasticsearch field
      */
-    name: z.string().min(1).superRefine(isNonEmptyString),
+    name: z
+      .string()
+      .min(1)
+      .superRefine(isNonEmptyString)
+      .describe('Name of an Elasticsearch field'),
     /**
      * Type of the Elasticsearch field
      */
-    type: z.string().min(1).superRefine(isNonEmptyString),
+    type: z
+      .string()
+      .min(1)
+      .superRefine(isNonEmptyString)
+      .describe('Type of the Elasticsearch field'),
   })
 );
 export type RequiredFieldInput = z.infer<typeof RequiredFieldInput>;
@@ -606,7 +632,11 @@ export const RuleActionFrequency = lazySchema(() =>
     /**
      * Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
      */
-    summary: z.boolean(),
+    summary: z
+      .boolean()
+      .describe(
+        'Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert'
+      ),
     notifyWhen: RuleActionNotifyWhen,
     throttle: RuleActionThrottle.nullable(),
   })
@@ -699,7 +729,11 @@ export const RuleAction = lazySchema(() =>
   - `.d3security`
 
       */
-    action_type_id: z.string(),
+    action_type_id: z
+      .string()
+      .describe(
+        'The action type used for sending notifications, can be:\n\n  - `.slack`\n  - `.slack_api`\n  - `.email`\n  - `.index`\n  - `.pagerduty`\n  - `.swimlane`\n  - `.webhook`\n  - `.servicenow`\n  - `.servicenow-itom`\n  - `.servicenow-sir`\n  - `.jira`\n  - `.resilient`\n  - `.opsgenie`\n  - `.teams`\n  - `.torq`\n  - `.tines`\n  - `.d3security`\n'
+      ),
     group: RuleActionGroup.optional(),
     id: RuleActionId,
     params: RuleActionParams,
@@ -739,16 +773,22 @@ export const RuleExceptionList = lazySchema(() =>
     /**
      * ID of the exception container
      */
-    id: z.string().min(1).superRefine(isNonEmptyString),
+    id: z.string().min(1).superRefine(isNonEmptyString).describe('ID of the exception container'),
     /**
      * List ID of the exception container
      */
-    list_id: z.string().min(1).superRefine(isNonEmptyString),
+    list_id: z
+      .string()
+      .min(1)
+      .superRefine(isNonEmptyString)
+      .describe('List ID of the exception container'),
     type: ExceptionListType,
     /**
      * Determines the exceptions validity in rule's Kibana space
      */
-    namespace_type: z.enum(['agnostic', 'single']),
+    namespace_type: z
+      .enum(['agnostic', 'single'])
+      .describe("Determines the exceptions validity in rule's Kibana space"),
   })
 );
 export type RuleExceptionList = z.infer<typeof RuleExceptionList>;

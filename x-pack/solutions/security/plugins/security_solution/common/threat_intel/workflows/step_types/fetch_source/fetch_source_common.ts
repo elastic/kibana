@@ -8,116 +8,129 @@
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
-import { SEVERITY_LEVELS, SOURCE_TYPES } from '../../../constants';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { FETCH_ADAPTER_TYPES, REPORT_SOURCE_TYPES, SEVERITY_LEVELS } from '../../../constants';
 
 /** Workflow step: fetch one source hit and return normalized threat reports. */
 export const FETCH_SOURCE_STEP_TYPE = 'threat_intel.fetch_source' as const;
 
-export const sourceHitSchema = z.object({
-  _id: z.string(),
-  _index: z.string().optional(),
-  _source: z.object({
-    adapter_type: z.enum(SOURCE_TYPES),
-    name: z.string(),
-    enabled: z.boolean().optional(),
-    config: z.record(z.string(), z.unknown()),
-    tags: z.array(z.string()).optional(),
-    space_id: z.string().optional(),
-  }),
-});
+/**
+ * Persisted catalog hit shape for the fetch_source step.
+ *
+ * Feed URLs are not stored on the sources index. Adapters resolve the URL from
+ * the stable `_id` via `resolveCatalogSourceUrl` at fetch time.
+ */
+export const sourceHitSchema = lazySchema(() =>
+  z.object({
+    _id: z.string(),
+    _index: z.string().optional(),
+    _source: z.object({
+      adapter_type: z.enum(FETCH_ADAPTER_TYPES),
+      name: z.string(),
+      enabled: z.boolean().optional(),
+      tags: z.array(z.string()).optional(),
+      space_id: z.string().optional(),
+    }),
+  })
+);
 
-export const fetchSourceInputSchema = z.object({
-  source: z.union([z.string(), sourceHitSchema]),
-});
+export const fetchSourceInputSchema = lazySchema(() =>
+  z.object({
+    source: z.union([z.string(), sourceHitSchema]),
+  })
+);
+
+/** Must match the `extracted.iocs` nested mapping in setup/index_templates.ts. */
+export const iocEntrySchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    value: z.string(),
+    defanged: z.string().optional(),
+    tier: z.string(),
+    tier_heuristic: z.string(),
+    tier_basis: z.string(),
+    port: z.number().optional(),
+    reference: z.string().optional(),
+    block_index: z.number().optional(),
+    deferred_unreviewed: z.boolean().optional(),
+  })
+);
+
+export type IocEntry = z.infer<typeof iocEntrySchema>;
 
 /** Must match `.kibana-threat-reports` strict mapping in setup/index_templates.ts. */
-export const normalizedReportSchema = z.object({
-  '@timestamp': z.string(),
-  content_fingerprint: z.string(),
-  space_id: z.string(),
-  source: z.object({
-    type: z.enum(SOURCE_TYPES),
-    name: z.string(),
-    url: z.string(),
-    adapter_id: z.string(),
-  }),
-  content: z.object({
-    title: z.string(),
-    body_text: z.string(),
-    body_html: z.string().optional(),
-    language: z.string().default('en'),
-    external_references: z
-      .array(
-        z.object({
-          source_name: z.string(),
-          url: z.string().optional(),
-          external_id: z.string().optional(),
-          description: z.string().optional(),
-          canonical_url: z.string().optional(),
-          ref_part: z.number().int().optional(),
-          ref_part_count: z.number().int().optional(),
+export const normalizedReportSchema = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string(),
+    content_fingerprint: z.string(),
+    space_id: z.string(),
+    source: z.object({
+      type: z.enum(REPORT_SOURCE_TYPES),
+      name: z.string(),
+      url: z.string().optional(),
+      adapter_id: z.string(),
+    }),
+    content: z.object({
+      title: z.string(),
+      body_text: z.string(),
+      language: z.string().default('en'),
+      article_url: z.string().optional(),
+    }),
+    severity: z.object({
+      level: z.enum(SEVERITY_LEVELS),
+      score: z.number(),
+    }),
+    /**
+     * `severity.score * extracted.relevance`. Written by the enrich workflow for
+     * `pending` reports; an adapter whose reports skip enrichment writes it itself so
+     * the hunt candidates sort (`rank_score` desc, `missing: 0`) does not park every one
+     * of its reports behind every enriched one.
+     */
+    rank_score: z.number().optional(),
+    lineage: z.object({
+      ingested_at: z.string(),
+      extraction_method: z.enum(['pending', 'text_indicator_list', 'kev']),
+      extracted_at: z.string().optional(),
+      source_doc_ref: z
+        .object({
+          index: z.string(),
+          id: z.string(),
         })
-      )
-      .optional(),
-  }),
-  severity: z.object({
-    level: z.enum(SEVERITY_LEVELS),
-    score: z.number(),
-  }),
-  lineage: z.object({
-    ingested_at: z.string(),
-    extraction_method: z.enum(['pending', 'stix', 'text_indicator_list', 'kev']),
-    extracted_at: z.string().optional(),
-    source_doc_ref: z
+        .optional(),
+    }),
+    extracted: z
       .object({
-        index: z.string(),
-        id: z.string(),
+        iocs: z.array(iocEntrySchema).optional(),
+        categories: z.array(z.string()).optional(),
+        /** Detection relevance in [0, 1]; see `rank_score`. */
+        relevance: z.number().min(0).max(1).optional(),
+        vulnerability: z
+          .object({
+            cve_id: z.string(),
+            vendor: z.string(),
+            product: z.string(),
+            name: z.string(),
+            cwes: z.array(z.string()).optional(),
+            date_added: z.string(),
+            due_date: z.string(),
+            ransomware_use: z.string().optional(),
+          })
+          .optional(),
       })
       .optional(),
-  }),
-  extracted: z
-    .object({
-      iocs: z
-        .array(
-          z.object({
-            type: z.string(),
-            value: z.string(),
-            defanged: z.string().optional(),
-            tier: z.string(),
-            tier_heuristic: z.string(),
-            tier_basis: z.string(),
-            port: z.number().optional(),
-            reference: z.string().optional(),
-            block_index: z.number().optional(),
-          })
-        )
-        .optional(),
-      categories: z.array(z.string()).optional(),
-      vulnerability: z
-        .object({
-          cve_id: z.string(),
-          vendor: z.string(),
-          product: z.string(),
-          name: z.string(),
-          cwes: z.array(z.string()).optional(),
-          date_added: z.string(),
-          due_date: z.string(),
-          ransomware_use: z.string().optional(),
-        })
-        .optional(),
-    })
-    .optional(),
-});
+  })
+);
 
 export type NormalizedReport = z.infer<typeof normalizedReportSchema>;
 
-export const fetchSourceOutputSchema = z.object({
-  adapter_type: z.enum(SOURCE_TYPES),
-  source_id: z.string(),
-  total_fetched: z.number(),
-  reports: z.array(normalizedReportSchema),
-});
+export const fetchSourceOutputSchema = lazySchema(() =>
+  z.object({
+    adapter_type: z.enum(FETCH_ADAPTER_TYPES),
+    source_id: z.string(),
+    total_fetched: z.number(),
+    reports: z.array(normalizedReportSchema),
+  })
+);
 
 export type FetchSourceInput = z.infer<typeof fetchSourceInputSchema>;
 export type FetchSourceOutput = z.infer<typeof fetchSourceOutputSchema>;
@@ -148,7 +161,7 @@ export const fetchSourceStepCommonDefinition: BaseStepDefinition<
         // Braces are wrapped in single quotes so ICU MessageFormat treats them
         // as literal text instead of parsing `{{ foreach.item }}` as an argument.
         defaultMessage:
-          "Runs the adapter for `source._source.adapter_type` (rss, stix, taxii, vendor_api, kev, text list). Pass `source` as `$'{{ foreach.item }}'` so the hit stays an object. `'{{ foreach.item }}'` stringifies it.",
+          "Runs the adapter for `source._source.adapter_type` (RSS, KEV, or text list). Pass `source` as `$'{{ foreach.item }}'` so the hit stays an object. `'{{ foreach.item }}'` stringifies it.",
       }
     ),
     examples: [

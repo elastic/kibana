@@ -9,6 +9,7 @@
 
 import { parseOasdiff } from './parse_oasdiff';
 import type { OasdiffEntry } from './parse_oasdiff';
+import { OASDIFF_RULE_POLICY } from './rule_policy';
 
 const entry = (overrides: Partial<OasdiffEntry> = {}): OasdiffEntry => ({
   id: 'request-parameter-removed',
@@ -16,7 +17,7 @@ const entry = (overrides: Partial<OasdiffEntry> = {}): OasdiffEntry => ({
   level: 3,
   operation: 'GET',
   path: '/api/test',
-  source: 'test',
+  source: '/opt/buildkite-agent/builds/agent-1/kibana/oas_docs/output/kibana.yaml',
   ...overrides,
 });
 
@@ -41,7 +42,6 @@ describe('parseOasdiff', () => {
         method: 'GET',
         reason: 'GET /api/test removed',
         oasdiffId: 'api-removed-without-deprecation',
-        source: 'test',
       },
     ]);
   });
@@ -62,7 +62,6 @@ describe('parseOasdiff', () => {
         method: undefined,
         reason: '/api/spaces/space removed',
         oasdiffId: 'api-path-removed-without-deprecation',
-        source: 'test',
       },
     ]);
   });
@@ -83,7 +82,6 @@ describe('parseOasdiff', () => {
         method: 'DELETE',
         reason: 'DELETE /api/old removed before sunset',
         oasdiffId: 'api-removed-before-sunset',
-        source: 'test',
       },
     ]);
   });
@@ -104,7 +102,6 @@ describe('parseOasdiff', () => {
         method: 'POST',
         reason: 'something broke',
         oasdiffId: 'some-unknown-breaking-check',
-        source: 'test',
       },
     ]);
   });
@@ -116,7 +113,6 @@ describe('parseOasdiff', () => {
         text: 'request property removed',
         operation: 'PUT',
         path: '/api/test',
-        source: '/components/schemas/Output/properties/name',
       }),
     ]);
     expect(result).toEqual([
@@ -126,9 +122,18 @@ describe('parseOasdiff', () => {
         method: 'PUT',
         reason: 'request property removed',
         oasdiffId: 'request-property-removed',
-        source: '/components/schemas/Output/properties/name',
       },
     ]);
+  });
+
+  it("drops oasdiff's spec file path source so stack and serverless entries match", () => {
+    const [stack, serverless] = parseOasdiff([
+      entry({ source: '/agent-1/oas_docs/output/kibana.yaml' }),
+      entry({ source: '/agent-1/oas_docs/output/kibana.serverless.yaml' }),
+    ]);
+
+    expect(stack).not.toHaveProperty('source');
+    expect(stack).toEqual(serverless);
   });
 
   it('maps request-parameter-removed to parameter_removed', () => {
@@ -147,7 +152,6 @@ describe('parseOasdiff', () => {
         method: 'GET',
         reason: 'parameter removed',
         oasdiffId: 'request-parameter-removed',
-        source: 'test',
       },
     ]);
   });
@@ -168,7 +172,6 @@ describe('parseOasdiff', () => {
         method: 'GET',
         reason: 'required response property removed',
         oasdiffId: 'response-required-property-removed',
-        source: 'test',
       },
     ]);
   });
@@ -212,7 +215,6 @@ describe('parseOasdiff', () => {
         method: 'GET',
         reason: 'optional response property removed',
         oasdiffId: 'response-optional-property-removed',
-        source: 'test',
       },
     ]);
   });
@@ -245,5 +247,79 @@ describe('parseOasdiff', () => {
     ]);
     expect(result).toHaveLength(1);
     expect(result[0].path).toBe('/api/a');
+  });
+
+  describe('rule policy', () => {
+    it('marks a response oneOf addition report-only and keeps the change details', () => {
+      const [change] = parseOasdiff([
+        entry({
+          id: 'response-property-one-of-added',
+          text: "added '#/components/schemas/WorkflowUserAction' to the response property 'payload' oneOf list",
+          path: '/api/cases/{caseId}/user_actions/_find',
+        }),
+      ]);
+
+      expect(change).toMatchObject({
+        type: 'operation_breaking',
+        path: '/api/cases/{caseId}/user_actions/_find',
+        method: 'GET',
+        oasdiffId: 'response-property-one-of-added',
+        reportOnly: true,
+      });
+      expect(change.policyReason).toContain('additive');
+    });
+
+    it.each([
+      ['response-property-one-of-added', 2],
+      ['response-property-one-of-added', 3],
+      ['response-body-one-of-added', 3],
+      ['response-property-enum-value-added', 2],
+      ['response-property-enum-value-added', 3],
+    ])('keeps %s at oasdiff level %i as report-only', (id, level) => {
+      const [change] = parseOasdiff([entry({ id, level })]);
+
+      expect(change.reportOnly).toBe(true);
+      expect(change.policyReason).toEqual(expect.any(String));
+    });
+
+    it.each(['api-removed-without-deprecation', 'request-body-one-of-removed'])(
+      'does not mark %s report-only',
+      (id) => {
+        const [change] = parseOasdiff([entry({ id })]);
+
+        expect(change.reportOnly).toBeUndefined();
+        expect(change.policyReason).toBeUndefined();
+      }
+    );
+
+    describe('ignored rules', () => {
+      const IGNORED_ID = 'test-only-ignored-rule';
+
+      beforeAll(() => {
+        Object.assign(OASDIFF_RULE_POLICY, {
+          [IGNORED_ID]: {
+            disposition: 'ignore',
+            reason: 'Additive change with no consumer impact for Kibana.',
+          },
+        });
+      });
+
+      afterAll(() => {
+        Reflect.deleteProperty(OASDIFF_RULE_POLICY, IGNORED_ID);
+      });
+
+      it.each([2, 3])('drops an ignored rule at oasdiff level %i', (level) => {
+        expect(parseOasdiff([entry({ id: IGNORED_ID, level })])).toEqual([]);
+      });
+
+      it('keeps neighboring changes when one is ignored', () => {
+        const result = parseOasdiff([
+          entry({ id: IGNORED_ID, path: '/api/ignored' }),
+          entry({ id: 'api-removed-without-deprecation', path: '/api/kept' }),
+        ]);
+
+        expect(result.map(({ path }) => path)).toEqual(['/api/kept']);
+      });
+    });
   });
 });

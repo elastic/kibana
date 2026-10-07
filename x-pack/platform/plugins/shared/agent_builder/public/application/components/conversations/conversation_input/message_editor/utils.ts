@@ -53,11 +53,15 @@ export const createCommandRange = (
 };
 
 /**
+ * NBSP used instead of a regular space.
+ */
+export const NON_BREAKING_SPACE = '\u00A0';
+
+/**
  * Inserts a non-breaking space text node immediately after `node` within `container`.
- * Uses NBSP (\u00A0) because browsers collapse trailing regular spaces in contenteditable.
  */
 export const insertSpaceAfter = (node: Node, container: HTMLElement): Text => {
-  const space = document.createTextNode('\u00A0');
+  const space = document.createTextNode(NON_BREAKING_SPACE);
   container.insertBefore(space, node.nextSibling);
   return space;
 };

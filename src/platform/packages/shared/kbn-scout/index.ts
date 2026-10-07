@@ -18,6 +18,7 @@ export {
   apiTest,
   globalSetupHook,
   globalTeardownHook,
+  getPlaywrightTagsFor,
   tags,
 } from './src/playwright';
 
@@ -48,18 +49,18 @@ export * from './src/playwright/ui_components';
 
 // Page-object wrappers and helpers for shared Kibana surfaces.
 export {
+  AppMenu,
   ContentListWrapper,
+  Controls,
   DataGrid,
   DiscoverApp,
   FilterBar,
   LensApp,
   QueryBar,
   UnifiedTabs,
-  buildContentListSearch,
-  buildContentListUrlRegex,
   ListingTable,
+  EmbeddableAlertsTablePage,
 } from './src/playwright/page_objects';
-export type { ContentListUrlState } from './src/playwright/page_objects';
 
 // Scout core types
 export type {
@@ -110,9 +111,15 @@ export type {
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
 
+// Locator helpers used by plugin page objects
+export { resolveSelector } from './src/playwright/utils';
+export type { SelectorInput } from './src/playwright/utils';
+
 // Config-set constants — exported so test files can import instead of redeclaring.
 export { AUDIT_LOG_PATH } from './src/servers/configs/config_sets/security_audit/shared';
+export { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from './src/servers/configs/config_sets/es_max_response_size/shared';
 export {
   OTEL_RECEIVER_PORT,
   OTEL_TEST_PROJECT_ID,
 } from './src/servers/configs/config_sets/security_audit_otel/shared';
+export { KIBANA_TLS_ORIGIN } from './src/servers/configs/config_sets/shared/tls_origin';

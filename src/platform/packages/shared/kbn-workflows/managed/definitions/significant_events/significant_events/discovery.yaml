@@ -16,31 +16,35 @@ tags:
 triggers:
   - type: manual
     inputs:
-      - name: detectionLookback
-        type: string
-        default: 'now-24h'
-        required: false
-        description: 'Lookback window for unprocessed detections; older detections are considered stale and excluded from the batch.'
-      - name: detectionBatchMax
-        type: number
-        default: 10
-        required: false
-        description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
-      - name: flakyRuleDetectionThreshold
-        type: number
-        default: 10
-        required: false
-        description: 'Rules with at least this many change-point detections inside the detectionLookback window are treated as flaky and suppressed from escalation until their oldest unprocessed detection ages past the probe interval.'
-      - name: flakyRuleProbeAfterMinutes
-        type: number
-        default: 360
-        required: false
-        description: 'A suppressed rule is let through to the agent once its oldest unprocessed detection is at least this old. Must stay below the detectionLookback window (default 24h=1440m) or the probe can never fire.'
-      - name: flakyRuleExemptSeverityScore
-        type: number
-        default: 80
-        required: false
-        description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
+      properties:
+        detectionLookback:
+          type: string
+          default: 'now-24h'
+          description: 'Lookback window for unprocessed detections; older detections are considered stale and excluded from the batch.'
+        detectionBatchMax:
+          type: number
+          default: 10
+          description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
+        flakyRuleDetectionThreshold:
+          type: number
+          default: 10
+          description: 'Rules with at least this many change-point detections inside the detectionLookback window are treated as flaky and suppressed from escalation until their oldest unprocessed detection ages past the probe interval.'
+        flakyRuleProbeAfterMinutes:
+          type: number
+          default: 360
+          description: 'A suppressed rule is let through to the agent once its oldest unprocessed detection is at least this old. Must stay below the detectionLookback window (default 24h=1440m) or the probe can never fire.'
+        flakyRuleExemptSeverityScore:
+          type: number
+          default: 80
+          description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
+        rootTriggeredBy:
+          type: string
+          description: 'Root workflow trigger type propagated by a managed driver.'
+        connector_id:
+          type: string
+          maxLength: 255
+          description: 'Optional chat model connector or inference endpoint ID for this run.'
+      additionalProperties: false
 outputs:
   - name: processedCount
     type: number
@@ -50,10 +54,44 @@ outputs:
     type: number
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
-  EVENTS_INDEX: '.significant_events-events'
-  INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
+  INVESTIGATABLE_SEVERITIES: ['critical', 'high']
 
 steps:
+  - name: bootstrap_cleanup_workflow
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
+
+  - name: check_budget
+    type: kibana.request
+    if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
+      body:
+        group: 'detection'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
+
+  - name: exit_if_budget_denied
+    type: if
+    condition: '${{ steps.check_budget.output.allowed == false }}'
+    steps:
+      - name: output_budget_denied
+        type: workflow.output
+        with:
+          processedCount: 0
+          hasWork: false
+          suppressedRuleCount: 0
+
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_initial_vars
     type: data.set
@@ -157,15 +195,21 @@ steps:
   # -----------------------------------------------------------------------
   # Correlate detections into discoveries.
   # -----------------------------------------------------------------------
+  - name: resolve_model
+    type: significantEvents.resolveModel
+    with:
+      step: discovery
+      connector_id: '{{ inputs.connector_id }}'
+
   - name: run_discovery_agent
     type: ai.agent
     agent-id: 'significant-events.discovery'
-    # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
-    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
-    connector-id-by-feature: 'significant_events_discovery'
-    plugin-id: 'significant_events_discovery'
-    aggregate-by: 'significant_events'
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
+    # Keep usage attribution IDs in sync with @kbn/significant-events-schema nightshift_usage_ids.ts.
+    plugin-id: 'nightshift_discovery'
+    aggregate-by: 'nightshift'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
     create-conversation: true
     public-conversation: true
     with:
@@ -182,42 +226,39 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every detection that is done this cycle: (1) already-recorded
-              known noise/false-positive that exited after the confirmation query without
-              events_write, or (2) a detection whose events_write result was written: true
-              or skipped with reason existing_active_event or unchanged_outcome.
-              Failed (bulk_error) or unattempted writes (except the already-recorded-noise
-              exit) must not be included.
+              rule_uuid of every detection that is done this cycle: a detection whose
+              events_write result was written: true or skipped with reason
+              existing_active_event or unchanged_outcome, or a detection intentionally
+              determined not event-eligible for which no write was attempted.
+              Failed (bulk_error or unknown_event_id) or unattempted event-eligible writes
+              must not be included.
               Used both as a hallucination guardrail (schema validation forces the agent
               to report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
               events_write tool — this is a compact summary only.
           significant_events:
             type: array
-            description: 'Final events_write outcomes from the discovery agent. Successful writes include event_uuid; failed writes have written: false. The workflow uses only successful open items to gate trigger_investigation.'
+            description: 'Final events_write outcomes from the discovery agent. Successful writes have written: true. The workflow uses only successful active items to gate trigger_investigation.'
             items:
               type: object
               properties:
                 event_id:
                   type: string
                   description: 'Echo the event_id verbatim from the discovery. Also returned by events_write. Required for trigger_investigation context.'
-                event_uuid:
-                  type: string
-                  description: 'UUID assigned by events_write. Present only when written is true and required for trigger_investigation context.'
                 severity:
                   type: string
-                  enum: ['80-critical', '60-high', '40-medium', '20-low']
+                  enum: ['critical', 'high', 'medium', 'low']
                   description: 'Severity of the event as decided by the discovery agent.'
                 status:
                   type: string
-                  enum: [open, dismissed, closed]
+                  enum: [active, inactive]
                   description: 'Status decision.'
                 written:
                   type: boolean
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome]
+                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome, unknown_event_id]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]
@@ -277,23 +318,23 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
+          # Written through Kibana as its internal user, like detections in detection.yaml.
           - name: write_processed_marker
-            type: elasticsearch.request
+            type: kibana.request
             with:
               method: POST
-              path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+              path: '/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_processed'
+              headers:
+                x-elastic-internal-origin: 'kibana'
               body:
-                '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-                kibana:
-                  space_ids:
-                    - '{{ variables.spaceId }}'
-                detection_id: '{{ foreach.item[0] }}'
+                detection_ids:
+                  - '{{ foreach.item[0] }}'
                 processed_by: '{{ execution.id }}'
             on-failure:
               continue: true
 
   # -----------------------------------------------------------------------
-  # Trigger root-cause investigation for newly-opened high-severity events.
+  # Trigger root-cause investigation for newly-active high-severity events.
   # The discovery agent owns the event decision and events_write; deterministic
   # queue advancement stays in the workflow and does not consume agent turns.
   # -----------------------------------------------------------------------
@@ -310,20 +351,20 @@ steps:
 
       # Size must be computed in a separate step — comparison operators cannot follow
       # a filter chain in the same expression (see compute_batch_size above).
-      - name: count_open_events
+      - name: count_active_events
         type: data.set
         with:
-          openCount: >-
+          activeCount: >-
             ${{ steps.store_significant_events.output.significant_events
               | default: []
-              | where: 'status', 'open'
+              | where: 'status', 'active'
               | reject: 'written', false
               | size
               | default: 0 }}
 
       - name: maybe_trigger_investigations
         type: if
-        condition: '${{ steps.count_open_events.output.openCount > 0 }}'
+        condition: '${{ steps.count_active_events.output.activeCount > 0 }}'
         steps:
           - name: foreach_significant_event
             type: foreach
@@ -331,7 +372,7 @@ steps:
               ${{
                 steps.store_significant_events.output.significant_events
                   | default: []
-                  | where: 'status', 'open'
+                  | where: 'status', 'active'
                   | reject: 'written', false
                   | default: [] }}
             iteration-on-failure:
@@ -339,54 +380,22 @@ steps:
             steps:
               - name: gate_investigatable_severity
                 type: if
-                condition: '${{ foreach.item.event_uuid != null and consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
+                condition: '${{ foreach.item.event_id != null and consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
                 steps:
-                  - name: resolve_open_event
-                    type: elasticsearch.request
+                  # Reads the latest current-state version per event_id from `.rule-events`.
+                  - name: resolve_active_event
+                    type: kibana.request
                     with:
-                      method: POST
-                      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
-                      body:
-                        size: 1
-                        sort:
-                          - '@timestamp':
-                              order: desc
-                        query:
-                          bool:
-                            filter:
-                              - term:
-                                  kibana.space_ids: '{{ variables.spaceId }}'
-                              - term:
-                                  event_id: '{{ foreach.item.event_id }}'
+                      method: GET
+                      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events?event_id={{ foreach.item.event_id | url_encode }}&perPage=1'
+                      headers:
+                        x-elastic-internal-origin: 'kibana'
                     on-failure:
                       continue: true
 
-                  # Skip events that already have an investigation attached. events_write carries
-                  # the investigations lineage forward on re-open, so any version of the event_id
-                  # that carries an investigations entry means this episode was already investigated.
-                  # The field is a mapped object, so an `exists` filter matches only versions that
-                  # actually carry an entry (an empty investigations array does not count).
-                  - name: check_prior_investigation
-                    type: elasticsearch.request
-                    with:
-                      method: POST
-                      path: '/{{ consts.EVENTS_INDEX }}/_count?ignore_unavailable=true'
-                      body:
-                        query:
-                          bool:
-                            filter:
-                              - term:
-                                  kibana.space_ids: '{{ variables.spaceId }}'
-                              - term:
-                                  event_id: '{{ foreach.item.event_id }}'
-                              - exists:
-                                  field: investigations
-                    on-failure:
-                      continue: true
-
-                  # Fire-and-forget a root-cause investigation for each newly-opened event that
+                  # Fire-and-forget a root-cause investigation for each newly-active event that
                   # has not been investigated before. Async so discovery (45m) never blocks on the
-                  # investigation (60m). concurrency_key per event_id ensures a re-opened event
+                  # investigation (60m). concurrency_key per event_id ensures a reactivated event
                   # cancels the prior in-progress investigation rather than queuing alongside it
                   # (cancel-in-progress / max:1 in the investigation workflow).
                   # Skip the launch when the event lookup fails or misses: the investigation
@@ -394,39 +403,39 @@ steps:
                   - name: guard_resolved_event
                     type: if
                     condition: >-
-                      ${{ steps.resolve_open_event.error == null
-                        and steps.resolve_open_event.output.hits.hits[0] != null }}
+                      ${{ steps.resolve_active_event.error == null
+                        and steps.resolve_active_event.output.hits[0] != null }}
                     steps:
-                      # The dedupe gate lives on this wrapping `if` step because
-                      # `workflow.executeAsync` does not support an inline `if`
-                      # (it is silently stripped during schema parsing).
+                      # Keep the dedupe condition as a wrapping step so an investigation starts
+                      # only after event deduplication.
                       - name: guard_missing_investigation
                         type: if
                         condition: >-
-                          ${{ steps.check_prior_investigation.error != null
-                            or steps.check_prior_investigation.output.count == 0 }}
+                          ${{ (steps.resolve_active_event.output.hits[0].investigations | size | default: 0) == 0 }}
                         steps:
                           - name: trigger_investigation
-                            type: workflow.executeAsync
+                            type: nightshift.triggerInvestigation
                             with:
-                              workflow-id: 'system-significant-events-investigation'
-                              inputs:
-                                message: |
-                                  {{ steps.resolve_open_event.output.hits.hits[0]._source.title }}
+                              subject_type: significant_event
+                              subject_id: '{{ foreach.item.event_id }}'
+                              message: |
+                                {{ steps.resolve_active_event.output.hits[0].title | truncate: 512, '' }}
 
-                                  {{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}
+                                {{ steps.resolve_active_event.output.hits[0].summary | truncate: 7000, '' }}
 
-                                  Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis }}
-                                stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
-                                concurrency_key: '{{ foreach.item.event_id }}'
-                                context:
-                                  source: 'significant_event'
-                                  trigger_type: 'automatic'
-                                  event_uuid: '{{ foreach.item.event_uuid }}'
-                                  event_id: '{{ foreach.item.event_id }}'
-                                  status: '{{ foreach.item.status }}'
-                                  causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
-                                  blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
+                                Probable cause: {{ steps.resolve_active_event.output.hits[0].symptom_hypothesis | truncate: 2000, '' }}
+                              title: '{{ steps.resolve_active_event.output.hits[0].title }}'
+                              summary: '{{ steps.resolve_active_event.output.hits[0].summary }}'
+                              stream_names: '${{ steps.resolve_active_event.output.hits[0].stream_names | default: [] }}'
+                              concurrency_key: '{{ foreach.item.event_id }}'
+                              trigger_type: automatic
+                              context:
+                                event_id: '{{ foreach.item.event_id }}'
+                                status: '{{ foreach.item.status }}'
+                                causal_features: '${{ steps.resolve_active_event.output.hits[0].causal_features | default: [] }}'
+                                blast_radius: '${{ steps.resolve_active_event.output.hits[0].blast_radius | default: [] }}'
+                            on-failure:
+                              continue: true
 
   - name: output_result
     type: workflow.output

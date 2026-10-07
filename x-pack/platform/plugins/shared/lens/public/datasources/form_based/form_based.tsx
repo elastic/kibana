@@ -85,6 +85,7 @@ import {
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
   getPrecisionErrorWarningMessages,
+  getCustomRankLastValueSortFieldWarningMessages,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -196,6 +197,7 @@ export function columnToOperation(
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
+    ...(column.customLabel ? { customLabel: true } : {}),
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
     hasReducedTimeRange: Boolean(reducedTimeRange),
@@ -848,6 +850,12 @@ export function getFormBasedDatasource({
         core.docLinks
       );
 
+      const customRankLastValueSortFieldWarningMsg = getCustomRankLastValueSortFieldWarningMessages(
+        state,
+        framePublicAPI,
+        setState
+      );
+
       const infoMessages = getNotifiableFeatures(state, framePublicAPI, visualizationInfo);
 
       return layerErrorMessages.concat(
@@ -855,6 +863,7 @@ export function getFormBasedDatasource({
         timeShiftWarningMessages,
         precisionErrorWarningMsg,
         unsupportedOpsWarningMsg,
+        customRankLastValueSortFieldWarningMsg,
         infoMessages
       );
     },

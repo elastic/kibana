@@ -12,7 +12,6 @@ import { FtrService } from '../ftr_provider_context';
 
 export class NewsfeedPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
-  private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
@@ -41,8 +40,13 @@ export class NewsfeedPageObject extends FtrService {
     return await this.testSubjects.exists('newsfeedSidebar');
   }
 
+  async waitForNewsfeedPanelOpen() {
+    this.log.debug('waitForNewsfeedPanelOpen');
+    return await this.testSubjects.waitForExists('newsfeedSidebar');
+  }
+
   async getRedButtonSign() {
-    return await this.find.existsByCssSelector('.euiHeaderSectionItemButton__notification--dot');
+    return await this.testSubjects.exists('headerActionButtonNotification');
   }
 
   async getNewsfeedList() {
@@ -57,7 +61,8 @@ export class NewsfeedPageObject extends FtrService {
     return objects;
   }
 
-  async openNewsfeedEmptyPanel() {
-    return await this.testSubjects.exists('emptyNewsfeed');
+  async waitForNewsfeedEmptyPanel() {
+    this.log.debug('waitForNewsfeedEmptyPanel');
+    return await this.testSubjects.waitForExists('emptyNewsfeed');
   }
 }

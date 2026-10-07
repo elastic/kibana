@@ -12,6 +12,7 @@ import type { ComponentProps } from 'react';
 import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   ChromeLayout,
@@ -202,6 +203,232 @@ export const WithLongSecondaryMenuTitle: StoryObj<PropsAndArgs> = {
             }
           : item
       ),
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [],
+    },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+const longLabel = '[Metrics Kubernetes] Pods CPU and memory usage dashboard with namespace filter';
+
+export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Long Secondary Item Labels',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    // Highlighted rows render EuiButton (semiBold) instead of EuiButtonEmpty.
+    activeItemId: 'long-new',
+    items: {
+      primaryItems: [
+        {
+          id: 'truncation-demo',
+          label: 'Dashboards',
+          iconType: 'dashboardApp',
+          href: '/dashboards',
+          sections: [
+            {
+              id: 'truncation-section',
+              label: 'Recently viewed',
+              items: [
+                {
+                  id: 'long-new',
+                  label: longLabel,
+                  href: '/dashboards/long-new',
+                  badgeType: 'new',
+                },
+                {
+                  id: 'long-beta',
+                  label: longLabel,
+                  href: '/dashboards/long-beta',
+                  badgeType: 'beta',
+                },
+                {
+                  id: 'long-tech-preview',
+                  label: longLabel,
+                  href: '/dashboards/long-tech-preview',
+                  badgeType: 'techPreview',
+                },
+                {
+                  id: 'long-alone',
+                  label: longLabel,
+                  href: '/dashboards/long-alone',
+                },
+                {
+                  id: 'long-external',
+                  label: longLabel,
+                  href: '/dashboards/long-external',
+                  isExternal: true,
+                },
+                {
+                  id: 'long-external-beta',
+                  label: longLabel,
+                  href: '/dashboards/long-external-beta',
+                  isExternal: true,
+                  badgeType: 'beta',
+                },
+                {
+                  id: 'short-new',
+                  label: 'Overview',
+                  href: '/dashboards/short-new',
+                  badgeType: 'new',
+                },
+                {
+                  id: 'short-tech-preview',
+                  label: 'Hosts',
+                  href: '/dashboards/short-tech-preview',
+                  badgeType: 'techPreview',
+                },
+                {
+                  id: 'short-alone',
+                  label: 'Alerts',
+                  href: '/dashboards/short-alone',
+                },
+                {
+                  id: 'short-external',
+                  label: 'Traces',
+                  href: '/dashboards/short-external',
+                  isExternal: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'alerts',
+          label: 'Alerts',
+          iconType: 'bell',
+          href: '/alerts',
+        },
+      ],
+      footerItems: [],
+      overflowItems: [
+        {
+          id: 'more-long-tech-preview',
+          label: longLabel,
+          iconType: 'machineLearningApp',
+          href: '/ml/overview',
+          badgeType: 'techPreview',
+          sections: [
+            {
+              id: 'ml-section',
+              items: [{ id: 'ml-overview', label: 'Overview', href: '/ml/overview' }],
+            },
+          ],
+        },
+        {
+          id: 'more-long',
+          label: longLabel,
+          iconType: 'gear',
+          href: '/ml/jobs',
+          sections: [
+            {
+              id: 'jobs-section',
+              items: [{ id: 'ml-jobs', label: 'Jobs', href: '/ml/jobs' }],
+            },
+          ],
+        },
+        {
+          id: 'more-short-new',
+          label: 'SLOs',
+          iconType: 'chartGauge',
+          href: '/slos',
+          badgeType: 'new',
+          sections: [
+            {
+              id: 'slos-section',
+              items: [{ id: 'slos-overview', label: 'Overview', href: '/slos' }],
+            },
+          ],
+        },
+      ],
+    },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+export const WithLongPopoverItemLabels: StoryObj<PropsAndArgs> = {
+  ...WithLongSecondaryItemLabels,
+  name: 'Navigation with Long Popover Item Labels',
+  args: { ...WithLongSecondaryItemLabels.args, isCollapsed: true },
+};
+
+// Mirrors a user who hid most items: the More menu overflows the popover max height,
+// and Customize navigation stays pinned below the scrolling list.
+export const WithCustomizeNavigation: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Customize Navigation',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    items: {
+      primaryItems: PRIMARY_MENU_ITEMS.slice(0, 1),
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [
+        ...PRIMARY_MENU_ITEMS.slice(1),
+        ...Array.from({ length: 12 }, (_, index) => ({
+          id: `hidden_item_${index + 1}`,
+          label: `Hidden Item ${index + 1}`,
+          iconType: 'empty',
+          href: `/hidden-${index + 1}`,
+        })),
+      ],
+    },
+    onCustomizeNavigation: action('onCustomizeNavigation'),
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+const scrollableSecondaryItem = {
+  id: 'scrollable-secondary',
+  label: 'Dashboards',
+  iconType: 'dashboardApp',
+  href: '/scrollable-secondary',
+  sections: ['Recently viewed', 'Favorites', 'Shared with me'].map(
+    (sectionLabel, sectionIndex) => ({
+      id: `scrollable-section-${sectionIndex + 1}`,
+      label: sectionLabel,
+      items: Array.from({ length: 15 }, (_, itemIndex) => ({
+        id: `scrollable-section-${sectionIndex + 1}-item-${itemIndex + 1}`,
+        label: `${sectionLabel} dashboard ${itemIndex + 1}`,
+        href: `/scrollable-secondary/${sectionIndex + 1}/${itemIndex + 1}`,
+      })),
+    })
+  ),
+};
+
+// The secondary menu overflows the side panel (expanded) and the popover (collapsed)
+export const WithScrollableSecondaryMenu: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Scrollable Secondary Menu',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    activeItemId: 'scrollable-section-1-item-1',
+    items: {
+      primaryItems: [scrollableSecondaryItem, ...PRIMARY_MENU_ITEMS.slice(1)],
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
       overflowItems: [],
     },

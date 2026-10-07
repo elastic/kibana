@@ -38,24 +38,24 @@ describe('encryptTelemetry', () => {
   it('encrypts payload', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: true });
-    expect(createRequestEncryptor).toBeCalledWith(telemetryJWKS);
+    expect(createRequestEncryptor).toHaveBeenCalledWith(telemetryJWKS);
   });
 
   it('uses kibana1 kid on { useProdKey: true }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: true });
-    expect(mockEncrypt).toBeCalledWith('kibana1', payload);
+    expect(mockEncrypt).toHaveBeenCalledWith('kibana1', payload);
   });
 
   it('uses kibana_dev1 kid on { useProdKey: false }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: false });
-    expect(mockEncrypt).toBeCalledWith('kibana_dev1', payload);
+    expect(mockEncrypt).toHaveBeenCalledWith('kibana_dev1', payload);
   });
 
   it('should fallback to { useProdKey: false }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload);
-    expect(mockEncrypt).toBeCalledWith('kibana_dev1', payload);
+    expect(mockEncrypt).toHaveBeenCalledWith('kibana_dev1', payload);
   });
 });
