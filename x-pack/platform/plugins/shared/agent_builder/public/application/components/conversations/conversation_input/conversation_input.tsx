@@ -34,6 +34,7 @@ import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
+import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import {
   useAgentId,
   useConversationReadOnly,
@@ -91,6 +92,12 @@ const composerFocusShadowStyles = (euiThemeContext: UseEuiTheme) => css`
       ${euiShadowHover(euiThemeContext, 'xl')}
     }
   }
+`;
+
+// In dark mode the wrapper's shadow draws a border overlay over the shell, hiding its focus border.
+const shellStyles = ({ euiTheme }: UseEuiTheme) => css`
+  position: relative;
+  z-index: ${Number(euiTheme.levels.content) + 1};
 `;
 
 const wrapperWithHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -161,6 +168,7 @@ const InputContainer: React.FC<
         isDisabled={isDisabled}
         isCollapsed={isCollapsed}
         suppressShadow
+        css={shellStyles}
         data-test-subj="agentBuilderConversationInputForm"
         aria-label={containerAriaLabel}
       >
@@ -322,6 +330,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
+  const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled =
@@ -334,6 +343,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     isSendingUserMessage ||
     isCreatingConversation ||
     !isAgentIdValid ||
+    isAgentModelLoading ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
 
