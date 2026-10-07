@@ -37,6 +37,7 @@ export const investigationTemplate: TemplateDefinition = {
     services,
     escalationsEnabled,
     makeLazyWithProviders,
+    groupedAttachments,
     renderAssignees,
     renderStatus,
   }) => {
@@ -132,6 +133,7 @@ export const investigationTemplate: TemplateDefinition = {
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
       templateId,
+      groupedAttachments,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'magnifyExclamation',
       renderAssignees,

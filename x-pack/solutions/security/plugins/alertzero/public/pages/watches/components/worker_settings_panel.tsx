@@ -31,7 +31,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ServiceAccountField } from './service_account_field';
 import type { AlertZeroStartDependencies } from '../../../types';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
@@ -110,10 +109,9 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const handleHardGateChange = useCallback((ok: boolean) => {
     setHardGateOk(ok);
   }, []);
-  // A worker that is already on can be turned off. Turning one on requires an account.
-  // Hunt also hard-blocks enable when ML/bootstrap supply prerequisites are unmet.
-  const cannotEnable =
-    (!enabled && !settings.serviceAccountId) || (isHuntWorker && !hardGateOk && !enabled);
+  // Hunt hard-blocks turning on when ML/bootstrap supply prerequisites are unmet.
+  // Already-on workers can still be turned off.
+  const cannotEnable = isHuntWorker && !hardGateOk && !enabled;
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -322,31 +320,6 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           onHardGateChange={handleHardGateChange}
         />
       ) : null}
-      <SettingRow
-        label={settingsI18n.SERVICE_ACCOUNT_LABEL}
-        labelHelp={settingsI18n.SERVICE_ACCOUNT_HELP}
-        data-test-subj={`alertZeroServiceAccountRow-${worker.id}`}
-      >
-        <ServiceAccountField
-          workerId={worker.id}
-          workerName={name}
-          current={settings.serviceAccountId}
-          isDisabled={controlsDisabled}
-          onChange={(serviceAccountId) => onSettingsChange({ serviceAccountId })}
-        />
-        {enabled && !settings.serviceAccountId ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText
-              size="xs"
-              color="danger"
-              data-test-subj={`alertZeroServiceAccountRequired-${worker.id}`}
-            >
-              <p>{settingsI18n.SERVICE_ACCOUNT_REQUIRED_TO_SAVE}</p>
-            </EuiText>
-          </>
-        ) : null}
-      </SettingRow>
       <SettingRow
         label={settingsI18n.AUTONOMY_SECTION_TITLE}
         labelHelp={autonomyIntro}

@@ -160,6 +160,7 @@ dependsOn:
   - '@kbn/workflows-yaml'
   - '@kbn/tooling-log'
   - '@kbn/test'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
