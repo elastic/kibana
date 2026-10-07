@@ -52,6 +52,23 @@ describe('spec failure seeding', () => {
     ]);
     expect(hasUnresolvedFailures(failed, false)).toBe(true);
   });
+  it('routes no unresolved failures when a teardown error follows a normal interactive close', () => {
+    const failed: string[] = getSpecFailureSeed(true, 'a.cy.ts');
+    const infraFailed: string[] = [];
+    const records = routeGroupFailure({
+      specFilePaths: ['a.cy.ts'],
+      completedSpecFilePaths: ['a.cy.ts'],
+      failedSpecFilePaths: failed,
+      infraFailedSpecFilePaths: infraFailed,
+      message: 'Elasticsearch failed to stop cleanly',
+      isRetryRun: false,
+    });
+
+    expect(records).toEqual([]);
+    expect(failed).toEqual([]);
+    expect(infraFailed).toEqual([]);
+    expect(hasUnresolvedFailures(failed, false)).toBe(false);
+  });
 });
 
 describe('hasUnresolvedFailures', () => {

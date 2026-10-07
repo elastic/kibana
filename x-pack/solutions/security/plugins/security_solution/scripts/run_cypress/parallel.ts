@@ -50,7 +50,7 @@ import {
   hasUnresolvedFailures,
   routeGroupFailure,
 } from './group_failure_routing';
-import { routeRunResult, runWithAssertionRetry } from './cypress_run_result';
+import { hasFailedTests, routeRunResult, runWithAssertionRetry } from './cypress_run_result';
 
 const filterCompletedSpecs = async (
   specFiles: string[],
@@ -571,6 +571,13 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                     env: cyCustomEnv,
                   },
                 });
+
+                // The interactive session closed normally: treat the spec as
+                // completed so a later teardown error in `isOpen` mode is not
+                // routed as an unresolved spec failure.
+                if (!completedSpecFilePaths.includes(filePath)) {
+                  completedSpecFilePaths.push(filePath);
+                }
               } else {
                 const runResult = await runWithAssertionRetry({
                   execute: executeCypressRun,
@@ -687,20 +694,6 @@ ${specGroups
           log.error(e);
         }
 
-        const hasFailedTests = (
-          runResults: Array<
-            | CypressCommandLine.CypressFailedRunResult
-            | CypressCommandLine.CypressRunResult
-            | undefined
-          >
-        ) =>
-          _.some(
-            runResults,
-            (runResult) =>
-              (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-              (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
-          );
-
         const hasFailedRetryTests = hasFailedTests(retryResults);
 
         // Successful retries must not mask failures from other specs.
@@ -759,20 +752,6 @@ ${specGroups
           log.error('Failed to render summary table');
           log.error(e);
         }
-
-        const hasFailedTests = (
-          runResults: Array<
-            | CypressCommandLine.CypressFailedRunResult
-            | CypressCommandLine.CypressRunResult
-            | undefined
-          >
-        ) =>
-          _.some(
-            runResults,
-            (runResult) =>
-              (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-              (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
-          );
 
         const hasFailedRetryTests = hasFailedTests(retryResults);
 

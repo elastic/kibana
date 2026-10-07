@@ -20,6 +20,13 @@ export const isCypressFailedRunResult = (
 export const isSuccessfulRun = (result: RunResult): result is CypressCommandLine.CypressRunResult =>
   Boolean(result && 'runs' in result && Array.isArray(result.runs) && result.totalFailed === 0);
 
+/** A run is failed when the runner failed, or when it is not a verifiably successful run. */
+export const isFailedRun = (result: RunResult): boolean =>
+  isCypressFailedRunResult(result) || !isSuccessfulRun(result);
+
+export const hasFailedTests = (runResults: RunResult[]): boolean =>
+  runResults.some((result) => isFailedRun(result));
+
 export const classifyRunResult = (
   result: RunResult,
   spec: string,
@@ -91,8 +98,11 @@ export const routeRunResult = ({
   completedSpecFilePaths: string[];
 }): boolean => {
   if (isSuccessfulRun(result)) {
-    const index = failedSpecFilePaths.indexOf(spec);
-    if (index !== -1) failedSpecFilePaths.splice(index, 1);
+    let index = failedSpecFilePaths.indexOf(spec);
+    while (index !== -1) {
+      failedSpecFilePaths.splice(index, 1);
+      index = failedSpecFilePaths.indexOf(spec);
+    }
     completedSpecFilePaths.push(spec);
     return true;
   }

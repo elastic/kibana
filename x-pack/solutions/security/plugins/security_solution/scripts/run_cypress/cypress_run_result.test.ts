@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { isSuccessfulRun, routeRunResult, runWithAssertionRetry } from './cypress_run_result';
+import {
+  hasFailedTests,
+  isSuccessfulRun,
+  routeRunResult,
+  runWithAssertionRetry,
+} from './cypress_run_result';
 import type { RunResult } from './cypress_run_result';
 import { hasUnresolvedFailures } from './group_failure_routing';
 
@@ -44,6 +49,33 @@ describe('Cypress result routing', () => {
   );
   it('does not accept an absent totalFailed as success', () => {
     expect(isSuccessfulRun({ runs: [] } as unknown as RunResult)).toBe(false);
+  });
+  it.each([
+    ['a failed runner result', [runnerFailure], true],
+    ['a run with totalFailed > 0', [assertion], true],
+    ['a malformed result with no runs and no status', [{} as unknown as RunResult], true],
+    ['an undefined result', [undefined], true],
+    ['a successful run', [success], false],
+    ['a successful run alongside a failed one', [success, runnerFailure], true],
+  ])('hasFailedTests counts %p as failed: %p', (_, results, expected) => {
+    expect(hasFailedTests(results)).toBe(expected);
+  });
+  it('removes every occurrence of a spec from failedSpecFilePaths after success', () => {
+    const failedSpecFilePaths = ['a', 'b', 'a'];
+    const infraFailedSpecFilePaths: string[] = [];
+    const completedSpecFilePaths: string[] = [];
+    expect(
+      routeRunResult({
+        result: success,
+        spec: 'a',
+        failedSpecFilePaths,
+        infraFailedSpecFilePaths,
+        completedSpecFilePaths,
+      })
+    ).toBe(true);
+    expect(failedSpecFilePaths).toEqual(['b']);
+    // 'b' never got a successful result, so it must stay unresolved.
+    expect(hasUnresolvedFailures(failedSpecFilePaths, false)).toBe(true);
   });
   it('keeps an assertion failure after an unrelated successful infra retry', () => {
     const failedSpecFilePaths = ['assertion', 'infra'];
