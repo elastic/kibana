@@ -14,6 +14,7 @@ import type {
 } from '@kbn/scout';
 import {
   getActionPoliciesApiService,
+  getActionPolicySavedObjectService,
   getAlertActionsApiService,
   getAlertActionsEventsService,
   getDispatcherApiService,
@@ -27,6 +28,7 @@ import {
   getTelemetryService,
   getWorkflowsApiService,
   type ActionPoliciesApiService,
+  type ActionPolicySavedObjectService,
   type AlertActionsApiService,
   type AlertActionsEventsService,
   type DispatcherApiService,
@@ -54,6 +56,7 @@ export interface AlertingApiServices {
   alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
   actionPolicies: ActionPoliciesApiService;
+  actionPolicySavedObject: ActionPolicySavedObjectService;
   maintenanceWindows: MaintenanceWindowsApiService;
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
@@ -93,6 +96,7 @@ export const buildAlertingApiServices = ({
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
     actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
+    actionPolicySavedObject: getActionPolicySavedObjectService({ esClient, log, config }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),
     ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
