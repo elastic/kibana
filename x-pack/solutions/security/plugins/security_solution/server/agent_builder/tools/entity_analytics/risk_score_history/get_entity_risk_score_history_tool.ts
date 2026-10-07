@@ -245,7 +245,10 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
           entityType,
         });
         if (!resolved.ok) {
-          return { results: resolved.results };
+          if (resolved.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolved.result.data.message);
+          }
+          return { results: [resolved.result] };
         }
 
         const { identifierType, identifier, entityStoreId } = resolved.identity;
