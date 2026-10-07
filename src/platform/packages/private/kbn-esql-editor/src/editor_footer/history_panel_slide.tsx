@@ -7,76 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
-const prefersReducedMotion = () =>
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 /** Slides the recent-queries panel open and closed. */
-export function HistoryPanelSlide({
+export const HistoryPanelSlide = ({
   isOpen,
   children,
 }: {
   isOpen: boolean;
   children: React.ReactNode;
-}): JSX.Element | null {
+}): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-  const [isMounted, setIsMounted] = useState(isOpen);
-  const [isExpanded, setIsExpanded] = useState(isOpen);
-  const hasExpandedRef = useRef(isOpen);
+  const hasBeenOpenRef = useRef(isOpen);
+  hasBeenOpenRef.current ||= isOpen;
 
-  useEffect(() => {
-    if (isOpen) {
-      setIsMounted(true);
-      const frame = window.requestAnimationFrame(() => {
-        hasExpandedRef.current = true;
-        setIsExpanded(true);
-      });
-      return () => window.cancelAnimationFrame(frame);
-    }
-
-    setIsExpanded(false);
-    // No transition will run, so nothing would fire transitionend to unmount the panel.
-    if (!hasExpandedRef.current || prefersReducedMotion()) setIsMounted(false);
-    hasExpandedRef.current = false;
-  }, [isOpen]);
-
-  if (!isMounted) return null;
+  const transition = `${euiTheme.animation.normal} ${euiTheme.animation.resistance}`;
 
   return (
     <div
       data-test-subj="ESQLEditor-history-panel-slide"
-      data-expanded={isExpanded ? 'true' : 'false'}
-      inert={isExpanded ? undefined : ''}
-      onTransitionEnd={(event) => {
-        if (
-          event.target === event.currentTarget &&
-          event.propertyName === 'grid-template-rows' &&
-          !isOpen
-        ) {
-          setIsMounted(false);
-        }
-      }}
+      data-expanded={isOpen}
       css={css`
         display: grid;
         flex: 0 0 auto;
         width: 100%;
-        overflow: hidden;
-        grid-template-rows: ${isExpanded ? '1fr' : '0fr'};
+        grid-template-rows: ${isOpen ? '1fr' : '0fr'};
+        visibility: ${isOpen ? 'visible' : 'hidden'};
         @media (prefers-reduced-motion: no-preference) {
-          transition: grid-template-rows ${euiTheme.animation.normal}
-            ${euiTheme.animation.resistance};
-        }
-        > div {
-          min-block-size: 0;
-          overflow: hidden;
+          transition: grid-template-rows ${transition}, visibility ${transition};
         }
       `}
     >
-      <div>{children}</div>
+      <div css={{ minBlockSize: 0, overflow: 'hidden' }}>{hasBeenOpenRef.current && children}</div>
     </div>
   );
-}
+};

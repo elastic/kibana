@@ -8,116 +8,38 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { HistoryPanelSlide } from './history_panel_slide';
 
 const panel = () => screen.getByTestId('ESQLEditor-history-panel-slide');
 
-const fireTransitionEnd = (target: HTMLElement) => {
-  const event = new Event('transitionend', { bubbles: true });
-  Object.defineProperty(event, 'propertyName', { value: 'grid-template-rows' });
-  target.dispatchEvent(event);
-};
+const renderSlide = (isOpen: boolean) => (
+  <HistoryPanelSlide isOpen={isOpen}>
+    <div>Recent queries</div>
+  </HistoryPanelSlide>
+);
 
 describe('HistoryPanelSlide', () => {
-  const originalMatchMedia = window.matchMedia;
+  it('does not render children until it has been opened', () => {
+    render(renderSlide(false));
 
-  afterEach(() => {
-    window.matchMedia = originalMatchMedia;
-  });
-
-  it('stays unmounted while recent queries are hidden', () => {
-    render(
-      <HistoryPanelSlide isOpen={false}>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-
+    expect(panel()).toHaveAttribute('data-expanded', 'false');
     expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
   });
 
-  it('slides open after painting a collapsed frame', async () => {
-    const { rerender } = render(
-      <HistoryPanelSlide isOpen={false}>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-
-    rerender(
-      <HistoryPanelSlide isOpen>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-
-    expect(panel()).toHaveAttribute('data-expanded', 'false');
-
-    await act(async () => {
-      await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
-    });
+  it('renders children and expands when opened', () => {
+    const { rerender } = render(renderSlide(false));
+    rerender(renderSlide(true));
 
     expect(panel()).toHaveAttribute('data-expanded', 'true');
-  });
-
-  it('stays mounted until its own slide-out finishes', () => {
-    const { rerender } = render(
-      <HistoryPanelSlide isOpen>
-        <div data-test-subj="child">Recent queries</div>
-      </HistoryPanelSlide>
-    );
-
-    rerender(
-      <HistoryPanelSlide isOpen={false}>
-        <div data-test-subj="child">Recent queries</div>
-      </HistoryPanelSlide>
-    );
-    expect(panel()).toHaveAttribute('data-expanded', 'false');
-
-    act(() => {
-      fireTransitionEnd(screen.getByTestId('child'));
-    });
     expect(screen.getByText('Recent queries')).toBeInTheDocument();
-
-    act(() => {
-      fireTransitionEnd(panel());
-    });
-    expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
   });
 
-  it('unmounts at once when closed before it expanded', () => {
-    const { rerender } = render(
-      <HistoryPanelSlide isOpen={false}>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
+  it('keeps children mounted but collapsed when closed again', () => {
+    const { rerender } = render(renderSlide(true));
+    rerender(renderSlide(false));
 
-    rerender(
-      <HistoryPanelSlide isOpen>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-    rerender(
-      <HistoryPanelSlide isOpen={false}>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-
-    expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
-  });
-
-  it('unmounts at once when reduced motion is preferred', () => {
-    window.matchMedia = jest.fn().mockReturnValue({ matches: true });
-    const { rerender } = render(
-      <HistoryPanelSlide isOpen>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-
-    rerender(
-      <HistoryPanelSlide isOpen={false}>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-
-    expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
+    expect(panel()).toHaveAttribute('data-expanded', 'false');
+    expect(screen.getByText('Recent queries')).toBeInTheDocument();
   });
 });
