@@ -56,7 +56,7 @@ const ALL_WORKERS_RESPONSE = {
 
 const selectServiceAccount = () => {
   fireEvent.click(screen.getByTestId('alertZeroServiceAccountSelect-onboarding'));
-  fireEvent.click(screen.getByRole('button', { name: 'Select service account' }));
+  fireEvent.click(screen.getByTestId('alertZeroMockServiceAccountPickerSelect'));
 };
 
 const enabledWorkerBody = JSON.stringify({
@@ -106,7 +106,11 @@ const renderPage = ({
           }: {
             onSelect: (account: { id: string } | null) => void;
           }) => (
-            <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
+            <button
+              type="button"
+              data-test-subj="alertZeroMockServiceAccountPickerSelect"
+              onClick={() => onSelect({ id: 'account-a' })}
+            >
               Select service account
             </button>
           ),
@@ -233,7 +237,7 @@ describe('OnboardingPage', () => {
     });
 
     expect(screen.getByTestId('alertZeroOnboardingModifyForbidden')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+    expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled();
     expect(
       screen.getByTestId(
         `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
@@ -275,11 +279,11 @@ describe('OnboardingPage', () => {
       renderPage({ canWrite: true });
 
       expect(screen.getByText(/Workers run as the service account you select/)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled();
 
       selectServiceAccount();
 
-      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toBeDisabled();
     });
 
     it('recommends keeping all Watches enabled', () => {
@@ -340,7 +344,7 @@ describe('OnboardingPage', () => {
       const { history } = renderPage({ canWrite: true, httpPatch });
 
       selectServiceAccount();
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() => expect(history.location.pathname).toBe('/watches'));
       expect(httpPatch).toHaveBeenCalledTimes(6);
@@ -358,24 +362,24 @@ describe('OnboardingPage', () => {
       renderPage({ canWrite: true, httpPatch });
 
       selectServiceAccount();
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       // While all six PATCHes are pending, the button must be disabled.
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).toHaveAttribute('disabled')
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toHaveAttribute('disabled')
       );
 
       // The Watch settings link must not navigate away mid-save.
       expect(screen.getByTestId('alertZeroOnboardingWatchSettingsLink')).toBeDisabled();
 
       // A second click while in-flight must not trigger additional requests.
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
       expect(httpPatch).toHaveBeenCalledTimes(6);
 
       // Resolve all pending PATCHes and verify the button re-enables.
       resolvers.forEach((r) => r());
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toHaveAttribute(
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toHaveAttribute(
           'disabled'
         )
       );
@@ -386,13 +390,13 @@ describe('OnboardingPage', () => {
       const { history } = renderPage({ canWrite: true, httpPatch });
 
       selectServiceAccount();
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       // Wait for the entire save to settle (button stops loading) before asserting
       // that navigation did not occur — checking immediately after httpPatch fires
       // can race against the still-running allSettled fan-out.
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toHaveAttribute(
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toHaveAttribute(
           'disabled'
         )
       );
@@ -425,12 +429,12 @@ describe('OnboardingPage', () => {
         );
 
       selectServiceAccount();
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toBeDisabled()
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
       await waitFor(() => expect(attackDiscoveryCalls()).toHaveLength(2));
       const retry = attackDiscoveryCalls()[1];
       if (!retry?.[1]?.body) {
@@ -465,7 +469,7 @@ describe('OnboardingPage', () => {
       const { application } = renderPage({ canWrite: true, httpPatch });
 
       selectServiceAccount();
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       // While PATCHes are pending the Back button must be disabled.
       await waitFor(() =>
@@ -504,7 +508,7 @@ describe('OnboardingPage', () => {
       fireEvent.click(toggles[1]);
 
       selectServiceAccount();
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() =>
         expect(httpPatch).toHaveBeenCalledWith(
@@ -553,7 +557,7 @@ describe('OnboardingPage', () => {
       const { history } = renderPage({ canWrite: true, httpPatch, serverWorkers });
 
       selectServiceAccount();
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() => expect(history.location.pathname).toBe('/watches'));
       // Only the 5 present workers should be PATCHed — not the skill-gated absent one.
@@ -570,7 +574,7 @@ describe('OnboardingPage', () => {
 
       expect(screen.getByTestId('alertZeroOnboardingNoWorkersAvailable')).toBeInTheDocument();
       expect(screen.queryByRole('switch')).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled();
     });
 
     it('does not count the absent worker toward the last-enabled guard', () => {
@@ -618,7 +622,11 @@ describe('OnboardingPage', () => {
               }: {
                 onSelect: (account: { id: string } | null) => void;
               }) => (
-                <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
+                <button
+                  type="button"
+                  data-test-subj="alertZeroMockServiceAccountPickerSelect"
+                  onClick={() => onSelect({ id: 'account-a' })}
+                >
                   Select service account
                 </button>
               ),
@@ -651,7 +659,7 @@ describe('OnboardingPage', () => {
       const toggles = screen.getAllByRole('switch');
       fireEvent.click(toggles[0]);
       selectServiceAccount();
-      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toBeDisabled();
 
       // Simulate a background workers refetch that removes the sole checked worker (Attack Discovery).
       // Update the http mock so the next fetch returns only Alert Triage (B), then force a refetch.
@@ -667,7 +675,7 @@ describe('OnboardingPage', () => {
       // enabledCount is now 0: only Alert Triage (B) remains and the user had checked it off.
       // The Enable button must be disabled so no empty PATCH fan-out can be submitted.
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled()
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled()
       );
     });
   });
