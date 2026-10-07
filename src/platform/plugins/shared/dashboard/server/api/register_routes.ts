@@ -55,5 +55,5 @@ export function registerRoutes(
 
   const unversionedRouter = core.http.createRouter<RequestHandlerContext>();
   registerTrackUserActivityRoute(unversionedRouter);
-  registerChangeHistoryRoute(deps, core, unversionedRouter);
+  registerChangeHistoryRoute(core, unversionedRouter);
 }

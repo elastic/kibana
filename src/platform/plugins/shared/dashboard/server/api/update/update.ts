@@ -49,7 +49,8 @@ export async function update(
   updateBody: DashboardState,
   serverTiming?: RequestTiming,
   spaceId: string = 'default',
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  restoredFrom?: number
 ): Promise<{
   body: DashboardCreateResponseBody | DashboardUpdateResponseBody;
   operation: Operation;
@@ -152,6 +153,7 @@ export async function update(
         current: savedObject.attributes.historySequence ?? INITIAL_HISTORY_SEQUENCE,
       },
       timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+      restoredFrom,
     });
   } catch (e) {
     // if update failed, let's attempt to roll back the access mode change if we changed it

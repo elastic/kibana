@@ -12,6 +12,10 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ChangeDetailsResponse } from '../../server/change_history/register_details_route';
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
 import type { DashboardApi } from '../dashboard_api/types';
+import { dashboardClient } from '../dashboard_client';
+import { coreServices } from '../services/kibana_services';
+import { DashboardUpdateResponseBody } from '@kbn/dashboard-plugin/server';
+import { DASHBOARD_APP_API_VERSION } from '@kbn/dashboard-plugin/common/constants';
 
 const BASE_HISTORY_PATH = `/internal/dashboard/change_history` as const;
 
@@ -25,6 +29,7 @@ export const createDashboardChangeHistoryAdapter = (
         query: { page: page.index + 1, per_page: page.size },
         signal,
       });
+      console.log({ response });
       if (dashboardApi && dashboardApi.hasUnsavedChanges$.getValue()) {
         // the first item is always the most recent
         response.items[0] = {
@@ -55,16 +60,32 @@ export const createDashboardChangeHistoryAdapter = (
   },
   restoreChange: dashboardApi
     ? async ({ objectId, changeId, signal }) => {
+        console.log('RESTORE!!!!!!!!!!!!!!!!!!!!');
         try {
           const response = await http.get<ChangeDetailsResponse>(
-            `${BASE_HISTORY_PATH}/${objectId}/${changeId}`,
+            `${BASE_HISTORY_PATH}/${objectId}/restore/${changeId}`,
             {
               signal,
             }
           );
-          // console.log({ response });
-          dashboardApi.setState(response.snapshot);
-          dashboardApi.runQuickSave();
+          console.log({ response });
+          // const response = await http.get<ChangeDetailsResponse>(
+          //   `${BASE_HISTORY_PATH}/${objectId}/${changeId}`,
+          //   {
+          //     signal,
+          //   }
+          // );
+          // // console.log({ response });
+          // // dashboardApi.setState(response.snapshot);
+          // const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
+          //   buildDashboardAppPath(objectId),
+          //   {
+          //     version: DASHBOARD_APP_API_VERSION,
+          //     body: JSON.stringify(response.snapshot),
+          //   }
+          // );
+
+          // dashboardApi.runQuickSave();
           // const result = await dashboardClient.update(objectId, response.snapshot);
           // dashboardApi.onSave$.next({
           //   objectId,
@@ -74,6 +95,7 @@ export const createDashboardChangeHistoryAdapter = (
 
           // console.log({ result });
         } catch (e) {
+          console.log({ e });
           throw mapChangeHistoryHttpError(e);
         }
       }

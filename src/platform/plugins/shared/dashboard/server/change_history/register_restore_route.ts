@@ -10,10 +10,12 @@
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import { getChangeHistoryClient } from './change_history_service';
 import { spacesService } from '../kibana_services';
+import { update } from '../api/update/update';
 
 const detailsResponseSchema = z.object({
   id: z.string(),
@@ -28,10 +30,10 @@ const detailsResponseSchema = z.object({
 });
 export type ChangeDetailsResponse = z.infer<typeof detailsResponseSchema>;
 
-export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext>) => {
+export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext>) => {
   router.get(
     {
-      path: '/internal/dashboard/change_history/{id}/{changeId}',
+      path: '/internal/dashboard/change_history/{id}/restore/{changeId}',
       validate: {
         request: {
           params: z
@@ -40,12 +42,6 @@ export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext
               changeId: z.string(),
             })
             .strict(),
-        },
-        response: {
-          200: {
-            body: () => detailsResponseSchema,
-            description: 'success',
-          },
         },
       },
       security: {
@@ -56,6 +52,7 @@ export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext
       },
     },
     async (ctx, req, res) => {
+      console.log('HERE!!!!!!!!!!!!!!!!');
       const core = await ctx.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
@@ -89,26 +86,18 @@ export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext
         return res.notFound();
       }
 
-      const { items: currentHistoryItem } = await client.getHistory(
-        spaceId,
-        'dashboard',
+      const result = await update(
+        ctx,
+        getDashboardStateSchema(true, true),
         req.params.id,
-        {
-          size: 1,
-        }
+        item.object.snapshot as DashboardState,
+        undefined,
+        spacesService?.getSpaceId(req),
+        true,
+        item.object.sequence
       );
-      const currentHistoryId = currentHistoryItem[0]?.event.id;
-
-      return res.ok({
-        body: {
-          id: req.params.changeId,
-          timestamp: item['@timestamp'],
-          actor: item.user,
-          action: item.event.action,
-          snapshot: item.object.snapshot,
-          isCurrent: item.event.id === currentHistoryId,
-        },
-      });
+      console.log({ result });
+      return res.ok();
     }
   );
 };

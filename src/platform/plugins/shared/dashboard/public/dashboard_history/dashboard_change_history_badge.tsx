@@ -21,7 +21,7 @@ const DashboardChangeHistoryBadge = ({
   item: ChangeHistoryListItem;
 }): JSX.Element | null => {
   const { euiTheme } = useEuiTheme();
-  console.log('!!!!!!!', { item });
+
   if (item.metadata?.unsavedChanges) {
     return (
       <EuiBadge color={euiTheme.colors.backgroundLightWarning}>
@@ -42,8 +42,8 @@ const DashboardChangeHistoryBadge = ({
         </EuiFlexItem>
         {item.metadata?.version ? (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
-              {i18n.translate('workflows.changeHistory.versionBadge', {
+            <EuiBadge color="hollow">
+              {i18n.translate('dashboard.changeHistory.versionBadge', {
                 defaultMessage: 'v{version}',
                 values: { version: item.metadata!.version as number },
               })}
@@ -56,8 +56,8 @@ const DashboardChangeHistoryBadge = ({
 
   if (item.metadata!.version) {
     return (
-      <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
-        {i18n.translate('workflows.changeHistory.versionBadge', {
+      <EuiBadge color="hollow">
+        {i18n.translate('dashboard.changeHistory.versionBadge', {
           defaultMessage: 'v{version}',
           values: { version: item.metadata!.version as number },
         })}

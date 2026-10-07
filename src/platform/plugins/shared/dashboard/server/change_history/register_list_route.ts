@@ -9,13 +9,15 @@
 import * as jsondiffpatch from 'jsondiffpatch';
 import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 
+import { i18n } from '@kbn/i18n';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
-import type { SetupDeps, StartDeps } from '../plugin';
+import type { StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
 import { getChangeHistoryClient } from './change_history_service';
+import { spacesService } from '../kibana_services';
 
 const listResponseSchema = z.object({
   items: z.array(
@@ -33,7 +35,6 @@ const listResponseSchema = z.object({
 export type HistoryListResponse = z.infer<typeof listResponseSchema>;
 
 export const registerHistoryListRoute = (
-  services: SetupDeps,
   coreSetup: CoreSetup<StartDeps, DashboardPluginStart>,
   router: IRouter<RequestHandlerContext>
 ) => {
@@ -91,7 +92,7 @@ export const registerHistoryListRoute = (
       } catch {
         return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
       }
-      const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
+      const spaceId = spacesService?.getSpaceId(req) ?? 'default';
 
       const { total, items } = await client.getHistory(
         spaceId,
@@ -131,6 +132,14 @@ export const registerHistoryListRoute = (
                 id: user.id,
               },
               ...(changes ? { changes: { count: changes.length } } : {}),
+              ...('restoredFrom' in (item.metadata ?? {})
+                ? {
+                    comment: i18n.translate('dashboard.changeHistory.versionBadge', {
+                      defaultMessage: 'Restored from v{version}',
+                      values: { version: item.metadata!.restoredFrom as number },
+                    }),
+                  }
+                : {}),
               metadata: {
                 version: item.object.sequence,
               },

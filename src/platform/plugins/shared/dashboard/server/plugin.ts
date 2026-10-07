@@ -30,7 +30,6 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ChangeHistoryClient } from '@kbn/change-history';
-import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { SpacesPluginStartApi } from '@kbn/spaces-plugin/server/plugin';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -64,7 +63,6 @@ export interface SetupDeps {
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
-  spaces?: SpacesPluginSetup; // TODO: remove this
 }
 
 export interface StartDeps {

@@ -22,6 +22,7 @@ export const addToHistory = async ({
   snapshot,
   timestamp,
   sequence,
+  restoredFrom,
 }: {
   ctx: RequestHandlerContext;
   spaceId: string | undefined;
@@ -29,6 +30,7 @@ export const addToHistory = async ({
   snapshot: DashboardState;
   timestamp: string;
   sequence: { previous?: number; current: number };
+  restoredFrom?: number;
 }) => {
   const core = await ctx.core;
   const user = core.security.authc.getCurrentUser();
@@ -63,6 +65,7 @@ export const addToHistory = async ({
     username: user.username,
     userProfileId: user.profile_uid,
     spaceId,
+    ...(typeof restoredFrom === 'number' && { data: { metadata: { restoredFrom } } }),
   });
   // return res.ok();
 };
