@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   type Worker,
   type WorkerSettings,
   type WorkerSettingsWrite,
@@ -37,6 +38,7 @@ import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
 import { FeatureSettingsLink } from './feature_settings_link';
 import { ViewExecutionsLink } from './view_executions_link';
+import { ThreatIntelSupplySection } from './threat_intel_supply_section';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -102,8 +104,15 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
+  const isHuntWorker = worker.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
+  const [hardGateOk, setHardGateOk] = useState(true);
+  const handleHardGateChange = useCallback((ok: boolean) => {
+    setHardGateOk(ok);
+  }, []);
   // A worker that is already on can be turned off. Turning one on requires an account.
-  const cannotEnable = !enabled && !settings.serviceAccountId;
+  // Hunt also hard-blocks enable when ML/bootstrap supply prerequisites are unmet.
+  const cannotEnable =
+    (!enabled && !settings.serviceAccountId) || (isHuntWorker && !hardGateOk && !enabled);
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -304,6 +313,13 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             <p>{error}</p>
           </EuiText>
         </>
+      ) : null}
+      {isHuntWorker ? (
+        <ThreatIntelSupplySection
+          canWrite={canWrite}
+          isSaving={isSaving}
+          onHardGateChange={handleHardGateChange}
+        />
       ) : null}
       <SettingRow
         label={settingsI18n.SERVICE_ACCOUNT_LABEL}

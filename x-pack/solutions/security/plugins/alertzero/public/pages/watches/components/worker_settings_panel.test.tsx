@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,12 +15,53 @@ import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
 import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   type Worker,
 } from '@kbn/alertzero-common';
 import { WorkerSettingsPanel } from './worker_settings_panel';
 
+jest.mock('../../../hooks/use_hunt_threat_intel_supply', () => ({
+  useHuntThreatIntelSupplyStatus: jest.fn(() => ({
+    data: {
+      huntEnabled: false,
+      drift: false,
+      hardGate: { ok: true, reasonCodes: [] },
+      workflows: [
+        {
+          key: 'ingest',
+          workflowId: 'ingest',
+          enabled: false,
+          installed: true,
+          scope: 'deployment',
+        },
+        {
+          key: 'enrich',
+          workflowId: 'enrich',
+          enabled: false,
+          installed: true,
+          scope: 'deployment',
+        },
+        {
+          key: 'attribute',
+          workflowId: 'attribute',
+          enabled: false,
+          installed: true,
+          scope: 'space',
+        },
+      ],
+    },
+    isLoading: false,
+  })),
+  useRestoreHuntThreatIntelSupply: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
 const WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const HUNT_WORKER_ID = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 /** Not `<workerId>-<spaceId>`, so a client that rebuilds that convention fails this test. */
 const WORKFLOW_ID = 'opaque-installed-workflow';
 
@@ -255,5 +296,89 @@ describe('WorkerSettingsPanel header band title', () => {
       .querySelector('.euiAccordion__button');
 
     expect(accordionButton).toHaveStyleRule('min-width', '0');
+  });
+});
+
+describe('WorkerSettingsPanel Hunt threat intel supply', () => {
+  const { useHuntThreatIntelSupplyStatus } = jest.requireMock(
+    '../../../hooks/use_hunt_threat_intel_supply'
+  ) as {
+    useHuntThreatIntelSupplyStatus: jest.Mock;
+  };
+
+  const renderHuntPanel = () => {
+    const core = coreMock.createStart();
+    core.http.get.mockResolvedValue(undefined);
+    core.application.getUrlForApp.mockReturnValue('/app/workflows');
+    core.settings.client.get.mockReturnValue(true);
+    core.settings.client.get$.mockReturnValue(of(true));
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      advancedSettings: { show: true, save: true },
+      workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
+    };
+
+    const huntWorker: Worker = {
+      id: HUNT_WORKER_ID,
+      name: 'Continuous Threat Hunt',
+      watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
+      enabled: false,
+      lastRun: null,
+      state: 'ok',
+      settingsRevision: 1,
+      workflowId: null,
+      settings: {
+        workerId: HUNT_WORKER_ID,
+        autonomy: 'manual',
+        serviceAccountId: 'sa-1',
+      },
+    };
+
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={core}>
+          <WorkerSettingsPanel
+            worker={huntWorker}
+            isAccordion={false}
+            isExpanded
+            onToggle={jest.fn()}
+            enabled={false}
+            settings={huntWorker.settings}
+            warningReasons={[]}
+            settingsLocked={false}
+            isSaving={false}
+            canWrite
+            onEnabledChange={jest.fn()}
+            onSettingsChange={jest.fn()}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+  };
+
+  it('renders the threat intel supply section for Hunt', () => {
+    renderHuntPanel();
+    expect(screen.getByTestId('alertZeroThreatIntelSupplySection')).toBeInTheDocument();
+  });
+
+  it('omits the threat intel supply section for non-Hunt workers', () => {
+    renderPanel(WORKFLOW_ID, false);
+    expect(screen.queryByTestId('alertZeroThreatIntelSupplySection')).not.toBeInTheDocument();
+  });
+
+  it('disables Enabled when the hard-gate fails', async () => {
+    useHuntThreatIntelSupplyStatus.mockReturnValue({
+      data: {
+        huntEnabled: false,
+        drift: false,
+        hardGate: { ok: false, reasonCodes: ['embedding_endpoint_unavailable'] },
+        workflows: [],
+      },
+      isLoading: false,
+    });
+    renderHuntPanel();
+    await waitFor(() => {
+      expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${HUNT_WORKER_ID}`)).toBeDisabled();
+    });
   });
 });
