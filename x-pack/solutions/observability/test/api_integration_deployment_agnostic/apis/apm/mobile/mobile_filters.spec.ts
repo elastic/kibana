@@ -280,6 +280,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         // huaweiP2 runs os version '11'.
         expect(getOptions(response, MobileProperty.OsVersion)).to.eql(['10']);
       });
+
+      it('returns no network connection types', () => {
+        // Empty rather than ['wifi'] because synthtrace writes
+        // `network.connection.*` onto http spans only, never onto error
+        // documents. Asserted regardless: if the aggregation regressed to
+        // querying spans, span-derived values would show up here.
+        expect(getOptions(response, MobileProperty.NetworkConnectionType)).to.eql([]);
+      });
     });
   });
 }
