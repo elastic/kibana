@@ -47,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ),
       ]);
 
+      await PageObjects.discover.setQueryMode('classic');
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.common.navigateToApp('landingPage');
 
