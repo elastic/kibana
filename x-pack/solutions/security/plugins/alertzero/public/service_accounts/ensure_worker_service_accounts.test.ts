@@ -135,6 +135,16 @@ describe('ensureWorkerServiceAccounts', () => {
     expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
   });
 
+  it('reports a failure when the lookup after a conflict also fails', async () => {
+    const { http, get, serviceAccounts } = setup();
+    serviceAccounts.create.mockRejectedValueOnce(httpError(409));
+    get.mockRejectedValueOnce(httpError(503, 'Service unavailable'));
+
+    const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE]);
+
+    expect(results.get(TRIAGE)).toEqual({ ok: false, error: 'Service unavailable' });
+  });
+
   it('fails only the worker whose role cannot be created', async () => {
     const { http, put, serviceAccounts } = setup();
     put.mockImplementation(async (url: string) => {

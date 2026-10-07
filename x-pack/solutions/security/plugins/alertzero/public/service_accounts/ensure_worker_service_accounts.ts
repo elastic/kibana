@@ -105,9 +105,15 @@ const ensureOne = async (
     return { ok: true, serviceAccountId: created.id };
   } catch (error) {
     if (!isConflict(error)) return { ok: false, error: toMessage(error) };
-    // Created concurrently, for example from another tab.
-    const concurrent = findByName(await listAccounts(http), definition.name);
-    return concurrent ? toResult(concurrent) : { ok: false, error: toMessage(error) };
+    // Created concurrently, for example from another tab. A failed lookup is reported like any
+    // other failure, so callers always get a result for this worker.
+    return listAccounts(http).then(
+      (current): WorkerServiceAccountResult => {
+        const concurrent = findByName(current, definition.name);
+        return concurrent ? toResult(concurrent) : { ok: false, error: toMessage(error) };
+      },
+      (listError): WorkerServiceAccountResult => ({ ok: false, error: toMessage(listError) })
+    );
   }
 };
 
