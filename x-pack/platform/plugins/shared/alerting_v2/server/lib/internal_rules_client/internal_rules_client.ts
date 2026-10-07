@@ -15,8 +15,13 @@ import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import { partition } from 'lodash';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { AlertingServerStartDependencies, InternalRulesClientApi } from '../../types';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import { EventOriginToken } from '../event_origin/token';
 import type { BulkByIdsParams, BulkResponse } from '../rules_client';
 import { RulesClient } from '../rules_client';
@@ -40,6 +45,7 @@ import { createInternalUserRequest } from './internal_user_request';
 @injectable()
 export class InternalRulesClient implements InternalRulesClientApi {
   private readonly internalSavedObjectsClient: SavedObjectsClientContract;
+  private readonly logger: LoggerServiceContract;
 
   constructor(
     @inject(CoreStart('injection')) private readonly injection: CoreDiServiceStart,
@@ -48,11 +54,13 @@ export class InternalRulesClient implements InternalRulesClientApi {
     private readonly spaces: SpacesPluginStart,
     /** Must search every namespace, i.e. be backed by an internal repository. */
     @inject(RulesSavedObjectServiceInternalToken)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.internalSavedObjectsClient = savedObjects.getUnsafeInternalClient({
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
     });
+    this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   public async bulkDisableRules({ ids }: BulkByIdsParams): Promise<BulkResponse> {
@@ -142,7 +150,14 @@ export class InternalRulesClient implements InternalRulesClientApi {
 
       return await fn(scope.get(RulesClient));
     } finally {
-      await scope.unbindAllAsync();
+      // A failed release must not fail a disable that already succeeded.
+      await scope.unbindAllAsync().catch((error) => {
+        this.logger.warn({
+          message: () => `Failed to release the internal rules client scope for space ${spaceId}`,
+          error,
+          code: ALERTING_LOG_CODES.INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED,
+        });
+      });
     }
   }
 }

@@ -10,7 +10,7 @@ import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { ALERTING_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import { EventOriginToken, type EventOrigin } from '../event_origin/token';
 import { RulesClient } from '../rules_client';
 import type { BulkResponse } from '../rules_client';
@@ -18,6 +18,7 @@ import { createRulesClient } from '../rules_client/rules_client.mock';
 import { createRulesSavedObjectServiceMock } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { RulesFindAllResultItem } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RuleSavedObjectsClientToken } from '../services/rules_saved_object_service/tokens';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { createRuleSoAttributes } from '../test_utils';
 import { InternalRulesClient } from './internal_rules_client';
@@ -37,7 +38,8 @@ interface ScopeSnapshot {
 
 const setup = (
   found: RulesFindAllResultItem[],
-  bulkDisableBySpace: Record<string, () => Promise<BulkResponse>> = {}
+  bulkDisableBySpace: Record<string, () => Promise<BulkResponse>> = {},
+  releaseFails = false
 ) => {
   const savedObjects = coreMock.createStart().savedObjects;
   const internalSoClient = savedObjects.getUnsafeInternalClient();
@@ -62,7 +64,10 @@ const setup = (
   const injection = {
     fork: jest.fn(() => {
       const scope = new Container();
-      jest.spyOn(scope, 'unbindAllAsync');
+      const unbind = jest.spyOn(scope, 'unbindAllAsync');
+      if (releaseFails) {
+        unbind.mockRejectedValue(new Error('release failed'));
+      }
       scopes.push(scope);
       scope.bind(RulesClient).toDynamicValue(({ get }) => {
         const spaceId = get(RequestSpaceIdToken);
@@ -83,9 +88,17 @@ const setup = (
     getContainer: jest.fn(),
   };
 
-  const client = new InternalRulesClient(injection, savedObjects, spaces, rulesSavedObjectService);
+  const { loggerService, mockLogger } = createLoggerService();
+  const client = new InternalRulesClient(
+    injection,
+    savedObjects,
+    spaces,
+    rulesSavedObjectService,
+    loggerService
+  );
   return {
     client,
+    mockLogger,
     findByIds: rulesSavedObjectService.findByIds,
     bulkDisableRules,
     snapshots,
@@ -185,6 +198,22 @@ describe('InternalRulesClient', () => {
       for (const scope of scopes) {
         expect(scope.unbindAllAsync).toHaveBeenCalledTimes(1);
       }
+    });
+
+    it('returns the disable when releasing the space scope fails', async () => {
+      const { client, mockLogger } = setup([foundRule('rule-1', ['default'])], {}, true);
+
+      const result = await client.bulkDisableRules({ ids: ['rule-1'] });
+
+      expect(result).toEqual({ affected_count: 1, errors: [] });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED,
+          }),
+        })
+      );
     });
 
     it('rejects more than MAX_BULK_ITEMS unique ids before reading any rule', async () => {

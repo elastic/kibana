@@ -126,10 +126,10 @@ export interface AlertingPublisherContext {
    */
   readonly request: KibanaRequest;
   /**
-   * Who made the change. Absent means `user`. Subscribers that need the
-   * caller's credentials (e.g. workflow scheduling) must skip `internal`.
+   * Who made the change. Subscribers that need the caller's credentials
+   * (e.g. workflow scheduling) must skip `internal`.
    */
-  readonly origin?: EventOrigin;
+  readonly origin: EventOrigin;
 }
 
 /**
