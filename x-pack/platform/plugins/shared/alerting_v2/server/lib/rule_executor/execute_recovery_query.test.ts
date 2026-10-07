@@ -17,6 +17,7 @@ import { buildGroupHash } from './build_alert_events';
 import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 import { executeRecoveryQuery } from './execute_recovery_query';
+import { RULE_EXECUTION_REASONS, resolveReasonForError } from './execution_outcome';
 
 describe('executeRecoveryQuery', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
@@ -195,6 +196,30 @@ describe('executeRecoveryQuery', () => {
     expect((error as QueryResponseSizeExceededError).queryType).toBe('recovery');
   });
 
+  it('tags content-length-exceeded errors as recovery_query_failed', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await executeRecoveryQuery({
+      queryService,
+      logger: loggerService,
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
+      effectiveQuery: 'FROM logs-*',
+      input: createRuleExecutionInput(),
+      activeGroupHashes: toActive(['hash-1']),
+      breachedGroupHashes: new Set(),
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
+    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED);
+  });
+
   it('does not mark ResponseError(503) recovery query errors as TaskErrorSource.USER', async () => {
     const { queryService, scopedEsClient } = setup();
 
@@ -239,6 +264,30 @@ describe('executeRecoveryQuery', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(getErrorSource(error as Error)).toBeUndefined();
+  });
+
+  it('tags failures as recovery_query_failed without losing the task error source', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.ResponseError({ statusCode: 400 } as DiagnosticResult)
+    );
+
+    const error = await executeRecoveryQuery({
+      queryService,
+      logger: loggerService,
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
+      effectiveQuery: 'FROM logs-* | WHERE invalid syntax',
+      input: createRuleExecutionInput(),
+      activeGroupHashes: toActive(['hash-1']),
+      breachedGroupHashes: new Set(),
+    }).catch((e: Error) => e);
+
+    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
   });
 
   it('forwards the executionContext abort signal to the recovery ES|QL call', async () => {
