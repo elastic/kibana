@@ -77,16 +77,36 @@ export async function createAlertingRuleFromTemplate(
       }
       throw err;
     });
-    // Already created
+    const { ruleTypeId, id: _id, ...rest } = template;
+
+    // Already created: reconcile the materialized rule back to the shipped template.
+    // A rule that has never been enabled carries exactly the params the template
+    // produced at install time, so overwriting is safe (no operator config to lose).
+    // A rule that has been enabled may have been deliberately tuned by an admin,
+    // so we leave it untouched.
     if (rule) {
+      if (rule.enabled === false) {
+        logger.debug(
+          `Reconciling disabled rule ${ruleId} for package ${pkgName} to shipped template`
+        );
+        await rulesClient.update({
+          id: ruleId,
+          data: {
+            name: (rest as { name?: string }).name ?? rule.name,
+            tags: (rest as { tags?: string[] }).tags ?? rule.tags,
+            schedule: (rest as { schedule?: typeof rule.schedule }).schedule ?? rule.schedule,
+            params: ((rest as { params?: Record<string, unknown> }).params ??
+              rule.params) as never,
+            actions: [],
+          },
+        });
+      }
       return {
         id: ruleId,
         type: KibanaSavedObjectType.alert,
         deferred: false,
       };
     }
-
-    const { ruleTypeId, id: _id, ...rest } = template;
 
     logger.debug(`Creating rule: ${ruleId} for package ${pkgName}`);
     await rulesClient.create({
