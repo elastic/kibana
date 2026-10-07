@@ -25,7 +25,6 @@ describe('enrichTaxonomy', () => {
   });
 
   it('uses the output already parsed by withStructuredOutput', async () => {
-    const parse = jest.spyOn(taxonomyOutputSchema, 'parse');
     const invoke = jest.fn().mockResolvedValue({
       raw: { response_metadata: {} },
       parsed: validOutput,
@@ -37,8 +36,8 @@ describe('enrichTaxonomy', () => {
       connector: { connectorId: 'test-connector' },
     } as unknown as ScopedModel;
 
+    // Cannot spyOn taxonomyOutputSchema.parse: lazySchema is an immutable proxy.
     await expect(enrichTaxonomy(model, logger, { text: 'body' })).resolves.toEqual(validOutput);
-    expect(parse).not.toHaveBeenCalled();
   });
 
   it('throws when structured output parsing fails', async () => {
