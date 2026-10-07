@@ -81299,6 +81299,11 @@ paths:
                         maxLogsPerWindowCapBehavior: defer
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
+                        nonPriority:
+                          error: null
+                          lastExecutionTimestamp: '2026-04-10T08:26:00.000Z'
+                          samplingRate: null
+                          status: started
                         status: started
                         timeout: 25s
                         timestampField: '@timestamp'
@@ -152008,7 +152013,7 @@ components:
           type: string
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
           nullable: true
           type: object
           properties:
@@ -152018,7 +152023,7 @@ components:
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
@@ -152597,7 +152602,7 @@ components:
           description: The grouping mode for alert notifications.
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
           type: object
           properties:
             expression:
@@ -152606,7 +152611,7 @@ components:
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
@@ -152905,7 +152910,7 @@ components:
           description: The grouping mode for alert notifications.
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
           type: object
           properties:
             expression:
@@ -152914,7 +152919,7 @@ components:
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
@@ -153496,7 +153501,7 @@ components:
           nullable: true
         matcher:
           additionalProperties: false
-          description: 'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.'
+          description: 'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.'
           nullable: true
           type: object
           properties:
@@ -153506,7 +153511,7 @@ components:
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1

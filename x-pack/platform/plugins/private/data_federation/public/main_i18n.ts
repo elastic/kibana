@@ -260,4 +260,15 @@ export const mainTranslations = {
       defaultMessage: 'Delete failed',
     }),
   },
+
+  refreshDataSetsErrorTitle: i18n.translate('xpack.dataFederation.refreshDataSets.errorTitle', {
+    defaultMessage: 'Could not refresh the datasets list',
+  }),
+
+  refreshDataSourcesErrorTitle: i18n.translate(
+    'xpack.dataFederation.refreshDataSources.errorTitle',
+    {
+      defaultMessage: 'Could not refresh the data sources list',
+    }
+  ),
 } as const;

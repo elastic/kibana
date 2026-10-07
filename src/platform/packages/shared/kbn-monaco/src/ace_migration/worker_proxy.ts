@@ -9,6 +9,7 @@
 
 import { monaco } from '../monaco_imports';
 import type { ParserWorker, ParseResult } from './types';
+import { getWorker } from '../languages/worker_factory';
 
 export class WorkerProxyService<IWorker extends ParserWorker> {
   private worker: monaco.editor.MonacoWebWorker<IWorker> | undefined;
@@ -23,7 +24,7 @@ export class WorkerProxyService<IWorker extends ParserWorker> {
   }
 
   public setup(langId: string) {
-    this.worker = monaco.editor.createWebWorker({ label: langId, moduleId: '' });
+    this.worker = monaco.editor.createWebWorker({ worker: Promise.resolve(getWorker(langId)) });
   }
 
   public stop() {
