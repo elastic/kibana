@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { OriginIsomerProjection, RoundCompleteEvent } from '@kbn/agent-builder-common';
+import type { OriginIsomerProjection } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
+import type { Spec } from '../spec/pack';
 import type { AttachmentSpecMapping } from '../spec/resolve_spec';
 
 /** What a projection needs to render a round. */
@@ -23,9 +24,6 @@ export interface IsomerProjectionDefinition<
 > {
   /** Origin type whose rounds get this projection. */
   id: TOrigin;
-  /** Renders the projection of a `round_complete` event, or nothing when it can't. */
-  render: (
-    event: RoundCompleteEvent,
-    context: ProjectionContext
-  ) => OriginIsomerProjection[TOrigin];
+  /** Renders the reply's spec, with its attachments resolved, for the surface. */
+  render: (spec: Spec) => NonNullable<OriginIsomerProjection[TOrigin]>;
 }

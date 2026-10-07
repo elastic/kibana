@@ -5,71 +5,16 @@
  * 2.0.
  */
 
-import * as isomerSlack from '@elastic/isomer-sdk/slack';
-import {
-  ChatEventType,
-  ConversationRoundStatus,
-  type ConversationRound,
-  type RoundCompleteEvent,
-} from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { loggerMock } from '@kbn/logging-mocks';
-import type { ProjectionContext } from '../projections/types';
 import { slackProjection } from '.';
 
-jest.mock('@elastic/isomer-sdk/slack', () => ({
-  ...jest.requireActual('@elastic/isomer-sdk/slack'),
-  renderSlackEnvelope: jest.fn(jest.requireActual('@elastic/isomer-sdk/slack').renderSlackEnvelope),
-}));
-
-const conversationUrl = 'http://localhost:5601/app/agent_builder/agents/a/conversations/c';
-
-const createRound = (message: string): ConversationRound => ({
-  id: 'round-1',
-  status: ConversationRoundStatus.completed,
-  input: { message: 'user message' },
-  response: { message },
-  steps: [],
-  started_at: '2026-10-06T00:00:00.000Z',
-  time_to_first_token: 0,
-  time_to_last_token: 0,
-  model_usage: { connector_id: 'unknown', input_tokens: 0, output_tokens: 0, llm_calls: 0 },
-});
-
-const esqlAttachment: VersionedAttachment = {
-  id: 'a1',
-  type: 'esql',
-  current_version: 1,
-  versions: [
-    {
-      version: 1,
-      data: { query: 'FROM logs | LIMIT 10' },
-      created_at: '2026-10-06T00:00:00.000Z',
-      content_hash: 'hash',
-    },
-  ],
-};
-
-const createRoundCompleteEvent = (
-  message: string,
-  attachments: VersionedAttachment[] = []
-): RoundCompleteEvent => ({
-  type: ChatEventType.roundComplete,
-  data: { round: createRound(message), attachments },
-});
-
-const createOptions = (overrides: Partial<ProjectionContext> = {}): ProjectionContext => ({
-  getMapping: () => undefined,
-  getConversationUrl: () => conversationUrl,
-  logger: loggerMock.create(),
-  ...overrides,
-});
-
 describe('slackProjection', () => {
-  it('renders the reply as Block Kit', () => {
-    const event = createRoundCompleteEvent('There are **3** [alerts](https://example.com).');
+  it('renders the spec as Block Kit', () => {
+    const spec = {
+      type: 'view' as const,
+      body: [{ type: 'markdown' as const, text: 'There are **3** [alerts](https://example.com).' }],
+    };
 
-    expect(slackProjection.render(event, createOptions())).toEqual({
+    expect(slackProjection.render(spec)).toEqual({
       text: expect.any(String),
       blocks: [
         {
@@ -78,49 +23,5 @@ describe('slackProjection', () => {
         },
       ],
     });
-  });
-
-  it('renders mapped attachments in place of their tags', () => {
-    const event = createRoundCompleteEvent(
-      'Here is the query:\n\n<render_attachment id="a1" version="1" />',
-      [esqlAttachment]
-    );
-    const options = createOptions({
-      getMapping: () => (data) => ({
-        type: 'view',
-        body: [{ type: 'markdown', text: `\`${(data as { query: string }).query}\`` }],
-      }),
-    });
-
-    const slack = slackProjection.render(event, options);
-
-    expect(JSON.stringify(slack)).toContain('FROM logs | LIMIT 10');
-    expect(JSON.stringify(slack)).not.toContain('render_attachment');
-  });
-
-  it('links unmapped attachments to Kibana', () => {
-    const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
-
-    const slack = slackProjection.render(event, createOptions());
-
-    expect(JSON.stringify(slack)).toContain(`<${conversationUrl}|View in Kibana>`);
-    expect(JSON.stringify(slack)).not.toContain('render_attachment');
-  });
-
-  it('renders nothing when rendering fails', () => {
-    jest.mocked(isomerSlack.renderSlackEnvelope).mockImplementationOnce(() => {
-      throw new Error('boom');
-    });
-    const logger = loggerMock.create();
-    const event = createRoundCompleteEvent('Hello');
-
-    expect(slackProjection.render(event, createOptions({ logger }))).toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
-  });
-
-  it('renders nothing when the reply is empty', () => {
-    const event = createRoundCompleteEvent('');
-
-    expect(slackProjection.render(event, createOptions())).toBeUndefined();
   });
 });

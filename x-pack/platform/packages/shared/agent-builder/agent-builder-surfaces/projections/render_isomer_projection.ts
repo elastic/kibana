@@ -11,18 +11,26 @@ import type {
   RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { slackProjection } from '../slack';
+import { replyToSpec } from '../spec/reply_to_spec';
+import { resolveSpec } from '../spec/resolve_spec';
 import type { ProjectionContext, IsomerProjectionDefinition } from './types';
 
 /** The projections of rounds, one per origin type. */
 const projectionDefinitions: IsomerProjectionDefinition[] = [slackProjection];
 
 /**
- * Renders the projection of the round's origin through Isomer. Returns nothing when the origin
- * has no projection, or it can't be rendered.
+ * Renders the projection of the round's origin through Isomer: the reply becomes a spec, its
+ * attachments are resolved, and the origin's definition renders it. Returns nothing when the
+ * origin has no projection, the reply is empty, or rendering fails.
  */
 export const renderIsomerProjection = (
-  event: RoundCompleteEvent,
-  { originType, ...context }: ProjectionContext & { originType?: ConversationOriginType }
+  { data: { round, attachments = [] } }: RoundCompleteEvent,
+  {
+    originType,
+    getMapping,
+    getConversationUrl,
+    logger,
+  }: ProjectionContext & { originType?: ConversationOriginType }
 ): OriginIsomerProjection | undefined => {
   const definition = projectionDefinitions.find(({ id }) => id === originType);
 
@@ -30,11 +38,27 @@ export const renderIsomerProjection = (
     return undefined;
   }
 
-  const projection = definition.render(event, context);
+  try {
+    const spec = replyToSpec(round.response.message);
 
-  if (!projection) {
+    if (!spec) {
+      return undefined;
+    }
+
+    const resolved = resolveSpec(spec, {
+      attachments,
+      attachmentRefs: round.input.attachment_refs,
+      getMapping,
+      conversationUrl: getConversationUrl(),
+      logger,
+    });
+
+    return { [definition.id]: definition.render(resolved) };
+  } catch (error) {
+    logger.warn(
+      `Failed to render the ${definition.id} projection, leaving it out: ${error.message}`
+    );
+
     return undefined;
   }
-
-  return { [definition.id]: projection };
 };
