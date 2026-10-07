@@ -1,5 +1,5 @@
 {
-  "sha1": "9d9294722bbdcb2417f0fa8e7520b9faa9965cd9",
+  "sha1": "71fb40362d797a18420cabeb2cc5839952c67516",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 332,
+        "line": 333,
         "column": 23
       }
     },
@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 345,
+        "line": 346,
         "column": 16
       }
     },
@@ -48,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 361,
+        "line": 362,
         "column": 21
       }
     },
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 384,
+        "line": 385,
         "column": 23
       }
     },
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 401,
+        "line": 402,
         "column": 14
       }
     },
@@ -96,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 441,
+        "line": 442,
         "column": 17
       }
     },

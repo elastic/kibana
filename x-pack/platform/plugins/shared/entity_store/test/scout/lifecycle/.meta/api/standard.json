@@ -1,5 +1,5 @@
 {
-  "sha1": "a9614a6606dfff20c70bfefd70496ff33ceff582",
+  "sha1": "d8c8309d31bfba74e0c9df8c12a88ac59ad78c51",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -469,8 +469,8 @@
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-1e886910e4426bc",
-      "title": "Entity Store install / update API tests logExtraction is mandatory on update",
+      "id": "d1ac35cbfabb8dd-5b6b2505dad5ad0",
+      "title": "Entity Store install / update API tests update requires logExtraction or historySnapshot",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -501,8 +501,8 @@
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-96e718a66e0f3df",
-      "title": "Entity Store install / update API tests install rejects unknown body keys",
+      "id": "d1ac35cbfabb8dd-9cf44f270656754",
+      "title": "Entity Store install / update API tests Update should change history snapshot interval and retention",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -517,6 +517,38 @@
       }
     },
     {
+      "id": "d1ac35cbfabb8dd-b78646e6d164755",
+      "title": "Entity Store install / update API tests update rejects a history snapshot interval shorter than 1 hour",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 258,
+        "column": 13
+      }
+    },
+    {
+      "id": "d1ac35cbfabb8dd-96e718a66e0f3df",
+      "title": "Entity Store install / update API tests install rejects unknown body keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 266,
+        "column": 15
+      }
+    },
+    {
       "id": "d1ac35cbfabb8dd-e1c3c58630a074b",
       "title": "Entity Store install / update API tests update rejects unknown body keys",
       "expectedStatus": "passed",
@@ -528,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 276,
+        "column": 21
       }
     },
     {
@@ -544,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 172,
-        "column": 16
+        "line": 290,
+        "column": 5
       }
     },
     {
@@ -560,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 181,
-        "column": 21
+        "line": 295,
+        "column": 55
       }
     },
     {
@@ -837,6 +869,38 @@
       }
     },
     {
+      "id": "7464d46f8495c10-b9b534b02eb8f97",
+      "title": "Entity Store per-process configuration and control runs both processes in one forced extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 233,
+        "column": 16
+      }
+    },
+    {
+      "id": "7464d46f8495c10-9c725821c35df78",
+      "title": "Entity Store per-process configuration and control rejects running all processes for a type with one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 245,
+        "column": 17
+      }
+    },
+    {
       "id": "7464d46f8495c10-d3769cc1dbcbd66",
       "title": "Entity Store per-process configuration and control rejects a forced extraction process the type does not run",
       "expectedStatus": "passed",
@@ -848,8 +912,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 238,
-        "column": 7
+        "line": 254,
+        "column": 13
       }
     },
     {
@@ -864,8 +928,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 249,
-        "column": 16
+        "line": 276,
+        "column": 13
       }
     },
     {
@@ -880,7 +944,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 273,
+        "line": 298,
         "column": 7
       }
     },
@@ -896,8 +960,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 295,
-        "column": 5
+        "line": 319,
+        "column": 25
       }
     },
     {
