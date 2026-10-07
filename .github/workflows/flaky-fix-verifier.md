@@ -155,7 +155,7 @@ steps:
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
-  - name: Download potential duplicate flaky-test fixes
+  - name: Download potential duplicate flaky-test-fixer PRs
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
       name: ${{ env.FLAKY_TEST_FIX_CANDIDATES_ARTIFACT_NAME }}
