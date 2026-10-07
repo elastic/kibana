@@ -12,6 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_IDS,
   WATCH_AUTONOMY_LEVELS,
   getAllowedAutonomyLevels,
+  getWorkerSettingsDeclaration,
   nearestLowerAutonomyLevel,
 } from '@kbn/alertzero-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -86,20 +87,23 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 /**
  * The stored values as the Worker is expected to run them: identical, except that an autonomy
- * level the Worker no longer allows becomes the nearest allowed level below it.
+ * level the Worker no longer allows becomes the nearest allowed level below it, and extras are
+ * dropped once the Worker declares none.
  */
 const expectedAfterUpgrade = (
   workerId: RegisteredWorkerId,
   stored: Record<string, unknown>
 ): Record<string, unknown> => {
-  const { autonomyLevel } = stored;
+  const { extras: _extras, ...withoutExtras } = stored;
+  const kept = getWorkerSettingsDeclaration(workerId).extras === undefined ? withoutExtras : stored;
+  const { autonomyLevel } = kept;
   const allowed = getAllowedAutonomyLevels(workerId);
   const level = WATCH_AUTONOMY_LEVELS.find((candidate) => candidate === autonomyLevel);
   if (level === undefined || allowed.includes(level)) {
-    return stored;
+    return kept;
   }
   const lowered = nearestLowerAutonomyLevel(allowed, level);
-  return lowered === undefined ? stored : { ...stored, autonomyLevel: lowered };
+  return lowered === undefined ? kept : { ...kept, autonomyLevel: lowered };
 };
 
 /** Keys the document did not store may be filled. A key it did store must survive the read. */

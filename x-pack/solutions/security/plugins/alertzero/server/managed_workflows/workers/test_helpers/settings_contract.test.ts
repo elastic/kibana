@@ -527,6 +527,7 @@ describe('Worker settings contract', () => {
       ],
       ['an overwrite', z.string().overwrite((value) => value.trim()), /overwrite check/],
       ['a catch', z.number().catch(1), /a catch schema/],
+      ['a regex with flags', z.string().regex(/^abc$/i), /a regex with flags \(\/\^abc\$\/i\)/],
     ])('fails explicitly on %s instead of comparing without it', (_label, field, reason) => {
       const check = () => assertComparableValidation(z.object({ field }).strict(), 'x');
       expect(check).toThrow(/Cannot establish settings compatibility at x\.field/);
@@ -576,6 +577,15 @@ describe('Worker settings contract', () => {
       expect(() => buildWorkerSettingsContracts()).not.toThrow();
       expect(() => buildSharedSettingsContract()).not.toThrow();
     });
+  });
+
+  it('rejects a schema default deeper than the stored-settings upgrade fills', () => {
+    const jsonSchema = toInputJsonSchema(
+      z.object({ extras: z.object({ nested: z.object({ a: z.number().default(1) }) }) })
+    );
+    expect(() =>
+      assertSchemaDefaultsDeclared('x', jsonSchema, { extras: { nested: { a: 1 } } })
+    ).toThrow(/has a default for extras\.nested\.a, where stored settings are not filled/);
   });
 
   it('rejects a file that is not a settings contract snapshot', () => {

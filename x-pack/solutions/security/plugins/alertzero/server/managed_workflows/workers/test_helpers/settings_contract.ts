@@ -169,7 +169,7 @@ const unclassified = (what: string, path: string): Error =>
 
 interface ZodDefinition {
   type: string;
-  checks?: ReadonlyArray<{ _zod: { def: { check: string; format?: string } } }>;
+  checks?: ReadonlyArray<{ _zod: { def: { check: string; format?: string; pattern?: RegExp } } }>;
   [key: string]: unknown;
 }
 
@@ -203,7 +203,11 @@ const cannotCompare = (what: string, path: string): Error =>
 export const assertComparableValidation = (schema: unknown, path: string): void => {
   const definition = zodDefinition(schema);
   for (const check of definition.checks ?? []) {
-    const { check: kind, format } = check._zod.def;
+    const { check: kind, format, pattern } = check._zod.def;
+    // JSON Schema `pattern` carries the regex source only, so flags would drop out of the contract.
+    if (kind === 'string_format' && pattern instanceof RegExp && pattern.flags !== '') {
+      throw cannotCompare(`a regex with flags (/${pattern.source}/${pattern.flags})`, path);
+    }
     if (kind === 'string_format' ? format !== 'regex' : !COMPARABLE_CHECKS.has(kind)) {
       throw cannotCompare(
         kind === 'custom'
@@ -394,15 +398,27 @@ const hasValueAt = (value: unknown, path: readonly string[]): boolean => {
   return true;
 };
 
-/** Throws when the schema has a default the declaration lacks: zod would show a value nothing stores. */
+/**
+ * Throws when the schema has a default the read path would apply but the renderer would not: one the
+ * declaration lacks, or one deeper than the stored-settings upgrade fills.
+ */
 export const assertSchemaDefaultsDeclared = (
   label: string,
   jsonSchema: unknown,
   defaults: Readonly<Record<string, unknown>>
 ): void => {
-  const undeclared = schemaDefaultPaths(jsonSchema, []).filter(
-    (path) => !hasValueAt(defaults, path)
-  );
+  const paths = schemaDefaultPaths(jsonSchema, []);
+  const unfilled = paths.filter((path) => !isFilledFromDefaults(path));
+  if (unfilled.length > 0) {
+    throw new Error(
+      `The settings schema for ${label} has a default for ${unfilled
+        .map((path) => path.join('.'))
+        .join(
+          ', '
+        )}, where stored settings are not filled from defaults (only scheduleInterval, extras and extras.<key> are). The read path would show that default while the rendered workflow does not, so declare the default at one of those paths instead.`
+    );
+  }
+  const undeclared = paths.filter((path) => !hasValueAt(defaults, path));
   if (undeclared.length > 0) {
     throw new Error(
       `The settings schema for ${label} has a default for ${undeclared
