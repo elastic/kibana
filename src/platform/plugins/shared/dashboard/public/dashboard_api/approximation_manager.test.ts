@@ -9,12 +9,13 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
+import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { initializeApproximationManager, getDefaultApproximation } from './approximation_manager';
 
 const mockGet = jest.fn();
 jest.mock('@kbn/esql-browser', () => ({
-  esqlApproximationStorage: { get: mockGet, set: jest.fn() },
+  esqlApproximationStorage: { get: () => mockGet(), set: jest.fn() },
 }));
 
 describe('getDefaultApproximation', () => {
@@ -28,6 +29,14 @@ describe('getDefaultApproximation', () => {
   test('returns object with undefined esql_approximation when storage is empty', () => {
     mockGet.mockReturnValue(undefined);
     expect(getDefaultApproximation()).toEqual({ esql_approximation: undefined });
+  });
+});
+
+describe('DEFAULT_DASHBOARD_STATE', () => {
+  test('does not set esql_approximation', () => {
+    // The default value of esql_approximation is based on local storage (see getDefaultApproximation)
+    // and should not be set in defaults
+    expect(DEFAULT_DASHBOARD_STATE).not.toHaveProperty('esql_approximation');
   });
 });
 

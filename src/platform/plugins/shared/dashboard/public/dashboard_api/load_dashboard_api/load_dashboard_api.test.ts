@@ -133,7 +133,7 @@ describe('loadDashboardApi', () => {
       });
 
       test('leaves esql_approximation undefined when localStorage is empty and not in saved object', async () => {
-        jest.mocked(getDefaultApproximation).mockReturnValue({});
+        jest.mocked(getDefaultApproximation).mockReturnValue({ esql_approximation: undefined });
         await loadDashboardApi({
           getCreationOptions: async () => ({ useSessionStorageIntegration: false }),
           savedObjectId: '12345',
