@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/investigation-output'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/nightshift-context-and-research-team'
+  defaultOwner: '@elastic/nightshift'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/investigation-output'
   description: Moon project for @kbn/investigation-output
   channel: ''
-  owner: '@elastic/nightshift-context-and-research-team'
+  owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/packages/kbn-investigation-output
 dependsOn:
   - '@kbn/core-http-browser'
@@ -26,7 +26,10 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/workflows'
   - '@kbn/workflows-ui'
-  - '@kbn/utility-types'
+  - '@kbn/charts-theme'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/visualization-utils'
 tags:
   - shared-browser
   - package

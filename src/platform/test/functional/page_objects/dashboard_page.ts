@@ -334,26 +334,22 @@ export class DashboardPageObject extends FtrService {
     });
   }
 
+  private async getViewMode() {
+    const viewMode = await this.testSubjects.getAttribute('dshDashboardViewport', 'data-view-mode');
+    if (!viewMode) {
+      throw new Error('The dashboard viewport rendered without a "data-view-mode" attribute');
+    }
+    return viewMode;
+  }
+
   public async getIsInEditMode() {
     this.log.debug('getIsInEditMode');
-    // Check if the "switch to view mode" button exists (indicates we're in edit mode)
-    if (await this.testSubjects.exists('dashboardViewOnlyMode')) {
-      return true;
-    }
-    // In edit mode, either quick save button (saved dashboard) or interactive save button (new dashboard) is present
-    const hasQuickSave = await this.testSubjects.exists('dashboardQuickSaveMenuItem');
-    const hasInteractiveSave = await this.testSubjects.exists('dashboardInteractiveSaveMenuItem');
-    return hasQuickSave || hasInteractiveSave;
+    return (await this.getViewMode()) === 'edit';
   }
 
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');
-    // Check if the "edit" button exists (indicates we're in view mode)
-    if (await this.testSubjects.exists('dashboardEditMode')) {
-      return true;
-    }
-    // If we're not in edit mode, we're in view mode
-    return !(await this.getIsInEditMode());
+    return (await this.getViewMode()) === 'view';
   }
 
   public async ensureDashboardIsInEditMode() {
@@ -367,16 +363,21 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('clickCancelOutOfEditMode');
     if (!(await this.getIsInEditMode())) return;
 
-    await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
+    // The top nav stays disabled for a moment after a save, and a click on it is silently dropped.
+    await this.appMenu.clickMenuItem('dashboardViewOnlyMode', { waitForEnabled: true });
 
-    if (accept) {
-      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
-        timeout: 2000,
-      });
-      if (confirmation) {
-        await this.common.clickConfirmOnModal();
-      }
+    if (!accept) return;
+
+    const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
+      timeout: 2000,
+    });
+    if (confirmation) {
+      await this.common.clickConfirmOnModal();
     }
+
+    await this.retry.waitFor('the dashboard to be in view mode', async () => {
+      return this.appMenu.menuItemExists('dashboardEditMode');
+    });
   }
 
   public async clickDiscardChanges(accept = true) {

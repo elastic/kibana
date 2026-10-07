@@ -13,10 +13,10 @@ export const matchActionPoliciesBodySchema = z
   .object({
     rule: z
       .object({
-        tags: tagsSchema
+        routing_tags: tagsSchema
           .optional()
           .describe(
-            'Tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the tags in this list, along with policies that apply to every rule.'
+            'Routing tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the routing tags in this list, along with policies that apply to every rule.'
           ),
       })
       .strict()
@@ -30,7 +30,7 @@ export type MatchActionPoliciesBody = z.infer<typeof matchActionPoliciesBodySche
 export const matchedActionPolicyCategorySchema = z
   .enum(['catch_all', 'tags'])
   .describe(
-    "The reason this policy applies to the rule. `catch_all` means the policy has neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule has at least one tag listed in the policy's `matcher.tags`."
+    "The reason this policy applies to the rule. `catch_all` means the policy has neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule has at least one routing tag listed in the policy's `matcher.tags`."
   );
 
 export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCategorySchema>;

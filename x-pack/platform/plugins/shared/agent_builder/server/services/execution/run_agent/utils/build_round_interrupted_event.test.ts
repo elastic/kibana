@@ -11,6 +11,7 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   EventActorType,
+  type PreExecutionWorkflowStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
@@ -94,6 +95,22 @@ describe('buildRoundInterruptedEvent', () => {
     });
     expect(event.data).not.toHaveProperty('resumed');
     expect(event.data).not.toHaveProperty('attachment_events');
+  });
+
+  it('persists a seeded pre-execution workflow step when the graph fails before streaming', () => {
+    const tracker = new RunTracker({ graphName: 'g' });
+    const workflowStep: PreExecutionWorkflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: '<system_update>workflow context</system_update>',
+      workflow_context: {
+        'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+      },
+    };
+    tracker.seed({ steps: [workflowStep] });
+
+    const event = base({ tracker });
+
+    expect(event.data.steps).toEqual([workflowStep]);
   });
 
   it('merges refs accessed during the run into the input and renders the attachment context', () => {
@@ -199,5 +216,23 @@ describe('buildRoundInterruptedEvent', () => {
   it('includes the workspace id when the run had one', () => {
     expect(base({ getWorkspaceId: () => 'ws-1' }).data.workspace_id).toBe('ws-1');
     expect(base({ getWorkspaceId: () => undefined }).data).not.toHaveProperty('workspace_id');
+  });
+
+  it('carries the compaction summary of the latest state, for persistence', () => {
+    const compactionSummary = {
+      summarized_up_to: { round_id: 'round-0', tool_call_id: 'c0' },
+      summarized_round_count: 0,
+      created_at: '2026-01-01T00:00:00.000Z',
+      token_count: 1,
+      structured_data: {} as never,
+    };
+    const tracker = new RunTracker({ graphName: 'g' });
+    tracker.seed({ steps: [] });
+    tracker.observeGraphEvent(
+      createRootStateChunkEvent('g', { steps: [toolCall], toolRenderState: {}, compactionSummary })
+    );
+
+    expect(base({ tracker }).data.compaction_summary).toEqual(compactionSummary);
+    expect(base().data).not.toHaveProperty('compaction_summary');
   });
 });

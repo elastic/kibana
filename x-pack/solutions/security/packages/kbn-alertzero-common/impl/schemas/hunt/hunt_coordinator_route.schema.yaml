@@ -37,18 +37,6 @@ paths:
                     sweep shares it, which is what the packaging barrier and the
                     conclusion dedupe key off. The route mints one only when the
                     caller has no sweep to tie the run to.
-                technology:
-                  type: string
-                  maxLength: 64
-                  nullable: true
-                  description: >-
-                    One of the HuntTechnology values to pin the hunt to that
-                    technology's index scope. Omit it, or send null or an empty
-                    string (a workflow renders an unset input as ""), and the
-                    coordinator resolves every known technology and hunts the ones
-                    whose required indices exist in the space. Any other value is a
-                    400. Kept a plain string because a workflow caller cannot omit
-                    the key.
                 text:
                   type: string
                   maxLength: 200000
@@ -108,7 +96,10 @@ paths:
                 required:
                   - status
                   - run_id
-                  - technologies
+                  - index_patterns
+                  - tier2_targets
+                  - tier2_target_sources
+                  - actionable_indices
                   - tier1
                   - message
                   - next_step
@@ -122,13 +113,48 @@ paths:
                     type: string
                   run_id:
                     type: string
-                  technologies:
+                  index_patterns:
                     type: array
                     description: >-
-                      Technologies whose indices the hunt ran against. Empty when
-                      the scope was blocked.
+                      What Tier 1 searched: the space's Security Solution default
+                      data view patterns, exclusions included, never an alerts
+                      index. Empty when the scope was blocked or resolution failed.
                     items:
-                      $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+                      type: string
+                  tier2_targets:
+                    type: array
+                    description: >-
+                      What Tier 2 was allowed to read, target, and count as a hit,
+                      chosen after the report was read and Tier 1 ran: the union of
+                      the datasets the report's vendor or product matched, the
+                      indices Tier 1 hit, the model's matches (only when neither of
+                      those found anything), and `actionable_indices`, each
+                      `*`-suffixed. `tier2_target_sources` says which signals
+                      contributed. Empty when the scope was blocked, resolution
+                      failed, or no signal named a target.
+                    items:
+                      type: string
+                  tier2_target_sources:
+                    type: array
+                    description: >-
+                      Which signals contributed to `tier2_targets`, in a fixed
+                      order. Empty when `tier2_targets` is empty.
+                    items:
+                      type: string
+                      enum: [report_match, tier1_hits, model, actionable]
+                  actionable_indices:
+                    type: array
+                    maxItems: 64
+                    description: >-
+                      `*`-suffixed streams and indices in the hunt's universe whose
+                      mapping carries `process.entity_id` or `process.pid`: where a
+                      hit can become a Defend response action. A mapping says a
+                      host can report process telemetry, not that it is enrolled;
+                      packaging decides that later. Empty when the scope was
+                      blocked or no mapping carries either field.
+                    items:
+                      type: string
+                      maxLength: 256
                   tier1:
                     allOf:
                       - $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
@@ -165,8 +191,8 @@ paths:
                             - technique_name
                             - reference
                             - tactic_ids
-                            - proposed_esql_rule
-                            - rule_name
+                            - validated_esql
+                            - title
                             - severity
                             - risk_score
                           properties:
@@ -188,10 +214,14 @@ paths:
                                 type: string
                             parent_technique_id:
                               type: string
-                            proposed_esql_rule:
+                            validated_esql:
                               type: string
-                            rule_name:
+                              description: >-
+                                The query Tier 2 generated and validated (and, when grounded,
+                                executed) to hunt this technique.
+                            title:
                               type: string
+                              description: Display title for this hunted finding.
                             severity:
                               type: string
                               enum: [critical, high, medium, low]
@@ -310,8 +340,8 @@ paths:
                   has_confirmed_hit:
                     type: boolean
                     description: >-
-                      True when Tier 1 confirmed a required-index hit or any
-                      Tier 2 behavior executed with a required-index hit.
+                      True when Tier 1 confirmed a hit in the searched universe or
+                      any Tier 2 behavior executed with a hit in its targets.
                       Callers that gate SSE emit or packaging on the hit bar
                       must read this field, not tier1.has_confirmed_hit alone.
                   completeness:
@@ -328,8 +358,9 @@ paths:
                   completed_successfully:
                     type: boolean
                     description: >-
-                      Whether the report should stay eligible for a later run.
-                      Derived from `completeness`: false only for
+                      Whether this run is done with the report and it can be
+                      retired: true when nothing a later sweep would cover is
+                      missing. Derived from `completeness`: false only for
                       `incomplete_retryable`, where repeating the run could cover
                       what this one missed. True for `incomplete_final` as well as
                       `complete`, because a deterministic gap returns identically
@@ -337,6 +368,44 @@ paths:
                       that writes "clean" off this flag alone will record a clean
                       environment for a run that could not search it — use
                       `completeness` for that.
+                  incomplete:
+                    type: array
+                    description: >-
+                      The coordinator's own coverage gaps — input this run had to
+                      truncate, and a Tier 2 that was requested but could not run,
+                      or had nothing to run against. Not a copy of
+                      `tier1.incomplete` / `tier2.incomplete`, which the caller
+                      already has; this is the part of `completeness` that would
+                      otherwise reach the caller only as an enum, or on the
+                      Tier-1-only paths, not even that. Absent or empty means the
+                      coordinator itself found nothing to report here.
+                    items:
+                      $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteness'
+                  recommendations:
+                    type: array
+                    maxItems: 8
+                    description: >-
+                      Up to 8 analyst next-step lines for a confirmed hit,
+                      grounded to this run's own SSE-visible entities. Absent
+                      when there is no confirmed hit or the run stopped before
+                      Tier 2.
+                    items:
+                      type: string
+                      minLength: 1
+                      maxLength: 2000
+                  headline:
+                    type: string
+                    description: >-
+                      One clause for the run conclusion message: the outcome
+                      (confirmed hit or not) plus what each tier did.
+                  narrative:
+                    type: string
+                    description: >-
+                      The full hunt results narrative the hunt child writes to
+                      the Investigation: what was hunted, where and when, what
+                      each tier found, and why a tier did not run. Deterministic
+                      markdown derived from the structured fields, self-sufficient
+                      because the SSE attachment may not render everywhere.
                   sse:
                     type: array
                     description: >-
@@ -360,6 +429,32 @@ paths:
                         data:
                           type: object
                           additionalProperties: true
+                  impacted_entities:
+                    type: array
+                    maxItems: 50
+                    description: >-
+                      Present alongside `sse`: the hosts and users the SSE
+                      entries name, deduplicated across entries, ready for the
+                      investigations impact route. Ids are
+                      `host:<host.name>` or `user:<user.name>`. Capped at 50,
+                      half of what one Investigation's impact may hold, because
+                      every sweep of a report merges onto the same
+                      Investigation.
+                    items:
+                      type: object
+                      required: [id, name, type]
+                      properties:
+                        id:
+                          type: string
+                          minLength: 1
+                          maxLength: 256
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 512
+                        type:
+                          type: string
+                          enum: [host, user]
 components:
   schemas:
     HuntCoordinatorStatus:

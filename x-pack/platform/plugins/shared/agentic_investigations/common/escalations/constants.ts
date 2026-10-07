@@ -10,9 +10,6 @@ import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
 export const ESCALATIONS_INTERNAL_URL =
   `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/escalations` as const;
 export const ESCALATION_BY_ID_URL = `${ESCALATIONS_INTERNAL_URL}/{id}` as const;
-export const ESCALATIONS_SUGGEST_USERS_URL =
-  `${ESCALATIONS_INTERNAL_URL}/_suggest_user_profiles` as const;
-
 /** URL for the per-escalation assignment route. */
 export const ESCALATION_ASSIGN_URL = `${ESCALATION_BY_ID_URL}/assignees` as const;
 
@@ -68,3 +65,6 @@ export const MAX_ESCALATIONS_RESULT_WINDOW = 10_000;
 export const ESCALATION_STATUS_URL = `${ESCALATIONS_INTERNAL_URL}/{id}/status` as const;
 export const ESCALATION_CLOSE_PREVIEW_URL =
   `${ESCALATIONS_INTERNAL_URL}/{id}/_close_preview` as const;
+
+/** URL for linking an investigation to an existing escalation (append-only). */
+export const ESCALATION_LINK_URL = `${ESCALATION_BY_ID_URL}/_link` as const;

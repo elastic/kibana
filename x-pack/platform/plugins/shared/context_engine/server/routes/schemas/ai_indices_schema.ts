@@ -41,7 +41,6 @@ import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_action
 import { MAX_KI_ID_LENGTH } from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,
-  validateAiIndexDestValue,
   validateAiIndexId,
   validateAiIndexQueryLimit,
   validateFeedbackAnalysisInterval,
@@ -212,7 +211,6 @@ const aiIndexDestSchema = schema.object(
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
-      validate: validateAiIndexDestValue,
       meta: {
         description:
           'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index ID. System indices are not allowed.',
@@ -257,6 +255,13 @@ const aiIndexPropertiesSchema = {
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
       meta: { description: 'Human-readable description of the AI Index.' },
+    })
+  ),
+  memory_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+      },
     })
   ),
   feedback_analysis: schema.maybe(feedbackAnalysisSchema),
@@ -476,6 +481,9 @@ export const aiIndexHttpItemResponseSchema = () =>
       meta: {
         description: 'Whether the AI Index is managed by a plugin and therefore immutable.',
       },
+    }),
+    memory_enabled: schema.boolean({
+      meta: { description: 'Whether this AI Index accepts memory writes.' },
     }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },

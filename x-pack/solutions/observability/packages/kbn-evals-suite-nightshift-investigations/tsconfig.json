@@ -21,6 +21,7 @@
     "@kbn/inference-common",
     "@kbn/inference-tracing",
     "@kbn/repo-info",
+    "@kbn/nightshift-decision-trees",
     "@kbn/nightshift-investigations-plugin",
     "@kbn/significant-events-schema",
     "@kbn/workflows",

@@ -7,7 +7,11 @@
 
 import expect from 'expect';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
+import {
+  buildUnifiedAlertReq,
+  getPostCaseRequest,
+  postCommentAlertReq,
+} from '../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
@@ -74,12 +78,10 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: firstCase.id,
         params: [
-          {
-            ...postCommentAlertReq,
+          buildUnifiedAlertReq('securitySolution', {
             alertId: firstCaseAlerts,
             index: firstCaseAlerts,
-            owner: 'securitySolution',
-          },
+          }),
         ],
         expectedHttpCode: 200,
       });
@@ -88,12 +90,10 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: firstCase.id,
         params: [
-          {
-            ...postCommentAlertReq,
+          buildUnifiedAlertReq('securitySolution', {
             alertId: secondCaseAlerts,
             index: secondCaseAlerts,
-            owner: 'securitySolution',
-          },
+          }),
         ],
         expectedHttpCode: 200,
       });

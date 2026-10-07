@@ -7,71 +7,60 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
-import { EventService } from '../../lib/significant_events/events/event_service';
+import { RuleEventsClient } from '../../lib/significant_events/events/rule_events_client';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
 
-jest.mock('../../lib/significant_events/events/event_service', () => ({
-  EventService: jest.fn(),
+jest.mock('../../lib/significant_events/events/rule_events_client', () => ({
+  RuleEventsClient: jest.fn(),
 }));
 
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'event-1',
   event_id: 'payment-outage',
   workflow_execution_id: 'workflow-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   symptom_hypothesis: 'Payment gateway timeout.',
   summary: 'Payments are failing.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.8,
 };
 
 const findLatestPaginated = jest.fn();
 const findLatestByEventId = jest.fn();
-const getDataStreams = jest.fn().mockResolvedValue({
-  initializeClient: jest.fn().mockResolvedValue({}),
-});
 const isAvailable = jest.fn().mockResolvedValue(true);
 
-const createGetScopedClients = (
-  events: SignificantEvent[]
-): jest.MockedFunction<GetScopedClients> => {
-  const getEventClient = jest.fn(() => ({
-    findLatestByEventId: jest.fn().mockResolvedValue(events.at(-1)),
-  }));
+const asCurrentUser = {} as never;
 
-  return jest.fn().mockResolvedValue({
-    getEventClient,
+const createGetScopedClients = (
+  _events: SignificantEvent[]
+): jest.MockedFunction<GetScopedClients> =>
+  jest.fn().mockResolvedValue({
+    scopedClusterClient: { asCurrentUser },
   } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
-};
 
 describe('createSignificantEventSmlType', () => {
   beforeEach(() => {
     findLatestPaginated.mockReset();
     findLatestByEventId.mockReset();
-    getDataStreams.mockClear();
+    jest.mocked(RuleEventsClient).mockClear();
     isAvailable.mockReset().mockResolvedValue(true);
-    jest.mocked(EventService).mockImplementation(
-      () =>
-        ({
-          getClient: jest.fn(() => ({
-            findLatestPaginated,
-            findLatestByEventId,
-          })),
-        } as unknown as EventService)
-    );
+    jest
+      .mocked(RuleEventsClient)
+      .mockImplementation(
+        () => ({ findLatestPaginated, findLatestByEventId } as unknown as RuleEventsClient)
+      );
   });
 
   it('equals SIGNIFICANT_EVENT_KI_TYPE', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
     });
 
@@ -82,12 +71,12 @@ describe('createSignificantEventSmlType', () => {
     findLatestPaginated.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
     });
 
+    const esClient = {} as never;
     const iterator = smlType.list({
-      esClient: {} as never,
+      esClient,
       savedObjectsClient: {} as never,
       logger: loggingSystemMock.createLogger(),
     });
@@ -102,14 +91,14 @@ describe('createSignificantEventSmlType', () => {
         },
       ],
     });
+    expect(RuleEventsClient).toHaveBeenCalledWith({ esClient, space: DEFAULT_SPACE_ID });
     expect(findLatestPaginated).toHaveBeenCalledWith({ page: 1, perPage: 100 });
   });
 
-  it('does not initialize the data stream when significant events are unavailable', async () => {
+  it('does not create a client when significant events are unavailable', async () => {
     isAvailable.mockResolvedValue(false);
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
     });
 
@@ -123,14 +112,13 @@ describe('createSignificantEventSmlType', () => {
       done: true,
       value: undefined,
     });
-    expect(getDataStreams).not.toHaveBeenCalled();
+    expect(RuleEventsClient).not.toHaveBeenCalled();
   });
 
   it('indexes a significant event chunk', async () => {
     findLatestByEventId.mockResolvedValue(event);
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
     });
 
@@ -154,7 +142,6 @@ describe('createSignificantEventSmlType', () => {
   it('getPermissions returns the streams read API privilege', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
     });
     const permissions = smlType.getPermissions!('payment-outage', {
@@ -168,9 +155,9 @@ describe('createSignificantEventSmlType', () => {
   });
 
   it('converts an SML document into an attachment', async () => {
+    findLatestByEventId.mockResolvedValue(event);
     const smlType = createSignificantEventSmlType({
-      getScopedClients: createGetScopedClients([event]),
-      getDataStreams,
+      getScopedClients: createGetScopedClients([]),
       isAvailable,
     });
 
@@ -207,13 +194,17 @@ describe('createSignificantEventSmlType', () => {
         {
           request: {} as KibanaRequest,
           savedObjectsClient: {} as never,
-          spaceId: 'default',
+          spaceId: 'other-space',
         }
       )
     ).resolves.toEqual({
       type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
       origin: 'payment-outage',
       data: event,
+    });
+    expect(RuleEventsClient).toHaveBeenCalledWith({
+      esClient: asCurrentUser,
+      space: 'other-space',
     });
   });
 });

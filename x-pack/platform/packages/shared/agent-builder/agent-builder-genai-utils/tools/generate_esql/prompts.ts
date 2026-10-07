@@ -100,10 +100,13 @@ export const createGenerateEsqlPrompt = ({
   rowLimit?: number;
   disableNamedParams?: boolean;
 }): BaseMessageLike[] => {
-  // always add the TS extended documentation if the agent requested doc about the command
-  const tsDocRequested = previousActions.some(
-    (a) => isRequestDocumentationAction(a) && a.requestedKeywords.includes('TS')
-  );
+  // always add the extended documentation of a command if the agent requested doc about it
+  const isDocRequested = (command: string) =>
+    previousActions.some(
+      (a) => isRequestDocumentationAction(a) && a.requestedKeywords.includes(command)
+    );
+  const tsDocRequested = isDocRequested('TS');
+  const promqlDocRequested = isDocRequested('PROMQL');
 
   return [
     [
@@ -121,6 +124,7 @@ ${getDocumentationSection({
   resource,
   documentation,
   tsDocRequested,
+  promqlDocRequested,
 })}
 
 ## Instructions
@@ -167,10 +171,12 @@ const getDocumentationSection = ({
   resource,
   documentation,
   tsDocRequested = false,
+  promqlDocRequested = false,
 }: {
   resource?: ResolvedResourceWithSampling;
   documentation: EsqlLoadedDocumentation;
   tsDocRequested?: boolean;
+  promqlDocRequested?: boolean;
 }): string => {
   const isTsdb = resource?.isTsdb || tsDocRequested;
 
@@ -185,7 +191,13 @@ ${
 ${documentation.getDocContent(EsqlDocEntry.tsQueries)}
 </tsds-documentation>`
     : ''
-}
+}${
+    promqlDocRequested
+      ? `\n<promql-documentation>
+${documentation.getDocContent(EsqlDocEntry.promqlQueries)}
+</promql-documentation>`
+      : ''
+  }
 
 <esql-examples>
 ${documentation.getDocContent(EsqlDocEntry.examples)}
