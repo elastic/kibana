@@ -478,10 +478,32 @@ describe('ClaimGrounding', () => {
       expected: { outcome: 'true_positive' },
       metadata: {},
     });
-    // The link cannot stand in for world claims: alert_linkage does not support
-    // it, and entity_role/alert_linkage alone never suffice for true_positive.
+    // World claims are required for a non-inconclusive verdict: a lone
+    // alert_link must not rescue an empty claims.world, even one whose
+    // alert_linkage check supports it. This is missing-claims, not ungrounded.
     expect(result.score).toBe(0);
-    expect(result.label).toBe('ungrounded');
+    expect(result.label).toBe('missing-claims');
+  });
+
+  it('scores 0 with label missing-claims for a TP whose only claim is alert_link: null', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        outcome: 'true_positive',
+        payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+        raw: {
+          ...groundedRun().raw!,
+          claims: { alert_link: null } as never,
+        },
+      }),
+      expected: { outcome: 'true_positive' },
+      metadata: {},
+    });
+    // A null alert_link must be normalized to absent: it must not slip past
+    // the empty-claims guard and then dodge validation via the falsy check,
+    // scoring the run 1 over zero validated claims.
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('missing-claims');
   });
 
   it('scores 0 with label missing-claims for a TP with empty claims.world', async () => {

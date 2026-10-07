@@ -247,23 +247,34 @@ export const claimGrounding: Evaluator = {
 
     const claims = (raw?.claims ?? {}) as RawClaims;
     const worldClaims = claims.world ?? [];
-    const hasEmittedClaims = worldClaims.length > 0 || claims.alert_link !== undefined;
+    // A null alert_link must be treated as absent: otherwise it slips past a
+    // `!== undefined` presence check while the falsy `if (alertLink)` below
+    // skips validation, scoring the run without validating any claim.
+    const alertLink = claims.alert_link ?? undefined;
 
-    if (!hasEmittedClaims) {
+    if (worldClaims.length === 0) {
       if (payload.verdict === 'inconclusive') {
-        // Including a downgraded truncation: an inconclusive verdict that emits
-        // no claims claims nothing about the world. Scoring it would pad the
-        // mean by the inconclusive rate and confound model comparison. But an
-        // inconclusive run that DOES emit claims is validated below — verdict
-        // independence holds either way, and an ungrounded claim must not
-        // silently vanish from the score.
-        return { score: null, label: 'N/A', explanation: null };
+        if (alertLink === undefined) {
+          // Including a downgraded truncation: an inconclusive verdict that
+          // emits no claims claims nothing about the world. Scoring it would
+          // pad the mean by the inconclusive rate and confound model
+          // comparison. But an inconclusive run that DOES emit claims is
+          // validated below — verdict independence holds either way, and an
+          // ungrounded claim must not silently vanish from the score.
+          return { score: null, label: 'N/A', explanation: null };
+        }
+        // An inconclusive verdict that still emitted an alert_link claim is
+        // validated below — fall through to the scoring loop.
+      } else {
+        // For a TP/FP verdict world claims are required: a lone alert_link
+        // must not rescue an empty world list to a score computed over
+        // nothing but the link.
+        return {
+          score: 0,
+          label: 'missing-claims',
+          explanation: 'world claims are missing but the verdict is not inconclusive',
+        };
       }
-      return {
-        score: 0,
-        label: 'missing-claims',
-        explanation: 'claims is empty but the verdict is not inconclusive',
-      };
     }
 
     let grounded = 0;
@@ -339,7 +350,6 @@ export const claimGrounding: Evaluator = {
       }
     }
 
-    const alertLink = claims.alert_link;
     if (alertLink) {
       total++;
       const linkProblems: string[] = [];
