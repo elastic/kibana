@@ -114,7 +114,7 @@ interface ArtifactViewFlyoutBaseProps {
   /** Renders the artifact-specific definition. Receives the full artifact item. */
   ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
   /** When false, no edit actions can be taken. Defaults to true. */
-  allowCardEditAction: boolean;
+  allowCardEditAction?: boolean;
   /** When false, the footer omits Delete. Defaults to true. */
   allowCardDeleteAction?: boolean;
   /** Opens edit or delete the same way the simple table does. */

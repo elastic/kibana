@@ -128,6 +128,7 @@ describe('ArtifactViewFlyout', () => {
           ? { allowCardDeleteAction: props.allowCardDeleteAction }
           : {}),
         ...(props.onTakeAction ? { onTakeAction: props.onTakeAction } : {}),
+        allowCardEditAction: props.allowCardEditAction ?? true,
       };
 
       renderResult = mockedContext.render(
@@ -135,16 +136,10 @@ describe('ArtifactViewFlyout', () => {
           <ArtifactViewFlyout
             {...sharedProps}
             showEnabledSwitch
-            allowCardEditAction={props.allowCardEditAction ?? true}
             onEnabledChangeRefresh={props.onEnabledChangeRefresh}
           />
         ) : (
-          <ArtifactViewFlyout
-            {...sharedProps}
-            {...(props.allowCardEditAction !== undefined
-              ? { allowCardEditAction: props.allowCardEditAction }
-              : {})}
-          />
+          <ArtifactViewFlyout {...sharedProps} />
         )
       );
       return renderResult;
