@@ -95,7 +95,7 @@ export const useServicesBootstrap = (
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: async (params) => {
-      const { fetchParams: nextFetchParams, lensDataView } = await processFetchParams({
+      const nextFetchParams = await processFetchParams({
         params,
         services,
         initialBreakdownField,
@@ -109,7 +109,7 @@ export const useServicesBootstrap = (
         });
       }
       let updatedLensVisServiceState: LensVisServiceState | undefined;
-      if (updatedLensVisService && enableLensVisService && lensDataView) {
+      if (updatedLensVisService && enableLensVisService) {
         updatedLensVisServiceState = updatedLensVisService.update({
           externalVisContext: nextFetchParams.externalVisContext,
           queryParams: {

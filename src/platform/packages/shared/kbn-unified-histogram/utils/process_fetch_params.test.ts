@@ -10,7 +10,12 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DataViewSource, EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import {
+  DataViewSource,
+  EsqlSource,
+  getRegisteredEsqlDataView,
+  registerEsqlSourceInDataViewsCache,
+} from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -22,7 +27,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 const dataViewsStub = createMockDataViewsService();
 
 const processParams = async (params: UnifiedHistogramFetchParamsExternal) => {
-  const { fetchParams } = await processFetchParams({
+  const fetchParams = await processFetchParams({
     params,
     services: {
       ...unifiedHistogramServicesMock,
@@ -88,7 +93,7 @@ describe('processFetchParams', () => {
   });
 
   it('assigns breakdown using initialBreakdownField if not in params', async () => {
-    const { fetchParams: result } = await processFetchParams({
+    const result = await processFetchParams({
       params: commonParams,
       services: unifiedHistogramServicesMock,
       initialBreakdownField: 'extension',
@@ -101,7 +106,7 @@ describe('processFetchParams', () => {
       ...commonParams,
       breakdownField: 'bytes',
     };
-    const { fetchParams: result } = await processFetchParams({
+    const result = await processFetchParams({
       params,
       services: unifiedHistogramServicesMock,
       initialBreakdownField: 'extension',
@@ -255,10 +260,12 @@ describe('processFetchParams ES|QL data view shim', () => {
       timeFieldName: '@timestamp',
     });
 
-    const first = await fetch(source, dataViews);
-    const second = await fetch(source, dataViews);
+    await fetch(source, dataViews);
+    const first = getRegisteredEsqlDataView(source);
+    await fetch(source, dataViews);
 
-    expect(second.lensDataView).toBe(first.lensDataView);
+    expect(first).toBeDefined();
+    expect(getRegisteredEsqlDataView(source)).toBe(first);
     expect(dataViews.create).toHaveBeenCalledTimes(1);
   });
 
@@ -271,9 +278,9 @@ describe('processFetchParams ES|QL data view shim', () => {
     });
 
     const registered = await registerEsqlSourceInDataViewsCache(dataViews, source);
-    const { lensDataView } = await fetch(source, dataViews);
+    await fetch(source, dataViews);
 
-    expect(lensDataView).toBe(registered);
+    expect(getRegisteredEsqlDataView(source)).toBe(registered);
     expect(dataViews.create).toHaveBeenCalledTimes(1);
   });
 
@@ -285,13 +292,13 @@ describe('processFetchParams ES|QL data view shim', () => {
       timeFieldName: '@timestamp',
     });
 
-    const first = await fetch(source, dataViews);
-    const second = await fetch(
-      source.withColumns([makeColumn('message', true), makeColumn('bytes')]),
-      dataViews
-    );
+    await fetch(source, dataViews);
+    const first = getRegisteredEsqlDataView(source);
+    const withColumns = source.withColumns([makeColumn('message', true), makeColumn('bytes')]);
+    await fetch(withColumns, dataViews);
 
-    expect(second.lensDataView).toBe(first.lensDataView);
+    expect(first).toBeDefined();
+    expect(getRegisteredEsqlDataView(withColumns)).toBe(first);
     expect(dataViews.create).toHaveBeenCalledTimes(1);
   });
 
@@ -310,12 +317,14 @@ describe('processFetchParams ES|QL data view shim', () => {
       timeFieldName: 'event.ingested',
     });
 
-    const first = await fetch(firstSource, dataViews);
-    const second = await fetch(nextSource, dataViews);
+    await fetch(firstSource, dataViews);
+    await fetch(nextSource, dataViews);
+    const first = getRegisteredEsqlDataView(firstSource);
+    const second = getRegisteredEsqlDataView(nextSource);
 
     expect(nextSource.id).not.toBe(firstSource.id);
-    expect(second.lensDataView).not.toBe(first.lensDataView);
-    expect(second.lensDataView?.id).not.toBe(first.lensDataView?.id);
+    expect(second).not.toBe(first);
+    expect(second?.id).not.toBe(first?.id);
     expect(dataViews.create).toHaveBeenCalledTimes(2);
   });
 });

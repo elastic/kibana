@@ -11,7 +11,6 @@ import { omit } from 'lodash';
 import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
@@ -25,12 +24,6 @@ import type {
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_ESQL_VARIABLES: ESQLControlVariable[] = [];
 const DEFAULT_TIME_INTERVAL = 'auto';
-
-export interface ProcessFetchParamsResult {
-  fetchParams: UnifiedHistogramFetchParams;
-  /** DataView derived from dataSource. Only used for the Lens suggestions API — nowhere else. */
-  lensDataView: DataView | undefined;
-}
 
 export const buildFetchParams = ({
   params,
@@ -85,18 +78,16 @@ export const processFetchParams = async ({
   params: UnifiedHistogramFetchParamsExternal;
   services: UnifiedHistogramServices;
   initialBreakdownField: string | undefined;
-}): Promise<ProcessFetchParamsResult> => {
+}): Promise<UnifiedHistogramFetchParams> => {
   const { dataSource } = params;
   const fetchParams = buildFetchParams({ params, services, initialBreakdownField });
 
-  let lensDataView: DataView | undefined;
-  if (dataSource instanceof DataViewSource) {
-    lensDataView = dataSource.getDataView();
-  } else if (dataSource instanceof EsqlSource) {
-    lensDataView = await getOrRegisterEsqlDataView(services.dataViews, dataSource);
+  // The Lens suggestions API still takes a DataView, which LensVisService looks up synchronously
+  if (dataSource instanceof EsqlSource) {
+    await getOrRegisterEsqlDataView(services.dataViews, dataSource);
   }
 
-  return { fetchParams, lensDataView };
+  return fetchParams;
 };
 
 function getProcessedBreakdownField({
