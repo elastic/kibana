@@ -607,7 +607,7 @@ const EcfFamilyPanelPostLaunch = ({
           >
             <FormattedMessage
               id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.reopenButton"
-              defaultMessage="Reopen AWS Console"
+              defaultMessage="Reopen CloudFormation launcher"
             />
           </EuiButtonEmpty>
         </>
