@@ -80,13 +80,12 @@ import {
   useNewlyHighCriticalCount,
 } from '../components/home/needs_attention_tiles/hooks';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
+import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
 import {
   EMPTY_ENTITY_IDS,
   type SignalCardData,
   type SignalCardId,
 } from '../components/home/needs_attention_tiles/data';
-
-const ENTITY_TABLE_SCOPE_ID = 'entity-analytics-new-entities-table';
 
 /** Cap tile → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
 const MAX_TILE_FILTER_ENTITY_IDS = 1000;
@@ -236,6 +235,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
+  // Flyouts opened from the table query alerts over the range it shows.
+  const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
 
@@ -251,12 +252,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         entityId,
         entityName,
         engineType,
-        scopeId: ENTITY_TABLE_SCOPE_ID,
-        contextID: ENTITY_TABLE_SCOPE_ID,
+        scopeId,
+        contextID: scopeId,
         origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
       });
     },
-    [openEntityFlyout]
+    [openEntityFlyout, scopeId]
   );
 
   const onGroupSizeClick = useCallback(
@@ -269,10 +270,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         entityId,
         entityName,
         entityType,
-        scopeId: ENTITY_TABLE_SCOPE_ID,
+        scopeId,
       });
     },
-    [openEntityResolution]
+    [openEntityResolution, scopeId]
   );
 
   const onAlertCountClick = useCallback(
@@ -282,9 +283,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       if (!entityId) return;
       const entityType = toSecurityEntityType(getString(row, ENTITY_TYPE_FIELD));
       const value = entityType === SecurityEntityType.generic ? entityId : entityName;
-      openEntityAlertsInsights({ entityType, value, entityId, scopeId: ENTITY_TABLE_SCOPE_ID });
+      openEntityAlertsInsights({ entityType, value, entityId, scopeId });
     },
-    [openEntityAlertsInsights]
+    [openEntityAlertsInsights, scopeId]
   );
 
   const onAnomalyCountClick = useCallback(
@@ -316,7 +317,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         }
         const field = EntityTypeToIdentifierField[entityType] ?? 'entity.id';
         const dataProviders = createDataProviders({
-          contextId: ENTITY_TABLE_SCOPE_ID,
+          contextId: scopeId,
           field,
           values: entityName,
         });
@@ -329,19 +330,19 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         openEntityGraphView({
           entityId,
           entityName,
-          scopeId: ENTITY_TABLE_SCOPE_ID,
+          scopeId,
           onShowEntity: ({ engineType, entityId: relatedId, entityName: relatedName }) => {
             openEntityFlyout({
               engineType,
               entityId: relatedId,
               entityName: relatedName,
-              scopeId: ENTITY_TABLE_SCOPE_ID,
+              scopeId,
             });
           },
         });
       },
     }),
-    [euidApi, investigateInTimeline, openEntityGraphView, openEntityFlyout]
+    [euidApi, investigateInTimeline, openEntityGraphView, openEntityFlyout, scopeId]
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
