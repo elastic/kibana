@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { EntityDefinitionOfAnyType, EntityType } from '../definitions/entity_schema';
+import type { EntityDefinitionOfAnyType } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, getSourceFieldNames } from './commons';
 
 export interface IdentitySourceFields {
@@ -37,11 +36,6 @@ export interface NamespaceSourceFields {
   prefixMatchFields: string[];
 }
 
-/** {@link getEuidSourceFieldsFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidSourceFields(entityType: EntityType): IdentitySourceFields {
-  return getEuidSourceFieldsFromDefinition(getEntityDefinitionWithoutId(entityType));
-}
-
 /**
  * Returns the identity source field names for a given entity definition.
  * Field evaluation destinations (e.g. entity.namespace) are excluded, since they are computed and not stored.
@@ -49,9 +43,7 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
  * @param definition - The entity definition
  * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidRanking
  */
-export function getEuidSourceFieldsFromDefinition(
-  definition: EntityDefinitionOfAnyType
-): IdentitySourceFields {
+export function getEuidSourceFields(definition: EntityDefinitionOfAnyType): IdentitySourceFields {
   const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -80,11 +72,6 @@ export function getEuidSourceFieldsFromDefinition(
   };
 }
 
-/** {@link getEuidNamespaceSourceFieldsFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceSourceFields {
-  return getEuidNamespaceSourceFieldsFromDefinition(getEntityDefinitionWithoutId(entityType));
-}
-
 /**
  * Returns the namespace source fields for a given entity definition, split by how they are matched.
  *
@@ -103,7 +90,7 @@ export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceS
  * @param definition - The entity definition
  * @returns exactMatchFields and prefixMatchFields from the entity's fieldEvaluations sources
  */
-export function getEuidNamespaceSourceFieldsFromDefinition(
+export function getEuidNamespaceSourceFields(
   definition: EntityDefinitionOfAnyType
 ): NamespaceSourceFields {
   const { identityField } = definition;
@@ -112,19 +99,6 @@ export function getEuidNamespaceSourceFieldsFromDefinition(
   }
   const allSources = (identityField.fieldEvaluations ?? []).flatMap((fe) => fe.sources);
   return getSourceFieldNames(allSources);
-}
-
-/** {@link getEuidNamespaceSourcePrefixFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidNamespaceSourcePrefix(
-  entityType: EntityType,
-  field: string,
-  observedValue: string
-): string | undefined {
-  return getEuidNamespaceSourcePrefixFromDefinition(
-    getEntityDefinitionWithoutId(entityType),
-    field,
-    observedValue
-  );
 }
 
 /**
@@ -149,7 +123,7 @@ export function getEuidNamespaceSourcePrefix(
  * @returns the derived prefix (e.g. `okta`), or `undefined` if `field` is not a prefix-matched
  *   source for this entity definition
  */
-export function getEuidNamespaceSourcePrefixFromDefinition(
+export function getEuidNamespaceSourcePrefix(
   definition: EntityDefinitionOfAnyType,
   field: string,
   observedValue: string

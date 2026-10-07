@@ -62,7 +62,7 @@ export const HeaderRow = ({ item, scopeId, onShowDocument, onShowEntity }: Heade
   const { euiTheme } = useEuiTheme();
   // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
   // the unnarrowed sourceFields (see getIdentityFilterFields).
-  const euidApi = useEntityStoreEuidApi()?.euid;
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
 
   const title = useMemo(() => {
     switch (item.itemType) {

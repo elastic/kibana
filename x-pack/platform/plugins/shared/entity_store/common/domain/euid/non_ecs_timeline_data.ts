@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { EntityDefinitionOfAnyType, EntityType } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import {
-  getEuidFromObjectFromDefinition,
-  getEntityIdentifiersFromDocumentFromDefinition,
-} from './memory';
+import type { EntityDefinitionOfAnyType } from '../definitions/entity_schema';
+import { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
 
 /**
  * Structural match for timeline non-ECS rows (e.g. `TimelineNonEcsData` from
@@ -61,19 +57,8 @@ export function nonEcsTimelineDataToDocument(
   return doc;
 }
 
-/** {@link getEuidFromTimelineNonEcsDataFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidFromTimelineNonEcsData(
-  entityType: EntityType,
-  rows: readonly NonEcsTimelineDataRow[] | undefined
-): string | undefined {
-  return getEuidFromTimelineNonEcsDataFromDefinition(
-    getEntityDefinitionWithoutId(entityType),
-    rows
-  );
-}
-
 /** Derives the entity id for an entity definition from timeline non-ECS rows, or `undefined` when the rows yield none. */
-export function getEuidFromTimelineNonEcsDataFromDefinition(
+export function getEuidFromTimelineNonEcsData(
   definition: EntityDefinitionOfAnyType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
 ): string | undefined {
@@ -81,22 +66,11 @@ export function getEuidFromTimelineNonEcsDataFromDefinition(
   if (Object.keys(doc).length === 0) {
     return undefined;
   }
-  return getEuidFromObjectFromDefinition(definition, doc);
-}
-
-/** {@link getEntityIdentifiersFromTimelineNonEcsDataFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEntityIdentifiersFromTimelineNonEcsData(
-  entityType: EntityType,
-  rows: readonly NonEcsTimelineDataRow[] | undefined
-): Record<string, string> | undefined {
-  return getEntityIdentifiersFromTimelineNonEcsDataFromDefinition(
-    getEntityDefinitionWithoutId(entityType),
-    rows
-  );
+  return getEuidFromObject(definition, doc);
 }
 
 /** Extracts the identity field name → value pairs for an entity definition from timeline non-ECS rows. */
-export function getEntityIdentifiersFromTimelineNonEcsDataFromDefinition(
+export function getEntityIdentifiersFromTimelineNonEcsData(
   definition: EntityDefinitionOfAnyType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
 ): Record<string, string> | undefined {
@@ -104,5 +78,5 @@ export function getEntityIdentifiersFromTimelineNonEcsDataFromDefinition(
   if (Object.keys(doc).length === 0) {
     return undefined;
   }
-  return getEntityIdentifiersFromDocumentFromDefinition(definition, doc);
+  return getEntityIdentifiersFromDocument(definition, doc);
 }

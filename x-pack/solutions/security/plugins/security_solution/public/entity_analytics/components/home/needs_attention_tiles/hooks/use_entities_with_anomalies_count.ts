@@ -67,7 +67,7 @@ export const useEntitiesWithAnomaliesCount = ({
   const query = useMemo(() => {
     if (!euidApi || !resolvedIndex?.indexName) return null;
     return buildEntitiesWithAnomaliesCountQuery(
-      euidApi.euid,
+      euidApi,
       resolvedIndex.indexName,
       timeRange,
       getEntityFilterESQL(entityFilters),

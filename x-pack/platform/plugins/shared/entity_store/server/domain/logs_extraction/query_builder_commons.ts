@@ -27,10 +27,10 @@ import type {
 import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
 import { type EntityField } from '../../../common/domain/definitions/entity_schema';
 import {
-  getEuidEsqlDocumentsContainsIdFilterFromDefinition,
-  getFieldEvaluationsEsqlFromDefinition,
+  getEuidEsqlDocumentsContainsIdFilter,
+  getFieldEvaluationsEsql,
 } from '../../../common/domain/euid/esql';
-import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
+import { getFieldEvaluations } from '../../../common/domain/euid/field_evaluations';
 
 export const MAX_COLLECTED_VALUES_PER_FIELD = 50;
 
@@ -91,9 +91,7 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
-      AND (${getEuidEsqlDocumentsContainsIdFilterFromDefinition(
-        entityDefinition
-      )})${extractionGateFilter}`;
+      AND (${getEuidEsqlDocumentsContainsIdFilter(entityDefinition)})${extractionGateFilter}`;
 
   if (!logsPageCursorStart) {
     return baseWhere;
@@ -189,7 +187,7 @@ export function extractPaginationParams(
  * Returns empty string when there are no field evaluations.
  */
 export function buildFieldEvaluations(entityDefinition: EntityDefinition): string {
-  const fieldEvaluationsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+  const fieldEvaluationsEsql = getFieldEvaluationsEsql(entityDefinition);
   if (fieldEvaluationsEsql === undefined || fieldEvaluationsEsql === '') {
     return '';
   }
@@ -428,5 +426,5 @@ export function buildPaginationSection(
 }
 
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {
-  return getFieldEvaluationsFromDefinition(entityDefinition).length > 0;
+  return getFieldEvaluations(entityDefinition).length > 0;
 }

@@ -5,56 +5,66 @@
  * 2.0.
  */
 
-import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
-  buildEvaluatedDoc,
-  buildEvaluatedDocFromDefinition,
   getEuidFromObject,
-  getEuidFromObjectFromDefinition,
   getEuidFromObjectForSearch,
-  getEuidFromObjectForSearchFromDefinition,
   getEntityIdentifiersFromDocument,
-  getEntityIdentifiersFromDocumentFromDefinition,
 } from './memory';
 
 describe('getEntityIdentifiersFromDocument', () => {
   it('returns undefined when doc is null or undefined', () => {
-    expect(getEntityIdentifiersFromDocument('host', null)).toBeUndefined();
-    expect(getEntityIdentifiersFromDocument('host', undefined)).toBeUndefined();
+    expect(
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('host'), null)
+    ).toBeUndefined();
+    expect(
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('host'), undefined)
+    ).toBeUndefined();
   });
 
   it('returns host.id entry when nested host.id is present', () => {
-    expect(getEntityIdentifiersFromDocument('host', { host: { id: 'h1' } })).toEqual({
+    expect(
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('host'), { host: { id: 'h1' } })
+    ).toEqual({
       'host.id': 'h1',
     });
   });
 
   it('returns host.name when host.id is absent', () => {
-    expect(getEntityIdentifiersFromDocument('host', { host: { name: 'server1' } })).toEqual({
+    expect(
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('host'), {
+        host: { name: 'server1' },
+      })
+    ).toEqual({
       'host.name': 'server1',
     });
   });
 
   it('unwraps _source like getEuidFromObject', () => {
     expect(
-      getEntityIdentifiersFromDocument('generic', { _source: { entity: { id: 'e-123' } } })
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('generic'), {
+        _source: { entity: { id: 'e-123' } },
+      })
     ).toEqual({ 'entity.id': 'e-123' });
   });
 
   it('returns service.name for single-field service identity', () => {
     expect(
-      getEntityIdentifiersFromDocument('service', { service: { name: 'api-gateway' } })
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('service'), {
+        service: { name: 'api-gateway' },
+      })
     ).toEqual({ 'service.name': 'api-gateway' });
   });
 
   it('returns undefined for service when service.name is missing', () => {
-    expect(getEntityIdentifiersFromDocument('service', { service: {} })).toBeUndefined();
+    expect(
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('service'), { service: {} })
+    ).toBeUndefined();
   });
 
   it('returns user.email and evaluated entity.namespace for IDP email path', () => {
     expect(
-      getEntityIdentifiersFromDocument('user', {
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('user'), {
         user: { email: 'alice@example.com' },
         event: { kind: 'asset', module: 'okta' },
       })
@@ -66,7 +76,7 @@ describe('getEntityIdentifiersFromDocument', () => {
 
   it('returns user.name, host.id, and entity.namespace for non-IDP local path', () => {
     expect(
-      getEntityIdentifiersFromDocument('user', {
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('user'), {
         user: { name: 'alice' },
         host: { id: 'host-1' },
       })
@@ -79,7 +89,7 @@ describe('getEntityIdentifiersFromDocument', () => {
 
   it('returns undefined when user document fails pipeline gate (e.g. wrong IDP module)', () => {
     expect(
-      getEntityIdentifiersFromDocument('user', {
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('user'), {
         user: { email: 'a@b.com' },
         event: { module: 'azure' },
       })
@@ -88,7 +98,7 @@ describe('getEntityIdentifiersFromDocument', () => {
 
   it('prefers host.id over host.name for host identifiers', () => {
     expect(
-      getEntityIdentifiersFromDocument('host', {
+      getEntityIdentifiersFromDocument(getEntityDefinitionWithoutId('host'), {
         host: { id: 'h1', name: 'server1', hostname: 'node-1' },
       })
     ).toEqual({
@@ -99,50 +109,64 @@ describe('getEntityIdentifiersFromDocument', () => {
 
 describe('getEuidFromObject', () => {
   it('returns empty string when obj is null or undefined', () => {
-    expect(getEuidFromObject('host', null)).toBe(undefined);
-    expect(getEuidFromObject('generic', undefined)).toBe(undefined);
+    expect(getEuidFromObject(getEntityDefinitionWithoutId('host'), null)).toBe(undefined);
+    expect(getEuidFromObject(getEntityDefinitionWithoutId('generic'), undefined)).toBe(undefined);
   });
 
   describe('generic', () => {
     it('returns entity.id without type prefix (skipTypePrepend)', () => {
-      expect(getEuidFromObject('generic', { entity: { id: 'e-123' } })).toBe('e-123');
+      expect(
+        getEuidFromObject(getEntityDefinitionWithoutId('generic'), { entity: { id: 'e-123' } })
+      ).toBe('e-123');
     });
 
     it('unwraps _source when doc is an Elasticsearch hit', () => {
-      expect(getEuidFromObject('generic', { _source: { entity: { id: 'e-123' } } })).toBe('e-123');
+      expect(
+        getEuidFromObject(getEntityDefinitionWithoutId('generic'), {
+          _source: { entity: { id: 'e-123' } },
+        })
+      ).toBe('e-123');
     });
   });
 
   describe('host', () => {
     it('uses host.id when present', () => {
-      expect(getEuidFromObject('host', { host: { id: 'host-id-1' } })).toBe('host:host-id-1');
+      expect(
+        getEuidFromObject(getEntityDefinitionWithoutId('host'), { host: { id: 'host-id-1' } })
+      ).toBe('host:host-id-1');
     });
 
     it('uses host.name when host.id is missing', () => {
-      expect(getEuidFromObject('host', { host: { name: 'server1' } })).toBe('host:server1');
+      expect(
+        getEuidFromObject(getEntityDefinitionWithoutId('host'), { host: { name: 'server1' } })
+      ).toBe('host:server1');
     });
 
     it('uses host.hostname when host.id and host.name are missing', () => {
-      expect(getEuidFromObject('host', { host: { hostname: 'node-1' } })).toBe('host:node-1');
+      expect(
+        getEuidFromObject(getEntityDefinitionWithoutId('host'), { host: { hostname: 'node-1' } })
+      ).toBe('host:node-1');
     });
 
     it('precedence: host.id over host.name', () => {
       const obj = { host: { id: 'h1', name: 'server1' } };
-      expect(getEuidFromObject('host', obj)).toBe('host:h1');
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('host'), obj)).toBe('host:h1');
     });
 
     it('precedence: host.id over host.hostname', () => {
       const obj = { host: { id: 'h1', hostname: 'node-1' } };
-      expect(getEuidFromObject('host', obj)).toBe('host:h1');
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('host'), obj)).toBe('host:h1');
     });
 
     it('precedence: host.name over host.hostname when both present', () => {
       const obj = { host: { name: 'server1', hostname: 'node-1' } };
-      expect(getEuidFromObject('host', obj)).toBe('host:server1');
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('host'), obj)).toBe('host:server1');
     });
 
     it('returns undefined when no host identity field is present', () => {
-      expect(getEuidFromObject('host', { host: { domain: 'example.com' } })).toBeUndefined();
+      expect(
+        getEuidFromObject(getEntityDefinitionWithoutId('host'), { host: { domain: 'example.com' } })
+      ).toBeUndefined();
     });
   });
 
@@ -154,13 +178,16 @@ describe('getEuidFromObject', () => {
 
     it('uses user.email + "@" + entity.namespace when user.email and event.module are present', () => {
       expect(
-        getEuidFromObject('user', withNamespace({ user: { email: 'alice@example.com' } }))
+        getEuidFromObject(
+          getEntityDefinitionWithoutId('user'),
+          withNamespace({ user: { email: 'alice@example.com' } })
+        )
       ).toBe('user:alice@example.com@okta');
     });
 
     it('maps event.module okta and entityanalytics_okta to namespace okta', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { email: 'a@b.com' },
           event: { kind: 'asset', module: 'entityanalytics_okta' },
         })
@@ -169,7 +196,7 @@ describe('getEuidFromObject', () => {
 
     it('returns undefined when document fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { email: 'a@b.com' },
           event: { module: 'azure' },
         })
@@ -178,7 +205,7 @@ describe('getEuidFromObject', () => {
 
     it('uses non-IDP path when user.name and host.id are present', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { name: 'alice' },
           host: { id: 'host-1' },
         })
@@ -187,7 +214,7 @@ describe('getEuidFromObject', () => {
 
     it('returns undefined when event.outcome is failure (documentsFilter)', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { email: 'a@b.com' },
           event: { kind: 'asset', module: 'okta', outcome: 'failure' },
         })
@@ -196,7 +223,7 @@ describe('getEuidFromObject', () => {
 
     it('maps event.module o365 and o365_metrics to namespace microsoft_365', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { email: 'a@b.com' },
           event: { kind: 'asset', module: 'o365_metrics' },
         })
@@ -205,7 +232,7 @@ describe('getEuidFromObject', () => {
 
     it('uses event.module as entity.namespace when no whenClause matches (fallback to source)', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { email: 'a@b.com' },
           event: { kind: 'asset', module: 'custom_module' },
         })
@@ -214,7 +241,7 @@ describe('getEuidFromObject', () => {
 
     it('returns euid with entity.namespace fallback when user.email is present but no source (event.module/data_stream.dataset) is set', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { email: 'dev@example.com' },
           event: { kind: 'asset' },
         })
@@ -222,34 +249,44 @@ describe('getEuidFromObject', () => {
     });
 
     it('uses user.name + "@" + entity.namespace when user.name and event.module are present', () => {
-      expect(getEuidFromObject('user', withNamespace({ user: { name: 'alice' } }))).toBe(
-        'user:alice@okta'
-      );
+      expect(
+        getEuidFromObject(
+          getEntityDefinitionWithoutId('user'),
+          withNamespace({ user: { name: 'alice' } })
+        )
+      ).toBe('user:alice@okta');
     });
 
     it('uses user.id + "@" + entity.namespace when user.id and event.module are present', () => {
-      expect(getEuidFromObject('user', withNamespace({ user: { id: 'user-id-42' } }))).toBe(
-        'user:user-id-42@okta'
-      );
+      expect(
+        getEuidFromObject(
+          getEntityDefinitionWithoutId('user'),
+          withNamespace({ user: { id: 'user-id-42' } })
+        )
+      ).toBe('user:user-id-42@okta');
     });
 
     it('precedence: user.email@entity.namespace over user.id@entity.namespace', () => {
       const obj = withNamespace({
         user: { email: 'alice@example.com', id: 'user-42' },
       });
-      expect(getEuidFromObject('user', obj)).toBe('user:alice@example.com@okta');
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('user'), obj)).toBe(
+        'user:alice@example.com@okta'
+      );
     });
 
     it('precedence: user.email over user.name@entity.namespace', () => {
       const obj = withNamespace({
         user: { email: 'dev@example.com', name: 'dave', domain: 'corp.com' },
       });
-      expect(getEuidFromObject('user', obj)).toBe('user:dev@example.com@okta');
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('user'), obj)).toBe(
+        'user:dev@example.com@okta'
+      );
     });
 
     it('uses user.name@user.domain when name and domain present', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { name: 'jane', domain: 'corp.com' },
           event: { kind: 'asset', module: 'entityanalytics_ad' },
         })
@@ -258,7 +295,7 @@ describe('getEuidFromObject', () => {
 
     it('uses user.name@user.domain when name and domain present (namespace does not affect which instruction matches)', () => {
       expect(
-        getEuidFromObject('user', {
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
           user: { name: 'jane', domain: 'corp.com' },
           event: { kind: 'asset', module: 'okta' },
         })
@@ -268,25 +305,33 @@ describe('getEuidFromObject', () => {
 
   describe('service', () => {
     it('returns undefined when service.name is missing (single-field identity)', () => {
-      expect(getEuidFromObject('service', { service: { entity: { id: 'svc-entity-1' } } })).toBe(
+      expect(
+        getEuidFromObject(getEntityDefinitionWithoutId('service'), {
+          service: { entity: { id: 'svc-entity-1' } },
+        })
+      ).toBe(undefined);
+    });
+
+    it('uses service.name (single-field identity)', () => {
+      expect(
+        getEuidFromObject(getEntityDefinitionWithoutId('service'), {
+          service: { name: 'api-gateway' },
+        })
+      ).toBe('service:api-gateway');
+    });
+
+    it('returns undefined when no service.name is present', () => {
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('service'), {})).toBe(undefined);
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('service'), { service: {} })).toBe(
         undefined
       );
     });
 
-    it('uses service.name (single-field identity)', () => {
-      expect(getEuidFromObject('service', { service: { name: 'api-gateway' } })).toBe(
-        'service:api-gateway'
-      );
-    });
-
-    it('returns undefined when no service.name is present', () => {
-      expect(getEuidFromObject('service', {})).toBe(undefined);
-      expect(getEuidFromObject('service', { service: {} })).toBe(undefined);
-    });
-
     it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
       const obj = { service: { entity: { id: 'svc-e1' }, name: 'api-gateway' } };
-      expect(getEuidFromObject('service', obj)).toBe('service:api-gateway');
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('service'), obj)).toBe(
+        'service:api-gateway'
+      );
     });
   });
 
@@ -299,55 +344,42 @@ describe('getEuidFromObject', () => {
     const asAlert = (doc: object) => ({ ...doc, 'kibana.alert.rule.uuid': 'rule-1' });
 
     it('resolves an alert on an IdP-namespace user', () => {
-      expect(getEuidFromObject('user', asAlert(oktaUser))).toBe('user:alice@example.com@okta');
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('user'), asAlert(oktaUser))).toBe(
+        'user:alice@example.com@okta'
+      );
     });
 
     it('resolves an alert nested under kibana.alert.rule as well as flattened', () => {
       expect(
-        getEuidFromObject('user', { ...oktaUser, kibana: { alert: { rule: { uuid: 'rule-1' } } } })
+        getEuidFromObject(getEntityDefinitionWithoutId('user'), {
+          ...oktaUser,
+          kibana: { alert: { rule: { uuid: 'rule-1' } } },
+        })
       ).toBe('user:alice@example.com@okta');
     });
 
     it('still rejects the same document when it is not an alert', () => {
-      expect(getEuidFromObject('user', oktaUser)).toBeUndefined();
+      expect(getEuidFromObject(getEntityDefinitionWithoutId('user'), oktaUser)).toBeUndefined();
     });
 
     it('still enforces documentsFilter on an alert', () => {
       expect(
         getEuidFromObject(
-          'user',
+          getEntityDefinitionWithoutId('user'),
           asAlert({ ...oktaUser, event: { ...oktaUser.event, outcome: 'failure' } })
         )
       ).toBeUndefined();
     });
 
     it('resolves without the gate in the search variant', () => {
-      expect(getEuidFromObjectForSearch('user', oktaUser)).toBe('user:alice@example.com@okta');
+      expect(getEuidFromObjectForSearch(getEntityDefinitionWithoutId('user'), oktaUser)).toBe(
+        'user:alice@example.com@okta'
+      );
     });
   });
 });
 
-describe('FromDefinition variants', () => {
-  const documentsByType: Array<[EntityType, object]> = [
-    ['user', { user: { email: 'alice@example.com' }, event: { kind: 'asset', module: 'okta' } }],
-    ['host', { host: { id: 'h1', name: 'server1' } }],
-    ['service', { service: { name: 'api-gateway' } }],
-    ['generic', { _source: { entity: { id: 'e-123' } } }],
-  ];
-
-  it.each(documentsByType)('match the type-name functions for %s', (type, doc) => {
-    const definition = getEntityDefinitionWithoutId(type);
-
-    expect(buildEvaluatedDocFromDefinition(definition, doc)).toEqual(buildEvaluatedDoc(type, doc));
-    expect(getEuidFromObjectFromDefinition(definition, doc)).toEqual(getEuidFromObject(type, doc));
-    expect(getEuidFromObjectForSearchFromDefinition(definition, doc)).toEqual(
-      getEuidFromObjectForSearch(type, doc)
-    );
-    expect(getEntityIdentifiersFromDocumentFromDefinition(definition, doc)).toEqual(
-      getEntityIdentifiersFromDocument(type, doc)
-    );
-  });
-
+describe('definition type', () => {
   it('takes the id prefix from the definition type', () => {
     const definition = {
       ...getEntityDefinitionWithoutId('service'),
@@ -356,7 +388,7 @@ describe('FromDefinition variants', () => {
       fields: [],
     };
 
-    const euid = getEuidFromObjectFromDefinition(definition, { k8s: { pod: { uid: 'pod-1' } } });
+    const euid = getEuidFromObject(definition, { k8s: { pod: { uid: 'pod-1' } } });
 
     expect(euid?.startsWith('k8s.pod:')).toBe(true);
     expect(euid).toBe('k8s.pod:pod-1');

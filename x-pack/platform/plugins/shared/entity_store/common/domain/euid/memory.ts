@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  EntityDefinitionOfAnyType,
-  EntityType,
-  EuidAttribute,
-} from '../definitions/entity_schema';
+import type { EntityDefinitionOfAnyType, EuidAttribute } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import type { EuidGateOptions } from './commons';
 import {
   applyWhenConditionTrueSetFields,
@@ -24,24 +19,16 @@ import {
 } from './commons';
 import { applyFieldEvaluations } from './field_evaluations';
 
-/** {@link buildEvaluatedDocFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function buildEvaluatedDoc(entityType: EntityType, doc: any): any {
-  return buildEvaluatedDocFromDefinition(getEntityDefinitionWithoutId(entityType), doc);
-}
-
 /**
  * Applies the calculated-identity evaluation pipeline of an entity definition to a document,
- * returning a fresh object — `doc` itself is never mutated. Shared by {@link getEuidFromObjectFromDefinition}
- * and {@link getEntityIdentifiersFromDocumentFromDefinition}, and by callers (e.g. the creation gate) that need
+ * returning a fresh object — `doc` itself is never mutated. Shared by {@link getEuidFromObject}
+ * and {@link getEntityIdentifiersFromDocument}, and by callers (e.g. the creation gate) that need
  * to evaluate a `requires` condition against fields derived at identity-evaluation time
  * (e.g. `entity.namespace`), not just raw document fields.
  *
  * For single-field identities there is nothing to evaluate, so `doc` is returned unchanged.
  */
-export function buildEvaluatedDocFromDefinition(
-  entityDefinition: EntityDefinitionOfAnyType,
-  doc: any
-): any {
+export function buildEvaluatedDoc(entityDefinition: EntityDefinitionOfAnyType, doc: any): any {
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -68,11 +55,6 @@ export function buildEvaluatedDocFromDefinition(
   return evaluatedDoc;
 }
 
-/** {@link getEuidFromObjectFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidFromObject(entityType: EntityType, doc: any, options?: EuidGateOptions) {
-  return getEuidFromObjectFromDefinition(getEntityDefinitionWithoutId(entityType), doc, options);
-}
-
 /**
  * Constructs an entity id from the provided entity definition and document.
  *
@@ -81,9 +63,9 @@ export function getEuidFromObject(entityType: EntityType, doc: any, options?: Eu
  *
  * Example usage:
  * ```ts
- * import { getEuidFromObjectFromDefinition } from './memory';
+ * import { getEuidFromObject } from './memory';
  *
- * const euid = getEuidFromObjectFromDefinition(hostDefinition, {
+ * const euid = getEuidFromObject(hostDefinition, {
  *   host: { name: 'server1', domain: 'example.com' },
  * });
  * // euid may look like:
@@ -91,14 +73,14 @@ export function getEuidFromObject(entityType: EntityType, doc: any, options?: Eu
  * ```
  *
  * Applies the creation gate: a document that may not put an entity in the store yields `undefined`.
- * For entities that already exist, use {@link getEuidFromObjectForSearchFromDefinition}.
+ * For entities that already exist, use {@link getEuidFromObjectForSearch}.
  *
  * @param entityDefinition - The entity definition whose identity rules derive the id
  * @param doc - The document to derive entity id from. May be a flattened or nested shape.
  * @param options - See {@link EuidGateOptions}.
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
-export function getEuidFromObjectFromDefinition(
+export function getEuidFromObject(
   entityDefinition: EntityDefinitionOfAnyType,
   doc: any,
   options?: EuidGateOptions
@@ -121,7 +103,7 @@ export function getEuidFromObjectFromDefinition(
     return `${entityType}:${value}`;
   }
 
-  const evaluatedDoc = buildEvaluatedDocFromDefinition(entityDefinition, doc);
+  const evaluatedDoc = buildEvaluatedDoc(entityDefinition, doc);
 
   if (!documentPassesCalculatedIdentityPipelineGate(evaluatedDoc, entityDefinition, options)) {
     return undefined;
@@ -140,13 +122,8 @@ export function getEuidFromObjectFromDefinition(
   return `${entityType}:${rawId}`;
 }
 
-/** {@link getEuidFromObjectForSearchFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidFromObjectForSearch(entityType: EntityType, doc: any) {
-  return getEuidFromObjectForSearchFromDefinition(getEntityDefinitionWithoutId(entityType), doc);
-}
-
 /**
- * Like {@link getEuidFromObjectFromDefinition} without the creation gate, so IdP and shared-account documents
+ * Like {@link getEuidFromObject} without the creation gate, so IdP and shared-account documents
  * still resolve to an entity that already exists.
  *
  * For risk scoring and enrichment. The caller checks store membership; this only answers which
@@ -156,29 +133,15 @@ export function getEuidFromObjectForSearch(entityType: EntityType, doc: any) {
  * @param doc - The document to derive entity id from. May be a flattened or nested shape.
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
-export function getEuidFromObjectForSearchFromDefinition(
-  entityDefinition: EntityDefinitionOfAnyType,
-  doc: any
-) {
-  return getEuidFromObjectFromDefinition(entityDefinition, doc, { applyPostAggFilter: false });
-}
-
-/** {@link getEntityIdentifiersFromDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEntityIdentifiersFromDocument(
-  entityType: EntityType,
-  doc: unknown
-): Record<string, string> | undefined {
-  return getEntityIdentifiersFromDocumentFromDefinition(
-    getEntityDefinitionWithoutId(entityType),
-    doc
-  );
+export function getEuidFromObjectForSearch(entityDefinition: EntityDefinitionOfAnyType, doc: any) {
+  return getEuidFromObject(entityDefinition, doc, { applyPostAggFilter: false });
 }
 
 /**
  * Extracts identity field name → value pairs from a document (flattened, nested, or ES hit with `_source`)
- * using the same rules as {@link getEuidFromObjectFromDefinition}. Use for entity store resolution / flyout identity seeds.
+ * using the same rules as {@link getEuidFromObject}. Use for entity store resolution / flyout identity seeds.
  */
-export function getEntityIdentifiersFromDocumentFromDefinition(
+export function getEntityIdentifiersFromDocument(
   entityDefinition: EntityDefinitionOfAnyType,
   doc: unknown
 ): Record<string, string> | undefined {
@@ -197,7 +160,7 @@ export function getEntityIdentifiersFromDocumentFromDefinition(
     return { [identityField.singleField]: value };
   }
 
-  const evaluatedDoc = buildEvaluatedDocFromDefinition(entityDefinition, workingDoc);
+  const evaluatedDoc = buildEvaluatedDoc(entityDefinition, workingDoc);
 
   if (!documentPassesCalculatedIdentityPipelineGate(evaluatedDoc, entityDefinition)) {
     return undefined;

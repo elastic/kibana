@@ -15,7 +15,7 @@ import {
 } from '../../../common/domain/euid/commons';
 import {
   applyFieldEvaluations,
-  getFieldEvaluationsFromDefinition,
+  getFieldEvaluations,
 } from '../../../common/domain/euid/field_evaluations';
 import { getEntityDefinitionWithoutId } from '../../../common/domain/definitions/registry';
 import {
@@ -116,7 +116,7 @@ function deriveEntitySource(
   definition: EntityDefinitionWithoutId,
   doc: unknown
 ): string[] | undefined {
-  const fieldEvaluations = getFieldEvaluationsFromDefinition(definition);
+  const fieldEvaluations = getFieldEvaluations(definition);
   if (fieldEvaluations.length === 0) {
     return undefined;
   }

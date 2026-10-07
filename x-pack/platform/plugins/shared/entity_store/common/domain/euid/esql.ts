@@ -12,15 +12,10 @@ import type {
   EntityDefinitionType,
   EuidRankingBranch,
   FieldEvaluation,
-  EntityType,
   EuidAttribute,
   FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import {
-  getEntityDefinitionWithoutId,
-  type EntityDefinitionOptions,
-} from '../definitions/registry';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   esqlIsNotNullOrEmpty,
@@ -65,23 +60,12 @@ export function collectRankingFields(branches: EuidRankingBranch[]): Set<string>
   return fields;
 }
 
-/** {@link getEuidEsqlFilterBasedOnDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidEsqlFilterBasedOnDocument(
-  entityType: EntityType,
-  doc: any
-): string | undefined {
-  return getEuidEsqlFilterBasedOnDocumentFromDefinition(
-    getEntityDefinitionWithoutId(entityType),
-    doc
-  );
-}
-
 /**
  * Constructs an ES|QL filter matching source documents that would resolve to the same entity as the
  * provided document under the given entity definition, or `undefined` if the document lacks enough
  * identifying information or fails the definition's pipeline gate.
  */
-export function getEuidEsqlFilterBasedOnDocumentFromDefinition(
+export function getEuidEsqlFilterBasedOnDocument(
   entityDefinition: EntityDefinitionOfAnyType,
   doc: any
 ): string | undefined {
@@ -365,11 +349,6 @@ function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpe
   return disjuncts.length === 1 ? disjuncts[0] : `(${disjuncts.join(' OR ')})`;
 }
 
-/** {@link getFieldEvaluationsEsqlFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {
-  return getFieldEvaluationsEsqlFromDefinition(getEntityDefinitionWithoutId(entityType));
-}
-
 /** `field` is present and non-empty, referencing the raw field (no TO_STRING cast). */
 function esqlRawFieldNonEmpty(field: string): string {
   return `(\`${field}\` IS NOT NULL AND \`${field}\` != "")`;
@@ -404,9 +383,7 @@ export function getHostScopedUserEuidEsql(): {
  * Returns an ESQL EVAL fragment for all field evaluations of the given entity definition.
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
-export function getFieldEvaluationsEsqlFromDefinition(
-  definition: EntityDefinitionOfAnyType
-): string | undefined {
+export function getFieldEvaluationsEsql(definition: EntityDefinitionOfAnyType): string | undefined {
   // Use only top-level shared evaluations (e.g. entity.source).
   // Identity-specific evaluations (e.g. entity.namespace) are emitted by
   // getEuidEsqlEvaluation directly, co-located with the EUID expression.
@@ -417,13 +394,6 @@ export function getFieldEvaluationsEsqlFromDefinition(
   return evaluations.map((e) => buildOneFieldEvaluationEsql(e)).join(',\n ');
 }
 
-/** {@link getEuidEsqlDocumentsContainsIdFilterFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
-  return getEuidEsqlDocumentsContainsIdFilterFromDefinition(
-    getEntityDefinitionWithoutId(entityType)
-  );
-}
-
 /**
  * Constructs an ESQL filter for the provided entity definition that checks if the documents contains an entity id.
  *
@@ -431,9 +401,9 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
  *
  * Example usage:
  * ```ts
- * import { getEuidEsqlDocumentsContainsIdFilterFromDefinition } from './esql';
+ * import { getEuidEsqlDocumentsContainsIdFilter } from './esql';
  *
- * const filter = getEuidEsqlDocumentsContainsIdFilterFromDefinition(hostDefinition);
+ * const filter = getEuidEsqlDocumentsContainsIdFilter(hostDefinition);
  * // filter may look like:
  * // '((host.entity.id IS NOT NULL) OR (host.id IS NOT NULL) OR (host.name IS NOT NULL) OR (host.hostname IS NOT NULL))'
  * ```
@@ -441,9 +411,7 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
  * @param definition - The entity definition
  * @returns An ESQL filter string that checks if the document contains an entity id.
  */
-export function getEuidEsqlDocumentsContainsIdFilterFromDefinition(
-  definition: EntityDefinitionOfAnyType
-) {
+export function getEuidEsqlDocumentsContainsIdFilter(definition: EntityDefinitionOfAnyType) {
   const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -451,19 +419,6 @@ export function getEuidEsqlDocumentsContainsIdFilterFromDefinition(
   }
 
   return conditionToESQL(identityField.documentsFilter);
-}
-
-/** {@link getEuidEsqlEvaluationFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidEsqlEvaluation(
-  entityType: EntityType,
-  outputColumn: string,
-  { withTypeId = true, options }: { withTypeId?: boolean; options?: EntityDefinitionOptions } = {}
-): string {
-  return getEuidEsqlEvaluationFromDefinition(
-    getEntityDefinitionWithoutId(entityType, undefined, options),
-    outputColumn,
-    { withTypeId }
-  );
 }
 
 /**
@@ -476,12 +431,12 @@ export function getEuidEsqlEvaluation(
  *
  * Wrap the returned string with `| EVAL`:
  * ```ts
- * parts.push(`| EVAL ${getEuidEsqlEvaluationFromDefinition(definition, 'entity.id')}`);
+ * parts.push(`| EVAL ${getEuidEsqlEvaluation(definition, 'entity.id')}`);
  * ```
  *
  * Lookup-only options (such as `excludedUserNames`) are already applied to the definition passed in.
  */
-export function getEuidEsqlEvaluationFromDefinition(
+export function getEuidEsqlEvaluation(
   entityDefinition: EntityDefinitionOfAnyType,
   outputColumn: string,
   { withTypeId = true }: { withTypeId?: boolean } = {}

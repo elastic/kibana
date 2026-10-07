@@ -50,7 +50,8 @@ export function getEntityCreationCandidate(
   }
 
   const doc = getDocument(sourceDoc);
-  const { creatableFromSingleDocument: rule } = getEntityDefinitionWithoutId(entityType);
+  const definition = getEntityDefinitionWithoutId(entityType);
+  const { creatableFromSingleDocument: rule } = definition;
   if (!rule) {
     return { accepted: false, reason: 'entity_type_not_creatable' };
   }
@@ -60,14 +61,14 @@ export function getEntityCreationCandidate(
   }
 
   if ('requires' in rule) {
-    const evaluatedDoc = buildEvaluatedDoc(entityType, doc);
+    const evaluatedDoc = buildEvaluatedDoc(definition, doc);
     if (!evaluateStreamlangCondition(evaluatedDoc, rule.requires)) {
       return { accepted: false, reason: rule.rejectionReason };
     }
   }
 
-  const euid = getEuidFromObject(entityType, doc);
-  const identityFields = getEntityIdentifiersFromDocument(entityType, doc);
+  const euid = getEuidFromObject(definition, doc);
+  const identityFields = getEntityIdentifiersFromDocument(definition, doc);
   if (!euid || !identityFields) {
     return { accepted: false, reason: 'no_identity' };
   }

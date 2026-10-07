@@ -47,8 +47,11 @@ export const Footer = ({ hostName, identityFields, entity }: FooterProps) => {
     if (!euidApi?.euid || !entity) {
       return undefined;
     }
-    return euidApi.euid.kql.getEuidFilterBasedOnDocument('host', entity);
-  }, [euidApi?.euid, entity]);
+    return euidApi.euid.kql.getEuidFilterBasedOnDocument(
+      euidApi.getEntityDefinitionWithoutId('host'),
+      entity
+    );
+  }, [euidApi, entity]);
 
   const entityStoreId = entity?.entity?.id;
   const risk = entity ? getRiskFromEntityRecord(entity) : undefined;

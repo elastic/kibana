@@ -10,8 +10,8 @@ import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   applyFieldEvaluations,
-  getFieldEvaluationsFromDefinition,
-  getIdentityFieldEvaluationsFromDefinition,
+  getFieldEvaluations,
+  getIdentityFieldEvaluations,
   getFieldValue,
   getSourceMatchSpec,
 } from './field_evaluations';
@@ -369,37 +369,33 @@ describe('shared entity.source field evaluation', () => {
   });
 });
 
-describe('getFieldEvaluationsFromDefinition', () => {
+describe('getFieldEvaluations', () => {
   it('should include shared field evaluations for single-field identities', () => {
     const serviceDefinition = getEntityDefinitionWithoutId('service');
 
-    expect(getFieldEvaluationsFromDefinition(serviceDefinition)).toEqual(
-      serviceDefinition.fieldEvaluations
-    );
+    expect(getFieldEvaluations(serviceDefinition)).toEqual(serviceDefinition.fieldEvaluations);
   });
 
   it('should return only shared field evaluations for calculated identities (identity evals are separate)', () => {
     const userDefinition = getEntityDefinitionWithoutId('user');
 
-    expect(getFieldEvaluationsFromDefinition(userDefinition)).toHaveLength(
+    expect(getFieldEvaluations(userDefinition)).toHaveLength(
       userDefinition.fieldEvaluations?.length ?? 0
     );
-    expect(getFieldEvaluationsFromDefinition(userDefinition)).toEqual(
-      userDefinition.fieldEvaluations
-    );
+    expect(getFieldEvaluations(userDefinition)).toEqual(userDefinition.fieldEvaluations);
   });
 });
 
-describe('getIdentityFieldEvaluationsFromDefinition', () => {
+describe('getIdentityFieldEvaluations', () => {
   it('returns empty array for single-field identities (service)', () => {
     const serviceDefinition = getEntityDefinitionWithoutId('service');
 
-    expect(getIdentityFieldEvaluationsFromDefinition(serviceDefinition)).toEqual([]);
+    expect(getIdentityFieldEvaluations(serviceDefinition)).toEqual([]);
   });
 
   it('returns identity-specific evaluations for calculated identities (user)', () => {
     const userDefinition = getEntityDefinitionWithoutId('user');
-    const identityEvals = getIdentityFieldEvaluationsFromDefinition(userDefinition);
+    const identityEvals = getIdentityFieldEvaluations(userDefinition);
 
     expect(identityEvals.length).toBeGreaterThan(0);
     expect(identityEvals.map((e) => e.destination)).toContain('entity.namespace');

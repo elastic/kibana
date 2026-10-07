@@ -22,6 +22,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
         .mockReturnValue({ term: { 'user.name': 'alice' } }),
     },
   },
+  getEntityDefinitionWithoutId: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getEntityDefinitionWithoutId,
 }));
 
 const mockEntityFilter = { term: { 'user.name': 'alice' } };
@@ -78,12 +80,14 @@ describe('searchEntityAnomalies', () => {
   });
 
   it('sends the correct base query to mlAnomalySearch', async () => {
-    const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
+    const { euid, getEntityDefinitionWithoutId } = jest.requireMock(
+      '@kbn/entity-store/common/euid_helpers'
+    );
 
     await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
     expect(euid.dsl.getEuidFilterBasedOnEntityRecord).toHaveBeenCalledWith(
-      'user',
+      getEntityDefinitionWithoutId('user'),
       mockEntityRecord
     );
     expect(mockMlAnomalySearch).toHaveBeenCalledWith(

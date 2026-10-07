@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../use_time_range_param';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
@@ -31,7 +31,7 @@ const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
  * is all that is needed to produce the watchlist-only aggregation.
  */
 export const buildAlertBasedTilesQuery = (
-  euid: EntityStoreEuid,
+  euidApi: EntityStoreEuidApi,
   entitiesIndexName: string,
   spaceId: string,
   timeRange: TimeRange = '24h',
@@ -42,7 +42,7 @@ export const buildAlertBasedTilesQuery = (
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${alertsIndex(spaceId)}`);
   parts.push(`| WHERE @timestamp >= NOW() - ${timeRange}`);
-  parts.push(...buildAlertEuidPipeline(euid));
+  parts.push(...buildAlertEuidPipeline(euidApi));
 
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
   // Discard entity IDs that have no entity-latest record (unrecognised identifiers).

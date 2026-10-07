@@ -34,6 +34,7 @@ export const useEntityEuidFromAlerts = ({
   const { data } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const getEuidRuntimeMapping = euidApi?.euid?.painless?.getEuidRuntimeMapping;
+  const getEntityDefinitionWithoutId = euidApi?.getEntityDefinitionWithoutId;
   const entityType = ENTITY_TYPE_BY_FIELD[fieldName];
 
   const willFetch = enabled && !!entityType && alertIds.length > 0 && !!getEuidRuntimeMapping;
@@ -43,7 +44,7 @@ export const useEntityEuidFromAlerts = ({
   const alertIdsKey = alertIds.join(',');
 
   useEffect(() => {
-    if (!willFetch || !getEuidRuntimeMapping || !entityType) {
+    if (!willFetch || !getEuidRuntimeMapping || !getEntityDefinitionWithoutId || !entityType) {
       setIsLoading(false);
       return;
     }
@@ -62,7 +63,7 @@ export const useEntityEuidFromAlerts = ({
                 query: { ids: { values: alertIds } },
                 _source: false,
                 runtime_mappings: {
-                  entity_id: getEuidRuntimeMapping(entityType),
+                  entity_id: getEuidRuntimeMapping(getEntityDefinitionWithoutId(entityType)),
                 },
                 fields: ['entity_id', fieldName],
                 size: alertIds.length,
@@ -103,6 +104,7 @@ export const useEntityEuidFromAlerts = ({
     alertIds,
     data.search,
     getEuidRuntimeMapping,
+    getEntityDefinitionWithoutId,
     entityType,
     fieldName,
     fieldValue,

@@ -7,60 +7,34 @@
 
 export {
   getEuidFromObject,
-  getEuidFromObjectFromDefinition,
   getEuidFromObjectForSearch,
-  getEuidFromObjectForSearchFromDefinition,
   getEntityIdentifiersFromDocument,
-  getEntityIdentifiersFromDocumentFromDefinition,
 } from './memory';
-export {
-  getEuidFromTimelineNonEcsData,
-  getEuidFromTimelineNonEcsDataFromDefinition,
-  type NonEcsTimelineDataRow,
-} from './non_ecs_timeline_data';
+export { getEuidFromTimelineNonEcsData, type NonEcsTimelineDataRow } from './non_ecs_timeline_data';
 export {
   getEuidPainlessEvaluation,
-  getEuidPainlessEvaluationFromDefinition,
   getEuidPainlessEvaluationForSearch,
-  getEuidPainlessEvaluationForSearchFromDefinition,
   getEuidPainlessRuntimeMapping,
-  getEuidPainlessRuntimeMappingFromDefinition,
 } from './painless';
 export {
   getEuidDslFilterBasedOnDocument,
-  getEuidDslFilterBasedOnDocumentFromDefinition,
   getEuidDslFilterBasedOnEntityRecord,
-  getEuidDslFilterBasedOnEntityRecordFromDefinition,
   getEuidDslDocumentsContainsIdFilter,
-  getEuidDslDocumentsContainsIdFilterFromDefinition,
 } from './dsl';
-export {
-  getEuidKqlFilterBasedOnDocument,
-  getEuidKqlFilterBasedOnDocumentFromDefinition,
-} from './kql';
+export { getEuidKqlFilterBasedOnDocument } from './kql';
 
 export {
   getEuidEsqlDocumentsContainsIdFilter,
-  getEuidEsqlDocumentsContainsIdFilterFromDefinition,
   getEuidEsqlEvaluation,
-  getEuidEsqlEvaluationFromDefinition,
   getEuidEsqlFilterBasedOnDocument,
-  getEuidEsqlFilterBasedOnDocumentFromDefinition,
   getFieldEvaluationsEsql,
-  getFieldEvaluationsEsqlFromDefinition,
   getHostScopedUserEuidEsql,
 } from './esql';
-export {
-  applyFieldEvaluations,
-  getIdentityFieldEvaluationsFromDefinition,
-} from './field_evaluations';
+export { applyFieldEvaluations, getIdentityFieldEvaluations } from './field_evaluations';
 export {
   getEuidSourceFields,
-  getEuidSourceFieldsFromDefinition,
   getEuidNamespaceSourceFields,
-  getEuidNamespaceSourceFieldsFromDefinition,
   getEuidNamespaceSourcePrefix,
-  getEuidNamespaceSourcePrefixFromDefinition,
   type IdentitySourceFields,
   type NamespaceSourceFields,
 } from './identity_fields';

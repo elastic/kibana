@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { ALL_ENTITY_TYPES, EntityType } from '../definitions/entity_schema';
+import { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
   getEuidSourceFields,
-  getEuidSourceFieldsFromDefinition,
   getEuidNamespaceSourceFields,
-  getEuidNamespaceSourceFieldsFromDefinition,
   getEuidNamespaceSourcePrefix,
-  getEuidNamespaceSourcePrefixFromDefinition,
 } from './identity_fields';
 
 describe('getEuidSourceFields', () => {
   it('returns expected host identity invariants deduplicated', () => {
-    const result = getEuidSourceFields(EntityType.enum.host);
+    const result = getEuidSourceFields(getEntityDefinitionWithoutId(EntityType.enum.host));
 
     expect(result.requiresOneOf).toEqual(result.identitySourceFields);
     expect(result.requiresOneOf).toEqual(
@@ -28,7 +25,7 @@ describe('getEuidSourceFields', () => {
   });
 
   it('excludes fieldEvaluation destinations (entity.namespace, entity.confidence) for user', () => {
-    const result = getEuidSourceFields(EntityType.enum.user);
+    const result = getEuidSourceFields(getEntityDefinitionWithoutId(EntityType.enum.user));
 
     expect(result.identitySourceFields).not.toContain('entity.namespace');
     expect(result.identitySourceFields).not.toContain('entity.confidence');
@@ -41,7 +38,7 @@ describe('getEuidSourceFields', () => {
 
 describe('getEuidNamespaceSourceFields', () => {
   it('splits the user namespace sources by how each is matched', () => {
-    const result = getEuidNamespaceSourceFields(EntityType.enum.user);
+    const result = getEuidNamespaceSourceFields(getEntityDefinitionWithoutId(EntityType.enum.user));
 
     // `event.module` is declared as a plain `{ field }` source, so it is compared with a term;
     // `data_stream.dataset` is `{ firstChunkOfField, splitBy }`, so it needs a prefix.
@@ -52,7 +49,9 @@ describe('getEuidNamespaceSourceFields', () => {
   });
 
   it('returns nothing for a single-field identity, which has no field evaluations', () => {
-    expect(getEuidNamespaceSourceFields(EntityType.enum.generic)).toEqual({
+    expect(
+      getEuidNamespaceSourceFields(getEntityDefinitionWithoutId(EntityType.enum.generic))
+    ).toEqual({
       exactMatchFields: [],
       prefixMatchFields: [],
     });
@@ -62,14 +61,22 @@ describe('getEuidNamespaceSourceFields', () => {
 describe('getEuidNamespaceSourcePrefix', () => {
   it('reduces a prefix-matched value to the chunk before its delimiter', () => {
     expect(
-      getEuidNamespaceSourcePrefix(EntityType.enum.user, 'data_stream.dataset', 'okta.system')
+      getEuidNamespaceSourcePrefix(
+        getEntityDefinitionWithoutId(EntityType.enum.user),
+        'data_stream.dataset',
+        'okta.system'
+      )
     ).toBe('okta');
     expect(
-      getEuidNamespaceSourcePrefix(EntityType.enum.user, 'data_stream.dataset', 'gcp.audit')
+      getEuidNamespaceSourcePrefix(
+        getEntityDefinitionWithoutId(EntityType.enum.user),
+        'data_stream.dataset',
+        'gcp.audit'
+      )
     ).toBe('gcp');
     expect(
       getEuidNamespaceSourcePrefix(
-        EntityType.enum.user,
+        getEntityDefinitionWithoutId(EntityType.enum.user),
         'data_stream.dataset',
         'entityanalytics_okta.user'
       )
@@ -81,50 +88,56 @@ describe('getEuidNamespaceSourcePrefix', () => {
     // and `gcp` respectively, but each belongs to its own namespace.
     expect(
       getEuidNamespaceSourcePrefix(
-        EntityType.enum.user,
+        getEntityDefinitionWithoutId(EntityType.enum.user),
         'data_stream.dataset',
         'okta_legacy.system'
       )
     ).toBe('okta_legacy');
     expect(
-      getEuidNamespaceSourcePrefix(EntityType.enum.user, 'data_stream.dataset', 'gcp_beta.audit')
+      getEuidNamespaceSourcePrefix(
+        getEntityDefinitionWithoutId(EntityType.enum.user),
+        'data_stream.dataset',
+        'gcp_beta.audit'
+      )
     ).toBe('gcp_beta');
   });
 
   it('returns the whole value when it contains no delimiter', () => {
-    expect(getEuidNamespaceSourcePrefix(EntityType.enum.user, 'data_stream.dataset', 'okta')).toBe(
-      'okta'
-    );
+    expect(
+      getEuidNamespaceSourcePrefix(
+        getEntityDefinitionWithoutId(EntityType.enum.user),
+        'data_stream.dataset',
+        'okta'
+      )
+    ).toBe('okta');
   });
 
   it('returns undefined for a field that is not a prefix-matched source', () => {
     // `event.module` is an exact-match source, so no prefix can be derived from it.
     expect(
-      getEuidNamespaceSourcePrefix(EntityType.enum.user, 'event.module', 'okta')
+      getEuidNamespaceSourcePrefix(
+        getEntityDefinitionWithoutId(EntityType.enum.user),
+        'event.module',
+        'okta'
+      )
     ).toBeUndefined();
     // And a field the definition never mentions.
     expect(
-      getEuidNamespaceSourcePrefix(EntityType.enum.user, 'user.email', 'alice@example.com')
+      getEuidNamespaceSourcePrefix(
+        getEntityDefinitionWithoutId(EntityType.enum.user),
+        'user.email',
+        'alice@example.com'
+      )
     ).toBeUndefined();
   });
 
   it('returns undefined for a single-field identity, which declares no namespace sources', () => {
     expect(
-      getEuidNamespaceSourcePrefix(EntityType.enum.generic, 'data_stream.dataset', 'okta.system')
+      getEuidNamespaceSourcePrefix(
+        getEntityDefinitionWithoutId(EntityType.enum.generic),
+        'data_stream.dataset',
+        'okta.system'
+      )
     ).toBeUndefined();
-  });
-});
-
-describe('FromDefinition variants', () => {
-  it.each(ALL_ENTITY_TYPES)('match the type-name functions for %s', (type) => {
-    const definition = getEntityDefinitionWithoutId(type);
-
-    expect(getEuidSourceFieldsFromDefinition(definition)).toEqual(getEuidSourceFields(type));
-    expect(getEuidNamespaceSourceFieldsFromDefinition(definition)).toEqual(
-      getEuidNamespaceSourceFields(type)
-    );
-    expect(
-      getEuidNamespaceSourcePrefixFromDefinition(definition, 'data_stream.dataset', 'okta.system')
-    ).toEqual(getEuidNamespaceSourcePrefix(type, 'data_stream.dataset', 'okta.system'));
   });
 });

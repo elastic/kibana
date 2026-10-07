@@ -16,13 +16,8 @@ import {
   isNotCondition,
   isAlwaysCondition,
 } from '@kbn/streamlang';
-import type {
-  EntityDefinitionOfAnyType,
-  EntityType,
-  FieldEvaluation,
-} from '../definitions/entity_schema';
+import type { EntityDefinitionOfAnyType, FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -36,22 +31,11 @@ import {
 import type { SourceMatchSpec } from './field_evaluations';
 import { applyFieldEvaluations, getSourceMatchSpec } from './field_evaluations';
 
-/** {@link getEuidKqlFilterBasedOnDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
-export function getEuidKqlFilterBasedOnDocument(
-  entityType: EntityType,
-  doc: any
-): string | undefined {
-  return getEuidKqlFilterBasedOnDocumentFromDefinition(
-    getEntityDefinitionWithoutId(entityType),
-    doc
-  );
-}
-
 /**
  * Constructs a KQL filter string matching source documents that would resolve to the same entity
  * as the provided document.
  *
- * Mirrors {@link getEuidDslFilterBasedOnDocumentFromDefinition} but produces KQL instead of ES DSL.
+ * Mirrors {@link getEuidDslFilterBasedOnDocument} but produces KQL instead of ES DSL.
  * Accepts either a raw source document or an entity store record (both flattened and nested shapes
  * are supported; `_source`-wrapped ES hits are unwrapped automatically).
  *
@@ -63,17 +47,17 @@ export function getEuidKqlFilterBasedOnDocument(
  *
  * @example
  * // Okta user — includes event.module condition so only okta documents match
- * getEuidKqlFilterBasedOnDocumentFromDefinition(userDefinition, { 'user.email': 'jane@acme.com', 'entity.namespace': 'okta' })
+ * getEuidKqlFilterBasedOnDocument(userDefinition, { 'user.email': 'jane@acme.com', 'entity.namespace': 'okta' })
  * // → 'user.email: "jane@acme.com" AND (event.module: "okta" OR event.module: "entityanalytics_okta" OR data_stream.dataset: okta* OR data_stream.dataset: entityanalytics_okta*)'
  *
  * @example
  * // Local user — identity fields alone are sufficient
- * getEuidKqlFilterBasedOnDocumentFromDefinition(userDefinition, { 'user.name': 'jdoe', 'host.id': 'HW-UUID-ABC', 'entity.namespace': 'local' })
+ * getEuidKqlFilterBasedOnDocument(userDefinition, { 'user.name': 'jdoe', 'host.id': 'HW-UUID-ABC', 'entity.namespace': 'local' })
  * // → 'user.name: "jdoe" AND host.id: "HW-UUID-ABC"'
  *
  * @example
  * // Host — single-field identity, no namespace
- * getEuidKqlFilterBasedOnDocumentFromDefinition(hostDefinition, { 'host.id': 'HW-UUID-ABC123' })
+ * getEuidKqlFilterBasedOnDocument(hostDefinition, { 'host.id': 'HW-UUID-ABC123' })
  * // → 'host.id: "HW-UUID-ABC123"'
  *
  * @param entityDefinition - The entity definition whose identity rules build the filter
@@ -81,7 +65,7 @@ export function getEuidKqlFilterBasedOnDocument(
  * @returns A KQL filter string, or `undefined` if the document lacks sufficient identity
  *   information or fails the entity's pipeline gate.
  */
-export function getEuidKqlFilterBasedOnDocumentFromDefinition(
+export function getEuidKqlFilterBasedOnDocument(
   entityDefinition: EntityDefinitionOfAnyType,
   doc: any
 ): string | undefined {

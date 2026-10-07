@@ -78,7 +78,7 @@ const useGraphPopovers = ({
   const [currentEventText, setCurrentEventText] = useState<string>('');
   // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
   // the unnarrowed sourceFields (see getIdentityFilterFields).
-  const euidApi = useEntityStoreEuidApi()?.euid;
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
   const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview, euidApi);
   const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   // Pass onOpenNetworkPreview so popover items call it directly instead of relying on PreviewLink.
@@ -445,7 +445,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       },
     });
 
-    const euidApi = useEntityStoreEuidApi()?.euid;
+    const euidApi = useEntityStoreEuidApi() ?? undefined;
     const entityTimelineFilters = useMemo(() => {
       if (originEventIds?.length) return [];
       const filters: Filter[] = [];

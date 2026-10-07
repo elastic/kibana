@@ -7,13 +7,9 @@
 
 import {
   getEuidEsqlEvaluation,
-  getEuidEsqlEvaluationFromDefinition,
   getEuidEsqlDocumentsContainsIdFilter,
-  getEuidEsqlDocumentsContainsIdFilterFromDefinition,
   getEuidEsqlFilterBasedOnDocument,
-  getEuidEsqlFilterBasedOnDocumentFromDefinition,
   getFieldEvaluationsEsql,
-  getFieldEvaluationsEsqlFromDefinition,
   collectRankingFields,
   buildRankingCaseEsql,
   buildSourcePickerEsql,
@@ -21,11 +17,10 @@ import {
   buildOneFieldEvaluationEsql,
   getHostScopedUserEuidEsql,
 } from './esql';
-import { getEuidDslDocumentsContainsIdFilterFromDefinition } from './dsl';
-import { getEuidKqlFilterBasedOnDocumentFromDefinition } from './kql';
-import { getEuidPainlessEvaluationFromDefinition } from './painless';
+import { getEuidDslDocumentsContainsIdFilter } from './dsl';
+import { getEuidKqlFilterBasedOnDocument } from './kql';
+import { getEuidPainlessEvaluation } from './painless';
 import type {
-  EntityType,
   EuidRankingBranch,
   FieldEvaluation,
   FieldEvaluationWhenClause,
@@ -44,20 +39,28 @@ const normalize = (s: string) =>
 
 describe('getEuidEsqlFilterBasedOnDocument', () => {
   it('returns undefined when doc is falsy', () => {
-    expect(getEuidEsqlFilterBasedOnDocument('host', null)).toBeUndefined();
-    expect(getEuidEsqlFilterBasedOnDocument('generic', undefined)).toBeUndefined();
-    expect(getEuidEsqlFilterBasedOnDocument('user', {})).toBeUndefined();
+    expect(
+      getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), null)
+    ).toBeUndefined();
+    expect(
+      getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('generic'), undefined)
+    ).toBeUndefined();
+    expect(
+      getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {})
+    ).toBeUndefined();
   });
 
   describe('generic', () => {
     it('returns ESQL filter with equality on entity.id when present', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('generic', { entity: { id: 'e-123' } });
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('generic'), {
+        entity: { id: 'e-123' },
+      });
 
       expect(result).toBe('(entity.id == "e-123")');
     });
 
     it('unwraps _source when doc is an Elasticsearch hit', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('generic', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('generic'), {
         _source: { entity: { id: 'e-123' } },
       });
 
@@ -67,7 +70,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
 
   describe('host', () => {
     it('returns filter with equality on host.id when present', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('host', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
         host: { name: 'to-be-ignored', id: 'host-id-1' },
       });
 
@@ -75,7 +78,9 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter with equality on host.name and null/empty check on host.id when host.id is missing', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('host', { host: { name: 'server1' } });
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
+        host: { name: 'server1' },
+      });
 
       expect(result).toBe(
         '((host.name == "server1") AND (TO_STRING(host.id) IS NULL OR TO_STRING(host.id) == ""))'
@@ -83,7 +88,9 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter with equality on host.hostname and null/empty checks when only host.hostname is present', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('host', { host: { hostname: 'node-1' } });
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
+        host: { hostname: 'node-1' },
+      });
 
       expect(result).toBe(
         '((host.hostname == "node-1") AND (TO_STRING(host.id) IS NULL OR TO_STRING(host.id) == "") AND (TO_STRING(host.name) IS NULL OR TO_STRING(host.name) == ""))'
@@ -91,7 +98,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('precedence: uses host.id when both host.id and host.name are present', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('host', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
         host: { id: 'e1', name: 'myserver' },
       });
 
@@ -101,7 +108,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
 
   describe('user', () => {
     it('returns filter with user.email and source clause when event.module is present (whenClause expands to sourceMatchesAny)', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { email: 'alice@example.com' },
         event: { kind: 'asset', module: 'okta' },
       });
@@ -112,7 +119,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter with user.email and unknown source clause when no event.module or data_stream.dataset', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { email: 'alice@example.com' },
         event: { kind: 'asset' },
       });
@@ -123,7 +130,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter with user.name and source clause (event.module whenClause) and null/empty checks on higher-ranked identity fields', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { name: 'alice' },
         event: { kind: 'asset', module: 'azure' },
       });
@@ -135,7 +142,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
 
     it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
       expect(
-        getEuidEsqlFilterBasedOnDocument('user', {
+        getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
           user: { id: 'user-id-42' },
           event: { module: 'o365' },
         })
@@ -143,11 +150,13 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns undefined when no user id fields are present', () => {
-      expect(getEuidEsqlFilterBasedOnDocument('user', {})).toBeUndefined();
+      expect(
+        getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {})
+      ).toBeUndefined();
     });
 
     it('precedence: uses user.email and source clause when both user.email and user.id are present', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { email: 'alice@example.com', id: 'user-42' },
         event: { kind: 'asset', module: 'entityanalytics_okta' },
       });
@@ -158,7 +167,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter for user.name and user.domain with source clause (single value from whenClause)', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { name: 'jane', domain: 'corp.com' },
         event: { kind: 'asset', module: 'entityanalytics_ad' },
       });
@@ -169,7 +178,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter with single value source clause when event.module has no whenClause match (e.g. aws)', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { email: 'romulo@elastic.co' },
         event: { kind: 'asset', module: 'aws' },
       });
@@ -180,7 +189,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter with source clause from first chunk of data_stream.dataset when event.module is missing', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { email: 'romulo@elastic.co' },
         event: { kind: 'asset' },
         data_stream: { dataset: 'aws.cloudtrail' },
@@ -194,7 +203,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
 
   describe('service', () => {
     it('returns undefined when service.name is missing (single-field identity)', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('service', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('service'), {
         service: { entity: { id: 'svc-entity-1' } },
       });
 
@@ -202,7 +211,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter with equality on service.name (single-field identity)', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('service', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('service'), {
         service: { name: 'api-gateway' },
       });
 
@@ -210,7 +219,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     });
 
     it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('service', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('service'), {
         service: { entity: { id: 'svc-e1' }, name: 'api-gateway' },
       });
 
@@ -221,13 +230,13 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
 
 describe('getEuidEsqlDocumentsContainsIdFilter', () => {
   it('returns single field condition for generic (one required field)', () => {
-    const result = getEuidEsqlDocumentsContainsIdFilter('generic');
+    const result = getEuidEsqlDocumentsContainsIdFilter(getEntityDefinitionWithoutId('generic'));
 
     expect(result).toBe('(TO_STRING(entity.id) IS NOT NULL AND TO_STRING(entity.id) != "")');
   });
 
   it('returns OR of required fields for host', () => {
-    const result = getEuidEsqlDocumentsContainsIdFilter('host');
+    const result = getEuidEsqlDocumentsContainsIdFilter(getEntityDefinitionWithoutId('host'));
 
     const expected =
       'TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != "" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != "" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != ""';
@@ -235,7 +244,7 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
   });
 
   it('returns documents filter AND postAggFilter for user (IDP or non-IDP only)', () => {
-    const result = getEuidEsqlDocumentsContainsIdFilter('user');
+    const result = getEuidEsqlDocumentsContainsIdFilter(getEntityDefinitionWithoutId('user'));
 
     expect(result).toMatchSnapshot();
   });
@@ -245,7 +254,7 @@ describe('getFieldEvaluationsEsql', () => {
   it.each(['generic', 'host', 'service'] as const)(
     'returns shared entity.source EVAL fragment for %s',
     (entityType) => {
-      const result = getFieldEvaluationsEsql(entityType);
+      const result = getFieldEvaluationsEsql(getEntityDefinitionWithoutId(entityType));
 
       expect(result).toContain('_src_entity_source0 = MV_FIRST(TO_STRING(event.module))');
       expect(result).toContain('_src_entity_source1 = MV_FIRST(TO_STRING(event.dataset))');
@@ -259,7 +268,7 @@ describe('getFieldEvaluationsEsql', () => {
   );
 
   it('returns only entity.source for user (entity.namespace is now in getEuidEsqlEvaluation)', () => {
-    const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
+    const result = getFieldEvaluationsEsql(getEntityDefinition('user', 'default'));
 
     expect(result).toBeDefined();
     // entity.source has no whenClauses -> 2-arm CASE (already CaseEagerEvaluator)
@@ -270,7 +279,7 @@ describe('getFieldEvaluationsEsql', () => {
   });
 
   it('getEuidEsqlEvaluation includes entity.namespace for user', () => {
-    const result = getEuidEsqlEvaluation('user', 'entity.id');
+    const result = getEuidEsqlEvaluation(getEntityDefinitionWithoutId('user'), 'entity.id');
 
     // Destination now uses COALESCE of single-arm CaseEagerEvaluators
     expect(result).toContain('entity.namespace = COALESCE(');
@@ -286,19 +295,19 @@ describe('getFieldEvaluationsEsql', () => {
 
 describe('getEuidEsqlEvaluation', () => {
   it('returns bare assignment for single-field identity (generic)', () => {
-    const result = getEuidEsqlEvaluation('generic', 'entity.id');
+    const result = getEuidEsqlEvaluation(getEntityDefinitionWithoutId('generic'), 'entity.id');
 
     expect(normalize(result)).toBe('entity.id = TO_STRING(entity.id)');
   });
 
   it('returns bare assignment for single-field identity (service)', () => {
-    const result = getEuidEsqlEvaluation('service', 'entity.id');
+    const result = getEuidEsqlEvaluation(getEntityDefinitionWithoutId('service'), 'entity.id');
 
     expect(normalize(result)).toBe(`entity.id = CONCAT("service:", TO_STRING(service.name))`);
   });
 
   it('returns _present booleans followed by output assignment for host', () => {
-    const result = getEuidEsqlEvaluation('host', 'entity.id');
+    const result = getEuidEsqlEvaluation(getEntityDefinitionWithoutId('host'), 'entity.id');
 
     expect(result).toContain(
       'host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != ""'
@@ -312,7 +321,7 @@ describe('getEuidEsqlEvaluation', () => {
   });
 
   it('returns _present booleans for all user identity fields', () => {
-    const result = getEuidEsqlEvaluation('user', 'entity.id');
+    const result = getEuidEsqlEvaluation(getEntityDefinitionWithoutId('user'), 'entity.id');
 
     expect(result).toContain('entity_namespace_present =');
     expect(result).toContain('user_email_present =');
@@ -322,7 +331,7 @@ describe('getEuidEsqlEvaluation', () => {
   });
 
   it('honours the outputColumn parameter', () => {
-    const result = getEuidEsqlEvaluation('host', 'my_custom_euid');
+    const result = getEuidEsqlEvaluation(getEntityDefinitionWithoutId('host'), 'my_custom_euid');
 
     expect(result).toContain('my_custom_euid =');
     expect(result).not.toContain('entity.id =');
@@ -331,7 +340,7 @@ describe('getEuidEsqlEvaluation', () => {
 
 describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
   it('uses user.name@host.id@entity.namespace when fieldEvaluations set entity.namespace to local', () => {
-    const result = getEuidEsqlFilterBasedOnDocument('user', {
+    const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
       user: { name: 'alice' },
       host: { id: 'host-1' },
       event: { category: 'authentication' },
@@ -342,7 +351,7 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
   });
 
   it('uses else ranking when entity.namespace is not local', () => {
-    const result = getEuidEsqlFilterBasedOnDocument('user', {
+    const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
       user: { email: 'alice@example.com' },
       event: { kind: 'asset', module: 'okta' },
     });
@@ -353,7 +362,7 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
 
   describe('evaluated fields and source clauses', () => {
     it('does not add filter on evaluated fields (entity.namespace) since they are not stored', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { email: 'alice@example.com' },
         event: { kind: 'asset', module: 'okta' },
       });
@@ -364,7 +373,7 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
     });
 
     it('includes source clause for entity.namespace evaluation (event.module, data_stream.dataset)', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
+      const result = getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
         user: { name: 'jane', domain: 'corp.com' },
         event: { kind: 'asset', module: 'entityanalytics_ad' },
       });
@@ -759,46 +768,6 @@ describe('getHostScopedUserEuidEsql', () => {
   });
 });
 
-describe('FromDefinition variants', () => {
-  const documentsByType: Array<[EntityType, object[]]> = [
-    ['generic', [{ entity: { id: 'e-123' } }, { _source: { entity: { id: 'e-123' } } }]],
-    ['host', [{ host: { name: 'to-be-ignored', id: 'host-id-1' } }, { host: { name: 'server1' } }]],
-    [
-      'user',
-      [
-        { user: { email: 'alice@example.com' }, event: { kind: 'asset', module: 'okta' } },
-        { user: { name: 'alice' }, host: { id: 'host-1' }, event: { category: 'authentication' } },
-        {},
-      ],
-    ],
-    [
-      'service',
-      [{ service: { name: 'api-gateway' } }, { service: { entity: { id: 'svc-entity-1' } } }],
-    ],
-  ];
-
-  it.each(documentsByType)('match the type-name functions for %s', (type, docs) => {
-    const definition = getEntityDefinitionWithoutId(type);
-
-    expect(getEuidEsqlDocumentsContainsIdFilterFromDefinition(definition)).toEqual(
-      getEuidEsqlDocumentsContainsIdFilter(type)
-    );
-    expect(getFieldEvaluationsEsqlFromDefinition(definition)).toEqual(
-      getFieldEvaluationsEsql(type)
-    );
-    for (const options of [undefined, { withTypeId: false }]) {
-      expect(getEuidEsqlEvaluationFromDefinition(definition, 'entity.id', options)).toEqual(
-        getEuidEsqlEvaluation(type, 'entity.id', options)
-      );
-    }
-    for (const doc of docs) {
-      expect(getEuidEsqlFilterBasedOnDocumentFromDefinition(definition, doc)).toEqual(
-        getEuidEsqlFilterBasedOnDocument(type, doc)
-      );
-    }
-  });
-});
-
 describe('definition type names in compiled output', () => {
   // `k8s.pod-v2_x` uses every separator the registry type-name pattern allows (`.`, `-`, `_`).
   const typeName = 'k8s.pod-v2_x';
@@ -806,20 +775,18 @@ describe('definition type names in compiled output', () => {
   const doc = { host: { id: 'host-id-1' } };
 
   it('emits the type name verbatim as the id prefix, with no escaping needed', () => {
-    expect(getEuidEsqlEvaluationFromDefinition(definition, 'entity.id')).toContain(
-      `CONCAT("${typeName}:", `
-    );
-    expect(getEuidPainlessEvaluationFromDefinition(definition)).toContain(`"${typeName}:" + `);
+    expect(getEuidEsqlEvaluation(definition, 'entity.id')).toContain(`CONCAT("${typeName}:", `);
+    expect(getEuidPainlessEvaluation(definition)).toContain(`"${typeName}:" + `);
   });
 
   it('does not depend on the type name for DSL and KQL document filters', () => {
     const builtIn = getEntityDefinitionWithoutId('host');
 
-    expect(getEuidDslDocumentsContainsIdFilterFromDefinition(definition)).toEqual(
-      getEuidDslDocumentsContainsIdFilterFromDefinition(builtIn)
+    expect(getEuidDslDocumentsContainsIdFilter(definition)).toEqual(
+      getEuidDslDocumentsContainsIdFilter(builtIn)
     );
-    expect(getEuidKqlFilterBasedOnDocumentFromDefinition(definition, doc)).toEqual(
-      getEuidKqlFilterBasedOnDocumentFromDefinition(builtIn, doc)
+    expect(getEuidKqlFilterBasedOnDocument(definition, doc)).toEqual(
+      getEuidKqlFilterBasedOnDocument(builtIn, doc)
     );
   });
 });
@@ -828,7 +795,7 @@ describe('type prefix validation', () => {
   const badDefinition = { ...hostEntityDefinition, type: 'a"b' };
 
   it('throws when the type name cannot be emitted as a prefix', () => {
-    expect(() => getEuidEsqlEvaluationFromDefinition(badDefinition, 'entity.id')).toThrow(
+    expect(() => getEuidEsqlEvaluation(badDefinition, 'entity.id')).toThrow(
       'Cannot emit the entity type prefix'
     );
   });
@@ -838,6 +805,6 @@ describe('type prefix validation', () => {
       ...badDefinition,
       identityField: { ...badDefinition.identityField, skipTypePrepend: true },
     };
-    expect(() => getEuidEsqlEvaluationFromDefinition(definition, 'entity.id')).not.toThrow();
+    expect(() => getEuidEsqlEvaluation(definition, 'entity.id')).not.toThrow();
   });
 });
