@@ -16,6 +16,21 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const AttachAlertTriageRulesRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * Managed Worker workflow id
+     */
+    workerId: z.string().min(1).max(128).describe('Managed Worker workflow id'),
+  })
+);
+export type AttachAlertTriageRulesRequestParams = z.infer<
+  typeof AttachAlertTriageRulesRequestParams
+>;
+export type AttachAlertTriageRulesRequestParamsInput = z.input<
+  typeof AttachAlertTriageRulesRequestParams
+>;
+
 export const AttachAlertTriageRulesRequestBody = lazySchema(() =>
   z
     .object({

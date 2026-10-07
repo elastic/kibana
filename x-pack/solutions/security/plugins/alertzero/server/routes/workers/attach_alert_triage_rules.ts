@@ -9,16 +9,22 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { i18n } from '@kbn/i18n';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
-  ALERTZERO_ALERT_TRIAGE_ATTACH_RULES_URL,
   ALERTZERO_ENABLED_SETTING_ID,
+  ALERTZERO_WORKER_ATTACH_RULES_URL_TEMPLATE,
   API_VERSIONS,
   AttachAlertTriageRulesRequestBody,
+  AttachAlertTriageRulesRequestParams,
   INTERNAL_API_ACCESS,
+  SYSTEM_SECURITY_WORKER_IDS,
+  SYSTEM_SECURITY_WORKER_IDS_WITH_RULE_ATTACHMENT,
 } from '@kbn/alertzero-common';
 import type { RouteDependencies } from '../register_routes';
 
+const isOneOf = (ids: readonly string[], id: string) => ids.includes(id);
+
 /**
- * Attaches the Alert Triage Worker to rules, only while the Worker is enabled in the space.
+ * Attaches a Worker to rules, only while the Worker is enabled in the space. Only a Worker that runs
+ * through a per-rule action accepts rules (today, Alert Triage); any other Worker is a 400.
  *
  * Authorized on rule write access, not on AlertZero's own privilege: it runs as whoever created the
  * rules (see the managed workflow that calls it), and that user can edit the rules but may not hold
@@ -34,25 +40,48 @@ export const registerAttachAlertTriageRulesRoute = ({
 }: RouteDependencies) => {
   router.versioned
     .post({
-      path: ALERTZERO_ALERT_TRIAGE_ATTACH_RULES_URL,
+      path: ALERTZERO_WORKER_ATTACH_RULES_URL_TEMPLATE,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
           requiredPrivileges: [RULES_API_ALL],
         },
       },
-      summary: 'Attach rules to the Alert Triage Worker',
+      summary: 'Attach rules to a Worker',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
+            params: buildRouteValidationWithZod(AttachAlertTriageRulesRequestParams),
             body: buildRouteValidationWithZod(AttachAlertTriageRulesRequestBody),
           },
         },
       },
       async (context, request, response) => {
+        const { workerId } = request.params;
+        if (!isOneOf(SYSTEM_SECURITY_WORKER_IDS, workerId)) {
+          return response.notFound({
+            body: {
+              message: i18n.translate('xpack.alertzero.attachRulesWorkerNotFoundErrorMessage', {
+                defaultMessage: 'Worker "{workerId}" not found',
+                values: { workerId },
+              }),
+            },
+          });
+        }
+        if (!isOneOf(SYSTEM_SECURITY_WORKER_IDS_WITH_RULE_ATTACHMENT, workerId)) {
+          return response.badRequest({
+            body: {
+              message: i18n.translate('xpack.alertzero.attachRulesWorkerUnsupportedErrorMessage', {
+                defaultMessage: 'Worker "{workerId}" does not attach to detection rules',
+                values: { workerId },
+              }),
+            },
+          });
+        }
+
         try {
           const { uiSettings } = await context.core;
           const { subscription, hasRequiredDependencies } = await context.alertzero;

@@ -9,14 +9,21 @@ import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
-  ALERTZERO_ALERT_TRIAGE_ATTACH_RULES_URL,
+  ALERTZERO_WORKER_ATTACH_RULES_URL_TEMPLATE,
   AttachAlertTriageRulesRequestBody,
+  AttachAlertTriageRulesRequestParams,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
 } from '@kbn/alertzero-common';
 import type { WorkersService } from '../../services/workers/workers_service';
 import { createRouteContextMock } from '../route_context.mock';
 import { registerAttachAlertTriageRulesRoute } from './attach_alert_triage_rules';
 
 const SPACE = 'space-a';
+const WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+
+const requestFor = (body: Record<string, unknown>, workerId: string = WORKER_ID) =>
+  httpServerMock.createKibanaRequest({ params: { workerId }, body });
 
 const setup = () => {
   const router = httpServiceMock.createRouter();
@@ -28,14 +35,66 @@ const setup = () => {
     getSpaceId: () => SPACE,
     getWorkersService: () => ({ attachRulesToAlertTriageWorker } as unknown as WorkersService),
   } as never);
-  const route = router.versioned.getRoute('post', ALERTZERO_ALERT_TRIAGE_ATTACH_RULES_URL);
+  const route = router.versioned.getRoute('post', ALERTZERO_WORKER_ATTACH_RULES_URL_TEMPLATE);
   const [{ handler }] = Object.values(route.versions);
   return { route, handler, attachRulesToAlertTriageWorker, logger };
 };
 
-describe('POST attach rules to the Alert Triage Worker', () => {
+describe('POST attach rules to a Worker', () => {
   it('is authorized on rule write access, which a rule creator holds', () => {
     expect(setup().route.config.security?.authz).toEqual({ requiredPrivileges: [RULES_API_ALL] });
+  });
+
+  // Only Alert Triage runs through a per-rule action; the URL names the Worker so it matches the
+  // other Worker routes, and a Worker that cannot take rules must say so instead of answering
+  // "attached" for something it will never run.
+  describe('which Worker the id names', () => {
+    it('answers 400 for a known Worker that does not attach to rules, without touching rules', async () => {
+      const { handler, attachRulesToAlertTriageWorker } = setup();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(
+        createRouteContextMock(),
+        requestFor({ ruleIds: ['r1'] }, SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
+        response
+      );
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
+        },
+      });
+      expect(attachRulesToAlertTriageWorker).not.toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
+    it('answers 404 for an id that is not a Worker, without touching rules', async () => {
+      const { handler, attachRulesToAlertTriageWorker } = setup();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(
+        createRouteContextMock(),
+        requestFor({ ruleIds: ['r1'] }, 'not-a-worker'),
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalledTimes(1);
+      expect(attachRulesToAlertTriageWorker).not.toHaveBeenCalled();
+    });
+
+    it('checks the Worker before AlertZero availability, so a wrong id is never a 200', async () => {
+      const { handler } = setup();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(
+        createRouteContextMock({ settingEnabled: false }),
+        requestFor({ ruleIds: ['r1'] }, 'not-a-worker'),
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalledTimes(1);
+      expect(response.ok).not.toHaveBeenCalled();
+    });
   });
 
   it("hands the body, the request's space and the request to the service and returns its outcome", async () => {
@@ -46,7 +105,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
       matched: 2,
       updated: 2,
     });
-    const request = httpServerMock.createKibanaRequest({ body });
+    const request = requestFor(body);
     const response = httpServerMock.createResponseFactory();
 
     await handler(createRouteContextMock(), request, response);
@@ -64,11 +123,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
       attachRulesToAlertTriageWorker.mockResolvedValue({ outcome });
       const response = httpServerMock.createResponseFactory();
 
-      await handler(
-        createRouteContextMock(),
-        httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
-        response
-      );
+      await handler(createRouteContextMock(), requestFor({ ruleIds: ['r1'] }), response);
 
       expect(response.ok).toHaveBeenCalledWith({ body: { outcome } });
       expect(response.customError).not.toHaveBeenCalled();
@@ -91,11 +146,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
       const { handler, attachRulesToAlertTriageWorker } = setup();
       const response = httpServerMock.createResponseFactory();
 
-      await handler(
-        createRouteContextMock(context),
-        httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
-        response
-      );
+      await handler(createRouteContextMock(context), requestFor({ ruleIds: ['r1'] }), response);
 
       expect(response.ok).toHaveBeenCalledWith({ body: { outcome: 'worker_unavailable' } });
       expect(attachRulesToAlertTriageWorker).not.toHaveBeenCalled();
@@ -111,7 +162,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
           subscription: 'available',
           hasRequiredDependencies: true,
         }),
-        httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
+        requestFor({ ruleIds: ['r1'] }),
         httpServerMock.createResponseFactory()
       );
 
@@ -125,11 +176,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
     attachRulesToAlertTriageWorker.mockRejectedValue(new Error('bulk edit failed'));
     const response = httpServerMock.createResponseFactory();
 
-    await handler(
-      createRouteContextMock(),
-      httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
-      response
-    );
+    await handler(createRouteContextMock(), requestFor({ ruleIds: ['r1'] }), response);
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(response.ok).not.toHaveBeenCalled();
@@ -139,6 +186,15 @@ describe('POST attach rules to the Alert Triage Worker', () => {
   // The route validates its body with this schema, so it is the request contract.
   describe('request validation', () => {
     const isValid = (body: unknown) => AttachAlertTriageRulesRequestBody.safeParse(body).success;
+
+    it.each([
+      { name: 'a Worker id', params: { workerId: WORKER_ID }, valid: true },
+      { name: 'an empty Worker id', params: { workerId: '' }, valid: false },
+      { name: 'a 129-character Worker id', params: { workerId: 'w'.repeat(129) }, valid: false },
+      { name: 'no Worker id', params: {}, valid: false },
+    ])('treats $name in the path as valid: $valid', ({ params, valid }) => {
+      expect(AttachAlertTriageRulesRequestParams.safeParse(params).success).toBe(valid);
+    });
 
     it('accepts a list of rule ids', () => {
       expect(isValid({ ruleIds: ['r1'] })).toBe(true);

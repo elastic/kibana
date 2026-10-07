@@ -8,7 +8,10 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { ALERTZERO_ALERT_TRIAGE_ATTACH_RULES_URL } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_WORKER_ATTACH_RULES_URL_TEMPLATE,
+  SYSTEM_SECURITY_WORKER_IDS_WITH_RULE_ATTACHMENT,
+} from '@kbn/alertzero-common';
 import { registerRoutes } from './register_routes';
 import { createRouteContextMock } from './route_context.mock';
 
@@ -19,7 +22,7 @@ import { createRouteContextMock } from './route_context.mock';
  * may hold no AlertZero privilege, and its caller must tell "AlertZero is off, nothing to do" from a
  * failure. Anything added here must say why, and gets its own gate test.
  */
-const OUTCOME_GATED_ROUTE_PATHS: readonly string[] = [ALERTZERO_ALERT_TRIAGE_ATTACH_RULES_URL];
+const OUTCOME_GATED_ROUTE_PATHS: readonly string[] = [ALERTZERO_WORKER_ATTACH_RULES_URL_TEMPLATE];
 
 const setup = () => {
   const router = httpServiceMock.createRouter();
@@ -105,7 +108,10 @@ describe('AlertZero route gate coverage', () => {
           const response = httpServerMock.createResponseFactory();
           await handler(
             createRouteContextMock(context),
-            httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
+            httpServerMock.createKibanaRequest({
+              params: { workerId: SYSTEM_SECURITY_WORKER_IDS_WITH_RULE_ATTACHMENT[0] },
+              body: { ruleIds: ['r1'] },
+            }),
             response
           );
           expect(response.ok).toHaveBeenCalledWith({ body: { outcome: 'worker_unavailable' } });
