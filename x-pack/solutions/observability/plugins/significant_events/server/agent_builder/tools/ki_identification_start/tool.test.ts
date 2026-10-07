@@ -6,7 +6,12 @@
  */
 
 import { createKiIdentificationStartTool } from './tool';
-import { createMockToolContext, mockSourcesClient } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  mockSourcesClient,
+  type NightshiftFeaturePrivilege,
+} from '../../utils/test_helpers';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
@@ -15,7 +20,9 @@ describe('createKiIdentificationStartTool', () => {
     trackAgentToolKiIdentificationStarted: jest.fn(),
   };
 
-  const setup = () => {
+  const setup = ({
+    featurePrivilege = 'all',
+  }: { featurePrivilege?: NightshiftFeaturePrivilege } = {}) => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
         id: 'system-streams-ki-onboarding',
@@ -37,6 +44,7 @@ describe('createKiIdentificationStartTool', () => {
     };
 
     const tool = createKiIdentificationStartTool({
+      server: createSignificantEventsServer({ featurePrivilege }),
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
@@ -109,5 +117,17 @@ describe('createKiIdentificationStartTool', () => {
       expect(data.message).toContain('Failed to start KI identification background task');
       expect(data.operation).toBe('ki_identification_start');
     }
+  });
+
+  it('does not let a Nightshift reader start onboarding', async () => {
+    const { tool, context, managementApi } = setup({ featurePrivilege: 'read' });
+
+    const result = await tool.handler(
+      { slug: 'logs.nginx', steps: [KIsOnboardingStep.FeaturesIdentification] },
+      context
+    );
+
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

@@ -19,6 +19,8 @@ import {
 } from '@kbn/nightshift-ai';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../../types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import {
@@ -104,9 +106,11 @@ const validateQueriesSchema = z.object({
 
 export const createValidateQueriesTool = ({
   getScopedClients,
+  server,
   logger,
 }: {
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
   return {
@@ -117,6 +121,8 @@ export const createValidateQueriesTool = ({
     schema: validateQueriesSchema,
     handler: async ({ slug, queries }, context) => {
       try {
+        await assertCanReadSignificantEvents({ request: context.request, server });
+
         const scopedClients = await getScopedClients({ request: context.request });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);

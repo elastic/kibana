@@ -17,6 +17,8 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import {
   assertSourceEnabled,
@@ -46,11 +48,13 @@ const onboardingStartSchema = z.object({
 });
 
 export const createKiIdentificationStartTool = ({
+  server,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
   getScopedClients,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
@@ -77,6 +81,7 @@ export const createKiIdentificationStartTool = ({
   handler: async ({ slug, steps, connectors }, { request }) => {
     let sourceId = '';
     try {
+      await assertCanManageSignificantEvents({ request, server });
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
       const [source] = resolveSourcesBySlug(catalog, [slug]);

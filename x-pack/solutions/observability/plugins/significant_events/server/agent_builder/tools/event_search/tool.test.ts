@@ -8,11 +8,11 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   createMockToolContext,
+  createSignificantEventsServer,
   invokeHandler,
   mockSourcesClient,
   sourceWithSlug,
 } from '../../utils/test_helpers';
-import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { searchEventsToolHandler } from './handler';
@@ -32,10 +32,16 @@ const createMockTelemetry = () => ({
 });
 
 describe('event_search tool', () => {
+  const readerServer = createSignificantEventsServer({ featurePrivilege: 'read' });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('uses expected tool id', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
+      server: readerServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -46,7 +52,7 @@ describe('event_search tool', () => {
   it('validates bounded filters and normalizes query', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
+      server: readerServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -108,7 +114,7 @@ describe('event_search tool', () => {
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
+      server: readerServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -180,7 +186,7 @@ describe('event_search tool', () => {
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
+      server: readerServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -206,5 +212,28 @@ describe('event_search tool', () => {
         events: [expect.objectContaining({ source_ids: ['source-uuid'] })],
       })
     );
+  });
+
+  it('does not search without the Nightshift read privilege', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+
+    const tool = createSearchEventsTool({
+      getScopedClients: jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn(),
+        licensing: {},
+      }) as unknown as GetScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
+      logger: loggingSystemMock.createLogger(),
+      telemetry: createMockTelemetry() as never,
+    });
+
+    const result = await invokeHandler(
+      tool as never,
+      { status: 'active' },
+      createMockToolContext()
+    );
+
+    expect(searchEventsToolHandler).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
   createMockToolContext,
+  createSignificantEventsServer,
   invokeHandler,
   mockSourcesClient,
 } from '../../../utils/test_helpers';
@@ -45,6 +46,7 @@ describe('ki_features_get tool', () => {
   const createTool = () =>
     createGetFeaturesTool({
       getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
     });
 
@@ -97,5 +99,18 @@ describe('ki_features_get tool', () => {
         },
       },
     ]);
+  });
+
+  it('does not load features without the Nightshift read privilege', async () => {
+    const tool = createGetFeaturesTool({
+      getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
+      logger,
+    });
+
+    const result = await invokeHandler(tool, { slug: 'logs.test' }, createMockToolContext());
+
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

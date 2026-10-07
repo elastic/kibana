@@ -22,6 +22,8 @@ import {
   resolveSourcesBySlug,
   toSourceRef,
 } from '../../../utils/resolve_source_slugs';
+import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../../types';
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
@@ -53,9 +55,11 @@ const getFeaturesSchema = z.object({
 
 export const createGetFeaturesTool = ({
   getScopedClients,
+  server,
   logger,
 }: {
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof getFeaturesSchema> => {
   return {
@@ -70,6 +74,7 @@ export const createGetFeaturesTool = ({
     ) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
+        await assertCanReadSignificantEvents({ request: context.request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

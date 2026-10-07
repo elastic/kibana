@@ -13,15 +13,18 @@ import type { GetScopedClients } from '../../../routes/types';
 import { createKiIdentificationCancelTool } from '../../tools/ki_identification_cancel/tool';
 import { createKiIdentificationStartTool } from '../../tools/ki_identification_start/tool';
 import { createKiIdentificationStatusTool } from '../../tools/ki_identification_status/tool';
+import type { SignificantEventsServer } from '../../../types';
 import description from './description.text';
 import content from './skill.md.text';
 
 export const createKiIdentificationManagementSkill = ({
+  server,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
   getScopedClients,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
@@ -37,13 +40,14 @@ export const createKiIdentificationManagementSkill = ({
     description,
     content,
     getInlineTools: () => [
-      createKiIdentificationCancelTool({ streamsKIsOnboardingClient, getScopedClients }),
+      createKiIdentificationCancelTool({ server, streamsKIsOnboardingClient, getScopedClients }),
       createKiIdentificationStartTool({
+        server,
         telemetry,
         streamsKIsOnboardingClient,
         maintenanceService,
         getScopedClients,
       }),
-      createKiIdentificationStatusTool({ streamsKIsOnboardingClient, getScopedClients }),
+      createKiIdentificationStatusTool({ server, streamsKIsOnboardingClient, getScopedClients }),
     ],
   });

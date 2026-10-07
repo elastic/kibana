@@ -19,6 +19,7 @@ import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import {
@@ -129,6 +130,7 @@ export function createFeatureKnowledgeIndicatorTool({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);
         sourceId = source.id;

@@ -13,6 +13,7 @@ import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
   FEATURE_SIMILARITY_TOOL_DESCRIPTION,
@@ -68,6 +69,7 @@ export const createFeatureSimilaritySearchTool = ({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCanReadSignificantEvents({ request: context.request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

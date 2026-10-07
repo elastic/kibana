@@ -16,6 +16,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { significantEventSchema } from '@kbn/significant-events-schema';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import {
@@ -257,6 +258,7 @@ export function createSearchEventsTool({
           request,
         });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanReadSignificantEvents({ request, server });
         const { slugs, ...searchParams } = toolParams;
         const catalog = await loadSourceCatalog(sourcesClient);
         const filterSources = slugs ? resolveSourcesBySlug(catalog, slugs) : [];

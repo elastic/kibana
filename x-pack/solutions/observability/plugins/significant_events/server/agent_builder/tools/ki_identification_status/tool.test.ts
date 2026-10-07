@@ -9,10 +9,17 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
-import { createMockToolContext, mockSourcesClient } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  mockSourcesClient,
+  type NightshiftFeaturePrivilege,
+} from '../../utils/test_helpers';
 
 describe('createKiIdentificationStatusTool', () => {
-  const setup = () => {
+  const setup = ({
+    featurePrivilege = 'read',
+  }: { featurePrivilege?: NightshiftFeaturePrivilege } = {}) => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
         results: [
@@ -47,6 +54,7 @@ describe('createKiIdentificationStatusTool', () => {
     });
 
     const tool = createKiIdentificationStatusTool({
+      server: createSignificantEventsServer({ featurePrivilege }),
       streamsKIsOnboardingClient,
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: mockSourcesClient(['logs.nginx']),
@@ -84,5 +92,14 @@ describe('createKiIdentificationStatusTool', () => {
       expect(data.message).toContain('Failed to get KI identification background task status');
       expect(data.operation).toBe('ki_identification_status');
     }
+  });
+
+  it('does not read onboarding status without the Nightshift read privilege', async () => {
+    const { tool, context, managementApi } = setup({ featurePrivilege: 'none' });
+
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
+
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

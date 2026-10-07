@@ -12,6 +12,8 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import {
   loadSourceCatalog,
@@ -29,9 +31,11 @@ const onboardingStatusSchema = z.object({
 });
 
 export const createKiIdentificationStatusTool = ({
+  server,
   streamsKIsOnboardingClient,
   getScopedClients,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   getScopedClients: GetScopedClients;
 }): BuiltinSkillBoundedTool<typeof onboardingStatusSchema> => ({
@@ -55,6 +59,7 @@ export const createKiIdentificationStatusTool = ({
   schema: onboardingStatusSchema,
   handler: async ({ slug }, { request }) => {
     try {
+      await assertCanReadSignificantEvents({ request, server });
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
       const [source] = resolveSourcesBySlug(catalog, [slug]);
