@@ -1091,6 +1091,35 @@ describe('start - slow start() warning', () => {
     await system.startPlugins(startDeps);
   };
 
+  // An asynchronous start() whose promise settles after `durationMs` on the fake clock.
+  const bootWithAsyncStart = async (
+    system: PluginsSystem<PluginType.standard>,
+    pluginName: string,
+    durationMs: number
+  ) => {
+    const plugin = createPlugin(pluginName);
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest
+      .spyOn(plugin, 'start')
+      .mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve('contract'), durationMs))
+      );
+    system.addPlugin(plugin);
+    await system.setupPlugins(setupDeps);
+    const started = system.startPlugins(startDeps);
+    await jest.advanceTimersByTimeAsync(durationMs);
+    await started;
+  };
+
+  it('warns when an asynchronous start() takes more than 1s to settle', async () => {
+    await bootWithAsyncStart(pluginsSystem, 'slow-async-start', 1500);
+
+    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual([
+      expect.stringContaining('asynchronous start lifecycle'),
+      slowStartWarning('slow-async-start', 1500),
+    ]);
+  });
+
   it('warns when a synchronous start() takes more than 1s', async () => {
     await bootWithSyncStart(pluginsSystem, 'slow-start', 1500);
 

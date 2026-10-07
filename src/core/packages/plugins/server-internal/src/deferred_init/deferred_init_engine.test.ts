@@ -372,14 +372,73 @@ describe('DeferredInitEngine', () => {
   });
 
   describe('status', () => {
-    it('getStatus() and status$ never invoke the runner', () => {
-      const runner = attach();
-      const seen: PluginInitStatus[] = [];
-      engine.status$(PLUGIN_ID).subscribe((status) => seen.push(status));
+    it('getStatus() and status$ never invoke the runner, in any state', async () => {
+      const runner = attach(
+        createRunner().mockRejectedValueOnce(new Error('boom')).mockResolvedValue(undefined)
+      );
+      const read = () => {
+        engine.getStatus(PLUGIN_ID);
+        engine.status$(PLUGIN_ID).subscribe().unsubscribe();
+      };
 
-      expect(engine.getStatus(PLUGIN_ID)).toEqual({ state: 'idle', attempts: 0 });
-      expect(seen).toEqual([{ state: 'idle', attempts: 0 }]);
+      read(); // idle
       expect(runner).not.toHaveBeenCalled();
+
+      const firstAttempt = engine.initialize(PLUGIN_ID).catch(noop);
+      read(); // initializing
+      await firstAttempt;
+      expect(engine.getStatus(PLUGIN_ID).state).toBe('failed');
+      read(); // failed, with the background retry still scheduled
+      await jest.advanceTimersByTimeAsync(0);
+      expect(runner).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(DEFERRED_INIT_BACKOFF_MAX_MS);
+      expect(engine.getStatus(PLUGIN_ID).state).toBe('available');
+      read(); // available
+      await jest.advanceTimersByTimeAsync(0);
+      expect(runner).toHaveBeenCalledTimes(2);
+    });
+
+    it('getStatus() and status$ never invoke the runner once background retries are exhausted', async () => {
+      const runner = attach(createRunner().mockRejectedValue(new Error('boom')));
+      await failTimes(DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS);
+      expect(jest.getTimerCount()).toBe(0);
+
+      engine.getStatus(PLUGIN_ID);
+      engine.status$(PLUGIN_ID).subscribe().unsubscribe();
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(runner).toHaveBeenCalledTimes(DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS);
+    });
+
+    it('keeps emissions ordered for every subscriber when one re-kicks synchronously on failed', async () => {
+      const runner = attach(
+        createRunner().mockRejectedValueOnce(new Error('boom')).mockResolvedValue(undefined)
+      );
+      // An early subscriber that retries from inside the `failed` emission itself.
+      engine.status$(PLUGIN_ID).subscribe((status) => {
+        if (status.state === 'failed') {
+          engine.initialize(PLUGIN_ID).catch(noop);
+        }
+      });
+      const seen: string[] = [];
+      engine
+        .status$(PLUGIN_ID)
+        .subscribe((status) => seen.push(`${status.state}:${status.attempts}`));
+
+      await engine.initialize(PLUGIN_ID).catch(noop);
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(seen).toEqual([
+        'idle:0',
+        'initializing:0',
+        'failed:1',
+        'initializing:1',
+        'available:0',
+      ]);
+      expect(engine.getStatus(PLUGIN_ID)).toEqual({ state: 'available', attempts: 0 });
+      expect(runner).toHaveBeenCalledTimes(2);
+      expect(jest.getTimerCount()).toBe(0);
     });
 
     it('getStatus() reports idle for an unknown plugin id without creating a record', () => {

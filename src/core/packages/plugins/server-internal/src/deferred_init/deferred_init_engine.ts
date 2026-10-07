@@ -44,6 +44,8 @@ interface DeferredInitRecord {
   failedAttempts: number;
   lastError?: Error;
   cooldown?: DeferredInitCooldown;
+  emitting?: boolean;
+  pendingEmissions?: PluginInitStatus[];
 }
 
 // Leaves the `lastError` key out entirely when there is no error, so status consumers and JSON
@@ -109,7 +111,7 @@ export class DeferredInitEngine {
 
   /** Marks a plugin that has no `initialize()` as `available` once its `start()` has returned. */
   public markAvailable(pluginId: string): void {
-    this.ensureRecord(pluginId).status$.next(toStatus('available', 0));
+    this.emit(this.ensureRecord(pluginId), toStatus('available', 0));
   }
 
   /** Current status of a plugin id (`idle` with no attempts if unknown); never creates a record or triggers anything. */
@@ -281,7 +283,29 @@ export class DeferredInitEngine {
         ? `Plugin "${pluginId}": running initialize().`
         : `Plugin "${pluginId}": retrying initialize() (${failedAttempts} failed attempt(s) so far).`
     );
-    record.status$.next(toStatus('initializing', failedAttempts, lastError));
+    this.emit(record, toStatus('initializing', failedAttempts, lastError));
+  }
+
+  /**
+   * Emits through the record's subject, queueing emissions requested while one is in progress
+   * (a subscriber that re-kicks synchronously) so every subscriber sees them in order.
+   */
+  private emit(record: DeferredInitRecord, status: PluginInitStatus): void {
+    if (record.emitting) {
+      record.pendingEmissions = [...(record.pendingEmissions ?? []), status];
+      return;
+    }
+    record.emitting = true;
+    try {
+      record.status$.next(status);
+      while (record.pendingEmissions?.length) {
+        const [next, ...rest] = record.pendingEmissions;
+        record.pendingEmissions = rest;
+        record.status$.next(next);
+      }
+    } finally {
+      record.emitting = false;
+    }
   }
 
   private onAttemptSucceeded(
@@ -297,7 +321,7 @@ export class DeferredInitEngine {
         durationMs
       )}ms; its routes and apps are now served.`
     );
-    record.status$.next(toStatus('available', 0));
+    this.emit(record, toStatus('available', 0));
   }
 
   private onAttemptFailed(pluginId: string, record: DeferredInitRecord, error: unknown): void {
@@ -316,7 +340,7 @@ export class DeferredInitEngine {
     this.log.error(
       `Plugin "${pluginId}" initialize() failed (attempt ${failedAttempts}): ${lastError.message}. ${nextStep}`
     );
-    record.status$.next(toStatus('failed', failedAttempts, lastError));
+    this.emit(record, toStatus('failed', failedAttempts, lastError));
   }
 
   /**

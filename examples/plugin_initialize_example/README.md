@@ -90,11 +90,11 @@ Set `plugin_initialize_example.failAttempts: 2` in `config/kibana.dev.yml` and r
 two attempts throw `Simulated initialize() failure <n> of 2`:
 
 - The logs show `Plugin "pluginInitializeExample" initialize() failed (attempt 1): ... Retrying in
-  1s.`, the retry, then `initialized in <n>ms`. This plugin's own `status$` lines go
+  <n>s.` (the delay is jittered, so the first retry may say `0s`), the retry, then `initialized in <n>ms`. This plugin's own `status$` lines go
   `initializing`, `failed (attempts: 1, lastError: ...)`, `initializing`, ... `available`.
 - `/plugin_initialize_example/health` and `/api/plugin_initialize_example_consumer/status` carry
   `attempts` and `lastError` while `failed`.
-- `GET /api/status` lists `plugin:pluginInitializeExample` as `degraded` while `failed`, never
+- `GET /api/status` lists `pluginInitializeExample` as `degraded` while `failed`, never
   `unavailable`: the failure is local to this instance and this plugin. `idle` and `initializing`
   report `available`, so a plugin that has simply not run `initialize()` yet never drags the overall
   status down.
@@ -123,7 +123,7 @@ two attempts throw `Simulated initialize() failure <n> of 2`:
    `GET /api/status` says `pluginInitializeExample is idle (initialize() has not run yet)`, and the
    consumer's status route reports `"dependency": { "state": "idle", "attempts": 0 }`.
 3. Make the first request: `curl -i localhost:5601/api/plugin_initialize_example/doc` answers
-   `503` with `"status": "idle"` and starts `initialize()` (`running initialize().` appears), or open
+   `503` with `"status": "initializing"` (the gated router kicks `initialize()` and reports the state after the kick) (`running initialize().` appears), or open
    `localhost:5601/app/pluginInitializeExample` and watch the loading screen do the same. About
    `initDelayMs` later the status is `available`, the route serves and the app mounts.
 

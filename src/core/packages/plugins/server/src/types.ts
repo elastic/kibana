@@ -282,6 +282,11 @@ export interface PluginManifest {
    * Core throws at boot when the flag and the method disagree. Only standard
    * plugins with a server entry may set it.
    *
+   * Core decides when `initialize()` runs: right after the plugin start loop at
+   * boot while `plugins.initializeOnBoot` is `true` (the default), otherwise on
+   * first use. It runs on every Kibana instance against the same cluster, so the
+   * work must be safe to run concurrently.
+   *
    * Default is `false`.
    */
   readonly hasInitialization?: boolean;
