@@ -33,10 +33,18 @@ export interface OverviewTabProps {
    * what appears while it is empty or loading.
    */
   proposedActionsContent?: React.ReactNode;
+  /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
+  proposedActionsCount?: React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
-  ({ investigation, attachments, groupedAttachments, proposedActionsContent }) => {
+  ({
+    investigation,
+    attachments,
+    groupedAttachments,
+    proposedActionsContent,
+    proposedActionsCount,
+  }) => {
     const { summary } = investigation;
     const [expanded, setExpanded] = useState(false);
 
@@ -82,7 +90,10 @@ export const OverviewTab = memo<OverviewTabProps>(
 
         {proposedActionsContent && (
           <EuiFlexItem>
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.proposedActions}>
+            <DetailsBlock
+              title={DETAILS_FLYOUT_LABELS.sections.proposedActions}
+              titleAppend={proposedActionsCount}
+            >
               {proposedActionsContent}
             </DetailsBlock>
           </EuiFlexItem>

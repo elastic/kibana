@@ -40,18 +40,22 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /** Renders a count shown beside the "Proposed actions" heading. */
+  renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
 
 export const OverviewSlot = ({
   conversation,
   groupedAttachments,
   renderProposedActions,
+  renderProposedActionsCount,
 }: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
     groupedAttachments={groupedAttachments}
     proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
+    proposedActionsCount={renderProposedActionsCount?.({ conversationId: conversation.id })}
   />
 );
 
