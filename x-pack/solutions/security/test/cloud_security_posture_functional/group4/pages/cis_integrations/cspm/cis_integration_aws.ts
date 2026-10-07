@@ -26,7 +26,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const browser = getService('browser');
   const retry = getService('retry');
-  const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
@@ -129,13 +128,14 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
         await cisIntegration.fillInTextField(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN, roleArn);
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
 
         /*
          * sometimes it takes a while to save the integration so added timeout to wait for post install modal
          */
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           await cisIntegration.waitForPostInstallModal();
           const modal = await cisIntegration.getPostInstallModal();
           if (!modal) {
@@ -145,9 +145,9 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickPolicyToBeEdited(integrationName);
         expect(
-          (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
-            roleArn
+          (await cisIntegration.getValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) === roleArn
         ).to.be(true);
       });
     });

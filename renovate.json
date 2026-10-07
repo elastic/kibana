@@ -2037,13 +2037,14 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-cli",
         "jest-config",
@@ -2054,7 +2055,9 @@
         "jest-runtime",
         "jest-specific-snapshot",
         "jest-snapshot",
-        "jest-styled-components"
+        "jest-styled-components",
+        "jest",
+        "magic-string"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2661,7 +2664,7 @@
     },
     {
       "groupName": "@swc",
-      "matchDepNames": ["@swc/core", "@swc/helpers"],
+      "matchDepNames": ["@swc/core", "@swc/helpers", "@swc/plugin-emotion"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
