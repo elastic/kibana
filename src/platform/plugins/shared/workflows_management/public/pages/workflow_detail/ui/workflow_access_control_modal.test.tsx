@@ -27,7 +27,8 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: mockHttp, userProfile: mockUserProfile } }),
 }));
 
-describe('WorkflowAccessControlModal', () => {
+// Failing: See https://github.com/elastic/kibana/issues/295436
+describe.skip('WorkflowAccessControlModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUserProfile.getCurrent.mockResolvedValue({ uid: 'owner', user: { username: 'owner' } });

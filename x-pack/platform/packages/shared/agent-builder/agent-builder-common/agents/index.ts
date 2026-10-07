@@ -12,6 +12,7 @@ export {
   agentBuilderDefaultAiIndexId,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentConfigurationInput,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
 } from './definition';
