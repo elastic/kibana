@@ -37,6 +37,7 @@ import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
+import { registerEscalationConversationEvents } from './escalations/conversation_events';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
@@ -82,6 +83,10 @@ export class AgenticInvestigationsPlugin
     { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
+
+    if (this.escalationsEnabled) {
+      registerEscalationConversationEvents(agentBuilder);
+    }
 
     // Attachment types, steps and tools register during setup but only run once Kibana has
     // started, so the authorization service is resolved per call rather than

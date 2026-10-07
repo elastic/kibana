@@ -6,7 +6,11 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+<<<<<<< HEAD
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
+=======
+import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
+>>>>>>> upstream/main
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
@@ -63,6 +67,12 @@ export class AgenticInvestigationsPublicPlugin
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder);
+      if (this.escalationsEnabled) {
+        registerEscalationConversationEventUiDefinitions({
+          conversationEvents: agentBuilder.conversationEvents,
+          application: core.application,
+        });
+      }
       registerSubjectAttachmentTypes(agentBuilder);
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({

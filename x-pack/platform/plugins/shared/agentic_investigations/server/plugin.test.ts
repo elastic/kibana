@@ -61,6 +61,7 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
+    conversationEvents: { register: jest.fn() },
     tools: { register: jest.fn() },
   };
 
@@ -248,6 +249,20 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(
         JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
       ).not.toMatch(/proposals/i);
+    });
+
+    it('registers the escalation timeline event types', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(
+        agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
+      ).toEqual(['escalation_created_from_investigation', 'escalation_investigation_linked']);
+    });
+
+    it('registers no escalation timeline event types when escalations are disabled', () => {
+      const { agentBuilder } = setupPlugin({ escalationsEnabled: false });
+
+      expect(agentBuilder.conversationEvents.register).not.toHaveBeenCalled();
     });
 
     it('registers the HTTP routes for every entity', () => {
