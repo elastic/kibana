@@ -9,14 +9,7 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 import type { PluginConfig } from '../config';
 
-/**
- * Presents this Kibana's client certificate to page-render-service, which reads our
- * identity off it. UIAM only honours the token alongside the identity it was minted for,
- * so without this the render is rejected.
- *
- * Mirrors the security plugin's own UIAM dispatcher. Undefined when no custom TLS is
- * configured, which is plain `fetch` behaviour.
- */
+/** Same TLS setup as the security plugin's UIAM client. Undefined when no custom TLS is configured. */
 function createDispatcher(ssl: PluginConfig['ssl']): Agent | undefined {
   const { certificate, key, certificateAuthorities, verificationMode } = ssl;
 
@@ -39,7 +32,7 @@ function createDispatcher(ssl: PluginConfig['ssl']): Agent | undefined {
       ca,
       cert,
       key: clientKey,
-      // Kibana pods carry only the cluster-scoped intermediate CA, not a root.
+      // The configured CA may be an intermediate rather than a root.
       allowPartialTrustChain: true,
       rejectUnauthorized: verificationMode !== 'none',
       ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
@@ -48,9 +41,8 @@ function createDispatcher(ssl: PluginConfig['ssl']): Agent | undefined {
 }
 
 /**
- * Defers reading the certificate until the first render. `config/serverless.yml` points at
- * paths that only exist in an ECP pod, but that file is also loaded by serverless FTR and
- * Scout runs -- reading at startup fails those with ENOENT before Kibana is available.
+ * Reads the certificate files on first use rather than at startup, so environments that load
+ * the serverless config without those files (e.g. functional tests) can still start.
  */
 export function createDispatcherProvider(ssl: PluginConfig['ssl']): () => Agent | undefined {
   let agent: Agent | undefined;

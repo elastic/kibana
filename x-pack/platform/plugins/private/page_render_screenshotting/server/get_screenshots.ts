@@ -6,30 +6,29 @@
  */
 
 import * as Rx from 'rxjs';
-import { map } from 'rxjs';
+import type { Dispatcher } from 'undici';
 import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SystemIdentity } from '@kbn/security-plugin-types-server';
 import type {
+  PdfScreenshotOptions,
   PdfScreenshotResult,
+  PngScreenshotOptions,
   PngScreenshotResult,
   ScreenshotOptions,
   ScreenshotResult,
+  ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
-import type { PluginConfig } from './config';
 import { buildRenderPageRequest } from './render/build_payload';
 import { renderPage } from './render/client';
 import type { RenderPageResult } from './render/types';
 
-/**
- * Structurally identical to `ScreenshottingStart` (`@kbn/screenshotting-plugin/server`) — reporting
- * prefers this contract over the real one when this plugin is enabled (see reporting's
- * `server/plugin.ts`). Only the `urls`-based dashboard/visualization capture path is implemented;
- * expression-based (Canvas) input is not supported.
- */
-export interface PageRenderScreenshottingStart {
-  getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult>;
-}
+/** Drop-in replacement for the `screenshotting` plugin's start contract. */
+export type PageRenderScreenshottingStart = ScreenshottingStart;
+
+/** There is no local browser to diagnose. */
+export const diagnose: ScreenshottingStart['diagnose'] = () =>
+  Rx.of('Browser diagnostics are not available: pages are rendered by page-render-service.');
 
 function toPdfResult(result: RenderPageResult): PdfScreenshotResult {
   return {
@@ -54,81 +53,61 @@ function toPngResult(result: RenderPageResult): PngScreenshotResult {
 }
 
 export function createGetScreenshots({
-  config,
+  getServiceUrl,
   logger,
   security,
   getCaptureBaseUrl = () => undefined,
   getSystemIdentity,
   getDispatcher = () => undefined,
 }: {
-  config: PluginConfig;
+  getServiceUrl: () => string | undefined;
   logger: Logger;
   security: SecurityServiceStart;
-  /** Resolved per call: the security plugin's start contract does not exist at setup. */
-  getSystemIdentity: () => SystemIdentity | undefined;
-  /** Presents Kibana's client certificate. Resolved per call: see `render/dispatcher.ts`. */
-  getDispatcher?: () => unknown;
-  /** Origin substituted into capture URLs so the remote render service can reach Kibana —
-   * `xpack.pageRenderScreenshotting.kibanaBaseUrl` if set, else `server.publicBaseUrl`. Resolved
-   * per call because `kibanaBaseUrl` is dynamically overridable. See the note in
-   * `server/plugin.ts`. */
   getCaptureBaseUrl?: () => string | undefined;
-}): PageRenderScreenshottingStart['getScreenshots'] {
-  return function getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
+  getSystemIdentity: () => SystemIdentity | undefined;
+  getDispatcher?: () => Dispatcher | undefined;
+}): ScreenshottingStart['getScreenshots'] {
+  function getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  function getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  function getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult>;
+  function getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
     if (options.expression) {
       return Rx.throwError(
-        () =>
-          new Error(
-            'pageRenderScreenshotting does not support expression-based (Canvas) capture (dashboard PDF/PNG export only)'
-          )
+        () => new Error('Expression-based (Canvas) capture is not supported by page-render-service')
       );
     }
 
-    if (!config.url) {
+    const url = getServiceUrl();
+    if (!url) {
       return Rx.throwError(() => new Error('xpack.pageRenderScreenshotting.url is not configured'));
     }
 
-    let payload;
-    let droppedUrlCount;
-    try {
-      ({ payload, droppedUrlCount } = buildRenderPageRequest(
-        options,
-        security,
-        getCaptureBaseUrl()
-      ));
-    } catch (err) {
-      return Rx.throwError(() => err);
-    }
-
-    if (droppedUrlCount > 0) {
-      logger.warn(
-        `getScreenshots() was called with ${
-          droppedUrlCount + 1
-        } URLs; page-render-service only supports one page per call — rendering the first and dropping the rest.`
-      );
-    }
-
-    const result$ = renderPage(
-      payload,
-      {
-        url: config.url,
-        createToken: async (signal) => {
-          const systemIdentity = getSystemIdentity();
-          if (!systemIdentity) {
-            throw new Error(
-              'Cannot authenticate to page-render-service: xpack.pageRenderScreenshotting is enabled but UIAM is not configured for this Kibana.'
-            );
-          }
-          return systemIdentity.createEphemeralToken(signal);
+    return Rx.defer(() => {
+      const payload = buildRenderPageRequest(options, security, getCaptureBaseUrl());
+      const result$ = renderPage(
+        payload,
+        {
+          url,
+          createToken: async (signal) => {
+            const systemIdentity = getSystemIdentity();
+            if (!systemIdentity) {
+              throw new Error(
+                'Cannot authenticate to page-render-service: xpack.security.uiam is not configured'
+              );
+            }
+            return systemIdentity.createEphemeralToken(signal);
+          },
+          dispatcher: getDispatcher(),
         },
-        dispatcher: getDispatcher(),
-      },
-      options.taskInstanceFields.retryAt,
-      logger
-    );
+        options.taskInstanceFields.retryAt,
+        logger
+      );
 
-    return options.format === 'png'
-      ? result$.pipe(map(toPngResult))
-      : result$.pipe(map(toPdfResult));
-  };
+      return options.format === 'png'
+        ? result$.pipe(Rx.map(toPngResult))
+        : result$.pipe(Rx.map(toPdfResult));
+    });
+  }
+
+  return getScreenshots;
 }

@@ -14,8 +14,6 @@ const sslConfig = (overrides: Partial<PluginConfig['ssl']> = {}): PluginConfig['
 });
 
 describe('createDispatcherProvider', () => {
-  // config/serverless.yml points at an ECP-only mount, but serverless FTR and Scout load
-  // that file too -- reading at startup took Kibana down with ENOENT before it was available.
   it('does not read the certificate until a render asks for the dispatcher', () => {
     const provider = createDispatcherProvider(
       sslConfig({ certificate: '/mnt/elastic-internal/http-certs/tls.crt' })

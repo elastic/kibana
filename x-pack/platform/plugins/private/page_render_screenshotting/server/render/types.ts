@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/**
- * Mirrors page-render-service's `POST /v1/render-page` Zod request schema
- * (`page-render-service/src/routes/render.ts`). Hand-written rather than shared, since the
- * service is a standalone, Kibana-agnostic repo (see AGENTS.md in the MT Reporting workspace) —
- * keep this in sync with the service's schema if it changes.
- */
+/** Request body of page-render-service's `POST /v1/render-page`. Keep in sync with the service. */
 export interface RenderPageRequest {
   url: string;
   pageAuth?: {
@@ -52,7 +47,7 @@ export interface RenderPageRequest {
   };
 }
 
-/** Shape of a non-2xx JSON error body from the service (`RenderErrorResponse` / `ServiceErrorResponse`). */
+/** JSON body of a non-2xx response. */
 export interface RenderPageErrorBody {
   error: string;
   phase?:
@@ -66,7 +61,7 @@ export interface RenderPageErrorBody {
   documentStatus?: number;
 }
 
-/** Result of a successful render, after any 429 retries. */
+/** A successful render. */
 export interface RenderPageResult {
   data: Buffer;
   renderErrors: string[];

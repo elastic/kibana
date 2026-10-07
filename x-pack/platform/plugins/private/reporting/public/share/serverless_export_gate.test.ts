@@ -23,7 +23,7 @@ describe('createServerlessExportGate', () => {
 
     const isAvailable = createServerlessExportGate({
       isServerless: false,
-      serverlessExportEnabled$: flag$,
+      enabled$: flag$,
     });
 
     expect(isAvailable()).toBe(true);
@@ -33,7 +33,7 @@ describe('createServerlessExportGate', () => {
   it('is available on serverless when the feature flag is on', () => {
     const isAvailable = createServerlessExportGate({
       isServerless: true,
-      serverlessExportEnabled$: new BehaviorSubject(true),
+      enabled$: new BehaviorSubject(true),
     });
 
     expect(isAvailable()).toBe(true);
@@ -42,7 +42,7 @@ describe('createServerlessExportGate', () => {
   it('is unavailable on serverless when the feature flag is off', () => {
     const isAvailable = createServerlessExportGate({
       isServerless: true,
-      serverlessExportEnabled$: new BehaviorSubject(false),
+      enabled$: new BehaviorSubject(false),
     });
 
     expect(isAvailable()).toBe(false);
@@ -51,7 +51,7 @@ describe('createServerlessExportGate', () => {
   it('is unavailable on serverless until the flag has emitted', () => {
     const isAvailable = createServerlessExportGate({
       isServerless: true,
-      serverlessExportEnabled$: new Subject<boolean>(),
+      enabled$: new Subject<boolean>(),
     });
 
     expect(isAvailable()).toBe(false);
@@ -62,7 +62,7 @@ describe('createServerlessExportGate', () => {
 
     const isAvailable = createServerlessExportGate({
       isServerless: true,
-      serverlessExportEnabled$: flag$,
+      enabled$: flag$,
     });
 
     expect(isAvailable()).toBe(false);

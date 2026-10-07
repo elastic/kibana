@@ -6,23 +6,25 @@
  */
 
 import * as Rx from 'rxjs';
+import type { Dispatcher } from 'undici';
 import type { Logger } from '@kbn/logging';
 import type { RenderPageErrorBody, RenderPageRequest, RenderPageResult } from './types';
 
 export interface PageRenderServiceConfig {
   url: string;
-  /** Mints a short-lived token for this Kibana's own UIAM identity. Not refreshable,
-   * never persisted. */
   createToken: (signal: AbortSignal) => Promise<string>;
-  /** The token does not validate without the certificate this presents. */
-  dispatcher?: unknown;
+  /** Presents Kibana's client certificate, which the service requires alongside the token. */
+  dispatcher?: Dispatcher;
 }
 
 const RENDER_PATH = '/v1/render-page';
+const CONTENT_TYPES = {
+  pdf: 'application/pdf',
+  png: 'image/png',
+  jpeg: 'image/jpeg',
+} as const;
 const DEFAULT_RETRY_AFTER_SECONDS = 30;
-// Keep enough runway before the task's own hard timeout (report:execute's queue.timeout, ~4
-// minutes) to still fail cleanly and let task-manager's own retry take over, rather than getting
-// cut off mid-request.
+// Leaves time to fail cleanly before the task's own timeout.
 const DEADLINE_SAFETY_MARGIN_MS = 15_000;
 
 async function delay(ms: number, signal: AbortSignal): Promise<void> {
@@ -42,9 +44,18 @@ async function delay(ms: number, signal: AbortSignal): Promise<void> {
   });
 }
 
-async function safeReadErrorBody(response: Response): Promise<RenderPageErrorBody | undefined> {
+function isRenderPageErrorBody(body: unknown): body is RenderPageErrorBody {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    typeof (body as Partial<RenderPageErrorBody>).error === 'string'
+  );
+}
+
+async function readErrorBody(response: Response): Promise<RenderPageErrorBody | undefined> {
   try {
-    return (await response.json()) as RenderPageErrorBody;
+    const body: unknown = await response.json();
+    return isRenderPageErrorBody(body) ? body : undefined;
   } catch {
     return undefined;
   }
@@ -58,9 +69,9 @@ async function postWithRetry(
   logger: Logger
 ): Promise<RenderPageResult> {
   for (;;) {
-    // Inside the loop: a retry may land minutes later, past the token's lifetime.
+    // Minted per attempt: a retry can outlive the previous token.
     const token = await config.createToken(signal);
-    const response = await fetch(`${config.url}${RENDER_PATH}`, {
+    const requestInit: RequestInit & { dispatcher?: Dispatcher } = {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -68,9 +79,9 @@ async function postWithRetry(
       },
       body: JSON.stringify(payload),
       signal,
-      // @ts-expect-error Undici `fetch` supports `dispatcher`, see https://github.com/nodejs/undici/pull/1411.
       dispatcher: config.dispatcher,
-    });
+    };
+    const response = await fetch(`${config.url.replace(/\/+$/, '')}${RENDER_PATH}`, requestInit);
 
     if (response.status === 429) {
       const retryAfterSeconds =
@@ -90,7 +101,7 @@ async function postWithRetry(
     }
 
     if (!response.ok) {
-      const body = await safeReadErrorBody(response);
+      const body = await readErrorBody(response);
       const detail = body?.phase
         ? ` (phase: ${body.phase}${
             body.documentStatus ? `, documentStatus: ${body.documentStatus}` : ''
@@ -103,8 +114,18 @@ async function postWithRetry(
       );
     }
 
+    const expectedContentType = CONTENT_TYPES[payload.output?.format ?? 'pdf'];
+    const contentType = response.headers.get('content-type')?.split(';')[0].trim();
+    if (contentType !== expectedContentType) {
+      throw new Error(
+        `page-render-service returned ${
+          contentType ?? 'no content type'
+        }, expected ${expectedContentType}`
+      );
+    }
+
     const data = Buffer.from(await response.arrayBuffer());
-    // The service only reports a count of panels that failed to render, not their messages.
+    // The service reports only how many panels failed, not why.
     const renderErrorCount = Number(response.headers.get('x-render-errors')) || 0;
 
     return {
@@ -116,10 +137,8 @@ async function postWithRetry(
 }
 
 /**
- * POSTs a render request to page-render-service, retrying on 429 (honoring `Retry-After`) up to
- * `retryAt` minus a safety margin. Returned as an Observable, not a Promise, so that unsubscribing
- * (e.g. the export type's `takeUntil(cancellationToken)`) aborts the in-flight request/retry loop
- * instead of leaking it.
+ * POSTs a render request, retrying 429s until `retryAt` (less a safety margin). Unsubscribing
+ * aborts the request.
  */
 export function renderPage(
   payload: RenderPageRequest,

@@ -44,7 +44,10 @@ import { APP_DESC, APP_TITLE } from './translations';
 import { APP_PATH } from './constants';
 import { getScheduledReportObjectTypes } from './management/integrations/get_scheduled_report_object_types';
 import { shouldRegisterReportingIntegration } from './management/integrations/should_register_reporting_integration';
-import { REPORTING_SERVERLESS_EXPORT_ENABLED } from '../common/feature_flags';
+import {
+  REPORTING_SERVERLESS_ON_DEMAND_EXPORT_ENABLED,
+  REPORTING_SERVERLESS_SCHEDULED_EXPORT_ENABLED,
+} from '../common/feature_flags';
 import { createServerlessExportGate, withAvailabilityGate } from './share/serverless_export_gate';
 
 export interface ReportingPublicPluginSetupDependencies {
@@ -144,15 +147,20 @@ export class ReportingPublicPlugin
       })
     );
 
-    const isExportAvailable = createServerlessExportGate({
-      isServerless: this.isServerless,
-      serverlessExportEnabled$: from(getStartServices()).pipe(
-        switchMap(([coreStart]) =>
-          coreStart.featureFlags.getBooleanValue$(REPORTING_SERVERLESS_EXPORT_ENABLED, false)
+    const createFeatureFlagGate = (flagName: string) =>
+      createServerlessExportGate({
+        isServerless: this.isServerless,
+        enabled$: from(getStartServices()).pipe(
+          switchMap(([coreStart]) => coreStart.featureFlags.getBooleanValue$(flagName, false)),
+          takeUntil(this.stop$)
         ),
-        takeUntil(this.stop$)
-      ),
-    });
+      });
+    const isOnDemandExportAvailable = createFeatureFlagGate(
+      REPORTING_SERVERLESS_ON_DEMAND_EXPORT_ENABLED
+    );
+    const isScheduledExportAvailable = createFeatureFlagGate(
+      REPORTING_SERVERLESS_SCHEDULED_EXPORT_ENABLED
+    );
 
     const apiClient = new ReportingAPIClient(core.http, core.uiSettings, this.kibanaVersion);
     this.apiClient = apiClient;
@@ -246,26 +254,20 @@ export class ReportingPublicPlugin
       })
     );
 
-    // The config decides which export types exist at all — it is read during `setup`, so it cannot
-    // be a feature flag — while `isExportAvailable` decides whether the ones that exist are offered
-    // to users. On serverless it is the rollout flag, so enabling the flag reveals only the export
-    // types this config already enabled.
-    if (this.config.export_types.pdf.enabled) {
+    if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
         withAvailabilityGate(
           reportingPDFExportShareIntegration({ apiClient, startServices$ }),
-          isExportAvailable
+          isOnDemandExportAvailable
         )
       );
-    }
 
-    if (this.config.export_types.png.enabled) {
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
         withAvailabilityGate(
           reportingPNGExportShareIntegration({ apiClient, startServices$ }),
-          isExportAvailable
+          isOnDemandExportAvailable
         )
       );
     }
@@ -306,7 +308,10 @@ export class ReportingPublicPlugin
           for (const objectType of scheduledReportObjectTypes) {
             shareSetup.registerShareIntegration<ExportShareDerivatives>(
               objectType,
-              scheduledReportsShareIntegration
+              // Every type except Discover's `search` is scheduled as PDF or PNG.
+              objectType === 'search'
+                ? scheduledReportsShareIntegration
+                : withAvailabilityGate(scheduledReportsShareIntegration, isScheduledExportAvailable)
             );
           }
         })

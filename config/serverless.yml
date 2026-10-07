@@ -85,9 +85,7 @@ xpack.features.overrides:
   ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
   maps_v2.hidden: true
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
-  ### response-ops-team#750: `generate_report` for Dashboard (PDF/PNG export) is granted here, like the
-  ### CSV privilege. The sub-feature stays disabled above so it is not shown in Role management; the
-  ### share menu entries are separately gated by the `reporting.serverlessExportEnabled` feature flag.
+  ### Dashboard PDF/PNG reports are additionally gated by feature flags (see reporting's common/feature_flags.ts).
   reporting:
     privileges:
       all.composedOf:
@@ -284,35 +282,16 @@ xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 xpack.reporting.csv.maxRows: 100000
-# PDF/PNG dashboard export via page-render-service instead of local Chromium
-# (xpack.screenshotting stays disabled above). See
-# x-pack/platform/plugins/private/page_render_screenshotting/README.md.
-#
-# Enabling these does not expose the exports: they are read during setup to decide which export
-# types Kibana wires up at all, and the share-menu entries stay hidden until the
-# `reporting.serverlessExportEnabled` feature flag turns them on per project. The rollout lever is
-# the flag, not this file — see x-pack/platform/plugins/private/reporting/common/feature_flags.ts.
+# PDF/PNG reports render through page-render-service, since Chromium is not shipped. They stay hidden
+# until enabled by feature flags (see reporting's common/feature_flags.ts).
 xpack.reporting.export_types.pdf.enabled: true
 xpack.reporting.export_types.png.enabled: true
-# page-render-service is colocated with serverless Kibana on the
-# serverless-regional clusters (cp-app-*/cp-internal-app-*), so it is reachable
-# over plain in-cluster DNS — no ingress or TLS involved.
-#
-# No trailing slash: the client concatenates the render path directly
-# (`${url}/v1/render-page`), and the service's Fastify router does not set
-# ignoreDuplicateSlashes, so a trailing slash here yields `//v1/render-page`
-# and a 404.
 xpack.pageRenderScreenshotting.enabled: true
 xpack.pageRenderScreenshotting.url: https://page-render-service.page-render-service.svc
-
-# The service reads this Kibana's identity off the client certificate we present and
-# forwards it to UIAM with the token we mint, so this must be the certificate UIAM already
-# knows us by: the same one the operator sets on xpack.security.uiam.ssl.
+# Must match xpack.security.uiam.ssl: the service authenticates Kibana by this certificate.
 xpack.pageRenderScreenshotting.ssl.certificate: /mnt/elastic-internal/http-certs/uiam.crt
 xpack.pageRenderScreenshotting.ssl.key: /mnt/elastic-internal/http-certs/uiam.key
-# The platform CA bundle, which is what signs the render service's certificate. Every
-# in-cluster client in the operator's own config verifies against this path; the ca.crt
-# beside our certificate in http-certs is a different CA and does not verify theirs.
+# The platform CA, which signs the render service's certificate (http-certs/ca.crt does not).
 xpack.pageRenderScreenshotting.ssl.certificateAuthorities: /mnt/elastic-internal/trust-bundle/ca.crt
 
 # Disabled Platform plugins

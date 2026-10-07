@@ -138,16 +138,13 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        featureFlags: core.featureFlags,
         analytics: core.analytics,
         savedObjects,
         uiSettings,
         store,
         securityService: core.security,
         ...plugins,
-        // response-ops-team#750: when the pageRenderScreenshotting plugin is enabled, its
-        // getScreenshots() (backed by page-render-service) stands in for real screenshotting
-        // everywhere reporting uses it. Disabled optional plugins are omitted from `plugins`
-        // entirely, so this is a no-op fallback to the real plugin (or undefined) otherwise.
         screenshotting: plugins.pageRenderScreenshotting ?? plugins.screenshotting,
       });
 

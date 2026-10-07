@@ -9,11 +9,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { KBN_SCREENSHOT_MODE_ENABLED_KEY } from '@kbn/screenshot-mode-plugin/common';
-import type { PdfScreenshotOptions, PngScreenshotOptions } from '@kbn/screenshotting-plugin/server';
-import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import type { ScreenshotOptions } from '@kbn/screenshotting-plugin/server';
 import type { RenderPageRequest } from './types';
 
-// Same literal as screenshot_mode/common/context.ts — not exported as a named constant there.
+// Not exported by screenshot_mode.
 const KBN_SCREENSHOT_CONTEXT_KEY = '__KBN_SCREENSHOT_CONTEXT__';
 
 const KBN_APP_WRAPPER_SELECTOR = '.kbnAppWrapper';
@@ -23,13 +22,10 @@ const SHARED_ITEMS_COUNT_ATTRIBUTE = 'data-shared-items-count';
 const RENDER_COMPLETE_ATTRIBUTE = 'data-render-complete';
 const RENDER_ERROR_ATTRIBUTE = 'data-render-error';
 
-// Matches screenshotting's DEFAULT_VIEWPORT (chromium/driver_factory/index.ts) — the same
-// viewport real screenshotting would have used.
+// Same as the screenshotting plugin's default viewport.
 const DEFAULT_VIEWPORT = { width: 1950, height: 1200 };
 
-// Ported from x-pack/platform/plugins/shared/screenshotting/server/layouts/preserve_layout.css —
-// screenshotting skips this injection for the 'print' layout (getCssOverridesPath() returns
-// undefined there), so it's only needed for the preserve_layout/viewport branch below.
+// Same as the screenshotting plugin's preserve_layout.css. Not used for the print layout.
 const PRESERVE_LAYOUT_CSS = `
 .hide-for-sharing { display: none !important; }
 .stretch-for-sharing { margin: 0px; }
@@ -38,11 +34,7 @@ const PRESERVE_LAYOUT_CSS = `
 .lnsVisualizationWorkspace_container { padding: 0 !important; border: 0 !important; }
 `.trim();
 
-export const DEMO_BANNER = 'Rendered in MT Reporting page-render-service';
-
-/** Serializes a value as an inert, CSP-safe init script (no eval — see page-render-service's
- * CSP writeup: `onNewDocumentScripts` are run via CDP's addScriptToEvaluateOnNewDocument, not
- * `page.evaluate(string)`, so this is safe even under Kibana's `script-src 'self'`). */
+/** Init script that defines a global before page scripts run. Injected by the browser, not `eval`, so it is CSP-safe. */
 function defineGlobal(key: string, value: unknown): string {
   return `Object.defineProperty(window, ${JSON.stringify(
     key
@@ -64,9 +56,6 @@ function getRequestAuthHeaders(
     headers.authorization = authHeader.toString();
 
     if (isUiamCredential(authHeader) && security.authc.apiKeys.uiam) {
-      // Spread last so a caller-supplied value can never win — same rule the interface's own
-      // doc comment calls out (and the pattern workflows_execution_engine's call_kibana_api.ts
-      // follows).
       Object.assign(
         headers,
         security.authc.apiKeys.uiam.getInternalCallerAttestationHeaders(authHeader)
@@ -82,33 +71,23 @@ function getRequestAuthHeaders(
   return headers;
 }
 
-/** `options.urls` holds at most one entry in practice for both pdf and png dashboard exports —
- * printable_pdf_v2.ts can in principle pass more than one locator, but the redirect app and the
- * capture below only ever handle a single page per render-service call, so anything past the
- * first is dropped with a warning surfaced via `renderErrors` on the eventual result. */
-function getSingleUrl(urls: UrlOrUrlWithContext[]): {
+/** The service renders one page per request. */
+function getSingleUrl(urls: ScreenshotOptions['urls'] = []): {
   url: string;
   context: Record<string, unknown>;
 } {
-  const [first] = urls;
-  if (first === undefined) {
-    throw new Error('getScreenshots() was called with no URLs to render');
+  if (urls.length !== 1) {
+    throw new Error(`page-render-service renders exactly one URL per report, got ${urls.length}`);
   }
+  const [first] = urls;
   if (typeof first === 'string') {
     return { url: first, context: {} };
   }
   const [url, context] = first;
-  return { url, context: context as Record<string, unknown> };
+  return { url, context };
 }
 
-/** Replaces the origin of a Reporting-built capture URL with an origin the render service can
- * reach, preserving path, query and hash.
- *
- * Reporting derives the origin from `xpack.reporting.kibanaServer.*`, which defaults to
- * `server.host`/`server.port` — and a `0.0.0.0` host is silently rewritten to `localhost`. That
- * is fine for the real screenshotting plugin (Chromium runs in the Kibana pod) but a remote
- * render service resolves `localhost` to itself. Returns the URL untouched if there is no
- * `captureBaseUrl` to substitute, or if either value will not parse. */
+/** Replaces the origin of `url` with that of `captureBaseUrl`. Returns `url` unchanged if either does not parse. */
 export function withCaptureOrigin(url: string, captureBaseUrl?: string): string {
   if (!captureBaseUrl) {
     return url;
@@ -123,21 +102,16 @@ export function withCaptureOrigin(url: string, captureBaseUrl?: string): string 
 }
 
 export function buildRenderPageRequest(
-  options: PdfScreenshotOptions | PngScreenshotOptions,
+  options: ScreenshotOptions,
   security: SecurityServiceStart,
   captureBaseUrl?: string
-): { payload: RenderPageRequest; droppedUrlCount: number } {
-  const { url: rawUrl, context } = getSingleUrl(options.urls ?? []);
-  const url = withCaptureOrigin(rawUrl, captureBaseUrl);
-  const droppedUrlCount = Math.max((options.urls?.length ?? 0) - 1, 0);
+): RenderPageRequest {
+  const { url: rawUrl, context } = getSingleUrl(options.urls);
 
   const layoutId = options.layout?.id ?? 'preserve_layout';
   const isPrint = options.format === 'pdf' && layoutId === 'print';
 
-  const screenshotContext = { ...context, layout: layoutId };
-
-  const authHeaders = getRequestAuthHeaders(options.request, security);
-  const customHeaders = options.headers
+  const requestHeaders = options.headers
     ? Object.fromEntries(
         Object.entries(options.headers)
           .filter((entry): entry is [string, string | string[]] => entry[1] !== undefined)
@@ -146,12 +120,12 @@ export function buildRenderPageRequest(
     : undefined;
 
   const payload: RenderPageRequest = {
-    url,
-    pageAuth: { headers: authHeaders },
-    requestHeaders: customHeaders,
+    url: withCaptureOrigin(rawUrl, captureBaseUrl),
+    pageAuth: { headers: getRequestAuthHeaders(options.request, security) },
+    requestHeaders,
     onNewDocumentScripts: [
       defineGlobal(KBN_SCREENSHOT_MODE_ENABLED_KEY, true),
-      defineGlobal(KBN_SCREENSHOT_CONTEXT_KEY, screenshotContext),
+      defineGlobal(KBN_SCREENSHOT_CONTEXT_KEY, { ...context, layout: layoutId }),
     ],
     css: isPrint ? undefined : PRESERVE_LAYOUT_CSS,
     waitFor: {
@@ -172,19 +146,16 @@ export function buildRenderPageRequest(
 
   if (options.format === 'pdf') {
     payload.pdf = isPrint
-      ? { mode: 'print', title: options.title, banner: DEMO_BANNER }
+      ? { mode: 'print', title: options.title }
       : {
           mode: 'viewport',
           title: options.title,
-          banner: DEMO_BANNER,
           contentSelector: SHARED_ITEMS_CONTAINER_SELECTOR,
         };
   } else {
-    // PNG is always preserve_layout in real Kibana (see plan notes). `mode`/`title`/`banner` are
-    // pdf-only, but `contentSelector` is still honored for image output — it's what tells the
-    // service what to measure and clip.
+    // The service also uses `contentSelector` to clip image output.
     payload.pdf = { contentSelector: SHARED_ITEMS_CONTAINER_SELECTOR };
   }
 
-  return { payload, droppedUrlCount };
+  return payload;
 }

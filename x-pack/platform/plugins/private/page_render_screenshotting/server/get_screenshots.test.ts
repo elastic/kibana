@@ -8,9 +8,10 @@
 import * as Rx from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
+import { Agent } from 'undici';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { PdfScreenshotOptions, PngScreenshotOptions } from '@kbn/screenshotting-plugin/server';
-import { createGetScreenshots } from './get_screenshots';
+import { createGetScreenshots, diagnose } from './get_screenshots';
 import { renderPage } from './render/client';
 
 jest.mock('./render/client');
@@ -43,13 +44,8 @@ function pngOptions(overrides: Partial<PngScreenshotOptions> = {}): PngScreensho
 describe('createGetScreenshots', () => {
   const logger = loggerMock.create();
   const security = securityServiceMock.createStart();
-  const config = {
-    enabled: true,
-    url: 'http://localhost:3001',
-    ssl: { verificationMode: 'full' as const },
-  };
+  const getServiceUrl = () => 'http://localhost:3001';
 
-  /** Kibana's own UIAM identity. Every render mints a fresh token from it. */
   const systemIdentity = { createEphemeralToken: jest.fn(async () => 'ephemeral-token') };
   const getSystemIdentity = () => systemIdentity;
 
@@ -60,7 +56,12 @@ describe('createGetScreenshots', () => {
   it('maps a successful render to a flat PdfScreenshotResult for pdf calls', async () => {
     mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('pdf-bytes'), renderErrors: [] }));
 
-    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+    const getScreenshots = createGetScreenshots({
+      getServiceUrl,
+      logger,
+      security,
+      getSystemIdentity,
+    });
     const result = await firstValueFrom(getScreenshots(pdfOptions()));
 
     expect(result).toEqual({
@@ -79,7 +80,12 @@ describe('createGetScreenshots', () => {
       })
     );
 
-    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+    const getScreenshots = createGetScreenshots({
+      getServiceUrl,
+      logger,
+      security,
+      getSystemIdentity,
+    });
     const result = await firstValueFrom(getScreenshots(pngOptions()));
 
     expect(result).toEqual({
@@ -95,17 +101,22 @@ describe('createGetScreenshots', () => {
   });
 
   it('rejects expression-based (Canvas) input without calling the render service', async () => {
-    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+    const getScreenshots = createGetScreenshots({
+      getServiceUrl,
+      logger,
+      security,
+      getSystemIdentity,
+    });
 
     await expect(
       firstValueFrom(getScreenshots({ ...pdfOptions(), expression: 'some canvas expression' }))
-    ).rejects.toThrow(/does not support expression-based/);
+    ).rejects.toThrow(/Expression-based \(Canvas\) capture is not supported/);
     expect(mockRenderPage).not.toHaveBeenCalled();
   });
 
   it('rejects when the service url is not configured, without calling the render service', async () => {
     const getScreenshots = createGetScreenshots({
-      config: { ...config, url: undefined },
+      getServiceUrl: () => undefined,
       logger,
       security,
       getSystemIdentity,
@@ -116,10 +127,15 @@ describe('createGetScreenshots', () => {
   });
 
   it('propagates a synchronous payload-build error (e.g. no urls) as an observable error', async () => {
-    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+    const getScreenshots = createGetScreenshots({
+      getServiceUrl,
+      logger,
+      security,
+      getSystemIdentity,
+    });
 
     await expect(firstValueFrom(getScreenshots(pdfOptions({ urls: [] })))).rejects.toThrow(
-      /no URLs to render/
+      /exactly one URL per report, got 0/
     );
     expect(mockRenderPage).not.toHaveBeenCalled();
   });
@@ -127,35 +143,85 @@ describe('createGetScreenshots', () => {
   it('propagates a render failure (e.g. exhausted 429 retries) as an observable error', async () => {
     mockRenderPage.mockReturnValue(Rx.throwError(() => new Error('service saturated')));
 
-    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+    const getScreenshots = createGetScreenshots({
+      getServiceUrl,
+      logger,
+      security,
+      getSystemIdentity,
+    });
 
     await expect(firstValueFrom(getScreenshots(pdfOptions()))).rejects.toThrow('service saturated');
   });
 
-  it('warns and drops extra urls, still rendering the first', async () => {
-    mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('pdf-bytes'), renderErrors: [] }));
+  it('rejects more than one url without calling the render service', async () => {
+    const getScreenshots = createGetScreenshots({
+      getServiceUrl,
+      logger,
+      security,
+      getSystemIdentity,
+    });
 
-    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
-    await firstValueFrom(
-      getScreenshots(
-        pdfOptions({
-          urls: [
-            ['http://localhost:5601/app/reportingRedirect', {}],
-            ['http://localhost:5601/app/reportingRedirect', {}],
-          ],
-        })
+    await expect(
+      firstValueFrom(
+        getScreenshots(
+          pdfOptions({
+            urls: [
+              ['http://localhost:5601/app/reportingRedirect', {}],
+              ['http://localhost:5601/app/reportingRedirect', {}],
+            ],
+          })
+        )
       )
+    ).rejects.toThrow(/exactly one URL per report, got 2/);
+    expect(mockRenderPage).not.toHaveBeenCalled();
+  });
+
+  it('passes the capture base url, dispatcher and task deadline to the render', async () => {
+    mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
+    const dispatcher = new Agent();
+    const retryAt = new Date('2026-01-01T00:05:00Z');
+
+    const getScreenshots = createGetScreenshots({
+      getServiceUrl,
+      logger,
+      security,
+      getSystemIdentity,
+      getCaptureBaseUrl: () => 'https://kibana.example.com',
+      getDispatcher: () => dispatcher,
+    });
+    await firstValueFrom(
+      getScreenshots(pdfOptions({ taskInstanceFields: { retryAt, startedAt: null } }))
     );
 
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('page-render-service only supports one page per call')
-    );
+    const [payload, serviceConfig, deadline] = mockRenderPage.mock.calls[0];
+    expect(payload.url).toBe('https://kibana.example.com/app/reportingRedirect');
+    expect(serviceConfig).toMatchObject({ url: 'http://localhost:3001', dispatcher });
+    expect(deadline).toBe(retryAt);
+  });
+
+  it('emits a dispatcher failure as an observable error', async () => {
+    const getScreenshots = createGetScreenshots({
+      getServiceUrl,
+      logger,
+      security,
+      getSystemIdentity,
+      getDispatcher: () => {
+        throw new Error('ENOENT');
+      },
+    });
+
+    await expect(firstValueFrom(getScreenshots(pdfOptions()))).rejects.toThrow('ENOENT');
   });
 
   describe('authenticating to the service', () => {
     it('mints a fresh token per render rather than reusing one', async () => {
       mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
-      const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+      const getScreenshots = createGetScreenshots({
+        getServiceUrl,
+        logger,
+        security,
+        getSystemIdentity,
+      });
 
       await firstValueFrom(getScreenshots(pdfOptions()));
       const { createToken } = mockRenderPage.mock.calls[0][1];
@@ -167,7 +233,12 @@ describe('createGetScreenshots', () => {
 
     it("forwards the caller's abort signal, so a mint cannot outlive the render", async () => {
       mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
-      const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+      const getScreenshots = createGetScreenshots({
+        getServiceUrl,
+        logger,
+        security,
+        getSystemIdentity,
+      });
 
       await firstValueFrom(getScreenshots(pdfOptions()));
       const { createToken } = mockRenderPage.mock.calls[0][1];
@@ -180,7 +251,7 @@ describe('createGetScreenshots', () => {
     it('fails the render when UIAM is not configured, rather than calling unauthenticated', async () => {
       mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
       const getScreenshots = createGetScreenshots({
-        config,
+        getServiceUrl,
         logger,
         security,
         getSystemIdentity: () => undefined,
@@ -190,8 +261,14 @@ describe('createGetScreenshots', () => {
       const { createToken } = mockRenderPage.mock.calls[0][1];
 
       await expect(createToken(new AbortController().signal)).rejects.toThrow(
-        /UIAM is not configured/
+        /xpack.security.uiam is not configured/
       );
     });
+  });
+});
+
+describe('diagnose', () => {
+  it('explains that there is no local browser', async () => {
+    await expect(firstValueFrom(diagnose())).resolves.toMatch(/not available/);
   });
 });

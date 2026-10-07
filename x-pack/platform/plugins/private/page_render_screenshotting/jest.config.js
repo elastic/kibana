@@ -13,6 +13,6 @@ module.exports = {
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/page_render_screenshotting',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/private/page_render_screenshotting/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/private/page_render_screenshotting/server/**/*.ts',
   ],
 };
