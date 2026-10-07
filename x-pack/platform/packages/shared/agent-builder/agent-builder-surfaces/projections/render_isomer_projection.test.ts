@@ -63,8 +63,8 @@ const createContext = (
   overrides: Partial<ProjectionContext> = {}
 ): ProjectionContext & { originType?: ConversationOriginType } => ({
   originType: ConversationOriginType.Slack,
-  getMapping: () => undefined,
-  getConversationUrl: () => conversationUrl,
+  attachmentsService: { getTypeDefinition: () => undefined },
+  conversationUrl,
   logger: loggerMock.create(),
   ...overrides,
 });
@@ -82,10 +82,14 @@ describe('renderIsomerProjection', () => {
       [esqlAttachment]
     );
     const context = createContext({
-      getMapping: () => (data) => ({
-        type: 'view',
-        body: [{ type: 'markdown', text: `\`${(data as { query: string }).query}\`` }],
-      }),
+      attachmentsService: {
+        getTypeDefinition: () => ({
+          toSpec: (data) => ({
+            type: 'view',
+            body: [{ type: 'markdown', text: `\`${(data as { query: string }).query}\`` }],
+          }),
+        }),
+      },
     });
 
     const slack = JSON.stringify(renderIsomerProjection(event, context)?.slack);

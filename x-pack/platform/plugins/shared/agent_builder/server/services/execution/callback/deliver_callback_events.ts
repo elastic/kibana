@@ -141,9 +141,8 @@ export const deliverCallbackEvents = ({
             // Output for the round's origin, such as the Slack payload of Slack rounds.
             const projection = renderIsomerProjection(roundCompleteEvent, {
               originType: agentParams.origin?.type,
-              getMapping: (type) => attachmentsService.getTypeDefinition(type)?.toSpec,
-              getConversationUrl: () =>
-                `${addSpaceIdToPath(getKibanaUrl(), spaceId)}${conversationPath}`,
+              attachmentsService,
+              conversationUrl: `${addSpaceIdToPath(getKibanaUrl(), spaceId)}${conversationPath}`,
               logger,
             });
 

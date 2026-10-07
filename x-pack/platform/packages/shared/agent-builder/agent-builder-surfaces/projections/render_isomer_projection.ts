@@ -27,8 +27,8 @@ export const renderIsomerProjection = (
   { data: { round, attachments = [] } }: RoundCompleteEvent,
   {
     originType,
-    getMapping,
-    getConversationUrl,
+    attachmentsService,
+    conversationUrl,
     logger,
   }: ProjectionContext & { originType?: ConversationOriginType }
 ): OriginIsomerProjection | undefined => {
@@ -48,8 +48,8 @@ export const renderIsomerProjection = (
     const resolved = resolveSpec(spec, {
       attachments,
       attachmentRefs: round.input.attachment_refs,
-      getMapping,
-      conversationUrl: getConversationUrl(),
+      getMapping: (type) => attachmentsService.getTypeDefinition(type)?.toSpec,
+      conversationUrl,
       logger,
     });
 

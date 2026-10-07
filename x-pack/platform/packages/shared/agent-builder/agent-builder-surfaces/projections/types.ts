@@ -12,9 +12,12 @@ import type { AttachmentSpecMapping } from '../spec/resolve_spec';
 
 /** What a projection needs to render a round. */
 export interface ProjectionContext {
-  getMapping: (type: string) => AttachmentSpecMapping | undefined;
+  /** Looks up attachment types, whose `toSpec` renders attachments in place of their tags. */
+  attachmentsService: {
+    getTypeDefinition: (type: string) => { toSpec?: AttachmentSpecMapping } | undefined;
+  };
   /** Linked from attachments that can't be shown, so they can be seen in Kibana. */
-  getConversationUrl: () => string;
+  conversationUrl: string;
   logger: Logger;
 }
 
