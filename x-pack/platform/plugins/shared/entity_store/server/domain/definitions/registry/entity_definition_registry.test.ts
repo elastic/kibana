@@ -84,8 +84,9 @@ describe('EntityDefinitionRegistry', () => {
       expectRejected('bad_schema', /failed schema validation: indexPatterns/);
     });
 
-    // The last three would break the `<type>:` prefix the id compiler emits verbatim into ES|QL
-    // and Painless string literals, so the pattern must keep rejecting them.
+    // `"` and `\` would break the double-quoted `<type>:` prefix the id compiler emits verbatim
+    // into ES|QL and Painless string literals, so the pattern must keep rejecting them. `'` is
+    // included for symmetry; it is simply outside the allowed character set.
     it.each([
       'Host',
       '1host',

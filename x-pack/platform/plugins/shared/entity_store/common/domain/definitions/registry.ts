@@ -35,7 +35,7 @@ const getRegisteredDefinition = (type: EntityType): EntityDefinitionWithoutId =>
   const definition = entitiesDefinitionRegistry[type];
   assert(
     definition,
-    `No entity description found for type: ${type}. Only the Entity Store's built-in types can be ` +
+    `No entity definition found for type: ${type}. Only the Entity Store's built-in types can be ` +
       `resolved by name; for any other definition, read it from the entity definition registry ` +
       `and use the \`...FromDefinition\` form of the euid helper.`
   );
