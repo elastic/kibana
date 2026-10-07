@@ -82,9 +82,11 @@ export function getFilterInOutPairDisabledWarning(params: CheckFilterParams): st
     : undefined;
 }
 
-const Copy: React.FC<
-  Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts; copyAsCsv: boolean }
-> = ({ Component, row, toasts, copyAsCsv }) => {
+const Copy: React.FC<Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts }> = ({
+  Component,
+  row,
+  toasts,
+}) => {
   if (!row) {
     return null;
   }
@@ -109,16 +111,14 @@ const Copy: React.FC<
           }
         );
 
-        const textToCopy = copyAsCsv ? row.formattedAsText : row.formattedAsRawText;
-
-        if (!textToCopy) {
+        if (!row.formattedAsText) {
           toasts.addWarning({
             title: errorMessage,
           });
           return;
         }
 
-        const copied = copyToClipboard(textToCopy);
+        const copied = copyToClipboard(row.formattedAsText);
         if (!copied) {
           toasts.addWarning({
             title: errorMessage,
@@ -394,14 +394,12 @@ export function getFieldValueCellActions({
   hideFilteringOnComputedColumns,
   onFilter,
   toasts,
-  copyAsCsv = true,
 }: {
   rows: FieldRow[];
   isEsqlMode: boolean | undefined;
   hideFilteringOnComputedColumns?: boolean;
   onFilter?: DocViewFilterFn;
   toasts: IToasts;
-  copyAsCsv?: boolean;
 }) {
   const filterActions = onFilter
     ? [
@@ -431,9 +429,7 @@ export function getFieldValueCellActions({
     : [];
 
   const copyAction = ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-    return (
-      <Copy toasts={toasts} copyAsCsv={copyAsCsv} row={rows[rowIndex]} Component={Component} />
-    );
+    return <Copy toasts={toasts} row={rows[rowIndex]} Component={Component} />;
   };
 
   return [...filterActions, copyAction];

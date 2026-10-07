@@ -26,7 +26,6 @@ export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const DEFAULT_ESQL_QUERY_SETTING = 'discover:defaultEsqlQuery';
 export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';
-export const DOC_VIEWER_COPY_AS_CSV_SETTING = 'discover:docViewerCopyAsCsv';
 export const FIELDS_LIMIT_SETTING = 'fields:popularLimit';
 export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
 export const IS_ESQL_DEFAULT_FEATURE_FLAG_KEY = 'discover.isEsqlDefault';

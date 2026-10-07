@@ -25,7 +25,6 @@ jest.mock('@elastic/eui', () => ({
 jest.mock('../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
     toasts: {},
-    uiSettings: { get: (_key: string, defaultValue: unknown) => defaultValue },
   }),
 }));
 

@@ -34,11 +34,9 @@ export class FieldRow {
   readonly #fieldFormats: FieldFormatsStart;
 
   #isFormattedAsText: boolean;
-  #isFormattedAsRawText: boolean;
   #isFormattedAsReact: boolean;
 
   #formattedAsText: string | undefined;
-  #formattedAsRawText: string | undefined;
   #formattedAsReact: ReactNode | undefined;
 
   #fieldType: string | undefined;
@@ -66,7 +64,6 @@ export class FieldRow {
     this.#dataView = dataView;
     this.#fieldFormats = fieldFormats;
     this.#isFormattedAsText = false;
-    this.#isFormattedAsRawText = false;
     this.#isFormattedAsReact = false;
 
     this.name = name;
@@ -106,29 +103,11 @@ export class FieldRow {
         flattenedValue: this.flattenedValue,
         dataTableRecord: this.#hit,
         fieldFormats: this.#fieldFormats,
-        options: {
-          compatibleWithCSV: true,
-        },
       }).formattedString;
       this.#isFormattedAsText = true;
     }
 
     return this.#formattedAsText;
-  }
-
-  public get formattedAsRawText(): string | undefined {
-    if (!this.#isFormattedAsRawText) {
-      this.#formattedAsRawText = convertValueToString({
-        dataView: this.#dataView,
-        dataViewField: this.dataViewField,
-        flattenedValue: this.flattenedValue,
-        dataTableRecord: this.#hit,
-        fieldFormats: this.#fieldFormats,
-      }).formattedString;
-      this.#isFormattedAsRawText = true;
-    }
-
-    return this.#formattedAsRawText;
   }
 
   public get fieldType(): string | undefined {

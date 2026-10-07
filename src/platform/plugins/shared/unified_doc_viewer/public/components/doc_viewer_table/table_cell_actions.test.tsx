@@ -203,50 +203,32 @@ describe('TableActions', () => {
       });
     });
 
-    describe('when copying a value with special characters', () => {
-      const url = 'https://www.elastic.co/downloads/beats/filebeat';
+    it.each([
+      ['a URL', 'https://www.elastic.co/downloads/beats/filebeat'],
+      ['a value with quotes', 'Large "capybara"'],
+      ['a value starting with a formula character', '=HYPERLINK("https://example.com")'],
+    ])('should copy %s without CSV escaping', async (_name, value) => {
+      // Given
+      const actions = getFieldValueCellActions({
+        rows: getRows('message', value),
+        toasts: toastsMock,
+        isEsqlMode: false,
+        onFilter: undefined,
+      }).map((Action, i) => (
+        <Action
+          key={i}
+          {...EuiCellParams}
+          Component={(props: any) => <div {...props}>{props.children}</div>}
+        />
+      ));
+      render(<>{actions}</>);
+      const user = userEvent.setup();
 
-      const renderCopyAction = (copyAsCsv?: boolean) => {
-        const actions = getFieldValueCellActions({
-          rows: getRows('message', url),
-          toasts: toastsMock,
-          isEsqlMode: false,
-          onFilter: undefined,
-          copyAsCsv,
-        }).map((Action, i) => (
-          <Action
-            key={i}
-            {...EuiCellParams}
-            Component={(props: any) => <div {...props}>{props.children}</div>}
-          />
-        ));
+      // When
+      await user.click(screen.getByText('Copy value'));
 
-        render(<>{actions}</>);
-      };
-
-      it('should copy the CSV-escaped value by default', async () => {
-        // Given
-        renderCopyAction();
-        const user = userEvent.setup();
-
-        // When
-        await user.click(screen.getByText('Copy value'));
-
-        // Then
-        expect(mockCopyToClipboard).toHaveBeenCalledWith(`"${url}"`);
-      });
-
-      it('should copy the raw value when copyAsCsv is false', async () => {
-        // Given
-        renderCopyAction(false);
-        const user = userEvent.setup();
-
-        // When
-        await user.click(screen.getByText('Copy value'));
-
-        // Then
-        expect(mockCopyToClipboard).toHaveBeenCalledWith(url);
-      });
+      // Then
+      expect(mockCopyToClipboard).toHaveBeenCalledWith(value);
     });
 
     it('should allow filtering in ES|QL mode', () => {
