@@ -34,7 +34,6 @@ const RESET_STREAM_NAME = 'logs.otel.maintenance-reset-test';
 const ORPHAN_RULE_STREAM_NAME = 'logs.otel.maintenance-reset-orphan-rule';
 const REGISTERED_DATA_STREAMS = [
   '.significant_events-detections',
-  '.significant_events-events',
   '.significant_events-knowledge_indicators',
 ] as const;
 const DISCOVERIES_DATA_STREAM = '.significant_events-discoveries';

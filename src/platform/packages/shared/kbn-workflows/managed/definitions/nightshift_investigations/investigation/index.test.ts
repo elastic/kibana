@@ -146,7 +146,10 @@ describe('Nightshift investigation workflow', () => {
   });
 
   it('addresses a continued investigation by its id rather than the run', () => {
-    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
+    // The source lookup lists sources by id and never touches the investigation document.
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request').filter(
+      ({ name }) => name !== 'list_investigation_sources'
+    );
 
     for (const { with: params } of requestSteps) {
       expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');

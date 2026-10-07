@@ -318,17 +318,17 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
+          # Written through Kibana as its internal user, like detections in detection.yaml.
           - name: write_processed_marker
-            type: elasticsearch.request
+            type: kibana.request
             with:
               method: POST
-              path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+              path: '/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_processed'
+              headers:
+                x-elastic-internal-origin: 'kibana'
               body:
-                '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-                kibana:
-                  space_ids:
-                    - '{{ variables.spaceId }}'
-                detection_id: '{{ foreach.item[0] }}'
+                detection_ids:
+                  - '{{ foreach.item[0] }}'
                 processed_by: '{{ execution.id }}'
             on-failure:
               continue: true

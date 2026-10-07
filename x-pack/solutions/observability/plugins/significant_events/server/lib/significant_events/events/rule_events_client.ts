@@ -111,8 +111,8 @@ const decodeSignificantEventResponse = (
 const buildBaseQuery = (space: string): ComposerQuery =>
   // `_id` metadata is required by `pickLatestPerGroup`'s tiebreaker (`MAX(_id)` / `WHERE _id ==
   // tiebreaker_id`) — omitting it fails at query time with `Unknown column [_id]` (verified against
-  // a live `.rule-events` cluster). Matches the `['_id', '_source']` convention already used for
-  // `EVENTS_DATA_STREAM` in `latest_source_query.ts`.
+  // a live `.rule-events` cluster). Matches the `['_id', '_source']` convention used in
+  // `latest_source_query.ts`.
   esql.from([RULE_EVENTS_INDEX], ['_id', '_source']).where`space_id == ${esql.str(
     space
   )} AND type == ${esql.str('alert')} AND source == ${esql.str(SIGNIFICANT_EVENTS_ALERT_SOURCE)}`;
