@@ -6,27 +6,39 @@
  */
 
 import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
+import {
+  createWorkflowsClientMock,
+  workflowsExtensionsMock,
+} from '@kbn/workflows-extensions/server/mocks';
 import { AlertStatusChangedWorkflowSubscriber } from './alert_status_changed_subscriber';
+import { AsyncDomainEventBus } from '../events/event_bus';
 import { AlertStatusChangedTriggerId } from '../../../common/workflows/triggers';
-import type { AlertStatusChangedEvent, AlertingPublisherContext } from './events';
+import type {
+  AlertStatusChangedEvent,
+  AlertingDomainEvent,
+  AlertingPublisherContext,
+} from './events';
 import { ALERT_STATUS_CHANGED_EVENT_TYPE } from './events';
 
-const makePayload = (): AlertStatusChangedEvent['payload'] => ({
-  rule: {
-    id: 'rule-1',
-    name: 'Test Rule',
-    spaceId: 'default',
-    consumer: 'alerts',
-    ruleTypeId: '.esql',
-    tags: ['k8s'],
-    ruleCategory: 'Elasticsearch query',
-  },
-  alert: {
-    id: 'alert-a',
-    uuid: 'uuid-a',
-    status: 'active',
-    actionGroup: 'default',
-    start: '2026-09-30T00:00:00.000Z',
+const makeEvent = (): AlertStatusChangedEvent => ({
+  type: ALERT_STATUS_CHANGED_EVENT_TYPE,
+  payload: {
+    rule: {
+      id: 'rule-1',
+      name: 'Test Rule',
+      spaceId: 'default',
+      consumer: 'alerts',
+      ruleTypeId: '.esql',
+      tags: ['k8s'],
+      ruleTypeName: 'Elasticsearch query',
+    },
+    alert: {
+      id: 'alert-a',
+      uuid: 'uuid-a',
+      status: 'active',
+      actionGroup: 'default',
+      start: '2026-09-30T00:00:00.000Z',
+    },
   },
 });
 
@@ -34,42 +46,42 @@ const makeContext = (): AlertingPublisherContext => ({
   request: httpServerMock.createKibanaRequest(),
 });
 
+// The bus delivers events from a setImmediate callback, and the handler then awaits mocked
+// promises. Wait for two turns of the event loop so both the delivery and the handler's
+// async work are done before the assertions run.
+const nextTurn = () => new Promise<void>((resolve) => setImmediate(resolve));
+const flushBus = async () => {
+  await nextTurn();
+  await nextTurn();
+};
+
 describe('AlertStatusChangedWorkflowSubscriber', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let mockUnsubscribe: jest.Mock;
-  let mockSubscribe: jest.Mock;
-  let mockBus: { subscribe: jest.Mock };
+  let bus: AsyncDomainEventBus<AlertingDomainEvent, AlertingPublisherContext>;
+  let subscribeSpy: jest.SpyInstance;
+  let workflows: ReturnType<typeof workflowsExtensionsMock.createStart>;
   let mockEmitEvent: jest.Mock;
-  let mockGetClient: jest.Mock;
-  let mockWorkflows: { getClient: jest.Mock };
   let subscriber: AlertStatusChangedWorkflowSubscriber;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    mockUnsubscribe = jest.fn();
-    mockSubscribe = jest.fn().mockReturnValue({ unsubscribe: mockUnsubscribe });
-    mockBus = { subscribe: mockSubscribe };
+    bus = new AsyncDomainEventBus<AlertingDomainEvent, AlertingPublisherContext>(logger);
+    subscribeSpy = jest.spyOn(bus, 'subscribe');
 
     mockEmitEvent = jest.fn().mockResolvedValue(undefined);
-    mockGetClient = jest.fn().mockResolvedValue({
-      isWorkflowsAvailable: true,
-      emitEvent: mockEmitEvent,
-    });
-    mockWorkflows = { getClient: mockGetClient };
-
-    subscriber = new AlertStatusChangedWorkflowSubscriber(
-      // @ts-ignore — partial mock
-      mockBus,
-      mockWorkflows,
-      logger
+    workflows = workflowsExtensionsMock.createStart();
+    workflows.getClient.mockResolvedValue(
+      createWorkflowsClientMock({ isWorkflowsAvailable: true, emitEvent: mockEmitEvent })
     );
+
+    subscriber = new AlertStatusChangedWorkflowSubscriber(bus, workflows, logger);
   });
 
   describe('start()', () => {
     it('subscribes to the bus on the alert.status.changed event type', () => {
       subscriber.start();
-      expect(mockSubscribe).toHaveBeenCalledTimes(1);
-      expect(mockSubscribe).toHaveBeenCalledWith(
+      expect(subscribeSpy).toHaveBeenCalledTimes(1);
+      expect(subscribeSpy).toHaveBeenCalledWith(
         ALERT_STATUS_CHANGED_EVENT_TYPE,
         expect.any(Function)
       );
@@ -78,7 +90,7 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
     it('calling start() a second time does not create a second subscription', () => {
       subscriber.start();
       subscriber.start();
-      expect(mockSubscribe).toHaveBeenCalledTimes(1);
+      expect(subscribeSpy).toHaveBeenCalledTimes(1);
     });
 
     it('logs a debug message on the second start() call', () => {
@@ -95,8 +107,19 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
   describe('stop()', () => {
     it('unsubscribes from the bus', () => {
       subscriber.start();
+      const unsubscribeSpy = jest.spyOn(subscribeSpy.mock.results[0].value, 'unsubscribe');
       subscriber.stop();
-      expect(mockUnsubscribe).toHaveBeenCalledTimes(1);
+      expect(unsubscribeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops forwarding events once stopped', async () => {
+      subscriber.start();
+      subscriber.stop();
+
+      bus.publish(makeEvent(), makeContext());
+      await flushBus();
+
+      expect(mockEmitEvent).not.toHaveBeenCalled();
     });
 
     it('calling stop() before start() does not throw', () => {
@@ -107,68 +130,58 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
       subscriber.start();
       subscriber.stop();
       subscriber.start();
-      expect(mockSubscribe).toHaveBeenCalledTimes(2);
+      expect(subscribeSpy).toHaveBeenCalledTimes(2);
     });
   });
 
-  describe('emit behavior (invoked via the bus handler)', () => {
-    let capturedHandler: (
-      event: AlertStatusChangedEvent,
-      context: AlertingPublisherContext
-    ) => Promise<void>;
-
+  describe('emit behavior (events published through the bus)', () => {
     beforeEach(() => {
       subscriber.start();
-      capturedHandler = mockSubscribe.mock.calls[0][1];
     });
 
     it('calls emitEvent with the trigger ID and payload when workflows are available', async () => {
-      const event: AlertStatusChangedEvent = {
-        type: ALERT_STATUS_CHANGED_EVENT_TYPE,
-        payload: makePayload(),
-      };
-      await capturedHandler(event, makeContext());
+      const event = makeEvent();
+      bus.publish(event, makeContext());
+      await flushBus();
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
       expect(mockEmitEvent).toHaveBeenCalledWith(AlertStatusChangedTriggerId, event.payload);
     });
 
     it('skips emitEvent when isWorkflowsAvailable is false', async () => {
-      mockGetClient.mockResolvedValue({ isWorkflowsAvailable: false, emitEvent: mockEmitEvent });
+      workflows.getClient.mockResolvedValue(
+        createWorkflowsClientMock({ isWorkflowsAvailable: false, emitEvent: mockEmitEvent })
+      );
 
-      const event: AlertStatusChangedEvent = {
-        type: ALERT_STATUS_CHANGED_EVENT_TYPE,
-        payload: makePayload(),
-      };
-      await capturedHandler(event, makeContext());
+      bus.publish(makeEvent(), makeContext());
+      await flushBus();
 
       expect(mockEmitEvent).not.toHaveBeenCalled();
     });
 
-    it('logs an error and does not propagate if emitEvent throws', async () => {
+    it('logs a warning with the rule id, alert uuid and stack if emitEvent throws', async () => {
       mockEmitEvent.mockRejectedValue(new Error('emit failed'));
 
-      const event: AlertStatusChangedEvent = {
-        type: ALERT_STATUS_CHANGED_EVENT_TYPE,
-        payload: makePayload(),
-      };
-      await expect(capturedHandler(event, makeContext())).resolves.toBeUndefined();
+      bus.publish(makeEvent(), makeContext());
+      await flushBus();
 
-      expect(loggingSystemMock.collect(logger).error).toEqual(
-        expect.arrayContaining([expect.arrayContaining([expect.stringContaining('emit failed')])])
-      );
+      const warnings = loggingSystemMock.collect(logger).warn;
+      expect(warnings).toHaveLength(1);
+      const [message, meta] = warnings[0];
+      expect(message).toEqual(expect.stringContaining('emit failed'));
+      expect(message).toEqual(expect.stringContaining('rule-1'));
+      expect(message).toEqual(expect.stringContaining('uuid-a'));
+      expect(meta).toEqual({ error: { stack_trace: expect.stringContaining('emit failed') } });
+      expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
     });
 
-    it('logs an error and does not propagate if getClient throws', async () => {
-      mockGetClient.mockRejectedValue(new Error('client unavailable'));
+    it('logs a warning and does not propagate if getClient throws', async () => {
+      workflows.getClient.mockRejectedValue(new Error('client unavailable'));
 
-      const event: AlertStatusChangedEvent = {
-        type: ALERT_STATUS_CHANGED_EVENT_TYPE,
-        payload: makePayload(),
-      };
-      await expect(capturedHandler(event, makeContext())).resolves.toBeUndefined();
+      bus.publish(makeEvent(), makeContext());
+      await flushBus();
 
-      expect(loggingSystemMock.collect(logger).error).toEqual(
+      expect(loggingSystemMock.collect(logger).warn).toEqual(
         expect.arrayContaining([
           expect.arrayContaining([expect.stringContaining('client unavailable')]),
         ])

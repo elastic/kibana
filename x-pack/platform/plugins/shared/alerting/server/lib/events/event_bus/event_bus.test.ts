@@ -152,11 +152,16 @@ describe('AsyncDomainEventBus', () => {
       await flushImmediate();
 
       expect(goodHandler).toHaveBeenCalledTimes(1);
-      expect(loggingSystemMock.collect(logger).error).toEqual(
+      const errors = loggingSystemMock.collect(logger).error;
+      expect(errors).toEqual(
         expect.arrayContaining([
           expect.arrayContaining([expect.stringContaining('intentional failure')]),
         ])
       );
+      // The stack is kept so a failing handler can be traced back to its source.
+      expect(errors[0][1]).toEqual({
+        error: { stack_trace: expect.stringContaining('intentional failure') },
+      });
     });
   });
 
