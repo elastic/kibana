@@ -1392,7 +1392,8 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops, undefined, soClient);
 
       expect(soClient.bulkGet).not.toHaveBeenCalled();
-      expect(result.data.artifacts).toEqual([]);
+      // Unlinking the last dashboard removes the key: the rule schemas reject an empty list.
+      expect(result.data).not.toHaveProperty('artifacts');
     });
   });
 

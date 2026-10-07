@@ -207,11 +207,14 @@ export const toApiQuery = (query: ReadableQuery): Query => ({
 /**
  * Projects stored `artifacts` onto the public shape. Rules migrated by model version 4 still carry
  * a legacy `value` on disk so a rollback can read it, and the public artifact schema is strict.
+ *
+ * An empty list reads as absent, so documents written before a clear removed the key need no
+ * migration to satisfy the API's `.min(1)`.
  */
 export const toApiArtifacts = (
   artifacts: RuleSavedObjectAttributes['artifacts']
 ): RuleSavedObjectAttributes['artifacts'] =>
-  artifacts?.map(({ id, type, data }) => ({ id, type, data }));
+  artifacts?.length ? artifacts.map(({ id, type, data }) => ({ id, type, data })) : undefined;
 
 /** Projects a stored `state_transition` onto the public shape, dropping the flat scalars. */
 export const toApiStateTransition = (

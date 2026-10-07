@@ -693,6 +693,39 @@ describe('utils', () => {
       ]);
     });
 
+    it('clears artifacts by removing the key, never by storing an empty list', () => {
+      const existing = createRuleSoAttributesWithArtifacts();
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { artifacts: null },
+        {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        }
+      );
+
+      expect(result.artifacts).toBeUndefined();
+      expect(JSON.parse(JSON.stringify(result))).not.toHaveProperty('artifacts');
+    });
+
+    it('drops a legacy empty artifacts list rather than writing it back', () => {
+      const existing = createRuleSoAttributes({ artifacts: [] });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        }
+      );
+
+      expect(JSON.parse(JSON.stringify(result))).not.toHaveProperty('artifacts');
+    });
+
     /**
      * The merged document is parsed with the create schema, whose artifact object is strict, so the
      * legacy key has to be projected away before the merge. It stays on disk for the rollback
@@ -749,6 +782,17 @@ describe('utils', () => {
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('projects a legacy empty artifacts list as an absent key', () => {
+      const attrs = createRuleSoAttributes({ artifacts: [] });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      // Documents written before a clear removed the key must still satisfy the response schema,
+      // whose `artifacts` is now bounded by `.min(1)`.
+      expect(result.artifacts).toBeUndefined();
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 

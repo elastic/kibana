@@ -30,24 +30,21 @@ export function validateDateString(dateString: string): void {
   }
 }
 
+/**
+ * The single throttle representation, shared by storage and the API: an interval the strategy
+ * cannot use is dropped rather than carried. Legacy documents may hold `null`, which reads the same
+ * as absent.
+ */
 const normalizeThrottle = (
   throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
-): { strategy?: ThrottleStrategy; interval: string | null } | null => {
-  if (throttle == null) return null;
+): ActionPolicyResponse['throttle'] => {
+  if (throttle == null) return undefined;
   const { strategy, interval } = throttle;
   const keepInterval = strategy == null || needsInterval(strategy);
   return {
     strategy,
-    interval: keepInterval ? interval ?? null : null,
+    interval: keepInterval ? interval ?? undefined : undefined,
   };
-};
-
-const toApiThrottle = (
-  throttle: ActionPolicySavedObjectAttributes['throttle']
-): ActionPolicyResponse['throttle'] => {
-  const normalized = normalizeThrottle(throttle);
-  if (normalized == null) return undefined;
-  return { strategy: normalized.strategy, interval: normalized.interval ?? undefined };
 };
 
 /** Policies stored before the API rejected empty sentinels can hold `tags: []` or `expression: ''`, both meaning "no constraint". */
@@ -72,7 +69,7 @@ export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
 
 /**
  * The create-shaped view of a stored policy, so a PATCH merges against exactly the document a GET
- * would return rather than against the saved object's `null` sentinels.
+ * would return rather than against the `null` sentinels older documents may still hold.
  */
 export const toPatchableActionPolicyData = (
   attributes: ActionPolicySavedObjectAttributes
@@ -83,17 +80,23 @@ export const toPatchableActionPolicyData = (
   matcher: toApiMatcher(attributes.matcher),
   group_by: attributes.groupBy ?? undefined,
   grouping_mode: attributes.groupingMode ?? undefined,
-  throttle: toApiThrottle(attributes.throttle),
+  throttle: normalizeThrottle(attributes.throttle),
 });
 
-/** The client-owned fields of a policy, in storage form. Shared so create and update cannot drift. */
+/**
+ * The client-owned fields of a policy, in storage form. Shared so create and update cannot drift.
+ *
+ * A cleared field is written as `undefined`, which the full-document write drops from the document
+ * entirely. The storage schema still accepts `null` so that documents written before this
+ * convention keep validating, but nothing writes one.
+ */
 const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
   name: data.name,
   description: data.description,
   destinations: data.destinations,
-  matcher: data.matcher ?? null,
-  groupBy: data.group_by ?? null,
-  groupingMode: data.grouping_mode ?? null,
+  matcher: data.matcher,
+  groupBy: data.group_by,
+  groupingMode: data.grouping_mode,
   throttle: normalizeThrottle(data.throttle),
 });
 
@@ -117,8 +120,6 @@ export const buildCreateActionPolicyAttributes = ({
   return {
     ...toStoredPolicyFields(data),
     enabled,
-    tags: null,
-    snoozedUntil: null,
     ...toApiKeyAttributes(auth),
     createdBy,
     createdAt,
@@ -147,8 +148,8 @@ export const buildUpdateActionPolicyAttributes = ({
   return {
     ...toStoredPolicyFields(data),
     enabled: existing.enabled,
-    tags: existing.tags ?? null,
-    snoozedUntil: existing.snoozedUntil ?? null,
+    tags: existing.tags ?? undefined,
+    snoozedUntil: existing.snoozedUntil ?? undefined,
     ...toApiKeyAttributes(auth),
     createdBy: existing.createdBy,
     createdAt: existing.createdAt,
@@ -173,7 +174,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     matcher: toApiMatcher(attributes.matcher),
     group_by: attributes.groupBy ?? undefined,
     grouping_mode: attributes.groupingMode ?? undefined,
-    throttle: toApiThrottle(attributes.throttle),
+    throttle: normalizeThrottle(attributes.throttle),
     snoozed_until: attributes.snoozedUntil ?? undefined,
     created_by: attributes.createdBy,
     created_at: attributes.createdAt,

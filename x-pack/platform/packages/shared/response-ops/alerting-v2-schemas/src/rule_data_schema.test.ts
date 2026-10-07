@@ -1012,6 +1012,49 @@ describe('createRuleDataSchema', () => {
     });
   });
 
+  describe('artifacts empty-array rejection', () => {
+    const artifact = { id: 'artifact-1', type: 'host', data: { value: 'host-a' } };
+
+    // "No artifacts" has one spelling: an absent key. An empty array would be a second one, and
+    // the clear on PATCH is `null`. Replace reuses `createRuleDataSchema`, so it shares the bound.
+    it('rejects an empty array on create and replace', () => {
+      const result = createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [] });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty array in a bulk-create item', () => {
+      const result = bulkCreateRulesRequestSchema.safeParse({
+        items: [{ ...validCreateData, artifacts: [] }],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty array on patch', () => {
+      expect(updateRuleDataSchema.safeParse({ artifacts: [] }).success).toBe(false);
+    });
+
+    it('rejects null on create and replace, where an absent key already means no artifacts', () => {
+      const result = createRuleDataSchema.safeParse({ ...validCreateData, artifacts: null });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts null on patch, the only way to clear', () => {
+      expect(updateRuleDataSchema.safeParse({ artifacts: null }).success).toBe(true);
+    });
+
+    it('accepts a one-item array everywhere', () => {
+      expect(
+        createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] }).success
+      ).toBe(true);
+      expect(updateRuleDataSchema.safeParse({ artifacts: [artifact] }).success).toBe(true);
+      expect(
+        bulkCreateRulesRequestSchema.safeParse({
+          items: [{ ...validCreateData, artifacts: [artifact] }],
+        }).success
+      ).toBe(true);
+    });
+  });
+
   describe('artifacts envelope', () => {
     const parseWithArtifact = (artifact: Record<string, unknown>) =>
       createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] });

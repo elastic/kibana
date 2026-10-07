@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * We are excluding the  @kbn/eslint/scout_require_api_client_in_api_test
- * eslint rule for this file because we do not test APIs but the how the data are persisted on disk.
- */
-
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { omit } from 'lodash';
@@ -19,6 +14,7 @@ import {
   ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  findNullPaths,
   getActionPolicyUrl,
   testData,
 } from '../fixtures';
@@ -32,57 +28,47 @@ const VOLATILE_FIELDS = ['apiKey', 'updatedAt'];
 /**
  * Asserts what a PATCH persisted, rather than what it returned.
  *
- * A policy stores a cleared field as an explicit `null` and the response projection turns those
- * sentinels back into absent keys, so "cleared on disk" and "never set" are indistinguishable over
- * HTTP.
+ * A policy clears a field by removing its key, the same convention rules follow, and the response
+ * projection reads a `null` and an absent key identically. A GET therefore cannot tell you which
+ * one is on disk, which is why these assertions go through the saved object.
+ *
+ * The writes go through `apiServices`, which keeps the stored audit actors identical before and
+ * after so a whole-document comparison stays meaningful. Authorization of the same endpoint is
+ * covered by `update_action_policy.spec.ts`.
  */
 apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-classic' }, () => {
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
 
-  apiTest(
-    'clears a field by storing null, keeping the key the response drops',
-    async ({ apiServices }) => {
-      const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
-      const created = await actionPolicies.create(
-        buildCreateActionPolicyData({
-          name: 'patch-clear',
-          matcher: { tags: ['prod'] },
-          group_by: ['service.name'],
-          grouping_mode: 'per_field',
-          throttle: { strategy: 'time_interval', interval: '5m' },
-        })
-      );
+  apiTest('clears a field by removing its key, never by storing null', async ({ apiServices }) => {
+    const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
+    const created = await actionPolicies.create(
+      buildCreateActionPolicyData({
+        name: 'patch-clear',
+        matcher: { tags: ['prod'] },
+        group_by: ['service.name'],
+        grouping_mode: 'per_field',
+        throttle: { strategy: 'time_interval', interval: '5m' },
+      })
+    );
 
-      const before = await actionPolicySavedObject.getAttributes(created.id);
+    const before = await actionPolicySavedObject.getAttributes(created.id);
 
-      await actionPolicies.patch(created.id, {
-        matcher: null,
-        group_by: null,
-        grouping_mode: null,
-        throttle: null,
-      });
+    await actionPolicies.patch(created.id, {
+      matcher: null,
+      group_by: null,
+      grouping_mode: null,
+      throttle: null,
+    });
 
-      const after = await actionPolicySavedObject.getAttributes(created.id);
-
-      expect(omit(after, VOLATILE_FIELDS)).toStrictEqual({
-        ...omit(before, VOLATILE_FIELDS),
-        matcher: null,
-        groupBy: null,
-        groupingMode: null,
-        throttle: null,
-      });
-
-      expect(after.updatedAt).not.toBe(before.updatedAt);
-
-      const projected = await actionPolicies.get(created.id);
-      expect(projected.matcher).toBeUndefined();
-      expect(projected.group_by).toBeUndefined();
-      expect(projected.grouping_mode).toBeUndefined();
-      expect(projected.throttle).toBeUndefined();
-    }
-  );
+    const after = await actionPolicySavedObject.getAttributes(created.id);
+    expect(omit(after, VOLATILE_FIELDS)).toStrictEqual(
+      omit(before, [...VOLATILE_FIELDS, 'matcher', 'groupBy', 'groupingMode', 'throttle'])
+    );
+    expect(findNullPaths(after)).toStrictEqual([]);
+    expect(after.updatedAt).not.toBe(before.updatedAt);
+  });
 
   apiTest('leaves every field the body omits unchanged on disk', async ({ apiServices }) => {
     const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
@@ -110,25 +96,21 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     expect(after.updatedAt).not.toBe(before.updatedAt);
   });
 
-  apiTest(
-    'clears a matcher leaf by removing it from the stored object',
-    async ({ apiServices }) => {
-      const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
-      const created = await actionPolicies.create(
-        buildCreateActionPolicyData({
-          name: 'patch-matcher-leaf',
-          matcher: { tags: ['prod'], expression: 'severity == "high"' },
-        })
-      );
+  apiTest('clears a nested leaf without disturbing its siblings', async ({ apiServices }) => {
+    const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
+    const created = await actionPolicies.create(
+      buildCreateActionPolicyData({
+        name: 'patch-matcher-leaf',
+        matcher: { tags: ['prod'], expression: 'severity == "high"' },
+      })
+    );
 
-      await actionPolicies.patch(created.id, { matcher: { expression: null } });
+    await actionPolicies.patch(created.id, { matcher: { expression: null } });
 
-      const after = await actionPolicySavedObject.getAttributes(created.id);
-      // Clearing the matcher itself stores `null`, but clearing one of its leaves drops the key:
-      // only the top-level fields are normalized to a sentinel on the way to disk.
-      expect(after.matcher).toStrictEqual({ tags: ['prod'] });
-    }
-  );
+    const after = await actionPolicySavedObject.getAttributes(created.id);
+    expect(after.matcher).toStrictEqual({ tags: ['prod'] });
+    expect(findNullPaths(after)).toStrictEqual([]);
+  });
 
   apiTest('drops a throttle interval the merged strategy does not use', async ({ apiServices }) => {
     const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
@@ -145,7 +127,7 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     const after = await actionPolicySavedObject.getAttributes(created.id);
     // Throttle leaves merge independently, so the stale interval survives the merge and is only
     // dropped on the way to disk. It must not linger for a reader of the raw document.
-    expect(after.throttle).toStrictEqual({ strategy: 'on_status_change', interval: null });
+    expect(after.throttle).toStrictEqual({ strategy: 'on_status_change' });
   });
 
   apiTest('rotates the stored api key on every patch', async ({ apiServices }) => {

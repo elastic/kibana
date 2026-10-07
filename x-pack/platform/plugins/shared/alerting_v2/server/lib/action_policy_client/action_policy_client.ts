@@ -489,6 +489,8 @@ export class ActionPolicyClient {
   }
 
   public async unsnoozeActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
+    // The state path merges rather than replaces, and a merge cannot remove a key, so this is the
+    // one field still cleared with a `null`. A later patch rewrites the document without it.
     return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
@@ -551,6 +553,7 @@ export class ActionPolicyClient {
   public async bulkUnsnoozeActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    // See `unsnoozeActionPolicy`: a merging write cannot remove a key.
     return this.executeBulkUpdate(ids, { snoozedUntil: null });
   }
 

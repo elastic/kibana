@@ -20,36 +20,12 @@ import {
   ALERTING_V2_RULES_ALL_ROLE,
   apiTest,
   buildCreateRuleData,
+  findNullPaths,
   getRuleUrl,
   testData,
 } from '../fixtures';
 
 const BASE_QUERY = 'FROM logs-* | STATS count = COUNT(*) BY host.name';
-
-/**
- * The audit actors are the only fields the storage schema declares nullable, so they are the only
- * legitimate nulls on disk. Everywhere else a PATCH clears a field by removing its key.
- */
-const NULLABLE_ROOT_FIELDS = new Set(['createdBy', 'updatedBy']);
-
-/** Dotted paths of every `null` reachable in the stored attributes. */
-const findNullPaths = (value: unknown, path: string[] = []): string[] => {
-  if (value === null) {
-    return [path.join('.')];
-  }
-
-  if (Array.isArray(value)) {
-    return value.flatMap((item, index) => findNullPaths(item, [...path, String(index)]));
-  }
-
-  if (typeof value === 'object') {
-    return Object.entries(value as Record<string, unknown>)
-      .filter(([key]) => !(path.length === 0 && NULLABLE_ROOT_FIELDS.has(key)))
-      .flatMap(([key, child]) => findNullPaths(child, [...path, key]));
-  }
-
-  return [];
-};
 
 /**
  * Asserts what a PATCH persisted, rather than what it returned. `toApiQuery`,
@@ -178,7 +154,7 @@ apiTest.describe('Patch rule saved object', { tag: '@local-stateful-classic' }, 
     }
   );
 
-  apiTest('stores a cleared artifacts list as an empty array', async ({ apiServices }) => {
+  apiTest('clears artifacts by removing the key, not by storing []', async ({ apiServices }) => {
     const { rules, ruleSavedObject } = apiServices.alertingV2;
     const created = await rules.create(
       buildCreateRuleData({
@@ -190,8 +166,26 @@ apiTest.describe('Patch rule saved object', { tag: '@local-stateful-classic' }, 
     await rules.update(created.id, { artifacts: null });
 
     const after = await ruleSavedObject.getAttributes(created.id);
-    expect(after.artifacts).toStrictEqual([]);
+    expect(Object.keys(after)).not.toContain('artifacts');
     expect(findNullPaths(after)).toStrictEqual([]);
+
+    const projected = await rules.get(created.id);
+    expect(Object.keys(projected)).not.toContain('artifacts');
+  });
+
+  apiTest('rejects an empty artifacts list on create', async ({ apiClient, requestAuth }) => {
+    const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_RULES_ALL_ROLE
+    );
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+      body: {
+        ...buildCreateRuleData({ metadata: { name: 'create-empty-artifacts' } }),
+        artifacts: [],
+      },
+    });
+
+    expect(response).toHaveStatusCode(400);
   });
 
   apiTest(

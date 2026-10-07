@@ -189,14 +189,19 @@ export function pickImmutable(
   >;
 }
 
-function nullToEmptyArray<T>(
+/**
+ * Applies a patch value to a stored array: `null` clears it, an absent key keeps what is stored.
+ * Neither a clear nor a legacy empty list is written back, since the rule schemas reject an empty
+ * array and "no items" is always an absent key.
+ */
+const patchArray = <T>(
   value: T[] | null | undefined,
   existing: T[] | undefined
-): T[] | undefined {
-  if (value === null) return [];
-  if (value === undefined) return existing;
+): T[] | undefined => {
+  if (value === null) return undefined;
+  if (value === undefined) return existing?.length ? existing : undefined;
   return value;
-}
+};
 
 /**
  * The lifecycle objects an alert rule is stored with. The request schema
@@ -355,8 +360,7 @@ export function buildUpdateRuleAttributes(
     no_data: next.no_data,
     state_transition: next.state_transition,
     grouping: next.grouping,
-    // A cleared `artifacts` is stored as an empty list, not as an absent key.
-    artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
+    artifacts: patchArray(updateData.artifacts, existingAttrs.artifacts),
     // `enabled` is never writable via update — lifecycle transitions are owned exclusively by
     // enableRule/disableRule, so the stored value is preserved.
     enabled: existingAttrs.enabled,

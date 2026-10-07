@@ -486,7 +486,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear. (min items: 1, max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'

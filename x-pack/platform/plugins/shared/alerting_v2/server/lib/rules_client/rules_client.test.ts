@@ -1427,17 +1427,23 @@ describe('RulesClient', () => {
         version: 'WzEsMV0=',
       });
 
-      await client.updateRule({
+      const response = await client.updateRule({
         id: 'rule-id-clear-artifacts',
         data: { artifacts: null },
       });
 
+      // Serialized, because an `undefined` property never reaches the wire or Elasticsearch: a
+      // cleared list leaves no key behind, rather than an empty array.
+      expect(JSON.parse(JSON.stringify(response))).not.toHaveProperty('artifacts');
+
       expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
         id: 'rule-id-clear-artifacts',
-        attrs: expect.objectContaining({ artifacts: [] }),
+        attrs: expect.any(Object),
         version: 'WzEsMV0=',
         references: [],
       });
+      const [{ attrs }] = rulesSavedObjectService.update.mock.calls[0];
+      expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('artifacts');
     });
 
     it('uses the server-read version for the optimistic concurrency check', async () => {

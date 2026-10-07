@@ -273,10 +273,11 @@ export const DashboardArtifactsSubsection: React.FC<RuleSummarySectionProps> = (
       {
         id: rule.id,
         payload: {
+          // Deleting the last artifact clears the field, which PATCH spells as `null`.
           artifacts:
             mapArtifacts(
               (rule.artifacts ?? []).filter((artifact) => artifact.id !== artifactIdPendingDelete)
-            ) ?? [],
+            ) ?? null,
         },
       },
       {
@@ -288,7 +289,7 @@ export const DashboardArtifactsSubsection: React.FC<RuleSummarySectionProps> = (
   }, [artifactIdPendingDelete, rule.artifacts, rule.id, updateRule]);
 
   const handleManageSave = useCallback(
-    (artifacts: RuleArtifactPayload) => {
+    (artifacts: RuleArtifactPayload | null) => {
       if (!rule.id) {
         return;
       }

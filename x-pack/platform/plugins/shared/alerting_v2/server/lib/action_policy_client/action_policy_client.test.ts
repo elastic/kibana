@@ -31,6 +31,10 @@ import type { UpdateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
+/** The document as stored: an `undefined` attribute never reaches Elasticsearch. */
+const toStoredDocument = (attributes: unknown): Record<string, unknown> =>
+  JSON.parse(JSON.stringify(attributes));
+
 describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
@@ -273,7 +277,7 @@ describe('ActionPolicyClient', () => {
       );
     });
 
-    it('stores tags as null on create', async () => {
+    it('leaves tags off the document on create', async () => {
       mockSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'policy-no-tags',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -291,13 +295,8 @@ describe('ActionPolicyClient', () => {
         options: { id: 'policy-no-tags' },
       });
 
-      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-        ACTION_POLICY_SAVED_OBJECT_TYPE,
-        expect.objectContaining({
-          tags: null,
-        }),
-        expect.anything()
-      );
+      const [, attributes] = mockSavedObjectsClient.create.mock.calls[0];
+      expect(attributes).not.toHaveProperty('tags');
     });
 
     it('throws 400 when data is invalid', async () => {
@@ -978,7 +977,7 @@ describe('ActionPolicyClient', () => {
       });
     });
 
-    it('clears nullable fields with null values', async () => {
+    it('clears a field by dropping its key from the stored document', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
@@ -1027,19 +1026,20 @@ describe('ActionPolicyClient', () => {
           name: 'original-policy',
           description: 'original-policy description',
           destinations: [{ type: 'workflow', id: 'original-workflow' }],
-          matcher: null,
-          groupBy: null,
-          throttle: null,
         }),
         { version: 'WzEsMV0=', mergeAttributes: false }
       );
+      const [, , attributes] = mockSavedObjectsClient.update.mock.calls[0];
+      expect(toStoredDocument(attributes)).not.toHaveProperty('matcher');
+      expect(toStoredDocument(attributes)).not.toHaveProperty('groupBy');
+      expect(toStoredDocument(attributes)).not.toHaveProperty('throttle');
       expect(res.matcher).toBeUndefined();
       expect(res.group_by).toBeUndefined();
       expect(res.throttle).toBeUndefined();
       expect(res.snoozed_until).toBeUndefined();
     });
 
-    it('nulls throttle.interval when transitioning to an intervalless strategy', async () => {
+    it('drops throttle.interval when transitioning to an intervalless strategy', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'transition-policy',
         description: 'transition-policy description',
@@ -1067,7 +1067,7 @@ describe('ActionPolicyClient', () => {
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
           ...existingAttributes,
-          throttle: { strategy: 'on_status_change', interval: null },
+          throttle: { strategy: 'on_status_change' },
         },
         references: [],
         version: 'WzIsMV0=',
@@ -1078,14 +1078,8 @@ describe('ActionPolicyClient', () => {
         options: { id: 'policy-id-update-1' },
       });
 
-      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-        ACTION_POLICY_SAVED_OBJECT_TYPE,
-        'policy-id-update-1',
-        expect.objectContaining({
-          throttle: { strategy: 'on_status_change', interval: null },
-        }),
-        { version: 'WzEsMV0=', mergeAttributes: false }
-      );
+      const [, , attributes] = mockSavedObjectsClient.update.mock.calls[0];
+      expect(toStoredDocument(attributes).throttle).toStrictEqual({ strategy: 'on_status_change' });
       expect(res.throttle).toEqual({ strategy: 'on_status_change' });
     });
 

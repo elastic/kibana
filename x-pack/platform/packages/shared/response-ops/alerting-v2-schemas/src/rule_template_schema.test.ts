@@ -643,11 +643,12 @@ describe('rule template create-rule schema coupling', () => {
           },
           "properties": Object {
             "artifacts": Object {
-              "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present.",
+              "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present. An empty array is rejected: omit \`artifacts\` on create, or send \`null\` on PATCH to clear.",
               "items": Object {
                 "$ref": "#/definitions/alerting_rule_artifact",
               },
               "maxItems": 100,
+              "minItems": 1,
               "type": "array",
             },
             "grouping": Object {
