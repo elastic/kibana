@@ -108,6 +108,21 @@ export type SignificantEventsMaintenanceStateAttributes = TypeOf<
   typeof maintenanceStateAttributesV3
 >;
 
+/**
+ * Rules recorded before version 3 had no space. The old sweep only used the request's own
+ * space, so the default space is the only one that could have been touched.
+ */
+export const backfillDisabledRules = (
+  attributes: Partial<TypeOf<typeof maintenanceStateAttributesV1>> &
+    Partial<SignificantEventsMaintenanceStateAttributes>
+): { attributes: Pick<SignificantEventsMaintenanceStateAttributes, 'disabledRules'> } => ({
+  attributes: {
+    disabledRules:
+      attributes.disabledRules ??
+      (attributes.disabledRuleIds ?? []).map((id) => ({ id, spaceId: 'default' })),
+  },
+});
+
 export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObjectsType => ({
   name: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
   hidden: true,
@@ -137,7 +152,12 @@ export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObje
       },
     },
     '3': {
-      changes: [],
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: ({ attributes }) => backfillDisabledRules(attributes),
+        },
+      ],
       schemas: {
         forwardCompatibility: maintenanceStateAttributesV3.extends({}, { unknowns: 'ignore' }),
         create: maintenanceStateAttributesV3,
