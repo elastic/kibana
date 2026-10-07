@@ -67,7 +67,14 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
       code: dedent`
         import { z } from '@kbn/zod';
         const makeSchema = () => z.object({});
-        const Schema = makeSchema();
+        const useSchema = () => makeSchema();
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        const parseValue = () => z.string().parse('ok');
+        const value = parseValue();
       `,
     },
     {
@@ -146,6 +153,76 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
   ],
 
   invalid: [
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        const createSchema = () => z.object({});
+        export const Schema = createSchema();
+      `,
+      errors: [DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const createSchema = () => z.object({});
+        export const Schema = lazySchema(() => createSchema());
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const nodeCount = (label) => z.number().describe(label);
+        const fields = { min: nodeCount('Minimum').optional() };
+      `,
+      errors: [DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const nodeCount = (label) => z.number().describe(label);
+        const fields = { min: lazySchema(() => nodeCount('Minimum').optional()) };
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const createSchema = () => {
+          const value = true;
+          return z.object({ value: z.boolean().default(value) });
+        };
+        export const Schema = createSchema();
+      `,
+      errors: [DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const createSchema = () => {
+          const value = true;
+          return z.object({ value: z.boolean().default(value) });
+        };
+        export const Schema = lazySchema(() => createSchema());
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod/v4';
+        export const Schemas = {
+          anything: z.any(),
+          website: z.url(),
+          choice: z.xor([z.string(), z.number()]),
+          pattern: z.string().regex(/x/),
+          date: z.string().datetime(),
+          hidden: z.string().meta({ hidden: true }),
+        };
+      `,
+      errors: [EAGER, EAGER, EAGER, EAGER, EAGER, EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod/v4';
+        export const Schemas = {
+          anything: lazySchema(() => z.any()),
+          website: lazySchema(() => z.url()),
+          choice: lazySchema(() => z.xor([z.string(), z.number()])),
+          pattern: lazySchema(() => z.string().regex(/x/)),
+          date: lazySchema(() => z.string().datetime()),
+          hidden: lazySchema(() => z.string().meta({ hidden: true })),
+        };
+      `,
+    },
     {
       code: dedent`
         import { z, lazySchema } from '@kbn/zod';

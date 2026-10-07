@@ -67,6 +67,28 @@ describe('changed-line scope for require_lazy_zod_schema', () => {
     );
   });
 
+  it('fixes a changed schema factory call but leaves old schemas alone', () => {
+    jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([{ start: 4, end: 4 }]);
+    const code = [
+      "import { z } from '@kbn/zod';",
+      'const makeSchema = () => z.string();',
+      'const Existing = z.object({});',
+      'const Added = makeSchema();',
+    ].join('\n');
+
+    expect(linter.verify(code, config, 'schema.ts')).toEqual([
+      expect.objectContaining({ messageId: 'eagerDerivedZodSchema', line: 4 }),
+    ]);
+    expect(linter.verifyAndFix(code, config, 'schema.ts').output).toBe(
+      [
+        "import { z, lazySchema } from '@kbn/zod';",
+        'const makeSchema = () => z.string();',
+        'const Existing = z.object({});',
+        'const Added = lazySchema(() => makeSchema());',
+      ].join('\n')
+    );
+  });
+
   it('checks a schema when one of its inner lines changes', () => {
     jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([{ start: 4, end: 4 }]);
     const code = [

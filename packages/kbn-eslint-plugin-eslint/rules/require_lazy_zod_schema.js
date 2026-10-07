@@ -22,15 +22,18 @@ const esTypes = tsEstree.AST_NODE_TYPES;
 const ZOD_SOURCES = new Set(['@kbn/zod', '@kbn/zod/v4', 'zod', 'zod/v4', 'zod/v3']);
 const AUTO_FIX_SCHEMA_METHODS = new Set([
   'array',
+  'any',
   'boolean',
   'default',
   'describe',
+  'datetime',
   'discriminatedUnion',
   'enum',
   'extend',
   'int',
   'literal',
   'max',
+  'meta',
   'min',
   'nullable',
   'number',
@@ -40,10 +43,13 @@ const AUTO_FIX_SCHEMA_METHODS = new Set([
   'pick',
   'record',
   'refine',
+  'regex',
   'string',
   'superRefine',
   'tuple',
   'union',
+  'url',
+  'xor',
 ]);
 const SCHEMA_VALUE_METHODS = new Set([
   'array',
@@ -206,6 +212,7 @@ const inspectZodChain = (node) => {
  *   zodImports: Map<string, { node: ImportDeclaration; namespace: boolean; name: string }>;
  *   importFixScheduled: boolean;
  *   schemaBindings: Set<string>;
+ *   schemaFactoryBindings: Set<string>;
  * }} FileState
  */
 
@@ -321,8 +328,45 @@ const isEagerDerivedSchemaChain = (init, state) => {
     return false;
   }
   const root = getChainRootIdentifier(init);
-  return Boolean(root && state.schemaBindings.has(root.name));
+  return Boolean(
+    root && (state.schemaBindings.has(root.name) || state.schemaFactoryBindings.has(root.name))
+  );
 };
+
+/**
+ * @param {Expression} init
+ * @param {FileState} state
+ * @returns {boolean}
+ */
+const isSchemaFactory = (init, state) => {
+  if (init.type !== esTypes.ArrowFunctionExpression && init.type !== esTypes.FunctionExpression) {
+    return false;
+  }
+  if (init.body.type !== esTypes.BlockStatement) {
+    return isEagerZodNamespaceChain(init.body, state) && canAutoFixSchemaCall(init.body);
+  }
+  const returns = init.body.body.filter((statement) => statement.type === esTypes.ReturnStatement);
+  return (
+    returns.length > 0 &&
+    returns.every(
+      (statement) =>
+        statement.argument &&
+        isEagerZodNamespaceChain(statement.argument, state) &&
+        canAutoFixSchemaCall(statement.argument)
+    )
+  );
+};
+
+/**
+ * @param {Expression} node
+ * @param {FileState} state
+ * @returns {boolean}
+ */
+const canAutoFixSchemaExpression = (node, state) =>
+  canAutoFixSchemaCall(node) ||
+  (node.type === esTypes.CallExpression &&
+    node.callee.type === esTypes.Identifier &&
+    state.schemaFactoryBindings.has(node.callee.name));
 
 /**
  * Adds declarator id name to schemaBindings when init is a Zod chain or a lazySchema call.
@@ -420,7 +464,10 @@ const getZodImportForSchema = (node, state) => {
   if (directImport) {
     return directImport;
   }
-  if (state.zodNamespaces.has(root.name) || !state.schemaBindings.has(root.name)) {
+  if (
+    state.zodNamespaces.has(root.name) ||
+    (!state.schemaBindings.has(root.name) && !state.schemaFactoryBindings.has(root.name))
+  ) {
     return null;
   }
   const imports = [...state.zodImports.values()];
@@ -491,7 +538,8 @@ module.exports = {
       if (!changedLines.touchesChangedLine(fileChangedLines, declaration)) {
         return;
       }
-      const canFix = allowFix && canAutoFixSchemaCall(node) && !containsAwaitExpression(node);
+      const canFix =
+        allowFix && canAutoFixSchemaExpression(node, state) && !containsAwaitExpression(node);
       let lazySchemaName =
         state.lazySchemaNames.size === 1 ? state.lazySchemaNames.values().next().value : undefined;
       let importToUpdate;
@@ -542,6 +590,7 @@ module.exports = {
           zodImports: new Map(),
           importFixScheduled: false,
           schemaBindings: new Set(),
+          schemaFactoryBindings: new Set(),
         };
         sourceCode = context.sourceCode;
         fileChangedLines = changedLines.getChangedLines(context.filename);
@@ -565,13 +614,17 @@ module.exports = {
           return;
         }
 
+        if (declarator.id.type === esTypes.Identifier && isSchemaFactory(declarator.init, state)) {
+          state.schemaFactoryBindings.add(declarator.id.name);
+        }
+
         if (
           declarator.id.type === esTypes.Identifier &&
           declarator.init.type === esTypes.ArrowFunctionExpression &&
           declarator.init.params.length === 0 &&
           !declarator.init.async &&
           declarator.init.body.type !== esTypes.BlockStatement &&
-          isEagerZodNamespaceChain(declarator.init.body, state)
+          state.schemaFactoryBindings.has(declarator.id.name)
         ) {
           schemaFactoryCandidates.push(declarator);
           return;
