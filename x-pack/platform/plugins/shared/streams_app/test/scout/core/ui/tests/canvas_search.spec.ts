@@ -112,7 +112,10 @@ test.describe(
 
       await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
       await expect(streams.canvasSearch).toHaveValue(DESTINATION_NAME);
-      await expect(page).toHaveURL(/query:'Canvas/);
+      await expect(page).toHaveURL(
+        (url) =>
+          url.searchParams.get('canvasState')?.includes(`query:'${DESTINATION_NAME}'`) ?? false
+      );
 
       // Only the matching flow is rendered; the unrelated classic stream is hidden.
       await expect(streams.getCanvasDestinationNode(DESTINATION_NAME)).toBeVisible();
