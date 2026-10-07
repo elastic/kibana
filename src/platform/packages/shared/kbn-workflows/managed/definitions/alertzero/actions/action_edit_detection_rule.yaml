@@ -151,7 +151,9 @@ steps:
     type: workflow.fail
     if: "${{ steps.fetch_rule.error != nil and steps.fetch_rule.error.message contains 'HTTP 404' }}"
     with:
-      message: The rule was deleted after this proposal was created, so this change wasn't applied.
+      message: >-
+        The rule was deleted after this proposal was created, so this tuning can't
+        be applied. Approving again won't work, so decline it.
 
   - name: fail_rule_read
     type: workflow.fail
@@ -167,7 +169,9 @@ steps:
     with:
       message: >-
         The rule was changed by "{{ steps.fetch_rule.output.updated_by }}" after this
-        proposal was created, so this change wasn't applied.
+        proposal was created, so this tuning can't be applied. Approving again won't
+        work, so decline it. If the rule keeps producing false positives, a new review
+        will follow.
 
   # The API changes only the keys it receives. `pick` drops absent keys, so only
   # supplied fields are patched, and `expected_revision` never reaches the

@@ -919,10 +919,13 @@ describe('detection rule workflows', () => {
           const deleted = await renderMessage('fail_rule_deleted', context);
 
           expect(changed).toBe(
-            'The rule was changed by "jane" after this proposal was created, so this change wasn\'t applied.'
+            'The rule was changed by "jane" after this proposal was created, so this tuning can\'t be applied. ' +
+              "Approving again won't work, so decline it. " +
+              'If the rule keeps producing false positives, a new review will follow.'
           );
           expect(deleted).toBe(
-            "The rule was deleted after this proposal was created, so this change wasn't applied."
+            "The rule was deleted after this proposal was created, so this tuning can't be applied. " +
+              "Approving again won't work, so decline it."
           );
           for (const message of [changed, deleted]) {
             for (const token of ['[', ']', 'revision', 'updated_at', '2026']) {
