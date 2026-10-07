@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { SchemaOutput } from '../schema_output';
+import type {
+  KerberosConfigCodec,
+  NtlmConfigCodec,
+  RequestBodyCheckCodec,
+  ResponseCheckJSONCodec,
+} from '../schemas/monitor_configs';
 
 export enum MonitorTypeEnum {
   HTTP = 'http',
@@ -111,58 +116,6 @@ export enum KerberosAuthType {
   PASSWORD = 'password',
   KEYTAB = 'keytab',
 }
-
-export const MonitorTypeCodec = z.enum(MonitorTypeEnum);
-export const ResponseBodyIndexPolicyCodec = z.enum(ResponseBodyIndexPolicy);
-export const CodeEditorModeCodec = z.enum(CodeEditorMode);
-export const ScheduleUnitCodec = z.enum(ScheduleUnit);
-export const VerificationModeCodec = z.enum(VerificationMode);
-export const TLSVersionCodec = z.enum(TLSVersion);
-export const ScreenshotOptionCodec = z.enum(ScreenshotOption);
-export const SourceTypeCodec = z.enum(SourceType);
-export const FormMonitorTypeCodec = z.enum(FormMonitorType);
-export const ModeCodec = z.enum(Mode);
-export const KerberosAuthTypeCodec = z.enum(KerberosAuthType);
-
-// Bounds limit request/policy amplification for nested auth payloads.
-const AUTH_STRING_MAX = 4096;
-const AUTH_INLINE_CONF_MAX = 131072; // krb5.conf / keytab content
-const authString = z.string().max(AUTH_STRING_MAX);
-const authInlineConf = z.string().max(AUTH_INLINE_CONF_MAX);
-
-// strictObject: reject unknown keys so size-bounded declared strings cannot be
-// bypassed via an oversized extra property on the auth block.
-export const KerberosConfigCodec = z.strictObject({
-  enabled: z.boolean(),
-  auth_type: KerberosAuthTypeCodec,
-  username: authString,
-  password: authString,
-  keytab: authInlineConf,
-  // Exactly one of config_path / krb5_conf is required when enabled (Heartbeat).
-  config_path: authString,
-  krb5_conf: authInlineConf,
-  realm: authString,
-  service_name: authString,
-  enable_krb5_fast: z.boolean(),
-});
-
-export const NtlmConfigCodec = z.strictObject({
-  enabled: z.boolean(),
-  username: authString,
-  password: authString,
-  domain: authString,
-  workstation: authString,
-});
-
-export const ResponseCheckJSONCodec = z.looseObject({
-  description: z.string(),
-  expression: z.string(),
-});
-
-export const RequestBodyCheckCodec = z.looseObject({
-  value: z.string(),
-  type: CodeEditorModeCodec,
-});
 
 export type KerberosConfig = SchemaOutput<typeof KerberosConfigCodec>;
 export type NtlmConfig = SchemaOutput<typeof NtlmConfigCodec>;

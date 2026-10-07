@@ -6,12 +6,17 @@ Builder. It builds a visualization config for the renderer chosen by the caller
 `create_visualization` tool):
 
 - `lens/` — the Lens engine (`buildLensConfig`): chart-type selection,
-  schemas, prompts, and palettes. `chart_type_registry.ts` holds one entry per
-  chart type with its presentation rules, stated in Lens JSON terms for the
-  config author. `general_rules.ts` holds the rules shared by every chart type.
-  `color_palettes.ts` adds the color mechanics and palette previews for charts
-  with dynamic or categorical coloring. `chart_type_guidance.ts` compiles them
-  into the config author's prompt.
+  prompts, examples, schema sections, and palettes. `chart_type_registry.ts`
+  holds one entry per chart type with its presentation rules, stated in Lens
+  JSON terms for the config author. `general_rules.ts` holds the rules shared by
+  every chart type. `color_palettes.ts` adds the color mechanics and palette
+  previews for charts with dynamic or categorical coloring.
+  `chart_type_guidance.ts` compiles them into the config author's prompt.
+  Instead of the full JSON schema, the author gets the chart type's house-style
+  examples from `config_examples.ts` and an index of the schema sections from
+  `schema_sections.ts`. It can load the sections it needs once with the
+  `load_schema_sections` tool, and a failed validation shows the schema of the
+  failing sections on the retry.
 - `vega/` — the Vega-Lite engine (`buildVegaConfig`): authors and normalizes a
   Vega-Lite spec for requests Lens cannot express.
 - `shared/` — guidance reused by both engines (e.g. ES|QL authoring instructions).
