@@ -8,6 +8,10 @@
 import { v5 as uuidv5 } from 'uuid';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { JsonSchema } from '@kbn/workflows';
+import {
+  MAX_SUMMARY_BULLETS_CHARS,
+  MAX_SUMMARY_PROPOSAL_BULLETS,
+} from '../../../../../common/step_types/package_report';
 import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
 import {
   buildProposalComment,
@@ -156,6 +160,36 @@ export const buildActionInput = ({
     actionInput.parameters = { entity_id: processSelector!.entityId };
   }
   return actionInput;
+};
+
+const MAX_SUMMARY_HOST_NAME_CHARS = 253;
+
+const truncate = (value: string, max: number): string =>
+  value.length > max ? `${value.slice(0, max - 1)}…` : value;
+
+/**
+ * Bounded bullet list for the run conclusion. `proposals` stays whole (it drives the gate
+ * fan-out); only this prose view is capped, and everything left out is reported as a count.
+ */
+export const buildProposalSummaryBullets = (
+  proposals: PackageReportMintPayload[]
+): { bullets: string[]; omittedCount: number } => {
+  const bullets: string[] = [];
+  let usedChars = 0;
+  for (const p of proposals.slice(0, MAX_SUMMARY_PROPOSAL_BULLETS)) {
+    const host = p.hostName ? ` on \`${truncate(p.hostName, MAX_SUMMARY_HOST_NAME_CHARS)}\`` : '';
+    const action = p.actionWorkflowId
+      ? `: runs \`${p.actionWorkflowId}\` on approval`
+      : ': recommendation only';
+    const bullet = `- **${p.title || p.category}**${host}${action}`;
+    // +1 for the newline between bullets.
+    if (usedChars + bullet.length + 1 > MAX_SUMMARY_BULLETS_CHARS) {
+      break;
+    }
+    bullets.push(bullet);
+    usedChars += bullet.length + 1;
+  }
+  return { bullets, omittedCount: proposals.length - bullets.length };
 };
 
 const buildClosureSummary = (state: CurrentRunState): string => {

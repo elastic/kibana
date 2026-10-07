@@ -15,3 +15,8 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { AgenticInvestigationsPluginSetup, AgenticInvestigationsPluginStart } from './types';
+export type { SubjectsClient } from './subjects/services/subjects_client';
+export type {
+  ClaimSubjectsParams,
+  ClaimSubjectsResult,
+} from './subjects/services/subject_claims_service';
