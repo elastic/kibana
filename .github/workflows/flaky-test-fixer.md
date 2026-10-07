@@ -404,7 +404,7 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ```markdown
 > [!IMPORTANT]
-> Requested by @${{ env.REQUESTED_BY }}. The flaky test runner may verify the PR, but the owning **team owns the next steps** for this PR:
+> Requested by @${{ env.REQUESTED_BY }}. The flaky test runner may verify the PR, but the owning **team is responsible the next steps**:
 >
 > - Review and merge it (update the branch or add missing labels if needed)
 > - Make changes (check out the branch locally, or ask `@copilot` if Copilot is enabled on your account)
